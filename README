@@ -1,0 +1,7 @@
+custom Minecraft Alpha server software written in C++.
+
+Currently in development, doesnt do anything yet ;)
+
+Builds in Windows (Visual Studio 2010) and Linux.
+
+We are trying to minimize memory and cpu usage compared to original Java server.

@@ -45,7 +45,7 @@ int main(void)
               << "  _/  _/  _/  _/  _/    _/  _/_/_/_/  _/_/      _/_/_/_/  _/_/      _/      _/  _/_/_/_/  _/_/        " << std::endl
               << " _/      _/  _/  _/    _/  _/            _/_/  _/        _/          _/  _/    _/        _/           " << std::endl
               << "_/      _/  _/  _/    _/    _/_/_/  _/_/_/      _/_/_/  _/            _/        _/_/_/  _/            " << std::endl;
-    std::cout << "Version 0.1 by Fador(&Psoden -_-)" << std::endl << std:endl;    
+    std::cout << "Version 0.1 by Fador(&Psoden -_-)" << std::endl << std::endl;    
 	h.Add(&l);
 	h.Select(1,0);
 	while (!quit)

@@ -72,12 +72,12 @@ bool waitForData=false;
 void DisplaySocket::OnRead()
 {
   uint32 i=0;
-	// OnRead of TcpSocket actually reads the data from the socket
-	// and moves it to the input buffer (ibuf)
-	TcpSocket::OnRead();
-	// get number of bytes in input buffer
-	size_t n = ibuf.GetLength();
-	char tmp[RSIZE]; // <--- tmp's here
+  // OnRead of TcpSocket actually reads the data from the socket
+  // and moves it to the input buffer (ibuf)
+  TcpSocket::OnRead();
+  // get number of bytes in input buffer
+  size_t n = ibuf.GetLength();
+  char tmp[RSIZE]; // <--- tmp's here
   ibuf.Read(tmp,n);
 
   for(int i=0;i<n;i++) buffer.push_back(tmp[i]);
@@ -197,7 +197,11 @@ void DisplaySocket::OnRead()
     int curpos=0;
     double x,y,stance,z;
     float rotation,pitch;
-    x=static_cast<double>((unsigned int)((buffer[curpos]<<56)|(buffer[curpos+1]<<48)|(buffer[curpos+2]<<40)|(buffer[curpos+3]<<32)|(buffer[curpos+4]<<24)|(buffer[curpos+5]<<16)|(buffer[curpos+6]<<8)|(buffer[curpos+7]) ));
+    uint8 *doubleAddress=(uint8 *)&x;
+    for(i=0;i<8;i++)
+    {
+      doubleAddress[i]=buffer[curpos+i];
+    }
     std::cout << "X: " << x << std::endl;
     buffer.erase(buffer.begin(), buffer.begin()+41);
   }
@@ -205,20 +209,13 @@ void DisplaySocket::OnRead()
   //printf("0x%x\n", tmp[0]);
   if(logged)//action=0x0a)
   {
-    char data4[18+81920];
-    char mapdata[81920];
+    logged=false;
+    uint8 data4[18+81920];
+    uint8 mapdata[81920]={0};
 
-    if(mapposx<2)
-    //for(int x=-10;x<10;x++)
+    for(mapposx=-5;mapposx<5;mapposx++)
     {
-      char data2[9]={0x03, 0x00, 0x06,'J','o','i','n','e','d'};    
-      h.SendSock(GetSocket(), (char *)&data2[0], 9);  
-
-
-      char data3[9]={0x04, 0x00, 0x06,0x1,0x1,0x1,0x1,0x1,0x1};    
-      h.SendSock(GetSocket(), (char *)&data3[0], 9);  
-    //printf("Login: %s\n", tmp[2]);
-      //for(int z=-10;z<10;z++)
+      for(mapposz=-5;mapposz<5;mapposz++)
       {
         //Pre chunk
         data4[0]=0x32;
@@ -231,8 +228,13 @@ void DisplaySocket::OnRead()
         data4[7]=(mapposz>>8)&0xff;
         data4[8]=(mapposz)&0xff;
         data4[9]=1;
-        h.SendSock(GetSocket(), (char *)&data4[0], 10);
-
+        h.SendSock(GetSocket(), (uint8 *)&data4[0], 10);
+      }
+    }
+    for(mapposx=-5;mapposx<5;mapposx++)
+    {
+      for(mapposz=-5;mapposz<5;mapposz++)
+      {   
         //Chunk
         data4[0]=0x33;
         data4[1]=(mapposx>>24)&0xff;
@@ -252,43 +254,49 @@ void DisplaySocket::OnRead()
 
 
         int index=0;
-        bool half=false;
+        
+        //Type array
         for(int mapx=0;mapx<16;mapx++)
         {
           for(int mapz=0;mapz<16;mapz++)
           {
             for(int mapy=0;mapy<128;mapy++)
             {
-              if(half)
+              if(mapy>70)
               {
-                if(mapy<70)
-                {                
-                }
-                else
-                {
-                  mapdata[index+1]|=1<<4;   //Type + Meta
-                  mapdata[index+2]|=0x4<<4; //Light + sky light
-                }
+                mapdata[index]=1; //Rock
               }
               else
               {
-                if(mapy<70) data4[index]=0;
-                else
-                {
-                  mapdata[index]=1;     //Type
-                  mapdata[index+1]=0x4; //Meta + light
-                }
+                mapdata[index]=0; //Empty
               }
-
-              index+=2;
-              if(half)
-              {
-                index++;
-              }
-              half=!half;
+              index++;
             }
           }
         }
+
+        //metadata
+        for(int i=0;i<16*16*128/2;i++)
+        {
+          mapdata[index]=0;
+          index++;
+        }
+
+
+        //Block light
+        for(int i=0;i<16*16*128/2;i++)
+        {
+          mapdata[index]=0xee;
+          index++;
+        }
+
+        //Sky light
+        for(int i=0;i<16*16*128/2;i++)
+        {
+          mapdata[index]=0x11;
+          index++;
+        }
+        
         
         uLongf written=81920;
         
@@ -302,19 +310,11 @@ void DisplaySocket::OnRead()
         data4[15]=(written>>16)&0xff;
         data4[16]=(written>>8)&0xff;
         data4[17]=(written)&0xff;
-        h.SendSock(GetSocket(), (char *)&data4[0], 18+written);
+        h.SendSock(GetSocket(), (uint8 *)&data4[0], 18+written);
+        
         
       }          
     }
-    if(mapposz<2) mapposz++;
-    else
-    {
-      if(mapposx<2)
-      {
-        mapposz=0;
-        mapposz++;
-      }
-    }    
   }
 
   //Send to player which is sending this data
