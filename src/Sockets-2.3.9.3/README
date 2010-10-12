@@ -1,0 +1,88 @@
+C++ Sockets Library :: installation instructions
+
+
+Unix (and Cygwin/Mingw on windows)
+==================================
+
+1.  Change the 'PLATFORM =' line in Makefile
+
+    Possible values are
+       linux-x86-32
+       win32-cygwin
+       solaris9-sparc-64
+       macosx
+       solaris8
+
+2.  If you want to use ssl encrypted socket communication, the library
+    has support for the third-party library openssl. If necessary, add
+    the following include directory to Makefile:
+
+    INCLUDE = -I<path to openssl>/include
+
+    The openssl include directory contains only one directory named
+    'openssl', in which all header files can be found.
+
+    OpenSSL support is enabled by default.
+
+    If you don't need encrypted communications, make sure to comment
+    out this line in the file 'sockets-config.h':
+
+    #define HAVE_OPENSSL
+
+3.  If you really need thread-safe dns lookups, and your operating has
+    support for *addrinfo and *nameinfo function calls, make sure this
+    line in 'sockets-config.h' is commented:
+
+    #define NO_GETADDRINFO
+
+    By default, dns lookups using getaddrinfo/getnameinfo is disabled.
+
+4.  If your operating system supports SCTP, there might be a slight
+    chance the sctp code in the library works. Uncomment this line in
+    'sockets-config.h' to try:
+
+    //#define USE_SCTP
+
+5.  If you need IPv6 support, uncomment this line in
+    'sockets-config.h':
+
+    //#define ENABLE_IPV6
+
+6.  Type 'make'
+
+7.  If all builds ok, you'll find the static library file 'libSockets.a'
+    in the build directory.
+
+
+When compiling the application, any flags used when compiling the library
+also needs to be present when including the library .h files. All flags
+can be retrieved using the 'Sockets-config' executable. Add something like
+this in your Makefile:
+
+CFLAGS += `Sockets-config`
+CPPFLAGS += `Sockets-config`
+
+When linking an application using the library, make sure the object and
+library files are in correct order on your link command line:
+
+    First:    Application object files
+    2nd:       -lSockets
+    3rd:      openssl libraries
+    Finally:  Everything else, ending with -lpthread
+
+
+windows
+=======
+
+Project files for various IDE's can be found here:
+
+    Project/           Visual studio 6.0
+    Project.net/       Visual studio .NET
+    DevCpp/            Dev C++
+
+Please see steps 2-5 above for some details on configuring the library.
+
+When linking on cygwin/mingw, add the following libraries:
+ -lwsock32
+ -lws2_32
+

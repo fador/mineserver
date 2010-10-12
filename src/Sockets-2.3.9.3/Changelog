@@ -1,0 +1,836 @@
+diff for next release always available @ http://www.alhem.net/Sockets/latest_diff.html
+
+2.3.9.3
+--------
+Added multithread support in sockethandler. New method SetNumberOfThreads()
+enables this.
+New method in sockethandler: Release(). Make select() release before
+specified timeout. Enable function with method EnableRelease().
+EventHandler using new release functionality.
+Thread startup controlled with semaphore instead of flag/sleep combo.
+Default thread startup behaviour is run at once, optional is wait until
+released by posting to semaphore (via method SetRelease(true)).
+Adding a socket with closeanddelete flag set now works as expected.
+Added platform independent method Utility::Sleep( milliseconds ).
+Added missing win32 implementation in new sockethandler.
+Added win32 implementation of Semaphore.
+Repaired build for cygwin/mingw/devcpp.
+
+2.3.9.2
+--------
+More internal restructuring of SocketHandler.
+The Get() method has been removed. Set() has been split into three:
+ISocketHandler_Add(), ISocketHandler_Mod(), and ISocketHandler_Del().
+New methods defined in ISocketHandler interface to support different 
+models of socket io: ISocketHandler_Select(), MaxCount().
+Removed Set() method from Socket class.
+Implemented SocketHandlerEp using epoll for linux only.
+reinterpret_cast<> added in ListenSocket for ipv6 address struct.
+HttpPostSocket member variable holding http headers (m_fields) is now
+protected (changed from private).
+Repaired Reconnect function in sockethandler.
+
+2.3.9.1
+--------
+Using thread- and memory safe clib/c runtime function when possible.
+Restructured sockethandler internals.
+Quicker tcp shutdown sequence when sockets lib initiates close.
+Renamed Utility::GetCurrentDirectory to Utility::CurrentDirectory, and
+added Utility::GetEnv().
+Removed unused triggers code.
+
+2.3.9
+------
+TcpSocket using std::vector<char> to receive incoming line (OnLine
+callback). Configurable max limit for library available in sockets-config.h,
+default 8192 bytes (TCP_LINE_SIZE). Override ISocketHandler::MaxTcpLineSize
+to change this value without recompiling the library.
+Added more operators in Debug class. Removed some leftover debug printouts.
+HttpResponse returns non-const output file.
+HTTPSocket aborts after receiving more than 200 (MAX_HTTP_HEADER_COUNT) http
+headers. Use method HTTPSocket::SetMaxHeaderCount() to modify this value.
+Reordered log level enum, added minlevel to StdoutLog.
+
+2.3.8
+------
+SSL sockets now operate in nonblocking mode. A much better solution to the
+"hang" problem mentioned in 2.3.7.
+Added Path() method to IFile interface. Returns File path name or MemFile
+virtual path name.
+Added constructor in MemFile that takes a File as input. Will read the
+entire File to memory. Added constructor in MemFile that copies another
+memfile. Will use the source memfile when reading.
+Added reference count when a MemFile object is source for another memfile.
+
+Set OnTransferLimit back to 0 after a successful transfer of requested file
+(in Ajp13Socket and HttpBaseSocket). Reset IFile auto_ptr to
+decrease the reference count asap (by using fclose).
+
+2.3.7
+------
+Moved some #include's outside the sockets namespace definition.
+Fix code to avoid an increment on an stl iterator that has reached end.
+Helping compilers deal with it++ when result is not used, changed all it++
+to ++it where appropriate.
+Doing an extra select on write readiness on file descriptor before calling
+SSL_write. Prevents a hang situation when the remote end drops the
+connection.
+
+2.3.6
+------
+Added improved Valid() method using unique socket instance identifier. Using
+this identifier internally for events and resolver. Added optional data
+parameter in Event class, used by library to store socket instance
+identifier.
+No longer using SSL_MODE_AUTO_RETRY for ssl connections. If remote end
+disconnects this would cause hangups.
+Using SSL_MODE_ENABLE_PARTIAL_WRITE because the library supports this.
+Renamed EventHandler() method in IEventOwner to GetEventHandler().
+Added file system path abstraction methods to Utility.
+Reset file descriptor after successful close of a ListenSocket.
+
+2.3.5
+------
+Added method(s) in UdpSocket to set default interface to be used for multicast.
+Added flag for position independent code for linux-x86-32 architecture (see
+Makefile.Defines.linux-x86-32).
+Added missing includes (on some distributions/gcc versions).
+SetUri in HttpRequest no longer URLDecodes the entire url.
+Fix for static variables in SSLInitializer.
+Fix for new version of openssl (const SSLxx_method()).
+Fix for getnameinfo.
+Modified Utility::Uri parser class so it also splits the url in path /
+querystring parts.
+
+2.3.4
+------
+Some .cpp were missing namespace declarations - fixed. Some includes for
+ipv6 was missing - fixed. Operators in StreamWriter class modified to work
+on 64-bit as well as 32-bit systems.
+
+2.3.3
+------
+Fix deadlock in SSLInitializer introduced in 2.3.2.
+Added check when select() returns -1 indicating one of the file descriptors
+have gone bad. The check rebuilds the fd_set used by select().
+Bugfix in HttpGetSocket, one of the constructors had no support in
+HttpClientSocket - added.
+Corrected bad #include's in Utility.
+Added IStream interface to read/write from socket and IFile (memfile, normal
+file). New classes SocketStream, FileStream, StreamWriter.
+Added ReadInput method in TcpSocket - read from input buffer.
+Added GetLine method in TcpSocket - chars input on current line when using
+SetLineProtocol mode.
+
+2.3.2
+------
+Threadsafe list of ssl initializer, ssl contexts and openssl error text 
+retrieval.
+Added interface for Mutex class, adding the possibility for others to
+implement the mutex functionality using other approaches.
+Moved FromUtf8 method from XmlNode to Utility.
+
+2.3.1
+------
+Request: Remove() method in SocketHandler changed from private to protected.
+Added Utility::Stack that returns a stack walk (currently linux only).
+Request: Added $(DESTDIR) variable in Makefile for more flexible installation.
+The timeout value is now reset before OnTimeout() is called, making it
+possible to set a new timeout value in the OnTimeout() method.
+
+2.3
+------
+Small change in ListenSocket<> to improve accepting of incoming
+connections.
+Added xml parsing classes: XmlDocument, XmlNode, and XmlException.
+Added new OnDisconnect(flags, code) callback that provides reason
+for the disconnect.
+Fix crash bug if an event object gets deleted in its own OnEvent
+method.
+gcc 4.3 compability fixes.
+
+2.2.9a
+------
+Added assignment operator on HttpRequest class.
+HttpdForm sometimes got stuck in an infinite loop - fixed.
+Lock using const Mutex, and Mutex modified to work when const.
+Added Utility::Uri that can be used for parsing of an url.
+
+2.2.9
+-----
+Fixed memory leak in TcpSocket.
+Fixed potentially unsafe code in http form data parser (HttpdForm).
+Fix memory and resource leak in HttpRequest.
+Ajp13Socket/HttpBaseSocket now creates a copy of the HttpResponse
+instance when sending a response, to avoid synchronization problems.
+Added "lost" flag which is set when a tcpsocket has lost connection
+unexpectedly (on read/write error). Earlier this function was only
+present when the connection pool was enabled (ENABLE_POOL).
+Removed unnecessary call to shutdown() when destroying a closed
+tcp socket.
+Added brief 'INSTALL' document.
+
+2.2.8
+-----
+Added http client ability to receive a chunked response.
+HTTP headers are now treated in a case insensitive manner.
+MacOS leopard fixes.
+Added callback "OnDataComplete" to HTTPSocket, which is called
+when the full body of the request/response has been received.
+New random generator (mersienne twister).
+
+2.2.7
+-----
+Http header names no longer converted to lowercase.
+"setsockopt()" wrapper methods returning int values has been fixed.
+No longer sets query_string attribute of HttpRequest when there is no
+query string present.
+
+2.2.6
+-----
+Modified HttpRequest class to easier add support for pipelining.
+Made the following classes work with the copy constructor: HttpRequest,
+HttpTransaction, HttpdCookies.
+Always adding http header names as lowercase in internal storage
+(HTTPSocket). Added method to check if http header is set.
+Changed IHttpServer interface to better separate request and response.
+Added -mno-cygwin flag in Makefile defines for cygwin.
+Added calls to OnDisconnect when socket operation caused socket to close.
+
+2.2.5
+-----
+A basic_string exception thrown while trying to access the first
+(non-existing) element in a zero-sized string was fixed in HTTPSocket.
+Added separate http_version for HttpResponse. Improved reset of state
+information in HTTPSocket and derivates (for keep-alive connections).
+MemFile support reads and writes larger than internal blocksize.
+
+2.2.4
+-----
+IFile (File/MemFile) added reset_read and reset_write.
+Bugfix MemFile read.
+UdpSocket timestamp small fix for win32.
+Cookies reworked in Http framework (Transaction/Request/Response
+and HttpBaseSocket/Ajp13Socket).
+Compile issue when compiling without openssl solved.
+
+2.2.3
+-----
+SSL Handshake was never initiated when using both client and server from the
+library - fixed.
+UdpSocket read timestamp added (SetTimestamp) as new OnRawData method. Use
+when timestamps enabled with call to SetSoTimestamp. Not win32.
+MacOSX project added. Big Thanks to Bruce for both of these.
+
+2.2.2
+-----
+Close file descriptor in File destructor.
+HttpClientSocket new access method Filename.
+Added a few access methods to HttpdSocket.
+Check if gethostbyname_r failed.
+Async resolver fix.
+Fix win32 build problem (uint64_t).
+
+2.2.1
+-----
+Adding (optional) exceptions when Bind() or CreateSocket() fails.
+Enable with ENABLE_EXCEPTIONS.
+Added GetSock* methods in Socket, to retreive information about local
+port and address in a connection.
+Added InitializeContext in TcpSocket with separate certificate / key files.
+Moved some #include's from .h to .cpp files.
+Removed multiple calls to recvfrom() in UdpSocket OnRead.
+HTTPSocket corrected.
+
+2.2
+-----
+TcpSocket output buffer error fixed.
+HTTPSocket HTTP/1.0 request (or HTTP/1.1 with connection: close) fixed.
+IEventHandler now won't crash if the IEventOwner is deleted in OnEvent.
+Added Ajp13Socket that understands the ajp/1.3 protocol. Each request received
+by the class results in an "OnExec(HttpRequest, HttpResponse)" call.
+Added "HttpBaseSocket" that also use the "OnExec" method to process a
+http/https request.
+
+2.1.9
+-----
+Added exception class.
+Changed platform selection in Unix Makefile.
+Cleaner compile on mingw.
+HTTPSocket supports keepalive.
+OnDisconnect moved out of ENABLE_RECONNECT scope.
+
+2.1.8
+-----
+Added missing (optional) namespace in SmtpdSocket.
+TcpSocket: Calling OnDisconnect when reading 0 bytes.
+TcpSocket: Added OnTransferLimit() callback, called when output buffer
+size drops below limit set by SetTransferLimit().
+Boundary bug (writes over two blocks failed) in MemFile fixed.
+Member variables in SSLInitializer no longer static since SSLInitializer
+in itself is static in TcpSocket (avoid potential problem with
+initialization order of static's).
+
+2.1.7
+-----
+Fatal bug in LineProtocol/Online found, when a crlf happens over a read
+buffer boundary. FIXED.
+New output buffer logic. OnWriteComplete callback added, which fires after
+the output buffer has been transferred.
+
+2.1.6
+-----
+No more random number generator in Socket. Random number generator used in
+Utility changed to static.
+ISocketHandler is now a pure virtual definition of the SocketHandler.
+Added general purpose timeout to Socket class (SetTimeout, OnTimeout), and
+used it to implement the connection timeout logic in TcpSocket/SctpSocket.
+Also added OnConnectTimeout which is called instead of OnTimeout, if the
+socket is in Connecting mode.
+New StreamSocket class defines variables used for sock_stream stuff (such
+as connecting, the line protocol).
+
+2.1.5
+-----
+Changed socket and ip option calls to directly manipulate the socket. They
+should be used in the OnOptions callback, to set up the connection before
+it is used. OnOptions is only called on client sockets. It is not called on
+incoming  connections accepted with accept()).
+Removed Set methods from ResolvSocket and replaced them with one
+constructor for each of the different resolves it can do.
+Added DNS cache in ResolvSocket.
+Made CircularBuffer an internal class of TcpSocket.
+Moved these classes to a separate download:
+ ICrypt NullCrypt CTcpSocket MinionSocket MinderSocket MinderHandler Uid
+ListenSocket now sets SO_REUSEADDR in its OnOptions method.
+Small fixes to SmtpSocket to support the new configuration stuff.
+Added socket to socket trigger framework (sockets-config.h: ENABLE_TRIGGERS).
+Small bugfix in TcpSocket::Open when trying to connect to an ipv6 host
+with numeric ip address.
+
+2.1.4
+-----
+Added traffic monitor function.
+EventHandler/IEventOwner bugfix (pure virtual method called on takedown).
+Added outstanding events counter to IEventOwner, to avoid calling
+ClearEvents in destructor of an IEventOwner with no events to clear.
+Modified GetTimeUntilNextEvent to not return a negative time.
+Added SmtpdSocket serverside implementation.
+Crash bug fix if trying to add a socket that already exists in
+sockethandler queue.
+Made a few classes internal (PoolSocket, EventSocket, SocketThread).
+
+2.1.3
+-----
+Added optional Ipv6 and Detach functionality to sockets-config.h.
+ (ENABLE_IPV6, ENABLE_DETACH)
+Crash bug fix: if socket that asked a resolve question is destroyed
+before answer arrives.
+HTTPS (openssl) session support on server side.
+Safer ssl read/write - tnx Peters!
+All debug output now to stderr.
+GetClientRemoteAddress and XXX now returns a copy of the address in
+question, to avoid NULLing the source address when using std::auto_ptr.
+SSL initialization code separated from TcpSocket and put in a new
+SSLInitializer class.
+
+2.1.2
+-----
+Fix for broken http framework.
+Http and httpd tests added.
+Configurable options moved to new 'sockets-config.h' file.
+Restored code for dns resolve when getaddrinfo/getnameinfo isn't available.
+(See sockets-config.h symbol NO_GETADDRINFO)
+
+2.1.1
+-----
+Semaphore added.
+Utility::GetTime() fixed on win32.
+
+2.1
+---
+ * Added Utility::GetTime.
+ * Created socket handler base class ISocketHandler. It will now be possible
+   to write really customized sockethandlers. One effect of this is that
+   the first parameter of the Socket class constructor changes from
+   SocketHandler& to ISocketHandler& - this will affect all current
+   software using the library.
+ * StdLog constructor first parameter changed from SocketHandler*
+   to ISocketHandler*
+ * Modified list handling in Socket/SocketHandler.
+ * Added possibility to clear tcp socket byte counters by passing
+   'true' as input parameter to GetBytesReceived() and GetBytesSent().
+ * Improved CircularBuffer performance when used as output buffer by
+   TcpSocket.
+ * Removed unused and confusing method ISocketHandler::GetSocket.
+ * SocketAddress will replace direct use of ipv4/ipv6 addresses in the code.
+ * Removed virtual supporting method Socket::ReadLine. If anyone was using
+   that method, it used to be called directly after the OnRead callback,
+   if SetLineProtocol was enabled. Repairing the functionality means
+   adding a call of your own in the OnRead callback.
+ * Optimized code for OnLine and HTTP header parsing.
+ * Found and fixed a timing bug in thread code that could cause
+   a segmentation fault.
+ * 'echoserver.cpp' and 'stressclient.cpp' added, for test. Supports
+   normal echo operation, http "echo" server and ssl server/client.
+
+2.0.9
+-----
+Added a way to disable input buffering on tcp sockets.
+The method TcpSocket::DisableInputBuffer() will prevent all writing
+to the input buffer. After that, the only way to receive data is to
+implement an OnRawData method. TcpSocket derived classes that
+already only use OnRawData as a means of receiving data should
+call DisableInputBuffer() to improve performance (and turn off those
+annoying warning messages).
+OnOptions will now be called by UdpSocket. OnOptions is now a pure
+virtual method in the Socket class. Moved default implementation of
+OnOptions from Socket to TcpSocket. Added empty implementations of
+OnOptions in ListenSocket<>, UdpSocket and PoolSocket.
+Made Sockets-config compile on mingw systems.
+
+2.0.8
+-----
+gethostbyname_r only used if the symbol LINUX is defined.
+Sctp protocol by default disabled. Enable by defining USE_SCTP.
+Fixed warnings about GetSocket/handler in connect and disconnect
+situations.
+
+2.0.7
+-----
+Added Resolve(ipaddr_t) and Resolve(const std::string&) in Socket class
+for reverse lookup. Added OnResolveFailed() callback to Socket when a
+Resolve call failed.
+Moved definition of SOCKETS_DYNAMIC_TEMP to socket_include.h to avoid
+breaking windows application not using Sockets-config to retrieve
+compile time flags.
+Added "fd XX" to StdoutLog debug printout whenever a socket instance
+generates an event, where XX is the file descriptor of the socket or
+-1 if the file descriptor isn't valid.
+Reset connected flag when read returns 0 - avoids using shutdown on
+Close() and the following warning.
+SCTP support added - see SctpSocket class.
+
+2.0.6
+-----
+"gethostbyname()" calls are replaced with "gethostbyname_r()", to ensure
+threadsafe operation.
+If the flag SOCKETS_DYNAMIC_TEMP is defined at compile time of the library,
+all application using the library must also define the same flag. In unix/
+linux Makefiles this is easiest done by adding `Sockets-config` to the
+CPPFLAGS variable.
+Optimized SocketHandler by removing the SocketHandler::GetSocket method
+and adding better code in each place where it was used - Thanks Samuel.
+CircularBuffer now has a ReadString method.
+Added method to remove a specific event to the EventHandler class.
+Added methods to the IEventOwner interface to remove all events or
+one specific events. - Thanks Thomas
+
+2.0.5
+-----
+Added missing call to OnRawData when using ssl.
+Bugfix in HttpPostSocket, where the boundary variable was never set.
+Reset connecting flag in TcpSocket when a connection attempt fails.
+Define SOCKETS_DYNAMIC_TEMP to use dynamically allocated temporary
+buffers in read operations - helps on ECOS.
+Compile with -O0 if you are using gcc 2.9.x.
+
+2.0.4
+-----
+Improved Http client classes, now they're all able to receive a response.
+Use methods SetFilename() / SetDataPtr() to write response to a file
+or to memory respectively.
+Small fix for uuid.h include for mac os x.
+Removed debug printout in SSLInitializer.
+
+2.0.3
+-----
+Url parsing modified for Http Get/Put/Post classes to enable ssl if the
+url protocol is https.
+TcpSocket/SSL random file modified, see tutorial page at
+http://www.alhem.net/Sockets/tutorial/using6d.html
+Removed a lot of old debug printouts.
+
+2.0.2b
+------
+Replaced direct read access to sockets map with a method looping through
+the map, to avoid adding null pointers to non-existing file descriptors.
+
+2.0.2a
+------
+The new add control logic broke tcp reconnect, so this is a fix for that.
+
+2.0.2
+-----
+Fixed infinite loop that could lock the main process when a socket attempts
+to connect, gets data to send, and then the connection fails.
+Added control so the same file descriptor can't be added to the socket
+handler twice.
+Utility::rfc1738_encode buffer overflow (read only) fixed.
+Moved local hostname resolution stuff from SocketHandler to Utility
+- see http://www.alhem.net/Sockets/tutorial/using6c.html
+Project files for visual studio 6 slightly modified (missing dependency,
+FD_SETSIZE define removed).
+
+2.0.1
+-----
+Moved Errno declaration outside sockets namespace when compiling for unix.
+This was already done for the win32 implementation.
+Made typedef for socket_m in SocketHandler protected, since its use are
+already protected.
+Fixed problem with reconnect.
+
+2.0
+---
+Optimizing SocketHandler.
+Fixed SSL socket reconnect.
+HttpGetSocket url parsing fixed. Really.
+Increased char buffer size in HttpdSocket for large query_string's.
+Added timer events, implemented in EventHandler.
+Using _beginthreadex()/_endthreadex() to create/end thread in _win32.
+Using GetTempPathA() explicitly when getting _win32 temporary path.
+ * Removed (almost) all sprintf's.
+Visual studio .net project now build multithreaded library.
+Removed redundant classes SSLSocket, HttpsGetSocket, and HttpsSocket
+(all SSL functionality now in TcpSocket).
+Using dummy ssl types in TcpSocket if HAVE_OPENSSL is not defined.
+Moved a few typedef's outside the optional sockets namespace in the file
+socket_include.h.
+Fixed Thread/SocketThread to avoid using method on deleted pointer.
+Added CXX in Makefile.
+Bugfix in SocketThread so the correct sockethandler will be used by the
+detached socket object.
+Added full mutex threadsafe operations. The old _THREADSAFE_SOCKETS
+Makefile option is no longer in use.
+Improved graceful shutdown of tcp connections when possible.
+Moved address resolution methods from class Socket to Utility. The methods
+are isip, u2ip, l2ip.
+Added fix for unassigned names in httpdform parser.
+
+1.9.9
+-----
+Trying to remove all dynamic_cast's. They are used in ListenSocket to
+check that the Create method returns correct type, and in the socket
+handler to give extra functionality to tcp sockets.
+New callback OnDisconnect is called only when a connected tcp socket
+is set for reconnect, and has lost connection.
+Memory leak in TcpSocket output buffering fixed.
+HttpGetSocket.url_this fixed.
+Replaced HttpGetSocket.m_content string with an allocated byte buffer.
+Fix bug in Utility::rfc1738_decode.
+SocketHandler.Select can be called without parameters, which means it
+will not return until an event has been received by a socket.
+Automatic purging of tcp sockets that hang around too long with data
+still left to send.
+Added virtual destructor for ICrypt pure virtual.
+
+1.9.8
+-----
+Nasty bug fixed on macosx that caused OnConnect to be called even if
+the connection failed.
+SSL client functionality restored. Cached data was not sent on connect
+because the connected flag was not set.
+Two new callbacks added for TcpSocket, to indicate that ssl negotiation
+failed: OnSSLConnectFailed and OnSSLAcceptFailed.
+HttpGetSocket: getting a https: address enables ssl....
+Added fatal error if trying to use a ssl server without implementing
+the initialization method (InitSSLServer).
+
+1.9.7
+-----
+SocketHandler.OkToAccept now takes a socket class pointer as input
+parameter, which can be used to identify which ListenSocket is
+calling OkToAccept.
+Treating socket exception as connection failed on win32
+(if trying to connect).
+Reset "flush before close" flag on write/read error.
+Moved sockethandler Add logic once again, this time outside loop
+checking for fd_set events..
+Check if fd_set is getting full (trying to add more than FD_SETSIZE
+sockets to the socket handler). Incoming connections are immediately
+disconnected if the fd_set is full. TcpSocket::Open calls will
+fail instantly if there is no more space in the fd_set.
+Remember that FD_SETSIZE can be defined in socket_handler.h if there
+is a need for larger fd_set's. The default on win32 is 64 slots which
+is a bit thin. Linux and probably most unixes has 1024 slots...
+On MacOsX the macro FD_COPY is used to copy the fd_set's before select().
+More debug logging on exactly how a connection was established.
+
+1.9.6
+-----
+Bugfix protecting the sockethandler from using deleted sockets.
+(Socket class destructor calls SocketHandler.Remove in case the socket
+is deleted before it is removed from the sockethandler).
+Removed a lot of warnings for visual studio .net / 2005 beta.
+Fix for bsd sockets sigpipe disable, using SO_NOSIGPIPE.
+Solaris use putenv in HttpdSocket.
+Added flag flush before close, telling a (tcp) socket to send all data
+before closing even while the SetCloseAndDelete flag is set.
+Default value: flush before close = true.
+
+1.9.5
+-----
+Visual studio 6 and .net project files updated.
+DevCpp project files updated.
+Using openssl win32 installer from www.slproweb.com,
+with installation location c:\OpenSSL.
+Merged Sockets and SocketsEx projects in all windows projects.
+Added winsock error texts.
+
+ListenSocket.Bind slightly modified - if port 0 random assigned is
+needed, 0 has to be specified in the Bind call (before this release
+a Bind call with no parameters had the same effect).
+Ipv6 support has been improved, with many of the ipv4/ipv6 methods
+overall merged into one. Ipv6 support for reconnect and connection retry.
+The connection pool now also support ipv6 connections.
+Added SocketHandler.ResolverReady that indicates the resolverthread
+is ready for queries.
+UdpSocket constructor modified to also include an ipv6 boolean
+parameter, because the socket file descriptor is created in the
+constructor.
+Change: UdpSocket.Bind returns 0 on success, -1 on failure, just like
+ListenSocket<>.Bind.
+Connection pool disabled by default. Use SocketHandler.EnablePool to
+turn it back on.
+HttpDebugSocket: Added first line of request (method url httpversion) to
+page echoing the request.
+TcpSocket ssl private key callback function no longer uses a static
+member variable to store the password. This enables the use of any number
+of private key files, each with a different password.
+
+1.9.4
+-----
+Changed udp sockets to nonblocking.
+
+1.9.3
+-----
+New define while compiling: _THREADSAFE_SOCKETS
+This "thread safe" compile mode only protects OnWrite / SendBuf in
+TcpSocket, but will probably include more sections of the code later on.
+Mutex and Lock classes added.
+HttpdCookies now excludes domain from the Set-Cookie http header
+(if COOKIE_DOMAIN is defined as a blank string "").
+Incoming connections should now respond quicker even when using a long
+Select() timeout.
+Documentation: All classes and Socket class members at least briefly described.
+Tcp and Udp socket now shares a common virtual description of the Send
+and SendBuf methods.
+Fixed bug that caused too long connection timeouts.
+UDP sockets reads up to 10 messages in one read event.
+
+1.9.2
+-----
+Support for HttpdSocket http/1.1 keep-alive operation added.
+Fiddling with the connection / reconnect code. Not perfect by a long shot.
+If a connection timeout is set, and the socket is supposed to reconnect,
+the socket will wait the defined connection timeout until a connection
+retry is made even if the connection fails immediately.
+OnConnectFailed() will only be called after all connection retries has
+been attempted.
+OnConnectRetry() will be called before each connection retry. Return
+false from this callback method to abort connection retries and kill the
+socket permanently.
+Data sent before / between connection is preserved, whatever that's worth.
+Added optional namespace for the entire library.
+
+1.9.1
+-----
+Added SetConnected() in ListenSocket.h for TcpSocket's on accept.
+If not, all incoming tcp connections refused to send their data.
+
+1.9
+---
+Added reconnect and connection retry for TcpSocket's.
+New callbacks:
+OnConnectRetry() can return false to abort connection retries.
+OnReconnect() when a connection has resumed.
+
+1.8.7
+-----
+Added methods GetSsl() and GetSslContext() to access openssl structures
+SSL resp. SSL_CTX in TcpSocket and SSLSocket.
+HttpGetSocket no longer reports an error when initialized with an empty
+filename.
+SocketHandler::GetCount now returns actual number of active socket plus
+number of sockets to be added to active sockets list.
+
+1.8.6
+-----
+Socket::DisableRead - use this when creating a socket only for output
+(the file descriptor will not be added to the read fd_set on select).
+Added check to make sure no more than FD_SETSIZE sockets are added to
+the socket handler.
+
+1.8.5
+-----
+ReadLine fixed.
+
+1.8.4
+-----
+Fixed a buffer problem that lost a byte for each read when doing large
+http transfers (HTTPSocket, HttpsSocket, TcpSocket).
+Added classes mentioned in v1.8.3...
+Thread class implemented for win32 (not tested)
+
+1.8.3
+-----
+(OnWriteComplete - pending)
+(IFile - File - MemFile)
+(HttpdSocket - HttpdForm - HttpdCookies)
+Incoming sockets are no longer blocking
+OnWrite no longer disconnect on EAGAIN error code
+SSLSocket has been integrated with TcpSocket (still experimental)
+
+1.8.2
+-----
+Removed warning about read after shutdown.
+Socket does not try to do shutdown/close if the file descriptor is invalid.
+
+1.8
+---
+ListenSocketBase functionality moved to ListenSocket template class.
+The important addition is the Create() method in Socket - use that to
+create a socket instance with an alternative constructor if needed.
+TcpSocket::Open bugfix - sometimes returned false (connection failed)
+although the connection was perfectly fine.
+Socks4 client functionality added for outgoing connections. See new
+SetSocks4Host, SetSocks4Port, SetSocks4Userid and SetSocks4TryDirect
+methods in SocketHandler.
+HttpGetSocket stores retrieved document in a private string member
+variable, reducing the need for disk access.
+Asynchronous DNS functionality added. Use the new SocketHandler method
+EnableResolver() to enable this for resolving of all outgoing connections.
+
+1.7.6
+-----
+Small changes in UdpSocket
+New class ListenSocketBase as an alternative to ListenSocket<> template
+class
+New callback in Socket: Create - used by ListenSocketBase
+
+1.7.5
+-----
+New callback on socket class: OnOptions, called when a new socket has
+been created, to set options like SetReuse and SetKeepalive.
+New get methods on MinionSocket.
+Socket::Close now does a recv() after shutdown().
+New logging level: Info
+
+1.7.2
+-----
+HttpsGetSocket::url_this default port changed to 443 (was 80).
+TcpSocket buffer sizes adjusted.
+Switch off LineProtocol when reading the http body in HTTPSocket and
+HttpsSocket.
+
+	
+1.7
+---
+HttpPostSocket added functionality, able to switch between url-encoded
+form-data or multipart/form-data.
+Connection pooling on TcpSocket's; When SetRetain() is called on a client
+socket (that use Open / OnConnect), that sockets connection will be left
+open and reused by the next TcpSocket the tries to open a new connection to
+the same host / port.
+This construction gives HTTPSocket HTTP/1.1 support for keep-alive
+connections.
+Pooled connections are stored as PoolSocket objects in the SocketHandler
+socket list, and supervised like any other socket - if a pooled connection
+is closed by the remote end, it's removed by the SocketHandler.
+
+
+1.6.4
+-----
+Socket::SetParent / ::GetParent added, as a way to find out which
+ListenSocket created the Socket. GetParent returns the pointer to the
+ListenSocket object, or NULL if the Socket was created by the
+programmer.
+Win32: WSA startup code is wrapped in a class, which is created as a
+static instance in Socket. This should automatically initialize
+winsock when the first Socket is created.
+
+
+1.6.3
+-----
+"errno" and "strerror" has been replaced by Errno and StrError,
+and is defined for each operating system environment.
+New classes for HTTP: HttpPutSocket, HttpPostSocket, HttpDebugSocket.
+
+1.6.2
+-----
+Bugfix in ListenSocket, when opening a random port GetPort() returned
+wrong port number - this is now fixed.
+Defining methods depending on ipv4 or ipv6 was removed, and all ipv4 methods
+renamed to their original names - without the '4'.
+
+
+1.6.1
+-----
+Dummy copy constructor / assignment operator added to classes that can't be
+copied by default.
+Minor improvements to HTTPSocket.
+Removed typedef string_v - collision with other projects that use same name
+for std::vector<std::string> instead of internal use std::list<std::vector>
+
+
+1.6
+---
+Improvements on win32 compile and linking. Remember to turn on rtti
+information (/GR in visual studio), because I tend to use dynamic_cast a lot.
+
+It is now possible to exclude openssl specific code, by not having
+HAVE_OPENSSL defined at compile time.
+Define HAVE_OPENSSL in Makefile or project file if openssl is installed
+on your machine.
+
+Bugfix in CircularBuffer. It finally works.
+
+Renamed CircularBuffer method GetCount to "ByteCounter" - the method returns
+the total number of bytes to have ever gone through the buffer.
+
+Improved logging, and cleaned up old debug printouts.
+
+Fixed a number of memory leaks that would occur in an application that
+creates and recreates a lot of SocketHandler's, and also in the threading
+part of the library.
+
+Some optimizations for speed.
+
+
+1.5.4
+-----
+UdpSocket: Broadcast flag, Multicast stuff
+
+
+1.5.3
+-----
+SocketHandler no longer resolves local hostname on startup.
+On hosts with unresolvable hostname this would cause a delay on startup.
+
+Changed unix socket i/o from read/write to recv/send with MSG_NOSIGNAL
+flag, to avoid sigpipe
+ - see readsocket/writesocket macros in socket_include.h.
+
+
+1.5
+---
+
+New callback: OnConnectFailed
+
+new / modified methods to support ipv6:
+	Socket::CreateSocket6
+	Socket::u2ip
+	Socket::l2ip
+	Socket::GetRemoteIP6
+	Socket::IsIpv6
+
+
+
+04-04-12
+--------
+void TcpSocket::OnRawData(const char *,size_t)
+called when new data is read
+
+bool SocketHandler::OkToAccept()
+called by ListenSocket - default implementation returns true
+

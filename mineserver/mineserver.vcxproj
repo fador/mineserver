@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\DisplayRawSocket.cpp" />
+    <ClCompile Include="..\src\DisplaySocket.cpp" />
+    <ClCompile Include="..\src\map.cpp" />
+    <ClCompile Include="..\src\mineserver.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\Base64.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\Exception.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\Ipv4Address.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\Lock.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\MemFile.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\Mutex.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\Parse.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\ResolvSocket.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\SctpSocket.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\Semaphore.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\Socket.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\SocketHandler.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\SocketHandlerEp.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\SocketHandlerThread.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\SocketStream.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\SocketThread.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\socket_include.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\StdoutLog.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\StreamSocket.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\StreamWriter.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\TcpSocket.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\Thread.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\UdpSocket.cpp" />
+    <ClCompile Include="..\src\Sockets-2.3.9.3\Utility.cpp" />
+    <ClCompile Include="..\src\StatusHandler.cpp" />
+    <ClCompile Include="..\src\user.cpp" />
+    <ClCompile Include="..\src\zlib\adler32.c" />
+    <ClCompile Include="..\src\zlib\compress.c" />
+    <ClCompile Include="..\src\zlib\crc32.c" />
+    <ClCompile Include="..\src\zlib\deflate.c" />
+    <ClCompile Include="..\src\zlib\gzio.c" />
+    <ClCompile Include="..\src\zlib\infback.c" />
+    <ClCompile Include="..\src\zlib\inffast.c" />
+    <ClCompile Include="..\src\zlib\inflate.c" />
+    <ClCompile Include="..\src\zlib\inftrees.c" />
+    <ClCompile Include="..\src\zlib\trees.c" />
+    <ClCompile Include="..\src\zlib\uncompr.c" />
+    <ClCompile Include="..\src\zlib\zutil.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\DisplayRawSocket.h" />
+    <ClInclude Include="..\src\DisplaySocket.h" />
+    <ClInclude Include="..\src\map.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\Base64.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\IBase.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\IEventHandler.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\Ipv4Address.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\ListenSocket.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\Lock.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\MemFile.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\Parse.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\ResolvServer.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\ResolvSocket.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\SctpSocket.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\Socket.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\SocketAddress.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\SocketHandler.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\SocketHandlerEp.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\SocketHandlerThread.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\sockets-config.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\SocketStream.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\SocketThread.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\socket_include.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\StreamSocket.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\StreamWriter.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\TcpSocket.h" />
+    <ClInclude Include="..\src\Sockets-2.3.9.3\Utility.h" />
+    <ClInclude Include="..\src\StatusHandler.h" />
+    <ClInclude Include="..\src\user.h" />
+    <ClInclude Include="..\src\zlib\crc32.h" />
+    <ClInclude Include="..\src\zlib\deflate.h" />
+    <ClInclude Include="..\src\zlib\inffast.h" />
+    <ClInclude Include="..\src\zlib\inffixed.h" />
+    <ClInclude Include="..\src\zlib\inflate.h" />
+    <ClInclude Include="..\src\zlib\inftrees.h" />
+    <ClInclude Include="..\src\zlib\trees.h" />
+    <ClInclude Include="..\src\zlib\zconf.h" />
+    <ClInclude Include="..\src\zlib\zconf.in.h" />
+    <ClInclude Include="..\src\zlib\zlib.h" />
+    <ClInclude Include="..\src\zlib\zutil.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7F6D1DAB-AA49-4343-B28E-C3E647BE5007}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>mineserver</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../src/Sockets-2.3.9.3/</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
