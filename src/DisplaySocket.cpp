@@ -14,7 +14,7 @@
 #include "zlib/zlib.h"
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
-#include "drawBoard.h"
+#include "map.h"
 #include "user.h"
 
 typedef std::map<SOCKET,Socket *> socket_m;
@@ -317,13 +317,13 @@ void DisplaySocket::OnRead()
     }    
   }
 
-  //L‰het‰ yhdistyneelle pelaajalle
+  //Send to player which is sending this data
   //h.SendSock(GetSocket(), (void*)&data[0], data.size());
 
-  //Lis‰‰ pelaaja
+  //Add new player
   //addUser(GetSocket(), nick);
   
-  //L‰het‰ kaikille
+  //Send some data to all
   //h.SendAll(std::string(tmp, i));
 
 }
