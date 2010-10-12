@@ -36,9 +36,16 @@ int main(void)
 
   //Bind to port 25565
 	if (l.Bind(25565))
-	{
+	{                                                                                                        
 		exit(-1);
 	}
+    std::cout << std::endl
+              << "    _/      _/  _/                                                                                    " << std::endl
+              << "   _/_/  _/_/      _/_/_/      _/_/      _/_/_/    _/_/    _/  _/_/  _/      _/    _/_/    _/  _/_/   " << std::endl
+              << "  _/  _/  _/  _/  _/    _/  _/_/_/_/  _/_/      _/_/_/_/  _/_/      _/      _/  _/_/_/_/  _/_/        " << std::endl
+              << " _/      _/  _/  _/    _/  _/            _/_/  _/        _/          _/  _/    _/        _/           " << std::endl
+              << "_/      _/  _/  _/    _/    _/_/_/  _/_/_/      _/_/_/  _/            _/        _/_/_/  _/            " << std::endl;
+    std::cout << "Version 0.1 by Fador(&Psoden -_-)" << std::endl << std:endl;    
 	h.Add(&l);
 	h.Select(1,0);
 	while (!quit)
