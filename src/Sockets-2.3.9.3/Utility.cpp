@@ -1384,6 +1384,7 @@ bool Utility::ChangeDirectory(const Utility::Path& to_dir)
 {
 #ifdef _WIN32
 	//return SetCurrentDirectory(to_dir.GetPath().c_str()) ? true : false;
+  return false;
 #else
 	if (chdir( to_dir.GetPath().c_str() ) == -1)
 	{

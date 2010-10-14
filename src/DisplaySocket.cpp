@@ -93,9 +93,13 @@ void DisplaySocket::OnRead()
      waitForData=false;
   }
 
-  printf("Action: 0x%x\n", action);
+  //printf("Action: 0x%x\n", action);
   //Login package
-  if(action==0x01)
+  if(action==0x00)
+  {   
+    //Ping
+  }
+  else if(action==0x01)
   {    
     if(buffer.size()<12)
     {
@@ -125,7 +129,7 @@ void DisplaySocket::OnRead()
     len=(buffer[curpos]<<8)+buffer[curpos+1];
     curpos+=2;
     
-    if(buffer.size()<curpos)
+    if(buffer.size()<curpos+len)
     {
       waitForData=true;
       return;
@@ -146,8 +150,9 @@ void DisplaySocket::OnRead()
     
     //Login
     char data[9]={0x01, 0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00};    
-    h.SendSock(GetSocket(), (char *)&data[0], 9);    
-    
+    h.SendSock(GetSocket(), (char *)&data[0], 9);   
+
+   
 
   }
   else if(action==0x02)
@@ -177,15 +182,99 @@ void DisplaySocket::OnRead()
 
     //char data[9]={0x01, 0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00};    
     //h.SendSock(GetSocket(), (char *)&data[0], 9); 
-    char data2[19]={0x02, 0x00,0x10,0x32 ,0x65 ,0x36 ,0x36 ,0x66 ,0x31 ,0x64 ,0x63 ,0x30 ,0x33 ,0x32 ,0x61 ,0x62,0x35 ,0x66 ,0x30};    
-    h.SendSock(GetSocket(), (char *)&data2[0], 19);
+    //char data2[19]={0x02, 0x00,0x10,0x32 ,0x65 ,0x36 ,0x36 ,0x66 ,0x31 ,0x64 ,0x63 ,0x30 ,0x33 ,0x32 ,0x61 ,0x62,0x35 ,0x66 ,0x30};    
+    //h.SendSock(GetSocket(), (char *)&data2[0], 19);
+    char data2[4]={0x02, 0x00,0x01,'-'};    
+    h.SendSock(GetSocket(), (char *)&data2[0], 4);
 
     //char data3[5]={0x1e, 0x01, 0x02, 0x03, 0x04};
     //h.SendSock(GetSocket(), (char *)&data3[0], 5);
   }
   else if(action==0x0a)
   {
+    if(buffer[0]==1)
+    {
+      std::cout << "On ground!" << std::endl;
+    }
     buffer.pop_front();
+  }
+  else if(action==0x0b) // PLayer position
+  {
+    if(buffer.size()<34)
+    {
+      waitForData=true;
+      return;
+    }
+    int curpos=0;
+    double x,y,stance,z;
+    float rotation,pitch;
+    uint8 doublearray[8];
+
+    for(i=0;i<8;i++) doublearray[i]=buffer[curpos+i];
+    x=getDouble(&doublearray[0]);    
+    curpos+=8;
+
+    for(i=0;i<8;i++) doublearray[i]=buffer[curpos+i];
+    y=getDouble(&doublearray[0]);
+    curpos+=8;
+
+    for(i=0;i<8;i++) doublearray[i]=buffer[curpos+i];
+    z=getDouble(&doublearray[0]);
+    curpos+=8;
+
+    std::cout << "X: " << x << " Y: " << y << " Z: " << z << std::endl;
+    buffer.erase(buffer.begin(), buffer.begin()+34);
+
+    //Player at ground
+    if(y==60.00f) //Just for this test
+    {
+
+      //Server time
+      uint8 data3[9]={0x04, 0x00, 0x00, 0x00,0x00,0x00,0x00,0x0e,0x00};
+      h.SendSock(GetSocket(), (char *)&data3[0], 9);
+
+      //Inventory      
+      uint8 data4[7+36*5];
+      data4[0]=0x05;
+      putSint32(&data4[1],-1);
+      data4[5]=0;
+      data4[6]=36;
+      for(i=0;i<36;i++)
+      {
+        putShort(&data4[7+i*5], 1);
+        data4[7+2+i*5]=1;
+        putShort(&data4[7+3+i*5], 0);
+      }
+      h.SendSock(GetSocket(), (char *)&data4[0], 7+36*5);
+
+      data4[6]=4;
+      putSint32(&data4[1],-2);
+      h.SendSock(GetSocket(), (char *)&data4[0], 7+4*5);
+
+      putSint32(&data4[1],-3);
+      h.SendSock(GetSocket(), (char *)&data4[0], 7+4*5);
+      
+      //Setup spawn position (0,70,0)
+      uint8 data2[13]={0};
+      data2[0]=0x06;
+      putSint32(&data2[1], 0); //X
+      putSint32(&data2[5], 70);//Y
+      putSint32(&data2[9], 0); //Z
+      
+      h.SendSock(GetSocket(), (char *)&data2[0], 13); 
+
+      //Add chat message
+      char data5[9]={0x03, 0x00, 0x06, 'J','o','i','n','e','d'};
+      h.SendSock(GetSocket(), (char *)&data5[0], 9);
+      
+      //Send "On Ground" signal
+      char data6[2]={0x0A, 0x01};
+      h.SendSock(GetSocket(), (char *)&data6[0], 2);
+
+      //Kick player out
+      //char dataQuit[9]={0xff, 0x00, 0x06, 'G','r','o','u','n','d'};
+      //h.SendSock(GetSocket(), (char *)&dataQuit[0], 9);
+    }
   }
   else if(action==0x0d)
   {
@@ -200,57 +289,48 @@ void DisplaySocket::OnRead()
     uint8 *doubleAddress=(uint8 *)&x;
     for(i=0;i<8;i++)
     {
-      doubleAddress[i]=buffer[curpos+i];
+      doubleAddress[7-i]=buffer[curpos+i];
     }
     std::cout << "X: " << x << std::endl;
     buffer.erase(buffer.begin(), buffer.begin()+41);
   }
+  else
+  {
+    printf("Unknown action: 0x%x\n", action);
+  }
 
-  //printf("0x%x\n", tmp[0]);
-  if(logged)//action=0x0a)
+  if(logged)
   {
     logged=false;
-    uint8 data4[18+81920];
+    uint8 data4[18+81920+1000];
     uint8 mapdata[81920]={0};
+    for(i=0;i<81920;i++) mapdata[i]=0;
 
-    for(mapposx=-5;mapposx<5;mapposx++)
+    for(mapposx=-2;mapposx<=1;mapposx++)
     {
-      for(mapposz=-5;mapposz<5;mapposz++)
+      for(mapposz=-2;mapposz<=1;mapposz++)
       {
         //Pre chunk
         data4[0]=0x32;
-        data4[1]=(mapposx>>24)&0xff;
-        data4[2]=(mapposx>>16)&0xff;
-        data4[3]=(mapposx>>8)&0xff;
-        data4[4]=(mapposx)&0xff;
-        data4[5]=(mapposz>>24)&0xff;
-        data4[6]=(mapposz>>16)&0xff;
-        data4[7]=(mapposz>>8)&0xff;
-        data4[8]=(mapposz)&0xff;
-        data4[9]=1;
+        putSint32(&data4[1], mapposx);
+        putSint32(&data4[5], mapposz);
+        data4[9]=1; //Init chunk
         h.SendSock(GetSocket(), (uint8 *)&data4[0], 10);
       }
     }
-    for(mapposx=-5;mapposx<5;mapposx++)
+    for(mapposx=-2;mapposx<=1;mapposx++)
     {
-      for(mapposz=-5;mapposz<5;mapposz++)
+      for(mapposz=-2;mapposz<=1;mapposz++)
       {   
         //Chunk
         data4[0]=0x33;
-        data4[1]=(mapposx>>24)&0xff;
-        data4[2]=(mapposx>>16)&0xff;
-        data4[3]=(mapposx>>8)&0xff;
-        data4[4]=(mapposx)&0xff;
+        putSint32(&data4[1], mapposx);
         data4[5]=0;
         data4[6]=0;
-        data4[7]=(mapposz>>24)&0xff;
-        data4[8]=(mapposz>>16)&0xff;
-        data4[9]=(mapposz>>8)&0xff;
-        data4[10]=(mapposz)&0xff;
+        putSint32(&data4[7], mapposz);
         data4[11]=15; //Size_x
         data4[12]=127; //Size_y
         data4[13]=15; //Size_z
-
 
 
         int index=0;
@@ -262,10 +342,14 @@ void DisplaySocket::OnRead()
           {
             for(int mapy=0;mapy<128;mapy++)
             {
-              if(mapy>70)
+              if(mapy<1)
+              {
+                mapdata[index]=7; //BedRock
+              }
+              else if(mapy<60)
               {
                 mapdata[index]=1; //Rock
-              }
+              }              
               else
               {
                 mapdata[index]=0; //Empty
@@ -293,25 +377,19 @@ void DisplaySocket::OnRead()
         //Sky light
         for(int i=0;i<16*16*128/2;i++)
         {
-          mapdata[index]=0x11;
+          mapdata[index]=0x00;
           index++;
         }
         
         
         uLongf written=81920;
         
-        compress((Bytef *)&data4[18], &written, (Bytef *)&mapdata[0],81920);
-            
+        //Compress data with zlib deflate
+        compress((uint8 *)&data4[18], &written, (uint8 *)&mapdata[0],81920+1000);            
         
-        std::cout << "Gzipped: " << written << std::endl;
-
-
-        data4[14]=(written>>24)&0xff;
-        data4[15]=(written>>16)&0xff;
-        data4[16]=(written>>8)&0xff;
-        data4[17]=(written)&0xff;
+        putSint32(&data4[14], written);
         h.SendSock(GetSocket(), (uint8 *)&data4[0], 18+written);
-        
+        std::cout << "Sent chunk " << written << " bytes" << std::endl;
         
       }          
     }

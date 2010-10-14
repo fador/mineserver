@@ -46,8 +46,8 @@ int ZEXPORT compress2 (dest, destLen, source, sourceLen, level)
 
     //Edit by Fador
     //Gzipping
-    err=deflateInit2(&stream, level, Z_DEFLATED, (15+16), 8, Z_DEFAULT_STRATEGY);  
-    //err = deflateInit(&stream, level);
+    //err=deflateInit2(&stream, level, Z_DEFLATED, (15+16), 8, Z_DEFAULT_STRATEGY);  
+    err = deflateInit(&stream, level);
     if (err != Z_OK) return err;
 
     err = deflate(&stream, Z_FINISH);

@@ -8,6 +8,11 @@ typedef char sint8;
 typedef unsigned int uint32;
 typedef int sint32;
 
+
+void putSint32(uint8 *buf, sint32 value);
+double getDouble(uint8 *buf);
+void putShort(uint8 *buf, short value);
+
 void initMap();
 void freeMap();
 
