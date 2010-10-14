@@ -260,6 +260,11 @@ void DisplaySocket::OnRead()
       {
         int item_id=getSint16(&buffer[curpos]);
         curpos+=2;
+        if(buffer.size()-curpos<items*2)
+        {
+          waitForData=true;
+          return;
+        }
         if(item_id!=-1)
         {
           if(buffer.size()-curpos<3)
@@ -336,9 +341,9 @@ void DisplaySocket::OnRead()
         data4[6]=36;
         for(i=0;i<36;i++)
         {
-          putShort(&data4[7+i*5], 1);
+          putSint16(&data4[7+i*5], 1);
           data4[7+2+i*5]=1;
-          putShort(&data4[7+3+i*5], 0);
+          putSint16(&data4[7+3+i*5], 0);
         }
         h.SendSock(GetSocket(), (char *)&data4[0], 7+36*5);
 
@@ -369,6 +374,26 @@ void DisplaySocket::OnRead()
         //char dataQuit[9]={0xff, 0x00, 0x06, 'G','r','o','u','n','d'};
         //h.SendSock(GetSocket(), (char *)&dataQuit[0], 9);
       }
+    }
+    else if(action==0x0c) //Player Look
+    {
+      if(buffer.size()<9)
+      {
+        waitForData=true;
+        return;
+      }
+
+      float yaw,pitch;
+      uint8 onground;
+      int curpos=0;
+      yaw=getFloat(&buffer[curpos]);
+      curpos+=4;
+      pitch=getFloat(&buffer[curpos]);
+      curpos+=4;
+      onground=buffer[curpos];
+      curpos++;
+
+      buffer.erase(buffer.begin(), buffer.begin()+9);
     }
     else if(action==0x0d) //Player Position & Look
     {

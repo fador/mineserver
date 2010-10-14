@@ -41,7 +41,7 @@ void putSint32(uint8 *buf, sint32 value)
   buf[3]=pointer[0];
 }
 
-void putShort(uint8 *buf, short value)
+void putSint16(uint8 *buf, short value)
 {
   uint8 *pointer = reinterpret_cast<uint8 *>(&value);
   buf[0]=pointer[1];
@@ -55,6 +55,18 @@ double getDouble(uint8 *buf)
   for(uint8 i=0;i<8;i++)
   {
     doubleAddress[7-i]=buf[i];
+  }
+
+  return temp;
+}
+
+float getFloat(uint8 *buf)
+{
+  float temp;
+  uint8 *floatAddress=reinterpret_cast<uint8 *>(&temp);
+  for(uint8 i=0;i<4;i++)
+  {
+    floatAddress[3-i]=buf[i];
   }
 
   return temp;
@@ -92,7 +104,7 @@ sint32 getSint16(uint8 *buf)
 {
   short temp;
   uint8 *shortAddress=reinterpret_cast<uint8 *>(&temp);
-  for(uint8 i=0;i<4;i++)
+  for(uint8 i=0;i<2;i++)
   {
     shortAddress[1-i]=buf[i];
   }

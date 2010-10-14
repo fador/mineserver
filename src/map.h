@@ -10,9 +10,10 @@ typedef int sint32;
 
 
 void putSint32(uint8 *buf, sint32 value);
-double getDouble(uint8 *buf);
-void putShort(uint8 *buf, short value);
+void putSint16(uint8 *buf, short value);
 
+double getDouble(uint8 *buf);
+float  getFloat(uint8 *buf);
 uint32 getUint32(uint8 *buf);
 sint32 getSint32(uint8 *buf);
 uint32 getUint16(uint8 *buf);
