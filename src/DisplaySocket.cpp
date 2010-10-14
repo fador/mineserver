@@ -363,8 +363,8 @@ void DisplaySocket::OnRead()
         h.SendSock(GetSocket(), (char *)&data2[0], 13); 
 
         //Add chat message
-        char data5[9]={0x03, 0x00, 0x06, 'J','o','i','n','e','d'};
-        h.SendSock(GetSocket(), (char *)&data5[0], 9);
+        //char data5[9]={0x03, 0x00, 0x06, 'J','o','i','n','e','d'};
+        //h.SendSock(GetSocket(), (char *)&data5[0], 9);
       
         //Send "On Ground" signal
         char data6[2]={0x0A, 0x01};
@@ -417,6 +417,36 @@ void DisplaySocket::OnRead()
     {
       std::cout << "Player now holding: " << getUint16(&buffer[4]) << std::endl;
       buffer.erase(buffer.begin(), buffer.begin()+6);
+    }
+    else if(action==0x03) // Chatmessage
+    {
+      if(buffer.size()<2)
+      {
+        waitForData=true;
+        return;
+      }
+
+      int curpos=0;
+
+      //Read message length
+      int len=getSint16(&buffer[curpos]);
+      curpos+=2;
+      
+      if(buffer.size()<curpos+len)
+      {
+        waitForData=true;
+        return;
+      }
+      
+      //Read message
+      std::string msg;
+      for(int pos=0;pos<len;pos++)
+      {
+        msg+=buffer[curpos+pos];
+      }
+      std::cout << "Message received: " << msg << std::endl;
+      
+      buffer.erase(buffer.begin(), buffer.begin()+curpos+len);
     }
     else
     {
