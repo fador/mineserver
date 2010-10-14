@@ -219,13 +219,15 @@ void DisplaySocket::OnRead()
         waitForData=true;
         return;
       }
-
+      
       int curpos=0;
-
-      //Read message length
-      int len=getSint16(&buffer[curpos]);
+      
+      uint8 shortarray[] = {};
+      for(i=0;i<2;i++) shortarray[i]=buffer[curpos+i]; 
+      short len = getSint16(&shortarray[0]); 
       curpos+=2;
       
+      // Wait for whole message
       if(buffer.size()<curpos+len)
       {
         waitForData=true;
@@ -234,12 +236,12 @@ void DisplaySocket::OnRead()
       
       //Read message
       std::string msg;
-      for(int pos=0;pos<len;pos++)
-      {
-        msg+=buffer[curpos+pos];
-      }
+      for(i=0;i<len;i++) msg+=buffer[curpos+i];
+      
+      // Debug
       std::cout << "Message received: " << msg << std::endl;
       
+      // Remove from buffer
       buffer.erase(buffer.begin(), buffer.begin()+curpos+len);
     }
     else if(action==0x05) //Inventory change
