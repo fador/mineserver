@@ -78,12 +78,26 @@ uint32 getUint16(uint8 *buf)
 
 sint32 getSint32(uint8 *buf)
 {
-    return (buf[0]<<24)|(buf[1]<<16)|(buf[2]<<8)|(buf[3]);
+  int temp;
+  uint8 *intAddress=reinterpret_cast<uint8 *>(&temp);
+  for(uint8 i=0;i<4;i++)
+  {
+    intAddress[3-i]=buf[i];
+  }
+
+  return temp;
 }
 
 sint32 getSint16(uint8 *buf)
 {
-    return (buf[0]<<8)|(buf[1]);
+  short temp;
+  uint8 *shortAddress=reinterpret_cast<uint8 *>(&temp);
+  for(uint8 i=0;i<4;i++)
+  {
+    shortAddress[1-i]=buf[i];
+  }
+
+  return temp;
 }
 
 /*
