@@ -44,9 +44,6 @@ int ZEXPORT compress2 (dest, destLen, source, sourceLen, level)
     stream.zfree = (free_func)0;
     stream.opaque = (voidpf)0;
 
-    //Edit by Fador
-    //Gzipping
-    //err=deflateInit2(&stream, level, Z_DEFLATED, (15+16), 8, Z_DEFAULT_STRATEGY);  
     err = deflateInit(&stream, level);
     if (err != Z_OK) return err;
 

@@ -99,47 +99,61 @@ void DisplaySocket::OnRead()
   {   
     //Ping
   }
-  else if(action==0x01)
+  else if(action==0x01) //Login request
   {    
+    //Check that we have enought data in the buffer
     if(buffer.size()<12)
     {
       waitForData=true;
       return;
     }
     int curpos=0;
-    int version=(buffer[0]<<24)+(buffer[1]<<16)+(buffer[2]<<8)+buffer[3];
+    //Client protocol version
+    int version=getUint32(&buffer[curpos]);
     curpos+=4;
-    int len=(buffer[curpos]<<8)+buffer[curpos+1];
+
+    //Player name length
+    int len=getUint16(&buffer[curpos]);
     curpos+=2;
     
-    std::string player;
+    
 
+    //Check for data
     if(buffer.size()<curpos+len+2)
     {
       waitForData=true;
       return;
     }
+
+    std::string player;
+    //Read player name
     for(int pos=0;pos<len;pos++)
     {
       player.append(1,buffer[curpos+pos]);
     }
     curpos+=len;
-    std::string passwd;
 
-    len=(buffer[curpos]<<8)+buffer[curpos+1];
+    
+    //Password length
+    len=getUint16(&buffer[curpos]);
     curpos+=2;
     
+    std::string passwd;
+    //Check for data
     if(buffer.size()<curpos+len)
     {
       waitForData=true;
       return;
     }
+
+    //Read password
     for(int pos=0;pos<len;pos++)
     {
       passwd.append(1,buffer[curpos+pos]);
     }
     curpos+=len;
 
+    //Package completely received, remove from buffer
     buffer.erase(buffer.begin(), buffer.begin()+curpos);
 
     std::cout << "Player login v." <<version<<" : " << player <<":" << passwd << std::endl;
@@ -148,14 +162,11 @@ void DisplaySocket::OnRead()
       logged=1;      
     }
     
-    //Login
+    //Login OK package
     char data[9]={0x01, 0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00};    
-    h.SendSock(GetSocket(), (char *)&data[0], 9);   
-
-   
-
+    h.SendSock(GetSocket(), (char *)&data[0], 9);
   }
-  else if(action==0x02)
+  else if(action==0x02) //Handshake
   {
     if(buffer.size()<3)
     {
@@ -163,13 +174,19 @@ void DisplaySocket::OnRead()
       return;
     }
     int curpos=0;
-    int len=(buffer[curpos]<<8)+buffer[curpos+1];
+
+    //Player name length
+    int len=getUint16(&buffer[curpos]);
     curpos+=2;
+
+    //Check for data
     if(buffer.size()<curpos+len)
     {
       waitForData=true;
       return;
     }
+
+    //Read player name
     std::string player;
     for(int pos=0;pos<len;pos++)
     {
@@ -177,6 +194,7 @@ void DisplaySocket::OnRead()
     }
     curpos+=len;
 
+    //Remove package from buffer
     buffer.erase(buffer.begin(), buffer.begin()+curpos);
     std::cout << "Handshake player: " << player << std::endl;
 
@@ -184,15 +202,17 @@ void DisplaySocket::OnRead()
     //h.SendSock(GetSocket(), (char *)&data[0], 9); 
     //char data2[19]={0x02, 0x00,0x10,0x32 ,0x65 ,0x36 ,0x36 ,0x66 ,0x31 ,0x64 ,0x63 ,0x30 ,0x33 ,0x32 ,0x61 ,0x62,0x35 ,0x66 ,0x30};    
     //h.SendSock(GetSocket(), (char *)&data2[0], 19);
+
+    //Send handshake package
     char data2[4]={0x02, 0x00,0x01,'-'};    
     h.SendSock(GetSocket(), (char *)&data2[0], 4);
 
     //char data3[5]={0x1e, 0x01, 0x02, 0x03, 0x04};
     //h.SendSock(GetSocket(), (char *)&data3[0], 5);
-  }
-  else if(action==0x0a)
+  }  
+  else if(action==0x0a) //"On Ground" of "Flying" package
   {
-    if(buffer[0]==1)
+    if(buffer[0]==1) //Player is on ground
     {
       std::cout << "On ground!" << std::endl;
     }
@@ -210,30 +230,35 @@ void DisplaySocket::OnRead()
     float rotation,pitch;
     uint8 doublearray[8];
 
+    //Read double X
     for(i=0;i<8;i++) doublearray[i]=buffer[curpos+i];
     x=getDouble(&doublearray[0]);    
     curpos+=8;
 
+    //Read double Y
     for(i=0;i<8;i++) doublearray[i]=buffer[curpos+i];
     y=getDouble(&doublearray[0]);
     curpos+=8;
 
+    //Read double Z
     for(i=0;i<8;i++) doublearray[i]=buffer[curpos+i];
     z=getDouble(&doublearray[0]);
     curpos+=8;
 
     std::cout << "X: " << x << " Y: " << y << " Z: " << z << std::endl;
+
+    //Skip others
     buffer.erase(buffer.begin(), buffer.begin()+34);
 
     //Player at ground
     if(y==60.00f) //Just for this test
     {
 
-      //Server time
+      //Send server time (after dawn)
       uint8 data3[9]={0x04, 0x00, 0x00, 0x00,0x00,0x00,0x00,0x0e,0x00};
       h.SendSock(GetSocket(), (char *)&data3[0], 9);
 
-      //Inventory      
+      //Inventory (full of stone blocks)
       uint8 data4[7+36*5];
       data4[0]=0x05;
       putSint32(&data4[1],-1);
@@ -259,8 +284,7 @@ void DisplaySocket::OnRead()
       data2[0]=0x06;
       putSint32(&data2[1], 0); //X
       putSint32(&data2[5], 70);//Y
-      putSint32(&data2[9], 0); //Z
-      
+      putSint32(&data2[9], 0); //Z      
       h.SendSock(GetSocket(), (char *)&data2[0], 13); 
 
       //Add chat message
@@ -276,7 +300,7 @@ void DisplaySocket::OnRead()
       //h.SendSock(GetSocket(), (char *)&dataQuit[0], 9);
     }
   }
-  else if(action==0x0d)
+  else if(action==0x0d) //Player Position & Look
   {
     if(buffer.size()<41)
     {

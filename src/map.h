@@ -13,6 +13,9 @@ void putSint32(uint8 *buf, sint32 value);
 double getDouble(uint8 *buf);
 void putShort(uint8 *buf, short value);
 
+uint32 getUint32(uint8 *buf);
+uint32 getUint16(uint8 *buf);
+
 void initMap();
 void freeMap();
 
