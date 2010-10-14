@@ -70,6 +70,11 @@ uint32 getUint24(uint8 *buf)
     return (buf[0]<<16)|(buf[1]<<8)|(buf[2]);
 }
 
+uint32 getUint16(uint8 *buf)
+{
+    return (buf[0]<<8)|(buf[1]);
+}
+
 
 sint32 getSint32(uint8 *buf)
 {
