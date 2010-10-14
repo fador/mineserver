@@ -212,6 +212,36 @@ void DisplaySocket::OnRead()
       //char data3[5]={0x1e, 0x01, 0x02, 0x03, 0x04};
       //h.SendSock(GetSocket(), (char *)&data3[0], 5);
     }  
+    else if(action==0x03) // Chatmessage
+    {
+      if(buffer.size()<2)
+      {
+        waitForData=true;
+        return;
+      }
+
+      int curpos=0;
+
+      //Read message length
+      int len=getSint16(&buffer[curpos]);
+      curpos+=2;
+      
+      if(buffer.size()<curpos+len)
+      {
+        waitForData=true;
+        return;
+      }
+      
+      //Read message
+      std::string msg;
+      for(int pos=0;pos<len;pos++)
+      {
+        msg+=buffer[curpos+pos];
+      }
+      std::cout << "Message received: " << msg << std::endl;
+      
+      buffer.erase(buffer.begin(), buffer.begin()+curpos+len);
+    }
     else if(action==0x05) //Inventory change
     {
 
@@ -417,36 +447,6 @@ void DisplaySocket::OnRead()
     {
       std::cout << "Player now holding: " << getUint16(&buffer[4]) << std::endl;
       buffer.erase(buffer.begin(), buffer.begin()+6);
-    }
-    else if(action==0x03) // Chatmessage
-    {
-      if(buffer.size()<2)
-      {
-        waitForData=true;
-        return;
-      }
-
-      int curpos=0;
-
-      //Read message length
-      int len=getSint16(&buffer[curpos]);
-      curpos+=2;
-      
-      if(buffer.size()<curpos+len)
-      {
-        waitForData=true;
-        return;
-      }
-      
-      //Read message
-      std::string msg;
-      for(int pos=0;pos<len;pos++)
-      {
-        msg+=buffer[curpos+pos];
-      }
-      std::cout << "Message received: " << msg << std::endl;
-      
-      buffer.erase(buffer.begin(), buffer.begin()+curpos+len);
     }
     else
     {
