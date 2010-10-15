@@ -84,6 +84,7 @@ void DisplaySocket::OnRead()
 
   while(buffer.size()>0)
   {
+    // If not waiting more data
     if(!waitForData)
     {
       action=buffer.front();
@@ -98,7 +99,6 @@ void DisplaySocket::OnRead()
     //Login package
     if(action==0x00)
     {  
-
       //Ping
     }
     else if(action==0x01) //Login request
@@ -110,15 +110,18 @@ void DisplaySocket::OnRead()
         return;
       }
       int curpos=0;
+      
       //Client protocol version
-      int version=getUint32(&buffer[curpos]);
+      uint8 tmpIntArray[4] = {0};
+      for(i=0;i<4;i++) tmpIntArray[i]=buffer[curpos+i]; 
+      int version = getUint32(&tmpIntArray[0]);     
       curpos+=4;
 
       //Player name length
-      int len=getUint16(&buffer[curpos]);
+      uint8 tmpShortArray[2] = {0};
+      for(i=0;i<2;i++) tmpShortArray[i]=buffer[curpos+i]; 
+      int len = getUint16(&tmpShortArray[0]);     
       curpos+=2;
-    
-    
 
       //Check for data
       if(buffer.size()<curpos+len+2)
@@ -131,13 +134,14 @@ void DisplaySocket::OnRead()
       //Read player name
       for(int pos=0;pos<len;pos++)
       {
-        player.append(1,buffer[curpos+pos]);
+        player+=buffer[curpos+pos];
       }
       curpos+=len;
 
     
       //Password length
-      len=getUint16(&buffer[curpos]);
+      for(i=0;i<2;i++) tmpShortArray[i]=buffer[curpos+i]; 
+      len = getUint16(&tmpShortArray[0]);     
       curpos+=2;
     
       std::string passwd;
@@ -151,7 +155,7 @@ void DisplaySocket::OnRead()
       //Read password
       for(int pos=0;pos<len;pos++)
       {
-        passwd.append(1,buffer[curpos+pos]);
+        passwd += buffer[curpos+pos];
       }
       curpos+=len;
 
@@ -178,7 +182,9 @@ void DisplaySocket::OnRead()
       int curpos=0;
 
       //Player name length
-      int len=getUint16(&buffer[curpos]);
+      uint8 tmpShortArray[2] = {0};
+      for(i=0;i<2;i++) tmpShortArray[i]=buffer[curpos+i]; 
+      int len = getSint16(&tmpShortArray[0]);     
       curpos+=2;
 
       //Check for data
@@ -192,7 +198,7 @@ void DisplaySocket::OnRead()
       std::string player;
       for(int pos=0;pos<len;pos++)
       {
-         player.append(1,buffer[curpos+pos]);
+         player += buffer[curpos+pos];
       }
       curpos+=len;
 
@@ -214,6 +220,7 @@ void DisplaySocket::OnRead()
     }  
     else if(action==0x03) // Chatmessage
     {
+      // Wait for length-short. HEHE
       if(buffer.size()<2)
       {
         waitForData=true;
@@ -222,9 +229,9 @@ void DisplaySocket::OnRead()
       
       int curpos=0;
       
-      uint8 shortarray[] = {};
-      for(i=0;i<2;i++) shortarray[i]=buffer[curpos+i]; 
-      short len = getSint16(&shortarray[0]); 
+      uint8 tmpLenArray[2] = {0};
+      for(i=0;i<2;i++) tmpLenArray[i]=buffer[curpos+i]; 
+      short len = getSint16(&tmpLenArray[0]); 
       curpos+=2;
       
       // Wait for whole message
@@ -236,13 +243,15 @@ void DisplaySocket::OnRead()
       
       //Read message
       std::string msg;
-      for(i=0;i<len;i++) msg+=buffer[curpos+i];
+      for(i=0;i<len;i++) msg += buffer[curpos+i];
+      
+      curpos += len;
       
       // Debug
       std::cout << "Message received: " << msg << std::endl;
       
       // Remove from buffer
-      buffer.erase(buffer.begin(), buffer.begin()+curpos+len);
+      buffer.erase(buffer.begin(), buffer.begin()+curpos);
     }
     else if(action==0x05) //Inventory change
     {
@@ -256,10 +265,14 @@ void DisplaySocket::OnRead()
       int curpos=0;
 
       //Read inventory type (-1,-2 or -3)
-      int type=getSint32(&buffer[curpos]);
+      uint8 tmpIntArray[4] = {0};
+      for(i=0;i<4;i++) tmpIntArray[i]=buffer[curpos+i]; 
+      int type = getSint32(&tmpIntArray[0]);
       curpos+=4;
 
-      int count=getSint16(&buffer[curpos]);
+      uint8 tmpShortArray[2] = {0};
+      for(i=0;i<2;i++) tmpShortArray[i]=buffer[curpos+i]; 
+      int count = getSint16(&tmpShortArray[0]);     
       curpos+=2;
 
       int items=0;
@@ -290,8 +303,10 @@ void DisplaySocket::OnRead()
 
       for(i=0;i<items;i++)
       {
-        int item_id=getSint16(&buffer[curpos]);
+        for(i=0;i<2;i++) tmpShortArray[i]=buffer[curpos+i]; 
+        int item_id = getSint16(&tmpShortArray[0]);     
         curpos+=2;
+
         if(buffer.size()-curpos<items*2)
         {
           waitForData=true;
@@ -306,7 +321,9 @@ void DisplaySocket::OnRead()
           }
           uint8 numberOfItems=buffer[curpos];
           curpos++;
-          int health=getSint16(&buffer[curpos]);
+          
+          for(i=0;i<2;i++) tmpShortArray[i]=buffer[curpos+i]; 
+          int health = getSint16(&tmpShortArray[0]);     
           curpos+=2;
         }
       }
@@ -417,12 +434,18 @@ void DisplaySocket::OnRead()
 
       float yaw,pitch;
       uint8 onground;
+      uint8 tmpFloatArray[4] = {0};
       int curpos=0;
-      yaw=getFloat(&buffer[curpos]);
+      
+      for(i=0;i<4;i++) tmpFloatArray[i]=buffer[curpos+i]; 
+      yaw = getFloat(&tmpFloatArray[0]);     
       curpos+=4;
-      pitch=getFloat(&buffer[curpos]);
+      
+      for(i=0;i<4;i++) tmpFloatArray[i]=buffer[curpos+i]; 
+      pitch = getFloat(&tmpFloatArray[0]);     
       curpos+=4;
-      onground=buffer[curpos];
+      
+      onground = buffer[curpos];
       curpos++;
 
       buffer.erase(buffer.begin(), buffer.begin()+9);
