@@ -303,26 +303,30 @@ void DisplaySocket::OnRead()
 
       for(i=0;i<items;i++)
       {
-        for(i=0;i<2;i++) tmpShortArray[i]=buffer[curpos+i]; 
+        int j = 0;
+        for(j=0;j<2;j++) tmpShortArray[j]=buffer[curpos+j]; 
         int item_id = getSint16(&tmpShortArray[0]);     
         curpos+=2;
 
-        if(buffer.size()-curpos<items*2)
+        if(buffer.size()<curpos+(items-i-1)*2)
         {
-          waitForData=true;
+          std::cout << "Odottaa rivilla 310" << std::endl;
+          waitForData = true;
           return;
         }
+        
         if(item_id!=-1)
         {
           if(buffer.size()-curpos<3)
           {
+            std::cout << "Odottaa rivilla 320" << std::endl;
             waitForData=true;
             return;
           }
           uint8 numberOfItems=buffer[curpos];
           curpos++;
           
-          for(i=0;i<2;i++) tmpShortArray[i]=buffer[curpos+i]; 
+          for(j=0;j<2;j++) tmpShortArray[j]=buffer[curpos+j]; 
           int health = getSint16(&tmpShortArray[0]);     
           curpos+=2;
         }
