@@ -260,14 +260,14 @@ void DisplaySocket::OnRead()
       {
         int item_id=getSint16(&buffer[curpos]);
         curpos+=2;
-        if(buffer.size()-curpos<items*2)
+        if(buffer.size()-curpos<(items-i-1)*2)
         {
           waitForData=true;
           return;
         }
         if(item_id!=-1)
         {
-          if(buffer.size()-curpos<3)
+          if(buffer.size()-curpos<(items-i-1)*2+3)
           {
             waitForData=true;
             return;
@@ -279,7 +279,7 @@ void DisplaySocket::OnRead()
         }
       }
 
-      std::cout << "Got items" << std::endl;
+      std::cout << "Got items type " << type << std::endl;
       //Package completely received, remove from buffer
       buffer.erase(buffer.begin(), buffer.begin()+curpos);
 
@@ -412,6 +412,26 @@ void DisplaySocket::OnRead()
       }
       std::cout << "X: " << x << std::endl;
       buffer.erase(buffer.begin(), buffer.begin()+41);
+    }
+    else if(action==0x0e) //Player Digging
+    {
+      if(buffer.size()<11)
+      {
+        waitForData=true;
+        return;
+      }
+
+      buffer.erase(buffer.begin(), buffer.begin()+11);
+    }
+    else if(action==0x0f) //Player Block Placement
+    {
+      if(buffer.size()<12)
+      {
+        waitForData=true;
+        return;
+      }
+
+      buffer.erase(buffer.begin(), buffer.begin()+12);
     }
     else if(action==0x10) //Holding change
     {
