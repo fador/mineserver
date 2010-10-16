@@ -32,6 +32,7 @@
         bool updateLook(float yaw, float pitch);
 
         bool sendOthers(uint8* data,uint32 len);
+        bool sendAll(uint8* data,uint32 len);
     };
 
     bool addUser(SOCKET sock,uint32 EID);

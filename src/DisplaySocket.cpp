@@ -40,17 +40,10 @@ void DisplaySocket::OnDisconnect()
 
 void DisplaySocket::OnAccept()
 {
-  //Send data to new user
-
+  
+  //Create user for the socket
   addUser(GetSocket(),generateEID());
-  /*
-  //Handshake
-  char data2[19]={0x02, 0x00,0x10,0x32 ,0x65 ,0x36 ,0x36 ,0x66 ,0x31 ,0x64 ,0x63 ,0x30 ,0x33 ,0x32 ,0x61 ,0x62,0x35 ,0x66 ,0x30};    
-  Send(std::string((char *)&data2[0], 19));
 
-  char data3[5]={0x1e, 0x01, 0x02, 0x03, 0x04};
-  Send(std::string((char *)&data3[0], 5));
-  */
 }
 /*
 std::string ToHex(unsigned int value)
@@ -86,6 +79,10 @@ void DisplaySocket::OnRead()
       {
           user=&Users[i];
       }
+  }
+  if(!user) //Must have user!
+  {
+    return;
   }
 
   //Push data to buffer
@@ -308,6 +305,20 @@ void DisplaySocket::OnRead()
       
       // Remove from buffer
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
+
+
+      //Send message to others
+      msg="<"+user->nick+"> "+msg;
+
+      uint8 *tmpArray = new uint8 [msg.size()+3];
+      tmpArray[0]=0x03;
+      tmpArray[1]=0;
+      tmpArray[2]=msg.size()&0xff;      
+      for(i=0;i<msg.size();i++) tmpArray[i+3]=msg[i]; 
+
+      user->sendAll(&tmpArray[0],msg.size()+3);
+      delete [] tmpArray;
+
     }
     else if(user->action==0x05) //Inventory change
     {
@@ -532,6 +543,30 @@ void DisplaySocket::OnRead()
         return;
       }
 
+      int curpos=0;
+      uint8 tmpShortArray[2];
+      uint8 tmpIntArray[4];
+
+      for(i=0;i<2;i++) tmpShortArray[i]=user->buffer[curpos+i]; 
+      int blockID=getSint16(&tmpShortArray[0]);
+      curpos+=2;
+
+      for(i=0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i]; 
+      int x=getSint32(&tmpIntArray[0]);
+      curpos+=4;
+
+      int y=user->buffer[curpos];
+      curpos++;
+
+      for(i=0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i];
+      int z=getSint32(&tmpIntArray[0]);
+      curpos+=4;
+
+      int direction=user->buffer[curpos];
+
+
+
+
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+12);
     }
     else if(user->action==0x10) //Holding change
@@ -543,6 +578,31 @@ void DisplaySocket::OnRead()
       }
       std::cout << "Player now holding: " << getUint16(&user->buffer[4]) << std::endl;
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+6);
+    }
+    else if(user->action==0xff) //Quit message
+    {
+      if(user->buffer.size()<2)
+      {
+        user->waitForData=true;
+        return;
+      }
+      int curpos=0;
+      uint8 shortArray[2];
+      for(i=0;i<2;i++) shortArray[i]=user->buffer[i];
+      int len=getSint16(&shortArray[0]);
+
+      curpos+=2;
+      // Wait for whole message
+      if(user->buffer.size()<curpos+len)
+      {
+        user->waitForData=true;
+        return;
+      }
+      
+      //Read message
+      std::string msg;
+      for(i=0;i<len;i++) msg += user->buffer[curpos+i];
+
     }
     else
     {

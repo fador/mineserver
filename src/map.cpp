@@ -32,6 +32,15 @@ void freeMap()
 #define BUFFER_SIZE 2048
 
 
+void putUint32(uint8 *buf, uint32 value)
+{
+  uint8 *pointer = reinterpret_cast<uint8 *>(&value);
+  buf[0]=pointer[3];
+  buf[1]=pointer[2];
+  buf[2]=pointer[1];
+  buf[3]=pointer[0];
+}
+
 void putSint32(uint8 *buf, sint32 value)
 {
   uint8 *pointer = reinterpret_cast<uint8 *>(&value);
