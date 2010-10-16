@@ -1,18 +1,46 @@
 #ifndef _USER_H
 #define _USER_H
 
-    typedef struct
+  typedef struct
+  {
+    double x;
+    double y;
+    double z;
+    double stance;
+    float yaw;
+    float pitch;
+  } position;
+
+    class User
     {
+      public:
+
+        User(SOCKET sock,uint32 EID);
+        ~User();
+
+        uint8 action;
+        bool waitForData;
+        SOCKET sock;
         unsigned int UID;
         std::string nick;
-        bool active;
-    } MyUser;
+        position pos;  
+        std::deque<unsigned char> buffer;
+            
 
-    extern std::vector<MyUser> Users;
-    
-    bool addUser(int UID, std::string nick);
-    bool remUser(int UID);
-    bool isUser(int UID);
+        bool changeNick(std::string nick);
+        bool updatePos(double x, double y, double z, double stance);
+        bool updateLook(float yaw, float pitch);
+
+        bool sendOthers(uint8* data,uint32 len);
+    };
+
+    bool addUser(SOCKET sock,uint32 EID);
+    bool remUser(SOCKET sock);
+    bool isUser(SOCKET sock);
+    uint32 generateEID();
+
+    extern std::vector<User> Users;
+
 
 
 #endif
