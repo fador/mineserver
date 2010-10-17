@@ -608,6 +608,8 @@ void DisplaySocket::OnRead()
       std::string msg;
       for(i=0;i<len;i++) msg += user->buffer[curpos+i];
 
+      user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
+
     }
     else
     {

@@ -35,8 +35,35 @@
       putSint32(&entityData[1], EID);
       this->sendOthers(&entityData[0],5);
       
-      uint8 entityData2[256];      
+      uint8 entityData2[256];  
 
+      int curpos=0;
+      entityData2[curpos]=0x14; //Named Entity Spawn
+      curpos++;
+      putSint32(&entityData2[curpos], EID);        
+      curpos+=4;
+      entityData2[curpos]=0;
+      entityData2[curpos+1]=nick.size();
+      curpos+=2;
+      for(int j=0;j<nick.size();j++)
+      {
+        entityData2[curpos]=nick[j];
+        curpos++;
+      }
+      putSint32(&entityData2[curpos],0);
+      curpos+=4;
+      putSint32(&entityData2[curpos],65*32);
+      curpos+=4;
+      putSint32(&entityData2[curpos],0);
+      curpos+=4;
+      entityData2[curpos]=10; //Rotation
+      entityData2[curpos+1]=0; //Pitch
+      curpos+=2;
+      putSint16(&entityData2[curpos],0); //current item
+      curpos+=2;
+      this->sendOthers(&entityData2[0],curpos);
+
+      /*
       for(int i=0;i<Users.size();i++)
       {
         //Initialize entity
@@ -70,6 +97,7 @@
 
         h.SendSock(sock, (uint8 *)&entityData2[0], curpos);
       }
+      */
       
       
       
@@ -128,6 +156,7 @@
             teleportData[18]=(char)Users[i].pos.pitch;
             this->sendOthers(&teleportData[0],19);
           }
+          
           
           Users[i].pos.x=x;
           Users[i].pos.y=y;
