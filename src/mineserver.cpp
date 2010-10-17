@@ -14,9 +14,12 @@
 #include <ListenSocket.h>
 #include "StatusHandler.h"
 
+#include "tri_logger.hpp"
+
 #include "DisplaySocket.h"
 #include "map.h"
 #include "user.h"
+#include "chat.h"
 
 static	bool quit = false;
 
