@@ -16,6 +16,7 @@
 
 #include "DisplaySocket.h"
 #include "map.h"
+#include "user.h"
 
 static	bool quit = false;
 
@@ -45,7 +46,7 @@ int main(void)
               << "  _/  _/  _/  _/  _/    _/  _/_/_/_/  _/_/      _/_/_/_/  _/_/      _/      _/  _/_/_/_/  _/_/        " << std::endl
               << " _/      _/  _/  _/    _/  _/            _/_/  _/        _/          _/  _/    _/        _/           " << std::endl
               << "_/      _/  _/  _/    _/    _/_/_/  _/_/_/      _/_/_/  _/            _/        _/_/_/  _/            " << std::endl;
-    std::cout << "Version 0.1.2 by Fador(&Psoden -_-)" << std::endl << std::endl;    
+    std::cout << "Version 0.1.3 by Fador(&Psoden -_-)" << std::endl << std::endl;    
 	h.Add(&l);
 	h.Select(1,0);
 	while (!quit)
@@ -55,6 +56,14 @@ int main(void)
         {
             starttime=time(0);
             std::cout << "Currently " << h.GetCount()-1 << " users in!" << std::endl;
+
+            //If users, ping them
+            if(Users.size()>0)
+            {
+              //0x00 package
+              uint8 data=0;
+              Users[0].sendAll(&data, 1);
+            }
         }
         #ifdef WIN32
         if(kbhit())

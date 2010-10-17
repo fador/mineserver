@@ -41,8 +41,6 @@ void DisplaySocket::OnDisconnect()
 void DisplaySocket::OnAccept()
 {
   
-  //Create user for the socket
-  addUser(GetSocket(),generateEID());
 
 }
 /*
@@ -52,11 +50,6 @@ std::string ToHex(unsigned int value)
   if(!(oss<<std::hex<<std::setw(2)<<std::setfill('0')<<value)) return 0;
   return oss.str();
 }*/
-
-
-int mapposx=-1;
-int mapposz=-1;
-int logged=0;
 
 
 
@@ -82,7 +75,9 @@ void DisplaySocket::OnRead()
   }
   if(!user) //Must have user!
   {
-    return;
+     //Create user for the socket
+     addUser(GetSocket(),generateEID());
+     user=&Users[Users.size()-1];
   }
 
   //Push data to buffer
@@ -174,7 +169,7 @@ void DisplaySocket::OnRead()
       std::cout << "Player login v." <<version<<" : " << player <<":" << passwd << std::endl;
       if(version==2)
       {
-        logged=1;
+        user->logged=1;
         user->changeNick(player);
       }
       else
@@ -579,6 +574,16 @@ void DisplaySocket::OnRead()
       std::cout << "Player now holding: " << getUint16(&user->buffer[4]) << std::endl;
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+6);
     }
+    else if(user->action==0x12) //Arm Animation
+    {
+      if(user->buffer.size()<5)
+      {
+        user->waitForData=true;
+        return;
+      }
+
+      user->buffer.erase(user->buffer.begin(), user->buffer.begin()+5);
+    }
     else if(user->action==0xff) //Quit message
     {
       if(user->buffer.size()<2)
@@ -609,13 +614,13 @@ void DisplaySocket::OnRead()
       printf("Unknown action: 0x%x\n", user->action);
     }
 
-    if(logged)
+    if(user->logged)
     {
-      logged=false;
+      user->logged=false;
       uint8 data4[18+81920+1000];
       uint8 mapdata[81920]={0};
       for(i=0;i<81920;i++) mapdata[i]=0;
-
+      int mapposx,mapposz;
       for(mapposx=-1;mapposx<=1;mapposx++)
       {
         for(mapposz=-1;mapposz<=1;mapposz++)

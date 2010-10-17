@@ -20,6 +20,7 @@
 
         uint8 action;
         bool waitForData;
+        bool logged;
         SOCKET sock;
         unsigned int UID;
         std::string nick;
