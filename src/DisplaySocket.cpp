@@ -16,6 +16,7 @@
 #include "StatusHandler.h"
 #include "map.h"
 #include "user.h"
+#include "chat.h"
 
 typedef std::map<SOCKET,Socket *> socket_m;
 
@@ -65,6 +66,7 @@ void DisplaySocket::OnRead()
   ibuf.Read(tmp,n);
 
   User *user=0;
+  Chat chat;
 
   for(i=0;i<Users.size();i++)
   {
@@ -265,8 +267,11 @@ void DisplaySocket::OnRead()
 
       //char data3[5]={0x1e, 0x01, 0x02, 0x03, 0x04};
       //h.SendSock(GetSocket(), (char *)&data3[0], 5);
-    }  
-    else if(user->action==0x03) // Chatmessage
+    } 
+    // 
+    // CHATMESSAGE
+    //
+    else if(user->action==0x03)
     {
       // Wait for length-short. HEHE
       if(user->buffer.size()<2)
@@ -295,24 +300,10 @@ void DisplaySocket::OnRead()
       
       curpos += len;
       
-      // Debug
-      std::cout << "Message received: " << msg << std::endl;
-      
       // Remove from buffer
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
 
-
-      //Send message to others
-      msg="<"+user->nick+"> "+msg;
-
-      uint8 *tmpArray = new uint8 [msg.size()+3];
-      tmpArray[0]=0x03;
-      tmpArray[1]=0;
-      tmpArray[2]=msg.size()&0xff;      
-      for(i=0;i<msg.size();i++) tmpArray[i+3]=msg[i]; 
-
-      user->sendAll(&tmpArray[0],msg.size()+3);
-      delete [] tmpArray;
+      chat.handleMsg( user, msg );
 
     }
     else if(user->action==0x05) //Inventory change
