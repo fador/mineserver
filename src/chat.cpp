@@ -24,4 +24,6 @@ bool Chat::handleMsg( User *user, std::string msg ) {
 
     user->sendAll(&tmpArray[0],msg.size()+3);
     delete [] tmpArray;
+
+    return true;
 }
