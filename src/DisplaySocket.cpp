@@ -528,6 +528,25 @@ void DisplaySocket::OnRead()
         return;
       }
 
+
+
+      //If block broken
+      if(user->buffer[0]==3)
+      {              
+        uint8 changeArray[12];
+        changeArray[0]=0x35; //Block change package
+
+        //Use location from user package
+        for(i=0;i<9;i++)
+        {
+          changeArray[i+1]=user->buffer[i+1];
+        }
+
+        changeArray[10]=0; //Replace block with
+        changeArray[11]=0;  //Metadata
+        user->sendAll(&changeArray[0], 12);
+      }
+
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+11);
     }
     else if(user->action==0x0f) //Player Block Placement
@@ -560,9 +579,42 @@ void DisplaySocket::OnRead()
       int direction=user->buffer[curpos];
 
 
-
-
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+12);
+
+      uint8 changeArray[12];
+      changeArray[0]=0x35; //Block change package
+      curpos=1;
+      switch(direction)        
+      {
+        case 0:
+          y--;
+          break;
+        case 1:
+          y++;
+          break;
+        case 2:
+          z--;
+          break;
+        case 3:
+          z++;
+          break;
+        case 4:
+          x--;
+          break;
+        case 5:
+          x++;
+          break;
+      }
+      putSint32(&changeArray[curpos],x);
+      curpos+=4;
+      changeArray[curpos]=y;
+      curpos++;
+      putSint32(&changeArray[curpos],z);
+      curpos+=4;
+      changeArray[10]=blockID; //Replace block with
+      changeArray[11]=0;       //Metadata
+      user->sendAll(&changeArray[0], 12);
+
     }
     else if(user->action==0x10) //Holding change
     {
@@ -608,6 +660,7 @@ void DisplaySocket::OnRead()
       std::string msg;
       for(i=0;i<len;i++) msg += user->buffer[curpos+i];
 
+      curpos+=len;
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
 
     }
@@ -619,7 +672,7 @@ void DisplaySocket::OnRead()
     if(user->logged)
     {
       user->logged=false;
-      uint8 data4[18+81920+1000];
+      uint8 data4[18+81920];
       uint8 mapdata[81920]={0};
       for(i=0;i<81920;i++) mapdata[i]=0;
       int mapposx,mapposz;
@@ -702,7 +755,7 @@ void DisplaySocket::OnRead()
           uLongf written=81920;
         
           //Compress data with zlib deflate
-          compress((uint8 *)&data4[18], &written, (uint8 *)&mapdata[0],81920+1000);            
+          compress((uint8 *)&data4[18], &written, (uint8 *)&mapdata[0],81920);            
         
           putSint32(&data4[14], written);
           h.SendSock(GetSocket(), (uint8 *)&data4[0], 18+written);
