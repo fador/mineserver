@@ -20,8 +20,11 @@ Chat::Chat()
   std::string temp;
 
   while( getline( ifs, temp ) ) {
-    admins.push_back( temp );
-    TRI_LOG_STR("Admin: " + temp);
+    // If not commentline
+    if(temp.substr(0,1) != "#") {
+        admins.push_back( temp );
+        TRI_LOG_STR("Admin: " + temp);
+    }
   }
 }
 
