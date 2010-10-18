@@ -20,6 +20,8 @@
 
 typedef std::map<SOCKET,Socket *> socket_m;
 
+Chat chat;
+
 // the constant TCP_BUFSIZE_READ is the maximum size of the standard input
 // buffer of TcpSocket
 #define RSIZE TCP_BUFSIZE_READ
@@ -66,7 +68,6 @@ void DisplaySocket::OnRead()
   ibuf.Read(tmp,n);
 
   User *user=0;
-  Chat chat;
 
   for(i=0;i<Users.size();i++)
   {
@@ -172,7 +173,7 @@ void DisplaySocket::OnRead()
       if(version==2)
       {
         user->logged=1;
-        user->changeNick(player);
+        user->changeNick(player, chat.admins);
       }
       else
       {

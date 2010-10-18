@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <iostream>
 #include <deque>
+#include <fstream>
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
 #include "tri_logger.hpp"
@@ -11,6 +12,18 @@
 #include "chat.h"
 
 extern StatusHandler h;
+
+Chat::Chat() 
+{
+  // Read admins to deque
+  std::ifstream ifs( "admin.txt" );
+  std::string temp;
+
+  while( getline( ifs, temp ) ) {
+    admins.push_back( temp );
+    TRI_LOG_STR("Admin: " + temp);
+  }
+}
 
 bool Chat::handleMsg( User *user, std::string msg ) {
     // Timestamp
@@ -24,7 +37,7 @@ bool Chat::handleMsg( User *user, std::string msg ) {
     // Admincommands
     if(msg.substr(0,1) == "/")
     {
-        if(user->isAdmin()) {
+        if(user->admin) {
             TRI_LOG_STR(user->nick + " adminkomento!");
             TRI_LOG(msg);
             this->sendMsg(user, msg.substr(1), ALL);

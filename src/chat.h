@@ -9,6 +9,8 @@ class Chat
     private:
         bool sendMsg( User *user, std::string msg, int action );
     public:
+        Chat();
+        std::deque<std::string> admins;
         bool handleMsg( User *user, std::string msg );
 };
 
