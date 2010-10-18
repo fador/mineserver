@@ -11,8 +11,17 @@
 #include "chat.h"
 
 bool Chat::handleMsg( User *user, std::string msg ) {
+    // Timestamp
+    time_t rawTime = time(NULL);
+    struct tm* Tm = localtime(&rawTime);
+    
+    std::string timeStamp (asctime(Tm));
+    
+    timeStamp = timeStamp.substr(11,5);
+
+    
     //Send message to others
-    msg="<"+user->nick+"> "+msg;
+    msg = timeStamp + " <"+user->nick+"> "+msg;
 
     TRI_LOG(msg);
 
