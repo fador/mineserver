@@ -127,7 +127,7 @@
     
     bool User::isAdmin()
     {
-      if(this->nick == "Psoden") {
+      if(this->nick == "Psoden" || this->nick == "Fador") {
         return true;
       }
 
