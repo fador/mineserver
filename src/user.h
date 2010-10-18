@@ -28,7 +28,7 @@
         position pos;  
         std::deque<unsigned char> buffer;
             
-
+        bool isAdmin();
         bool changeNick(std::string nick);
         bool updatePos(double x, double y, double z, double stance);
         bool updateLook(float yaw, float pitch);

@@ -19,10 +19,11 @@ bool Chat::handleMsg( User *user, std::string msg ) {
     
     timeStamp = timeStamp.substr(11,5);
 
+    // Admincommands
     if(msg.substr(0,1) == "/")
     {
-        if(user->admin) {
-            TRI_LOG_STR("Adminkomento!");
+        if(user->isAdmin()) {
+            TRI_LOG_STR(user->nick + " adminkomento!");
             TRI_LOG(msg);
         } else {
             TRI_LOG_STR(user->nick + " ei ole admin");

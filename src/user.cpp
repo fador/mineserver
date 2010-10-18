@@ -114,6 +114,15 @@
 
       return true;
     }
+    
+    bool User::isAdmin()
+    {
+      if(this->nick == "Psoden") {
+        return true;
+      }
+
+      return false;
+    }
 
     User::~User()
     {
