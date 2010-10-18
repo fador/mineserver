@@ -696,23 +696,27 @@ void DisplaySocket::OnRead()
 
 
       int index=0;
-      int heigth=40;
+      int height=40;
         
       //Type array
       for(int mapx=0;mapx<16;mapx++)
       {
         for(int mapz=0;mapz<16;mapz++)
         {
-          heigth=55+rand()%5;
+          height=55+rand()%5;
           for(int mapy=0;mapy<128;mapy++)
           {
             if(mapy<1)
             {
               mapdata[index]=7; //BedRock
             }
-            else if(mapy<heigth)
+            else if(mapy<height)
             {
               mapdata[index]=3; //Dirt
+            }
+            else if(mapy==height)
+            {
+              mapdata[index]=2; //Grass
             }
             else
             {
