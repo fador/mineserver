@@ -11,6 +11,7 @@
 #include <ListenSocket.h>
 #include <iostream>
 #include <deque>
+#include <fstream>
 #include "zlib/zlib.h"
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
@@ -174,6 +175,13 @@ void DisplaySocket::OnRead()
       {
         user->logged=1;
         user->changeNick(player, chat.admins);
+        // Send motd
+        std::ifstream ifs( "motd.txt" );
+        std::string temp;
+
+        while( getline( ifs, temp ) ) {
+            chat.sendMsg(user, temp, USER);
+        }
       }
       else
       {

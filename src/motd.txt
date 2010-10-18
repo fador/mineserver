@@ -1,0 +1,3 @@
+Welcome to Mineserver!
+This is MOTD
+This is third line of MOTD :E
