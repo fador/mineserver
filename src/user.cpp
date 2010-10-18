@@ -26,6 +26,7 @@
       this->sock=sock;
       this->UID=EID;
       this->logged=false;
+      this->admin=false;
       
       
       

@@ -19,20 +19,33 @@ bool Chat::handleMsg( User *user, std::string msg ) {
     
     timeStamp = timeStamp.substr(11,5);
 
+    if(msg.substr(0,1) == "/")
+    {
+        if(user->admin) {
+            TRI_LOG_STR("Adminkomento!");
+            TRI_LOG(msg);
+        } else {
+            TRI_LOG_STR(user->nick + " ei ole admin");
+        }
+    } 
+    // Normal message
+    else {
     
-    //Send message to others
-    msg = timeStamp + " <"+user->nick+"> "+msg;
+        //Send message to others
+        msg = timeStamp + " <"+user->nick+"> "+msg;
 
-    TRI_LOG(msg);
+        TRI_LOG(msg);
 
-    uint8 *tmpArray = new uint8 [msg.size()+3];
-    tmpArray[0]=0x03;
-    tmpArray[1]=0;
-    tmpArray[2]=msg.size()&0xff;      
-    for(int i=0;i<msg.size();i++) tmpArray[i+3]=msg[i]; 
+        uint8 *tmpArray = new uint8 [msg.size()+3];
+        tmpArray[0]=0x03;
+        tmpArray[1]=0;
+        tmpArray[2]=msg.size()&0xff;      
+        for(int i=0;i<msg.size();i++) tmpArray[i+3]=msg[i]; 
 
-    user->sendAll(&tmpArray[0],msg.size()+3);
-    delete [] tmpArray;
+        user->sendAll(&tmpArray[0],msg.size()+3);
+        delete [] tmpArray;
+        
+    }
 
     return true;
 }

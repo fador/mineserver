@@ -21,6 +21,7 @@
         uint8 action;
         bool waitForData;
         bool logged;
+        bool admin;
         SOCKET sock;
         unsigned int UID;
         std::string nick;
