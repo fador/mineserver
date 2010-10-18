@@ -12,7 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <deque>
-
+#include <fstream>
 #include "zlib/zlib.h"
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
@@ -22,6 +22,8 @@
 #include "nbt.h"
 
 typedef std::map<SOCKET,Socket *> socket_m;
+
+Chat chat;
 
 // the constant TCP_BUFSIZE_READ is the maximum size of the standard input
 // buffer of TcpSocket
@@ -69,7 +71,6 @@ void DisplaySocket::OnRead()
   ibuf.Read(tmp,n);
 
   User *user=0;
-  Chat chat;
 
   for(i=0;i<Users.size();i++)
   {
@@ -175,7 +176,14 @@ void DisplaySocket::OnRead()
       if(version==2)
       {
         user->logged=1;
-        user->changeNick(player);
+        user->changeNick(player, chat.admins);
+        // Send motd
+        std::ifstream ifs( "motd.txt" );
+        std::string temp;
+
+        while( getline( ifs, temp ) ) {
+            chat.sendMsg(user, temp, USER);
+        }
       }
       else
       {

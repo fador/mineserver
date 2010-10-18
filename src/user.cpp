@@ -6,6 +6,7 @@
 #include <deque>
 #include <SocketHandler.h>
 #include <ListenSocket.h>
+#include "tri_logger.hpp"
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
 
@@ -27,7 +28,6 @@
       this->UID=EID;
       this->logged=false;
       this->admin=false;
-      
       
       /*
       //Send signal to create an entity
@@ -118,20 +118,21 @@
       //h.SendAll(std::string((char *)&data[0],8+nick.size()));        
     }
 
-    bool User::changeNick(std::string nick)
+    bool User::changeNick(std::string nick, std::deque<std::string> admins)
     {
       this->nick=nick;
+      
+      // Check adminstatus
+      for(int i = 0; i < admins.size(); i++) {
+        if(admins[i] == nick) {
+            this->admin=true;
+            TRI_LOG_STR(nick + " admin");
 
-      return true;
-    }
-    
-    bool User::isAdmin()
-    {
-      if(this->nick == "Psoden" || this->nick == "fador") {
-        return true;
+        }
+        TRI_LOG_STR(nick + " not admin");
       }
-
-      return false;
+      
+      return true;
     }
 
     User::~User()
