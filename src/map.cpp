@@ -118,18 +118,27 @@ sint32 getSint16(uint8 *buf)
   return temp;
 }
 
-/*
+
+std::string base36_encode(int value)
+{
+  std::string output;
+  my_itoa(value,output, 36);
+
+  return output;
+}
+
+
+
 void my_itoa(int value, std::string& buf, int base)
 {
-	std::string hexarray="0123456789abcdef";
+	std::string hexarray("0123456789abcdefghijklmnopqrstuvwxyz");
 	int i = 30;
   buf="";
 	
   if(!value) buf="0";
 	for(; value && i ; --i, value /= base)
   {
-      buf = hexarray[value % base] + buf;
+    buf.append(1,(char)hexarray[value % base]);
   }
 	
 }
-*/

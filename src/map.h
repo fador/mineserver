@@ -25,4 +25,6 @@ void freeMap();
 
 void my_itoa(int value, std::string& buf, int base);
 
+std::string base36_encode(int value);
+
 #endif
