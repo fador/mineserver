@@ -21,13 +21,14 @@
         uint8 action;
         bool waitForData;
         bool logged;
+        bool admin;
         SOCKET sock;
         unsigned int UID;
         std::string nick;
         position pos;  
         std::deque<unsigned char> buffer;
             
-
+        bool isAdmin();
         bool changeNick(std::string nick);
         bool updatePos(double x, double y, double z, double stance);
         bool updateLook(float yaw, float pitch);

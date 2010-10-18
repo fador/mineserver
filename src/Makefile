@@ -2,7 +2,7 @@
 
 DEP=$(CXX) -MM
 CXXFLAGS=-I ./Sockets-2.3.9.3/ -I ./zlib/ -O2 -lpthread
-# C++ compile flags logger
+# Logger flags
 CXXFLAGS+=-DTLOG="mineserver.log"
 SRC1=$(wildcard *.cpp)
 SRC2=$(wildcard Sockets-2.3.9.3/*.cpp)

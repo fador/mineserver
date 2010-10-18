@@ -21,7 +21,7 @@
 #include "user.h"
 #include "chat.h"
 
-static	bool quit = false;
+static bool quit = false;
 
 StatusHandler h;
 ListenSocket<DisplaySocket> l(h);
