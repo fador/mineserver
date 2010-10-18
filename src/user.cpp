@@ -28,29 +28,39 @@
       this->logged=false;
       
       
-      
+      /*
       //Send signal to create an entity
       uint8 entityData[5];
       entityData[0]=0x1e; //Initialize entity;
-      putSint32(&entityData[1], EID);
-      this->sendOthers(&entityData[0],5);
+      putSint32(&entityData[1], 12345);
+      h.SendSock(GetSocket(), (uint8 *)&entityData[0], 5);
       
       uint8 entityData2[256];  
 
       int curpos=0;
       entityData2[curpos]=0x14; //Named Entity Spawn
       curpos++;
-      putSint32(&entityData2[curpos], EID);        
+      putSint32(&entityData2[curpos], 12345);        
       curpos+=4;
       entityData2[curpos]=0;
-      entityData2[curpos+1]=nick.size();
+      entityData2[curpos+1]=6;//nick.size();
       curpos+=2;
-      for(int j=0;j<nick.size();j++)
-      {
-        entityData2[curpos]=nick[j];
-        curpos++;
-      }
-      putSint32(&entityData2[curpos],0);
+      
+      //for(int j=0;j<nick.size();j++)
+      //{
+      //  entityData2[curpos]=nick[j];
+      //  curpos++;
+      //}
+      
+      entityData2[curpos]='P';
+      entityData2[curpos+1]='s';
+      entityData2[curpos+2]='o';
+      entityData2[curpos+3]='d';
+      entityData2[curpos+4]='e';
+      entityData2[curpos+5]='n';
+      curpos+=6;
+      
+      putSint32(&entityData2[curpos],35);
       curpos+=4;
       putSint32(&entityData2[curpos],65*32);
       curpos+=4;
@@ -61,8 +71,8 @@
       curpos+=2;
       putSint16(&entityData2[curpos],0); //current item
       curpos+=2;
-      this->sendOthers(&entityData2[0],curpos);
-
+      h.SendSock(GetSocket(), (uint8 *)&entityData2[0], curpos);
+      */
       /*
       for(int i=0;i<Users.size();i++)
       {

@@ -83,7 +83,7 @@ void DisplaySocket::OnRead()
   }
 
   //Push data to buffer
-  for(int i=0;i<n;i++)
+  for(uint32 i=0;i<n;i++)
   {
       user->buffer.push_back(tmp[i]);
   }
@@ -115,7 +115,7 @@ void DisplaySocket::OnRead()
         user->waitForData=true;
         return;
       }
-      int curpos=0;
+      uint32 curpos=0;
       
       //Client protocol version
       uint8 tmpIntArray[4] = {0};
@@ -180,8 +180,9 @@ void DisplaySocket::OnRead()
       }
     
       //Login OK package
-      char data[9]={0x01, 0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00};    
-      h.SendSock(GetSocket(), (char *)&data[0], 9);
+      char data[11]={0x01, 0x00, 0x00,0x00,0x00,0x00,0x01,'F',0x00,0x01, 'P'};
+      putSint32((uint8 *)&data[1],user->UID);
+      h.SendSock(GetSocket(), (char *)&data[0], 11);
 
 
       //Send server time (after dawn)
@@ -196,7 +197,11 @@ void DisplaySocket::OnRead()
       data4[6]=36;
       for(i=0;i<36;i++)
       {
-        putSint16(&data4[7+i*5], 1);
+        if(i<10)
+          putSint16(&data4[7+i*5], 0x115);
+        else
+          putSint16(&data4[7+i*5], 1);
+
         data4[7+2+i*5]=1;
         putSint16(&data4[7+3+i*5], 0);
       }
@@ -265,6 +270,8 @@ void DisplaySocket::OnRead()
       char data2[4]={0x02, 0x00,0x01,'-'};    
       h.SendSock(GetSocket(), (char *)&data2[0], 4);
 
+      //user->logged=1;
+      //user->changeNick(player);
       //char data3[5]={0x1e, 0x01, 0x02, 0x03, 0x04};
       //h.SendSock(GetSocket(), (char *)&data3[0], 5);
     } 
@@ -667,9 +674,9 @@ void DisplaySocket::OnRead()
       uint8 mapdata[81920]={0};
       for(i=0;i<81920;i++) mapdata[i]=0;
       int mapposx,mapposz;
-      for(mapposx=-1;mapposx<=1;mapposx++)
+      for(mapposx=-2;mapposx<=2;mapposx++)
       {
-        for(mapposz=-1;mapposz<=1;mapposz++)
+        for(mapposz=-2;mapposz<=2;mapposz++)
         {
           //Pre chunk
           data4[0]=0x32;
@@ -679,69 +686,74 @@ void DisplaySocket::OnRead()
           h.SendSock(GetSocket(), (uint8 *)&data4[0], 10);
         }
       }
-      for(mapposx=-1;mapposx<=1;mapposx++)
+
+      //Chunk
+      data4[0]=0x33;
+      
+      data4[11]=15; //Size_x
+      data4[12]=127; //Size_y
+      data4[13]=15; //Size_z
+
+
+      int index=0;
+      int heigth=40;
+        
+      //Type array
+      for(int mapx=0;mapx<16;mapx++)
       {
-        for(mapposz=-1;mapposz<=1;mapposz++)
+        for(int mapz=0;mapz<16;mapz++)
+        {
+          heigth=55+rand()%5;
+          for(int mapy=0;mapy<128;mapy++)
+          {
+            if(mapy<1)
+            {
+              mapdata[index]=7; //BedRock
+            }
+            else if(mapy<heigth)
+            {
+              mapdata[index]=3; //Dirt
+            }
+            else
+            {
+              mapdata[index]=0; //Empty
+            }
+            index++;
+          }
+        }
+      }
+
+      //metadata
+      for(int i=0;i<16*16*128/2;i++)
+      {
+        mapdata[index]=0;
+        index++;
+      }
+
+
+      //Block light
+      for(int i=0;i<16*16*128/2;i++)
+      {
+        mapdata[index]=0x00;
+        index++;
+      }
+
+      //Sky light
+      for(int i=0;i<16*16*128/2;i++)
+      {
+        mapdata[index]=0xff;
+        index++;
+      }
+
+      for(mapposx=-2;mapposx<=2;mapposx++)
+      {
+        for(mapposz=-2;mapposz<=2;mapposz++)
         {   
-          //Chunk
-          data4[0]=0x33;
-          putSint32(&data4[1], mapposx);
+
+          putSint32(&data4[1], mapposx*16);
           data4[5]=0;
           data4[6]=0;
-          putSint32(&data4[7], mapposz);
-          data4[11]=15; //Size_x
-          data4[12]=127; //Size_y
-          data4[13]=15; //Size_z
-
-
-          int index=0;
-        
-          //Type array
-          for(int mapx=0;mapx<16;mapx++)
-          {
-            for(int mapz=0;mapz<16;mapz++)
-            {
-              for(int mapy=0;mapy<128;mapy++)
-              {
-                if(mapy<1)
-                {
-                  mapdata[index]=7; //BedRock
-                }
-                else if(mapy<60)
-                {
-                  mapdata[index]=1; //Rock
-                }              
-                else
-                {
-                  mapdata[index]=0; //Empty
-                }
-                index++;
-              }
-            }
-          }
-
-          //metadata
-          for(int i=0;i<16*16*128/2;i++)
-          {
-            mapdata[index]=0;
-            index++;
-          }
-
-
-          //Block light
-          for(int i=0;i<16*16*128/2;i++)
-          {
-            mapdata[index]=0xee;
-            index++;
-          }
-
-          //Sky light
-          for(int i=0;i<16*16*128/2;i++)
-          {
-            mapdata[index]=0x00;
-            index++;
-          }
-        
+          putSint32(&data4[7], mapposz*16);
         
           uLongf written=81920;
         
@@ -750,12 +762,13 @@ void DisplaySocket::OnRead()
         
           putSint32(&data4[14], written);
           h.SendSock(GetSocket(), (uint8 *)&data4[0], 18+written);
-          std::cout << "Sent chunk " << written << " bytes" << std::endl;
-        
+          std::cout << "Sent chunk " << written << " bytes" << std::endl;          
         }          
       }
     }
   } //End while
+
+
 
   //Send to player which is sending this data
   //h.SendSock(GetSocket(), (void*)&data[0], data.size());
