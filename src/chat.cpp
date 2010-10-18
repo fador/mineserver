@@ -10,6 +10,8 @@
 #include "user.h"
 #include "chat.h"
 
+extern StatusHandler h;
+
 bool Chat::handleMsg( User *user, std::string msg ) {
     // Timestamp
     time_t rawTime = time(NULL);
@@ -25,6 +27,7 @@ bool Chat::handleMsg( User *user, std::string msg ) {
         if(user->isAdmin()) {
             TRI_LOG_STR(user->nick + " adminkomento!");
             TRI_LOG(msg);
+            this->sendMsg(user, msg.substr(1), ALL);
         } else {
             TRI_LOG_STR(user->nick + " ei ole admin");
         }
@@ -37,16 +40,23 @@ bool Chat::handleMsg( User *user, std::string msg ) {
 
         TRI_LOG(msg);
 
-        uint8 *tmpArray = new uint8 [msg.size()+3];
-        tmpArray[0]=0x03;
-        tmpArray[1]=0;
-        tmpArray[2]=msg.size()&0xff;      
-        for(int i=0;i<msg.size();i++) tmpArray[i+3]=msg[i]; 
-
-        user->sendAll(&tmpArray[0],msg.size()+3);
-        delete [] tmpArray;
-        
+        this->sendMsg(user, msg, ALL);
     }
 
+    return true;
+}
+
+bool Chat::sendMsg(User *user, std::string msg, int action = ALL)
+{
+    uint8 *tmpArray = new uint8 [msg.size()+3];
+    tmpArray[0]=0x03;
+    tmpArray[1]=0;
+    tmpArray[2]=msg.size()&0xff;      
+    for(int i=0;i<msg.size();i++) tmpArray[i+3]=msg[i]; 
+
+    if(action == ALL) user->sendAll(&tmpArray[0],msg.size()+3);
+    if(action == USER) h.SendSock(user->sock, &tmpArray[0], msg.size()+3);
+    delete [] tmpArray;
+    
     return true;
 }

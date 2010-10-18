@@ -703,7 +703,7 @@ void DisplaySocket::OnRead()
       {
         for(int mapz=0;mapz<16;mapz++)
         {
-          height=55+rand()%5;
+          height=55+rand()%2;
           for(int mapy=0;mapy<128;mapy++)
           {
             if(mapy<1)
