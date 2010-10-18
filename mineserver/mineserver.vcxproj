@@ -46,6 +46,7 @@
     <ClCompile Include="..\src\lua\print.c" />
     <ClCompile Include="..\src\map.cpp" />
     <ClCompile Include="..\src\mineserver.cpp" />
+    <ClCompile Include="..\src\nbt.cpp" />
     <ClCompile Include="..\src\Sockets-2.3.9.3\Base64.cpp" />
     <ClCompile Include="..\src\Sockets-2.3.9.3\Exception.cpp" />
     <ClCompile Include="..\src\Sockets-2.3.9.3\Ipv4Address.cpp" />
@@ -114,6 +115,7 @@
     <ClInclude Include="..\src\lua\lvm.h" />
     <ClInclude Include="..\src\lua\lzio.h" />
     <ClInclude Include="..\src\map.h" />
+    <ClInclude Include="..\src\nbt.h" />
     <ClInclude Include="..\src\nullstream.hpp" />
     <ClInclude Include="..\src\Sockets-2.3.9.3\Base64.h" />
     <ClInclude Include="..\src\Sockets-2.3.9.3\IBase.h" />

@@ -10,13 +10,16 @@
 #include <SocketHandler.h>
 #include <ListenSocket.h>
 #include <iostream>
+#include <fstream>
 #include <deque>
+
 #include "zlib/zlib.h"
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
 #include "map.h"
 #include "user.h"
 #include "chat.h"
+#include "nbt.h"
 
 typedef std::map<SOCKET,Socket *> socket_m;
 
@@ -199,6 +202,8 @@ void DisplaySocket::OnRead()
       {
         if(i<10)
           putSint16(&data4[7+i*5], 0x115);
+        else if(i<20)
+          putSint16(&data4[7+i*5], 50);
         else
           putSint16(&data4[7+i*5], 1);
 
@@ -217,9 +222,9 @@ void DisplaySocket::OnRead()
       //Setup spawn position (0,70,0)
       uint8 data2[13]={0};
       data2[0]=0x06;
-      putSint32(&data2[1], 0); //X
-      putSint32(&data2[5], 70);//Y
-      putSint32(&data2[9], 0); //Z      
+      putSint32(&data2[1], 20); //X
+      putSint32(&data2[5], 70*16);//Y
+      putSint32(&data2[9], 10); //Z      
       h.SendSock(GetSocket(), (char *)&data2[0], 13); 
 
             
@@ -695,64 +700,37 @@ void DisplaySocket::OnRead()
       data4[13]=15; //Size_z
 
 
-      int index=0;
-      int height=40;
-        
-      //Type array
-      for(int mapx=0;mapx<16;mapx++)
-      {
-        for(int mapz=0;mapz<16;mapz++)
-        {
-          height=55+rand()%2;
-          for(int mapy=0;mapy<128;mapy++)
-          {
-            if(mapy<1)
-            {
-              mapdata[index]=7; //BedRock
-            }
-            else if(mapy<height)
-            {
-              mapdata[index]=3; //Dirt
-            }
-            else if(mapy==height)
-            {
-              mapdata[index]=2; //Grass
-            }
-            else
-            {
-              mapdata[index]=0; //Empty
-            }
-            index++;
-          }
-        }
-      }
-
-      //metadata
-      for(int i=0;i<16*16*128/2;i++)
-      {
-        mapdata[index]=0;
-        index++;
-      }
-
-
-      //Block light
-      for(int i=0;i<16*16*128/2;i++)
-      {
-        mapdata[index]=0x00;
-        index++;
-      }
-
-      //Sky light
-      for(int i=0;i<16*16*128/2;i++)
-      {
-        mapdata[index]=0xff;
-        index++;
-      }
-
       for(mapposx=-2;mapposx<=2;mapposx++)
       {
         for(mapposz=-2;mapposz<=2;mapposz++)
         {   
+
+          //Generate map file name
+          int modulox=(mapposx-15);
+          while(modulox<0) modulox+=64;
+          int moduloz=(mapposz-14);
+          while(moduloz<0) moduloz+=64;
+          modulox%=64;
+          moduloz%=64;
+          std::string infile="testmap/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+base36_encode(mapposx-15)+"."+base36_encode(mapposz-14)+".dat";
+
+          //Read gzipped map file
+          gzFile mapfile=gzopen(infile.c_str(),"rb");
+          uint8 uncompressedData[100000];
+          int uncompressedSize=gzread(mapfile,&uncompressedData[0],100000);
+          gzclose(mapfile);
+
+          std::cout << "File: " << infile << std::endl;
+          int outlen=81920;
+          std::cout << "Blocks: ";
+          readTag(&uncompressedData[0],uncompressedSize, &mapdata[0], &outlen, "Blocks");
+          std::cout << "Data: ";
+          readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768], &outlen, "Data");
+          std::cout << "BlockLight: ";
+          readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768+16384], &outlen, "BlockLight");
+          std::cout << "SkyLight: ";
+          readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768+16384+16384], &outlen, "SkyLight");
+
 
           putSint32(&data4[1], mapposx*16);
           data4[5]=0;
@@ -762,13 +740,16 @@ void DisplaySocket::OnRead()
           uLongf written=81920;
         
           //Compress data with zlib deflate
-          compress((uint8 *)&data4[18], &written, (uint8 *)&mapdata[0],81920);            
+          compress((uint8 *)&data4[18], &written, (uint8 *)&mapdata[0],81920);
         
           putSint32(&data4[14], written);
           h.SendSock(GetSocket(), (uint8 *)&data4[0], 18+written);
-          std::cout << "Sent chunk " << written << " bytes" << std::endl;          
+          std::cout << "Sent chunk " << written << " bytes" << std::endl; 
         }          
       }
+      //Send "On Ground" signal
+      char data6[2]={0x0A, 0x01};
+      h.SendSock(GetSocket(), (char *)&data6[0], 2);
     }
   } //End while
 

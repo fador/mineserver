@@ -1,10 +1,11 @@
 #ifdef WIN32
   #define _CRTDBG_MAP_ALLOC
-  #include <stdlib.h>
+
   #include <crtdbg.h>
   #include <conio.h>
 #endif
 
+#include <cstdlib>
 #include <iostream>
 #include <vector>
 #include <cstdio>
@@ -122,7 +123,8 @@ sint32 getSint16(uint8 *buf)
 std::string base36_encode(int value)
 {
   std::string output;
-  my_itoa(value,output, 36);
+  my_itoa((int)abs(value),output, 36);
+  if(value<0) output.insert (output.begin(),'-');
 
   return output;
 }
@@ -138,7 +140,7 @@ void my_itoa(int value, std::string& buf, int base)
   if(!value) buf="0";
 	for(; value && i ; --i, value /= base)
   {
-    buf.append(1,(char)hexarray[value % base]);
+    buf.insert(buf.begin(),(char)hexarray[value % base]);
   }
 	
 }
