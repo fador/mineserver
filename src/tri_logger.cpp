@@ -6,6 +6,7 @@
 // ( copy at http://www.boost.org/LICENSE_1_0.txt )
 
 #include "tri_logger.hpp"
+#include <cctype>
 
 #if !defined(CLEANTLOG)
 

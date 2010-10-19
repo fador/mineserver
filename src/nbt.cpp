@@ -35,7 +35,7 @@ int readTag(uint8* input, int inputlen,uint8* output, int* outputlen,std::string
         curpos++;
       }
 
-      if(TAG==name) std::cout << "Name: " << name << " Curpos: " << curpos << " Level: " << level << std::endl;
+      //if(TAG==name) std::cout << "Name: " << name << " Curpos: " << curpos << " Level: " << level << std::endl;
     }
     
 
