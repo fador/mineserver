@@ -55,6 +55,25 @@ void putSint16(uint8 *buf, short value)
   buf[1]=pointer[0];
 }
 
+void putFloat(uint8 *buf, float value)
+{
+  uint8 *floatAddress=reinterpret_cast<uint8 *>(&value);
+  for(uint8 i=0;i<4;i++)
+  {
+    buf[i]=floatAddress[3-i];
+  }
+}
+
+
+void putDouble(uint8 *buf, double value)
+{
+  uint8 *doubleAddress=reinterpret_cast<uint8 *>(&value);
+  for(uint8 i=0;i<8;i++)
+  {
+    buf[i]=doubleAddress[7-i];
+  }
+}
+
 double getDouble(uint8 *buf)
 {
   double temp;

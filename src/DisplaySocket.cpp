@@ -191,16 +191,16 @@ void DisplaySocket::OnRead()
       }
     
       //Login OK package
-      char data[11]={0x01, 0x00, 0x00,0x00,0x00,0x00,0x01,'F',0x00,0x01, 'P'};
+      char data[9]={0x01, 0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00};
       putSint32((uint8 *)&data[1],user->UID);
-      h.SendSock(GetSocket(), (char *)&data[0], 11);
+      h.SendSock(GetSocket(), (char *)&data[0], 9);
 
 
       //Send server time (after dawn)
       uint8 data3[9]={0x04, 0x00, 0x00, 0x00,0x00,0x00,0x00,0x0e,0x00};
       h.SendSock(GetSocket(), (char *)&data3[0], 9);
 
-      //Inventory (full of stone blocks)
+      //Inventory
       uint8 data4[7+36*5];
       data4[0]=0x05;
       putSint32(&data4[1],-1);
@@ -209,13 +209,13 @@ void DisplaySocket::OnRead()
       for(i=0;i<36;i++)
       {
         if(i<10)
-          putSint16(&data4[7+i*5], 0x115);
+          putSint16(&data4[7+i*5], 0x115); //Diamond shovel
         else if(i<20)
-          putSint16(&data4[7+i*5], 50);
+          putSint16(&data4[7+i*5], 50); //Torch
         else
-          putSint16(&data4[7+i*5], 1);
+          putSint16(&data4[7+i*5], 1); //Stone
 
-        data4[7+2+i*5]=1;
+        data4[7+2+i*5]=1; //Count
         putSint16(&data4[7+3+i*5], 0);
       }
       h.SendSock(GetSocket(), (char *)&data4[0], 7+36*5);
@@ -227,13 +227,7 @@ void DisplaySocket::OnRead()
       putSint32(&data4[1],-3);
       h.SendSock(GetSocket(), (char *)&data4[0], 7+4*5);
       
-      //Setup spawn position (0,70,0)
-      uint8 data2[13]={0};
-      data2[0]=0x06;
-      putSint32(&data2[1], 20); //X
-      putSint32(&data2[5], 70*16);//Y
-      putSint32(&data2[9], 10); //Z      
-      h.SendSock(GetSocket(), (char *)&data2[0], 13); 
+
 
             
       //Send "On Ground" signal
@@ -687,9 +681,9 @@ void DisplaySocket::OnRead()
       uint8 mapdata[81920]={0};
       for(i=0;i<81920;i++) mapdata[i]=0;
       int mapposx,mapposz;
-      for(mapposx=-2;mapposx<=2;mapposx++)
+      for(mapposx=-5;mapposx<=5;mapposx++)
       {
-        for(mapposz=-2;mapposz<=2;mapposz++)
+        for(mapposz=-5;mapposz<=5;mapposz++)
         {
           //Pre chunk
           data4[0]=0x32;
@@ -708,9 +702,9 @@ void DisplaySocket::OnRead()
       data4[13]=15; //Size_z
 
 
-      for(mapposx=-2;mapposx<=2;mapposx++)
+      for(mapposx=-5;mapposx<=5;mapposx++)
       {
-        for(mapposz=-2;mapposz<=2;mapposz++)
+        for(mapposz=-5;mapposz<=5;mapposz++)
         {   
 
           //Generate map file name
@@ -728,15 +722,15 @@ void DisplaySocket::OnRead()
           int uncompressedSize=gzread(mapfile,&uncompressedData[0],100000);
           gzclose(mapfile);
 
-          std::cout << "File: " << infile << std::endl;
+          //std::cout << "File: " << infile << std::endl;
           int outlen=81920;
-          std::cout << "Blocks: ";
+          //std::cout << "Blocks: ";
           readTag(&uncompressedData[0],uncompressedSize, &mapdata[0], &outlen, "Blocks");
-          std::cout << "Data: ";
+          //std::cout << "Data: ";
           readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768], &outlen, "Data");
-          std::cout << "BlockLight: ";
+          //std::cout << "BlockLight: ";
           readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768+16384], &outlen, "BlockLight");
-          std::cout << "SkyLight: ";
+          //std::cout << "SkyLight: ";
           readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768+16384+16384], &outlen, "SkyLight");
 
 
@@ -752,12 +746,33 @@ void DisplaySocket::OnRead()
         
           putSint32(&data4[14], written);
           h.SendSock(GetSocket(), (uint8 *)&data4[0], 18+written);
-          std::cout << "Sent chunk " << written << " bytes" << std::endl; 
+          //std::cout << "Sent chunk " << written << " bytes" << std::endl; 
         }          
       }
       //Send "On Ground" signal
       char data6[2]={0x0A, 0x01};
       h.SendSock(GetSocket(), (char *)&data6[0], 2);
+
+      //Teleport (0,70,0)
+      uint8 spawndata[42]={0};
+      int curpos=0;
+      spawndata[curpos]=0x0d;
+      curpos++;
+      putDouble(&spawndata[curpos],0.0); //X
+      curpos+=8;
+      putDouble(&spawndata[curpos], 70);  //Y
+      curpos+=8;
+      putDouble(&spawndata[curpos], 0); //Z
+      curpos+=8;
+      putDouble(&spawndata[curpos], 0.0); //Stance
+      curpos+=8;
+      putFloat(&spawndata[curpos], 0.0);
+      curpos+=4;
+      putFloat(&spawndata[curpos], 0.0);
+      curpos+=4;
+      spawndata[curpos] = 0; //On Ground
+      h.SendSock(GetSocket(), (char *)&spawndata[0], 42);
+     
     }
   } //End while
 

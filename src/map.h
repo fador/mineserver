@@ -12,6 +12,8 @@ typedef int sint32;
 void putUint32(uint8 *buf, uint32 value);
 void putSint32(uint8 *buf, sint32 value);
 void putSint16(uint8 *buf, short value);
+void putDouble(uint8 *buf, double value);
+void putFloat(uint8 *buf, float value);
 
 double getDouble(uint8 *buf);
 float  getFloat(uint8 *buf);
