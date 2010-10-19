@@ -45,16 +45,31 @@ bool Chat::handleMsg( User *user, std::string msg ) {
     
     timeStamp = timeStamp.substr(11,5);
 
-    // Admincommands
-    if(msg.substr(0,1) == "/")
+    //
+    // Chat commands
+    //
+    
+    // Servermsg (Admin-only)
+    if(msg.substr(0,1) == "%" && user->admin) 
     {
-        if(msg.substr(1,4) == "list") {
+        this->sendMsg(user, msg.substr(1), ALL);
+    } 
+    else if(msg.substr(0,1) == "/")
+    {
+        if(msg.substr(1,7) == "players") {
             this->sendUserlist(user);
+        }
+        if(msg.substr(1,5) == "about") {
+            this->sendMsg(user, "SERVER: Mineserver v.???", USER);
         }
         if(user->admin) {
             if(msg.substr(1,4) == "smsg") {
                 this->sendMsg(user, msg.substr(5), ALL);
             }
+            if(msg.substr(1,4) == "kick") {
+                this->sendMsg(user, 'POTKITAANPOTKITAAN', ALL);
+            }
+
             if(msg.substr(1,3) == "ctp") { // x y z
                 msg = msg.substr(5);
                 TRI_LOG(msg);
