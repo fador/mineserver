@@ -29,7 +29,7 @@ Chat::Chat()
 }
 
 bool Chat::sendUserlist( User *user ) {
-      this->sendMsg(user, "Pelaajalista", USER);
+      this->sendMsg(user, "Playerlist", USER);
       for(int i=0;i<Users.size();i++)
       {
           this->sendMsg(user, Users[i].nick, USER);
