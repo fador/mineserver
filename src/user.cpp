@@ -276,7 +276,7 @@
       putSint16(&entityData2[curpos],0); //current item
       curpos+=2;
       this->sendOthers((uint8 *)&entityData2[0], curpos);
-
+      return true;
     }
 
     bool User::spawnOthers()
@@ -316,7 +316,7 @@
           h.SendSock(this->sock,(uint8 *)&entityData2[0], curpos);
         }
       }
-
+      return true;
     }
 
     bool addUser(SOCKET sock,uint32 EID)

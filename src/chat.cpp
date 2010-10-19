@@ -69,7 +69,7 @@ bool Chat::handleMsg( User *user, std::string msg ) {
                 this->sendMsg(user, msg.substr(5), ALL);
             }
             if(msg.substr(1,4) == "kick") {
-                this->sendMsg(user, 'POTKITAANPOTKITAAN', ALL);
+                this->sendMsg(user, "POTKITAANPOTKITAAN", ALL);
             }
 
             if(msg.substr(1,3) == "ctp") { // x y z
