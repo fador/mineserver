@@ -11,6 +11,7 @@ class Chat
         std::deque<std::string> admins;
         bool handleMsg( User *user, std::string msg );
         bool sendMsg( User *user, std::string msg, int action );
+        bool sendUserlist( User *user );
 };
 
 #endif

@@ -28,6 +28,14 @@ Chat::Chat()
   }
 }
 
+bool Chat::sendUserlist( User *user ) {
+      this->sendMsg(user, "Pelaajalista", USER);
+      for(int i=0;i<Users.size();i++)
+      {
+          this->sendMsg(user, Users[i].nick, USER);
+      }
+}
+
 bool Chat::handleMsg( User *user, std::string msg ) {
     // Timestamp
     time_t rawTime = time(NULL);
@@ -40,13 +48,16 @@ bool Chat::handleMsg( User *user, std::string msg ) {
     // Admincommands
     if(msg.substr(0,1) == "/")
     {
-        if(user->admin) {
+        if(msg.substr(1,4) == "list") {
+            this->sendUserlist(user);
+        }
+        /*if(user->admin) {
             TRI_LOG_STR(user->nick + " adminkomento!");
             TRI_LOG(msg);
             this->sendMsg(user, msg.substr(1), ALL);
         } else {
             TRI_LOG_STR(user->nick + " ei ole admin");
-        }
+        }*/
     } 
     // Normal message
     else {
