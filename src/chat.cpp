@@ -51,13 +51,23 @@ bool Chat::handleMsg( User *user, std::string msg ) {
         if(msg.substr(1,4) == "list") {
             this->sendUserlist(user);
         }
-        /*if(user->admin) {
-            TRI_LOG_STR(user->nick + " adminkomento!");
-            TRI_LOG(msg);
-            this->sendMsg(user, msg.substr(1), ALL);
-        } else {
-            TRI_LOG_STR(user->nick + " ei ole admin");
-        }*/
+        if(user->admin) {
+            if(msg.substr(1,4) == "smsg") {
+                this->sendMsg(user, msg.substr(5), ALL);
+            }
+            if(msg.substr(1,3) == "ctp") { // x y z
+                msg = msg.substr(5);
+                TRI_LOG(msg);
+                float x = atof(msg.substr(0, msg.find(' ')).c_str());
+                msg = msg.substr(msg.find(' ')+1);
+                TRI_LOG(msg);
+                float y = atof(msg.substr(0, msg.find(' ')).c_str());
+                msg = msg.substr(msg.find(' ')+1);
+                TRI_LOG(msg);
+                float z = atof(msg.c_str());
+                user->teleport(x,z,y);
+            }
+        }
     } 
     // Normal message
     else {

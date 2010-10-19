@@ -127,9 +127,7 @@
         if(admins[i] == nick) {
             this->admin=true;
             TRI_LOG_STR(nick + " admin");
-
         }
-        TRI_LOG_STR(nick + " not admin");
       }
       
       return true;
