@@ -754,8 +754,14 @@ void DisplaySocket::OnRead()
       h.SendSock(GetSocket(), (char *)&data6[0], 2);
 
       //Teleport player
-      user->teleport(0,70,0);
-     
+      user->teleport(0,70,0); 
+
+      //Spawn this user to others
+      user->spawnUser(0,70*32,0);
+
+      //Spawn other users for connected user
+      user->spawnOthers();
+
     }
   } //End while
 

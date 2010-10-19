@@ -144,70 +144,55 @@
 
     bool User::updatePos(double x, double y, double z, double stance)
     {
-      unsigned int i;
-      for(i=0;i<(int)Users.size();i++)
-      {
-        if(Users[i].sock==sock)
+         
+        //Do we send relative or absolute move values
+        if(0)//abs(x-this->pos.x)<127
+          //&& abs(y-this->pos.y)<127
+          //&& abs(z-this->pos.z)<127)
         {
-          
-          //Do we send relative or absolute move values
-          if(abs(x-Users[i].pos.x)<127
-            && abs(y-Users[i].pos.y)<127
-            && abs(z-Users[i].pos.z)<127)
-          {
-            uint8 movedata[8];
-            movedata[0]=0x1f; //Relative move
-            putUint32(&movedata[1],this->UID);
-            movedata[5]=(char)(x-Users[i].pos.x);
-            movedata[6]=(char)(y-Users[i].pos.y);
-            movedata[7]=(char)(z-Users[i].pos.z);
-            this->sendOthers(&movedata[0],8);
-          }
-          else
-          {
-            uint8 teleportData[19];
-            teleportData[0]=0x22; //Teleport
-            putSint32(&teleportData[1],Users[i].UID);
-            putSint32(&teleportData[5],(int)Users[i].pos.x);
-            putSint32(&teleportData[9],(int)Users[i].pos.y);
-            putSint32(&teleportData[13],(int)Users[i].pos.z);
-            teleportData[17]=(char)Users[i].pos.yaw;
-            teleportData[18]=(char)Users[i].pos.pitch;
-            this->sendOthers(&teleportData[0],19);
-          }
-          
-          
-          Users[i].pos.x=x;
-          Users[i].pos.y=y;
-          Users[i].pos.z=z;
-          Users[i].pos.stance=stance;
-          return true;
+          uint8 movedata[8];
+          movedata[0]=0x1f; //Relative move
+          putUint32(&movedata[1],this->UID);
+          movedata[5]=(char)(x-this->pos.x);
+          movedata[6]=(char)(y-this->pos.y);
+          movedata[7]=(char)(z-this->pos.z);
+          this->sendOthers(&movedata[0],8);
         }
-      }
-      return false;
+        else
+        {
+          uint8 teleportData[19];
+          teleportData[0]=0x22; //Teleport
+          putSint32(&teleportData[1],this->UID);
+          putSint32(&teleportData[5],(int)this->pos.x*32);
+          putSint32(&teleportData[9],(int)this->pos.y*32);
+          putSint32(&teleportData[13],(int)this->pos.z*32);
+          teleportData[17]=(char)this->pos.yaw;
+          teleportData[18]=(char)this->pos.pitch;
+          this->sendOthers(&teleportData[0],19);
+        }
+          
+          
+        this->pos.x=x;
+        this->pos.y=y;
+        this->pos.z=z;
+        this->pos.stance=stance;
+        return true;
     }
 
     bool User::updateLook(float yaw, float pitch)
     {
-      unsigned int i;
-      for(i=0;i<(int)Users.size();i++)
-      {
-        if(Users[i].sock==sock)
-        {
+      
+        uint8 lookdata[7];
+        lookdata[0]=0x20;
+        putUint32(&lookdata[1],this->UID);
+        lookdata[5]=(char)(yaw);
+        lookdata[6]=(char)(pitch);          
+        this->sendOthers(&lookdata[0],7);
           
-          uint8 lookdata[7];
-          lookdata[0]=0x20;
-          putUint32(&lookdata[1],this->UID);
-          lookdata[5]=(char)(yaw);
-          lookdata[6]=(char)(pitch);          
-          this->sendOthers(&lookdata[0],7);
-          
-          Users[i].pos.yaw=yaw;
-          Users[i].pos.pitch=pitch;
-          return true;
-        }
-      }
-      return false;
+        this->pos.yaw=yaw;
+        this->pos.pitch=pitch;
+        return true;
+
     }
 
     bool User::sendOthers(uint8* data,uint32 len)
@@ -261,6 +246,78 @@
       return true;
     }
 
+    bool User::spawnUser(int x, int y, int z)
+    {
+       uint8 entityData2[256];
+      int curpos=0;
+      entityData2[curpos]=0x14; //Named Entity Spawn
+      curpos++;
+      putSint32(&entityData2[curpos], this->UID);        
+      curpos+=4;
+      entityData2[curpos]=0;
+      entityData2[curpos+1]=this->nick.size();
+      curpos+=2;
+      
+      for(int j=0;j<this->nick.size();j++)
+      {
+        entityData2[curpos]=this->nick[j];
+        curpos++;
+      }
+      
+      putSint32(&entityData2[curpos],x);
+      curpos+=4;
+      putSint32(&entityData2[curpos],y);
+      curpos+=4;
+      putSint32(&entityData2[curpos],z);
+      curpos+=4;
+      entityData2[curpos]=0; //Rotation
+      entityData2[curpos+1]=0; //Pitch
+      curpos+=2;
+      putSint16(&entityData2[curpos],0); //current item
+      curpos+=2;
+      this->sendOthers((uint8 *)&entityData2[0], curpos);
+
+    }
+
+    bool User::spawnOthers()
+    {
+
+      for(int i=0;i<Users.size(); i++)
+      {
+        if(Users[i].UID!=this->UID && Users[i].nick != this->nick)
+        {
+          uint8 entityData2[256];
+          int curpos=0;
+          entityData2[curpos]=0x14; //Named Entity Spawn
+          curpos++;
+          putSint32(&entityData2[curpos], Users[i].UID);        
+          curpos+=4;
+          entityData2[curpos]=0;
+          entityData2[curpos+1]=Users[i].nick.size();
+          curpos+=2;
+      
+          for(int j=0;j<Users[i].nick.size();j++)
+          {
+            entityData2[curpos]=Users[i].nick[j];
+            curpos++;
+          }
+      
+          putSint32(&entityData2[curpos],Users[i].pos.x*32);
+          curpos+=4;
+          putSint32(&entityData2[curpos],Users[i].pos.y*32);
+          curpos+=4;
+          putSint32(&entityData2[curpos],Users[i].pos.z*32);
+          curpos+=4;
+          entityData2[curpos]=0; //Rotation
+          entityData2[curpos+1]=0; //Pitch
+          curpos+=2;
+          putSint16(&entityData2[curpos],0); //current item
+          curpos+=2;
+          h.SendSock(this->sock,(uint8 *)&entityData2[0], curpos);
+        }
+      }
+
+    }
 
     bool addUser(SOCKET sock,uint32 EID)
     {

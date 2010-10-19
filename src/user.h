@@ -36,6 +36,10 @@
         bool sendAll(uint8* data,uint32 len);
 
         bool teleport(double x, double y, double z);
+
+        bool spawnUser(int x, int y, int z);
+
+        bool spawnOthers();
     };
 
     bool addUser(SOCKET sock,uint32 EID);
