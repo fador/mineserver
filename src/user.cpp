@@ -259,6 +259,8 @@
       curpos+=4;
       teleportdata[curpos] = 0; //On Ground
       h.SendSock(this->sock, (char *)&teleportdata[0], 42);
+
+      return true;
     }
 
 
