@@ -239,6 +239,28 @@
     }
 
 
+    bool User::teleport(double x, double y, double z)
+    {      
+      uint8 teleportdata[42]={0};
+      int curpos=0;
+      teleportdata[curpos]=0x0d;
+      curpos++;
+      putDouble(&teleportdata[curpos],x); //X
+      curpos+=8;
+      putDouble(&teleportdata[curpos],y);  //Y
+      curpos+=8;
+      putDouble(&teleportdata[curpos],z); //Z
+      curpos+=8;
+      putDouble(&teleportdata[curpos], 0.0); //Stance
+      curpos+=8;
+      putFloat(&teleportdata[curpos], 0.0);
+      curpos+=4;
+      putFloat(&teleportdata[curpos], 0.0);
+      curpos+=4;
+      teleportdata[curpos] = 0; //On Ground
+      h.SendSock(this->sock, (char *)&teleportdata[0], 42);
+    }
+
 
     bool addUser(SOCKET sock,uint32 EID)
     {
@@ -298,4 +320,5 @@
       }
       return EID;
     }
+
 

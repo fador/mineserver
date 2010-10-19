@@ -753,25 +753,8 @@ void DisplaySocket::OnRead()
       char data6[2]={0x0A, 0x01};
       h.SendSock(GetSocket(), (char *)&data6[0], 2);
 
-      //Teleport (0,70,0)
-      uint8 spawndata[42]={0};
-      int curpos=0;
-      spawndata[curpos]=0x0d;
-      curpos++;
-      putDouble(&spawndata[curpos],0.0); //X
-      curpos+=8;
-      putDouble(&spawndata[curpos], 70);  //Y
-      curpos+=8;
-      putDouble(&spawndata[curpos], 0); //Z
-      curpos+=8;
-      putDouble(&spawndata[curpos], 0.0); //Stance
-      curpos+=8;
-      putFloat(&spawndata[curpos], 0.0);
-      curpos+=4;
-      putFloat(&spawndata[curpos], 0.0);
-      curpos+=4;
-      spawndata[curpos] = 0; //On Ground
-      h.SendSock(GetSocket(), (char *)&spawndata[0], 42);
+      //Teleport player
+      user->teleport(0,70,0);
      
     }
   } //End while
