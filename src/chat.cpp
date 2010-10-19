@@ -34,6 +34,8 @@ bool Chat::sendUserlist( User *user ) {
       {
           this->sendMsg(user, Users[i].nick, USER);
       }
+
+      return true;
 }
 
 bool Chat::handleMsg( User *user, std::string msg ) {
