@@ -43,6 +43,7 @@ extern StatusHandler h;
 
 void DisplaySocket::OnDisconnect()
 {
+  std::cout << "Disconnect!" << std::endl;
     remUser(GetSocket());
 }
 
@@ -176,11 +177,12 @@ void DisplaySocket::OnRead()
       //Package completely received, remove from buffer
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
 
-      std::cout << "Player login v." <<version<<" : " << player <<":" << passwd << std::endl;
+      std::cout << "Player " << user->UID << " login v." <<version<<" : " << player <<":" << passwd << std::endl;
       if(version==2)
-      {
+      {        
         user->logged=1;
         user->changeNick(player, chat.admins);
+       
         // Send motd
         std::ifstream ifs( "motd.txt" );
         std::string temp;
@@ -188,6 +190,7 @@ void DisplaySocket::OnRead()
         while( getline( ifs, temp ) ) {
             chat.sendMsg(user, temp, USER);
         }
+
       }
       else
       {
@@ -642,8 +645,14 @@ void DisplaySocket::OnRead()
         user->waitForData=true;
         return;
       }
-
+      char forward=user->buffer[4];
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+5);
+
+      uint8 animationPackage[6];
+      animationPackage[0]=0x12;
+      putSint32(&animationPackage[1],user->UID);
+      animationPackage[5]=forward;
+      user->sendOthers(&animationPackage[0], 6);
     }
     else if(user->action==0xff) //Quit message
     {
@@ -678,35 +687,6 @@ void DisplaySocket::OnRead()
       printf("Unknown action: 0x%x\n", user->action);
     }
 
-    if(user->logged)
-    {
-      user->logged=false;
-
-      //We need the first map part quickly
-      user->addQueue(0,0);
-      user->pushMap();
-
-      for(int x=-user->viewDistance;x<=user->viewDistance;x++)
-      {
-        for(int z=-user->viewDistance;z<=user->viewDistance;z++)
-        {
-          user->addQueue(x,z);
-        }
-      }
-      //Send "On Ground" signal
-      char data6[2]={0x0A, 0x01};
-      h.SendSock(GetSocket(), (char *)&data6[0], 2);
-
-      //Teleport player
-      user->teleport(0,70,0); 
-
-      //Spawn this user to others
-      user->spawnUser(0,70*32,0);
-
-      //Spawn other users for connected user
-      user->spawnOthers();
-
-    }
   } //End while
 
 

@@ -65,10 +65,10 @@
         bool addRemoveQueue(int x, int z);
 
         //Add known map piece
-        bool User::addKnown(int x, int z);
+        bool addKnown(int x, int z);
 
         //Delete known map piece
-        bool User::delKnown(int x, int z);
+        bool delKnown(int x, int z);
 
         //Push queued map data to client
         bool pushMap();

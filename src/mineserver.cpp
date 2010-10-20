@@ -68,6 +68,10 @@ int main(void)
         //0x00 package
         uint8 data=0;
         Users[0].sendAll(&data, 1);
+
+        //Send server time (after dawn)
+        uint8 data3[9]={0x04, 0x00, 0x00, 0x00,0x00,0x00,0x00,0x0e,0x00};
+        Users[0].sendAll((uint8 *)&data3[0], 9);
       }
     }
 
@@ -84,6 +88,34 @@ int main(void)
 
           //Remove map far away
           Users[i].popMap();
+        }
+
+        if(Users[i].logged)
+        {
+          Users[i].logged=false;
+          //Send "On Ground" signal
+          char data6[2]={0x0A, 0x01};
+          h.SendSock(Users[i].sock, (char *)&data6[0], 2);
+
+          //We need the first map part quickly
+          Users[i].addQueue(0,0);
+          Users[i].pushMap();
+
+          //Teleport player
+          Users[i].teleport(0,70,0); 
+          
+          for(int x=-Users[i].viewDistance;x<=Users[i].viewDistance;x++)
+          {
+            for(int z=-Users[i].viewDistance;z<=Users[i].viewDistance;z++)
+            {
+              Users[i].addQueue(x,z);
+            }
+          }
+
+          //Spawn this user to others
+          Users[i].spawnUser(0,70*32,0);
+          //Spawn other users for connected user
+          Users[i].spawnOthers();
         }
       }
     }

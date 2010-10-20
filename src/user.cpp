@@ -7,6 +7,7 @@
 #include <SocketHandler.h>
 #include <ListenSocket.h>
 #include <algorithm>
+#include <sys/stat.h> 
 #include "tri_logger.hpp"
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
@@ -16,6 +17,7 @@
 #include "user.h"
 #include "nbt.h"
 #include "zlib/zlib.h"
+
     
 
     extern ListenSocket<DisplaySocket> l;
@@ -269,21 +271,6 @@
         int mapposx=mapQueue[0].x;
         int mapposz=mapQueue[0].z;
 
-        //Pre chunk
-        data4[0]=0x32;
-        putSint32(&data4[1], mapposx);
-        putSint32(&data4[5], mapposz);
-        data4[9]=1; //Init chunk
-        h.SendSock(this->sock, (uint8 *)&data4[0], 10);
-
-
-        //Chunk
-        data4[0]=0x33;
-      
-        data4[11]=15; //Size_x
-        data4[12]=127; //Size_y
-        data4[13]=15; //Size_z
-
         //Generate map file name
         int modulox=(mapposx-15);
         while(modulox<0) modulox+=64;
@@ -293,36 +280,66 @@
         moduloz%=64;
         std::string infile="testmap/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+base36_encode(mapposx-15)+"."+base36_encode(mapposz-14)+".dat";
 
-        //Read gzipped map file
-        gzFile mapfile=gzopen(infile.c_str(),"rb");        
-        uint8 uncompressedData[100000];
-        int uncompressedSize=gzread(mapfile,&uncompressedData[0],100000);
-        gzclose(mapfile);
+        struct stat stFileInfo; 
+        bool blnReturn; 
+        int intStat; 
 
-        //std::cout << "File: " << infile << std::endl;
-        int outlen=81920;
-        //std::cout << "Blocks: ";
-        readTag(&uncompressedData[0],uncompressedSize, &mapdata[0], &outlen, "Blocks");
-        //std::cout << "Data: ";
-        readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768], &outlen, "Data");
-        //std::cout << "BlockLight: ";
-        readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768+16384], &outlen, "BlockLight");
-        //std::cout << "SkyLight: ";
-        readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768+16384+16384], &outlen, "SkyLight");
+        // Attempt to get the file attributes 
+        intStat = stat(infile.c_str(),&stFileInfo); 
+        if(intStat != 0)
+        { 
+          std::cout << "File not found: " << infile << std::endl;
+        }
+        else
+        {
+          //Pre chunk
+          data4[0]=0x32;
+          putSint32(&data4[1], mapposx);
+          putSint32(&data4[5], mapposz);
+          data4[9]=1; //Init chunk
+          h.SendSock(this->sock, (uint8 *)&data4[0], 10);
 
 
-        putSint32(&data4[1], mapposx*16);
-        data4[5]=0;
-        data4[6]=0;
-        putSint32(&data4[7], mapposz*16);
+          //Chunk
+          data4[0]=0x33;
+      
+          data4[11]=15; //Size_x
+          data4[12]=127; //Size_y
+          data4[13]=15; //Size_z
+
+
+
+          //Read gzipped map file
+          gzFile mapfile=gzopen(infile.c_str(),"rb");        
+          uint8 uncompressedData[100000];
+          int uncompressedSize=gzread(mapfile,&uncompressedData[0],100000);
+          gzclose(mapfile);
+
+          //std::cout << "File: " << infile << std::endl;
+          int outlen=81920;
+          //std::cout << "Blocks: ";
+          readTag(&uncompressedData[0],uncompressedSize, &mapdata[0], &outlen, "Blocks");
+          //std::cout << "Data: ";
+          readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768], &outlen, "Data");
+          //std::cout << "BlockLight: ";
+          readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768+16384], &outlen, "BlockLight");
+          //std::cout << "SkyLight: ";
+          readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768+16384+16384], &outlen, "SkyLight");
+
+
+          putSint32(&data4[1], mapposx*16);
+          data4[5]=0;
+          data4[6]=0;
+          putSint32(&data4[7], mapposz*16);
         
-        uLongf written=81920;
+          uLongf written=81920;
         
-        //Compress data with zlib deflate
-        compress((uint8 *)&data4[18], &written, (uint8 *)&mapdata[0],81920);
+          //Compress data with zlib deflate
+          compress((uint8 *)&data4[18], &written, (uint8 *)&mapdata[0],81920);
         
-        putSint32(&data4[14], written);
-        h.SendSock(this->sock, (uint8 *)&data4[0], 18+written);
+          putSint32(&data4[14], written);
+          h.SendSock(this->sock, (uint8 *)&data4[0], 18+written);
+        }
 
         //Add this to known list
         addKnown(mapQueue[0].x, mapQueue[0].z);
@@ -442,9 +459,8 @@
     }
 
     bool remUser(SOCKET sock)
-    {
-        unsigned int i;
-        for(i=0;i<(int)Users.size();i++)
+    {        
+        for(unsigned int i=0;i<(int)Users.size();i++)
         {
             if(Users[i].sock==sock)
             {
@@ -479,7 +495,7 @@
       while(!finished)
       {
         finished=true;
-        EID=rand() & 0xffffff;
+        EID=rand()%0xffffffff;
 
         for(uint8 i=0;i<Users.size();i++)
         {
