@@ -92,7 +92,7 @@
         }
         
         //Chunk position changed, check for map updates
-        if(x/16 != curChunk.x ||z/16 != curChunk.z)
+        if((int)(x/16) != curChunk.x ||(int)(z/16) != curChunk.z)
         {
           curChunk.x=x/16;
           curChunk.z=z/16;
@@ -102,6 +102,18 @@
             for(int mapz=-viewDistance+curChunk.z;mapz<=viewDistance+curChunk.z;mapz++)
             {
               addQueue(mapx,mapz);
+            }
+          }
+
+          for(unsigned int i=0;i<mapKnown.size();i++)
+          {
+            //If client has map data more than viesDistance+1 chunks away, remove it
+            if(mapKnown[i].x<curChunk.x-viewDistance-1 ||
+               mapKnown[i].x>curChunk.x+viewDistance+1 ||
+               mapKnown[i].z<curChunk.z-viewDistance-1 ||
+               mapKnown[i].z>curChunk.z+viewDistance+1)
+            {
+              addRemoveQueue(mapKnown[i].x,mapKnown[i].z);              
             }
           }
         }
@@ -180,6 +192,15 @@
       return true;
     }
 
+    bool User::addRemoveQueue(int x, int z)
+    {
+      coord newMap={x,0,z};
+
+      this->mapRemoveQueue.push_back(newMap);
+
+      return true;
+    }
+
     bool User::addKnown(int x, int z)
     {
       coord newMap={x,0,z};
@@ -188,10 +209,51 @@
       return true;
     }
 
+    bool User::delKnown(int x, int z)
+    {
+      
+      for(unsigned int i=0;i<mapKnown.size();i++)
+      {
+        if(mapKnown[i].x==x && mapKnown[i].z==z)
+        {
+          mapKnown.erase(mapKnown.begin()+i);
+          return true;
+        }
+      }
+
+      return false;
+    }
+
     bool SortVect(const coord &first, const coord &second)
     {
         return first.x*first.x+first.z*first.z < second.x*second.x+second.z*second.z;
     }
+
+    bool User::popMap()
+    {
+      //If map in queue, push it to client
+      if(this->mapRemoveQueue.size())
+      {
+        uint8 preChunk[10];
+        //Pre chunk
+        preChunk[0]=0x32;
+        putSint32(&preChunk[1], mapRemoveQueue[0].x);
+        putSint32(&preChunk[5], mapRemoveQueue[0].z);
+        preChunk[9]=0; //Unload chunk
+        h.SendSock(this->sock, (uint8 *)&preChunk[0], 10);
+
+        //Delete from known list
+        delKnown(mapRemoveQueue[0].x, mapRemoveQueue[0].z);
+
+        //Remove from queue
+        mapRemoveQueue.erase(mapRemoveQueue.begin());
+
+        return true;
+      }
+
+      return false;
+    }
+
 
     bool User::pushMap()
     {

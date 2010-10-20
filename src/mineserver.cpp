@@ -77,11 +77,14 @@ int main(void)
       //Loop users
       for(unsigned int i=0;i<Users.size();i++)
       {
-        //Push new map data
-        Users[i].pushMap();
-        Users[i].pushMap();
-        Users[i].pushMap();
-        Users[i].pushMap();
+        for(uint8 j=0;j<5;j++)
+        {
+          //Push new map data        
+          Users[i].pushMap();
+
+          //Remove map far away
+          Users[i].popMap();
+        }
       }
     }
     #ifdef WIN32

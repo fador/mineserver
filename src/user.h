@@ -25,7 +25,8 @@
         User(SOCKET sock,uint32 EID);
         ~User();
 
-        const int viewDistance=5;
+        //View distance in chunks -viewDistance <-> viewDistance
+        static const int viewDistance=5;
         uint8 action;
         bool waitForData;
         bool logged;
@@ -51,17 +52,29 @@
         //Map queue
         std::vector<coord> mapQueue;
 
+        //Chunks needed to be removed from client
+        std::vector<coord> mapRemoveQueue;
+
         //Known map pieces
         std::vector<coord> mapKnown;
 
         //Add map coords to queue
         bool addQueue(int x, int z);
 
+        //Add map coords to remove queue
+        bool addRemoveQueue(int x, int z);
+
         //Add known map piece
         bool User::addKnown(int x, int z);
 
+        //Delete known map piece
+        bool User::delKnown(int x, int z);
+
         //Push queued map data to client
         bool pushMap();
+
+        //Push remove queued map data to client
+        bool popMap();
 
         bool teleport(double x, double y, double z);
         bool spawnUser(int x, int y, int z);
