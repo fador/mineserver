@@ -24,9 +24,10 @@ Chat::Chat()
     // If not commentline
     if(temp.substr(0,1) != "#") {
         admins.push_back( temp );
-        TRI_LOG_STR("Admin: " + temp);
+        //TRI_LOG_STR("Admin: " + temp);
     }
   }
+  ifs.close();
 }
 
 bool Chat::sendUserlist( User *user ) {
@@ -111,6 +112,7 @@ bool Chat::sendMsg(User *user, std::string msg, int action = ALL)
 
     if(action == ALL) user->sendAll(&tmpArray[0],msg.size()+3);
     if(action == USER) h.SendSock(user->sock, &tmpArray[0], msg.size()+3);
+    if(action == OTHERS)  user->sendOthers(&tmpArray[0], msg.size()+3);
     delete [] tmpArray;
     
     return true;

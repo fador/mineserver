@@ -27,10 +27,13 @@ static bool quit = false;
 StatusHandler h;
 ListenSocket<DisplaySocket> l(h);
 
+
+const std::string VERSION="0.1.4";
+
 int main(void)
 {
-    uint32 starttime=time(0);
-    uint32 tick=time(0);
+    uint32 starttime=(uint32)time(0);
+    uint32 tick=(uint32)time(0);
 
 #ifdef WIN32
   _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
@@ -41,25 +44,26 @@ int main(void)
   //atexit(freeMap);
 
   //Bind to port 25565
-	if (l.Bind(25565))
-	{                                                                                                        
-		exit(-1);
-	}
+  if (l.Bind(25565))
+  {
+    std::cout << "Unable to Bind port!" << std::endl;
+    exit(-1);
+  }
     std::cout << std::endl
               << "    _/      _/  _/                                                                                    " << std::endl
               << "   _/_/  _/_/      _/_/_/      _/_/      _/_/_/    _/_/    _/  _/_/  _/      _/    _/_/    _/  _/_/   " << std::endl
               << "  _/  _/  _/  _/  _/    _/  _/_/_/_/  _/_/      _/_/_/_/  _/_/      _/      _/  _/_/_/_/  _/_/        " << std::endl
               << " _/      _/  _/  _/    _/  _/            _/_/  _/        _/          _/  _/    _/        _/           " << std::endl
               << "_/      _/  _/  _/    _/    _/_/_/  _/_/_/      _/_/_/  _/            _/        _/_/_/  _/            " << std::endl;
-    std::cout << "Version 0.1.3 by Fador(&Psoden -_-)" << std::endl << std::endl;    
-	h.Add(&l);
-	h.Select(1,0);
-	while (!quit)
-	{
-		h.Select(1,0);
+    std::cout << "Version " << VERSION <<" by Fador(&Psoden -_-)" << std::endl << std::endl;    
+  h.Add(&l);
+  h.Select(1,0);
+  while (!quit)
+  {
+    h.Select(1,0);
     if(time(0)-starttime>10)
     {
-      starttime=time(0);
+      starttime=(uint32)time(0);
       std::cout << "Currently " << h.GetCount()-1 << " users in!" << std::endl;
 
       //If users, ping them
@@ -78,6 +82,7 @@ int main(void)
     //Every second
     if(time(0)-tick>0)
     {
+      tick=(uint32)time(0);
       //Loop users
       for(unsigned int i=0;i<Users.size();i++)
       {
@@ -120,10 +125,10 @@ int main(void)
       }
     }
     #ifdef WIN32
-    if(kbhit())
+    if(_kbhit())
         quit=1;
     #endif
-	}
+  }
 
     
   Map::getInstance().freeMap();

@@ -17,9 +17,10 @@
 #include "user.h"
 #include "nbt.h"
 #include "zlib/zlib.h"
+#include "chat.h"
 
     
-
+    extern Chat chat;
     extern ListenSocket<DisplaySocket> l;
     extern StatusHandler h;
 
@@ -44,15 +45,16 @@
       for(int i = 0; i < admins.size(); i++) {
         if(admins[i] == nick) {
             this->admin=true;
-            TRI_LOG_STR(nick + " admin");
+            //TRI_LOG_STR(nick + " admin");
         }
-      }
+      }      
       
       return true;
     }
 
     User::~User()
     {
+      //chat.sendMsg(this, nick+" disconnected!", ALL);
       //Send signal to everyone that the entity is destroyed
       uint8 entityData[5];
       entityData[0]=0x1d; //Destroy entity;
@@ -263,83 +265,9 @@
       if(this->mapQueue.size())
       {
         //Sort by distance from center
-        sort(mapQueue.begin(),mapQueue.end(),SortVect);
+        //sort(mapQueue.begin(),mapQueue.end(),SortVect);
 
-        uint8 data4[18+81920];
-        uint8 mapdata[81920]={0};
-        for(int i=0;i<81920;i++) mapdata[i]=0;
-        int mapposx=mapQueue[0].x;
-        int mapposz=mapQueue[0].z;
-
-        //Generate map file name
-        int modulox=(mapposx-15);
-        while(modulox<0) modulox+=64;
-        int moduloz=(mapposz-14);
-        while(moduloz<0) moduloz+=64;
-        modulox%=64;
-        moduloz%=64;
-        std::string infile="testmap/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+base36_encode(mapposx-15)+"."+base36_encode(mapposz-14)+".dat";
-
-        struct stat stFileInfo; 
-        bool blnReturn; 
-        int intStat; 
-
-        // Attempt to get the file attributes 
-        intStat = stat(infile.c_str(),&stFileInfo); 
-        if(intStat != 0)
-        { 
-          std::cout << "File not found: " << infile << std::endl;
-        }
-        else
-        {
-          //Pre chunk
-          data4[0]=0x32;
-          putSint32(&data4[1], mapposx);
-          putSint32(&data4[5], mapposz);
-          data4[9]=1; //Init chunk
-          h.SendSock(this->sock, (uint8 *)&data4[0], 10);
-
-
-          //Chunk
-          data4[0]=0x33;
-      
-          data4[11]=15; //Size_x
-          data4[12]=127; //Size_y
-          data4[13]=15; //Size_z
-
-
-
-          //Read gzipped map file
-          gzFile mapfile=gzopen(infile.c_str(),"rb");        
-          uint8 uncompressedData[100000];
-          int uncompressedSize=gzread(mapfile,&uncompressedData[0],100000);
-          gzclose(mapfile);
-
-          //std::cout << "File: " << infile << std::endl;
-          int outlen=81920;
-          //std::cout << "Blocks: ";
-          readTag(&uncompressedData[0],uncompressedSize, &mapdata[0], &outlen, "Blocks");
-          //std::cout << "Data: ";
-          readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768], &outlen, "Data");
-          //std::cout << "BlockLight: ";
-          readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768+16384], &outlen, "BlockLight");
-          //std::cout << "SkyLight: ";
-          readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768+16384+16384], &outlen, "SkyLight");
-
-
-          putSint32(&data4[1], mapposx*16);
-          data4[5]=0;
-          data4[6]=0;
-          putSint32(&data4[7], mapposz*16);
-        
-          uLongf written=81920;
-        
-          //Compress data with zlib deflate
-          compress((uint8 *)&data4[18], &written, (uint8 *)&mapdata[0],81920);
-        
-          putSint32(&data4[14], written);
-          h.SendSock(this->sock, (uint8 *)&data4[0], 18+written);
-        }
+        Map::getInstance().sendToUser(this,mapQueue[0].x, mapQueue[0].z);
 
         //Add this to known list
         addKnown(mapQueue[0].x, mapQueue[0].z);
@@ -464,6 +392,7 @@
         {
             if(Users[i].sock==sock)
             {
+                chat.sendMsg(&Users[i], Users[i].nick+" disconnected!", OTHERS);
                 Users.erase(Users.begin()+i);
                 //Send quit to all
                 //h.SendAll(std::string((char *)&data[0], 7));
@@ -495,7 +424,7 @@
       while(!finished)
       {
         finished=true;
-        EID=rand()%0xffffffff;
+        EID=rand()%0xffff;
 
         for(uint8 i=0;i<Users.size();i++)
         {

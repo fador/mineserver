@@ -42,17 +42,16 @@ extern ListenSocket<DisplaySocket> l;
 extern StatusHandler h;
 
 void DisplaySocket::OnDisconnect()
-{
-  std::cout << "Disconnect!" << std::endl;
-    remUser(GetSocket());
+{  
+  remUser(GetSocket());
 }
 
 
 
 void DisplaySocket::OnAccept()
 {
-  
-
+  //Create user for the socket
+  addUser(GetSocket(),generateEID());
 }
 /*
 std::string ToHex(unsigned int value)
@@ -86,9 +85,8 @@ void DisplaySocket::OnRead()
   }
   if(!user) //Must have user!
   {
-     //Create user for the socket
-     addUser(GetSocket(),generateEID());
-     user=&Users[Users.size()-1];
+    this->Close();
+    return;
   }
 
   //Push data to buffer
@@ -191,10 +189,12 @@ void DisplaySocket::OnRead()
             chat.sendMsg(user, temp, USER);
         }
 
+        chat.sendMsg(user, player+" connected!", USER);
+
       }
       else
       {
-
+        this->Close();
       }
     
       //Login OK package
@@ -635,8 +635,16 @@ void DisplaySocket::OnRead()
         user->waitForData=true;
         return;
       }
-      std::cout << "Player now holding: " << getUint16(&user->buffer[4]) << std::endl;
+      int itemID=getUint16(&user->buffer[4]);      
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+6);
+
+      //Send holding change to others
+      uint8 holdingPackage[7];
+      holdingPackage[0]=0x10;
+      putSint32(&holdingPackage[1], user->UID);
+      putSint16(&holdingPackage[5], itemID);
+      user->sendOthers(&holdingPackage[0],7);
+
     }
     else if(user->action==0x12) //Arm Animation
     {
@@ -653,6 +661,27 @@ void DisplaySocket::OnRead()
       putSint32(&animationPackage[1],user->UID);
       animationPackage[5]=forward;
       user->sendOthers(&animationPackage[0], 6);
+    }
+    else if(user->action==0x15) //Pickup Spawn
+    {
+      if(user->buffer.size()<22)
+      {
+        user->waitForData=true;
+        return;
+      }
+      
+      user->buffer.erase(user->buffer.begin(), user->buffer.begin()+22);
+    }
+    else if(user->action==0x35) //Block Change
+    {
+      std::cout << "Got block change!" << std::endl;
+      if(user->buffer.size()<11)
+      {
+        user->waitForData=true;
+        return;
+      }
+      
+      user->buffer.erase(user->buffer.begin(), user->buffer.begin()+11);
     }
     else if(user->action==0xff) //Quit message
     {

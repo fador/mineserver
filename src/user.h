@@ -1,6 +1,9 @@
 #ifndef _USER_H
 #define _USER_H
 
+#include <deque>
+#include "tools.h"
+
   struct position
   {
     double x;
@@ -26,7 +29,7 @@
         ~User();
 
         //View distance in chunks -viewDistance <-> viewDistance
-        static const int viewDistance=5;
+        static const int viewDistance=2;
         uint8 action;
         bool waitForData;
         bool logged;
