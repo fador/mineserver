@@ -7,6 +7,7 @@
 #include "StatusHandler.h"
 #include "tri_logger.hpp"
 
+#include "tools.h"
 #include "map.h"
 #include "user.h"
 #include "chat.h"

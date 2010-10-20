@@ -10,8 +10,10 @@
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
 
+#include "tools.h"
 #include "map.h"
 #include "user.h"
+
     
 
     extern ListenSocket<DisplaySocket> l;
@@ -221,6 +223,13 @@
       return true;
     }
 
+    bool User::addQueue(int x, int z)
+    {
+      coord newMap={x,0,z};
+      this->mapQueue.push_back(newMap);
+
+      return true;
+    }
 
     bool User::teleport(double x, double y, double z)
     {      

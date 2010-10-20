@@ -1,7 +1,7 @@
 #ifndef _USER_H
 #define _USER_H
 
-  typedef struct
+  struct position
   {
     double x;
     double y;
@@ -9,7 +9,14 @@
     double stance;
     float yaw;
     float pitch;
-  } position;
+  };
+
+  struct coord
+  {
+    int x;
+    int y;
+    int z;
+  };
 
     class User
     {
@@ -25,8 +32,10 @@
         SOCKET sock;
         unsigned int UID;
         std::string nick;
-        position pos;  
+        position pos;
+
         std::deque<unsigned char> buffer;
+
 
         bool changeNick(std::string nick, std::deque<std::string> admins);
         bool updatePos(double x, double y, double z, double stance);
@@ -35,10 +44,13 @@
         bool sendOthers(uint8* data,uint32 len);
         bool sendAll(uint8* data,uint32 len);
 
+        //Map related
+        std::vector<coord> mapQueue;
+
+        bool addQueue(int x, int z);
+
         bool teleport(double x, double y, double z);
-
         bool spawnUser(int x, int y, int z);
-
         bool spawnOthers();
     };
 

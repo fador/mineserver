@@ -5,6 +5,7 @@
 #include <fstream>
 #include <deque>
 
+#include "tools.h"
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
 #include "map.h"

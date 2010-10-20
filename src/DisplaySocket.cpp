@@ -13,6 +13,8 @@
 #include <fstream>
 #include <deque>
 #include <fstream>
+
+#include "tools.h"
 #include "zlib/zlib.h"
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
@@ -398,7 +400,7 @@ void DisplaySocket::OnRead()
         }
       }
 
-      std::cout << "Got items type " << type << std::endl;
+      //std::cout << "Got items type " << type << std::endl;
       //Package completely received, remove from buffer
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
 

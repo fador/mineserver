@@ -17,6 +17,7 @@
 #include "tri_logger.hpp"
 
 #include "DisplaySocket.h"
+#include "tools.h"
 #include "map.h"
 #include "user.h"
 #include "chat.h"
@@ -35,8 +36,8 @@ int main(void)
   _CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_DEBUG );
 #endif
 
-  initMap();
-  atexit(freeMap);
+  Map::getInstance().initMap();
+  //atexit(freeMap);
 
   //Bind to port 25565
 	if (l.Bind(25565))
@@ -75,7 +76,7 @@ int main(void)
 	}
 
     
-  freeMap();
+  Map::getInstance().freeMap();
   l.CloseAndDelete();
 
   //Windows debug
