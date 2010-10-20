@@ -25,6 +25,7 @@
         User(SOCKET sock,uint32 EID);
         ~User();
 
+        const int viewDistance=5;
         uint8 action;
         bool waitForData;
         bool logged;
@@ -33,6 +34,7 @@
         unsigned int UID;
         std::string nick;
         position pos;
+        coord curChunk;
 
         std::deque<unsigned char> buffer;
 
@@ -45,9 +47,21 @@
         bool sendAll(uint8* data,uint32 len);
 
         //Map related
+
+        //Map queue
         std::vector<coord> mapQueue;
 
+        //Known map pieces
+        std::vector<coord> mapKnown;
+
+        //Add map coords to queue
         bool addQueue(int x, int z);
+
+        //Add known map piece
+        bool User::addKnown(int x, int z);
+
+        //Push queued map data to client
+        bool pushMap();
 
         bool teleport(double x, double y, double z);
         bool spawnUser(int x, int y, int z);
@@ -61,6 +75,6 @@
 
     extern std::vector<User> Users;
 
-
+    bool SortVect(const coord &first, const coord &second);
 
 #endif

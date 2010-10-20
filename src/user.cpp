@@ -6,6 +6,7 @@
 #include <deque>
 #include <SocketHandler.h>
 #include <ListenSocket.h>
+#include <algorithm>
 #include "tri_logger.hpp"
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
@@ -13,7 +14,8 @@
 #include "tools.h"
 #include "map.h"
 #include "user.h"
-
+#include "nbt.h"
+#include "zlib/zlib.h"
     
 
     extern ListenSocket<DisplaySocket> l;
@@ -30,94 +32,6 @@
       this->UID=EID;
       this->logged=false;
       this->admin=false;
-      
-      /*
-      //Send signal to create an entity
-      uint8 entityData[5];
-      entityData[0]=0x1e; //Initialize entity;
-      putSint32(&entityData[1], 12345);
-      h.SendSock(GetSocket(), (uint8 *)&entityData[0], 5);
-      
-      uint8 entityData2[256];  
-
-      int curpos=0;
-      entityData2[curpos]=0x14; //Named Entity Spawn
-      curpos++;
-      putSint32(&entityData2[curpos], 12345);        
-      curpos+=4;
-      entityData2[curpos]=0;
-      entityData2[curpos+1]=6;//nick.size();
-      curpos+=2;
-      
-      //for(int j=0;j<nick.size();j++)
-      //{
-      //  entityData2[curpos]=nick[j];
-      //  curpos++;
-      //}
-      
-      entityData2[curpos]='P';
-      entityData2[curpos+1]='s';
-      entityData2[curpos+2]='o';
-      entityData2[curpos+3]='d';
-      entityData2[curpos+4]='e';
-      entityData2[curpos+5]='n';
-      curpos+=6;
-      
-      putSint32(&entityData2[curpos],35);
-      curpos+=4;
-      putSint32(&entityData2[curpos],65*32);
-      curpos+=4;
-      putSint32(&entityData2[curpos],0);
-      curpos+=4;
-      entityData2[curpos]=10; //Rotation
-      entityData2[curpos+1]=0; //Pitch
-      curpos+=2;
-      putSint16(&entityData2[curpos],0); //current item
-      curpos+=2;
-      h.SendSock(GetSocket(), (uint8 *)&entityData2[0], curpos);
-      */
-      /*
-      for(int i=0;i<Users.size();i++)
-      {
-        //Initialize entity
-        putSint32(&entityData[1], Users[i].UID);
-        h.SendSock(sock, &entityData[0],5);
-
-        int curpos=0;
-        entityData2[0]=0x14; //Named Entity Spawn
-        curpos++;
-        putSint32(&entityData2[curpos], Users[i].UID);        
-        curpos+=4;
-        entityData2[curpos]=0;
-        entityData2[curpos+1]=Users[i].nick.size();
-        curpos+=2;
-        for(int j=0;j<Users[i].nick.size();j++)
-        {
-          entityData2[curpos]=Users[i].nick[j];
-          curpos++;
-        }
-        putSint32(&entityData2[curpos],(int)Users[i].pos.x);
-        curpos+=4;
-        putSint32(&entityData2[curpos],(int)Users[i].pos.y);
-        curpos+=4;
-        putSint32(&entityData2[curpos],(int)Users[i].pos.z);
-        curpos+=4;
-        entityData2[curpos]=10; //Rotation
-        entityData2[curpos+1]=(char)Users[i].pos.yaw;
-        curpos+=2;
-        putSint16(&entityData2[curpos],1);
-        curpos+=2;
-
-        h.SendSock(sock, (uint8 *)&entityData2[0], curpos);
-      }
-      */
-      
-      
-      
-      
-      //sendOthers(sock, 
-      //Send login to all
-      //h.SendAll(std::string((char *)&data[0],8+nick.size()));        
     }
 
     bool User::changeNick(std::string nick, std::deque<std::string> admins)
@@ -161,7 +75,11 @@
           this->sendOthers(&movedata[0],8);
         }
         else
-        {
+        {          
+          this->pos.x=x;
+          this->pos.y=y;
+          this->pos.z=z;
+          this->pos.stance=stance;
           uint8 teleportData[19];
           teleportData[0]=0x22; //Teleport
           putSint32(&teleportData[1],this->UID);
@@ -172,8 +90,22 @@
           teleportData[18]=(char)this->pos.pitch;
           this->sendOthers(&teleportData[0],19);
         }
-          
-          
+        
+        //Chunk position changed, check for map updates
+        if(x/16 != curChunk.x ||z/16 != curChunk.z)
+        {
+          curChunk.x=x/16;
+          curChunk.z=z/16;
+
+          for(int mapx=-viewDistance+curChunk.x;mapx<=viewDistance+curChunk.x;mapx++)
+          {
+            for(int mapz=-viewDistance+curChunk.z;mapz<=viewDistance+curChunk.z;mapz++)
+            {
+              addQueue(mapx,mapz);
+            }
+          }
+        }
+
         this->pos.x=x;
         this->pos.y=y;
         this->pos.z=z;
@@ -226,11 +158,122 @@
     bool User::addQueue(int x, int z)
     {
       coord newMap={x,0,z};
+
+      for(unsigned int i=0;i<mapQueue.size();i++)
+      {
+        //Check for duplicates
+        if(mapQueue[i].x==newMap.x && mapQueue[i].z==newMap.z)
+        {
+          return false;
+        }
+      }
+      for(unsigned int i=0;i<mapKnown.size();i++)
+      {
+        //Check for duplicates
+        if(mapKnown[i].x==newMap.x && mapKnown[i].z==newMap.z)
+        {
+          return false;
+        }
+      }
       this->mapQueue.push_back(newMap);
 
       return true;
     }
 
+    bool User::addKnown(int x, int z)
+    {
+      coord newMap={x,0,z};
+      this->mapKnown.push_back(newMap);
+
+      return true;
+    }
+
+    bool SortVect(const coord &first, const coord &second)
+    {
+        return first.x*first.x+first.z*first.z < second.x*second.x+second.z*second.z;
+    }
+
+    bool User::pushMap()
+    {
+      //If map in queue, push it to client
+      if(this->mapQueue.size())
+      {
+        //Sort by distance from center
+        sort(mapQueue.begin(),mapQueue.end(),SortVect);
+
+        uint8 data4[18+81920];
+        uint8 mapdata[81920]={0};
+        for(int i=0;i<81920;i++) mapdata[i]=0;
+        int mapposx=mapQueue[0].x;
+        int mapposz=mapQueue[0].z;
+
+        //Pre chunk
+        data4[0]=0x32;
+        putSint32(&data4[1], mapposx);
+        putSint32(&data4[5], mapposz);
+        data4[9]=1; //Init chunk
+        h.SendSock(this->sock, (uint8 *)&data4[0], 10);
+
+
+        //Chunk
+        data4[0]=0x33;
+      
+        data4[11]=15; //Size_x
+        data4[12]=127; //Size_y
+        data4[13]=15; //Size_z
+
+        //Generate map file name
+        int modulox=(mapposx-15);
+        while(modulox<0) modulox+=64;
+        int moduloz=(mapposz-14);
+        while(moduloz<0) moduloz+=64;
+        modulox%=64;
+        moduloz%=64;
+        std::string infile="testmap/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+base36_encode(mapposx-15)+"."+base36_encode(mapposz-14)+".dat";
+
+        //Read gzipped map file
+        gzFile mapfile=gzopen(infile.c_str(),"rb");        
+        uint8 uncompressedData[100000];
+        int uncompressedSize=gzread(mapfile,&uncompressedData[0],100000);
+        gzclose(mapfile);
+
+        //std::cout << "File: " << infile << std::endl;
+        int outlen=81920;
+        //std::cout << "Blocks: ";
+        readTag(&uncompressedData[0],uncompressedSize, &mapdata[0], &outlen, "Blocks");
+        //std::cout << "Data: ";
+        readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768], &outlen, "Data");
+        //std::cout << "BlockLight: ";
+        readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768+16384], &outlen, "BlockLight");
+        //std::cout << "SkyLight: ";
+        readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768+16384+16384], &outlen, "SkyLight");
+
+
+        putSint32(&data4[1], mapposx*16);
+        data4[5]=0;
+        data4[6]=0;
+        putSint32(&data4[7], mapposz*16);
+        
+        uLongf written=81920;
+        
+        //Compress data with zlib deflate
+        compress((uint8 *)&data4[18], &written, (uint8 *)&mapdata[0],81920);
+        
+        putSint32(&data4[14], written);
+        h.SendSock(this->sock, (uint8 *)&data4[0], 18+written);
+
+        //Add this to known list
+        addKnown(mapQueue[0].x, mapQueue[0].z);
+
+        //Remove from queue
+        mapQueue.erase(mapQueue.begin());
+      }
+      else
+      {
+        return false;
+      }
+      return true;
+    }
     bool User::teleport(double x, double y, double z)
     {      
       uint8 teleportdata[42]={0};

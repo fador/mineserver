@@ -14,8 +14,6 @@
 
 #include "tools.h"
 
-
-
 void putUint32(uint8 *buf, uint32 value)
 {
   uint8 *pointer = reinterpret_cast<uint8 *>(&value);

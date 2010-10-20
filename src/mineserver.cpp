@@ -30,6 +30,7 @@ ListenSocket<DisplaySocket> l(h);
 int main(void)
 {
     uint32 starttime=time(0);
+    uint32 tick=time(0);
 
 #ifdef WIN32
   _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
@@ -56,23 +57,37 @@ int main(void)
 	while (!quit)
 	{
 		h.Select(1,0);
-        if(time(0)-starttime>10)
-        {
-            starttime=time(0);
-            std::cout << "Currently " << h.GetCount()-1 << " users in!" << std::endl;
+    if(time(0)-starttime>10)
+    {
+      starttime=time(0);
+      std::cout << "Currently " << h.GetCount()-1 << " users in!" << std::endl;
 
-            //If users, ping them
-            if(Users.size()>0)
-            {
-              //0x00 package
-              uint8 data=0;
-              Users[0].sendAll(&data, 1);
-            }
-        }
-        #ifdef WIN32
-        if(kbhit())
-            quit=1;
-        #endif
+      //If users, ping them
+      if(Users.size()>0)
+      {
+        //0x00 package
+        uint8 data=0;
+        Users[0].sendAll(&data, 1);
+      }
+    }
+
+    //Every second
+    if(time(0)-tick>0)
+    {
+      //Loop users
+      for(unsigned int i=0;i<Users.size();i++)
+      {
+        //Push new map data
+        Users[i].pushMap();
+        Users[i].pushMap();
+        Users[i].pushMap();
+        Users[i].pushMap();
+      }
+    }
+    #ifdef WIN32
+    if(kbhit())
+        quit=1;
+    #endif
 	}
 
     
