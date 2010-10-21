@@ -34,6 +34,7 @@ private:
       }
     }
   };
+
   std::string mapDirectory;
   
 public:

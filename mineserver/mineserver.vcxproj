@@ -90,6 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\chat.h" />
+    <ClInclude Include="..\src\constants.h" />
     <ClInclude Include="..\src\DisplayRawSocket.h" />
     <ClInclude Include="..\src\DisplaySocket.h" />
     <ClInclude Include="..\src\lua\lapi.h" />
