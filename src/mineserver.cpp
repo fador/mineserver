@@ -16,6 +16,7 @@
 #include <ListenSocket.h>
 #include "StatusHandler.h"
 
+#include "logger.h"
 #include "tri_logger.hpp"
 
 #include "DisplaySocket.h"
@@ -63,6 +64,7 @@ int main(void)
     if(time(0)-starttime>10)
     {
       starttime=(uint32)time(0);
+      //Logger::get().log("Currently " + h.GetCount()-1 + " users in!");
       std::cout << "Currently " << h.GetCount()-1 << " users in!" << std::endl;
 
       //If users, ping them
