@@ -30,7 +30,7 @@
         ~User();
 
         //View distance in chunks -viewDistance <-> viewDistance
-        static const int viewDistance=2;
+        static const int viewDistance=10;
         uint8 action;
         bool waitForData;
         bool logged;

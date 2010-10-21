@@ -21,11 +21,13 @@
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
 
+
 #include "map.h"
 #include "tools.h"
 #include "zlib/zlib.h"
 #include "user.h"
 #include "nbt.h"
+
 
 extern ListenSocket<DisplaySocket> l;
 extern StatusHandler h;
@@ -38,40 +40,37 @@ Map &Map::getInstance()
 
 void Map::initMap()
 {
-    uint32 i;
-    uint32 x,y;
     this->mapDirectory="testmap";
 }
 
 
 void Map::freeMap()
 {
-    uint32 i;
-    uint32 x,y;
+
 }
 
 //Send chunk to user
 void Map::sendToUser(User *user, int x, int z)
 {
     bool dataFromMemory=false;
-    storedMap *mapData;
-    std::map<int, std::map<int, storedMap> >::iterator iter;
-    iter = maps.find(x);
-    if (iter != maps.end() )
-    {
-       std::map<int, storedMap>::iterator iter2;
-       iter2 = maps[x].find(z);
-       if (iter2 != maps[x].end() )
-       {
-         //Data in memory
-         dataFromMemory=true;
-         mapData=&maps[x][z];
-       }
-    }
+    std::map<int, std::map<int, NBT_struct> >::iterator iter;
     uint8 data4[18+81920];
     uint8 mapdata[81920]={0};    
     int mapposx=x;
     int mapposz=z;
+
+    iter = maps.find(x);
+    if (iter != maps.end() )
+    {
+      std::map<int, NBT_struct>::iterator iter2;
+      iter2 = maps[x].find(z);
+      if (iter2 != maps[x].end() )
+      {
+        //Data in memory
+        dataFromMemory=true;
+      }
+    }
+
 
     //Generate map file name
     int modulox=(mapposx-15);
@@ -83,7 +82,6 @@ void Map::sendToUser(User *user, int x, int z)
     std::string infile=mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+base36_encode(mapposx-15)+"."+base36_encode(mapposz-14)+".dat";
 
     struct stat stFileInfo; 
-    bool blnReturn; 
     int intStat; 
 
     if(!dataFromMemory)
@@ -112,16 +110,7 @@ void Map::sendToUser(User *user, int x, int z)
       data4[12]=127; //Size_y
       data4[13]=15; //Size_z
 
-
-      if(dataFromMemory)
-      {
-        memcpy(&mapdata[0],mapData->blocks, 32768);
-        memcpy(&mapdata[32768],mapData->metadata, 16384);
-        memcpy(&mapdata[32768+16384],mapData->blocklight, 16384);
-        memcpy(&mapdata[32768+16384+16384],mapData->skylight, 16384);
-        LOG("Taking data from memory!");
-      }
-      else
+      if(!dataFromMemory)      
       {
         //Read gzipped map file
         gzFile mapfile=gzopen(infile.c_str(),"rb");        
@@ -129,36 +118,18 @@ void Map::sendToUser(User *user, int x, int z)
         int uncompressedSize=gzread(mapfile,&uncompressedData[0],200000);
         gzclose(mapfile);
 
-        //std::cout << "File: " << infile << std::endl;
         int outlen=81920;
-        //std::cout << "Blocks: ";
-        readTag(&uncompressedData[0],uncompressedSize, &mapdata[0], &outlen, "Blocks");
-        //std::cout << "Data: ";
-        readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768], &outlen, "Data");
-        //std::cout << "BlockLight: ";
-        readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768+16384], &outlen, "BlockLight");
-        //std::cout << "SkyLight: ";
-        readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768+16384+16384], &outlen, "SkyLight");
 
         //Save this map data to map manager
-        int pointerPos=0;
-        storedMap newMapStruct;
-        uint8 *newMapData=new uint8 [uncompressedSize];
-        memcpy(newMapData,&uncompressedData[0],uncompressedSize);
-        newMapStruct.datasize=uncompressedSize;
-        newMapStruct.fullData=newMapData;
-        newMapStruct.x=x;
-        newMapStruct.z=z;
-        readTag(&uncompressedData[0],uncompressedSize, NULL, &outlen, "Blocks", &pointerPos);
-        newMapStruct.blocks=&newMapData[pointerPos];
-        readTag(&uncompressedData[0],uncompressedSize, NULL, &outlen, "Data", &pointerPos);
-        newMapStruct.metadata=&newMapData[pointerPos];
-        readTag(&uncompressedData[0],uncompressedSize, NULL, &outlen, "BlockLight", &pointerPos);
-        newMapStruct.blocklight=&newMapData[pointerPos];
-        readTag(&uncompressedData[0],uncompressedSize, NULL, &outlen, "SkyLight", &pointerPos);
-        newMapStruct.skylight=&newMapData[pointerPos];
+        NBT_struct newMapStruct;
+        TAG_Compound(&uncompressedData[0], &newMapStruct,true);
         maps[x][z]=newMapStruct;
       }
+
+      memcpy(&mapdata[0],get_NBT_pointer(&maps[x][z], "Blocks"), 32768);
+      memcpy(&mapdata[32768],get_NBT_pointer(&maps[x][z], "Data"), 16384);
+      memcpy(&mapdata[32768+16384],get_NBT_pointer(&maps[x][z], "BlockLight"), 16384);
+      memcpy(&mapdata[32768+16384+16384],get_NBT_pointer(&maps[x][z], "SkyLight"), 16384);
 
 
       putSint32(&data4[1], mapposx*16);

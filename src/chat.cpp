@@ -89,7 +89,7 @@ bool Chat::handleMsg( User *user, std::string msg ) {
             User* tUser = getUserByNick(msg);
             if(tUser != false)
             {
-              tUser->kick();
+              tUser->kick("kickmsg");
               LOG("kicked!");
             }
           }

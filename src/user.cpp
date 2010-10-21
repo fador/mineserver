@@ -70,13 +70,15 @@ User::~User()
 bool User::kick(std::string kickMsg) 
 {
   int len = kickMsg.size();
-  uint8 data[3+len];
+  uint8 *data = new uint8 [3+len];
   
   data[0] = 0xff;
   putSint16(&data[1],len);
   for(int i=0;i<kickMsg.size();i++) data[i+3]= kickMsg[i];
-  
+  delete [] data;
+
   h.SendSock(this->sock, data,len+3);
+  return true;
 }
 
 bool User::updatePos(double x, double y, double z, double stance)
@@ -282,7 +284,7 @@ bool User::pushMap()
   if(this->mapQueue.size())
   {
     //Sort by distance from center
-    //sort(mapQueue.begin(),mapQueue.end(),SortVect);
+    sort(mapQueue.begin(),mapQueue.end(),SortVect);
 
     Map::getInstance().sendToUser(this,mapQueue[0].x, mapQueue[0].z);
 

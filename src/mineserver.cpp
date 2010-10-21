@@ -23,6 +23,8 @@
 #include "map.h"
 #include "user.h"
 #include "chat.h"
+#include "nbt.h"
+#include "zlib/zlib.h"
 
 static bool quit = false;
 
@@ -41,7 +43,18 @@ int main(void)
 
   Map::getInstance().initMap();
   //atexit(freeMap);
-
+  /*
+  std::string infile="testmap/1f/1f/c.-d.-d.dat";
+  gzFile mapfile=gzopen(infile.c_str(),"rb");        
+  uint8 uncompressedData[200000];
+  int uncompressedSize=gzread(mapfile,&uncompressedData[0],200000);
+  gzclose(mapfile);
+  int out;
+  NBT_struct structure;
+  TAG_Compound(&uncompressedData[0], &structure,true);
+  get_NBT_pointer(&structure, "Blocks");
+  exit(1);
+  */
   //Bind to port
   if (l.Bind(PORT))
   {
@@ -103,13 +116,13 @@ int main(void)
           char data6[2]={0x0A, 0x01};
           h.SendSock(Users[i].sock, (char *)&data6[0], 2);
 
-          //We need the first map part quickly
+          //Add (0,0) to map queue
           Users[i].addQueue(0,0);
-          Users[i].pushMap();
 
           //Teleport player
           Users[i].teleport(0,70,0); 
           
+          /*
           for(int x=-Users[i].viewDistance;x<=Users[i].viewDistance;x++)
           {
             for(int z=-Users[i].viewDistance;z<=Users[i].viewDistance;z++)
@@ -117,6 +130,7 @@ int main(void)
               Users[i].addQueue(x,z);
             }
           }
+          */
 
           //Spawn this user to others
           Users[i].spawnUser(0,70*32,0);
