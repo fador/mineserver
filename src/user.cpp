@@ -270,7 +270,7 @@ bool User::pushMap()
   if(this->mapQueue.size())
   {
     //Sort by distance from center
-    //sort(mapQueue.begin(),mapQueue.end(),SortVect);
+    sort(mapQueue.begin(),mapQueue.end(),SortVect);
 
     Map::getInstance().sendToUser(this,mapQueue[0].x, mapQueue[0].z);
 
