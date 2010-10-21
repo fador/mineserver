@@ -2,31 +2,52 @@
 #ifndef _MAP_H
 #define _MAP_H
 
-
-typedef unsigned char uint8;
-typedef char sint8;
-typedef unsigned int uint32;
-typedef int sint32;
+#include "user.h"
+#include <map>
 
 
-void putUint32(uint8 *buf, uint32 value);
-void putSint32(uint8 *buf, sint32 value);
-void putSint16(uint8 *buf, short value);
-void putDouble(uint8 *buf, double value);
-void putFloat(uint8 *buf, float value);
+typedef struct
+{
+  int x;
+  int z;
+  uint8 *fullData;
+  uint8 *blocks;
+  uint8 *metadata;
+  uint8 *blocklight;
+  uint8 *skylight;
+  int datasize;
+} storedMap;
 
-double getDouble(uint8 *buf);
-float  getFloat(uint8 *buf);
-uint32 getUint32(uint8 *buf);
-sint32 getSint32(uint8 *buf);
-uint32 getUint16(uint8 *buf);
-sint32 getSint16(uint8 *buf);
+class Map
+{
+private:
+    
+  Map() {};
+  ~Map()
+  {
+    //Free all memory
+    for (std::map<int, std::map<int, storedMap>>::const_iterator it = maps.begin(); it != maps.end(); ++it)
+    {
+      for (std::map<int, storedMap>::const_iterator it2 = maps[it->first].begin(); it2 != maps[it->first].end(); ++it2)
+      {
+        delete [] maps[it->first][it2->first].fullData;
+      }
+    }
+  };
+  std::string mapDirectory;
+  
+public:
 
-void initMap();
-void freeMap();
+  coord spawnPos;
+  std::map<int, std::map<int, storedMap>> maps;
 
-void my_itoa(int value, std::string& buf, int base);
+  void initMap();
+  void freeMap();
+  void sendToUser(User *user, int x, int z);
 
-std::string base36_encode(int value);
+  static Map &getInstance();
+};
+
+
 
 #endif

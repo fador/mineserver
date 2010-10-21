@@ -5,13 +5,14 @@
 #include <fstream>
 #include <deque>
 
+#include "tools.h"
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
 #include "map.h"
 
 //NBT level file reading
 //More info: http://www.minecraft.net/docs/NBT.txt
-int readTag(uint8* input, int inputlen,uint8* output, int* outputlen,std::string TAG)
+int readTag(uint8* input, int inputlen,uint8* output, int* outputlen,std::string TAG, int *pointer=0)
 {
   int level=0;
   int curpos=0;
@@ -94,6 +95,11 @@ int readTag(uint8* input, int inputlen,uint8* output, int* outputlen,std::string
 
       if(TAG==name)
       {
+        if(pointer!=0)
+        {
+          *pointer=curpos;
+          return 0;
+        }
         *outputlen=dataLen;
         while(dataLen)
         {

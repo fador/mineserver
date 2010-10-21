@@ -72,6 +72,7 @@
     <ClCompile Include="..\src\Sockets-2.3.9.3\UdpSocket.cpp" />
     <ClCompile Include="..\src\Sockets-2.3.9.3\Utility.cpp" />
     <ClCompile Include="..\src\StatusHandler.cpp" />
+    <ClCompile Include="..\src\tools.cpp" />
     <ClCompile Include="..\src\tri_logger.cpp" />
     <ClCompile Include="..\src\user.cpp" />
     <ClCompile Include="..\src\zlib\adler32.c" />
@@ -142,6 +143,7 @@
     <ClInclude Include="..\src\Sockets-2.3.9.3\TcpSocket.h" />
     <ClInclude Include="..\src\Sockets-2.3.9.3\Utility.h" />
     <ClInclude Include="..\src\StatusHandler.h" />
+    <ClInclude Include="..\src\tools.h" />
     <ClInclude Include="..\src\tri_logger.hpp" />
     <ClInclude Include="..\src\user.h" />
     <ClInclude Include="..\src\zlib\crc32.h" />

@@ -6,14 +6,21 @@
 #include <deque>
 #include <SocketHandler.h>
 #include <ListenSocket.h>
+#include <algorithm>
+#include <sys/stat.h> 
 #include "tri_logger.hpp"
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
 
+#include "tools.h"
 #include "map.h"
 #include "user.h"
-    
+#include "nbt.h"
+#include "zlib/zlib.h"
+#include "chat.h"
 
+    
+    extern Chat chat;
     extern ListenSocket<DisplaySocket> l;
     extern StatusHandler h;
 
@@ -28,94 +35,6 @@
       this->UID=EID;
       this->logged=false;
       this->admin=false;
-      
-      /*
-      //Send signal to create an entity
-      uint8 entityData[5];
-      entityData[0]=0x1e; //Initialize entity;
-      putSint32(&entityData[1], 12345);
-      h.SendSock(GetSocket(), (uint8 *)&entityData[0], 5);
-      
-      uint8 entityData2[256];  
-
-      int curpos=0;
-      entityData2[curpos]=0x14; //Named Entity Spawn
-      curpos++;
-      putSint32(&entityData2[curpos], 12345);        
-      curpos+=4;
-      entityData2[curpos]=0;
-      entityData2[curpos+1]=6;//nick.size();
-      curpos+=2;
-      
-      //for(int j=0;j<nick.size();j++)
-      //{
-      //  entityData2[curpos]=nick[j];
-      //  curpos++;
-      //}
-      
-      entityData2[curpos]='P';
-      entityData2[curpos+1]='s';
-      entityData2[curpos+2]='o';
-      entityData2[curpos+3]='d';
-      entityData2[curpos+4]='e';
-      entityData2[curpos+5]='n';
-      curpos+=6;
-      
-      putSint32(&entityData2[curpos],35);
-      curpos+=4;
-      putSint32(&entityData2[curpos],65*32);
-      curpos+=4;
-      putSint32(&entityData2[curpos],0);
-      curpos+=4;
-      entityData2[curpos]=10; //Rotation
-      entityData2[curpos+1]=0; //Pitch
-      curpos+=2;
-      putSint16(&entityData2[curpos],0); //current item
-      curpos+=2;
-      h.SendSock(GetSocket(), (uint8 *)&entityData2[0], curpos);
-      */
-      /*
-      for(int i=0;i<Users.size();i++)
-      {
-        //Initialize entity
-        putSint32(&entityData[1], Users[i].UID);
-        h.SendSock(sock, &entityData[0],5);
-
-        int curpos=0;
-        entityData2[0]=0x14; //Named Entity Spawn
-        curpos++;
-        putSint32(&entityData2[curpos], Users[i].UID);        
-        curpos+=4;
-        entityData2[curpos]=0;
-        entityData2[curpos+1]=Users[i].nick.size();
-        curpos+=2;
-        for(int j=0;j<Users[i].nick.size();j++)
-        {
-          entityData2[curpos]=Users[i].nick[j];
-          curpos++;
-        }
-        putSint32(&entityData2[curpos],(int)Users[i].pos.x);
-        curpos+=4;
-        putSint32(&entityData2[curpos],(int)Users[i].pos.y);
-        curpos+=4;
-        putSint32(&entityData2[curpos],(int)Users[i].pos.z);
-        curpos+=4;
-        entityData2[curpos]=10; //Rotation
-        entityData2[curpos+1]=(char)Users[i].pos.yaw;
-        curpos+=2;
-        putSint16(&entityData2[curpos],1);
-        curpos+=2;
-
-        h.SendSock(sock, (uint8 *)&entityData2[0], curpos);
-      }
-      */
-      
-      
-      
-      
-      //sendOthers(sock, 
-      //Send login to all
-      //h.SendAll(std::string((char *)&data[0],8+nick.size()));        
     }
 
     bool User::changeNick(std::string nick, std::deque<std::string> admins)
@@ -126,15 +45,16 @@
       for(int i = 0; i < admins.size(); i++) {
         if(admins[i] == nick) {
             this->admin=true;
-            TRI_LOG_STR(nick + " admin");
+            //TRI_LOG_STR(nick + " admin");
         }
-      }
+      }      
       
       return true;
     }
 
     User::~User()
     {
+      //chat.sendMsg(this, nick+" disconnected!", ALL);
       //Send signal to everyone that the entity is destroyed
       uint8 entityData[5];
       entityData[0]=0x1d; //Destroy entity;
@@ -159,7 +79,11 @@
           this->sendOthers(&movedata[0],8);
         }
         else
-        {
+        {          
+          this->pos.x=x;
+          this->pos.y=y;
+          this->pos.z=z;
+          this->pos.stance=stance;
           uint8 teleportData[19];
           teleportData[0]=0x22; //Teleport
           putSint32(&teleportData[1],this->UID);
@@ -170,8 +94,34 @@
           teleportData[18]=(char)this->pos.pitch;
           this->sendOthers(&teleportData[0],19);
         }
-          
-          
+        
+        //Chunk position changed, check for map updates
+        if((int)(x/16) != curChunk.x ||(int)(z/16) != curChunk.z)
+        {
+          curChunk.x=x/16;
+          curChunk.z=z/16;
+
+          for(int mapx=-viewDistance+curChunk.x;mapx<=viewDistance+curChunk.x;mapx++)
+          {
+            for(int mapz=-viewDistance+curChunk.z;mapz<=viewDistance+curChunk.z;mapz++)
+            {
+              addQueue(mapx,mapz);
+            }
+          }
+
+          for(unsigned int i=0;i<mapKnown.size();i++)
+          {
+            //If client has map data more than viesDistance+1 chunks away, remove it
+            if(mapKnown[i].x<curChunk.x-viewDistance-1 ||
+               mapKnown[i].x>curChunk.x+viewDistance+1 ||
+               mapKnown[i].z<curChunk.z-viewDistance-1 ||
+               mapKnown[i].z>curChunk.z+viewDistance+1)
+            {
+              addRemoveQueue(mapKnown[i].x,mapKnown[i].z);              
+            }
+          }
+        }
+
         this->pos.x=x;
         this->pos.y=y;
         this->pos.z=z;
@@ -221,7 +171,116 @@
       return true;
     }
 
+    bool User::addQueue(int x, int z)
+    {
+      coord newMap={x,0,z};
 
+      for(unsigned int i=0;i<mapQueue.size();i++)
+      {
+        //Check for duplicates
+        if(mapQueue[i].x==newMap.x && mapQueue[i].z==newMap.z)
+        {
+          return false;
+        }
+      }
+      for(unsigned int i=0;i<mapKnown.size();i++)
+      {
+        //Check for duplicates
+        if(mapKnown[i].x==newMap.x && mapKnown[i].z==newMap.z)
+        {
+          return false;
+        }
+      }
+      this->mapQueue.push_back(newMap);
+
+      return true;
+    }
+
+    bool User::addRemoveQueue(int x, int z)
+    {
+      coord newMap={x,0,z};
+
+      this->mapRemoveQueue.push_back(newMap);
+
+      return true;
+    }
+
+    bool User::addKnown(int x, int z)
+    {
+      coord newMap={x,0,z};
+      this->mapKnown.push_back(newMap);
+
+      return true;
+    }
+
+    bool User::delKnown(int x, int z)
+    {
+      
+      for(unsigned int i=0;i<mapKnown.size();i++)
+      {
+        if(mapKnown[i].x==x && mapKnown[i].z==z)
+        {
+          mapKnown.erase(mapKnown.begin()+i);
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    bool SortVect(const coord &first, const coord &second)
+    {
+        return first.x*first.x+first.z*first.z < second.x*second.x+second.z*second.z;
+    }
+
+    bool User::popMap()
+    {
+      //If map in queue, push it to client
+      if(this->mapRemoveQueue.size())
+      {
+        uint8 preChunk[10];
+        //Pre chunk
+        preChunk[0]=0x32;
+        putSint32(&preChunk[1], mapRemoveQueue[0].x);
+        putSint32(&preChunk[5], mapRemoveQueue[0].z);
+        preChunk[9]=0; //Unload chunk
+        h.SendSock(this->sock, (uint8 *)&preChunk[0], 10);
+
+        //Delete from known list
+        delKnown(mapRemoveQueue[0].x, mapRemoveQueue[0].z);
+
+        //Remove from queue
+        mapRemoveQueue.erase(mapRemoveQueue.begin());
+
+        return true;
+      }
+
+      return false;
+    }
+
+
+    bool User::pushMap()
+    {
+      //If map in queue, push it to client
+      if(this->mapQueue.size())
+      {
+        //Sort by distance from center
+        //sort(mapQueue.begin(),mapQueue.end(),SortVect);
+
+        Map::getInstance().sendToUser(this,mapQueue[0].x, mapQueue[0].z);
+
+        //Add this to known list
+        addKnown(mapQueue[0].x, mapQueue[0].z);
+
+        //Remove from queue
+        mapQueue.erase(mapQueue.begin());
+      }
+      else
+      {
+        return false;
+      }
+      return true;
+    }
     bool User::teleport(double x, double y, double z)
     {      
       uint8 teleportdata[42]={0};
@@ -328,12 +387,12 @@
     }
 
     bool remUser(SOCKET sock)
-    {
-        unsigned int i;
-        for(i=0;i<(int)Users.size();i++)
+    {        
+        for(unsigned int i=0;i<(int)Users.size();i++)
         {
             if(Users[i].sock==sock)
             {
+                chat.sendMsg(&Users[i], Users[i].nick+" disconnected!", OTHERS);
                 Users.erase(Users.begin()+i);
                 //Send quit to all
                 //h.SendAll(std::string((char *)&data[0], 7));
@@ -365,7 +424,7 @@
       while(!finished)
       {
         finished=true;
-        EID=rand() & 0xffffff;
+        EID=rand()%0xffff;
 
         for(uint8 i=0;i<Users.size();i++)
         {

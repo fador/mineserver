@@ -17,6 +17,7 @@
 #include "tri_logger.hpp"
 
 #include "DisplaySocket.h"
+#include "tools.h"
 #include "map.h"
 #include "user.h"
 #include "chat.h"
@@ -26,56 +27,111 @@ static bool quit = false;
 StatusHandler h;
 ListenSocket<DisplaySocket> l(h);
 
+
+const std::string VERSION="0.1.4";
+
 int main(void)
 {
-    uint32 starttime=time(0);
+    uint32 starttime=(uint32)time(0);
+    uint32 tick=(uint32)time(0);
 
 #ifdef WIN32
   _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
   _CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_DEBUG );
 #endif
 
-  initMap();
-  atexit(freeMap);
+  Map::getInstance().initMap();
+  //atexit(freeMap);
 
   //Bind to port 25565
-	if (l.Bind(25565))
-	{                                                                                                        
-		exit(-1);
-	}
+  if (l.Bind(25565))
+  {
+    std::cout << "Unable to Bind port!" << std::endl;
+    exit(-1);
+  }
     std::cout << std::endl
               << "    _/      _/  _/                                                                                    " << std::endl
               << "   _/_/  _/_/      _/_/_/      _/_/      _/_/_/    _/_/    _/  _/_/  _/      _/    _/_/    _/  _/_/   " << std::endl
               << "  _/  _/  _/  _/  _/    _/  _/_/_/_/  _/_/      _/_/_/_/  _/_/      _/      _/  _/_/_/_/  _/_/        " << std::endl
               << " _/      _/  _/  _/    _/  _/            _/_/  _/        _/          _/  _/    _/        _/           " << std::endl
               << "_/      _/  _/  _/    _/    _/_/_/  _/_/_/      _/_/_/  _/            _/        _/_/_/  _/            " << std::endl;
-    std::cout << "Version 0.1.3 by Fador(&Psoden -_-)" << std::endl << std::endl;    
-	h.Add(&l);
-	h.Select(1,0);
-	while (!quit)
-	{
-		h.Select(1,0);
-        if(time(0)-starttime>10)
-        {
-            starttime=time(0);
-            std::cout << "Currently " << h.GetCount()-1 << " users in!" << std::endl;
+    std::cout << "Version " << VERSION <<" by Fador(&Psoden -_-)" << std::endl << std::endl;    
+  h.Add(&l);
+  h.Select(1,0);
+  while (!quit)
+  {
+    h.Select(1,0);
+    if(time(0)-starttime>10)
+    {
+      starttime=(uint32)time(0);
+      std::cout << "Currently " << h.GetCount()-1 << " users in!" << std::endl;
 
-            //If users, ping them
-            if(Users.size()>0)
-            {
-              //0x00 package
-              uint8 data=0;
-              Users[0].sendAll(&data, 1);
-            }
+      //If users, ping them
+      if(Users.size()>0)
+      {
+        //0x00 package
+        uint8 data=0;
+        Users[0].sendAll(&data, 1);
+
+        //Send server time (after dawn)
+        uint8 data3[9]={0x04, 0x00, 0x00, 0x00,0x00,0x00,0x00,0x0e,0x00};
+        Users[0].sendAll((uint8 *)&data3[0], 9);
+      }
+    }
+
+    //Every second
+    if(time(0)-tick>0)
+    {
+      tick=(uint32)time(0);
+      //Loop users
+      for(unsigned int i=0;i<Users.size();i++)
+      {
+        for(uint8 j=0;j<5;j++)
+        {
+          //Push new map data        
+          Users[i].pushMap();
+
+          //Remove map far away
+          Users[i].popMap();
         }
-        #ifdef WIN32
-        if(kbhit())
-            quit=1;
-        #endif
-	}
+
+        if(Users[i].logged)
+        {
+          Users[i].logged=false;
+          //Send "On Ground" signal
+          char data6[2]={0x0A, 0x01};
+          h.SendSock(Users[i].sock, (char *)&data6[0], 2);
+
+          //We need the first map part quickly
+          Users[i].addQueue(0,0);
+          Users[i].pushMap();
+
+          //Teleport player
+          Users[i].teleport(0,70,0); 
+          
+          for(int x=-Users[i].viewDistance;x<=Users[i].viewDistance;x++)
+          {
+            for(int z=-Users[i].viewDistance;z<=Users[i].viewDistance;z++)
+            {
+              Users[i].addQueue(x,z);
+            }
+          }
+
+          //Spawn this user to others
+          Users[i].spawnUser(0,70*32,0);
+          //Spawn other users for connected user
+          Users[i].spawnOthers();
+        }
+      }
+    }
+    #ifdef WIN32
+    if(_kbhit())
+        quit=1;
+    #endif
+  }
 
     
-  freeMap();
+  Map::getInstance().freeMap();
   l.CloseAndDelete();
 
   //Windows debug

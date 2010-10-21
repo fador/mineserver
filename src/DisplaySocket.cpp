@@ -13,13 +13,17 @@
 #include <fstream>
 #include <deque>
 #include <fstream>
+
+
+#include "tools.h"
 #include "zlib/zlib.h"
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
-#include "map.h"
 #include "user.h"
+#include "map.h"
 #include "chat.h"
 #include "nbt.h"
+
 
 typedef std::map<SOCKET,Socket *> socket_m;
 
@@ -38,16 +42,16 @@ extern ListenSocket<DisplaySocket> l;
 extern StatusHandler h;
 
 void DisplaySocket::OnDisconnect()
-{
-    remUser(GetSocket());
+{  
+  remUser(GetSocket());
 }
 
 
 
 void DisplaySocket::OnAccept()
 {
-  
-
+  //Create user for the socket
+  addUser(GetSocket(),generateEID());
 }
 /*
 std::string ToHex(unsigned int value)
@@ -81,9 +85,8 @@ void DisplaySocket::OnRead()
   }
   if(!user) //Must have user!
   {
-     //Create user for the socket
-     addUser(GetSocket(),generateEID());
-     user=&Users[Users.size()-1];
+    this->Close();
+    return;
   }
 
   //Push data to buffer
@@ -172,11 +175,12 @@ void DisplaySocket::OnRead()
       //Package completely received, remove from buffer
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
 
-      std::cout << "Player login v." <<version<<" : " << player <<":" << passwd << std::endl;
+      std::cout << "Player " << user->UID << " login v." <<version<<" : " << player <<":" << passwd << std::endl;
       if(version==2)
-      {
+      {        
         user->logged=1;
         user->changeNick(player, chat.admins);
+       
         // Send motd
         std::ifstream ifs( "motd.txt" );
         std::string temp;
@@ -184,10 +188,13 @@ void DisplaySocket::OnRead()
         while( getline( ifs, temp ) ) {
             chat.sendMsg(user, temp, USER);
         }
+
+        chat.sendMsg(user, player+" connected!", USER);
+
       }
       else
       {
-
+        this->Close();
       }
     
       //Login OK package
@@ -250,7 +257,7 @@ void DisplaySocket::OnRead()
       curpos+=2;
 
       //Check for data
-      if(user->buffer.size()<curpos+len)
+      if(user->buffer.size()<(unsigned int)curpos+len)
       {
         user->waitForData=true;
         return;
@@ -302,7 +309,7 @@ void DisplaySocket::OnRead()
       curpos+=2;
       
       // Wait for whole message
-      if(user->buffer.size()<curpos+len)
+      if(user->buffer.size()<(unsigned int)curpos+len)
       {
         user->waitForData=true;
         return;
@@ -310,7 +317,7 @@ void DisplaySocket::OnRead()
       
       //Read message
       std::string msg;
-      for(i=0;i<len;i++) msg += user->buffer[curpos+i];
+      for(i=0;i<(unsigned int)len;i++) msg += user->buffer[curpos+i];
       
       curpos += len;
       
@@ -362,13 +369,13 @@ void DisplaySocket::OnRead()
         break;
       }
 
-      if(user->buffer.size()<6+2*items)
+      if(user->buffer.size()<(unsigned int)6+2*items)
       {
         user->waitForData=true;
         return;
       }
 
-      for(i=0;i<items;i++)
+      for(i=0;i<(unsigned int)items;i++)
       {
         int j = 0;
         for(j=0;j<2;j++) tmpShortArray[j]=user->buffer[curpos+j]; 
@@ -398,7 +405,7 @@ void DisplaySocket::OnRead()
         }
       }
 
-      std::cout << "Got items type " << type << std::endl;
+      //std::cout << "Got items type " << type << std::endl;
       //Package completely received, remove from buffer
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
 
@@ -628,8 +635,16 @@ void DisplaySocket::OnRead()
         user->waitForData=true;
         return;
       }
-      std::cout << "Player now holding: " << getUint16(&user->buffer[4]) << std::endl;
+      int itemID=getUint16(&user->buffer[4]);      
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+6);
+
+      //Send holding change to others
+      uint8 holdingPackage[7];
+      holdingPackage[0]=0x10;
+      putSint32(&holdingPackage[1], user->UID);
+      putSint16(&holdingPackage[5], itemID);
+      user->sendOthers(&holdingPackage[0],7);
+
     }
     else if(user->action==0x12) //Arm Animation
     {
@@ -638,8 +653,35 @@ void DisplaySocket::OnRead()
         user->waitForData=true;
         return;
       }
-
+      char forward=user->buffer[4];
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+5);
+
+      uint8 animationPackage[6];
+      animationPackage[0]=0x12;
+      putSint32(&animationPackage[1],user->UID);
+      animationPackage[5]=forward;
+      user->sendOthers(&animationPackage[0], 6);
+    }
+    else if(user->action==0x15) //Pickup Spawn
+    {
+      if(user->buffer.size()<22)
+      {
+        user->waitForData=true;
+        return;
+      }
+      
+      user->buffer.erase(user->buffer.begin(), user->buffer.begin()+22);
+    }
+    else if(user->action==0x35) //Block Change
+    {
+      std::cout << "Got block change!" << std::endl;
+      if(user->buffer.size()<11)
+      {
+        user->waitForData=true;
+        return;
+      }
+      
+      user->buffer.erase(user->buffer.begin(), user->buffer.begin()+11);
     }
     else if(user->action==0xff) //Quit message
     {
@@ -655,7 +697,7 @@ void DisplaySocket::OnRead()
 
       curpos+=2;
       // Wait for whole message
-      if(user->buffer.size()<curpos+len)
+      if(user->buffer.size()<(unsigned int)curpos+len)
       {
         user->waitForData=true;
         return;
@@ -663,7 +705,7 @@ void DisplaySocket::OnRead()
       
       //Read message
       std::string msg;
-      for(i=0;i<len;i++) msg += user->buffer[curpos+i];
+      for(i=0;i<(unsigned int)len;i++) msg += user->buffer[curpos+i];
 
       curpos+=len;
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
@@ -674,95 +716,6 @@ void DisplaySocket::OnRead()
       printf("Unknown action: 0x%x\n", user->action);
     }
 
-    if(user->logged)
-    {
-      user->logged=false;
-      uint8 data4[18+81920];
-      uint8 mapdata[81920]={0};
-      for(i=0;i<81920;i++) mapdata[i]=0;
-      int mapposx,mapposz;
-      for(mapposx=-5;mapposx<=5;mapposx++)
-      {
-        for(mapposz=-5;mapposz<=5;mapposz++)
-        {
-          //Pre chunk
-          data4[0]=0x32;
-          putSint32(&data4[1], mapposx);
-          putSint32(&data4[5], mapposz);
-          data4[9]=1; //Init chunk
-          h.SendSock(GetSocket(), (uint8 *)&data4[0], 10);
-        }
-      }
-
-      //Chunk
-      data4[0]=0x33;
-      
-      data4[11]=15; //Size_x
-      data4[12]=127; //Size_y
-      data4[13]=15; //Size_z
-
-
-      for(mapposx=-5;mapposx<=5;mapposx++)
-      {
-        for(mapposz=-5;mapposz<=5;mapposz++)
-        {   
-
-          //Generate map file name
-          int modulox=(mapposx-15);
-          while(modulox<0) modulox+=64;
-          int moduloz=(mapposz-14);
-          while(moduloz<0) moduloz+=64;
-          modulox%=64;
-          moduloz%=64;
-          std::string infile="testmap/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+base36_encode(mapposx-15)+"."+base36_encode(mapposz-14)+".dat";
-
-          //Read gzipped map file
-          gzFile mapfile=gzopen(infile.c_str(),"rb");
-          uint8 uncompressedData[100000];
-          int uncompressedSize=gzread(mapfile,&uncompressedData[0],100000);
-          gzclose(mapfile);
-
-          //std::cout << "File: " << infile << std::endl;
-          int outlen=81920;
-          //std::cout << "Blocks: ";
-          readTag(&uncompressedData[0],uncompressedSize, &mapdata[0], &outlen, "Blocks");
-          //std::cout << "Data: ";
-          readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768], &outlen, "Data");
-          //std::cout << "BlockLight: ";
-          readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768+16384], &outlen, "BlockLight");
-          //std::cout << "SkyLight: ";
-          readTag(&uncompressedData[0],uncompressedSize, &mapdata[32768+16384+16384], &outlen, "SkyLight");
-
-
-          putSint32(&data4[1], mapposx*16);
-          data4[5]=0;
-          data4[6]=0;
-          putSint32(&data4[7], mapposz*16);
-        
-          uLongf written=81920;
-        
-          //Compress data with zlib deflate
-          compress((uint8 *)&data4[18], &written, (uint8 *)&mapdata[0],81920);
-        
-          putSint32(&data4[14], written);
-          h.SendSock(GetSocket(), (uint8 *)&data4[0], 18+written);
-          //std::cout << "Sent chunk " << written << " bytes" << std::endl; 
-        }          
-      }
-      //Send "On Ground" signal
-      char data6[2]={0x0A, 0x01};
-      h.SendSock(GetSocket(), (char *)&data6[0], 2);
-
-      //Teleport player
-      user->teleport(0,70,0); 
-
-      //Spawn this user to others
-      user->spawnUser(0,70*32,0);
-
-      //Spawn other users for connected user
-      user->spawnOthers();
-
-    }
   } //End while
 
 
