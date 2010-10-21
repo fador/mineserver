@@ -1,13 +1,14 @@
 //
 // Mineserver logger.h
 //
+#include <string>
 
 class Logger
 {
     private:
         Logger() {};
     public:
-        void tLog(std::string msg);
+        void log(std::string msg);
         static Logger &get();
 
 };

@@ -46,6 +46,7 @@ bool User::changeNick(std::string nick, std::deque<std::string> admins)
   this->nick=nick;
   
   // Check adminstatus
+  Logger::get().log("Testing logger");
   for(int i = 0; i < admins.size(); i++) {
     if(admins[i] == nick) {
         this->admin=true;

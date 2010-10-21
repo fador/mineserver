@@ -20,7 +20,7 @@ extern StatusHandler h;
 Chat::Chat() 
 {
   // Read admins to deque
-  std::ifstream ifs( ADMINFILE );
+  std::ifstream ifs( ADMINFILE.c_str() );
   std::string temp;
 
   while( getline( ifs, temp ) ) {

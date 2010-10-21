@@ -1,22 +1,22 @@
 // Mineserver constants
 
-# Chat colors
-#define COLOR_BLACK "§0"
-#define COLOR_DARK_BLUE "§1"
-#define COLOR_DARK_GREEN "§2"
-#define COLOR_DARK_CYAN "§3"
-#define COLOR_DARK_RED "§4"
-#define COLOR_DARK_MAGENTA "§5"
-#define COLOR_DARK_ORANGE "§6"
-#define COLOR_GREY "§7"
-#define COLOR_DARK_GREY "§8"
-#define COLOR_BLUE "§9"
-#define COLOR_GREEN "§a"
-#define COLOR_CYAN "§b"
-#define COLOR_RED "§c"
-#define COLOR_MAGENTA "§d"
-#define COLOR_YELLOW "§e"
-#define COLOR_WHITE "§f"
+// Chat colors
+#define COLOR_BLACK std::string("§0")
+#define COLOR_DARK_BLUE std::string("§1")
+#define COLOR_DARK_GREEN std::string("§2")
+#define COLOR_DARK_CYAN std::string("§3")
+#define COLOR_DARK_RED std::string("§4")
+#define COLOR_DARK_MAGENTA std::string("§5")
+#define COLOR_DARK_ORANGE std::string("§6")
+#define COLOR_GREY std::string("§7")
+#define COLOR_DARK_GREY std::string("§8")
+#define COLOR_BLUE std::string("§9")
+#define COLOR_GREEN std::string("§a")
+#define COLOR_CYAN std::string("§b")
+#define COLOR_RED std::string("§c")
+#define COLOR_MAGENTA std::string("§d")
+#define COLOR_YELLOW std::string("§e")
+#define COLOR_WHITE std::string("§f")
 
 
 const int PORT = 25565;

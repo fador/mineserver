@@ -2,6 +2,12 @@
 // Mineserver logger.cpp
 //
 
+#include <cstdio>
+//#include <cstdlib>
+#include <iostream>
+#include <string>
+#include "logger.h"
+
 Logger &Logger::get()
 {
   static Logger instance;
