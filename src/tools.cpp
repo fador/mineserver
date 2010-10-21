@@ -11,6 +11,8 @@
 #include <cstdio>
 #include <ctime>
 #include <cmath>
+#include <string>
+#include <cctype>
 
 #include "tools.h"
 
@@ -146,4 +148,14 @@ void my_itoa(int value, std::string& buf, int base)
     buf.insert(buf.begin(),(char)hexarray[value % base]);
   }
 	
+}
+
+std::string strToLower(std::string temp)
+{
+  const int len = temp.length();
+  for(int i=0; i!=len; ++i)
+  {
+    temp[i] = std::tolower(temp[i]);
+  }
+  return temp;
 }

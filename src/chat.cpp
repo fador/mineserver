@@ -83,7 +83,15 @@ bool Chat::handleMsg( User *user, std::string msg ) {
           // Kick user
           if(msg.substr(1,4) == "kick") 
           {
-            this->sendMsg(user, "Kick!", ALL);
+            msg = msg.substr(5);
+            LOG("Kicking: " + msg);
+            // Get coordinates
+            User* tUser = getUserByNick(msg);
+            if(tUser != false)
+            {
+              tUser->kick();
+              LOG("kicked!");
+            }
           }
           
           // Teleport to coordinates
@@ -96,7 +104,7 @@ bool Chat::handleMsg( User *user, std::string msg ) {
               float y = atof(msg.substr(0, msg.find(' ')).c_str());
               msg = msg.substr(msg.find(' ')+1);
               float z = atof(msg.c_str());
-              user->teleport(x,z,y);
+              user->teleport(x,y,z);
           }
           
           // Teleport to user
@@ -106,16 +114,10 @@ bool Chat::handleMsg( User *user, std::string msg ) {
               LOG(user->nick + " teleport to: " + msg);
               
               // Get coordinates
-              for(unsigned int i=0;i<Users.size();i++)
+              User* tUser = getUserByNick(msg);
+              if(tUser != false)
               {
-                if(Users[i].nick == msg)
-                {
-                  double x = Users[i].pos.x;
-                  double y = Users[i].pos.y;
-                  double z = Users[i].pos.z;
-                  user->teleport(x,z,y);
-                  break;
-                }
+                user->teleport(tUser->pos.x, tUser->pos.y, tUser->pos.z);
               }
           }
         }

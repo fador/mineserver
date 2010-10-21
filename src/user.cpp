@@ -66,6 +66,18 @@ User::~User()
   this->sendOthers(&entityData[0],5);
 }
 
+// Kick player
+bool User::kick(std::string kickMsg) 
+{
+  int len = kickMsg.size();
+  uint8 data[3+len];
+  
+  data[0] = 0xff;
+  putSint16(&data[1],len);
+  for(int i=0;i<kickMsg.size();i++) data[i+3]= kickMsg[i];
+  
+}
+
 bool User::updatePos(double x, double y, double z, double stance)
 {
      
@@ -441,4 +453,16 @@ uint32 generateEID()
   return EID;
 }
 
-
+//Not case-sensitive search
+User *getUserByNick(std::string nick) 
+{
+  // Get coordinates
+  for(unsigned int i=0;i<Users.size();i++)
+  {
+    if(strToLower(Users[i].nick) == strToLower(nick))
+    {
+      return &Users[i];
+    }
+  }
+  return false;
+}
