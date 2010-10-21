@@ -10,6 +10,8 @@
 #include <deque>
 #include <iostream>
 
+#include "constants.h"
+
 #include <SocketHandler.h>
 #include <ListenSocket.h>
 #include "StatusHandler.h"
@@ -27,9 +29,6 @@ static bool quit = false;
 StatusHandler h;
 ListenSocket<DisplaySocket> l(h);
 
-
-const std::string VERSION="0.1.4";
-
 int main(void)
 {
     uint32 starttime=(uint32)time(0);
@@ -43,8 +42,8 @@ int main(void)
   Map::getInstance().initMap();
   //atexit(freeMap);
 
-  //Bind to port 25565
-  if (l.Bind(25565))
+  //Bind to port
+  if (l.Bind(PORT))
   {
     std::cout << "Unable to Bind port!" << std::endl;
     exit(-1);
@@ -55,7 +54,7 @@ int main(void)
               << "  _/  _/  _/  _/  _/    _/  _/_/_/_/  _/_/      _/_/_/_/  _/_/      _/      _/  _/_/_/_/  _/_/        " << std::endl
               << " _/      _/  _/  _/    _/  _/            _/_/  _/        _/          _/  _/    _/        _/           " << std::endl
               << "_/      _/  _/  _/    _/    _/_/_/  _/_/_/      _/_/_/  _/            _/        _/_/_/  _/            " << std::endl;
-    std::cout << "Version " << VERSION <<" by Fador(&Psoden -_-)" << std::endl << std::endl;    
+    std::cout << "Version " << VERSION <<" by Fador & Psoden" << std::endl << std::endl;    
   h.Add(&l);
   h.Select(1,0);
   while (!quit)

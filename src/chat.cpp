@@ -3,6 +3,9 @@
 #include <iostream>
 #include <deque>
 #include <fstream>
+
+#include "constants.h"
+
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
 #include "tri_logger.hpp"
@@ -17,7 +20,7 @@ extern StatusHandler h;
 Chat::Chat() 
 {
   // Read admins to deque
-  std::ifstream ifs( "admin.txt" );
+  std::ifstream ifs( ADMINFILE );
   std::string temp;
 
   while( getline( ifs, temp ) ) {
@@ -31,7 +34,7 @@ Chat::Chat()
 }
 
 bool Chat::sendUserlist( User *user ) {
-      this->sendMsg(user, "Playerlist", USER);
+      this->sendMsg(user, COLOR_BLUE + "Playerlist", USER);
       for(int i=0;i<Users.size();i++)
       {
           this->sendMsg(user, Users[i].nick, USER);
@@ -64,7 +67,7 @@ bool Chat::handleMsg( User *user, std::string msg ) {
             this->sendUserlist(user);
         }
         if(msg.substr(1,5) == "about") {
-            this->sendMsg(user, "SERVER: Mineserver v.???", USER);
+            this->sendMsg(user, COLOR_DARK_MAGENTA + "SERVER:" + COLOR_RED + " Mineserver v." + VERSION, USER);
         }
         if(user->admin) {
             if(msg.substr(1,4) == "smsg") {

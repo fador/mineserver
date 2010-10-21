@@ -52,7 +52,7 @@ void Map::sendToUser(User *user, int x, int z)
 {
     bool dataFromMemory=false;
     storedMap *mapData;
-    std::map<int, std::map<int, storedMap>>::iterator iter;
+    std::map<int, std::map<int, storedMap> >::iterator iter;
     iter = maps.find(x);
     if (iter != maps.end() )
     {

@@ -26,7 +26,7 @@ private:
   ~Map()
   {
     //Free all memory
-    for (std::map<int, std::map<int, storedMap>>::const_iterator it = maps.begin(); it != maps.end(); ++it)
+    for (std::map<int, std::map<int, storedMap> >::const_iterator it = maps.begin(); it != maps.end(); ++it)
     {
       for (std::map<int, storedMap>::const_iterator it2 = maps[it->first].begin(); it2 != maps[it->first].end(); ++it2)
       {
@@ -39,7 +39,7 @@ private:
 public:
 
   coord spawnPos;
-  std::map<int, std::map<int, storedMap>> maps;
+  std::map<int, std::map<int, storedMap> > maps;
 
   void initMap();
   void freeMap();
