@@ -9,7 +9,6 @@
 
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
-#include "tri_logger.hpp"
 
 #include "tools.h"
 #include "map.h"
@@ -35,10 +34,10 @@ Chat::Chat()
 }
 
 bool Chat::sendUserlist( User *user ) {
-      this->sendMsg(user, COLOR_BLUE + "Playerlist", USER);
+      this->sendMsg(user, COLOR_BLUE + "[ Players online ]", USER);
       for(int i=0;i<Users.size();i++)
       {
-          this->sendMsg(user, Users[i].nick, USER);
+          this->sendMsg(user, "> " + Users[i].nick, USER);
       }
 
       return true;
@@ -80,13 +79,11 @@ bool Chat::handleMsg( User *user, std::string msg ) {
 
             if(msg.substr(1,3) == "ctp") { // x y z
                 msg = msg.substr(5);
-                TRI_LOG(msg);
+                LOG(user->nick + " teleport to: " + msg);
                 float x = atof(msg.substr(0, msg.find(' ')).c_str());
                 msg = msg.substr(msg.find(' ')+1);
-                TRI_LOG(msg);
                 float y = atof(msg.substr(0, msg.find(' ')).c_str());
                 msg = msg.substr(msg.find(' ')+1);
-                TRI_LOG(msg);
                 float z = atof(msg.c_str());
                 user->teleport(x,z,y);
             }
