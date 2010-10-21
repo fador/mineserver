@@ -27,7 +27,6 @@ Chat::Chat()
     // If not commentline
     if(temp.substr(0,1) != "#") {
         admins.push_back( temp );
-        LOG("Admin: " + temp);
     }
   }
   ifs.close();
@@ -75,6 +74,7 @@ bool Chat::handleMsg( User *user, std::string msg ) {
         {
           this->sendMsg(user, COLOR_DARK_MAGENTA + "SERVER:" + COLOR_RED + " Mineserver v." + VERSION, USER);
         }
+        
         //
         // Admin commands
         //
@@ -83,7 +83,7 @@ bool Chat::handleMsg( User *user, std::string msg ) {
           // Kick user
           if(msg.substr(1,4) == "kick") 
           {
-            msg = msg.substr(5);
+            msg = msg.substr(6);
             LOG("Kicking: " + msg);
             // Get coordinates
             User* tUser = getUserByNick(msg);
@@ -110,7 +110,7 @@ bool Chat::handleMsg( User *user, std::string msg ) {
           // Teleport to user
           if(msg.substr(1,2) == "tp") 
           {
-              msg = msg.substr(3);
+              msg = msg.substr(4);
               LOG(user->nick + " teleport to: " + msg);
               
               // Get coordinates

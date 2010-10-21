@@ -76,6 +76,7 @@ bool User::kick(std::string kickMsg)
   putSint16(&data[1],len);
   for(int i=0;i<kickMsg.size();i++) data[i+3]= kickMsg[i];
   
+  h.SendSock(this->sock, data,len+3);
 }
 
 bool User::updatePos(double x, double y, double z, double stance)
