@@ -59,42 +59,77 @@ bool Chat::handleMsg( User *user, std::string msg ) {
     // Servermsg (Admin-only)
     if(msg.substr(0,1) == "%" && user->admin) 
     {
-        this->sendMsg(user, msg.substr(1), ALL);
+        // Decorate server message
+        msg = COLOR_RED + "[!]" + COLOR_MAGENTA + msg.substr(1);
+        this->sendMsg(user, msg, ALL);
     } 
     else if(msg.substr(0,1) == "/")
     {
-        if(msg.substr(1,7) == "players") {
-            this->sendUserlist(user);
+        // Playerlist
+        if(msg.substr(1,7) == "players") 
+        {
+          this->sendUserlist(user);
         }
-        if(msg.substr(1,5) == "about") {
-            this->sendMsg(user, COLOR_DARK_MAGENTA + "SERVER:" + COLOR_RED + " Mineserver v." + VERSION, USER);
+        // About server
+        if(msg.substr(1,5) == "about") 
+        {
+          this->sendMsg(user, COLOR_DARK_MAGENTA + "SERVER:" + COLOR_RED + " Mineserver v." + VERSION, USER);
         }
-        if(user->admin) {
-            if(msg.substr(1,4) == "smsg") {
-                this->sendMsg(user, msg.substr(5), ALL);
-            }
-            if(msg.substr(1,4) == "kick") {
-                this->sendMsg(user, "POTKITAANPOTKITAAN", ALL);
-            }
-
-            if(msg.substr(1,3) == "ctp") { // x y z
-                msg = msg.substr(5);
-                LOG(user->nick + " teleport to: " + msg);
-                float x = atof(msg.substr(0, msg.find(' ')).c_str());
-                msg = msg.substr(msg.find(' ')+1);
-                float y = atof(msg.substr(0, msg.find(' ')).c_str());
-                msg = msg.substr(msg.find(' ')+1);
-                float z = atof(msg.c_str());
-                user->teleport(x,z,y);
-            }
+        //
+        // Admin commands
+        //
+        if(user->admin) 
+        {
+          // Kick user
+          if(msg.substr(1,4) == "kick") 
+          {
+            this->sendMsg(user, "Kick!", ALL);
+          }
+          
+          // Teleport to coordinates
+          if(msg.substr(1,3) == "ctp") 
+          {
+              msg = msg.substr(5);
+              LOG(user->nick + " teleport to: " + msg);
+              float x = atof(msg.substr(0, msg.find(' ')).c_str());
+              msg = msg.substr(msg.find(' ')+1);
+              float y = atof(msg.substr(0, msg.find(' ')).c_str());
+              msg = msg.substr(msg.find(' ')+1);
+              float z = atof(msg.c_str());
+              user->teleport(x,z,y);
+          }
+          
+          // Teleport to user
+          if(msg.substr(1,2) == "tp") 
+          {
+              msg = msg.substr(3);
+              LOG(user->nick + " teleport to: " + msg);
+              
+              // Get coordinates
+              for(unsigned int i=0;i<Users.size();i++)
+              {
+                if(Users[i].nick == msg)
+                {
+                  double x = Users[i].pos.x;
+                  double y = Users[i].pos.y;
+                  double z = Users[i].pos.z;
+                  user->teleport(x,z,y);
+                  break;
+                }
+              }
+          }
         }
     } 
     // Normal message
     else {
-    
-        //Send message to others
-        msg = timeStamp + " <"+user->nick+"> "+msg;
-
+        
+        if(user->admin) 
+        {
+          msg = timeStamp + " <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg;
+        } else 
+        {
+          msg = timeStamp + " <"+ user->nick + "> " + msg;
+        }
         LOG(msg);
 
         this->sendMsg(user, msg, ALL);

@@ -37,7 +37,8 @@ User::User(SOCKET sock, uint32 EID)
   this->sock=sock;
   this->UID=EID;
   this->logged=false;
-  this->admin=false;
+  // ENABLED FOR DEBUG
+  this->admin=true;
 }
 
 bool User::changeNick(std::string nick, std::deque<std::string> admins)

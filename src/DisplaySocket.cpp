@@ -188,8 +188,12 @@ void DisplaySocket::OnRead()
         std::string temp;
 
         while( getline( ifs, temp ) ) {
+          // If not commentline
+          if(temp.substr(0,1) != "#") {
             chat.sendMsg(user, temp, USER);
+          }
         }
+        ifs.close();
 
         chat.sendMsg(user, player+" connected!", USER);
 
