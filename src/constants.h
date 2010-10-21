@@ -22,3 +22,4 @@
 const int PORT = 25565;
 const std::string VERSION = "0.1.5";
 const std::string ADMINFILE = "admin.txt";
+const std::string MOTDFILE = "motd.txt";

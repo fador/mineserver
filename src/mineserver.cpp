@@ -17,7 +17,6 @@
 #include "StatusHandler.h"
 
 #include "logger.h"
-#include "tri_logger.hpp"
 
 #include "DisplaySocket.h"
 #include "tools.h"

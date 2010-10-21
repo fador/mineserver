@@ -14,6 +14,8 @@
 #include <deque>
 #include <fstream>
 
+#include "logger.h"
+#include "constants.h"
 
 #include "tools.h"
 #include "zlib/zlib.h"
@@ -182,7 +184,7 @@ void DisplaySocket::OnRead()
         user->changeNick(player, chat.admins);
        
         // Send motd
-        std::ifstream ifs( "motd.txt" );
+        std::ifstream ifs( MOTDFILE.c_str() );
         std::string temp;
 
         while( getline( ifs, temp ) ) {
@@ -674,7 +676,7 @@ void DisplaySocket::OnRead()
     }
     else if(user->action==0x35) //Block Change
     {
-      std::cout << "Got block change!" << std::endl;
+      LOG("Got block change!");
       if(user->buffer.size()<11)
       {
         user->waitForData=true;

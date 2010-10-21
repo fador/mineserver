@@ -4,6 +4,7 @@
 #include <deque>
 #include <fstream>
 
+#include "logger.h"
 #include "constants.h"
 
 #include "DisplaySocket.h"
@@ -27,7 +28,7 @@ Chat::Chat()
     // If not commentline
     if(temp.substr(0,1) != "#") {
         admins.push_back( temp );
-        //TRI_LOG_STR("Admin: " + temp);
+        LOG("Admin: " + temp);
     }
   }
   ifs.close();
@@ -97,7 +98,7 @@ bool Chat::handleMsg( User *user, std::string msg ) {
         //Send message to others
         msg = timeStamp + " <"+user->nick+"> "+msg;
 
-        TRI_LOG(msg);
+        LOG(msg);
 
         this->sendMsg(user, msg, ALL);
     }

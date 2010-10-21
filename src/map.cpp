@@ -12,6 +12,9 @@
 #include <ctime>
 #include <cmath>
 #include <algorithm>
+
+#include "logger.h"
+
 #include <sys/stat.h> 
 #include <SocketHandler.h>
 #include <ListenSocket.h>
@@ -90,7 +93,7 @@ void Map::sendToUser(User *user, int x, int z)
     }
     if(intStat != 0 && !dataFromMemory)
     { 
-      std::cout << "File not found: " << infile << std::endl;
+      LOG("File not found: " + infile);
     }
     else
     {
@@ -116,7 +119,7 @@ void Map::sendToUser(User *user, int x, int z)
         memcpy(&mapdata[32768],mapData->metadata, 16384);
         memcpy(&mapdata[32768+16384],mapData->blocklight, 16384);
         memcpy(&mapdata[32768+16384+16384],mapData->skylight, 16384);
-        std::cout << "Taking data from memory!" << std::endl;
+        LOG("Taking data from memory!");
       }
       else
       {

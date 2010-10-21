@@ -11,7 +11,6 @@
 
 #include "constants.h"
 
-#include "tri_logger.hpp"
 #include "logger.h"
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
@@ -46,11 +45,10 @@ bool User::changeNick(std::string nick, std::deque<std::string> admins)
   this->nick=nick;
   
   // Check adminstatus
-  Logger::get().log("Testing logger");
   for(int i = 0; i < admins.size(); i++) {
     if(admins[i] == nick) {
         this->admin=true;
-        Logger::get().log(nick + " admin");
+        LOG(nick + " admin");
     }
   }      
   
