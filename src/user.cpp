@@ -70,12 +70,14 @@ User::~User()
 bool User::kick(std::string kickMsg) 
 {
   int len = kickMsg.size();
-  uint8 data[3+len];
+  uint8 *data = new uint8 [3+len];
   
   data[0] = 0xff;
   putSint16(&data[1],len);
   for(int i=0;i<kickMsg.size();i++) data[i+3]= kickMsg[i];
-  
+  delete [] data;
+
+  return true;
 }
 
 bool User::updatePos(double x, double y, double z, double stance)
