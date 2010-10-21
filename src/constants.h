@@ -1,3 +1,6 @@
+#ifndef _CONSTANTS_H
+#define _CONSTANTS_H
+
 // Mineserver constants
 
 // Chat colors
@@ -22,3 +25,6 @@
 const int PORT = 25565;
 const std::string VERSION = "0.1.5";
 const std::string ADMINFILE = "admin.txt";
+const std::string MOTDFILE = "motd.txt";
+
+#endif

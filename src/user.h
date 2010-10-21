@@ -3,6 +3,7 @@
 
 #include <deque>
 #include "tools.h"
+#include "constants.h"
 
   struct position
   {
@@ -49,6 +50,9 @@
 
         bool sendOthers(uint8* data,uint32 len);
         bool sendAll(uint8* data,uint32 len);
+        
+        // Kick player
+        bool kick(std::string kickMsg);
 
         //Map related
 
@@ -90,6 +94,8 @@
     uint32 generateEID();
 
     extern std::vector<User> Users;
+    
+    User *getUserByNick(std::string nick);
 
     bool SortVect(const coord &first, const coord &second);
 

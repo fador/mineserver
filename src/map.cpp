@@ -12,6 +12,9 @@
 #include <ctime>
 #include <cmath>
 #include <algorithm>
+
+#include "logger.h"
+
 #include <sys/stat.h> 
 #include <SocketHandler.h>
 #include <ListenSocket.h>
@@ -88,7 +91,7 @@ void Map::sendToUser(User *user, int x, int z)
     }
     if(intStat != 0 && !dataFromMemory)
     { 
-      std::cout << "File not found: " << infile << std::endl;
+      LOG("File not found: " + infile);
     }
     else
     {

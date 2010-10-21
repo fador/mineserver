@@ -15,7 +15,7 @@ Logger &Logger::get()
 }
 
 // Log to terminal
-void Logger::log(std::string msg) 
+void Logger::log(std::string msg, std::string file, int line) 
 {
-    std::cout << "> " << msg << std::endl;
+    std::cout << "[" << file << "@" << line << "]: " << msg << std::endl;
 }

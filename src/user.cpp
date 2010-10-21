@@ -11,7 +11,6 @@
 
 #include "constants.h"
 
-#include "tri_logger.hpp"
 #include "logger.h"
 #include "DisplaySocket.h"
 #include "StatusHandler.h"
@@ -38,7 +37,8 @@ User::User(SOCKET sock, uint32 EID)
   this->sock=sock;
   this->UID=EID;
   this->logged=false;
-  this->admin=false;
+  // ENABLED FOR DEBUG
+  this->admin=true;
 }
 
 bool User::changeNick(std::string nick, std::deque<std::string> admins)
@@ -46,11 +46,10 @@ bool User::changeNick(std::string nick, std::deque<std::string> admins)
   this->nick=nick;
   
   // Check adminstatus
-  Logger::get().log("Testing logger");
   for(int i = 0; i < admins.size(); i++) {
     if(admins[i] == nick) {
         this->admin=true;
-        Logger::get().log(nick + " admin");
+        LOG(nick + " admin");
     }
   }      
   
@@ -65,6 +64,18 @@ User::~User()
   entityData[0]=0x1d; //Destroy entity;
   putSint32(&entityData[1], this->UID);
   this->sendOthers(&entityData[0],5);
+}
+
+// Kick player
+bool User::kick(std::string kickMsg) 
+{
+  int len = kickMsg.size();
+  uint8 data[3+len];
+  
+  data[0] = 0xff;
+  putSint16(&data[1],len);
+  for(int i=0;i<kickMsg.size();i++) data[i+3]= kickMsg[i];
+  
 }
 
 bool User::updatePos(double x, double y, double z, double stance)
@@ -442,4 +453,16 @@ uint32 generateEID()
   return EID;
 }
 
-
+//Not case-sensitive search
+User *getUserByNick(std::string nick) 
+{
+  // Get coordinates
+  for(unsigned int i=0;i<Users.size();i++)
+  {
+    if(strToLower(Users[i].nick) == strToLower(nick))
+    {
+      return &Users[i];
+    }
+  }
+  return false;
+}

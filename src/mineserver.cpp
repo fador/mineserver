@@ -17,7 +17,6 @@
 #include "StatusHandler.h"
 
 #include "logger.h"
-#include "tri_logger.hpp"
 
 #include "DisplaySocket.h"
 #include "tools.h"
@@ -62,13 +61,14 @@ int main(void)
     std::cout << "Unable to Bind port!" << std::endl;
     exit(-1);
   }
-    std::cout << std::endl
-              << "    _/      _/  _/                                                                                    " << std::endl
-              << "   _/_/  _/_/      _/_/_/      _/_/      _/_/_/    _/_/    _/  _/_/  _/      _/    _/_/    _/  _/_/   " << std::endl
-              << "  _/  _/  _/  _/  _/    _/  _/_/_/_/  _/_/      _/_/_/_/  _/_/      _/      _/  _/_/_/_/  _/_/        " << std::endl
-              << " _/      _/  _/  _/    _/  _/            _/_/  _/        _/          _/  _/    _/        _/           " << std::endl
-              << "_/      _/  _/  _/    _/    _/_/_/  _/_/_/      _/_/_/  _/            _/        _/_/_/  _/            " << std::endl;
-    std::cout << "Version " << VERSION <<" by Fador & Psoden" << std::endl << std::endl;    
+  std::cout << std::endl
+            << "   _____  .__  " << std::endl
+            << "  /     \\ |__| ____   ____   ______ ______________  __ ___________ " << std::endl
+            << " /  \\ /  \\|  |/    \\_/ __ \\ /  ___// __ \\_  __ \\  \\/ // __ \\_  __ \\" << std::endl
+            << "/    Y    \\  |   |  \\  ___/ \\___ \\\\  ___/|  | \\/\\   /\\  ___/|  | \\/" << std::endl
+            << "\\____|__  /__|___|  /\\___  >____  >\\___  >__|    \\_/  \\___  >__|   " << std::endl
+            << "        \\/        \\/     \\/     \\/     \\/                 \\/       " << std::endl  
+            << "Version " << VERSION <<" by Fador & Psoden" << std::endl << std::endl;    
   h.Add(&l);
   h.Select(1,0);
   while (!quit)
