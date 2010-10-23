@@ -46,7 +46,7 @@ public:
   bool loadMap(int x,int z);
 
   bool getBlock(int x, int y, int z, char &type, char &meta);
-  bool Map::setBlock(int x, int y, int z, char type, char meta);
+  bool setBlock(int x, int y, int z, char type, char meta);
 
   static Map &getInstance();
 };
