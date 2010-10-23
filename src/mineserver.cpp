@@ -100,11 +100,13 @@ int main(void)
       //Loop users
       for(unsigned int i=0;i<Users.size();i++)
       {
-        for(uint8 j=0;j<5;j++)
+        for(uint8 j=0;j<10;j++)
         {
           //Push new map data        
           Users[i].pushMap();
-
+        }
+        for(uint8 j=0;j<20;j++)
+        {
           //Remove map far away
           Users[i].popMap();
         }

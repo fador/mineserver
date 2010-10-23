@@ -49,51 +49,145 @@ void Map::freeMap()
 
 }
 
+NBT_struct *Map::getMapData(int x, int z)
+{
+  std::map<int, std::map<int, NBT_struct> >::iterator iter;
+  iter = maps.find(x);
+  if (iter != maps.end() )
+  {
+    std::map<int, NBT_struct>::iterator iter2;
+    iter2 = maps[x].find(z);
+    if (iter2 != maps[x].end() )
+    {
+      //Data in memory
+      return &maps[x][z];
+    }
+  }
+  return 0;
+}
+
+bool Map::getBlock(int x, int y, int z, char &type, char &meta)
+{
+  int chunk_x=((x<0)?(x/16)-1:x/16);
+  int chunk_z=((z<0)?(z/16)-1:z/16);
+  NBT_struct *chunk=getMapData(chunk_x, chunk_z);
+  if(!chunk || y<0 || y>127)
+  {
+    return false;
+  }
+
+  int chunk_block_x=x-(chunk_x*16);
+  int chunk_block_z=z-(chunk_z*16);
+  uint8 *blocks=get_NBT_pointer(chunk, "Blocks");
+  uint8 *metapointer=get_NBT_pointer(chunk, "Data");
+  int index=y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
+  type=blocks[index];
+  char metadata=metapointer[(index)>>1];
+  
+  if(y%2)
+  {
+    metadata&=0xf0;
+    metadata>>=4;
+  }
+  else
+  {
+    metadata&=0x0f;
+  }
+  meta=metadata;
+
+  return true;
+}
+
+bool Map::setBlock(int x, int y, int z, char type, char meta)
+{
+  int chunk_x=((x<0)?(x/16)-1:x/16);
+  int chunk_z=((z<0)?(z/16)-1:z/16);
+  NBT_struct *chunk=getMapData(chunk_x, chunk_z);
+  if(!chunk || y<0 || y>127)
+  {
+    return false;
+  }
+
+  int chunk_block_x=x-(chunk_x*16);
+  int chunk_block_z=z-(chunk_z*16);
+  uint8 *blocks=get_NBT_pointer(chunk, "Blocks");
+  uint8 *metapointer=get_NBT_pointer(chunk, "Data");
+  int index=y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
+  blocks[index]=type;
+  char metadata=metapointer[index>>1];
+  if((y%2))
+  {
+    metadata&=0x0f;
+    metadata|=meta<<4;
+  }
+  else
+  {
+    metadata&=0xf0;
+    metadata|=meta;
+  }
+  metapointer[index>>1]=metadata;
+
+  return true;
+}
+
+bool Map::loadMap(int x, int z)
+{
+  //Update last used time
+  mapLastused[x][z]=time(0);
+
+  if(getMapData(x,z)!=0)
+  {
+    return true;
+  }
+
+  int mapposx=x;
+  int mapposz=z;
+  //Generate map file name
+  int modulox=(mapposx-15);
+  while(modulox<0) modulox+=64;
+  int moduloz=(mapposz-14);
+  while(moduloz<0) moduloz+=64;
+  modulox%=64;
+  moduloz%=64;
+  std::string infile=mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+base36_encode(mapposx-15)+"."+base36_encode(mapposz-14)+".dat";
+
+  struct stat stFileInfo; 
+  int intStat; 
+  // Attempt to get the file attributes 
+  intStat = stat(infile.c_str(),&stFileInfo); 
+
+  if(intStat != 0)
+  {
+    LOG("File not found: " + infile);
+    return false;
+  }
+  //Read gzipped map file
+  gzFile mapfile=gzopen(infile.c_str(),"rb");        
+  uint8 uncompressedData[200000];
+  int uncompressedSize=gzread(mapfile,&uncompressedData[0],200000);
+  gzclose(mapfile);
+
+  int outlen=81920;
+
+  //Save this map data to map manager
+  NBT_struct newMapStruct;
+  TAG_Compound(&uncompressedData[0], &newMapStruct,true);
+
+  maps[x][z]=newMapStruct;
+
+  return true;
+}
+
 //Send chunk to user
 void Map::sendToUser(User *user, int x, int z)
 {
-    bool dataFromMemory=false;
-    std::map<int, std::map<int, NBT_struct> >::iterator iter;
+    bool dataFromMemory=false;    
     uint8 data4[18+81920];
     uint8 mapdata[81920]={0};    
     int mapposx=x;
     int mapposz=z;
 
-    iter = maps.find(x);
-    if (iter != maps.end() )
-    {
-      std::map<int, NBT_struct>::iterator iter2;
-      iter2 = maps[x].find(z);
-      if (iter2 != maps[x].end() )
-      {
-        //Data in memory
-        dataFromMemory=true;
-      }
-    }
-
-
-    //Generate map file name
-    int modulox=(mapposx-15);
-    while(modulox<0) modulox+=64;
-    int moduloz=(mapposz-14);
-    while(moduloz<0) moduloz+=64;
-    modulox%=64;
-    moduloz%=64;
-    std::string infile=mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+base36_encode(mapposx-15)+"."+base36_encode(mapposz-14)+".dat";
-
-    struct stat stFileInfo; 
-    int intStat; 
-
-    if(!dataFromMemory)
-    {
-      // Attempt to get the file attributes 
-      intStat = stat(infile.c_str(),&stFileInfo); 
-    }
-    if(intStat != 0 && !dataFromMemory)
-    { 
-      LOG("File not found: " + infile);
-    }
-    else
+    if(loadMap(x,z))
     {
       //Pre chunk
       data4[0]=0x32;
@@ -109,22 +203,6 @@ void Map::sendToUser(User *user, int x, int z)
       data4[11]=15; //Size_x
       data4[12]=127; //Size_y
       data4[13]=15; //Size_z
-
-      if(!dataFromMemory)      
-      {
-        //Read gzipped map file
-        gzFile mapfile=gzopen(infile.c_str(),"rb");        
-        uint8 uncompressedData[200000];
-        int uncompressedSize=gzread(mapfile,&uncompressedData[0],200000);
-        gzclose(mapfile);
-
-        int outlen=81920;
-
-        //Save this map data to map manager
-        NBT_struct newMapStruct;
-        TAG_Compound(&uncompressedData[0], &newMapStruct,true);
-        maps[x][z]=newMapStruct;
-      }
 
       memcpy(&mapdata[0],get_NBT_pointer(&maps[x][z], "Blocks"), 32768);
       memcpy(&mapdata[32768],get_NBT_pointer(&maps[x][z], "Data"), 16384);

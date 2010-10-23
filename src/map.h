@@ -29,11 +29,24 @@ private:
 public:
 
   coord spawnPos;
+
+  //Store all maps here
   std::map<int, std::map<int, NBT_struct> > maps;
+
+  //Store the time map chunk has been last used
+  std::map<int, std::map<int, int> > mapLastused;
+
+  //Store if map has been modified
+  std::map<int, std::map<int, bool> > mapChanged;
 
   void initMap();
   void freeMap();
   void sendToUser(User *user, int x, int z);
+  NBT_struct *getMapData(int x, int z);
+  bool loadMap(int x,int z);
+
+  bool getBlock(int x, int y, int z, char &type, char &meta);
+  bool Map::setBlock(int x, int y, int z, char type, char meta);
 
   static Map &getInstance();
 };

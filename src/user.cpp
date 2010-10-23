@@ -106,9 +106,9 @@ bool User::updatePos(double x, double y, double z, double stance)
       uint8 teleportData[19];
       teleportData[0]=0x22; //Teleport
       putSint32(&teleportData[1],this->UID);
-      putSint32(&teleportData[5],(int)this->pos.x*32);
-      putSint32(&teleportData[9],(int)this->pos.y*32);
-      putSint32(&teleportData[13],(int)this->pos.z*32);
+      putSint32(&teleportData[5],(int)(this->pos.x*32));
+      putSint32(&teleportData[9],(int)(this->pos.y*32));
+      putSint32(&teleportData[13],(int)(this->pos.z*32));
       teleportData[17]=(char)this->pos.yaw;
       teleportData[18]=(char)this->pos.pitch;
       this->sendOthers(&teleportData[0],19);

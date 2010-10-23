@@ -42,7 +42,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
 #define TCP_BUFSIZE_READ 16400
-#define TCP_OUTPUT_CAPACITY 1024000
+#define TCP_OUTPUT_CAPACITY 10240000
 
 // flags used in OnDisconnect callback
 #define TCP_DISCONNECT_WRITE 1

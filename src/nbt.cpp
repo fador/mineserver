@@ -271,7 +271,73 @@ uint8 *get_NBT_pointer(NBT_struct *input, std::string TAG)
     if(pointer!=0)
     {
       return pointer;
-    }    
+    }
   }
   return 0;
 }
+/*
+bool dumpNBT_value(NBT_value *input, uint8 *buffer)
+{
+  int curpos=0;
+
+  buffer[curpos]=input->type;
+  curpos++;
+
+  switch(input->type)
+  {
+    case TAG_BYTE:
+        value.value=(void *)new char;
+        curpos+=TAG_Byte(&input[curpos], (char *)value.value);
+        output->values.push_back(value);
+      break;
+    case TAG_SHORT:
+        value.value=(void *)new int;
+        curpos+=TAG_Short(&input[curpos], (int *)value.value);
+        output->values.push_back(value);
+      break;
+    case TAG_INT:
+        value.value=(void *)new int;
+        curpos+=TAG_Int(&input[curpos], (int *)value.value);
+        output->values.push_back(value);
+      break;
+    case TAG_LONG:
+        value.value=(void *)new long long;
+        curpos+=TAG_Long(&input[curpos], (long long *)value.value);
+        output->values.push_back(value);
+      break;
+    case TAG_FLOAT:
+        value.value=(void *)new float;
+        curpos+=TAG_Float(&input[curpos], (float *)value.value);
+        output->values.push_back(value);
+      break;
+    case TAG_DOUBLE:
+        value.value=(void *)new double;
+        curpos+=TAG_Double(&input[curpos], (double *)value.value);
+        output->values.push_back(value);
+      break;
+    case TAG_STRING:
+        value.value=(void *)new std::string;
+        curpos+=TAG_String(&input[curpos], (std::string *)value.value);
+        output->values.push_back(value);
+      break;
+  }
+}
+
+bool dumpNBT_list(NBT_list *input, uint8 *buffer)
+{
+  int curpos=0;
+
+}
+
+bool dumpNBT_byte_array(NBT_byte_array *input, uint8 *buffer)
+{
+  int curpos=0;
+
+}
+
+bool dumpNBT_struct(NBT_struct *input, uint8 *buffer)
+{
+  int curpos=0;
+
+}
+*/
