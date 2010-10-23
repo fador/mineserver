@@ -78,8 +78,8 @@ bool Map::getBlock(int x, int y, int z, char &type, char &meta)
 
   int chunk_block_x=x-(chunk_x*16);
   int chunk_block_z=z-(chunk_z*16);
-  uint8 *blocks=get_NBT_pointer(chunk, "Blocks");
-  uint8 *metapointer=get_NBT_pointer(chunk, "Data");
+  uint8 *blocks=chunk->blocks;
+  uint8 *metapointer=chunk->data;
   int index=y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
   type=blocks[index];
   char metadata=metapointer[(index)>>1];
@@ -110,8 +110,8 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
 
   int chunk_block_x=x-(chunk_x*16);
   int chunk_block_z=z-(chunk_z*16);
-  uint8 *blocks=get_NBT_pointer(chunk, "Blocks");
-  uint8 *metapointer=get_NBT_pointer(chunk, "Data");
+  uint8 *blocks=chunk->blocks;
+  uint8 *metapointer=chunk->data;
   int index=y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
   blocks[index]=type;
   char metadata=metapointer[index>>1];
@@ -153,6 +153,42 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
 
     return true;
 }
+
+bool Map::sendPickupSpawn(spawnedItem item)
+{
+  uint8 curpos=0;
+  uint8 changeArray[23];
+  changeArray[curpos]=0x15; //Pickup Spawn
+  curpos++;
+  putSint32(&changeArray[curpos],item.EID);
+  curpos+=4;
+  putSint16(&changeArray[curpos],item.item);
+  curpos+=2;
+  changeArray[curpos]=item.count;
+  curpos++;
+
+  putSint32(&changeArray[curpos],item.x);
+  curpos+=4;
+  putSint32(&changeArray[curpos],item.y);
+  curpos+=4;
+  putSint32(&changeArray[curpos],item.z);
+  curpos+=4;
+  changeArray[curpos]=0; //Rotation
+  curpos++;
+  changeArray[curpos]=0; //Pitch
+  curpos++;
+  changeArray[curpos]=0; //Roll
+  curpos++;
+
+  //TODO: only send to users in range
+  for(unsigned int i=0;i<Users.size();i++)
+  {
+    h.SendSock(Users[i].sock,&changeArray[0], 23);
+  }
+
+  return true;
+}
+
 bool Map::loadMap(int x, int z)
 {
   //Update last used time
@@ -201,6 +237,12 @@ bool Map::loadMap(int x, int z)
   return true;
 }
 
+
+bool Map::releaseMap(int x, int z)
+{
+  return true;
+}
+
 //Send chunk to user
 void Map::sendToUser(User *user, int x, int z)
 {
@@ -227,10 +269,25 @@ void Map::sendToUser(User *user, int x, int z)
       data4[12]=127; //Size_y
       data4[13]=15; //Size_z
 
-      memcpy(&mapdata[0],get_NBT_pointer(&maps[x][z], "Blocks"), 32768);
-      memcpy(&mapdata[32768],get_NBT_pointer(&maps[x][z], "Data"), 16384);
-      memcpy(&mapdata[32768+16384],get_NBT_pointer(&maps[x][z], "BlockLight"), 16384);
-      memcpy(&mapdata[32768+16384+16384],get_NBT_pointer(&maps[x][z], "SkyLight"), 16384);
+      maps[x][z].blocks=get_NBT_pointer(&maps[x][z], "Blocks");
+      maps[x][z].data=get_NBT_pointer(&maps[x][z], "Data");
+      maps[x][z].blocklight=get_NBT_pointer(&maps[x][z], "BlockLight");
+      maps[x][z].skylight=get_NBT_pointer(&maps[x][z], "SkyLight");
+
+      //Check if the items were not found
+      if(maps[x][z].blocks == 0     ||
+         maps[x][z].data == 0       ||
+         maps[x][z].blocklight == 0 ||
+         maps[x][z].skylight == 0)
+      {
+        LOG("Error in map data");
+        return;
+      }
+
+      memcpy(&mapdata[0],maps[x][z].blocks, 32768);
+      memcpy(&mapdata[32768],maps[x][z].data, 16384);
+      memcpy(&mapdata[32768+16384],maps[x][z].blocklight, 16384);
+      memcpy(&mapdata[32768+16384+16384],maps[x][z].skylight, 16384);
 
 
       putSint32(&data4[1], mapposx*16);

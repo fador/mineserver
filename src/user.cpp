@@ -436,14 +436,15 @@ bool isUser(SOCKET sock)
 //Generate random and unique entity ID
 uint32 generateEID()
 {
-  uint32 EID;
+  static uint32 EID = 0;
+  /*
   bool finished=false;
   srand ( time(NULL) );
           
   while(!finished)
   {
     finished=true;
-    EID=rand()%0xffff;
+    EID=rand()%0xffffff;
 
     for(uint8 i=0;i<Users.size();i++)
     {
@@ -452,8 +453,16 @@ uint32 generateEID()
         finished=false;
       }
     }
+    for(uint8 i=0;i<Map::get().items.size();i++)
+    {
+      if(Map::get().items[i].EID==EID)
+      {
+        finished=false;
+      }
+    }
   }
-  return EID;
+  */
+  return ++EID;
 }
 
 //Not case-sensitive search

@@ -39,6 +39,11 @@ struct NBT_byte_array
 
 struct NBT_struct
 {
+  uint8 *blocks;
+  uint8 *data;
+  uint8 *blocklight;
+  uint8 *skylight;
+
   std::string name;
   std::vector<NBT_value> values;
   std::vector<NBT_list> lists;

@@ -6,6 +6,17 @@
 #include <map>
 #include "nbt.h"
 
+
+struct spawnedItem
+{
+  int EID;
+  int item;
+  char count;
+  int x;
+  int y;
+  int z;
+};
+
 class Map
 {
 private:
@@ -39,16 +50,27 @@ public:
   //Store if map has been modified
   std::map<int, std::map<int, bool> > mapChanged;
 
+  std::vector<spawnedItem> items;
+
   void initMap();
   void freeMap();
   void sendToUser(User *user, int x, int z);
+
+  //Get pointer to struct
   NBT_struct *getMapData(int x, int z);
+
+  //Load map chunk
   bool loadMap(int x,int z);
+
+  //Release/save map chunk
+  bool releaseMap(int x, int z);
 
   bool getBlock(int x, int y, int z, char &type, char &meta);
   bool setBlock(int x, int y, int z, char type, char meta);
 
   bool sendBlockChange(int x, int y, int z, char type, char meta);
+
+  bool sendPickupSpawn(spawnedItem item);
 
   static Map &get();
 };

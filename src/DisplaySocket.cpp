@@ -564,6 +564,9 @@ void DisplaySocket::OnRead()
       //If block broken
       if(status==3)
       {
+        char block; char meta;
+        Map::get().getBlock(x,y,z, block, meta);
+
         Map::get().sendBlockChange(x,y,z,0,0);
         Map::get().setBlock(x,y,z,0,0);
 
@@ -571,6 +574,19 @@ void DisplaySocket::OnRead()
         if(Map::get().getBlock(x,y+1,z, topblock, topmeta) && topblock==0x4e) //If snow on top, destroy it
         {
           Map::get().sendBlockChange(x,y+1,z,0, 0);
+        }
+
+        if(block!=0x4e)
+        {
+          spawnedItem item;
+          item.EID=generateEID();
+          item.item=block;
+          item.x=x*32;
+          item.y=y*32;
+          item.z=z*32;
+          item.x+=(rand()%32);
+          item.z+=(rand()%32);
+          Map::get().sendPickupSpawn(item);
         }
       }
 
