@@ -48,7 +48,9 @@ public:
   bool getBlock(int x, int y, int z, char &type, char &meta);
   bool setBlock(int x, int y, int z, char type, char meta);
 
-  static Map &getInstance();
+  bool sendBlockChange(int x, int y, int z, char type, char meta);
+
+  static Map &get();
 };
 
 

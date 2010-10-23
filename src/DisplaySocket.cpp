@@ -545,25 +545,33 @@ void DisplaySocket::OnRead()
         user->waitForData=true;
         return;
       }
+      uint8 tmpIntArray[4];
+      int curpos=0;
+      char status=user->buffer[curpos];
+      curpos++;
 
+      for(i=0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i];      
+      int x=getSint32(&tmpIntArray[0]);
+      curpos+=4;
 
+      char y=user->buffer[curpos];
+      curpos++;
+
+      for(i=0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i];
+      int z=getSint32(&tmpIntArray[0]);
+      curpos+=4;
 
       //If block broken
-      if(user->buffer[0]==3)
+      if(status==3)
       {
-        //Map::getInstance().setBlock(x,y,z, 0, 0);
-        uint8 changeArray[12];
-        changeArray[0]=0x35; //Block change package
+        Map::get().sendBlockChange(x,y,z,0,0);
+        Map::get().setBlock(x,y,z,0,0);
 
-        //Use location from user package
-        for(i=0;i<9;i++)
+        char topblock; char topmeta;        
+        if(Map::get().getBlock(x,y+1,z, topblock, topmeta) && topblock==0x4e) //If snow on top, destroy it
         {
-          changeArray[i+1]=user->buffer[i+1];
+          Map::get().sendBlockChange(x,y+1,z,0, 0);
         }
-
-        changeArray[10]=0; //Replace block with
-        changeArray[11]=0;  //Metadata
-        user->sendAll(&changeArray[0], 12);
       }
 
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+11);
@@ -585,8 +593,7 @@ void DisplaySocket::OnRead()
       int blockID=getSint16(&tmpShortArray[0]);
       curpos+=2;
 
-      for(i=0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i];
-      
+      for(i=0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i];      
       int x=orig_x=getSint32(&tmpIntArray[0]);
       curpos+=4;
 
@@ -602,19 +609,11 @@ void DisplaySocket::OnRead()
 
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+12);
 
-      if(blockID<0xff && blockID!=-1)
-      {
-        change=true;
-      }
 
 
-
-      std::cout << "Change: " << (int)blockID << " with direction " << (int)direction << std::endl;
       char block;
       char metadata;
-      Map::getInstance().getBlock(x,y,z, block, metadata);
-      std::cout << "Got: " << (int)block << " with meta " << (int)metadata << std::endl;
-
+      Map::get().getBlock(x,y,z, block, metadata);
 
       switch(direction)        
       {
@@ -625,10 +624,31 @@ void DisplaySocket::OnRead()
         case 4: x--; break;
         case 5: x++; break;
       }
+      
+      char block_direction;
+      char metadata_direction;
+      Map::get().getBlock(x,y,z, block_direction, metadata_direction);
+
+
+      //If placing normal block and current block is empty
+      if(blockID<0xff && blockID!=-1 && block_direction==0x00)
+      {
+        change=true;
+      }
+
+      if(block==0x4e || block==50) //If snow or torch, overwrite
+      {
+        change=true;
+        x=orig_x;
+        y=orig_y;
+        z=orig_z;
+      }
 
       //Door status change
       if((block==0x40)|| (block==0x47))
       {
+        change=true;
+
         blockID=block;
 
         //Toggle door state
@@ -642,23 +662,14 @@ void DisplaySocket::OnRead()
         }
 
         char metadata2,block2;
-        //If top half
-        int modifier=0;
-        if(metadata&0x8)
-        {
-          modifier=-1;
-        }
-        else
-        {
-          modifier=1;
-        }
 
-        
+        int modifier=(metadata&0x8)?1:-1;
+                
         x=orig_x;
         y=orig_y;
         z=orig_z;
 
-        Map::getInstance().getBlock(x,y+modifier,z, block2, metadata2);
+        Map::get().getBlock(x,y+modifier,z, block2, metadata2);
         if(block2==block)
         {
           if(metadata2&0x4)
@@ -670,40 +681,16 @@ void DisplaySocket::OnRead()
             metadata2|=0x4;
           }
 
-          Map::getInstance().setBlock(x,y+modifier,z, block2, metadata2);
-
-          uint8 changeArray[12];
-          changeArray[0]=0x35; //Block change package
-          curpos=1;
-          putSint32(&changeArray[curpos],x);
-          curpos+=4;
-          changeArray[curpos]=y+modifier;
-          curpos++;
-          putSint32(&changeArray[curpos],z);
-          curpos+=4;
-          changeArray[10]=blockID;   //Replace block with
-          changeArray[11]=metadata2;  //Metadata
-          user->sendAll(&changeArray[0], 12);
+          Map::get().setBlock(x,y+modifier,z, block2, metadata2);
+          Map::get().sendBlockChange(x,y+modifier,z,blockID, metadata2);
         }
 
       }
 
       if(change)
       {
-        Map::getInstance().setBlock(x,y,z, blockID, metadata);
-
-        uint8 changeArray[12];
-        changeArray[0]=0x35; //Block change package
-        curpos=1;
-        putSint32(&changeArray[curpos],x);
-        curpos+=4;
-        changeArray[curpos]=y;
-        curpos++;
-        putSint32(&changeArray[curpos],z);
-        curpos+=4;
-        changeArray[10]=blockID;   //Replace block with
-        changeArray[11]=metadata;  //Metadata
-        user->sendAll(&changeArray[0], 12);
+        Map::get().setBlock(x,y,z, blockID, metadata);
+        Map::get().sendBlockChange(x,y,z,blockID, metadata);
       }
 
     }
@@ -751,17 +738,6 @@ void DisplaySocket::OnRead()
       
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+22);
     }
-    else if(user->action==0x35) //Block Change
-    {
-      LOG("Got block change!");
-      if(user->buffer.size()<11)
-      {
-        user->waitForData=true;
-        return;
-      }
-      
-      user->buffer.erase(user->buffer.begin(), user->buffer.begin()+11);
-    }
     else if(user->action==0xff) //Quit message
     {
       if(user->buffer.size()<2)
@@ -788,13 +764,13 @@ void DisplaySocket::OnRead()
 
       curpos+=len;
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
-
       this->SetCloseAndDelete();
 
     }
     else
     {
       printf("Unknown action: 0x%x\n", user->action);
+      this->SetCloseAndDelete();
     }
 
   } //End while

@@ -286,7 +286,7 @@ bool User::pushMap()
     //Sort by distance from center
     sort(mapQueue.begin(),mapQueue.end(),SortVect);
 
-    Map::getInstance().sendToUser(this,mapQueue[0].x, mapQueue[0].z);
+    Map::get().sendToUser(this,mapQueue[0].x, mapQueue[0].z);
 
     //Add this to known list
     addKnown(mapQueue[0].x, mapQueue[0].z);

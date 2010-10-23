@@ -32,7 +32,7 @@
 extern ListenSocket<DisplaySocket> l;
 extern StatusHandler h;
 
-Map &Map::getInstance()
+Map &Map::get()
 {
   static Map instance;
   return instance;
@@ -115,7 +115,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   int index=y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
   blocks[index]=type;
   char metadata=metapointer[index>>1];
-  if((y%2))
+  if(y%2)
   {
     metadata&=0x0f;
     metadata|=meta<<4;
@@ -130,6 +130,29 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   return true;
 }
 
+bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
+{
+    uint8 curpos=0;
+    uint8 changeArray[12];
+    changeArray[0]=0x35; //Block change package
+    curpos=1;
+    putSint32(&changeArray[curpos],x);
+    curpos+=4;
+    changeArray[curpos]=y;
+    curpos++;
+    putSint32(&changeArray[curpos],z);
+    curpos+=4;
+    changeArray[10]=type;   //Replace block with
+    changeArray[11]=meta;  //Metadata
+
+    //TODO: only send to users in range
+    for(unsigned int i=0;i<Users.size();i++)
+    {
+      h.SendSock(Users[i].sock,&changeArray[0], 12);
+    }
+
+    return true;
+}
 bool Map::loadMap(int x, int z)
 {
   //Update last used time

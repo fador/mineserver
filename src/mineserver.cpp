@@ -41,7 +41,7 @@ int main(void)
   _CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_DEBUG );
 #endif
 
-  Map::getInstance().initMap();
+  Map::get().initMap();
   //atexit(freeMap);
   /*
   std::string infile="testmap/1f/1f/c.-d.-d.dat";
@@ -148,7 +148,7 @@ int main(void)
   }
 
     
-  Map::getInstance().freeMap();
+  Map::get().freeMap();
   l.CloseAndDelete();
 
   //Windows debug
