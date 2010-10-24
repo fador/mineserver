@@ -16,6 +16,16 @@
 
 #include "tools.h"
 
+void putSint64(uint8 *buf, long long value)
+{
+  uint8 *pointer = reinterpret_cast<uint8 *>(&value);
+  for(uint8 i=0;i<8;i++)
+  {
+    buf[i]=pointer[7-i];  
+  }
+}
+
+
 void putUint32(uint8 *buf, uint32 value)
 {
   uint8 *pointer = reinterpret_cast<uint8 *>(&value);
@@ -97,6 +107,18 @@ uint32 getUint24(uint8 *buf)
 uint32 getUint16(uint8 *buf)
 {
     return (buf[0]<<8)|(buf[1]);
+}
+
+
+long long getSint64(uint8 *buf)
+{
+  long long temp;
+  uint8 *longAddress=reinterpret_cast<uint8 *>(&temp);
+  for(uint8 i=0;i<8;i++)
+  {
+    longAddress[7-i]=buf[i];
+  }
+  return temp;
 }
 
 

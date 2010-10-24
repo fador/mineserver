@@ -560,7 +560,7 @@ void DisplaySocket::OnRead()
       for(i=0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i];
       int z=getSint32(&tmpIntArray[0]);
       curpos+=4;
-
+      user->buffer.erase(user->buffer.begin(), user->buffer.begin()+11);
       //If block broken
       if(status==3)
       {
@@ -574,6 +574,7 @@ void DisplaySocket::OnRead()
         if(Map::get().getBlock(x,y+1,z, topblock, topmeta) && topblock==0x4e) //If snow on top, destroy it
         {
           Map::get().sendBlockChange(x,y+1,z,0, 0);
+          Map::get().setBlock(x,y+1,z,0,0);
         }
 
         if(block!=0x4e)
@@ -589,8 +590,6 @@ void DisplaySocket::OnRead()
           Map::get().sendPickupSpawn(item);
         }
       }
-
-      user->buffer.erase(user->buffer.begin(), user->buffer.begin()+11);
     }
     else if(user->action==0x0f) //Player Block Placement
     {

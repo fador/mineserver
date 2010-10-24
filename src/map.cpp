@@ -237,6 +237,11 @@ bool Map::loadMap(int x, int z)
   return true;
 }
 
+bool Map::saveMap(int x, int z)
+{
+  return true;
+}
+
 
 bool Map::releaseMap(int x, int z)
 {

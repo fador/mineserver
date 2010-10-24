@@ -52,7 +52,14 @@ int main(void)
   int out;
   NBT_struct structure;
   TAG_Compound(&uncompressedData[0], &structure,true);
-  get_NBT_pointer(&structure, "Blocks");
+
+  std::string outfile="testmap.nbt";
+  uint8 uncompressedData2[200000];
+  int dumpsize=dumpNBT_struct(&structure.compounds[0], &uncompressedData2[0]);
+  gzFile mapfile2=gzopen(outfile.c_str(),"wb");        
+  gzwrite(mapfile2,&uncompressedData2[0],dumpsize);
+  gzclose(mapfile2);
+
   exit(1);
   */
   //Bind to port

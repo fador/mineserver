@@ -413,9 +413,6 @@ bool remUser(SOCKET sock)
         {
             chat.sendMsg(&Users[i], Users[i].nick+" disconnected!", OTHERS);
             Users.erase(Users.begin()+i);
-            //Send quit to all
-            //h.SendAll(std::string((char *)&data[0], 7));
-            //std::cout << "Send remove UID: " << UID << std::endl;
             return true;
         }
     }

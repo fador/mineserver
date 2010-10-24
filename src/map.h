@@ -62,6 +62,9 @@ public:
   //Load map chunk
   bool loadMap(int x,int z);
 
+   //Save map chunk to disc
+  bool saveMap(int x,int z);
+
   //Release/save map chunk
   bool releaseMap(int x, int z);
 

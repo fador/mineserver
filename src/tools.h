@@ -9,13 +9,14 @@ typedef unsigned int uint32;
 typedef int sint32;
 
 
-
+void putSint64(uint8 *buf, long long value);
 void putUint32(uint8 *buf, uint32 value);
 void putSint32(uint8 *buf, sint32 value);
 void putSint16(uint8 *buf, short value);
 void putDouble(uint8 *buf, double value);
 void putFloat(uint8 *buf, float value);
 
+long long getSint64(uint8 *buf);
 double getDouble(uint8 *buf);
 float  getFloat(uint8 *buf);
 uint32 getUint32(uint8 *buf);

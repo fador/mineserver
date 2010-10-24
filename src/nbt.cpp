@@ -34,7 +34,7 @@ int TAG_Int(uint8* input, int *output)
 }
 int TAG_Long(uint8* input, long long *output)
 {
-  //TODO: long reading
+  *output=getSint64(input);
   return 8;
 }
 int TAG_Float(uint8* input, float *output)
@@ -275,69 +275,175 @@ uint8 *get_NBT_pointer(NBT_struct *input, std::string TAG)
   }
   return 0;
 }
-/*
-bool dumpNBT_value(NBT_value *input, uint8 *buffer)
+
+
+
+int dumpNBT_string(uint8 *buffer, std::string name)
 {
   int curpos=0;
+  putSint16(buffer, name.length());
+  curpos+=2;
 
+  for(unsigned int i=0;i<name.length();i++)
+  {
+    buffer[curpos]=name[i];
+    curpos++;
+  }
+  return curpos;
+}
+
+int dumpNBT_value(NBT_value *input, uint8 *buffer)
+{
+  int curpos=0;
   buffer[curpos]=input->type;
   curpos++;
+  curpos+=dumpNBT_string(&buffer[curpos],input->name);
 
   switch(input->type)
   {
     case TAG_BYTE:
-        value.value=(void *)new char;
-        curpos+=TAG_Byte(&input[curpos], (char *)value.value);
-        output->values.push_back(value);
+        buffer[curpos]=*(char *)input->value;
+        curpos++;
       break;
     case TAG_SHORT:
-        value.value=(void *)new int;
-        curpos+=TAG_Short(&input[curpos], (int *)value.value);
-        output->values.push_back(value);
+        putSint16(&buffer[curpos], *(int *)input->value);
+        curpos+=2;
       break;
     case TAG_INT:
-        value.value=(void *)new int;
-        curpos+=TAG_Int(&input[curpos], (int *)value.value);
-        output->values.push_back(value);
+        putSint32(&buffer[curpos], *(int *)input->value);
+        curpos+=4;
       break;
     case TAG_LONG:
-        value.value=(void *)new long long;
-        curpos+=TAG_Long(&input[curpos], (long long *)value.value);
-        output->values.push_back(value);
+        putSint64(&buffer[curpos], *(long long *)input->value);
+        curpos+=8;
       break;
     case TAG_FLOAT:
-        value.value=(void *)new float;
-        curpos+=TAG_Float(&input[curpos], (float *)value.value);
-        output->values.push_back(value);
+        putFloat(&buffer[curpos], *(float *)input->value);
+        curpos+=4;
       break;
     case TAG_DOUBLE:
-        value.value=(void *)new double;
-        curpos+=TAG_Double(&input[curpos], (double *)value.value);
-        output->values.push_back(value);
+        putDouble(&buffer[curpos], *(double *)input->value);
+        curpos+=8;
       break;
     case TAG_STRING:
-        value.value=(void *)new std::string;
-        curpos+=TAG_String(&input[curpos], (std::string *)value.value);
-        output->values.push_back(value);
+        curpos+=dumpNBT_string(&buffer[curpos],*(std::string *)input->value);
       break;
   }
+  return curpos;
 }
 
-bool dumpNBT_list(NBT_list *input, uint8 *buffer)
+int dumpNBT_list(NBT_list *input, uint8 *buffer)
+{
+  int curpos=0;
+  buffer[curpos]=TAG_LIST;
+  curpos++;
+  curpos+=dumpNBT_string(&buffer[curpos],input->name);
+
+  buffer[curpos]=input->tagId;
+  curpos++;
+
+  putSint32(&buffer[curpos],input->length);
+  curpos+=4;
+
+  for(int i=0;i<input->length;i++)
+  {
+
+    switch(input->tagId)
+    {
+      case TAG_BYTE:
+        buffer[curpos]=*(char *)input->items[i];
+          curpos++;
+        break;
+      case TAG_SHORT:
+          putSint16(&buffer[curpos], *(int *)input->items[i]);
+          curpos+=2;
+        break;
+      case TAG_INT:
+          putSint32(&buffer[curpos], *(int *)input->items[i]);
+          curpos+=4;
+        break;
+      case TAG_LONG:
+          putSint64(&buffer[curpos], *(long long *)input->items[i]);
+          curpos+=8;
+        break;
+      case TAG_FLOAT:
+          putFloat(&buffer[curpos], *(float *)input->items[i]);
+          curpos+=4;
+        break;
+      case TAG_DOUBLE:
+          putDouble(&buffer[curpos], *(double *)input->items[i]);
+          curpos+=8;
+        break;
+      case TAG_STRING:
+          curpos+=dumpNBT_string(&buffer[curpos],*(std::string *)input->items[i]);
+        break;
+      case TAG_BYTE_ARRAY:
+          curpos+=dumpNBT_byte_array((NBT_byte_array *)input->items[i], &buffer[curpos],true);
+        break;
+      case TAG_COMPOUND:
+          curpos+=dumpNBT_struct((NBT_struct *)input->items[i], &buffer[curpos],true);
+        break;
+    }
+  }
+  return curpos;
+}
+
+int dumpNBT_byte_array(NBT_byte_array *input, uint8 *buffer, bool list)
 {
   int curpos=0;
 
+
+  if(!list)
+  {
+    buffer[curpos]=TAG_BYTE_ARRAY;
+    curpos++;
+    curpos+=dumpNBT_string(&buffer[curpos],input->name);
+  }
+  putSint32(&buffer[curpos],input->length);
+  curpos+=4;
+  memcpy(&buffer[curpos],input->data, input->length);
+  curpos+=input->length;
+  return curpos;
 }
 
-bool dumpNBT_byte_array(NBT_byte_array *input, uint8 *buffer)
+int dumpNBT_struct(NBT_struct *input, uint8 *buffer, bool list)
 {
   int curpos=0;
 
-}
+  if(!list)
+  {
+    buffer[curpos]=TAG_COMPOUND;
+    curpos++;
+    curpos+=dumpNBT_string(&buffer[curpos],input->name);
+  }
 
-bool dumpNBT_struct(NBT_struct *input, uint8 *buffer)
-{
-  int curpos=0;
+  //Dump all values
+  for(unsigned int i=0;i<input->values.size();i++)
+  {
+    curpos+=dumpNBT_value(&input->values[i],&buffer[curpos]);
+  }
 
+  //Dump byte arrays
+  for(unsigned int i=0;i<input->byte_arrays.size();i++)
+  {
+    curpos+=dumpNBT_byte_array(&input->byte_arrays[i],&buffer[curpos]);
+  }
+
+  //Dump lists
+  for(unsigned int i=0;i<input->lists.size();i++)
+  {
+    curpos+=dumpNBT_list(&input->lists[i],&buffer[curpos]);
+  }
+
+  //Dump compounds
+  for(unsigned int i=0;i<input->compounds.size();i++)
+  {
+    curpos+=dumpNBT_struct(&input->compounds[i],&buffer[curpos]);
+  }
+
+  buffer[curpos]=0x00; //TAG_END
+  curpos++;
+
+  //Total size
+  return curpos;
 }
-*/

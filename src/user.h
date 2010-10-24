@@ -22,81 +22,88 @@
     int z;
   };
 
-    class User
-    {
-      public:
-
-        User(SOCKET sock,uint32 EID);
-        ~User();
-
-        //View distance in chunks -viewDistance <-> viewDistance
-        static const int viewDistance=10;
-        uint8 action;
-        bool waitForData;
-        bool logged;
-        bool admin;
-        SOCKET sock;
-        unsigned int UID;
-        std::string nick;
-        position pos;
-        coord curChunk;
-
-        std::deque<unsigned char> buffer;
+  struct inventory
+  {
 
 
-        bool changeNick(std::string nick, std::deque<std::string> admins);
-        bool updatePos(double x, double y, double z, double stance);
-        bool updateLook(float yaw, float pitch);
+  };
 
-        bool sendOthers(uint8* data,uint32 len);
-        bool sendAll(uint8* data,uint32 len);
+  class User
+  {
+    public:
+
+      User(SOCKET sock,uint32 EID);
+      ~User();
+
+      //View distance in chunks -viewDistance <-> viewDistance
+      static const int viewDistance=10;
+      uint8 action;
+      bool waitForData;
+      bool logged;
+      bool admin;
+      SOCKET sock;
+      unsigned int UID;
+      std::string nick;
+      position pos;
+      coord curChunk;
+
+      //Input buffer
+      std::deque<unsigned char> buffer;
+
+
+      bool changeNick(std::string nick, std::deque<std::string> admins);
+      bool updatePos(double x, double y, double z, double stance);
+      bool updateLook(float yaw, float pitch);
+
+      bool sendOthers(uint8* data,uint32 len);
+      bool sendAll(uint8* data,uint32 len);
         
-        // Kick player
-        bool kick(std::string kickMsg);
+      // Kick player
+      bool kick(std::string kickMsg);
 
-        //Map related
+      //Map related
 
-        //Map queue
-        std::vector<coord> mapQueue;
+      //Map queue
+      std::vector<coord> mapQueue;
 
-        //Chunks needed to be removed from client
-        std::vector<coord> mapRemoveQueue;
+      //Chunks needed to be removed from client
+      std::vector<coord> mapRemoveQueue;
 
-        //Known map pieces
-        std::vector<coord> mapKnown;
+      //Known map pieces
+      std::vector<coord> mapKnown;
 
-        //Add map coords to queue
-        bool addQueue(int x, int z);
+      //Add map coords to queue
+      bool addQueue(int x, int z);
 
-        //Add map coords to remove queue
-        bool addRemoveQueue(int x, int z);
+      //Add map coords to remove queue
+      bool addRemoveQueue(int x, int z);
 
-        //Add known map piece
-        bool addKnown(int x, int z);
+      //Add known map piece
+      bool addKnown(int x, int z);
 
-        //Delete known map piece
-        bool delKnown(int x, int z);
+      //Delete known map piece
+      bool delKnown(int x, int z);
 
-        //Push queued map data to client
-        bool pushMap();
+      //Push queued map data to client
+      bool pushMap();
 
-        //Push remove queued map data to client
-        bool popMap();
+      //Push remove queued map data to client
+      bool popMap();
 
-        bool teleport(double x, double y, double z);
-        bool spawnUser(int x, int y, int z);
-        bool spawnOthers();
-    };
+      bool teleport(double x, double y, double z);
+      bool spawnUser(int x, int y, int z);
+      bool spawnOthers();
+  };
 
-    bool addUser(SOCKET sock,uint32 EID);
-    bool remUser(SOCKET sock);
-    bool isUser(SOCKET sock);
-    uint32 generateEID();
+  bool addUser(SOCKET sock,uint32 EID);
+  bool remUser(SOCKET sock);
+  bool isUser(SOCKET sock);
+  uint32 generateEID();
 
-    extern std::vector<User> Users;
+  extern std::vector<User> Users;
     
-    User *getUserByNick(std::string nick);
+  User *getUserByNick(std::string nick);
 
-    bool SortVect(const coord &first, const coord &second);
+  bool SortVect(const coord &first, const coord &second);
 
 #endif
