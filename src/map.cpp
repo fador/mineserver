@@ -68,6 +68,19 @@ NBT_struct *Map::getMapData(int x, int z)
   return 0;
 }
 
+
+bool Map::saveWholeMap()
+{
+  for (std::map<int, std::map<int, NBT_struct> >::const_iterator it = maps.begin(); it != maps.end(); ++it)
+  {
+    for (std::map<int, NBT_struct>::const_iterator it2 = maps[it->first].begin(); it2 != maps[it->first].end(); ++it2)
+    {
+      saveMap(it->first, it2->first);
+    }
+  }
+  return true;
+}
+
 bool Map::getBlock(int x, int y, int z, char &type, char &meta)
 {
 

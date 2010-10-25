@@ -63,6 +63,9 @@ public:
 
    //Save map chunk to disc
   bool saveMap(int x,int z);
+  
+  // Save whole map to disc (/save command)
+  bool saveWholeMap();
 
   //Release/save map chunk
   bool releaseMap(int x, int z);

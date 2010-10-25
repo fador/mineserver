@@ -80,6 +80,12 @@ bool Chat::handleMsg( User *user, std::string msg ) {
         //
         if(user->admin) 
         {
+          // Save map
+          if(msg.substr(1,4) == "save") 
+          {
+            Map::get().saveWholeMap();
+            this->sendMsg(user, COLOR_DARK_MAGENTA + "SERVER:" + COLOR_RED + " Saved map to disc", USER);
+          }
           // Kick user
           if(msg.substr(1,4) == "kick") 
           {
