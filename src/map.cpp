@@ -51,6 +51,9 @@ void Map::freeMap()
 
 NBT_struct *Map::getMapData(int x, int z)
 {
+  //Update last used time
+  mapLastused[x][z]=time(0);
+
   std::map<int, std::map<int, NBT_struct> >::iterator iter;
   iter = maps.find(x);
   if (iter != maps.end() )
@@ -126,6 +129,8 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
     metadata|=meta;
   }
   metapointer[index>>1]=metadata;
+
+  mapChanged[x][z]=1;
 
   return true;
 }
@@ -234,11 +239,21 @@ bool Map::loadMap(int x, int z)
 
   maps[x][z]=newMapStruct;
 
+  //Update last used time
+  mapLastused[x][z]=time(0);
+
+  //Not changed
+  mapChanged[x][z]=0;
+
   return true;
 }
 
 bool Map::saveMap(int x, int z)
 {
+  if(!mapChanged[x][z])
+  {
+    return true;
+  }
   int mapposx=x;
   int mapposz=z;
   //Generate map file name
@@ -256,13 +271,15 @@ bool Map::saveMap(int x, int z)
   gzwrite(mapfile2,&uncompressedData[0],dumpsize);
   gzclose(mapfile2);
 
+  //Not changed
+  mapChanged[x][z]=0;
   return true;
 }
 
 
 bool Map::releaseMap(int x, int z)
 {
-
+  freeNBT_struct(&maps[x][z]);
   return true;
 }
 
