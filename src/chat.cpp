@@ -42,7 +42,28 @@ bool Chat::sendUserlist( User *user ) {
       return true;
 }
 
-bool Chat::handleMsg( User *user, std::string msg ) {
+std::deque<std::string> Chat::parseCmd(std::string cmd)
+{
+  int del;
+  std::deque<std::string> temp;
+  while(cmd.length() > 0) {
+    while(cmd[0] == ' ') cmd = cmd.substr(1);
+    del = cmd.find(' ');
+    if(del > -1)
+    {
+      temp.push_back( cmd.substr(0,del) );
+      cmd = cmd.substr(del+1);
+    } else {
+      temp.push_back( cmd );
+      break;
+    }
+  }
+  if(temp.empty()) temp.push_back("empty");
+  return temp;
+}
+
+bool Chat::handleMsg( User *user, std::string msg )
+{
     // Timestamp
     time_t rawTime = time(NULL);
     struct tm* Tm = localtime(&rawTime);
@@ -56,21 +77,24 @@ bool Chat::handleMsg( User *user, std::string msg ) {
     //
     
     // Servermsg (Admin-only)
-    if(msg.substr(0,1) == "%" && user->admin) 
+    if(msg[0] == SERVERMSGPREFIX && user->admin) 
     {
         // Decorate server message
-        msg = COLOR_RED + "[!]" + COLOR_MAGENTA + msg.substr(1);
+        msg = COLOR_RED + "[!] " + COLOR_GREEN + msg.substr(1);
         this->sendMsg(user, msg, ALL);
     } 
-    else if(msg.substr(0,1) == "/")
+    else if(msg[0] == CHATCMDPREFIX)
     {
+        std::deque<std::string> cmd = this->parseCmd( msg.substr(1) );
+        
         // Playerlist
-        if(msg.substr(1,7) == "players") 
+        if(cmd.at(0) == "players") 
         {
           this->sendUserlist(user);
         }
+        
         // About server
-        if(msg.substr(1,5) == "about") 
+        if(cmd.at(0) == "about") 
         {
           this->sendMsg(user, COLOR_DARK_MAGENTA + "SERVER:" + COLOR_RED + " Mineserver v." + VERSION, USER);
         }
@@ -81,50 +105,68 @@ bool Chat::handleMsg( User *user, std::string msg ) {
         if(user->admin) 
         {
           // Save map
-          if(msg.substr(1,4) == "save") 
+          if(cmd.at(0) == "save") 
           {
             Map::get().saveWholeMap();
             this->sendMsg(user, COLOR_DARK_MAGENTA + "SERVER:" + COLOR_RED + " Saved map to disc", USER);
           }
+          
           // Kick user
-          if(msg.substr(1,4) == "kick") 
+          if(cmd.at(0) == "kick") 
           {
-            msg = msg.substr(6);
-            LOG("Kicking: " + msg);
-            // Get coordinates
-            User* tUser = getUserByNick(msg);
-            if(tUser != false)
-            {
-              tUser->kick("kickmsg");
-              LOG("kicked!");
+            cmd.pop_front();
+            if( !cmd.empty() ) {
+              LOG( "Kicking: " + cmd.at(0) );
+              // Get coordinates
+              User* tUser = getUserByNick(cmd.at(0));
+              if(tUser != false)
+              {
+                cmd.pop_front();
+                std::string kickMsg = DEFAULTKICKMSG;
+                if( !cmd.empty() ) 
+                {
+                  kickMsg = "";
+                  while( !cmd.empty() ) 
+                  {
+                    kickMsg += cmd.at(0) + " ";
+                    cmd.pop_front();
+                  }
+                }
+                tUser->kick(kickMsg);
+                LOG("Kicked!");
+              }
             }
           }
           
           // Teleport to coordinates
-          if(msg.substr(1,3) == "ctp") 
+          if(cmd.at(0) == "ctp") 
           {
-              msg = msg.substr(5);
-              LOG(user->nick + " teleport to: " + msg);
-              float x = atof(msg.substr(0, msg.find(' ')).c_str());
-              msg = msg.substr(msg.find(' ')+1);
-              float y = atof(msg.substr(0, msg.find(' ')).c_str());
-              msg = msg.substr(msg.find(' ')+1);
-              float z = atof(msg.c_str());
+            cmd.pop_front();
+            if( cmd.size() > 2 ) {
+              LOG(user->nick + " teleport to: " + cmd.at(0) + " " + cmd.at(1) + " " + cmd.at(2) );
+              float x = atof( cmd.at(0).c_str() );
+              float y = atof( cmd.at(1).c_str() );
+              float z = atof( cmd.at(2).c_str() );
               user->teleport(x,y,z);
+            }
           }
           
           // Teleport to user
-          if(msg.substr(1,2) == "tp") 
+          if(cmd.at(0) == "tp") 
           {
-              msg = msg.substr(4);
-              LOG(user->nick + " teleport to: " + msg);
+            cmd.pop_front();
+            if( !cmd.empty() ) {
+              LOG(user->nick + " teleport to: " + cmd.at(0));
               
               // Get coordinates
-              User* tUser = getUserByNick(msg);
+              User* tUser = getUserByNick( cmd.at(0) );
               if(tUser != false)
               {
-                user->teleport(tUser->pos.x, tUser->pos.y, tUser->pos.z);
+                user->teleport(tUser->pos.x*32, tUser->pos.y*32, tUser->pos.z*32);
+              } else {
+                this->sendMsg(user, COLOR_DARK_MAGENTA + "Error!" + COLOR_RED + " User " + cmd.at(0) + " not found (See /players)", USER);
               }
+            }
           }
         }
     } 
