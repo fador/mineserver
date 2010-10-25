@@ -99,6 +99,27 @@ int main(void)
         uint8 data3[9]={0x04, 0x00, 0x00, 0x00,0x00,0x00,0x00,0x0e,0x00};
         Users[0].sendAll((uint8 *)&data3[0], 9);
       }
+
+      //Release chunks not used in MAP_RELEASE_TIME seconds
+      std::vector<coord> toRelease;
+      for (std::map<int, std::map<int, int> >::const_iterator it = Map::get().mapLastused.begin(); it != Map::get().mapLastused.end(); ++it)
+      {
+        for (std::map<int, int>::const_iterator it2 = Map::get().mapLastused[it->first].begin();it2 != Map::get().mapLastused[it->first].end(); ++it2)
+        {
+          if(Map::get().mapLastused[it->first][it2->first] <= time(0)-MAP_RELEASE_TIME)
+          {
+            coord newCoord={it->first,0, it2->first};
+            toRelease.push_back(newCoord);
+          }
+        }
+      }
+
+      for(unsigned i=0;i<toRelease.size();i++)
+      {
+        coord releaseCoord=toRelease[i];
+        Map::get().releaseMap(releaseCoord.x, releaseCoord.z);
+      }
+
     }
 
     //Every second

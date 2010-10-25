@@ -29,8 +29,7 @@ private:
     {
       for (std::map<int, NBT_struct>::const_iterator it2 = maps[it->first].begin(); it2 != maps[it->first].end(); ++it2)
       {
-        //TODO: Free memory!
-        //delete [] maps[it->first][it2->first].fullData;
+        releaseMap(it->first, it2->first);
       }
     }
   };

@@ -27,4 +27,7 @@ const std::string VERSION = "0.1.5";
 const std::string ADMINFILE = "admin.txt";
 const std::string MOTDFILE = "motd.txt";
 
+//Chunk release time on seconds when not user
+const int MAP_RELEASE_TIME = 10;
+
 #endif

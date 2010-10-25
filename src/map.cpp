@@ -51,9 +51,6 @@ void Map::freeMap()
 
 NBT_struct *Map::getMapData(int x, int z)
 {
-  //Update last used time
-  mapLastused[x][z]=time(0);
-
   std::map<int, std::map<int, NBT_struct> >::iterator iter;
   iter = maps.find(x);
   if (iter != maps.end() )
@@ -62,6 +59,8 @@ NBT_struct *Map::getMapData(int x, int z)
     iter2 = maps[x].find(z);
     if (iter2 != maps[x].end() )
     {
+      //Update last used time
+      mapLastused[x][z]=time(0);
       //Data in memory
       return &maps[x][z];
     }
@@ -71,8 +70,13 @@ NBT_struct *Map::getMapData(int x, int z)
 
 bool Map::getBlock(int x, int y, int z, char &type, char &meta)
 {
+
   int chunk_x=((x<0)?(x/16)-1:x/16);
   int chunk_z=((z<0)?(z/16)-1:z/16);
+  if(!loadMap(chunk_x,chunk_z))
+  {
+    return false;
+  }
   NBT_struct *chunk=getMapData(chunk_x, chunk_z);
   if(!chunk || y<0 || y>127)
   {
@@ -97,14 +101,20 @@ bool Map::getBlock(int x, int y, int z, char &type, char &meta)
     metadata&=0x0f;
   }
   meta=metadata;
+  mapLastused[chunk_x][chunk_z]=time(0);
 
   return true;
 }
 
 bool Map::setBlock(int x, int y, int z, char type, char meta)
 {
+
   int chunk_x=((x<0)?(x/16)-1:x/16);
   int chunk_z=((z<0)?(z/16)-1:z/16);
+  if(!loadMap(chunk_x,chunk_z))
+  {
+    return false;
+  }
   NBT_struct *chunk=getMapData(chunk_x, chunk_z);
   if(!chunk || y<0 || y>127)
   {
@@ -130,7 +140,8 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   }
   metapointer[index>>1]=metadata;
 
-  mapChanged[x][z]=1;
+  mapChanged[chunk_x][chunk_z]=1;
+  mapLastused[chunk_x][chunk_z]=time(0);
 
   return true;
 }
@@ -239,6 +250,21 @@ bool Map::loadMap(int x, int z)
 
   maps[x][z]=newMapStruct;
 
+  
+  maps[x][z].blocks=get_NBT_pointer(&maps[x][z], "Blocks");
+  maps[x][z].data=get_NBT_pointer(&maps[x][z], "Data");
+  maps[x][z].blocklight=get_NBT_pointer(&maps[x][z], "BlockLight");
+  maps[x][z].skylight=get_NBT_pointer(&maps[x][z], "SkyLight");
+  //Check if the items were not found
+  if(maps[x][z].blocks      == 0 ||
+      maps[x][z].data       == 0 ||
+      maps[x][z].blocklight == 0 ||
+      maps[x][z].skylight   == 0)
+  {
+    LOG("Error in map data");
+    return false;
+  }
+
   //Update last used time
   mapLastused[x][z]=time(0);
 
@@ -254,6 +280,25 @@ bool Map::saveMap(int x, int z)
   {
     return true;
   }
+
+  std::map<int, std::map<int, NBT_struct> >::iterator iter;
+  iter = maps.find(x);
+  if (iter != maps.end() )
+  {
+    std::map<int, NBT_struct>::iterator iter2;
+    iter2 = maps[x].find(z);
+    if (iter2 == maps[x].end() )
+    {
+      //Map not in memory!
+      return false;
+    }
+  }
+  else
+  {
+    //Map not in memory!
+    return false;
+  }
+
   int mapposx=x;
   int mapposz=z;
   //Generate map file name
@@ -271,7 +316,7 @@ bool Map::saveMap(int x, int z)
   gzwrite(mapfile2,&uncompressedData[0],dumpsize);
   gzclose(mapfile2);
 
-  //Not changed
+  //Set "not changed"
   mapChanged[x][z]=0;
   return true;
 }
@@ -279,7 +324,67 @@ bool Map::saveMap(int x, int z)
 
 bool Map::releaseMap(int x, int z)
 {
-  freeNBT_struct(&maps[x][z]);
+  //save first
+  saveMap(x,z);
+
+  std::map<int, std::map<int, NBT_struct> >::iterator iter;
+  iter = maps.find(x);
+  std::map<int, NBT_struct>::iterator iter2;
+  if (iter != maps.end() )
+  {    
+    iter2 = maps[x].find(z);
+    if (iter2 == maps[x].end() )
+    {
+        mapChanged[x].erase(z);
+      if(!mapChanged.count(x))
+      {
+        mapChanged.erase(x);
+      }
+
+      mapLastused[x].erase(z);
+      if(!mapLastused.count(x))
+      {
+        mapLastused.erase(x);
+      }
+      //Map not in memory!
+      return false;
+    }
+  }
+  else
+  {
+    mapChanged[x].erase(z);
+    if(!mapChanged.count(x))
+    {
+      mapChanged.erase(x);
+    }
+
+    mapLastused[x].erase(z);
+    if(!mapLastused.count(x))
+    {
+      mapLastused.erase(x);
+    }
+    //Map not in memory!
+    return false;
+  }
+
+  freeNBT_struct(&maps[x][z]);  
+  //Erase from map
+  maps[x].erase(z);
+  if(!maps.count(x))
+  {
+    maps.erase(x);
+  }
+  mapChanged[x].erase(z);
+  if(!mapChanged.count(x))
+  {
+    mapChanged.erase(x);
+  }
+
+  mapLastused[x].erase(z);
+  if(!mapLastused.count(x))
+  {
+    mapLastused.erase(x);
+  }
   return true;
 }
 
@@ -309,20 +414,6 @@ void Map::sendToUser(User *user, int x, int z)
       data4[12]=127; //Size_y
       data4[13]=15; //Size_z
 
-      maps[x][z].blocks=get_NBT_pointer(&maps[x][z], "Blocks");
-      maps[x][z].data=get_NBT_pointer(&maps[x][z], "Data");
-      maps[x][z].blocklight=get_NBT_pointer(&maps[x][z], "BlockLight");
-      maps[x][z].skylight=get_NBT_pointer(&maps[x][z], "SkyLight");
-
-      //Check if the items were not found
-      if(maps[x][z].blocks == 0     ||
-         maps[x][z].data == 0       ||
-         maps[x][z].blocklight == 0 ||
-         maps[x][z].skylight == 0)
-      {
-        LOG("Error in map data");
-        return;
-      }
 
       memcpy(&mapdata[0],maps[x][z].blocks, 32768);
       memcpy(&mapdata[32768],maps[x][z].data, 16384);
