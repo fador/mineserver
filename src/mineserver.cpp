@@ -60,6 +60,7 @@ int main(void)
   gzwrite(mapfile2,&uncompressedData2[0],dumpsize);
   gzclose(mapfile2);
 
+  freeNBT_struct(&structure);
   exit(1);
   */
   //Bind to port

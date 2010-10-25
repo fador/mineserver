@@ -447,3 +447,122 @@ int dumpNBT_struct(NBT_struct *input, uint8 *buffer, bool list)
   //Total size
   return curpos;
 }
+
+bool freeNBT_struct(NBT_struct *input)
+{
+  //Free all values
+  for(unsigned int i=0;i<input->values.size();i++)
+  {
+    switch(input->values[i].type)
+    {
+      case TAG_BYTE:
+          delete (char *)input->values[i].value;
+        break;
+      case TAG_SHORT:
+          delete (int *)input->values[i].value;
+        break;
+      case TAG_INT:
+          delete (int *)input->values[i].value;
+        break;
+      case TAG_LONG:
+          delete (long long *)input->values[i].value;
+        break;
+      case TAG_FLOAT:
+          delete (float *)input->values[i].value;
+        break;
+      case TAG_DOUBLE:
+          delete (double *)input->values[i].value;
+        break;
+      case TAG_STRING:
+          delete (std::string *)input->values[i].value;
+        break;
+    }
+    
+  }
+
+  input->values.clear();
+
+  //Free byte arrays
+  for(unsigned int i=0;i<input->byte_arrays.size();i++)
+  {
+    delete [] input->byte_arrays[i].data;
+  }
+
+  input->byte_arrays.clear();
+
+  //Free lists
+  for(unsigned int i=0;i<input->lists.size();i++)
+  {
+      switch(input->lists[i].tagId)
+      {
+        case TAG_BYTE:
+            for(unsigned int j=0;j<input->lists[i].length;j++)
+            {
+              delete (char *)input->lists[i].items[j];
+            }
+          break;
+        case TAG_SHORT:
+            for(unsigned int j=0;j<input->lists[i].length;j++)
+            {
+              delete (int *)input->lists[i].items[j];
+            }
+          break;
+        case TAG_INT:
+            for(unsigned int j=0;j<input->lists[i].length;j++)
+            {
+              delete (int *)input->lists[i].items[j];
+            }
+          break;
+        case TAG_LONG:
+            for(unsigned int j=0;j<input->lists[i].length;j++)
+            {
+              delete (long long *)input->lists[i].items[j];
+            }
+          break;
+        case TAG_FLOAT:
+            for(unsigned int j=0;j<input->lists[i].length;j++)
+            {
+              delete (float *)input->lists[i].items[j];
+            }
+          break;
+        case TAG_DOUBLE:
+            for(unsigned int j=0;j<input->lists[i].length;j++)
+            {
+              delete (double *)input->lists[i].items[j];
+            }
+          break;
+        case TAG_STRING:
+            for(unsigned int j=0;j<input->lists[i].length;j++)
+            {
+              delete (std::string *)input->lists[i].items[j];
+            }
+          break;
+        case TAG_COMPOUND:
+            for(unsigned int j=0;j<input->lists[i].length;j++)
+            {
+              freeNBT_struct((NBT_struct *)input->lists[i].items[j]);
+              delete (NBT_struct *)input->lists[i].items[j];
+            }
+          break;
+        case TAG_BYTE_ARRAY:
+            for(unsigned int j=0;j<input->lists[i].length;j++)
+            {
+              NBT_byte_array *temparray=(NBT_byte_array *)input->lists[i].items[j];
+              delete [] temparray->data;
+            }
+          break;
+      } 
+  }
+
+  input->lists.clear();
+
+  //Free compounds
+  for(unsigned int i=0;i<input->compounds.size();i++)
+  {
+    freeNBT_struct(&input->compounds[i]);
+  }
+
+  input->compounds.clear();
+
+  return true;
+}

@@ -239,12 +239,30 @@ bool Map::loadMap(int x, int z)
 
 bool Map::saveMap(int x, int z)
 {
+  int mapposx=x;
+  int mapposz=z;
+  //Generate map file name
+  int modulox=(mapposx-15);
+  while(modulox<0) modulox+=64;
+  int moduloz=(mapposz-14);
+  while(moduloz<0) moduloz+=64;
+  modulox%=64;
+  moduloz%=64;
+  std::string outfile=mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+base36_encode(mapposx-15)+"."+base36_encode(mapposz-14)+".dat";
+
+  uint8 uncompressedData[200000];
+  int dumpsize=dumpNBT_struct(&maps[x][z].compounds[0], &uncompressedData[0]);
+  gzFile mapfile2=gzopen(outfile.c_str(),"wb");        
+  gzwrite(mapfile2,&uncompressedData[0],dumpsize);
+  gzclose(mapfile2);
+
   return true;
 }
 
 
 bool Map::releaseMap(int x, int z)
 {
+
   return true;
 }
 
