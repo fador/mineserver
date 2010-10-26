@@ -68,28 +68,31 @@ NBT_struct *Map::getMapData(int x, int z)
   return 0;
 }
 
-bool Map::getBlock(int x, int y, int z, char &type, char &meta)
+bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta)
 {
 
-  int chunk_x=((x<0)?(x/16)-1:x/16);
-  int chunk_z=((z<0)?(z/16)-1:z/16);
+  int chunk_x=((x<0)?((x+1)/16)-1:x/16);
+  int chunk_z=((z<0)?((z+1)/16)-1:z/16);
   if(!loadMap(chunk_x,chunk_z))
   {
+    LOG("Loadmap failed");
     return false;
   }
   NBT_struct *chunk=getMapData(chunk_x, chunk_z);
   if(!chunk || y<0 || y>127)
   {
+    LOG("chunk failed");
     return false;
   }
 
-  int chunk_block_x=x-(chunk_x*16);
-  int chunk_block_z=z-(chunk_z*16);
+  int chunk_block_x=((x<0)?15+((x+1)%16):(x%16));
+  int chunk_block_z=((z<0)?15+((z+1)%16):(z%16));
+
   uint8 *blocks=chunk->blocks;
   uint8 *metapointer=chunk->data;
   int index=y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
-  type=blocks[index];
-  char metadata=metapointer[(index)>>1];
+  *type=blocks[index];
+  uint8 metadata=metapointer[(index)>>1];
   
   if(y%2)
   {
@@ -100,7 +103,7 @@ bool Map::getBlock(int x, int y, int z, char &type, char &meta)
   {
     metadata&=0x0f;
   }
-  meta=metadata;
+  *meta=metadata;
   mapLastused[chunk_x][chunk_z]=time(0);
 
   return true;
@@ -109,8 +112,8 @@ bool Map::getBlock(int x, int y, int z, char &type, char &meta)
 bool Map::setBlock(int x, int y, int z, char type, char meta)
 {
 
-  int chunk_x=((x<0)?(x/16)-1:x/16);
-  int chunk_z=((z<0)?(z/16)-1:z/16);
+  int chunk_x=((x<0)?((x+1)/16)-1:x/16);
+  int chunk_z=((z<0)?((z+1)/16)-1:z/16);
   if(!loadMap(chunk_x,chunk_z))
   {
     return false;
@@ -121,8 +124,8 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
     return false;
   }
 
-  int chunk_block_x=x-(chunk_x*16);
-  int chunk_block_z=z-(chunk_z*16);
+  int chunk_block_x=((x<0)?15+((x+1)%16):(x%16));
+  int chunk_block_z=((z<0)?15+((z+1)%16):(z%16));
   uint8 *blocks=chunk->blocks;
   uint8 *metapointer=chunk->data;
   int index=y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
