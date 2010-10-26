@@ -75,9 +75,10 @@ bool User::kick(std::string kickMsg)
   data[0] = 0xff;
   putSint16(&data[1],len);
   for(int i=0;i<kickMsg.size();i++) data[i+3]= kickMsg[i];
-  delete [] data;
-
+  
   h.SendSock(this->sock, data,len+3);
+
+  delete [] data;
   return true;
 }
 

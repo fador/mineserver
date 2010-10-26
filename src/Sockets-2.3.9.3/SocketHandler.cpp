@@ -54,7 +54,7 @@ namespace SOCKETS_NAMESPACE {
 #endif
 
 #ifdef _DEBUG
-#define DEB(x) x; fflush(stderr);
+#define DEB(x) //x; fflush(stderr);
 #else
 #define DEB(x) 
 #endif

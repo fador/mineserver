@@ -564,30 +564,31 @@ void DisplaySocket::OnRead()
       //If block broken
       if(status==3)
       {
-        char block; char meta;
-        Map::get().getBlock(x,y,z, block, meta);
+        uint8 block; uint8 meta;
+        if(Map::get().getBlock(x,y,z, &block, &meta))
+        {          
+          Map::get().sendBlockChange(x,y,z,0,0);
+          Map::get().setBlock(x,y,z,0,0);
 
-        Map::get().sendBlockChange(x,y,z,0,0);
-        Map::get().setBlock(x,y,z,0,0);
+          uint8 topblock; uint8 topmeta;        
+          if(Map::get().getBlock(x,y+1,z, &topblock, &topmeta) && topblock==0x4e) //If snow on top, destroy it
+          {
+            Map::get().sendBlockChange(x,y+1,z,0, 0);
+            Map::get().setBlock(x,y+1,z,0,0);
+          }
 
-        char topblock; char topmeta;        
-        if(Map::get().getBlock(x,y+1,z, topblock, topmeta) && topblock==0x4e) //If snow on top, destroy it
-        {
-          Map::get().sendBlockChange(x,y+1,z,0, 0);
-          Map::get().setBlock(x,y+1,z,0,0);
-        }
-
-        if(block!=0x4e)
-        {
-          spawnedItem item;
-          item.EID=generateEID();
-          item.item=block;
-          item.x=x*32;
-          item.y=y*32;
-          item.z=z*32;
-          item.x+=(rand()%32);
-          item.z+=(rand()%32);
-          Map::get().sendPickupSpawn(item);
+          if(block!=0x4e && (int)block>0 && (int)block<255)
+          {         
+            spawnedItem item;
+            item.EID=generateEID();
+            item.item=(int)block;
+            item.x=x*32;
+            item.y=y*32;
+            item.z=z*32;
+            item.x+=(rand()%32);
+            item.z+=(rand()%32);
+            Map::get().sendPickupSpawn(item);
+          }
         }
       }
     }
@@ -626,9 +627,9 @@ void DisplaySocket::OnRead()
 
 
 
-      char block;
-      char metadata;
-      Map::get().getBlock(x,y,z, block, metadata);
+      uint8 block;
+      uint8 metadata;
+      Map::get().getBlock(x,y,z, &block, &metadata);
 
       switch(direction)        
       {
@@ -640,9 +641,9 @@ void DisplaySocket::OnRead()
         case 5: x++; break;
       }
       
-      char block_direction;
-      char metadata_direction;
-      Map::get().getBlock(x,y,z, block_direction, metadata_direction);
+      uint8 block_direction;
+      uint8 metadata_direction;
+      Map::get().getBlock(x,y,z, &block_direction, &metadata_direction);
 
 
       //If placing normal block and current block is empty
@@ -676,7 +677,7 @@ void DisplaySocket::OnRead()
           metadata|=0x4;
         }
 
-        char metadata2,block2;
+        uint8 metadata2,block2;
 
         int modifier=(metadata&0x8)?1:-1;
                 
@@ -684,7 +685,7 @@ void DisplaySocket::OnRead()
         y=orig_y;
         z=orig_z;
 
-        Map::get().getBlock(x,y+modifier,z, block2, metadata2);
+        Map::get().getBlock(x,y+modifier,z, &block2, &metadata2);
         if(block2==block)
         {
           if(metadata2&0x4)

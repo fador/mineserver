@@ -70,7 +70,7 @@ public:
   //Release/save map chunk
   bool releaseMap(int x, int z);
 
-  bool getBlock(int x, int y, int z, char &type, char &meta);
+  bool getBlock(int x, int y, int z, uint8 *type, uint8 *meta);
   bool setBlock(int x, int y, int z, char type, char meta);
 
   bool sendBlockChange(int x, int y, int z, char type, char meta);
