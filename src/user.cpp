@@ -161,7 +161,6 @@ bool User::updateLook(float yaw, float pitch)
     this->pos.yaw=yaw;
     this->pos.pitch=pitch;
     return true;
-
 }
 
 bool User::sendOthers(uint8* data,uint32 len)
