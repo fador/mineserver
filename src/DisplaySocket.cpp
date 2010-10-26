@@ -566,8 +566,7 @@ void DisplaySocket::OnRead()
       {
         uint8 block; uint8 meta;
         if(Map::get().getBlock(x,y,z, &block, &meta))
-        {
-          std::cout << "Spawn " << (int)block << std::endl;
+        {          
           Map::get().sendBlockChange(x,y,z,0,0);
           Map::get().setBlock(x,y,z,0,0);
 
