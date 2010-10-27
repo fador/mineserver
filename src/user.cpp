@@ -310,10 +310,11 @@ bool User::teleport(double x, double y, double z)
   curpos+=8;
   putDouble(&teleportdata[curpos],y);  //Y
   curpos+=8;
-  putDouble(&teleportdata[curpos],z); //Z
-  curpos+=8;
   putDouble(&teleportdata[curpos], 0.0); //Stance
   curpos+=8;
+  putDouble(&teleportdata[curpos],z); //Z
+  curpos+=8;
+
   putFloat(&teleportdata[curpos], 0.0);
   curpos+=4;
   putFloat(&teleportdata[curpos], 0.0);
@@ -321,6 +322,8 @@ bool User::teleport(double x, double y, double z)
   teleportdata[curpos] = 0; //On Ground
   h.SendSock(this->sock, (char *)&teleportdata[0], 42);
 
+  //Also update pos for other players
+  updatePos(x,y,z,0);
   return true;
 }
 

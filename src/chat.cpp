@@ -162,7 +162,7 @@ bool Chat::handleMsg( User *user, std::string msg )
               User* tUser = getUserByNick( cmd[0] );
               if(tUser != false)
               {
-                user->teleport(tUser->pos.x, tUser->pos.y, tUser->pos.z);
+                user->teleport(tUser->pos.x, tUser->pos.y+2, tUser->pos.z);
               } else {
                 this->sendMsg(user, COLOR_DARK_MAGENTA + "Error!" + COLOR_RED + " User " + cmd[0] + " not found (See /players)", USER);
               }
