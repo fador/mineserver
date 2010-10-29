@@ -23,6 +23,7 @@
 #include "map.h"
 #include "user.h"
 #include "chat.h"
+#include "config.h"
 #include "nbt.h"
 #include "zlib/zlib.h"
 
@@ -76,7 +77,13 @@ int main(void)
             << "/    Y    \\  |   |  \\  ___/ \\___ \\\\  ___/|  | \\/\\   /\\  ___/|  | \\/" << std::endl
             << "\\____|__  /__|___|  /\\___  >____  >\\___  >__|    \\_/  \\___  >__|   " << std::endl
             << "        \\/        \\/     \\/     \\/     \\/                 \\/       " << std::endl  
-            << "Version " << VERSION <<" by Fador & Psoden" << std::endl << std::endl;    
+            << "Version " << VERSION <<" by Fador & Psoden" << std::endl << std::endl;
+            
+  Conf::get().load(CONFIGFILE);
+  
+  // TESTING Config
+  Conf::get().value("servername");
+  
   h.Add(&l);
   h.Select(1,0);
   while (!quit)
