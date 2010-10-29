@@ -34,7 +34,7 @@ Chat::Chat()
 
 bool Chat::sendUserlist( User *user ) {
       this->sendMsg(user, COLOR_BLUE + "[ Players online ]", USER);
-      for(int i=0;i<Users.size();i++)
+      for(unsigned int i=0;i<Users.size();i++)
       {
           this->sendMsg(user, "> " + Users[i].nick, USER);
       }
@@ -144,9 +144,9 @@ bool Chat::handleMsg( User *user, std::string msg )
             cmd.pop_front();
             if( cmd.size() > 2 ) {
               LOG(user->nick + " teleport to: " + cmd[0] + " " + cmd[1] + " " + cmd[2] );
-              float x = atof( cmd[0].c_str() );
-              float y = atof( cmd[1].c_str() );
-              float z = atof( cmd[2].c_str() );
+              double x = atof( cmd[0].c_str() );
+              double y = atof( cmd[1].c_str() );
+              double z = atof( cmd[2].c_str() );
               user->teleport(x,y,z);
             }
           }
@@ -194,7 +194,7 @@ bool Chat::sendMsg(User *user, std::string msg, int action = ALL)
     tmpArray[0]=0x03;
     tmpArray[1]=0;
     tmpArray[2]=msg.size()&0xff;      
-    for(int i=0;i<msg.size();i++) tmpArray[i+3]=msg[i]; 
+    for(unsigned int i=0;i<msg.size();i++) tmpArray[i+3]=msg[i]; 
 
     if(action == ALL) user->sendAll(&tmpArray[0],msg.size()+3);
     if(action == USER) h.SendSock(user->sock, &tmpArray[0], msg.size()+3);

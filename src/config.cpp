@@ -83,7 +83,7 @@ bool Conf::load(std::string configFile)
     if(line[1][0] == '"') 
     {
       // Append to text
-      for(int i = 1; i < line.size(); i++ ) 
+      for(unsigned int i = 1; i < line.size(); i++ ) 
       {
         text += line[i] + " ";
       }

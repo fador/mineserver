@@ -60,7 +60,7 @@ NBT_struct *Map::getMapData(int x, int z)
     if (iter2 != maps[x].end() )
     {
       //Update last used time
-      mapLastused[x][z]=time(0);
+      mapLastused[x][z]=(int)time(0);
       //Data in memory
       return &maps[x][z];
     }
@@ -115,7 +115,7 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta){
     metadata&=0x0f;
   }
   *meta=metadata;
-  mapLastused[chunk_x][chunk_z]=time(0);
+  mapLastused[chunk_x][chunk_z]=(int)time(0);
 
   return true;
 }
@@ -155,7 +155,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   metapointer[index>>1]=metadata;
 
   mapChanged[chunk_x][chunk_z]=1;
-  mapLastused[chunk_x][chunk_z]=time(0);
+  mapLastused[chunk_x][chunk_z]=(int)time(0);
 
   return true;
 }
@@ -222,7 +222,7 @@ bool Map::sendPickupSpawn(spawnedItem item)
 bool Map::loadMap(int x, int z)
 {
   //Update last used time
-  mapLastused[x][z]=time(0);
+  mapLastused[x][z]=(int)time(0);
 
   if(getMapData(x,z)!=0)
   {
@@ -280,7 +280,7 @@ bool Map::loadMap(int x, int z)
   }
 
   //Update last used time
-  mapLastused[x][z]=time(0);
+  mapLastused[x][z]=(int)time(0);
 
   //Not changed
   mapChanged[x][z]=0;

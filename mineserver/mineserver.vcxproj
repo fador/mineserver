@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\chat.cpp" />
+    <ClCompile Include="..\src\config.cpp" />
     <ClCompile Include="..\src\DisplayRawSocket.cpp" />
     <ClCompile Include="..\src\DisplaySocket.cpp" />
     <ClCompile Include="..\src\logger.cpp" />
@@ -90,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\chat.h" />
+    <ClInclude Include="..\src\config.h" />
     <ClInclude Include="..\src\constants.h" />
     <ClInclude Include="..\src\DisplayRawSocket.h" />
     <ClInclude Include="..\src\DisplaySocket.h" />
@@ -213,7 +215,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;FTLOG=main;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CONSOLE;FTLOG=main;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>../src/Sockets-2.3.9.3/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
