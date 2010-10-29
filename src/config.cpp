@@ -30,27 +30,28 @@ bool Conf::load(std::string configFile)
   
   std::string temp;
   
-  // Empty configvector (to allow configuration reload)
-  confSet.empty();
+  // Clear config (to allow configuration reload)
+  confSet.clear();
 
   // Reading row at a time
   int del;
   int lineNum = 0;
   std::vector<std::string> line;
+  std::string text;
   while( getline( ifs, temp ) ) 
   {
     // Count line numbers
     lineNum++;
     
     // If not enough characters (Absolute min is 5: "a = s")
-    if(temp.length() < 5) break;
+    if(temp.length() < 5) continue;
     
     // If commentline -> skip to next
-    if(temp[0] == COMMENTPREFIX) break;
+    if(temp[0] == COMMENTPREFIX) continue;
     
     // Init vars
     del = 0;
-    line.empty();
+    line.clear();
     
     // Process line
     while(temp.length() > 0) 
@@ -78,7 +79,7 @@ bool Conf::load(std::string configFile)
     }
     
     // Construct strings if needed
-    std::string text;
+    text = "";
     if(line[1][0] == '"') 
     {
       // Append to text
@@ -87,7 +88,7 @@ bool Conf::load(std::string configFile)
         text += line[i] + " ";
       }
       // Remove "" 
-      text = text.substr(1, text.length()-2);
+      text = text.substr(1, text.length()-3);
     } else 
     {
       text = line[1];
@@ -96,10 +97,7 @@ bool Conf::load(std::string configFile)
     // TODO: Validate configline
     
     // Push to configuration
-    std::map<std::string, std::string> temppi;
-    temppi[line[0]] = text;
-    
-    confSet.push_back( temppi ); // std::pair<std::string, std::string>(line[0], text)
+    confSet.insert( std::pair<std::string, std::string>(line[0], text) );
     
     // DEBUG
     std::cout << "> " << line[0] << " = " << text << std::endl;
@@ -121,12 +119,11 @@ bool Conf::save(std::string configFile)
 // Return value
 std::string Conf::value(std::string name) 
 {
-    /*if( confSet.find(name) != std::map::end() ) 
+    if( confSet.find(name) != confSet.end() ) 
     {
       return confSet[name];
     } else
     {
-      return false;
-    }*/
-    return "moi vaan perkele";
+      return "Not found!";
+    }
 }

@@ -5,7 +5,7 @@ class Conf
 {
     private:
         Conf() {};
-        std::vector<std::map<std::string, std::string> > confSet;
+        std::map<std::string, std::string> confSet;
     public:
         bool load(std::string configFile);
         bool save(std::string configFile);

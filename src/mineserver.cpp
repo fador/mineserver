@@ -81,9 +81,6 @@ int main(void)
             
   Conf::get().load(CONFIGFILE);
   
-  // TESTING Config
-  Conf::get().value("servername");
-  
   h.Add(&l);
   h.Select(1,0);
   while (!quit)
