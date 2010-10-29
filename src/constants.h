@@ -26,9 +26,11 @@ const int PORT = 25565;
 const std::string VERSION = "0.1.6";
 const std::string ADMINFILE = "admin.txt";
 const std::string MOTDFILE = "motd.txt";
+const std::string CONFFILE = "config.cfg";
 
 const char SERVERMSGPREFIX = '%';
 const char CHATCMDPREFIX = '/';
+const char COMMENTPREFIX = '#';
 const std::string DEFAULTKICKMSG = "This is a default kick message";
 
 //Chunk release time on seconds when not user

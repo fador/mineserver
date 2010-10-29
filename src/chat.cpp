@@ -25,7 +25,7 @@ Chat::Chat()
 
   while( getline( ifs, temp ) ) {
     // If not commentline
-    if(temp.substr(0,1) != "#") {
+    if(temp[0] != CONFIGPREFIX) {
         admins.push_back( temp );
     }
   }

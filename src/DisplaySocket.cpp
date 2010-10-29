@@ -189,7 +189,7 @@ void DisplaySocket::OnRead()
 
         while( getline( ifs, temp ) ) {
           // If not commentline
-          if(temp.substr(0,1) != "#") {
+          if(temp[0] != COMMENTPREFIX) {
             chat.sendMsg(user, temp, USER);
           }
         }
