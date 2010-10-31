@@ -178,7 +178,7 @@ void DisplaySocket::OnRead()
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
 
       std::cout << "Player " << user->UID << " login v." <<version<<" : " << player <<":" << passwd << std::endl;
-      if(version==2)
+      if(version==2 || version==3)
       {        
         user->logged=1;
         user->changeNick(player, chat.admins);
@@ -200,7 +200,7 @@ void DisplaySocket::OnRead()
       }
       else
       {
-        this->Close();
+        this->SetCloseAndDelete();
       }
     
       //Login OK package

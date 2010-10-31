@@ -80,6 +80,176 @@ bool Map::saveWholeMap()
   }
   return true;
 }
+
+bool Map::generateLightMaps(int x, int z)
+{
+  LOG("Generating lightmap..");
+  if(!loadMap(x,z)) return false;
+  uint8 *skylight=maps[x][z].skylight;
+  uint8 *blocklight=maps[x][z].blocklight;
+  uint8 *blocks=maps[x][z].blocks;
+
+  //Clear lightmaps
+  memset(blocklight, 0, 16*16*128/2);
+  memset(skylight, 0, 16*16*128/2);
+
+  //Skylight
+
+  //First set sunlight for all blocks until hit ground
+  for(uint8 block_x=0;block_x<16;block_x++)
+  {
+    for(uint8 block_z=0;block_z<16;block_z++)
+    {
+      for(uint8 block_y=127;block_y>0;block_y--)
+      {
+        int index=block_y + (block_z * 128) + (block_x * 128 * 16);
+        int absolute_x=x*16+block_x;
+        int absolute_z=z*16+block_z;
+        uint8 block=blocks[index];
+        if(stopLight[block]==-16)
+        {
+          break;
+        }
+        else
+        {
+          setBlockLight(absolute_x,block_y,absolute_z, 0, 15, 2);
+        }
+      }
+    }
+  }
+  LOG("first pass done");
+
+
+    //Loop again and now spread the light
+  for(uint8 block_x=0;block_x<16;block_x++)
+  {
+    for(uint8 block_z=0;block_z<16;block_z++)
+    {
+      for(int block_y=127;block_y>=0;block_y--)
+      {
+        int index=block_y + (block_z * 128) + (block_x * 128 * 16);
+        int absolute_x=x*16+block_x;
+        int absolute_z=z*16+block_z;
+        uint8 block=blocks[index];
+        //getBlock(absolute_x,block_y,absolute_z,&block,&meta);
+        if(stopLight[block]==-16)
+        {
+          setBlockLight(absolute_x,block_y,absolute_z, 15+stopLight[block], 0, 1);
+          break;
+        }
+        else
+        {
+          setBlockLight(absolute_x,block_y,absolute_z, 15, 0, 1);
+          lightmapStep(absolute_x,block_y,absolute_z,15+stopLight[block]);
+        }
+      }
+    }
+  }
+  LOG("2nd pass done");
+
+
+  
+  //Blocklight
+  for(uint8 block_x=0;block_x<16;block_x++)
+  {
+    for(uint8 block_z=0;block_z<16;block_z++)
+    {
+      for(int block_y=127;block_y>=0;block_y--)
+      {
+        int index=block_y + (block_z * 128) + (block_x * 128 * 16);
+        if(blocks[index]==0x32)
+        {
+          int absolute_x=x*16+block_x;
+          int absolute_z=z*16+block_z;          
+          blocklightmapStep(absolute_x,block_y,absolute_z,14);          
+        }
+      }
+    }
+  }
+
+  LOG("..done");
+  return true;
+}
+
+bool Map::blocklightmapStep(int x, int y, int z, int light)
+{
+  uint8 block,meta;
+
+  //If no light, stop!
+  if(light<1) return false;
+
+  for(uint8 i=0;i<6;i++)
+  {
+    int x_local=x;
+    int y_local=y;
+    int z_local=z;
+    switch(i)
+    {
+      case 0: x_local++; break;
+      case 1: x_local--; break;
+      case 2: y_local++; break;
+      case 3: y_local--; break;
+      case 4: z_local++; break;
+      case 5: z_local--; break;
+    }
+
+    if(getBlock(x_local,y_local,z_local,&block,&meta))
+    {
+      uint8 blocklight,skylight;
+      getBlockLight(x_local,y_local,z_local, &blocklight, &skylight);
+      if(blocklight<light+stopLight[block]-1)
+      {
+        setBlockLight(x_local,y_local,z_local, light+stopLight[block]-1,15,1);
+        if(stopLight[block]!=-16)
+        {
+          blocklightmapStep(x_local,y_local,z_local, light+stopLight[block]-1);
+        }
+      }
+    }
+  }
+  return true;
+}
+
+bool Map::lightmapStep(int x, int y, int z, int light)
+{
+  uint8 block,meta;
+
+  //If no light, stop!
+  if(light<1) return false;
+
+  for(uint8 i=0;i<6;i++)
+  {
+    int x_local=x;
+    int y_local=y;
+    int z_local=z;
+    switch(i)
+    {
+      case 0: x_local++; break;
+      case 1: x_local--; break;
+      case 2: y_local++; break;
+      case 3: y_local--; break;
+      case 4: z_local++; break;
+      case 5: z_local--; break;
+    }
+
+    if(getBlock(x_local,y_local,z_local,&block,&meta))
+    {
+      uint8 blocklight,skylight;
+      getBlockLight(x_local,y_local,z_local, &blocklight, &skylight);
+      if(skylight<light+stopLight[block]-1)
+      {
+        setBlockLight(x_local,y_local,z_local,0, light+stopLight[block]-1,2);
+        if(stopLight[block]!=-16)
+        {
+          lightmapStep(x_local,y_local,z_local, light+stopLight[block]-1);
+        }
+      }
+    }
+  }
+  return true;
+}
+
+
 bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta){
 
   int chunk_x=((x<0)?((x+1)/16)-1:x/16);
@@ -92,7 +262,7 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta){
   NBT_struct *chunk=getMapData(chunk_x, chunk_z);
   if(!chunk || y<0 || y>127)
   {
-    LOG("chunk failed");
+    //LOG("chunk failed");
     return false;
   }
 
@@ -116,6 +286,112 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta){
   }
   *meta=metadata;
   mapLastused[chunk_x][chunk_z]=(int)time(0);
+
+  return true;
+}
+
+bool Map::getBlockLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight)
+{
+
+  int chunk_x=((x<0)?((x+1)/16)-1:x/16);
+  int chunk_z=((z<0)?((z+1)/16)-1:z/16);
+  if(!loadMap(chunk_x,chunk_z))
+  {
+    LOG("Loadmap failed");
+    return false;
+  }
+  NBT_struct *chunk=getMapData(chunk_x, chunk_z);
+  if(!chunk || y<0 || y>127)
+  {
+    LOG("chunk failed");
+    return false;
+  }
+
+  int chunk_block_x=((x<0)?15+((x+1)%16):(x%16));
+  int chunk_block_z=((z<0)?15+((z+1)%16):(z%16));
+
+  uint8 *blocklightpointer=chunk->blocklight;
+  uint8 *skylightpointer=chunk->skylight;
+
+  int index=y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
+  *blocklight=blocklightpointer[(index)>>1];
+  *skylight=skylightpointer[(index)>>1];
+  
+  if(y%2)
+  {
+    *blocklight&=0xf0;
+    *blocklight>>=4;
+
+    *skylight&=0xf0;
+    *skylight>>=4;
+  }
+  else
+  {
+    *blocklight&=0x0f;
+    *skylight&=0x0f;
+  }
+
+  return true;
+}
+
+bool Map::setBlockLight(int x, int y, int z, uint8 blocklight, uint8 skylight, uint8 setLight)
+{
+
+  int chunk_x=((x<0)?((x+1)/16)-1:x/16);
+  int chunk_z=((z<0)?((z+1)/16)-1:z/16);
+  if(!loadMap(chunk_x,chunk_z))
+  {
+    return false;
+  }
+  NBT_struct *chunk=getMapData(chunk_x, chunk_z);
+  if(!chunk || y<0 || y>127)
+  {
+    return false;
+  }
+
+  int chunk_block_x=((x<0)?15+((x+1)%16):(x%16));
+  int chunk_block_z=((z<0)?15+((z+1)%16):(z%16));
+  uint8 *blocklightpointer=chunk->blocklight;
+  uint8 *skylightpointer=chunk->skylight;
+  int index=y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
+
+  char skylight_local=skylightpointer[index>>1];
+  char blocklight_local=blocklightpointer[index>>1];
+  if(y%2)
+  {
+    if(setLight&0x6) // 2 or 4
+    {
+      skylight_local&=0x0f;
+      skylight_local|=skylight<<4;
+    }
+    if(setLight&0x5) //1 or 4
+    {
+      blocklight_local&=0x0f;
+      blocklight_local|=blocklight<<4;
+    }
+  }
+  else
+  {
+    if(setLight&0x6) // 2 or 4
+    {
+      skylight_local&=0xf0;
+      skylight_local|=skylight;
+    }
+    if(setLight&0x5) //1 or 4
+    {
+      blocklight_local&=0xf0;
+      blocklight_local|=blocklight;
+    }
+  }
+
+  if(setLight&0x6) // 2 or 4
+  {
+    skylightpointer[index>>1]=skylight_local;
+  }
+  if(setLight&0x5) //1 or 4
+  {
+    blocklightpointer[index>>1]=blocklight_local;
+  }
 
   return true;
 }
@@ -312,6 +588,9 @@ bool Map::saveMap(int x, int z)
     //Map not in memory!
     return false;
   }
+
+  //Recalculate light maps
+  generateLightMaps(x,z);
 
   int mapposx=x;
   int mapposz=z;
