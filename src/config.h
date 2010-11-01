@@ -8,7 +8,6 @@ class Conf
         std::map<std::string, std::string> confSet;
     public:
         bool load(std::string configFile);
-        bool save(std::string configFile);
         std::string value(std::string name);
         static Conf &get();
 };

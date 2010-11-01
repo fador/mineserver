@@ -35,7 +35,11 @@ bool Chat::checkMotd(std::string motdFile)
   // If file does not exist
   if( ifs.fail() )
   {
-    std::cout << "> Warning: " << motdFile << " not found. Creating using default message..." << std::endl;
+    std::cout << "> Warning: " << motdFile << " not found. Creating..." << std::endl;
+    
+    std::ofstream motdofs( motdFile.c_str() );
+    motdofs << DEFAULTMOTDFILE << std::endl;
+    motdofs.close();
   }
   
   ifs.close();
@@ -54,9 +58,7 @@ bool Chat::loadAdmins(std::string adminFile)
     std::cout << "> Warning: " << adminFile << " not found. Creating..." << std::endl;
     
     std::ofstream adminofs( adminFile.c_str() );
-
     adminofs << DEFAULTADMINFILE << std::endl;
-
     adminofs.close();
     
     return true;

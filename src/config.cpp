@@ -27,6 +27,8 @@ bool Conf::load(std::string configFile)
   if( ifs.fail() )
   {
     std::cout << "> Warning: " << configFile << " not found. Creating using default values..." << std::endl;
+    
+    // TODO: Actually create it ;(
   }
   
   std::string temp;
@@ -75,7 +77,7 @@ bool Conf::load(std::string configFile)
     // If under two words skip the line and log skipping.
     if(line.size() < 2) 
     {
-      //LOG("Invalid configuration at line " + std::string(lineNum) + " of " + configFile);
+      std::cout << "Invalid configuration at line " << lineNum << " of " << configFile;
       break;
     }
     
@@ -109,13 +111,6 @@ bool Conf::load(std::string configFile)
   
   return true;
 }
-
-// Save configuration
-bool Conf::save(std::string configFile) 
-{
-  return true;
-}
-
 
 // Return value
 std::string Conf::value(std::string name) 
