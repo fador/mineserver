@@ -96,23 +96,20 @@ bool Map::generateLightMaps(int x, int z)
   //Skylight
 
   //First set sunlight for all blocks until hit ground
-  for(uint8 block_x=0;block_x<16;block_x++)
+  for(int block_x=0;block_x<16;block_x++)
   {
-    for(uint8 block_z=0;block_z<16;block_z++)
+    for(int block_z=0;block_z<16;block_z++)
     {
-      for(uint8 block_y=127;block_y>0;block_y--)
+      for(int block_y=127;block_y>0;block_y--)
       {
         int index=block_y + (block_z * 128) + (block_x * 128 * 16);
         int absolute_x=x*16+block_x;
         int absolute_z=z*16+block_z;
         uint8 block=blocks[index];
+        setBlockLight(absolute_x,block_y,absolute_z, 0, 15, 2);
         if(stopLight[block]==-16)
         {
           break;
-        }
-        else
-        {
-          setBlockLight(absolute_x,block_y,absolute_z, 0, 15, 2);
         }
       }
     }
@@ -121,9 +118,9 @@ bool Map::generateLightMaps(int x, int z)
 
 
     //Loop again and now spread the light
-  for(uint8 block_x=0;block_x<16;block_x++)
+  for(int block_x=0;block_x<16;block_x++)
   {
-    for(uint8 block_z=0;block_z<16;block_z++)
+    for(int block_z=0;block_z<16;block_z++)
     {
       for(int block_y=127;block_y>=0;block_y--)
       {

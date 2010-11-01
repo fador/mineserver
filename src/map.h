@@ -30,14 +30,15 @@ private:
     emitLight[0x32] = 14; //Torch
     emitLight[0x33] = 15; //Fire
     emitLight[0x3E] = 14; //Lit furnace
+    emitLight[0x4A] = 9;  //Redstone ore (Glowing)
     emitLight[0x4C] = 7;  //Redstone Torch (On)
     emitLight[0x59] = 15; //Lightstone
     emitLight[0x5B] = 15; //Jack-O-Lantern
 
     for(int i=0;i<256;i++) stopLight[i]=-16;
     stopLight[0x00] = 0; //Empty
-    stopLight[0x08] =-4; //Water
-    stopLight[0x09] =-4; //Stationary water
+    stopLight[0x08] =-3; //Water
+    stopLight[0x09] =-3; //Stationary water
     stopLight[0x12] = 0; //Leaves
     stopLight[0x14] = 0; //Glass
     stopLight[0x25] = 0; //Yellow flower
@@ -48,6 +49,7 @@ private:
     stopLight[0x4b] = 0; //Redstone Torch (Off)
     stopLight[0x4C] = 0; //Redstone Torch (On)
     stopLight[0x4e] = 0; //Snow
+    stopLight[0x4f] =-3; //Ice
   };
   ~Map()
   {
