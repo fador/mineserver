@@ -90,13 +90,18 @@ int main(void)
         Users[0].sendAll((uint8 *)&data3[0], 9);
       }
 
-      //Release chunks not used in MAP_RELEASE_TIME seconds
+      //Try to load port from config
+      int map_release_time=atoi(Conf::get().value("map_release_time").c_str());
+      //If failed, use default
+      if(map_release_time==0) map_release_time=DEFAULT_MAP_RELEASE_TIME;
+
+      //Release chunks not used in <map_release_time> seconds
       std::vector<coord> toRelease;
       for (std::map<int, std::map<int, int> >::const_iterator it = Map::get().mapLastused.begin(); it != Map::get().mapLastused.end(); ++it)
       {
         for (std::map<int, int>::const_iterator it2 = Map::get().mapLastused[it->first].begin();it2 != Map::get().mapLastused[it->first].end(); ++it2)
         {
-          if(Map::get().mapLastused[it->first][it2->first] <= time(0)-MAP_RELEASE_TIME)
+          if(Map::get().mapLastused[it->first][it2->first] <= time(0)-map_release_time)
           {
             coord newCoord={it->first,0, it2->first};
             toRelease.push_back(newCoord);

@@ -34,6 +34,6 @@ const char COMMENTPREFIX = '#';
 const std::string DEFAULTKICKMSG = "This is a default kick message";
 
 //Chunk release time on seconds when not user
-const int MAP_RELEASE_TIME = 10;
+const int DEFAULT_MAP_RELEASE_TIME = 10;
 
 #endif
