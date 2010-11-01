@@ -1,7 +1,21 @@
 custom Minecraft Alpha server software written in C++.
 
-Currently in development, doesn't do anything yet ;)
+Currently in development.
 
 Tested to build on Windows (Visual Studio 2010 project included) and on Linux (Makefile included).
 
 We are trying to minimize memory and cpu usage compared to original Java server.
+
+Features:
+ - some chat commands, more to come..
+ - own NBT parsing/saving
+ - Lightmap generation
+ - Config file with some options
+  
+ToDo:
+ - Map generation
+ - Physics
+ - Growing trees etc.
+ + more
+ 
+ 
