@@ -282,7 +282,7 @@ bool User::popMap()
 bool User::pushMap()
 {
   //If map in queue, push it to client
-  if(this->mapQueue.size())
+  if(this->mapQueue.size()>0)
   {
     //Sort by distance from center
     sort(mapQueue.begin(),mapQueue.end(),SortVect);

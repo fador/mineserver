@@ -83,7 +83,6 @@ bool Map::saveWholeMap()
 
 bool Map::generateLightMaps(int x, int z)
 {
-  LOG("Generating lightmap..");
   if(!loadMap(x,z)) return false;
   uint8 *skylight=maps[x][z].skylight;
   uint8 *blocklight=maps[x][z].blocklight;
@@ -114,10 +113,8 @@ bool Map::generateLightMaps(int x, int z)
       }
     }
   }
-  LOG("first pass done");
 
-
-    //Loop again and now spread the light
+  //Loop again and now spread the light
   for(int block_x=0;block_x<16;block_x++)
   {
     for(int block_z=0;block_z<16;block_z++)
@@ -142,10 +139,7 @@ bool Map::generateLightMaps(int x, int z)
       }
     }
   }
-  LOG("2nd pass done");
 
-
-  
   //Blocklight
   for(uint8 block_x=0;block_x<16;block_x++)
   {
@@ -165,8 +159,6 @@ bool Map::generateLightMaps(int x, int z)
       }
     }
   }
-
-  LOG("..done");
   return true;
 }
 

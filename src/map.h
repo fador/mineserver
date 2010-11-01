@@ -39,7 +39,7 @@ private:
     stopLight[0x00] = 0; //Empty
     stopLight[0x08] =-3; //Water
     stopLight[0x09] =-3; //Stationary water
-    stopLight[0x12] = 0; //Leaves
+    stopLight[0x12] =-3; //Leaves
     stopLight[0x14] = 0; //Glass
     stopLight[0x25] = 0; //Yellow flower
     stopLight[0x26] = 0; //Red rose

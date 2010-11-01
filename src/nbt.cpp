@@ -233,6 +233,17 @@ int TAG_Compound(uint8* input, NBT_struct *output, bool start)
         break;
       case TAG_BYTE_ARRAY:
           curpos+=TAG_Byte_Array(&input[curpos], &bytearray);
+          //Special handling with lightmaps
+          if(bytearray.length==0)
+          {
+            //If zero sized lightmap, generate a new empty lightmap
+            if(bytearray.name=="BlockLight" || bytearray.name=="SkyLight")
+            {
+              bytearray.length=16*16*128/2;
+              bytearray.data=new uint8[bytearray.length];
+              memset(bytearray.data, 0, bytearray.length);
+            }
+          }
           output->byte_arrays.push_back(bytearray);
         break;
       case TAG_STRING:
