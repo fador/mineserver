@@ -22,8 +22,6 @@
 #include "zlib/zlib.h"
 #include "chat.h"
 
-
-extern Chat chat;
 extern ListenSocket<DisplaySocket> l;
 extern StatusHandler h;
 
@@ -415,7 +413,7 @@ bool remUser(SOCKET sock)
     {
         if(Users[i].sock==sock)
         {
-            chat.sendMsg(&Users[i], Users[i].nick+" disconnected!", OTHERS);
+            Chat::get().sendMsg(&Users[i], Users[i].nick+" disconnected!", OTHERS);
             Users.erase(Users.begin()+i);
             return true;
         }

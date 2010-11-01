@@ -18,35 +18,40 @@
 
 extern StatusHandler h;
 
-Chat::Chat() 
+Chat &Chat::get()
 {
-  this->loadAdmins();
-  
+  static Chat instance;
+  return instance;
+}
+
+
+bool Chat::checkMotd(std::string motdFile) 
+{
   //
   // Create motdfile is it doesn't exist
   //
-  std::ifstream ifs( MOTDFILE.c_str() );
+  std::ifstream ifs( motdFile.c_str() );
         
   // If file does not exist
   if( ifs.fail() )
   {
-    std::cout << "> Warning: " << MOTDFILE << " not found." << std::endl;
-    std::cout << "> Creating " << MOTDFILE << " with default message" << std::endl;
+    std::cout << "> Warning: " << motdFile << " not found." << std::endl;
+    std::cout << "> Creating " << motdFile << " with default message" << std::endl;
   }
   
   ifs.close();
 }
 
-bool Chat::loadAdmins() 
+bool Chat::loadAdmins(std::string adminFile) 
 {
   // Read admins to deque
-  std::ifstream ifs( ADMINFILE.c_str() );
+  std::ifstream ifs( adminFile.c_str() );
   
   // If file does not exist
   if( ifs.fail() )
   {
-    std::cout << "> Warning: " << ADMINFILE << " not found." << std::endl;
-    std::cout << "> Creating " << ADMINFILE << std::endl;
+    std::cout << "> Warning: " << adminFile << " not found." << std::endl;
+    std::cout << "> Creating " << adminFile << std::endl;
     
     return true;
   }
@@ -63,7 +68,7 @@ bool Chat::loadAdmins()
   }
   ifs.close();
   
-  std::cout << "Loaded admins from " << ADMINFILE << std::endl;
+  std::cout << "Loaded admins from " << adminFile << std::endl;
   
   return true;
 } 
@@ -211,7 +216,7 @@ bool Chat::handleMsg( User *user, std::string msg )
             cmd.pop_front();
             
             // Load admins
-            this->loadAdmins();
+            this->loadAdmins(ADMINFILE);
             
             // Load config
             Conf::get().load(CONFIGFILE);

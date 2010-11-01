@@ -44,6 +44,9 @@ int main(void)
 
   Map::get().initMap();
 
+  Chat::get().loadAdmins(ADMINFILE);
+  Chat::get().checkMotd(MOTDFILE);
+  
   Conf::get().load(CONFIGFILE);
 
   //Try to load port from config
