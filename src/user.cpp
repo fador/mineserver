@@ -46,7 +46,7 @@ bool User::changeNick(std::string nick, std::deque<std::string> admins)
   this->nick=nick;
   
   // Check adminstatus
-  for(int i = 0; i < admins.size(); i++) {
+  for(unsigned int i = 0; i < admins.size(); i++) {
     if(admins[i] == nick) {
         this->admin=true;
         LOG(nick + " admin");
@@ -74,7 +74,7 @@ bool User::kick(std::string kickMsg)
   
   data[0] = 0xff;
   putSint16(&data[1],len);
-  for(int i=0;i<kickMsg.size();i++) data[i+3]= kickMsg[i];
+  for(unsigned int i=0;i<kickMsg.size();i++) data[i+3]= kickMsg[i];
   
   h.SendSock(this->sock, data,len+3);
 
@@ -118,8 +118,9 @@ bool User::updatePos(double x, double y, double z, double stance)
     //Chunk position changed, check for map updates
     if((int)(x/16) != curChunk.x ||(int)(z/16) != curChunk.z)
     {
-      curChunk.x=x/16;
-      curChunk.z=z/16;
+      //This is not accurate chunk!!
+      curChunk.x=(int)(x/16);
+      curChunk.z=(int)(z/16);
 
       for(int mapx=-viewDistance+curChunk.x;mapx<=viewDistance+curChunk.x;mapx++)
       {
@@ -339,7 +340,7 @@ bool User::spawnUser(int x, int y, int z)
   entityData2[curpos+1]=this->nick.size();
   curpos+=2;
   
-  for(int j=0;j<this->nick.size();j++)
+  for(unsigned int j=0;j<this->nick.size();j++)
   {
     entityData2[curpos]=this->nick[j];
     curpos++;
@@ -363,7 +364,7 @@ bool User::spawnUser(int x, int y, int z)
 bool User::spawnOthers()
 {
 
-  for(int i=0;i<Users.size(); i++)
+  for(unsigned int i=0;i<Users.size(); i++)
   {
     if(Users[i].UID!=this->UID && Users[i].nick != this->nick)
     {
@@ -377,17 +378,17 @@ bool User::spawnOthers()
       entityData2[curpos+1]=Users[i].nick.size();
       curpos+=2;
   
-      for(int j=0;j<Users[i].nick.size();j++)
+      for(unsigned int j=0;j<Users[i].nick.size();j++)
       {
         entityData2[curpos]=Users[i].nick[j];
         curpos++;
       }
   
-      putSint32(&entityData2[curpos],Users[i].pos.x*32);
+      putSint32(&entityData2[curpos],(int)(Users[i].pos.x*32));
       curpos+=4;
-      putSint32(&entityData2[curpos],Users[i].pos.y*32);
+      putSint32(&entityData2[curpos],(int)(Users[i].pos.y*32));
       curpos+=4;
-      putSint32(&entityData2[curpos],Users[i].pos.z*32);
+      putSint32(&entityData2[curpos],(int)(Users[i].pos.z*32));
       curpos+=4;
       entityData2[curpos]=0; //Rotation
       entityData2[curpos+1]=0; //Pitch

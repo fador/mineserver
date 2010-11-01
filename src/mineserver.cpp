@@ -43,29 +43,15 @@ int main(void)
 #endif
 
   Map::get().initMap();
-  //atexit(freeMap);
-  /*
-  std::string infile="testmap/1f/1f/c.-d.-d.dat";
-  gzFile mapfile=gzopen(infile.c_str(),"rb");        
-  uint8 uncompressedData[200000];
-  int uncompressedSize=gzread(mapfile,&uncompressedData[0],200000);
-  gzclose(mapfile);
-  int out;
-  NBT_struct structure;
-  TAG_Compound(&uncompressedData[0], &structure,true);
 
-  std::string outfile="testmap.nbt";
-  uint8 uncompressedData2[200000];
-  int dumpsize=dumpNBT_struct(&structure.compounds[0], &uncompressedData2[0]);
-  gzFile mapfile2=gzopen(outfile.c_str(),"wb");        
-  gzwrite(mapfile2,&uncompressedData2[0],dumpsize);
-  gzclose(mapfile2);
+  Conf::get().load(CONFIGFILE);
 
-  freeNBT_struct(&structure);
-  exit(1);
-  */
+  //Try to load port from config
+  int port=atoi(Conf::get().value("port").c_str());
+  //If failed, use default
+  if(port==0) port=DEFAULT_PORT;
   //Bind to port
-  if (l.Bind(PORT))
+  if (l.Bind(port))
   {
     std::cout << "Unable to Bind port!" << std::endl;
     exit(-1);
@@ -79,7 +65,7 @@ int main(void)
             << "        \\/        \\/     \\/     \\/     \\/                 \\/       " << std::endl  
             << "Version " << VERSION <<" by Fador & Psoden" << std::endl << std::endl;
             
-  Conf::get().load(CONFIGFILE);
+
   
   h.Add(&l);
   h.Select(1,0);
