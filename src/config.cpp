@@ -26,8 +26,7 @@ bool Conf::load(std::string configFile)
   // If file does not exist
   if( ifs.fail() )
   {
-    std::cout << "> Warning: " << configFile << " not found." << std::endl;
-    std::cout << "> Creating " << configFile << " with default values" << std::endl;
+    std::cout << "> Warning: " << configFile << " not found. Creating using default values..." << std::endl;
   }
   
   std::string temp;

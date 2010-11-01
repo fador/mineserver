@@ -35,8 +35,7 @@ bool Chat::checkMotd(std::string motdFile)
   // If file does not exist
   if( ifs.fail() )
   {
-    std::cout << "> Warning: " << motdFile << " not found." << std::endl;
-    std::cout << "> Creating " << motdFile << " with default message" << std::endl;
+    std::cout << "> Warning: " << motdFile << " not found. Creating using default message..." << std::endl;
   }
   
   ifs.close();
@@ -50,8 +49,13 @@ bool Chat::loadAdmins(std::string adminFile)
   // If file does not exist
   if( ifs.fail() )
   {
-    std::cout << "> Warning: " << adminFile << " not found." << std::endl;
-    std::cout << "> Creating " << adminFile << std::endl;
+    std::cout << "> Warning: " << adminFile << " not found. Creating..." << std::endl;
+    
+    std::ofstream adminofs( adminFile.c_str() );
+
+    adminofs << DEFAULTADMINFILE << std::endl;
+
+    adminofs.close();
     
     return true;
   }
@@ -196,7 +200,9 @@ bool Chat::handleMsg( User *user, std::string msg )
           else if(cmd[0] == "tp") 
           {
             cmd.pop_front();
-            if( !cmd.empty() ) {
+            // Teleport me to param
+            if( cmd.size() == 1 )
+            {
               LOG(user->nick + " teleport to: " + cmd[0]);
               
               // Get coordinates
@@ -207,6 +213,28 @@ bool Chat::handleMsg( User *user, std::string msg )
               } else {
                 this->sendMsg(user, COLOR_DARK_MAGENTA + "Error!" + COLOR_RED + " User " + cmd[0] + " not found (See /players)", USER);
               }
+            } 
+            // Teleport param1 to param2
+            else if( cmd.size() == 2 ) 
+            {
+              LOG(user->nick + ": teleport " + cmd[0] + " to " + cmd[1]);
+              
+              // Get coordinates
+              User* whatUser = getUserByNick( cmd[0] );
+              User* toUser = getUserByNick( cmd[1] );
+              if(whatUser != false && toUser != false)
+              {
+                whatUser->teleport(toUser->pos.x, toUser->pos.y+2, toUser->pos.z);
+                this->sendMsg(user, COLOR_MAGENTA + "Teleported!", USER);
+              } 
+              else 
+              {
+                this->sendMsg(user, COLOR_DARK_MAGENTA + "Error!" + COLOR_RED + " User " + cmd[0] + " or " + cmd[1] + " not found (See /players)", USER);
+              }
+            } 
+            else 
+            {
+              this->sendMsg(user, COLOR_DARK_MAGENTA + "Error!" + COLOR_RED + " Faulty parameters", USER);
             }
           }
           
@@ -220,6 +248,8 @@ bool Chat::handleMsg( User *user, std::string msg )
             
             // Load config
             Conf::get().load(CONFIGFILE);
+            
+            this->sendMsg(user, COLOR_DARK_MAGENTA + "SERVER:" + COLOR_RED + " Reloaded admins and config", USER);
             
             // Note: Motd is loaded whenever new user joins
           }
