@@ -29,8 +29,6 @@
 
 typedef std::map<SOCKET,Socket *> socket_m;
 
-Chat chat;
-
 // the constant TCP_BUFSIZE_READ is the maximum size of the standard input
 // buffer of TcpSocket
 #define RSIZE TCP_BUFSIZE_READ
@@ -181,22 +179,22 @@ void DisplaySocket::OnRead()
       if(version==2 || version==3)
       {        
         user->logged=1;
-        user->changeNick(player, chat.admins);
+        user->changeNick(player, Chat::get().admins);
        
         // Send motd
-        std::ifstream ifs( MOTDFILE.c_str() );
+        std::ifstream motdfs( MOTDFILE.c_str() );
         
         std::string temp;
 
-        while( getline( ifs, temp ) ) {
+        while( getline( motdfs, temp ) ) {
           // If not commentline
           if(temp[0] != COMMENTPREFIX) {
-            chat.sendMsg(user, temp, USER);
+            Chat::get().sendMsg(user, temp, USER);
           }
         }
-        ifs.close();
+        motdfs.close();
 
-        chat.sendMsg(user, player+" connected!", USER);
+        Chat::get().sendMsg(user, player+" connected!", USER);
 
       }
       else
@@ -331,7 +329,7 @@ void DisplaySocket::OnRead()
       // Remove from buffer
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
 
-      chat.handleMsg( user, msg );
+      Chat::get().handleMsg( user, msg );
 
     }
     else if(user->action==0x05) //Inventory change

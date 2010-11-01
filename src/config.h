@@ -11,7 +11,6 @@ class Conf
         bool save(std::string configFile);
         std::string value(std::string name);
         static Conf &get();
-
 };
 
 #endif
