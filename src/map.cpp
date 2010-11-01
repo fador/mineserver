@@ -157,11 +157,13 @@ bool Map::generateLightMaps(int x, int z)
       for(int block_y=127;block_y>=0;block_y--)
       {
         int index=block_y + (block_z * 128) + (block_x * 128 * 16);
-        if(blocks[index]==0x32)
+
+        //If light emitting block
+        if(emitLight[blocks[index]])
         {
           int absolute_x=x*16+block_x;
           int absolute_z=z*16+block_z;          
-          blocklightmapStep(absolute_x,block_y,absolute_z,14);          
+          blocklightmapStep(absolute_x,block_y,absolute_z,emitLight[blocks[index]]);          
         }
       }
     }
