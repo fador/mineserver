@@ -37,6 +37,7 @@ private:
 
     for(int i=0;i<256;i++) stopLight[i]=-16;
     stopLight[0x00] = 0; //Empty
+    stopLight[0x06] = 0; //Sapling
     stopLight[0x08] =-3; //Water
     stopLight[0x09] =-3; //Stationary water
     stopLight[0x12] =-3; //Leaves
@@ -46,10 +47,16 @@ private:
     stopLight[0x27] = 0; //Brown mushroom
     stopLight[0x28] = 0; //Red mushroom
     stopLight[0x32] = 0; //Torch
+    stopLight[0x33] = 0; //Fire
+    stopLight[0x34] = 0; //Mob spawner
+    stopLight[0x37] = 0; //Redstone wire
+    stopLight[0x41] = 0; //Ladder
+    stopLight[0x42] = 0; //Minecart track
     stopLight[0x4b] = 0; //Redstone Torch (Off)
     stopLight[0x4C] = 0; //Redstone Torch (On)
     stopLight[0x4e] = 0; //Snow
     stopLight[0x4f] =-3; //Ice
+    stopLight[0x55] = 0; //Fence
   };
   ~Map()
   {
