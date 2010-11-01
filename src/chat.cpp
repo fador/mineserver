@@ -39,6 +39,8 @@ bool Chat::checkMotd(std::string motdFile)
   }
   
   ifs.close();
+
+  return true;
 }
 
 bool Chat::loadAdmins(std::string adminFile) 
