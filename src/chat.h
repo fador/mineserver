@@ -15,6 +15,7 @@ class Chat
         bool sendUserlist( User *user );
     private:
         std::deque<std::string> parseCmd(std::string cmd);
+        bool loadAdmins();
 };
 
 #endif

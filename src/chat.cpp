@@ -19,9 +19,40 @@ extern StatusHandler h;
 
 Chat::Chat() 
 {
+  this->loadAdmins();
+  
+  //
+  // Create motdfile is it doesn't exist
+  //
+  std::ifstream ifs( MOTDFILE.c_str() );
+        
+  // If file does not exist
+  if( ifs.fail() )
+  {
+    std::cout << "> Warning: " << MOTDFILE << " not found." << std::endl;
+    std::cout << "> Creating " << MOTDFILE << " with default message" << std::endl;
+  }
+  
+  ifs.close();
+}
+
+bool Chat::loadAdmins() 
+{
   // Read admins to deque
   std::ifstream ifs( ADMINFILE.c_str() );
+  
+  // If file does not exist
+  if( ifs.fail() )
+  {
+    std::cout << "> Warning: " << ADMINFILE << " not found." << std::endl;
+    std::cout << "> Creating " << ADMINFILE << std::endl;
+    
+    return true;
+  }
+  
   std::string temp;
+  
+  admins.clear();
 
   while( getline( ifs, temp ) ) {
     // If not commentline
@@ -30,7 +61,11 @@ Chat::Chat()
     }
   }
   ifs.close();
-}
+  
+  std::cout << "Loaded admins from " << ADMINFILE << std::endl;
+  
+  return true;
+} 
 
 bool Chat::sendUserlist( User *user ) {
       this->sendMsg(user, COLOR_BLUE + "[ Players online ]", USER);
@@ -168,6 +203,21 @@ bool Chat::handleMsg( User *user, std::string msg )
               }
             }
           }
+          
+                    // Kick user
+          else if(cmd[0] == "reload") 
+          {
+            cmd.pop_front();
+            
+            // Load admins
+            this->loadAdmins();
+            
+            // Load config
+            Conf::get().load(CONFIGFILE);
+            
+            // Note: Motd is loaded whenever new user joins
+          }
+          
         }
     } 
     // Normal message
