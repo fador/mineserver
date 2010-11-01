@@ -185,6 +185,7 @@ void DisplaySocket::OnRead()
        
         // Send motd
         std::ifstream ifs( MOTDFILE.c_str() );
+        
         std::string temp;
 
         while( getline( ifs, temp ) ) {

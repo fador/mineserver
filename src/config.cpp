@@ -22,10 +22,11 @@ bool Conf::load(std::string configFile)
   std::cout << "Loading configuration from " << configFile << std::endl;
   std::ifstream ifs( configFile.c_str() );
   
+  // If file does not exist
   if( ifs.fail() )
   {
-    LOG("Failed to open configurationfile");
-    return false;
+    std::cout << "> Warning: " << configFile << " not found." << std::endl;
+    std::cout << "> Creating " << configFile << " with default values" << std::endl;
   }
   
   std::string temp;
