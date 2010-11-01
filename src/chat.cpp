@@ -14,6 +14,7 @@
 #include "map.h"
 #include "user.h"
 #include "chat.h"
+#include "config.h"
 
 extern StatusHandler h;
 
