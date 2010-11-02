@@ -266,6 +266,26 @@ int TAG_Compound(uint8* input, NBT_struct *output, bool start)
 }
 
 
+bool get_NBT_value(NBT_struct *input, std::string TAG, int *value)
+{  
+  for(unsigned i=0;i<input->values.size();i++)
+  {
+    if(input->values[i].name==TAG)
+    {
+      //ToDo: Fix casting
+      *value=(int)input->values[i].value;
+      return true;
+    }
+  }
+  for(unsigned j=0;j<input->compounds.size();j++)
+  {    
+    return get_NBT_value(&input->compounds[j], TAG, value);    
+  }
+  return false;
+}
+
+
+
 uint8 *get_NBT_pointer(NBT_struct *input, std::string TAG)
 {
   uint8 *pointer;
