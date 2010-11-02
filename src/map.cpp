@@ -28,6 +28,7 @@
 #include "zlib/zlib.h"
 #include "user.h"
 #include "nbt.h"
+#include "config.h"
 
 
 extern ListenSocket<DisplaySocket> l;
@@ -40,8 +41,45 @@ Map &Map::get()
 }
 
 void Map::initMap()
-{
-    this->mapDirectory="testmap";
+{  
+  this->mapDirectory=Conf::get().value("mapdir");
+  if(this->mapDirectory=="Not found!")
+  {
+    std::cout << "Error, mapdir not defined!" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  std::string infile=mapDirectory+"/level.dat";
+
+  struct stat stFileInfo; 
+  int intStat; 
+  // Attempt to get the file attributes 
+  intStat = stat(infile.c_str(),&stFileInfo); 
+
+  if(intStat != 0)
+  {
+    std::cout << "Error, map not found!" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  //Read gzipped map file
+  gzFile mapfile=gzopen(infile.c_str(),"rb");        
+  uint8 uncompressedData[200000];
+  int uncompressedSize=gzread(mapfile,&uncompressedData[0],200000);
+  gzclose(mapfile);
+
+  //Save level data
+  TAG_Compound(&uncompressedData[0], &levelInfo,true);
+
+  if(!get_NBT_value(&levelInfo, "SpawnX", &spawnPos.x) ||
+     !get_NBT_value(&levelInfo, "SpawnY", &spawnPos.y) ||
+     !get_NBT_value(&levelInfo, "SpawnZ", &spawnPos.z))
+  {
+    std::cout << "Error, spawn pos not found from " << infile << "!" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  std::cout << "Spawn: (" << spawnPos.x << "," << spawnPos.y << "," << spawnPos.z << ")" << std::endl;
+  
 }
 
 
@@ -500,13 +538,13 @@ bool Map::loadMap(int x, int z)
   int mapposx=x;
   int mapposz=z;
   //Generate map file name
-  int modulox=(mapposx-15);
+  int modulox=(mapposx);
   while(modulox<0) modulox+=64;
-  int moduloz=(mapposz-14);
+  int moduloz=(mapposz);
   while(moduloz<0) moduloz+=64;
   modulox%=64;
   moduloz%=64;
-  std::string infile=mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+base36_encode(mapposx-15)+"."+base36_encode(mapposz-14)+".dat";
+  std::string infile=mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+base36_encode(mapposx)+"."+base36_encode(mapposz)+".dat";
 
   struct stat stFileInfo; 
   int intStat; 
@@ -539,9 +577,9 @@ bool Map::loadMap(int x, int z)
   maps[x][z].skylight=get_NBT_pointer(&maps[x][z], "SkyLight");
   //Check if the items were not found
   if(maps[x][z].blocks      == 0 ||
-      maps[x][z].data       == 0 ||
-      maps[x][z].blocklight == 0 ||
-      maps[x][z].skylight   == 0)
+     maps[x][z].data        == 0 ||
+     maps[x][z].blocklight  == 0 ||
+     maps[x][z].skylight    == 0)
   {
     LOG("Error in map data");
     return false;
@@ -587,13 +625,13 @@ bool Map::saveMap(int x, int z)
   int mapposx=x;
   int mapposz=z;
   //Generate map file name
-  int modulox=(mapposx-15);
+  int modulox=(mapposx);
   while(modulox<0) modulox+=64;
-  int moduloz=(mapposz-14);
+  int moduloz=(mapposz);
   while(moduloz<0) moduloz+=64;
   modulox%=64;
   moduloz%=64;
-  std::string outfile=mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+base36_encode(mapposx-15)+"."+base36_encode(mapposz-14)+".dat";
+  std::string outfile=mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+base36_encode(mapposx)+"."+base36_encode(mapposz)+".dat";
 
   // Try to create parent directories if necessary
   struct stat stFileInfo;

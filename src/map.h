@@ -68,19 +68,26 @@ private:
         releaseMap(it->first, it2->first);
       }
     }
+
+    //Free level.dat info
+    freeNBT_struct(&levelInfo);
   };
 
   std::string mapDirectory;
   
 public:
 
+  //Map spawn position
+  coord spawnPos;
+
+  //for level.dat file
+  NBT_struct levelInfo;
+
   //How blocks affect light
   int stopLight[256];
 
   //Blocks that emit light
   int emitLight[256];
-
-  coord spawnPos;
 
   //Store all maps here
   std::map<int, std::map<int, NBT_struct> > maps;
