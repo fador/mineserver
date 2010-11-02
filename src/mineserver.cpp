@@ -42,13 +42,14 @@ int main(void)
   _CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_DEBUG );
 #endif
 
-  Map::get().initMap();
+
 
   Chat::get().loadAdmins(ADMINFILE);
   Chat::get().checkMotd(MOTDFILE);
   
   Conf::get().load(CONFIGFILE);
 
+  Map::get().initMap();
   //Try to load port from config
   int port=atoi(Conf::get().value("port").c_str());
   //If failed, use default
@@ -146,10 +147,10 @@ int main(void)
           h.SendSock(Users[i].sock, (char *)&data6[0], 2);
 
           //Add (0,0) to map queue
-          Users[i].addQueue(0,0);
+          //Users[i].addQueue(0,0);
 
           //Teleport player
-          Users[i].teleport(0,70,0); 
+          Users[i].teleport(Map::get().spawnPos.x,Map::get().spawnPos.y+2,Map::get().spawnPos.z); 
           
           /*
           for(int x=-Users[i].viewDistance;x<=Users[i].viewDistance;x++)
@@ -162,7 +163,7 @@ int main(void)
           */
 
           //Spawn this user to others
-          Users[i].spawnUser(0,70*32,0);
+          Users[i].spawnUser(Map::get().spawnPos.x*32,(Map::get().spawnPos.y+2)*32,Map::get().spawnPos.z*32);
           //Spawn other users for connected user
           Users[i].spawnOthers();
         }

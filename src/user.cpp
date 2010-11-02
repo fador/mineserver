@@ -37,6 +37,10 @@ User::User(SOCKET sock, uint32 EID)
   this->logged=false;
   // ENABLED FOR DEBUG
   this->admin=true;
+
+  this->pos.x=Map::get().spawnPos.x;
+  this->pos.y=Map::get().spawnPos.y;
+  this->pos.z=Map::get().spawnPos.z;
 }
 
 bool User::changeNick(std::string nick, std::deque<std::string> admins)
@@ -85,60 +89,63 @@ bool User::kick(std::string kickMsg)
 bool User::updatePos(double x, double y, double z, double stance)
 {
      
-    //Do we send relative or absolute move values
-    if(0)//abs(x-this->pos.x)<127
-      //&& abs(y-this->pos.y)<127
-      //&& abs(z-this->pos.z)<127)
+    if(nick.size() && !logged)
     {
-      uint8 movedata[8];
-      movedata[0]=0x1f; //Relative move
-      putUint32(&movedata[1],this->UID);
-      movedata[5]=(char)(x-this->pos.x);
-      movedata[6]=(char)(y-this->pos.y);
-      movedata[7]=(char)(z-this->pos.z);
-      this->sendOthers(&movedata[0],8);
-    }
-    else
-    {          
-      this->pos.x=x;
-      this->pos.y=y;
-      this->pos.z=z;
-      this->pos.stance=stance;
-      uint8 teleportData[19];
-      teleportData[0]=0x22; //Teleport
-      putSint32(&teleportData[1],this->UID);
-      putSint32(&teleportData[5],(int)(this->pos.x*32));
-      putSint32(&teleportData[9],(int)(this->pos.y*32));
-      putSint32(&teleportData[13],(int)(this->pos.z*32));
-      teleportData[17]=(char)this->pos.yaw;
-      teleportData[18]=(char)this->pos.pitch;
-      this->sendOthers(&teleportData[0],19);
-    }
-    
-    //Chunk position changed, check for map updates
-    if((int)(x/16) != curChunk.x ||(int)(z/16) != curChunk.z)
-    {
-      //This is not accurate chunk!!
-      curChunk.x=(int)(x/16);
-      curChunk.z=(int)(z/16);
-
-      for(int mapx=-viewDistance+curChunk.x;mapx<=viewDistance+curChunk.x;mapx++)
+      //Do we send relative or absolute move values
+      if(0)//abs(x-this->pos.x)<127
+        //&& abs(y-this->pos.y)<127
+        //&& abs(z-this->pos.z)<127)
       {
-        for(int mapz=-viewDistance+curChunk.z;mapz<=viewDistance+curChunk.z;mapz++)
-        {
-          addQueue(mapx,mapz);
-        }
+        uint8 movedata[8];
+        movedata[0]=0x1f; //Relative move
+        putUint32(&movedata[1],this->UID);
+        movedata[5]=(char)(x-this->pos.x);
+        movedata[6]=(char)(y-this->pos.y);
+        movedata[7]=(char)(z-this->pos.z);
+        this->sendOthers(&movedata[0],8);
       }
-
-      for(unsigned int i=0;i<mapKnown.size();i++)
+      else
+      {          
+        this->pos.x=x;
+        this->pos.y=y;
+        this->pos.z=z;
+        this->pos.stance=stance;
+        uint8 teleportData[19];
+        teleportData[0]=0x22; //Teleport
+        putSint32(&teleportData[1],this->UID);
+        putSint32(&teleportData[5],(int)(this->pos.x*32));
+        putSint32(&teleportData[9],(int)(this->pos.y*32));
+        putSint32(&teleportData[13],(int)(this->pos.z*32));
+        teleportData[17]=(char)this->pos.yaw;
+        teleportData[18]=(char)this->pos.pitch;
+        this->sendOthers(&teleportData[0],19);
+      }
+    
+      //Chunk position changed, check for map updates
+      if((int)(x/16) != curChunk.x ||(int)(z/16) != curChunk.z)
       {
-        //If client has map data more than viesDistance+1 chunks away, remove it
-        if(mapKnown[i].x<curChunk.x-viewDistance-1 ||
-           mapKnown[i].x>curChunk.x+viewDistance+1 ||
-           mapKnown[i].z<curChunk.z-viewDistance-1 ||
-           mapKnown[i].z>curChunk.z+viewDistance+1)
+        //This is not accurate chunk!!
+        curChunk.x=(int)(x/16);
+        curChunk.z=(int)(z/16);
+
+        for(int mapx=-viewDistance+curChunk.x;mapx<=viewDistance+curChunk.x;mapx++)
         {
-          addRemoveQueue(mapKnown[i].x,mapKnown[i].z);              
+          for(int mapz=-viewDistance+curChunk.z;mapz<=viewDistance+curChunk.z;mapz++)
+          {
+            addQueue(mapx,mapz);
+          }
+        }
+
+        for(unsigned int i=0;i<mapKnown.size();i++)
+        {
+          //If client has map data more than viesDistance+1 chunks away, remove it
+          if(mapKnown[i].x<curChunk.x-viewDistance-1 ||
+             mapKnown[i].x>curChunk.x+viewDistance+1 ||
+             mapKnown[i].z<curChunk.z-viewDistance-1 ||
+             mapKnown[i].z>curChunk.z+viewDistance+1)
+          {
+            addRemoveQueue(mapKnown[i].x,mapKnown[i].z);              
+          }
         }
       }
     }
@@ -250,7 +257,8 @@ bool User::delKnown(int x, int z)
 
 bool SortVect(const coord &first, const coord &second)
 {
-    return first.x*first.x+first.z*first.z < second.x*second.x+second.z*second.z;
+  return (first.x-Map::get().spawnPos.x/16)*(first.x-Map::get().spawnPos.x/16)+(first.z-Map::get().spawnPos.z/16)*(first.z-Map::get().spawnPos.z/16) 
+          < (second.x-Map::get().spawnPos.x/16)*(second.x-Map::get().spawnPos.x/16)+(second.z-Map::get().spawnPos.z/16)*(second.z-Map::get().spawnPos.z/16);
 }
 
 bool User::popMap()
