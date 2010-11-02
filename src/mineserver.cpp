@@ -3,22 +3,28 @@
   #define _CRTDBG_MAP_ALLOC
   #include <crtdbg.h>
   #include <conio.h>
+  #include <winsock2.h>
+#else
+  #include <sys/socket.h>
+  #include <netinet/in.h>
+  #include <arpa/inet.h>
+  #include <string.h>
 #endif
 
+#include <sys/types.h>
+#include <fcntl.h>
 #include <cstdio>
-//#include <cstdlib>
 #include <deque>
 #include <iostream>
+#include <event.h>
+#include <ctime>
+#include <vector>
 
 #include "constants.h"
 
-#include <SocketHandler.h>
-#include <ListenSocket.h>
-#include "StatusHandler.h"
-
 #include "logger.h"
 
-#include "DisplaySocket.h"
+#include "sockets.h"
 #include "tools.h"
 #include "map.h"
 #include "user.h"
@@ -29,8 +35,21 @@
 
 static bool quit = false;
 
-StatusHandler h;
-ListenSocket<DisplaySocket> l(h);
+int setnonblock(int fd)
+{
+  #ifdef WIN32
+  u_long iMode = 1;
+  ioctlsocket(fd, FIONBIO, &iMode);
+  #else
+  int flags;
+
+  flags = fcntl(fd, F_GETFL);
+  flags |= O_NONBLOCK;
+  fcntl(fd, F_SETFL, flags);
+  #endif
+
+  return 1;
+}
 
 int main(void)
 {
@@ -40,7 +59,38 @@ int main(void)
 #ifdef WIN32
   _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
   _CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_DEBUG );
+  WSADATA wsaData;
+   int iResult;
+  // Initialize Winsock
+    iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
+    if (iResult != 0) {
+        printf("WSAStartup failed with error: %d\n", iResult);
+        return 1;
+    }
 #endif
+
+    int socketlisten;
+  struct sockaddr_in addresslisten;
+  struct event accept_event;
+  int reuse = 1;
+
+  event_base *eventbase=(event_base *)event_init();
+#ifdef WIN32
+  socketlisten = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+#else
+  socketlisten = socket(AF_INET, SOCK_STREAM, 0);
+#endif
+  
+  if (socketlisten < 0)
+  {
+    fprintf(stderr,"Failed to create listen socket");
+    return 1;
+  }
+
+  memset(&addresslisten, 0, sizeof(addresslisten));
+
+  addresslisten.sin_family = AF_INET;
+  addresslisten.sin_addr.s_addr = INADDR_ANY;
 
 
 
@@ -55,11 +105,43 @@ int main(void)
   //If failed, use default
   if(port==0) port=DEFAULT_PORT;
   //Bind to port
-  if (l.Bind(port))
-  {
-    std::cout << "Unable to Bind port!" << std::endl;
-    exit(-1);
-  }
+
+
+  addresslisten.sin_port = htons(port);
+
+  if (bind(socketlisten,
+           (struct sockaddr *)&addresslisten,
+           sizeof(addresslisten)) < 0)
+    {
+      fprintf(stderr,"Failed to bind");
+      return 1;
+    }
+
+  if (listen(socketlisten, 5) < 0)
+    {
+      fprintf(stderr,"Failed to listen to socket");
+      return 1;
+    }
+
+  setsockopt(socketlisten,
+             SOL_SOCKET,
+             SO_REUSEADDR,
+             (char *)&reuse,
+             sizeof(reuse));
+
+  setnonblock(socketlisten);
+
+  event_set(&accept_event,
+            socketlisten,
+            EV_READ|EV_PERSIST,
+            accept_callback,
+            NULL);
+
+  event_add(&accept_event,
+            NULL);
+
+
+
   std::cout << std::endl
             << "   _____  .__  " << std::endl
             << "  /     \\ |__| ____   ____   ______ ______________  __ ___________ " << std::endl
@@ -71,27 +153,24 @@ int main(void)
             
 
   
-  h.Add(&l);
-  h.Select(1,0);
-  while (!quit)
+  while (event_base_loop(eventbase, EVLOOP_ONCE | EVLOOP_NONBLOCK)==0)
   {
-    h.Select(1,0);
     if(time(0)-starttime>10)
     {
       starttime=(uint32)time(0);
       //Logger::get().log("Currently " + h.GetCount()-1 + " users in!");
-      std::cout << "Currently " << h.GetCount()-1 << " users in!" << std::endl;
+      std::cout << "Currently " << Users.size() << " users in!" << std::endl;
 
       //If users, ping them
       if(Users.size()>0)
       {
         //0x00 package
         uint8 data=0;
-        Users[0].sendAll(&data, 1);
+        Users[0]->sendAll(&data, 1);
 
         //Send server time (after dawn)
         uint8 data3[9]={0x04, 0x00, 0x00, 0x00,0x00,0x00,0x00,0x0e,0x00};
-        Users[0].sendAll((uint8 *)&data3[0], 9);
+        Users[0]->sendAll((uint8 *)&data3[0], 9);
       }
 
       //Try to load port from config
@@ -128,29 +207,29 @@ int main(void)
       //Loop users
       for(unsigned int i=0;i<Users.size();i++)
       {
-        for(uint8 j=0;j<10;j++)
+        //for(uint8 j=0;j<10;j++)
         {
           //Push new map data        
-          Users[i].pushMap();
+          Users[i]->pushMap();
         }
-        for(uint8 j=0;j<20;j++)
+        //for(uint8 j=0;j<20;j++)
         {
           //Remove map far away
-          Users[i].popMap();
+          Users[i]->popMap();
         }
 
-        if(Users[i].logged)
+        if(Users[i]->logged)
         {
-          Users[i].logged=false;
+          Users[i]->logged=false;
           //Send "On Ground" signal
           char data6[2]={0x0A, 0x01};
-          h.SendSock(Users[i].sock, (char *)&data6[0], 2);
+          bufferevent_write(Users[i]->buf_ev, (char *)&data6[0], 2);
 
           //Add (0,0) to map queue
           //Users[i].addQueue(0,0);
 
           //Teleport player
-          Users[i].teleport(Map::get().spawnPos.x,Map::get().spawnPos.y+2,Map::get().spawnPos.z); 
+          Users[i]->teleport(Map::get().spawnPos.x,Map::get().spawnPos.y+2,Map::get().spawnPos.z); 
           
           /*
           for(int x=-Users[i].viewDistance;x<=Users[i].viewDistance;x++)
@@ -163,9 +242,9 @@ int main(void)
           */
 
           //Spawn this user to others
-          Users[i].spawnUser(Map::get().spawnPos.x*32,(Map::get().spawnPos.y+2)*32,Map::get().spawnPos.z*32);
+          Users[i]->spawnUser(Map::get().spawnPos.x*32,(Map::get().spawnPos.y+2)*32,Map::get().spawnPos.z*32);
           //Spawn other users for connected user
-          Users[i].spawnOthers();
+          Users[i]->spawnOthers();
         }
       }
     }
@@ -177,7 +256,14 @@ int main(void)
 
     
   Map::get().freeMap();
-  l.CloseAndDelete();
+
+  //event_dispatch();
+
+  #ifdef WIN32
+  closesocket(socketlisten);
+  #else
+  close(socketlisten);
+  #endif
 
   //Windows debug
   #ifdef WIN32

@@ -2,6 +2,7 @@
 #define _USER_H
 
 #include <deque>
+#include <event.h>
 #include "tools.h"
 #include "constants.h"
 
@@ -32,16 +33,17 @@
   {
     public:
 
-      User(SOCKET sock,uint32 EID);
+      User(int sock,uint32 EID);
       ~User();
 
+      int fd;
+      struct bufferevent *buf_ev;
       //View distance in chunks -viewDistance <-> viewDistance
       static const int viewDistance=10;
       uint8 action;
       bool waitForData;
       bool logged;
       bool admin;
-      SOCKET sock;
       unsigned int UID;
       std::string nick;
       position pos;
@@ -95,12 +97,12 @@
       bool spawnOthers();
   };
 
-  bool addUser(SOCKET sock,uint32 EID);
-  bool remUser(SOCKET sock);
-  bool isUser(SOCKET sock);
+  User *addUser(int sock,uint32 EID);
+  bool remUser(int sock);
+  bool isUser(int sock);
   uint32 generateEID();
 
-  extern std::vector<User> Users;
+  extern std::vector<User *> Users;
     
   User *getUserByNick(std::string nick);
 

@@ -13,8 +13,6 @@
   <ItemGroup>
     <ClCompile Include="..\src\chat.cpp" />
     <ClCompile Include="..\src\config.cpp" />
-    <ClCompile Include="..\src\DisplayRawSocket.cpp" />
-    <ClCompile Include="..\src\DisplaySocket.cpp" />
     <ClCompile Include="..\src\logger.cpp" />
     <ClCompile Include="..\src\lua\lapi.c" />
     <ClCompile Include="..\src\lua\lauxlib.c" />
@@ -49,31 +47,7 @@
     <ClCompile Include="..\src\map.cpp" />
     <ClCompile Include="..\src\mineserver.cpp" />
     <ClCompile Include="..\src\nbt.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\Base64.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\Exception.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\Ipv4Address.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\Lock.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\MemFile.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\Mutex.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\Parse.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\ResolvSocket.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\SctpSocket.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\Semaphore.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\Socket.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\SocketHandler.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\SocketHandlerEp.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\SocketHandlerThread.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\SocketStream.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\SocketThread.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\socket_include.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\StdoutLog.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\StreamSocket.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\StreamWriter.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\TcpSocket.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\Thread.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\UdpSocket.cpp" />
-    <ClCompile Include="..\src\Sockets-2.3.9.3\Utility.cpp" />
-    <ClCompile Include="..\src\StatusHandler.cpp" />
+    <ClCompile Include="..\src\sockets.cpp" />
     <ClCompile Include="..\src\tools.cpp" />
     <ClCompile Include="..\src\user.cpp" />
     <ClCompile Include="..\src\zlib\adler32.c" />
@@ -93,8 +67,6 @@
     <ClInclude Include="..\src\chat.h" />
     <ClInclude Include="..\src\config.h" />
     <ClInclude Include="..\src\constants.h" />
-    <ClInclude Include="..\src\DisplayRawSocket.h" />
-    <ClInclude Include="..\src\DisplaySocket.h" />
     <ClInclude Include="..\src\logger.h" />
     <ClInclude Include="..\src\lua\lapi.h" />
     <ClInclude Include="..\src\lua\lauxlib.h" />
@@ -121,30 +93,7 @@
     <ClInclude Include="..\src\lua\lzio.h" />
     <ClInclude Include="..\src\map.h" />
     <ClInclude Include="..\src\nbt.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\Base64.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\IBase.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\IEventHandler.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\Ipv4Address.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\ListenSocket.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\Lock.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\MemFile.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\Parse.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\ResolvServer.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\ResolvSocket.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\SctpSocket.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\Socket.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\SocketAddress.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\SocketHandler.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\SocketHandlerEp.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\SocketHandlerThread.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\sockets-config.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\SocketStream.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\SocketThread.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\socket_include.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\StreamSocket.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\StreamWriter.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\TcpSocket.h" />
-    <ClInclude Include="..\src\Sockets-2.3.9.3\Utility.h" />
+    <ClInclude Include="..\src\sockets.h" />
     <ClInclude Include="..\src\StatusHandler.h" />
     <ClInclude Include="..\src\tools.h" />
     <ClInclude Include="..\src\user.h" />
@@ -216,13 +165,15 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CONSOLE;FTLOG=main;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../src/Sockets-2.3.9.3/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../src/Sockets-2.3.9.3/;../src/libevent/compat/;../src/libevent/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>libevent.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,99 +1,78 @@
 #ifdef WIN32
-
     #define _CRTDBG_MAP_ALLOC
     #include <stdlib.h>
     #include <crtdbg.h>
     #include <conio.h>
-
+    #include <winsock2.h>
 #endif
 
-#include <SocketHandler.h>
-#include <ListenSocket.h>
 #include <iostream>
 #include <fstream>
 #include <deque>
 #include <fstream>
-
+#include <vector>
+#include <ctime>
+#include <event.h>
+#include <sys/stat.h> 
 #include "logger.h"
 #include "constants.h"
 
 #include "tools.h"
 #include "zlib/zlib.h"
-#include "DisplaySocket.h"
-#include "StatusHandler.h"
 #include "user.h"
 #include "map.h"
 #include "chat.h"
 #include "nbt.h"
 
+extern int setnonblock(int fd);
 
-typedef std::map<SOCKET,Socket *> socket_m;
 
-// the constant TCP_BUFSIZE_READ is the maximum size of the standard input
-// buffer of TcpSocket
-#define RSIZE TCP_BUFSIZE_READ
 
-DisplaySocket::DisplaySocket(ISocketHandler& h) : TcpSocket(h)
+void buf_write_callback(struct bufferevent *bev,
+                        void *arg)
 {
-    
 }
 
-extern ListenSocket<DisplaySocket> l;
-extern StatusHandler h;
-
-void DisplaySocket::OnDisconnect()
-{  
-  remUser(GetSocket());
+void buf_error_callback(struct bufferevent *bev,
+                        short what,
+                        void *arg)
+{
+  User *client = (User *)arg;
+  bufferevent_free(client->buf_ev);
+  remUser(client->fd);
+  #ifdef WIN32
+  closesocket(client->fd);
+  #else
+  close(client->fd);
+  #endif
+  free(client);
 }
 
 
-
-void DisplaySocket::OnAccept()
-{
-  //Create user for the socket
-  addUser(GetSocket(),generateEID());
-}
-/*
-std::string ToHex(unsigned int value)
-{
-  std::ostringstream oss;
-  if(!(oss<<std::hex<<std::setw(2)<<std::setfill('0')<<value)) return 0;
-  return oss.str();
-}*/
-
-
-
-void DisplaySocket::OnRead()
+void buf_read_callback(struct bufferevent *incoming,
+                       void *arg)
 {
   uint32 i=0;
-  // OnRead of TcpSocket ei kunactually reads the data from the socket
-  // and moves it to the input buffer (ibuf)
-  TcpSocket::OnRead();
-  // get number of bytes in input buffer
-  size_t n = ibuf.GetLength();
-  char tmp[RSIZE]; // <--- tmp's here
-  ibuf.Read(tmp,n);
 
-  User *user=0;
+  User *user=(User *)arg;
 
-  for(i=0;i<Users.size();i++)
-  {
-      if(Users[i].sock==GetSocket())
-      {
-          user=&Users[i];
-      }
-  }
-  if(!user) //Must have user!
-  {
-    this->Close();
-    return;
-  }
+  int read=1;
+
+  uint8 *buf=new uint8[2048];
 
   //Push data to buffer
-  for(uint32 i=0;i<n;i++)
+  while(read)
   {
-      user->buffer.push_back(tmp[i]);
+    if(read=bufferevent_read(incoming,buf,2048))
+    {
+      for(int i=0;i<read;i++)
+      {
+          user->buffer.push_back(buf[i]);
+      }
+    }
   }
+
+  delete [] buf;
 
   while(user->buffer.size()>0)
   {
@@ -199,18 +178,18 @@ void DisplaySocket::OnRead()
       }
       else
       {
-        this->SetCloseAndDelete();
+        closesocket(user->fd);
       }
     
       //Login OK package
       char data[9]={0x01, 0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00};
       putSint32((uint8 *)&data[1],user->UID);
-      h.SendSock(GetSocket(), (char *)&data[0], 9);
+      bufferevent_write(user->buf_ev, (char *)&data[0], 9);
 
 
       //Send server time (after dawn)
       uint8 data3[9]={0x04, 0x00, 0x00, 0x00,0x00,0x00,0x00,0x0e,0x00};
-      h.SendSock(GetSocket(), (char *)&data3[0], 9);
+      bufferevent_write(user->buf_ev, (char *)&data3[0], 9);
 
       //Inventory
       uint8 data4[7+36*5];
@@ -230,21 +209,21 @@ void DisplaySocket::OnRead()
         data4[7+2+i*5]=1; //Count
         putSint16(&data4[7+3+i*5], 0);
       }
-      h.SendSock(GetSocket(), (char *)&data4[0], 7+36*5);
+      bufferevent_write(user->buf_ev, (char *)&data4[0], 7+36*5);
 
       data4[6]=4;
       putSint32(&data4[1],-2);
-      h.SendSock(GetSocket(), (char *)&data4[0], 7+4*5);
+      bufferevent_write(user->buf_ev, (char *)&data4[0], 7+4*5);
 
       putSint32(&data4[1],-3);
-      h.SendSock(GetSocket(), (char *)&data4[0], 7+4*5);
+      bufferevent_write(user->buf_ev, (char *)&data4[0], 7+4*5);
       
 
 
             
       //Send "On Ground" signal
       char data6[2]={0x0A, 0x01};
-      h.SendSock(GetSocket(), (char *)&data6[0], 2);
+      bufferevent_write(user->buf_ev, (char *)&data6[0], 2);
     }
     else if(user->action==0x02) //Handshake
     {
@@ -281,18 +260,18 @@ void DisplaySocket::OnRead()
       std::cout << "Handshake player: " << player << std::endl;
 
       //char data[9]={0x01, 0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00};    
-      //h.SendSock(GetSocket(), (char *)&data[0], 9); 
+      //bufferevent_write(user->buf_ev, (char *)&data[0], 9); 
       //char data2[19]={0x02, 0x00,0x10,0x32 ,0x65 ,0x36 ,0x36 ,0x66 ,0x31 ,0x64 ,0x63 ,0x30 ,0x33 ,0x32 ,0x61 ,0x62,0x35 ,0x66 ,0x30};    
-      //h.SendSock(GetSocket(), (char *)&data2[0], 19);
+      //bufferevent_write(user->buf_ev, (char *)&data2[0], 19);
 
       //Send handshake package
       char data2[4]={0x02, 0x00,0x01,'-'};    
-      h.SendSock(GetSocket(), (char *)&data2[0], 4);
+      bufferevent_write(user->buf_ev, (char *)&data2[0], 4);
 
       //user->logged=1;
       //user->changeNick(player);
       //char data3[5]={0x1e, 0x01, 0x02, 0x03, 0x04};
-      //h.SendSock(GetSocket(), (char *)&data3[0], 5);
+      //bufferevent_write(user->buf_ev, (char *)&data3[0], 5);
     } 
     // 
     // CHATMESSAGE
@@ -779,13 +758,13 @@ void DisplaySocket::OnRead()
 
       curpos+=len;
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
-      this->SetCloseAndDelete();
+      closesocket(user->fd);
 
     }
     else
     {
       printf("Unknown action: 0x%x\n", user->action);
-      this->SetCloseAndDelete();
+      closesocket(user->fd);
     }
 
   } //End while
@@ -793,7 +772,7 @@ void DisplaySocket::OnRead()
 
 
   //Send to player which is sending this data
-  //h.SendSock(GetSocket(), (void*)&data[0], data.size());
+  //bufferevent_write(user->buf_ev, (void*)&data[0], data.size());
 
   //Add new player
   //addUser(GetSocket(), nick);
@@ -801,4 +780,37 @@ void DisplaySocket::OnRead()
   //Send some data to all
   //h.SendAll(std::string(tmp, i));
 
+}
+
+typedef  int socklen_t;
+
+
+  //remUser(GetSocket());
+void accept_callback(int fd,
+                     short ev,
+                     void *arg)
+{
+  int client_fd;
+  struct sockaddr_in client_addr;
+  socklen_t client_len = sizeof(client_addr);
+  
+
+  client_fd = accept(fd,
+                     (struct sockaddr *)&client_addr,
+                     &client_len);
+  if (client_fd < 0)
+    {
+      LOG("Client: accept() failed");
+      return;
+    }
+  User *client=addUser(client_fd,generateEID());
+  setnonblock(client_fd);
+
+  client->buf_ev = bufferevent_new(client_fd,
+                                   buf_read_callback,
+                                   buf_write_callback,
+                                   buf_error_callback,
+                                   client);
+
+  bufferevent_enable(client->buf_ev, EV_READ);
 }

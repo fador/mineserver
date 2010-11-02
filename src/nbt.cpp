@@ -1,13 +1,14 @@
-
-#include <SocketHandler.h>
-#include <ListenSocket.h>
 #include <iostream>
 #include <fstream>
 #include <deque>
+#include <vector>
+#include <string>
+#ifdef WIN32
+  #include <winsock2.h>
+#endif
+
 
 #include "tools.h"
-#include "DisplaySocket.h"
-#include "StatusHandler.h"
 #include "map.h"
 #include "nbt.h"
 
