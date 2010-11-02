@@ -605,7 +605,7 @@ bool Map::saveMap(int x, int z)
     {
       if (stat(outdir_a.c_str(), &stFileInfo) != 0)
       {
-#ifdef __WIN32
+#ifdef WIN32
         if (mkdir(outdir_a.c_str()) == -1)
 #else
         if (mkdir(outdir_a.c_str(), 0755) == -1)
@@ -615,7 +615,7 @@ bool Map::saveMap(int x, int z)
         }
       }
 
-#ifdef __WIN32
+#ifdef WIN32
       if (mkdir(outdir_b.c_str()) == -1)
 #else
       if (mkdir(outdir_b.c_str(), 0755) == -1)
