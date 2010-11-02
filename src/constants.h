@@ -30,6 +30,10 @@ const std::string MOTDFILE = "motd.txt";
 const std::string DEFAULTMOTDFILE = "This is default motd! Please edit " + MOTDFILE;
 const std::string CONFIGFILE = "config.cfg";
 
+// Default configuration
+//const std::map<std::string, std::string> DEFAULTCONFIG;
+//DEFAULTCONFIG.insert( std::pair<std::string, std::string>("key", "value") );
+
 const char SERVERMSGPREFIX = '%';
 const char CHATCMDPREFIX = '/';
 const char COMMENTPREFIX = '#';

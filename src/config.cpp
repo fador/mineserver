@@ -26,9 +26,17 @@ bool Conf::load(std::string configFile)
   // If file does not exist
   if( ifs.fail() )
   {
-    std::cout << "> Warning: " << configFile << " not found. Creating using default values..." << std::endl;
+    std::cout << ">>> " << configFile << " not found. Creating using default values..." << std::endl;
     
-    // TODO: Actually create it ;(
+    std::ofstream confofs( configFile.c_str() );
+    confofs << "# This configfile is created by mineserver using default values" << std::endl
+            << "servername = \"Mineserver alpha\"" << std::endl
+            << "servername = \"Mineserver alpha\"" << std::endl
+            << "servername = \"Mineserver alpha\"" << std::endl
+            << "servername = \"Mineserver alpha\"" << std::endl;
+    confofs.close();
+    
+    this->load(CONFIGFILE);
   }
   
   std::string temp;

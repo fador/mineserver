@@ -239,10 +239,11 @@ bool Chat::handleMsg( User *user, std::string msg )
             else 
             {
               this->sendMsg(user, COLOR_DARK_MAGENTA + "Error!" + COLOR_RED + " Faulty parameters", USER);
+              return true;
             }
           }
           
-                    // Kick user
+          // Reload admins and configuration
           else if(cmd[0] == "reload") 
           {
             cmd.pop_front();
@@ -256,6 +257,49 @@ bool Chat::handleMsg( User *user, std::string msg )
             this->sendMsg(user, COLOR_DARK_MAGENTA + "SERVER:" + COLOR_RED + " Reloaded admins and config", USER);
             
             // Note: Motd is loaded whenever new user joins
+          }
+          
+          // Spawn items
+          else if(cmd[0] == "give") 
+          {
+            cmd.pop_front();
+            
+            User* tUser;
+            int itemId;
+            char itemCount = 1;
+            
+            if(cmd.size() > 1)
+            {
+              tUser = getUserByNick( cmd[0] );
+              itemId = atoi(cmd[1].c_str());
+              if( cmd.size() > 2 ) {
+                itemCount = atoi(cmd[2].c_str());
+              }
+            }
+            // Not valid parameters
+            else 
+            {
+              this->sendMsg(user, COLOR_DARK_MAGENTA + "Error!" + COLOR_RED + " Too few parameters", USER);
+              return true;
+            }
+            
+            if( tUser ){
+              spawnedItem item;
+              item.EID=generateEID();
+              item.item = itemId;
+              item.count = itemCount;
+              item.x = tUser->pos.x*32;
+              item.y = tUser->pos.y*32;
+              item.z = tUser->pos.z*32;
+              
+              Map::get().sendPickupSpawn(item);
+              
+              this->sendMsg(user, COLOR_RED + "Spawned some items!", USER);
+            } 
+            else 
+            {
+              this->sendMsg(user, COLOR_DARK_MAGENTA + "Error!" + COLOR_RED + " User " + cmd[0] + " not found (See /players)", USER);
+            }
           }
           
         }
