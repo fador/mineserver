@@ -51,13 +51,13 @@ void buf_error_callback(struct bufferevent *bev,
 {
   User *client = (User *)arg;
   bufferevent_free(client->buf_ev);
-  remUser(client->fd);
+
   #ifdef WIN32
   closesocket(client->fd);
   #else
   close(client->fd);
   #endif
-  free(client);
+  remUser(client->fd);
 }
 
 
@@ -190,11 +190,13 @@ void buf_read_callback(struct bufferevent *incoming,
       }
       else
       {
+        bufferevent_free(user->buf_ev);
         #ifdef WIN32
           closesocket(user->fd);
         #else
           close(user->fd);
         #endif
+        remUser(user->fd);
       }
     
       //Login OK package
@@ -774,34 +776,28 @@ void buf_read_callback(struct bufferevent *incoming,
 
       curpos+=len;
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
+
+      bufferevent_free(user->buf_ev);
       #ifdef WIN32
         closesocket(user->fd);
       #else
         close(user->fd);
       #endif
+      remUser(user->fd);
     }
     else
     {
       printf("Unknown action: 0x%x\n", user->action);
+      bufferevent_free(user->buf_ev);
       #ifdef WIN32
         closesocket(user->fd);
       #else
         close(user->fd);
       #endif
+      remUser(user->fd);
     }
 
   } //End while
-
-
-
-  //Send to player which is sending this data
-  //bufferevent_write(user->buf_ev, (void*)&data[0], data.size());
-
-  //Add new player
-  //addUser(GetSocket(), nick);
-  
-  //Send some data to all
-  //h.SendAll(std::string(tmp, i));
 
 }
 
