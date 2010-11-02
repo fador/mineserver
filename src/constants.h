@@ -27,7 +27,7 @@ const std::string VERSION = "0.1.8";
 const std::string ADMINFILE = "admin.txt";
 const std::string DEFAULTADMINFILE = "# This is default admin file. Write admin nicks here one per line";
 const std::string MOTDFILE = "motd.txt";
-const std::string DEFAULTMOTDFILE = "This is default motd! Please edit " + MOTDFILE;
+const std::string DEFAULTMOTDFILE = "This is default motd! Please edit motd.txt";
 const std::string CONFIGFILE = "config.cfg";
 
 // Default configuration
@@ -39,7 +39,7 @@ const char CHATCMDPREFIX = '/';
 const char COMMENTPREFIX = '#';
 const std::string DEFAULTKICKMSG = "This is a default kick message";
 
-//Chunk release time on seconds when not user
+//Chunk release time on seconds when not used
 const int DEFAULT_MAP_RELEASE_TIME = 10;
 
 #endif
