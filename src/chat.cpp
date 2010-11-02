@@ -3,12 +3,14 @@
 #include <iostream>
 #include <deque>
 #include <fstream>
+#include <vector>
+#include <ctime>
+#ifdef WIN32
+  #include <winsock2.h>
+#endif
 
 #include "logger.h"
 #include "constants.h"
-
-#include "DisplaySocket.h"
-#include "StatusHandler.h"
 
 #include "tools.h"
 #include "map.h"
@@ -16,7 +18,6 @@
 #include "chat.h"
 #include "config.h"
 
-extern StatusHandler h;
 
 Chat &Chat::get()
 {
@@ -85,7 +86,7 @@ bool Chat::sendUserlist( User *user ) {
       this->sendMsg(user, COLOR_BLUE + "[ Players online ]", USER);
       for(unsigned int i=0;i<Users.size();i++)
       {
-          this->sendMsg(user, "> " + Users[i].nick, USER);
+          this->sendMsg(user, "> " + Users[i]->nick, USER);
       }
 
       return true;
@@ -331,7 +332,7 @@ bool Chat::sendMsg(User *user, std::string msg, int action = ALL)
     for(unsigned int i=0;i<msg.size();i++) tmpArray[i+3]=msg[i]; 
 
     if(action == ALL) user->sendAll(&tmpArray[0],msg.size()+3);
-    if(action == USER) h.SendSock(user->sock, &tmpArray[0], msg.size()+3);
+    if(action == USER) bufferevent_write(user->buf_ev, &tmpArray[0], msg.size()+3);
     if(action == OTHERS)  user->sendOthers(&tmpArray[0], msg.size()+3);
     delete [] tmpArray;
     

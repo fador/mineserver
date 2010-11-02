@@ -4,6 +4,7 @@
   #include <crtdbg.h>
   #include <conio.h>
   #include <direct.h>
+  #include <winsock2.h>
 #endif
 
 #include <cstdlib>
@@ -17,11 +18,6 @@
 #include "logger.h"
 
 #include <sys/stat.h> 
-#include <SocketHandler.h>
-#include <ListenSocket.h>
-#include "DisplaySocket.h"
-#include "StatusHandler.h"
-
 
 #include "map.h"
 #include "tools.h"
@@ -30,9 +26,6 @@
 #include "nbt.h"
 #include "config.h"
 
-
-extern ListenSocket<DisplaySocket> l;
-extern StatusHandler h;
 
 Map &Map::get()
 {
@@ -484,7 +477,7 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
     //TODO: only send to users in range
     for(unsigned int i=0;i<Users.size();i++)
     {
-      h.SendSock(Users[i].sock,&changeArray[0], 12);
+      bufferevent_write(Users[i]->buf_ev,&changeArray[0], 12);
     }
 
     return true;
@@ -519,7 +512,7 @@ bool Map::sendPickupSpawn(spawnedItem item)
   //TODO: only send to users in range
   for(unsigned int i=0;i<Users.size();i++)
   {
-    h.SendSock(Users[i].sock,&changeArray[0], 23);
+    bufferevent_write(Users[i]->buf_ev,&changeArray[0], 23);
   }
 
   return true;
@@ -759,7 +752,7 @@ void Map::sendToUser(User *user, int x, int z)
       putSint32(&data4[1], mapposx);
       putSint32(&data4[5], mapposz);
       data4[9]=1; //Init chunk
-      h.SendSock(user->sock, (uint8 *)&data4[0], 10);
+      bufferevent_write(user->buf_ev, (uint8 *)&data4[0], 10);
 
 
       //Chunk
@@ -787,7 +780,7 @@ void Map::sendToUser(User *user, int x, int z)
       compress((uint8 *)&data4[18], &written, (uint8 *)&mapdata[0],81920);
         
       putSint32(&data4[14], written);
-      h.SendSock(user->sock, (uint8 *)&data4[0], 18+written);
+      bufferevent_write(user->buf_ev, (uint8 *)&data4[0], 18+written);
     }
 }
 

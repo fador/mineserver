@@ -4,16 +4,14 @@
 #include <cstdio>
 #include <iostream>
 #include <deque>
-#include <SocketHandler.h>
-#include <ListenSocket.h>
 #include <algorithm>
 #include <sys/stat.h> 
-
+#ifdef WIN32
+  #include <winsock2.h>
+#endif
 #include "constants.h"
 
 #include "logger.h"
-#include "DisplaySocket.h"
-#include "StatusHandler.h"
 
 #include "tools.h"
 #include "map.h"
@@ -22,17 +20,15 @@
 #include "zlib/zlib.h"
 #include "chat.h"
 
-extern ListenSocket<DisplaySocket> l;
-extern StatusHandler h;
 
-std::vector<User> Users;
+std::vector<User *> Users;
 
 
-User::User(SOCKET sock, uint32 EID)
+User::User(int sock, uint32 EID)
 {
   this->action=0;
   this->waitForData=false;
-  this->sock=sock;
+  this->fd=sock;
   this->UID=EID;
   this->logged=false;
   // ENABLED FOR DEBUG
@@ -80,7 +76,7 @@ bool User::kick(std::string kickMsg)
   putSint16(&data[1],len);
   for(unsigned int i=0;i<kickMsg.size();i++) data[i+3]= kickMsg[i];
   
-  h.SendSock(this->sock, data,len+3);
+  bufferevent_write(this->buf_ev, data,len+3);
 
   delete [] data;
   return true;
@@ -177,9 +173,9 @@ bool User::sendOthers(uint8* data,uint32 len)
   unsigned int i;
   for(i=0;i<(int)Users.size();i++)
   {
-    if(Users[i].sock!=this->sock)
+    if(Users[i]->fd!=this->fd)
     {
-      h.SendSock(Users[i].sock, data,len);
+      bufferevent_write(Users[i]->buf_ev, data,len);
     }
   }
   return true;
@@ -190,9 +186,9 @@ bool User::sendAll(uint8* data,uint32 len)
   unsigned int i;
   for(i=0;i<(int)Users.size();i++)
   {
-    if(Users[i].sock)
+    if(Users[i]->fd)
     {
-      h.SendSock(Users[i].sock, data,len);
+      bufferevent_write(Users[i]->buf_ev, data,len);
     }
   }
   return true;
@@ -264,7 +260,7 @@ bool SortVect(const coord &first, const coord &second)
 bool User::popMap()
 {
   //If map in queue, push it to client
-  if(this->mapRemoveQueue.size())
+  while(this->mapRemoveQueue.size())
   {
     uint8 preChunk[10];
     //Pre chunk
@@ -272,7 +268,7 @@ bool User::popMap()
     putSint32(&preChunk[1], mapRemoveQueue[0].x);
     putSint32(&preChunk[5], mapRemoveQueue[0].z);
     preChunk[9]=0; //Unload chunk
-    h.SendSock(this->sock, (uint8 *)&preChunk[0], 10);
+    bufferevent_write(this->buf_ev, (uint8 *)&preChunk[0], 10);
 
     //Delete from known list
     delKnown(mapRemoveQueue[0].x, mapRemoveQueue[0].z);
@@ -280,7 +276,7 @@ bool User::popMap()
     //Remove from queue
     mapRemoveQueue.erase(mapRemoveQueue.begin());
 
-    return true;
+    //return true;
   }
 
   return false;
@@ -290,7 +286,7 @@ bool User::popMap()
 bool User::pushMap()
 {
   //If map in queue, push it to client
-  if(this->mapQueue.size()>0)
+  while(this->mapQueue.size()>0)
   {
     //Sort by distance from center
     sort(mapQueue.begin(),mapQueue.end(),SortVect);
@@ -302,11 +298,11 @@ bool User::pushMap()
 
     //Remove from queue
     mapQueue.erase(mapQueue.begin());
-  }
+  }/*
   else
   {
     return false;
-  }
+  }*/
   return true;
 }
 bool User::teleport(double x, double y, double z)
@@ -329,7 +325,7 @@ bool User::teleport(double x, double y, double z)
   putFloat(&teleportdata[curpos], 0.0);
   curpos+=4;
   teleportdata[curpos] = 0; //On Ground
-  h.SendSock(this->sock, (char *)&teleportdata[0], 42);
+  bufferevent_write(this->buf_ev, (char *)&teleportdata[0], 42);
 
   //Also update pos for other players
   updatePos(x,y,z,0);
@@ -374,59 +370,60 @@ bool User::spawnOthers()
 
   for(unsigned int i=0;i<Users.size(); i++)
   {
-    if(Users[i].UID!=this->UID && Users[i].nick != this->nick)
+    if(Users[i]->UID!=this->UID && Users[i]->nick != this->nick)
     {
       uint8 entityData2[256];
       int curpos=0;
       entityData2[curpos]=0x14; //Named Entity Spawn
       curpos++;
-      putSint32(&entityData2[curpos], Users[i].UID);        
+      putSint32(&entityData2[curpos], Users[i]->UID);        
       curpos+=4;
       entityData2[curpos]=0;
-      entityData2[curpos+1]=Users[i].nick.size();
+      entityData2[curpos+1]=Users[i]->nick.size();
       curpos+=2;
   
-      for(unsigned int j=0;j<Users[i].nick.size();j++)
+      for(unsigned int j=0;j<Users[i]->nick.size();j++)
       {
-        entityData2[curpos]=Users[i].nick[j];
+        entityData2[curpos]=Users[i]->nick[j];
         curpos++;
       }
   
-      putSint32(&entityData2[curpos],(int)(Users[i].pos.x*32));
+      putSint32(&entityData2[curpos],(int)(Users[i]->pos.x*32));
       curpos+=4;
-      putSint32(&entityData2[curpos],(int)(Users[i].pos.y*32));
+      putSint32(&entityData2[curpos],(int)(Users[i]->pos.y*32));
       curpos+=4;
-      putSint32(&entityData2[curpos],(int)(Users[i].pos.z*32));
+      putSint32(&entityData2[curpos],(int)(Users[i]->pos.z*32));
       curpos+=4;
       entityData2[curpos]=0; //Rotation
       entityData2[curpos+1]=0; //Pitch
       curpos+=2;
       putSint16(&entityData2[curpos],0); //current item
       curpos+=2;
-      h.SendSock(this->sock,(uint8 *)&entityData2[0], curpos);
+      bufferevent_write(this->buf_ev,(uint8 *)&entityData2[0], curpos);
     }
   }
   return true;
 }
 
-bool addUser(SOCKET sock,uint32 EID)
+User *addUser(int sock,uint32 EID)
 {
-  User newuser(sock,EID);
+  User *newuser = new User(sock,EID);
   Users.push_back(newuser);
 
-  return true;
+  return newuser;
 }
 
-bool remUser(SOCKET sock)
+bool remUser(int sock)
 {        
   for(unsigned int i=0;i<(int)Users.size();i++)
   {
-    if(Users[i].sock==sock)
+    if(Users[i]->fd==sock)
     {
-      if(Users[i].nick.size())
+      if(Users[i]->nick.size())
       {
-        Chat::get().sendMsg(&Users[i], Users[i].nick+" disconnected!", OTHERS);
+        Chat::get().sendMsg(Users[i], Users[i]->nick+" disconnected!", OTHERS);
       }
+      delete Users[i];
       Users.erase(Users.begin()+i);
       return true;
     }
@@ -434,12 +431,12 @@ bool remUser(SOCKET sock)
   return false;
 }
 
-bool isUser(SOCKET sock)
+bool isUser(int sock)
 {
   uint8 i;
   for(i=0;i<Users.size();i++)
   {
-      if(Users[i].sock==sock)
+      if(Users[i]->fd==sock)
           return true;
   }
   return false;
@@ -460,7 +457,7 @@ uint32 generateEID()
 
     for(uint8 i=0;i<Users.size();i++)
     {
-      if(Users[i].UID==EID)
+      if(Users[i]->UID==EID)
       {
         finished=false;
       }
@@ -483,9 +480,9 @@ User *getUserByNick(std::string nick)
   // Get coordinates
   for(unsigned int i=0;i<Users.size();i++)
   {
-    if(strToLower(Users[i].nick) == strToLower(nick))
+    if(strToLower(Users[i]->nick) == strToLower(nick))
     {
-      return &Users[i];
+      return Users[i];
     }
   }
   return false;
