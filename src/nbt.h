@@ -68,7 +68,7 @@ int TAG_List(uint8* input, NBT_list *output);
 int TAG_Compound(uint8* input, NBT_struct *output, bool start=false);
 
 uint8 *get_NBT_pointer(NBT_struct *input, std::string TAG);
-
+bool get_NBT_value(NBT_struct *input, std::string TAG, int *value);
 
 int dumpNBT_string(uint8 *buffer, std::string name);
 int dumpNBT_value(NBT_value *input, uint8 *buffer);

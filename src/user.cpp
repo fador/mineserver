@@ -56,12 +56,14 @@ bool User::changeNick(std::string nick, std::deque<std::string> admins)
 
 User::~User()
 {
-  //chat.sendMsg(this, nick+" disconnected!", ALL);
-  //Send signal to everyone that the entity is destroyed
-  uint8 entityData[5];
-  entityData[0]=0x1d; //Destroy entity;
-  putSint32(&entityData[1], this->UID);
-  this->sendOthers(&entityData[0],5);
+  if(this->nick.size())
+  {
+    //Send signal to everyone that the entity is destroyed
+    uint8 entityData[5];
+    entityData[0]=0x1d; //Destroy entity;
+    putSint32(&entityData[1], this->UID);
+    this->sendOthers(&entityData[0],5);
+  }
 }
 
 // Kick player
@@ -401,35 +403,38 @@ bool User::spawnOthers()
 
 bool addUser(SOCKET sock,uint32 EID)
 {
-    User newuser(sock,EID);
-    Users.push_back(newuser);
+  User newuser(sock,EID);
+  Users.push_back(newuser);
 
-    return true;
+  return true;
 }
 
 bool remUser(SOCKET sock)
 {        
-    for(unsigned int i=0;i<(int)Users.size();i++)
+  for(unsigned int i=0;i<(int)Users.size();i++)
+  {
+    if(Users[i].sock==sock)
     {
-        if(Users[i].sock==sock)
-        {
-            Chat::get().sendMsg(&Users[i], Users[i].nick+" disconnected!", OTHERS);
-            Users.erase(Users.begin()+i);
-            return true;
-        }
+      if(Users[i].nick.size())
+      {
+        Chat::get().sendMsg(&Users[i], Users[i].nick+" disconnected!", OTHERS);
+      }
+      Users.erase(Users.begin()+i);
+      return true;
     }
-    return false;
+  }
+  return false;
 }
 
 bool isUser(SOCKET sock)
 {
-    uint8 i;
-    for(i=0;i<Users.size();i++)
-    {
-        if(Users[i].sock==sock)
-            return true;
-    }
-    return false;
+  uint8 i;
+  for(i=0;i<Users.size();i++)
+  {
+      if(Users[i].sock==sock)
+          return true;
+  }
+  return false;
 }
 
 //Generate random and unique entity ID
