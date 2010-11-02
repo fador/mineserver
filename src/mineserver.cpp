@@ -56,6 +56,18 @@ int main(void)
     uint32 starttime=(uint32)time(0);
     uint32 tick=(uint32)time(0);
 
+    Chat::get().loadAdmins(ADMINFILE);
+    Chat::get().checkMotd(MOTDFILE);
+  
+    Conf::get().load(CONFIGFILE);
+
+    Map::get().initMap();
+    //Try to load port from config
+    int port=atoi(Conf::get().value("port").c_str());
+    //If failed, use default
+    if(port==0) port=DEFAULT_PORT;
+
+
 #ifdef WIN32
   _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
   _CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_DEBUG );
@@ -75,11 +87,11 @@ int main(void)
   int reuse = 1;
 
   event_base *eventbase=(event_base *)event_init();
-#ifdef WIN32
-  socketlisten = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-#else
-  socketlisten = socket(AF_INET, SOCK_STREAM, 0);
-#endif
+  #ifdef WIN32
+    socketlisten = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  #else
+    socketlisten = socket(AF_INET, SOCK_STREAM, 0);
+  #endif
   
   if (socketlisten < 0)
   {
@@ -91,24 +103,9 @@ int main(void)
 
   addresslisten.sin_family = AF_INET;
   addresslisten.sin_addr.s_addr = INADDR_ANY;
-
-
-
-  Chat::get().loadAdmins(ADMINFILE);
-  Chat::get().checkMotd(MOTDFILE);
-  
-  Conf::get().load(CONFIGFILE);
-
-  Map::get().initMap();
-  //Try to load port from config
-  int port=atoi(Conf::get().value("port").c_str());
-  //If failed, use default
-  if(port==0) port=DEFAULT_PORT;
-  //Bind to port
-
-
   addresslisten.sin_port = htons(port);
 
+  //Bind to port
   if (bind(socketlisten,
            (struct sockaddr *)&addresslisten,
            sizeof(addresslisten)) < 0)
@@ -151,9 +148,12 @@ int main(void)
             << "        \\/        \\/     \\/     \\/     \\/                 \\/       " << std::endl  
             << "Version " << VERSION <<" by Fador & Psoden" << std::endl << std::endl;
             
+  timeval loopTime;
+  loopTime.tv_sec=0;
+  loopTime.tv_usec=1000;
 
-  
-  while (event_base_loop(eventbase, EVLOOP_ONCE | EVLOOP_NONBLOCK)==0)
+  event_base_loopexit(eventbase,&loopTime);
+  while (event_base_loop(eventbase, 0)==0)
   {
     if(time(0)-starttime>10)
     {
@@ -252,6 +252,8 @@ int main(void)
     if(_kbhit())
         quit=1;
     #endif
+
+    event_base_loopexit(eventbase,&loopTime);
   }
 
     
