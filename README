@@ -18,4 +18,14 @@ ToDo:
  - Growing trees etc.
  + more
  
- 
+Chat commands:
+ For all players:
+ - /players : Lists online players
+ - /about : Server name & version
+ Admin only:
+ - /kick <nick> (<kickmsg>): Kicks user with optional kick message
+ - /save : Manually save map to disc
+ - /ctp <x> <y> <z> : Teleport to coordinates (eg. /ctp 100 100 100)
+ - /tp <nick> : Teleport yourself to <nick>'s position
+ - /tp <nick1> <nick2> : Teleport <nick1> to <nick2>
+ - /reload : Reload admins and configuration

@@ -594,6 +594,38 @@ bool Map::saveMap(int x, int z)
   moduloz%=64;
   std::string outfile=mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+base36_encode(mapposx-15)+"."+base36_encode(mapposz-14)+".dat";
 
+  // Try to create parent directories if necessary
+  struct stat stFileInfo;
+  if (stat(outfile.c_str(), &stFileInfo) != 0)
+  {
+    std::string outdir_a = mapDirectory+"/"+base36_encode(modulox);
+    std::string outdir_b = mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz);
+
+    if (stat(outdir_b.c_str(), &stFileInfo) != 0)
+    {
+      if (stat(outdir_a.c_str(), &stFileInfo) != 0)
+      {
+#ifdef WIN32
+        if (mkdir(outdir_a.c_str()) == -1)
+#else
+        if (mkdir(outdir_a.c_str(), 0755) == -1)
+#endif
+        {
+          return false;
+        }
+      }
+
+#ifdef WIN32
+      if (mkdir(outdir_b.c_str()) == -1)
+#else
+      if (mkdir(outdir_b.c_str(), 0755) == -1)
+#endif
+      {
+        return false;
+      }
+    }
+  }
+
   uint8 uncompressedData[200000];
   int dumpsize=dumpNBT_struct(&maps[x][z].compounds[0], &uncompressedData[0]);
   gzFile mapfile2=gzopen(outfile.c_str(),"wb");        
