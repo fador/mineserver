@@ -5,12 +5,23 @@
 #include <string>
 #ifdef WIN32
   #include <winsock2.h>
+#else
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <event.h>
+
 #endif
 
-
 #include "tools.h"
-#include "map.h"
 #include "nbt.h"
+#include "map.h"
 
 //NBT level file reading
 //More info: http://www.minecraft.net/docs/NBT.txt

@@ -2,10 +2,9 @@
 #ifndef _MAP_H
 #define _MAP_H
 
-#include "user.h"
 #include <map>
 #include "nbt.h"
-
+#include "user.h"
 
 struct spawnedItem
 {

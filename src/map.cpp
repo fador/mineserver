@@ -6,7 +6,7 @@
   #include <direct.h>
   #include <winsock2.h>
 #endif
-
+#include <string.h>
 #include <cstdlib>
 #include <iostream>
 #include <vector>
@@ -19,8 +19,8 @@
 
 #include <sys/stat.h> 
 
-#include "map.h"
 #include "tools.h"
+#include "map.h"
 #include "zlib/zlib.h"
 #include "user.h"
 #include "nbt.h"

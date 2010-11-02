@@ -4,6 +4,18 @@
     #include <crtdbg.h>
     #include <conio.h>
     #include <winsock2.h>
+typedef  int socklen_t;
+
+#else
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
 #endif
 
 #include <iostream>
@@ -178,7 +190,11 @@ void buf_read_callback(struct bufferevent *incoming,
       }
       else
       {
-        closesocket(user->fd);
+        #ifdef WIN32
+          closesocket(user->fd);
+        #else
+          close(user->fd);
+        #endif
       }
     
       //Login OK package
@@ -758,13 +774,20 @@ void buf_read_callback(struct bufferevent *incoming,
 
       curpos+=len;
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
-      closesocket(user->fd);
-
+      #ifdef WIN32
+        closesocket(user->fd);
+      #else
+        close(user->fd);
+      #endif
     }
     else
     {
       printf("Unknown action: 0x%x\n", user->action);
-      closesocket(user->fd);
+      #ifdef WIN32
+        closesocket(user->fd);
+      #else
+        close(user->fd);
+      #endif
     }
 
   } //End while
@@ -782,7 +805,6 @@ void buf_read_callback(struct bufferevent *incoming,
 
 }
 
-typedef  int socklen_t;
 
 
   //remUser(GetSocket());
