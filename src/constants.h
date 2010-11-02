@@ -27,7 +27,7 @@ const std::string VERSION = "0.1.8";
 const std::string ADMINFILE = "admin.txt";
 const std::string DEFAULTADMINFILE = "# This is default admin file. Write admin nicks here one per line";
 const std::string MOTDFILE = "motd.txt";
-const std::string DEFAULTMOTDFILE = "This is default motd! Please edit " + MOTDFILE;
+const std::string DEFAULTMOTDFILE = "This is default motd! Please edit motd.txt";
 const std::string CONFIGFILE = "config.cfg";
 
 const char SERVERMSGPREFIX = '%';

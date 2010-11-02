@@ -3,6 +3,7 @@
 
   #include <crtdbg.h>
   #include <conio.h>
+  #include <direct.h>
 #endif
 
 #include <cstdlib>
