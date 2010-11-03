@@ -172,9 +172,11 @@ int main(void)
         }
       }
 
+      int x_temp,z_temp;
       for(unsigned i=0;i<toRelease.size();i++)
       {
-        Map::get().releaseMap(toRelease[i] >> 16, toRelease[i] - (toRelease[i]/65536));
+        Map::get().idToPos(toRelease[i], &x_temp,&z_temp);
+        Map::get().releaseMap(x_temp,z_temp);
       }
     }
 

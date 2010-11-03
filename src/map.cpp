@@ -26,6 +26,7 @@
 #include "nbt.h"
 #include "config.h"
 
+
 Map &Map::get()
 {
   static Map instance;
@@ -34,13 +35,16 @@ Map &Map::get()
 
 void Map::posToId(int x, int z, uint32 *id)
 {
-  *id = (x<<16)+z;
+  uint8 *id_pointer=reinterpret_cast<uint8 *>(id);
+  putSint16(&id_pointer[0],x);
+  putSint16(&id_pointer[2],z);  
 }
 
 void Map::idToPos(uint32 id, int *x, int *z)
 {
-  *x = (id >> 16);
-  *z = (id % (1<<16));
+  uint8 *id_pointer=reinterpret_cast<uint8 *>(&id);
+  *x=getSint16(&id_pointer[0]);
+  *z=getSint16(&id_pointer[2]);
 }
 
 void Map::initMap()
@@ -203,12 +207,12 @@ bool Map::blocklightmapStep(int x, int y, int z, int light)
     // Going too high
     if(y==127 && i==2)
     {
-      continue;
+      i++;
     }
     // going negative
     else if(y==0 && i==3)
     {
-      continue;
+      i++;
     }
     int x_local=x;
     int y_local=y;
@@ -224,7 +228,7 @@ bool Map::blocklightmapStep(int x, int y, int z, int light)
       case 5: z_local--; break;
     }
 
-    printf("getBlock(%d, %d, %d) (blocklightmapStep)\n", x_local, y_local, z_local);
+    //printf("getBlock(%d, %d, %d) (blocklightmapStep)\n", x_local, y_local, z_local);
     if(getBlock(x_local, y_local, z_local, &block, &meta))
     {
       uint8 blocklight, skylight;
@@ -254,6 +258,17 @@ bool Map::lightmapStep(int x, int y, int z, int light)
 
   for(uint8 i=0;i<6;i++)
   {
+    // Going too high
+    if(y==127 && i==2)
+    {
+      i++;
+    }
+    // going negative
+    else if(y==0 && i==3)
+    {
+      i++;
+    }
+
     int x_local = x;
     int y_local = y;
     int z_local = z;
@@ -268,7 +283,7 @@ bool Map::lightmapStep(int x, int y, int z, int light)
       case 5: z_local--; break;
     }
 
-    printf("getBlock(%d, %d, %d) (lightmapStep)\n", x_local, y_local, z_local);
+    //printf("getBlock(%d, %d, %d) (lightmapStep)\n", x_local, y_local, z_local);
     if(getBlock(x_local, y_local, z_local, &block, &meta))
     {
       uint8 blocklight, skylight;
@@ -298,11 +313,11 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta){
     return false;
   }
 
-  uint32 mapId;
-  Map::posToId(x, z, &mapId);
-
   int chunk_x = ((x<0) ? (((x+1)/16)-1) : (x/16));
   int chunk_z = ((z<0) ? (((z+1)/16)-1) : (z/16));
+
+  uint32 mapId;
+  Map::posToId(chunk_x, chunk_z, &mapId);
 
   NBT_struct *chunk = getMapData(chunk_x, chunk_z);
 
@@ -336,6 +351,7 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta){
   return true;
 }
 
+
 bool Map::getBlockLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight)
 {
 #ifdef MSDBG
@@ -348,6 +364,7 @@ bool Map::getBlockLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight)
     return false;
   }
 
+  // Map chunk pos from block pos
   int chunk_x = ((x<0) ? (((x+1)/16)-1) : (x/16));
   int chunk_z = ((z<0) ? (((z+1)/16)-1) : (z/16));
 
@@ -359,6 +376,7 @@ bool Map::getBlockLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight)
     return false;
   }
 
+  // Which block inside the chunk
   int chunk_block_x = ((x<0) ? (15+((x+1)%16)) : (x%16));
   int chunk_block_z = ((z<0) ? (15+((z+1)%16)) : (z%16));
 
@@ -471,11 +489,12 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
     return false;
   }
 
-  uint32 mapId;
-  Map::posToId(x, z, &mapId);
-
+  // Map chunk pos from block pos
   int chunk_x = ((x<0) ? (((x+1)/16)-1) : (x/16));
   int chunk_z = ((z<0) ? (((z+1)/16)-1) : (z/16));
+
+  uint32 mapId;
+  Map::posToId(chunk_x, chunk_z, &mapId);
 
   NBT_struct *chunk = getMapData(chunk_x, chunk_z);
 
@@ -485,6 +504,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
     return false;
   }
 
+  // Which block inside the chunk
   int chunk_block_x = ((x<0) ? (15+((x+1)%16)) : (x%16));
   int chunk_block_z = ((z<0) ? (15+((z+1)%16)) : (z%16));
 
@@ -727,7 +747,7 @@ bool Map::releaseMap(int x, int z)
   if (maps.count(mapId))
     freeNBT_struct(&maps[mapId]);
 
-  return maps.erase(mapId);
+  return maps.erase(mapId)?true:false;
 }
 
 // Send chunk to user
