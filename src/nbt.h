@@ -43,6 +43,8 @@ struct NBT_struct
   uint8 *data;
   uint8 *blocklight;
   uint8 *skylight;
+  sint16 x;
+  sint16 z;
 
   std::string name;
   std::vector<NBT_value> values;

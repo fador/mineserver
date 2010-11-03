@@ -163,23 +163,18 @@ int main(void)
       if(map_release_time==0) map_release_time=DEFAULT_MAP_RELEASE_TIME;
 
       //Release chunks not used in <map_release_time> seconds
-      std::vector<coord> toRelease;
-      for (std::map<int, std::map<int, int> >::const_iterator it = Map::get().mapLastused.begin(); it != Map::get().mapLastused.end(); ++it)
+      std::vector<uint32> toRelease;
+      for (std::map<uint32, int>::const_iterator it = Map::get().mapLastused.begin(); it != Map::get().mapLastused.end(); ++it)
       {
-        for (std::map<int, int>::const_iterator it2 = Map::get().mapLastused[it->first].begin();it2 != Map::get().mapLastused[it->first].end(); ++it2)
+        if(Map::get().mapLastused[it->first] <= time(0)-map_release_time)
         {
-          if(Map::get().mapLastused[it->first][it2->first] <= time(0)-map_release_time)
-          {
-            coord newCoord={it->first,0, it2->first};
-            toRelease.push_back(newCoord);
-          }
+          toRelease.push_back(it->first);
         }
       }
 
       for(unsigned i=0;i<toRelease.size();i++)
       {
-        coord releaseCoord=toRelease[i];
-        Map::get().releaseMap(releaseCoord.x, releaseCoord.z);
+        Map::get().releaseMap(toRelease[i] >> 16, toRelease[i] - (toRelease[i]/65536));
       }
     }
 
