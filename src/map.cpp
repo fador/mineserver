@@ -103,8 +103,6 @@ bool Map::generateLightMaps(int x, int z)
   printf("generateLightMaps(x=%d, z=%d)\n", x, z);
 #endif
 
-  if(!loadMap(x, z))
-    return false;
   uint8 *skylight=maps[x][z].skylight;
   uint8 *blocklight=maps[x][z].blocklight;
   uint8 *blocks=maps[x][z].blocks;
@@ -281,7 +279,7 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta){
 
   if(!chunk || y<0 || y>127)
   {
-    LOG("chunk failed");
+    LOG("Loading chunk failed (getBlock)");
     return false;
   }
 
@@ -322,7 +320,7 @@ bool Map::getBlockLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight)
 
   if(!chunk || y<0 || y>127)
   {
-    LOG("chunk failed");
+    LOG("Loading chunk failed (getBlockLight)");
     return false;
   }
 
@@ -365,7 +363,7 @@ bool Map::setBlockLight(int x, int y, int z, uint8 blocklight, uint8 skylight, u
 
   if(!chunk || y<0 || y>127)
   {
-    LOG("chunk failed");
+    LOG("Loading chunk failed (setBlockLight)");
     return false;
   }
 
@@ -433,7 +431,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
 
   if(!chunk || y<0 || y>127)
   {
-    LOG("chunk failed");
+    LOG("Loading chunk failed (setBlock)");
     return false;
   }
 
