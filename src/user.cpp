@@ -199,20 +199,18 @@ bool User::addQueue(int x, int z)
 
   for(unsigned int i=0;i<mapQueue.size();i++)
   {
-    //Check for duplicates
+    // Check for duplicates
     if(mapQueue[i].x==newMap.x && mapQueue[i].z==newMap.z)
-    {
       return false;
-    }
   }
+
   for(unsigned int i=0;i<mapKnown.size();i++)
   {
     //Check for duplicates
     if(mapKnown[i].x==newMap.x && mapKnown[i].z==newMap.z)
-    {
       return false;
-    }
   }
+
   this->mapQueue.push_back(newMap);
 
   return true;
@@ -281,29 +279,26 @@ bool User::popMap()
   return false;
 }
 
-
 bool User::pushMap()
 {
-  //If map in queue, push it to client
-  while(this->mapQueue.size()>0)
+  // If map in queue, push it to client
+  while(this->mapQueue.size() > 0)
   {
-    //Sort by distance from center
+    // Sort by distance from center
     sort(mapQueue.begin(),mapQueue.end(),SortVect);
 
     Map::get().sendToUser(this,mapQueue[0].x, mapQueue[0].z);
 
-    //Add this to known list
+    // Add this to known list
     addKnown(mapQueue[0].x, mapQueue[0].z);
 
-    //Remove from queue
+    // Remove from queue
     mapQueue.erase(mapQueue.begin());
-  }/*
-  else
-  {
-    return false;
-  }*/
+  }
+
   return true;
 }
+
 bool User::teleport(double x, double y, double z)
 {      
   uint8 teleportdata[42]={0};

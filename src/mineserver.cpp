@@ -214,15 +214,13 @@ int main(void)
           //Teleport player
           Users[i]->teleport(Map::get().spawnPos.x,Map::get().spawnPos.y+2,Map::get().spawnPos.z);
 
-          /*
-          for(int x=-Users[i].viewDistance;x<=Users[i].viewDistance;x++)
+          for(int x=-Users[i]->viewDistance;x<=Users[i]->viewDistance;x++)
           {
-            for(int z=-Users[i].viewDistance;z<=Users[i].viewDistance;z++)
+            for(int z=-Users[i]->viewDistance;z<=Users[i]->viewDistance;z++)
             {
-              Users[i].addQueue(x,z);
+              Users[i]->addQueue(x,z);
             }
           }
-          */
 
           //Spawn this user to others
           Users[i]->spawnUser(Map::get().spawnPos.x*32,(Map::get().spawnPos.y+2)*32,Map::get().spawnPos.z*32);
