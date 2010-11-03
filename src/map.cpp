@@ -17,7 +17,7 @@
 
 #include "logger.h"
 
-#include <sys/stat.h> 
+#include <sys/stat.h>
 
 #include "tools.h"
 #include "map.h"
@@ -34,7 +34,7 @@ Map &Map::get()
 }
 
 void Map::initMap()
-{  
+{
   this->mapDirectory=Conf::get().value("mapdir");
   if(this->mapDirectory=="Not found!")
   {
@@ -44,24 +44,20 @@ void Map::initMap()
 
   std::string infile=mapDirectory+"/level.dat";
 
-  struct stat stFileInfo; 
-  int intStat; 
-  // Attempt to get the file attributes 
-  intStat = stat(infile.c_str(),&stFileInfo); 
-
-  if(intStat != 0)
+  struct stat stFileInfo;
+  if(stat(infile.c_str(), &stFileInfo) != 0)
   {
     std::cout << "Error, map not found!" << std::endl;
     exit(EXIT_FAILURE);
   }
   //Read gzipped map file
-  gzFile mapfile=gzopen(infile.c_str(),"rb");        
+  gzFile mapfile=gzopen(infile.c_str(), "rb");
   uint8 uncompressedData[200000];
-  int uncompressedSize=gzread(mapfile,&uncompressedData[0],200000);
+  int uncompressedSize=gzread(mapfile, &uncompressedData[0], 200000);
   gzclose(mapfile);
 
   //Save level data
-  TAG_Compound(&uncompressedData[0], &levelInfo,true);
+  TAG_Compound(&uncompressedData[0], &levelInfo, true);
 
   if(!get_NBT_value(&levelInfo, "SpawnX", &spawnPos.x) ||
      !get_NBT_value(&levelInfo, "SpawnY", &spawnPos.y) ||
@@ -72,9 +68,7 @@ void Map::initMap()
   }
 
   std::cout << "Spawn: (" << spawnPos.x << "," << spawnPos.y << "," << spawnPos.z << ")" << std::endl;
-  
 }
-
 
 void Map::freeMap()
 {
@@ -115,7 +109,7 @@ bool Map::saveWholeMap()
 
 bool Map::generateLightMaps(int x, int z)
 {
-  if(!loadMap(x,z)) return false;
+  if(!loadMap(x, z)) return false;
   uint8 *skylight=maps[x][z].skylight;
   uint8 *blocklight=maps[x][z].blocklight;
   uint8 *blocks=maps[x][z].blocks;
@@ -137,7 +131,7 @@ bool Map::generateLightMaps(int x, int z)
         int absolute_x=x*16+block_x;
         int absolute_z=z*16+block_z;
         uint8 block=blocks[index];
-        setBlockLight(absolute_x,block_y,absolute_z, 0, 15, 2);
+        setBlockLight(absolute_x, block_y, absolute_z, 0, 15, 2);
         if(stopLight[block]==-16)
         {
           break;
@@ -157,16 +151,16 @@ bool Map::generateLightMaps(int x, int z)
         int absolute_x=x*16+block_x;
         int absolute_z=z*16+block_z;
         uint8 block=blocks[index];
-        //getBlock(absolute_x,block_y,absolute_z,&block,&meta);
+        //getBlock(absolute_x, block_y, absolute_z, &block, &meta);
         if(stopLight[block]==-16)
         {
-          setBlockLight(absolute_x,block_y,absolute_z, 15+stopLight[block], 0, 1);
+          setBlockLight(absolute_x, block_y, absolute_z, 15+stopLight[block], 0, 1);
           break;
         }
         else
         {
-          setBlockLight(absolute_x,block_y,absolute_z, 15, 0, 1);
-          lightmapStep(absolute_x,block_y,absolute_z,15+stopLight[block]);
+          setBlockLight(absolute_x, block_y, absolute_z, 15, 0, 1);
+          lightmapStep(absolute_x, block_y, absolute_z, 15+stopLight[block]);
         }
       }
     }
@@ -185,8 +179,8 @@ bool Map::generateLightMaps(int x, int z)
         if(emitLight[blocks[index]])
         {
           int absolute_x=x*16+block_x;
-          int absolute_z=z*16+block_z;          
-          blocklightmapStep(absolute_x,block_y,absolute_z,emitLight[blocks[index]]);          
+          int absolute_z=z*16+block_z;
+          blocklightmapStep(absolute_x, block_y, absolute_z, emitLight[blocks[index]]);
         }
       }
     }
@@ -196,7 +190,7 @@ bool Map::generateLightMaps(int x, int z)
 
 bool Map::blocklightmapStep(int x, int y, int z, int light)
 {
-  uint8 block,meta;
+  uint8 block, meta;
 
   //If no light, stop!
   if(light<1) return false;
@@ -216,16 +210,16 @@ bool Map::blocklightmapStep(int x, int y, int z, int light)
       case 5: z_local--; break;
     }
 
-    if(getBlock(x_local,y_local,z_local,&block,&meta))
+    if(getBlock(x_local, y_local, z_local, &block, &meta))
     {
-      uint8 blocklight,skylight;
-      getBlockLight(x_local,y_local,z_local, &blocklight, &skylight);
+      uint8 blocklight, skylight;
+      getBlockLight(x_local, y_local, z_local, &blocklight, &skylight);
       if(blocklight<light+stopLight[block]-1)
       {
-        setBlockLight(x_local,y_local,z_local, light+stopLight[block]-1,15,1);
+        setBlockLight(x_local, y_local, z_local, light+stopLight[block]-1, 15, 1);
         if(stopLight[block]!=-16)
         {
-          blocklightmapStep(x_local,y_local,z_local, light+stopLight[block]-1);
+          blocklightmapStep(x_local, y_local, z_local, light+stopLight[block]-1);
         }
       }
     }
@@ -235,7 +229,7 @@ bool Map::blocklightmapStep(int x, int y, int z, int light)
 
 bool Map::lightmapStep(int x, int y, int z, int light)
 {
-  uint8 block,meta;
+  uint8 block, meta;
 
   //If no light, stop!
   if(light<1) return false;
@@ -255,16 +249,16 @@ bool Map::lightmapStep(int x, int y, int z, int light)
       case 5: z_local--; break;
     }
 
-    if(getBlock(x_local,y_local,z_local,&block,&meta))
+    if(getBlock(x_local, y_local, z_local, &block, &meta))
     {
-      uint8 blocklight,skylight;
-      getBlockLight(x_local,y_local,z_local, &blocklight, &skylight);
+      uint8 blocklight, skylight;
+      getBlockLight(x_local, y_local, z_local, &blocklight, &skylight);
       if(skylight<light+stopLight[block]-1)
       {
-        setBlockLight(x_local,y_local,z_local,0, light+stopLight[block]-1,2);
+        setBlockLight(x_local, y_local, z_local, 0, light+stopLight[block]-1, 2);
         if(stopLight[block]!=-16)
         {
-          lightmapStep(x_local,y_local,z_local, light+stopLight[block]-1);
+          lightmapStep(x_local, y_local, z_local, light+stopLight[block]-1);
         }
       }
     }
@@ -277,7 +271,7 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta){
 
   int chunk_x=((x<0)?((x+1)/16)-1:x/16);
   int chunk_z=((z<0)?((z+1)/16)-1:z/16);
-  if(!loadMap(chunk_x,chunk_z))
+  if(!loadMap(chunk_x, chunk_z))
   {
     LOG("Loadmap failed");
     return false;
@@ -297,7 +291,7 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta){
   int index=y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
   *type=blocks[index];
   uint8 metadata=metapointer[(index)>>1];
-  
+
   if(y%2)
   {
     metadata&=0xf0;
@@ -318,7 +312,7 @@ bool Map::getBlockLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight)
 
   int chunk_x=((x<0)?((x+1)/16)-1:x/16);
   int chunk_z=((z<0)?((z+1)/16)-1:z/16);
-  if(!loadMap(chunk_x,chunk_z))
+  if(!loadMap(chunk_x, chunk_z))
   {
     LOG("Loadmap failed");
     return false;
@@ -339,7 +333,7 @@ bool Map::getBlockLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight)
   int index=y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
   *blocklight=blocklightpointer[(index)>>1];
   *skylight=skylightpointer[(index)>>1];
-  
+
   if(y%2)
   {
     *blocklight&=0xf0;
@@ -362,7 +356,7 @@ bool Map::setBlockLight(int x, int y, int z, uint8 blocklight, uint8 skylight, u
 
   int chunk_x=((x<0)?((x+1)/16)-1:x/16);
   int chunk_z=((z<0)?((z+1)/16)-1:z/16);
-  if(!loadMap(chunk_x,chunk_z))
+  if(!loadMap(chunk_x, chunk_z))
   {
     return false;
   }
@@ -424,7 +418,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
 
   int chunk_x=((x<0)?((x+1)/16)-1:x/16);
   int chunk_z=((z<0)?((z+1)/16)-1:z/16);
-  if(!loadMap(chunk_x,chunk_z))
+  if(!loadMap(chunk_x, chunk_z))
   {
     return false;
   }
@@ -465,11 +459,11 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
     uint8 changeArray[12];
     changeArray[0]=0x35; //Block change package
     curpos=1;
-    putSint32(&changeArray[curpos],x);
+    putSint32(&changeArray[curpos], x);
     curpos+=4;
     changeArray[curpos]=y;
     curpos++;
-    putSint32(&changeArray[curpos],z);
+    putSint32(&changeArray[curpos], z);
     curpos+=4;
     changeArray[10]=type;   //Replace block with
     changeArray[11]=meta;  //Metadata
@@ -477,7 +471,7 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
     //TODO: only send to users in range
     for(unsigned int i=0;i<Users.size();i++)
     {
-      bufferevent_write(Users[i]->buf_ev,&changeArray[0], 12);
+      bufferevent_write(Users[i]->buf_ev, &changeArray[0], 12);
     }
 
     return true;
@@ -489,18 +483,18 @@ bool Map::sendPickupSpawn(spawnedItem item)
   uint8 changeArray[23];
   changeArray[curpos]=0x15; //Pickup Spawn
   curpos++;
-  putSint32(&changeArray[curpos],item.EID);
+  putSint32(&changeArray[curpos], item.EID);
   curpos+=4;
-  putSint16(&changeArray[curpos],item.item);
+  putSint16(&changeArray[curpos], item.item);
   curpos+=2;
   changeArray[curpos]=item.count;
   curpos++;
 
-  putSint32(&changeArray[curpos],item.x);
+  putSint32(&changeArray[curpos], item.x);
   curpos+=4;
-  putSint32(&changeArray[curpos],item.y);
+  putSint32(&changeArray[curpos], item.y);
   curpos+=4;
-  putSint32(&changeArray[curpos],item.z);
+  putSint32(&changeArray[curpos], item.z);
   curpos+=4;
   changeArray[curpos]=0; //Rotation
   curpos++;
@@ -512,7 +506,7 @@ bool Map::sendPickupSpawn(spawnedItem item)
   //TODO: only send to users in range
   for(unsigned int i=0;i<Users.size();i++)
   {
-    bufferevent_write(Users[i]->buf_ev,&changeArray[0], 23);
+    bufferevent_write(Users[i]->buf_ev, &changeArray[0], 23);
   }
 
   return true;
@@ -523,7 +517,7 @@ bool Map::loadMap(int x, int z)
   //Update last used time
   mapLastused[x][z]=(int)time(0);
 
-  if(getMapData(x,z)!=0)
+  if(getMapData(x, z)!=0)
   {
     return true;
   }
@@ -539,31 +533,27 @@ bool Map::loadMap(int x, int z)
   moduloz%=64;
   std::string infile=mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+base36_encode(mapposx)+"."+base36_encode(mapposz)+".dat";
 
-  struct stat stFileInfo; 
-  int intStat; 
-  // Attempt to get the file attributes 
-  intStat = stat(infile.c_str(),&stFileInfo); 
-
-  if(intStat != 0)
+  struct stat stFileInfo;
+  if(stat(infile.c_str(), &stFileInfo) != 0)
   {
     LOG("File not found: " + infile);
     return false;
   }
   //Read gzipped map file
-  gzFile mapfile=gzopen(infile.c_str(),"rb");        
+  gzFile mapfile=gzopen(infile.c_str(), "rb");
   uint8 uncompressedData[200000];
-  int uncompressedSize=gzread(mapfile,&uncompressedData[0],200000);
+  int uncompressedSize=gzread(mapfile, &uncompressedData[0], 200000);
   gzclose(mapfile);
 
   int outlen=81920;
 
   //Save this map data to map manager
   NBT_struct newMapStruct;
-  TAG_Compound(&uncompressedData[0], &newMapStruct,true);
+  TAG_Compound(&uncompressedData[0], &newMapStruct, true);
 
   maps[x][z]=newMapStruct;
 
-  
+
   maps[x][z].blocks=get_NBT_pointer(&maps[x][z], "Blocks");
   maps[x][z].data=get_NBT_pointer(&maps[x][z], "Data");
   maps[x][z].blocklight=get_NBT_pointer(&maps[x][z], "BlockLight");
@@ -613,7 +603,7 @@ bool Map::saveMap(int x, int z)
   }
 
   //Recalculate light maps
-  generateLightMaps(x,z);
+  generateLightMaps(x, z);
 
   int mapposx=x;
   int mapposz=z;
@@ -660,8 +650,8 @@ bool Map::saveMap(int x, int z)
 
   uint8 uncompressedData[200000];
   int dumpsize=dumpNBT_struct(&maps[x][z].compounds[0], &uncompressedData[0]);
-  gzFile mapfile2=gzopen(outfile.c_str(),"wb");        
-  gzwrite(mapfile2,&uncompressedData[0],dumpsize);
+  gzFile mapfile2=gzopen(outfile.c_str(), "wb");
+  gzwrite(mapfile2, &uncompressedData[0], dumpsize);
   gzclose(mapfile2);
 
   //Set "not changed"
@@ -673,13 +663,13 @@ bool Map::saveMap(int x, int z)
 bool Map::releaseMap(int x, int z)
 {
   //save first
-  saveMap(x,z);
+  saveMap(x, z);
 
   std::map<int, std::map<int, NBT_struct> >::iterator iter;
   iter = maps.find(x);
   std::map<int, NBT_struct>::iterator iter2;
   if (iter != maps.end() )
-  {    
+  {
     iter2 = maps[x].find(z);
     if (iter2 == maps[x].end() )
     {
@@ -715,7 +705,7 @@ bool Map::releaseMap(int x, int z)
     return false;
   }
 
-  freeNBT_struct(&maps[x][z]);  
+  freeNBT_struct(&maps[x][z]);
   //Erase from map
   maps[x].erase(z);
   if(!maps.count(x))
@@ -739,13 +729,13 @@ bool Map::releaseMap(int x, int z)
 //Send chunk to user
 void Map::sendToUser(User *user, int x, int z)
 {
-    bool dataFromMemory=false;    
+    bool dataFromMemory=false;
     uint8 data4[18+81920];
-    uint8 mapdata[81920]={0};    
+    uint8 mapdata[81920]={0};
     int mapposx=x;
     int mapposz=z;
 
-    if(loadMap(x,z))
+    if(loadMap(x, z))
     {
       //Pre chunk
       data4[0]=0x32;
@@ -757,28 +747,28 @@ void Map::sendToUser(User *user, int x, int z)
 
       //Chunk
       data4[0]=0x33;
-      
+
       data4[11]=15; //Size_x
       data4[12]=127; //Size_y
       data4[13]=15; //Size_z
 
 
-      memcpy(&mapdata[0],maps[x][z].blocks, 32768);
-      memcpy(&mapdata[32768],maps[x][z].data, 16384);
-      memcpy(&mapdata[32768+16384],maps[x][z].blocklight, 16384);
-      memcpy(&mapdata[32768+16384+16384],maps[x][z].skylight, 16384);
+      memcpy(&mapdata[0], maps[x][z].blocks, 32768);
+      memcpy(&mapdata[32768], maps[x][z].data, 16384);
+      memcpy(&mapdata[32768+16384], maps[x][z].blocklight, 16384);
+      memcpy(&mapdata[32768+16384+16384], maps[x][z].skylight, 16384);
 
 
       putSint32(&data4[1], mapposx*16);
       data4[5]=0;
       data4[6]=0;
       putSint32(&data4[7], mapposz*16);
-        
+
       uLongf written=81920;
-        
+
       //Compress data with zlib deflate
-      compress((uint8 *)&data4[18], &written, (uint8 *)&mapdata[0],81920);
-        
+      compress((uint8 *)&data4[18], &written, (uint8 *)&mapdata[0], 81920);
+
       putSint32(&data4[14], written);
       bufferevent_write(user->buf_ev, (uint8 *)&data4[0], 18+written);
     }

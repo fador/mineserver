@@ -7,10 +7,9 @@
 
 class Logger
 {
-    private:
-        Logger() {};
-    public:
-        void log(std::string msg, std::string file, int line);
-        static Logger &get();
-
+  private:
+    Logger() {};
+  public:
+    void log(std::string msg, std::string file, int line);
+    static Logger &get();
 };

@@ -1,4 +1,3 @@
-
 #ifndef _MAP_H
 #define _MAP_H
 
@@ -137,7 +136,5 @@ public:
 
   static Map &get();
 };
-
-
 
 #endif

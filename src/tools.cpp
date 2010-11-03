@@ -25,7 +25,6 @@ void putSint64(uint8 *buf, long long value)
   }
 }
 
-
 void putUint32(uint8 *buf, uint32 value)
 {
   uint8 *pointer = reinterpret_cast<uint8 *>(&value);
@@ -59,7 +58,6 @@ void putFloat(uint8 *buf, float value)
     buf[i]=floatAddress[3-i];
   }
 }
-
 
 void putDouble(uint8 *buf, double value)
 {
@@ -109,7 +107,6 @@ uint32 getUint16(uint8 *buf)
     return (buf[0]<<8)|(buf[1]);
 }
 
-
 long long getSint64(uint8 *buf)
 {
   long long temp;
@@ -120,7 +117,6 @@ long long getSint64(uint8 *buf)
   }
   return temp;
 }
-
 
 sint32 getSint32(uint8 *buf)
 {
@@ -146,7 +142,6 @@ sint32 getSint16(uint8 *buf)
   return temp;
 }
 
-
 std::string base36_encode(int value)
 {
   std::string output;
@@ -156,28 +151,29 @@ std::string base36_encode(int value)
   return output;
 }
 
-
-
 void my_itoa(int value, std::string& buf, int base)
 {
-	std::string hexarray("0123456789abcdefghijklmnopqrstuvwxyz");
-	int i = 30;
-  buf="";
+  std::string hexarray("0123456789abcdefghijklmnopqrstuvwxyz");
+  int i = 30;
+  buf = "";
 	
-  if(!value) buf="0";
-	for(; value && i ; --i, value /= base)
+  if(!value)
+    buf="0";
+
+  for(; value && i ; --i, value /= base)
   {
     buf.insert(buf.begin(),(char)hexarray[value % base]);
   }
-	
 }
 
 std::string strToLower(std::string temp)
 {
   const int len = temp.length();
+
   for(int i=0; i!=len; ++i)
   {
     temp[i] = std::tolower(temp[i]);
   }
+
   return temp;
 }
