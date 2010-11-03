@@ -191,6 +191,16 @@ bool Map::blocklightmapStep(int x, int y, int z, int light)
 
   for(uint8 i=0;i<6;i++)
   {
+    // Going too high
+    if(y==127 && i==2)
+    {
+      continue;
+    }
+    // going negative
+    else if(y==0 && i==3)
+    {
+      continue;
+    }
     int x_local=x;
     int y_local=y;
     int z_local=z;
