@@ -99,7 +99,7 @@ bool Map::saveWholeMap()
 
 bool Map::generateLightMaps(int x, int z)
 {
-#ifdef DEBUG
+#ifdef MSDBG
   printf("generateLightMaps(x=%d, z=%d)\n", x, z);
 #endif
 
@@ -266,9 +266,8 @@ bool Map::lightmapStep(int x, int y, int z, int light)
   return true;
 }
 
-
 bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta){
-#ifdef DEBUG
+#ifdef MSDBG
   printf("getBlock(x=%d, y=%d, z=%d)\n", x, y, z);
 #endif
 
@@ -309,7 +308,7 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta){
 
 bool Map::getBlockLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight)
 {
-#ifdef DEBUG
+#ifdef MSDBG
   printf("getBlockLight(x=%d, y=%d, z=%d)\n", x, y, z);
 #endif
 
@@ -352,7 +351,7 @@ bool Map::getBlockLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight)
 
 bool Map::setBlockLight(int x, int y, int z, uint8 blocklight, uint8 skylight, uint8 setLight)
 {
-#ifdef DEBUG
+#ifdef MSDBG
   printf("setBlockLight(x=%d, y=%d, z=%d, %u, %u)\n", x, z, blocklight, skylight, setLight);
 #endif
 
@@ -420,7 +419,7 @@ bool Map::setBlockLight(int x, int y, int z, uint8 blocklight, uint8 skylight, u
 
 bool Map::setBlock(int x, int y, int z, char type, char meta)
 {
-#ifdef DEBUG
+#ifdef MSDBG
   printf("setBlock(x=%d, y=%d, z=%d, type=%d, char=%d)\n", x, y, z, type, meta);
 #endif
 
@@ -523,7 +522,7 @@ bool Map::sendPickupSpawn(spawnedItem item)
 
 bool Map::loadMap(int x, int z)
 {
-#ifdef DEBUG
+#ifdef MSDBG
   printf("loadMap(x=%d, z=%d)\n", x, z);
 #endif
 
@@ -737,7 +736,7 @@ bool Map::releaseMap(int x, int z)
 // Send chunk to user
 void Map::sendToUser(User *user, int x, int z)
 {
-#ifdef DEBUG
+#ifdef MSDBG
   printf("sendToUser(x=%d, z=%d)\n", x, z);
 #endif
 
