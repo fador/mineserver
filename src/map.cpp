@@ -32,6 +32,17 @@ Map &Map::get()
   return instance;
 }
 
+void Map::posToId(int x, int z, uint32 *id)
+{
+  *id = (x<<16)+z;
+}
+
+void Map::idToPos(uint32 id, int *x, int *z)
+{
+  *x = (id >> 16);
+  *z = (id % (1<<16));
+}
+
 void Map::initMap()
 {
   this->mapDirectory=Conf::get().value("mapdir");
@@ -73,27 +84,22 @@ void Map::freeMap() {}
 
 NBT_struct *Map::getMapData(int x, int z)
 {
-  if (!maps.count(x) && !loadMap(x, z))
-    return 0;
+  uint32 mapId;
+  Map::posToId(x, z, &mapId);
 
-  if (!maps[x].count(z) && !loadMap(x, z))
+  if (!maps.count(mapId) && !loadMap(x, z))
     return 0;
 
   // Update last used time
-  mapLastused[x][z]=(int)time(0);
+  mapLastused[mapId] = (int)time(0);
   // Data in memory
-  return &maps[x][z];
+  return &maps[mapId];
 }
 
 bool Map::saveWholeMap()
 {
-  for (std::map<int, std::map<int, NBT_struct> >::const_iterator it = maps.begin(); it != maps.end(); ++it)
-  {
-    for (std::map<int, NBT_struct>::const_iterator it2 = maps[it->first].begin(); it2 != maps[it->first].end(); ++it2)
-    {
-      saveMap(it->first, it2->first);
-    }
-  }
+  for (std::map<uint32, NBT_struct>::const_iterator it = maps.begin(); it != maps.end(); ++it)
+    saveMap(maps[it->first].x, maps[it->first].z);
   return true;
 }
 
@@ -103,9 +109,12 @@ bool Map::generateLightMaps(int x, int z)
   printf("generateLightMaps(x=%d, z=%d)\n", x, z);
 #endif
 
-  uint8 *skylight=maps[x][z].skylight;
-  uint8 *blocklight=maps[x][z].blocklight;
-  uint8 *blocks=maps[x][z].blocks;
+  uint32 mapId;
+  Map::posToId(x, z, &mapId);
+
+  uint8 *skylight=maps[mapId].skylight;
+  uint8 *blocklight=maps[mapId].blocklight;
+  uint8 *blocks=maps[mapId].blocks;
 
   // Clear lightmaps
   memset(blocklight, 0, 16*16*128/2);
@@ -187,13 +196,13 @@ bool Map::blocklightmapStep(int x, int y, int z, int light)
   uint8 block, meta;
 
   // If no light, stop!
-  if(light<1) return false;
+  if(light < 1) return false;
 
   for(uint8 i=0;i<6;i++)
   {
-    int x_local=x;
-    int y_local=y;
-    int z_local=z;
+    int x_local = x;
+    int y_local = y;
+    int z_local = z;
 
     switch(i)
     {
@@ -205,6 +214,7 @@ bool Map::blocklightmapStep(int x, int y, int z, int light)
       case 5: z_local--; break;
     }
 
+    printf("getBlock(%d, %d, %d) (blocklightmapStep)\n", x_local, y_local, z_local);
     if(getBlock(x_local, y_local, z_local, &block, &meta))
     {
       uint8 blocklight, skylight;
@@ -229,14 +239,14 @@ bool Map::lightmapStep(int x, int y, int z, int light)
   uint8 block, meta;
 
   // If no light, stop!
-  if(light<1)
+  if(light < 1)
     return false;
 
   for(uint8 i=0;i<6;i++)
   {
-    int x_local=x;
-    int y_local=y;
-    int z_local=z;
+    int x_local = x;
+    int y_local = y;
+    int z_local = z;
 
     switch(i)
     {
@@ -248,6 +258,7 @@ bool Map::lightmapStep(int x, int y, int z, int light)
       case 5: z_local--; break;
     }
 
+    printf("getBlock(%d, %d, %d) (lightmapStep)\n", x_local, y_local, z_local);
     if(getBlock(x_local, y_local, z_local, &block, &meta))
     {
       uint8 blocklight, skylight;
@@ -271,19 +282,28 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta){
   printf("getBlock(x=%d, y=%d, z=%d)\n", x, y, z);
 #endif
 
-  int chunk_x = (x<0) ? (((x+1)/16)-1) : (x/16);
-  int chunk_z = (z<0) ? (((z+1)/16)-1) : (z/16);
+  if ((y < 0) || (y > 127))
+  {
+    LOG("Invalid y value (getBlock)");
+    return false;
+  }
+
+  uint32 mapId;
+  Map::posToId(x, z, &mapId);
+
+  int chunk_x = ((x<0) ? (((x+1)/16)-1) : (x/16));
+  int chunk_z = ((z<0) ? (((z+1)/16)-1) : (z/16));
 
   NBT_struct *chunk = getMapData(chunk_x, chunk_z);
 
-  if(!chunk || y<0 || y>127)
+  if(!chunk)
   {
     LOG("Loading chunk failed (getBlock)");
     return false;
   }
 
-  int chunk_block_x = (x<0) ? (15+((x+1)%16)) : (x%16);
-  int chunk_block_z = (z<0) ? (15+((z+1)%16)) : (z%16);
+  int chunk_block_x = ((x<0) ? (15+((x+1)%16)) : (x%16));
+  int chunk_block_z = ((z<0) ? (15+((z+1)%16)) : (z%16));
 
   uint8 *blocks=chunk->blocks;
   uint8 *metapointer=chunk->data;
@@ -301,7 +321,7 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta){
     metadata&=0x0f;
   }
   *meta=metadata;
-  mapLastused[chunk_x][chunk_z]=(int)time(0);
+  mapLastused[mapId] = (int)time(0);
 
   return true;
 }
@@ -312,19 +332,25 @@ bool Map::getBlockLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight)
   printf("getBlockLight(x=%d, y=%d, z=%d)\n", x, y, z);
 #endif
 
-  int chunk_x = (x<0) ? (((x+1)/16)-1) : (x/16);
-  int chunk_z = (z<0) ? (((z+1)/16)-1) : (z/16);
+  if ((y < 0) || (y > 127))
+  {
+    LOG("Invalid y value (getBlockLight)");
+    return false;
+  }
+
+  int chunk_x = ((x<0) ? (((x+1)/16)-1) : (x/16));
+  int chunk_z = ((z<0) ? (((z+1)/16)-1) : (z/16));
 
   NBT_struct *chunk = getMapData(chunk_x, chunk_z);
 
-  if(!chunk || y<0 || y>127)
+  if(!chunk)
   {
     LOG("Loading chunk failed (getBlockLight)");
     return false;
   }
 
-  int chunk_block_x = (x<0) ? (15+((x+1)%16)) : (x%16);
-  int chunk_block_z = (z<0) ? (15+((z+1)%16)) : (z%16);
+  int chunk_block_x = ((x<0) ? (15+((x+1)%16)) : (x%16));
+  int chunk_block_z = ((z<0) ? (15+((z+1)%16)) : (z%16));
 
   uint8 *blocklightpointer=chunk->blocklight;
   uint8 *skylightpointer=chunk->skylight;
@@ -355,19 +381,25 @@ bool Map::setBlockLight(int x, int y, int z, uint8 blocklight, uint8 skylight, u
   printf("setBlockLight(x=%d, y=%d, z=%d, %u, %u)\n", x, z, blocklight, skylight, setLight);
 #endif
 
-  int chunk_x = (x<0) ? (((x+1)/16)-1) : (x/16);
-  int chunk_z = (z<0) ? (((z+1)/16)-1) : (z/16);
+  if ((y < 0) || (y > 127))
+  {
+    LOG("Invalid y value (setBlockLight)");
+    return false;
+  }
+
+  int chunk_x = ((x<0) ? (((x+1)/16)-1) : (x/16));
+  int chunk_z = ((z<0) ? (((z+1)/16)-1) : (z/16));
 
   NBT_struct *chunk = getMapData(chunk_x, chunk_z);
 
-  if(!chunk || y<0 || y>127)
+  if(!chunk)
   {
     LOG("Loading chunk failed (setBlockLight)");
     return false;
   }
 
-  int chunk_block_x = (x<0) ? (15+((x+1)%16)) : (x%16);
-  int chunk_block_z = (z<0) ? (15+((z+1)%16)) : (z%16);
+  int chunk_block_x = ((x<0) ? (15+((x+1)%16)) : (x%16));
+  int chunk_block_z = ((z<0) ? (15+((z+1)%16)) : (z%16));
 
   uint8 *blocklightpointer=chunk->blocklight;
   uint8 *skylightpointer=chunk->skylight;
@@ -423,40 +455,49 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   printf("setBlock(x=%d, y=%d, z=%d, type=%d, char=%d)\n", x, y, z, type, meta);
 #endif
 
-  int chunk_x = (x<0) ? (((x+1)/16)-1) : (x/16);
-  int chunk_z = (z<0) ? (((z+1)/16)-1) : (z/16);
+  if ((y < 0) || (y > 127))
+  {
+    LOG("Invalid y value (setBlock)");
+    return false;
+  }
+
+  uint32 mapId;
+  Map::posToId(x, z, &mapId);
+
+  int chunk_x = ((x<0) ? (((x+1)/16)-1) : (x/16));
+  int chunk_z = ((z<0) ? (((z+1)/16)-1) : (z/16));
 
   NBT_struct *chunk = getMapData(chunk_x, chunk_z);
 
-  if(!chunk || y<0 || y>127)
+  if(!chunk)
   {
     LOG("Loading chunk failed (setBlock)");
     return false;
   }
 
-  int chunk_block_x = (x<0) ? (15+((x+1)%16)) : (x%16);
-  int chunk_block_z = (z<0) ? (15+((z+1)%16)) : (z%16);
+  int chunk_block_x = ((x<0) ? (15+((x+1)%16)) : (x%16));
+  int chunk_block_z = ((z<0) ? (15+((z+1)%16)) : (z%16));
 
-  uint8 *blocks=chunk->blocks;
-  uint8 *metapointer=chunk->data;
-  int index=y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
-  blocks[index]=type;
-  char metadata=metapointer[index>>1];
+  uint8 *blocks = chunk->blocks;
+  uint8 *metapointer = chunk->data;
+  int index = y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
+  blocks[index] = type;
+  char metadata = metapointer[index>>1];
 
   if(y%2)
   {
-    metadata&=0x0f;
-    metadata|=meta<<4;
+    metadata &= 0x0f;
+    metadata |= meta<<4;
   }
   else
   {
-    metadata&=0xf0;
-    metadata|=meta;
+    metadata &= 0xf0;
+    metadata |= meta;
   }
-  metapointer[index>>1]=metadata;
+  metapointer[index >> 1] = metadata;
 
-  mapChanged[chunk_x][chunk_z]=1;
-  mapLastused[chunk_x][chunk_z]=(int)time(0);
+  mapChanged[mapId] = 1;
+  mapLastused[mapId] = (int)time(0);
 
   return true;
 }
@@ -526,6 +567,9 @@ bool Map::loadMap(int x, int z)
   printf("loadMap(x=%d, z=%d)\n", x, z);
 #endif
 
+  uint32 mapId;
+  Map::posToId(x, z, &mapId);
+
   // Generate map file name
 
   int mapposx=x;
@@ -559,55 +603,48 @@ bool Map::loadMap(int x, int z)
   NBT_struct newMapStruct;
   TAG_Compound(&uncompressedData[0], &newMapStruct, true);
 
-  maps[x][z]=newMapStruct;
+  maps[mapId] = newMapStruct;
 
-  maps[x][z].blocks=get_NBT_pointer(&maps[x][z], "Blocks");
-  maps[x][z].data=get_NBT_pointer(&maps[x][z], "Data");
-  maps[x][z].blocklight=get_NBT_pointer(&maps[x][z], "BlockLight");
-  maps[x][z].skylight=get_NBT_pointer(&maps[x][z], "SkyLight");
+  maps[mapId].x = x;
+  maps[mapId].z = z;
+
+  maps[mapId].blocks = get_NBT_pointer(&maps[mapId], "Blocks");
+  maps[mapId].data = get_NBT_pointer(&maps[mapId], "Data");
+  maps[mapId].blocklight = get_NBT_pointer(&maps[mapId], "BlockLight");
+  maps[mapId].skylight = get_NBT_pointer(&maps[mapId], "SkyLight");
   // Check if the items were not found
-  if(maps[x][z].blocks      == 0 ||
-     maps[x][z].data        == 0 ||
-     maps[x][z].blocklight  == 0 ||
-     maps[x][z].skylight    == 0)
+  if(maps[mapId].blocks      == 0 ||
+     maps[mapId].data        == 0 ||
+     maps[mapId].blocklight  == 0 ||
+     maps[mapId].skylight    == 0)
   {
     LOG("Error in map data");
     return false;
   }
 
   // Update last used time
-  mapLastused[x][z] = (int)time(0);
+  mapLastused[mapId] = (int)time(0);
 
   // Not changed
-  mapChanged[x][z] = 0;
+  mapChanged[mapId] = 0;
 
   return true;
 }
 
 bool Map::saveMap(int x, int z)
 {
-  if(!mapChanged[x][z])
-  {
-    return true;
-  }
+#ifdef MSDBG
+  printf("saveMap(x=%d, z=%d)\n", x, z);
+#endif
 
-  std::map<int, std::map<int, NBT_struct> >::iterator iter;
-  iter = maps.find(x);
-  if (iter != maps.end())
-  {
-    std::map<int, NBT_struct>::iterator iter2;
-    iter2 = maps[x].find(z);
-    if (iter2 == maps[x].end())
-    {
-      // Map not in memory!
-      return false;
-    }
-  }
-  else
-  {
-    // Map not in memory!
+  uint32 mapId;
+  Map::posToId(x, z, &mapId);
+
+  if(!mapChanged[mapId])
+    return true;
+
+  if (!maps.count(mapId))
     return false;
-  }
 
   // Recalculate light maps
   generateLightMaps(x, z);
@@ -656,81 +693,31 @@ bool Map::saveMap(int x, int z)
   }
 
   uint8 uncompressedData[200000];
-  int dumpsize=dumpNBT_struct(&maps[x][z].compounds[0], &uncompressedData[0]);
+  int dumpsize=dumpNBT_struct(&maps[mapId].compounds[0], &uncompressedData[0]);
   gzFile mapfile2=gzopen(outfile.c_str(), "wb");
   gzwrite(mapfile2, &uncompressedData[0], dumpsize);
   gzclose(mapfile2);
 
   // Set "not changed"
-  mapChanged[x][z]=0;
+  mapChanged[mapId] = 0;
+
   return true;
 }
-
 
 bool Map::releaseMap(int x, int z)
 {
   // save first
   saveMap(x, z);
 
-  std::map<int, std::map<int, NBT_struct> >::iterator iter;
-  iter = maps.find(x);
-  std::map<int, NBT_struct>::iterator iter2;
-  if (iter != maps.end())
-  {
-    iter2 = maps[x].find(z);
-    if (iter2 == maps[x].end())
-    {
-        mapChanged[x].erase(z);
-      if(!mapChanged.count(x))
-      {
-        mapChanged.erase(x);
-      }
+  uint32 mapId;
+  Map::posToId(x, z, &mapId);
 
-      mapLastused[x].erase(z);
-      if(!mapLastused.count(x))
-      {
-        mapLastused.erase(x);
-      }
-      // Map not in memory!
-      return false;
-    }
-  }
-  else
-  {
-    mapChanged[x].erase(z);
-    if(!mapChanged.count(x))
-    {
-      mapChanged.erase(x);
-    }
+  mapChanged.erase(mapId);
+  mapLastused.erase(mapId);
+  if (maps.count(mapId))
+    freeNBT_struct(&maps[mapId]);
 
-    mapLastused[x].erase(z);
-    if(!mapLastused.count(x))
-    {
-      mapLastused.erase(x);
-    }
-    // Map not in memory!
-    return false;
-  }
-
-  freeNBT_struct(&maps[x][z]);
-  // Erase from map
-  maps[x].erase(z);
-  if(!maps.count(x))
-  {
-    maps.erase(x);
-  }
-  mapChanged[x].erase(z);
-  if(!mapChanged.count(x))
-  {
-    mapChanged.erase(x);
-  }
-
-  mapLastused[x].erase(z);
-  if(!mapLastused.count(x))
-  {
-    mapLastused.erase(x);
-  }
-  return true;
+  return maps.erase(mapId);
 }
 
 // Send chunk to user
@@ -739,6 +726,9 @@ void Map::sendToUser(User *user, int x, int z)
 #ifdef MSDBG
   printf("sendToUser(x=%d, z=%d)\n", x, z);
 #endif
+
+  uint32 mapId;
+  Map::posToId(x, z, &mapId);
 
   bool dataFromMemory=false;
   uint8 data4[18+81920];
@@ -762,10 +752,10 @@ void Map::sendToUser(User *user, int x, int z)
     data4[12]=127; // Size_y
     data4[13]=15;  // Size_z
 
-    memcpy(&mapdata[0], maps[x][z].blocks, 32768);
-    memcpy(&mapdata[32768], maps[x][z].data, 16384);
-    memcpy(&mapdata[32768+16384], maps[x][z].blocklight, 16384);
-    memcpy(&mapdata[32768+16384+16384], maps[x][z].skylight, 16384);
+    memcpy(&mapdata[0], maps[mapId].blocks, 32768);
+    memcpy(&mapdata[32768], maps[mapId].data, 16384);
+    memcpy(&mapdata[32768+16384], maps[mapId].blocklight, 16384);
+    memcpy(&mapdata[32768+16384+16384], maps[mapId].skylight, 16384);
 
     putSint32(&data4[1], mapposx*16);
     data4[5]=0;

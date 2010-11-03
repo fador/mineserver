@@ -59,12 +59,9 @@ private:
   ~Map()
   {
     // Free all memory
-    for (std::map<int, std::map<int, NBT_struct> >::const_iterator it = maps.begin(); it != maps.end(); ++it)
+    for (std::map<uint32, NBT_struct>::const_iterator it = maps.begin(); it != maps.end(); ++it)
     {
-      for (std::map<int, NBT_struct>::const_iterator it2 = maps[it->first].begin(); it2 != maps[it->first].end(); ++it2)
-      {
-        releaseMap(it->first, it2->first);
-      }
+      releaseMap(maps[it->first].x, maps[it->first].z);
     }
 
     // Free level.dat info
@@ -88,15 +85,18 @@ public:
   int emitLight[256];
 
   // Store all maps here
-  std::map<int, std::map<int, NBT_struct> > maps;
+  std::map<uint32, NBT_struct> maps;
 
   // Store the time map chunk has been last used
-  std::map<int, std::map<int, int> > mapLastused;
+  std::map<uint32, int> mapLastused;
 
   // Store if map has been modified
-  std::map<int, std::map<int, bool> > mapChanged;
+  std::map<uint32, bool> mapChanged;
 
   std::vector<spawnedItem> items;
+
+  void posToId(int x, int z, uint32 *id);
+  void idToPos(uint32 id, int *x, int *z);
 
   void initMap();
   void freeMap();
