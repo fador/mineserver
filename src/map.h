@@ -31,7 +31,9 @@ private:
     emitLight[0x4A] = 9;  // Redstone ore (Glowing)
     emitLight[0x4C] = 7;  // Redstone Torch (On)
     emitLight[0x59] = 15; // Lightstone
+    emitLight[0x5A] = 11; // Portal
     emitLight[0x5B] = 15; // Jack-O-Lantern
+    
 
     for(int i=0;i<256;i++) stopLight[i]=-16;
     stopLight[0x00] = 0; // Empty
@@ -48,13 +50,17 @@ private:
     stopLight[0x33] = 0; // Fire
     stopLight[0x34] = 0; // Mob spawner
     stopLight[0x37] = 0; // Redstone wire
+    stopLight[0x40] = 0; // Wooden door
     stopLight[0x41] = 0; // Ladder
     stopLight[0x42] = 0; // Minecart track
+    stopLight[0x47] = 0; // Iron door
     stopLight[0x4b] = 0; // Redstone Torch (Off)
     stopLight[0x4C] = 0; // Redstone Torch (On)
     stopLight[0x4e] = 0; // Snow
-    stopLight[0x4f] =-3; // Ice
+    stopLight[0x4f] =-3; // Ice    
     stopLight[0x55] = 0; // Fence
+    stopLight[0x5A] = 0; // Portal
+    stopLight[0x5B] = 0; // Jack-O-Lantern
   };
   ~Map()
   {

@@ -133,8 +133,8 @@ int main(void)
             << "Version " << VERSION <<" by Fador & Psoden"                                   << std::endl << std::endl;
 
   timeval loopTime;
-  loopTime.tv_sec=0;
-  loopTime.tv_usec=1000;
+  loopTime.tv_sec=1;
+  loopTime.tv_usec=0;
 
   event_base_loopexit(eventbase,&loopTime);
   while (event_base_loop(eventbase, 0)==0)
