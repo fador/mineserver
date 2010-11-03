@@ -26,9 +26,30 @@ bool Conf::load(std::string configFile)
   // If file does not exist
   if( ifs.fail() )
   {
-    std::cout << "> Warning: " << configFile << " not found. Creating using default values..." << std::endl;
+    std::cout << ">>> " << configFile << " not found. Creating using default values..." << std::endl;
     
-    // TODO: Actually create it ;(
+    std::ofstream confofs( configFile.c_str() );
+    confofs << "#"                                                                            << std::endl
+            << "# Default Mineserver configuration"                                                   << std::endl
+            << "#"                                                                            << std::endl
+                                                                                              << std::endl
+            << "# Server name"                                                               << std::endl
+            << "servername = \"Mineserver alpha testserver\""                                << std::endl
+                                                                                              << std::endl
+            << "# Userlimit"                                                                 << std::endl
+            << "userlimit = 50"                                                              << std::endl
+                                                                                              << std::endl
+            << "# Port"                                                                      << std::endl 
+            << "port = 25565"                                                                << std::endl
+                                                                                              << std::endl
+            << "# Map Release time - time in seconds to keep unused map chunks in memory"    << std::endl
+            << "# Memory vs. CPU tradeoff. Reloading map data takes a bit of CPU each time"  << std::endl
+            << "# but the map in memory consumes it around 100kb/chunk"                      << std::endl
+            << "map_release_time = 10 << std::endl"                                          << std::endl;
+                
+    confofs.close();
+    
+    this->load(CONFIGFILE);
   }
   
   std::string temp;
