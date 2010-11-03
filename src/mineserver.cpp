@@ -214,11 +214,12 @@ int main(void)
           //Teleport player
           Users[i]->teleport(Map::get().spawnPos.x,Map::get().spawnPos.y+2,Map::get().spawnPos.z);
 
+          //Put nearby chunks to queue
           for(int x=-Users[i]->viewDistance;x<=Users[i]->viewDistance;x++)
           {
             for(int z=-Users[i]->viewDistance;z<=Users[i]->viewDistance;z++)
             {
-              Users[i]->addQueue(x,z);
+              Users[i]->addQueue(Map::get().spawnPos.x/16+x,Map::get().spawnPos.z/16+z);
             }
           }
 
