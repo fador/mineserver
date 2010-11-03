@@ -54,7 +54,10 @@
     <ClCompile Include="..\src\zlib\compress.c" />
     <ClCompile Include="..\src\zlib\crc32.c" />
     <ClCompile Include="..\src\zlib\deflate.c" />
-    <ClCompile Include="..\src\zlib\gzio.c" />
+    <ClCompile Include="..\src\zlib\gzclose.c" />
+    <ClCompile Include="..\src\zlib\gzlib.c" />
+    <ClCompile Include="..\src\zlib\gzread.c" />
+    <ClCompile Include="..\src\zlib\gzwrite.c" />
     <ClCompile Include="..\src\zlib\infback.c" />
     <ClCompile Include="..\src\zlib\inffast.c" />
     <ClCompile Include="..\src\zlib\inflate.c" />
@@ -99,6 +102,7 @@
     <ClInclude Include="..\src\user.h" />
     <ClInclude Include="..\src\zlib\crc32.h" />
     <ClInclude Include="..\src\zlib\deflate.h" />
+    <ClInclude Include="..\src\zlib\gzguts.h" />
     <ClInclude Include="..\src\zlib\inffast.h" />
     <ClInclude Include="..\src\zlib\inffixed.h" />
     <ClInclude Include="..\src\zlib\inflate.h" />
