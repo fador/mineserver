@@ -3,13 +3,13 @@
 
 class Conf
 {
-    private:
-        Conf() {};
-        std::map<std::string, std::string> confSet;
-    public:
-        bool load(std::string configFile);
-        std::string value(std::string name);
-        static Conf &get();
+  private:
+    Conf() {};
+    std::map<std::string, std::string> confSet;
+  public:
+    bool load(std::string configFile);
+    std::string value(std::string name);
+    static Conf &get();
 };
 
 #endif

@@ -53,46 +53,46 @@ int setnonblock(int fd)
 
 int main(void)
 {
-    uint32 starttime=(uint32)time(0);
-    uint32 tick=(uint32)time(0);
+  uint32 starttime=(uint32)time(0);
+  uint32 tick=(uint32)time(0);
 
-    Chat::get().loadAdmins(ADMINFILE);
-    Chat::get().checkMotd(MOTDFILE);
-  
-    Conf::get().load(CONFIGFILE);
+  Chat::get().loadAdmins(ADMINFILE);
+  Chat::get().checkMotd(MOTDFILE);
 
-    Map::get().initMap();
-    //Try to load port from config
-    int port=atoi(Conf::get().value("port").c_str());
-    //If failed, use default
-    if(port==0) port=DEFAULT_PORT;
+  Conf::get().load(CONFIGFILE);
 
+  Map::get().initMap();
+  //Try to load port from config
+  int port=atoi(Conf::get().value("port").c_str());
+  //If failed, use default
+  if(port==0)
+    port=DEFAULT_PORT;
 
 #ifdef WIN32
   _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
   _CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_DEBUG );
   WSADATA wsaData;
-   int iResult;
+  int iResult;
   // Initialize Winsock
-    iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
-    if (iResult != 0) {
-        printf("WSAStartup failed with error: %d\n", iResult);
-        return 1;
-    }
+  iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
+  if (iResult != 0) {
+    printf("WSAStartup failed with error: %d\n", iResult);
+    return 1;
+  }
 #endif
 
-    int socketlisten;
+  int socketlisten;
   struct sockaddr_in addresslisten;
   struct event accept_event;
   int reuse = 1;
 
   event_base *eventbase=(event_base *)event_init();
-  #ifdef WIN32
-    socketlisten = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  #else
-    socketlisten = socket(AF_INET, SOCK_STREAM, 0);
-  #endif
-  
+#ifdef WIN32
+  socketlisten = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+#else
+  socketlisten = socket(AF_INET, SOCK_STREAM, 0);
+#endif
+
   if (socketlisten < 0)
   {
     fprintf(stderr,"Failed to create listen socket");
@@ -106,48 +106,32 @@ int main(void)
   addresslisten.sin_port = htons(port);
 
   //Bind to port
-  if (bind(socketlisten,
-           (struct sockaddr *)&addresslisten,
-           sizeof(addresslisten)) < 0)
-    {
-      fprintf(stderr,"Failed to bind");
-      return 1;
-    }
+  if (bind(socketlisten, (struct sockaddr *)&addresslisten, sizeof(addresslisten)) < 0)
+  {
+    fprintf(stderr,"Failed to bind");
+    return 1;
+  }
 
   if (listen(socketlisten, 5) < 0)
-    {
-      fprintf(stderr,"Failed to listen to socket");
-      return 1;
-    }
+  {
+    fprintf(stderr,"Failed to listen to socket");
+    return 1;
+  }
 
-  setsockopt(socketlisten,
-             SOL_SOCKET,
-             SO_REUSEADDR,
-             (char *)&reuse,
-             sizeof(reuse));
-
+  setsockopt(socketlisten, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse));
   setnonblock(socketlisten);
-
-  event_set(&accept_event,
-            socketlisten,
-            EV_READ|EV_PERSIST,
-            accept_callback,
-            NULL);
-
-  event_add(&accept_event,
-            NULL);
-
-
+  event_set(&accept_event, socketlisten, EV_READ|EV_PERSIST, accept_callback, NULL);
+  event_add(&accept_event, NULL);
 
   std::cout << std::endl
-            << "   _____  .__  " << std::endl
-            << "  /     \\ |__| ____   ____   ______ ______________  __ ___________ " << std::endl
+            << "   _____  .__  "                                                              << std::endl
+            << "  /     \\ |__| ____   ____   ______ ______________  __ ___________ "         << std::endl
             << " /  \\ /  \\|  |/    \\_/ __ \\ /  ___// __ \\_  __ \\  \\/ // __ \\_  __ \\" << std::endl
             << "/    Y    \\  |   |  \\  ___/ \\___ \\\\  ___/|  | \\/\\   /\\  ___/|  | \\/" << std::endl
-            << "\\____|__  /__|___|  /\\___  >____  >\\___  >__|    \\_/  \\___  >__|   " << std::endl
-            << "        \\/        \\/     \\/     \\/     \\/                 \\/       " << std::endl  
-            << "Version " << VERSION <<" by Fador & Psoden" << std::endl << std::endl;
-            
+            << "\\____|__  /__|___|  /\\___  >____  >\\___  >__|    \\_/  \\___  >__|   "     << std::endl
+            << "        \\/        \\/     \\/     \\/     \\/                 \\/       "    << std::endl
+            << "Version " << VERSION <<" by Fador & Psoden"                                   << std::endl << std::endl;
+
   timeval loopTime;
   loopTime.tv_sec=0;
   loopTime.tv_usec=1000;
@@ -197,7 +181,6 @@ int main(void)
         coord releaseCoord=toRelease[i];
         Map::get().releaseMap(releaseCoord.x, releaseCoord.z);
       }
-
     }
 
     //Every second
@@ -209,7 +192,7 @@ int main(void)
       {
         //for(uint8 j=0;j<10;j++)
         {
-          //Push new map data        
+          //Push new map data
           Users[i]->pushMap();
         }
         //for(uint8 j=0;j<20;j++)
@@ -229,8 +212,8 @@ int main(void)
           //Users[i].addQueue(0,0);
 
           //Teleport player
-          Users[i]->teleport(Map::get().spawnPos.x,Map::get().spawnPos.y+2,Map::get().spawnPos.z); 
-          
+          Users[i]->teleport(Map::get().spawnPos.x,Map::get().spawnPos.y+2,Map::get().spawnPos.z);
+
           /*
           for(int x=-Users[i].viewDistance;x<=Users[i].viewDistance;x++)
           {
@@ -248,29 +231,28 @@ int main(void)
         }
       }
     }
-    #ifdef WIN32
+#ifdef WIN32
     if(_kbhit())
         quit=1;
-    #endif
+#endif
 
     event_base_loopexit(eventbase,&loopTime);
   }
 
-    
   Map::get().freeMap();
 
   //event_dispatch();
 
-  #ifdef WIN32
+#ifdef WIN32
   closesocket(socketlisten);
-  #else
+#else
   close(socketlisten);
-  #endif
+#endif
 
   //Windows debug
-  #ifdef WIN32
-      _CrtDumpMemoryLeaks();
-  #endif
+#ifdef WIN32
+  _CrtDumpMemoryLeaks();
+#endif
 
   return EXIT_SUCCESS;
 }

@@ -51,9 +51,7 @@ struct NBT_struct
   std::vector<NBT_struct> compounds;
 };
 
-
 //int readTag(uint8* input, int inputlen,uint8* output, int* outputlen,std::string TAG, int *pointer=0);
-
 
 int TAG_Byte(uint8* input, char *output);
 int TAG_Short(uint8* input, int *output);

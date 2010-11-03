@@ -38,48 +38,42 @@ typedef  int socklen_t;
 
 extern int setnonblock(int fd);
 
-
-
-void buf_write_callback(struct bufferevent *bev,
-                        void *arg)
+void buf_write_callback(struct bufferevent *bev, void *arg)
 {
 }
 
-void buf_error_callback(struct bufferevent *bev,
-                        short what,
-                        void *arg)
+void buf_error_callback(struct bufferevent *bev, short what, void *arg)
 {
   User *client = (User *)arg;
   bufferevent_free(client->buf_ev);
 
-  #ifdef WIN32
+#ifdef WIN32
   closesocket(client->fd);
-  #else
+#else
   close(client->fd);
-  #endif
+#endif
+
   remUser(client->fd);
 }
 
-
-void buf_read_callback(struct bufferevent *incoming,
-                       void *arg)
+void buf_read_callback(struct bufferevent *incoming, void *arg)
 {
-  uint32 i=0;
+  uint32 i = 0;
 
   User *user=(User *)arg;
 
-  int read=1;
+  int read = 1;
 
-  uint8 *buf=new uint8[2048];
+  uint8 *buf = new uint8[2048];
 
   //Push data to buffer
   while(read)
   {
-    if(read=bufferevent_read(incoming,buf,2048))
+    if(read = bufferevent_read(incoming, buf, 2048))
     {
-      for(int i=0;i<read;i++)
+      for(int i = 0;i<read;i++)
       {
-          user->buffer.push_back(buf[i]);
+        user->buffer.push_back(buf[i]);
       }
     }
   }
@@ -91,52 +85,54 @@ void buf_read_callback(struct bufferevent *incoming,
     // If not waiting more data
     if(!user->waitForData)
     {
-      user->action=user->buffer.front();
+      user->action = user->buffer.front();
       user->buffer.pop_front();
       //printf("Action: 0x%x\n", user->action);
     }
     else
     {
-       user->waitForData=false;
+       user->waitForData = false;
     }
 
-    //Login package
-    if(user->action==0x00)
+    // Keep Alive (http://mc.kev009.com/wiki/Protocol#Keep_Alive_.280x00.29)
+    if(user->action == 0x00)
     {  
       //Ping
     }
-    else if(user->action==0x01) //Login request
+
+    // Login request (http://mc.kev009.com/wiki/Protocol#Login_Request_.280x01.29)
+    else if(user->action == 0x01)
     {    
       //Check that we have enought data in the buffer
       if(user->buffer.size()<12)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
-      uint32 curpos=0;
+      uint32 curpos = 0;
       
       //Client protocol version
       uint8 tmpIntArray[4] = {0};
-      for(i=0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i]; 
+      for(i = 0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i]; 
       int version = getUint32(&tmpIntArray[0]);     
       curpos+=4;
 
       //Player name length
       uint8 tmpShortArray[2] = {0};
-      for(i=0;i<2;i++) tmpShortArray[i]=user->buffer[curpos+i]; 
+      for(i = 0;i<2;i++) tmpShortArray[i]=user->buffer[curpos+i]; 
       int len = getUint16(&tmpShortArray[0]);     
       curpos+=2;
 
       //Check for data
       if(user->buffer.size()<curpos+len+2)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
 
       std::string player;
       //Read player name
-      for(int pos=0;pos<len;pos++)
+      for(int pos = 0;pos<len;pos++)
       {
         player+=user->buffer[curpos+pos];
       }
@@ -144,7 +140,7 @@ void buf_read_callback(struct bufferevent *incoming,
 
     
       //Password length
-      for(i=0;i<2;i++) tmpShortArray[i]=user->buffer[curpos+i]; 
+      for(i = 0;i<2;i++) tmpShortArray[i]=user->buffer[curpos+i]; 
       len = getUint16(&tmpShortArray[0]);     
       curpos+=2;
     
@@ -152,12 +148,12 @@ void buf_read_callback(struct bufferevent *incoming,
       //Check for data
       if(user->buffer.size()<curpos+len)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
 
       //Read password
-      for(int pos=0;pos<len;pos++)
+      for(int pos = 0;pos<len;pos++)
       {
         passwd += user->buffer[curpos+pos];
       }
@@ -167,9 +163,9 @@ void buf_read_callback(struct bufferevent *incoming,
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
 
       std::cout << "Player " << user->UID << " login v." <<version<<" : " << player <<":" << passwd << std::endl;
-      if(version==2 || version==3)
+      if(version == 2 || version == 3)
       {        
-        user->logged=1;
+        user->logged = 1;
         user->changeNick(player, Chat::get().admins);
        
         // Send motd
@@ -204,7 +200,6 @@ void buf_read_callback(struct bufferevent *incoming,
       putSint32((uint8 *)&data[1],user->UID);
       bufferevent_write(user->buf_ev, (char *)&data[0], 9);
 
-
       //Send server time (after dawn)
       uint8 data3[9]={0x04, 0x00, 0x00, 0x00,0x00,0x00,0x00,0x0e,0x00};
       bufferevent_write(user->buf_ev, (char *)&data3[0], 9);
@@ -215,7 +210,7 @@ void buf_read_callback(struct bufferevent *incoming,
       putSint32(&data4[1],-1);
       data4[5]=0;
       data4[6]=36;
-      for(i=0;i<36;i++)
+      for(i = 0;i<36;i++)
       {
         if(i<10)
           putSint16(&data4[7+i*5], 0x115); //Diamond shovel
@@ -235,39 +230,38 @@ void buf_read_callback(struct bufferevent *incoming,
 
       putSint32(&data4[1],-3);
       bufferevent_write(user->buf_ev, (char *)&data4[0], 7+4*5);
-      
-
-
             
       //Send "On Ground" signal
       char data6[2]={0x0A, 0x01};
       bufferevent_write(user->buf_ev, (char *)&data6[0], 2);
     }
-    else if(user->action==0x02) //Handshake
+
+    // Handshake
+    else if(user->action == 0x02)
     {
       if(user->buffer.size()<3)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
-      int curpos=0;
+      int curpos = 0;
 
       //Player name length
       uint8 tmpShortArray[2] = {0};
-      for(i=0;i<2;i++) tmpShortArray[i]=user->buffer[curpos+i]; 
+      for(i = 0;i<2;i++) tmpShortArray[i]=user->buffer[curpos+i]; 
       int len = getSint16(&tmpShortArray[0]);     
       curpos+=2;
 
       //Check for data
       if(user->buffer.size()<(unsigned int)curpos+len)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
 
       //Read player name
       std::string player;
-      for(int pos=0;pos<len;pos++)
+      for(int pos = 0;pos<len;pos++)
       {
          player += user->buffer[curpos+pos];
       }
@@ -286,40 +280,39 @@ void buf_read_callback(struct bufferevent *incoming,
       char data2[4]={0x02, 0x00,0x01,'-'};    
       bufferevent_write(user->buf_ev, (char *)&data2[0], 4);
 
-      //user->logged=1;
+      //user->logged = 1;
       //user->changeNick(player);
       //char data3[5]={0x1e, 0x01, 0x02, 0x03, 0x04};
       //bufferevent_write(user->buf_ev, (char *)&data3[0], 5);
     } 
-    // 
-    // CHATMESSAGE
-    //
-    else if(user->action==0x03)
+
+    // Chat
+    else if(user->action == 0x03)
     {
       // Wait for length-short. HEHE
       if(user->buffer.size()<2)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
       
-      int curpos=0;
+      int curpos = 0;
       
       uint8 tmpLenArray[2] = {0};
-      for(i=0;i<2;i++) tmpLenArray[i]=user->buffer[curpos+i]; 
+      for(i = 0;i<2;i++) tmpLenArray[i]=user->buffer[curpos+i]; 
       short len = getSint16(&tmpLenArray[0]); 
       curpos+=2;
       
       // Wait for whole message
       if(user->buffer.size()<(unsigned int)curpos+len)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
       
       //Read message
       std::string msg;
-      for(i=0;i<(unsigned int)len;i++) msg += user->buffer[curpos+i];
+      for(i = 0;i<(unsigned int)len;i++) msg += user->buffer[curpos+i];
       
       curpos += len;
       
@@ -329,58 +322,60 @@ void buf_read_callback(struct bufferevent *incoming,
       Chat::get().handleMsg( user, msg );
 
     }
-    else if(user->action==0x05) //Inventory change
+
+    // Inventory change
+    else if(user->action == 0x05)
     {
 
       if(user->buffer.size()<14)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
 
-      int curpos=0;
+      int curpos = 0;
 
       //Read inventory type (-1,-2 or -3)
       uint8 tmpIntArray[4] = {0};
-      for(i=0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i]; 
+      for(i = 0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i]; 
       int type = getSint32(&tmpIntArray[0]);
       curpos+=4;
 
       uint8 tmpShortArray[2] = {0};
-      for(i=0;i<2;i++) tmpShortArray[i]=user->buffer[curpos+i]; 
+      for(i = 0;i<2;i++) tmpShortArray[i]=user->buffer[curpos+i]; 
       int count = getSint16(&tmpShortArray[0]);     
       curpos+=2;
 
-      int items=0;
+      int items = 0;
 
       switch(type)
       {
         //Main inventory
         case -1:
-          items=36;
+          items = 36;
         break;
 
         //Equipped armour
         case -2:
-          items=4;
+          items = 4;
         break;
 
         //Crafting slots
         case -3:
-          items=4;
+          items = 4;
         break;
       }
 
       if(user->buffer.size()<(unsigned int)6+2*items)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
 
-      for(i=0;i<(unsigned int)items;i++)
+      for(i = 0;i<(unsigned int)items;i++)
       {
         int j = 0;
-        for(j=0;j<2;j++) tmpShortArray[j]=user->buffer[curpos+j]; 
+        for(j = 0;j<2;j++) tmpShortArray[j]=user->buffer[curpos+j]; 
         int item_id = getSint16(&tmpShortArray[0]);     
         curpos+=2;
 
@@ -395,13 +390,13 @@ void buf_read_callback(struct bufferevent *incoming,
         {
           if(user->buffer.size()-curpos<(items-i-1)*2+3)
           {
-            user->waitForData=true;
+            user->waitForData = true;
             return;
           }
-          uint8 numberOfItems=user->buffer[curpos];
+          uint8 numberOfItems = user->buffer[curpos];
           curpos++;
           
-          for(j=0;j<2;j++) tmpShortArray[j]=user->buffer[curpos+j]; 
+          for(j = 0;j<2;j++) tmpShortArray[j]=user->buffer[curpos+j]; 
           int health = getSint16(&tmpShortArray[0]);     
           curpos+=2;
         }
@@ -412,44 +407,46 @@ void buf_read_callback(struct bufferevent *incoming,
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
 
     }
-    else if(user->action==0x0a) //"On Ground" of "Flying" package
+
+    // Player (http://mc.kev009.com/wiki/Protocol#Player_.280x0A.29)
+    else if(user->action == 0x0a)
     {
       if(user->buffer.size()<1)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }      
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+1);
     }
-    else if(user->action==0x0b) // PLayer position
+    else if(user->action == 0x0b) // PLayer position
     {
       if(user->buffer.size()<33)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
-      int curpos=0;
+      int curpos = 0;
       double x,y,stance,z;
       uint8 doublearray[8];
 
       //Read double X
-      for(i=0;i<8;i++) doublearray[i]=user->buffer[curpos+i];
-      x=getDouble(&doublearray[0]);    
+      for(i = 0;i<8;i++) doublearray[i]=user->buffer[curpos+i];
+      x = getDouble(&doublearray[0]);    
       curpos+=8;
 
       //Read double Y
-      for(i=0;i<8;i++) doublearray[i]=user->buffer[curpos+i];
-      y=getDouble(&doublearray[0]);
+      for(i = 0;i<8;i++) doublearray[i]=user->buffer[curpos+i];
+      y = getDouble(&doublearray[0]);
       curpos+=8;
 
       //Read double stance
-      for(i=0;i<8;i++) doublearray[i]=user->buffer[curpos+i];
-      stance=getDouble(&doublearray[0]);
+      for(i = 0;i<8;i++) doublearray[i]=user->buffer[curpos+i];
+      stance = getDouble(&doublearray[0]);
       curpos+=8;
 
       //Read double Z
-      for(i=0;i<8;i++) doublearray[i]=user->buffer[curpos+i];
-      z=getDouble(&doublearray[0]);
+      for(i = 0;i<8;i++) doublearray[i]=user->buffer[curpos+i];
+      z = getDouble(&doublearray[0]);
       curpos+=8;
 
       user->updatePos(x, y, z, stance);
@@ -457,24 +454,24 @@ void buf_read_callback(struct bufferevent *incoming,
       //Skip others
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+33);
     }
-    else if(user->action==0x0c) //Player Look
+    else if(user->action == 0x0c) //Player Look
     {
       if(user->buffer.size()<9)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
 
       float yaw,pitch;
       uint8 onground;
       uint8 tmpFloatArray[4] = {0};
-      int curpos=0;
+      int curpos = 0;
       
-      for(i=0;i<4;i++) tmpFloatArray[i]=user->buffer[curpos+i]; 
+      for(i = 0;i<4;i++) tmpFloatArray[i]=user->buffer[curpos+i]; 
       yaw = getFloat(&tmpFloatArray[0]);     
       curpos+=4;
       
-      for(i=0;i<4;i++) tmpFloatArray[i]=user->buffer[curpos+i]; 
+      for(i = 0;i<4;i++) tmpFloatArray[i]=user->buffer[curpos+i]; 
       pitch = getFloat(&tmpFloatArray[0]);     
       curpos+=4;
       
@@ -485,47 +482,47 @@ void buf_read_callback(struct bufferevent *incoming,
 
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+9);
     }
-    else if(user->action==0x0d) //Player Position & Look
+    else if(user->action == 0x0d) //Player Position & Look
     {
       if(user->buffer.size()<41)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
-      int curpos=0;
+      int curpos = 0;
 
       double x,y,stance,z;
       uint8 doublearray[8];
 
       //Read double X
-      for(i=0;i<8;i++) doublearray[i]=user->buffer[curpos+i];
-      x=getDouble(&doublearray[0]);    
+      for(i = 0;i<8;i++) doublearray[i]=user->buffer[curpos+i];
+      x = getDouble(&doublearray[0]);    
       curpos+=8;
 
       //Read double Y
-      for(i=0;i<8;i++) doublearray[i]=user->buffer[curpos+i];
-      y=getDouble(&doublearray[0]);
+      for(i = 0;i<8;i++) doublearray[i]=user->buffer[curpos+i];
+      y = getDouble(&doublearray[0]);
       curpos+=8;
 
       //Read double stance
-      for(i=0;i<8;i++) doublearray[i]=user->buffer[curpos+i];
-      stance=getDouble(&doublearray[0]);
+      for(i = 0;i<8;i++) doublearray[i]=user->buffer[curpos+i];
+      stance = getDouble(&doublearray[0]);
       curpos+=8;
 
       //Read double Z
-      for(i=0;i<8;i++) doublearray[i]=user->buffer[curpos+i];
-      z=getDouble(&doublearray[0]);
+      for(i = 0;i<8;i++) doublearray[i]=user->buffer[curpos+i];
+      z = getDouble(&doublearray[0]);
       curpos+=8;
 
 
       float yaw,pitch;
       uint8 tmpFloatArray[4] = {0};
       
-      for(i=0;i<4;i++) tmpFloatArray[i]=user->buffer[curpos+i]; 
+      for(i = 0;i<4;i++) tmpFloatArray[i]=user->buffer[curpos+i]; 
       yaw = getFloat(&tmpFloatArray[0]);     
       curpos+=4;
       
-      for(i=0;i<4;i++) tmpFloatArray[i]=user->buffer[curpos+i]; 
+      for(i = 0;i<4;i++) tmpFloatArray[i]=user->buffer[curpos+i]; 
       pitch = getFloat(&tmpFloatArray[0]);     
       curpos+=4;
 
@@ -534,31 +531,31 @@ void buf_read_callback(struct bufferevent *incoming,
       user->updateLook(yaw, pitch);
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+41);
     }
-    else if(user->action==0x0e) //Player Digging
+    else if(user->action == 0x0e) //Player Digging
     {
       if(user->buffer.size()<11)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
       uint8 tmpIntArray[4];
-      int curpos=0;
-      char status=user->buffer[curpos];
+      int curpos = 0;
+      char status = user->buffer[curpos];
       curpos++;
 
-      for(i=0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i];      
-      int x=getSint32(&tmpIntArray[0]);
+      for(i = 0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i];      
+      int x = getSint32(&tmpIntArray[0]);
       curpos+=4;
 
-      char y=user->buffer[curpos];
+      char y = user->buffer[curpos];
       curpos++;
 
-      for(i=0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i];
-      int z=getSint32(&tmpIntArray[0]);
+      for(i = 0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i];
+      int z = getSint32(&tmpIntArray[0]);
       curpos+=4;
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+11);
       //If block broken
-      if(status==3)
+      if(status == 3)
       {
         uint8 block; uint8 meta;
         if(Map::get().getBlock(x,y,z, &block, &meta))
@@ -567,7 +564,7 @@ void buf_read_callback(struct bufferevent *incoming,
           Map::get().setBlock(x,y,z,0,0);
 
           uint8 topblock; uint8 topmeta;        
-          if(Map::get().getBlock(x,y+1,z, &topblock, &topmeta) && topblock==0x4e) //If snow on top, destroy it
+          if(Map::get().getBlock(x,y+1,z, &topblock, &topmeta) && topblock == 0x4e) //If snow on top, destroy it
           {
             Map::get().sendBlockChange(x,y+1,z,0, 0);
             Map::get().setBlock(x,y+1,z,0,0);
@@ -576,11 +573,11 @@ void buf_read_callback(struct bufferevent *incoming,
           if(block!=0x4e && (int)block>0 && (int)block<255)
           {         
             spawnedItem item;
-            item.EID=generateEID();
+            item.EID = generateEID();
             item.item=(int)block;
-            item.x=x*32;
-            item.y=y*32;
-            item.z=z*32;
+            item.x = x*32;
+            item.y = y*32;
+            item.z = z*32;
             item.x+=(rand()%32);
             item.z+=(rand()%32);
             Map::get().sendPickupSpawn(item);
@@ -588,35 +585,35 @@ void buf_read_callback(struct bufferevent *incoming,
         }
       }
     }
-    else if(user->action==0x0f) //Player Block Placement
+    else if(user->action == 0x0f) //Player Block Placement
     {
       if(user->buffer.size()<12)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
-      int curpos=0;
+      int curpos = 0;
       uint8 tmpShortArray[2];
       uint8 tmpIntArray[4];
       int orig_x,orig_y,orig_z;
-      bool change=false;
+      bool change = false;
 
-      for(i=0;i<2;i++) tmpShortArray[i]=user->buffer[curpos+i]; 
-      int blockID=getSint16(&tmpShortArray[0]);
+      for(i = 0;i<2;i++) tmpShortArray[i]=user->buffer[curpos+i]; 
+      int blockID = getSint16(&tmpShortArray[0]);
       curpos+=2;
 
-      for(i=0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i];      
-      int x=orig_x=getSint32(&tmpIntArray[0]);
+      for(i = 0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i];      
+      int x = orig_x = getSint32(&tmpIntArray[0]);
       curpos+=4;
 
-      int y=orig_y=user->buffer[curpos];
+      int y = orig_y = user->buffer[curpos];
       curpos++;
 
-      for(i=0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i];
-      int z=orig_z=getSint32(&tmpIntArray[0]);
+      for(i = 0;i<4;i++) tmpIntArray[i]=user->buffer[curpos+i];
+      int z = orig_z = getSint32(&tmpIntArray[0]);
       curpos+=4;
 
-      int direction=user->buffer[curpos];
+      int direction = user->buffer[curpos];
 
 
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+12);
@@ -643,25 +640,25 @@ void buf_read_callback(struct bufferevent *incoming,
 
 
       //If placing normal block and current block is empty
-      if(blockID<0xff && blockID!=-1 && block_direction==0x00)
+      if(blockID<0xff && blockID!=-1 && block_direction == 0x00)
       {
-        change=true;
+        change = true;
       }
 
-      if(block==0x4e || block==50) //If snow or torch, overwrite
+      if(block == 0x4e || block == 50) //If snow or torch, overwrite
       {
-        change=true;
-        x=orig_x;
-        y=orig_y;
-        z=orig_z;
+        change = true;
+        x = orig_x;
+        y = orig_y;
+        z = orig_z;
       }
 
       //Door status change
-      if((block==0x40)|| (block==0x47))
+      if((block == 0x40)|| (block == 0x47))
       {
-        change=true;
+        change = true;
 
-        blockID=block;
+        blockID = block;
 
         //Toggle door state
         if(metadata&0x4)
@@ -677,12 +674,12 @@ void buf_read_callback(struct bufferevent *incoming,
 
         int modifier=(metadata&0x8)?1:-1;
                 
-        x=orig_x;
-        y=orig_y;
-        z=orig_z;
+        x = orig_x;
+        y = orig_y;
+        z = orig_z;
 
         Map::get().getBlock(x,y+modifier,z, &block2, &metadata2);
-        if(block2==block)
+        if(block2 == block)
         {
           if(metadata2&0x4)
           {
@@ -706,14 +703,14 @@ void buf_read_callback(struct bufferevent *incoming,
       }
 
     }
-    else if(user->action==0x10) //Holding change
+    else if(user->action == 0x10) //Holding change
     {
       if(user->buffer.size()<6)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
-      int itemID=getUint16(&user->buffer[4]);      
+      int itemID = getUint16(&user->buffer[4]);      
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+6);
 
       //Send holding change to others
@@ -724,14 +721,14 @@ void buf_read_callback(struct bufferevent *incoming,
       user->sendOthers(&holdingPackage[0],7);
 
     }
-    else if(user->action==0x12) //Arm Animation
+    else if(user->action == 0x12) //Arm Animation
     {
       if(user->buffer.size()<5)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
-      char forward=user->buffer[4];
+      char forward = user->buffer[4];
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+5);
 
       uint8 animationPackage[6];
@@ -740,39 +737,39 @@ void buf_read_callback(struct bufferevent *incoming,
       animationPackage[5]=forward;
       user->sendOthers(&animationPackage[0], 6);
     }
-    else if(user->action==0x15) //Pickup Spawn
+    else if(user->action == 0x15) //Pickup Spawn
     {
       if(user->buffer.size()<22)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
       
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+22);
     }
-    else if(user->action==0xff) //Quit message
+    else if(user->action == 0xff) //Quit message
     {
       if(user->buffer.size()<2)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
-      int curpos=0;
+      int curpos = 0;
       uint8 shortArray[2];
-      for(i=0;i<2;i++) shortArray[i]=user->buffer[i];
-      int len=getSint16(&shortArray[0]);
+      for(i = 0;i<2;i++) shortArray[i]=user->buffer[i];
+      int len = getSint16(&shortArray[0]);
 
       curpos+=2;
       // Wait for whole message
       if(user->buffer.size()<(unsigned int)curpos+len)
       {
-        user->waitForData=true;
+        user->waitForData = true;
         return;
       }
       
       //Read message
       std::string msg;
-      for(i=0;i<(unsigned int)len;i++) msg += user->buffer[curpos+i];
+      for(i = 0;i<(unsigned int)len;i++) msg += user->buffer[curpos+i];
 
       curpos+=len;
       user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
@@ -821,7 +818,7 @@ void accept_callback(int fd,
       LOG("Client: accept() failed");
       return;
     }
-  User *client=addUser(client_fd,generateEID());
+  User *client = addUser(client_fd,generateEID());
   setnonblock(client_fd);
 
   client->buf_ev = bufferevent_new(client_fd,
