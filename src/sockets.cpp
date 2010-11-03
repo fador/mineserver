@@ -165,7 +165,42 @@ void buf_read_callback(struct bufferevent *incoming, void *arg)
       std::cout << "Player " << user->UID << " login v." <<version<<" : " << player <<":" << passwd << std::endl;
       if(version == 2 || version == 3)
       {        
-        user->logged = 1;
+        //Login OK package
+        char data[9]={0x01, 0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+        putSint32((uint8 *)&data[1],user->UID);
+        bufferevent_write(user->buf_ev, (char *)&data[0], 9);
+
+        //Send server time (after dawn)
+        uint8 data3[9]={0x04, 0x00, 0x00, 0x00,0x00,0x00,0x00,0x0e,0x00};
+        bufferevent_write(user->buf_ev, (char *)&data3[0], 9);
+
+        //Inventory
+        uint8 data4[7+36*5];
+        data4[0]=0x05;
+        putSint32(&data4[1],-1);
+        data4[5]=0;
+        data4[6]=36;
+        for(i = 0;i<36;i++)
+        {
+          if(i<10)
+            putSint16(&data4[7+i*5], 0x115); //Diamond shovel
+          else if(i<20)
+            putSint16(&data4[7+i*5], 50); //Torch
+          else
+            putSint16(&data4[7+i*5], 1); //Stone
+
+          data4[7+2+i*5]=1; //Count
+          putSint16(&data4[7+3+i*5], 0);
+        }
+        bufferevent_write(user->buf_ev, (char *)&data4[0], 7+36*5);
+
+        data4[6]=4;
+        putSint32(&data4[1],-2);
+        bufferevent_write(user->buf_ev, (char *)&data4[0], 7+4*5);
+
+        putSint32(&data4[1],-3);
+        bufferevent_write(user->buf_ev, (char *)&data4[0], 7+4*5);
+            
         user->changeNick(player, Chat::get().admins);
        
         // Send motd
@@ -181,7 +216,33 @@ void buf_read_callback(struct bufferevent *incoming, void *arg)
         }
         motdfs.close();
 
-        Chat::get().sendMsg(user, player+" connected!", USER);
+        //Teleport player
+        user->teleport(Map::get().spawnPos.x,Map::get().spawnPos.y+2,Map::get().spawnPos.z);
+
+        //Put nearby chunks to queue
+        for(int x=-user->viewDistance;x<=user->viewDistance;x++)
+        {
+          for(int z=-user->viewDistance;z<=user->viewDistance;z++)
+          {
+            user->addQueue(Map::get().spawnPos.x/16+x,Map::get().spawnPos.z/16+z);
+          }
+        }
+        // Push chunks to user
+        user->pushMap();
+
+        //Spawn this user to others
+        user->spawnUser(Map::get().spawnPos.x*32,(Map::get().spawnPos.y+2)*32,Map::get().spawnPos.z*32);
+        //Spawn other users for connected user
+        user->spawnOthers();
+        
+                          
+        //Send "On Ground" signal
+        char data6[2]={0x0A, 0x01};
+        bufferevent_write(user->buf_ev, (char *)&data6[0], 2);
+
+        user->logged = true;
+
+        Chat::get().sendMsg(user, player+" connected!", ALL);
 
       }
       else
@@ -193,47 +254,8 @@ void buf_read_callback(struct bufferevent *incoming, void *arg)
           close(user->fd);
         #endif
         remUser(user->fd);
-      }
-    
-      //Login OK package
-      char data[9]={0x01, 0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-      putSint32((uint8 *)&data[1],user->UID);
-      bufferevent_write(user->buf_ev, (char *)&data[0], 9);
+      }    
 
-      //Send server time (after dawn)
-      uint8 data3[9]={0x04, 0x00, 0x00, 0x00,0x00,0x00,0x00,0x0e,0x00};
-      bufferevent_write(user->buf_ev, (char *)&data3[0], 9);
-
-      //Inventory
-      uint8 data4[7+36*5];
-      data4[0]=0x05;
-      putSint32(&data4[1],-1);
-      data4[5]=0;
-      data4[6]=36;
-      for(i = 0;i<36;i++)
-      {
-        if(i<10)
-          putSint16(&data4[7+i*5], 0x115); //Diamond shovel
-        else if(i<20)
-          putSint16(&data4[7+i*5], 50); //Torch
-        else
-          putSint16(&data4[7+i*5], 1); //Stone
-
-        data4[7+2+i*5]=1; //Count
-        putSint16(&data4[7+3+i*5], 0);
-      }
-      bufferevent_write(user->buf_ev, (char *)&data4[0], 7+36*5);
-
-      data4[6]=4;
-      putSint32(&data4[1],-2);
-      bufferevent_write(user->buf_ev, (char *)&data4[0], 7+4*5);
-
-      putSint32(&data4[1],-3);
-      bufferevent_write(user->buf_ev, (char *)&data4[0], 7+4*5);
-            
-      //Send "On Ground" signal
-      char data6[2]={0x0A, 0x01};
-      bufferevent_write(user->buf_ev, (char *)&data6[0], 2);
     }
 
     // Handshake

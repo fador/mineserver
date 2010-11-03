@@ -197,34 +197,6 @@ int main(void)
           //Remove map far away
           Users[i]->popMap();
         }
-
-        if(Users[i]->logged)
-        {
-          Users[i]->logged=false;
-          //Send "On Ground" signal
-          char data6[2]={0x0A, 0x01};
-          bufferevent_write(Users[i]->buf_ev, (char *)&data6[0], 2);
-
-          //Add (0,0) to map queue
-          //Users[i].addQueue(0,0);
-
-          //Teleport player
-          Users[i]->teleport(Map::get().spawnPos.x,Map::get().spawnPos.y+2,Map::get().spawnPos.z);
-
-          //Put nearby chunks to queue
-          for(int x=-Users[i]->viewDistance;x<=Users[i]->viewDistance;x++)
-          {
-            for(int z=-Users[i]->viewDistance;z<=Users[i]->viewDistance;z++)
-            {
-              Users[i]->addQueue(Map::get().spawnPos.x/16+x,Map::get().spawnPos.z/16+z);
-            }
-          }
-
-          //Spawn this user to others
-          Users[i]->spawnUser(Map::get().spawnPos.x*32,(Map::get().spawnPos.y+2)*32,Map::get().spawnPos.z*32);
-          //Spawn other users for connected user
-          Users[i]->spawnOthers();
-        }
       }
     }
 #ifdef WIN32

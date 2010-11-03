@@ -84,7 +84,7 @@ bool User::kick(std::string kickMsg)
 bool User::updatePos(double x, double y, double z, double stance)
 {
      
-    if(nick.size() && !logged)
+    if(nick.size() && logged)
     {
       //Do we send relative or absolute move values
       if(0)//abs(x-this->pos.x)<127
@@ -172,7 +172,7 @@ bool User::sendOthers(uint8* data,uint32 len)
   unsigned int i;
   for(i=0;i<(int)Users.size();i++)
   {
-    if(Users[i]->fd!=this->fd)
+    if(Users[i]->fd!=this->fd && Users[i]->logged)
     {
       bufferevent_write(Users[i]->buf_ev, data,len);
     }
@@ -185,7 +185,7 @@ bool User::sendAll(uint8* data,uint32 len)
   unsigned int i;
   for(i=0;i<(int)Users.size();i++)
   {
-    if(Users[i]->fd)
+    if(Users[i]->fd && Users[i]->logged)
     {
       bufferevent_write(Users[i]->buf_ev, data,len);
     }
