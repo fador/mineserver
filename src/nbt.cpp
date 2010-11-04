@@ -521,6 +521,8 @@ bool freeNBT_struct(NBT_struct *input)
       delete (double *)input->values[i].value;
       break;
     case TAG_STRING:
+      std::string *temp_string=(std::string *)input->values[i].value;
+      temp_string->clear();
       delete (std::string *)input->values[i].value;
       break;
     }

@@ -3,12 +3,10 @@ CXXFLAGS= -O2 -lpthread -levent -lz
 INC=./
 
 SRC_MS=$(wildcard *.cpp)
-SRC_ZLIB=$(wildcard zlib/*.c)
-SRC=$(SRC_MS) $(SRC_ZLIB)
+SRC=$(SRC_MS)
 
 OBJS_MS=$(subst .cpp,.o,$(SRC_MS))
-OBJS_ZLIB=$(subst .c,.o,$(SRC_ZLIB))
-OBJS=$(OBJS_MS) $(OBJS_ZLIB)
+OBJS=$(OBJS_MS)
 
 BIN=mineserver
 
