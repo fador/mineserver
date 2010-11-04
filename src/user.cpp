@@ -190,6 +190,18 @@ bool User::sendAll(uint8* data,uint32 len)
   return true;
 }
 
+bool User::sendAdmins(uint8* data,uint32 len)
+{
+  for(unsigned int i=0;i<Users.size();i++)
+  {
+    if(Users[i]->fd && Users[i]->logged && Users[i]->admin)
+    {
+      bufferevent_write(Users[i]->buf_ev, data,len);
+    }
+  }
+  return true;
+}
+
 bool User::addQueue(int x, int z)
 {
   coord newMap={x,0,z};

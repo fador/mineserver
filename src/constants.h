@@ -29,6 +29,8 @@ const std::string DEFAULTADMINFILE = "# This is default admin file. Write admin 
 const std::string MOTDFILE = "motd.txt";
 const std::string DEFAULTMOTDFILE = "This is default motd! Please edit motd.txt";
 const std::string CONFIGFILE = "config.cfg";
+const std::string ITEMALIASFILE = "item_alias.cfg";
+
 
 // Default configuration
 //const std::map<std::string, std::string> DEFAULTCONFIG;

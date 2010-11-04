@@ -4,6 +4,7 @@
 #define ALL 1
 #define USER 2
 #define OTHERS 3
+#define ADMINS 4
 
 class Chat 
 {

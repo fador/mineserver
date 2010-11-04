@@ -299,14 +299,24 @@ bool Chat::handleMsg(User *user, std::string msg)
       cmd.pop_front();
 
       User* tUser;
-      int itemId;
+      int itemId = 0;
       char itemCount = 1;
 
       if(cmd.size() > 1)
       {
         tUser = getUserByNick(cmd[0]);
-        itemId = atoi(cmd[1].c_str());
-
+        
+        // Check for aliases
+        itemId = atoi(Conf::get().value(cmd[1]).c_str());
+        if( itemId == 0 ) {
+          itemId = atoi(cmd[1].c_str());
+        }
+        
+        // Check if valid block or item id
+        if( itemId < 1 || (itemId > 91 && itemId < 256 ) || itemId > 350 ) // Blocks and items 
+          if(itemId != 2256 || itemId != 2257) // Records (doh)
+            return false;
+        
         if(cmd.size() > 2)
           itemCount = atoi(cmd[2].c_str());
       }
@@ -314,7 +324,7 @@ bool Chat::handleMsg(User *user, std::string msg)
       else
       {
         this->sendMsg(user, COLOR_DARK_MAGENTA + "Error!" + COLOR_RED + " Too few parameters", USER);
-        return true;
+        return false;
       }
 
       if(tUser){
@@ -329,7 +339,7 @@ bool Chat::handleMsg(User *user, std::string msg)
 
         Map::get().sendPickupSpawn(item);
 
-        this->sendMsg(user, COLOR_RED + "Spawned some items!", USER);
+        this->sendMsg(user, COLOR_RED + user->nick + " spawned items", ADMINS);
       }
       else
       {
@@ -374,6 +384,9 @@ bool Chat::sendMsg(User *user, std::string msg, int action = ALL)
 
   if(action == USER)
     bufferevent_write(user->buf_ev, &tmpArray[0], msg.size()+3);
+    
+  if(action == ADMINS)
+    user->sendAdmins(&tmpArray[0], msg.size()+3);
 
   if(action == OTHERS)
     user->sendOthers(&tmpArray[0], msg.size()+3);
