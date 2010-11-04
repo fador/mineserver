@@ -23,7 +23,7 @@
 
 
 const int DEFAULT_PORT = 25565;
-const std::string VERSION = "0.1.8";
+const std::string VERSION = "0.1.9";
 const std::string ADMINFILE = "admin.txt";
 const std::string DEFAULTADMINFILE = "# This is default admin file. Write admin nicks here one for each line";
 const std::string MOTDFILE = "motd.txt";

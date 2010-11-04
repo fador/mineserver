@@ -10,7 +10,7 @@ Features:
  - some chat commands, more to come..
  - own NBT parsing/saving
  - Lightmap generation
- - Config file with some options
+ - Config file
   
 ToDo:
  - Map generation
@@ -23,9 +23,13 @@ Chat commands:
  - /players : Lists online players
  - /about : Server name & version
  Admin only:
- - /kick <nick> (<kickmsg>): Kicks user with optional kick message
+ - %<text> : Servermessage 
+ - &<text> : Admin-only message
+ - /kick <nick> (<kickmsg>) : Kicks user with optional kick message
  - /save : Manually save map to disc
  - /ctp <x> <y> <z> : Teleport to coordinates (eg. /ctp 100 100 100)
  - /tp <nick> : Teleport yourself to <nick>'s position
  - /tp <nick1> <nick2> : Teleport <nick1> to <nick2>
  - /reload : Reload admins and configuration
+ - /give <nick> <id/alias> (<count>) : Gives <nick> <count> pieces of <id/alias>. If count is not provided, 1 piece is given.
+                                       Support for over 64 items. Aliases configurable with item_alias.cfg
