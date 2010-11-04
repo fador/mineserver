@@ -45,7 +45,10 @@ bool Conf::load(std::string configFile)
             << "# Map Release time - time in seconds to keep unused map chunks in memory"   << std::endl
             << "# Memory vs. CPU tradeoff. Reloading map data takes a bit of CPU each time" << std::endl
             << "# but the map in memory consumes it around 100kb/chunk"                     << std::endl
-            << "map_release_time = 10 << std::endl"                                         << std::endl;
+            << "map_release_time = 10"                                                      << std::endl
+                                                                                            << std::endl
+            << "# Map directory"                                                            << std::endl
+            << "mapdir = \"testmap\""                                                       << std::endl;
 
     confofs.close();
 
