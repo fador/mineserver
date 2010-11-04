@@ -33,7 +33,9 @@
 #include "nbt.h"
 #include "zlib/zlib.h"
 
+#ifdef WIN32
 static bool quit = false;
+#endif
 
 int setnonblock(int fd)
 {
@@ -201,7 +203,7 @@ int main(void)
     }
 #ifdef WIN32
     if(_kbhit())
-        quit=1;
+        quit = 1;
 #endif
 
     event_base_loopexit(eventbase,&loopTime);

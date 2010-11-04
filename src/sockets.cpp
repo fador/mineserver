@@ -69,7 +69,7 @@ void buf_read_callback(struct bufferevent *incoming, void *arg)
   //Push data to buffer
   while(read)
   {
-    if(read = bufferevent_read(incoming, buf, 2048))
+    if((read = bufferevent_read(incoming, buf, 2048)))
     {
       for(int i = 0;i<read;i++)
       {
@@ -365,7 +365,7 @@ void buf_read_callback(struct bufferevent *incoming, void *arg)
 
       uint8 tmpShortArray[2] = {0};
       for(i = 0;i<2;i++) tmpShortArray[i]=user->buffer[curpos+i]; 
-      int count = getSint16(&tmpShortArray[0]);     
+      //int count = getSint16(&tmpShortArray[0]);     
       curpos+=2;
 
       int items = 0;
@@ -415,11 +415,12 @@ void buf_read_callback(struct bufferevent *incoming, void *arg)
             user->waitForData = true;
             return;
           }
-          uint8 numberOfItems = user->buffer[curpos];
+
+          //uint8 numberOfItems = user->buffer[curpos];
           curpos++;
           
           for(j = 0;j<2;j++) tmpShortArray[j]=user->buffer[curpos+j]; 
-          int health = getSint16(&tmpShortArray[0]);     
+          //int health = getSint16(&tmpShortArray[0]);     
           curpos+=2;
         }
       }

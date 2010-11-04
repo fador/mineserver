@@ -43,7 +43,7 @@ bool User::changeNick(std::string nick, std::deque<std::string> admins)
   this->nick=nick;
   
   // Check adminstatus
-  for(unsigned int i = 0; i < admins.size(); i++) {
+  for(unsigned int i=0;i<admins.size();i++) {
     if(admins[i] == nick) {
         this->admin=true;
         LOG(nick + " admin");
@@ -83,7 +83,6 @@ bool User::kick(std::string kickMsg)
 
 bool User::updatePos(double x, double y, double z, double stance)
 {
-     
     if(nick.size() && logged)
     {
       //Do we send relative or absolute move values
@@ -169,8 +168,7 @@ bool User::updateLook(float yaw, float pitch)
 
 bool User::sendOthers(uint8* data,uint32 len)
 {
-  unsigned int i;
-  for(i=0;i<(int)Users.size();i++)
+  for(unsigned int i=0;i<Users.size();i++)
   {
     if(Users[i]->fd!=this->fd && Users[i]->logged)
     {
@@ -182,8 +180,7 @@ bool User::sendOthers(uint8* data,uint32 len)
 
 bool User::sendAll(uint8* data,uint32 len)
 {
-  unsigned int i;
-  for(i=0;i<(int)Users.size();i++)
+  for(unsigned int i=0;i<Users.size();i++)
   {
     if(Users[i]->fd && Users[i]->logged)
     {
@@ -409,7 +406,7 @@ User *addUser(int sock,uint32 EID)
 
 bool remUser(int sock)
 {        
-  for(unsigned int i=0;i<(int)Users.size();i++)
+  for(int i=0;i<(int)Users.size();i++)
   {
     if(Users[i]->fd==sock)
     {
