@@ -62,6 +62,8 @@ int main(void)
   Chat::get().checkMotd(MOTDFILE);
 
   Conf::get().load(CONFIGFILE);
+  // Load item aliases
+  Conf::get().load(ITEMALIASFILE);
 
   Map::get().initMap();
   //Try to load port from config
@@ -133,6 +135,8 @@ int main(void)
             << "\\____|__  /__|___|  /\\___  >____  >\\___  >__|    \\_/  \\___  >__|   "     << std::endl
             << "        \\/        \\/     \\/     \\/     \\/                 \\/       "    << std::endl
             << "Version " << VERSION <<" by Fador & Psoden"                                   << std::endl << std::endl;
+
+  std::cout << "Listening at port " << port << std::endl;
 
   timeval loopTime;
   loopTime.tv_sec=1;

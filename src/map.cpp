@@ -98,9 +98,9 @@ NBT_struct *Map::getMapData(int x, int z)
 
   uint32 mapId;
   Map::posToId(x, z, &mapId);
-
+#ifdef MSDBG
   printf("Getting data for chunk %u\n", mapId);
-
+#endif
   if (!maps.count(mapId) && !loadMap(x, z))
     return 0;
 

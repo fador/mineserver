@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include <ctime>
+#include <math.h>
 #ifdef WIN32
   #include <winsock2.h>
 #endif
@@ -307,7 +308,8 @@ bool Chat::handleMsg(User *user, std::string msg)
 
       User* tUser;
       int itemId = 0;
-      char itemCount = 1;
+      int itemCount = 1;
+      int itemStacks = 1;
 
       if(cmd.size() > 1)
       {
@@ -315,9 +317,10 @@ bool Chat::handleMsg(User *user, std::string msg)
         
         // Check for aliases
         itemId = atoi(Conf::get().value(cmd[1]).c_str());
+        
         if( itemId == 0 )
           itemId = atoi(cmd[1].c_str());
-        
+
         // Check if valid block or item id
         if( itemId < 1 || (itemId > 91 && itemId < 256 ) || itemId > 350 ) // Blocks and items 
           if(itemId != 2256 || itemId != 2257) // Records (doh)
@@ -325,6 +328,11 @@ bool Chat::handleMsg(User *user, std::string msg)
         
         if(cmd.size() > 2)
           itemCount = atoi(cmd[2].c_str());
+          
+        if(itemCount > 64) {
+          itemStacks = ceil(itemCount / 64) + 1;
+          itemCount = itemCount % 64;
+        }
       }
       // Invalid parameters
       else
@@ -335,16 +343,25 @@ bool Chat::handleMsg(User *user, std::string msg)
 
       // If username found -> send item
       if(tUser){
-        spawnedItem item;
+        int amount = 64;
+        for(int i = 0; i < itemStacks; i++) 
+        {
+          // If last stack
+          if( i == itemStacks-1 )
+            amount = itemCount;
+            
+          spawnedItem item;
+          item.EID = generateEID();
+          item.item = itemId;
+          item.count = amount;
+          item.x = tUser->pos.x*32;
+          item.y = tUser->pos.y*32;
+          item.z = tUser->pos.z*32;
+          
+          //std::cout << "Gave " << amount << std::endl;
 
-        item.EID = generateEID();
-        item.item = itemId;
-        item.count = itemCount;
-        item.x = tUser->pos.x*32;
-        item.y = tUser->pos.y*32;
-        item.z = tUser->pos.z*32;
-
-        Map::get().sendPickupSpawn(item);
+          Map::get().sendPickupSpawn(item);
+        }
 
         this->sendMsg(user, COLOR_RED + user->nick + " spawned items", ADMINS);
       }
