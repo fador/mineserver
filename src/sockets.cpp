@@ -30,7 +30,7 @@ typedef  int socklen_t;
 #include "constants.h"
 
 #include "tools.h"
-#include "zlib/zlib.h"
+#include <zlib.h>
 #include "user.h"
 #include "map.h"
 #include "chat.h"

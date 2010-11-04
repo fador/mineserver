@@ -21,7 +21,7 @@
 
 #include "tools.h"
 #include "map.h"
-#include "zlib/zlib.h"
+#include <zlib.h>
 #include "user.h"
 #include "nbt.h"
 #include "config.h"

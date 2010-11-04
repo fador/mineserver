@@ -31,7 +31,7 @@
 #include "chat.h"
 #include "config.h"
 #include "nbt.h"
-#include "zlib/zlib.h"
+#include <zlib.h>
 
 #ifdef WIN32
 static bool quit = false;
