@@ -95,7 +95,7 @@ int main(void)
 
   if (socketlisten < 0)
   {
-    fprintf(stderr,"Failed to create listen socket");
+    fprintf(stderr,"Failed to create listen socket\n");
     return 1;
   }
 
@@ -108,13 +108,13 @@ int main(void)
   //Bind to port
   if (bind(socketlisten, (struct sockaddr *)&addresslisten, sizeof(addresslisten)) < 0)
   {
-    fprintf(stderr,"Failed to bind");
+    fprintf(stderr, "Failed to bind\n");
     return 1;
   }
 
   if (listen(socketlisten, 5) < 0)
   {
-    fprintf(stderr,"Failed to listen to socket");
+    fprintf(stderr, "Failed to listen to socket\n");
     return 1;
   }
 
