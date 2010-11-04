@@ -72,7 +72,7 @@ void Map::initMap()
   gzFile mapfile=gzopen(infile.c_str(), "rb");
   uint8 uncompressedData[200000];
   gzread(mapfile, &uncompressedData[0], 200000);
-  gzclose_r(mapfile);
+  gzclose(mapfile);
 
   // Save level data
   TAG_Compound(&uncompressedData[0], &levelInfo, true);
@@ -655,7 +655,7 @@ bool Map::loadMap(int x, int z)
   gzFile mapfile=gzopen(infile.c_str(), "rb");
   uint8 uncompressedData[200000];
   gzread(mapfile, &uncompressedData[0], 200000);
-  gzclose_r(mapfile);
+  gzclose(mapfile);
 
   // Save this map data to map manager
   NBT_struct newMapStruct;
@@ -757,7 +757,7 @@ bool Map::saveMap(int x, int z)
   int dumpsize=dumpNBT_struct(&maps[mapId].compounds[0], &uncompressedData[0]);
   gzFile mapfile2=gzopen(outfile.c_str(), "wb");
   gzwrite(mapfile2, &uncompressedData[0], dumpsize);
-  gzclose_w(mapfile2);
+  gzclose(mapfile2);
 
   // Set "not changed"
   mapChanged[mapId] = 0;
