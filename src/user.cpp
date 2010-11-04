@@ -16,7 +16,7 @@
 #include "map.h"
 #include "user.h"
 #include "nbt.h"
-#include "zlib/zlib.h"
+#include <zlib.h>
 #include "chat.h"
 
 

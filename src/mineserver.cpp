@@ -31,7 +31,7 @@
 #include "chat.h"
 #include "config.h"
 #include "nbt.h"
-#include "zlib/zlib.h"
+#include <zlib.h>
 
 static bool quit = false;
 

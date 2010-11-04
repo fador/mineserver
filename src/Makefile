@@ -1,5 +1,5 @@
 DEP=$(CXX) -MM
-CXXFLAGS= -I ./zlib/ -O2 -lpthread -levent
+CXXFLAGS= -O2 -lpthread -levent -lz
 INC=./
 
 SRC_MS=$(wildcard *.cpp)
