@@ -146,6 +146,13 @@ bool Chat::handleMsg(User *user, std::string msg)
     msg = COLOR_RED + "[!] " + COLOR_GREEN + msg.substr(1);
     this->sendMsg(user, msg, ALL);
   }
+  
+  // Adminchat
+  else if(msg[0] == ADMINCHATPREFIX && user->admin)
+  {
+    msg = timeStamp + " <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg.substr(1);
+    this->sendMsg(user, msg, ADMINS);
+  }
 
   // Command
   else if(msg[0] == CHATCMDPREFIX)
@@ -308,9 +315,8 @@ bool Chat::handleMsg(User *user, std::string msg)
         
         // Check for aliases
         itemId = atoi(Conf::get().value(cmd[1]).c_str());
-        if( itemId == 0 ) {
+        if( itemId == 0 )
           itemId = atoi(cmd[1].c_str());
-        }
         
         // Check if valid block or item id
         if( itemId < 1 || (itemId > 91 && itemId < 256 ) || itemId > 350 ) // Blocks and items 
@@ -327,6 +333,7 @@ bool Chat::handleMsg(User *user, std::string msg)
         return false;
       }
 
+      // If username found -> send item
       if(tUser){
         spawnedItem item;
 

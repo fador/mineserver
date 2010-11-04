@@ -39,6 +39,7 @@ const std::string ITEMALIASFILE = "item_alias.cfg";
 const char SERVERMSGPREFIX = '%';
 const char CHATCMDPREFIX = '/';
 const char COMMENTPREFIX = '#';
+const char ADMINCHATPREFIX = '&';
 const std::string DEFAULTKICKMSG = "This is a default kick message";
 
 //Chunk release time on seconds when not used
