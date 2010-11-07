@@ -26,7 +26,7 @@ bool Conf::load(std::string configFile)
   // If configfile does not exist
   if(ifs.fail() && configFile == CONFIGFILE)
   {
-    std::cout << ">>> " << configFile << " not found. Creating using default values..." << std::endl;
+    std::cout << ">>> " << configFile << " not found. Generating default configuration.." << std::endl;
 
     std::ofstream confofs(configFile.c_str());
     confofs << "#"                                                                          << std::endl

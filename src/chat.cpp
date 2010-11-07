@@ -171,6 +171,31 @@ bool Chat::handleMsg(User *user, std::string msg)
     {
       this->sendMsg(user, COLOR_DARK_MAGENTA + "SERVER:" + COLOR_RED + " Mineserver v." + VERSION, USER);
     }
+    
+    // Rules
+    else if(cmd[0] == "rules")
+    {
+      User* tUser = user;
+      cmd.pop_front();
+      
+      // Enforced rules (admin only)
+      if(!cmd.empty() && user->admin)
+      {
+        tUser = getUserByNick(cmd[0]);
+      }
+      // Send rules
+      std::ifstream motdfs( RULESFILE.c_str() );
+      
+      std::string temp;
+
+      while( getline( motdfs, temp ) ) {
+        // If not commentline
+        if(temp[0] != COMMENTPREFIX) {
+          Chat::get().sendMsg(tUser, temp, USER);
+        }
+      }
+      motdfs.close();
+    }
 
     //
     // Admin commands

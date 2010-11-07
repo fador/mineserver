@@ -30,6 +30,7 @@ const std::string MOTDFILE = "motd.txt";
 const std::string DEFAULTMOTDFILE = "This is default motd! Please edit motd.txt";
 const std::string CONFIGFILE = "config.cfg";
 const std::string ITEMALIASFILE = "item_alias.cfg";
+const std::string RULESFILE = "rules.txt";
 
 
 // Default configuration
