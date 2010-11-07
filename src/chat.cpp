@@ -183,18 +183,28 @@ bool Chat::handleMsg(User *user, std::string msg)
       {
         tUser = getUserByNick(cmd[0]);
       }
-      // Send rules
-      std::ifstream motdfs( RULESFILE.c_str() );
       
-      std::string temp;
+      
+      if(tUser != false)
+      {
+        // Send rules
+        std::ifstream motdfs( RULESFILE.c_str() );
+        
+        std::string temp;
 
-      while( getline( motdfs, temp ) ) {
-        // If not commentline
-        if(temp[0] != COMMENTPREFIX) {
-          Chat::get().sendMsg(tUser, temp, USER);
+        while( getline( motdfs, temp ) ) {
+          // If not commentline
+          if(temp[0] != COMMENTPREFIX) {
+            this->sendMsg(tUser, temp, USER);
+          }
         }
+        motdfs.close();
       }
-      motdfs.close();
+      else
+      {
+        this->sendMsg(user, COLOR_DARK_MAGENTA + "Error!" + COLOR_RED + " User " + cmd[0] + " not found (See /players)", USER);
+      }
+      
     }
 
     //

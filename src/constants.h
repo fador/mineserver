@@ -32,10 +32,8 @@ const std::string CONFIGFILE = "config.cfg";
 const std::string ITEMALIASFILE = "item_alias.cfg";
 const std::string RULESFILE = "rules.txt";
 
-
-// Default configuration
-//const std::map<std::string, std::string> DEFAULTCONFIG;
-//DEFAULTCONFIG.insert( std::pair<std::string, std::string>("key", "value") );
+const std::string SERVERFULLMSG = "Server is currently full";
+const std::string WRONGPROTOCOLMSG = "Wrong protocol version";
 
 const char SERVERMSGPREFIX = '%';
 const char CHATCMDPREFIX = '/';
