@@ -1,4 +1,12 @@
-custom Minecraft Alpha server software written in C++.
+    _____  .__                                                      
+   /     \ |__| ____   ____   ______ ______________  __ ___________ 
+  /  \ /  \|  |/    \_/ __ \ /  ___// __ \_  __ \  \/ // __ \_  __ \
+ /    Y    \  |   |  \  ___/ \___ \\  ___/|  | \/\   /\  ___/|  | \/
+ \____|__  /__|___|  /\___  >____  >\___  >__|    \_/  \___  >__|   
+         \/        \/     \/     \/     \/                 \/    
+  by Fador & Psoden
+
+Custom Minecraft Alpha server software written in C++.
 
 Currently in development.
 
@@ -22,6 +30,7 @@ Chat commands:
  For all players:
  - /players : Lists online players
  - /about : Server name & version
+ - /rules : Shows server rules
  Admin only:
  - %<text> : Servermessage 
  - &<text> : Admin-only message
@@ -33,3 +42,4 @@ Chat commands:
  - /reload : Reload admins and configuration
  - /give <nick> <id/alias> (<count>) : Gives <nick> <count> pieces of <id/alias>. If count is not provided, 1 piece is given.
                                        Support for over 64 items. Aliases configurable with item_alias.cfg
+ - /rules <nick> : Shows server rules (from rules.txt) to <nick>
