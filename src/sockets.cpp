@@ -171,13 +171,13 @@ void buf_read_callback(struct bufferevent *incoming, void *arg)
       {
         user->kick(WRONGPROTOCOLMSG);
         
-        bufferevent_free(user->buf_ev);
+        /*bufferevent_free(user->buf_ev);
         #ifdef WIN32
           closesocket(user->fd);
         #else
           close(user->fd);
         #endif
-        remUser(user->fd);
+        remUser(user->fd);*/
         
         return;
       }
@@ -187,13 +187,13 @@ void buf_read_callback(struct bufferevent *incoming, void *arg)
       if((int)Users.size() >= atoi(Conf::get().value("userlimit").c_str()))
       {
         user->kick(SERVERFULLMSG);
-        bufferevent_free(user->buf_ev);
+        /*bufferevent_free(user->buf_ev);
         #ifdef WIN32
           closesocket(user->fd);
         #else
           close(user->fd);
         #endif
-        remUser(user->fd);
+        remUser(user->fd);*/
         
         return;
       }
