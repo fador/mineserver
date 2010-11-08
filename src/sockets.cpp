@@ -88,7 +88,7 @@ void buf_read_callback(struct bufferevent *incoming, void *arg)
     {
       user->action = user->buffer.front();
       user->buffer.pop_front();
-      printf("Action: 0x%x\n", user->action);
+      //printf("Action: 0x%x\n", user->action);
     }
     else
     {
