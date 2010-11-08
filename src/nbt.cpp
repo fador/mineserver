@@ -285,25 +285,26 @@ int TAG_Compound(uint8* input, NBT_struct *output, bool start)
 
   return curpos;
 }
-
-bool get_NBT_value(NBT_struct *input, std::string TAG, int *value)
+/*
+template <typename customType>
+bool get_NBT_value(NBT_struct *input, std::string TAG, customType *value)
 {  
   for(unsigned i=0;i<input->values.size();i++)
   {
     if(input->values[i].name==TAG)
-    {
-      //ToDo: Fix casting
-      *value=*(int *)input->values[i].value;
+    {      
+      *value=*(customType*)input->values[i].value;
       return true;
     }
   }
 
   for(unsigned j=0;j<input->compounds.size();j++)
   {    
-    return get_NBT_value(&input->compounds[j], TAG, value);    
+    return get_NBT_value(&input->compounds[j], TAG, value);
   }
   return false;
 }
+*/
 
 uint8 *get_NBT_pointer(NBT_struct *input, std::string TAG)
 {
@@ -328,6 +329,31 @@ uint8 *get_NBT_pointer(NBT_struct *input, std::string TAG)
 
   return 0;
 }
+
+NBT_list *get_NBT_list(NBT_struct *input, std::string TAG)
+{
+  NBT_list *pointer;
+
+  for(unsigned i=0;i<input->lists.size();i++)
+  {
+    if(input->lists[i].name==TAG)
+    {
+      return &input->lists[i];
+    }
+  }
+
+  for(unsigned j=0;j<input->compounds.size();j++)
+  {    
+    pointer=get_NBT_list(&input->compounds[j], TAG);
+    if(pointer!=0)
+    {
+      return pointer;
+    }
+  }
+
+  return 0;
+}
+
 
 int dumpNBT_string(uint8 *buffer, std::string name)
 {

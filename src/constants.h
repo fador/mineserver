@@ -45,4 +45,6 @@ const char COMMENTPREFIX = '#';
 const char ADMINCHATPREFIX = '&';
 const std::string DEFAULTKICKMSG = "This is a default kick message";
 
+const int ALLOCATE_NBTFILE = 200000;
+
 #endif

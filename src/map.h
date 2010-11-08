@@ -74,9 +74,11 @@ private:
     freeNBT_struct(&levelInfo);
   };
 
-  std::string mapDirectory;
+  
 
 public:
+
+  std::string mapDirectory;
 
   // Map spawn position
   coord spawnPos;

@@ -32,6 +32,7 @@
     {
       type=0;
       count=0;
+      health=0;
     }
   };
 
@@ -78,6 +79,10 @@
       bool sendOthers(uint8* data,uint32 len);
       bool sendAll(uint8* data,uint32 len);
       bool sendAdmins(uint8* data,uint32 len);
+
+      //Load/save player data from/to a file at <mapdir>/players/<nick>.dat
+      bool saveData();
+      bool loadData();
         
       // Kick player
       bool kick(std::string kickMsg);

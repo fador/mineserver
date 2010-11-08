@@ -144,6 +144,11 @@ int PacketHandler::login_request(User *user)
     user->kick(SERVERFULLMSG);       
     return curpos;
   }
+  
+  user->changeNick(player, Chat::get().admins);
+
+  //Load user data
+  user->loadData();
 
   //Login OK package
   char data[9]={0x01, 0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00};
@@ -159,30 +164,71 @@ int PacketHandler::login_request(User *user)
   data4[0]=0x05;
   putSint32(&data4[1],-1);
   data4[5]=0;
-  data4[6]=36;
+  int index=0;
   for(i = 0;i<36;i++)
   {
-    if(i<10)
-      putSint16(&data4[7+i*5], 0x115); //Diamond shovel
-    else if(i<20)
-      putSint16(&data4[7+i*5], 50); //Torch
-    else
-      putSint16(&data4[7+i*5], 1); //Stone
-
-    data4[7+2+i*5]=1; //Count
-    putSint16(&data4[7+3+i*5], 0);
+    if(user->inv.main[i].count) index++;
   }
-  bufferevent_write(user->buf_ev, (char *)&data4[0], 7+36*5);
-
-  data4[6]=4;
+  data4[6]=index;
+  index=0;
+  //Send main inventory
+  for(i = 0;i<36;i++)
+  {
+    if(user->inv.main[i].count)
+    {
+      putSint16(&data4[7+index*5], user->inv.main[i].type);     //Type
+      data4[7+2+index*5]=user->inv.main[i].count;               //Count
+      putSint16(&data4[7+3+index*5], user->inv.main[i].health); //Health
+      index++;
+    }
+  }
+  if(index)
+    bufferevent_write(user->buf_ev, (char *)&data4[0], 7+index*5);
+    
+  //Send equipped inventory
   putSint32(&data4[1],-2);
-  bufferevent_write(user->buf_ev, (char *)&data4[0], 7+4*5);
-
+  index=0;
+  for(i = 0;i<4;i++)
+  {
+    if(user->inv.equipped[i].count) index++;
+  }
+  data4[6]=index;
+  index=0;
+  for(i = 0;i<4;i++)
+  {
+    if(user->inv.equipped[i].count)
+    {
+      putSint16(&data4[7+index*5], user->inv.equipped[i].type);     //Type
+      data4[7+2+index*5]=user->inv.equipped[i].count;               //Count
+      putSint16(&data4[7+3+index*5], user->inv.equipped[i].health); //Health
+      index++;
+    }
+  }
+  if(index)
+    bufferevent_write(user->buf_ev, (char *)&data4[0], 7+index*5);
+  
+  //Send crafting inventory
   putSint32(&data4[1],-3);
-  bufferevent_write(user->buf_ev, (char *)&data4[0], 7+4*5);
-            
-  user->changeNick(player, Chat::get().admins);
-       
+  index=0;
+  for(i = 0;i<4;i++)
+  {
+    if(user->inv.crafting[i].count) index++;
+  }
+  data4[6]=index;
+  index=0;
+  for(i = 0;i<4;i++)
+  {
+    if(user->inv.crafting[i].count)
+    {
+      putSint16(&data4[7+index*5], user->inv.crafting[i].type);     //Type
+      data4[7+2+index*5]=user->inv.crafting[i].count;               //Count
+      putSint16(&data4[7+3+index*5], user->inv.crafting[i].health); //Health
+      index++;
+    }
+  }
+  if(index)
+    bufferevent_write(user->buf_ev, (char *)&data4[0], 7+index*5);
+
   // Send motd
   std::ifstream motdfs( MOTDFILE.c_str() );
         

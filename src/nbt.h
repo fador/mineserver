@@ -53,8 +53,7 @@ struct NBT_struct
   std::vector<NBT_struct> compounds;
 };
 
-//int readTag(uint8* input, int inputlen,uint8* output, int* outputlen,std::string TAG, int *pointer=0);
-
+//Data reading
 int TAG_Byte(uint8* input, char *output);
 int TAG_Short(uint8* input, int *output);
 int TAG_Int(uint8* input, int *output);
@@ -67,8 +66,30 @@ int TAG_Byte_Array(uint8* input, NBT_byte_array *output);
 int TAG_List(uint8* input, NBT_list *output);
 int TAG_Compound(uint8* input, NBT_struct *output, bool start=false);
 
+//Get data from struct
 uint8 *get_NBT_pointer(NBT_struct *input, std::string TAG);
-bool get_NBT_value(NBT_struct *input, std::string TAG, int *value);
+//template <typename customType>
+//inline bool get_NBT_value(NBT_struct *input, std::string TAG, customType *value);
+template <typename customType>
+bool get_NBT_value(NBT_struct *input, std::string TAG, customType *value)
+{  
+  for(unsigned i=0;i<input->values.size();i++)
+  {
+    if(input->values[i].name==TAG)
+    {      
+      *value=*(customType*)input->values[i].value;
+      return true;
+    }
+  }
+
+  for(unsigned j=0;j<input->compounds.size();j++)
+  {    
+    return get_NBT_value(&input->compounds[j], TAG, value);
+  }
+  return false;
+}
+
+NBT_list *get_NBT_list(NBT_struct *input, std::string TAG);
 
 int dumpNBT_string(uint8 *buffer, std::string name);
 int dumpNBT_value(NBT_value *input, uint8 *buffer);

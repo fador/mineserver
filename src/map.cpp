@@ -71,12 +71,14 @@ void Map::initMap()
 
   // Read gzipped map file
   gzFile mapfile=gzopen(infile.c_str(), "rb");
-  uint8 uncompressedData[200000];
-  gzread(mapfile, &uncompressedData[0], 200000);
+  uint8 *uncompressedData = new uint8[ALLOCATE_NBTFILE];
+  gzread(mapfile, uncompressedData, ALLOCATE_NBTFILE);
   gzclose(mapfile);
 
   // Save level data
-  TAG_Compound(&uncompressedData[0], &levelInfo, true);
+  TAG_Compound(uncompressedData, &levelInfo, true);
+  
+  delete [] uncompressedData;
 
   if(!get_NBT_value(&levelInfo, "SpawnX", &spawnPos.x) ||
      !get_NBT_value(&levelInfo, "SpawnY", &spawnPos.y) ||
@@ -654,13 +656,15 @@ bool Map::loadMap(int x, int z)
 
   // Read gzipped map file
   gzFile mapfile=gzopen(infile.c_str(), "rb");
-  uint8 uncompressedData[200000];
-  gzread(mapfile, &uncompressedData[0], 200000);
+  uint8 *uncompressedData = new uint8 [ALLOCATE_NBTFILE];
+  gzread(mapfile, uncompressedData, ALLOCATE_NBTFILE);
   gzclose(mapfile);
 
   // Save this map data to map manager
   NBT_struct newMapStruct;
-  TAG_Compound(&uncompressedData[0], &newMapStruct, true);
+  TAG_Compound(uncompressedData, &newMapStruct, true);
+
+  delete [] uncompressedData;
 
   maps[mapId] = newMapStruct;
 
@@ -734,7 +738,7 @@ bool Map::saveMap(int x, int z)
       if (stat(outdir_a.c_str(), &stFileInfo) != 0)
       {
 #ifdef WIN32
-        if (mkdir(outdir_a.c_str()) == -1)
+        if (_mkdir(outdir_a.c_str()) == -1)
 #else
         if (mkdir(outdir_a.c_str(), 0755) == -1)
 #endif
@@ -744,7 +748,7 @@ bool Map::saveMap(int x, int z)
       }
 
 #ifdef WIN32
-      if (mkdir(outdir_b.c_str()) == -1)
+      if (_mkdir(outdir_b.c_str()) == -1)
 #else
       if (mkdir(outdir_b.c_str(), 0755) == -1)
 #endif
@@ -754,11 +758,13 @@ bool Map::saveMap(int x, int z)
     }
   }
 
-  uint8 uncompressedData[200000];
-  int dumpsize=dumpNBT_struct(&maps[mapId], &uncompressedData[0]);
+  uint8 *uncompressedData = new uint8 [ALLOCATE_NBTFILE];
+  int dumpsize=dumpNBT_struct(&maps[mapId], uncompressedData);
   gzFile mapfile2=gzopen(outfile.c_str(), "wb");
-  gzwrite(mapfile2, &uncompressedData[0], dumpsize);
+  gzwrite(mapfile2, uncompressedData, dumpsize);
   gzclose(mapfile2);
+
+  delete [] uncompressedData;
 
   // Set "not changed"
   mapChanged[mapId] = 0;
