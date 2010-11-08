@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <fstream>
+#include <sstream>
 
 #include "logger.h"
 #include "constants.h"
@@ -57,9 +58,6 @@ bool Conf::load(std::string configFile)
 
   std::string temp;
 
-  // Clear config (to allow configuration reload)
-  //confSet.clear();
-
   // Reading row at a time
   int del;
   int lineNum = 0;
@@ -67,9 +65,6 @@ bool Conf::load(std::string configFile)
   std::string text;
   while(getline(ifs, temp))
   {
-    // Count line numbers
-    lineNum++;
-
     // If not enough characters (Absolute min is 5: "a = s")
     if(temp.length() < 5) continue;
 
@@ -102,7 +97,7 @@ bool Conf::load(std::string configFile)
     if(line.size() < 2)
     {
       std::cout << "Invalid configuration at line " << lineNum << " of " << configFile;
-      break;
+      continue;
     }
 
     // Construct strings if needed
@@ -133,6 +128,9 @@ bool Conf::load(std::string configFile)
       confSet.insert(std::pair<std::string, std::string>(line[0], text));
       //std::cout << "Added> " << line[0] << " = " << text << std::endl;
     }
+    
+    // Count line numbers
+    lineNum++;
   }
   ifs.close();
 
@@ -145,11 +143,12 @@ bool Conf::load(std::string configFile)
 std::string Conf::value(std::string name)
 {
   if(confSet.find(name) != confSet.end())
-  {
+  { 
     return confSet[name];
   }
   else
   {
-    return "Not found!";
+    std::cout << "Warning! " << name << " not defined in configuration. Using default value: " << defaultConf[name] << std::endl;
+    return defaultConf[name];
   }
 }

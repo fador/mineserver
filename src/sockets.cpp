@@ -183,8 +183,7 @@ void buf_read_callback(struct bufferevent *incoming, void *arg)
       }
       
       // If userlimit is reached
-      std::cout << Conf::get().value("userlimit") << std::endl;
-      if((int)Users.size() >= atoi(Conf::get().value("userlimit").c_str()))
+      if((int)Users.size() > atoi(Conf::get().value("userlimit").c_str()))
       {
         user->kick(SERVERFULLMSG);
         /*bufferevent_free(user->buf_ev);

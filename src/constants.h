@@ -1,6 +1,8 @@
 #ifndef _CONSTANTS_H
 #define _CONSTANTS_H
 
+#include <map>
+
 // Mineserver constants
 
 // Chat colors
@@ -21,8 +23,6 @@
 #define COLOR_YELLOW std::string("§e")
 #define COLOR_WHITE std::string("§f")
 
-
-const int DEFAULT_PORT = 25565;
 const std::string VERSION = "0.1.9";
 const std::string ADMINFILE = "admin.txt";
 const std::string DEFAULTADMINFILE = "# This is default admin file. Write admin nicks here one for each line";
@@ -32,6 +32,10 @@ const std::string CONFIGFILE = "config.cfg";
 const std::string ITEMALIASFILE = "item_alias.cfg";
 const std::string RULESFILE = "rules.txt";
 
+// Default configuration
+extern std::map<std::string, std::string> defaultConf;
+void initDefaultConf();
+
 const std::string SERVERFULLMSG = "Server is currently full";
 const std::string WRONGPROTOCOLMSG = "Wrong protocol version";
 
@@ -40,8 +44,5 @@ const char CHATCMDPREFIX = '/';
 const char COMMENTPREFIX = '#';
 const char ADMINCHATPREFIX = '&';
 const std::string DEFAULTKICKMSG = "This is a default kick message";
-
-//Chunk release time on seconds when not used
-const int DEFAULT_MAP_RELEASE_TIME = 10;
 
 #endif

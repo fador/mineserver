@@ -15,6 +15,7 @@
 #include <fcntl.h>
 #include <cstdio>
 #include <deque>
+#include <map>
 #include <iostream>
 #include <event.h>
 #include <ctime>
@@ -57,6 +58,8 @@ int main(void)
 {
   uint32 starttime=(uint32)time(0);
   uint32 tick=(uint32)time(0);
+  
+  initDefaultConf();
 
   Chat::get().loadAdmins(ADMINFILE);
   Chat::get().checkMotd(MOTDFILE);
@@ -66,11 +69,9 @@ int main(void)
   Conf::get().load(ITEMALIASFILE);
 
   Map::get().initMap();
+  
   //Try to load port from config
-  int port=atoi(Conf::get().value("port").c_str());
-  //If failed, use default
-  if(port==0)
-    port=DEFAULT_PORT;
+  int port = atoi(Conf::get().value("port").c_str());
 
 #ifdef WIN32
   _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
@@ -165,8 +166,6 @@ int main(void)
 
       //Try to load port from config
       int map_release_time=atoi(Conf::get().value("map_release_time").c_str());
-      //If failed, use default
-      if(map_release_time==0) map_release_time=DEFAULT_MAP_RELEASE_TIME;
 
       //Release chunks not used in <map_release_time> seconds
       std::vector<uint32> toRelease;

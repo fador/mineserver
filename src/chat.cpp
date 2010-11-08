@@ -169,7 +169,7 @@ bool Chat::handleMsg(User *user, std::string msg)
     // About server
     else if(cmd[0] == "about")
     {
-      this->sendMsg(user, COLOR_DARK_MAGENTA + "SERVER:" + COLOR_RED + " Mineserver v." + VERSION, USER);
+      this->sendMsg(user, COLOR_DARK_MAGENTA + Conf::get().value("servername") + COLOR_RED + " Running Mineserver v." + VERSION, USER);
     }
     
     // Rules
