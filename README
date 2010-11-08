@@ -4,7 +4,7 @@
  /    Y    \  |   |  \  ___/ \___ \\  ___/|  | \/\   /\  ___/|  | \/
  \____|__  /__|___|  /\___  >____  >\___  >__|    \_/  \___  >__|   
          \/        \/     \/     \/     \/                 \/    
-  by Fador & Psoden
+      by Fador & Psoden
 
 Custom Minecraft Alpha server software written in C++.
 
@@ -15,16 +15,16 @@ Tested to build on Windows (Visual Studio 2010 project included) and on Linux (M
 We are trying to minimize memory and cpu usage compared to original Java server.
 
 Features:
- - some chat commands, more to come..
- - own NBT parsing/saving
- - Lightmap generation
- - Config file
+ * some chat commands, more to come..
+ * own NBT parsing/saving
+ * Lightmap generation
+ * Config file
   
 ToDo:
- - Map generation
- - Physics
- - Growing trees etc.
- + more
+ * Map generation
+ * Physics
+ * Growing trees etc.
+ and more
  
 Chat commands:
  For all players:
@@ -40,6 +40,7 @@ Chat commands:
  - /tp <nick> : Teleport yourself to <nick>'s position
  - /tp <nick1> <nick2> : Teleport <nick1> to <nick2>
  - /reload : Reload admins and configuration
- - /give <nick> <id/alias> (<count>) : Gives <nick> <count> pieces of <id/alias>. If count is not provided, 1 piece is given.
+ - /give <nick> <id/alias> (<count>) : Gives <nick> <count> pieces of <id/alias>. 
+                                       count = 1 is used if it is not provided.
                                        Support for over 64 items. Aliases configurable with item_alias.cfg
  - /rules <nick> : Shows server rules (from rules.txt) to <nick>

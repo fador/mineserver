@@ -76,6 +76,8 @@ bool User::kick(std::string kickMsg)
   for(unsigned int i=0;i<kickMsg.size();i++) data[i+3]= kickMsg[i];
   
   bufferevent_write(this->buf_ev, data,len+3);
+  
+  std::cout << this->nick << " kicked. Reason: " << kickMsg << std::endl;
 
   delete [] data;
   return true;
