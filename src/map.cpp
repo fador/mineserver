@@ -1,5 +1,6 @@
 #ifdef WIN32
   #define _CRTDBG_MAP_ALLOC
+  #define ZLIB_WINAPI
 
   #include <crtdbg.h>
   #include <conio.h>
@@ -14,6 +15,7 @@
 #include <ctime>
 #include <cmath>
 #include <algorithm>
+
 #include <zlib.h>
 #include <sys/stat.h>
 

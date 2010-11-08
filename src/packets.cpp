@@ -134,15 +134,15 @@ int PacketHandler::login_request(User *user)
   {
     user->kick(WRONGPROTOCOLMSG);
       
-    return;
+    return curpos;
   }
       
   // If userlimit is reached
-  std::cout << Conf::get().value("userlimit") << std::endl;
+  std::cout << "Userlimit: " << Conf::get().value("userlimit") << std::endl;
   if((int)Users.size() >= atoi(Conf::get().value("userlimit").c_str()))
   {
     user->kick(SERVERFULLMSG);       
-    return;
+    return curpos;
   }
 
   //Login OK package
@@ -502,6 +502,7 @@ void PacketHandler::player_digging(uint8 *data, User *user)
         spawnedItem item;
         item.EID = generateEID();
         item.item=(int)block;
+        item.count=1;
         item.x = x*32;
         item.y = y*32;
         item.z = z*32;

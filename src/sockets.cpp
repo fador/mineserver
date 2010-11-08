@@ -108,7 +108,7 @@ void buf_read_callback(struct bufferevent *incoming, void *arg)
         return;
       }
     }
-    if(PacketHandler::get().packets[user->action].len==PACKET_DOES_NOT_EXIST)
+    else if(PacketHandler::get().packets[user->action].len==PACKET_DOES_NOT_EXIST)
     {
       printf("Unknown action: 0x%x\n", user->action);
       bufferevent_free(user->buf_ev);
