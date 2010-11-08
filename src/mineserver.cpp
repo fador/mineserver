@@ -62,8 +62,7 @@ int main(void)
   uint32 starttime=(uint32)time(0);
   uint32 tick=(uint32)time(0);
   
-  initDefaultConf();
-
+  initConstants();
 
   Chat::get().loadAdmins(ADMINFILE);
   Chat::get().checkMotd(MOTDFILE);

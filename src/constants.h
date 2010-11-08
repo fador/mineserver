@@ -78,26 +78,45 @@ enum
 // Records
 enum{ ITEM_GOLD_RECORD = 2256, ITEM_GREEN_RECORD };
 
-const std::string VERSION = "0.1.9";
+const std::string VERSION = "0.1.10 (Alpha)";
+
+// Adminfile
 const std::string ADMINFILE = "admin.txt";
 const std::string DEFAULTADMINFILE = "# This is default admin file. Write admin nicks here one for each line";
+
+// Motdfile
 const std::string MOTDFILE = "motd.txt";
 const std::string DEFAULTMOTDFILE = "This is default motd! Please edit motd.txt";
+
+// Configuration
 const std::string CONFIGFILE = "config.cfg";
+
+// Item aliases
 const std::string ITEMALIASFILE = "item_alias.cfg";
+
+// Server rules
 const std::string RULESFILE = "rules.txt";
 
 // Default configuration
 extern std::map<std::string, std::string> defaultConf;
-void initDefaultConf();
 
-const std::string SERVERFULLMSG = "Server is currently full";
-const std::string WRONGPROTOCOLMSG = "Wrong protocol version";
+//
+// Blocks that drop special things!
+//
+struct Drop {
+  uint8 item_id;
+  uint8 propability;
+  uint8 count;
+}
 
+extern std::map<uint8, Drop> BLOCKDROPS;
+
+// Chat prefixes
 const char SERVERMSGPREFIX = '%';
 const char CHATCMDPREFIX = '/';
 const char COMMENTPREFIX = '#';
 const char ADMINCHATPREFIX = '&';
-const std::string DEFAULTKICKMSG = "This is a default kick message";
+
+void initConstants();
 
 #endif

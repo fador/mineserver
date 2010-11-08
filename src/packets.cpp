@@ -132,7 +132,7 @@ int PacketHandler::login_request(User *user)
   // If version is not 2 or 3
   if(!(version == 2 || version == 3))
   {
-    user->kick(WRONGPROTOCOLMSG);
+    user->kick(Conf::get().value("wrong_protocol_message"));
       
     return curpos;
   }
@@ -141,7 +141,7 @@ int PacketHandler::login_request(User *user)
   std::cout << "Userlimit: " << Conf::get().value("userlimit") << std::endl;
   if((int)Users.size() >= atoi(Conf::get().value("userlimit").c_str()))
   {
-    user->kick(SERVERFULLMSG);       
+    user->kick(Conf::get().value("server_full_message"));       
     return curpos;
   }
 

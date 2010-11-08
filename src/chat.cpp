@@ -233,7 +233,7 @@ bool Chat::handleMsg(User *user, std::string msg)
         if(tUser != false)
         {
           cmd.pop_front();
-          std::string kickMsg = DEFAULTKICKMSG;
+          std::string kickMsg = Conf::get().value("default_kick_message");
 
           if(!cmd.empty())
           {
