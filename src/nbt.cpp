@@ -267,8 +267,15 @@ int TAG_Compound(uint8* input, NBT_struct *output, bool start)
       output->lists.push_back(list);
       break;
     case TAG_COMPOUND:
-      curpos+=TAG_Compound(&input[curpos], (NBT_struct *)&compound);
-      output->compounds.push_back(compound);
+      if(start)
+      {
+        curpos+=TAG_Compound(&input[curpos], output);
+      }
+      else
+      {
+        curpos+=TAG_Compound(&input[curpos], (NBT_struct *)&compound);
+        output->compounds.push_back(compound);
+      }
       break;
     }
 

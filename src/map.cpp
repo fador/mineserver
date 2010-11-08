@@ -755,7 +755,7 @@ bool Map::saveMap(int x, int z)
   }
 
   uint8 uncompressedData[200000];
-  int dumpsize=dumpNBT_struct(&maps[mapId].compounds[0], &uncompressedData[0]);
+  int dumpsize=dumpNBT_struct(&maps[mapId], &uncompressedData[0]);
   gzFile mapfile2=gzopen(outfile.c_str(), "wb");
   gzwrite(mapfile2, &uncompressedData[0], dumpsize);
   gzclose(mapfile2);
