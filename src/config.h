@@ -1,4 +1,4 @@
-#ifndef _CONFIG_H
+h#ifndef _CONFIG_H
 #define _CONFIG_H
 
 class Conf
@@ -8,7 +8,8 @@ class Conf
     std::map<std::string, std::string> confSet;
   public:
     bool load(std::string configFile);
-    std::string value(std::string name);
+    int iValue(std::string name);
+    std::string sValue(std::string name);
     static Conf &get();
 };
 

@@ -80,6 +80,8 @@ enum{ ITEM_GOLD_RECORD = 2256, ITEM_GREEN_RECORD };
 
 const std::string VERSION = "0.1.10 (Alpha)";
 
+const char COMMENTPREFIX = '#';
+
 // Adminfile
 const std::string ADMINFILE = "admin.txt";
 const std::string DEFAULTADMINFILE = "# This is default admin file. Write admin nicks here one for each line";
@@ -105,7 +107,7 @@ extern std::map<std::string, std::string> defaultConf;
 //
 struct Drop {
   uint8 item_id;
-  uint8 propability;
+  uint8 probability;
   uint8 count;
 }
 
@@ -114,7 +116,6 @@ extern std::map<uint8, Drop> BLOCKDROPS;
 // Chat prefixes
 const char SERVERMSGPREFIX = '%';
 const char CHATCMDPREFIX = '/';
-const char COMMENTPREFIX = '#';
 const char ADMINCHATPREFIX = '&';
 
 void initConstants();

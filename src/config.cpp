@@ -30,27 +30,9 @@ bool Conf::load(std::string configFile)
     std::cout << ">>> " << configFile << " not found. Generating default configuration.." << std::endl;
 
     std::ofstream confofs(configFile.c_str());
-    confofs << "#"                                                                          << std::endl
-            << "# Default Mineserver configuration"                                         << std::endl
-            << "#"                                                                          << std::endl
-                                                                                            << std::endl
-            << "# Server name"                                                              << std::endl
-            << "servername = \"Mineserver alpha testserver\""                               << std::endl
-                                                                                            << std::endl
-            << "# Userlimit"                                                                << std::endl
-            << "userlimit = 50"                                                             << std::endl
-                                                                                            << std::endl
-            << "# Port"                                                                     << std::endl
-            << "port = 25565"                                                               << std::endl
-                                                                                            << std::endl
-            << "# Map Release time - time in seconds to keep unused map chunks in memory"   << std::endl
-            << "# Memory vs. CPU tradeoff. Reloading map data takes a bit of CPU each time" << std::endl
-            << "# but the map in memory consumes it around 100kb/chunk"                     << std::endl
-            << "map_release_time = 10"                                                      << std::endl
-                                                                                            << std::endl
-            << "# Map directory"                                                            << std::endl
-            << "mapdir = \"testmap\""                                                       << std::endl;
-
+    confofs << "#"                                                  << std::endl
+            << "# Load configuration example from: <address here>"   << std::endl
+            << "#"                                                  << std::endl;
     confofs.close();
 
     this->load(CONFIGFILE);
@@ -139,8 +121,8 @@ bool Conf::load(std::string configFile)
   return true;
 }
 
-// Return value
-std::string Conf::value(std::string name)
+// Return values
+std::string Conf::sValue(std::string name)
 {
   if(confSet.find(name) != confSet.end())
   { 
@@ -150,5 +132,18 @@ std::string Conf::value(std::string name)
   {
     std::cout << "Warning! " << name << " not defined in configuration. Using default value: " << defaultConf[name] << std::endl;
     return defaultConf[name];
+  }
+}
+
+int Conf::iValue(std::string name)
+{
+  if(confSet.find(name) != confSet.end())
+  { 
+    return atoi(confSet[name].c_str());
+  }
+  else
+  {
+    std::cout << "Warning! " << name << " not defined in configuration. Using default value: " << defaultConf[name] << std::endl;
+    return atoi(defaultConf[name].c_str());
   }
 }

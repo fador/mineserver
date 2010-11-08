@@ -169,7 +169,7 @@ bool Chat::handleMsg(User *user, std::string msg)
     // About server
     else if(cmd[0] == "about")
     {
-      this->sendMsg(user, COLOR_DARK_MAGENTA + Conf::get().value("servername") + COLOR_RED + " Running Mineserver v." + VERSION, USER);
+      this->sendMsg(user, COLOR_DARK_MAGENTA + Conf::get().sValue("servername") + COLOR_RED + " Running Mineserver v." + VERSION, USER);
     }
     
     // Rules
@@ -233,7 +233,7 @@ bool Chat::handleMsg(User *user, std::string msg)
         if(tUser != false)
         {
           cmd.pop_front();
-          std::string kickMsg = Conf::get().value("default_kick_message");
+          std::string kickMsg = Conf::get().sValue("default_kick_message");
 
           if(!cmd.empty())
           {
@@ -351,7 +351,7 @@ bool Chat::handleMsg(User *user, std::string msg)
         tUser = getUserByNick(cmd[0]);
         
         // Check for aliases
-        itemId = atoi(Conf::get().value(cmd[1]).c_str());
+        itemId = Conf::get().iValue(cmd[1]);
         
         if( itemId == 0 )
           itemId = atoi(cmd[1].c_str());

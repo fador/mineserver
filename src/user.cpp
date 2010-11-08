@@ -46,7 +46,6 @@ bool User::changeNick(std::string nick, std::deque<std::string> admins)
   for(unsigned int i=0;i<admins.size();i++) {
     if(admins[i] == nick) {
         this->admin=true;
-        LOG(nick + " admin");
     }
   }      
   

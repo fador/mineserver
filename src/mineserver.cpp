@@ -78,8 +78,8 @@ int main(void)
   //Initialize packethandler
   PacketHandler::get().initPackets();
 
-  //Try to load port from config
-  int port = atoi(Conf::get().value("port").c_str());
+  // Load port from config
+  int port = Conf::get().iValue("port");
 
 #ifdef WIN32
   _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
@@ -172,7 +172,7 @@ int main(void)
       }
 
       //Try to load port from config
-      int map_release_time=atoi(Conf::get().value("map_release_time").c_str());
+      int map_release_time = Conf::get().iValue("map_release_time");
 
       //Release chunks not used in <map_release_time> seconds
       std::vector<uint32> toRelease;
