@@ -54,9 +54,9 @@ enum
 // Items
 enum
 {
-  ITEM_IRON_SPADE = 256, ITEM_IRON_PICKAXE, ITEM_FLINT_AND_STEEL, ITEM_APPLE, ITEM_BOW,
+  ITEM_IRON_SPADE = 256, ITEM_IRON_PICKAXE,ITEM_IRON_AXE, ITEM_FLINT_AND_STEEL, ITEM_APPLE, ITEM_BOW,
   ITEM_ARROW, ITEM_COAL, ITEM_DIAMOND, ITEM_IRON_INGOT, ITEM_GOLD_INGOT, ITEM_IRON_SWORD,
-  ITEM_WOODEN_SWORD, ITEM_WOODEN_SPADE, ITEM_WOODEN_PICKAXE, ITEM_STONE_SWORD,
+  ITEM_WOODEN_SWORD, ITEM_WOODEN_SPADE, ITEM_WOODEN_PICKAXE,ITEM_WOODEN_AXE, ITEM_STONE_SWORD,
   ITEM_STONE_SPADE, ITEM_STONE_PICKAXE, ITEM_STONE_AXE, ITEM_DIAMOND_SWORD, 
   ITEM_DIAMOND_SPADE, ITEM_DIAMOND_PICKAXE, ITEM_DIAMOND_AXE, ITEM_STICK, ITEM_BOWL,
   ITEM_MUSHROOM_SOUP, ITEM_GOLD_SWORD, ITEM_GOLD_SPADE, ITEM_GOLD_PICKAXE, ITEM_GOLD_AXE,
@@ -107,10 +107,15 @@ extern std::map<std::string, std::string> defaultConf;
 // Blocks that drop special things!
 //
 struct Drop {
-  uint8 item_id;
+  uint16 item_id;
   uint32 probability;
   uint8 count;
-  Drop(uint8 item_id,uint32 probability,uint8 count)
+  Drop()
+  {
+
+  }
+
+  Drop(uint16 item_id,uint32 probability,uint8 count)
   {
     this->item_id=item_id;
     this->probability=probability;

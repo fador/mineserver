@@ -563,11 +563,21 @@ void PacketHandler::player_digging(uint8 *data, User *user)
       }
 
       if(block!=0x4e && (int)block>0 && (int)block<255)
-      {         
+      {
         spawnedItem item;
         item.EID = generateEID();
-        item.item=(int)block;
-        item.count=1;
+
+        //Spawn drop according to BLOCKDROPS
+        if(BLOCKDROPS.count(block))
+        {
+          item.item=BLOCKDROPS[block].item_id;
+          item.count=BLOCKDROPS[block].count;
+        }
+        else
+        {
+          item.item=(int)block;
+          item.count=1;
+        }
         item.x = x*32;
         item.y = y*32;
         item.z = z*32;

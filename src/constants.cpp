@@ -19,12 +19,12 @@ void initConstants()
   defaultConf.insert(std::pair<std::string, std::string>("wrong_protocol_message", "Wrong client protocol"));
 
   // Block drops (10000 = 100%)
-  BLOCKDROPS.insert(std::pair<uint8, Drop>((uint8)BLOCK_STONE, Drop((uint8)BLOCK_COBBLESTONE, 10000, 1)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>((uint8)BLOCK_GRASS, Drop((uint8)BLOCK_DIRT, 10000, 1)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>((uint8)BLOCK_GRAVEL, Drop((uint8)ITEM_FLINT, 850, 1)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>((uint8)BLOCK_COAL_ORE, Drop((uint8)ITEM_COAL, 10000, 1)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>((uint8)BLOCK_LEAVES, Drop((uint8)BLOCK_SAPLING, 1200, 1)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>((uint8)BLOCK_DIAMOND_ORE, Drop((uint8)ITEM_DIAMOND, 10000, 1)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>((uint8)BLOCK_REDSTONE_ORE, Drop((uint8)ITEM_REDSTONE, 10000, 4)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_STONE, Drop(BLOCK_COBBLESTONE, 10000, 1)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_GRASS, Drop(BLOCK_DIRT, 10000, 1)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_GRAVEL, Drop(ITEM_FLINT, 850, 1)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_COAL_ORE, Drop(ITEM_COAL, 10000, 1)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_LEAVES, Drop(BLOCK_SAPLING, 1200, 1)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_DIAMOND_ORE, Drop(ITEM_DIAMOND, 10000, 1)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_REDSTONE_ORE, Drop(ITEM_REDSTONE, 10000, 4)));
 
 }
