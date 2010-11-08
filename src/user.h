@@ -23,10 +23,27 @@
     int z;
   };
 
-  struct inventory
+  struct Item
   {
+    sint16 type;
+    uint8 count;
+    sint16 health;
+    Item()
+    {
+      type=0;
+      count=0;
+    }
+  };
 
+  struct Inventory
+  {
+    Item main[36];
+    Item equipped[4];
+    Item crafting[4];
 
+    Inventory()
+    {
+    }
   };
 
   class User
@@ -48,6 +65,7 @@
       std::string nick;
       position pos;
       coord curChunk;
+      Inventory inv;
 
       //Input buffer
       std::deque<unsigned char> buffer;

@@ -325,22 +325,31 @@ int PacketHandler::player_inventory(User *user)
   curpos+=2;
 
   int items = 0;
+  Item *slots=NULL;
+
+  items=count;
 
   switch(type)
   {
     //Main inventory
     case -1:
-      items = 36;
+      //items = 36;
+      memset(user->inv.main, 0, sizeof(Item)*36);
+      slots=(Item *)&user->inv.main;
     break;
 
     //Equipped armour
     case -2:
-      items = 4;
+      //items = 4;
+      memset(user->inv.equipped, 0, sizeof(Item)*4);
+      slots=(Item *)&user->inv.equipped;
     break;
 
     //Crafting slots
     case -3:
-      items = 4;
+      //items = 4;
+      memset(user->inv.crafting, 0, sizeof(Item)*4);
+      slots=(Item *)&user->inv.crafting;
     break;
   }
 
@@ -373,6 +382,11 @@ int PacketHandler::player_inventory(User *user)
       for(j = 0;j<2;j++) tmpShortArray[j]=user->buffer[curpos+j]; 
       int health = getSint16(&tmpShortArray[0]);     
       curpos+=2;
+
+      //Save to user inventory      
+      slots[i].type=item_id;
+      slots[i].count=numberOfItems;
+      slots[i].health=health;
     }
   }
 

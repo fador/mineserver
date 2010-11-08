@@ -60,7 +60,6 @@ void buf_error_callback(struct bufferevent *bev, short what, void *arg)
 
 void buf_read_callback(struct bufferevent *incoming, void *arg)
 {
-  uint32 i = 0;
 
   User *user=(User *)arg;
 
@@ -71,7 +70,7 @@ void buf_read_callback(struct bufferevent *incoming, void *arg)
   //Push data to buffer
   while(read)
   {
-    if(read = bufferevent_read(incoming, buf, 2048))
+    if((read = bufferevent_read(incoming, buf, 2048)))
     {
       for(int i = 0;i<read;i++)
       {
@@ -121,7 +120,7 @@ void buf_read_callback(struct bufferevent *incoming, void *arg)
     }
     else
     {
-      if(user->buffer.size()<PacketHandler::get().packets[user->action].len)
+      if(user->buffer.size()<(uint32)PacketHandler::get().packets[user->action].len)
       {
         user->waitForData = true;
         return;
