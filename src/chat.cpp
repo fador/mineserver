@@ -365,7 +365,7 @@ bool Chat::handleMsg(User *user, std::string msg)
           itemCount = atoi(cmd[2].c_str());
           
         if(itemCount > 64) {
-          itemStacks = ceil(float(itemCount / 64)) + 1;
+          itemStacks = static_cast<int>(ceil(float(itemCount / 64)) + 1);
           itemCount = itemCount % 64;
         }
       }
@@ -389,9 +389,9 @@ bool Chat::handleMsg(User *user, std::string msg)
           item.EID = generateEID();
           item.item = itemId;
           item.count = amount;
-          item.x = tUser->pos.x*32;
-          item.y = tUser->pos.y*32;
-          item.z = tUser->pos.z*32;
+          item.x = static_cast<int>(tUser->pos.x*32);
+          item.y = static_cast<int>(tUser->pos.y*32);
+          item.z = static_cast<int>(tUser->pos.z*32);
           
           //std::cout << "Gave " << amount << std::endl;
 

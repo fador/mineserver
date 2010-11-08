@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\chat.cpp" />
     <ClCompile Include="..\src\config.cpp" />
+    <ClCompile Include="..\src\constants.cpp" />
     <ClCompile Include="..\src\logger.cpp" />
     <ClCompile Include="..\src\lua\lapi.c" />
     <ClCompile Include="..\src\lua\lauxlib.c" />

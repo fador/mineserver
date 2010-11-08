@@ -276,7 +276,7 @@ int PacketHandler::chat_message(User *user)
   }
       
   int curpos = 0;
-  int i;
+  unsigned int i;
       
   uint8 tmpLenArray[2] = {0};
   for(i = 0;i<2;i++) tmpLenArray[i]=user->buffer[curpos+i]; 
@@ -311,7 +311,7 @@ int PacketHandler::player_inventory(User *user)
   }
 
   int curpos = 0;
-  int i;
+  unsigned int i;
 
   //Read inventory type (-1,-2 or -3)
   uint8 tmpIntArray[4] = {0};
@@ -654,7 +654,7 @@ int PacketHandler::disconnect(User *user)
     return PACKET_NEED_MORE_DATA;
   }
   int curpos = 0;
-  int i;
+  unsigned int i;
   uint8 shortArray[2];
   for(i = 0;i<2;i++) shortArray[i]=user->buffer[i];
   int len = getSint16(&shortArray[0]);
