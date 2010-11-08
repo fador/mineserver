@@ -24,10 +24,6 @@
   };
 
   struct Item
-  {
-    sint16 type;
-    uint8 count;
-    sint16 health;
     Item()
     {
       type=0;

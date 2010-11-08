@@ -127,21 +127,19 @@ int PacketHandler::login_request(User *user)
   //Package completely received, remove from buffer
   user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
 
-  std::cout << "Player " << user->UID << " login v." <<version<<" : " << player <<":" << passwd << std::endl;
+  std::cout << "Player " << user->UID << " login v." << version <<" : " << player <<":" << passwd << std::endl;
 
   // If version is not 2 or 3
   if(!(version == 2 || version == 3))
   {
-    user->kick(WRONGPROTOCOLMSG);
-      
+    user->kick(Conf::get().sValue("wrong_protocol_message"));
     return curpos;
   }
       
   // If userlimit is reached
-  std::cout << "Userlimit: " << Conf::get().value("userlimit") << std::endl;
-  if((int)Users.size() >= atoi(Conf::get().value("userlimit").c_str()))
+  if((int)Users.size() >= Conf::get().iValue("userlimit"))
   {
-    user->kick(SERVERFULLMSG);       
+    user->kick(Conf::get().sValue("server_full_message"));       
     return curpos;
   }
   

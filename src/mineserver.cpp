@@ -32,6 +32,7 @@
 #include "map.h"
 #include "user.h"
 #include "chat.h"
+#include "mapgen.h"
 #include "config.h"
 #include "nbt.h"
 #include "packets.h"
@@ -62,8 +63,7 @@ int main(void)
   uint32 starttime=(uint32)time(0);
   uint32 tick=(uint32)time(0);
   
-  initDefaultConf();
-
+  initConstants();
 
   Chat::get().loadAdmins(ADMINFILE);
   Chat::get().checkMotd(MOTDFILE);
@@ -79,8 +79,8 @@ int main(void)
   //Initialize packethandler
   PacketHandler::get().initPackets();
 
-  //Try to load port from config
-  int port = atoi(Conf::get().value("port").c_str());
+  // Load port from config
+  int port = Conf::get().iValue("port");
 
 #ifdef WIN32
   _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
@@ -158,7 +158,6 @@ int main(void)
     if(time(0)-starttime>10)
     {
       starttime=(uint32)time(0);
-      //Logger::get().log("Currently " + h.GetCount()-1 + " users in!");
       std::cout << "Currently " << Users.size() << " users in!" << std::endl;
 
       //If users, ping them
@@ -174,7 +173,7 @@ int main(void)
       }
 
       //Try to load port from config
-      int map_release_time=atoi(Conf::get().value("map_release_time").c_str());
+      int map_release_time = Conf::get().iValue("map_release_time");
 
       //Release chunks not used in <map_release_time> seconds
       std::vector<uint32> toRelease;
