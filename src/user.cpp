@@ -266,14 +266,14 @@ bool User::saveData()
     if(inv.equipped[i].count) invlength++;
   }
   nbtlist.length=invlength;
-  nbtlist.items=(void **)new NBT_struct *[nbtlist.length];
+  nbtlist.items=(void **)new NBT_struct *[invlength];
 
   //Start with main items
   Item *slots=(Item *)&inv.main;
   char slotid=0;
   char itemslot=0;
   int index=0;
-  for(int i=0;i<nbtlist.length;i++)
+  for(int i=0;i<36+4+4;i++)
   {
     //Crafting items after main
     if(i == 36)
@@ -322,7 +322,7 @@ bool User::saveData()
       inventory->values.push_back(nbtvalue);
 
 
-      nbtlist.items[index]=inventory;
+      nbtlist.items[index]=(void *)inventory;
       index++;
     }
 

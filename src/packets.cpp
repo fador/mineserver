@@ -164,70 +164,77 @@ int PacketHandler::login_request(User *user)
   data4[0]=0x05;
   putSint32(&data4[1],-1);
   data4[5]=0;
-  int index=0;
-  for(i = 0;i<36;i++)
-  {
-    if(user->inv.main[i].count) index++;
-  }
-  data4[6]=index;
-  index=0;
+  data4[6]=36;
+  int curpos2=7;
   //Send main inventory
   for(i = 0;i<36;i++)
   {
     if(user->inv.main[i].count)
     {
-      putSint16(&data4[7+index*5], user->inv.main[i].type);     //Type
-      data4[7+2+index*5]=user->inv.main[i].count;               //Count
-      putSint16(&data4[7+3+index*5], user->inv.main[i].health); //Health
-      index++;
+      putSint16(&data4[curpos2], user->inv.main[i].type);     //Type
+      curpos2+=2;
+      data4[curpos2]=user->inv.main[i].count;               //Count
+      curpos2++;
+      putSint16(&data4[curpos2], user->inv.main[i].health); //Health
+      curpos2+=2;
+    }
+    else
+    {
+      //Empty slot
+      putSint16(&data4[curpos2], -1);
+      curpos2+=2;
     }
   }
-  if(index)
-    bufferevent_write(user->buf_ev, (char *)&data4[0], 7+index*5);
+  bufferevent_write(user->buf_ev, (char *)&data4[0], curpos2);
     
+
   //Send equipped inventory
-  putSint32(&data4[1],-2);
-  index=0;
-  for(i = 0;i<4;i++)
-  {
-    if(user->inv.equipped[i].count) index++;
-  }
-  data4[6]=index;
-  index=0;
+  putSint32(&data4[1],-3);
+  data4[6]=4;
+  curpos2=7;
   for(i = 0;i<4;i++)
   {
     if(user->inv.equipped[i].count)
     {
-      putSint16(&data4[7+index*5], user->inv.equipped[i].type);     //Type
-      data4[7+2+index*5]=user->inv.equipped[i].count;               //Count
-      putSint16(&data4[7+3+index*5], user->inv.equipped[i].health); //Health
-      index++;
+      putSint16(&data4[curpos2], user->inv.equipped[i].type);     //Type
+      curpos2+=2;
+      data4[curpos2]=user->inv.equipped[i].count;               //Count
+      curpos2++;
+      putSint16(&data4[curpos2], user->inv.equipped[i].health); //Health
+      curpos2+=2;
+    }
+    else
+    {
+      //Empty slot
+      putSint16(&data4[curpos2], -1);
+      curpos2+=2;
     }
   }
-  if(index)
-    bufferevent_write(user->buf_ev, (char *)&data4[0], 7+index*5);
+  bufferevent_write(user->buf_ev, (char *)&data4[0], curpos2);
   
   //Send crafting inventory
-  putSint32(&data4[1],-3);
-  index=0;
-  for(i = 0;i<4;i++)
-  {
-    if(user->inv.crafting[i].count) index++;
-  }
-  data4[6]=index;
-  index=0;
+  putSint32(&data4[1],-2);
+  data4[6]=4;
+  curpos2=7;
   for(i = 0;i<4;i++)
   {
     if(user->inv.crafting[i].count)
     {
-      putSint16(&data4[7+index*5], user->inv.crafting[i].type);     //Type
-      data4[7+2+index*5]=user->inv.crafting[i].count;               //Count
-      putSint16(&data4[7+3+index*5], user->inv.crafting[i].health); //Health
-      index++;
+      putSint16(&data4[curpos2], user->inv.crafting[i].type);     //Type
+      curpos2+=2;
+      data4[curpos2]=user->inv.crafting[i].count;               //Count
+      curpos2++;
+      putSint16(&data4[curpos2], user->inv.crafting[i].health); //Health
+      curpos2+=2;
+    }
+    else
+    {
+      //Empty slot
+      putSint16(&data4[curpos2], -1);
+      curpos2+=2;
     }
   }
-  if(index)
-    bufferevent_write(user->buf_ev, (char *)&data4[0], 7+index*5);
+  bufferevent_write(user->buf_ev, (char *)&data4[0], curpos2);
 
   // Send motd
   std::ifstream motdfs( MOTDFILE.c_str() );
@@ -385,14 +392,14 @@ int PacketHandler::player_inventory(User *user)
     break;
 
     //Equipped armour
-    case -2:
+    case -3:
       //items = 4;
       memset(user->inv.equipped, 0, sizeof(Item)*4);
       slots=(Item *)&user->inv.equipped;
     break;
 
     //Crafting slots
-    case -3:
+    case -2:
       //items = 4;
       memset(user->inv.crafting, 0, sizeof(Item)*4);
       slots=(Item *)&user->inv.crafting;
