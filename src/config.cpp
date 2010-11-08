@@ -20,13 +20,13 @@ Conf &Conf::get()
 // Load/reload configuration
 bool Conf::load(std::string configFile)
 {
-  std::cout << "Loading configuration from " << configFile << std::endl;
+  std::cout << "Loading data from " << configFile << std::endl;
   std::ifstream ifs(configFile.c_str());
 
-  // If file does not exist
-  if(ifs.fail())
+  // If configfile does not exist
+  if(ifs.fail() && configFile == CONFIGFILE)
   {
-    std::cout << ">>> " << configFile << " not found. Creating using default values..." << std::endl;
+    std::cout << ">>> " << configFile << " not found. Generating default configuration.." << std::endl;
 
     std::ofstream confofs(configFile.c_str());
     confofs << "#"                                                                          << std::endl
@@ -45,7 +45,10 @@ bool Conf::load(std::string configFile)
             << "# Map Release time - time in seconds to keep unused map chunks in memory"   << std::endl
             << "# Memory vs. CPU tradeoff. Reloading map data takes a bit of CPU each time" << std::endl
             << "# but the map in memory consumes it around 100kb/chunk"                     << std::endl
-            << "map_release_time = 10 << std::endl"                                         << std::endl;
+            << "map_release_time = 10"                                                      << std::endl
+                                                                                            << std::endl
+            << "# Map directory"                                                            << std::endl
+            << "mapdir = \"testmap\""                                                       << std::endl;
 
     confofs.close();
 
@@ -55,7 +58,7 @@ bool Conf::load(std::string configFile)
   std::string temp;
 
   // Clear config (to allow configuration reload)
-  confSet.clear();
+  //confSet.clear();
 
   // Reading row at a time
   int del;
@@ -118,17 +121,22 @@ bool Conf::load(std::string configFile)
       text = line[1];
     }
 
-    // TODO: Validate configline
-
-    // Push to configuration
-    confSet.insert(std::pair<std::string, std::string>(line[0], text));
-
-    // DEBUG
-    std::cout << "> " << line[0] << " = " << text << std::endl;
+    // Update existing configuration and add new lines
+    if(confSet.find(line[0]) != confSet.end())
+    {
+      confSet[line[0]] = text;
+      //std::cout << "Updated> " << line[0] << " = " << text << std::endl;
+    }
+    else
+    {
+      // Push to configuration
+      confSet.insert(std::pair<std::string, std::string>(line[0], text));
+      //std::cout << "Added> " << line[0] << " = " << text << std::endl;
+    }
   }
   ifs.close();
 
-  std::cout << "Configuration loaded!" << std::endl;
+  std::cout << "Loaded " << lineNum << " lines from " << configFile << std::endl;
 
   return true;
 }

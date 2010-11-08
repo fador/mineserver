@@ -59,6 +59,7 @@
 
       bool sendOthers(uint8* data,uint32 len);
       bool sendAll(uint8* data,uint32 len);
+      bool sendAdmins(uint8* data,uint32 len);
         
       // Kick player
       bool kick(std::string kickMsg);

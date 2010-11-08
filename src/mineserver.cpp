@@ -35,7 +35,9 @@
 #include "packets.h"
 
 
+#ifdef WIN32
 static bool quit = false;
+#endif
 
 int setnonblock(int fd)
 {
@@ -64,6 +66,8 @@ int main(void)
 
   //Initialize conf
   Conf::get().load(CONFIGFILE);
+  // Load item aliases
+  Conf::get().load(ITEMALIASFILE);
 
   //Initialize map
   Map::get().initMap();
@@ -104,7 +108,7 @@ int main(void)
 
   if (socketlisten < 0)
   {
-    fprintf(stderr,"Failed to create listen socket");
+    fprintf(stderr,"Failed to create listen socket\n");
     return 1;
   }
 
@@ -117,13 +121,13 @@ int main(void)
   //Bind to port
   if (bind(socketlisten, (struct sockaddr *)&addresslisten, sizeof(addresslisten)) < 0)
   {
-    fprintf(stderr,"Failed to bind");
+    fprintf(stderr, "Failed to bind\n");
     return 1;
   }
 
   if (listen(socketlisten, 5) < 0)
   {
-    fprintf(stderr,"Failed to listen to socket");
+    fprintf(stderr, "Failed to listen to socket\n");
     return 1;
   }
 
@@ -140,6 +144,8 @@ int main(void)
             << "\\____|__  /__|___|  /\\___  >____  >\\___  >__|    \\_/  \\___  >__|   "     << std::endl
             << "        \\/        \\/     \\/     \\/     \\/                 \\/       "    << std::endl
             << "Version " << VERSION <<" by Fador & Psoden"                                   << std::endl << std::endl;
+
+  std::cout << "Listening at port " << port << std::endl;
 
   timeval loopTime;
   loopTime.tv_sec=1;
@@ -210,7 +216,7 @@ int main(void)
     }
 #ifdef WIN32
     if(_kbhit())
-        quit=1;
+        quit = 1;
 #endif
 
     event_base_loopexit(eventbase,&loopTime);
