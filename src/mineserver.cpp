@@ -19,6 +19,7 @@
 #include <event.h>
 #include <ctime>
 #include <vector>
+#include <zlib.h>
 
 #include "constants.h"
 
@@ -31,7 +32,8 @@
 #include "chat.h"
 #include "config.h"
 #include "nbt.h"
-#include <zlib.h>
+#include "packets.h"
+
 
 static bool quit = false;
 
@@ -56,12 +58,19 @@ int main(void)
   uint32 starttime=(uint32)time(0);
   uint32 tick=(uint32)time(0);
 
+
   Chat::get().loadAdmins(ADMINFILE);
   Chat::get().checkMotd(MOTDFILE);
 
+  //Initialize conf
   Conf::get().load(CONFIGFILE);
 
+  //Initialize map
   Map::get().initMap();
+
+  //Initialize packethandler
+  PacketHandler::get().initPackets();
+
   //Try to load port from config
   int port=atoi(Conf::get().value("port").c_str());
   //If failed, use default
@@ -77,7 +86,7 @@ int main(void)
   iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
   if (iResult != 0) {
     printf("WSAStartup failed with error: %d\n", iResult);
-    return 1;
+    return EXIT_FAILURE;
   }
 #endif
 
@@ -221,6 +230,6 @@ int main(void)
 #ifdef WIN32
   _CrtDumpMemoryLeaks();
 #endif
-
+  
   return EXIT_SUCCESS;
 }

@@ -14,14 +14,13 @@
 #include <ctime>
 #include <cmath>
 #include <algorithm>
-
-#include "logger.h"
-
+#include <zlib.h>
 #include <sys/stat.h>
 
+#include "logger.h"
 #include "tools.h"
 #include "map.h"
-#include <zlib.h>
+
 #include "user.h"
 #include "nbt.h"
 #include "config.h"

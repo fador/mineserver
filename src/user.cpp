@@ -281,9 +281,12 @@ bool User::popMap()
 
 bool User::pushMap()
 {
+  //Dont send all at once
+  int maxcount=10;
   // If map in queue, push it to client
-  while(this->mapQueue.size() > 0)
+  while(this->mapQueue.size() > 0 && maxcount>0)
   {
+    maxcount--;
     // Sort by distance from center
     sort(mapQueue.begin(),mapQueue.end(),SortVect);
 
