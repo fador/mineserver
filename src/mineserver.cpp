@@ -158,7 +158,6 @@ int main(void)
     if(time(0)-starttime>10)
     {
       starttime=(uint32)time(0);
-      //Logger::get().log("Currently " + h.GetCount()-1 + " users in!");
       std::cout << "Currently " << Users.size() << " users in!" << std::endl;
 
       //If users, ping them
