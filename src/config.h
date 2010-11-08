@@ -1,4 +1,4 @@
-h#ifndef _CONFIG_H
+#ifndef _CONFIG_H
 #define _CONFIG_H
 
 class Conf

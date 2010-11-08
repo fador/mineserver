@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <iostream>
 #include <string>
+#include <cmath>
 
 #include "logger.h"
 #include "constants.h"

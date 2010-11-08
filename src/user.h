@@ -24,6 +24,10 @@
   };
 
   struct Item
+  {
+    sint16 type;
+    sint8 count;
+    sint16 health;
     Item()
     {
       type=0;

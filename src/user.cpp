@@ -141,23 +141,23 @@ bool User::loadData()
       //Main inventory slot
       if(slot>=0 && slot<=35)
       {
-        inv.main[slot].count=count;
-        inv.main[slot].health=damage;
-        inv.main[slot].type=item_id;
+        inv.main[(uint8)slot].count=count;
+        inv.main[(uint8)slot].health=damage;
+        inv.main[(uint8)slot].type=item_id;
       }
       //Crafting      
       else if(slot>=80 && slot <= 83)
       {
-        inv.crafting[slot-80].count=count;
-        inv.crafting[slot-80].health=damage;
-        inv.crafting[slot-80].type=item_id;
+        inv.crafting[(uint8)slot-80].count=count;
+        inv.crafting[(uint8)slot-80].health=damage;
+        inv.crafting[(uint8)slot-80].type=item_id;
       }
       //Equipped
       else if(slot>=100 && slot <= 103)
       {
-        inv.equipped[slot-100].count=count;
-        inv.equipped[slot-100].health=damage;
-        inv.equipped[slot-100].type=item_id;
+        inv.equipped[(uint8)slot-100].count=count;
+        inv.equipped[(uint8)slot-100].health=damage;
+        inv.equipped[(uint8)slot-100].type=item_id;
       }
     }
   }
@@ -288,7 +288,7 @@ bool User::saveData()
       itemslot=100;
       slotid=0;
     }
-    if(slots[slotid].count)
+    if(slots[(uint8)slotid].count)
     {
       NBT_struct *inventory=new NBT_struct;
     
@@ -296,7 +296,7 @@ bool User::saveData()
       nbtvalue.type=TAG_BYTE;
       nbtvalue.name="Count";
       nbtvalue.value=(void *)new char;
-      *(char *)nbtvalue.value=slots[slotid].count;
+      *(char *)nbtvalue.value=slots[(uint8)slotid].count;
       inventory->values.push_back(nbtvalue);
 
       //Count
@@ -310,14 +310,14 @@ bool User::saveData()
       nbtvalue.type=TAG_SHORT;
       nbtvalue.name="Damage";
       nbtvalue.value=(void *)new sint16;
-      *(sint16 *)nbtvalue.value=slots[slotid].health;
+      *(sint16 *)nbtvalue.value=slots[(uint8)slotid].health;
       inventory->values.push_back(nbtvalue);
 
       //ID
       nbtvalue.type=TAG_SHORT;
       nbtvalue.name="id";
       nbtvalue.value=(void *)new sint16;
-      *(sint16 *)nbtvalue.value=slots[slotid].type;
+      *(sint16 *)nbtvalue.value=slots[(uint8)slotid].type;
       inventory->values.push_back(nbtvalue);
 
 
