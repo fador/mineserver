@@ -634,12 +634,23 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
 
 
   //If placing normal block and current block is empty
-  if(blockID<0xff && blockID!=-1 && block_direction == 0x00)
+  if(blockID<0xff && blockID!=-1 && ( block_direction == BLOCK_AIR || 
+                                      block_direction == BLOCK_WATER ||
+                                      block_direction == BLOCK_STATIONARY_WATER ||
+                                      block_direction == BLOCK_LAVA ||
+                                      block_direction == BLOCK_STATIONARY_LAVA ) )
   {
-    change = true;
+    // If block is not BLOCK_WORKBENCH or BLOCK_FURNACE or BLOCK_BURNING_FURNACE or BLOCK_CHEST
+    if( block != BLOCK_WORKBENCH &&
+        block != BLOCK_FURNACE &&
+        block != BLOCK_BURNING_FURNACE &&
+        block != BLOCK_CHEST )
+    {
+      change = true;
+    }
   }
 
-  if(block == 0x4e || block == 50) //If snow or torch, overwrite
+  if(block == BLOCK_SNOW || block == BLOCK_TORCH) //If snow or torch, overwrite
   {
     change = true;
     x = orig_x;
@@ -648,7 +659,7 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
   }
 
   //Door status change
-  if((block == 0x40)|| (block == 0x47))
+  if((block == BLOCK_WOODEN_DOOR) || (block == BLOCK_IRON_DOOR))
   {
     change = true;
 
@@ -688,6 +699,18 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
       Map::get().sendBlockChange(x,y+modifier,z,blockID, metadata2);
     }
 
+  }
+  
+  // If player is standing there
+  //std::cout << "posx-1 " << (int)user->pos.x-1 << " == " << x << std::endl;
+  //std::cout << "and posz-1 " << (int)user->pos.z-1 << " == " << z << std::endl;
+  //std::cout << "and posy " << (int)user->pos.y << " == " << y << std::endl;
+  //std::cout << "or posy " << (int)user->pos.y << " == " << y-1 << std::endl;
+  if( (int)user->pos.x-1 == x && 
+      (int)user->pos.z-1 == z &&
+      (user->pos.y == y || user->pos.y == y-1 ) )
+  {
+    change = false;
   }
 
   if(change)
