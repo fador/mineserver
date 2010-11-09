@@ -19,6 +19,7 @@
 #include <event.h>
 #include <fstream>
 #include <ctime>
+#include <cmath>
 #include <vector>
 #include <zlib.h>
 #include <stdint.h>
@@ -703,16 +704,51 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
 
   }
   
-  // If player is standing there
-  //std::cout << "posx-1 " << (int)user->pos.x-1 << " == " << x << std::endl;
-  //std::cout << "and posz-1 " << (int)user->pos.z-1 << " == " << z << std::endl;
-  //std::cout << "and posy " << (int)user->pos.y << " == " << y << std::endl;
-  //std::cout << "or posy " << (int)user->pos.y << " == " << y-1 << std::endl;
-  if( (int)user->pos.x-1 == x && 
-      (int)user->pos.z-1 == z &&
-      (user->pos.y == y || user->pos.y == y-1 ) )
+  // Check if player is standing there
+  double intX, intZ, fracX, fracZ;
+  if( y == user->pos.y || y-1 == user->pos.y ) // Height
   {
-    change = false;
+    fracX = std::abs(std::modf(user->pos.x, &intX));
+    fracZ = std::abs(std::modf(user->pos.z, &intZ));
+    
+    // Mystics
+    intX--;
+    intZ--;
+    
+    
+    // Optimized version of the code below
+    if( (z==intZ || (z==intZ+1 && fracZ<0.30) || (z==intZ-1 && fracZ>0.70)) &&
+        (x==intX || (x==intX+1 && fracZ<0.30) || (x==intX-1 && fracX>0.70)) )
+    {
+      change = false;
+    }
+    
+    /*if(x==intX && z==intZ)
+      change = false;
+      
+    if(x==intX && z==intZ+1 && fracZ < 0.30)
+      change = false;
+      
+    if(x==intX && z==intZ-1 && fracZ > 0.70)
+      change = false;
+      
+    if(z==intZ && x==intX+1 && fracX < 0.30)
+      change = false;
+    
+    if(z==intZ && x==intX-1 && fracX > 0.70)
+      change = false;
+      
+    if(z==intZ-1 && x==intX-1 && fracZ > 0.70 && fracX > 0.70)
+      change = false;
+      
+    if(z==intZ-1 && x==intX+1 && fracZ > 0.70 && fracX < 0.30)
+      change = false;
+      
+    if(z==intZ+1 && x==intX+1 && fracZ < 0.30 && fracX < 0.30)
+      change = false;
+
+    if(z==intZ+1 && x==intX-1 && fracZ < 0.30 && fracX > 0.70)
+      change = false;*/
   }
 
   if(change)

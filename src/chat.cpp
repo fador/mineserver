@@ -353,13 +353,17 @@ bool Chat::handleMsg(User *user, std::string msg)
         // Check for aliases
         itemId = Conf::get().iValue(cmd[1]);
         
-        if( itemId == 0 )
+        if(itemId == 0)
           itemId = atoi(cmd[1].c_str());
 
         // Check if valid block or item id
-        if( itemId < 1 || (itemId > 91 && itemId < 256 ) || itemId > 350 ) // Blocks and items 
+        if(itemId < 1 || (itemId > 91 && itemId < 256) || itemId > 350) // Blocks and items 
           if(itemId != 2256 || itemId != 2257) // Records (doh)
             return false;
+            
+        // Check if items are those that crash client (colored cloths)
+        if(itemId >= BLOCK_RED_CLOTH && itemId <= BLOCK_GRAY_CLOTH)
+          return false;
         
         if(cmd.size() > 2)
           itemCount = atoi(cmd[2].c_str());
