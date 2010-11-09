@@ -342,8 +342,8 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta){
     return false;
   }
 
-  int chunk_x = ((x<0) ? (((x+1)/16)-1) : (x/16));
-  int chunk_z = ((z<0) ? (((z+1)/16)-1) : (z/16));
+  int chunk_x = blockToChunk(x);
+  int chunk_z = blockToChunk(z);
 
   uint32 mapId;
   Map::posToId(chunk_x, chunk_z, &mapId);
@@ -356,8 +356,8 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta){
     return false;
   }
 
-  int chunk_block_x = ((x<0) ? (15+((x+1)%16)) : (x%16));
-  int chunk_block_z = ((z<0) ? (15+((z+1)%16)) : (z%16));
+  int chunk_block_x = blockToChunkBlock(x);
+  int chunk_block_z = blockToChunkBlock(z);
 
   uint8 *blocks = chunk->blocks;
   uint8 *metapointer = chunk->data;
@@ -394,8 +394,8 @@ bool Map::getBlockLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight)
   }
 
   // Map chunk pos from block pos
-  int chunk_x = ((x<0) ? (((x+1)/16)-1) : (x/16));
-  int chunk_z = ((z<0) ? (((z+1)/16)-1) : (z/16));
+  int chunk_x = blockToChunk(x);
+  int chunk_z = blockToChunk(z);
 
   NBT_struct *chunk = getMapData(chunk_x, chunk_z);
 
@@ -406,8 +406,8 @@ bool Map::getBlockLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight)
   }
 
   // Which block inside the chunk
-  int chunk_block_x = ((x<0) ? (15+((x+1)%16)) : (x%16));
-  int chunk_block_z = ((z<0) ? (15+((z+1)%16)) : (z%16));
+  int chunk_block_x = blockToChunkBlock(x);
+  int chunk_block_z = blockToChunkBlock(z);
 
   uint8 *blocklightpointer=chunk->blocklight;
   uint8 *skylightpointer=chunk->skylight;
@@ -444,8 +444,8 @@ bool Map::setBlockLight(int x, int y, int z, uint8 blocklight, uint8 skylight, u
     return false;
   }
 
-  int chunk_x = ((x<0) ? (((x+1)/16)-1) : (x/16));
-  int chunk_z = ((z<0) ? (((z+1)/16)-1) : (z/16));
+  int chunk_x = blockToChunk(x);
+  int chunk_z = blockToChunk(z);
 
   NBT_struct *chunk = getMapData(chunk_x, chunk_z);
 
@@ -455,8 +455,8 @@ bool Map::setBlockLight(int x, int y, int z, uint8 blocklight, uint8 skylight, u
     return false;
   }
 
-  int chunk_block_x = ((x<0) ? (15+((x+1)%16)) : (x%16));
-  int chunk_block_z = ((z<0) ? (15+((z+1)%16)) : (z%16));
+  int chunk_block_x = blockToChunkBlock(x);
+  int chunk_block_z = blockToChunkBlock(z);
 
   uint8 *blocklightpointer = chunk->blocklight;
   uint8 *skylightpointer = chunk->skylight;
@@ -591,6 +591,19 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
 
 bool Map::sendPickupSpawn(spawnedItem item)
 {
+  //Push to global item storage
+  spawnedItem *storedItem=new spawnedItem;
+  *storedItem=item;  
+  items[item.EID]=storedItem;
+
+  //Push to local item storage
+  int chunk_x = blockToChunk(item.x/32);
+  int chunk_z = blockToChunk(item.z/32);
+  uint32 chunkHash;
+  posToId(chunk_x,chunk_z,&chunkHash);
+  mapItems[chunkHash].push_back(storedItem);
+
+
   uint8 curpos=0;
   uint8 changeArray[23];
   changeArray[curpos]=0x15; // Pickup Spawn

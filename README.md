@@ -18,10 +18,11 @@ We are trying to minimize memory and cpu usage compared to original Java server.
  * NBT parsing/saving
  * Lightmap generation
  * Config file
+ * Normal mining/item spawning/item pickups
   
 ### ToDo (Arranged by priority)
- * Item pickup
  * Map generation
+ * Getting chests,furnaces,signs etc to work
  * Physics
  * Multithreading
  * Growing trees etc.

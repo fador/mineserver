@@ -2,6 +2,7 @@
 #define _MAP_H
 
 #include <map>
+#include <ctime>
 #include "nbt.h"
 #include "user.h"
 
@@ -10,9 +11,18 @@ struct spawnedItem
   int EID;
   int item;
   char count;
+  sint16 health;
   int x;
   int y;
   int z;
+  time_t spawnedAt;
+  sint32 spawnedBy;
+
+  spawnedItem()
+  {
+    spawnedAt=time(0);
+    spawnedBy=0;
+  }
 };
 
 class Map
@@ -70,6 +80,12 @@ private:
       releaseMap(maps[it->first].x, maps[it->first].z);
     }
 
+    //Free item memory
+    for (std::map<uint32, spawnedItem*>::const_iterator it = items.begin(); it != items.end(); ++it)
+    {
+      delete items[it->first];
+    }
+
     // Free level.dat info
     freeNBT_struct(&levelInfo);
   };
@@ -101,7 +117,11 @@ public:
   // Store if map has been modified
   std::map<uint32, bool> mapChanged;
 
-  std::vector<spawnedItem> items;
+  // Store item pointers for each chunk
+  std::map<uint32, std::vector<spawnedItem *>> mapItems;
+
+  //All spawned items on map
+  std::map<uint32,spawnedItem *> items;
 
   void posToId(int x, int z, uint32 *id);
   void idToPos(uint32 id, int *x, int *z);
@@ -140,7 +160,7 @@ public:
 
   bool sendBlockChange(int x, int y, int z, char type, char meta);
 
-  bool sendPickupSpawn(spawnedItem item);
+  bool sendPickupSpawn(spawnedItem item);  
 
   static Map &get();
 };
