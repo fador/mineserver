@@ -255,14 +255,14 @@ int PacketHandler::login_request(User *user)
   {
     for(int z=-user->viewDistance;z<=user->viewDistance;z++)
     {
-      user->addQueue(user->pos.x/16+x,user->pos.z/16+z);
+      user->addQueue((sint32)user->pos.x/16+x,(sint32)user->pos.z/16+z);
     }
   }
   // Push chunks to user
   user->pushMap();
 
   //Spawn this user to others
-  user->spawnUser(user->pos.x*32,(user->pos.y+2)*32,user->pos.z*32);
+  user->spawnUser((sint32)user->pos.x*32,((sint32)user->pos.y+2)*32,(sint32)user->pos.z*32);
   //Spawn other users for connected user
   user->spawnOthers();
         
@@ -763,6 +763,8 @@ void PacketHandler::pickup_spawn(uint8 *data, User *user)
   curpos+=4;
   item.z = getSint32(&data[curpos]);
   curpos+=4;
+  item.spawnedBy=user->UID;
+
   Map::get().sendPickupSpawn(item);
 }
 

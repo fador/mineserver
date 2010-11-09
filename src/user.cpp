@@ -11,6 +11,7 @@
   #define ZLIB_WINAPI
 #endif
 #include <zlib.h>
+#include <ctime>
 #include "constants.h"
 
 #include "logger.h"
@@ -452,36 +453,41 @@ bool User::updatePos(double x, double y, double z, double stance)
              abs((sint32)z-Map::get().mapItems[chunkHash][i]->z/32) < 2 &&
              abs((sint32)y-Map::get().mapItems[chunkHash][i]->y/32) < 2)
           {
-            //Check player inventory for space!
-            if(checkInventory(Map::get().mapItems[chunkHash][i]->item, Map::get().mapItems[chunkHash][i]->count))
+            //Dont pickup own spawns right away
+            if(Map::get().mapItems[chunkHash][i]->spawnedBy != this->UID ||
+              Map::get().mapItems[chunkHash][i]->spawnedAt+2 < time(0))
             {
-              //Send player collect item packet
-              uint8 *packet=new uint8[9];
-              packet[0] = PACKET_COLLECT_ITEM;
-              putSint32(&packet[1], Map::get().mapItems[chunkHash][i]->EID);
-              putSint32(&packet[5], this->UID);
-              bufferevent_write(this->buf_ev, (char *)packet, 9);
+              //Check player inventory for space!
+              if(checkInventory(Map::get().mapItems[chunkHash][i]->item, Map::get().mapItems[chunkHash][i]->count))
+              {
+                //Send player collect item packet
+                uint8 *packet=new uint8[9];
+                packet[0] = PACKET_COLLECT_ITEM;
+                putSint32(&packet[1], Map::get().mapItems[chunkHash][i]->EID);
+                putSint32(&packet[5], this->UID);
+                bufferevent_write(this->buf_ev, (char *)packet, 9);
 
-              //Send everyone destroy_entity-packet
-              packet[0] = PACKET_DESTROY_ENTITY;
-              putSint32(&packet[1], Map::get().mapItems[chunkHash][i]->EID);
-              //ToDo: Only send users in range
-              this->sendAll(packet,5);
+                //Send everyone destroy_entity-packet
+                packet[0] = PACKET_DESTROY_ENTITY;
+                putSint32(&packet[1], Map::get().mapItems[chunkHash][i]->EID);
+                //ToDo: Only send users in range
+                this->sendAll(packet,5);
 
-              packet[0] = PACKET_ADD_TO_INVENTORY;
-              putSint16(&packet[1], Map::get().mapItems[chunkHash][i]->item);
-              packet[3]=Map::get().mapItems[chunkHash][i]->count;
-              putSint16(&packet[4], Map::get().mapItems[chunkHash][i]->health);
-              bufferevent_write(this->buf_ev, (char *)packet, 6);
+                packet[0] = PACKET_ADD_TO_INVENTORY;
+                putSint16(&packet[1], Map::get().mapItems[chunkHash][i]->item);
+                packet[3]=Map::get().mapItems[chunkHash][i]->count;
+                putSint16(&packet[4], Map::get().mapItems[chunkHash][i]->health);
+                bufferevent_write(this->buf_ev, (char *)packet, 6);
 
-              //We're done, release packet memory
-              delete [] packet;
+                //We're done, release packet memory
+                delete [] packet;
               
 
-              Map::get().items.erase(Map::get().mapItems[chunkHash][i]->EID);
-              delete Map::get().mapItems[chunkHash][i];
-              Map::get().mapItems[chunkHash].erase(Map::get().mapItems[chunkHash].begin()+i);
-            }            
+                Map::get().items.erase(Map::get().mapItems[chunkHash][i]->EID);
+                delete Map::get().mapItems[chunkHash][i];
+                Map::get().mapItems[chunkHash].erase(Map::get().mapItems[chunkHash].begin()+i);
+              }
+            }
           }
         }
       }

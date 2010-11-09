@@ -2,6 +2,7 @@
 #define _MAP_H
 
 #include <map>
+#include <ctime>
 #include "nbt.h"
 #include "user.h"
 
@@ -14,6 +15,14 @@ struct spawnedItem
   int x;
   int y;
   int z;
+  time_t spawnedAt;
+  sint32 spawnedBy;
+
+  spawnedItem()
+  {
+    spawnedAt=time(0);
+    spawnedBy=0;
+  }
 };
 
 class Map
