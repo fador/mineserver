@@ -365,7 +365,7 @@ bool Chat::handleMsg(User *user, std::string msg)
           itemCount = atoi(cmd[2].c_str());
           
         if(itemCount > 64) {
-          itemStacks = static_cast<int>(ceil(float(itemCount / 64)) + 1);
+          itemStacks = ceil(itemCount / 64.0);
           itemCount = itemCount % 64;
         }
       }
