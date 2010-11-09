@@ -16,7 +16,7 @@ struct spawnedItem
   int y;
   int z;
   time_t spawnedAt;
-  sint32 spawnedBy;
+  uint32 spawnedBy;
 
   spawnedItem()
   {
@@ -118,7 +118,7 @@ public:
   std::map<uint32, bool> mapChanged;
 
   // Store item pointers for each chunk
-  std::map<uint32, std::vector<spawnedItem *>> mapItems;
+  std::map<uint32, std::vector<spawnedItem *> > mapItems;
 
   //All spawned items on map
   std::map<uint32,spawnedItem *> items;
