@@ -388,6 +388,7 @@ bool Chat::handleMsg(User *user, std::string msg)
           spawnedItem item;
           item.EID = generateEID();
           item.item = itemId;
+          item.health = 0;
           item.count = amount;
           item.x = static_cast<int>(tUser->pos.x*32);
           item.y = static_cast<int>(tUser->pos.y*32);

@@ -80,6 +80,9 @@
       bool sendAll(uint8* data,uint32 len);
       bool sendAdmins(uint8* data,uint32 len);
 
+      //Check inventory for space
+      bool checkInventory(sint16 itemID, char count);
+
       //Load/save player data from/to a file at <mapdir>/players/<nick>.dat
       bool saveData();
       bool loadData();

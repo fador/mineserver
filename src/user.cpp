@@ -19,7 +19,7 @@
 #include "user.h"
 #include "nbt.h"
 #include "chat.h"
-
+#include "packets.h"
 
 std::vector<User *> Users;
 
@@ -382,6 +382,27 @@ bool User::saveData()
 
 }
 
+bool User::checkInventory(sint16 itemID, char count)
+{
+  int leftToFit=count;
+  for(uint8 i=0;i<36;i++)
+  {
+    if(inv.main[i].type==0) return true;
+    if(inv.main[i].type==itemID)
+    {
+      if(64-inv.main[i].count>=leftToFit)
+      {
+        return true;
+      }
+      else if(64-inv.main[i].count>0)
+      {
+        leftToFit-=64-inv.main[i].count;
+      }
+    }    
+  }
+  return false;
+}
+
 bool User::updatePos(double x, double y, double z, double stance)
 {
     if(nick.size() && logged)
@@ -415,6 +436,56 @@ bool User::updatePos(double x, double y, double z, double stance)
         teleportData[18]=(char)this->pos.pitch;
         this->sendOthers(&teleportData[0],19);
       }
+
+      //Check if there are items in this chunk!
+      sint32 chunk_x=blockToChunk((sint32)x);
+      sint32 chunk_z=blockToChunk((sint32)z);
+      uint32 chunkHash;
+      Map::get().posToId(chunk_x,chunk_z,&chunkHash);
+      if(Map::get().mapItems.count(chunkHash))
+      {
+        //Loop through items and check if they are close enought to be picked up
+        for(sint32 i=Map::get().mapItems[chunkHash].size()-1;i>=0;i--)
+        {
+          //No more than 2 blocks away
+          if(abs((sint32)x-Map::get().mapItems[chunkHash][i]->x/32) < 2 && 
+             abs((sint32)z-Map::get().mapItems[chunkHash][i]->z/32) < 2 &&
+             abs((sint32)y-Map::get().mapItems[chunkHash][i]->y/32) < 2)
+          {
+            //Check player inventory for space!
+            if(checkInventory(Map::get().mapItems[chunkHash][i]->item, Map::get().mapItems[chunkHash][i]->count))
+            {
+              //Send player collect item packet
+              uint8 *packet=new uint8[9];
+              packet[0] = PACKET_COLLECT_ITEM;
+              putSint32(&packet[1], Map::get().mapItems[chunkHash][i]->EID);
+              putSint32(&packet[5], this->UID);
+              bufferevent_write(this->buf_ev, (char *)packet, 9);
+
+              //Send everyone destroy_entity-packet
+              packet[0] = PACKET_DESTROY_ENTITY;
+              putSint32(&packet[1], Map::get().mapItems[chunkHash][i]->EID);
+              //ToDo: Only send users in range
+              this->sendAll(packet,5);
+
+              packet[0] = PACKET_ADD_TO_INVENTORY;
+              putSint16(&packet[1], Map::get().mapItems[chunkHash][i]->item);
+              packet[3]=Map::get().mapItems[chunkHash][i]->count;
+              putSint16(&packet[4], Map::get().mapItems[chunkHash][i]->health);
+              bufferevent_write(this->buf_ev, (char *)packet, 6);
+
+              //We're done, release packet memory
+              delete [] packet;
+              
+
+              Map::get().items.erase(Map::get().mapItems[chunkHash][i]->EID);
+              delete Map::get().mapItems[chunkHash][i];
+              Map::get().mapItems[chunkHash].erase(Map::get().mapItems[chunkHash].begin()+i);
+            }            
+          }
+        }
+      }
+
     
       //Chunk position changed, check for map updates
       if((int)(x/16) != curChunk.x ||(int)(z/16) != curChunk.z)

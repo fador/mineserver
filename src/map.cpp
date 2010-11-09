@@ -597,10 +597,10 @@ bool Map::sendPickupSpawn(spawnedItem item)
   items[item.EID]=storedItem;
 
   //Push to local item storage
-  int chunk_block_x = blockToChunk(item.x/32);
-  int chunk_block_z = blockToChunk(item.z/32);
+  int chunk_x = blockToChunk(item.x/32);
+  int chunk_z = blockToChunk(item.z/32);
   uint32 chunkHash;
-  posToId(chunk_block_x,chunk_block_z,&chunkHash);
+  posToId(chunk_x,chunk_z,&chunkHash);
   mapItems[chunkHash].push_back(storedItem);
 
 

@@ -10,6 +10,7 @@ struct spawnedItem
   int EID;
   int item;
   char count;
+  sint16 health;
   int x;
   int y;
   int z;
@@ -68,6 +69,12 @@ private:
     for (std::map<uint32, NBT_struct>::const_iterator it = maps.begin(); it != maps.end(); ++it)
     {
       releaseMap(maps[it->first].x, maps[it->first].z);
+    }
+
+    //Free item memory
+    for (std::map<uint32, spawnedItem*>::const_iterator it = items.begin(); it != items.end(); ++it)
+    {
+      delete items[it->first];
     }
 
     // Free level.dat info
@@ -144,7 +151,7 @@ public:
 
   bool sendBlockChange(int x, int y, int z, char type, char meta);
 
-  bool sendPickupSpawn(spawnedItem item);
+  bool sendPickupSpawn(spawnedItem item);  
 
   static Map &get();
 };

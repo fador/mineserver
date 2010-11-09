@@ -450,7 +450,7 @@ int PacketHandler::player_inventory(User *user)
 
 void PacketHandler::player(uint8 *data, User *user)
 {
-
+  //OnGround packet
 }
 
 void PacketHandler::player_position(uint8 *data, User *user)
@@ -566,6 +566,7 @@ void PacketHandler::player_digging(uint8 *data, User *user)
       {
         spawnedItem item;
         item.EID = generateEID();
+        item.health=0;
 
         // Spawn drop according to BLOCKDROPS
         // Check propability 
@@ -747,7 +748,22 @@ void PacketHandler::arm_animation(uint8 *data, User *user)
 
 void PacketHandler::pickup_spawn(uint8 *data, User *user)
 {
+  uint32 curpos=4;
+  spawnedItem item;
+  item.EID = generateEID();
+  item.health=0;
+  item.item = getSint16(&data[curpos]);
+  curpos+=2;
+  item.count = data[curpos];
+  curpos++;
 
+  item.x = getSint32(&data[curpos]);
+  curpos+=4;
+  item.y = getSint32(&data[curpos]);
+  curpos+=4;
+  item.z = getSint32(&data[curpos]);
+  curpos+=4;
+  Map::get().sendPickupSpawn(item);
 }
 
 int PacketHandler::disconnect(User *user)
