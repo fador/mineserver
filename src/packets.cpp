@@ -596,7 +596,12 @@ void PacketHandler::player_digging(uint8 *data, User *user)
       // Block physics for BLOCK_GRAVEL and BLOCK_SAND and BLOCK_SNOW
       while(Map::get().getBlock(x,y+1,z, &topblock, &topmeta) && (topblock == BLOCK_GRAVEL ||
                                                                   topblock == BLOCK_SAND ||
-                                                                  topblock == BLOCK_SNOW ))
+                                                                  topblock == BLOCK_SNOW ||
+                                                                  topblock == BLOCK_BROWN_MUSHROOM ||
+                                                                  topblock == BLOCK_RED_MUSHROOM ||
+                                                                  topblock == BLOCK_YELLOW_FLOWER ||
+                                                                  topblock == BLOCK_RED_ROSE ||
+                                                                  topblock == BLOCK_SAPLING ))
       {
         // Destroy original block
         Map::get().sendBlockChange(x,y+1,z,0, 0);
@@ -658,11 +663,12 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
                                       block_direction == BLOCK_LAVA ||
                                       block_direction == BLOCK_STATIONARY_LAVA ) )
   {
-    // If block is not BLOCK_WORKBENCH or BLOCK_FURNACE or BLOCK_BURNING_FURNACE or BLOCK_CHEST
+    // DO NOT place a block if block is ...
     if( block != BLOCK_WORKBENCH &&
         block != BLOCK_FURNACE &&
         block != BLOCK_BURNING_FURNACE &&
-        block != BLOCK_CHEST )
+        block != BLOCK_CHEST &&
+        block != BLOCK_JUKEBOX )
     {
       change = true;
     }
