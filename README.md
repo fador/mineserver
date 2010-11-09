@@ -5,12 +5,11 @@
 
 Custom Minecraft Alpha server software written in C++.
 
-### NOTICE
-Currently in development. (Alpha stage)
+### == NOTICE ==
+Currently in (early) development. (Alpha stage)
 Server still lacks some critical features and should be only used for testing.
 
-Tested to build on Windows (Visual Studio 2010 project included) and on Linux (Makefile included).
-
+Tested to build on Windows (Visual Studio 2010 project included) and on Linux (Makefile included). 
 We are trying to minimize memory and cpu usage compared to original Java server.
 
 ### Features
@@ -19,11 +18,12 @@ We are trying to minimize memory and cpu usage compared to original Java server.
  * Lightmap generation
  * Config file
  * Normal mining/item spawning/item pickups
+ * Basic physics for gravel and sand
   
 ### ToDo (Arranged by priority)
  * Map generation
  * Getting chests,furnaces,signs etc to work
- * Physics
+ * More Physics (water, lava)
  * Multithreading
  * Growing trees etc.
  * and more
