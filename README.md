@@ -53,6 +53,7 @@ Depends on (and tested with):
  * [zlib 1.2.5](http://www.zlib.org)
  * [libevent 1.4.14b](http://monkey.org/~provos/libevent/)
  * [lua 5.1.4](http://www.lua.org) (Not yet in use!)
+
  Installing on Debian and Ubuntu:
 
     sudo apt-get install libevent1 libevent-dev zlib1g zlib1g-dev
@@ -75,7 +76,7 @@ Compiling using windows (VS2010):
  * Build
  * Run mineserver.exe
  
- An example using commandline compiler available at http://www.microsoft.com/express/Windows/ :
+ An example using commandline compiler available at http://www.microsoft.com/express/Windows/ Please change the ZLIB_INC_DIR, LIBEVENT_INC_DIR, ZLIB_LIB_DIR and LIBEVENT_LIB_DIR to those you keep the includes/libs.
  
     call "%VS100COMNTOOLS%vsvars32.bat"
     cl /I"ZLIB_INC_DIR;LIBEVENT_INC_DIR" /W3 /WX- /O2 /D WIN32 /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /EHsc *.cpp zlibwapi.lib libevent.lib Ws2_32.lib /link /OUT:mineserver.exe /LIBPATH:"ZLIB_LIB_DIR;LIBEVENT_LIB_DIR"
