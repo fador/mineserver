@@ -354,7 +354,7 @@ bool User::saveData()
   nbtlist.items[1]=(void *)new double;
   *(double *)nbtlist.items[1]=pos.y;
   nbtlist.items[2]=(void *)new double;
-  *(double *)nbtlist.items[2]=pos.x;
+  *(double *)nbtlist.items[2]=pos.z;
   playerdata.lists.push_back(nbtlist);
 
   nbtlist.name="Rotation";

@@ -101,7 +101,11 @@ public:
   // Store if map has been modified
   std::map<uint32, bool> mapChanged;
 
-  std::vector<spawnedItem> items;
+  // Store item pointers for each chunk
+  std::map<uint32, std::vector<spawnedItem *>> mapItems;
+
+  //All spawned items on map
+  std::map<uint32,spawnedItem *> items;
 
   void posToId(int x, int z, uint32 *id);
   void idToPos(uint32 id, int *x, int *z);

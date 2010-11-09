@@ -392,8 +392,6 @@ bool Chat::handleMsg(User *user, std::string msg)
           item.x = static_cast<int>(tUser->pos.x*32);
           item.y = static_cast<int>(tUser->pos.y*32);
           item.z = static_cast<int>(tUser->pos.z*32);
-          
-          //std::cout << "Gave " << amount << std::endl;
 
           Map::get().sendPickupSpawn(item);
         }

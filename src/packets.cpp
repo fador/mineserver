@@ -64,7 +64,7 @@ void PacketHandler::initPackets()
 // Keep Alive (http://mc.kev009.com/wiki/Protocol#Keep_Alive_.280x00.29)
 void PacketHandler::keep_alive(uint8 *data, User *user)
 {
-
+  //No need to do anything
 }
 
 // Login request (http://mc.kev009.com/wiki/Protocol#Login_Request_.280x01.29)
@@ -248,21 +248,21 @@ int PacketHandler::login_request(User *user)
   motdfs.close();
 
   //Teleport player
-  user->teleport(Map::get().spawnPos.x,Map::get().spawnPos.y+2,Map::get().spawnPos.z);
+  user->teleport(user->pos.x,user->pos.y+2,user->pos.z);
 
   //Put nearby chunks to queue
   for(int x=-user->viewDistance;x<=user->viewDistance;x++)
   {
     for(int z=-user->viewDistance;z<=user->viewDistance;z++)
     {
-      user->addQueue(Map::get().spawnPos.x/16+x,Map::get().spawnPos.z/16+z);
+      user->addQueue(user->pos.x/16+x,user->pos.z/16+z);
     }
   }
   // Push chunks to user
   user->pushMap();
 
   //Spawn this user to others
-  user->spawnUser(Map::get().spawnPos.x*32,(Map::get().spawnPos.y+2)*32,Map::get().spawnPos.z*32);
+  user->spawnUser(user->pos.x*32,(user->pos.y+2)*32,user->pos.z*32);
   //Spawn other users for connected user
   user->spawnOthers();
         
@@ -582,8 +582,9 @@ void PacketHandler::player_digging(uint8 *data, User *user)
         item.x = x*32;
         item.y = y*32;
         item.z = z*32;
-        item.x+=(rand()%32);
-        item.z+=(rand()%32);
+        //Randomize spawn position a bit
+        item.x+=5+(rand()%22);
+        item.z+=5+(rand()%22);
         
         // If count is greater than 0
         if(item.count > 0)
