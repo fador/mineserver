@@ -138,7 +138,7 @@ std::string Conf::sValue(std::string name)
 int Conf::iValue(std::string name)
 {
   if(confSet.find(name) != confSet.end())
-  { 
+  {
     return atoi(confSet[name].c_str());
   }
   else
@@ -146,4 +146,41 @@ int Conf::iValue(std::string name)
     std::cout << "Warning! " << name << " not defined in configuration. Using default value: " << defaultConf[name] << std::endl;
     return atoi(defaultConf[name].c_str());
   }
+}
+
+std::vector<int> Conf::vValue(std::string name)
+{
+  std::vector<int> temp;
+  std::string tmpStr;
+  int del;
+  if(confSet.find(name) != confSet.end())
+  {
+    tmpStr = confSet[name];
+    
+    // Process "array"
+    while(tmpStr.length() > 0)
+    {
+      // Remove white spaces and = characters -_-
+      while(tmpStr[0] == ' ') tmpStr = tmpStr.substr(1);
+
+      // Split words
+      del = tmpStr.find(',');
+      if(del > -1)
+      {
+        temp.push_back(atoi(tmpStr.substr(0,del).c_str()));
+        tmpStr = tmpStr.substr(del+1);
+      } else {
+        temp.push_back(atoi(tmpStr.c_str()));
+        break;
+      }
+    }
+    
+    return temp;
+  }
+  else
+  {
+    std::cout << "Warning! " << name << " not defined in configuration." << std::endl;
+    return temp;
+  }
+
 }

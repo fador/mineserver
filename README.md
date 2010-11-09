@@ -34,6 +34,8 @@ We are trying to minimize memory and cpu usage compared to original Java server.
 *  /players : Lists online players
 *  /about : Server name & version
 *  /rules : Shows server rules
+*  /home : Teleports user to map spawn location
+*  /kit starter : Gives starterkit. Items defined in config.cfg with kit_starter using itemId's
 
 **Admin only**
 

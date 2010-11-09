@@ -206,6 +206,37 @@ bool Chat::handleMsg(User *user, std::string msg)
       }
       
     }
+    
+    else if(cmd[0] == "home")
+    {
+      this->sendMsg(user, COLOR_DARK_MAGENTA + "Teleporting you home!", USER);
+      user->teleport(Map::get().spawnPos.x, Map::get().spawnPos.y+2, Map::get().spawnPos.z);
+    }
+    
+    else if(cmd[0] == "kit")
+    {
+      cmd.pop_front();
+      if(!cmd.empty())
+      {
+        if(cmd[0] == "starter")
+        {
+          std::vector<int> kitItems = Conf::get().vValue("kit_starter");
+          while(!kitItems.empty())
+          {
+            spawnedItem item;
+            item.EID = generateEID();
+            item.item = kitItems[kitItems.size()-1];
+            item.count = 1;
+            item.x = static_cast<int>(user->pos.x*32+(rand()%30));
+            item.y = static_cast<int>(user->pos.y*32);
+            item.z = static_cast<int>(user->pos.z*32+(rand()%30));
+            Map::get().sendPickupSpawn(item);
+            
+            kitItems.pop_back();
+          }
+        }
+      }
+    }
 
     //
     // Admin commands

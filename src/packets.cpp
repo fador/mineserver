@@ -557,13 +557,13 @@ void PacketHandler::player_digging(uint8 *data, User *user)
       Map::get().setBlock(x,y,z,0,0);
 
       uint8 topblock; uint8 topmeta;        
-      if(Map::get().getBlock(x,y+1,z, &topblock, &topmeta) && topblock == 0x4e) //If snow on top, destroy it
+      if(Map::get().getBlock(x,y+1,z, &topblock, &topmeta) && topblock == BLOCK_SNOW) //If snow on top, destroy it
       {
         Map::get().sendBlockChange(x,y+1,z,0, 0);
         Map::get().setBlock(x,y+1,z,0,0);
       }
 
-      if(block!=0x4e && (int)block>0 && (int)block<255)
+      if(block!=BLOCK_SNOW && (int)block>0 && (int)block<255)
       {
         spawnedItem item;
         item.EID = generateEID();
@@ -589,6 +589,21 @@ void PacketHandler::player_digging(uint8 *data, User *user)
         // If count is greater than 0
         if(item.count > 0)
           Map::get().sendPickupSpawn(item);
+      }
+      
+      // Block physics for BLOCK_GRAVEL and BLOCK_SAND and BLOCK_SNOW
+      while(Map::get().getBlock(x,y+1,z, &topblock, &topmeta) && (topblock == BLOCK_GRAVEL ||
+                                                                  topblock == BLOCK_SAND ||
+                                                                  topblock == BLOCK_SNOW ))
+      {
+        // Destroy original block
+        Map::get().sendBlockChange(x,y+1,z,0, 0);
+        Map::get().setBlock(x,y+1,z,0,0);
+        
+        Map::get().setBlock(x,y,z, topblock, topmeta);
+        Map::get().sendBlockChange(x,y,z, topblock, topmeta);
+        
+        y++;
       }
     }
   }
@@ -704,7 +719,8 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
   
   // Check if player is standing there
   double intX, intZ, fracX, fracZ;
-  if( y == user->pos.y || y-1 == user->pos.y ) // Height
+  // Check Y coordinate
+  if( y == user->pos.y || y-1 == user->pos.y )
   {
     fracX = std::abs(std::modf(user->pos.x, &intX));
     fracZ = std::abs(std::modf(user->pos.z, &intZ));
@@ -712,7 +728,6 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
     // Mystics
     intX--;
     intZ--;
-    
     
     // Optimized version of the code below
     if( (z==intZ || (z==intZ+1 && fracZ<0.30) || (z==intZ-1 && fracZ>0.70)) &&
