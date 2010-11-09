@@ -703,7 +703,6 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
   }
   
   // Check if player is standing there
-  // Unoptimized version :D
   double intX, intZ, fracX, fracZ;
   if( y == user->pos.y || y-1 == user->pos.y ) // Height
   {
@@ -714,7 +713,15 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
     intX--;
     intZ--;
     
-    if(x==intX && z==intZ)
+    
+    // Optimized version of the code below
+    if( (z==intZ || (z==intZ+1 && fracZ<0.30) || (z==intZ-1 && fracZ>0.70)) &&
+        (x==intX || (x==intX+1 && fracZ<0.30) || (x==intX-1 && fracX>0.70)) )
+    {
+      change = false;
+    }
+    
+    /*if(x==intX && z==intZ)
       change = false;
       
     if(x==intX && z==intZ+1 && fracZ < 0.30)
@@ -738,8 +745,8 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
     if(z==intZ+1 && x==intX+1 && fracZ < 0.30 && fracX < 0.30)
       change = false;
 
-    if(z==intZ+1 && x==intX-1 && fracZ < 0.30 && fracX > 0.75)
-      change = false;
+    if(z==intZ+1 && x==intX-1 && fracZ < 0.30 && fracX > 0.70)
+      change = false;*/
   }
 
   if(change)

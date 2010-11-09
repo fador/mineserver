@@ -14,8 +14,8 @@ Tested to build on Windows (Visual Studio 2010 project included) and on Linux (M
 We are trying to minimize memory and cpu usage compared to original Java server.
 
 ### Features
- * some chat commands, more to come..
- * own NBT parsing/saving
+ * Various chat commands, more to come..
+ * NBT parsing/saving
  * Lightmap generation
  * Config file
   
@@ -23,6 +23,7 @@ We are trying to minimize memory and cpu usage compared to original Java server.
  * Item pickup
  * Map generation
  * Physics
+ * Multithreading
  * Growing trees etc.
  * and more
  
