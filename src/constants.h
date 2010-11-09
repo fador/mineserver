@@ -108,7 +108,7 @@ extern std::map<std::string, std::string> defaultConf;
 //
 struct Drop {
   uint16 item_id;
-  uint32 probability;
+  sint32 probability;
   uint8 count;
   Drop()
   {
