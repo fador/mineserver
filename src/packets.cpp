@@ -567,8 +567,9 @@ void PacketHandler::player_digging(uint8 *data, User *user)
         spawnedItem item;
         item.EID = generateEID();
 
-        //Spawn drop according to BLOCKDROPS
-        if(BLOCKDROPS.count(block))
+        // Spawn drop according to BLOCKDROPS
+        // Check propability 
+        if(BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand()%10000)
         {
           item.item=BLOCKDROPS[block].item_id;
           item.count=BLOCKDROPS[block].count;
@@ -583,7 +584,10 @@ void PacketHandler::player_digging(uint8 *data, User *user)
         item.z = z*32;
         item.x+=(rand()%32);
         item.z+=(rand()%32);
-        Map::get().sendPickupSpawn(item);
+        
+        // If count is greater than 0
+        if(item.count > 0)
+          Map::get().sendPickupSpawn(item);
       }
     }
   }
