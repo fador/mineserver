@@ -131,7 +131,7 @@ int PacketHandler::login_request(User *user)
   std::cout << "Player " << user->UID << " login v." << version <<" : " << player <<":" << passwd << std::endl;
 
   // If version is not 2 or 3
-  if(!(version == 2 || version == 3))
+  if(version != 4 && version != 3 && version != 2)
   {
     user->kick(Conf::get().sValue("wrong_protocol_message"));
     return curpos;
@@ -546,6 +546,7 @@ void PacketHandler::player_digging(uint8 *data, User *user)
 
   int z = getSint32(&data[curpos]);
   curpos+=4;
+
 
   //If block broken
   if(status == 3)
