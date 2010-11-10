@@ -573,7 +573,7 @@ void PacketHandler::player_digging(uint8 *data, User *user)
           spawnedItem item;
           item.EID = generateEID();
           item.health=0;
-          item.item=(int)block;
+          item.item=(int)topblock;
           item.count=1;
 
           item.x = x*32;
