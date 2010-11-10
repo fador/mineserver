@@ -557,10 +557,34 @@ void PacketHandler::player_digging(uint8 *data, User *user)
       Map::get().setBlock(x,y,z,0,0);
 
       uint8 topblock; uint8 topmeta;        
-      if(Map::get().getBlock(x,y+1,z, &topblock, &topmeta) && topblock == BLOCK_SNOW) //If snow on top, destroy it
+      //Destroy items on top
+      if(Map::get().getBlock(x,y+1,z, &topblock, &topmeta) && (topblock == BLOCK_SNOW ||
+                                                              topblock == BLOCK_BROWN_MUSHROOM ||
+                                                              topblock == BLOCK_RED_MUSHROOM ||
+                                                              topblock == BLOCK_YELLOW_FLOWER ||
+                                                              topblock == BLOCK_RED_ROSE ||
+                                                              topblock == BLOCK_SAPLING ))
       {
         Map::get().sendBlockChange(x,y+1,z,0, 0);
         Map::get().setBlock(x,y+1,z,0,0);
+        //Others than snow will spawn
+        if(topblock!=BLOCK_SNOW)
+        {
+          spawnedItem item;
+          item.EID = generateEID();
+          item.health=0;
+          item.item=(int)block;
+          item.count=1;
+
+          item.x = x*32;
+          item.y = (y+1)*32;
+          item.z = z*32;
+          //Randomize spawn position a bit
+          item.x+=5+(rand()%22);
+          item.z+=5+(rand()%22);
+        
+          Map::get().sendPickupSpawn(item);
+        }
       }
 
       if(block!=BLOCK_SNOW && (int)block>0 && (int)block<255)
@@ -692,7 +716,7 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
     //Toggle door state
     if(metadata&0x4)
     {
-      metadata&=~0x4;
+      metadata&=(0x8|0x3);
     }
     else
     {
@@ -701,7 +725,7 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
 
     uint8 metadata2,block2;
 
-    int modifier=(metadata&0x8)?1:-1;
+    int modifier=(metadata&0x8)?-1:1;
                 
     x = orig_x;
     y = orig_y;
@@ -710,14 +734,17 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
     Map::get().getBlock(x,y+modifier,z, &block2, &metadata2);
     if(block2 == block)
     {
-      if(metadata2&0x4)
+      metadata2=metadata;
+      if(metadata&0x8)
       {
-        metadata2&=~0x4;
+        metadata2&=(0x7);
       }
       else
       {
-        metadata2|=0x4;
+        metadata2|=0x8;
       }
+      
+      
 
       Map::get().setBlock(x,y+modifier,z, block2, metadata2);
       Map::get().sendBlockChange(x,y+modifier,z,blockID, metadata2);
