@@ -1,5 +1,5 @@
 # Mineserver
-*by Fador & Psoden*
+*by Fador & Nredor*
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
