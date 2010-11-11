@@ -131,7 +131,7 @@ int PacketHandler::login_request(User *user)
   std::cout << "Player " << user->UID << " login v." << version <<" : " << player <<":" << passwd << std::endl;
 
   // If version is not 2 or 3
-  if(!(version == 3 || version == 4))
+  if(version != 4 && version != 3 && version != 2)
   {
     user->kick(Conf::get().sValue("wrong_protocol_message"));
     return curpos;
@@ -547,6 +547,7 @@ void PacketHandler::player_digging(uint8 *data, User *user)
   int z = getSint32(&data[curpos]);
   curpos+=4;
 
+
   //If block broken
   if(status == 3)
   {
@@ -616,6 +617,12 @@ void PacketHandler::player_digging(uint8 *data, User *user)
         if(item.count > 0)
           Map::get().sendPickupSpawn(item);
       }
+      
+      // Init water physics (Under dev/disabled for now)
+      /*if(topblock == BLOCK_WATER || topblock == BLOCK_STATIONARY_WATER)
+      {
+        Physics::get().addSimulation(x, y+1, z);
+      }*/
       
       // Block physics for BLOCK_GRAVEL and BLOCK_SAND and BLOCK_SNOW
       while(Map::get().getBlock(x,y+1,z, &topblock, &topmeta) && (topblock == BLOCK_GRAVEL ||
