@@ -37,7 +37,7 @@ struct SimBlock {
   int y;
   int z;
   uint8 meta;
-  
+  SimBlock(){}
   SimBlock(uint8 id, int x, int y, int z, uint8 meta)
   {
     this->id = id;

@@ -50,6 +50,7 @@
     <ClCompile Include="..\src\mineserver.cpp" />
     <ClCompile Include="..\src\nbt.cpp" />
     <ClCompile Include="..\src\packets.cpp" />
+    <ClCompile Include="..\src\physics.cpp" />
     <ClCompile Include="..\src\sockets.cpp" />
     <ClCompile Include="..\src\tools.cpp" />
     <ClCompile Include="..\src\user.cpp" />
@@ -86,6 +87,7 @@
     <ClInclude Include="..\src\mapgen.h" />
     <ClInclude Include="..\src\nbt.h" />
     <ClInclude Include="..\src\packets.h" />
+    <ClInclude Include="..\src\physics.h" />
     <ClInclude Include="..\src\sockets.h" />
     <ClInclude Include="..\src\StatusHandler.h" />
     <ClInclude Include="..\src\tools.h" />

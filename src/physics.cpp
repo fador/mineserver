@@ -24,6 +24,24 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#ifdef WIN32
+    #define _CRTDBG_MAP_ALLOC
+    #include <stdlib.h>
+    #include <crtdbg.h>
+    #include <conio.h>
+    #include <winsock2.h>
+typedef  int socklen_t;
+#else
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#endif
 
 #include <cstdlib>
 #include <cstdio>
@@ -33,11 +51,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <ctime>
 
 #include "logger.h"
 #include "constants.h"
 #include "config.h"
 #include "user.h"
+#include "map.h"
 
 #include "physics.h"
 
@@ -62,7 +82,7 @@ bool Physics::update()
     
     // Blocks
     uint8 block, meta;
-    for(std::vector<SimBlock>::iterator it = simIt->blocks.begin(), it!=simIt->blocks.end(), it++)
+    for(std::vector<SimBlock>::iterator it = simIt->blocks.begin(); it!=simIt->blocks.end(); it++)
     {
       // If below is free to fall
       if(!Map::get().getBlock(it->x, it->y-1, it->z, &block, &meta))
@@ -70,8 +90,8 @@ bool Physics::update()
         // Set new fallblock there
         block = BLOCK_WATER;
         meta = M_FALLING;
-        Map::get().setBlock(x,y-1,z, block, meta);
-        Map::get().sendBlockChange(x,y-1,z, block, meta);
+        //Map::get().setBlock(x,y-1,z, block, meta);
+        //Map::get().sendBlockChange(x,y-1,z, block, meta);
         
         // Change simulation-block to current block
         it->y--;
@@ -95,6 +115,6 @@ bool Physics::addSimulation(int x, int y, int z)
   Map::get().getBlock(x,y,z, &block, &meta);  
   
   // Simulating only water for now..
-  simList.push_back(Sim(TYPE_WATER, Simblock temp(block, x, y, z, meta)));
+  simList.push_back(Sim(TYPE_WATER, SimBlock(block, x, y, z, meta)));
 }
 

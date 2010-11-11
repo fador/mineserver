@@ -73,7 +73,13 @@ enum
   PACKET_MULTI_BLOCK_CHANGE         = 0x34,
   PACKET_BLOCK_CHANGE               = 0x35,
   PACKET_COMPLEX_ENTITIES           = 0x3b,
-  PACKET_KICK                       = 0xff
+  PACKET_KICK                       = 0xff,
+
+
+  //v4 Packets
+  PACKET_USE_ENTITY                 = 0x07,
+  PACKET_ENTITY_VELOCITY            = 0x1c,
+  PACKET_ATTACH_ENTITY              = 0x27,
 };
 
 
@@ -173,6 +179,8 @@ class PacketHandler
     void arm_animation(uint8 *data, User *user);
     void pickup_spawn(uint8 *data, User *user);
     int  disconnect(User *user);
+
+    void use_entity(uint8 *data, User *user);
 
 
 };

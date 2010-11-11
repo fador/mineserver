@@ -76,6 +76,7 @@ void PacketHandler::initPackets()
   packets[PACKET_HANDSHAKE]                 = Packets(PACKET_VARIABLE_LEN,&PacketHandler::handshake);
   packets[PACKET_CHAT_MESSAGE]              = Packets(PACKET_VARIABLE_LEN,&PacketHandler::chat_message);
   packets[PACKET_PLAYER_INVENTORY]          = Packets(PACKET_VARIABLE_LEN,&PacketHandler::player_inventory);
+  packets[PACKET_USE_ENTITY]                = Packets( 8,&PacketHandler::use_entity);
   packets[PACKET_PLAYER]                    = Packets( 1,&PacketHandler::player);
   packets[PACKET_PLAYER_POSITION]           = Packets(33,&PacketHandler::player_position);
   packets[PACKET_PLAYER_LOOK]               = Packets( 9,&PacketHandler::player_look);
@@ -921,4 +922,11 @@ int PacketHandler::disconnect(User *user)
   remUser(user->fd);
 
   return curpos;
+}
+
+
+void PacketHandler::use_entity(uint8 *data, User *user)
+{
+
+
 }

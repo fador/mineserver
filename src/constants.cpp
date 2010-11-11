@@ -53,6 +53,7 @@ void initConstants()
   BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_LEAVES, Drop(BLOCK_SAPLING, 1200, 1)));
   BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_DIAMOND_ORE, Drop(ITEM_DIAMOND, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_REDSTONE_ORE, Drop(ITEM_REDSTONE, 10000, 4)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_CLAY, Drop(ITEM_CLAY_BALLS, 10000, 4)));
   
   // Blocks that drop nothing
   BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_TNT, Drop(BLOCK_TNT, 10000, 0)));
