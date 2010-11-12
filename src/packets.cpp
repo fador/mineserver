@@ -808,6 +808,11 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
   {
     Map::get().setBlock(x,y,z, blockID, metadata);
     Map::get().sendBlockChange(x,y,z,blockID, metadata);
+    if(blockID == BLOCK_WATER || blockID == BLOCK_STATIONARY_WATER ||
+       blockID == BLOCK_LAVA || blockID == BLOCK_STATIONARY_LAVA)
+    {
+      Physics::get().addSimulation(x,y,z);
+    }
   }
 
   // Check liquid physics
@@ -882,6 +887,8 @@ int PacketHandler::disconnect(User *user)
   //Read message
   std::string msg;
   for(i = 0;i<(unsigned int)len;i++) msg += user->buffer[curpos+i];
+
+  std::cout << "Disconnect: " << msg << std::endl;
 
   curpos+=len;
   user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);

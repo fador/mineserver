@@ -93,7 +93,7 @@ bool Physics::update()
 
         // If below is free to fall
         if(Map::get().getBlock(x, y-1, z, &block, &meta)
-           && block == BLOCK_AIR)
+           && (block == BLOCK_AIR || block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER) )
         {
           // Set new fallblock there
           block = BLOCK_WATER;
@@ -122,16 +122,20 @@ bool Physics::update()
             }
 
             if(Map::get().getBlock(x_local, y_local, z_local, &block, &meta)
-               && block == BLOCK_AIR)
+               && (block == BLOCK_AIR || block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER) )
             {
               //Decrease water level each turn
-              meta=(simList[simIt].blocks[it].meta&0x07)+1;
-              Map::get().setBlock(x_local, y_local, z_local, BLOCK_WATER, meta);
-              Map::get().sendBlockChange(x_local, y_local, z_local, BLOCK_WATER, meta);
-              if(meta < M7)
+              if(block == BLOCK_AIR || meta>(simList[simIt].blocks[it].meta&0x07)+1)
               {
-                addSimulation(x_local, y_local, z_local);
+                meta=(simList[simIt].blocks[it].meta&0x07)+1;
+                Map::get().setBlock(x_local, y_local, z_local, BLOCK_WATER, meta);
+                Map::get().sendBlockChange(x_local, y_local, z_local, BLOCK_WATER, meta);
+                if(meta < M7)
+                {
+                  addSimulation(x_local, y_local, z_local);
+                }
               }
+
             }            
           } // End for i=0:3
           //Remove this block from simulation
@@ -153,7 +157,10 @@ bool Physics::addSimulation(int x, int y, int z)
   // Simulating water
   if(block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
   {    
-    simList.push_back(Sim(TYPE_WATER, SimBlock(block, x, y, z, meta)));
+    if((meta&M7)!=M7)
+    {
+      simList.push_back(Sim(TYPE_WATER, SimBlock(block, x, y, z, meta)));
+    }
     return true;
   }
   // Simulating lava
