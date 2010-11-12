@@ -808,6 +808,8 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
   {
     Map::get().setBlock(x,y,z, blockID, metadata);
     Map::get().sendBlockChange(x,y,z,blockID, metadata);
+
+
     if(blockID == BLOCK_WATER || blockID == BLOCK_STATIONARY_WATER ||
        blockID == BLOCK_LAVA || blockID == BLOCK_STATIONARY_LAVA)
     {

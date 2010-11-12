@@ -70,6 +70,8 @@ Physics &Physics::get()
 // Physics loop
 bool Physics::update()
 {
+  if(!enabled)
+    return true;
   // Check if needs to be updated
   if(simList.empty())
     return true;
@@ -106,7 +108,8 @@ bool Physics::update()
           simList[simIt].blocks[it].meta = M_FALLING;        
         }
         //Else if spreading to sides
-        else
+        //If water level is at minimum, dont simulate anymore
+        else if((meta&M7)!=M7)
         {
           for(int i=0;i<4;i++)
           {
@@ -138,10 +141,21 @@ bool Physics::update()
 
             }            
           } // End for i=0:3
+
+          //Remove this block from simulation
+          simList.erase(simList.begin()+simIt);
+        } 
+        //Water level at minimum
+        else
+        {
+          //Todo: Check if source has drained
+
           //Remove this block from simulation
           simList.erase(simList.begin()+simIt);
         }
+        
       }
+      
     }
   }
     
@@ -151,16 +165,15 @@ bool Physics::update()
 // Add world simulation
 bool Physics::addSimulation(int x, int y, int z)
 {
+  if(!enabled)
+    return true;
   uint8 block; uint8 meta;        
   Map::get().getBlock(x,y,z, &block, &meta);  
   
   // Simulating water
   if(block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
-  {    
-    if((meta&M7)!=M7)
-    {
-      simList.push_back(Sim(TYPE_WATER, SimBlock(block, x, y, z, meta)));
-    }
+  {
+    simList.push_back(Sim(TYPE_WATER, SimBlock(block, x, y, z, meta)));
     return true;
   }
   // Simulating lava
@@ -177,6 +190,8 @@ bool Physics::addSimulation(int x, int y, int z)
 
 bool Physics::checkSurrounding(int x, int y, int z)
 {
+  if(!enabled)
+    return true;
   uint8 block; uint8 meta;
   
   for(int i=0;i<5;i++)
