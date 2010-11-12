@@ -25,8 +25,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef _MAP_H
-#define _MAP_H
+#ifndef _MAP_H_
+#define _MAP_H_
 
 #include <map>
 #include <ctime>
