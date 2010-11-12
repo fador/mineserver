@@ -68,6 +68,7 @@ class Physics
     static Physics &get();
     bool update();
     bool addSimulation(int x, int y, int z);
+    bool checkSurrounding(int x, int y, int z);
 };
 
 #endif

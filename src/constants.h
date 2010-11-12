@@ -35,6 +35,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Mineserver constants
 //
 
+//Player digging status
+enum
+{
+  BLOCK_STATUS_STARTED_DIGGING,
+  BLOCK_STATUS_DIGGING,
+  BLOCK_STATUS_STOPPED_DIGGING,
+  BLOCK_STATUS_BLOCK_BROKEN
+};
+
+
 // Chat colors
 #define COLOR_BLACK std::string("§0")
 #define COLOR_DARK_BLUE std::string("§1")

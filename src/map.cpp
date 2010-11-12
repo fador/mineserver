@@ -365,6 +365,7 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta){
 
   if ((y < 0) || (y > 127))
   {
+    printf("(%i, %i, %i) ", x, y, z);
     LOG("Invalid y value (getBlock)");
     return false;
   }

@@ -63,6 +63,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "config.h"
 #include "nbt.h"
 #include "packets.h"
+#include "physics.h"
 
 
 void PacketHandler::initPackets()
@@ -577,7 +578,7 @@ void PacketHandler::player_digging(uint8 *data, User *user)
 
 
   //If block broken
-  if(status == 3)
+  if(status == BLOCK_STATUS_BLOCK_BROKEN)
   {
     uint8 block; uint8 meta;
     if(Map::get().getBlock(x,y,z, &block, &meta))
@@ -587,12 +588,12 @@ void PacketHandler::player_digging(uint8 *data, User *user)
 
       uint8 topblock; uint8 topmeta;        
       //Destroy items on top
-      if(Map::get().getBlock(x,y+1,z, &topblock, &topmeta) && (topblock == BLOCK_SNOW ||
-                                                              topblock == BLOCK_BROWN_MUSHROOM ||
-                                                              topblock == BLOCK_RED_MUSHROOM ||
-                                                              topblock == BLOCK_YELLOW_FLOWER ||
-                                                              topblock == BLOCK_RED_ROSE ||
-                                                              topblock == BLOCK_SAPLING ))
+      if(Map::get().getBlock(x,y+1,z, &topblock, &topmeta) && (topblock == BLOCK_SNOW           ||
+                                                               topblock == BLOCK_BROWN_MUSHROOM ||
+                                                               topblock == BLOCK_RED_MUSHROOM   ||
+                                                               topblock == BLOCK_YELLOW_FLOWER  ||
+                                                               topblock == BLOCK_RED_ROSE       ||
+                                                               topblock == BLOCK_SAPLING ))
       {
         Map::get().sendBlockChange(x,y+1,z,0, 0);
         Map::get().setBlock(x,y+1,z,0,0);
@@ -646,11 +647,9 @@ void PacketHandler::player_digging(uint8 *data, User *user)
           Map::get().sendPickupSpawn(item);
       }
       
-      // Init water physics (Under dev/disabled for now)
-      /*if(topblock == BLOCK_WATER || topblock == BLOCK_STATIONARY_WATER)
-      {
-        Physics::get().addSimulation(x, y+1, z);
-      }*/
+      // Check liquid physics
+      Physics::get().checkSurrounding(x, y, z);
+     
       
       // Block physics for BLOCK_GRAVEL and BLOCK_SAND and BLOCK_SNOW
       while(Map::get().getBlock(x,y+1,z, &topblock, &topmeta) && (topblock == BLOCK_GRAVEL ||
@@ -687,14 +686,14 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
   int x = orig_x = getSint32(&data[curpos]);
   curpos+=4;
 
-  int y = orig_y = user->buffer[curpos];
+  int y = orig_y = data[curpos];
   curpos++;
 
   int z = orig_z = getSint32(&data[curpos]);
   curpos+=4;
 
   int direction = data[curpos];
-
+  curpos++;
 
   uint8 block;
   uint8 metadata;
@@ -778,8 +777,6 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
       {
         metadata2|=0x8;
       }
-      
-      
 
       Map::get().setBlock(x,y+modifier,z, block2, metadata2);
       Map::get().sendBlockChange(x,y+modifier,z,blockID, metadata2);
@@ -804,34 +801,7 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
         (x==intX || (x==intX+1 && fracZ<0.30) || (x==intX-1 && fracX>0.70)) )
     {
       change = false;
-    }
-    
-    /*if(x==intX && z==intZ)
-      change = false;
-      
-    if(x==intX && z==intZ+1 && fracZ < 0.30)
-      change = false;
-      
-    if(x==intX && z==intZ-1 && fracZ > 0.70)
-      change = false;
-      
-    if(z==intZ && x==intX+1 && fracX < 0.30)
-      change = false;
-    
-    if(z==intZ && x==intX-1 && fracX > 0.70)
-      change = false;
-      
-    if(z==intZ-1 && x==intX-1 && fracZ > 0.70 && fracX > 0.70)
-      change = false;
-      
-    if(z==intZ-1 && x==intX+1 && fracZ > 0.70 && fracX < 0.30)
-      change = false;
-      
-    if(z==intZ+1 && x==intX+1 && fracZ < 0.30 && fracX < 0.30)
-      change = false;
-
-    if(z==intZ+1 && x==intX-1 && fracZ < 0.30 && fracX > 0.70)
-      change = false;*/
+    }    
   }
 
   if(change)
@@ -839,6 +809,9 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
     Map::get().setBlock(x,y,z, blockID, metadata);
     Map::get().sendBlockChange(x,y,z,blockID, metadata);
   }
+
+  // Check liquid physics
+  Physics::get().checkSurrounding(x, y, z);
 }
 
 void PacketHandler::holding_change(uint8 *data, User *user)

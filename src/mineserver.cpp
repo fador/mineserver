@@ -63,6 +63,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "config.h"
 #include "nbt.h"
 #include "packets.h"
+#include "physics.h"
 
 
 #ifdef WIN32
@@ -176,8 +177,8 @@ int main(void)
   std::cout << "Listening at port " << port << std::endl;
 
   timeval loopTime;
-  loopTime.tv_sec=1;
-  loopTime.tv_usec=0;
+  loopTime.tv_sec=0;
+  loopTime.tv_usec=200000; //200ms
 
   event_base_loopexit(eventbase,&loopTime);
   while (event_base_loop(eventbase, 0)==0)
@@ -243,6 +244,9 @@ int main(void)
     if(_kbhit())
         quit = 1;
 #endif
+
+    //Physics simulation every 200ms
+    Physics::get().update();
 
     event_base_loopexit(eventbase,&loopTime);
   }
