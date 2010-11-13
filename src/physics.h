@@ -62,9 +62,13 @@ struct Sim {
 class Physics
 {
   private:
-    Physics() {};
+    Physics()
+    {
+      enabled=true;
+    };
     std::vector<Sim> simList;
   public:
+    bool enabled;
     static Physics &get();
     bool update();
     bool addSimulation(int x, int y, int z);

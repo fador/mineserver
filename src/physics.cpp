@@ -70,13 +70,19 @@ Physics &Physics::get()
 // Physics loop
 bool Physics::update()
 {
+  if(!enabled)
+    return true;
   // Check if needs to be updated
   if(simList.empty())
     return true;
-    
+  clock_t starttime=clock();
+
+  std::vector<sint32> toRemove;
+  std::vector<coord> toAdd;
+
   std::cout << "Simulating " << simList.size() << " items!" << std::endl;
   // Iterate each simulation
-  for(sint32 simIt = (sint32)(simList.size()-1);simIt>=0;simIt--)
+  for(sint32 simIt =0; simIt<(sint32)(simList.size());simIt++)
   {
     // Blocks
     uint8 block, meta;
@@ -90,70 +96,185 @@ bool Physics::update()
         int x=simList[simIt].blocks[it].x;
         int y=simList[simIt].blocks[it].y;
         int z=simList[simIt].blocks[it].z;
+        bool havesource=false;
 
-        // If below is free to fall
-        if(Map::get().getBlock(x, y-1, z, &block, &meta)
-           && block == BLOCK_AIR)
+        //Search for water source if this is not the source
+        if(simList[simIt].blocks[it].id != BLOCK_STATIONARY_WATER)
         {
-          // Set new fallblock there
-          block = BLOCK_WATER;
-          meta = M_FALLING;
-          Map::get().setBlock(x,y-1,z, block, meta);
-          Map::get().sendBlockChange(x,y-1,z, block, meta);        
-          // Change simulation-block to current block
-          simList[simIt].blocks[it].y--;
-          simList[simIt].blocks[it].id = BLOCK_WATER;
-          simList[simIt].blocks[it].meta = M_FALLING;        
-        }
-        //Else if spreading to sides
-        else
-        {
-          for(int i=0;i<4;i++)
+          for(int i=0;i<6;i++)
           {
             int x_local=x;
             int y_local=y;
             int z_local=z;
             switch(i)
             {
-              case 0: x_local++; break;
-              case 1: x_local--; break;
-              case 2: z_local++; break;
-              case 3: z_local--; break;
+              case 0: y_local++; break;
+              case 1: x_local++; break;
+              case 2: x_local--; break;
+              case 3: z_local++; break;
+              case 4: z_local--; break;
+              case 5: y_local--; break;
             }
 
-            if(Map::get().getBlock(x_local, y_local, z_local, &block, &meta)
-               && block == BLOCK_AIR)
+            //Search neighboring water blocks for source current
+            if(Map::get().getBlock(x_local,y_local,z_local, &block, &meta) &&
+                (block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER) )
             {
-              //Decrease water level each turn
-              meta=(simList[simIt].blocks[it].meta&0x07)+1;
-              Map::get().setBlock(x_local, y_local, z_local, BLOCK_WATER, meta);
-              Map::get().sendBlockChange(x_local, y_local, z_local, BLOCK_WATER, meta);
-              if(meta < M7)
+              //is this the source block
+              if(i!=5 && (block == BLOCK_STATIONARY_WATER || (meta&0x07)<(simList[simIt].blocks[it].meta&0x07) || i==0 ) )
               {
-                addSimulation(x_local, y_local, z_local);
+                havesource=true;
               }
-            }            
-          } // End for i=0:3
-          //Remove this block from simulation
-          simList.erase(simList.begin()+simIt);
+              //Else we have to search for source to this block also
+              else if(i==5 || (meta&0x07)>(simList[simIt].blocks[it].meta&0x07))
+              {
+                coord newblock={x_local, y_local, z_local};
+                toAdd.push_back(newblock);
+              }
+            }
+          }
         }
+        //Stationary water block is the source
+        else
+        {
+          havesource=true;
+        }
+
+        //If no source, dry block away
+        if(!havesource)
+        {
+          //This block will change so add surrounding blocks to simulation
+          for(uint32 i=0;i<toAdd.size();i++)
+          {
+            addSimulation(toAdd[i].x, toAdd[i].y, toAdd[i].z);
+          }
+          //If not dried out yet
+          if(!(simList[simIt].blocks[it].meta&0x8) && (simList[simIt].blocks[it].meta&0x07)<M7)
+          {
+            // Set new water level
+            block = BLOCK_WATER;
+            meta = simList[simIt].blocks[it].meta+1;
+            Map::get().setBlock(x,y,z, block, meta);
+            Map::get().sendBlockChange(x,y,z, block, meta);        
+            // Update simulation meta information
+            simList[simIt].blocks[it].meta = meta;   
+          }
+          //Else this block has dried out
+          else
+          {
+            //Clear and remove simulation
+            Map::get().setBlock(x,y,z, BLOCK_AIR, 0);
+            Map::get().sendBlockChange(x,y,z, BLOCK_AIR, 0);
+            toRemove.push_back(simIt);
+            
+            //If below this block has another waterblock, simulate it also
+            /*
+            if(Map::get().getBlock(x, y-1, z, &block, &meta) && (block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER))
+            {
+              addSimulation(x, y-1, z);
+            }*/
+           
+          }
+        }
+        else
+        {
+          toAdd.clear();
+          // If below is free to fall
+          if(Map::get().getBlock(x, y-1, z, &block, &meta) && (block == BLOCK_AIR || block == BLOCK_SNOW || block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER))
+          {
+            // Set new fallblock there
+            block = BLOCK_WATER;
+            meta = M_FALLING;
+            Map::get().setBlock(x,y-1,z, block, meta);
+            Map::get().sendBlockChange(x,y-1,z, block, meta);        
+            // Change simulation-block to current block
+            simList[simIt].blocks[it].y--;
+            simList[simIt].blocks[it].id = BLOCK_WATER;
+            simList[simIt].blocks[it].meta = M_FALLING;        
+          }
+          //Else if spreading to sides
+          //If water level is at minimum, dont simulate anymore
+          else if((simList[simIt].blocks[it].meta&M7)!=M7)
+          {
+            for(int i=0;i<4;i++)
+            {
+              int x_local=x;
+              int y_local=y;
+              int z_local=z;
+              switch(i)
+              {
+                case 0: x_local++; break;
+                case 1: x_local--; break;
+                case 2: z_local++; break;
+                case 3: z_local--; break;
+              }
+
+              if(Map::get().getBlock(x_local, y_local, z_local, &block, &meta)
+                 && (block == BLOCK_AIR || block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER || block == BLOCK_SNOW) )
+              {
+                //Decrease water level each turn
+                if(block == BLOCK_AIR || meta>(simList[simIt].blocks[it].meta&0x07)+1)
+                {
+                  meta=(simList[simIt].blocks[it].meta&0x07)+1;
+                  Map::get().setBlock(x_local, y_local, z_local, BLOCK_WATER, meta);
+                  Map::get().sendBlockChange(x_local, y_local, z_local, BLOCK_WATER, meta);
+                  if(meta < M7)
+                  {
+                    addSimulation(x_local, y_local, z_local);
+                  }
+                }
+
+              }            
+            } // End for i=0:3
+
+            //Remove this block from simulation
+            toRemove.push_back(simIt);
+          }
+          //Water level at minimum
+          else
+          {
+            //Remove this block from simulation
+            toRemove.push_back(simIt);
+          }
+        }
+        
       }
+      
     }
   }
-    
+  while (!toRemove.empty())
+  {
+    simList.erase(simList.begin()+toRemove.back());
+    toRemove.pop_back();
+  }
+  
+  clock_t endtime=clock()-starttime;
+  std::cout << "Exit simulation, took " << endtime << " ms, " << simList.size() << " items left" << std::endl;
   return true;
 }
 
 // Add world simulation
 bool Physics::addSimulation(int x, int y, int z)
 {
+  if(!enabled)
+    return true;
   uint8 block; uint8 meta;        
   Map::get().getBlock(x,y,z, &block, &meta);  
   
   // Simulating water
   if(block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
-  {    
-    simList.push_back(Sim(TYPE_WATER, SimBlock(block, x, y, z, meta)));
+  {
+    bool already=false;
+    for(uint32 i=0;i<simList.size();i++)
+    {
+      if(simList[i].blocks[0].x == x && simList[i].blocks[0].y == y && simList[i].blocks[0].z == z)
+      {
+        already=true;
+        break;
+      }
+    }
+    if(!already)
+      simList.push_back(Sim(TYPE_WATER, SimBlock(block, x, y, z, meta)));
     return true;
   }
   // Simulating lava
@@ -170,9 +291,11 @@ bool Physics::addSimulation(int x, int y, int z)
 
 bool Physics::checkSurrounding(int x, int y, int z)
 {
+  if(!enabled)
+    return true;
   uint8 block; uint8 meta;
   
-  for(int i=0;i<5;i++)
+  for(int i=0;i<6;i++)
   {
     int x_local=x;
     int y_local=y;
@@ -184,6 +307,7 @@ bool Physics::checkSurrounding(int x, int y, int z)
       case 2: x_local--; break;
       case 3: z_local++; break;
       case 4: z_local--; break;
+      case 5: y_local--; break;
     }
 
     //Add liquid blocks to simulation if they are affected by breaking a block

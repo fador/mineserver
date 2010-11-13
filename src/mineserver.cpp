@@ -101,6 +101,9 @@ int main(void)
   // Load item aliases
   Conf::get().load(ITEMALIASFILE);
 
+  //Set physics enable state according to config
+  Physics::get().enabled=(Conf::get().iValue("liquid_physics")?true:false);
+
   //Initialize map
   Map::get().initMap();
 

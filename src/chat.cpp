@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "user.h"
 #include "chat.h"
 #include "config.h"
+#include "physics.h"
 
 
 Chat &Chat::get()
@@ -388,6 +389,9 @@ bool Chat::handleMsg(User *user, std::string msg)
 
       // Load config
       Conf::get().load(CONFIGFILE);
+
+      //Set physics enable state according to config
+      Physics::get().enabled=(Conf::get().iValue("liquid_physics")?true:false);
 
       this->sendMsg(user, COLOR_DARK_MAGENTA + "SERVER:" + COLOR_RED + " Reloaded admins and config", USER);
 

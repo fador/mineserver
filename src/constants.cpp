@@ -1,4 +1,4 @@
-﻿/*
+/*
 Copyright (c) 2010, The Mineserver Project
 All rights reserved.
 
@@ -41,6 +41,7 @@ void initConstants()
   defaultConf.insert(std::pair<std::string, std::string>("mapdir", "testmap"));
   defaultConf.insert(std::pair<std::string, std::string>("userlimit", "20"));
   defaultConf.insert(std::pair<std::string, std::string>("map_release_time", "10"));
+  defaultConf.insert(std::pair<std::string, std::string>("liquid_physics", "1"));
   defaultConf.insert(std::pair<std::string, std::string>("server_full_message", "Server is currently full"));
   defaultConf.insert(std::pair<std::string, std::string>("default_kick_message", "You have been kicked"));
   defaultConf.insert(std::pair<std::string, std::string>("wrong_protocol_message", "Wrong client protocol"));
