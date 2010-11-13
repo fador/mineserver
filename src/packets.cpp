@@ -687,13 +687,22 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
   curpos+=4;
 
   int y = orig_y = data[curpos];
+  char y_orig = (char)(data[curpos]);
   curpos++;
 
   int z = orig_z = getSint32(&data[curpos]);
   curpos+=4;
 
-  int direction = data[curpos];
+  int direction = (char)data[curpos];
   curpos++;
+
+
+  if(y>127)
+  {
+    //std::cout << blockID << " (" << x << "," << (int)y_orig << "," << z << ") " << direction << std::endl;
+    return;
+  }
+  //std::cout << blockID << " (" << x << "," << (int)y_orig << "," << z << ")" << direction << std::endl;
 
   uint8 block;
   uint8 metadata;
@@ -713,6 +722,8 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
   uint8 metadata_direction;
   Map::get().getBlock(x,y,z, &block_direction, &metadata_direction);
 
+  // Check liquid physics
+  Physics::get().checkSurrounding(x, y, z);
 
   //If placing normal block and current block is empty
   if(blockID<0xff && blockID!=-1 && ( block_direction == BLOCK_AIR || 
@@ -817,8 +828,7 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
     }
   }
 
-  // Check liquid physics
-  Physics::get().checkSurrounding(x, y, z);
+
 }
 
 void PacketHandler::holding_change(uint8 *data, User *user)
@@ -893,6 +903,7 @@ int PacketHandler::disconnect(User *user)
   std::cout << "Disconnect: " << msg << std::endl;
 
   curpos+=len;
+  
   user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
 
   bufferevent_free(user->buf_ev);
@@ -902,7 +913,7 @@ int PacketHandler::disconnect(User *user)
     close(user->fd);
   #endif
   remUser(user->fd);
-
+  
   return curpos;
 }
 
