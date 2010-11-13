@@ -179,6 +179,7 @@ class PacketHandler
     void arm_animation(uint8 *data, User *user);
     void pickup_spawn(uint8 *data, User *user);
     int  disconnect(User *user);
+    int  complex_entities(User *user);
 
     void use_entity(uint8 *data, User *user);
 

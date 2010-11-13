@@ -88,6 +88,7 @@ void PacketHandler::initPackets()
   packets[PACKET_ARM_ANIMATION]             = Packets( 5,&PacketHandler::arm_animation);
   packets[PACKET_PICKUP_SPAWN]              = Packets(22,&PacketHandler::pickup_spawn);
   packets[PACKET_DISCONNECT]                = Packets(PACKET_VARIABLE_LEN,&PacketHandler::disconnect);
+  packets[PACKET_COMPLEX_ENTITIES]          = Packets(PACKET_VARIABLE_LEN,&PacketHandler::complex_entities);
 
 }
 
@@ -696,7 +697,7 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
   curpos++;
 
   //Invalid y value
-  if(y>127)
+  if(y>127 || y<0)
   {
     //std::cout << blockID << " (" << x << "," << (int)y_orig << "," << z << ") " << direction << std::endl;
     return;
@@ -913,6 +914,155 @@ int PacketHandler::disconnect(User *user)
   #endif
   remUser(user->fd);
   
+  return curpos;
+}
+
+int PacketHandler::complex_entities(User *user)
+{
+  if(user->buffer.size()<12)
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+  int curpos = 0;
+  unsigned int i;
+  uint8 intArray[4];
+  uint8 shortArray[2];
+
+  std::copy(user->buffer.begin()+curpos,user->buffer.begin()+curpos+4, intArray);
+  int x=getSint32(&intArray[0]);
+  curpos+=4;
+  std::copy(user->buffer.begin()+curpos,user->buffer.begin()+curpos+2, shortArray);
+  int y= getSint16(&shortArray[0]);
+  curpos+=2;
+  std::copy(user->buffer.begin()+curpos,user->buffer.begin()+curpos+4, intArray);
+  int z=getSint32(&intArray[0]);
+  curpos+=4;
+
+  std::copy(user->buffer.begin()+curpos,user->buffer.begin()+curpos+2, shortArray);
+  int len = getSint16(&shortArray[0]);
+  curpos+=2;
+
+  // Wait for whole message
+  if(user->buffer.size()<(unsigned int)curpos+len)
+  {
+    return PACKET_NEED_MORE_DATA;
+  } 
+   //ToDo: check len
+
+  uint8 *buffer = new uint8[len];
+  for(i=0;i<len;i++)
+  {
+    buffer[i]=user->buffer[curpos+i];
+  }
+  //Calculate uncompressed size and allocate memory
+  uLongf uncompressedSize=buffer[len-3] + (buffer[len-2]<<8) + (buffer[len-1]<<16) + (buffer[len]<<24);
+  uint8 *uncompressedBuffer = new uint8[uncompressedSize];
+  /*
+  FILE *outfile=fopen("struct.nbt", "wb");
+  fwrite(buffer, len,1, outfile);
+  fclose(outfile);
+  */
+  uncompress(uncompressedBuffer, &uncompressedSize, buffer, len);
+  delete [] buffer;
+  NBT_struct newObject;
+  TAG_Compound(uncompressedBuffer, &newObject, true);
+
+  //Get chunk position
+  int block_x=blockToChunk(x/16);
+  int block_z=blockToChunk(z/16);
+  uint32 chunkID;
+
+  //Load map
+  if(Map::get().loadMap(block_x, block_z))
+  {
+    uint8 block,meta;
+    Map::get().getBlock(x/16,y,z/16, &block, &meta);
+    Map::get().posToId(block_x,block_z,&chunkID);
+    NBT_struct mapData=Map::get().maps[chunkID];
+
+    //Try to find entitylist from the chunk
+    NBT_list *entitylist=get_NBT_list(&mapData, "Entities");
+
+    //If list exists
+    if(entitylist)
+    {
+      //Verify list type
+      if(entitylist->tagId != TAG_COMPOUND)
+      {
+        freeNBT_list(entitylist);
+        entitylist = new NBT_list;        
+        entitylist->tagId=TAG_COMPOUND;
+        entitylist->length=0;
+      }
+      NBT_struct **entities=(NBT_struct **)entitylist->items;
+      bool entityExists=false;
+      NBT_struct *theEntity;
+
+      //Search for mathing entity in the list
+      for(int i=0;i<entitylist->length;i++)
+      {
+        NBT_struct *entity=entities[i];
+        std::string id;
+        if(get_NBT_value(entity, "id", &id))
+        {
+          int entity_x,entity_y,entity_z;
+          get_NBT_value(entity, "x", &entity_x);
+          get_NBT_value(entity, "y", &entity_y);
+          get_NBT_value(entity, "z", &entity_z);
+
+          //Check for mathing blocktype and ID
+
+          if(block == BLOCK_CHEST && id == "Chest")
+          {
+            if(x/16 == entity_x && y == entity_y && z/16 == entity_z)
+            {
+              entityExists=true;
+              theEntity=entity;
+              break;
+            }
+          }
+          else if( (block == BLOCK_FURNACE || block == BLOCK_BURNING_FURNACE) 
+                   && id == "Furnace")
+          {
+            if(x/16 == entity_x && y == entity_y && z/16 == entity_z)
+            {
+              entityExists=true;
+              theEntity=entity;
+              break;
+            }
+          }
+          else if( (block == BLOCK_SIGN_POST ) 
+                   && id == "Sign")
+          {
+            if(x/16 == entity_x && y == entity_y && z/16 == entity_z)
+            {
+              entityExists=true;
+              theEntity=entity;
+              break;
+            }
+          }
+        }
+      } //End For entitylist
+
+      if(!entityExists)
+      {
+        theEntity = new NBT_struct;
+      }
+
+    }
+    
+  }
+
+  
+  delete [] uncompressedBuffer;
+  curpos+=len;
+
+  std::cout << "Got complex entity!!" << std::endl;
+  user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
+
+
+  user->sendAll(
+
   return curpos;
 }
 
