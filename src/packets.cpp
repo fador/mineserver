@@ -686,8 +686,7 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
   int x = orig_x = getSint32(&data[curpos]);
   curpos+=4;
 
-  int y = orig_y = data[curpos];
-  char y_orig = (char)(data[curpos]);
+  int y = orig_y = (char)data[curpos];  
   curpos++;
 
   int z = orig_z = getSint32(&data[curpos]);
@@ -696,7 +695,7 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
   int direction = (char)data[curpos];
   curpos++;
 
-
+  //Invalid y value
   if(y>127)
   {
     //std::cout << blockID << " (" << x << "," << (int)y_orig << "," << z << ") " << direction << std::endl;
