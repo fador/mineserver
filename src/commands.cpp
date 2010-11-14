@@ -258,10 +258,12 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
   {
     tUser = getUserByNick(args[0]);
 
-    itemId = Conf::get().iValue(args[1]);
-
+    //First check if item is a number
+    itemId = atoi(args[1].c_str());
+    
+    //If item was not a number, search the name from config
     if (itemId == 0)
-      itemId = atoi(args[1].c_str());
+      itemId = Conf::get().iValue(args[1]);
 
     // Check item validity
     if (!isValidItem(itemId))
