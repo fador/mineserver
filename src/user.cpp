@@ -897,5 +897,5 @@ User *getUserByNick(std::string nick)
       return Users[i];
     }
   }
-  return false;
+  return NULL;
 }
