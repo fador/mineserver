@@ -979,14 +979,19 @@ int PacketHandler::complex_entities(User *user)
   fclose(outfile);
   
   z_stream zstream;
-  inflateInit2(&zstream,16+MAX_WBITS);
+
   //inflate(
   zstream.avail_in=len;
   zstream.avail_out=uncompressedSize;
   zstream.next_in=buffer;
   zstream.next_out=uncompressedBuffer;
-  inflate(&zstream, Z_FINISH);
+  inflateInit2(&zstream,MAX_WBITS+1);
+  if(int state=inflate(&zstream, Z_FINISH)!=Z_OK)
+  {
+      std::cout << "Error in inflate: " << state << std::endl;
+  }
   uncompressedSize=zstream.total_out;
+
   //uncompress(uncompressedBuffer, &uncompressedSize, buffer, len);
   std::cout << "Uncomp Size: " << uncompressedSize << std::endl;
   
@@ -1187,13 +1192,14 @@ int PacketHandler::complex_entities(User *user)
     putSint32(&packetData[1],x);
     putSint16(&packetData[5],y);
     putSint32(&packetData[7],z);
-    putSint16(&packetData[11], (uint16)written);
+    putSint16(&packetData[11], (sint16)written);
     user->sendAll((uint8 *)&packetData[0], 13+written);    
+    std::cout << "Written out: " << written << std::endl;
 
     gzFile outfile2=gzopen("dumped2.nbt", "wb");
     gzwrite(outfile2,structdump, dumped);
     gzclose(outfile2);
-
+    
     delete [] packetData;
     delete [] structdump;
   }

@@ -412,11 +412,13 @@ bool Chat::handleMsg(User *user, std::string msg)
       {
         tUser = getUserByNick(cmd[0]);
         
-        // Check for aliases
-        itemId = Conf::get().iValue(cmd[1]);
-        
+        //Try to convert itemid to int
+        itemId = atoi(cmd[1].c_str());
+
+        // Check for aliases if itemid was not a number
         if(itemId == 0)
-          itemId = atoi(cmd[1].c_str());
+          itemId = Conf::get().iValue(cmd[1]);
+          
 
         // Check if valid block or item id
         if(itemId < 1 || (itemId > 91 && itemId < 256) || itemId > 350) // Blocks and items 
