@@ -972,21 +972,26 @@ int PacketHandler::complex_entities(User *user)
   //Calculate uncompressed size and allocate memory
   uLongf uncompressedSize=ALLOCATE_NBTFILE;//buffer[len-3] + (buffer[len-2]<<8) + (buffer[len-1]<<16) + (buffer[len]<<24);
   uint8 *uncompressedBuffer = new uint8[uncompressedSize];
-  std::cout << "Size: " << uncompressedSize << std::endl;
-
+  
   FILE *outfile=fopen("struct.nbt", "wb");
   fwrite(buffer, len,1, outfile);
   fclose(outfile);
   
   z_stream zstream;
 
-  //inflate(
-  zstream.avail_in=len;
-  zstream.avail_out=uncompressedSize;
+  zstream.zalloc = (alloc_func)0;
+	zstream.zfree = (free_func)0;
+	zstream.opaque = (voidpf)0;
   zstream.next_in=buffer;
   zstream.next_out=uncompressedBuffer;
-  inflateInit2(&zstream,MAX_WBITS+1);
-  if(int state=inflate(&zstream, Z_FINISH)!=Z_OK)
+  zstream.avail_in=len;
+  zstream.avail_out=uncompressedSize;
+  zstream.total_in    = 0;
+  zstream.total_out   = 0;  
+  zstream.data_type=Z_BINARY;
+  inflateInit2(&zstream,1+MAX_WBITS);
+
+  if(int state=inflate(&zstream, Z_FULL_FLUSH)!=Z_OK)
   {
       std::cout << "Error in inflate: " << state << std::endl;
   }
@@ -1120,6 +1125,8 @@ int PacketHandler::complex_entities(User *user)
         itemlist.tagId = TAG_COMPOUND;
         itemlist.length=newlist->length;   
         itemlist.items=(void **)new NBT_struct *[itemlist.length];
+
+        NBT_struct **structlist=(NBT_struct **)itemlist.items;
         for(int i=0;i<itemlist.length;i++)
         {
           itemlist.items[i]=(void *)new NBT_struct;
@@ -1129,27 +1136,31 @@ int PacketHandler::complex_entities(User *user)
           value.name="Count";
           char type_char;
           get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "Count", &type_char);
-          value.value=(void *)new char(type_char);
-          theEntity->values.push_back(value);
+          value.value=(void *)new char;
+          *(char *)value.value=type_char;
+          structlist[i]->values.push_back(value);
 
           value.type=TAG_BYTE;
           value.name="Slot";
           get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "Slot", &type_char);
-          value.value=(void *)new char(type_char);
-          theEntity->values.push_back(value);
+          value.value=(void *)new char;
+            *(char *)value.value=type_char;
+          structlist[i]->values.push_back(value);
 
           value.type=TAG_SHORT;
           value.name="Damage";
           sint16 type_sint16;
           get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "Damage", &type_sint16);
-          value.value=(void *)new sint16(type_sint16);
-          theEntity->values.push_back(value);
+          value.value=(void *)new sint16;
+          *(sint16 *)value.value=type_sint16;
+          structlist[i]->values.push_back(value);
 
           value.type=TAG_SHORT;
           value.name="id";
           get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "id", &type_sint16);
-          value.value=(void *)new sint16(type_sint16);
-          theEntity->values.push_back(value);
+          value.value=(void *)new sint16;
+          *(sint16 *)value.value=type_sint16;
+          structlist[i]->values.push_back(value);
         }
 
         theEntity->lists.push_back(itemlist);
@@ -1196,9 +1207,15 @@ int PacketHandler::complex_entities(User *user)
     user->sendAll((uint8 *)&packetData[0], 13+written);    
     std::cout << "Written out: " << written << std::endl;
 
+    FILE *outfile2=fopen("dumped3.nbt", "wb");
+    fwrite(&packetData[13],written,1,outfile2);
+    fclose(outfile2);
+
+    /*
     gzFile outfile2=gzopen("dumped2.nbt", "wb");
     gzwrite(outfile2,structdump, dumped);
     gzclose(outfile2);
+    */
     
     delete [] packetData;
     delete [] structdump;
