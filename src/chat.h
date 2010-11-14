@@ -38,6 +38,7 @@ class Chat
       OTHERS,
       ADMINS
     };
+    typedef void (*ChatCommand)(User *, std::string, std::deque<std::string>);
     //Chat();
     std::deque<std::string> admins;
     bool handleMsg( User *user, std::string msg );
@@ -45,9 +46,14 @@ class Chat
     bool sendUserlist( User *user );
     bool loadAdmins(std::string adminFile);
     bool checkMotd(std::string motdFile);
+    void registerCommand(std::string name, ChatCommand command, bool adminOnly);
     static Chat &get();
   private:
-    Chat() {};
+    typedef std::map<std::string, ChatCommand> CommandList;
+    CommandList userCommands;
+    CommandList adminCommands;
+    Chat();
+    void registerStandardCommands();
     std::deque<std::string> parseCmd(std::string cmd);
 };
 
