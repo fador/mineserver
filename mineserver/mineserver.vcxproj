@@ -89,7 +89,6 @@
     <ClInclude Include="..\src\packets.h" />
     <ClInclude Include="..\src\physics.h" />
     <ClInclude Include="..\src\sockets.h" />
-    <ClInclude Include="..\src\StatusHandler.h" />
     <ClInclude Include="..\src\tools.h" />
     <ClInclude Include="..\src\user.h" />
   </ItemGroup>

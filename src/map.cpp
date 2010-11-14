@@ -839,8 +839,8 @@ void Map::sendToUser(User *user, int x, int z)
   uint32 mapId;
   Map::posToId(x, z, &mapId);
 
-  uint8 data4[18+81920];
-  uint8 mapdata[81920]={0};
+  uint8 *data4 = new uint8[18+81920];
+  uint8 *mapdata = new uint8[81920];
   int mapposx=x;
   int mapposz=z;
 
@@ -873,9 +873,12 @@ void Map::sendToUser(User *user, int x, int z)
     uLongf written=81920;
 
     // Compress data with zlib deflate
-    compress((uint8 *)&data4[18], &written, (uint8 *)&mapdata[0], 81920);
+    compress(&data4[18], &written, &mapdata[0], 81920);
 
     putSint32(&data4[14], written);
-    bufferevent_write(user->buf_ev, (uint8 *)&data4[0], 18+written);
+    bufferevent_write(user->buf_ev, &data4[0], 18+written);
   }
+
+  delete [] data4;
+  delete [] mapdata;
 }
