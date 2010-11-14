@@ -233,7 +233,7 @@ bool Chat::handleMsg(User *user, std::string msg)
 bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
 {
   size_t tmpArrayLen = msg.size()+3;
-  uint8 tmpArray[tmpArrayLen];
+  uint8 *tmpArray = new uint8[tmpArrayLen];
 
   tmpArray[0] = 0x03;
   tmpArray[1] = 0;
@@ -257,6 +257,8 @@ bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
     user->sendOthers(tmpArray, tmpArrayLen);
     break;
   }
+
+  delete [] tmpArray;
 
   return true;
 }

@@ -218,7 +218,7 @@ void reloadConfiguration(User *user, std::string command, std::deque<std::string
   Conf::get().load(CONFIGFILE);
 
   // Set physics enable state based on config
-  Physics::get().enabled = static_cast<bool>(Conf::get().iValue("liquid_physics"));
+  Physics::get().enabled = ((Conf::get().iValue("liquid_physics")==0)?false:true);
 
   Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + "SERVER:" + COLOR_RED + 
                             " Reloaded admins and config", Chat::USER);
