@@ -28,18 +28,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _CHAT_H
 #define _CHAT_H
 
-#define ALL 1
-#define USER 2
-#define OTHERS 3
-#define ADMINS 4
-
 class Chat 
 {
   public:
+    enum MessageTarget
+    {
+      ALL,
+      USER,
+      OTHERS,
+      ADMINS
+    };
     //Chat();
     std::deque<std::string> admins;
     bool handleMsg( User *user, std::string msg );
-    bool sendMsg( User *user, std::string msg, int action );
+    bool sendMsg( User *user, std::string msg, MessageTarget action = ALL );
     bool sendUserlist( User *user );
     bool loadAdmins(std::string adminFile);
     bool checkMotd(std::string motdFile);

@@ -832,7 +832,7 @@ bool remUser(int sock)
     {
       if(Users[i]->nick.size())
       {
-        Chat::get().sendMsg(Users[i], Users[i]->nick+" disconnected!", OTHERS);
+        Chat::get().sendMsg(Users[i], Users[i]->nick+" disconnected!", Chat::OTHERS);
         Users[i]->saveData();
       }
       delete Users[i];

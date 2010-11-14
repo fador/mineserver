@@ -272,7 +272,7 @@ int PacketHandler::login_request(User *user)
   while( getline( motdfs, temp ) ) {
     // If not commentline
     if(temp[0] != COMMENTPREFIX) {
-      Chat::get().sendMsg(user, temp, USER);
+      Chat::get().sendMsg(user, temp, Chat::USER);
     }
   }
   motdfs.close();
@@ -303,7 +303,7 @@ int PacketHandler::login_request(User *user)
 
   user->logged = true;
 
-  Chat::get().sendMsg(user, player+" connected!", ALL);
+  Chat::get().sendMsg(user, player+" connected!", Chat::ALL);
 
   return curpos;
 }

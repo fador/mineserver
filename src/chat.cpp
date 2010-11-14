@@ -492,9 +492,10 @@ bool Chat::handleMsg(User *user, std::string msg)
   return true;
 }
 
-bool Chat::sendMsg(User *user, std::string msg, int action = ALL)
+bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
 {
-  uint8 *tmpArray = new uint8 [msg.size()+3];
+  size_t tmpArrayLen = msg.size()+3;
+  uint8 tmpArray[tmpArrayLen];
 
   tmpArray[0] = 0x03;
   tmpArray[1] = 0;
@@ -503,19 +504,21 @@ bool Chat::sendMsg(User *user, std::string msg, int action = ALL)
   for(unsigned int i=0;i<msg.size();i++)
     tmpArray[i+3] = msg[i];
 
-  if(action == ALL)
-    user->sendAll(&tmpArray[0], msg.size()+3);
-
-  if(action == USER)
-    bufferevent_write(user->buf_ev, &tmpArray[0], msg.size()+3);
-    
-  if(action == ADMINS)
-    user->sendAdmins(&tmpArray[0], msg.size()+3);
-
-  if(action == OTHERS)
-    user->sendOthers(&tmpArray[0], msg.size()+3);
-
-  delete [] tmpArray;
+  switch(action)
+  {
+  case ALL:
+    user->sendAll(tmpArray, tmpArrayLen);
+    break;
+  case USER:
+    bufferevent_write(user->buf_ev, tmpArray, tmpArrayLen);
+    break;
+  case ADMINS:
+    user->sendAdmins(tmpArray, tmpArrayLen);
+    break;
+  case OTHERS:
+    user->sendOthers(tmpArray, tmpArrayLen);
+    break;
+  }
 
   return true;
 }
