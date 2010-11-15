@@ -877,6 +877,72 @@ void Map::sendToUser(User *user, int x, int z)
 
     putSint32(&data4[14], written);
     bufferevent_write(user->buf_ev, &data4[0], 18+written);
+
+    //Get list of chests,furnaces etc on the chunk
+    NBT_list *entitylist = get_NBT_list(&maps[mapId], "TileEntities");
+
+    //Verify the type
+    if(entitylist && entitylist->tagId==TAG_COMPOUND)
+    {
+      uint8 *structdump = new uint8 [ALLOCATE_NBTFILE];
+      uint8 *packetData = new uint8[ALLOCATE_NBTFILE];
+
+      NBT_struct **tempstruct=(NBT_struct **)entitylist->items;
+      //Loop through every item
+      for(sint32 i=0;i<entitylist->length;i++)
+      {
+        std::string id;
+        //Just send chest,sign and furnace data for now
+        if(get_NBT_value(tempstruct[i], "id", &id) && (id=="Chest" || id=="Furnace" || id=="Sign"))
+        {
+          //Get position
+          int entity_x,entity_y,entity_z;
+          if(!get_NBT_value(tempstruct[i], "x", &entity_x) ||
+             !get_NBT_value(tempstruct[i], "y", &entity_y) ||
+             !get_NBT_value(tempstruct[i], "z", &entity_z))
+          {
+            continue;
+          }
+          //Dump the struct data to NBT format
+          int dumped=dumpNBT_struct(tempstruct[i], structdump);
+          written=ALLOCATE_NBTFILE;
+          z_stream zstream2;
+          zstream2.zalloc = Z_NULL;
+          zstream2.zfree = Z_NULL;
+          zstream2.opaque = Z_NULL;
+          zstream2.next_out=&packetData[13];
+          zstream2.next_in=structdump;
+          zstream2.avail_in=dumped;
+          zstream2.avail_out=written;
+          zstream2.total_out=0;
+          zstream2.total_in=0;
+          deflateInit2(&zstream2, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15+MAX_WBITS, 8,
+                               Z_DEFAULT_STRATEGY);
+   
+          //Gzip the data
+          if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
+          {
+            std::cout << "Error in deflate: " << state << std::endl;
+            deflateEnd(&zstream2);
+          }
+          else
+          {
+            written=zstream2.total_out;
+    
+            // !!!! Complex Entity packet! !!!!
+            packetData[0] = 0x3b; //Complex Entities
+            putSint32(&packetData[1],entity_x); //X-pos
+            putSint16(&packetData[5],entity_y); //Y-pos
+            putSint32(&packetData[7],entity_z); //Z-pos
+            putSint16(&packetData[11], (sint16)written); //Size
+            bufferevent_write(user->buf_ev, (uint8 *)&packetData[0], 13+written);
+          }
+        }
+      }
+
+      delete [] packetData;
+      delete [] structdump;
+    }
   }
 
   delete [] data4;

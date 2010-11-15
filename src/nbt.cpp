@@ -562,7 +562,8 @@ bool freeNBT_list(NBT_list *input)
     {
       return false;
     }
-
+    NBT_struct **tempstruct=(NBT_struct **)input->items;
+    NBT_byte_array **temparray=(NBT_byte_array **)input->items;
     switch(input->tagId)
     {
     case TAG_BYTE:
@@ -614,20 +615,19 @@ bool freeNBT_list(NBT_list *input)
       }
       delete [] (std::string **)input->items;
       break;
-    case TAG_COMPOUND:
+    case TAG_COMPOUND:      
       for(int j=0;j<input->length;j++)
-      {
-        freeNBT_struct((NBT_struct *)input->items[j]);
+      {        
+        freeNBT_struct(tempstruct[j]);
         delete (NBT_struct *)input->items[j];
       }
       delete [] (NBT_struct **)input->items;
       break;
-    case TAG_BYTE_ARRAY:
+    case TAG_BYTE_ARRAY:      
       for(int j=0;j<input->length;j++)
       {
-        NBT_byte_array *temparray=(NBT_byte_array *)input->items[j];
-        delete [] temparray->data;
-        delete temparray;
+        delete [] temparray[j]->data;
+        delete temparray[j];
       }
       delete [] (NBT_byte_array **)input->items;
       break;

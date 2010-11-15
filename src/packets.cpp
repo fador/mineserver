@@ -1058,7 +1058,7 @@ int PacketHandler::complex_entities(User *user)
     NBT_struct mapData=Map::get().maps[chunkID];
 
     //Try to find entitylist from the chunk
-    NBT_list *entitylist=get_NBT_list(&mapData, "Entities");
+    NBT_list *entitylist=get_NBT_list(&mapData, "TileEntities");
 
     //If list exists
     if(entitylist)
@@ -1070,18 +1070,19 @@ int PacketHandler::complex_entities(User *user)
         freeNBT_list(entitylist);
         for(i=0;i<mapData.lists.size();i++)
         {
-          if(mapData.lists[i].name=="Entities")
+          if(mapData.lists[i].name=="TileEntities")
           {
             mapData.lists.erase(mapData.lists.begin()+i);
             break;
           }
         }
-        NBT_list newlisting;          
+        NBT_list newlisting;  
+        newlisting.name="TileEntities";
         newlisting.tagId=TAG_COMPOUND;
         newlisting.length=0;
         mapData.lists.push_back(newlisting);
 
-        entitylist = get_NBT_list(&mapData, "Entities");
+        entitylist = get_NBT_list(&mapData, "TileEntities");
       }
 
       NBT_struct **entities=(NBT_struct **)entitylist->items;
@@ -1123,7 +1124,7 @@ int PacketHandler::complex_entities(User *user)
       //Push ID
       value.type=TAG_STRING;
       value.name="id";
-      std::string *name= new std::string("chest");
+      std::string *name= new std::string("Chest");
       value.value=(void *)name;        
       theEntity->values.push_back(value);
 
@@ -1258,7 +1259,7 @@ int PacketHandler::complex_entities(User *user)
     putSint16(&packetData[5],y);
     putSint32(&packetData[7],z);
     putSint16(&packetData[11], (sint16)written);
-    user->sendAll((uint8 *)&packetData[0], 13+written);    
+    user->sendAll((uint8 *)&packetData[0], 13+written);
     std::cout << "Written out: " << written << std::endl;
 
     FILE *outfile2=fopen("dumped3.nbt", "wb");
