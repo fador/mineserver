@@ -54,7 +54,8 @@ bool Conf::load(std::string configFile)
   // If configfile does not exist
   if(ifs.fail() && configFile == CONFIGFILE)
   {
-    std::cout << ">>> " << configFile << " not found. Generating default configuration.." << std::endl;
+    // TODO: Load default configuration from the internets!
+    std::cout << ">>> " << configFile << " not found." << std::endl;
 
     std::ofstream confofs(configFile.c_str());
     confofs << "#"                                                  << std::endl
@@ -74,11 +75,11 @@ bool Conf::load(std::string configFile)
   std::string text;
   while(getline(ifs, temp))
   {
-    // If not enough characters (Absolute min is 5: "a = s")
-    if(temp.length() < 5) continue;
-
     // If commentline -> skip to next
     if(temp[0] == COMMENTPREFIX) continue;
+
+    // If not enough characters (Absolute min is 5: "a = s")
+    if(temp.length() < 5) continue;
 
     // Init vars
     del = 0;
@@ -129,13 +130,11 @@ bool Conf::load(std::string configFile)
     if(confSet.find(line[0]) != confSet.end())
     {
       confSet[line[0]] = text;
-      //std::cout << "Updated> " << line[0] << " = " << text << std::endl;
     }
     else
     {
       // Push to configuration
       confSet.insert(std::pair<std::string, std::string>(line[0], text));
-      //std::cout << "Added> " << line[0] << " = " << text << std::endl;
     }
     
     // Count line numbers
@@ -187,7 +186,7 @@ std::vector<int> Conf::vValue(std::string name)
     // Process "array"
     while(tmpStr.length() > 0)
     {
-      // Remove white spaces and = characters -_-
+      // Remove white spaces characters
       while(tmpStr[0] == ' ') tmpStr = tmpStr.substr(1);
 
       // Split words
