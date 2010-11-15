@@ -40,9 +40,7 @@ struct spawnedItem
   int item;
   char count;
   sint16 health;
-  int x;
-  int y;
-  int z;
+  vec pos;
   time_t spawnedAt;
   uint32 spawnedBy;
 

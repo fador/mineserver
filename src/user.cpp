@@ -476,9 +476,9 @@ bool User::updatePos(double x, double y, double z, double stance)
         for(sint32 i=Map::get().mapItems[chunkHash].size()-1;i>=0;i--)
         {
           //No more than 2 blocks away
-          if(abs((sint32)x-Map::get().mapItems[chunkHash][i]->x/32) < 2 && 
-             abs((sint32)z-Map::get().mapItems[chunkHash][i]->z/32) < 2 &&
-             abs((sint32)y-Map::get().mapItems[chunkHash][i]->y/32) < 2)
+          if(abs((sint32)x-Map::get().mapItems[chunkHash][i]->pos.x()/32) < 2 && 
+             abs((sint32)z-Map::get().mapItems[chunkHash][i]->pos.z()/32) < 2 &&
+             abs((sint32)y-Map::get().mapItems[chunkHash][i]->pos.y()/32) < 2)
           {
             //Dont pickup own spawns right away
             if(Map::get().mapItems[chunkHash][i]->spawnedBy != this->UID ||

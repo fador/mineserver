@@ -608,12 +608,12 @@ void PacketHandler::player_digging(uint8 *data, User *user)
           item.item=(int)topblock;
           item.count=1;
 
-          item.x = x*32;
-          item.y = (y+1)*32;
-          item.z = z*32;
+          item.pos.x() = x*32;
+          item.pos.y() = (y+1)*32;
+          item.pos.z() = z*32;
           //Randomize spawn position a bit
-          item.x+=5+(rand()%22);
-          item.z+=5+(rand()%22);
+          item.pos.x()+=5+(rand()%22);
+          item.pos.z()+=5+(rand()%22);
         
           Map::get().sendPickupSpawn(item);
         }
@@ -637,12 +637,12 @@ void PacketHandler::player_digging(uint8 *data, User *user)
           item.item=(int)block;
           item.count=1;
         }
-        item.x = x*32;
-        item.y = y*32;
-        item.z = z*32;
+        item.pos.x() = x*32;
+        item.pos.y() = y*32;
+        item.pos.z() = z*32;
         //Randomize spawn position a bit
-        item.x+=5+(rand()%22);
-        item.z+=5+(rand()%22);
+        item.pos.x()+=5+(rand()%22);
+        item.pos.z()+=5+(rand()%22);
         
         // If count is greater than 0
         if(item.count > 0)
@@ -867,11 +867,11 @@ void PacketHandler::pickup_spawn(uint8 *data, User *user)
   item.count = data[curpos];
   curpos++;
 
-  item.x = getSint32(&data[curpos]);
+  item.pos.x() = getSint32(&data[curpos]);
   curpos+=4;
-  item.y = getSint32(&data[curpos]);
+  item.pos.y() = getSint32(&data[curpos]);
   curpos+=4;
-  item.z = getSint32(&data[curpos]);
+  item.pos.z() = getSint32(&data[curpos]);
   curpos+=4;
   item.spawnedBy=user->UID;
 
