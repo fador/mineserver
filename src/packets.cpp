@@ -816,6 +816,31 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
     }    
   }
 
+  if(blockID == BLOCK_TORCH ||
+     blockID == BLOCK_REDSTONE_TORCH_OFF ||
+     blockID == BLOCK_REDSTONE_TORCH_ON)
+  {
+    switch (direction)
+    {
+    case 0:
+    case 1:
+      metadata = 5;
+      break;
+    case 2:
+      metadata = 4;
+      break;
+    case 3:
+      metadata = 3;
+      break;
+    case 4:
+      metadata = 1;
+      break;
+    case 5:
+      metadata = 2;
+      break;
+    }
+  }
+
   if(change)
   {
     Map::get().setBlock(x,y,z, blockID, metadata);
