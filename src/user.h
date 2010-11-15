@@ -154,6 +154,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     
   User *getUserByNick(std::string nick);
 
-  bool SortVect(vec first, vec second);
-
 #endif

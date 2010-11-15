@@ -663,20 +663,6 @@ bool User::delKnown(int x, int z)
   return false;
 }
 
-bool SortVect(vec first, vec second)
-{
-  // get the spawn position
-  vec spawnPos = Map::get().spawnPos;
-  spawnPos.x() /= 16;
-  spawnPos.y() /= 16;
-  // clear all y coordinates
-  first.y()    = 0;
-  second.y()   = 0;
-  spawnPos.y() = 0;
-  // compare distances
-  return vec::squareDistance(first, spawnPos) < vec::squareDistance(second, spawnPos);
-}
-
 bool User::popMap()
 {
   //If map in queue, push it to client
@@ -702,6 +688,26 @@ bool User::popMap()
   return false;
 }
 
+namespace
+{
+
+class DistanceComparator
+{
+  private:
+    vec target;
+  public:
+    DistanceComparator(vec tgt) : target(tgt) { target.y() = 0; }
+    bool operator()(vec a, vec b) const
+    {
+      a.y() = 0;
+      b.y() = 0;
+      return vec::squareDistance(a, target) <
+             vec::squareDistance(b, target);
+    }
+};
+
+}
+
 bool User::pushMap()
 {
   //Dont send all at once
@@ -711,7 +717,10 @@ bool User::pushMap()
   {
     maxcount--;
     // Sort by distance from center
-    sort(mapQueue.begin(),mapQueue.end(),SortVect);
+    vec target(static_cast<int>(pos.x / 16),
+               static_cast<int>(pos.y / 16),
+               static_cast<int>(pos.z / 16));
+    sort(mapQueue.begin(),mapQueue.end(),DistanceComparator(target));
 
     Map::get().sendToUser(this,mapQueue[0].x(), mapQueue[0].z());
 
