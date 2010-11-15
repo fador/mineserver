@@ -1,5 +1,6 @@
 DEP=$(CXX) -MM
-CXXFLAGS= -O2 -lpthread -levent -lz -Wall -Werror
+LDFLAGS= -lpthread -levent -lz
+CXXFLAGS= -O2 -Wall -Werror
 INC=./
 
 SRC_MS=$(wildcard *.cpp)
