@@ -555,6 +555,87 @@ int dumpNBT_struct(NBT_struct *input, uint8 *buffer, bool list)
   return curpos;
 }
 
+bool freeNBT_list(NBT_list *input)
+{
+    //Free lists  
+    if(!input->length)
+    {
+      return false;
+    }
+
+    switch(input->tagId)
+    {
+    case TAG_BYTE:
+      for(int j=0;j<input->length;j++)
+      {
+        delete (char *)input->items[j];
+      }
+      delete [] (char **)input->items;
+      break;
+    case TAG_SHORT:
+      for(int j=0;j<input->length;j++)
+      {
+        delete (int *)input->items[j];
+      }
+      delete [] (int **)input->items;
+      break;
+    case TAG_INT:
+      for(int j=0;j<input->length;j++)
+      {
+        delete (int *)input->items[j];
+      }
+      delete [] (int **)input->items;
+      break;
+    case TAG_LONG:
+      for(int j=0;j<input->length;j++)
+      {
+        delete (long long *)input->items[j];
+      }
+      delete [] (long long **)input->items;
+      break;
+    case TAG_FLOAT:
+      for(int j=0;j<input->length;j++)
+      {
+        delete (float *)input->items[j];
+      }
+      delete [] (float **)input->items;
+      break;
+    case TAG_DOUBLE:
+      for(int j=0;j<input->length;j++)
+      {
+        delete (double *)input->items[j];
+      }
+      delete [] (double **)input->items;
+      break;
+    case TAG_STRING:
+      for(int j=0;j<input->length;j++)
+      {
+        delete (std::string *)input->items[j];
+      }
+      delete [] (std::string **)input->items;
+      break;
+    case TAG_COMPOUND:
+      for(int j=0;j<input->length;j++)
+      {
+        freeNBT_struct((NBT_struct *)input->items[j]);
+        delete (NBT_struct *)input->items[j];
+      }
+      delete [] (NBT_struct **)input->items;
+      break;
+    case TAG_BYTE_ARRAY:
+      for(int j=0;j<input->length;j++)
+      {
+        NBT_byte_array *temparray=(NBT_byte_array *)input->items[j];
+        delete [] temparray->data;
+        delete temparray;
+      }
+      delete [] (NBT_byte_array **)input->items;
+      break;
+    } 
+
+  return true;
+}
+
 bool freeNBT_struct(NBT_struct *input)
 {
   //Free all values
@@ -596,86 +677,14 @@ bool freeNBT_struct(NBT_struct *input)
     delete [] input->byte_arrays[i].data;
   }
 
-  input->byte_arrays.clear();
-
-  //Free lists
   for(unsigned int i=0;i<input->lists.size();i++)
   {
-    if(!input->lists[i].length)
-    {
-      break;
-    }
-
-    switch(input->lists[i].tagId)
-    {
-    case TAG_BYTE:
-      for(int j=0;j<input->lists[i].length;j++)
-      {
-        delete (char *)input->lists[i].items[j];
-      }
-      delete [] (char **)input->lists[i].items;
-      break;
-    case TAG_SHORT:
-      for(int j=0;j<input->lists[i].length;j++)
-      {
-        delete (int *)input->lists[i].items[j];
-      }
-      delete [] (int **)input->lists[i].items;
-      break;
-    case TAG_INT:
-      for(int j=0;j<input->lists[i].length;j++)
-      {
-        delete (int *)input->lists[i].items[j];
-      }
-      delete [] (int **)input->lists[i].items;
-      break;
-    case TAG_LONG:
-      for(int j=0;j<input->lists[i].length;j++)
-      {
-        delete (long long *)input->lists[i].items[j];
-      }
-      delete [] (long long **)input->lists[i].items;
-      break;
-    case TAG_FLOAT:
-      for(int j=0;j<input->lists[i].length;j++)
-      {
-        delete (float *)input->lists[i].items[j];
-      }
-      delete [] (float **)input->lists[i].items;
-      break;
-    case TAG_DOUBLE:
-      for(int j=0;j<input->lists[i].length;j++)
-      {
-        delete (double *)input->lists[i].items[j];
-      }
-      delete [] (double **)input->lists[i].items;
-      break;
-    case TAG_STRING:
-      for(int j=0;j<input->lists[i].length;j++)
-      {
-        delete (std::string *)input->lists[i].items[j];
-      }
-      delete [] (std::string **)input->lists[i].items;
-      break;
-    case TAG_COMPOUND:
-      for(int j=0;j<input->lists[i].length;j++)
-      {
-        freeNBT_struct((NBT_struct *)input->lists[i].items[j]);
-        delete (NBT_struct *)input->lists[i].items[j];
-      }
-      delete [] (NBT_struct **)input->lists[i].items;
-      break;
-    case TAG_BYTE_ARRAY:
-      for(int j=0;j<input->lists[i].length;j++)
-      {
-        NBT_byte_array *temparray=(NBT_byte_array *)input->lists[i].items[j];
-        delete [] temparray->data;
-        delete temparray;
-      }
-      delete [] (NBT_byte_array **)input->lists[i].items;
-      break;
-    } 
+    freeNBT_list(&input->lists[i]);
   }
+
+  input->byte_arrays.clear();
+
+
 
   input->lists.clear();
 

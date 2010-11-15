@@ -31,6 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   #include <crtdbg.h>
   #include <conio.h>
   #include <winsock2.h>
+  #define ZLIB_WINAPI
 #else
   #include <sys/socket.h>
   #include <netinet/in.h>
@@ -88,6 +89,7 @@ void PacketHandler::initPackets()
   packets[PACKET_ARM_ANIMATION]             = Packets( 5,&PacketHandler::arm_animation);
   packets[PACKET_PICKUP_SPAWN]              = Packets(22,&PacketHandler::pickup_spawn);
   packets[PACKET_DISCONNECT]                = Packets(PACKET_VARIABLE_LEN,&PacketHandler::disconnect);
+  packets[PACKET_COMPLEX_ENTITIES]          = Packets(PACKET_VARIABLE_LEN,&PacketHandler::complex_entities);
 
 }
 
@@ -272,7 +274,7 @@ int PacketHandler::login_request(User *user)
   while( getline( motdfs, temp ) ) {
     // If not commentline
     if(temp[0] != COMMENTPREFIX) {
-      Chat::get().sendMsg(user, temp, USER);
+      Chat::get().sendMsg(user, temp, Chat::USER);
     }
   }
   motdfs.close();
@@ -303,7 +305,7 @@ int PacketHandler::login_request(User *user)
 
   user->logged = true;
 
-  Chat::get().sendMsg(user, player+" connected!", ALL);
+  Chat::get().sendMsg(user, player+" connected!", Chat::ALL);
 
   return curpos;
 }
@@ -696,7 +698,7 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
   curpos++;
 
   //Invalid y value
-  if(y>127)
+  if(y>127 || y<0)
   {
     //std::cout << blockID << " (" << x << "," << (int)y_orig << "," << z << ") " << direction << std::endl;
     return;
@@ -913,6 +915,316 @@ int PacketHandler::disconnect(User *user)
   #endif
   remUser(user->fd);
   
+  return curpos;
+}
+
+int PacketHandler::complex_entities(User *user)
+{
+  if(user->buffer.size()<12)
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+  int curpos = 0;
+  unsigned int i;
+  uint8 intArray[4];
+  uint8 shortArray[2];
+
+  std::copy(user->buffer.begin()+curpos,user->buffer.begin()+curpos+4, intArray);
+  int x=getSint32(&intArray[0]);
+  curpos+=4;
+  std::copy(user->buffer.begin()+curpos,user->buffer.begin()+curpos+2, shortArray);
+  int y= getSint16(&shortArray[0]);
+  curpos+=2;
+  std::copy(user->buffer.begin()+curpos,user->buffer.begin()+curpos+4, intArray);
+  int z=getSint32(&intArray[0]);
+  curpos+=4;
+
+  std::copy(user->buffer.begin()+curpos,user->buffer.begin()+curpos+2, shortArray);
+  int len = getSint16(&shortArray[0]);
+  curpos+=2;
+
+  // Wait for whole message
+  if(user->buffer.size()<(unsigned int)curpos+len)
+  {
+    return PACKET_NEED_MORE_DATA;
+  } 
+   //ToDo: check len
+  std::cout << "Complex: (" << x << "," << y << "," << z << ")" << std::endl;
+  uint8 *buffer = new uint8[len];
+  for(i=0;i<(uint32)len;i++)
+  {
+    buffer[i]=user->buffer[curpos+i];
+  }
+  curpos+=len;
+  std::cout << "len: " << len << std::endl;
+
+  user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
+
+  uint8 block,meta;
+  Map::get().getBlock(x,y,z, &block, &meta);
+
+  //We only handle chest for now
+  if(block != BLOCK_CHEST)
+  {
+    return curpos;
+  }
+
+  //Calculate uncompressed size and allocate memory
+  uLongf uncompressedSize=ALLOCATE_NBTFILE;//buffer[len-3] + (buffer[len-2]<<8) + (buffer[len-1]<<16) + (buffer[len]<<24);
+  uint8 *uncompressedBuffer = new uint8[uncompressedSize];
+  
+  FILE *outfile=fopen("struct.nbt", "wb");
+  fwrite(buffer, len,1, outfile);
+  fclose(outfile);
+  
+  z_stream zstream;
+
+  zstream.zalloc = (alloc_func)0;
+	zstream.zfree = (free_func)0;
+	zstream.opaque = (voidpf)0;
+  zstream.next_in=buffer;
+  zstream.next_out=uncompressedBuffer;
+  zstream.avail_in=len;
+  zstream.avail_out=uncompressedSize;
+  zstream.total_in    = 0;
+  zstream.total_out   = 0;  
+  zstream.data_type=Z_BINARY;
+  inflateInit2(&zstream,1+MAX_WBITS);
+
+  if(int state=inflate(&zstream, Z_FULL_FLUSH)!=Z_OK)
+  {
+      std::cout << "Error in inflate: " << state << std::endl;
+  }
+  uncompressedSize=zstream.total_out;
+
+  //uncompress(uncompressedBuffer, &uncompressedSize, buffer, len);
+  std::cout << "Uncomp Size: " << uncompressedSize << std::endl;
+  
+  NBT_struct newObject;
+  TAG_Compound(uncompressedBuffer, &newObject, true);
+
+  int dumpsize=dumpNBT_struct(&newObject,uncompressedBuffer);
+  std::cout << "dumpsize: " << dumpsize << std::endl;
+
+
+  gzFile outfile2=gzopen("dumped.nbt", "wb");
+  gzwrite(outfile2,uncompressedBuffer, dumpsize);
+  gzclose(outfile2);
+
+  delete [] buffer;
+  delete [] uncompressedBuffer;
+
+  //Get chunk position
+  int block_x=blockToChunk(x);
+  int block_z=blockToChunk(z);
+  uint32 chunkID;
+
+  NBT_struct *theEntity=0;
+
+
+  //Load map
+  if(Map::get().loadMap(block_x, block_z))
+  {   
+    Map::get().posToId(block_x,block_z,&chunkID);
+    NBT_struct mapData=Map::get().maps[chunkID];
+
+    //Try to find entitylist from the chunk
+    NBT_list *entitylist=get_NBT_list(&mapData, "Entities");
+
+    //If list exists
+    if(entitylist)
+    {
+      //Verify list type
+      if(entitylist->tagId != TAG_COMPOUND)
+      {
+        //If wrong type, recreate
+        freeNBT_list(entitylist);
+        for(i=0;i<mapData.lists.size();i++)
+        {
+          if(mapData.lists[i].name=="Entities")
+          {
+            mapData.lists.erase(mapData.lists.begin()+i);
+            break;
+          }
+        }
+        NBT_list newlisting;          
+        newlisting.tagId=TAG_COMPOUND;
+        newlisting.length=0;
+        mapData.lists.push_back(newlisting);
+
+        entitylist = get_NBT_list(&mapData, "Entities");
+      }
+      NBT_struct **entities=(NBT_struct **)entitylist->items;
+      bool entityExists=false;
+      int existingID=0;
+
+
+      //Search for mathing entity in the list
+      for(int i=0;i<entitylist->length;i++)
+      {
+        NBT_struct *entity=entities[i];
+        std::string id;
+        if(get_NBT_value(entity, "id", &id))
+        {
+          int entity_x,entity_y,entity_z;
+          get_NBT_value(entity, "x", &entity_x);
+          get_NBT_value(entity, "y", &entity_y);
+          get_NBT_value(entity, "z", &entity_z);
+
+          //Check for mathing blocktype and ID
+
+          if(block == BLOCK_CHEST && id == "Chest")
+          {
+            if(x == entity_x && y == entity_y && z == entity_z)
+            {
+              entityExists=true;
+              theEntity=entity;
+              existingID=i;
+              break;
+            }
+          }
+        }
+      } //End For entitylist
+
+      //Generate struct
+      theEntity = new NBT_struct;          
+      NBT_value value;
+
+      //Push ID
+      value.type=TAG_STRING;
+      value.name="id";
+      std::string *name= new std::string("chest");
+      value.value=(void *)name;        
+      theEntity->values.push_back(value);
+
+      //Position
+      value.type=TAG_INT;
+      value.name="x";
+      value.value=(void *)new int(x);
+      theEntity->values.push_back(value);
+
+      value.name="y";
+      value.value=(void *)new int(y);
+      theEntity->values.push_back(value);
+
+      value.name="z";
+      value.value=(void *)new int(z);
+      theEntity->values.push_back(value);
+
+      //Put special chest items
+      if(block == BLOCK_CHEST)
+      {
+        NBT_list *newlist = get_NBT_list(&newObject, "Items");
+        if(!newlist)
+        {
+          std::cout << "Items not found!" << std::endl;
+          return curpos;
+        }
+        NBT_list itemlist;
+        itemlist.name="Items";
+        itemlist.tagId = TAG_COMPOUND;
+        itemlist.length=newlist->length;   
+        itemlist.items=(void **)new NBT_struct *[itemlist.length];
+
+        NBT_struct **structlist=(NBT_struct **)itemlist.items;
+        for(int i=0;i<itemlist.length;i++)
+        {
+          itemlist.items[i]=(void *)new NBT_struct;
+          //Generate struct
+          //Position
+          value.type=TAG_BYTE;
+          value.name="Count";
+          char type_char;
+          get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "Count", &type_char);
+          value.value=(void *)new char;
+          *(char *)value.value=type_char;
+          structlist[i]->values.push_back(value);
+
+          value.type=TAG_BYTE;
+          value.name="Slot";
+          get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "Slot", &type_char);
+          value.value=(void *)new char;
+            *(char *)value.value=type_char;
+          structlist[i]->values.push_back(value);
+
+          value.type=TAG_SHORT;
+          value.name="Damage";
+          sint16 type_sint16;
+          get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "Damage", &type_sint16);
+          value.value=(void *)new sint16;
+          *(sint16 *)value.value=type_sint16;
+          structlist[i]->values.push_back(value);
+
+          value.type=TAG_SHORT;
+          value.name="id";
+          get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "id", &type_sint16);
+          value.value=(void *)new sint16;
+          *(sint16 *)value.value=type_sint16;
+          structlist[i]->values.push_back(value);
+        }
+
+        theEntity->lists.push_back(itemlist);
+      }
+      
+      //If entity doesn't exist in the list, resize the list to fit it in
+      if(!entityExists)
+      {
+        NBT_struct **newlist= new NBT_struct *[entitylist->length+1];
+        NBT_struct **oldlist=(NBT_struct **)entitylist->items;
+        for(int i=0;i<entitylist->length;i++)
+        {          
+          newlist[i]=oldlist[i];
+        }
+        entitylist->items=(void **)newlist;
+        delete [] (NBT_struct **)oldlist;
+        entitylist->length++;
+        newlist[entitylist->length]= theEntity;
+      }
+      //If item exists, replace the old with the new
+      else
+      {
+        NBT_struct **oldlist=(NBT_struct **)entitylist->items;
+        freeNBT_struct(existingID[oldlist]);
+        existingID[oldlist]=theEntity;
+      }
+    }
+  }
+
+  //Send complex entity packet to others
+  if(theEntity)
+  {
+    uint8 *structdump = new uint8 [ALLOCATE_NBTFILE];
+    uint8 *packetData = new uint8[ALLOCATE_NBTFILE];
+    int dumped=dumpNBT_struct(theEntity, structdump);
+    uLongf written=ALLOCATE_NBTFILE;
+       
+    compress(&packetData[13], &written, structdump, dumped);
+    packetData[0] = 0x3b; //Complex Entities
+    putSint32(&packetData[1],x);
+    putSint16(&packetData[5],y);
+    putSint32(&packetData[7],z);
+    putSint16(&packetData[11], (sint16)written);
+    user->sendAll((uint8 *)&packetData[0], 13+written);    
+    std::cout << "Written out: " << written << std::endl;
+
+    FILE *outfile2=fopen("dumped3.nbt", "wb");
+    fwrite(&packetData[13],written,1,outfile2);
+    fclose(outfile2);
+
+    /*
+    gzFile outfile2=gzopen("dumped2.nbt", "wb");
+    gzwrite(outfile2,structdump, dumped);
+    gzclose(outfile2);
+    */
+    
+    delete [] packetData;
+    delete [] structdump;
+  }
+
+
+
+
+
   return curpos;
 }
 

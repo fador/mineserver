@@ -125,5 +125,6 @@ int dumpNBT_byte_array(NBT_byte_array *input, uint8 *buffer, bool list=false);
 int dumpNBT_list(NBT_list *input, uint8 *buffer);
 
 bool freeNBT_struct(NBT_struct *input);
+bool freeNBT_list(NBT_list *input);
 
 #endif
