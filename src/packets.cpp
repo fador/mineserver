@@ -175,7 +175,7 @@ int PacketHandler::login_request(User *user)
     return curpos;
   }
   
-  user->changeNick(player, Chat::get().admins);
+  user->changeNick(player);
 
   //Load user data
   user->loadData();

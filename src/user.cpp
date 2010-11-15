@@ -67,8 +67,9 @@ User::User(int sock, uint32 EID)
   this->pos.z=Map::get().spawnPos.z();
 }
 
-bool User::changeNick(std::string nick, std::deque<std::string> admins)
+bool User::changeNick(std::string nick)
 {
+  std::deque<std::string> admins = Chat::get().admins;
   this->nick=nick;
   
   // Check adminstatus

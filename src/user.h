@@ -93,7 +93,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       std::deque<unsigned char> buffer;
 
 
-      bool changeNick(std::string nick, std::deque<std::string> admins);
+      bool changeNick(std::string nick);
       bool updatePos(double x, double y, double z, double stance);
       bool updateLook(float yaw, float pitch);
 
