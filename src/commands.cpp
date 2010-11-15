@@ -114,6 +114,7 @@ void kit(User *user, std::string command, std::deque<std::string> args)
         item.EID = generateEID();
         item.item = *iter;
         item.count = 1;
+        item.health=0;
         item.pos.x() = static_cast<int>(user->pos.x*32 + (rand() % 30));
         item.pos.y() = static_cast<int>(user->pos.y*32);
         item.pos.z() = static_cast<int>(user->pos.z*32 + (rand() % 30));
