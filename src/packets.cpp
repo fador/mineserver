@@ -1017,7 +1017,7 @@ int PacketHandler::complex_entities(User *user)
   inflateInit2(&zstream,1+MAX_WBITS);
 
   //inflateReset2(&zstream,8+MAX_WBITS);
-  if(int state=inflate(&zstream, Z_FINISH)!=Z_OK)
+  if(int state=inflate(&zstream, Z_FULL_FLUSH)!=Z_OK)
   {
       std::cout << "Error in inflate: " << state << std::endl;
       inflateEnd(&zstream);
@@ -1117,7 +1117,7 @@ int PacketHandler::complex_entities(User *user)
       } //End For entitylist
 
       //Generate struct
-      theEntity = new NBT_struct;          
+      theEntity = new NBT_struct;
       NBT_value value;
 
       //Push ID
@@ -1159,9 +1159,9 @@ int PacketHandler::complex_entities(User *user)
         NBT_struct **structlist=(NBT_struct **)itemlist.items;
         for(int i=0;i<itemlist.length;i++)
         {
-          itemlist.items[i]=(void *)new NBT_struct;
+          structlist[i]=new NBT_struct;
+
           //Generate struct
-          //Position
           value.type=TAG_BYTE;
           value.name="Count";
           char type_char;
@@ -1195,7 +1195,7 @@ int PacketHandler::complex_entities(User *user)
 
         theEntity->lists.push_back(itemlist);
       }
-      /*
+      
       //If entity doesn't exist in the list, resize the list to fit it in
       if(!entityExists)
       {
@@ -1208,16 +1208,18 @@ int PacketHandler::complex_entities(User *user)
         entitylist->items=(void **)newlist;
         delete [] (NBT_struct **)oldlist;
         entitylist->length++;
-        newlist[entitylist->length]= theEntity;
+        newlist[entitylist->length-1]= theEntity;
       }
       //If item exists, replace the old with the new
       else
       {
+        //Destroy old entitylist
         NBT_struct **oldlist=(NBT_struct **)entitylist->items;
         freeNBT_struct(oldlist[existingID]);
+        //Replace with the new
         oldlist[existingID]=theEntity;
       }
-      */
+      
     }
   }
 

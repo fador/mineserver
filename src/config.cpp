@@ -75,6 +75,9 @@ bool Conf::load(std::string configFile)
   std::string text;
   while(getline(ifs, temp))
   {
+    //If empty line
+    if(temp.size() == 0) continue;
+
     // If commentline -> skip to next
     if(temp[0] == COMMENTPREFIX) continue;
 
