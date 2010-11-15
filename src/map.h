@@ -182,9 +182,15 @@ public:
 
   // Block value/meta get/set
   bool getBlock(int x, int y, int z, uint8 *type, uint8 *meta);
+  bool getBlock(vec pos, uint8 *type, uint8 *meta)
+    { return getBlock(pos.x(), pos.y(), pos.z(), type, meta); }
   bool setBlock(int x, int y, int z, char type, char meta);
+  bool setBlock(vec pos, char type, char meta)
+    { return setBlock(pos.x(), pos.y(), pos.z(), type, meta); }
 
   bool sendBlockChange(int x, int y, int z, char type, char meta);
+  bool sendBlockChange(vec pos, char type, char meta)
+    { return sendBlockChange(pos.x(), pos.y(), pos.z(), type, meta); }
 
   bool sendPickupSpawn(spawnedItem item);  
 
