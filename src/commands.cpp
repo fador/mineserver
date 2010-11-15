@@ -74,16 +74,16 @@ void rules(User *user, std::string command, std::deque<std::string> args)
   if (tUser != NULL)
   {
     // Send rules
-    std::ifstream motdfs( RULESFILE.c_str() );
+    std::ifstream ofs( RULESFILE.c_str() );
     std::string temp;
 
-    while (getline(motdfs, temp))
+    while (getline(ofs, temp))
     {
       // If not a comment
       if (temp.empty() || temp[0] == COMMENTPREFIX)
         Chat::get().sendMsg(tUser, temp, Chat::USER);
     }
-    motdfs.close();
+    ofs.close();
   }
   else
   {
@@ -103,7 +103,7 @@ void kit(User *user, std::string command, std::deque<std::string> args)
   {
     if (args[0] == "starter")
     {
-      std::vector<int> kitItems = Conf::get().vValue("kit_starter");
+      std::vector<int> kitItems = Conf::get().vValue("kit_" + args[0]);
       for (std::vector<int>::iterator iter = kitItems.begin(), end = kitItems.end();
                                       iter != end;
                                       ++iter)
