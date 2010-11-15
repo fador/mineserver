@@ -101,9 +101,10 @@ void kit(User *user, std::string command, std::deque<std::string> args)
 {
   if (!args.empty())
   {
-    if (args[0] == "starter")
+    std::vector<int> kitItems = Conf::get().vValue("kit_" + args[0]);
+    // If kit is found
+    if(!kitItems.empty())
     {
-      std::vector<int> kitItems = Conf::get().vValue("kit_" + args[0]);
       for (std::vector<int>::iterator iter = kitItems.begin(), end = kitItems.end();
                                       iter != end;
                                       ++iter)
@@ -118,6 +119,10 @@ void kit(User *user, std::string command, std::deque<std::string> args)
         Map::get().sendPickupSpawn(item);
         kitItems.pop_back();
       }
+    }
+    else
+    {
+      reportError(user, "Kit " + args[0] + " not found");
     }
   }
 }
@@ -134,7 +139,6 @@ void kick(User *user, std::string command, std::deque<std::string> args)
   if (!args.empty())
   {
     std::string victim = args[0];
-    LOG("Kicking: " + victim);
 
     User *tUser = getUserByNick(victim);
 
@@ -156,7 +160,6 @@ void kick(User *user, std::string command, std::deque<std::string> args)
       }
 
       tUser->kick(kickMsg);
-      LOG("Kicked!");
     }
     else
     {
