@@ -107,15 +107,15 @@ void Map::initMap()
   
   delete [] uncompressedData;
 
-  if(!get_NBT_value(&levelInfo, "SpawnX", &spawnPos.x) ||
-     !get_NBT_value(&levelInfo, "SpawnY", &spawnPos.y) ||
-     !get_NBT_value(&levelInfo, "SpawnZ", &spawnPos.z))
+  if(!get_NBT_value(&levelInfo, "SpawnX", &spawnPos.x()) ||
+     !get_NBT_value(&levelInfo, "SpawnY", &spawnPos.y()) ||
+     !get_NBT_value(&levelInfo, "SpawnZ", &spawnPos.z()))
   {
     std::cout << "Error, spawn pos not found from " << infile << "!" << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  std::cout << "Spawn: (" << spawnPos.x << "," << spawnPos.y << "," << spawnPos.z << ")" << std::endl;
+  std::cout << "Spawn: (" << spawnPos.x() << "," << spawnPos.y() << "," << spawnPos.z() << ")" << std::endl;
 }
 
 void Map::freeMap() {}
@@ -625,8 +625,8 @@ bool Map::sendPickupSpawn(spawnedItem item)
   items[item.EID]=storedItem;
 
   //Push to local item storage
-  int chunk_x = blockToChunk(item.x/32);
-  int chunk_z = blockToChunk(item.z/32);
+  int chunk_x = blockToChunk(item.pos.x()/32);
+  int chunk_z = blockToChunk(item.pos.z()/32);
   uint32 chunkHash;
   posToId(chunk_x,chunk_z,&chunkHash);
   mapItems[chunkHash].push_back(storedItem);
@@ -643,11 +643,11 @@ bool Map::sendPickupSpawn(spawnedItem item)
   changeArray[curpos]=item.count;
   curpos++;
 
-  putSint32(&changeArray[curpos], item.x);
+  putSint32(&changeArray[curpos], item.pos.x());
   curpos+=4;
-  putSint32(&changeArray[curpos], item.y);
+  putSint32(&changeArray[curpos], item.pos.y());
   curpos+=4;
-  putSint32(&changeArray[curpos], item.z);
+  putSint32(&changeArray[curpos], item.pos.z());
   curpos+=4;
   changeArray[curpos]=0; // Rotation
   curpos++;

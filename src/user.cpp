@@ -62,13 +62,14 @@ User::User(int sock, uint32 EID)
   // ENABLED FOR DEBUG
   this->admin=true;
 
-  this->pos.x=Map::get().spawnPos.x;
-  this->pos.y=Map::get().spawnPos.y;
-  this->pos.z=Map::get().spawnPos.z;
+  this->pos.x=Map::get().spawnPos.x();
+  this->pos.y=Map::get().spawnPos.y();
+  this->pos.z=Map::get().spawnPos.z();
 }
 
-bool User::changeNick(std::string nick, std::deque<std::string> admins)
+bool User::changeNick(std::string nick)
 {
+  std::deque<std::string> admins = Chat::get().admins;
   this->nick=nick;
   
   // Check adminstatus
@@ -476,9 +477,9 @@ bool User::updatePos(double x, double y, double z, double stance)
         for(sint32 i=Map::get().mapItems[chunkHash].size()-1;i>=0;i--)
         {
           //No more than 2 blocks away
-          if(abs((sint32)x-Map::get().mapItems[chunkHash][i]->x/32) < 2 && 
-             abs((sint32)z-Map::get().mapItems[chunkHash][i]->z/32) < 2 &&
-             abs((sint32)y-Map::get().mapItems[chunkHash][i]->y/32) < 2)
+          if(abs((sint32)x-Map::get().mapItems[chunkHash][i]->pos.x()/32) < 2 && 
+             abs((sint32)z-Map::get().mapItems[chunkHash][i]->pos.z()/32) < 2 &&
+             abs((sint32)y-Map::get().mapItems[chunkHash][i]->pos.y()/32) < 2)
           {
             //Dont pickup own spawns right away
             if(Map::get().mapItems[chunkHash][i]->spawnedBy != this->UID ||
@@ -521,15 +522,15 @@ bool User::updatePos(double x, double y, double z, double stance)
 
     
       //Chunk position changed, check for map updates
-      if((int)(x/16) != curChunk.x ||(int)(z/16) != curChunk.z)
+      if((int)(x/16) != curChunk.x() ||(int)(z/16) != curChunk.z())
       {
         //This is not accurate chunk!!
-        curChunk.x=(int)(x/16);
-        curChunk.z=(int)(z/16);
+        curChunk.x()=(int)(x/16);
+        curChunk.z()=(int)(z/16);
 
-        for(int mapx=-viewDistance+curChunk.x;mapx<=viewDistance+curChunk.x;mapx++)
+        for(int mapx=-viewDistance+curChunk.x();mapx<=viewDistance+curChunk.x();mapx++)
         {
-          for(int mapz=-viewDistance+curChunk.z;mapz<=viewDistance+curChunk.z;mapz++)
+          for(int mapz=-viewDistance+curChunk.z();mapz<=viewDistance+curChunk.z();mapz++)
           {
             addQueue(mapx,mapz);
           }
@@ -538,12 +539,12 @@ bool User::updatePos(double x, double y, double z, double stance)
         for(unsigned int i=0;i<mapKnown.size();i++)
         {
           //If client has map data more than viesDistance+1 chunks away, remove it
-          if(mapKnown[i].x<curChunk.x-viewDistance-1 ||
-             mapKnown[i].x>curChunk.x+viewDistance+1 ||
-             mapKnown[i].z<curChunk.z-viewDistance-1 ||
-             mapKnown[i].z>curChunk.z+viewDistance+1)
+          if(mapKnown[i].x()<curChunk.x()-viewDistance-1 ||
+             mapKnown[i].x()>curChunk.x()+viewDistance+1 ||
+             mapKnown[i].z()<curChunk.z()-viewDistance-1 ||
+             mapKnown[i].z()>curChunk.z()+viewDistance+1)
           {
-            addRemoveQueue(mapKnown[i].x,mapKnown[i].z);              
+            addRemoveQueue(mapKnown[i].x(),mapKnown[i].z());              
           }
         }
       }
@@ -609,19 +610,19 @@ bool User::sendAdmins(uint8* data,uint32 len)
 
 bool User::addQueue(int x, int z)
 {
-  coord newMap={x,0,z};
+  vec newMap(x,0,z);
 
   for(unsigned int i=0;i<mapQueue.size();i++)
   {
     // Check for duplicates
-    if(mapQueue[i].x==newMap.x && mapQueue[i].z==newMap.z)
+    if(mapQueue[i].x()==newMap.x() && mapQueue[i].z()==newMap.z())
       return false;
   }
 
   for(unsigned int i=0;i<mapKnown.size();i++)
   {
     //Check for duplicates
-    if(mapKnown[i].x==newMap.x && mapKnown[i].z==newMap.z)
+    if(mapKnown[i].x()==newMap.x() && mapKnown[i].z()==newMap.z())
       return false;
   }
 
@@ -632,7 +633,7 @@ bool User::addQueue(int x, int z)
 
 bool User::addRemoveQueue(int x, int z)
 {
-  coord newMap={x,0,z};
+  vec newMap(x,0,z);
 
   this->mapRemoveQueue.push_back(newMap);
 
@@ -641,7 +642,7 @@ bool User::addRemoveQueue(int x, int z)
 
 bool User::addKnown(int x, int z)
 {
-  coord newMap={x,0,z};
+  vec newMap(x,0,z);
   this->mapKnown.push_back(newMap);
 
   return true;
@@ -652,7 +653,7 @@ bool User::delKnown(int x, int z)
   
   for(unsigned int i=0;i<mapKnown.size();i++)
   {
-    if(mapKnown[i].x==x && mapKnown[i].z==z)
+    if(mapKnown[i].x()==x && mapKnown[i].z()==z)
     {
       mapKnown.erase(mapKnown.begin()+i);
       return true;
@@ -660,12 +661,6 @@ bool User::delKnown(int x, int z)
   }
 
   return false;
-}
-
-bool SortVect(const coord &first, const coord &second)
-{
-  return (first.x-Map::get().spawnPos.x/16)*(first.x-Map::get().spawnPos.x/16)+(first.z-Map::get().spawnPos.z/16)*(first.z-Map::get().spawnPos.z/16) 
-          < (second.x-Map::get().spawnPos.x/16)*(second.x-Map::get().spawnPos.x/16)+(second.z-Map::get().spawnPos.z/16)*(second.z-Map::get().spawnPos.z/16);
 }
 
 bool User::popMap()
@@ -676,13 +671,13 @@ bool User::popMap()
     uint8 preChunk[10];
     //Pre chunk
     preChunk[0]=0x32;
-    putSint32(&preChunk[1], mapRemoveQueue[0].x);
-    putSint32(&preChunk[5], mapRemoveQueue[0].z);
+    putSint32(&preChunk[1], mapRemoveQueue[0].x());
+    putSint32(&preChunk[5], mapRemoveQueue[0].z());
     preChunk[9]=0; //Unload chunk
     bufferevent_write(this->buf_ev, (uint8 *)&preChunk[0], 10);
 
     //Delete from known list
-    delKnown(mapRemoveQueue[0].x, mapRemoveQueue[0].z);
+    delKnown(mapRemoveQueue[0].x(), mapRemoveQueue[0].z());
 
     //Remove from queue
     mapRemoveQueue.erase(mapRemoveQueue.begin());
@@ -691,6 +686,26 @@ bool User::popMap()
   }
 
   return false;
+}
+
+namespace
+{
+
+class DistanceComparator
+{
+  private:
+    vec target;
+  public:
+    DistanceComparator(vec tgt) : target(tgt) { target.y() = 0; }
+    bool operator()(vec a, vec b) const
+    {
+      a.y() = 0;
+      b.y() = 0;
+      return vec::squareDistance(a, target) <
+             vec::squareDistance(b, target);
+    }
+};
+
 }
 
 bool User::pushMap()
@@ -702,12 +717,15 @@ bool User::pushMap()
   {
     maxcount--;
     // Sort by distance from center
-    sort(mapQueue.begin(),mapQueue.end(),SortVect);
+    vec target(static_cast<int>(pos.x / 16),
+               static_cast<int>(pos.y / 16),
+               static_cast<int>(pos.z / 16));
+    sort(mapQueue.begin(),mapQueue.end(),DistanceComparator(target));
 
-    Map::get().sendToUser(this,mapQueue[0].x, mapQueue[0].z);
+    Map::get().sendToUser(this,mapQueue[0].x(), mapQueue[0].z());
 
     // Add this to known list
-    addKnown(mapQueue[0].x, mapQueue[0].z);
+    addKnown(mapQueue[0].x(), mapQueue[0].z());
 
     // Remove from queue
     mapQueue.erase(mapQueue.begin());

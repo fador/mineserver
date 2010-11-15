@@ -32,6 +32,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ctime>
 #include "nbt.h"
 #include "user.h"
+#include "vec.h"
 
 struct spawnedItem
 {
@@ -39,9 +40,7 @@ struct spawnedItem
   int item;
   char count;
   sint16 health;
-  int x;
-  int y;
-  int z;
+  vec pos;
   time_t spawnedAt;
   uint32 spawnedBy;
 
@@ -124,7 +123,7 @@ public:
   std::string mapDirectory;
 
   // Map spawn position
-  coord spawnPos;
+  vec spawnPos;
 
   // for level.dat file
   NBT_struct levelInfo;
@@ -183,9 +182,15 @@ public:
 
   // Block value/meta get/set
   bool getBlock(int x, int y, int z, uint8 *type, uint8 *meta);
+  bool getBlock(vec pos, uint8 *type, uint8 *meta)
+    { return getBlock(pos.x(), pos.y(), pos.z(), type, meta); }
   bool setBlock(int x, int y, int z, char type, char meta);
+  bool setBlock(vec pos, char type, char meta)
+    { return setBlock(pos.x(), pos.y(), pos.z(), type, meta); }
 
   bool sendBlockChange(int x, int y, int z, char type, char meta);
+  bool sendBlockChange(vec pos, char type, char meta)
+    { return sendBlockChange(pos.x(), pos.y(), pos.z(), type, meta); }
 
   bool sendPickupSpawn(spawnedItem item);  
 

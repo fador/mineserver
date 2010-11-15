@@ -175,7 +175,7 @@ int PacketHandler::login_request(User *user)
     return curpos;
   }
   
-  user->changeNick(player, Chat::get().admins);
+  user->changeNick(player);
 
   //Load user data
   user->loadData();
@@ -608,12 +608,12 @@ void PacketHandler::player_digging(uint8 *data, User *user)
           item.item=(int)topblock;
           item.count=1;
 
-          item.x = x*32;
-          item.y = (y+1)*32;
-          item.z = z*32;
+          item.pos.x() = x*32;
+          item.pos.y() = (y+1)*32;
+          item.pos.z() = z*32;
           //Randomize spawn position a bit
-          item.x+=5+(rand()%22);
-          item.z+=5+(rand()%22);
+          item.pos.x()+=5+(rand()%22);
+          item.pos.z()+=5+(rand()%22);
         
           Map::get().sendPickupSpawn(item);
         }
@@ -637,12 +637,12 @@ void PacketHandler::player_digging(uint8 *data, User *user)
           item.item=(int)block;
           item.count=1;
         }
-        item.x = x*32;
-        item.y = y*32;
-        item.z = z*32;
+        item.pos.x() = x*32;
+        item.pos.y() = y*32;
+        item.pos.z() = z*32;
         //Randomize spawn position a bit
-        item.x+=5+(rand()%22);
-        item.z+=5+(rand()%22);
+        item.pos.x()+=5+(rand()%22);
+        item.pos.z()+=5+(rand()%22);
         
         // If count is greater than 0
         if(item.count > 0)
@@ -650,7 +650,7 @@ void PacketHandler::player_digging(uint8 *data, User *user)
       }
       
       // Check liquid physics
-      Physics::get().checkSurrounding(x, y, z);
+      Physics::get().checkSurrounding(vec(x, y, z));
      
       
       // Block physics for BLOCK_GRAVEL and BLOCK_SAND and BLOCK_SNOW
@@ -724,7 +724,7 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
   Map::get().getBlock(x,y,z, &block_direction, &metadata_direction);
 
   // Check liquid physics
-  Physics::get().checkSurrounding(x, y, z);
+  Physics::get().checkSurrounding(vec(x, y, z));
 
   //If placing normal block and current block is empty
   if(blockID<0xff && blockID!=-1 && ( block_direction == BLOCK_AIR || 
@@ -816,6 +816,31 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
     }    
   }
 
+  if(blockID == BLOCK_TORCH ||
+     blockID == BLOCK_REDSTONE_TORCH_OFF ||
+     blockID == BLOCK_REDSTONE_TORCH_ON)
+  {
+    switch (direction)
+    {
+    case 0:
+    case 1:
+      metadata = 5;
+      break;
+    case 2:
+      metadata = 4;
+      break;
+    case 3:
+      metadata = 3;
+      break;
+    case 4:
+      metadata = 1;
+      break;
+    case 5:
+      metadata = 2;
+      break;
+    }
+  }
+
   if(change)
   {
     Map::get().setBlock(x,y,z, blockID, metadata);
@@ -825,7 +850,7 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
     if(blockID == BLOCK_WATER || blockID == BLOCK_STATIONARY_WATER ||
        blockID == BLOCK_LAVA || blockID == BLOCK_STATIONARY_LAVA)
     {
-      Physics::get().addSimulation(x,y,z);
+      Physics::get().addSimulation(vec(x,y,z));
     }
   }
 
@@ -867,11 +892,11 @@ void PacketHandler::pickup_spawn(uint8 *data, User *user)
   item.count = data[curpos];
   curpos++;
 
-  item.x = getSint32(&data[curpos]);
+  item.pos.x() = getSint32(&data[curpos]);
   curpos+=4;
-  item.y = getSint32(&data[curpos]);
+  item.pos.y() = getSint32(&data[curpos]);
   curpos+=4;
-  item.z = getSint32(&data[curpos]);
+  item.pos.z() = getSint32(&data[curpos]);
   curpos+=4;
   item.spawnedBy=user->UID;
 

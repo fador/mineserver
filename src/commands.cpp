@@ -95,7 +95,7 @@ void rules(User *user, std::string command, std::deque<std::string> args)
 void home(User *user, std::string command, std::deque<std::string> args)
 {
   Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + "Teleporting you home!", Chat::USER);
-  user->teleport(Map::get().spawnPos.x, Map::get().spawnPos.y + 2, Map::get().spawnPos.z);
+  user->teleport(Map::get().spawnPos.x(), Map::get().spawnPos.y() + 2, Map::get().spawnPos.z());
 }
 
 void kit(User *user, std::string command, std::deque<std::string> args)
@@ -114,9 +114,9 @@ void kit(User *user, std::string command, std::deque<std::string> args)
         item.EID = generateEID();
         item.item = *iter;
         item.count = 1;
-        item.x = static_cast<int>(user->pos.x*32 + (rand() % 30));
-        item.y = static_cast<int>(user->pos.y*32);
-        item.z = static_cast<int>(user->pos.z*32 + (rand() % 30));
+        item.pos.x() = static_cast<int>(user->pos.x*32 + (rand() % 30));
+        item.pos.y() = static_cast<int>(user->pos.y*32);
+        item.pos.z() = static_cast<int>(user->pos.z*32 + (rand() % 30));
         Map::get().sendPickupSpawn(item);
         kitItems.pop_back();
       }
@@ -294,9 +294,9 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
       item.item = itemId;
       item.health = 0;
       item.count = amount;
-      item.x = static_cast<int>(tUser->pos.x * 32);
-      item.y = static_cast<int>(tUser->pos.y * 32);
-      item.z = static_cast<int>(tUser->pos.z * 32);
+      item.pos.x() = static_cast<int>(tUser->pos.x * 32);
+      item.pos.y() = static_cast<int>(tUser->pos.y * 32);
+      item.pos.z() = static_cast<int>(tUser->pos.z * 32);
 
       Map::get().sendPickupSpawn(item);
     }
