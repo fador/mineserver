@@ -91,6 +91,9 @@ bool Chat::checkMotd(std::string motdFile)
 
 bool Chat::loadAdmins(std::string adminFile)
 {
+  // Clear current admin-vector
+  admins.clear();
+
   // Read admins to deque
   std::ifstream ifs(adminFile.c_str());
 
@@ -107,9 +110,6 @@ bool Chat::loadAdmins(std::string adminFile)
   }
 
   std::string temp;
-
-  admins.clear();
-
   while(getline(ifs, temp))
   {
     // If not commentline
@@ -173,7 +173,6 @@ bool Chat::handleMsg(User *user, std::string msg)
   struct tm* Tm = localtime(&rawTime);
 
   std::string timeStamp (asctime(Tm));
-
   timeStamp = timeStamp.substr(11, 5);
 
   //
@@ -191,7 +190,7 @@ bool Chat::handleMsg(User *user, std::string msg)
   // Adminchat
   else if(msg[0] == ADMINCHATPREFIX && user->admin)
   {
-    msg = timeStamp + " <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg.substr(1);
+    msg = timeStamp + " @@ <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg.substr(1);
     this->sendMsg(user, msg, ADMINS);
   }
 
