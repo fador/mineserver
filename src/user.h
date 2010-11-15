@@ -30,6 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <deque>
 #include <event.h>
+#include "vec.h"
 #include "tools.h"
 #include "constants.h"
 
@@ -41,13 +42,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     double stance;
     float yaw;
     float pitch;
-  };
-
-  struct coord
-  {
-    int x;
-    int y;
-    int z;
   };
 
   struct Item
@@ -92,7 +86,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       unsigned int UID;
       std::string nick;
       position pos;
-      coord curChunk;
+      vec curChunk;
       Inventory inv;
 
       //Input buffer
@@ -120,13 +114,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       //Map related
 
       //Map queue
-      std::vector<coord> mapQueue;
+      std::vector<vec> mapQueue;
 
       //Chunks needed to be removed from client
-      std::vector<coord> mapRemoveQueue;
+      std::vector<vec> mapRemoveQueue;
 
       //Known map pieces
-      std::vector<coord> mapKnown;
+      std::vector<vec> mapKnown;
 
       //Add map coords to queue
       bool addQueue(int x, int z);
@@ -160,6 +154,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     
   User *getUserByNick(std::string nick);
 
-  bool SortVect(const coord &first, const coord &second);
+  bool SortVect(vec first, vec second);
 
 #endif

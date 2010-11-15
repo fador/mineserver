@@ -107,15 +107,15 @@ void Map::initMap()
   
   delete [] uncompressedData;
 
-  if(!get_NBT_value(&levelInfo, "SpawnX", &spawnPos.x) ||
-     !get_NBT_value(&levelInfo, "SpawnY", &spawnPos.y) ||
-     !get_NBT_value(&levelInfo, "SpawnZ", &spawnPos.z))
+  if(!get_NBT_value(&levelInfo, "SpawnX", &spawnPos.x()) ||
+     !get_NBT_value(&levelInfo, "SpawnY", &spawnPos.y()) ||
+     !get_NBT_value(&levelInfo, "SpawnZ", &spawnPos.z()))
   {
     std::cout << "Error, spawn pos not found from " << infile << "!" << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  std::cout << "Spawn: (" << spawnPos.x << "," << spawnPos.y << "," << spawnPos.z << ")" << std::endl;
+  std::cout << "Spawn: (" << spawnPos.x() << "," << spawnPos.y() << "," << spawnPos.z() << ")" << std::endl;
 }
 
 void Map::freeMap() {}

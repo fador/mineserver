@@ -32,6 +32,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ctime>
 #include "nbt.h"
 #include "user.h"
+#include "vec.h"
 
 struct spawnedItem
 {
@@ -124,7 +125,7 @@ public:
   std::string mapDirectory;
 
   // Map spawn position
-  coord spawnPos;
+  vec spawnPos;
 
   // for level.dat file
   NBT_struct levelInfo;

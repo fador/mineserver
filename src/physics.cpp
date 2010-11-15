@@ -58,6 +58,7 @@ typedef  int socklen_t;
 #include "config.h"
 #include "user.h"
 #include "map.h"
+#include "vec.h"
 
 #include "physics.h"
 
@@ -108,7 +109,7 @@ bool Physics::update()
   clock_t starttime=clock();
 
   std::vector<sint32> toRemove;
-  std::vector<coord> toAdd;
+  std::vector<vec> toAdd;
 
   std::cout << "Simulating " << simList.size() << " items!" << std::endl;
   uint32 listSize=simList.size();
@@ -167,7 +168,7 @@ bool Physics::update()
                 //Else we have to search for source to this block also
                 else if(i==5 || (meta&0x07)>(simList[simIt].blocks[it].meta&0x07))
                 {
-                  coord newblock={x_local, y_local, z_local};
+                  vec newblock(x_local, y_local, z_local);
                   toAdd.push_back(newblock);
                 }
               }
@@ -185,7 +186,7 @@ bool Physics::update()
             //This block will change so add surrounding blocks to simulation
             for(uint32 i=0;i<toAdd.size();i++)
             {
-              addSimulation(toAdd[i].x, toAdd[i].y, toAdd[i].z);
+              addSimulation(toAdd[i].x(), toAdd[i].y(), toAdd[i].z());
             }
             //If not dried out yet
             if(!(simList[simIt].blocks[it].meta&0x8) && (simList[simIt].blocks[it].meta&0x07)<M7)

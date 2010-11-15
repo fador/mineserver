@@ -94,7 +94,7 @@ void rules(User *user, std::string command, std::deque<std::string> args)
 void home(User *user, std::string command, std::deque<std::string> args)
 {
   Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + "Teleporting you home!", Chat::USER);
-  user->teleport(Map::get().spawnPos.x, Map::get().spawnPos.y + 2, Map::get().spawnPos.z);
+  user->teleport(Map::get().spawnPos.x(), Map::get().spawnPos.y() + 2, Map::get().spawnPos.z());
 }
 
 void kit(User *user, std::string command, std::deque<std::string> args)
