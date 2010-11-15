@@ -991,12 +991,15 @@ int PacketHandler::complex_entities(User *user)
   zstream.data_type=Z_BINARY;
   inflateInit2(&zstream,1+MAX_WBITS);
 
-  if(int state=inflate(&zstream, Z_FULL_FLUSH)!=Z_OK)
+  //inflateReset2(&zstream,8+MAX_WBITS);
+  if(int state=inflate(&zstream, Z_FINISH)!=Z_OK)
   {
       std::cout << "Error in inflate: " << state << std::endl;
+      inflateEnd(&zstream);
   }
   uncompressedSize=zstream.total_out;
-
+  
+  
   //uncompress(uncompressedBuffer, &uncompressedSize, buffer, len);
   std::cout << "Uncomp Size: " << uncompressedSize << std::endl;
   
@@ -1019,6 +1022,7 @@ int PacketHandler::complex_entities(User *user)
   int block_z=blockToChunk(z);
   uint32 chunkID;
 
+  
   NBT_struct *theEntity=0;
 
 
@@ -1054,6 +1058,7 @@ int PacketHandler::complex_entities(User *user)
 
         entitylist = get_NBT_list(&mapData, "Entities");
       }
+
       NBT_struct **entities=(NBT_struct **)entitylist->items;
       bool entityExists=false;
       int existingID=0;
@@ -1165,7 +1170,7 @@ int PacketHandler::complex_entities(User *user)
 
         theEntity->lists.push_back(itemlist);
       }
-      
+      /*
       //If entity doesn't exist in the list, resize the list to fit it in
       if(!entityExists)
       {
@@ -1184,9 +1189,10 @@ int PacketHandler::complex_entities(User *user)
       else
       {
         NBT_struct **oldlist=(NBT_struct **)entitylist->items;
-        freeNBT_struct(existingID[oldlist]);
-        existingID[oldlist]=theEntity;
+        freeNBT_struct(oldlist[existingID]);
+        oldlist[existingID]=theEntity;
       }
+      */
     }
   }
 
@@ -1198,7 +1204,28 @@ int PacketHandler::complex_entities(User *user)
     int dumped=dumpNBT_struct(theEntity, structdump);
     uLongf written=ALLOCATE_NBTFILE;
        
-    compress(&packetData[13], &written, structdump, dumped);
+    z_stream zstream2;
+    zstream2.zalloc = Z_NULL;
+    zstream2.zfree = Z_NULL;
+    zstream2.opaque = Z_NULL;
+    zstream2.next_out=&packetData[13];
+    zstream2.next_in=structdump;
+    zstream2.avail_in=dumped;
+    zstream2.avail_out=written;
+    zstream2.total_out=0;
+    zstream2.total_in=0;
+    deflateInit2(&zstream2, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15+MAX_WBITS, 8,
+                         Z_DEFAULT_STRATEGY);
+    //compress(&packetData[13], &written, structdump, dumped);
+    
+    if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
+    {
+      std::cout << "Error in deflate: " << state << std::endl;
+      deflateEnd(&zstream2);
+    }
+    written=zstream2.total_out;
+    
+
     packetData[0] = 0x3b; //Complex Entities
     putSint32(&packetData[1],x);
     putSint16(&packetData[5],y);
