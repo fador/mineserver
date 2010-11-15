@@ -186,7 +186,7 @@ std::vector<int> Conf::vValue(std::string name)
     // Process "array"
     while(tmpStr.length() > 0)
     {
-      // Remove white spaces characters -_-
+      // Remove white spaces characters
       while(tmpStr[0] == ' ') tmpStr = tmpStr.substr(1);
 
       // Split words
