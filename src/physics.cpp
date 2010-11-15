@@ -61,6 +61,36 @@ typedef  int socklen_t;
 
 #include "physics.h"
 
+namespace
+{
+
+bool isWaterBlock(int id)
+{
+  return id == BLOCK_WATER ||
+         id == BLOCK_STATIONARY_WATER;
+}
+
+bool isLavaBlock(int id)
+{
+  return id == BLOCK_LAVA ||
+         id == BLOCK_STATIONARY_LAVA;
+}
+
+bool isLiquidBlock(int id)
+{
+  return isWaterBlock(id) || isLavaBlock(id);
+}
+
+bool mayFallThrough(int id)
+{
+  return id == BLOCK_AIR ||
+         id == BLOCK_WATER ||
+         id == BLOCK_STATIONARY_WATER ||
+         id == BLOCK_SNOW;
+}
+
+}
+
 Physics &Physics::get()
 {
   static Physics instance;
@@ -98,7 +128,7 @@ bool Physics::update()
     //Water simulation
     if(simList[simIt].type == TYPE_WATER)
     {
-      if(block==BLOCK_WATER || block==BLOCK_STATIONARY_WATER)
+      if(isWaterBlock(block))
       {
 
         sint32 it=0;
@@ -127,7 +157,7 @@ bool Physics::update()
 
               //Search neighboring water blocks for source current
               if(Map::get().getBlock(x_local,y_local,z_local, &block, &meta) &&
-                  (block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER) )
+                  isWaterBlock(block) )
               {
                 //is this the source block
                 if(i!=5 && (block == BLOCK_STATIONARY_WATER || (meta&0x07)<(simList[simIt].blocks[it].meta&0x07) || i==0 ) )
@@ -221,10 +251,10 @@ bool Physics::update()
                 }
 
                 if(Map::get().getBlock(x_local, y_local, z_local, &block, &meta)
-                   && (block == BLOCK_AIR || block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER || block == BLOCK_SNOW) )
+                   && mayFallThrough(block) )
                 {
                   //Decrease water level each turn
-                  if(block == BLOCK_AIR || block == BLOCK_SNOW || meta>(simList[simIt].blocks[it].meta&0x07)+1)
+                  if(!isWaterBlock(block) || meta>(simList[simIt].blocks[it].meta&0x07)+1)
                   {
                     meta=(simList[simIt].blocks[it].meta&0x07)+1;
                     Map::get().setBlock(x_local, y_local, z_local, BLOCK_WATER, meta);
@@ -319,8 +349,7 @@ bool Physics::checkSurrounding(int x, int y, int z)
 
     //Add liquid blocks to simulation if they are affected by breaking a block
     if(Map::get().getBlock(x_local,y_local,z_local, &block, &meta) &&
-       (block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER ||
-        block == BLOCK_LAVA || block == BLOCK_STATIONARY_LAVA ))
+       isLiquidBlock(block))
     {
       addSimulation(x_local,y_local,z_local);
     }
