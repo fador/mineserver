@@ -36,17 +36,13 @@ class Physics
 
     struct SimBlock {
       uint8 id;
-      int x;
-      int y;
-      int z;
+      vec pos;
       uint8 meta;
       SimBlock(){}
-      SimBlock(uint8 id, int x, int y, int z, uint8 meta)
+      SimBlock(uint8 id, vec pos, uint8 meta)
       {
         this->id = id;
-        this->x=x;
-        this->y=y;
-        this->z=z;
+        this->pos = pos;
         this->meta=meta;
       }
     };
@@ -69,8 +65,8 @@ class Physics
     bool enabled;
     static Physics &get();
     bool update();
-    bool addSimulation(int x, int y, int z);
-    bool checkSurrounding(int x, int y, int z);
+    bool addSimulation(vec pos);
+    bool checkSurrounding(vec pos);
 };
 
 #endif

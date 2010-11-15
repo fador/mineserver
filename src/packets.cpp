@@ -650,7 +650,7 @@ void PacketHandler::player_digging(uint8 *data, User *user)
       }
       
       // Check liquid physics
-      Physics::get().checkSurrounding(x, y, z);
+      Physics::get().checkSurrounding(vec(x, y, z));
      
       
       // Block physics for BLOCK_GRAVEL and BLOCK_SAND and BLOCK_SNOW
@@ -724,7 +724,7 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
   Map::get().getBlock(x,y,z, &block_direction, &metadata_direction);
 
   // Check liquid physics
-  Physics::get().checkSurrounding(x, y, z);
+  Physics::get().checkSurrounding(vec(x, y, z));
 
   //If placing normal block and current block is empty
   if(blockID<0xff && blockID!=-1 && ( block_direction == BLOCK_AIR || 
@@ -825,7 +825,7 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
     if(blockID == BLOCK_WATER || blockID == BLOCK_STATIONARY_WATER ||
        blockID == BLOCK_LAVA || blockID == BLOCK_STATIONARY_LAVA)
     {
-      Physics::get().addSimulation(x,y,z);
+      Physics::get().addSimulation(vec(x,y,z));
     }
   }
 

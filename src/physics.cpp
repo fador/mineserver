@@ -116,12 +116,10 @@ bool Physics::update()
   // Iterate each simulation
   for(uint32 simIt =0; simIt<listSize;simIt++)
   {
-    int x=simList[simIt].blocks[0].x;
-    int y=simList[simIt].blocks[0].y;
-    int z=simList[simIt].blocks[0].z;
+    vec pos = simList[simIt].blocks[0].pos;
     // Blocks
     uint8 block, meta;
-    Map::get().getBlock(x,y,z, &block, &meta);
+    Map::get().getBlock(pos.x(),pos.y(),pos.z(), &block, &meta);
 
     simList[simIt].blocks[0].id=block;
     simList[simIt].blocks[0].meta=meta;
@@ -143,22 +141,20 @@ bool Physics::update()
           {
             for(int i=0;i<6;i++)
             {
-              int x_local=x;
-              int y_local=y;
-              int z_local=z;
+              vec local(pos);
               switch(i)
               {
-                case 0: y_local++; break;
-                case 1: x_local++; break;
-                case 2: x_local--; break;
-                case 3: z_local++; break;
-                case 4: z_local--; break;
-                case 5: y_local--; break;
+                case 0: local += vec( 0,  1,  0); break;
+                case 1: local += vec( 1,  0,  0); break;
+                case 2: local += vec(-1,  0,  0); break;
+                case 3: local += vec( 0,  0,  1); break;
+                case 4: local += vec( 0,  0, -1); break;
+                case 5: local += vec( 0, -1,  0); break;
               }
 
               //Search neighboring water blocks for source current
-              if(Map::get().getBlock(x_local,y_local,z_local, &block, &meta) &&
-                  isWaterBlock(block) )
+              if(Map::get().getBlock(local.x(),local.y(),local.z(), &block, &meta) &&
+                 isWaterBlock(block) )
               {
                 //is this the source block
                 if(i!=5 && (block == BLOCK_STATIONARY_WATER || (meta&0x07)<(simList[simIt].blocks[it].meta&0x07) || i==0 ) )
@@ -168,8 +164,7 @@ bool Physics::update()
                 //Else we have to search for source to this block also
                 else if(i==5 || (meta&0x07)>(simList[simIt].blocks[it].meta&0x07))
                 {
-                  vec newblock(x_local, y_local, z_local);
-                  toAdd.push_back(newblock);
+                  toAdd.push_back(local);
                 }
               }
             }
@@ -186,7 +181,7 @@ bool Physics::update()
             //This block will change so add surrounding blocks to simulation
             for(uint32 i=0;i<toAdd.size();i++)
             {
-              addSimulation(toAdd[i].x(), toAdd[i].y(), toAdd[i].z());
+              addSimulation(toAdd[i]);
             }
             //If not dried out yet
             if(!(simList[simIt].blocks[it].meta&0x8) && (simList[simIt].blocks[it].meta&0x07)<M7)
@@ -194,11 +189,11 @@ bool Physics::update()
               // Set new water level
               block = BLOCK_WATER;
               meta = simList[simIt].blocks[it].meta+1;
-              Map::get().setBlock(x,y,z, block, meta);
-              Map::get().sendBlockChange(x,y,z, block, meta);
+              Map::get().setBlock(pos.x(),pos.y(),pos.z(), block, meta);
+              Map::get().sendBlockChange(pos.x(),pos.y(),pos.z(), block, meta);
 
               toRemove.push_back(simIt);
-              addSimulation(x,y,z);
+              addSimulation(pos);
               // Update simulation meta information
               //simList[simIt].blocks[it].meta = meta;   
             }
@@ -206,14 +201,15 @@ bool Physics::update()
             else
             {
               //Clear and remove simulation
-              Map::get().setBlock(x,y,z, BLOCK_AIR, 0);
-              Map::get().sendBlockChange(x,y,z, BLOCK_AIR, 0);
+              Map::get().setBlock(pos.x(),pos.y(),pos.z(), BLOCK_AIR, 0);
+              Map::get().sendBlockChange(pos.x(),pos.y(),pos.z(), BLOCK_AIR, 0);
               toRemove.push_back(simIt);
 
               //If below this block has another waterblock, simulate it also              
-              if(Map::get().getBlock(x, y-1, z, &block, &meta) && (block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER))
+              if(Map::get().getBlock(pos.x(), pos.y()-1, pos.z(), &block, &meta) &&
+                 isWaterBlock(block))
               {
-                addSimulation(x, y-1, z);
+                addSimulation(pos - vec(0, 1, 0));
               }
            
             }
@@ -223,16 +219,17 @@ bool Physics::update()
           {
             toAdd.clear();
             // If below is free to fall
-            if(Map::get().getBlock(x, y-1, z, &block, &meta) && (block == BLOCK_AIR || block == BLOCK_SNOW || block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER))
+            if(Map::get().getBlock(pos.x(), pos.y()-1, pos.z(), &block, &meta) &&
+               mayFallThrough(block))
             {
               // Set new fallblock there
               block = BLOCK_WATER;
               meta = M_FALLING;
-              Map::get().setBlock(x,y-1,z, block, meta);
-              Map::get().sendBlockChange(x,y-1,z, block, meta);        
+              Map::get().setBlock(pos.x(),pos.y()-1,pos.z(), block, meta);
+              Map::get().sendBlockChange(pos.x(),pos.y()-1,pos.z(), block, meta);        
               // Change simulation-block to current block
               toRemove.push_back(simIt);
-              addSimulation(x,y-1,z);
+              addSimulation(pos - vec(0, 1, 0));
             }
             //Else if spreading to sides
             //If water level is at minimum, dont simulate anymore
@@ -240,32 +237,30 @@ bool Physics::update()
             {
               for(int i=0;i<4;i++)
               {
-                int x_local=x;
-                int y_local=y;
-                int z_local=z;
+                vec local(pos);
                 switch(i)
                 {
-                  case 0: x_local++; break;
-                  case 1: x_local--; break;
-                  case 2: z_local++; break;
-                  case 3: z_local--; break;
+                  case 0: local += vec( 1,  0,  0); break;
+                  case 1: local += vec(-1,  0,  0); break;
+                  case 2: local += vec( 0,  0,  1); break;
+                  case 3: local += vec( 0,  0, -1); break;
                 }
 
-                if(Map::get().getBlock(x_local, y_local, z_local, &block, &meta)
+                if(Map::get().getBlock(local.x(), local.y(), local.z(), &block, &meta)
                    && mayFallThrough(block) )
                 {
                   //Decrease water level each turn
                   if(!isWaterBlock(block) || meta>(simList[simIt].blocks[it].meta&0x07)+1)
                   {
                     meta=(simList[simIt].blocks[it].meta&0x07)+1;
-                    Map::get().setBlock(x_local, y_local, z_local, BLOCK_WATER, meta);
-                    Map::get().sendBlockChange(x_local, y_local, z_local, BLOCK_WATER, meta);
+                    Map::get().setBlock(local.x(), local.y(), local.z(), BLOCK_WATER, meta);
+                    Map::get().sendBlockChange(local.x(), local.y(), local.z(), BLOCK_WATER, meta);
                     if(meta < M7)
                     {
-                      addSimulation(x_local, y_local, z_local);
+                      addSimulation(local);
                     }
                   }
-                }            
+                }
               } // End for i=0:3
 
               //Remove this block from simulation
@@ -302,23 +297,24 @@ bool Physics::update()
 }
 
 // Add world simulation
-bool Physics::addSimulation(int x, int y, int z)
+bool Physics::addSimulation(vec pos)
 {
   if(!enabled)
     return true;
   uint8 block; uint8 meta;        
-  Map::get().getBlock(x,y,z, &block, &meta);  
-  
+  Map::get().getBlock(pos.x(),pos.y(),pos.z(), &block, &meta);  
+  SimBlock simulationBlock(block, pos, meta);
+
   // Simulating water
-  if(block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
+  if(isWaterBlock(block))
   {
-    simList.push_back(Sim(TYPE_WATER, SimBlock(block, x, y, z, meta)));
+    simList.push_back(Sim(TYPE_WATER, simulationBlock));
     return true;
   }
   // Simulating lava
-  else if(block == BLOCK_LAVA || block == BLOCK_STATIONARY_LAVA)
+  else if(isLavaBlock(block))
   {    
-    simList.push_back(Sim(TYPE_LAVA, SimBlock(block, x, y, z, meta)));
+    simList.push_back(Sim(TYPE_LAVA, simulationBlock));
     return true;
   }
 
@@ -327,7 +323,7 @@ bool Physics::addSimulation(int x, int y, int z)
 
 
 
-bool Physics::checkSurrounding(int x, int y, int z)
+bool Physics::checkSurrounding(vec pos)
 {
   if(!enabled)
     return true;
@@ -335,27 +331,24 @@ bool Physics::checkSurrounding(int x, int y, int z)
   
   for(int i=0;i<6;i++)
   {
-    int x_local=x;
-    int y_local=y;
-    int z_local=z;
+    vec local(pos);
     switch(i)
     {
-      case 0: y_local++; break;
-      case 1: x_local++; break;
-      case 2: x_local--; break;
-      case 3: z_local++; break;
-      case 4: z_local--; break;
-      case 5: y_local--; break;
+      case 0: local += vec( 0,  1,  0); break;
+      case 1: local += vec( 1,  0,  0); break;
+      case 2: local += vec(-1,  0,  0); break;
+      case 3: local += vec( 0,  0,  1); break;
+      case 4: local += vec( 0,  0, -1); break;
+      case 5: local += vec( 0, -1,  0); break;
     }
 
     //Add liquid blocks to simulation if they are affected by breaking a block
-    if(Map::get().getBlock(x_local,y_local,z_local, &block, &meta) &&
+    if(Map::get().getBlock(local.x(),local.y(),local.z(), &block, &meta) &&
        isLiquidBlock(block))
     {
-      addSimulation(x_local,y_local,z_local);
+      addSimulation(local);
     }
   }
 
   return true;
-
 }
