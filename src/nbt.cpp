@@ -463,7 +463,7 @@ int dumpNBT_list(NBT_list *input, uint8 *buffer)
 
   putSint32(&buffer[curpos], input->length);
   curpos += 4;
-  NBT_struct **structlist=(NBT_struct **)input->items;
+  //NBT_struct **structlist=(NBT_struct **)input->items;
   for(int i = 0; i < input->length; i++)
   {
     switch(input->tagId)

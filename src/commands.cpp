@@ -52,7 +52,7 @@ namespace
 
 void reportError(User *user, std::string message)
 {
-  Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + "Error!" + COLOR_RED + message, Chat::USER);
+  Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + "Error! " + COLOR_RED + message, Chat::USER);
 }
 
 void playerList(User *user, std::string command, std::deque<std::string> args)
@@ -267,7 +267,10 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
 
     // Check item validity
     if(!isValidItem(itemId))
+    {
+      reportError(user, "Item " + args[1] + " not found.");
       return;
+    }
 
     if(args.size() > 2)
     {
@@ -316,7 +319,7 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
 }
 
 void Chat::registerStandardCommands()
-{
+{wha
   registerCommand("players", playerList, false);
   registerCommand("about", about, false);
   registerCommand("rules", rules, false);

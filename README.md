@@ -19,11 +19,11 @@ We are trying to minimize memory and cpu usage compared to original Java server.
  * Config file
  * Normal mining/item spawning/item pickups
  * Basic physics for gravel and sand
+ * Experimental physics for water and lava
   
 ### ToDo (Arranged by priority)
  * Map generation
  * Getting chests,furnaces,signs etc to work
- * More Physics (water, lava)
  * Multithreading
  * Growing trees etc.
  * and more
@@ -36,7 +36,7 @@ We are trying to minimize memory and cpu usage compared to original Java server.
 *  /about : Server name & version
 *  /rules : Shows server rules
 *  /home : Teleports user to map spawn location
-*  /kit starter : Gives starterkit. Items defined in config.cfg with kit_starter using itemId's
+*  /kit (name) : Gives kit. Items for kit defined in config.cfg with kit_(name) using itemId's
 
 **Admin only**
 
