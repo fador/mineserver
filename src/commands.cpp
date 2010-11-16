@@ -319,7 +319,7 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
 }
 
 void Chat::registerStandardCommands()
-{wha
+{
   registerCommand("players", playerList, false);
   registerCommand("about", about, false);
   registerCommand("rules", rules, false);
