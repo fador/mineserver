@@ -1224,7 +1224,6 @@ int PacketHandler::complex_entities(User *user)
       //If item exists, replace the old with the new
       else
       {
-        std::cout << "Replacing old! " << existingID << std::endl;
         //Destroy old entitylist
         NBT_struct **oldlist = (NBT_struct **)entitylist->items;
         freeNBT_struct(oldlist[existingID]);
