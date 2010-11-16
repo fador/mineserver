@@ -1,29 +1,29 @@
 /*
-Copyright (c) 2010, The Mineserver Project
-All rights reserved.
+   Copyright (c) 2010, The Mineserver Project
+   All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+ * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
+ * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of the The Mineserver Project nor the
+ * Neither the name of the The Mineserver Project nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #ifndef _MAP_H_
 #define _MAP_H_
@@ -46,8 +46,8 @@ struct spawnedItem
 
   spawnedItem()
   {
-    spawnedAt=time(0);
-    spawnedBy=0;
+    spawnedAt = time(0);
+    spawnedBy = 0;
   }
 };
 
@@ -57,7 +57,8 @@ private:
 
   Map()
   {
-    for(int i=0;i<256;i++) emitLight[i]=0;
+    for(int i = 0; i < 256; i++)
+      emitLight[i] = 0;
     emitLight[0x0A] = 15; // Lava
     emitLight[0x0B] = 15; // Stationary Lava
     emitLight[0x27] = 1;  // Brown mushroom
@@ -69,14 +70,15 @@ private:
     emitLight[0x59] = 15; // Lightstone
     emitLight[0x5A] = 11; // Portal
     emitLight[0x5B] = 15; // Jack-O-Lantern
-    
 
-    for(int i=0;i<256;i++) stopLight[i]=-16;
+
+    for(int i = 0; i < 256; i++)
+      stopLight[i] = -16;
     stopLight[0x00] = 0; // Empty
     stopLight[0x06] = 0; // Sapling
-    stopLight[0x08] =-3; // Water
-    stopLight[0x09] =-3; // Stationary water
-    stopLight[0x12] =-3; // Leaves
+    stopLight[0x08] = -3; // Water
+    stopLight[0x09] = -3; // Stationary water
+    stopLight[0x12] = -3; // Leaves
     stopLight[0x14] = 0; // Glass
     stopLight[0x25] = 0; // Yellow flower
     stopLight[0x26] = 0; // Red rose
@@ -93,30 +95,30 @@ private:
     stopLight[0x4b] = 0; // Redstone Torch (Off)
     stopLight[0x4C] = 0; // Redstone Torch (On)
     stopLight[0x4e] = 0; // Snow
-    stopLight[0x4f] =-3; // Ice    
+    stopLight[0x4f] = -3; // Ice
     stopLight[0x55] = 0; // Fence
     stopLight[0x5A] = 0; // Portal
     stopLight[0x5B] = 0; // Jack-O-Lantern
-  };
+  }
   ~Map()
   {
     // Free all memory
-    for (std::map<uint32, NBT_struct>::const_iterator it = maps.begin(); it != maps.end(); ++it)
+    for(std::map<uint32, NBT_struct>::const_iterator it = maps.begin(); it != maps.end(); ++it)
     {
       releaseMap(maps[it->first].x, maps[it->first].z);
     }
 
     //Free item memory
-    for (std::map<uint32, spawnedItem*>::const_iterator it = items.begin(); it != items.end(); ++it)
+    for(std::map<uint32, spawnedItem *>::const_iterator it = items.begin(); it != items.end(); ++it)
     {
       delete items[it->first];
     }
 
     // Free level.dat info
     freeNBT_struct(&levelInfo);
-  };
+  }
 
-  
+
 
 public:
 
@@ -147,7 +149,7 @@ public:
   std::map<uint32, std::vector<spawnedItem *> > mapItems;
 
   //All spawned items on map
-  std::map<uint32,spawnedItem *> items;
+  std::map<uint32, spawnedItem *> items;
 
   void posToId(int x, int z, uint32 *id);
   void idToPos(uint32 id, int *x, int *z);
@@ -160,10 +162,10 @@ public:
   NBT_struct *getMapData(int x, int z);
 
   // Load map chunk
-  bool loadMap(int x,int z);
+  bool loadMap(int x, int z);
 
-   // Save map chunk to disc
-  bool saveMap(int x,int z);
+  // Save map chunk to disc
+  bool saveMap(int x, int z);
 
   // Save whole map to disc (/save command)
   bool saveWholeMap();
@@ -183,16 +185,22 @@ public:
   // Block value/meta get/set
   bool getBlock(int x, int y, int z, uint8 *type, uint8 *meta);
   bool getBlock(vec pos, uint8 *type, uint8 *meta)
-    { return getBlock(pos.x(), pos.y(), pos.z(), type, meta); }
+  {
+    return getBlock(pos.x(), pos.y(), pos.z(), type, meta);
+  }
   bool setBlock(int x, int y, int z, char type, char meta);
   bool setBlock(vec pos, char type, char meta)
-    { return setBlock(pos.x(), pos.y(), pos.z(), type, meta); }
+  {
+    return setBlock(pos.x(), pos.y(), pos.z(), type, meta);
+  }
 
   bool sendBlockChange(int x, int y, int z, char type, char meta);
   bool sendBlockChange(vec pos, char type, char meta)
-    { return sendBlockChange(pos.x(), pos.y(), pos.z(), type, meta); }
+  {
+    return sendBlockChange(pos.x(), pos.y(), pos.z(), type, meta);
+  }
 
-  bool sendPickupSpawn(spawnedItem item);  
+  bool sendPickupSpawn(spawnedItem item);
 
   static Map &get();
 };
