@@ -252,7 +252,7 @@ int roundUpTo(int x, int nearest)
 void giveItems(User *user, std::string command, std::deque<std::string> args)
 {
   User *tUser = NULL;
-  int itemId = 0, itemCount, itemStacks;
+  int itemId = 0, itemCount = 1, itemStacks = 1;
 
   if(args.size() > 1)
   {
