@@ -993,7 +993,10 @@ int PacketHandler::complex_entities(User *user)
 
   //We only handle chest for now
   if(block != BLOCK_CHEST)
+  {
+    delete[] buffer;
     return curpos;
+  }
 
 
   //Calculate uncompressed size and allocate memory
@@ -1019,7 +1022,7 @@ int PacketHandler::complex_entities(User *user)
       inflateEnd(&zstream);
   }
   //Get size
-  uncompressedSize=zstream.total_out;
+  uncompressedSize  = zstream.total_out;
   
   //Push data to NBT struct
   NBT_struct newObject;
@@ -1034,7 +1037,6 @@ int PacketHandler::complex_entities(User *user)
   int block_z = blockToChunk(z);
   uint32 chunkID;
 
-
   NBT_struct *theEntity = 0;
 
 
@@ -1045,7 +1047,7 @@ int PacketHandler::complex_entities(User *user)
     NBT_struct mapData = Map::get().maps[chunkID];
 
     //Try to find entitylist from the chunk
-    NBT_list *entitylist = get_NBT_list(&mapData, "Entities");
+    NBT_list *entitylist = get_NBT_list(&mapData, "TileEntities");
 
     //If list exists
     if(entitylist)
@@ -1057,7 +1059,7 @@ int PacketHandler::complex_entities(User *user)
         freeNBT_list(entitylist);
         for(i = 0; i < mapData.lists.size(); i++)
         {
-          if(mapData.lists[i].name == "Entities")
+          if(mapData.lists[i].name == "TileEntities")
           {
             //Destroy old list
             freeNBT_list(&mapData.lists[i]);
@@ -1158,27 +1160,27 @@ int PacketHandler::complex_entities(User *user)
         NBT_struct **structlist = (NBT_struct **)itemlist.items;
         for(int i = 0; i < itemlist.length; i++)
         {
-          structlist[i]=new NBT_struct;
+          structlist[i]        = new NBT_struct;
+          char type_char;
+          sint16 type_sint16;
 
           //Generate struct
-          value.type = TAG_BYTE;
-          value.name = "Count";
-          char type_char;
+          value.type             = TAG_BYTE;
+          value.name             = "Count";          
           get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "Count", &type_char);
-          value.value          = (void *)new char;
-          *(char *)value.value = type_char;
+          value.value            = (void *)new char;
+          *(char *)value.value   = type_char;
           structlist[i]->values.push_back(value);
 
-          value.type           = TAG_BYTE;
-          value.name           = "Slot";
+          value.type             = TAG_BYTE;
+          value.name             = "Slot";
           get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "Slot", &type_char);
-          value.value          = (void *)new char;
-          *(char *)value.value = type_char;
+          value.value            = (void *)new char;
+          *(char *)value.value   = type_char;
           structlist[i]->values.push_back(value);
 
-          value.type = TAG_SHORT;
-          value.name = "Damage";
-          sint16 type_sint16;
+          value.type             = TAG_SHORT;
+          value.name             = "Damage";          
           get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "Damage", &type_sint16);
           value.value            = (void *)new sint16;
           *(sint16 *)value.value = type_sint16;
@@ -1209,7 +1211,7 @@ int PacketHandler::complex_entities(User *user)
           dumpNBT_struct(oldlist[i],structbuffer);
           TAG_Compound(structbuffer, newlist[i],true);
           freeNBT_struct(oldlist[i]);
-          oldlist[i]=NULL;
+          oldlist[i] = NULL;
         }
         
         delete [] structbuffer;
@@ -1221,7 +1223,8 @@ int PacketHandler::complex_entities(User *user)
       }
       //If item exists, replace the old with the new
       else
-      {        
+      {
+        std::cout << "Replacing old! " << existingID << std::endl;
         //Destroy old entitylist
         NBT_struct **oldlist = (NBT_struct **)entitylist->items;
         freeNBT_struct(oldlist[existingID]);

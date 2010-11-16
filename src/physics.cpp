@@ -294,7 +294,7 @@ bool Physics::update()
 
   
   clock_t endtime = clock()-starttime;
-  std::cout << "Exit simulation, took " << endtime << " ms, " << simList.size() << " items left" << std::endl;
+  std::cout << "Exit simulation, took " << endtime*1000/CLOCKS_PER_SEC << " ms, " << simList.size() << " items left" << std::endl;
   return true;
 }
 
