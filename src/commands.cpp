@@ -246,10 +246,18 @@ bool isValidItem(int id)
   return true;
 }
 
+int roundUpTo(int x, int nearest) 
+{ 
+  x += (nearest - 1); 
+  x /= nearest; 
+  x *= nearest; 
+  return x; 
+} 
+
 void giveItems(User *user, std::string command, std::deque<std::string> args)
 {
   User *tUser = NULL;
-  int itemId = 0, itemCount = 1, itemStacks = 1;
+  int itemId = 0, itemCount, itemStacks;
 
   if (args.size() > 1)
   {
@@ -266,15 +274,19 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
     if (!isValidItem(itemId))
       return;
 
-    // If itemcount is not provided assume 1
     if (args.size() > 2)
+    {
       itemCount = atoi(args[2].c_str());
-
-    // If multiple stacks
-    if(itemCount > 64) {
-      itemStacks = itemCount & 0x3F ? 1 + (itemCount >> 6) : itemCount >> 6; //(int)ceil(itemCount / 64.0);
-      itemCount = itemCount % 64;
+      // If multiple stacks
+      itemStacks = roundUpTo(itemCount, 64) / 64; 
+      itemCount  -= (itemStacks-1) * 64; 
     }
+    else 
+    {
+      // if itemCount is not provided assume 1
+      itemCount = 1;
+      itemStacks = 1;
+    } 
   }
   else
   {
