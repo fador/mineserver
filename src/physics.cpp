@@ -1,29 +1,29 @@
 /*
-Copyright (c) 2010, The Mineserver Project
-All rights reserved.
+   Copyright (c) 2010, The Mineserver Project
+   All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+ * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
+ * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of the The Mineserver Project nor the
+ * Neither the name of the The Mineserver Project nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 #ifdef WIN32
     #define _CRTDBG_MAP_ALLOC
     #include <stdlib.h>
@@ -103,26 +103,28 @@ bool Physics::update()
 {
   if(!enabled)
     return true;
+
   // Check if needs to be updated
   if(simList.empty())
     return true;
-  clock_t starttime=clock();
+
+  clock_t starttime = clock();
 
   std::vector<sint32> toRemove;
   std::vector<vec> toAdd;
 
   std::cout << "Simulating " << simList.size() << " items!" << std::endl;
-  uint32 listSize=simList.size();
+  uint32 listSize = simList.size();
   // Iterate each simulation
-  for(uint32 simIt =0; simIt<listSize;simIt++)
+  for(uint32 simIt = 0; simIt < listSize; simIt++)
   {
     vec pos = simList[simIt].blocks[0].pos;
     // Blocks
     uint8 block, meta;
     Map::get().getBlock(pos, &block, &meta);
 
-    simList[simIt].blocks[0].id=block;
-    simList[simIt].blocks[0].meta=meta;
+    simList[simIt].blocks[0].id   = block;
+    simList[simIt].blocks[0].meta = meta;
 
     //Water simulation
     if(simList[simIt].type == TYPE_WATER)
@@ -130,72 +132,73 @@ bool Physics::update()
       if(isWaterBlock(block))
       {
 
-        sint32 it=0;
+        sint32 it = 0;
         //for(sint32 it=simList[simIt].blocks.size()-1; it>=0; it--)
         {
 
-          bool havesource=false;
+          bool havesource = false;
 
           //Search for water source if this is not the source
           if(simList[simIt].blocks[it].id != BLOCK_STATIONARY_WATER)
           {
-            for(int i=0;i<6;i++)
+            for(int i = 0; i < 6; i++)
             {
               vec local(pos);
               switch(i)
               {
-                case 0: local += vec( 0,  1,  0); break;
-                case 1: local += vec( 1,  0,  0); break;
-                case 2: local += vec(-1,  0,  0); break;
-                case 3: local += vec( 0,  0,  1); break;
-                case 4: local += vec( 0,  0, -1); break;
-                case 5: local += vec( 0, -1,  0); break;
+              case 0: local += vec( 0,  1,  0); break;
+
+              case 1: local += vec( 1,  0,  0); break;
+
+              case 2: local += vec(-1,  0,  0); break;
+
+              case 3: local += vec( 0,  0,  1); break;
+
+              case 4: local += vec( 0,  0, -1); break;
+
+              case 5: local += vec( 0, -1,  0); break;
               }
 
               //Search neighboring water blocks for source current
               if(Map::get().getBlock(local, &block, &meta) &&
-                 isWaterBlock(block) )
+                 isWaterBlock(block))
               {
                 //is this the source block
-                if(i!=5 && (block == BLOCK_STATIONARY_WATER || (meta&0x07)<(simList[simIt].blocks[it].meta&0x07) || i==0 ) )
-                {
-                  havesource=true;
-                }
+                if(i != 5 &&
+                   (block == BLOCK_STATIONARY_WATER || (meta&0x07) <
+                    (simList[simIt].blocks[it].meta&0x07) || i == 0))
+                  havesource = true;
                 //Else we have to search for source to this block also
-                else if(i==5 || (meta&0x07)>(simList[simIt].blocks[it].meta&0x07))
-                {
+                else if(i == 5 || (meta&0x07) > (simList[simIt].blocks[it].meta&0x07))
                   toAdd.push_back(local);
-                }
               }
             }
           }
           //Stationary water block is the source
           else
-          {
-            havesource=true;
-          }
+            havesource = true;
 
           //If no source, dry block away
           if(!havesource)
           {
             //This block will change so add surrounding blocks to simulation
-            for(uint32 i=0;i<toAdd.size();i++)
+            for(uint32 i = 0; i < toAdd.size(); i++)
             {
               addSimulation(toAdd[i]);
             }
             //If not dried out yet
-            if(!(simList[simIt].blocks[it].meta&0x8) && (simList[simIt].blocks[it].meta&0x07)<M7)
+            if(!(simList[simIt].blocks[it].meta&0x8) && (simList[simIt].blocks[it].meta&0x07) < M7)
             {
               // Set new water level
               block = BLOCK_WATER;
-              meta = simList[simIt].blocks[it].meta+1;
+              meta  = simList[simIt].blocks[it].meta+1;
               Map::get().setBlock(pos, block, meta);
               Map::get().sendBlockChange(pos, block, meta);
 
               toRemove.push_back(simIt);
               addSimulation(pos);
               // Update simulation meta information
-              //simList[simIt].blocks[it].meta = meta;   
+              //simList[simIt].blocks[it].meta = meta;
             }
             //Else this block has dried out
             else
@@ -205,13 +208,11 @@ bool Physics::update()
               Map::get().sendBlockChange(pos, BLOCK_AIR, 0);
               toRemove.push_back(simIt);
 
-              //If below this block has another waterblock, simulate it also              
+              //If below this block has another waterblock, simulate it also
               if(Map::get().getBlock(pos - vec(0, 1, 0), &block, &meta) &&
                  isWaterBlock(block))
-              {
                 addSimulation(pos - vec(0, 1, 0));
-              }
-           
+
             }
           }
           //Have source!
@@ -225,41 +226,42 @@ bool Physics::update()
             {
               // Set new fallblock there
               block = BLOCK_WATER;
-              meta = M_FALLING;
+              meta  = M_FALLING;
               Map::get().setBlock(belowPos, block, meta);
-              Map::get().sendBlockChange(belowPos, block, meta);        
+              Map::get().sendBlockChange(belowPos, block, meta);
               // Change simulation-block to current block
               toRemove.push_back(simIt);
               addSimulation(belowPos);
             }
             //Else if spreading to sides
             //If water level is at minimum, dont simulate anymore
-            else if((simList[simIt].blocks[it].meta&M7)!=M7)
+            else if((simList[simIt].blocks[it].meta&M7) != M7)
             {
-              for(int i=0;i<4;i++)
+              for(int i = 0; i < 4; i++)
               {
                 vec local(pos);
                 switch(i)
                 {
-                  case 0: local += vec( 1,  0,  0); break;
-                  case 1: local += vec(-1,  0,  0); break;
-                  case 2: local += vec( 0,  0,  1); break;
-                  case 3: local += vec( 0,  0, -1); break;
+                case 0: local += vec( 1,  0,  0); break;
+
+                case 1: local += vec(-1,  0,  0); break;
+
+                case 2: local += vec( 0,  0,  1); break;
+
+                case 3: local += vec( 0,  0, -1); break;
                 }
 
-                if(Map::get().getBlock(local, &block, &meta)
-                   && mayFallThrough(block) )
+                if(Map::get().getBlock(local, &block, &meta) &&
+                   mayFallThrough(block))
                 {
                   //Decrease water level each turn
-                  if(!isWaterBlock(block) || meta>(simList[simIt].blocks[it].meta&0x07)+1)
+                  if(!isWaterBlock(block) || meta > (simList[simIt].blocks[it].meta&0x07)+1)
                   {
-                    meta=(simList[simIt].blocks[it].meta&0x07)+1;
+                    meta = (simList[simIt].blocks[it].meta&0x07)+1;
                     Map::get().setBlock(local, BLOCK_WATER, meta);
                     Map::get().sendBlockChange(local, BLOCK_WATER, meta);
                     if(meta < M7)
-                    {
                       addSimulation(local);
-                    }
                   }
                 }
               } // End for i=0:3
@@ -286,14 +288,15 @@ bool Physics::update()
   }
 
 
-  while (!toRemove.empty())
+  while(!toRemove.empty())
   {
     simList.erase(simList.begin()+toRemove.back());
     toRemove.pop_back();
   }
-  
-  clock_t endtime=clock()-starttime;
-  std::cout << "Exit simulation, took " << endtime << " ms, " << simList.size() << " items left" << std::endl;
+
+  clock_t endtime = clock()-starttime;
+  std::cout << "Exit simulation, took " << endtime << " ms, " << simList.size() << " items left"<<
+  std::endl;
   return true;
 }
 
@@ -302,8 +305,9 @@ bool Physics::addSimulation(vec pos)
 {
   if(!enabled)
     return true;
-  uint8 block; uint8 meta;        
-  Map::get().getBlock(pos, &block, &meta);  
+
+  uint8 block; uint8 meta;
+  Map::get().getBlock(pos, &block, &meta);
   SimBlock simulationBlock(block, pos, meta);
 
   // Simulating water
@@ -314,7 +318,7 @@ bool Physics::addSimulation(vec pos)
   }
   // Simulating lava
   else if(isLavaBlock(block))
-  {    
+  {
     simList.push_back(Sim(TYPE_LAVA, simulationBlock));
     return true;
   }
@@ -328,27 +332,31 @@ bool Physics::checkSurrounding(vec pos)
 {
   if(!enabled)
     return true;
+
   uint8 block; uint8 meta;
-  
-  for(int i=0;i<6;i++)
+
+  for(int i = 0; i < 6; i++)
   {
     vec local(pos);
     switch(i)
     {
-      case 0: local += vec( 0,  1,  0); break;
-      case 1: local += vec( 1,  0,  0); break;
-      case 2: local += vec(-1,  0,  0); break;
-      case 3: local += vec( 0,  0,  1); break;
-      case 4: local += vec( 0,  0, -1); break;
-      case 5: local += vec( 0, -1,  0); break;
+    case 0: local += vec( 0,  1,  0); break;
+
+    case 1: local += vec( 1,  0,  0); break;
+
+    case 2: local += vec(-1,  0,  0); break;
+
+    case 3: local += vec( 0,  0,  1); break;
+
+    case 4: local += vec( 0,  0, -1); break;
+
+    case 5: local += vec( 0, -1,  0); break;
     }
 
     //Add liquid blocks to simulation if they are affected by breaking a block
     if(Map::get().getBlock(local, &block, &meta) &&
        isLiquidBlock(block))
-    {
       addSimulation(local);
-    }
   }
 
   return true;

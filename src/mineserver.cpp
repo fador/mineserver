@@ -1,29 +1,29 @@
 /*
-Copyright (c) 2010, The Mineserver Project
-All rights reserved.
+   Copyright (c) 2010, The Mineserver Project
+   All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+ * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
+ * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of the The Mineserver Project nor the
+ * Neither the name of the The Mineserver Project nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include <stdlib.h>
 #ifdef WIN32
@@ -78,7 +78,7 @@ int setnonblock(int fd)
   #else
   int flags;
 
-  flags = fcntl(fd, F_GETFL);
+  flags  = fcntl(fd, F_GETFL);
   flags |= O_NONBLOCK;
   fcntl(fd, F_SETFL, flags);
   #endif
@@ -88,9 +88,9 @@ int setnonblock(int fd)
 
 int main(void)
 {
-  uint32 starttime=(uint32)time(0);
-  uint32 tick=(uint32)time(0);
-  
+  uint32 starttime = (uint32)time(0);
+  uint32 tick      = (uint32)time(0);
+
   initConstants();
 
   Chat::get().loadAdmins(ADMINFILE);
@@ -102,7 +102,7 @@ int main(void)
   Conf::get().load(ITEMALIASFILE);
 
   //Set physics enable state according to config
-  Physics::get().enabled=(Conf::get().iValue("liquid_physics")?true:false);
+  Physics::get().enabled = (Conf::get().iValue("liquid_physics") ? true : false);
 
   //Initialize map
   Map::get().initMap();
@@ -119,8 +119,9 @@ int main(void)
   WSADATA wsaData;
   int iResult;
   // Initialize Winsock
-  iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
-  if (iResult != 0) {
+  iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+  if(iResult != 0)
+  {
     printf("WSAStartup failed with error: %d\n", iResult);
     return EXIT_FAILURE;
   }
@@ -129,35 +130,35 @@ int main(void)
   int socketlisten;
   struct sockaddr_in addresslisten;
   struct event accept_event;
-  int reuse = 1;
+  int reuse             = 1;
 
-  event_base *eventbase=(event_base *)event_init();
+  event_base *eventbase = (event_base *)event_init();
 #ifdef WIN32
   socketlisten = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 #else
   socketlisten = socket(AF_INET, SOCK_STREAM, 0);
 #endif
 
-  if (socketlisten < 0)
+  if(socketlisten < 0)
   {
-    fprintf(stderr,"Failed to create listen socket\n");
+    fprintf(stderr, "Failed to create listen socket\n");
     return 1;
   }
 
   memset(&addresslisten, 0, sizeof(addresslisten));
 
-  addresslisten.sin_family = AF_INET;
+  addresslisten.sin_family      = AF_INET;
   addresslisten.sin_addr.s_addr = INADDR_ANY;
-  addresslisten.sin_port = htons(port);
+  addresslisten.sin_port        = htons(port);
 
   //Bind to port
-  if (bind(socketlisten, (struct sockaddr *)&addresslisten, sizeof(addresslisten)) < 0)
+  if(bind(socketlisten, (struct sockaddr *)&addresslisten, sizeof(addresslisten)) < 0)
   {
     fprintf(stderr, "Failed to bind\n");
     return 1;
   }
 
-  if (listen(socketlisten, 5) < 0)
+  if(listen(socketlisten, 5) < 0)
   {
     fprintf(stderr, "Failed to listen to socket\n");
     return 1;
@@ -168,38 +169,45 @@ int main(void)
   event_set(&accept_event, socketlisten, EV_READ|EV_PERSIST, accept_callback, NULL);
   event_add(&accept_event, NULL);
 
-  std::cout << std::endl
-            << "   _____  .__  "                                                              << std::endl
-            << "  /     \\ |__| ____   ____   ______ ______________  __ ___________ "         << std::endl
-            << " /  \\ /  \\|  |/    \\_/ __ \\ /  ___// __ \\_  __ \\  \\/ // __ \\_  __ \\" << std::endl
-            << "/    Y    \\  |   |  \\  ___/ \\___ \\\\  ___/|  | \\/\\   /\\  ___/|  | \\/" << std::endl
-            << "\\____|__  /__|___|  /\\___  >____  >\\___  >__|    \\_/  \\___  >__|   "     << std::endl
-            << "        \\/        \\/     \\/     \\/     \\/                 \\/       "    << std::endl
-            << "Version " << VERSION <<" by Fador & Nredor"                                   << std::endl << std::endl;
+  std::cout << std::endl<<
+  "   _____  .__  "<<
+  std::endl<<
+  "  /     \\ |__| ____   ____   ______ ______________  __ ___________ "<<
+  std::endl<<
+  " /  \\ /  \\|  |/    \\_/ __ \\ /  ___// __ \\_  __ \\  \\/ // __ \\_  __ \\"<<
+  std::endl<<
+  "/    Y    \\  |   |  \\  ___/ \\___ \\\\  ___/|  | \\/\\   /\\  ___/|  | \\/"<<
+  std::endl<<
+  "\\____|__  /__|___|  /\\___  >____  >\\___  >__|    \\_/  \\___  >__|   "<<
+  std::endl<<
+  "        \\/        \\/     \\/     \\/     \\/                 \\/       "<<
+  std::endl<<
+  "Version " << VERSION <<" by Fador & Nredor"<<
+  std::endl << std::endl;
 
   std::cout << "Listening at port " << port << std::endl;
 
   timeval loopTime;
-  loopTime.tv_sec=0;
-  loopTime.tv_usec=200000; //200ms
+  loopTime.tv_sec  = 0;
+  loopTime.tv_usec = 200000; //200ms
 
-  event_base_loopexit(eventbase,&loopTime);
-  while (event_base_loop(eventbase, 0)==0)
+  event_base_loopexit(eventbase, &loopTime);
+  while(event_base_loop(eventbase, 0) == 0)
   {
-    if(time(0)-starttime>10)
+    if(time(0)-starttime > 10)
     {
-      starttime=(uint32)time(0);
+      starttime = (uint32)time(0);
       std::cout << "Currently " << Users.size() << " users in!" << std::endl;
 
       //If users, ping them
-      if(Users.size()>0)
+      if(Users.size() > 0)
       {
         //0x00 package
-        uint8 data=0;
+        uint8 data = 0;
         Users[0]->sendAll(&data, 1);
 
         //Send server time (after dawn)
-        uint8 data3[9]={0x04, 0x00, 0x00, 0x00,0x00,0x00,0x00,0x0e,0x00};
+        uint8 data3[9] = {0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0e, 0x00};
         Users[0]->sendAll((uint8 *)&data3[0], 9);
       }
 
@@ -208,28 +216,28 @@ int main(void)
 
       //Release chunks not used in <map_release_time> seconds
       std::vector<uint32> toRelease;
-      for (std::map<uint32, int>::const_iterator it = Map::get().mapLastused.begin(); it != Map::get().mapLastused.end(); ++it)
+      for(std::map<uint32, int>::const_iterator it = Map::get().mapLastused.begin();
+          it != Map::get().mapLastused.end();
+          ++it)
       {
         if(Map::get().mapLastused[it->first] <= time(0)-map_release_time)
-        {
           toRelease.push_back(it->first);
-        }
       }
 
-      int x_temp,z_temp;
-      for(unsigned i=0;i<toRelease.size();i++)
+      int x_temp, z_temp;
+      for(unsigned i = 0; i < toRelease.size(); i++)
       {
-        Map::get().idToPos(toRelease[i], &x_temp,&z_temp);
-        Map::get().releaseMap(x_temp,z_temp);
+        Map::get().idToPos(toRelease[i], &x_temp, &z_temp);
+        Map::get().releaseMap(x_temp, z_temp);
       }
     }
 
     //Every second
-    if(time(0)-tick>0)
+    if(time(0)-tick > 0)
     {
-      tick=(uint32)time(0);
+      tick = (uint32)time(0);
       //Loop users
-      for(unsigned int i=0;i<Users.size();i++)
+      for(unsigned int i = 0; i < Users.size(); i++)
       {
         //for(uint8 j=0;j<10;j++)
         {
@@ -245,13 +253,13 @@ int main(void)
     }
 #ifdef WIN32
     if(_kbhit())
-        quit = 1;
+      quit = 1;
 #endif
 
     //Physics simulation every 200ms
     Physics::get().update();
 
-    event_base_loopexit(eventbase,&loopTime);
+    event_base_loopexit(eventbase, &loopTime);
   }
 
   Map::get().freeMap();
@@ -268,6 +276,6 @@ int main(void)
 #ifdef WIN32
   _CrtDumpMemoryLeaks();
 #endif
-  
+
   return EXIT_SUCCESS;
 }
