@@ -205,7 +205,7 @@ bool Physics::update()
               Map::get().sendBlockChange(pos, BLOCK_AIR, 0);
               toRemove.push_back(simIt);
 
-              //If below this block has another waterblock, simulate it also              
+              //If below this block has another waterblock, simulate it also               
               if(Map::get().getBlock(pos - vec(0, 1, 0), &block, &meta) &&
                  isWaterBlock(block))
               {
@@ -256,10 +256,7 @@ bool Physics::update()
                     meta=(simList[simIt].blocks[it].meta&0x07)+1;
                     Map::get().setBlock(local, BLOCK_WATER, meta);
                     Map::get().sendBlockChange(local, BLOCK_WATER, meta);
-                    if(meta < M7)
-                    {
-                      addSimulation(local);
-                    }
+                    addSimulation(local);
                   }
                 }
               } // End for i=0:3
@@ -285,12 +282,12 @@ bool Physics::update()
     }
   }
 
-
-  while (!toRemove.empty())
+  std::vector<int>::reverse_iterator rit;
+  for ( rit=toRemove.rbegin() ; rit < toRemove.rend(); ++rit )
   {
-    simList.erase(simList.begin()+toRemove.back());
-    toRemove.pop_back();
+    simList.erase(simList.begin()+*rit);
   }
+
   
   clock_t endtime=clock()-starttime;
   std::cout << "Exit simulation, took " << endtime << " ms, " << simList.size() << " items left" << std::endl;

@@ -742,6 +742,7 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
     {
       change = true;
     }
+    //std::cout << "Placing over " << (int)block_direction << std::endl;
   }
 
   if(block == BLOCK_SNOW || block == BLOCK_TORCH) //If snow or torch, overwrite
@@ -1063,7 +1064,7 @@ int PacketHandler::complex_entities(User *user)
             break;
           }
         }
-
+        
         //New list
         NBT_list newlisting;  
         newlisting.name="TileEntities";
@@ -1077,7 +1078,6 @@ int PacketHandler::complex_entities(User *user)
       NBT_struct **entities=(NBT_struct **)entitylist->items;
       bool entityExists=false;
       int existingID=-1;
-
 
       //Search for mathing entity in the list
       for(int i=0;i<entitylist->length;i++)
@@ -1197,17 +1197,26 @@ int PacketHandler::complex_entities(User *user)
       //If entity doesn't exist in the list, resize the list to fit it in
       if(!entityExists)
       {
+        
         //ToDo: try this!
         NBT_struct **newlist= new NBT_struct *[entitylist->length+1];
         NBT_struct **oldlist=(NBT_struct **)entitylist->items;
+        uint8 *structbuffer=new uint8[ALLOCATE_NBTFILE];        
         for(int i=0;i<entitylist->length;i++)
         {
-          newlist[i]=oldlist[i];
+          newlist[i]=new NBT_struct;
+          dumpNBT_struct(oldlist[i],structbuffer);
+          TAG_Compound(structbuffer, newlist[i],true);
+          freeNBT_struct(oldlist[i]);
+          oldlist[i]=NULL;
         }
+        
+        delete [] structbuffer;
         entitylist->length++;
-        newlist[entitylist->length-1]= theEntity;
         entitylist->items=(void **)newlist;
-        //delete [] (NBT_struct **)oldlist;        
+        delete [] (NBT_struct **)oldlist;
+        newlist[entitylist->length-1] = theEntity;
+        
       }
       //If item exists, replace the old with the new
       else

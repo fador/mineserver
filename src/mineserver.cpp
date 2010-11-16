@@ -86,6 +86,7 @@ int setnonblock(int fd)
   return 1;
 }
 
+
 int main(void)
 {
   uint32 starttime=(uint32)time(0);
@@ -243,10 +244,6 @@ int main(void)
         }
       }
     }
-#ifdef WIN32
-    if(_kbhit())
-        quit = 1;
-#endif
 
     //Physics simulation every 200ms
     Physics::get().update();
