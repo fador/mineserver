@@ -27,8 +27,9 @@ We are trying to minimize memory and cpu usage compared to original Java server.
  * Experimental physics for water and lava
   
 ### ToDo (Arranged by priority)
- * Map generation
- * Getting chests,furnaces,signs etc to work
+ * Map generation (In progress)
+ * Getting chests,furnaces,signs etc to work (In progress)
+ * Plugin support
  * Multithreading
  * Growing trees etc.
  * and more
