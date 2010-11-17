@@ -35,6 +35,9 @@
 #include <math.h>
 #ifdef WIN32
   #include <winsock2.h>
+#else
+  #include <netinet/in.h>
+  #include <string.h>
 #endif
 
 #include "logger.h"

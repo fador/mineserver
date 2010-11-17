@@ -33,6 +33,8 @@
   #include <conio.h>
   #include <direct.h>
   #include <winsock2.h>
+#else
+  #include <netinet/in.h>
 #endif
 #include <string.h>
 #include <cstdlib>
