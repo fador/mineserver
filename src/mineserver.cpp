@@ -31,7 +31,7 @@
   #include <crtdbg.h>
   #include <conio.h>
   #include <winsock2.h>
-  #define ZLIB_WINAPI
+//  #define ZLIB_WINAPI
 #else
   #include <sys/socket.h>
   #include <netinet/in.h>

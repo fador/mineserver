@@ -27,7 +27,7 @@
 
 #ifdef WIN32
   #define _CRTDBG_MAP_ALLOC
-  #define ZLIB_WINAPI
+//  #define ZLIB_WINAPI
 
   #include <crtdbg.h>
   #include <conio.h>
