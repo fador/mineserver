@@ -35,7 +35,9 @@
 #ifdef WIN32
   #include <winsock2.h>
   #include <direct.h>
-  #define ZLIB_WINAPI
+#else
+  #include <netinet/in.h>
+  #include <string.h>
 #endif
 #include <zlib.h>
 #include <ctime>

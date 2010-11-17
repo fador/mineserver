@@ -33,6 +33,7 @@
 #include "vec.h"
 #include "tools.h"
 #include "constants.h"
+#include "packets.h"
 
 struct position
 {
@@ -90,7 +91,8 @@ public:
   Inventory inv;
 
   //Input buffer
-  std::deque<unsigned char> buffer;
+  //std::deque<unsigned char> buffer;
+  Packet buffer;
 
 
   bool changeNick(std::string nick);

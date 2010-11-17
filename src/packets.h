@@ -29,10 +29,12 @@
 #define _PACKETS_H
 
 #define PACKET_NEED_MORE_DATA -3
-#define PACKET_VARIABLE_LEN   -1
 #define PACKET_DOES_NOT_EXIST -2
+#define PACKET_VARIABLE_LEN   -1
+#define PACKET_OK             0
 
 class PacketHandler;
+class User;
 
 //Packet names
 enum
@@ -82,13 +84,202 @@ enum
   PACKET_ATTACH_ENTITY   = 0x27,
 };
 
+class Packet
+{
+private:
+	typedef std::vector<uint8> bufVector;
+	bufVector m_buffer;
+	bufVector::size_type m_readPos;
+	bool m_isValid;
+
+public:
+	Packet() : m_readPos(0), m_isValid(true) {}
+
+	bool haveData(int requiredBytes)
+	{
+		return m_isValid = m_isValid && ((m_readPos + requiredBytes) <= m_buffer.size());
+	}
+
+	operator bool() const
+	{
+		return m_isValid;
+	}
+
+	void reset()
+	{
+		m_readPos = 0;
+		m_isValid = true;
+	}
+
+	void append(std::vector<uint8> &buffer)
+	{
+		m_buffer.insert(m_buffer.end(), buffer.begin(), buffer.end());
+	}
+
+	void append(const void * data, bufVector::size_type dataSize)
+	{
+		bufVector::size_type start = m_buffer.size();
+		m_buffer.resize(start + dataSize);
+		memcpy(&m_buffer[start], data, dataSize);
+	}
+
+	void removePacket()
+	{
+		m_buffer.erase(m_buffer.begin(), m_buffer.begin() + m_readPos);
+		m_readPos = 0;
+	}
+
+	Packet & operator<<(sint8 val)
+	{
+		m_buffer.push_back(val);
+		return *this;
+	}
+
+	Packet & operator>>(sint8 &val)
+	{
+		if(haveData(sizeof(val)))
+		{
+			val = *reinterpret_cast<const sint8*>(&m_buffer[m_readPos]);
+			m_readPos += sizeof(val);
+		}
+		return *this;
+	}
+
+	Packet & operator<<(sint16 val)
+	{
+		uint16 nval = htons(val);
+		append(&nval, sizeof(nval));
+		return *this;
+	}
+
+	Packet & operator>>(sint16 &val)
+	{
+		if(haveData(sizeof(val)))
+		{
+			val = ntohs(*reinterpret_cast<const sint16*>(&m_buffer[m_readPos]));
+			m_readPos += sizeof(val);
+		}
+		return *this;
+	}
+
+	Packet & operator<<(sint32 val)
+	{
+		uint32 nval = htonl(val);
+		append(&nval, sizeof(nval));
+	}
+
+	Packet & operator>>(sint32 &val)
+	{
+		if(haveData(sizeof(val)))
+		{
+			val = ntohl(*reinterpret_cast<const sint32*>(&m_buffer[m_readPos]));
+			m_readPos += sizeof(val);
+		}
+		return *this;
+	}
+
+	Packet & operator<<(sint64 val)
+	{
+		uint64 nval = ((((uint64)htonl((u_long)val)) << 32) + htonl((u_long)(val >> 32)));
+		append(&nval, sizeof(nval));
+		return *this;
+	}
+
+	Packet & operator>>(sint64 &val)
+	{
+		if(haveData(sizeof(val)))
+		{
+			val = *reinterpret_cast<const sint16*>(&m_buffer[m_readPos]);
+			val = ((((uint64)ntohl((u_long)val)) << 32) + ntohl((u_long)(val >> 32)));
+			m_readPos += sizeof(val);
+		}
+		return *this;
+	}
+
+	Packet & operator<<(float val)
+	{
+		uint32 nval = htonl(*reinterpret_cast<uint32*>(&val));
+		append(&nval, sizeof(nval));
+		return *this;
+	}
+
+	Packet & operator>>(float &val)
+	{
+		if(haveData(sizeof(val)))
+		{
+			int ival = ntohl(*reinterpret_cast<const sint32*>(&m_buffer[m_readPos]));
+			val = *reinterpret_cast<float*>(&ival);
+			m_readPos += sizeof(val);
+		}
+		return *this;
+	}
+
+	Packet & operator<<(double val)
+	{
+		uint64 nval = *reinterpret_cast<uint64*>(&val);
+		nval = ((((uint64)htonl((u_long)nval)) << 32) + htonl((u_long)(nval >> 32)));
+		append(&nval, sizeof(nval));
+		return *this;
+	}
+
+
+	Packet & operator>>(double &val)
+	{
+		if(haveData(sizeof(val)))
+		{
+			uint64 ival = *reinterpret_cast<const sint16*>(&m_buffer[m_readPos]);
+			ival = ((((uint64)ntohl((u_long)ival)) << 32) + ntohl((u_long)(ival >> 32)));
+			val = *reinterpret_cast<double*>(&ival);
+			m_readPos += sizeof(val);
+		}
+		return *this;
+	}
+
+	Packet & operator<<(const std::string &str)
+	{
+		uint16 lenval = htons(str.size());
+		append(&lenval, sizeof(lenval));
+
+		append(&str[0], str.size());
+		return *this;
+	}
+
+	Packet & operator>>(std::string &str)
+	{
+		sint16 lenval;
+		if(haveData(sizeof(lenval)))
+		{
+			lenval = ntohs(*reinterpret_cast<const sint16*>(&m_buffer[m_readPos]));
+			m_readPos += sizeof(lenval);
+
+			if(haveData(lenval))
+			{
+				str.assign((char*)&m_buffer[m_readPos], lenval);
+				m_readPos += lenval;
+			}
+		}
+
+		
+		return *this;
+	}
+
+	void getData(void *buf, int count)
+	{
+		if(haveData(count))
+		{
+			memcpy(buf, &m_buffer[m_readPos], count);
+		}
+	}
+};
+
+
 
 struct Packets
 {
   int len;
-  void (PacketHandler::*function)(uint8 *, User *);
+  int (PacketHandler::*function)(User *);
 
-  int (PacketHandler::*varLenFunction)(User *);
+  //int (PacketHandler::*varLenFunction)(User *);
 
   Packets()
   {
@@ -98,16 +289,22 @@ struct Packets
   {
     len = newlen;
   }
-  Packets(int newlen, void (PacketHandler::*newfunction)(uint8*, User *))
+/*  Packets(int newlen, void (PacketHandler::*newfunction)(uint *, User *))
   {
     len      = newlen;
     function = newfunction;
   }
 
+  Packets(int newlen, void (PacketHandler::*newfunction)(User *))
+  {
+    len            = newlen;
+    function = newfunction;
+  }
+*/
   Packets(int newlen, int (PacketHandler::*newfunction)(User *))
   {
     len            = newlen;
-    varLenFunction = newfunction;
+    function = newfunction;
   }
 };
 
@@ -174,27 +371,28 @@ public:
   Packets packets[256];
 
   //The packet functions
-  void keep_alive(uint8 *data, User *user);
+  int keep_alive(User *user);
   int  login_request(User *user);
   int  handshake(User *user);
   int  chat_message(User *user);
   int  player_inventory(User *user);
-  void player(uint8 *data, User *user);
-  void player_position(uint8 *data, User *user);
-  void player_look(uint8 *data, User *user);
-  void player_position_and_look(uint8 *data, User *user);
-  void player_digging(uint8 *data, User *user);
-  void player_block_placement(uint8 *data, User *user);
-  void holding_change(uint8 *data, User *user);
-  void arm_animation(uint8 *data, User *user);
-  void pickup_spawn(uint8 *data, User *user);
+  int player(User *user);
+  int player_position(User *user);
+  int player_look(User *user);
+  int player_position_and_look(User *user);
+  int player_digging(User *user);
+  int player_block_placement(User *user);
+  int holding_change(User *user);
+  int arm_animation(User *user);
+  int pickup_spawn(User *user);
   int  disconnect(User *user);
   int  complex_entities(User *user);
 
-  void use_entity(uint8 *data, User *user);
+  int use_entity(User *user);
 
 
 };
+
 
 
 

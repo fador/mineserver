@@ -58,11 +58,18 @@ Depends on (and tested with):
  * [libevent 1.4.14b](http://monkey.org/~provos/libevent/)
  * [lua 5.1.4](http://www.lua.org) (Not yet in use!)
 
- Installing on Debian and Ubuntu:
+ * Installing on Debian and Ubuntu:
 
     sudo apt-get install libevent1 libevent-dev zlib1g zlib1g-dev
 
+    
+ * Installing on CentOS and RHEL
 
+    # Install EPEL (Extra Packages for Enterprise Linux) 
+    sudo su -c 'rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm'
+    sudo yum install git libevent libevent-devel zlib zlib-devel lua lua-devel
+
+ 
 Compiling using linux (make & gcc):
 
  * Download and extract source or use `git clone git://github.com/fador/mineserver.git`

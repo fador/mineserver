@@ -94,43 +94,33 @@ void buf_read_callback(struct bufferevent *incoming, void *arg)
   uint8 *buf = new uint8[2048];
 
   //Push data to buffer
-  while(read)
+  while(read = bufferevent_read(incoming, buf, 2048))
   {
-    if((read = bufferevent_read(incoming, buf, 2048)))
-    {
-      for(int i = 0; i < read; i++)
-      {
-        user->buffer.push_back(buf[i]);
-      }
-    }
+	user->buffer.append(buf, read);
   }
 
   delete[] buf;
 
-  while(user->buffer.size() > 0)
-  {
-    // If not waiting more data
-    if(!user->waitForData)
-    {
-      user->action = user->buffer.front();
-      user->buffer.pop_front();
-      //printf("Action: 0x%x\n", user->action);
-    }
-    else
-      user->waitForData = false;
+  user->buffer.reset();
 
+  while(user->buffer >> (sint8&)user->action)
+  {
     //Variable len package
     if(PacketHandler::get().packets[user->action].len == PACKET_VARIABLE_LEN)
     {
       //Call specific function
-      int (PacketHandler::*varLenFunction)(User *) =
-        PacketHandler::get().packets[user->action].varLenFunction;
-      int curpos = (PacketHandler::get().*varLenFunction)(user);
+      int (PacketHandler::*function)(User *) =
+        PacketHandler::get().packets[user->action].function;
+	  bool disconnecting = user->action == 0xFF;
+      int curpos = (PacketHandler::get().*function)(user);
       if(curpos == PACKET_NEED_MORE_DATA)
       {
         user->waitForData = true;
         return;
       }
+
+	  if(disconnecting) // disconnect -- player gone
+		  return;
     }
     else if(PacketHandler::get().packets[user->action].len == PACKET_DOES_NOT_EXIST)
     {
@@ -145,28 +135,16 @@ void buf_read_callback(struct bufferevent *incoming, void *arg)
     }
     else
     {
-      if(user->buffer.size() < (uint32) PacketHandler::get().packets[user->action].len)
+	  if(!user->buffer.haveData(PacketHandler::get().packets[user->action].len))
       {
         user->waitForData = true;
         return;
       }
-      //Store data to dynamic array
-      uint8 *data = new uint8[PacketHandler::get().packets[user->action].len];
-      if(PacketHandler::get().packets[user->action].len)
-        std::copy(user->buffer.begin(), user->buffer.begin()+
-                  PacketHandler::get().packets[user->action].len, data);
 
-      //Call specific function
-      void (PacketHandler::*function)(uint8 *,
-                                      User *) = PacketHandler::get().packets[user->action].function;
-      (PacketHandler::get().*function)(data, user);
+	  //Call specific function
+      int (PacketHandler::*function)(User *) = PacketHandler::get().packets[user->action].function;
+      (PacketHandler::get().*function)(user);
 
-      //Release data array
-      delete[] data;
-
-      //Package completely received, remove from buffer
-      user->buffer.erase(user->buffer.begin(), user->buffer.begin()+
-                         PacketHandler::get().packets[user->action].len);
     }
 
   } //End while
