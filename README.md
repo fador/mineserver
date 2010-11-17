@@ -9,7 +9,12 @@ Custom Minecraft Alpha server software written in C++.
 Currently in (early) development. (Alpha stage)
 Server still lacks some critical features and should be only used for testing.
 
-Tested to build on Windows (Visual Studio 2010 project included) and on Linux (Makefile included).
+**Tested to build on**
+
+ * Windows (VS2010 and VS2008 projects included)
+ * Linux (Makefile included)
+ * Mac OS X
+ 
 We are trying to minimize memory and cpu usage compared to original Java server.
 
 ### Features
@@ -60,24 +65,22 @@ Depends on (and tested with):
 
  * Installing on Debian and Ubuntu:
 
-    sudo apt-get install libevent1 libevent-dev zlib1g zlib1g-dev
+    `sudo apt-get install libevent1 libevent-dev zlib1g zlib1g-dev`
 
-    
  * Installing on CentOS and RHEL
 
-    # Install EPEL (Extra Packages for Enterprise Linux) 
-    sudo su -c 'rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm'
-    sudo yum install git libevent libevent-devel zlib zlib-devel lua lua-devel
+    `# Install EPEL (Extra Packages for Enterprise Linux)`   
+    `sudo su -c 'rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm'`   
+    `sudo yum install git libevent libevent-devel zlib zlib-devel lua lua-devel`   
 
- 
-Compiling using linux (make & gcc):
+**Compiling using linux (make & gcc):**
 
  * Download and extract source or use `git clone git://github.com/fador/mineserver.git`
  * Go to mineserver/src/ directory
  * Run make
  * Run server with ./mineserver
   
-Compiling using windows (VS2010):
+**Compiling using windows (VS2010/VS2008):**
 
  * Download and compile [zlib](http://www.zlib.org) or use [pre-built binaries](http://www.winimage.com/zLibDll/index.html)
  * Add zlib libraries to project (zlibstat.lib or zlibwapi.lib which requires also zlibwapi.dll in the same dir with the executable)
