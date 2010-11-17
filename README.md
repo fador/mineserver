@@ -62,13 +62,14 @@ Depends on (and tested with):
 
     sudo apt-get install libevent1 libevent-dev zlib1g zlib1g-dev
 
- * Installing on CentOS and RHEL
     
+ * Installing on CentOS and RHEL
+
     # Install EPEL (Extra Packages for Enterprise Linux) 
     sudo su -c 'rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm'
     sudo yum install git libevent libevent-devel zlib zlib-devel lua lua-devel
 
-
+ 
 Compiling using linux (make & gcc):
 
  * Download and extract source or use `git clone git://github.com/fador/mineserver.git`
