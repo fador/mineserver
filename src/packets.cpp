@@ -31,7 +31,7 @@
   #include <crtdbg.h>
   #include <conio.h>
   #include <winsock2.h>
-  #define ZLIB_WINAPI
+//  #define ZLIB_WINAPI
 #else
   #include <sys/socket.h>
   #include <netinet/in.h>
@@ -66,7 +66,6 @@
 #include "packets.h"
 #include "physics.h"
 
-
 void PacketHandler::initPackets()
 {
 
@@ -98,70 +97,34 @@ void PacketHandler::initPackets()
 }
 
 // Keep Alive (http://mc.kev009.com/wiki/Protocol#Keep_Alive_.280x00.29)
-void PacketHandler::keep_alive(uint8 *data, User *user)
+int PacketHandler::keep_alive(User *user)
 {
   //No need to do anything
+	user->buffer.removePacket();
+	return PACKET_OK;
 }
 
 // Login request (http://mc.kev009.com/wiki/Protocol#Login_Request_.280x01.29)
 int PacketHandler::login_request(User *user)
 {
   //Check that we have enought data in the buffer
-  if(user->buffer.size() < 12)
+  if(!user->buffer.haveData(12))
     return PACKET_NEED_MORE_DATA;
 
-  uint32 curpos = 0;
   int i;
 
-  //Client protocol version
-  uint8 tmpIntArray[4] = {0};
-  for(i = 0; i < 4; i++)
-    tmpIntArray[i] = user->buffer[curpos+i];
-  int version = getUint32(&tmpIntArray[0]);
-  curpos += 4;
-
-  //Player name length
-  uint8 tmpShortArray[2] = {0};
-  for(i = 0; i < 2; i++)
-    tmpShortArray[i] = user->buffer[curpos+i];
-  int len = getUint16(&tmpShortArray[0]);
-  curpos += 2;
-
-  //Check for data
-  if(user->buffer.size() < curpos+len+2)
-    return PACKET_NEED_MORE_DATA;
+  sint32 version;
+  std::string player, passwd;
+  sint64 mapseed;
+  sint8 dimension;
 
 
-  std::string player;
-  //Read player name
-  for(int pos = 0; pos < len; pos++)
-  {
-    player += user->buffer[curpos+pos];
-  }
-  curpos += len;
+  user->buffer >> version >> player >> passwd >> mapseed >> dimension;
 
+  if(!user->buffer)
+	  return PACKET_NEED_MORE_DATA;
 
-  //Password length
-  for(i = 0; i < 2; i++)
-    tmpShortArray[i] = user->buffer[curpos+i];
-  len     = getUint16(&tmpShortArray[0]);
-  curpos += 2;
-
-  std::string passwd;
-  //Check for data
-  if(user->buffer.size() < curpos+len)
-    return PACKET_NEED_MORE_DATA;
-
-
-  //Read password
-  for(int pos = 0; pos < len; pos++)
-  {
-    passwd += user->buffer[curpos+pos];
-  }
-  curpos += len;
-
-  //Package completely received, remove from buffer
-  user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
+  user->buffer.removePacket();
 
   std::cout << "Player " << user->UID << " login v." << version <<" : " << player <<":"<<
   passwd << std::endl;
@@ -170,14 +133,14 @@ int PacketHandler::login_request(User *user)
   if(version != 4 && version != 3 && version != 2)
   {
     user->kick(Conf::get().sValue("wrong_protocol_message"));
-    return curpos;
+    return PACKET_OK;
   }
 
   // If userlimit is reached
   if((int)Users.size() >= Conf::get().iValue("userlimit"))
   {
     user->kick(Conf::get().sValue("server_full_message"));
-    return curpos;
+    return PACKET_OK;
   }
 
   user->changeNick(player);
@@ -312,105 +275,67 @@ int PacketHandler::login_request(User *user)
 
   Chat::get().sendMsg(user, player+" connected!", Chat::ALL);
 
-  return curpos;
+  return PACKET_OK;
 }
 
 int PacketHandler::handshake(User *user)
 {
-  if(user->buffer.size() < 3)
+  if(!user->buffer.haveData(3))
     return PACKET_NEED_MORE_DATA;
 
-  int curpos = 0;
-  int i;
+  std::string player;
 
-  //Player name length
-  uint8 tmpShortArray[2] = {0};
-  for(i = 0; i < 2; i++)
-    tmpShortArray[i] = user->buffer[curpos+i];
-  int len = getSint16(&tmpShortArray[0]);
-  curpos += 2;
+  user->buffer >> player;
 
   //Check for data
-  if(user->buffer.size() < (unsigned int)curpos+len)
+  if(!user->buffer)
     return PACKET_NEED_MORE_DATA;
 
-
-  //Read player name
-  std::string player;
-  for(int pos = 0; pos < len; pos++)
-  {
-    player += user->buffer[curpos+pos];
-  }
-  curpos += len;
+  user->buffer.removePacket();
 
   //Remove package from buffer
-  user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
   std::cout << "Handshake player: " << player << std::endl;
 
   //Send handshake package
   char data2[4] = {0x02, 0x00, 0x01, '-'};
   bufferevent_write(user->buf_ev, (char *)&data2[0], 4);
 
-  return curpos;
+  return PACKET_OK;
 }
 
 int PacketHandler::chat_message(User *user)
 {
   // Wait for length-short. HEHE
-  if(user->buffer.size() < 2)
+  if(!user->buffer.haveData(2))
     return PACKET_NEED_MORE_DATA;
 
-
-  int curpos = 0;
-  unsigned int i;
-
-  uint8 tmpLenArray[2] = {0};
-  for(i = 0; i < 2; i++)
-    tmpLenArray[i] = user->buffer[curpos+i];
-  short len = getSint16(&tmpLenArray[0]);
-  curpos += 2;
-
-  // Wait for whole message
-  if(user->buffer.size() < (unsigned int)curpos+len)
-    return PACKET_NEED_MORE_DATA;
-
-
-  //Read message
   std::string msg;
-  for(i = 0; i < (unsigned int)len; i++)
-    msg += user->buffer[curpos+i];
 
-  curpos += len;
+  user->buffer >> msg;
 
-  // Remove from buffer
-  user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
+  if(!user->buffer)
+	  return PACKET_NEED_MORE_DATA;
+
+  user->buffer.removePacket();
 
   Chat::get().handleMsg( user, msg );
 
-  return curpos;
+  return PACKET_OK;
 }
 
 int PacketHandler::player_inventory(User *user)
 {
-  if(user->buffer.size() < 14)
+  if(!user->buffer.haveData(14))
     return PACKET_NEED_MORE_DATA;
 
+  int i=0;
+  sint32 type;
+  sint16 count;
 
-  int curpos = 0;
-  unsigned int i;
+  user->buffer >> type >> count;
 
-  //Read inventory type (-1,-2 or -3)
-  uint8 tmpIntArray[4] = {0};
-  for(i = 0; i < 4; i++)
-    tmpIntArray[i] = user->buffer[curpos+i];
-  int type = getSint32(&tmpIntArray[0]);
-  curpos += 4;
-
-  uint8 tmpShortArray[2] = {0};
-  for(i = 0; i < 2; i++)
-    tmpShortArray[i] = user->buffer[curpos+i];
-  int count = getSint16(&tmpShortArray[0]);
-  curpos += 2;
+  if(!user->buffer)
+	  return PACKET_NEED_MORE_DATA;
 
   int items   = 0;
   Item *slots = NULL;
@@ -441,147 +366,113 @@ int PacketHandler::player_inventory(User *user)
     break;
   }
 
-  if(user->buffer.size() < (unsigned int)6+2*items)
-    return PACKET_NEED_MORE_DATA;
-
-
   for(i = 0; i < (unsigned int)items; i++)
   {
-    int j = 0;
-    for(j = 0; j < 2; j++)
-      tmpShortArray[j] = user->buffer[curpos+j];
-    int item_id = getSint16(&tmpShortArray[0]);
-    curpos += 2;
+	  sint16 item_id;
+	  sint8 numberOfItems;
+	  sint16 health;
 
-    if(user->buffer.size() < curpos+(items-i-1)*2)
-      return PACKET_NEED_MORE_DATA;
+	  user->buffer >> item_id;
 
+	  if(!user->buffer)
+		  return PACKET_NEED_MORE_DATA;
 
-    if(item_id != -1)
-    {
-      if(user->buffer.size()-curpos < (items-i-1)*2+3)
-        return PACKET_NEED_MORE_DATA;
+	  if(item_id != -1)
+	  {
+		  user->buffer >> numberOfItems >> health;
 
-      uint8 numberOfItems = user->buffer[curpos];
-      curpos++;
+		  if(!user->buffer)
+			  return PACKET_NEED_MORE_DATA;
 
-      for(j = 0; j < 2; j++)
-        tmpShortArray[j] = user->buffer[curpos+j];
-      int health = getSint16(&tmpShortArray[0]);
-      curpos += 2;
-
-      //Save to user inventory
-      slots[i].type   = item_id;
-      slots[i].count  = numberOfItems;
-      slots[i].health = health;
-    }
+		  
+		  slots[i].type   = item_id;
+		  slots[i].count  = numberOfItems;
+		  slots[i].health = health;
+	  }
   }
 
-  //std::cout << "Got items type " << type << std::endl;
-  //Package completely received, remove from buffer
-  user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
+  user->buffer.removePacket();
 
-  return curpos;
+  return PACKET_OK;
 }
 
-void PacketHandler::player(uint8 *data, User *user)
+int PacketHandler::player(User *user)
 {
   //OnGround packet
+	sint8 onground;
+	user->buffer >> onground;
+	if(!user->buffer)
+		return PACKET_NEED_MORE_DATA;
+	user->buffer.removePacket();
+	return PACKET_OK;
 }
 
-void PacketHandler::player_position(uint8 *data, User *user)
+int PacketHandler::player_position(User *user)
 {
-  int curpos = 0;
   double x, y, stance, z;
+  sint8 onground;
 
-  //Read double X
-  x       = getDouble(&data[curpos]);
-  curpos += 8;
+  user->buffer >> x >> y >> stance >> z >> onground;
 
-  //Read double Y
-  y       = getDouble(&data[curpos]);
-  curpos += 8;
-
-  //Read double stance
-  stance  = getDouble(&data[curpos]);
-  curpos += 8;
-
-  //Read double Z
-  z       = getDouble(&data[curpos]);
-  curpos += 8;
+  if(!user->buffer)
+	  return PACKET_NEED_MORE_DATA;
 
   user->updatePos(x, y, z, stance);
+  user->buffer.removePacket();
+
+  return PACKET_OK;
 }
 
-void PacketHandler::player_look(uint8 *data, User *user)
+int PacketHandler::player_look(User *user)
 {
   float yaw, pitch;
-  uint8 onground;
-  int curpos = 0;
+  sint8 onground;
 
-  yaw     = getFloat(&data[curpos]);
-  curpos += 4;
-
-  pitch   = getFloat(&data[curpos]);
-  curpos += 4;
+  user->buffer >> yaw >> pitch >> onground;
+  
+  if(!user->buffer)
+	  return PACKET_NEED_MORE_DATA;
 
   user->updateLook(yaw, pitch);
 
-  onground = data[curpos];
-  curpos++;
+  user->buffer.removePacket();
+
+  return PACKET_OK;
 }
 
-void PacketHandler::player_position_and_look(uint8 *data, User *user)
+int PacketHandler::player_position_and_look(User *user)
 {
-  int curpos = 0;
-
   double x, y, stance, z;
-
-  //Read double X
-  x       = getDouble(&data[curpos]);
-  curpos += 8;
-
-  //Read double Y
-  y       = getDouble(&data[curpos]);
-  curpos += 8;
-
-  //Read double stance
-  stance  = getDouble(&data[curpos]);
-  curpos += 8;
-
-  //Read double Z
-  z       = getDouble(&data[curpos]);
-  curpos += 8;
-
-
   float yaw, pitch;
+  sint8 onground;
 
-  yaw     = getFloat(&data[curpos]);
-  curpos += 4;
+  user->buffer >> x >> y >> stance >> z 
+				>> yaw >> pitch >> onground;
 
-  pitch   = getFloat(&data[curpos]);
-  curpos += 4;
+  if(!user->buffer)
+	  return PACKET_NEED_MORE_DATA;
 
   //Update user data
   user->updatePos(x, y, z, stance);
   user->updateLook(yaw, pitch);
+
+  user->buffer.removePacket();
+
+  return PACKET_OK;
 }
 
-void PacketHandler::player_digging(uint8 *data, User *user)
+int PacketHandler::player_digging(User *user)
 {
-  int curpos  = 0;
-  char status = data[curpos];
-  curpos++;
+	sint8 status,y;
+	sint32 x,z;
+	sint8 direction;
 
-  int x = getSint32(&data[curpos]);
-  curpos += 4;
+	user->buffer >> status >> x >> y >> z >> direction;
 
-  char y = data[curpos];
-  curpos++;
+	if(!user->buffer)
+		return PACKET_NEED_MORE_DATA;
 
-  int z = getSint32(&data[curpos]);
-  curpos += 4;
-
+	user->buffer.removePacket();
 
   //If block broken
   if(status == BLOCK_STATUS_BLOCK_BROKEN)
@@ -682,34 +573,33 @@ void PacketHandler::player_digging(uint8 *data, User *user)
       }
     }
   }
+  return PACKET_OK;
 }
 
-void PacketHandler::player_block_placement(uint8 *data, User *user)
+int PacketHandler::player_block_placement(User *user)
 {
   int curpos  = 0;
   int orig_x, orig_y, orig_z;
   bool change = false;
 
-  int blockID = getSint16(&data[curpos]);
-  curpos += 2;
+  sint8 y, direction;
+  sint16 blockID;
+  sint32 x, z;
 
-  int x = orig_x = getSint32(&data[curpos]);
-  curpos += 4;
+  user->buffer >> blockID >> x >> y >> z >> direction;
 
-  int y = orig_y = (char)data[curpos];
-  curpos++;
+  if(!user->buffer)
+	  return PACKET_NEED_MORE_DATA;
 
-  int z = orig_z = getSint32(&data[curpos]);
-  curpos += 4;
+  user->buffer.removePacket();
 
-  int direction = (char)data[curpos];
-  curpos++;
+  orig_x = x; orig_y = y; orig_z = z;
 
   //Invalid y value
   if(y > 127 || y < 0)
   {
     //std::cout << blockID << " (" << x << "," << (int)y_orig << "," << z << ") " << direction << std::endl;
-    return;
+    return PACKET_OK;
   }
   //std::cout << blockID << " (" << x << "," << (int)y_orig << "," << z << ")" << direction << std::endl;
 
@@ -857,13 +747,20 @@ void PacketHandler::player_block_placement(uint8 *data, User *user)
        blockID == BLOCK_LAVA || blockID == BLOCK_STATIONARY_LAVA)
       Physics::get().addSimulation(vec(x, y, z));
   }
-
+  return PACKET_OK;
 
 }
 
-void PacketHandler::holding_change(uint8 *data, User *user)
+int PacketHandler::holding_change(User *user)
 {
-  int itemID = getUint16(&data[4]);
+  sint32 entityID;
+  sint16 itemID;
+  user->buffer >> entityID >> itemID;
+
+  if(!user->buffer)
+	  return PACKET_NEED_MORE_DATA;
+
+  user->buffer.removePacket();
 
   //Send holding change to others
   uint8 holdingPackage[7];
@@ -872,70 +769,71 @@ void PacketHandler::holding_change(uint8 *data, User *user)
   putSint16(&holdingPackage[5], itemID);
   user->sendOthers(&holdingPackage[0], 7);
 
+  return PACKET_OK;
 }
 
-void PacketHandler::arm_animation(uint8 *data, User *user)
+int PacketHandler::arm_animation(User *user)
 {
-  char forward = data[4];
+	sint32 userID;
+	sint8 animType;
+	
+	user->buffer >> userID >> animType;
+
+	if(!user->buffer)
+		return PACKET_NEED_MORE_DATA;
+
+	user->buffer.removePacket();
 
   uint8 animationPackage[6];
   animationPackage[0] = 0x12;
   putSint32(&animationPackage[1], user->UID);
-  animationPackage[5] = forward;
+  animationPackage[5] = animType;
   user->sendOthers(&animationPackage[0], 6);
+
+  return PACKET_OK;
 }
 
-void PacketHandler::pickup_spawn(uint8 *data, User *user)
+int PacketHandler::pickup_spawn(User *user)
 {
   uint32 curpos = 4;
   spawnedItem item;
   item.EID    = generateEID();
   item.health = 0;
-  item.item   = getSint16(&data[curpos]);
-  curpos     += 2;
-  item.count  = data[curpos];
-  curpos++;
 
-  item.pos.x()   = getSint32(&data[curpos]);
-  curpos        += 4;
-  item.pos.y()   = getSint32(&data[curpos]);
-  curpos        += 4;
-  item.pos.z()   = getSint32(&data[curpos]);
-  curpos        += 4;
+  sint8 yaw, pitch, roll;
+
+  user->buffer >> (sint16&)item.item >> (sint8&)item.count ;
+  user->buffer >> (sint32&)item.pos.x() >> (sint32&)item.pos.y() >> (sint32&)item.pos.z();
+  user->buffer >> yaw >> pitch >> roll;
+
+  if(!user->buffer)
+	  return PACKET_NEED_MORE_DATA;
+
   item.spawnedBy = user->UID;
 
   Map::get().sendPickupSpawn(item);
+
+  return PACKET_OK;
 }
 
 int PacketHandler::disconnect(User *user)
 {
-  if(user->buffer.size() < 2)
+  if(!user->buffer.haveData(2))
     return PACKET_NEED_MORE_DATA;
 
-  int curpos = 0;
-  unsigned int i;
-  uint8 shortArray[2];
-  for(i = 0; i < 2; i++)
-    shortArray[i] = user->buffer[i];
-  int len = getSint16(&shortArray[0]);
-
-  curpos += 2;
-  // Wait for whole message
-  if(user->buffer.size() < (unsigned int)curpos+len)
-    return PACKET_NEED_MORE_DATA;
-
-
-  //Read message
   std::string msg;
-  for(i = 0; i < (unsigned int)len; i++)
-    msg += user->buffer[curpos+i];
+  user->buffer >> msg;
+
+  if(!user->buffer)
+	  return PACKET_NEED_MORE_DATA;
+
+  user->buffer.removePacket();
 
   std::cout << "Disconnect: " << msg << std::endl;
 
-  curpos += len;
+//  user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
 
-  user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
-
+  bufferevent_disable(user->buf_ev, EV_READ);
   bufferevent_free(user->buf_ev);
   
   #ifdef WIN32
@@ -947,46 +845,34 @@ int PacketHandler::disconnect(User *user)
   remUser(user->fd);
 
   
-  return curpos;
+  return PACKET_OK;
 }
 
 int PacketHandler::complex_entities(User *user)
 {
-  if(user->buffer.size() < 12)
+  if(!user->buffer.haveData(12))
     return PACKET_NEED_MORE_DATA;
 
-  int curpos = 0;
   unsigned int i;
-  uint8 intArray[4];
-  uint8 shortArray[2];
 
-  std::copy(user->buffer.begin()+curpos, user->buffer.begin()+curpos+4, intArray);
-  int x = getSint32(&intArray[0]);
-  curpos += 4;
-  std::copy(user->buffer.begin()+curpos, user->buffer.begin()+curpos+2, shortArray);
-  int y = getSint16(&shortArray[0]);
-  curpos += 2;
-  std::copy(user->buffer.begin()+curpos, user->buffer.begin()+curpos+4, intArray);
-  int z = getSint32(&intArray[0]);
-  curpos += 4;
+  int x,y,z;
+  sint32 len;
 
-  std::copy(user->buffer.begin()+curpos, user->buffer.begin()+curpos+2, shortArray);
-  int len = getSint16(&shortArray[0]);
-  curpos += 2;
 
-  // Wait for whole message
-  if(user->buffer.size() < (unsigned int)curpos+len)
-    return PACKET_NEED_MORE_DATA;
+  user->buffer >> x >> y >> z >> len;
+
+  if(!user->buffer)
+	  return PACKET_NEED_MORE_DATA;
+
+  if(!user->buffer.haveData(len))
+	  return PACKET_NEED_MORE_DATA;
 
   //ToDo: check len
   uint8 *buffer = new uint8[len];
-  for(i = 0; i < (uint32)len; i++)
-  {
-    buffer[i] = user->buffer[curpos+i];
-  }
-  curpos += len;
 
-  user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
+  user->buffer.getData(buffer, len);
+
+  user->buffer.removePacket();
 
   uint8 block, meta;
   Map::get().getBlock(x, y, z, &block, &meta);
@@ -995,7 +881,7 @@ int PacketHandler::complex_entities(User *user)
   if(block != BLOCK_CHEST)
   {
     delete[] buffer;
-    return curpos;
+    return PACKET_OK;
   }
 
 
@@ -1149,7 +1035,7 @@ int PacketHandler::complex_entities(User *user)
         if(!newlist)
         {
           //std::cout << "Items not found!" << std::endl;
-          return curpos;
+          return PACKET_OK;
         }
         NBT_list itemlist;
         itemlist.name   = "Items";
@@ -1278,16 +1164,16 @@ int PacketHandler::complex_entities(User *user)
     delete [] structdump;
   }
 
-
-
-
-
-  return curpos;
+  return PACKET_OK;
 }
 
 
-void PacketHandler::use_entity(uint8 *data, User *user)
+int PacketHandler::use_entity(User *user)
 {
+	sint32 userID,target;
+	user->buffer >> userID >> target;
+	if(!user->buffer)
+		return PACKET_NEED_MORE_DATA;
 
-
+	return PACKET_OK;
 }
