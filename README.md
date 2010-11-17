@@ -1,7 +1,7 @@
 # Mineserver
 *by Fador & Nredor*
 
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    Copyright (c) 2010, The Mineserver Project
 
 Custom Minecraft Alpha server software written in C++.
 
@@ -85,5 +85,5 @@ Compiling using windows (VS2010):
     call "%VS100COMNTOOLS%vsvars32.bat"
     cl /I"ZLIB_INC_DIR;LIBEVENT_INC_DIR" /W3 /WX- /O2 /D WIN32 /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /EHsc *.cpp zlibwapi.lib libevent.lib Ws2_32.lib /link /OUT:mineserver.exe /LIBPATH:"ZLIB_LIB_DIR;LIBEVENT_LIB_DIR"
 
-  
+
  

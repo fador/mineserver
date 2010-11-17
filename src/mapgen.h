@@ -35,13 +35,11 @@ private:
   {
   }
   unsigned int noiseSeed;
-  double psRand(double x, double y);
-  double interpolate(double a, double b, double x);
 public:
   static MapGen &get();
   bool setSeed(unsigned int seed);
   unsigned int getSeed();
-  double noise(double x, double y);
+  char getHeight(double x, double z);
 };
 
 #endif
