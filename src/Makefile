@@ -7,7 +7,7 @@ ifeq ($(SYSTEM),FreeBSD)
 DFLAGS += -D__FREEBSD__
 endif
 
-RM = "rm -f"
+RM = rm -f
 C++ = g++
 LFLAGS = -I. -I/usr/local/include -L/usr/local/lib -lpthread -levent -lz
 CFLAGS = $(DFLAGS) -I. -I/usr/local/include -L/usr/local/lib
