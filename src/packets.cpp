@@ -366,7 +366,7 @@ int PacketHandler::player_inventory(User *user)
     break;
   }
 
-  for(i = 0; i < (unsigned int)items; i++)
+  for(i = 0; i < items; i++)
   {
 	  sint16 item_id;
 	  sint8 numberOfItems;
@@ -685,7 +685,7 @@ int PacketHandler::player_block_placement(User *user)
         metadata2 |= 0x8;
 
       Map::get().setBlock(x, y+modifier, z, block2, metadata2);
-      Map::get().sendBlockChange(x, y+modifier, z, blockID, metadata2);
+      Map::get().sendBlockChange(x, y+modifier, z, (char)blockID, metadata2);
     }
 
   }
@@ -739,8 +739,8 @@ int PacketHandler::player_block_placement(User *user)
 
   if(change)
   {
-    Map::get().setBlock(x, y, z, blockID, metadata);
-    Map::get().sendBlockChange(x, y, z, blockID, metadata);
+    Map::get().setBlock(x, y, z, (char)blockID, metadata);
+    Map::get().sendBlockChange(x, y, z, (char)blockID, metadata);
 
 
     if(blockID == BLOCK_WATER || blockID == BLOCK_STATIONARY_WATER ||
