@@ -14,6 +14,7 @@ Server still lacks some critical features and should be only used for testing.
  * Windows (VS2010 and VS2008 projects included)
  * Linux (Makefile included)
  * Mac OS X
+ * FreeBSD / PCBSD
  
 We are trying to minimize memory and cpu usage compared to original Java server.
 
@@ -74,12 +75,23 @@ Depends on (and tested with):
     `sudo su -c 'rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm'`   
     `sudo yum install git libevent libevent-devel zlib zlib-devel lua lua-devel`   
 
+ * Installing on FreeBSD / PCBSD
+
+    `sudo pkg_add -r libevent`
+
 **Compiling using linux (make & gcc):**
 
  * Download and extract source or use `git clone git://github.com/fador/mineserver.git`
  * Go to mineserver/src/ directory
- * Run make
- * Run server with ./mineserver
+ * Run `make`
+ * Run server with `./mineserver`
+
+**Compiling using FreeBSD / PCBSD (gmake & g++):**
+
+ * Download and extract source or use `git clone git://github.com/fador/mineserver.git`
+ * Go to mineserver/src/ directory
+ * Run `gmake`
+ * Run server with `./mineserver`
   
 **Compiling using windows (VS2010/VS2008):**
 
