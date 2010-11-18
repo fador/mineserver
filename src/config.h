@@ -39,9 +39,11 @@ private:
   std::map<std::string, std::string> confSet;
 public:
   bool load(std::string configFile);
+  
   int iValue(std::string name);
   std::string sValue(std::string name);
   std::vector<int> vValue(std::string name);
+  
   static Conf &get();
 };
 
