@@ -81,7 +81,7 @@ void rules(User *user, std::string command, std::deque<std::string> args)
     std::ifstream ifs( RULESFILE.c_str());
     std::string temp;
 
-    if(ifs.fail)
+    if(ifs.fail())
     {
       std::cout << "> Warning: " << RULESFILE << " not found." << std::endl;
       return;
