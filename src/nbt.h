@@ -83,7 +83,7 @@ struct NBT_struct
 
 //Data reading
 int TAG_Byte(uint8 *input, char *output);
-int TAG_Short(uint8 *input, int *output);
+int TAG_Short(uint8 *input, sint16 *output);
 int TAG_Int(uint8 *input, int *output);
 int TAG_Long(uint8 *input, long long *output);
 int TAG_Float(uint8 *input, float *output);
