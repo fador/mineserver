@@ -366,7 +366,7 @@ int PacketHandler::player_inventory(User *user)
     break;
   }
 
-  for(i = 0; i < (unsigned int)items; i++)
+  for(i = 0; i < items; i++)
   {
 	  sint16 item_id;
 	  sint8 numberOfItems;
@@ -795,19 +795,21 @@ int PacketHandler::arm_animation(User *user)
 
 int PacketHandler::pickup_spawn(User *user)
 {
-  uint32 curpos = 4;
   spawnedItem item;
   item.EID    = generateEID();
   item.health = 0;
 
   sint8 yaw, pitch, roll;
+  sint32 eid;
 
-  user->buffer >> (sint16&)item.item >> (sint8&)item.count ;
+  user->buffer >> eid >> (sint16&)item.item >> (sint8&)item.count ;
   user->buffer >> (sint32&)item.pos.x() >> (sint32&)item.pos.y() >> (sint32&)item.pos.z();
   user->buffer >> yaw >> pitch >> roll;
 
   if(!user->buffer)
 	  return PACKET_NEED_MORE_DATA;
+
+  user->buffer.removePacket();
 
   item.spawnedBy = user->UID;
 
@@ -855,9 +857,8 @@ int PacketHandler::complex_entities(User *user)
 
   unsigned int i;
 
-  int x,y,z;
-  sint32 len;
-
+  sint32 x,z;
+  sint16 y, len;
 
   user->buffer >> x >> y >> z >> len;
 
@@ -1174,6 +1175,8 @@ int PacketHandler::use_entity(User *user)
 	user->buffer >> userID >> target;
 	if(!user->buffer)
 		return PACKET_NEED_MORE_DATA;
+
+	user->buffer.removePacket();
 
 	return PACKET_OK;
 }
