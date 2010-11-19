@@ -207,9 +207,8 @@ public:
 	{
 		if(haveData(sizeof(val)))
 		{
-			//int ival = ntohl(*reinterpret_cast<const sint32*>(&m_buffer[m_readPos]));
-			//val = *reinterpret_cast<float*>(&ival);
-      val=getFloat(&m_buffer[m_readPos]);
+			int ival = ntohl(*reinterpret_cast<const sint32*>(&m_buffer[m_readPos]));
+			val = *reinterpret_cast<float*>(&ival);
 			m_readPos += sizeof(val);
 		}
 		return *this;
@@ -228,10 +227,9 @@ public:
 	{
 		if(haveData(sizeof(val)))
 		{
-			//uint64 ival = *reinterpret_cast<const sint16*>(&m_buffer[m_readPos]);
-      val=getDouble(&m_buffer[m_readPos]);
-			//ival = ((((uint64)ntohl((u_long)ival)) << 32) + ntohl((u_long)(ival >> 32)));
-			//val = *reinterpret_cast<double*>(&ival);
+			uint64 ival = *reinterpret_cast<const sint64*>(&m_buffer[m_readPos]);
+			ival = ((((uint64)ntohl((u_long)ival)) << 32) + ntohl((u_long)(ival >> 32)));
+			val = *reinterpret_cast<double*>(&ival);
 			m_readPos += sizeof(val);
 		}
 		return *this;
