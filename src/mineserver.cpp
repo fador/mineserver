@@ -94,7 +94,6 @@ int main(void)
   uint32 tick      = (uint32)time(0);
 
   initConstants();
-  srand(time(NULL));
 
   Chat::get().loadAdmins(ADMINFILE);
   Chat::get().checkMotd(MOTDFILE);
