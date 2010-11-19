@@ -16,26 +16,19 @@ DFLAGS += -D__SOLARIS__
 endif
 
 RM = rm -f
-C++ = g++
-LFLAGS = -I. -I/usr/local/include -L/usr/local/lib -lpthread -levent -lz
-CFLAGS = $(DFLAGS) -I. -I/usr/local/include -L/usr/local/lib
+CXX = g++
+CC = $(CXX)
+LDFLAGS = -L/usr/local/lib -lpthread -levent -lz
+CXXFLAGS = $(DFLAGS) -I. -I/usr/local/include -L/usr/local/lib
 
 OBJS = map.o chat.o commands.o config.o constants.o logger.o mapgen.o nbt.o packets.o physics.o sockets.o tools.o user.o perlin.o mineserver.o
 PROG = ./mineserver
 PROGS = $(PROG)
 
-all: $(OBJS) $(PROGS)
-
-$(PROG): $(OBJS)
-	$(C++) -o $(PROG) $(OBJS) $(LFLAGS)
+$(PROGS): $(OBJS)
 
 clean: 
 	$(RM) $(OBJS) $(PROGS)
-
-$(OBJS): %.o: %.cpp
-	$(C++) -o $@ $(CFLAGS) -c $<
-
-$(PROG): $(OBJS)
 
 all: $(PROGS)
 
