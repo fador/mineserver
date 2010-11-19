@@ -702,7 +702,6 @@ int PacketHandler::player_block_placement(User *user)
     intX--;
     intZ--;
 
-    // Optimized version of the code below
     if((z == intZ || (z == intZ+1 && fracZ < 0.30) || (z == intZ-1 && fracZ > 0.70)) &&
        (x == intX || (x == intX+1 && fracZ < 0.30) || (x == intX-1 && fracX > 0.70)))
       change = false;
