@@ -596,7 +596,7 @@ int PacketHandler::player_block_placement(User *user)
   orig_x = x; orig_y = y; orig_z = z;
 
   //Invalid y value
-  if(y < 0) // need only to check <0, sint8 cannot be >127
+  if(y > 127 || y < 0)
   {
     //std::cout << blockID << " (" << x << "," << (int)y_orig << "," << z << ") " << direction << std::endl;
     return PACKET_OK;
@@ -795,21 +795,19 @@ int PacketHandler::arm_animation(User *user)
 
 int PacketHandler::pickup_spawn(User *user)
 {
+  uint32 curpos = 4;
   spawnedItem item;
   item.EID    = generateEID();
   item.health = 0;
 
   sint8 yaw, pitch, roll;
-  sint32 eid;
 
-  user->buffer >> eid >> (sint16&)item.item >> (sint8&)item.count ;
+  user->buffer >> (sint16&)item.item >> (sint8&)item.count ;
   user->buffer >> (sint32&)item.pos.x() >> (sint32&)item.pos.y() >> (sint32&)item.pos.z();
   user->buffer >> yaw >> pitch >> roll;
 
   if(!user->buffer)
 	  return PACKET_NEED_MORE_DATA;
-
-  user->buffer.removePacket();
 
   item.spawnedBy = user->UID;
 
@@ -857,8 +855,9 @@ int PacketHandler::complex_entities(User *user)
 
   unsigned int i;
 
-  sint32 x,z;
-  sint16 y, len;
+  int x,y,z;
+  sint32 len;
+
 
   user->buffer >> x >> y >> z >> len;
 
@@ -1175,8 +1174,6 @@ int PacketHandler::use_entity(User *user)
 	user->buffer >> userID >> target;
 	if(!user->buffer)
 		return PACKET_NEED_MORE_DATA;
-
-	user->buffer.removePacket();
 
 	return PACKET_OK;
 }

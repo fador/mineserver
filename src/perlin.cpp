@@ -79,7 +79,7 @@ double Perlin::getPerlin(double x, double y)
   double getnoise = 0;
   for(int a = 0; a < mOctaves-1; a++)
   {
-    double frequency = 2<<a;
+    double frequency = 1<<a;
     double amplitude = pow(mPersistence,(double)a);
     getnoise += noise(((double)x)*frequency,((double)y)*frequency)*amplitude;
   }  
