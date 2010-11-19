@@ -884,7 +884,6 @@ uint32 generateEID()
 	do
 	{
 		finished = true;
-		srand (randomness);
 		randomness = (randomness + rand()) % 0xFFFFFFFF;
 		EID = randomness % 0x7FFFFFFF;
 		
