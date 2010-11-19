@@ -58,5 +58,5 @@ unsigned int MapGen::getSeed()
 
 char MapGen::getHeight(double x, double z) 
 {
-  return 60 + Perlin::get().getPerlin(x,z)*10;
+  return (char)(60 + Perlin::get().getPerlin(x,z)*10);
 }

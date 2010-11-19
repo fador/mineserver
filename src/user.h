@@ -94,8 +94,7 @@ public:
   //std::deque<unsigned char> buffer;
   Packet buffer;
 
-
-  bool changeNick(std::string nick);
+  bool changeNick(std::string _nick);
   bool updatePos(double x, double y, double z, double stance);
   bool updateLook(float yaw, float pitch);
 

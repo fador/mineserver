@@ -78,16 +78,24 @@ void rules(User *user, std::string command, std::deque<std::string> args)
   if(tUser != NULL)
   {
     // Send rules
-    std::ifstream ofs( RULESFILE.c_str());
+    std::ifstream ifs( RULESFILE.c_str());
     std::string temp;
 
-    while(getline(ofs, temp))
+    if(ifs.fail())
     {
-      // If not a comment
-      if(temp.empty() || temp[0] == COMMENTPREFIX)
-        Chat::get().sendMsg(tUser, temp, Chat::USER);
+      std::cout << "> Warning: " << RULESFILE << " not found." << std::endl;
+      return;
     }
-    ofs.close();
+    else
+    {
+      while(getline(ifs, temp))
+      {
+        // If not a comment
+        if(temp.empty() || temp[0] == COMMENTPREFIX)
+          Chat::get().sendMsg(tUser, temp, Chat::USER);
+      }
+      ifs.close();
+    }
   }
   else
     reportError(user, "User " + args[0] + " not found (see /players)");
@@ -95,7 +103,7 @@ void rules(User *user, std::string command, std::deque<std::string> args)
 
 void home(User *user, std::string command, std::deque<std::string> args)
 {
-  Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + "Teleporting you home!", Chat::USER);
+  Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + "Teleported you home!", Chat::USER);
   user->teleport(Map::get().spawnPos.x(), Map::get().spawnPos.y() + 2, Map::get().spawnPos.z());
 }
 
@@ -194,17 +202,17 @@ void userTeleport(User *user, std::string command, std::deque<std::string> args)
   {
     LOG(user->nick + ": teleport " + args[0] + " to " + args[1]);
 
-    User *whatUser = getUserByNick(args[0]);
+    User *whoUser = getUserByNick(args[0]);
     User *toUser   = getUserByNick(args[1]);
 
-    if(whatUser != NULL && toUser != NULL)
+    if(whoUser != NULL && toUser != NULL)
     {
-      whatUser->teleport(toUser->pos.x, toUser->pos.y + 2, toUser->pos.z);
+      whoUser->teleport(toUser->pos.x, toUser->pos.y + 2, toUser->pos.z);
       Chat::get().sendMsg(user, COLOR_MAGENTA + "Teleported!", Chat::USER);
     }
     else
     {
-      reportError(user, "User " + (whatUser == NULL ? args[0] : args[1])+
+      reportError(user, "User " + (whoUser == NULL ? args[0] : args[1])+
                   " not found (see /players");
     }
   }
@@ -282,12 +290,6 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
       itemStacks = roundUpTo(itemCount, 64) / 64; 
       itemCount  -= (itemStacks-1) * 64; 
     }
-    else 
-    {
-      // if itemCount is not provided assume 1
-      itemCount = 1;
-      itemStacks = 1;
-    } 
   }
   else
     reportError(user, "Too few parameters.");
@@ -313,7 +315,7 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
       Map::get().sendPickupSpawn(item);
     }
 
-    Chat::get().sendMsg(user, COLOR_RED + user->nick + " spawned items", Chat::ADMINS);
+    Chat::get().sendMsg(user, COLOR_RED + user->nick + " spawned " + args[1], Chat::ADMINS);
   }
   else
     reportError(user, "User " + args[0] + " not found (see /players)");

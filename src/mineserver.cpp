@@ -108,24 +108,6 @@ int main(void)
 
   //Initialize map
   Map::get().initMap();
-  
-  // REMOVE
-  Perlin::get().init(7,0.5,1376312589);
-  for(int i=1; i<10; i++) {
-    for(int k=1; k<10; k++) {
-      std::cout << Perlin::get().getPerlin(k, i) << "  ";
-    }
-    std::cout << std::endl;
-  }
-  std::cout << std::endl;
-  
-  Perlin::get().init(7,0.3,1376312589);
-  for(int i=1; i<10; i++) {
-    for(int k=1; k<10; k++) {
-      std::cout << 60+Perlin::get().getPerlin(k, i)*5 << "  ";
-    }
-    std::cout << std::endl;
-  }
 
   //Initialize packethandler
   PacketHandler::get().initPackets();
