@@ -522,7 +522,7 @@ int PacketHandler::player_digging(User *user)
         item.health = 0;
 
         // Spawn drop according to BLOCKDROPS
-        // Check propability
+        // Check probability
         if(BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand()%10000)
         {
           item.item  = BLOCKDROPS[block].item_id;

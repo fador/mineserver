@@ -30,6 +30,20 @@ $(PROGS): $(OBJS)
 clean: 
 	$(RM) $(OBJS) $(PROGS)
 
+<<<<<<< HEAD
+=======
+clean-objs:
+	$(RM) $(OBJS)
+
+clean-progs:
+	$(RM) $(PROGS)
+
+$(OBJS): %.o: %.cpp
+	$(C++) -o $@ $(CFLAGS) -c $<
+
+$(PROG): $(OBJS)
+
+>>>>>>> CodeReview
 all: $(PROGS)
 
 chat.o: chat.cpp logger.h constants.h tools.h map.h user.h chat.h config.h physics.h
