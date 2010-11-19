@@ -32,6 +32,12 @@ $(PROG): $(OBJS)
 clean: 
 	$(RM) $(OBJS) $(PROGS)
 
+clean-objs:
+	$(RM) $(OBJS)
+
+clean-progs:
+	$(RM) $(PROGS)
+
 $(OBJS): %.o: %.cpp
 	$(C++) -o $@ $(CFLAGS) -c $<
 
