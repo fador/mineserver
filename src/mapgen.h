@@ -25,60 +25,15 @@
 #ifndef _MAPGEN_H
 #define _MAPGEN_H
 
-#include "mapgenargs.h"
 #include "noise.h"
-
-enum MapGenTemplate {
-  Archipelago,
-  Atoll,
-  Bay,
-  Default,
-  Dunes,
-  Flat,
-  Hills,
-  Ice,
-  Island,
-  Lake,
-  Mountains,
-  Peninsula,
-  River,
-  Streams
-};
 
 class MapGen
 {
 private:
-  MapGenArgs args;
   Noise noise;
-  float** heightmap;
-  float** blendmap;
-  float** slopemap;
-  
-  Block bWaterSurface, bGroundSurface, bWater, bGround, bSeaFloor, bBedrock, bDeepWaterSurface, bCliff;
 
-  const int WaterCoveragePasses;
-  const float CliffsideBlockThreshold;
-  
-  int groundThickness, seaFloorThickness;
-  
-  struct WaterParticle 
-  {
-      int x, y, h;
-      float velocity, mass, deposit;
-  };
-public:
-  MapGen(MapGenArgs mArgs);
-  
-  void GenerateHeightmap();
-  void applyBias();
-  
-  float MatchWaterCoverage(float** heightmap, float desiredWaterCoverage);
-  float CalculateWaterCoverage(float** heightmap, float waterLevel);
-  void CalculateSlope(float** heightmap, float** slopemap);
-
-  void applyTheme( MapGenTheme theme );
-
-  //void Erode();
+public:  
+  void generateHeightmap();
 
 };
 
