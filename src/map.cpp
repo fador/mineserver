@@ -649,16 +649,10 @@ bool Map::loadMap(int x, int z)
   // Generate map file name
 
   int mapposx = x;
-  int modulox = (mapposx);
-  while(modulox < 0)
-    modulox += 64;
-  modulox %= 64;
+  int modulox = (mapposx) & 0x3F;
 
   int mapposz = z;
-  int moduloz = (mapposz);
-  while(moduloz < 0)
-    moduloz += 64;
-  moduloz %= 64;
+  int moduloz = (mapposz) & 0x3F;
 
   std::string infile = mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+
                        base36_encode(mapposx)+"."+base36_encode(mapposz)+".dat";
