@@ -71,7 +71,7 @@ int TAG_Int(uint8 *input, int *output)
   return 4;
 }
 
-int TAG_Long(uint8 *input, long long *output)
+int TAG_Long(uint8 *input, sint64 *output)
 {
   *output = getSint64(input);
   return 8;
@@ -152,11 +152,11 @@ int TAG_List(uint8 *input, NBT_list *output)
     break;
 
   case TAG_LONG:
-    output->items = (void **)new long long *[output->length];
+    output->items = (void **)new sint64 *[output->length];
     for(int i = 0; i < output->length; i++)
     {
-      output->items[i] = (void *)new long long;
-      curpos          += TAG_Long(&input[curpos], (long long *)output->items[i]);
+      output->items[i] = (void *)new sint64;
+      curpos          += TAG_Long(&input[curpos], (sint64 *)output->items[i]);
     }
     break;
 
@@ -266,8 +266,8 @@ int TAG_Compound(uint8 *input, NBT_struct *output, bool start)
       break;
 
     case TAG_LONG:
-      value.value = (void *)new long long;
-      curpos     += TAG_Long(&input[curpos], (long long *)value.value);
+      value.value = (void *)new sint64;
+      curpos     += TAG_Long(&input[curpos], (sint64 *)value.value);
       output->values.push_back(value);
       break;
 
@@ -429,7 +429,7 @@ int dumpNBT_value(NBT_value *input, uint8 *buffer)
     break;
 
   case TAG_LONG:
-    putSint64(&buffer[curpos], *(long long *)input->value);
+    putSint64(&buffer[curpos], *(sint64 *)input->value);
     curpos += 8;
     break;
 
@@ -485,7 +485,7 @@ int dumpNBT_list(NBT_list *input, uint8 *buffer)
       break;
 
     case TAG_LONG:
-      putSint64(&buffer[curpos], *(long long *)input->items[i]);
+      putSint64(&buffer[curpos], *(sint64 *)input->items[i]);
       curpos += 8;
       break;
 
@@ -613,9 +613,9 @@ bool freeNBT_list(NBT_list *input)
   case TAG_LONG:
     for(int j = 0; j < input->length; j++)
     {
-      delete (long long *)input->items[j];
+      delete (sint64 *)input->items[j];
     }
-    delete[] (long long **)input->items;
+    delete[] (sint64 **)input->items;
     break;
 
   case TAG_FLOAT:
@@ -685,7 +685,7 @@ bool freeNBT_struct(NBT_struct *input)
       break;
 
     case TAG_LONG:
-      delete (long long *)input->values[i].value;
+      delete (sint64 *)input->values[i].value;
       break;
 
     case TAG_FLOAT:

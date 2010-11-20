@@ -37,7 +37,7 @@
 struct spawnedItem
 {
   int EID;
-  int item;
+  sint16 item;
   char count;
   sint16 health;
   vec pos;
@@ -103,7 +103,7 @@ private:
   ~Map()
   {
     // Free all memory
-    for(std::map<uint32, NBT_struct>::const_iterator it = maps.begin(); it != maps.end(); ++it)
+    for(std::map<uint32, NBT_struct>::const_iterator it = maps.begin(); it != maps.end(); it = maps.begin())
     {
       releaseMap(maps[it->first].x, maps[it->first].z);
     }
@@ -113,6 +113,8 @@ private:
     {
       delete items[it->first];
     }
+
+    items.clear();
 
     // Free level.dat info
     freeNBT_struct(&levelInfo);
