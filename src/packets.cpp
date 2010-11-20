@@ -652,7 +652,6 @@ int PacketHandler::player_block_placement(User *user)
 
   }
 
-<<<<<<< HEAD
   // Check if player is standing there
   if (y >= user->pos.y - 0.50 && y <= user->pos.y + 1.50) //TODO: Got values from tryes and guesses, need to decompile minecraft to get the real values
   {
@@ -666,8 +665,6 @@ int PacketHandler::player_block_placement(User *user)
       change = false;
 	}
 
-=======
->>>>>>> 2cbc0fcf6a497edeb233e6d1ce545f40caa16d9b
   if(blockID == BLOCK_TORCH ||
      blockID == BLOCK_REDSTONE_TORCH_OFF ||
      blockID == BLOCK_REDSTONE_TORCH_ON)
