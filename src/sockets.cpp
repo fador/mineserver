@@ -72,30 +72,6 @@ void client_callback(int fd,
                      void *arg)
 {
   User *user = (User *)arg;
-
-  if(ev & EV_WRITE)
-  {
-	  int writeLen = user->buffer.getWriteLen();
-	  if(writeLen)
-	  {
-		  int written = send(fd, (char*)user->buffer.getWrite(), writeLen, 0);
-		  if(written == -1)
-		  {
-			std::cout << "Error writing to client" << std::endl;
-			event_del(user->GetEvent());
-
-	#ifdef WIN32
-			closesocket(user->fd);
-	#else
-			close(user->fd);
-	#endif
-			remUser(user->fd);
-			return;
-
-		  }
-		  user->buffer.clearWrite(written);
-	  }
-  }
   
   if(ev & EV_READ)
   {
@@ -108,7 +84,7 @@ void client_callback(int fd,
 	  if(read == 0)
 	  {
 		std::cout << "Socket closed properly" << std::endl;
-		event_del(user->GetEvent());
+		//event_del(user->GetEvent());
 
 #ifdef WIN32
 		closesocket(user->fd);
@@ -133,52 +109,88 @@ void client_callback(int fd,
 
 	  while(user->buffer >> (sint8&)user->action)
 	  {
-		//Variable len package
-		if(PacketHandler::get().packets[user->action].len == PACKET_VARIABLE_LEN)
-		{
-		  //Call specific function
-		  int (PacketHandler::*function)(User *) =
-			PacketHandler::get().packets[user->action].function;
-		  bool disconnecting = user->action == 0xFF;
-		  int curpos = (PacketHandler::get().*function)(user);
-		  if(curpos == PACKET_NEED_MORE_DATA)
+		  //Variable len package
+		  if(PacketHandler::get().packets[user->action].len == PACKET_VARIABLE_LEN)
 		  {
-			user->waitForData = true;
-			return;
-		  }
-
-		  if(disconnecting) // disconnect -- player gone
+		    //Call specific function
+		    int (PacketHandler::*function)(User *) =
+			  PacketHandler::get().packets[user->action].function;
+		    bool disconnecting = user->action == 0xFF;
+		    int curpos = (PacketHandler::get().*function)(user);
+		    if(curpos == PACKET_NEED_MORE_DATA)
+		    {
+			  user->waitForData = true;
+        event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
+        event_add(user->GetEvent(), NULL);
 			  return;
-		}
-		else if(PacketHandler::get().packets[user->action].len == PACKET_DOES_NOT_EXIST)
-		{
-		  printf("Unknown action: 0x%x\n", user->action);
+		    }
 
-		  event_del(user->GetEvent());
-
-		  #ifdef WIN32
-		  closesocket(user->fd);
-		  #else
-		  close(user->fd);
-		  #endif
-		  remUser(user->fd);
-		}
-		else
-		{
-		  if(!user->buffer.haveData(PacketHandler::get().packets[user->action].len))
-		  {
-			user->waitForData = true;
-			return;
+		    if(disconnecting) // disconnect -- player gone
+        {
+          return;
+        }
 		  }
+		  else if(PacketHandler::get().packets[user->action].len == PACKET_DOES_NOT_EXIST)
+		  {
+		    printf("Unknown action: 0x%x\n", user->action);
 
-		  //Call specific function
-		  int (PacketHandler::*function)(User *) = PacketHandler::get().packets[user->action].function;
-		  (PacketHandler::get().*function)(user);
+		    //event_del(user->GetEvent());
 
-		}
+		    #ifdef WIN32
+		    closesocket(user->fd);
+		    #else
+		    close(user->fd);
+		    #endif
+		    remUser(user->fd);
+		  }
+		  else
+		  {
+		    if(!user->buffer.haveData(PacketHandler::get().packets[user->action].len))
+		    {
+			    user->waitForData = true;
+          event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
+          event_add(user->GetEvent(), NULL);
+			    return;
+		    }
 
+		    //Call specific function
+		    int (PacketHandler::*function)(User *) = PacketHandler::get().packets[user->action].function;
+		    (PacketHandler::get().*function)(user);
+
+		  }
 	  } //End while
   }
+
+  int writeLen = user->buffer.getWriteLen();
+  if(writeLen)
+  {
+	  int written = send(fd, (char*)user->buffer.getWrite(), writeLen, 0);
+	  if(written == -1)
+	  {
+		  std::cout << "Error writing to client" << std::endl;
+		  //event_del(user->GetEvent());
+
+  #ifdef WIN32
+		  closesocket(user->fd);
+  #else
+		  close(user->fd);
+  #endif
+		  remUser(user->fd);
+		  return;
+
+	  }
+	  user->buffer.clearWrite(written);
+
+	  if(user->buffer.getWriteLen())
+	  {
+		  event_set(user->GetEvent(), fd, EV_WRITE|EV_READ, client_callback, user);
+		  event_add(user->GetEvent(), NULL);
+		  return;
+	  }
+  }
+
+  event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
+  event_add(user->GetEvent(), NULL);
 
 }
 
@@ -202,6 +214,7 @@ void accept_callback(int fd,
   User *client = addUser(client_fd, generateEID());
   setnonblock(client_fd);
 
-  event_set(client->GetEvent(), client_fd, EV_WRITE|EV_READ|EV_PERSIST, client_callback, client);
+  event_set(client->GetEvent(), client_fd,EV_WRITE|EV_READ, client_callback, client);
   event_add(client->GetEvent(), NULL);
+
 }
