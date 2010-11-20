@@ -111,13 +111,10 @@ int PacketHandler::login_request(User *user)
   if(!user->buffer.haveData(12))
     return PACKET_NEED_MORE_DATA;
 
-  int i;
-
   sint32 version;
   std::string player, passwd;
   sint64 mapseed;
   sint8 dimension;
-
 
   user->buffer >> version >> player >> passwd >> mapseed >> dimension;
 
@@ -126,11 +123,10 @@ int PacketHandler::login_request(User *user)
 
   user->buffer.removePacket();
 
-  std::cout << "Player " << user->UID << " login v." << version <<" : " << player <<":"<<
-  passwd << std::endl;
+  std::cout << "Player " << user->UID << " login v." << version <<" : " << player <<":"<< passwd << std::endl;
 
   // If version is not 2 or 3
-  if(version != 4 && version != 3 && version != 2)
+  if(version != 4)
   {
     user->kick(Conf::get().sValue("wrong_protocol_message"));
     return PACKET_OK;
@@ -149,90 +145,52 @@ int PacketHandler::login_request(User *user)
   user->loadData();
 
   //Login OK package
-  char data[9] = {0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-  putSint32((uint8 *)&data[1], user->UID);
-  bufferevent_write(user->buf_ev, (char *)&data[0], 9);
+  //char data[9] = {0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+  //putSint32((uint8 *)&data[1], user->UID);
+  user->buffer << (sint8)PACKET_LOGIN_RESPONSE 
+	  << (sint32)user->UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
+  //bufferevent_write(user->buf_ev, (char *)&data[0], 9);
 
   //Send server time (after dawn)
-  uint8 data3[9] = {0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0e, 0x00};
-  bufferevent_write(user->buf_ev, (char *)&data3[0], 9);
+  //uint8 data3[9] = {0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0e, 0x00};
+  //bufferevent_write(user->buf_ev, (char *)&data3[0], 9);
+  user->buffer << (sint8)PACKET_TIME_UPDATE << (sint64) 0x0e00;
 
   //Inventory
-  uint8 data4[7+36*5];
-  data4[0] = 0x05;
-  putSint32(&data4[1], -1);
-  data4[5] = 0;
-  data4[6] = 36;
-  int curpos2 = 7;
-  //Send main inventory
-  for(i = 0; i < 36; i++)
+  for(sint32 invType=-1; invType != -4; invType--)
   {
-    if(user->inv.main[i].count)
-    {
-      putSint16(&data4[curpos2], user->inv.main[i].type);     //Type
-      curpos2       += 2;
-      data4[curpos2] = user->inv.main[i].count;               //Count
-      curpos2++;
-      putSint16(&data4[curpos2], user->inv.main[i].health); //Health
-      curpos2 += 2;
-    }
-    else
-    {
-      //Empty slot
-      putSint16(&data4[curpos2], -1);
-      curpos2 += 2;
-    }
-  }
-  bufferevent_write(user->buf_ev, (char *)&data4[0], curpos2);
+    Item *inventory = NULL;
+	sint16 inventoryCount = 0;
 
+	if(invType == -1)
+	{
+		inventory = user->inv.main;
+		inventoryCount = 36;
+	}
+	else if(invType == -2)
+	{
+		inventory = user->inv.equipped;
+		inventoryCount = 4;
+	}
+	else if(invType == -3)
+	{
+		inventory = user->inv.crafting;
+		inventoryCount = 4;
+	}
+	user->buffer << (sint8)PACKET_PLAYER_INVENTORY << invType << inventoryCount;
 
-  //Send equipped inventory
-  putSint32(&data4[1], -3);
-  data4[6] = 4;
-  curpos2  = 7;
-  for(i = 0; i < 4; i++)
-  {
-    if(user->inv.equipped[i].count)
-    {
-      putSint16(&data4[curpos2], user->inv.equipped[i].type);     //Type
-      curpos2       += 2;
-      data4[curpos2] = user->inv.equipped[i].count;               //Count
-      curpos2++;
-      putSint16(&data4[curpos2], user->inv.equipped[i].health); //Health
-      curpos2 += 2;
-    }
-    else
-    {
-      //Empty slot
-      putSint16(&data4[curpos2], -1);
-      curpos2 += 2;
-    }
+	for(int i=0; i<inventoryCount; i++)
+	{
+		if(inventory[i].count)
+		{
+			user->buffer << (sint16)inventory[i].type << (sint8)inventory[i].count << (sint16)inventory[i].health;
+		}
+		else
+		{
+			user->buffer << (sint16)-1;
+		}
+	}
   }
-  bufferevent_write(user->buf_ev, (char *)&data4[0], curpos2);
-
-  //Send crafting inventory
-  putSint32(&data4[1], -2);
-  data4[6] = 4;
-  curpos2  = 7;
-  for(i = 0; i < 4; i++)
-  {
-    if(user->inv.crafting[i].count)
-    {
-      putSint16(&data4[curpos2], user->inv.crafting[i].type);     //Type
-      curpos2       += 2;
-      data4[curpos2] = user->inv.crafting[i].count;               //Count
-      curpos2++;
-      putSint16(&data4[curpos2], user->inv.crafting[i].health); //Health
-      curpos2 += 2;
-    }
-    else
-    {
-      //Empty slot
-      putSint16(&data4[curpos2], -1);
-      curpos2 += 2;
-    }
-  }
-  bufferevent_write(user->buf_ev, (char *)&data4[0], curpos2);
 
   // Send motd
   std::ifstream motdfs( MOTDFILE.c_str());
@@ -243,7 +201,9 @@ int PacketHandler::login_request(User *user)
   {
     // If not commentline
     if(temp[0] != COMMENTPREFIX)
-      Chat::get().sendMsg(user, temp, Chat::USER);
+	{
+      user->buffer << (sint8)PACKET_CHAT_MESSAGE << temp;
+	}
   }
   motdfs.close();
 
@@ -268,8 +228,8 @@ int PacketHandler::login_request(User *user)
 
 
   //Send "On Ground" signal
-  char data6[2] = {0x0A, 0x01};
-  bufferevent_write(user->buf_ev, (char *)&data6[0], 2);
+//  char data6[2] = {0x0A, 0x01};
+//  bufferevent_write(user->buf_ev, (char *)&data6[0], 2);
 
   user->logged = true;
 
@@ -297,8 +257,7 @@ int PacketHandler::handshake(User *user)
   std::cout << "Handshake player: " << player << std::endl;
 
   //Send handshake package
-  char data2[4] = {0x02, 0x00, 0x01, '-'};
-  bufferevent_write(user->buf_ev, (char *)&data2[0], 4);
+  user->buffer << (sint8)PACKET_HANDSHAKE << std::string("-");
 
   return PACKET_OK;
 }
@@ -522,7 +481,7 @@ int PacketHandler::player_digging(User *user)
         item.health = 0;
 
         // Spawn drop according to BLOCKDROPS
-        // Check propability
+        // Check probability
         if(BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand()%10000)
         {
           item.item  = BLOCKDROPS[block].item_id;
@@ -592,6 +551,10 @@ int PacketHandler::player_block_placement(User *user)
 	  return PACKET_NEED_MORE_DATA;
 
   user->buffer.removePacket();
+
+  // TODO: Handle processing of 
+  if(direction == -1)
+	  return PACKET_OK;
 
   orig_x = x; orig_y = y; orig_z = z;
 
@@ -685,27 +648,9 @@ int PacketHandler::player_block_placement(User *user)
         metadata2 |= 0x8;
 
       Map::get().setBlock(x, y+modifier, z, block2, metadata2);
-      Map::get().sendBlockChange(x, y+modifier, z, blockID, metadata2);
+      Map::get().sendBlockChange(x, y+modifier, z, (char)blockID, metadata2);
     }
 
-  }
-
-  // Check if player is standing there
-  double intX, intZ, fracX, fracZ;
-  // Check Y coordinate
-  if(y == user->pos.y || y-1 == user->pos.y)
-  {
-    fracX = std::abs(std::modf(user->pos.x, &intX));
-    fracZ = std::abs(std::modf(user->pos.z, &intZ));
-
-    // Mystics
-    intX--;
-    intZ--;
-
-    // Optimized version of the code below
-    if((z == intZ || (z == intZ+1 && fracZ < 0.30) || (z == intZ-1 && fracZ > 0.70)) &&
-       (x == intX || (x == intX+1 && fracZ < 0.30) || (x == intX-1 && fracX > 0.70)))
-      change = false;
   }
 
   if(blockID == BLOCK_TORCH ||
@@ -739,8 +684,8 @@ int PacketHandler::player_block_placement(User *user)
 
   if(change)
   {
-    Map::get().setBlock(x, y, z, blockID, metadata);
-    Map::get().sendBlockChange(x, y, z, blockID, metadata);
+    Map::get().setBlock(x, y, z, (char)blockID, metadata);
+    Map::get().sendBlockChange(x, y, z, (char)blockID, metadata);
 
 
     if(blockID == BLOCK_WATER || blockID == BLOCK_STATIONARY_WATER ||
@@ -763,11 +708,9 @@ int PacketHandler::holding_change(User *user)
   user->buffer.removePacket();
 
   //Send holding change to others
-  uint8 holdingPackage[7];
-  holdingPackage[0] = 0x10;
-  putSint32(&holdingPackage[1], user->UID);
-  putSint16(&holdingPackage[5], itemID);
-  user->sendOthers(&holdingPackage[0], 7);
+  Packet pkt;
+  pkt << (sint8)PACKET_HOLDING_CHANGE << (sint32)user->UID << itemID;
+  user->sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
 
   return PACKET_OK;
 }
@@ -784,11 +727,9 @@ int PacketHandler::arm_animation(User *user)
 
 	user->buffer.removePacket();
 
-  uint8 animationPackage[6];
-  animationPackage[0] = 0x12;
-  putSint32(&animationPackage[1], user->UID);
-  animationPackage[5] = animType;
-  user->sendOthers(&animationPackage[0], 6);
+	Packet pkt;
+	pkt << (sint8)PACKET_ARM_ANIMATION << (sint32)user->UID << animType;
+	user->sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
 
   return PACKET_OK;
 }
@@ -833,10 +774,7 @@ int PacketHandler::disconnect(User *user)
 
   std::cout << "Disconnect: " << msg << std::endl;
 
-//  user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
-
-  bufferevent_disable(user->buf_ev, EV_READ);
-  bufferevent_free(user->buf_ev);
+  event_del(user->GetEvent());
   
   #ifdef WIN32
   closesocket(user->fd);

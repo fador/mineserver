@@ -71,13 +71,16 @@ struct Inventory
 
 class User
 {
+private:
+	event m_event;
 public:
 
   User(int sock, uint32 EID);
   ~User();
 
+
   int fd;
-  struct bufferevent *buf_ev;
+  //struct bufferevent *buf_ev;
   //View distance in chunks -viewDistance <-> viewDistance
   static const int viewDistance = 10;
   uint8 action;
@@ -145,6 +148,8 @@ public:
   bool teleport(double x, double y, double z);
   bool spawnUser(int x, int y, int z);
   bool spawnOthers();
+
+  struct event *GetEvent();
 };
 
 User *addUser(int sock, uint32 EID);

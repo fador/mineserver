@@ -88,16 +88,17 @@ class Packet
 {
 private:
 	typedef std::vector<uint8> bufVector;
-	bufVector m_buffer;
+	bufVector m_readBuffer;
 	bufVector::size_type m_readPos;
 	bool m_isValid;
 
+	bufVector m_writeBuffer;
 public:
 	Packet() : m_readPos(0), m_isValid(true) {}
 
 	bool haveData(int requiredBytes)
 	{
-		return m_isValid = m_isValid && ((m_readPos + requiredBytes) <= m_buffer.size());
+		return m_isValid = m_isValid && ((m_readPos + requiredBytes) <= m_readBuffer.size());
 	}
 
 	operator bool() const
@@ -111,27 +112,36 @@ public:
 		m_isValid = true;
 	}
 
-	void append(std::vector<uint8> &buffer)
+	void addToRead(std::vector<uint8> &buffer)
 	{
-		m_buffer.insert(m_buffer.end(), buffer.begin(), buffer.end());
+		m_readBuffer.insert(m_readBuffer.end(), buffer.begin(), buffer.end());
 	}
 
-	void append(const void * data, bufVector::size_type dataSize)
+	void addToRead(const void * data, bufVector::size_type dataSize)
 	{
-		bufVector::size_type start = m_buffer.size();
-		m_buffer.resize(start + dataSize);
-		memcpy(&m_buffer[start], data, dataSize);
+		bufVector::size_type start = m_readBuffer.size();
+		m_readBuffer.resize(start + dataSize);
+		memcpy(&m_readBuffer[start], data, dataSize);
+	}
+
+	void addToWrite(const void * data, bufVector::size_type dataSize)
+	{
+		if(dataSize == 0)
+			return;
+		bufVector::size_type start = m_writeBuffer.size();
+		m_writeBuffer.resize(start + dataSize);
+		memcpy(&m_writeBuffer[start], data, dataSize);
 	}
 
 	void removePacket()
 	{
-		m_buffer.erase(m_buffer.begin(), m_buffer.begin() + m_readPos);
+		m_readBuffer.erase(m_readBuffer.begin(), m_readBuffer.begin() + m_readPos);
 		m_readPos = 0;
 	}
 
 	Packet & operator<<(sint8 val)
 	{
-		m_buffer.push_back(val);
+		m_writeBuffer.push_back(val);
 		return *this;
 	}
 
@@ -139,7 +149,7 @@ public:
 	{
 		if(haveData(sizeof(val)))
 		{
-			val = *reinterpret_cast<const sint8*>(&m_buffer[m_readPos]);
+			val = *reinterpret_cast<const sint8*>(&m_readBuffer[m_readPos]);
 			m_readPos += sizeof(val);
 		}
 		return *this;
@@ -148,7 +158,7 @@ public:
 	Packet & operator<<(sint16 val)
 	{
 		uint16 nval = htons(val);
-		append(&nval, sizeof(nval));
+		addToWrite(&nval, sizeof(nval));
 		return *this;
 	}
 
@@ -156,7 +166,7 @@ public:
 	{
 		if(haveData(sizeof(val)))
 		{
-			val = ntohs(*reinterpret_cast<const sint16*>(&m_buffer[m_readPos]));
+			val = ntohs(*reinterpret_cast<const sint16*>(&m_readBuffer[m_readPos]));
 			m_readPos += sizeof(val);
 		}
 		return *this;
@@ -165,14 +175,15 @@ public:
 	Packet & operator<<(sint32 val)
 	{
 		uint32 nval = htonl(val);
-		append(&nval, sizeof(nval));
+		addToWrite(&nval, sizeof(nval));
+		return *this;
 	}
 
 	Packet & operator>>(sint32 &val)
 	{
 		if(haveData(sizeof(val)))
 		{
-			val = ntohl(*reinterpret_cast<const sint32*>(&m_buffer[m_readPos]));
+			val = ntohl(*reinterpret_cast<const sint32*>(&m_readBuffer[m_readPos]));
 			m_readPos += sizeof(val);
 		}
 		return *this;
@@ -181,7 +192,7 @@ public:
 	Packet & operator<<(sint64 val)
 	{
 		uint64 nval = ((((uint64)htonl((u_long)val)) << 32) + htonl((u_long)(val >> 32)));
-		append(&nval, sizeof(nval));
+		addToWrite(&nval, sizeof(nval));
 		return *this;
 	}
 
@@ -189,7 +200,7 @@ public:
 	{
 		if(haveData(sizeof(val)))
 		{
-			val = *reinterpret_cast<const sint16*>(&m_buffer[m_readPos]);
+			val = *reinterpret_cast<const sint16*>(&m_readBuffer[m_readPos]);
 			val = ((((uint64)ntohl((u_long)val)) << 32) + ntohl((u_long)(val >> 32)));
 			m_readPos += sizeof(val);
 		}
@@ -199,7 +210,7 @@ public:
 	Packet & operator<<(float val)
 	{
 		uint32 nval = htonl(*reinterpret_cast<uint32*>(&val));
-		append(&nval, sizeof(nval));
+		addToWrite(&nval, sizeof(nval));
 		return *this;
 	}
 
@@ -207,7 +218,7 @@ public:
 	{
 		if(haveData(sizeof(val)))
 		{
-			int ival = ntohl(*reinterpret_cast<const sint32*>(&m_buffer[m_readPos]));
+			int ival = ntohl(*reinterpret_cast<const sint32*>(&m_readBuffer[m_readPos]));
 			val = *reinterpret_cast<float*>(&ival);
 			m_readPos += sizeof(val);
 		}
@@ -218,7 +229,7 @@ public:
 	{
 		uint64 nval = *reinterpret_cast<uint64*>(&val);
 		nval = ((((uint64)htonl((u_long)nval)) << 32) + htonl((u_long)(nval >> 32)));
-		append(&nval, sizeof(nval));
+		addToWrite(&nval, sizeof(nval));
 		return *this;
 	}
 
@@ -227,7 +238,7 @@ public:
 	{
 		if(haveData(sizeof(val)))
 		{
-			uint64 ival = *reinterpret_cast<const sint16*>(&m_buffer[m_readPos]);
+			uint64 ival = *reinterpret_cast<const uint64*>(&m_readBuffer[m_readPos]);
 			ival = ((((uint64)ntohl((u_long)ival)) << 32) + ntohl((u_long)(ival >> 32)));
 			val = *reinterpret_cast<double*>(&ival);
 			m_readPos += sizeof(val);
@@ -238,9 +249,9 @@ public:
 	Packet & operator<<(const std::string &str)
 	{
 		uint16 lenval = htons(str.size());
-		append(&lenval, sizeof(lenval));
+		addToWrite(&lenval, sizeof(lenval));
 
-		append(&str[0], str.size());
+		addToWrite(&str[0], str.size());
 		return *this;
 	}
 
@@ -249,26 +260,49 @@ public:
 		sint16 lenval;
 		if(haveData(sizeof(lenval)))
 		{
-			lenval = ntohs(*reinterpret_cast<const sint16*>(&m_buffer[m_readPos]));
+			lenval = ntohs(*reinterpret_cast<const sint16*>(&m_readBuffer[m_readPos]));
 			m_readPos += sizeof(lenval);
 
 			if(haveData(lenval))
 			{
-				str.assign((char*)&m_buffer[m_readPos], lenval);
+				str.assign((char*)&m_readBuffer[m_readPos], lenval);
 				m_readPos += lenval;
 			}
-		}
-
-		
+		}		
 		return *this;
+	}
+
+	void operator<<(Packet &other)
+	{
+		int dataSize = other.getWriteLen();
+		if(dataSize == 0)
+			return;
+		bufVector::size_type start = m_writeBuffer.size();
+		m_writeBuffer.resize(start + dataSize);
+		memcpy(&m_writeBuffer[start], other.getWrite(), dataSize);
 	}
 
 	void getData(void *buf, int count)
 	{
 		if(haveData(count))
 		{
-			memcpy(buf, &m_buffer[m_readPos], count);
+			memcpy(buf, &m_readBuffer[m_readPos], count);
 		}
+	}
+
+	void *getWrite()
+	{
+		return &m_writeBuffer[0];
+	}
+
+	size_t getWriteLen() const
+	{
+		return m_writeBuffer.size();
+	}
+
+	void clearWrite(int count)
+	{
+		m_writeBuffer.erase(m_writeBuffer.begin(), m_writeBuffer.begin() + count);
 	}
 };
 
