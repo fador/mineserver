@@ -149,7 +149,7 @@ int Mineserver::Run()
   int reuse             = 1;
 
   //event_base *eventbase = (event_base *)event_init();
-  m_eventBase = event_init();
+  m_eventBase = (event_base *)event_init();
 #ifdef WIN32
   socketlisten = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 #else
