@@ -796,35 +796,10 @@ bool isUser(int sock)
   return false;
 }
 
-//Generate random and unique entity ID
+//Generate "unique" entity ID
 uint32 generateEID()
 {
   static uint32 EID = 0;
-  /*
-     bool finished=false;
-     srand ( time(NULL) );
-
-     while(!finished)
-     {
-     finished=true;
-     EID=rand()%0xffffff;
-
-     for(uint8 i=0;i<Users.size();i++)
-     {
-      if(Users[i]->UID==EID)
-      {
-        finished=false;
-      }
-     }
-     for(uint8 i=0;i<Map::get().items.size();i++)
-     {
-      if(Map::get().items[i].EID==EID)
-      {
-        finished=false;
-      }
-     }
-     }
-   */
   return ++EID;
 }
 
