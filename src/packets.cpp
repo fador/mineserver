@@ -72,7 +72,7 @@ void PacketHandler::initPackets()
   //Len 0
   packets[PACKET_KEEP_ALIVE]               = Packets(0, &PacketHandler::keep_alive);
   //Variable len
-  packets[PACKET_LOGIN_REQUEST]            = Packets(-1, &PacketHandler::login_request);
+  packets[PACKET_LOGIN_REQUEST]            = Packets(PACKET_VARIABLE_LEN, &PacketHandler::login_request);
   //Variable len
   packets[PACKET_HANDSHAKE]                = Packets(PACKET_VARIABLE_LEN, &PacketHandler::handshake);
   packets[PACKET_CHAT_MESSAGE]             = Packets(PACKET_VARIABLE_LEN,
@@ -750,11 +750,13 @@ int PacketHandler::pickup_spawn(User *user)
 {
   uint32 curpos = 4;
   spawnedItem item;
-  item.EID    = generateEID();
+  
   item.health = 0;
 
   sint8 yaw, pitch, roll;
 
+  user->buffer >> (sint32)item.EID;
+  item.EID    = generateEID();
   user->buffer >> (sint16&)item.item >> (sint8&)item.count ;
   user->buffer >> (sint32&)item.pos.x() >> (sint32&)item.pos.y() >> (sint32&)item.pos.z();
   user->buffer >> yaw >> pitch >> roll;

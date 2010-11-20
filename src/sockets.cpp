@@ -72,30 +72,6 @@ void client_callback(int fd,
                      void *arg)
 {
   User *user = (User *)arg;
-
-  if(ev & EV_WRITE)
-  {
-	  int writeLen = user->buffer.getWriteLen();
-	  if(writeLen)
-	  {
-		  int written = send(fd, (char*)user->buffer.getWrite(), writeLen, 0);
-		  if(written == -1)
-		  {
-			std::cout << "Error writing to client" << std::endl;
-			event_del(user->GetEvent());
-
-	#ifdef WIN32
-			closesocket(user->fd);
-	#else
-			close(user->fd);
-	#endif
-			remUser(user->fd);
-			return;
-
-		  }
-		  user->buffer.clearWrite(written);
-	  }
-  }
   
   if(ev & EV_READ)
   {
@@ -180,6 +156,37 @@ void client_callback(int fd,
 	  } //End while
   }
 
+  int writeLen = user->buffer.getWriteLen();
+  if(writeLen)
+  {
+	  int written = send(fd, (char*)user->buffer.getWrite(), writeLen, 0);
+	  if(written == -1)
+	  {
+		std::cout << "Error writing to client" << std::endl;
+		event_del(user->GetEvent());
+
+#ifdef WIN32
+		closesocket(user->fd);
+#else
+		close(user->fd);
+#endif
+		remUser(user->fd);
+		return;
+
+	  }
+	  user->buffer.clearWrite(written);
+
+	  if(user->buffer.getWriteLen())
+	  {
+		  event_set(user->GetEvent(), fd, EV_WRITE|EV_READ, client_callback, user);
+		  event_add(user->GetEvent(), NULL);
+		  return;
+	  }
+  }
+
+  event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
+  event_add(user->GetEvent(), NULL);
+
 }
 
 void accept_callback(int fd,
@@ -202,6 +209,7 @@ void accept_callback(int fd,
   User *client = addUser(client_fd, generateEID());
   setnonblock(client_fd);
 
-  event_set(client->GetEvent(), client_fd, EV_WRITE|EV_READ|EV_PERSIST, client_callback, client);
+
+  event_set(client->GetEvent(), client_fd, EV_WRITE|EV_READ, client_callback, client);
   event_add(client->GetEvent(), NULL);
 }
