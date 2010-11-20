@@ -28,6 +28,8 @@
 #ifndef _PACKETS_H
 #define _PACKETS_H
 
+#include <string.h>
+
 #define PACKET_NEED_MORE_DATA -3
 #define PACKET_DOES_NOT_EXIST -2
 #define PACKET_VARIABLE_LEN   -1
@@ -147,10 +149,10 @@ public:
 
 	Packet & operator>>(sint8 &val)
 	{
-		if(haveData(sizeof(val)))
+		if(haveData(1))
 		{
 			val = *reinterpret_cast<const sint8*>(&m_readBuffer[m_readPos]);
-			m_readPos += sizeof(val);
+			m_readPos += 1;
 		}
 		return *this;
 	}
@@ -158,16 +160,16 @@ public:
 	Packet & operator<<(sint16 val)
 	{
 		uint16 nval = htons(val);
-		addToWrite(&nval, sizeof(nval));
+		addToWrite(&nval, 2);
 		return *this;
 	}
 
 	Packet & operator>>(sint16 &val)
 	{
-		if(haveData(sizeof(val)))
+		if(haveData(2))
 		{
 			val = ntohs(*reinterpret_cast<const sint16*>(&m_readBuffer[m_readPos]));
-			m_readPos += sizeof(val);
+			m_readPos += 2;
 		}
 		return *this;
 	}
@@ -175,72 +177,71 @@ public:
 	Packet & operator<<(sint32 val)
 	{
 		uint32 nval = htonl(val);
-		addToWrite(&nval, sizeof(nval));
+		addToWrite(&nval, 4);
 		return *this;
 	}
 
 	Packet & operator>>(sint32 &val)
 	{
-		if(haveData(sizeof(val)))
+		if(haveData(4))
 		{
 			val = ntohl(*reinterpret_cast<const sint32*>(&m_readBuffer[m_readPos]));
-			m_readPos += sizeof(val);
+			m_readPos += 4;
 		}
 		return *this;
 	}
 
 	Packet & operator<<(sint64 val)
 	{
-		uint64 nval = ((((uint64)htonl((u_long)val)) << 32) + htonl((u_long)(val >> 32)));
-		addToWrite(&nval, sizeof(nval));
+		uint64 nval = ntohll(val);
+		addToWrite(&nval, 8);
 		return *this;
 	}
 
 	Packet & operator>>(sint64 &val)
 	{
-		if(haveData(sizeof(val)))
+		if(haveData(8))
 		{
 			val = *reinterpret_cast<const sint16*>(&m_readBuffer[m_readPos]);
-			val = ((((uint64)ntohl((u_long)val)) << 32) + ntohl((u_long)(val >> 32)));
-			m_readPos += sizeof(val);
+			val = ntohll(val);
+			m_readPos += 8;
 		}
 		return *this;
 	}
 
 	Packet & operator<<(float val)
 	{
-		uint32 nval = htonl(*reinterpret_cast<uint32*>(&val));
-		addToWrite(&nval, sizeof(nval));
+		uint32 nval = htonl(*(uint32*)(void*)(&val));
+		addToWrite(&nval, 4);
 		return *this;
 	}
 
 	Packet & operator>>(float &val)
 	{
-		if(haveData(sizeof(val)))
+		if(haveData(4))
 		{
 			int ival = ntohl(*reinterpret_cast<const sint32*>(&m_readBuffer[m_readPos]));
-			val = *reinterpret_cast<float*>(&ival);
-			m_readPos += sizeof(val);
+			val = *(float*)(void*)(&ival);
+			m_readPos += 4;
 		}
 		return *this;
 	}
 
 	Packet & operator<<(double val)
 	{
-		uint64 nval = *reinterpret_cast<uint64*>(&val);
-		nval = ((((uint64)htonl((u_long)nval)) << 32) + htonl((u_long)(nval >> 32)));
-		addToWrite(&nval, sizeof(nval));
+		uint64 nval = ntohll(*(uint64*)(void*)(&val));
+		addToWrite(&nval, 8);
 		return *this;
 	}
 
 
 	Packet & operator>>(double &val)
 	{
-		if(haveData(sizeof(val)))
+		if(haveData(8))
 		{
 			uint64 ival = *reinterpret_cast<const uint64*>(&m_readBuffer[m_readPos]);
-			ival = ((((uint64)ntohl((u_long)ival)) << 32) + ntohl((u_long)(ival >> 32)));
-			val = *reinterpret_cast<double*>(&ival);
+			ival = ntohll(ival);
+			val = *(double*)(void*)(&ival);
 			m_readPos += sizeof(val);
 		}
 		return *this;
@@ -249,7 +250,7 @@ public:
 	Packet & operator<<(const std::string &str)
 	{
 		uint16 lenval = htons(str.size());
-		addToWrite(&lenval, sizeof(lenval));
+		addToWrite(&lenval, 2);
 
 		addToWrite(&str[0], str.size());
 		return *this;
@@ -258,7 +259,7 @@ public:
 	Packet & operator>>(std::string &str)
 	{
 		sint16 lenval;
-		if(haveData(sizeof(lenval)))
+		if(haveData(2))
 		{
 			lenval = ntohs(*reinterpret_cast<const sint16*>(&m_readBuffer[m_readPos]));
 			m_readPos += sizeof(lenval);

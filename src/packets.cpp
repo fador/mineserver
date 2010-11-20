@@ -327,9 +327,9 @@ int PacketHandler::player_inventory(User *user)
 
   for(i = 0; i < items; i++)
   {
-	  sint16 item_id;
-	  sint8 numberOfItems;
-	  sint16 health;
+	  sint16 item_id = 0;
+	  sint8 numberOfItems = 0;
+	  sint16 health = 0;
 
 	  user->buffer >> item_id;
 
@@ -537,7 +537,6 @@ int PacketHandler::player_digging(User *user)
 
 int PacketHandler::player_block_placement(User *user)
 {
-  int curpos  = 0;
   int orig_x, orig_y, orig_z;
   bool change = false;
 

@@ -37,7 +37,7 @@
 struct spawnedItem
 {
   int EID;
-  int item;
+  sint16 item;
   char count;
   sint16 health;
   vec pos;
