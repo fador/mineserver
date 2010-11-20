@@ -691,24 +691,17 @@ int PacketHandler::player_block_placement(User *user)
   }
 
   // Check if player is standing there
-  
-  // Check Y coordinate
-  if(y >= user->pos.y && y <= user->pos.y + 1)
+  if (y >= user->pos.y - 0.50 && y <= user->pos.y + 1.50) //TODO: Got values from tryes and guesses, need to decompile minecraft to get the real values
   {
 		double intX, intZ, fracX, fracZ;
-	  
-    fracX = std::abs(std::modf(user->pos.x, &intX));
+		
+		fracX = std::abs(std::modf(user->pos.x, &intX));
     fracZ = std::abs(std::modf(user->pos.z, &intZ));
-
-    // Mystics
-    intX--;
-    intZ--;
-
-    // Optimized version of the code below
+    
     if((z == intZ || (z == intZ + 1 && fracZ < 0.30) || (z == intZ - 1 && fracZ > 0.70)) &&
        (x == intX || (x == intX + 1 && fracZ < 0.30) || (x == intX - 1 && fracX > 0.70)))
       change = false;
-  }
+	}
 
   if(blockID == BLOCK_TORCH ||
      blockID == BLOCK_REDSTONE_TORCH_OFF ||
