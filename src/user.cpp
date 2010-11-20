@@ -101,19 +101,8 @@ User::~User()
 // Kick player
 bool User::kick(std::string kickMsg)
 {
-  int len     = kickMsg.size();
-  uint8 *data = new uint8[3+len];
-
-  data[0] = 0xff;
-  putSint16(&data[1], len);
-  for(unsigned int i = 0; i < kickMsg.size(); i++)
-    data[i+3] = kickMsg[i];
-
-  bufferevent_write(this->buf_ev, data, len+3);
-
-  std::cout << this->nick << " kicked. Reason: " << kickMsg << std::endl;
-
-  delete[] data;
+	buffer << (sint8)PACKET_KICK << kickMsg;
+	std::cout << nick << " kicked. Reason: " << kickMsg << std::endl;
   return true;
 }
 
@@ -498,7 +487,7 @@ bool User::updatePos(double x, double y, double z, double stance)
               packet[0] = PACKET_COLLECT_ITEM;
               putSint32(&packet[1], Map::get().mapItems[chunkHash][i]->EID);
               putSint32(&packet[5], this->UID);
-              bufferevent_write(this->buf_ev, (char *)packet, 9);
+			  buffer.addToWrite(packet, 9);
 
               //Send everyone destroy_entity-packet
               packet[0] = PACKET_DESTROY_ENTITY;
@@ -510,7 +499,8 @@ bool User::updatePos(double x, double y, double z, double stance)
               putSint16(&packet[1], Map::get().mapItems[chunkHash][i]->item);
               packet[3] = Map::get().mapItems[chunkHash][i]->count;
               putSint16(&packet[4], Map::get().mapItems[chunkHash][i]->health);
-              bufferevent_write(this->buf_ev, (char *)packet, 6);
+
+			  buffer.addToWrite(packet, 6);
 
               //We're done, release packet memory
               delete[] packet;
@@ -562,7 +552,6 @@ bool User::updatePos(double x, double y, double z, double stance)
 
 bool User::updateLook(float yaw, float pitch)
 {
-
   uint8 lookdata[7];
   lookdata[0] = 0x20;
   putSint32(&lookdata[1], (sint32)this->UID);
@@ -580,7 +569,7 @@ bool User::sendOthers(uint8 *data, uint32 len)
   for(unsigned int i = 0; i < Users.size(); i++)
   {
     if(Users[i]->fd != this->fd && Users[i]->logged)
-      bufferevent_write(Users[i]->buf_ev, data, len);
+		Users[i]->buffer.addToWrite(data, len);
   }
   return true;
 }
@@ -590,7 +579,7 @@ bool User::sendAll(uint8 *data, uint32 len)
   for(unsigned int i = 0; i < Users.size(); i++)
   {
     if(Users[i]->fd && Users[i]->logged)
-      bufferevent_write(Users[i]->buf_ev, data, len);
+		Users[i]->buffer.addToWrite(data, len);
   }
   return true;
 }
@@ -600,7 +589,7 @@ bool User::sendAdmins(uint8 *data, uint32 len)
   for(unsigned int i = 0; i < Users.size(); i++)
   {
     if(Users[i]->fd && Users[i]->logged && Users[i]->admin)
-      bufferevent_write(Users[i]->buf_ev, data, len);
+		Users[i]->buffer.addToWrite(data, len);
   }
   return true;
 }
@@ -665,13 +654,8 @@ bool User::popMap()
   //If map in queue, push it to client
   while(this->mapRemoveQueue.size())
   {
-    uint8 preChunk[10];
     //Pre chunk
-    preChunk[0] = 0x32;
-    putSint32(&preChunk[1], mapRemoveQueue[0].x());
-    putSint32(&preChunk[5], mapRemoveQueue[0].z());
-    preChunk[9] = 0; //Unload chunk
-    bufferevent_write(this->buf_ev, (uint8 *)&preChunk[0], 10);
+	buffer << (sint8)PACKET_PRE_CHUNK << (sint32)mapRemoveQueue[0].x() << (sint32)mapRemoveQueue[0].z() << (sint8)0;
 
     //Delete from known list
     delKnown(mapRemoveQueue[0].x(), mapRemoveQueue[0].z());
@@ -736,25 +720,8 @@ bool User::pushMap()
 
 bool User::teleport(double x, double y, double z)
 {
-  uint8 teleportdata[42] = {0};
-  int curpos             = 0;
-  teleportdata[curpos] = 0x0d;
-  curpos++;
-  putDouble(&teleportdata[curpos], x); //X
-  curpos += 8;
-  putDouble(&teleportdata[curpos], y);  //Y
-  curpos += 8;
-  putDouble(&teleportdata[curpos], 0.0); //Stance
-  curpos += 8;
-  putDouble(&teleportdata[curpos], z); //Z
-  curpos += 8;
-
-  putFloat(&teleportdata[curpos], 0.0);
-  curpos              += 4;
-  putFloat(&teleportdata[curpos], 0.0);
-  curpos              += 4;
-  teleportdata[curpos] = 0; //On Ground
-  bufferevent_write(this->buf_ev, (char *)&teleportdata[0], 42);
+	buffer << (sint8)PACKET_PLAYER_POSITION_AND_LOOK << x << y << (double)0.0 << z 
+		<< (float)0.f << (float)0.f << (sint8)0;
 
   //Also update pos for other players
   updatePos(x, y, z, 0);
@@ -763,34 +730,11 @@ bool User::teleport(double x, double y, double z)
 
 bool User::spawnUser(int x, int y, int z)
 {
-  uint8 entityData2[256];
-  int curpos = 0;
-  entityData2[curpos] = 0x14; //Named Entity Spawn
-  curpos++;
-  putSint32(&entityData2[curpos], this->UID);
-  curpos               += 4;
-  entityData2[curpos]   = 0;
-  entityData2[curpos+1] = this->nick.size();
-  curpos               += 2;
-
-  for(unsigned int j = 0; j < this->nick.size(); j++)
-  {
-    entityData2[curpos] = this->nick[j];
-    curpos++;
-  }
-
-  putSint32(&entityData2[curpos], x);
-  curpos               += 4;
-  putSint32(&entityData2[curpos], y);
-  curpos               += 4;
-  putSint32(&entityData2[curpos], z);
-  curpos               += 4;
-  entityData2[curpos]   = 0; //Rotation
-  entityData2[curpos+1] = 0; //Pitch
-  curpos               += 2;
-  putSint16(&entityData2[curpos], 0); //current item
-  curpos               += 2;
-  this->sendOthers((uint8 *)&entityData2[0], curpos);
+	Packet pkt;
+	pkt << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)UID << nick
+		<< (sint32)x << (sint32)y << (sint32)z << (sint8)0 << (sint8)0
+		<< (sint16)0;
+	sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
   return true;
 }
 
@@ -801,37 +745,17 @@ bool User::spawnOthers()
   {
     if(Users[i]->UID != this->UID && Users[i]->nick != this->nick)
     {
-      uint8 entityData2[256];
-      int curpos = 0;
-      entityData2[curpos] = 0x14; //Named Entity Spawn
-      curpos++;
-      putSint32(&entityData2[curpos], Users[i]->UID);
-      curpos               += 4;
-      entityData2[curpos]   = 0;
-      entityData2[curpos+1] = Users[i]->nick.size();
-      curpos               += 2;
-
-      for(unsigned int j = 0; j < Users[i]->nick.size(); j++)
-      {
-        entityData2[curpos] = Users[i]->nick[j];
-        curpos++;
-      }
-
-      putSint32(&entityData2[curpos], (int)(Users[i]->pos.x*32));
-      curpos               += 4;
-      putSint32(&entityData2[curpos], (int)(Users[i]->pos.y*32));
-      curpos               += 4;
-      putSint32(&entityData2[curpos], (int)(Users[i]->pos.z*32));
-      curpos               += 4;
-      entityData2[curpos]   = 0; //Rotation
-      entityData2[curpos+1] = 0; //Pitch
-      curpos               += 2;
-      putSint16(&entityData2[curpos], 0); //current item
-      curpos               += 2;
-      bufferevent_write(this->buf_ev, (uint8 *)&entityData2[0], curpos);
+		buffer << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)Users[i]->UID << Users[i]->nick 
+			<< (sint32)(Users[i]->pos.x * 32) << (sint32)(Users[i]->pos.y * 32) << (sint32)(Users[i]->pos.z * 32) 
+			<< (sint8)0 << (sint8)0 << (sint16)0;
     }
   }
   return true;
+}
+
+struct event *User::GetEvent()
+{
+	return &m_event;
 }
 
 User *addUser(int sock, uint32 EID)

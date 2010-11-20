@@ -45,79 +45,64 @@
 #include <cctype>
 
 #include "tools.h"
+#include "string.h"
 
 void putSint64(uint8 *buf, sint64 value)
 {
-  uint64 nval = ((((uint64)htonl((u_long)value)) << 32) + htonl((u_long)(value >> 32)));
-  uint8 *pointer = reinterpret_cast<uint8 *>(&nval);
-  for(uint8 i = 0; i < 8; i++)
-  {
-    buf[i] = pointer[i];
-  }
+  uint64 nval = ntohll(value);
+  memcpy(buf, &nval, 8);
 }
 
 void putSint32(uint8 *buf, sint32 value)
 {
   uint32 nval = htonl(value);
-  uint8 *pointer = reinterpret_cast<uint8 *>(&nval);
-  buf[0] = pointer[0];
-  buf[1] = pointer[1];
-  buf[2] = pointer[2];
-  buf[3] = pointer[3];
+  memcpy(buf, &nval, 4);
 }
 
 void putSint16(uint8 *buf, short value)
 {
   short value2=htons(value);
-  uint8 *pointer = reinterpret_cast<uint8 *>(&value2);
-  buf[0] = pointer[0];
-  buf[1] = pointer[1];
+  memcpy(buf, &value2, 2);
 }
 
 void putFloat(uint8 *buf, float value)
 {
-  uint32 nval = htonl(*reinterpret_cast<uint32*>(&value));
-  uint8 *floatAddress = reinterpret_cast<uint8 *>(&nval);
-  for(uint8 i = 0; i < 4; i++)
-  {
-    buf[i] = floatAddress[i];
-  }
+  uint32 nval;
+  memcpy(&nval, &value, 4);
+  nval = htonl(nval);
+  memcpy(buf, &nval, 4);
 }
 
 void putDouble(uint8 *buf, double value)
 {
-  uint64 nval = *reinterpret_cast<uint64*>(&value);
-	nval = ((((uint64)htonl((u_long)nval)) << 32) + htonl((u_long)(nval >> 32)));
-
-  uint8 *doubleAddress = reinterpret_cast<uint8 *>(&nval);
-  for(uint8 i = 0; i < 8; i++)
-  {
-    buf[i] = doubleAddress[i];
-  }
+  uint64 nval;
+  memcpy(&nval, &value, 8);
+  nval = ntohll(nval);
+  memcpy(buf, &nval, 8);
 }
 
 double getDouble(uint8 *buf)
 {
   double val;
   uint64 ival = *reinterpret_cast<const sint64*>(buf);
-	ival = ((((uint64)ntohl((u_long)ival)) << 32) + ntohl((u_long)(ival >> 32)));
-	val = *reinterpret_cast<double*>(&ival);
+  ival = ntohll(ival);
+  memcpy(&val, &ival, 8);
   return val;
 }
 
 float getFloat(uint8 *buf)
 {
   float val;
-	int ival = ntohl(*reinterpret_cast<const sint32*>(buf));
-	val = *reinterpret_cast<float*>(&ival);
+  int ival = ntohl(*reinterpret_cast<const sint32*>(buf));
+  memcpy(&val, &ival, 4);
   return val;
 }
 
-long long getSint64(uint8 *buf)
+sint64 getSint64(uint8 *buf)
 {
-  long long val;
+  sint64 val;
 	val = *reinterpret_cast<const sint16*>(buf);
-	val = ((((uint64)ntohl((u_long)val)) << 32) + ntohl((u_long)(val >> 32)));
+	val = ntohll(val);
   return val;
 }
 

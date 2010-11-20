@@ -261,6 +261,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\mineserver.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\nbt.h"
 				>
 			</File>
