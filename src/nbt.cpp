@@ -59,7 +59,7 @@ int TAG_Byte(uint8 *input, char *output)
   return 1;
 }
 
-int TAG_Short(uint8 *input, int *output)
+int TAG_Short(uint8 *input, sint16 *output)
 {
   *output = getSint16(input);
   return 2;
@@ -91,7 +91,7 @@ int TAG_Double(uint8 *input, double *output)
 
 int TAG_String(uint8 *input, std::string *output)
 {
-  int strLen = getUint16(&input[0]);
+  int strLen = getSint16(&input[0]);
   *output = "";
 
   for(int i = 0; i < strLen; i++)
@@ -134,11 +134,11 @@ int TAG_List(uint8 *input, NBT_list *output)
     break;
 
   case TAG_SHORT:
-    output->items = (void **)new int *[output->length];
+    output->items = (void **)new sint16 *[output->length];
     for(int i = 0; i < output->length; i++)
     {
-      output->items[i] = (void *)new int;
-      curpos          += TAG_Short(&input[curpos], (int *)output->items[i]);
+      output->items[i] = (void *)new sint16;
+      curpos          += TAG_Short(&input[curpos], (sint16 *)output->items[i]);
     }
     break;
 
@@ -254,8 +254,8 @@ int TAG_Compound(uint8 *input, NBT_struct *output, bool start)
       break;
 
     case TAG_SHORT:
-      value.value = (void *)new int;
-      curpos     += TAG_Short(&input[curpos], (int *)value.value);
+      value.value = (void *)new sint16;
+      curpos     += TAG_Short(&input[curpos], (sint16 *)value.value);
       output->values.push_back(value);
       break;
 
@@ -419,7 +419,7 @@ int dumpNBT_value(NBT_value *input, uint8 *buffer)
     break;
 
   case TAG_SHORT:
-    putSint16(&buffer[curpos], *(int *)input->value);
+    putSint16(&buffer[curpos], *(sint16 *)input->value);
     curpos += 2;
     break;
 
@@ -475,7 +475,7 @@ int dumpNBT_list(NBT_list *input, uint8 *buffer)
       break;
 
     case TAG_SHORT:
-      putSint16(&buffer[curpos], *(int *)input->items[i]);
+      putSint16(&buffer[curpos], *(sint16 *)input->items[i]);
       curpos += 2;
       break;
 
@@ -597,9 +597,9 @@ bool freeNBT_list(NBT_list *input)
   case TAG_SHORT:
     for(int j = 0; j < input->length; j++)
     {
-      delete (int *)input->items[j];
+      delete (sint16 *)input->items[j];
     }
-    delete[] (int **)input->items;
+    delete[] (sint16 **)input->items;
     break;
 
   case TAG_INT:
@@ -677,7 +677,7 @@ bool freeNBT_struct(NBT_struct *input)
       break;
 
     case TAG_SHORT:
-      delete (int *)input->values[i].value;
+      delete (sint16 *)input->values[i].value;
       break;
 
     case TAG_INT:

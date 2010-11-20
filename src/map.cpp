@@ -697,6 +697,7 @@ bool Map::loadMap(int x, int z)
   struct stat stFileInfo;
   if(stat(infile.c_str(), &stFileInfo) != 0)
   {
+    std::cout << "Mappos: " << x << "," << z << std::endl;
     LOG("File not found: " + infile);
     return false;
   }
@@ -929,8 +930,7 @@ void Map::sendToUser(User *user, int x, int z)
           //Gzip the data
           if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
           {
-            std::cout << "Error in deflate: " << state << std::endl;
-            deflateEnd(&zstream2);
+            std::cout << "Error in deflate: " << state << std::endl;            
           }
           else
           {
@@ -944,6 +944,7 @@ void Map::sendToUser(User *user, int x, int z)
             putSint16(&packetData[11], (sint16)written); //Size
             bufferevent_write(user->buf_ev, (uint8 *)&packetData[0], 13+written);
           }
+          deflateEnd(&zstream2);
         }
       }
 

@@ -227,7 +227,7 @@ public:
 	{
 		if(haveData(sizeof(val)))
 		{
-			uint64 ival = *reinterpret_cast<const sint16*>(&m_buffer[m_readPos]);
+			uint64 ival = *reinterpret_cast<const sint64*>(&m_buffer[m_readPos]);
 			ival = ((((uint64)ntohl((u_long)ival)) << 32) + ntohl((u_long)(ival >> 32)));
 			val = *reinterpret_cast<double*>(&ival);
 			m_readPos += sizeof(val);
