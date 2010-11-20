@@ -652,8 +652,33 @@ int PacketHandler::player_block_placement(User *user)
 
   }
 
-  // Check if player is standing there
-  if (y >= user->pos.y - 0.50 && y <= user->pos.y + 1.50) //TODO: Got values from tryes and guesses, need to decompile minecraft to get the real values
+  // Check if the block is place-able "inside" the user
+  if ((blockID != BLOCK_TORCH && 
+       blockID != BLOCK_REDSTONE_TORCH_OFF &&
+       blockID != BLOCK_REDSTONE_TORCH_ON &&
+       blockID != BLOCK_AIR &&
+       blockID != BLOCK_WATER &&
+       blockID != BLOCK_STATIONARY_WATER &&
+       blockID != BLOCK_LAVA &&
+       blockID != BLOCK_STATIONARY_LAVA &&
+       blockID != BLOCK_BROWN_MUSHROOM &&
+       blockID != BLOCK_RED_MUSHROOM &&
+       blockID != BLOCK_YELLOW_FLOWER &&
+       blockID != BLOCK_RED_ROSE &&
+       blockID != BLOCK_SAPLING &&
+       blockID != BLOCK_FIRE &&
+       blockID != BLOCK_REDSTONE_WIRE &&
+       blockID != BLOCK_SIGN_POST &&
+       blockID != BLOCK_LADDER &&
+       blockID != BLOCK_MINECART_TRACKS &&
+       blockID != BLOCK_WALL_SIGN &&
+       blockID != BLOCK_STONE_PRESSURE_PLATE &&
+       blockID != BLOCK_WOODEN_PRESSURE_PLATE &&
+       blockID != BLOCK_STONE_BUTTON &&
+       blockID != BLOCK_PORTAL
+      ) &&
+      (((blockID == BLOCK_WOODEN_DOOR || blockID == BLOCK_IRON_DOOR || blockID == BLOCK_FENCE) && y >= user->pos.y - 0.5 && y <= user->pos.y + 2.5) ||
+        (y >= user->pos.y - 0.5 && y <= user->pos.y + 1.5))) //TODO: <- ^- Got values from tryes and guesses need to find the real values
   {
 		double intX, intZ, fracX, fracZ;
 		
