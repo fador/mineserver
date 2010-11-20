@@ -45,6 +45,7 @@
 #include <cctype>
 
 #include "tools.h"
+#include "string.h"
 
 void putSint64(uint8 *buf, sint64 value)
 {
