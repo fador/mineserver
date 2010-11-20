@@ -91,7 +91,7 @@ int TAG_Double(uint8 *input, double *output)
 
 int TAG_String(uint8 *input, std::string *output)
 {
-  int strLen = getUint16(&input[0]);
+  int strLen = getSint16(&input[0]);
   *output = "";
 
   for(int i = 0; i < strLen; i++)

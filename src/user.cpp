@@ -447,7 +447,7 @@ bool User::updatePos(double x, double y, double z, double stance)
     {
       uint8 movedata[8];
       movedata[0] = 0x1f; //Relative move
-      putUint32(&movedata[1], this->UID);
+      putSint32(&movedata[1], (sint32)this->UID);
       movedata[5] = (char)(x-this->pos.x);
       movedata[6] = (char)(y-this->pos.y);
       movedata[7] = (char)(z-this->pos.z);
@@ -565,7 +565,7 @@ bool User::updateLook(float yaw, float pitch)
 
   uint8 lookdata[7];
   lookdata[0] = 0x20;
-  putUint32(&lookdata[1], this->UID);
+  putSint32(&lookdata[1], (sint32)this->UID);
   lookdata[5] = (char)(yaw);
   lookdata[6] = (char)(pitch);
   this->sendOthers(&lookdata[0], 7);

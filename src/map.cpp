@@ -697,6 +697,7 @@ bool Map::loadMap(int x, int z)
   struct stat stFileInfo;
   if(stat(infile.c_str(), &stFileInfo) != 0)
   {
+    std::cout << "Mappos: " << x << "," << z << std::endl;
     LOG("File not found: " + infile);
     return false;
   }
