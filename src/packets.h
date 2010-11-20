@@ -202,7 +202,7 @@ public:
 	{
 		if(haveData(8))
 		{
-			val = *reinterpret_cast<const sint16*>(&m_readBuffer[m_readPos]);
+			val = *reinterpret_cast<const sint64*>(&m_readBuffer[m_readPos]);
 			val = ntohll(val);
 			m_readPos += 8;
 		}
@@ -211,7 +211,9 @@ public:
 
 	Packet & operator<<(float val)
 	{
-		uint32 nval = htonl(*(uint32*)(void*)(&val));
+		uint32 nval;
+		memcpy(&nval, &val , 4);
+		htonl(nval);
 		addToWrite(&nval, 4);
 		return *this;
 	}
@@ -220,8 +222,8 @@ public:
 	{
 		if(haveData(4))
 		{
-			int ival = ntohl(*reinterpret_cast<const sint32*>(&m_readBuffer[m_readPos]));
-			val = *(float*)(void*)(&ival);
+			sint32 ival = ntohl(*reinterpret_cast<const sint32*>(&m_readBuffer[m_readPos]));
+			memcpy(&val, &ival, 4);
 			m_readPos += 4;
 		}
 		return *this;
@@ -229,7 +231,9 @@ public:
 
 	Packet & operator<<(double val)
 	{
-		uint64 nval = ntohll(*(uint64*)(void*)(&val));
+		uint64 nval;
+		memcpy(&nval, &val, 8);
+		nval = ntohll(nval);
 		addToWrite(&nval, 8);
 		return *this;
 	}
@@ -241,8 +245,8 @@ public:
 		{
 			uint64 ival = *reinterpret_cast<const uint64*>(&m_readBuffer[m_readPos]);
 			ival = ntohll(ival);
-			val = *(double*)(void*)(&ival);
-			m_readPos += sizeof(val);
+			memcpy((void*)&val, (void*)&ival, 8);
+			m_readPos += 8;
 		}
 		return *this;
 	}
@@ -262,7 +266,7 @@ public:
 		if(haveData(2))
 		{
 			lenval = ntohs(*reinterpret_cast<const sint16*>(&m_readBuffer[m_readPos]));
-			m_readPos += sizeof(lenval);
+			m_readPos += 2;
 
 			if(haveData(lenval))
 			{

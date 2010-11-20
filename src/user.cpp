@@ -716,8 +716,8 @@ bool User::pushMap()
 
 bool User::teleport(double x, double y, double z)
 {
-	buffer << (sint8)PACKET_PLAYER_POSITION_AND_LOOK << x << y << 0.0 << z 
-		<< (float)0.0 << (float)0.0 << (sint8)0;
+	buffer << (sint8)PACKET_PLAYER_POSITION_AND_LOOK << x << y << (double)0.0 << z 
+		<< (float)0.f << (float)0.f << (sint8)0;
 
   //Also update pos for other players
   updatePos(x, y, z, 0);
