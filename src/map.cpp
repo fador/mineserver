@@ -98,24 +98,18 @@ void Map::initMap()
     exit(EXIT_FAILURE);
   }
 
-  // Read gzipped map file
-  gzFile mapfile          = gzopen(infile.c_str(), "rb");
-  uint8 *uncompressedData = new uint8[ALLOCATE_NBTFILE];
-  gzread(mapfile, uncompressedData, ALLOCATE_NBTFILE);
-  gzclose(mapfile);
+  NBT_Value *root = NBT_Value::LoadFromFile(infile);
 
-  // Save level data
-  TAG_Compound(uncompressedData, &levelInfo, true);
+  NBT_Value &data = *((*root)["Data"]);
 
-  delete[] uncompressedData;
+  spawnPos.x() = (sint32)*data["SpawnX"];
+  spawnPos.y() = (sint32)*data["SpawnY"];
+  spawnPos.z() = (sint32)*data["SpawnZ"];
 
-  if(!get_NBT_value(&levelInfo, "SpawnX", &spawnPos.x()) ||
-     !get_NBT_value(&levelInfo, "SpawnY", &spawnPos.y()) ||
-     !get_NBT_value(&levelInfo, "SpawnZ", &spawnPos.z()))
-  {
-    std::cout << "Error, spawn pos not found from " << infile << "!" << std::endl;
-    exit(EXIT_FAILURE);
-  }
+
+  root->SaveToFile("test.nbt");
+
+  delete root;
 
   std::cout << "Spawn: (" << spawnPos.x() << "," << spawnPos.y() << "," << spawnPos.z() << ")"<<
   std::endl;
@@ -125,7 +119,7 @@ void Map::freeMap()
 {
 }
 
-NBT_struct *Map::getMapData(int x, int z)
+sChunk *Map::getMapData(int x, int z)
 {
 #ifdef MSDBG
   printf("getMapData(x=%d, z=%d)\n", x, z);
@@ -152,7 +146,7 @@ bool Map::saveWholeMap()
   printf("saveWholeMap()\n");
 #endif
 
-  for(std::map<uint32, NBT_struct>::const_iterator it = maps.begin(); it != maps.end(); ++it)
+  for(std::map<uint32, sChunk>::const_iterator it = maps.begin(); it != maps.end(); ++it)
     saveMap(maps[it->first].x, maps[it->first].z);
   return true;
 }
@@ -383,7 +377,7 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta)
   uint32 mapId;
   Map::posToId(chunk_x, chunk_z, &mapId);
 
-  NBT_struct *chunk = getMapData(chunk_x, chunk_z);
+  sChunk *chunk = getMapData(chunk_x, chunk_z);
 
   if(!chunk)
   {
@@ -430,7 +424,7 @@ bool Map::getBlockLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight)
   int chunk_x       = blockToChunk(x);
   int chunk_z       = blockToChunk(z);
 
-  NBT_struct *chunk = getMapData(chunk_x, chunk_z);
+  sChunk *chunk = getMapData(chunk_x, chunk_z);
 
   if(!chunk)
   {
@@ -480,7 +474,7 @@ bool Map::setBlockLight(int x, int y, int z, uint8 blocklight, uint8 skylight, u
   int chunk_x       = blockToChunk(x);
   int chunk_z       = blockToChunk(z);
 
-  NBT_struct *chunk = getMapData(chunk_x, chunk_z);
+  sChunk *chunk = getMapData(chunk_x, chunk_z);
 
   if(!chunk)
   {
@@ -556,7 +550,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   uint32 mapId;
   Map::posToId(chunk_x, chunk_z, &mapId);
 
-  NBT_struct *chunk = getMapData(chunk_x, chunk_z);
+  sChunk *chunk = getMapData(chunk_x, chunk_z);
 
   if(!chunk)
   {
@@ -648,6 +642,9 @@ bool Map::loadMap(int x, int z)
   uint32 mapId;
   Map::posToId(x, z, &mapId);
 
+  if(maps.count(mapId))
+	  return true;
+
   // Generate map file name
 
   int mapposx = x;
@@ -667,36 +664,52 @@ bool Map::loadMap(int x, int z)
     return false;
   }
 
-  // Read gzipped map file
-  gzFile mapfile          = gzopen(infile.c_str(), "rb");
-  uint8 *uncompressedData = new uint8[ALLOCATE_NBTFILE];
-  gzread(mapfile, uncompressedData, ALLOCATE_NBTFILE);
-  gzclose(mapfile);
+  maps[mapId].nbt = NBT_Value::LoadFromFile(infile.c_str());
 
-  // Save this map data to map manager
-  NBT_struct newMapStruct;
-  TAG_Compound(uncompressedData, &newMapStruct, true);
-
-  delete[] uncompressedData;
-
-  maps[mapId]            = newMapStruct;
-
-  maps[mapId].x          = x;
-  maps[mapId].z          = z;
-
-  maps[mapId].blocks     = get_NBT_pointer(&maps[mapId], "Blocks");
-  maps[mapId].data       = get_NBT_pointer(&maps[mapId], "Data");
-  maps[mapId].blocklight = get_NBT_pointer(&maps[mapId], "BlockLight");
-  maps[mapId].skylight   = get_NBT_pointer(&maps[mapId], "SkyLight");
-  // Check if the items were not found
-  if(maps[mapId].blocks      == 0 ||
-     maps[mapId].data        == 0 ||
-     maps[mapId].blocklight  == 0 ||
-     maps[mapId].skylight    == 0)
+  if(maps[mapId].nbt == NULL)
   {
-    LOG("Error in map data");
+    LOG("Error in loading map (unable to load file)");
     return false;
   }
+
+  NBT_Value &level = *(*maps[mapId].nbt)["Level"];
+
+  maps[mapId].x = (sint32)(*level["xPos"]);
+  maps[mapId].z = (sint32)(*level["zPos"]);
+
+  if(maps[mapId].x != x || maps[mapId].z != z)
+  {
+	  LOG("Error in loading map (incorrect chunk)");
+	  return false;
+  }
+
+  std::vector<uint8> *blocks = level["Blocks"]->GetByteArray();
+  std::vector<uint8> *data = level["Data"]->GetByteArray();
+  std::vector<uint8> *blocklight = level["BlockLight"]->GetByteArray();
+  std::vector<uint8> *skylight = level["SkyLight"]->GetByteArray();
+
+  if(blocks == 0 || data == 0 || blocklight == 0 || skylight == 0)
+  {
+	  LOG("Error in loading map (chunk missing data)");
+	  return false;
+  }
+
+  size_t fullLen = (16 * 128 * 16);
+  size_t halfLen = fullLen >> 1;
+
+  if(blocks->size() != fullLen ||
+	  data->size() != halfLen ||
+	  blocklight->size() != halfLen ||
+	  skylight->size() != halfLen)
+  {
+	  LOG("Error in loading map (corrupt?)");
+	  return false;
+  }
+
+  maps[mapId].blocks = &((*blocks)[0]);
+  maps[mapId].data = &((*data)[0]);
+  maps[mapId].blocklight = &((*blocklight)[0]);
+  maps[mapId].skylight = &((*skylight)[0]);
 
   // Update last used time
   mapLastused[mapId] = (int)time(0);
@@ -772,13 +785,7 @@ bool Map::saveMap(int x, int z)
     }
   }
 
-  uint8 *uncompressedData = new uint8[ALLOCATE_NBTFILE];
-  int dumpsize            = dumpNBT_struct(&maps[mapId], uncompressedData);
-  gzFile mapfile2         = gzopen(outfile.c_str(), "wb");
-  gzwrite(mapfile2, uncompressedData, dumpsize);
-  gzclose(mapfile2);
-
-  delete[] uncompressedData;
+  maps[mapId].nbt->SaveToFile(outfile);
 
   // Set "not changed"
   mapChanged[mapId] = 0;
@@ -797,7 +804,9 @@ bool Map::releaseMap(int x, int z)
   mapChanged.erase(mapId);
   mapLastused.erase(mapId);
   if(maps.count(mapId))
-    freeNBT_struct(&maps[mapId]);
+  {
+    delete maps[mapId].nbt;
+  }
 
   return maps.erase(mapId) ? true : false;
 }
@@ -841,70 +850,198 @@ void Map::sendToUser(User *user, int x, int z)
 	user->buffer.addToWrite(buffer, written);
 
     //Get list of chests,furnaces etc on the chunk
-    NBT_list *entitylist = get_NBT_list(&maps[mapId], "TileEntities");
+	NBT_Value *entityList = (*(*maps[mapId].nbt)["Level"])["TileEntities"];
 
     //Verify the type
-    if(entitylist && entitylist->tagId==TAG_COMPOUND)
+	if(entityList && entityList->GetType() == NBT_Value::TAG_LIST && entityList->GetListType() == NBT_Value::TAG_COMPOUND)
     {
-      uint8 *structdump = new uint8 [ALLOCATE_NBTFILE];
-      uint8 *nbtData = new uint8[ALLOCATE_NBTFILE];
+		std::vector<NBT_Value*> *entities = entityList->GetList();
+		std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
 
-      NBT_struct **tempstruct=(NBT_struct **)entitylist->items;
-      //Loop through every item
-      for(sint32 i=0;i<entitylist->length;i++)
-      {
-        std::string id;
-        //Just send chest,sign and furnace data for now
-        if(get_NBT_value(tempstruct[i], "id", &id) && (id=="Chest" || id=="Furnace" || id=="Sign"))
-        {
-          //Get position
-          int entity_x,entity_y,entity_z;
-          if(!get_NBT_value(tempstruct[i], "x", &entity_x) ||
-             !get_NBT_value(tempstruct[i], "y", &entity_y) ||
-             !get_NBT_value(tempstruct[i], "z", &entity_z))
-          {
-            continue;
-          }
-          //Dump the struct data to NBT format
-          int dumped=dumpNBT_struct(tempstruct[i], structdump);
-          written=ALLOCATE_NBTFILE;
-          z_stream zstream2;
-          zstream2.zalloc = Z_NULL;
-          zstream2.zfree = Z_NULL;
-          zstream2.opaque = Z_NULL;
-          zstream2.next_out=nbtData;
-          zstream2.next_in=structdump;
-          zstream2.avail_in=dumped;
-          zstream2.avail_out=written;
-          zstream2.total_out=0;
-          zstream2.total_in=0;
-          deflateInit2(&zstream2, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15+MAX_WBITS, 8,
-                               Z_DEFAULT_STRATEGY);
-   
-          //Gzip the data
-          if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
-          {
-            std::cout << "Error in deflate: " << state << std::endl;            
-          }
-          else
-          {
-            written=zstream2.total_out;
-    
-            // !!!! Complex Entity packet! !!!!
-			user->buffer << (sint8)PACKET_COMPLEX_ENTITIES 
-				<< (sint32)entity_x << (sint16)entity_y << (sint32)entity_z << (sint16)written;
+		uint8 *compressedData = new uint8[ALLOCATE_NBTFILE];
 
-			user->buffer.addToWrite(nbtData, written);
-          }
-          deflateEnd(&zstream2);
-        }
-      }
+		for( ; iter != end ; iter++)
+		{
+			std::vector<uint8> buffer;
+			std::string *id = (**iter)["id"]->GetString();
+			if(id && (*id=="Chest" || *id=="Furnace" || *id=="Sign"))
+			{
+				if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
+					(**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
+					(**iter)["z"]->GetType() != NBT_Value::TAG_INT)
+				{
+					continue;
+				}
 
-      delete [] nbtData;
-      delete [] structdump;
+				  buffer.push_back(NBT_Value::TAG_COMPOUND);
+				  buffer.push_back(0);
+				  buffer.push_back(0);
+				  (*iter)->Write(buffer);
+				  buffer.push_back(0);
+				  buffer.push_back(0);
+
+
+				z_stream zstream2;
+				zstream2.zalloc = Z_NULL;
+				zstream2.zfree = Z_NULL;
+				zstream2.opaque = Z_NULL;
+				zstream2.next_out=compressedData;
+				zstream2.next_in=&buffer[0];
+				zstream2.avail_in=buffer.size();
+				zstream2.avail_out=ALLOCATE_NBTFILE;
+				zstream2.total_out=0;
+				zstream2.total_in=0;
+				deflateInit2(&zstream2, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15+MAX_WBITS, 8,
+								   Z_DEFAULT_STRATEGY);
+
+				//Gzip the data
+				if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
+				{
+					std::cout << "Error in deflate: " << state << std::endl;            
+				}
+
+				sint32 entityX = *(**iter)["x"];
+				sint32 entityY = *(**iter)["y"];
+				sint32 entityZ = *(**iter)["z"];
+
+				// !!!! Complex Entity packet! !!!!
+				user->buffer << (sint8)PACKET_COMPLEX_ENTITIES 
+					<< (sint32)entityX << (sint16)entityY << (sint32)entityZ << (sint16)zstream2.total_out;
+				user->buffer.addToWrite(compressedData, zstream2.total_out);
+
+				deflateEnd(&zstream2);
+			}
+		}
     }
   }
 
   delete[] data4;
   delete[] mapdata;
+}
+
+
+void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
+{
+  uint32 mapId;
+  
+  int block_x = blockToChunk(x);
+  int block_z = blockToChunk(z);
+
+  if(!loadMap(block_x, block_z))
+	  return;
+
+  Map::posToId(block_x, block_z, &mapId);
+
+  if(entity->GetType() != NBT_Value::TAG_COMPOUND)
+  {
+	  LOG("Complex Entity wasn't TAG_COMPOUND");
+	  return;
+  }
+
+  if((*entity)["x"] == NULL)
+	  entity->Insert("x", new NBT_Value(x));
+  else
+	*(*entity)["x"] = x;
+
+  if((*entity)["y"] == NULL)
+	  entity->Insert("y", new NBT_Value(y));
+  else
+    *(*entity)["y"] = y;
+
+  if((*entity)["z"] == NULL)
+	  entity->Insert("z", new NBT_Value(z));
+  else
+    *(*entity)["z"] = z;
+
+  NBT_Value *entityList = (*(*maps[mapId].nbt)["Level"])["TileEntities"];
+
+  if(!entityList)
+  {
+	  entityList = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
+	  maps[mapId].nbt->Insert("TileEntities", entityList);
+  }
+
+  if(entityList->GetType() == NBT_Value::TAG_LIST)
+  {
+	 if(entityList->GetListType() != NBT_Value::TAG_COMPOUND)
+		 entityList->SetType(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
+
+	 std::vector<NBT_Value*> *entities = entityList->GetList();
+	 std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
+
+	 bool done = false;
+
+	 for( ; iter != end; iter++ )
+	 {
+ 		if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
+			(**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
+			(**iter)["z"]->GetType() != NBT_Value::TAG_INT)
+		{
+			continue;
+		}
+
+		if((sint32)(*(**iter)["x"]) == x && (sint32)(*(**iter)["y"]) == y && (sint32)(*(**iter)["z"]) == z)
+		{
+			// Replace entity
+			delete *iter;
+			*iter = entity;
+			done = true;
+			break;
+		}
+	 }
+
+	 if(!done)
+	 {
+		// Add new entity
+		entityList->GetList()->push_back(entity);
+	 }
+  }
+  else
+  {
+	  LOG("TileEntities list type not valid");
+	  return;
+  }
+
+  mapChanged[mapId] = true;
+
+  std::vector<uint8> buffer;
+  buffer.push_back(NBT_Value::TAG_COMPOUND);
+  buffer.push_back(0);
+  buffer.push_back(0);
+  entity->Write(buffer);
+  buffer.push_back(0);
+  buffer.push_back(0);
+  buffer.push_back(0);
+
+  	uint8 *compressedData = new uint8[ALLOCATE_NBTFILE];
+
+	z_stream zstream2;
+	zstream2.zalloc = Z_NULL;
+	zstream2.zfree = Z_NULL;
+	zstream2.opaque = Z_NULL;
+	zstream2.next_out=compressedData;
+	zstream2.next_in=&buffer[0];
+	zstream2.avail_in=buffer.size();
+	zstream2.avail_out=ALLOCATE_NBTFILE;
+	zstream2.total_out=0;
+	zstream2.total_in=0;
+	deflateInit2(&zstream2, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15+MAX_WBITS, 8,
+					   Z_DEFAULT_STRATEGY);
+
+	//Gzip the data
+	if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
+	{
+		std::cout << "Error in deflate: " << state << std::endl;            
+	}
+
+	deflateEnd(&zstream2);
+
+
+	Packet pkt;
+	pkt << (sint8)PACKET_COMPLEX_ENTITIES 
+		<< x << (sint16)y << z << (sint16)zstream2.total_out;
+	pkt.addToWrite(compressedData, zstream2.total_out);
+
+
+	User::sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
 }

@@ -46,690 +46,521 @@
 
 #endif
 
+#include <zlib.h>
+
 #include "tools.h"
 #include "nbt.h"
 #include "map.h"
 
+
 //NBT level file reading
 //More info: http://www.minecraft.net/docs/NBT.txt
 
-int TAG_Byte(uint8 *input, char *output)
+NBT_Value::NBT_Value(eTAG_Type type, eTAG_Type listType) : m_type(type)
 {
-  *output = input[0];
-  return 1;
+	memset(&m_value, 0, sizeof(m_value));
+	if(type == TAG_LIST)
+		m_value.listVal.type = listType;
 }
 
-int TAG_Short(uint8 *input, sint16 *output)
+NBT_Value::NBT_Value(sint8 value) : m_type(TAG_BYTE)
 {
-  *output = getSint16(input);
-  return 2;
+	m_value.byteVal = value;
 }
 
-int TAG_Int(uint8 *input, int *output)
+NBT_Value::NBT_Value(sint16 value) : m_type(TAG_SHORT)
 {
-  *output = getSint32(input);
-  return 4;
+	m_value.shortVal = value;
 }
 
-int TAG_Long(uint8 *input, sint64 *output)
+NBT_Value::NBT_Value(sint32 value) : m_type(TAG_INT)
 {
-  *output = getSint64(input);
-  return 8;
+	m_value.intVal = value;
 }
 
-int TAG_Float(uint8 *input, float *output)
+NBT_Value::NBT_Value(sint64 value) : m_type(TAG_LONG)
 {
-  *output = getFloat(input);
-  return 4;
+	m_value.longVal = value;
 }
 
-int TAG_Double(uint8 *input, double *output)
+NBT_Value::NBT_Value(float value) : m_type(TAG_FLOAT)
 {
-  *output = getDouble(input);
-  return 8;
+	m_value.floatVal = value;
 }
 
-int TAG_String(uint8 *input, std::string *output)
+NBT_Value::NBT_Value(double value) : m_type(TAG_DOUBLE)
 {
-  int strLen = getSint16(&input[0]);
-  *output = "";
-
-  for(int i = 0; i < strLen; i++)
-  {
-    *output += input[i+2];
-  }
-  return strLen+2;
+	m_value.doubleVal = value;
 }
 
-int TAG_Byte_Array(uint8 *input, NBT_byte_array *output)
+NBT_Value::NBT_Value(uint8 *buf, sint32 len) : m_type(TAG_BYTE_ARRAY)
 {
-  int curpos = 0;
-  curpos      += TAG_Int(&input[curpos], &output->length);
-  output->data = new uint8[output->length];
-  memcpy(output->data, &input[curpos], output->length);
-  curpos      += output->length;
-  return curpos;
+	m_value.byteArrayVal = new std::vector<uint8>(buf, buf + len);
 }
 
-int TAG_List(uint8 *input, NBT_list *output)
+NBT_Value::NBT_Value(const std::string &str) : m_type(TAG_STRING)
 {
-  int curpos = 0;
-  curpos += TAG_Byte(&input[curpos], &output->tagId);
-  curpos += TAG_Int(&input[curpos], &output->length);
-
-  //If zero length list
-  if(!output->length)
-    return curpos;
-
-
-  switch(output->tagId)
-  {
-  case TAG_BYTE:
-    output->items = (void **)new char *[output->length];
-    for(int i = 0; i < output->length; i++)
-    {
-      output->items[i] = (void *)new char;
-      curpos          += TAG_Byte(&input[curpos], (char *)output->items[i]);
-    }
-    break;
-
-  case TAG_SHORT:
-    output->items = (void **)new sint16 *[output->length];
-    for(int i = 0; i < output->length; i++)
-    {
-      output->items[i] = (void *)new sint16;
-      curpos          += TAG_Short(&input[curpos], (sint16 *)output->items[i]);
-    }
-    break;
-
-  case TAG_INT:
-    output->items = (void **)new int *[output->length];
-    for(int i = 0; i < output->length; i++)
-    {
-      output->items[i] = (void *)new int;
-      curpos          += TAG_Int(&input[curpos], (int *)output->items[i]);
-    }
-    break;
-
-  case TAG_LONG:
-    output->items = (void **)new sint64 *[output->length];
-    for(int i = 0; i < output->length; i++)
-    {
-      output->items[i] = (void *)new sint64;
-      curpos          += TAG_Long(&input[curpos], (sint64 *)output->items[i]);
-    }
-    break;
-
-  case TAG_FLOAT:
-    output->items = (void **)new float *[output->length];
-    for(int i = 0; i < output->length; i++)
-    {
-      output->items[i] = (void *)new float;
-      curpos          += TAG_Float(&input[curpos], (float *)output->items[i]);
-    }
-    break;
-
-  case TAG_DOUBLE:
-    output->items = (void **)new double *[output->length];
-    for(int i = 0; i < output->length; i++)
-    {
-      output->items[i] = (void *)new double;
-      curpos          += TAG_Double(&input[curpos], (double *)output->items[i]);
-    }
-    break;
-
-  case TAG_BYTE_ARRAY:
-    output->items = (void **)new NBT_byte_array *[output->length];
-    for(int i = 0; i < output->length; i++)
-    {
-      output->items[i] = (void *)new NBT_byte_array;
-      curpos          += TAG_Byte_Array(&input[curpos], (NBT_byte_array *)output->items[i]);
-    }
-    break;
-
-  case TAG_STRING:
-    output->items = (void **)new std::string *[output->length];
-    for(int i = 0; i < output->length; i++)
-    {
-      output->items[i] = (void *)new std::string;
-      curpos          += TAG_String(&input[curpos], (std::string *)output->items[i]);
-    }
-    break;
-
-  case TAG_LIST:
-    output->items = (void **)new NBT_list *[output->length];
-    for(int i = 0; i < output->length; i++)
-    {
-      output->items[i] = (void *)new NBT_list;
-      curpos          += TAG_List(&input[curpos], (NBT_list *)output->items[i]);
-    }
-    break;
-
-  case TAG_COMPOUND:
-    output->items = (void **)new NBT_struct *[output->length];
-    for(int i = 0; i < output->length; i++)
-    {
-      output->items[i] = (void *)new NBT_struct;
-      curpos          += TAG_Compound(&input[curpos], (NBT_struct *)output->items[i]);
-    }
-    break;
-  }
-
-  return curpos;
+	m_value.stringVal = new std::string(str);
 }
 
-
-int TAG_Compound(uint8 *input, NBT_struct *output, bool start)
+NBT_Value::NBT_Value(eTAG_Type type, uint8 **buf, int &remaining) : m_type(type)
 {
-  char tagType = 1;
-  std::string name;
-  int curpos   = 0;
+	switch(m_type)
+	{
+	case TAG_BYTE:
+		remaining--;
+		if(remaining >= 0)
+		{
+			m_value.byteVal = **buf;
+			(*buf)++;
+		}
+		break;
+	case TAG_SHORT:
+		remaining-=2;
+		if(remaining >= 0)
+		{
+			m_value.shortVal = getSint16(*buf);
+			*buf += 2;
+		}
+		break;
+	case TAG_INT:
+		remaining-=4;
+		if(remaining >= 0)
+		{
+			m_value.intVal = getSint32(*buf);
+			*buf += 4;
+		}
+		break;
+	case TAG_LONG:
+		remaining -= 8;
+		if(remaining >= 0)
+		{
+			m_value.longVal = getSint64(*buf);
+			*buf += 8;
+		}
+		break;
+	case TAG_FLOAT:
+		remaining -= 4;
+		if(remaining >= 0)
+		{
+			m_value.floatVal = getFloat(*buf);
+			*buf += 4;
+		}
+		break;
+	case TAG_DOUBLE:
+		remaining -= 8;
+		if(remaining >= 0)
+		{
+			m_value.doubleVal = getDouble(*buf);
+			*buf += 8;
+		}
+		break;
+	case TAG_BYTE_ARRAY:
+		remaining -= 4;
+		if(remaining >= 0)
+		{
+			sint32 bufLen = getSint32(*buf);
+			remaining -= bufLen;
+			*buf += 4;
+			if(remaining >= 0)
+			{
+				m_value.byteArrayVal = new std::vector<uint8>();
+				m_value.byteArrayVal->assign(*buf, (*buf)+bufLen);
+				*buf += bufLen;
+			}
+		}
+		break;
+	case TAG_STRING:
+		remaining -= 2;
+		if(remaining >= 0)
+		{
+			sint16 stringLen = getSint16(*buf);
+			remaining -= stringLen;
+			*buf += 2;
+			if(remaining >= 0)
+			{
+				m_value.stringVal = new std::string((char*)*buf, stringLen);
+				*buf += stringLen;
+			}
+		}
+		break;
+	case TAG_LIST:
+		remaining -= 5;
+		if(remaining >= 0)
+		{
+			sint8 type = **buf;
+			(*buf)++;
+			m_value.listVal.type = (eTAG_Type)type;
+			sint32 count = getSint32(*buf);
+			*buf += 4;
+			m_value.listVal.data = new std::vector<NBT_Value*>();
+			if(count)
+				m_value.listVal.data->resize(count);
+			
+			for(int i=0;i<count;i++)
+			{
+				(*m_value.listVal.data)[i] = new NBT_Value((eTAG_Type)type, buf, remaining);
+			}
+		}
+		break;
+	case TAG_COMPOUND:
+		m_value.compoundVal = new std::map<std::string, NBT_Value*>();
+		while(remaining > 0)
+		{
+			remaining--;
+			sint8 type = **buf;
+			(*buf)++;
+			if(type == TAG_END)
+				break;
 
-  while(tagType != 0)
-  {
-    curpos += TAG_Byte(&input[curpos], &tagType);
-    if(tagType == 0)
-    {
-      //std::cout << "TAG_end" << std::endl;
-      return curpos;
-    }
-    curpos += TAG_String(&input[curpos], &name);
-    //std::cout << "Name: " << name << std::endl;
-    NBT_value value;
-    value.type     = tagType;
-    value.name     = name;
-    NBT_byte_array bytearray;
-    bytearray.name = name;
-    NBT_list list;
-    list.name      = name;
-    NBT_struct compound;
-    compound.name  = name;
+			remaining -= 2;
+			if(remaining <= 0)
+				break;
 
-    switch(tagType)
-    {
-    case TAG_BYTE:
-      value.value = (void *)new char;
-      curpos     += TAG_Byte(&input[curpos], (char *)value.value);
-      output->values.push_back(value);
-      break;
+			sint16 stringLen = getSint16(*buf);
+			*buf += 2;
 
-    case TAG_SHORT:
-      value.value = (void *)new sint16;
-      curpos     += TAG_Short(&input[curpos], (sint16 *)value.value);
-      output->values.push_back(value);
-      break;
+			remaining -= stringLen;
 
-    case TAG_INT:
-      value.value = (void *)new int;
-      curpos     += TAG_Int(&input[curpos], (int *)value.value);
-      output->values.push_back(value);
-      break;
+			if(remaining <= 0)
+				break;
 
-    case TAG_LONG:
-      value.value = (void *)new sint64;
-      curpos     += TAG_Long(&input[curpos], (sint64 *)value.value);
-      output->values.push_back(value);
-      break;
+			std::string key((char*)*buf, stringLen);
+			*buf += stringLen;
 
-    case TAG_FLOAT:
-      value.value = (void *)new float;
-      curpos     += TAG_Float(&input[curpos], (float *)value.value);
-      output->values.push_back(value);
-      break;
-
-    case TAG_DOUBLE:
-      value.value = (void *)new double;
-      curpos     += TAG_Double(&input[curpos], (double *)value.value);
-      output->values.push_back(value);
-      break;
-
-    case TAG_BYTE_ARRAY:
-      curpos += TAG_Byte_Array(&input[curpos], &bytearray);
-      //Special handling with lightmaps
-      if(bytearray.length == 0)
-      {
-        //If zero sized lightmap, generate a new empty lightmap
-        if(bytearray.name == "BlockLight" || bytearray.name == "SkyLight")
-        {
-          bytearray.length = 16*16*128/2;
-          bytearray.data   = new uint8[bytearray.length];
-          memset(bytearray.data, 0, bytearray.length);
-        }
-      }
-      output->byte_arrays.push_back(bytearray);
-      break;
-
-    case TAG_STRING:
-      value.value = (void *)new std::string;
-      curpos     += TAG_String(&input[curpos], (std::string *)value.value);
-      output->values.push_back(value);
-      break;
-
-    case TAG_LIST:
-      curpos += TAG_List(&input[curpos], &list);
-      output->lists.push_back(list);
-      break;
-
-    case TAG_COMPOUND:
-      if(start)
-        curpos += TAG_Compound(&input[curpos], output);
-      else
-      {
-        curpos += TAG_Compound(&input[curpos], (NBT_struct *)&compound);
-        output->compounds.push_back(compound);
-      }
-      break;
-    }
-
-    if(start)
-      break;
-  }
-
-  return curpos;
-}
-/*
-   template <typename customType>
-   bool get_NBT_value(NBT_struct *input, std::string TAG, customType *value)
-   {
-   for(unsigned i=0;i<input->values.size();i++)
-   {
-    if(input->values[i].name==TAG)
-    {
-   *value=*(customType*)input->values[i].value;
-      return true;
-    }
-   }
-
-   for(unsigned j=0;j<input->compounds.size();j++)
-   {
-    return get_NBT_value(&input->compounds[j], TAG, value);
-   }
-   return false;
-   }
- */
-
-uint8 *get_NBT_pointer(NBT_struct *input, std::string TAG)
-{
-  uint8 *pointer;
-
-  for(unsigned i = 0; i < input->byte_arrays.size(); i++)
-  {
-    if(input->byte_arrays[i].name == TAG)
-      return input->byte_arrays[i].data;
-  }
-
-  for(unsigned j = 0; j < input->compounds.size(); j++)
-  {
-    pointer = get_NBT_pointer(&input->compounds[j], TAG);
-    if(pointer != 0)
-      return pointer;
-  }
-
-  return 0;
+			(*m_value.compoundVal)[key] = new NBT_Value((eTAG_Type)type, buf, remaining);
+		}
+		break;
+	}
 }
 
-NBT_list *get_NBT_list(NBT_struct *input, std::string TAG)
+NBT_Value::~NBT_Value()
 {
-  NBT_list *pointer;
+	cleanup();
+}
 
-  for(unsigned i = 0; i < input->lists.size(); i++)
-  {
-    if(input->lists[i].name == TAG)
-      return &input->lists[i];
-  }
+NBT_Value * NBT_Value::operator[](const std::string &index)
+{
+	if(m_type != TAG_COMPOUND)
+		return NULL;
 
-  for(unsigned j = 0; j < input->compounds.size(); j++)
-  {
-    pointer = get_NBT_list(&input->compounds[j], TAG);
-    if(pointer != 0)
-      return pointer;
-  }
+	if(!m_value.compoundVal->count(index))
+		return NULL;
 
-  return 0;
+	return (*m_value.compoundVal)[index];
 }
 
 
-int dumpNBT_string(uint8 *buffer, std::string name)
+NBT_Value * NBT_Value::operator[](const char *index)
 {
-  int curpos = 0;
-  putSint16(buffer, name.length());
-  curpos += 2;
+	if(m_type != TAG_COMPOUND)
+		return NULL;
 
-  for(unsigned int i = 0; i < name.length(); i++)
-  {
-    buffer[curpos] = name[i];
-    curpos++;
-  }
+	std::string stdIndex(index);
 
-  return curpos;
+	if(!m_value.compoundVal->count(stdIndex))
+		return NULL;
+
+	return (*m_value.compoundVal)[stdIndex];
 }
 
-int dumpNBT_value(NBT_value *input, uint8 *buffer)
+void NBT_Value::Insert(const std::string &str, NBT_Value *val)
 {
-  int curpos = 0;
-  buffer[curpos] = input->type;
-  curpos++;
-  curpos        += dumpNBT_string(&buffer[curpos], input->name);
+	if(m_type != NBT_Value::TAG_COMPOUND)
+		return;
 
-  switch(input->type)
-  {
-  case TAG_BYTE:
-    buffer[curpos] = *(char *)input->value;
-    curpos++;
-    break;
+	if(m_value.compoundVal == 0)
+		m_value.compoundVal = new std::map<std::string, NBT_Value*>();
 
-  case TAG_SHORT:
-    putSint16(&buffer[curpos], *(sint16 *)input->value);
-    curpos += 2;
-    break;
-
-  case TAG_INT:
-    putSint32(&buffer[curpos], *(int *)input->value);
-    curpos += 4;
-    break;
-
-  case TAG_LONG:
-    putSint64(&buffer[curpos], *(sint64 *)input->value);
-    curpos += 8;
-    break;
-
-  case TAG_FLOAT:
-    putFloat(&buffer[curpos], *(float *)input->value);
-    curpos += 4;
-    break;
-
-  case TAG_DOUBLE:
-    putDouble(&buffer[curpos], *(double *)input->value);
-    curpos += 8;
-    break;
-
-  case TAG_STRING:
-    curpos += dumpNBT_string(&buffer[curpos], *(std::string *)input->value);
-    break;
-  }
-
-  return curpos;
+	(*m_value.compoundVal)[str] = val;
 }
 
-int dumpNBT_list(NBT_list *input, uint8 *buffer)
+NBT_Value::operator sint8()
 {
-  int curpos = 0;
-  buffer[curpos] = TAG_LIST;
-  curpos++;
-  curpos        += dumpNBT_string(&buffer[curpos], input->name);
+	if(m_type != TAG_BYTE)
+		return 0;
 
-  buffer[curpos] = input->tagId;
-  curpos++;
-
-  putSint32(&buffer[curpos], input->length);
-  curpos += 4;
-  NBT_struct **structlist = (NBT_struct **)input->items;
-
-  for(int i = 0; i < input->length; i++)
-  {
-    switch(input->tagId)
-    {
-    case TAG_BYTE:
-      buffer[curpos] = *(char *)input->items[i];
-      curpos++;
-      break;
-
-    case TAG_SHORT:
-      putSint16(&buffer[curpos], *(sint16 *)input->items[i]);
-      curpos += 2;
-      break;
-
-    case TAG_INT:
-      putSint32(&buffer[curpos], *(int *)input->items[i]);
-      curpos += 4;
-      break;
-
-    case TAG_LONG:
-      putSint64(&buffer[curpos], *(sint64 *)input->items[i]);
-      curpos += 8;
-      break;
-
-    case TAG_FLOAT:
-      putFloat(&buffer[curpos], *(float *)input->items[i]);
-      curpos += 4;
-      break;
-
-    case TAG_DOUBLE:
-      putDouble(&buffer[curpos], *(double *)input->items[i]);
-      curpos += 8;
-      break;
-
-    case TAG_STRING:
-      curpos += dumpNBT_string(&buffer[curpos], *(std::string *)input->items[i]);
-      break;
-
-    case TAG_BYTE_ARRAY:
-      curpos += dumpNBT_byte_array((NBT_byte_array *)input->items[i], &buffer[curpos], true);
-      break;
-
-    case TAG_COMPOUND:
-      curpos += dumpNBT_struct(structlist[i], &buffer[curpos], true);
-      break;
-    }
-  }
-
-  return curpos;
+	return m_value.byteVal;
 }
 
-int dumpNBT_byte_array(NBT_byte_array *input, uint8 *buffer, bool list)
+NBT_Value::operator sint16()
 {
-  int curpos = 0;
+	if(m_type != TAG_SHORT)
+		return 0;
 
-  if(!list)
-  {
-    buffer[curpos] = TAG_BYTE_ARRAY;
-    curpos++;
-    curpos        += dumpNBT_string(&buffer[curpos], input->name);
-  }
-
-  putSint32(&buffer[curpos], input->length);
-  curpos += 4;
-  memcpy(&buffer[curpos], input->data, input->length);
-  curpos += input->length;
-
-  return curpos;
+	return m_value.shortVal;
 }
 
-int dumpNBT_struct(NBT_struct *input, uint8 *buffer, bool list)
+NBT_Value::operator sint32()
 {
-  int curpos = 0;
+	if(m_type != TAG_INT)
+		return 0;
 
-  if(!list)
-  {
-    buffer[curpos] = TAG_COMPOUND;
-    curpos++;
-    curpos        += dumpNBT_string(&buffer[curpos], input->name);
-  }
-
-  //Dump all values
-  for(unsigned int i = 0; i < input->values.size(); i++)
-  {
-    curpos += dumpNBT_value(&input->values[i], &buffer[curpos]);
-  }
-
-  //Dump byte arrays
-  for(unsigned int i = 0; i < input->byte_arrays.size(); i++)
-  {
-    curpos += dumpNBT_byte_array(&input->byte_arrays[i], &buffer[curpos]);
-  }
-
-  //Dump lists
-  for(unsigned int i = 0; i < input->lists.size(); i++)
-  {
-    curpos += dumpNBT_list(&input->lists[i], &buffer[curpos]);
-  }
-
-  //Dump compounds
-  for(unsigned int i = 0; i < input->compounds.size(); i++)
-  {
-    curpos += dumpNBT_struct(&input->compounds[i], &buffer[curpos]);
-  }
-
-  buffer[curpos] = 0x00; //TAG_END
-  curpos++;
-
-  //Total size
-  return curpos;
+	return m_value.intVal;
 }
 
-bool freeNBT_list(NBT_list *input)
+NBT_Value::operator sint64()
 {
-  //Free lists
-  if(!input->length)
-    return false;
+	if(m_type != TAG_LONG)
+		return 0;
 
-
-  switch(input->tagId)
-  {
-    case TAG_BYTE:
-      for(int j = 0; j < input->length; j++)
-      {
-        delete (char *)input->items[j];
-      }
-      delete [] (char **)input->items;
-      break;
-
-  case TAG_SHORT:
-    for(int j = 0; j < input->length; j++)
-    {
-      delete (sint16 *)input->items[j];
-    }
-    delete[] (sint16 **)input->items;
-    break;
-
-  case TAG_INT:
-    for(int j = 0; j < input->length; j++)
-    {
-      delete (int *)input->items[j];
-    }
-    delete[] (int **)input->items;
-    break;
-
-  case TAG_LONG:
-    for(int j = 0; j < input->length; j++)
-    {
-      delete (sint64 *)input->items[j];
-    }
-    delete[] (sint64 **)input->items;
-    break;
-
-  case TAG_FLOAT:
-    for(int j = 0; j < input->length; j++)
-    {
-      delete (float *)input->items[j];
-    }
-    delete[] (float **)input->items;
-    break;
-
-  case TAG_DOUBLE:
-    for(int j = 0; j < input->length; j++)
-    {
-      delete (double *)input->items[j];
-    }
-    delete[] (double **)input->items;
-    break;
-
-  case TAG_STRING:
-    for(int j = 0; j < input->length; j++)
-    {
-      delete (std::string *)input->items[j];
-    }
-    delete[] (std::string **)input->items;
-    break;
-
-  case TAG_COMPOUND:
-    for(int j = 0; j < input->length; j++)
-    {
-      freeNBT_struct((NBT_struct *)input->items[j]);
-      delete (NBT_struct *)input->items[j];
-    }
-    delete[] (NBT_struct **)input->items;
-    break;
-
-  case TAG_BYTE_ARRAY:
-    for(int j = 0; j < input->length; j++)
-    {
-      NBT_byte_array *temparray = (NBT_byte_array *)input->items[j];
-      delete[] temparray->data;
-      delete temparray;
-    }
-    delete[] (NBT_byte_array **)input->items;
-    break;
-  }
-
-  return true;
+	return m_value.longVal;
 }
 
-bool freeNBT_struct(NBT_struct *input)
+NBT_Value::operator float()
 {
-  //Free all values
-  for(unsigned int i = 0; i < input->values.size(); i++)
-  {
-    switch(input->values[i].type)
-    {
-    case TAG_BYTE:
-      delete (char *)input->values[i].value;
-      break;
+	if(m_type != TAG_FLOAT)
+		return 0;
 
-    case TAG_SHORT:
-      delete (sint16 *)input->values[i].value;
-      break;
+	return m_value.floatVal;
+}
 
-    case TAG_INT:
-      delete (int *)input->values[i].value;
-      break;
+NBT_Value::operator double()
+{
+	if(m_type != TAG_DOUBLE)
+		return 0;
 
-    case TAG_LONG:
-      delete (sint64 *)input->values[i].value;
-      break;
+	return m_value.doubleVal;
+}
 
-    case TAG_FLOAT:
-      delete (float *)input->values[i].value;
-      break;
+NBT_Value & NBT_Value::operator =(sint8 val)
+{
+	cleanup();
+	m_type = TAG_BYTE;
+	m_value.byteVal = val;
+	return *this;
+}
 
-    case TAG_DOUBLE:
-      delete (double *)input->values[i].value;
-      break;
+NBT_Value & NBT_Value::operator =(sint16 val)
+{
+	cleanup();
+	m_type = TAG_SHORT;
+	m_value.shortVal = val;
+	return *this;
+}
 
-    case TAG_STRING:
-      std::string *temp_string = (std::string *)input->values[i].value;
-      temp_string->clear();
-      delete (std::string *)input->values[i].value;
-      break;
-    }
-  }
+NBT_Value & NBT_Value::operator =(sint32 val)
+{
+	cleanup();
+	m_type = TAG_INT;
+	m_value.intVal = val;
+	return *this;
+}
 
-  input->values.clear();
+NBT_Value & NBT_Value::operator =(sint64 val)
+{
+	cleanup();
+	m_type = TAG_LONG;
+	m_value.longVal = val;
+	return *this;
+}
 
-  //Free byte arrays
-  for(unsigned int i = 0; i < input->byte_arrays.size(); i++)
-  {
-    delete[] input->byte_arrays[i].data;
-  }
+NBT_Value & NBT_Value::operator =(float val)
+{
+	cleanup();
+	m_type = TAG_FLOAT;
+	m_value.floatVal = val;
+	return *this;
+}
 
-  for(unsigned int i = 0; i < input->lists.size(); i++)
-  {
-    freeNBT_list(&input->lists[i]);
-  }
+NBT_Value & NBT_Value::operator =(double val)
+{
+	cleanup();
+	m_type = TAG_DOUBLE;
+	m_value.doubleVal = val;
+	return *this;
+}
 
-  input->byte_arrays.clear();
+std::vector<uint8> *NBT_Value::GetByteArray()
+{
+	if(m_type != TAG_BYTE_ARRAY)
+		return NULL;
+	if(m_value.byteArrayVal == NULL)
+		m_value.byteArrayVal = new std::vector<uint8>();
+	return m_value.byteArrayVal;
+}
 
 
+std::string *NBT_Value::GetString()
+{
+	if(m_type != TAG_STRING)
+		return NULL;
+	if(m_value.stringVal == NULL)
+		m_value.stringVal = new std::string();
+	return m_value.stringVal;
+}
 
-  input->lists.clear();
+NBT_Value::eTAG_Type NBT_Value::GetListType()
+{
+	if(m_type != TAG_LIST)
+		return TAG_END;
+	return m_value.listVal.type;
+}
 
-  //Free compounds
-  for(unsigned int i = 0; i < input->compounds.size(); i++)
-  {
-    freeNBT_struct(&input->compounds[i]);
-  }
+std::vector<NBT_Value*> *NBT_Value::GetList()
+{
+	if(m_type != TAG_LIST)
+		return NULL;
+	if(m_value.listVal.data == NULL)
+		m_value.listVal.data = new std::vector<NBT_Value*>();
+	return m_value.listVal.data;
+}
 
-  input->compounds.clear();
 
-  return true;
+void NBT_Value::SetType(eTAG_Type type, eTAG_Type listType)
+{
+	cleanup();
+	m_type = type;
+
+	if(m_type == TAG_LIST)
+		m_value.listVal.type = listType;
+}
+
+NBT_Value::eTAG_Type NBT_Value::GetType()
+{
+	return m_type;
+}
+
+void NBT_Value::cleanup()
+{
+	if(m_type == TAG_STRING)
+		delete m_value.stringVal;
+	if(m_type == TAG_BYTE_ARRAY)
+		delete m_value.byteArrayVal;
+	if(m_type == TAG_LIST)
+		delete m_value.listVal.data;
+	if(m_type == TAG_COMPOUND)
+		delete m_value.compoundVal;
+
+	memset(&m_value, 0, sizeof(m_value));
+	m_type = TAG_END;
+}
+
+NBT_Value * NBT_Value::LoadFromFile(const std::string &filename)
+{
+	FILE *fp = fopen(filename.c_str(), "rb");
+	if(fp == NULL)
+		return NULL;
+	fseek(fp, -4, SEEK_END);
+	uint32 uncompressedSize = 0;
+	fread(&uncompressedSize, 4, 1, fp);
+	fclose(fp);
+
+	uint8 *uncompressedData = new uint8[uncompressedSize];
+	gzFile nbtFile = gzopen(filename.c_str(), "rb");
+	if(nbtFile == NULL)
+		return NULL;
+	gzread(nbtFile, uncompressedData, uncompressedSize);
+	gzclose(nbtFile);
+
+	uint8 *ptr = uncompressedData+3; // Jump blank compound
+	int remaining = uncompressedSize;
+
+	NBT_Value *root = new NBT_Value(TAG_COMPOUND, &ptr, remaining);
+
+	delete[] uncompressedData;
+
+	return root;
+}
+
+void NBT_Value::SaveToFile(const std::string &filename)
+{
+	std::vector<uint8> buffer;
+	
+	// Blank compound tag
+	buffer.push_back(TAG_COMPOUND);
+	buffer.push_back(0);
+	buffer.push_back(0);
+
+	Write(buffer);
+
+	gzFile nbtFile = gzopen(filename.c_str(), "wb");
+	gzwrite(nbtFile, &buffer[0], buffer.size());
+	gzclose(nbtFile);
+}
+
+void NBT_Value::Write(std::vector<uint8> &buffer)
+{
+	int storeAt = buffer.size();;
+	switch(m_type)
+	{
+	case TAG_BYTE:
+		buffer.push_back(m_value.byteVal);
+		break;
+	case TAG_SHORT:
+		buffer.resize(storeAt + 2);
+		putSint16(&buffer[storeAt], m_value.shortVal);
+		break;
+	case TAG_INT:
+		buffer.resize(storeAt + 4);
+		putSint32(&buffer[storeAt], m_value.intVal);
+		break;
+	case TAG_LONG:
+		buffer.resize(storeAt + 8);
+		putSint64(&buffer[storeAt], m_value.longVal);
+		break;
+	case TAG_FLOAT:
+		buffer.resize(storeAt + 4);
+		putFloat(&buffer[storeAt], m_value.floatVal);
+		break;
+	case TAG_DOUBLE:
+		buffer.resize(storeAt + 8);
+		putDouble(&buffer[storeAt], m_value.doubleVal);
+		break;
+	case TAG_BYTE_ARRAY:
+		{
+			int arraySize = m_value.byteArrayVal ? m_value.byteArrayVal->size() : 0;
+			buffer.resize(storeAt + 4 + arraySize);
+			putSint32(&buffer[storeAt], arraySize);
+			storeAt += 4;
+			if(arraySize)
+				memcpy(&buffer[storeAt], &(*m_value.byteArrayVal)[0], arraySize);
+			break;
+		}
+	case TAG_STRING:
+		{
+			int stringLen = m_value.stringVal ? m_value.stringVal->size() : 0;
+			buffer.resize(storeAt + 2 + stringLen);
+			putSint16(&buffer[storeAt], (sint16)stringLen);
+			storeAt += 2;
+			memcpy(&buffer[storeAt], m_value.stringVal->c_str(), stringLen);
+			break;
+		}
+	case TAG_LIST:
+		{
+			buffer.resize(storeAt + 5);
+			int listCount = m_value.listVal.data ? m_value.listVal.data->size() : 0;
+			buffer[storeAt] = m_value.listVal.type;
+			storeAt++;
+			putSint32(&buffer[storeAt], listCount);
+			for(int i=0;i<listCount;i++)
+				(*m_value.listVal.data)[i]->Write(buffer);
+			break;
+		}
+	case TAG_COMPOUND:
+		{
+			int compoundCount = m_value.compoundVal ? m_value.compoundVal->size() : 0;
+			if(compoundCount)
+			{
+				std::map<std::string, NBT_Value*>::iterator iter = m_value.compoundVal->begin(), end = m_value.compoundVal->end();
+				for( ; iter != end; iter++)
+				{
+					const std::string &key = iter->first;
+					int keySize = key.size();
+					NBT_Value *val = iter->second;
+					int curPos = buffer.size();
+					buffer.resize(curPos + 3 + keySize);
+					buffer[curPos] = (uint8)val->GetType();
+					curPos++;
+					putSint16(&buffer[curPos], keySize);
+					curPos += 2;
+					if(keySize)
+						memcpy(&buffer[curPos], key.c_str(), keySize);
+					val->Write(buffer);
+				}
+			}
+			buffer.push_back(TAG_END);
+			break;
+		}
+	}
 }

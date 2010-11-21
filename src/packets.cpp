@@ -145,15 +145,10 @@ int PacketHandler::login_request(User *user)
   user->loadData();
 
   //Login OK package
-  //char data[9] = {0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-  //putSint32((uint8 *)&data[1], user->UID);
   user->buffer << (sint8)PACKET_LOGIN_RESPONSE 
 	  << (sint32)user->UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
-  //bufferevent_write(user->buf_ev, (char *)&data[0], 9);
 
   //Send server time (after dawn)
-  //uint8 data3[9] = {0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0e, 0x00};
-  //bufferevent_write(user->buf_ev, (char *)&data3[0], 9);
   user->buffer << (sint8)PACKET_TIME_UPDATE << (sint64) 0x0e00;
 
   //Inventory
@@ -225,11 +220,6 @@ int PacketHandler::login_request(User *user)
   user->spawnUser((sint32)user->pos.x*32, ((sint32)user->pos.y+2)*32, (sint32)user->pos.z*32);
   //Spawn other users for connected user
   user->spawnOthers();
-
-
-  //Send "On Ground" signal
-//  char data6[2] = {0x0A, 0x01};
-//  bufferevent_write(user->buf_ev, (char *)&data6[0], 2);
 
   user->logged = true;
 
@@ -805,10 +795,8 @@ int PacketHandler::complex_entities(User *user)
   if(!user->buffer.haveData(12))
     return PACKET_NEED_MORE_DATA;
 
-  unsigned int i;
-
-  int x,y,z;
-  sint32 len;
+  sint32 x,z;
+  sint16 len,y;
 
 
   user->buffer >> x >> y >> z >> len;
@@ -819,7 +807,6 @@ int PacketHandler::complex_entities(User *user)
   if(!user->buffer.haveData(len))
 	  return PACKET_NEED_MORE_DATA;
 
-  //ToDo: check len
   uint8 *buffer = new uint8[len];
 
   user->buffer.getData(buffer, len);
@@ -862,259 +849,14 @@ int PacketHandler::complex_entities(User *user)
   //Get size
   uncompressedSize  = zstream.total_out;
   
-  //Push data to NBT struct
-  NBT_struct newObject;
-  TAG_Compound(uncompressedBuffer, &newObject, true);
+  uint8 *ptr = uncompressedBuffer + 3; // skip blank compound
+  int remaining = uncompressedSize;
 
-  //These are not needed anymore
-  delete[] buffer;
-  delete[] uncompressedBuffer;
+  NBT_Value *entity = new NBT_Value(NBT_Value::TAG_COMPOUND, &ptr, remaining);
 
-  //Get chunk position
-  int block_x = blockToChunk(x);
-  int block_z = blockToChunk(z);
-  uint32 chunkID;
+  Map::get().setComplexEntity(x, y, z, entity);
 
-  NBT_struct *theEntity = 0;
-
-
-  //Load map
-  if(Map::get().loadMap(block_x, block_z))
-  {
-    Map::get().posToId(block_x, block_z, &chunkID);
-    NBT_struct mapData = Map::get().maps[chunkID];
-
-    //Try to find entitylist from the chunk
-    NBT_list *entitylist = get_NBT_list(&mapData, "TileEntities");
-
-    //If list exists
-    if(entitylist)
-    {
-      //Verify list type
-      if(entitylist->tagId != TAG_COMPOUND)
-      {
-        //If wrong type, recreate
-        freeNBT_list(entitylist);
-        for(i = 0; i < mapData.lists.size(); i++)
-        {
-          if(mapData.lists[i].name == "TileEntities")
-          {
-            //Destroy old list
-            freeNBT_list(&mapData.lists[i]);
-            mapData.lists.erase(mapData.lists.begin()+i);
-            break;
-          }
-        }
-        
-        //New list
-        NBT_list newlisting;  
-        newlisting.name   = "TileEntities";
-        newlisting.tagId  = TAG_COMPOUND;
-        newlisting.length = 0;
-        mapData.lists.push_back(newlisting);
-
-        entitylist = get_NBT_list(&mapData, "TileEntities");
-      }
-
-      NBT_struct **entities = (NBT_struct **)entitylist->items;
-      bool entityExists     = false;
-      int existingID        = -1;
-
-      //Search for mathing entity in the list
-      for(int i = 0; i < entitylist->length; i++)
-      {
-        NBT_struct *entity = entities[i];
-        std::string id;
-
-        //Get ID
-        if(get_NBT_value(entity, "id", &id))
-        {
-          int entity_x, entity_y, entity_z;
-          if(!get_NBT_value(entity, "x", &entity_x) ||
-             !get_NBT_value(entity, "y", &entity_y) ||
-             !get_NBT_value(entity, "z", &entity_z))
-          {
-            continue;
-          }
-
-          //Check for mathing blocktype and ID
-          if(block == BLOCK_CHEST && id == "Chest")
-          {
-            if(x == entity_x && y == entity_y && z == entity_z)
-            {
-              entityExists = true;
-              theEntity    = entity;
-              existingID   = i;
-              break;
-            }
-          }
-        }
-      } //End For entitylist
-
-      //Generate struct
-      theEntity = new NBT_struct;
-      NBT_value value;
-
-      //Push ID
-      value.type  = TAG_STRING;
-      value.name  = "id";
-      std::string *name =  new std::string;
-      value.value = (void *)name;
-      *(std::string *)value.value = "Chest";
-      theEntity->values.push_back(value);
-
-      //Position
-      value.type  = TAG_INT;
-      value.name  = "x";
-      value.value = (void *)new int;
-      *(int *)value.value = x;
-      theEntity->values.push_back(value);
-
-      value.name  = "y";
-      value.value = (void *)new int;
-      *(int *)value.value = y;
-      theEntity->values.push_back(value);
-
-      value.name  = "z";
-      value.value = (void *)new int;
-      *(int *)value.value = z;
-      theEntity->values.push_back(value);
-
-      //Put special chest items
-      if(block == BLOCK_CHEST)
-      {
-        NBT_list *newlist = get_NBT_list(&newObject, "Items");
-        if(!newlist)
-        {
-          //std::cout << "Items not found!" << std::endl;
-          return PACKET_OK;
-        }
-        NBT_list itemlist;
-        itemlist.name   = "Items";
-        itemlist.tagId  = TAG_COMPOUND;
-        itemlist.length = newlist->length;
-        itemlist.items  = (void **)new NBT_struct *[itemlist.length];
-
-        NBT_struct **structlist = (NBT_struct **)itemlist.items;
-        for(int i = 0; i < itemlist.length; i++)
-        {
-          structlist[i]        = new NBT_struct;
-          char type_char;
-          sint16 type_sint16;
-
-          //Generate struct
-          value.type             = TAG_BYTE;
-          value.name             = "Count";          
-          get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "Count", &type_char);
-          value.value            = (void *)new char;
-          *(char *)value.value   = type_char;
-          structlist[i]->values.push_back(value);
-
-          value.type             = TAG_BYTE;
-          value.name             = "Slot";
-          get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "Slot", &type_char);
-          value.value            = (void *)new char;
-          *(char *)value.value   = type_char;
-          structlist[i]->values.push_back(value);
-
-          value.type             = TAG_SHORT;
-          value.name             = "Damage";          
-          get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "Damage", &type_sint16);
-          value.value            = (void *)new sint16;
-          *(sint16 *)value.value = type_sint16;
-          structlist[i]->values.push_back(value);
-
-          value.type             = TAG_SHORT;
-          value.name             = "id";
-          get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "id", &type_sint16);
-          value.value            = (void *)new sint16;
-          *(sint16 *)value.value = type_sint16;
-          structlist[i]->values.push_back(value);
-        }
-
-        theEntity->lists.push_back(itemlist);
-      }
-      
-      //If entity doesn't exist in the list, resize the list to fit it in
-      if(!entityExists)
-      {
-        
-        //ToDo: try this!
-        NBT_struct **newlist = new NBT_struct *[entitylist->length+1];
-        NBT_struct **oldlist = (NBT_struct **)entitylist->items;
-        uint8 *structbuffer  = new uint8[ALLOCATE_NBTFILE];        
-        for(int i = 0; i < entitylist->length; i++)
-        {
-          newlist[i] = new NBT_struct;
-          dumpNBT_struct(oldlist[i],structbuffer);
-          TAG_Compound(structbuffer, newlist[i],true);
-          freeNBT_struct(oldlist[i]);
-          oldlist[i] = NULL;
-        }
-        
-        delete [] structbuffer;
-        entitylist->length++;
-        entitylist->items = (void **)newlist;
-        delete [] (NBT_struct **)oldlist;
-        newlist[entitylist->length-1] = theEntity;
-        
-      }
-      //If item exists, replace the old with the new
-      else
-      {
-        //Destroy old entitylist
-        NBT_struct **oldlist = (NBT_struct **)entitylist->items;
-        freeNBT_struct(oldlist[existingID]);
-        //Replace with the new
-        oldlist[existingID]  = theEntity;
-      }
-
-      //Mark chunk as changed
-      Map::get().mapChanged[chunkID] = true;
-      
-    } //If entity exists
-  } //If loaded map
-
-  //Send complex entity packet to others
-  if(theEntity)
-  {
-    uint8 *structdump = new uint8[ALLOCATE_NBTFILE];
-    uint8 *packetData = new uint8[ALLOCATE_NBTFILE];
-    int dumped        = dumpNBT_struct(theEntity, structdump);
-    uLongf written    = ALLOCATE_NBTFILE;
-
-    z_stream zstream2;
-    zstream2.zalloc    = Z_NULL;
-    zstream2.zfree     = Z_NULL;
-    zstream2.opaque    = Z_NULL;
-    zstream2.next_out  = &packetData[13];
-    zstream2.next_in   = structdump;
-    zstream2.avail_in  = dumped;
-    zstream2.avail_out = written;
-    zstream2.total_out = 0;
-    zstream2.total_in  = 0;
-    deflateInit2(&zstream2, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15+MAX_WBITS, 8,
-                 Z_DEFAULT_STRATEGY);
-
-    if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
-    {
-      std::cout << "Error in deflate: " << state << std::endl;
-      deflateEnd(&zstream2);
-    }
-    else
-    {
-      written = zstream2.total_out;
-      packetData[0] = 0x3b; //Complex Entities
-      putSint32(&packetData[1],x);
-      putSint16(&packetData[5],y);
-      putSint32(&packetData[7],z);
-      putSint16(&packetData[11], (sint16)written);
-      user->sendAll((uint8 *)&packetData[0], 13+written);
-    }
-
-    delete [] packetData;
-    delete [] structdump;
-  }
+  delete [] buffer;
 
   return PACKET_OK;
 }
