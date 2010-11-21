@@ -863,7 +863,10 @@ void Map::sendToUser(User *user, int x, int z)
 		for( ; iter != end ; iter++)
 		{
 			std::vector<uint8> buffer;
-			std::string *id = (**iter)["id"]->GetString();
+			NBT_Value *idVal = (**iter)["id"];
+			if(idVal == NULL)
+				continue;
+			std::string *id = idVal->GetString();
 			if(id && (*id=="Chest" || *id=="Furnace" || *id=="Sign"))
 			{
 				if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
