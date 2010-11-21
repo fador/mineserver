@@ -114,51 +114,35 @@ bool User::loadData()
   if(stat(infile.c_str(), &stFileInfo) != 0)
     return false;
 
-
-  // Read gzipped map file
-  gzFile mapfile          = gzopen(infile.c_str(), "rb");
-  uint8 *uncompressedData = new uint8[ALLOCATE_NBTFILE];
-  gzread(mapfile, uncompressedData, ALLOCATE_NBTFILE);
-  gzclose(mapfile);
-
-  NBT_struct userdata;
-
-  TAG_Compound(uncompressedData, &userdata, true);
-
-  delete[] uncompressedData;
-
-  //Load position
-  NBT_list *Pos = get_NBT_list(&userdata, "Pos");
-  if(Pos != 0 && Pos->length == 3)
+  NBT_Value * playerRoot = NBT_Value::LoadFromFile(infile.c_str());
+  NBT_Value &nbtPlayer = *playerRoot;
+  if(playerRoot == NULL)
   {
-    pos.x = *(double *)Pos->items[0];
-    pos.y = *(double *)Pos->items[1];
-    pos.z = *(double *)Pos->items[2];
+	  LOG("Failed to open player file");
+	  return false;
   }
 
-  //Load rotation
-  NBT_list *Rotation = get_NBT_list(&userdata, "Rotation");
-  if(Rotation != 0 && Rotation->length == 2)
-  {
-    pos.yaw   = *(float *)Rotation->items[0];
-    pos.pitch = *(float *)Rotation->items[1];
-  }
+  std::vector<NBT_Value*> *_pos = nbtPlayer["Pos"]->GetList();
+  pos.x = (double)(*(*_pos)[0]);
+  pos.y = (double)(*(*_pos)[1]);
+  pos.z = (double)(*(*_pos)[2]);
 
-  //Load inventory
-  NBT_list *Inventory = get_NBT_list(&userdata, "Inventory");
-  if(Inventory != 0)
+  std::vector<NBT_Value*> *rot = nbtPlayer["Rotation"]->GetList();
+  pos.yaw = (float)(*(*rot)[0]);
+  pos.yaw = (float)(*(*rot)[1]);
+
+  std::vector<NBT_Value*> *_inv = nbtPlayer["Inventory"]->GetList();
+  std::vector<NBT_Value*>::iterator iter = _inv->begin(), end = _inv->end();
+
+  for( ; iter != end ; iter++ )
   {
-    for(int i = 0; i < Inventory->length; i++)
-    {
-      NBT_struct *item = (NBT_struct *)Inventory->items[i];
-      char count;
-      get_NBT_value(item, "Count", &count);
-      char slot;
-      get_NBT_value(item, "Slot", &slot);
-      sint16 damage;
-      get_NBT_value(item, "Damage", &damage);
-      sint16 item_id;
-      get_NBT_value(item, "id", &item_id);
+	  sint8 slot, count;
+	  sint16 damage, item_id;
+
+	  slot = *(**iter)["Slot"];
+	  count = *(**iter)["Count"];
+	  damage = *(**iter)["Damage"];
+	  item_id = *(**iter)["id"];
 
       //Main inventory slot
       if(slot >= 0 && slot <= 35)
@@ -181,10 +165,9 @@ bool User::loadData()
         inv.equipped[(uint8)slot-100].health = damage;
         inv.equipped[(uint8)slot-100].type   = item_id;
       }
-    }
   }
 
-  freeNBT_struct(&userdata);
+  delete playerRoot;
 
   return true;
 }
@@ -210,92 +193,22 @@ bool User::saveData()
     }
   }
 
-  NBT_struct playerdata;
-  NBT_value nbtvalue;
+  NBT_Value val(NBT_Value::TAG_COMPOUND);
+  val.Insert("OnGround", new NBT_Value((sint8)1));
+  val.Insert("Air", new NBT_Value((sint16)300));
+  val.Insert("AttackTime", new NBT_Value((sint16)0));
+  val.Insert("DeathTime", new NBT_Value((sint16)0));
+  val.Insert("Fire", new NBT_Value((sint16)-20));
+  val.Insert("Health", new NBT_Value((sint16)20));
+  val.Insert("HurtTime", new NBT_Value((sint16)0));
+  val.Insert("FallDistance", new NBT_Value(54.f));
 
-  //OnGround
-  nbtvalue.type           = TAG_BYTE;
-  nbtvalue.name           = "OnGround";
-  nbtvalue.value          = (void *)new char;
-  *(char *)nbtvalue.value = 1;
-  playerdata.values.push_back(nbtvalue);
-
-  //Air
-  nbtvalue.type             = TAG_SHORT;
-  nbtvalue.name             = "Air";
-  nbtvalue.value            = (void *)new sint16;
-  *(sint16 *)nbtvalue.value = 300;
-  playerdata.values.push_back(nbtvalue);
-
-  //AttackTime
-  nbtvalue.type             = TAG_SHORT;
-  nbtvalue.name             = "AttackTime";
-  nbtvalue.value            = (void *)new sint16;
-  *(sint16 *)nbtvalue.value = 0;
-  playerdata.values.push_back(nbtvalue);
-
-  //DeathTime
-  nbtvalue.type             = TAG_SHORT;
-  nbtvalue.name             = "DeathTime";
-  nbtvalue.value            = (void *)new sint16;
-  *(sint16 *)nbtvalue.value = 0;
-  playerdata.values.push_back(nbtvalue);
-
-  //Fire
-  nbtvalue.type             = TAG_SHORT;
-  nbtvalue.name             = "Fire";
-  nbtvalue.value            = (void *)new sint16;
-  *(sint16 *)nbtvalue.value = -20;
-  playerdata.values.push_back(nbtvalue);
-
-  //Health
-  nbtvalue.type             = TAG_SHORT;
-  nbtvalue.name             = "Health";
-  nbtvalue.value            = (void *)new sint16;
-  *(sint16 *)nbtvalue.value = 20;
-  playerdata.values.push_back(nbtvalue);
-
-  //HurtTime
-  nbtvalue.type             = TAG_SHORT;
-  nbtvalue.name             = "HurtTime";
-  nbtvalue.value            = (void *)new sint16;
-  *(sint16 *)nbtvalue.value = 0;
-  playerdata.values.push_back(nbtvalue);
-
-  //FallDistance
-  nbtvalue.type            = TAG_FLOAT;
-  nbtvalue.name            = "FallDistance";
-  nbtvalue.value           = (void *)new float;
-  *(float *)nbtvalue.value = 54.0;
-  playerdata.values.push_back(nbtvalue);
-
-  NBT_list nbtlist;
-  nbtlist.name  = "Inventory";
-  nbtlist.tagId = TAG_COMPOUND;
-  int invlength = 0;
-  for(int i = 0; i < 36; i++)
-  {
-    if(inv.main[i].count)
-      invlength++;
-  }
-  for(int i = 0; i < 4; i++)
-  {
-    if(inv.crafting[i].count)
-      invlength++;
-  }
-  for(int i = 0; i < 4; i++)
-  {
-    if(inv.equipped[i].count)
-      invlength++;
-  }
-  nbtlist.length = invlength;
-  nbtlist.items  = (void **)new NBT_struct *[invlength];
+  NBT_Value *nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
 
   //Start with main items
   Item *slots   = (Item *)&inv.main;
   char slotid   = 0;
   char itemslot = 0;
-  int index     = 0;
   for(int i = 0; i < 36+4+4; i++)
   {
     //Crafting items after main
@@ -314,93 +227,40 @@ bool User::saveData()
     }
     if(slots[(uint8)slotid].count)
     {
-      NBT_struct *inventory = new NBT_struct;
-
-      //Count
-      nbtvalue.type           = TAG_BYTE;
-      nbtvalue.name           = "Count";
-      nbtvalue.value          = (void *)new char;
-      *(char *)nbtvalue.value = slots[(uint8)slotid].count;
-      inventory->values.push_back(nbtvalue);
-
-      //Count
-      nbtvalue.type           = TAG_BYTE;
-      nbtvalue.name           = "Slot";
-      nbtvalue.value          = (void *)new char;
-      *(char *)nbtvalue.value = itemslot;
-      inventory->values.push_back(nbtvalue);
-
-      //Damage
-      nbtvalue.type             = TAG_SHORT;
-      nbtvalue.name             = "Damage";
-      nbtvalue.value            = (void *)new sint16;
-      *(sint16 *)nbtvalue.value = slots[(uint8)slotid].health;
-      inventory->values.push_back(nbtvalue);
-
-      //ID
-      nbtvalue.type             = TAG_SHORT;
-      nbtvalue.name             = "id";
-      nbtvalue.value            = (void *)new sint16;
-      *(sint16 *)nbtvalue.value = slots[(uint8)slotid].type;
-      inventory->values.push_back(nbtvalue);
-
-
-      nbtlist.items[index] = (void *)inventory;
-      index++;
+	  NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+	  val->Insert("Count", new NBT_Value((sint8)slots[(uint8)slotid].count));
+	  val->Insert("Slot", new NBT_Value((sint8)itemslot));
+	  val->Insert("Damage", new NBT_Value((sint16)slots[(uint8)slotid].health));
+	  val->Insert("id", new NBT_Value((sint16)slots[(uint8)slotid].type));
+	  nbtInv->GetList()->push_back(val);
     }
 
     slotid++;
     itemslot++;
   }
 
-  playerdata.lists.push_back(nbtlist);
+  val.Insert("Inventory", nbtInv);
+
+  NBT_Value *nbtPos = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_DOUBLE);
+  nbtPos->GetList()->push_back(new NBT_Value((double)pos.x));
+  nbtPos->GetList()->push_back(new NBT_Value((double)pos.y));
+  nbtPos->GetList()->push_back(new NBT_Value((double)pos.z));
+  val.Insert("Pos", nbtPos);
+  
+
+  NBT_Value *nbtRot = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_FLOAT);
+  nbtRot->GetList()->push_back(new NBT_Value((float)pos.yaw));
+  nbtRot->GetList()->push_back(new NBT_Value((float)pos.pitch));
+  val.Insert("Rotation", nbtRot);
 
 
+  NBT_Value *nbtMotion = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_DOUBLE);
+  nbtMotion->GetList()->push_back(new NBT_Value((double)0.0));
+  nbtMotion->GetList()->push_back(new NBT_Value((double)0.0));
+  nbtMotion->GetList()->push_back(new NBT_Value((double)0.0));
+  val.Insert("Motion", nbtMotion);
 
-  nbtlist.name                = "Motion";
-  nbtlist.tagId               = TAG_DOUBLE;
-  nbtlist.length              = 3;
-  nbtlist.items               = (void **)new double *[3];
-  nbtlist.items[0]            = (void *)new double;
-  *(double *)nbtlist.items[0] = 0;
-  nbtlist.items[1]            = (void *)new double;
-  *(double *)nbtlist.items[1] = 0;
-  nbtlist.items[2]            = (void *)new double;
-  *(double *)nbtlist.items[2] = 0;
-  playerdata.lists.push_back(nbtlist);
-
-  nbtlist.name                = "Pos";
-  nbtlist.tagId               = TAG_DOUBLE;
-  nbtlist.length              = 3;
-  nbtlist.items               = (void **)new double *[3];
-  nbtlist.items[0]            = (void *)new double;
-  *(double *)nbtlist.items[0] = pos.x;
-  nbtlist.items[1]            = (void *)new double;
-  *(double *)nbtlist.items[1] = pos.y;
-  nbtlist.items[2]            = (void *)new double;
-  *(double *)nbtlist.items[2] = pos.z;
-  playerdata.lists.push_back(nbtlist);
-
-  nbtlist.name               = "Rotation";
-  nbtlist.tagId              = TAG_FLOAT;
-  nbtlist.length             = 2;
-  nbtlist.items              = (void **)new float *[2];
-  nbtlist.items[0]           = (void *)new float;
-  *(float *)nbtlist.items[0] = pos.yaw;
-  nbtlist.items[1]           = (void *)new float;
-  *(float *)nbtlist.items[1] = pos.pitch;
-  playerdata.lists.push_back(nbtlist);
-
-  // Save gzipped player file
-  uint8 *uncompressedData = new uint8[ALLOCATE_NBTFILE];
-  int dumpsize            = dumpNBT_struct(&playerdata, uncompressedData);
-  gzFile mapfile2         = gzopen(outfile.c_str(), "wb");
-  gzwrite(mapfile2, uncompressedData, dumpsize);
-  gzclose(mapfile2);
-
-  freeNBT_struct(&playerdata);
-
-  delete[] uncompressedData;
+  val.SaveToFile(outfile);
 
   return true;
 

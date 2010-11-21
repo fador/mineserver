@@ -292,6 +292,7 @@ public:
 		if(haveData(count))
 		{
 			memcpy(buf, &m_readBuffer[m_readPos], count);
+			m_readPos += count;
 		}
 	}
 

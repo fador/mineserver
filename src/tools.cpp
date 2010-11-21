@@ -101,7 +101,7 @@ float getFloat(uint8 *buf)
 sint64 getSint64(uint8 *buf)
 {
   sint64 val;
-	val = *reinterpret_cast<const sint16*>(buf);
+	val = *reinterpret_cast<const sint64*>(buf);
 	val = ntohll(val);
   return val;
 }

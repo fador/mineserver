@@ -78,9 +78,8 @@ public:
   User(int sock, uint32 EID);
   ~User();
 
-
   int fd;
-  //struct bufferevent *buf_ev;
+
   //View distance in chunks -viewDistance <-> viewDistance
   static const int viewDistance = 10;
   uint8 action;
@@ -94,7 +93,6 @@ public:
   Inventory inv;
 
   //Input buffer
-  //std::deque<unsigned char> buffer;
   Packet buffer;
 
   bool changeNick(std::string _nick);
@@ -102,8 +100,8 @@ public:
   bool updateLook(float yaw, float pitch);
 
   bool sendOthers(uint8 *data, uint32 len);
-  bool sendAll(uint8 *data, uint32 len);
-  bool sendAdmins(uint8 *data, uint32 len);
+  static bool sendAll(uint8 *data, uint32 len);
+  static bool sendAdmins(uint8 *data, uint32 len);
 
   //Check inventory for space
   bool checkInventory(sint16 itemID, char count);
