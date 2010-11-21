@@ -838,7 +838,7 @@ int PacketHandler::complex_entities(User *user)
   zstream.total_in  = 0;
   zstream.total_out = 0;
   zstream.data_type = Z_BINARY;
-  inflateInit2(&zstream, 1+MAX_WBITS);
+  inflateInit2(&zstream, 15+MAX_WBITS);
 
   uLongf uncompressedSize   = deflateBound(&zstream, len);
   uint8 *uncompressedBuffer = new uint8[uncompressedSize];
