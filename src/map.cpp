@@ -1006,9 +1006,6 @@ void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
   buffer.push_back(0);
   buffer.push_back(0);
   entity->Write(buffer);
-  buffer.push_back(0);
-  buffer.push_back(0);
-  buffer.push_back(0);
 
   	uint8 *compressedData = new uint8[ALLOCATE_NBTFILE];
 
