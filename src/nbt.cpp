@@ -568,3 +568,68 @@ void NBT_Value::Write(std::vector<uint8> &buffer)
 		}
 	}
 }
+
+void NBT_Value::Print(const std::string &name, int tabs)
+{
+	for(int i=0;i<tabs;i++)
+		std::cout << "  ";
+	switch(m_type)
+	{
+	case TAG_END:
+		std::cout << "TAG_End(\"" << name << "\")" << std::endl;
+		break;
+	case TAG_BYTE:
+		std::cout << "TAG_Byte(\"" << name << "\"): " << (int)m_value.byteVal << std::endl;
+		break;
+	case TAG_SHORT:
+		std::cout << "TAG_Short(\"" << name << "\"): " << m_value.shortVal << std::endl;
+		break;
+	case TAG_INT:
+		std::cout << "TAG_Int(\"" << name << "\"): " << m_value.intVal << std::endl;
+		break;
+	case TAG_LONG:
+		std::cout << "TAG_Long(\"" << name << "\"): " << m_value.longVal << std::endl;
+		break;
+	case TAG_FLOAT:
+		std::cout << "TAG_Float(\"" << name << "\"): " << m_value.floatVal << std::endl;
+		break;
+	case TAG_DOUBLE:
+		std::cout << "TAG_Double(\"" << name << "\"): " << m_value.doubleVal << std::endl;
+		break;
+	case TAG_BYTE_ARRAY:
+		std::cout << "TAG_Byte_Array(\"" << name << "\"): ";
+		if(m_value.byteArrayVal != NULL)
+			std::cout << m_value.byteArrayVal->size() << " bytes" << std::endl;
+		else
+			std::cout << "0 bytes" << std::endl;
+		break;
+	case TAG_STRING:
+		std::cout << "TAG_String(\"" << name << "\"): ";
+		if(m_value.stringVal != NULL)
+			std::cout << m_value.stringVal << std::endl;
+		else
+			std::cout << std::endl;
+		break;
+	case TAG_LIST:
+		std::cout << "TAG_List(\"" << name << "\"): Type " << m_value.listVal.type << std::endl;
+		if(m_value.listVal.data != NULL)
+		{
+			std::vector<NBT_Value*>::iterator iter = m_value.listVal.data->begin(), end = m_value.listVal.data->end();
+			for( ; iter != end ; iter++ )
+				(*iter)->Print(std::string(""), tabs+1);
+		}
+		break;
+	case TAG_COMPOUND:
+		std::cout << "TAG_Compound(\"" << name << "\"):" << std::endl;
+		if(m_value.compoundVal != NULL)
+		{
+			std::map<std::string, NBT_Value*>::iterator iter = m_value.compoundVal->begin(), end = m_value.compoundVal->end();
+			for( ; iter != end; iter++)
+				iter->second->Print(iter->first, tabs+1);
+		}
+		break;
+	default:
+		std::cout << "Invalid TAG:" << m_type << std::endl;
+	}
+}
+

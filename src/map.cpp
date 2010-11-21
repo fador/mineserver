@@ -946,6 +946,7 @@ void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
 	 (*entity)["z"] == NULL || (sint32)(*entity)["z"] != z)
   {
 	  LOG("Invalid Complex Entity");
+	  return;
   }
 
   NBT_Value *entityList = (*(*maps[mapId].nbt)["Level"])["TileEntities"];
@@ -968,7 +969,8 @@ void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
 
 	 for( ; iter != end; iter++ )
 	 {
- 		if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
+ 		if((**iter)["x"] == NULL || (**iter)["y"] == NULL || (**iter)["z"] == NULL ||
+			(**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
 			(**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
 			(**iter)["z"]->GetType() != NBT_Value::TAG_INT)
 		{

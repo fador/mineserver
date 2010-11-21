@@ -854,6 +854,11 @@ int PacketHandler::complex_entities(User *user)
 
   NBT_Value *entity = new NBT_Value(NBT_Value::TAG_COMPOUND, &ptr, remaining);
 
+#ifdef _DEBUG
+  std::cout << "Complex entity at (" << x << "," << y << "," << z << ")" << std::endl;
+  entity->Print();
+#endif
+
   Map::get().setComplexEntity(x, y, z, entity);
 
   delete [] buffer;
