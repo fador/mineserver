@@ -43,7 +43,7 @@ typedef  int socklen_t;
 #include <fcntl.h>
 #include <unistd.h>
 #endif
-
+#include <errno.h>
 #include <iostream>
 #include <fstream>
 #include <deque>
@@ -167,19 +167,25 @@ void client_callback(int fd,
     int written = send(fd, (char*)user->buffer.getWrite(), writeLen, 0);
     if(written == -1)
     {
-      std::cout << "Error writing to client" << std::endl;
-      //event_del(user->GetEvent());
+      if(errno != EAGAIN && errno != EINTR)
+      {
+        std::cout << "Error writing to client" << std::endl;
+        //event_del(user->GetEvent());
 
-  #ifdef WIN32
-      closesocket(user->fd);
-  #else
-      close(user->fd);
-  #endif
-      remUser(user->fd);
-      return;
+    #ifdef WIN32
+        closesocket(user->fd);
+    #else
+        close(user->fd);
+    #endif
+        remUser(user->fd);
+        return;
+      }
 
     }
-    user->buffer.clearWrite(written);
+    else
+    {
+      user->buffer.clearWrite(written);
+    }
 
     if(user->buffer.getWriteLen())
     {
