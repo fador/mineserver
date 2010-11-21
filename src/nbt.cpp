@@ -256,7 +256,7 @@ NBT_Value * NBT_Value::operator[](const char *index)
   if(m_type != TAG_COMPOUND)
     return NULL;
 
-  std::string stdIndex(index);
+  std::string stdIndex(index, strlen(index));
 
   if(!m_value.compoundVal->count(stdIndex))
     return NULL;
@@ -606,7 +606,7 @@ void NBT_Value::Print(const std::string &name, int tabs)
   case TAG_STRING:
     std::cout << "TAG_String(\"" << name << "\"): ";
     if(m_value.stringVal != NULL)
-      std::cout << m_value.stringVal << std::endl;
+      std::cout << *m_value.stringVal << std::endl;
     else
       std::cout << std::endl;
     break;
