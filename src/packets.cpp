@@ -825,8 +825,6 @@ int PacketHandler::complex_entities(User *user)
 
 
   //Calculate uncompressed size and allocate memory
-  uLongf uncompressedSize   = ALLOCATE_NBTFILE; //buffer[len-3] + (buffer[len-2]<<8) + (buffer[len-1]<<16) + (buffer[len]<<24);
-  uint8 *uncompressedBuffer = new uint8[uncompressedSize];
   
   //Initialize zstream to handle gzip format
   z_stream zstream;
@@ -834,13 +832,20 @@ int PacketHandler::complex_entities(User *user)
   zstream.zfree     = (free_func)0;
   zstream.opaque    = (voidpf)0;
   zstream.next_in   = buffer;
-  zstream.next_out  = uncompressedBuffer;
+  zstream.next_out  = 0;
   zstream.avail_in  = len;
-  zstream.avail_out = uncompressedSize;
+  zstream.avail_out = 0;
   zstream.total_in  = 0;
   zstream.total_out = 0;
   zstream.data_type = Z_BINARY;
   inflateInit2(&zstream, 1+MAX_WBITS);
+
+  uLongf uncompressedSize   = deflateBound(&zstream, len);
+  uint8 *uncompressedBuffer = new uint8[uncompressedSize];
+
+  zstream.avail_out = uncompressedSize;
+  zstream.next_out = uncompressedBuffer;
+  
   //Uncompress
   if(/*int state=*/inflate(&zstream, Z_FULL_FLUSH)!=Z_OK)
   {
