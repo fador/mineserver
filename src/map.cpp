@@ -941,20 +941,12 @@ void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
 	  return;
   }
 
-  if((*entity)["x"] == NULL)
-	  entity->Insert("x", new NBT_Value(x));
-  else
-	*(*entity)["x"] = x;
-
-  if((*entity)["y"] == NULL)
-	  entity->Insert("y", new NBT_Value(y));
-  else
-    *(*entity)["y"] = y;
-
-  if((*entity)["z"] == NULL)
-	  entity->Insert("z", new NBT_Value(z));
-  else
-    *(*entity)["z"] = z;
+  if((*entity)["x"] == NULL || (sint32)(*entity)["x"] != x ||
+	 (*entity)["y"] == NULL || (sint32)(*entity)["y"] != y ||
+	 (*entity)["z"] == NULL || (sint32)(*entity)["z"] != z)
+  {
+	  LOG("Invalid Complex Entity");
+  }
 
   NBT_Value *entityList = (*(*maps[mapId].nbt)["Level"])["TileEntities"];
 

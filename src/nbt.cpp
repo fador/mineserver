@@ -474,6 +474,10 @@ void NBT_Value::SaveToFile(const std::string &filename)
 
 	Write(buffer);
 
+	buffer.push_back(0);
+	buffer.push_back(0);
+	buffer.push_back(0);
+
 	gzFile nbtFile = gzopen(filename.c_str(), "wb");
 	gzwrite(nbtFile, &buffer[0], buffer.size());
 	gzclose(nbtFile);
