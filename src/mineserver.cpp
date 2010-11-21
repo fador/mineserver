@@ -90,7 +90,7 @@ int setnonblock(int fd)
 
 int main(void)
 {
-	return Mineserver::Get().Run();
+  return Mineserver::Get().Run();
 }
 
 Mineserver::Mineserver()
@@ -99,7 +99,7 @@ Mineserver::Mineserver()
 
 event_base *Mineserver::GetEventBase()
 {
-	return m_eventBase;
+  return m_eventBase;
 }
 
 int Mineserver::Run()

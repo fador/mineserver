@@ -89,227 +89,227 @@ enum
 class Packet
 {
 private:
-	typedef std::vector<uint8> bufVector;
-	bufVector m_readBuffer;
-	bufVector::size_type m_readPos;
-	bool m_isValid;
+  typedef std::vector<uint8> bufVector;
+  bufVector m_readBuffer;
+  bufVector::size_type m_readPos;
+  bool m_isValid;
 
-	bufVector m_writeBuffer;
+  bufVector m_writeBuffer;
 public:
-	Packet() : m_readPos(0), m_isValid(true) {}
+  Packet() : m_readPos(0), m_isValid(true) {}
 
-	bool haveData(int requiredBytes)
-	{
-		return m_isValid = m_isValid && ((m_readPos + requiredBytes) <= m_readBuffer.size());
-	}
+  bool haveData(int requiredBytes)
+  {
+    return m_isValid = m_isValid && ((m_readPos + requiredBytes) <= m_readBuffer.size());
+  }
 
-	operator bool() const
-	{
-		return m_isValid;
-	}
+  operator bool() const
+  {
+    return m_isValid;
+  }
 
-	void reset()
-	{
-		m_readPos = 0;
-		m_isValid = true;
-	}
+  void reset()
+  {
+    m_readPos = 0;
+    m_isValid = true;
+  }
 
-	void addToRead(std::vector<uint8> &buffer)
-	{
-		m_readBuffer.insert(m_readBuffer.end(), buffer.begin(), buffer.end());
-	}
+  void addToRead(std::vector<uint8> &buffer)
+  {
+    m_readBuffer.insert(m_readBuffer.end(), buffer.begin(), buffer.end());
+  }
 
-	void addToRead(const void * data, bufVector::size_type dataSize)
-	{
-		bufVector::size_type start = m_readBuffer.size();
-		m_readBuffer.resize(start + dataSize);
-		memcpy(&m_readBuffer[start], data, dataSize);
-	}
+  void addToRead(const void * data, bufVector::size_type dataSize)
+  {
+    bufVector::size_type start = m_readBuffer.size();
+    m_readBuffer.resize(start + dataSize);
+    memcpy(&m_readBuffer[start], data, dataSize);
+  }
 
-	void addToWrite(const void * data, bufVector::size_type dataSize)
-	{
-		if(dataSize == 0)
-			return;
-		bufVector::size_type start = m_writeBuffer.size();
-		m_writeBuffer.resize(start + dataSize);
-		memcpy(&m_writeBuffer[start], data, dataSize);
-	}
+  void addToWrite(const void * data, bufVector::size_type dataSize)
+  {
+    if(dataSize == 0)
+      return;
+    bufVector::size_type start = m_writeBuffer.size();
+    m_writeBuffer.resize(start + dataSize);
+    memcpy(&m_writeBuffer[start], data, dataSize);
+  }
 
-	void removePacket()
-	{
-		m_readBuffer.erase(m_readBuffer.begin(), m_readBuffer.begin() + m_readPos);
-		m_readPos = 0;
-	}
+  void removePacket()
+  {
+    m_readBuffer.erase(m_readBuffer.begin(), m_readBuffer.begin() + m_readPos);
+    m_readPos = 0;
+  }
 
-	Packet & operator<<(sint8 val)
-	{
-		m_writeBuffer.push_back(val);
-		return *this;
-	}
+  Packet & operator<<(sint8 val)
+  {
+    m_writeBuffer.push_back(val);
+    return *this;
+  }
 
-	Packet & operator>>(sint8 &val)
-	{
-		if(haveData(1))
-		{
-			val = *reinterpret_cast<const sint8*>(&m_readBuffer[m_readPos]);
-			m_readPos += 1;
-		}
-		return *this;
-	}
+  Packet & operator>>(sint8 &val)
+  {
+    if(haveData(1))
+    {
+      val = *reinterpret_cast<const sint8*>(&m_readBuffer[m_readPos]);
+      m_readPos += 1;
+    }
+    return *this;
+  }
 
-	Packet & operator<<(sint16 val)
-	{
-		uint16 nval = htons(val);
-		addToWrite(&nval, 2);
-		return *this;
-	}
+  Packet & operator<<(sint16 val)
+  {
+    uint16 nval = htons(val);
+    addToWrite(&nval, 2);
+    return *this;
+  }
 
-	Packet & operator>>(sint16 &val)
-	{
-		if(haveData(2))
-		{
-			val = ntohs(*reinterpret_cast<const sint16*>(&m_readBuffer[m_readPos]));
-			m_readPos += 2;
-		}
-		return *this;
-	}
+  Packet & operator>>(sint16 &val)
+  {
+    if(haveData(2))
+    {
+      val = ntohs(*reinterpret_cast<const sint16*>(&m_readBuffer[m_readPos]));
+      m_readPos += 2;
+    }
+    return *this;
+  }
 
-	Packet & operator<<(sint32 val)
-	{
-		uint32 nval = htonl(val);
-		addToWrite(&nval, 4);
-		return *this;
-	}
+  Packet & operator<<(sint32 val)
+  {
+    uint32 nval = htonl(val);
+    addToWrite(&nval, 4);
+    return *this;
+  }
 
-	Packet & operator>>(sint32 &val)
-	{
-		if(haveData(4))
-		{
-			val = ntohl(*reinterpret_cast<const sint32*>(&m_readBuffer[m_readPos]));
-			m_readPos += 4;
-		}
-		return *this;
-	}
+  Packet & operator>>(sint32 &val)
+  {
+    if(haveData(4))
+    {
+      val = ntohl(*reinterpret_cast<const sint32*>(&m_readBuffer[m_readPos]));
+      m_readPos += 4;
+    }
+    return *this;
+  }
 
-	Packet & operator<<(sint64 val)
-	{
-		uint64 nval = ntohll(val);
-		addToWrite(&nval, 8);
-		return *this;
-	}
+  Packet & operator<<(sint64 val)
+  {
+    uint64 nval = ntohll(val);
+    addToWrite(&nval, 8);
+    return *this;
+  }
 
-	Packet & operator>>(sint64 &val)
-	{
-		if(haveData(8))
-		{
-			val = *reinterpret_cast<const sint64*>(&m_readBuffer[m_readPos]);
-			val = ntohll(val);
-			m_readPos += 8;
-		}
-		return *this;
-	}
+  Packet & operator>>(sint64 &val)
+  {
+    if(haveData(8))
+    {
+      val = *reinterpret_cast<const sint64*>(&m_readBuffer[m_readPos]);
+      val = ntohll(val);
+      m_readPos += 8;
+    }
+    return *this;
+  }
 
-	Packet & operator<<(float val)
-	{
-		uint32 nval;
-		memcpy(&nval, &val , 4);
-		htonl(nval);
-		addToWrite(&nval, 4);
-		return *this;
-	}
+  Packet & operator<<(float val)
+  {
+    uint32 nval;
+    memcpy(&nval, &val , 4);
+    htonl(nval);
+    addToWrite(&nval, 4);
+    return *this;
+  }
 
-	Packet & operator>>(float &val)
-	{
-		if(haveData(4))
-		{
-			sint32 ival = ntohl(*reinterpret_cast<const sint32*>(&m_readBuffer[m_readPos]));
-			memcpy(&val, &ival, 4);
-			m_readPos += 4;
-		}
-		return *this;
-	}
+  Packet & operator>>(float &val)
+  {
+    if(haveData(4))
+    {
+      sint32 ival = ntohl(*reinterpret_cast<const sint32*>(&m_readBuffer[m_readPos]));
+      memcpy(&val, &ival, 4);
+      m_readPos += 4;
+    }
+    return *this;
+  }
 
-	Packet & operator<<(double val)
-	{
-		uint64 nval;
-		memcpy(&nval, &val, 8);
-		nval = ntohll(nval);
-		addToWrite(&nval, 8);
-		return *this;
-	}
+  Packet & operator<<(double val)
+  {
+    uint64 nval;
+    memcpy(&nval, &val, 8);
+    nval = ntohll(nval);
+    addToWrite(&nval, 8);
+    return *this;
+  }
 
 
-	Packet & operator>>(double &val)
-	{
-		if(haveData(8))
-		{
-			uint64 ival = *reinterpret_cast<const uint64*>(&m_readBuffer[m_readPos]);
-			ival = ntohll(ival);
-			memcpy((void*)&val, (void*)&ival, 8);
-			m_readPos += 8;
-		}
-		return *this;
-	}
+  Packet & operator>>(double &val)
+  {
+    if(haveData(8))
+    {
+      uint64 ival = *reinterpret_cast<const uint64*>(&m_readBuffer[m_readPos]);
+      ival = ntohll(ival);
+      memcpy((void*)&val, (void*)&ival, 8);
+      m_readPos += 8;
+    }
+    return *this;
+  }
 
-	Packet & operator<<(const std::string &str)
-	{
-		uint16 lenval = htons(str.size());
-		addToWrite(&lenval, 2);
+  Packet & operator<<(const std::string &str)
+  {
+    uint16 lenval = htons(str.size());
+    addToWrite(&lenval, 2);
 
-		addToWrite(&str[0], str.size());
-		return *this;
-	}
+    addToWrite(&str[0], str.size());
+    return *this;
+  }
 
-	Packet & operator>>(std::string &str)
-	{
-		sint16 lenval;
-		if(haveData(2))
-		{
-			lenval = ntohs(*reinterpret_cast<const sint16*>(&m_readBuffer[m_readPos]));
-			m_readPos += 2;
+  Packet & operator>>(std::string &str)
+  {
+    sint16 lenval;
+    if(haveData(2))
+    {
+      lenval = ntohs(*reinterpret_cast<const sint16*>(&m_readBuffer[m_readPos]));
+      m_readPos += 2;
 
-			if(haveData(lenval))
-			{
-				str.assign((char*)&m_readBuffer[m_readPos], lenval);
-				m_readPos += lenval;
-			}
-		}		
-		return *this;
-	}
+      if(haveData(lenval))
+      {
+        str.assign((char*)&m_readBuffer[m_readPos], lenval);
+        m_readPos += lenval;
+      }
+    }    
+    return *this;
+  }
 
-	void operator<<(Packet &other)
-	{
-		int dataSize = other.getWriteLen();
-		if(dataSize == 0)
-			return;
-		bufVector::size_type start = m_writeBuffer.size();
-		m_writeBuffer.resize(start + dataSize);
-		memcpy(&m_writeBuffer[start], other.getWrite(), dataSize);
-	}
+  void operator<<(Packet &other)
+  {
+    int dataSize = other.getWriteLen();
+    if(dataSize == 0)
+      return;
+    bufVector::size_type start = m_writeBuffer.size();
+    m_writeBuffer.resize(start + dataSize);
+    memcpy(&m_writeBuffer[start], other.getWrite(), dataSize);
+  }
 
-	void getData(void *buf, int count)
-	{
-		if(haveData(count))
-		{
-			memcpy(buf, &m_readBuffer[m_readPos], count);
-			m_readPos += count;
-		}
-	}
+  void getData(void *buf, int count)
+  {
+    if(haveData(count))
+    {
+      memcpy(buf, &m_readBuffer[m_readPos], count);
+      m_readPos += count;
+    }
+  }
 
-	void *getWrite()
-	{
-		return &m_writeBuffer[0];
-	}
+  void *getWrite()
+  {
+    return &m_writeBuffer[0];
+  }
 
-	size_t getWriteLen() const
-	{
-		return m_writeBuffer.size();
-	}
+  size_t getWriteLen() const
+  {
+    return m_writeBuffer.size();
+  }
 
-	void clearWrite(int count)
-	{
-		m_writeBuffer.erase(m_writeBuffer.begin(), m_writeBuffer.begin() + count);
-	}
+  void clearWrite(int count)
+  {
+    m_writeBuffer.erase(m_writeBuffer.begin(), m_writeBuffer.begin() + count);
+  }
 };
 
 

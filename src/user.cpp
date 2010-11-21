@@ -101,8 +101,8 @@ User::~User()
 // Kick player
 bool User::kick(std::string kickMsg)
 {
-	buffer << (sint8)PACKET_KICK << kickMsg;
-	std::cout << nick << " kicked. Reason: " << kickMsg << std::endl;
+  buffer << (sint8)PACKET_KICK << kickMsg;
+  std::cout << nick << " kicked. Reason: " << kickMsg << std::endl;
   return true;
 }
 
@@ -118,8 +118,8 @@ bool User::loadData()
   NBT_Value &nbtPlayer = *playerRoot;
   if(playerRoot == NULL)
   {
-	  LOG("Failed to open player file");
-	  return false;
+    LOG("Failed to open player file");
+    return false;
   }
 
   std::vector<NBT_Value*> *_pos = nbtPlayer["Pos"]->GetList();
@@ -136,13 +136,13 @@ bool User::loadData()
 
   for( ; iter != end ; iter++ )
   {
-	  sint8 slot, count;
-	  sint16 damage, item_id;
+    sint8 slot, count;
+    sint16 damage, item_id;
 
-	  slot = *(**iter)["Slot"];
-	  count = *(**iter)["Count"];
-	  damage = *(**iter)["Damage"];
-	  item_id = *(**iter)["id"];
+    slot = *(**iter)["Slot"];
+    count = *(**iter)["Count"];
+    damage = *(**iter)["Damage"];
+    item_id = *(**iter)["id"];
 
       //Main inventory slot
       if(slot >= 0 && slot <= 35)
@@ -227,12 +227,12 @@ bool User::saveData()
     }
     if(slots[(uint8)slotid].count)
     {
-	  NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
-	  val->Insert("Count", new NBT_Value((sint8)slots[(uint8)slotid].count));
-	  val->Insert("Slot", new NBT_Value((sint8)itemslot));
-	  val->Insert("Damage", new NBT_Value((sint16)slots[(uint8)slotid].health));
-	  val->Insert("id", new NBT_Value((sint16)slots[(uint8)slotid].type));
-	  nbtInv->GetList()->push_back(val);
+    NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+    val->Insert("Count", new NBT_Value((sint8)slots[(uint8)slotid].count));
+    val->Insert("Slot", new NBT_Value((sint8)itemslot));
+    val->Insert("Damage", new NBT_Value((sint16)slots[(uint8)slotid].health));
+    val->Insert("id", new NBT_Value((sint16)slots[(uint8)slotid].type));
+    nbtInv->GetList()->push_back(val);
     }
 
     slotid++;
@@ -347,7 +347,7 @@ bool User::updatePos(double x, double y, double z, double stance)
               packet[0] = PACKET_COLLECT_ITEM;
               putSint32(&packet[1], Map::get().mapItems[chunkHash][i]->EID);
               putSint32(&packet[5], this->UID);
-			  buffer.addToWrite(packet, 9);
+        buffer.addToWrite(packet, 9);
 
               //Send everyone destroy_entity-packet
               packet[0] = PACKET_DESTROY_ENTITY;
@@ -360,7 +360,7 @@ bool User::updatePos(double x, double y, double z, double stance)
               packet[3] = Map::get().mapItems[chunkHash][i]->count;
               putSint16(&packet[4], Map::get().mapItems[chunkHash][i]->health);
 
-			  buffer.addToWrite(packet, 6);
+        buffer.addToWrite(packet, 6);
 
               //We're done, release packet memory
               delete[] packet;
@@ -429,7 +429,7 @@ bool User::sendOthers(uint8 *data, uint32 len)
   for(unsigned int i = 0; i < Users.size(); i++)
   {
     if(Users[i]->fd != this->fd && Users[i]->logged)
-		Users[i]->buffer.addToWrite(data, len);
+    Users[i]->buffer.addToWrite(data, len);
   }
   return true;
 }
@@ -439,7 +439,7 @@ bool User::sendAll(uint8 *data, uint32 len)
   for(unsigned int i = 0; i < Users.size(); i++)
   {
     if(Users[i]->fd && Users[i]->logged)
-		Users[i]->buffer.addToWrite(data, len);
+    Users[i]->buffer.addToWrite(data, len);
   }
   return true;
 }
@@ -449,7 +449,7 @@ bool User::sendAdmins(uint8 *data, uint32 len)
   for(unsigned int i = 0; i < Users.size(); i++)
   {
     if(Users[i]->fd && Users[i]->logged && Users[i]->admin)
-		Users[i]->buffer.addToWrite(data, len);
+    Users[i]->buffer.addToWrite(data, len);
   }
   return true;
 }
@@ -515,7 +515,7 @@ bool User::popMap()
   while(this->mapRemoveQueue.size())
   {
     //Pre chunk
-	buffer << (sint8)PACKET_PRE_CHUNK << (sint32)mapRemoveQueue[0].x() << (sint32)mapRemoveQueue[0].z() << (sint8)0;
+  buffer << (sint8)PACKET_PRE_CHUNK << (sint32)mapRemoveQueue[0].x() << (sint32)mapRemoveQueue[0].z() << (sint8)0;
 
     //Delete from known list
     delKnown(mapRemoveQueue[0].x(), mapRemoveQueue[0].z());
@@ -580,8 +580,8 @@ bool User::pushMap()
 
 bool User::teleport(double x, double y, double z)
 {
-	buffer << (sint8)PACKET_PLAYER_POSITION_AND_LOOK << x << y << (double)0.0 << z 
-		<< (float)0.f << (float)0.f << (sint8)0;
+  buffer << (sint8)PACKET_PLAYER_POSITION_AND_LOOK << x << y << (double)0.0 << z 
+    << (float)0.f << (float)0.f << (sint8)0;
 
   //Also update pos for other players
   updatePos(x, y, z, 0);
@@ -590,11 +590,11 @@ bool User::teleport(double x, double y, double z)
 
 bool User::spawnUser(int x, int y, int z)
 {
-	Packet pkt;
-	pkt << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)UID << nick
-		<< (sint32)x << (sint32)y << (sint32)z << (sint8)0 << (sint8)0
-		<< (sint16)0;
-	sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
+  Packet pkt;
+  pkt << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)UID << nick
+    << (sint32)x << (sint32)y << (sint32)z << (sint8)0 << (sint8)0
+    << (sint16)0;
+  sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
   return true;
 }
 
@@ -605,9 +605,9 @@ bool User::spawnOthers()
   {
     if(Users[i]->UID != this->UID && Users[i]->nick != this->nick)
     {
-		buffer << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)Users[i]->UID << Users[i]->nick 
-			<< (sint32)(Users[i]->pos.x * 32) << (sint32)(Users[i]->pos.y * 32) << (sint32)(Users[i]->pos.z * 32) 
-			<< (sint8)0 << (sint8)0 << (sint16)0;
+    buffer << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)Users[i]->UID << Users[i]->nick 
+      << (sint32)(Users[i]->pos.x * 32) << (sint32)(Users[i]->pos.y * 32) << (sint32)(Users[i]->pos.z * 32) 
+      << (sint8)0 << (sint8)0 << (sint16)0;
     }
   }
   return true;
@@ -615,7 +615,7 @@ bool User::spawnOthers()
 
 struct event *User::GetEvent()
 {
-	return &m_event;
+  return &m_event;
 }
 
 User *addUser(int sock, uint32 EID)

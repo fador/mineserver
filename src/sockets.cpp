@@ -76,117 +76,117 @@ void client_callback(int fd,
   if(ev & EV_READ)
   {
   
-	  int read   = 1;
+    int read   = 1;
 
-	  uint8 *buf = new uint8[2048];
+    uint8 *buf = new uint8[2048];
 
-	  read = recv(fd, (char*)buf, 2048, 0);
-	  if(read == 0)
-	  {
-		std::cout << "Socket closed properly" << std::endl;
-		//event_del(user->GetEvent());
+    read = recv(fd, (char*)buf, 2048, 0);
+    if(read == 0)
+    {
+    std::cout << "Socket closed properly" << std::endl;
+    //event_del(user->GetEvent());
 
 #ifdef WIN32
-		closesocket(user->fd);
+    closesocket(user->fd);
 #else
-		close(user->fd);
+    close(user->fd);
 #endif
-		remUser(user->fd);
-		return;
-	  }
+    remUser(user->fd);
+    return;
+    }
 
-	  if(read == -1)
-	  {
-		  std::cout << "Socket had no data to read" << std::endl;
-		  return;
-	  }
+    if(read == -1)
+    {
+      std::cout << "Socket had no data to read" << std::endl;
+      return;
+    }
 
-	  user->buffer.addToRead(buf, read);
+    user->buffer.addToRead(buf, read);
 
-	  delete[] buf;
+    delete[] buf;
 
-	  user->buffer.reset();
+    user->buffer.reset();
 
-	  while(user->buffer >> (sint8&)user->action)
-	  {
-		  //Variable len package
-		  if(PacketHandler::get().packets[user->action].len == PACKET_VARIABLE_LEN)
-		  {
-		    //Call specific function
-		    int (PacketHandler::*function)(User *) =
-			  PacketHandler::get().packets[user->action].function;
-		    bool disconnecting = user->action == 0xFF;
-		    int curpos = (PacketHandler::get().*function)(user);
-		    if(curpos == PACKET_NEED_MORE_DATA)
-		    {
-			  user->waitForData = true;
+    while(user->buffer >> (sint8&)user->action)
+    {
+      //Variable len package
+      if(PacketHandler::get().packets[user->action].len == PACKET_VARIABLE_LEN)
+      {
+        //Call specific function
+        int (PacketHandler::*function)(User *) =
+        PacketHandler::get().packets[user->action].function;
+        bool disconnecting = user->action == 0xFF;
+        int curpos = (PacketHandler::get().*function)(user);
+        if(curpos == PACKET_NEED_MORE_DATA)
+        {
+        user->waitForData = true;
         event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
         event_add(user->GetEvent(), NULL);
-			  return;
-		    }
+        return;
+        }
 
-		    if(disconnecting) // disconnect -- player gone
+        if(disconnecting) // disconnect -- player gone
         {
           return;
         }
-		  }
-		  else if(PacketHandler::get().packets[user->action].len == PACKET_DOES_NOT_EXIST)
-		  {
-		    printf("Unknown action: 0x%x\n", user->action);
+      }
+      else if(PacketHandler::get().packets[user->action].len == PACKET_DOES_NOT_EXIST)
+      {
+        printf("Unknown action: 0x%x\n", user->action);
 
-		    //event_del(user->GetEvent());
+        //event_del(user->GetEvent());
 
-		    #ifdef WIN32
-		    closesocket(user->fd);
-		    #else
-		    close(user->fd);
-		    #endif
-		    remUser(user->fd);
-		  }
-		  else
-		  {
-		    if(!user->buffer.haveData(PacketHandler::get().packets[user->action].len))
-		    {
-			    user->waitForData = true;
+        #ifdef WIN32
+        closesocket(user->fd);
+        #else
+        close(user->fd);
+        #endif
+        remUser(user->fd);
+      }
+      else
+      {
+        if(!user->buffer.haveData(PacketHandler::get().packets[user->action].len))
+        {
+          user->waitForData = true;
           event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
           event_add(user->GetEvent(), NULL);
-			    return;
-		    }
+          return;
+        }
 
-		    //Call specific function
-		    int (PacketHandler::*function)(User *) = PacketHandler::get().packets[user->action].function;
-		    (PacketHandler::get().*function)(user);
+        //Call specific function
+        int (PacketHandler::*function)(User *) = PacketHandler::get().packets[user->action].function;
+        (PacketHandler::get().*function)(user);
 
-		  }
-	  } //End while
+      }
+    } //End while
   }
 
   int writeLen = user->buffer.getWriteLen();
   if(writeLen)
   {
-	  int written = send(fd, (char*)user->buffer.getWrite(), writeLen, 0);
-	  if(written == -1)
-	  {
-		  std::cout << "Error writing to client" << std::endl;
-		  //event_del(user->GetEvent());
+    int written = send(fd, (char*)user->buffer.getWrite(), writeLen, 0);
+    if(written == -1)
+    {
+      std::cout << "Error writing to client" << std::endl;
+      //event_del(user->GetEvent());
 
   #ifdef WIN32
-		  closesocket(user->fd);
+      closesocket(user->fd);
   #else
-		  close(user->fd);
+      close(user->fd);
   #endif
-		  remUser(user->fd);
-		  return;
+      remUser(user->fd);
+      return;
 
-	  }
-	  user->buffer.clearWrite(written);
+    }
+    user->buffer.clearWrite(written);
 
-	  if(user->buffer.getWriteLen())
-	  {
-		  event_set(user->GetEvent(), fd, EV_WRITE|EV_READ, client_callback, user);
-		  event_add(user->GetEvent(), NULL);
-		  return;
-	  }
+    if(user->buffer.getWriteLen())
+    {
+      event_set(user->GetEvent(), fd, EV_WRITE|EV_READ, client_callback, user);
+      event_add(user->GetEvent(), NULL);
+      return;
+    }
   }
 
   event_set(user->GetEvent(), fd, EV_READ, client_callback, user);

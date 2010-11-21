@@ -72,7 +72,7 @@ struct Inventory
 class User
 {
 private:
-	event m_event;
+  event m_event;
 public:
 
   User(int sock, uint32 EID);

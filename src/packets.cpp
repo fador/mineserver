@@ -100,8 +100,8 @@ void PacketHandler::initPackets()
 int PacketHandler::keep_alive(User *user)
 {
   //No need to do anything
-	user->buffer.removePacket();
-	return PACKET_OK;
+  user->buffer.removePacket();
+  return PACKET_OK;
 }
 
 // Login request (http://mc.kev009.com/wiki/Protocol#Login_Request_.280x01.29)
@@ -119,7 +119,7 @@ int PacketHandler::login_request(User *user)
   user->buffer >> version >> player >> passwd >> mapseed >> dimension;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   user->buffer.removePacket();
 
@@ -146,7 +146,7 @@ int PacketHandler::login_request(User *user)
 
   //Login OK package
   user->buffer << (sint8)PACKET_LOGIN_RESPONSE 
-	  << (sint32)user->UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
+    << (sint32)user->UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
 
   //Send server time (after dawn)
   user->buffer << (sint8)PACKET_TIME_UPDATE << (sint64) 0x0e00;
@@ -155,36 +155,36 @@ int PacketHandler::login_request(User *user)
   for(sint32 invType=-1; invType != -4; invType--)
   {
     Item *inventory = NULL;
-	sint16 inventoryCount = 0;
+  sint16 inventoryCount = 0;
 
-	if(invType == -1)
-	{
-		inventory = user->inv.main;
-		inventoryCount = 36;
-	}
-	else if(invType == -2)
-	{
-		inventory = user->inv.equipped;
-		inventoryCount = 4;
-	}
-	else if(invType == -3)
-	{
-		inventory = user->inv.crafting;
-		inventoryCount = 4;
-	}
-	user->buffer << (sint8)PACKET_PLAYER_INVENTORY << invType << inventoryCount;
+  if(invType == -1)
+  {
+    inventory = user->inv.main;
+    inventoryCount = 36;
+  }
+  else if(invType == -2)
+  {
+    inventory = user->inv.equipped;
+    inventoryCount = 4;
+  }
+  else if(invType == -3)
+  {
+    inventory = user->inv.crafting;
+    inventoryCount = 4;
+  }
+  user->buffer << (sint8)PACKET_PLAYER_INVENTORY << invType << inventoryCount;
 
-	for(int i=0; i<inventoryCount; i++)
-	{
-		if(inventory[i].count)
-		{
-			user->buffer << (sint16)inventory[i].type << (sint8)inventory[i].count << (sint16)inventory[i].health;
-		}
-		else
-		{
-			user->buffer << (sint16)-1;
-		}
-	}
+  for(int i=0; i<inventoryCount; i++)
+  {
+    if(inventory[i].count)
+    {
+      user->buffer << (sint16)inventory[i].type << (sint8)inventory[i].count << (sint16)inventory[i].health;
+    }
+    else
+    {
+      user->buffer << (sint16)-1;
+    }
+  }
   }
 
   // Send motd
@@ -196,9 +196,9 @@ int PacketHandler::login_request(User *user)
   {
     // If not commentline
     if(temp[0] != COMMENTPREFIX)
-	{
+  {
       user->buffer << (sint8)PACKET_CHAT_MESSAGE << temp;
-	}
+  }
   }
   motdfs.close();
 
@@ -263,7 +263,7 @@ int PacketHandler::chat_message(User *user)
   user->buffer >> msg;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   user->buffer.removePacket();
 
@@ -284,7 +284,7 @@ int PacketHandler::player_inventory(User *user)
   user->buffer >> type >> count;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   int items   = 0;
   Item *slots = NULL;
@@ -317,27 +317,27 @@ int PacketHandler::player_inventory(User *user)
 
   for(i = 0; i < items; i++)
   {
-	  sint16 item_id = 0;
-	  sint8 numberOfItems = 0;
-	  sint16 health = 0;
+    sint16 item_id = 0;
+    sint8 numberOfItems = 0;
+    sint16 health = 0;
 
-	  user->buffer >> item_id;
+    user->buffer >> item_id;
 
-	  if(!user->buffer)
-		  return PACKET_NEED_MORE_DATA;
+    if(!user->buffer)
+      return PACKET_NEED_MORE_DATA;
 
-	  if(item_id != -1)
-	  {
-		  user->buffer >> numberOfItems >> health;
+    if(item_id != -1)
+    {
+      user->buffer >> numberOfItems >> health;
 
-		  if(!user->buffer)
-			  return PACKET_NEED_MORE_DATA;
+      if(!user->buffer)
+        return PACKET_NEED_MORE_DATA;
 
-		  
-		  slots[i].type   = item_id;
-		  slots[i].count  = numberOfItems;
-		  slots[i].health = health;
-	  }
+      
+      slots[i].type   = item_id;
+      slots[i].count  = numberOfItems;
+      slots[i].health = health;
+    }
   }
 
   user->buffer.removePacket();
@@ -348,12 +348,12 @@ int PacketHandler::player_inventory(User *user)
 int PacketHandler::player(User *user)
 {
   //OnGround packet
-	sint8 onground;
-	user->buffer >> onground;
-	if(!user->buffer)
-		return PACKET_NEED_MORE_DATA;
-	user->buffer.removePacket();
-	return PACKET_OK;
+  sint8 onground;
+  user->buffer >> onground;
+  if(!user->buffer)
+    return PACKET_NEED_MORE_DATA;
+  user->buffer.removePacket();
+  return PACKET_OK;
 }
 
 int PacketHandler::player_position(User *user)
@@ -364,7 +364,7 @@ int PacketHandler::player_position(User *user)
   user->buffer >> x >> y >> stance >> z >> onground;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   user->updatePos(x, y, z, stance);
   user->buffer.removePacket();
@@ -380,7 +380,7 @@ int PacketHandler::player_look(User *user)
   user->buffer >> yaw >> pitch >> onground;
   
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   user->updateLook(yaw, pitch);
 
@@ -396,10 +396,10 @@ int PacketHandler::player_position_and_look(User *user)
   sint8 onground;
 
   user->buffer >> x >> y >> stance >> z 
-				>> yaw >> pitch >> onground;
+        >> yaw >> pitch >> onground;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   //Update user data
   user->updatePos(x, y, z, stance);
@@ -412,16 +412,16 @@ int PacketHandler::player_position_and_look(User *user)
 
 int PacketHandler::player_digging(User *user)
 {
-	sint8 status,y;
-	sint32 x,z;
-	sint8 direction;
+  sint8 status,y;
+  sint32 x,z;
+  sint8 direction;
 
-	user->buffer >> status >> x >> y >> z >> direction;
+  user->buffer >> status >> x >> y >> z >> direction;
 
-	if(!user->buffer)
-		return PACKET_NEED_MORE_DATA;
+  if(!user->buffer)
+    return PACKET_NEED_MORE_DATA;
 
-	user->buffer.removePacket();
+  user->buffer.removePacket();
 
   //If block broken
   if(status == BLOCK_STATUS_BLOCK_BROKEN)
@@ -537,13 +537,13 @@ int PacketHandler::player_block_placement(User *user)
   user->buffer >> blockID >> x >> y >> z >> direction;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   user->buffer.removePacket();
 
   // TODO: Handle processing of 
   if(direction == -1)
-	  return PACKET_OK;
+    return PACKET_OK;
 
   orig_x = x; orig_y = y; orig_z = z;
 
@@ -670,15 +670,15 @@ int PacketHandler::player_block_placement(User *user)
       (((blockID == BLOCK_WOODEN_DOOR || blockID == BLOCK_IRON_DOOR || blockID == BLOCK_FENCE) && y >= user->pos.y - 0.5 && y <= user->pos.y + 2.5) ||
         (y >= user->pos.y - 0.5 && y <= user->pos.y + 1.5))) //TODO: <- ^- Got values from tryes and guesses need to find the real values
   {
-		double intX, intZ, fracX, fracZ;
-		
-		fracX = std::abs(std::modf(user->pos.x, &intX));
+    double intX, intZ, fracX, fracZ;
+    
+    fracX = std::abs(std::modf(user->pos.x, &intX));
     fracZ = std::abs(std::modf(user->pos.z, &intZ));
     
     if((z == intZ || (z == intZ + 1 && fracZ < 0.30) || (z == intZ - 1 && fracZ > 0.70)) &&
        (x == intX || (x == intX + 1 && fracZ < 0.30) || (x == intX - 1 && fracX > 0.70)))
       change = false;
-	}
+  }
 
   if(blockID == BLOCK_TORCH ||
      blockID == BLOCK_REDSTONE_TORCH_OFF ||
@@ -730,7 +730,7 @@ int PacketHandler::holding_change(User *user)
   user->buffer >> entityID >> itemID;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   user->buffer.removePacket();
 
@@ -744,19 +744,19 @@ int PacketHandler::holding_change(User *user)
 
 int PacketHandler::arm_animation(User *user)
 {
-	sint32 userID;
-	sint8 animType;
-	
-	user->buffer >> userID >> animType;
+  sint32 userID;
+  sint8 animType;
+  
+  user->buffer >> userID >> animType;
 
-	if(!user->buffer)
-		return PACKET_NEED_MORE_DATA;
+  if(!user->buffer)
+    return PACKET_NEED_MORE_DATA;
 
-	user->buffer.removePacket();
+  user->buffer.removePacket();
 
-	Packet pkt;
-	pkt << (sint8)PACKET_ARM_ANIMATION << (sint32)user->UID << animType;
-	user->sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
+  Packet pkt;
+  pkt << (sint8)PACKET_ARM_ANIMATION << (sint32)user->UID << animType;
+  user->sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
 
   return PACKET_OK;
 }
@@ -777,7 +777,7 @@ int PacketHandler::pickup_spawn(User *user)
   user->buffer >> yaw >> pitch >> roll;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   item.spawnedBy = user->UID;
 
@@ -795,7 +795,7 @@ int PacketHandler::disconnect(User *user)
   user->buffer >> msg;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   user->buffer.removePacket();
 
@@ -827,10 +827,10 @@ int PacketHandler::complex_entities(User *user)
   user->buffer >> x >> y >> z >> len;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   if(!user->buffer.haveData(len))
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   uint8 *buffer = new uint8[len];
 
@@ -863,7 +863,7 @@ int PacketHandler::complex_entities(User *user)
   zstream.total_in  = 0;
   zstream.total_out = 0;
   zstream.data_type = Z_BINARY;
-  inflateInit2(&zstream, 15+MAX_WBITS);
+  inflateInit2(&zstream, 16+MAX_WBITS);
 
   uLongf uncompressedSize   = deflateBound(&zstream, len);
   uint8 *uncompressedBuffer = new uint8[uncompressedSize];
@@ -872,10 +872,15 @@ int PacketHandler::complex_entities(User *user)
   zstream.next_out = uncompressedBuffer;
   
   //Uncompress
-  if(/*int state=*/inflate(&zstream, Z_FULL_FLUSH)!=Z_OK)
+  if(inflate(&zstream, Z_FULL_FLUSH)!=Z_STREAM_END)
   {
-      inflateEnd(&zstream);
+    std::cout << "Error in inflate!" << std::endl;
+    delete[] buffer;
+    return PACKET_OK;
   }
+
+  inflateEnd(&zstream);
+
   //Get size
   uncompressedSize  = zstream.total_out;
   
@@ -899,10 +904,10 @@ int PacketHandler::complex_entities(User *user)
 
 int PacketHandler::use_entity(User *user)
 {
-	sint32 userID,target;
-	user->buffer >> userID >> target;
-	if(!user->buffer)
-		return PACKET_NEED_MORE_DATA;
+  sint32 userID,target;
+  user->buffer >> userID >> target;
+  if(!user->buffer)
+    return PACKET_NEED_MORE_DATA;
 
-	return PACKET_OK;
+  return PACKET_OK;
 }
