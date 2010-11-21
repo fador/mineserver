@@ -941,9 +941,9 @@ void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
     return;
   }
 
-  if((*entity)["x"] == NULL || (sint32)*(*entity)["x"] != x ||
-   (*entity)["y"] == NULL || (sint32)*(*entity)["y"] != y   ||
-   (*entity)["z"] == NULL || (sint32)*(*entity)["z"] != z)
+  if((*entity)["x"] == NULL || (sint32)*(*entity)["x"] != x  ||
+     (*entity)["y"] == NULL || (sint32)*(*entity)["y"] != y  ||
+     (*entity)["z"] == NULL || (sint32)*(*entity)["z"] != z)
   {
     LOG("Invalid Complex Entity");
     return;
