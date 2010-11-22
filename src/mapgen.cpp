@@ -1,7 +1,5 @@
 /*
-  The MIT License
-
-  Copyright (c) 2009, 2010 Matvei Stefarov <me@matvei.org>
+  Copyright (c) 2010 Drew Gottlieb - with code from fragmer and TkTech
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +19,9 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
  */
+ 
+// This code is modified from MySMP C# server by Drew Gottlieb
+// Thanks!
 
 #include <cstdlib>
 #include <cstdio>
@@ -73,8 +74,7 @@ void MapGen::CalculateHeightmap()
     {
       for (char y = 127; y >= 0; y--) 
       {
-        //if (Blocks.SkyLightCarryingBlocks.Contains((Block)blocks[GetBlockIndex(x, y, z)].type))
-        index      = y + (z * 128) + (x * 128 * 16);
+        index = y + (z * 128) + (x * 128 * 16);
         if(blocks[index] == BLOCK_AIR)
           continue;
         heightmap[GetHeightmapIndex(x, z)] = (char)(y + 1);
@@ -98,31 +98,13 @@ void MapGen::LoadFlatgrass()
       for (uint8 bZ = 0; bZ < 16; bZ++) 
       {
         if (bY == 0) 
-        {
-          blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_BEDROCK;
-        } 
+          blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_BEDROCK; 
         else if (bY < 64) 
-        {
           blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_DIRT;
-        } 
         else if (bY == 64) 
-        {
-          /*if ((x == -1 && z == 0) &&false) 
-          {
-            if(bX == 0 && bZ == 15)
-              blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_LEAVES;
-            else
-              blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_SAND;
-          } 
-          else 
-          {*/
-            blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_GRASS;
-          //}
-        } 
+          blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_GRASS;
         else 
-        {
           blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_AIR;
-        }
       }
     }
   }
@@ -131,12 +113,14 @@ void MapGen::LoadFlatgrass()
 
 void MapGen::generateChunk(int x, int z)
 {
-  NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
-  LoadFlatgrass();
-  
   NBT_Value *main = new NBT_Value(NBT_Value::TAG_COMPOUND);
-
-  
+  NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+ 
+  if(Conf::get().bValue("map_flatland"))
+    LoadFlatgrass();
+  else
+    LoadFlatgrass(); // generate with noise here
+   
   val->Insert("Blocks", new NBT_Value(blocks, 16*16*128));
   val->Insert("Data", new NBT_Value(blockdata, 16*16*128/2));
   val->Insert("SkyLight", new NBT_Value(skylight, 16*16*128/2));
@@ -172,9 +156,8 @@ void MapGen::generateChunk(int x, int z)
 
   // Not changed
   Map::get().mapChanged[chunkid] = 0;
-
   
-  Map::get().maps[chunkid].nbt=main;
+  Map::get().maps[chunkid].nbt = main;
 }
 /*
 void GenerateWithNoise() {

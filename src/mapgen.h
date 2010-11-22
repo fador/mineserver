@@ -1,7 +1,5 @@
 /*
-  The MIT License
-
-  Copyright (c) 2009, 2010 Matvei Stefarov <me@matvei.org>
+  Copyright (c) 2010 Drew Gottlieb - with code from fragmer and TkTech
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +19,9 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
  */
+ 
+// This code is modified from MySMP C# server by Drew Gottlieb
+// Thanks!
 
 #ifndef _MAPGEN_H
 #define _MAPGEN_H
@@ -36,18 +37,14 @@ private:
   uint8 *blocklight;
   uint8 *heightmap;
   Noise noise;
+  
   int GetHeightmapIndex(char x, char z);
   void CalculateHeightmap();
   void LoadFlatgrass();
-  //char heightmap[256]; // 16*16
-
 
 public:
   MapGen(int seed);
-  ~MapGen();
-  //void generateHeightmap();
-
-  
+  ~MapGen();  
   void generateChunk(int x, int z);
 
 };

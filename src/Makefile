@@ -37,7 +37,7 @@ config.o: logger.h constants.h config.h
 constants.o: constants.h
 logger.o: logger.h
 map.o: logger.h tools.h map.h user.h nbt.h config.h
-mapgen.o: logger.h constants.h config.h mapgen.h
+mapgen.o: logger.h constants.h config.h mapgen.h nbt.h map.h noise.h
 nbt.o: tools.h nbt.h map.h
 packets.o: constants.h logger.h sockets.h tools.h map.h user.h chat.h config.h nbt.h packets.h physics.h
 physics.o: logger.h constants.h config.h user.h map.h vec.h physics.h
