@@ -281,17 +281,12 @@ bool Map::blocklightmapStep(int x, int y, int z, int light)
 
     switch(i)
     {
-    case 0: x_local++; break;
-
-    case 1: x_local--; break;
-
-    case 2: y_local++; break;
-
-    case 3: y_local--; break;
-
-    case 4: z_local++; break;
-
-    case 5: z_local--; break;
+      case 0: x_local++; break;
+      case 1: x_local--; break;
+      case 2: y_local++; break;
+      case 3: y_local--; break;
+      case 4: z_local++; break;
+      case 5: z_local--; break;
     }
 
     if(getBlock(x_local, y_local, z_local, &block, &meta, false))
@@ -302,7 +297,7 @@ bool Map::blocklightmapStep(int x, int y, int z, int light)
 
       if(blocklight < light+stopLight[block]-1)
       {
-        setBlockLight(x_local, y_local, z_local, light+stopLight[block]-1, 15, 1);
+        setBlockLight(x_local, y_local, z_local, light+stopLight[block]-1, 0, 1);
 
         if(stopLight[block] != -16)
           blocklightmapStep(x_local, y_local, z_local, light+stopLight[block]-1);
@@ -340,17 +335,12 @@ bool Map::lightmapStep(int x, int y, int z, int light)
 
     switch(i)
     {
-    case 0: x_local++; break;
-
-    case 1: x_local--; break;
-
-    case 2: y_local++; break;
-
-    case 3: y_local--; break;
-
-    case 4: z_local++; break;
-
-    case 5: z_local--; break;
+      case 0: x_local++; break;
+      case 1: x_local--; break;
+      case 2: y_local++; break;
+      case 3: y_local--; break;
+      case 4: z_local++; break;
+      case 5: z_local--; break;
     }
 
     //printf("getBlock(%d, %d, %d) (lightmapStep)\n", x_local, y_local, z_local);
