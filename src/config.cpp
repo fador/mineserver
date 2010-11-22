@@ -178,7 +178,7 @@ int Conf::iValue(std::string name)
   }
 }
 
-bool bValue(std::string name)
+bool Conf::bValue(std::string name)
 {
   if(confSet.find(name) != confSet.end())
     return (confSet[name] == "true")?true:false;

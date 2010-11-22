@@ -35,26 +35,37 @@
 
 #include "config.h"
 #include "noise.h"
+#include "nbt.h"
+#include "map.h"
 
 #include "mapgen.h"
 
-Chunk::Chunk(int m_x, int m_z)
-{
-  if (Conf::get().bValue("map_flatland"))
-    mapgen.LoadFlatgrass();
-  //else
-  //  mapgen.GenerateWithNoise();
-}
-
 MapGen::MapGen(int seed)
 {
+  blocks = new uint8[16*16*128];
+  blockdata = new uint8[16*16*128/2];
+  skylight = new uint8[16*16*128/2];
+  blocklight = new uint8[16*16*128/2];
+  heightmap = new uint8[16*16];
+  
+  
   noise.init(seed, Noise::Bicubic);
 }
 
+MapGen::~MapGen()
+{
+  delete [] blocks;
+  delete [] blockdata;
+  delete [] skylight;
+  delete [] blocklight;
+  delete [] heightmap;
+}
 
-/*void MapGen::CalculateHeightmap() 
+
+void MapGen::CalculateHeightmap() 
 {
   uint8 block; uint8 meta;
+  int index;
 
   for(char x = 0; x < 16; x++) 
   {
@@ -63,14 +74,15 @@ MapGen::MapGen(int seed)
       for (char y = 127; y >= 0; y--) 
       {
         //if (Blocks.SkyLightCarryingBlocks.Contains((Block)blocks[GetBlockIndex(x, y, z)].type))
-        if(Map::get().getBlock(x, y, z, &block, &meta))
+        index      = y + (z * 128) + (x * 128 * 16);
+        if(blocks[index] == BLOCK_AIR)
           continue;
         heightmap[GetHeightmapIndex(x, z)] = (char)(y + 1);
         break;
       }
     }
   }
-}*/
+}
 
 int MapGen::GetHeightmapIndex(char x, char z) 
 {
@@ -79,42 +91,90 @@ int MapGen::GetHeightmapIndex(char x, char z)
 
 void MapGen::LoadFlatgrass() 
 {
-  for (char bX = 0; bX < 16; bX++) 
+  for (uint8 bX = 0; bX < 16; bX++) 
   {
-    for (char bY = 0; bY < 128; bY++) 
+    for (uint8 bY = 0; bY < 128; bY++) 
     {
-      for (char bZ = 0; bZ < 16; bZ++) 
+      for (uint8 bZ = 0; bZ < 16; bZ++) 
       {
         if (bY == 0) 
         {
-          blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(BLOCK_BEDROCK, 0x00, 0x00);
+          blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_BEDROCK;
         } 
         else if (bY < 64) 
         {
-          blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(BLOCK_DIRT, 0x00, 0x00);
+          blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_DIRT;
         } 
         else if (bY == 64) 
         {
-          if ((x == -1 && z == 0) && false) 
+          /*if ((x == -1 && z == 0) &&false) 
           {
             if(bX == 0 && bZ == 15)
-              blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(BLOCK_LEAVES, 0x00, 0xFF);
+              blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_LEAVES;
             else
-              blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(BLOCK_SAND, 0x00, 0xFF);
+              blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_SAND;
           } 
           else 
-          {
-            blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(BLOCK_GRASS, 0x00, 0xFF);
-          }
+          {*/
+            blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_GRASS;
+          //}
         } 
         else 
         {
-          blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(BLOCK_AIR, 0x00, 0xFF);
+          blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_AIR;
         }
       }
     }
   }
-  //CalculateHeightmap();
+  CalculateHeightmap();
+}
+
+void MapGen::generateChunk(int x, int z)
+{
+  NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+  LoadFlatgrass();
+  
+  NBT_Value *main = new NBT_Value(NBT_Value::TAG_COMPOUND);
+
+  
+  val->Insert("Blocks", new NBT_Value(blocks, 16*16*128));
+  val->Insert("Data", new NBT_Value(blockdata, 16*16*128/2));
+  val->Insert("SkyLight", new NBT_Value(skylight, 16*16*128/2));
+  val->Insert("BlockLight", new NBT_Value(blocklight, 16*16*128/2));
+  val->Insert("HeightMap", new NBT_Value(heightmap, 16*16));
+  val->Insert("Entities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
+  val->Insert("TileEntities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
+  val->Insert("LastUpdate", new NBT_Value((sint64)time(NULL)));
+  val->Insert("xPos", new NBT_Value(x));
+  val->Insert("zPos", new NBT_Value(z));
+  val->Insert("TerrainPopulated", new NBT_Value((char)1));
+  
+  main->Insert("Level", val);
+  
+  uint32 chunkid;
+  Map::get().posToId(x, z, &chunkid);
+  
+  Map::get().maps[chunkid].x = x;
+  Map::get().maps[chunkid].z = z;
+
+  std::vector<uint8> *t_blocks = (*val)["Blocks"]->GetByteArray();
+  std::vector<uint8> *t_data = (*val)["Data"]->GetByteArray();
+  std::vector<uint8> *t_blocklight = (*val)["BlockLight"]->GetByteArray();
+  std::vector<uint8> *t_skylight = (*val)["SkyLight"]->GetByteArray();
+  
+  Map::get().maps[chunkid].blocks = &((*t_blocks)[0]);
+  Map::get().maps[chunkid].data = &((*t_data)[0]);
+  Map::get().maps[chunkid].blocklight = &((*t_blocklight)[0]);
+  Map::get().maps[chunkid].skylight = &((*t_skylight)[0]);
+
+  // Update last used time
+  Map::get().mapLastused[chunkid] = (int)time(0);
+
+  // Not changed
+  Map::get().mapChanged[chunkid] = 0;
+
+  
+  Map::get().maps[chunkid].nbt=main;
 }
 /*
 void GenerateWithNoise() {

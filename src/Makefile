@@ -12,7 +12,7 @@ C++ = g++
 LFLAGS = -I. -I/usr/local/include -L/usr/local/lib -lpthread -levent -lz
 CFLAGS = $(DFLAGS) -I. -I/usr/local/include -L/usr/local/lib
 
-OBJS = map.o chat.o commands.o config.o constants.o logger.o mapgen.o nbt.o packets.o physics.o sockets.o tools.o user.o mineserver.o noise.o mapgenargs.o
+OBJS = map.o chat.o commands.o config.o constants.o logger.o mapgen.o nbt.o packets.o physics.o sockets.o tools.o user.o mineserver.o noise.o
 PROG = ./mineserver
 PROGS = $(PROG)
 
@@ -46,4 +46,3 @@ tools.o: tools.h
 user.o: constants.h logger.h tools.h map.h user.h nbt.h chat.h packets.h
 mineserver.o: constants.h logger.h sockets.h tools.h map.h user.h chat.h mapgen.h config.h nbt.h packets.h physics.h
 noise.o: noise.h constants.h
-mapgenargs.o: mapgenargs.h

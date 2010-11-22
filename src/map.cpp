@@ -51,6 +51,7 @@
 #include "logger.h"
 #include "tools.h"
 #include "map.h"
+#include "mapgen.h"
 
 #include "user.h"
 #include "nbt.h"
@@ -660,12 +661,18 @@ bool Map::loadMap(int x, int z)
   if(stat(infile.c_str(), &stFileInfo) != 0)
   {
     std::cout << "Mappos: " << x << "," << z << std::endl;
-    LOG("File not found: " + infile);
-    return false;
+    LOG("Generating chunk...");
+    MapGen mapgen(time(NULL));
+    
+    mapgen.generateChunk(x,z);  
+    generateLightMaps(x, z);
   }
-
-  maps[mapId].nbt = NBT_Value::LoadFromFile(infile.c_str());
-
+  else 
+  {
+    maps[mapId].nbt = NBT_Value::LoadFromFile(infile.c_str());
+  }
+  
+  
   if(maps[mapId].nbt == NULL)
   {
     LOG("Error in loading map (unable to load file)");
