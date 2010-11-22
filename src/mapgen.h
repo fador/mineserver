@@ -27,13 +27,28 @@
 
 #include "noise.h"
 
+class Chunk
+{
+private:
+  MapGen mapgen;
+public:
+  Chunk(int m_x, int m_z);
+  int x, z;
+};
+
 class MapGen
 {
 private:
   Noise noise;
+  int GetHeightmapIndex(char x, char z);
+  //void CalculateHeightmap();
+  //char heightmap[256]; // 16*16
 
-public:  
-  void generateHeightmap();
+
+public:
+  MapGen(int seed);
+  //void generateHeightmap();
+  void LoadFlatgrass();
 
 };
 

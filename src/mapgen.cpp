@@ -38,148 +38,85 @@
 
 #include "mapgen.h"
 
-MapGen::MapGen()
+Chunk::Chunk(int m_x, int m_z)
 {
-  // Seed random number generator
-  //srand(args.seed);
-  noise.init(args.seed, Noise::Bicubic);
-  applyTheme(args.theme);
+  if (Conf::get().bValue("map_flatland"))
+    mapgen.LoadFlatgrass();
+  //else
+  //  mapgen.GenerateWithNoise();
+}
+
+MapGen::MapGen(int seed)
+{
+  noise.init(seed, Noise::Bicubic);
 }
 
 
-void MapGen::GenerateHeightmap() 
+/*void MapGen::CalculateHeightmap() 
 {
-  std::cout << "Heightmap: Priming" << std::endl;
-  
-  float** heightmap = new float*[args.dimX];
-  for(int i = 0; i < args.dimX; i++)
+  uint8 block; uint8 meta;
+
+  for(char x = 0; x < 16; x++) 
   {
-    heightmap[i] = new float[args.dimY];
-  }
-
-  noise.PerlinNoiseMap(heightmap, args.featureScale, args.detailScale, args.roughness, 0, 0);
-  
-  /*if(args.useBias && !args.delayBias) 
-  {
-    //reportProgress(2, "Heightmap: Biasing");
-    noise.Normalize(heightmap);
-    applyBias();
-  }*/
-
-    for(int y=0; y<16;y++) {
-    for(int x=0; x<16;x++) {
-      std::cout << heightmap[x][y] << " ";
-    }
-    std::cout << std::endl;
-  }
-  noise.Normalize(heightmap);
-  
-     for(int y=0; y<16;y++) {
-    for(int x=0; x<16;x++) {
-      std::cout << heightmap[x][y] << " ";
-    }
-    std::cout << std::endl;
-  }
-
-  /*if(args.layeredHeightmap) 
-  {
-    //reportProgress(10, "Heightmap: Layering");
-
-    // needs a new Noise object to randomize second map
-    float** heightmap2 = new float*[args.dimX];
-    for(int i = 0; i < args.dimX; i++)
+    for(char z = 0; z < 16; z++)
     {
-      heightmap2[i] = new float[args.dimY];
+      for (char y = 127; y >= 0; y--) 
+      {
+        //if (Blocks.SkyLightCarryingBlocks.Contains((Block)blocks[GetBlockIndex(x, y, z)].type))
+        if(Map::get().getBlock(x, y, z, &block, &meta))
+          continue;
+        heightmap[GetHeightmapIndex(x, z)] = (char)(y + 1);
+        break;
+      }
     }
-    
-    Noise tempNoise;
-    tempNoise.init(rand(), Noise::Bicubic);
-    tempNoise.PerlinNoiseMap( heightmap2, 0, args.detailScale, args.roughness, 0, 0 );
-    noise.Normalize( heightmap2 );
-
-    // make a blendmap
-    blendmap = new float*[args.dimX];
-    for(int i = 0; i < args.dimX; i++)
-    {
-      blendmap[i] = new float[args.dimY];
-    }
-    
-    int blendmapDetailSize = (int)log2( (double)std::max( args.dimX, args.dimY ) ) - 2;
-    
-    tempNoise.init(rand(), Noise::Cosine);
-    tempNoise.PerlinNoiseMap(blendmap, 3, blendmapDetailSize, 0.5f, 0, 0);
-    
-    noise.Normalize(blendmap);
-    float cliffSteepness = DIMXY / 6.0f;
-    noise.ScaleAndClip(blendmap, cliffSteepness);
-
-    noise.Blend(heightmap, heightmap2, blendmap);
   }
-
-  if( args.marbledHeightmap ) {
-    //reportProgress(1, "Heightmap: Marbling");
-    noise.Marble(heightmap);
-  }
-
-  if(args.invertHeightmap) {
-    //reportProgress(1, "Heightmap: Inverting");
-    noise.Invert(heightmap);
-  }
-
-  if(args.useBias && args.delayBias) {
-    //reportProgress(2, "Heightmap: Biasing");
-    noise.Normalize(heightmap);
-    applyBias();
-  }
-  noise.Normalize(heightmap);
-  */
-}
-
-
-
-/*void GenerateFlatgrass( Map map ) {
-    for( int i = 0; i < map.widthX; i++ ) {
-        for( int j = 0; j < map.widthY; j++ ) {
-            for( int k = 0; k < map.height / 2 - 1; k++ ) {
-                if( k < map.height / 2 - 5 ) {
-                    map.SetBlock( i, j, k, BLOCK_STONE );
-                } else {
-                    map.SetBlock( i, j, k, BLOCK_DIRT );
-                }
-            }
-            map.SetBlock( i, j, map.height / 2 - 1, BLOCK_GRASS );
-        }
-    }
 }*/
 
-void LoadFlatgrass() {
-  lock (blockslock) {
-      for (byte bX = 0; bX < 16; bX++) {
-          for (byte bY = 0; bY < 128; bY++) {
-              for (byte bZ = 0; bZ < 16; bZ++) {
-                  if (bY == 0) {
-                      blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(Block.Admincrete, 0x00, 0x00);
-                  } else if (bY < 64) {
-                      blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(Block.Dirt, 0x00, 0x00);
-                  } else if (bY == 64) {
-                      if ((x == -1 && z == 0) && false) {
-                          if(bX == 0 && bZ == 15)
-                              blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(Block.Leaves, 0x00, 0xFF);
-                          else
-                              blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(Block.Sand, 0x00, 0xFF);
-                      } else {
-                          blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(Block.Grass, 0x00, 0xFF);
-                      }
-                  } else {
-                      blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(Block.Air, 0x00, 0xFF);
-                  }
-              }
-          }
-      }
-      CalculateHeightmap();
-  }
+int MapGen::GetHeightmapIndex(char x, char z) 
+{
+  return z + (x * 16);
 }
 
+void MapGen::LoadFlatgrass() 
+{
+  for (char bX = 0; bX < 16; bX++) 
+  {
+    for (char bY = 0; bY < 128; bY++) 
+    {
+      for (char bZ = 0; bZ < 16; bZ++) 
+      {
+        if (bY == 0) 
+        {
+          blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(BLOCK_BEDROCK, 0x00, 0x00);
+        } 
+        else if (bY < 64) 
+        {
+          blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(BLOCK_DIRT, 0x00, 0x00);
+        } 
+        else if (bY == 64) 
+        {
+          if ((x == -1 && z == 0) && false) 
+          {
+            if(bX == 0 && bZ == 15)
+              blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(BLOCK_LEAVES, 0x00, 0xFF);
+            else
+              blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(BLOCK_SAND, 0x00, 0xFF);
+          } 
+          else 
+          {
+            blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(BLOCK_GRASS, 0x00, 0xFF);
+          }
+        } 
+        else 
+        {
+          blocks[bY + (bZ * 128 + (bX * 128 * 16))] = new ChunkBlock(BLOCK_AIR, 0x00, 0xFF);
+        }
+      }
+    }
+  }
+  //CalculateHeightmap();
+}
+/*
 void GenerateWithNoise() {
   // Ore arrays
   byte[] oreX, oreY, oreZ, oreType;
@@ -435,20 +372,4 @@ void GenerateWithNoise() {
   hasChanged = true;
 }
 
-
-internal void CalculateHeightmap() {
-    for (byte x = 0; x < 16; x++) {
-        for (byte z = 0; z < 16; z++) {
-            for (byte y = 127; y >= 0; y--) {
-                if (Blocks.SkyLightCarryingBlocks.Contains((Block)blocks[GetBlockIndex(x, y, z)].type))
-                    continue;
-                heightmap[GetHeightmapIndex(x, z)] = (byte)(y + 1);
-                break;
-            }
-        }
-    }
-}
-
-        internal static int GetHeightmapIndex(byte x, byte z) {
-            return z + (x * 16);
-        }
+*/
