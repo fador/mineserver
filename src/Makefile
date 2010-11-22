@@ -21,7 +21,7 @@ CC = $(CXX)
 LDFLAGS = -L/usr/local/lib -lpthread -levent -lz
 CXXFLAGS = $(DFLAGS) -I. -I/usr/local/include -L/usr/local/lib
 
-OBJS = map.o chat.o commands.o config.o constants.o logger.o mapgen.o nbt.o packets.o physics.o sockets.o tools.o user.o perlin.o mineserver.o
+OBJS = map.o chat.o commands.o config.o constants.o logger.o mapgen.o nbt.o packets.o physics.o sockets.o tools.o user.o noise.o mineserver.o
 PROG = ./mineserver
 PROGS = $(PROG)
 
@@ -46,4 +46,4 @@ sockets.o: sockets.cpp logger.h constants.h tools.h user.h map.h chat.h nbt.h pa
 tools.o: tools.cpp tools.h
 user.o: user.cpp constants.h logger.h tools.h map.h user.h nbt.h chat.h packets.h
 mineserver.o: mineserver.cpp constants.h logger.h sockets.h tools.h map.h user.h chat.h mapgen.h config.h nbt.h packets.h physics.h
-perlin.o: perlin.cpp perlin.h
+noise.o: noise.cpp noise.h
