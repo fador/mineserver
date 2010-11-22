@@ -168,10 +168,10 @@ public:
   void sendToUser(User *user, int x, int z);
 
   // Get pointer to struct
-  sChunk *getMapData(int x, int z);
+  sChunk *getMapData(int x, int z, bool generate = true);
 
   // Load map chunk
-  bool loadMap(int x, int z);
+  bool loadMap(int x, int z, bool generate = true);
 
   // Save map chunk to disc
   bool saveMap(int x, int z);
@@ -192,7 +192,7 @@ public:
   bool blocklightmapStep(int x, int y, int z, int light);
 
   // Block value/meta get/set
-  bool getBlock(int x, int y, int z, uint8 *type, uint8 *meta);
+  bool getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate = true);
   bool getBlock(vec pos, uint8 *type, uint8 *meta)
   {
     return getBlock(pos.x(), pos.y(), pos.z(), type, meta);

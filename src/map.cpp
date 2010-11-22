@@ -51,6 +51,7 @@
 #include "logger.h"
 #include "tools.h"
 #include "map.h"
+#include "mapgen.h"
 
 #include "user.h"
 #include "nbt.h"
@@ -119,7 +120,7 @@ void Map::freeMap()
 {
 }
 
-sChunk *Map::getMapData(int x, int z)
+sChunk *Map::getMapData(int x, int z, bool generate)
 {
 #ifdef MSDBG
   printf("getMapData(x=%d, z=%d)\n", x, z);
@@ -130,7 +131,7 @@ sChunk *Map::getMapData(int x, int z)
 #ifdef MSDBG
   printf("Getting data for chunk %u\n", mapId);
 #endif
-  if(!maps.count(mapId) && !loadMap(x, z))
+  if(!maps.count(mapId) && !loadMap(x, z, generate))
     return 0;
 
   // Update last used time
@@ -293,7 +294,7 @@ bool Map::blocklightmapStep(int x, int y, int z, int light)
     case 5: z_local--; break;
     }
 
-    if(getBlock(x_local, y_local, z_local, &block, &meta))
+    if(getBlock(x_local, y_local, z_local, &block, &meta, false))
     {
       uint8 blocklight, skylight;
 
@@ -353,7 +354,7 @@ bool Map::lightmapStep(int x, int y, int z, int light)
     }
 
     //printf("getBlock(%d, %d, %d) (lightmapStep)\n", x_local, y_local, z_local);
-    if(getBlock(x_local, y_local, z_local, &block, &meta))
+    if(getBlock(x_local, y_local, z_local, &block, &meta, false))
     {
       uint8 blocklight, skylight;
 
@@ -372,7 +373,7 @@ bool Map::lightmapStep(int x, int y, int z, int light)
   return true;
 }
 
-bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta)
+bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate)
 {
 #ifdef MSDBG
   printf("getBlock(x=%d, y=%d, z=%d)\n", x, y, z);
@@ -391,7 +392,7 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta)
   uint32 mapId;
   Map::posToId(chunk_x, chunk_z, &mapId);
 
-  sChunk *chunk = getMapData(chunk_x, chunk_z);
+  sChunk *chunk = getMapData(chunk_x, chunk_z, generate);
 
   if(!chunk)
   {
@@ -438,7 +439,7 @@ bool Map::getBlockLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight)
   int chunk_x       = blockToChunk(x);
   int chunk_z       = blockToChunk(z);
 
-  sChunk *chunk = getMapData(chunk_x, chunk_z);
+  sChunk *chunk = getMapData(chunk_x, chunk_z, false);
 
   if(!chunk)
   {
@@ -488,7 +489,7 @@ bool Map::setBlockLight(int x, int y, int z, uint8 blocklight, uint8 skylight, u
   int chunk_x       = blockToChunk(x);
   int chunk_z       = blockToChunk(z);
 
-  sChunk *chunk = getMapData(chunk_x, chunk_z);
+  sChunk *chunk = getMapData(chunk_x, chunk_z, false);
 
   if(!chunk)
   {
@@ -647,7 +648,7 @@ bool Map::sendPickupSpawn(spawnedItem item)
   return true;
 }
 
-bool Map::loadMap(int x, int z)
+bool Map::loadMap(int x, int z, bool generate)
 {
 #ifdef MSDBG
   printf("loadMap(x=%d, z=%d)\n", x, z);
@@ -674,12 +675,27 @@ bool Map::loadMap(int x, int z)
   if(stat(infile.c_str(), &stFileInfo) != 0)
   {
     std::cout << "Mappos: " << x << "," << z << std::endl;
-    LOG("File not found: " + infile);
-    return false;
+    
+    // If generate (false only for lightmapgenerator)
+    if(generate)
+    {
+      LOG("Generating chunk...");
+    
+      MapGen mapgen(time(NULL));
+      mapgen.generateChunk(x,z);
+      //generateLightMaps(x, z);
+    } 
+    else 
+    {
+      return false;
+    }
   }
-
-  maps[mapId].nbt = NBT_Value::LoadFromFile(infile.c_str());
-
+  else 
+  {
+    maps[mapId].nbt = NBT_Value::LoadFromFile(infile.c_str());
+  }
+  
+  
   if(maps[mapId].nbt == NULL)
   {
     LOG("Error in loading map (unable to load file)");

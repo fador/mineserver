@@ -178,6 +178,18 @@ int Conf::iValue(std::string name)
   }
 }
 
+bool Conf::bValue(std::string name)
+{
+  if(confSet.find(name) != confSet.end())
+    return (confSet[name] == "true")?true:false;
+  else
+  {
+    std::cout << "Warning! " << name << " not defined in configuration. Using default value: "<<
+    defaultConf[name] << std::endl;
+    return (defaultConf[name] == "true")?true:false;
+  }
+}
+
 std::vector<int> Conf::vValue(std::string name)
 {
   std::vector<int> temp;

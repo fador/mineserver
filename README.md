@@ -26,10 +26,11 @@ We are trying to minimize memory and cpu usage compared to original Java server.
  * Normal mining/item spawning/item pickups
  * Basic physics for gravel and sand
  * Experimental physics for water and lava
+ * Flatland map generation
   
 ### ToDo (Arranged by priority)
- * Map generation (In progress)
- * Getting chests,furnaces,signs etc to work (In progress)
+ * Map generation with heightmap (In progress)
+ * Getting chests, furnaces,signs etc to work (In progress)
  * Plugin support
  * Multithreading
  * Growing trees etc.

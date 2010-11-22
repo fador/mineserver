@@ -64,7 +64,7 @@ enum
 #define COLOR_WHITE std::string("§f")
 
 // Blocks
-enum
+enum Block
 {
   BLOCK_AIR, BLOCK_STONE, BLOCK_GRASS, BLOCK_DIRT, BLOCK_COBBLESTONE, BLOCK_WOOD,
   BLOCK_SAPLING, BLOCK_BEDROCK, BLOCK_WATER, BLOCK_STATIONARY_WATER, BLOCK_LAVA,
@@ -117,7 +117,7 @@ enum
 // Records
 enum { ITEM_GOLD_RECORD = 2256, ITEM_GREEN_RECORD };
 
-const std::string VERSION = "0.1.10 (Alpha)";
+const std::string VERSION = "0.1.12 (Alpha)";
 
 const char COMMENTPREFIX  = '#';
 
@@ -176,5 +176,12 @@ const char ADMINCHATPREFIX = '&';
 void initConstants();
 
 const int ALLOCATE_NBTFILE = 200000;
+
+// Chunk size
+const char DIMXY = 16;
+const char DIMX = 16;
+const char DIMY = 16;
+const char DIMH = 128;
+const int BLOCKCOUNT = 32768;
 
 #endif
