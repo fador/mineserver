@@ -428,9 +428,26 @@ void NBT_Value::cleanup()
   if(m_type == TAG_BYTE_ARRAY)
     delete m_value.byteArrayVal;
   if(m_type == TAG_LIST)
-    delete m_value.listVal.data;
+  {
+    if(m_value.listVal.data != NULL)
+	{
+      std::vector<NBT_Value*>::iterator iter = m_value.listVal.data->begin(), end = m_value.listVal.data->end();
+      for( ; iter != end ; iter++)
+        delete *iter;
+      delete m_value.listVal.data;
+	}
+  }
   if(m_type == TAG_COMPOUND)
-    delete m_value.compoundVal;
+  {
+    if(m_value.compoundVal != NULL)
+    {
+      std::map<std::string, NBT_Value*>::iterator iter = m_value.compoundVal->begin(), end = m_value.compoundVal->end();
+      for( ; iter != end ; iter++ )
+        delete iter->second;
+	  
+      delete m_value.compoundVal;
+    }
+  }
 
   memset(&m_value, 0, sizeof(m_value));
   m_type = TAG_END;
