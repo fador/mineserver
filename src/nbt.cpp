@@ -449,7 +449,10 @@ NBT_Value * NBT_Value::LoadFromFile(const std::string &filename)
   uint8 *uncompressedData = new uint8[uncompressedSize];
   gzFile nbtFile = gzopen(filename.c_str(), "rb");
   if(nbtFile == NULL)
+  {
+    delete[] uncompressedData;
     return NULL;
+  }
   gzread(nbtFile, uncompressedData, uncompressedSize);
   gzclose(nbtFile);
 

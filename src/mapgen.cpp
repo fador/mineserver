@@ -107,7 +107,7 @@ void MapGen::LoadFlatgrass()
       }
     }
   }
-  CalculateHeightmap();
+  //CalculateHeightmap();
 }
 
 void MapGen::generateChunk(int x, int z)
