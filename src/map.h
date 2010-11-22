@@ -40,6 +40,7 @@ struct sChunk
   uint8 *data;
   uint8 *blocklight;
   uint8 *skylight;
+  uint8 *heightmap;
   sint32 x;
   sint32 z;
   NBT_Value *nbt;

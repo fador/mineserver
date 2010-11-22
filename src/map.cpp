@@ -160,9 +160,12 @@ bool Map::generateLightMaps(int x, int z)
   uint32 mapId;
   Map::posToId(x, z, &mapId);
 
+  uint8 highest_y = 127;
+
   uint8 *skylight   = maps[mapId].skylight;
   uint8 *blocklight = maps[mapId].blocklight;
   uint8 *blocks     = maps[mapId].blocks;
+  uint8 *heightmap  = maps[mapId].heightmap;
 
   // Clear lightmaps
   memset(blocklight, 0, 16*16*128/2);
@@ -185,7 +188,15 @@ bool Map::generateLightMaps(int x, int z)
         setBlockLight(absolute_x, block_y, absolute_z, 0, 15, 2);
 
         if(stopLight[block] == -16)
+        {
+          //Calculate heightmap while looping this
+          heightmap[z+x<<4] = block_y;
+          if(block_y>highest_y)
+          {
+            highest_y=block_y;
+          }
           break;
+        }
       }
     }
   }
@@ -195,7 +206,9 @@ bool Map::generateLightMaps(int x, int z)
   {
     for(int block_z = 0; block_z < 16; block_z++)
     {
-      for(int block_y = 127; block_y >= 0; block_y--)
+      //Start from highest pos of the chunk, might still mess lighting
+      // if neighboring chunks are higher..
+      for(int block_y = highest_y; block_y >= 0; block_y--)
       {
         int index      = block_y + (block_z * 128) + (block_x * 128 * 16);
         int absolute_x = x*16+block_x;
@@ -221,7 +234,8 @@ bool Map::generateLightMaps(int x, int z)
   {
     for(uint8 block_z = 0; block_z < 16; block_z++)
     {
-      for(int block_y = 127; block_y >= 0; block_y--)
+      //Start searching from first block pos
+      for(int block_y = heightmap[z+x<<4]; block_y >= 0; block_y--)
       {
         int index = block_y + (block_z * 128) + (block_x * 128 * 16);
 
