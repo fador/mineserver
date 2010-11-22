@@ -131,7 +131,7 @@ sChunk *Map::getMapData(int x, int z, bool generate)
 #ifdef MSDBG
   printf("Getting data for chunk %u\n", mapId);
 #endif
-  if(!maps.count(mapId) && !loadMap(x, z, generate))
+  if(!maps.count(mapId) && (!generate || !loadMap(x, z, generate)))
     return 0;
 
   // Update last used time
@@ -161,7 +161,7 @@ bool Map::generateLightMaps(int x, int z)
   uint32 mapId;
   Map::posToId(x, z, &mapId);
 
-  uint8 highest_y = 127;
+  uint8 highest_y = 0;
 
   uint8 *skylight   = maps[mapId].skylight;
   uint8 *blocklight = maps[mapId].blocklight;
@@ -191,7 +191,7 @@ bool Map::generateLightMaps(int x, int z)
         if(stopLight[block] == -16)
         {
           //Calculate heightmap while looping this
-          heightmap[z+x<<4] = block_y;
+          heightmap[block_z+(block_x<<4)] = ((block_y==127)?block_y:block_y+1);
           if(block_y>highest_y)
           {
             highest_y=block_y;
@@ -236,7 +236,7 @@ bool Map::generateLightMaps(int x, int z)
     for(uint8 block_z = 0; block_z < 16; block_z++)
     {
       //Start searching from first block pos
-      for(int block_y = heightmap[z+x<<4]; block_y >= 0; block_y--)
+      for(int block_y = heightmap[block_z+(block_x<<4)]; block_y >= 0; block_y--)
       {
         int index = block_y + (block_z * 128) + (block_x * 128 * 16);
 
@@ -396,7 +396,8 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate)
 
   if(!chunk)
   {
-    LOG("Loading chunk failed (getBlock)");
+    if(generate)
+     LOG("Loading chunk failed (getBlock)");
     return false;
   }
 
@@ -681,9 +682,10 @@ bool Map::loadMap(int x, int z, bool generate)
     {
       LOG("Generating chunk...");
     
-      MapGen mapgen(time(NULL));
+      MapGen mapgen((int)time(NULL));
       mapgen.generateChunk(x,z);
-      //generateLightMaps(x, z);
+      generateLightMaps(x, z);
+      return true;
     } 
     else 
     {
@@ -717,8 +719,9 @@ bool Map::loadMap(int x, int z, bool generate)
   std::vector<uint8> *data = level["Data"]->GetByteArray();
   std::vector<uint8> *blocklight = level["BlockLight"]->GetByteArray();
   std::vector<uint8> *skylight = level["SkyLight"]->GetByteArray();
+  std::vector<uint8> *heightmap = level["HeightMap"]->GetByteArray();
 
-  if(blocks == 0 || data == 0 || blocklight == 0 || skylight == 0)
+  if(blocks == 0 || data == 0 || blocklight == 0 || skylight == 0 || heightmap == 0)
   {
     LOG("Error in loading map (chunk missing data)");
     return false;
@@ -740,6 +743,7 @@ bool Map::loadMap(int x, int z, bool generate)
   maps[mapId].data = &((*data)[0]);
   maps[mapId].blocklight = &((*blocklight)[0]);
   maps[mapId].skylight = &((*skylight)[0]);
+  maps[mapId].heightmap = &((*heightmap)[0]);
 
   // Update last used time
   mapLastused[mapId] = (int)time(0);
