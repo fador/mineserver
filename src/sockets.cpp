@@ -167,7 +167,7 @@ void client_callback(int fd,
     int written = send(fd, (char*)user->buffer.getWrite(), writeLen, 0);
     if(written == -1)
     {
-      if(errno != EAGAIN && errno != EINTR)
+      if((errno != EAGAIN && errno != EINTR) || user->write_err_count>1000)
       {
         std::cout << "Error writing to client" << std::endl;
         //event_del(user->GetEvent());
@@ -180,11 +180,16 @@ void client_callback(int fd,
         remUser(user->fd);
         return;
       }
+      else
+      {
+        user->write_err_count++;
+      }
 
     }
     else
     {
       user->buffer.clearWrite(written);
+      user->write_err_count=0;
     }
 
     if(user->buffer.getWriteLen())

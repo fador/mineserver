@@ -35,6 +35,9 @@ class Mineserver
 private:
 	struct event m_listenEvent;
 	event_base *m_eventBase;
+  int m_socketlisten;
+  bool m_running;
+
 public:
 	static Mineserver &Get()
 	{
@@ -44,6 +47,7 @@ public:
 
 	Mineserver();
 	int Run();
+  bool Stop();
 	event_base *GetEventBase();
 };
 

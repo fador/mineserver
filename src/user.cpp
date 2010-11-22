@@ -56,17 +56,18 @@ std::vector<User *> Users;
 
 User::User(int sock, uint32 EID)
 {
-  this->action      = 0;
-  this->waitForData = false;
-  this->fd          = sock;
-  this->UID         = EID;
-  this->logged      = false;
+  this->action          = 0;
+  this->waitForData     = false;
+  this->fd              = sock;
+  this->UID             = EID;
+  this->logged          = false;
   // ENABLED FOR DEBUG
-  this->admin       = true;
+  this->admin           = true;
 
-  this->pos.x       = Map::get().spawnPos.x();
-  this->pos.y       = Map::get().spawnPos.y();
-  this->pos.z       = Map::get().spawnPos.z();
+  this->pos.x           = Map::get().spawnPos.x();
+  this->pos.y           = Map::get().spawnPos.y();
+  this->pos.z           = Map::get().spawnPos.z();
+  this->write_err_count = 0;
 }
 
 bool User::changeNick(std::string _nick)

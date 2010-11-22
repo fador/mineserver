@@ -84,6 +84,7 @@ public:
   static const int viewDistance = 10;
   uint8 action;
   bool waitForData;
+  uint32 write_err_count;
   bool logged;
   bool admin;
   unsigned int UID;
