@@ -607,7 +607,7 @@ int PacketHandler::player_block_placement(User *user)
     //std::cout << "Placing over " << (int)block_direction << std::endl;
   }
 
-  if(block == BLOCK_SNOW || block == BLOCK_TORCH) //If snow or torch, overwrite
+  if(block == BLOCK_SNOW || block == BLOCK_TORCH || block == BLOCK_FIRE) //If snow or torch or fire, overwrite
   {
     change = true;
     x      = orig_x;
