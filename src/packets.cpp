@@ -477,7 +477,7 @@ int PacketHandler::player_digging(User *user)
           item.count = BLOCKDROPS[block].count;
           spawnItem = true;
         }
-        else if(!BLOCKDROPS.count(block) || (BLOCKDROPS.count(block) && !BLOCKDROPS[block].exclusive))
+        else if(!BLOCKDROPS.count(block) || !BLOCKDROPS[block].exclusive)
         {
           item.item  = (int)block;
           item.count = 1;
