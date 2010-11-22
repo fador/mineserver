@@ -146,17 +146,12 @@ bool Physics::update()
               vec local(pos);
               switch(i)
               {
-              case 0: local += vec( 0,  1,  0); break;
-
-              case 1: local += vec( 1,  0,  0); break;
-
-              case 2: local += vec(-1,  0,  0); break;
-
-              case 3: local += vec( 0,  0,  1); break;
-
-              case 4: local += vec( 0,  0, -1); break;
-
-              case 5: local += vec( 0, -1,  0); break;
+                case 0: local += vec( 0,  1,  0); break; //y++
+                case 1: local += vec( 1,  0,  0); break; //x++
+                case 2: local += vec(-1,  0,  0); break; //x--
+                case 3: local += vec( 0,  0,  1); break; //z++
+                case 4: local += vec( 0,  0, -1); break; //z--
+                case 5: local += vec( 0, -1,  0); break; //y--
               }
 
               //Search neighboring water blocks for source current
