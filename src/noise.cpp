@@ -187,11 +187,11 @@ float Noise::PerlinNoise(float x, float y, int startOctave, int endOctave, float
 
 void Noise::PerlinNoiseMap(float** heightmap, int startOctave, int endOctave, float decay, int offsetX, int offsetY)
 {
-  float maxDim = 1.0 / DIMXY;
+  float maxDim = 1.0 / 16;
   
-  for(int x = DIMXY - 1; x >= 0; x--) 
+  for(int x = 16 - 1; x >= 0; x--) 
   {
-    for(int y = DIMXY - 1; y >= 0; y--) 
+    for(int y = 16 - 1; y >= 0; y--) 
     {
       heightmap[x][y] += PerlinNoise(x * maxDim + offsetX, y * maxDim + offsetY, startOctave, endOctave, decay);
     }
@@ -207,9 +207,9 @@ void Noise::Normalize(float** map)
 void Noise::Normalize(float** map, float low, float high)
 {
   float minV = FLT_MAX, maxV = FLT_MIN;
-  for( int x = DIMX - 1; x >= 0; x-- ) 
+  for( int x = 16 - 1; x >= 0; x-- ) 
   {
-    for( int y = DIMY - 1; y >= 0; y-- ) 
+    for( int y = 16 - 1; y >= 0; y-- ) 
     {
       minV = min( minV, map[x][y] );
       maxV = max( maxV, map[x][y] );
@@ -219,9 +219,9 @@ void Noise::Normalize(float** map, float low, float high)
   float multiplier = (high - low) / (maxV - minV);
   float constant = -minV * (high - low) / (maxV - minV) + low;
 
-  for(int x = DIMX - 1; x >= 0; x--) 
+  for(int x = 16 - 1; x >= 0; x--) 
   {
-    for(int y = DIMY - 1; y >= 0; y--) 
+    for(int y = 16 - 1; y >= 0; y--) 
     {
       map[x][y] = map[x][y] * multiplier + constant;
     }
@@ -232,9 +232,9 @@ void Noise::Normalize(float** map, float low, float high)
 // assumes normalized input
 void Noise::Marble(float** map) 
 {
-  for(int x = DIMX - 1; x >= 0; x--) 
+  for(int x = 16 - 1; x >= 0; x--) 
   {
-    for(int y = DIMY - 1; y >= 0; y--) 
+    for(int y = 16 - 1; y >= 0; y--) 
     {
       map[x][y] = abs(map[x][y] * 2 - 1);
     }
@@ -245,9 +245,9 @@ void Noise::Marble(float** map)
 // assumes normalized input
 void Noise::Blend(float** map1, float** map2, float** blendMap)
 {
-  for(int x = DIMX - 1; x >= 0; x--) 
+  for(int x = 16 - 1; x >= 0; x--) 
   {
-    for(int y = DIMY - 1; y >= 0; y--) 
+    for(int y = 16 - 1; y >= 0; y--) 
     {
       map1[x][y] = map1[x][y] * blendMap[x][y] + map2[x][y] * (1 - blendMap[x][y]);
     }
@@ -257,9 +257,9 @@ void Noise::Blend(float** map1, float** map2, float** blendMap)
 
 void Noise::Add(float** map1, float** map2)
 {
-  for(int x = DIMX - 1; x >= 0; x--) 
+  for(int x = 16 - 1; x >= 0; x--) 
   {
-    for(int y = DIMY - 1; y >= 0; y--) 
+    for(int y = 16 - 1; y >= 0; y--) 
     {
       map1[x][y] += map2[x][y];
     }
@@ -269,10 +269,10 @@ void Noise::Add(float** map1, float** map2)
 
 void Noise::applyBias(float** heightmap, float c00, float c01, float c10, float c11, float midpoint) 
 {
-  float maxX = 2.0 / DIMX;
-  float maxY = 2.0 / DIMY;
-  int offsetX = DIMX / 2;
-  int offsetY = DIMY / 2;
+  float maxX = 2.0 / 16;
+  float maxY = 2.0 / 16;
+  int offsetX = 16 / 2;
+  int offsetY = 16 / 2;
 
   for(int x = offsetX - 1; x >= 0; x--) 
   {
@@ -290,9 +290,9 @@ void Noise::applyBias(float** heightmap, float c00, float c01, float c10, float 
 // assumes normalized input
 void Noise::ScaleAndClip(float** heightmap, float steepness)
 {
-  for(int x = DIMX - 1; x >= 0; x--) 
+  for(int x = 16 - 1; x >= 0; x--) 
   {
-    for(int y = DIMY - 1; y >= 0; y--) 
+    for(int y = 16 - 1; y >= 0; y--) 
     {
       heightmap[x][y] = min( 1.0f, max( 0.0f, heightmap[x][y] * steepness * 2 - steepness ) );
     }
@@ -301,9 +301,9 @@ void Noise::ScaleAndClip(float** heightmap, float steepness)
 
 void Noise::Invert(float** heightmap)
 {
-  for(int x = DIMX - 1; x >= 0; x--) 
+  for(int x = 16 - 1; x >= 0; x--) 
   {
-    for(int y = DIMY - 1; y >= 0; y--) 
+    for(int y = 16 - 1; y >= 0; y--) 
     {
       heightmap[x][y] = 1 - heightmap[x][y];
     }
@@ -313,16 +313,16 @@ void Noise::Invert(float** heightmap)
 float** Noise::BoxBlur(float** heightmap) 
 {
   float divisor = 1 / 23.0f;
-  float** output = new float*[DIMX];
-  for(int i=0;i<DIMX;i++)
+  float** output = new float*[16];
+  for(int i=0;i<16;i++)
   {
-    output[i] = new float[DIMY];
+    output[i] = new float[16];
   }
-  for(int x = DIMX - 1; x >= 0; x--) 
+  for(int x = 16 - 1; x >= 0; x--) 
   {
-    for(int y = DIMY - 1; y >= 0; y--) 
+    for(int y = 16 - 1; y >= 0; y--) 
     {
-      if((x == 0) || (y == 0) || (x == DIMX - 1) || (y == DIMY - 1)) 
+      if((x == 0) || (y == 0) || (x == 16 - 1) || (y == 16 - 1)) 
       {
         output[x][y] = heightmap[x][y];
       } 
@@ -342,16 +342,16 @@ float** Noise::BoxBlur(float** heightmap)
 float** Noise::GaussianBlur5x5(float** heightmap) 
 {
   float divisor = 1 / 273.0f;
-  float** output = new float*[DIMX];
-  for(int i = 0; i < DIMX; i++)
+  float** output = new float*[16];
+  for(int i = 0; i < 16; i++)
   {
-    output[i] = new float[DIMY];
+    output[i] = new float[16];
   }
-  for(int x = DIMX - 1; x >= 0; x--) 
+  for(int x = 16 - 1; x >= 0; x--) 
   {
-    for(int y = DIMY - 1; y >= 0; y--) 
+    for(int y = 16 - 1; y >= 0; y--) 
     {
-      if((x < 2) || (y < 2) || (x > DIMX - 3) || (y > DIMY - 3)) 
+      if((x < 2) || (y < 2) || (x > 16 - 3) || (y > 16 - 3)) 
       {
         output[x][y] = heightmap[x][y];
       } 
@@ -371,17 +371,17 @@ float** Noise::GaussianBlur5x5(float** heightmap)
 
 float** Noise::CalculateSlope(float** heightmap)
 {
-  float** output = new float*[DIMX];
-  for(int i = 0; i < DIMX; i++)
+  float** output = new float*[16];
+  for(int i = 0; i < 16; i++)
   {
-    output[i] = new float[DIMY];
+    output[i] = new float[16];
   }
 
-  for(int x = DIMX - 1; x >= 0; x--) 
+  for(int x = 16 - 1; x >= 0; x--) 
   {
-    for(int y = DIMY - 1; y >= 0; y--) 
+    for(int y = 16 - 1; y >= 0; y--) 
     {
-      if((x == 0) || (y == 0) || (x == DIMX - 1) || (y == DIMY - 1)) 
+      if((x == 0) || (y == 0) || (x == 16 - 1) || (y == 16 - 1)) 
       {
         output[x][y] = 0;
       } 
