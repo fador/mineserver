@@ -59,8 +59,8 @@ bool Conf::load(std::string configFile)
 
     std::ofstream confofs(configFile.c_str());
     confofs << "#"                                                  << std::endl<<
-    "# Load configuration example from: <address here>"   << std::endl<<
-    "#"                                                  << std::endl;
+               "# Load configuration example from: <address here>"  << std::endl<<
+               "#"                                                  << std::endl;
     confofs.close();
 
     this->load(CONFIGFILE);
@@ -76,7 +76,8 @@ bool Conf::load(std::string configFile)
   while(getline(ifs, temp))
   {
     //If empty line
-    if(temp.size() == 0) continue;
+    if(temp.size() == 0) 
+      continue;
 
     // If commentline -> skip to next
     if(temp[0] == COMMENTPREFIX)

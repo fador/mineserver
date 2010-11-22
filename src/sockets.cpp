@@ -43,7 +43,7 @@ typedef  int socklen_t;
 #include <fcntl.h>
 #include <unistd.h>
 #endif
-
+#include <errno.h>
 #include <iostream>
 #include <fstream>
 #include <deque>
@@ -66,88 +66,142 @@ typedef  int socklen_t;
 
 extern int setnonblock(int fd);
 
-void buf_write_callback(struct bufferevent *bev, void *arg)
-{
-}
 
-void buf_error_callback(struct bufferevent *bev, short what, void *arg)
+void client_callback(int fd,
+                     short ev,
+                     void *arg)
 {
-  User *client = (User *)arg;
-  bufferevent_free(client->buf_ev);
+  User *user = (User *)arg;
+  
+  if(ev & EV_READ)
+  {
+  
+    int read   = 1;
+
+    uint8 *buf = new uint8[2048];
+
+    read = recv(fd, (char*)buf, 2048, 0);
+    if(read == 0)
+    {
+    std::cout << "Socket closed properly" << std::endl;
+    //event_del(user->GetEvent());
 
 #ifdef WIN32
-  closesocket(client->fd);
+    closesocket(user->fd);
 #else
-  close(client->fd);
+    close(user->fd);
 #endif
+    remUser(user->fd);
+    return;
+    }
 
-  remUser(client->fd);
-}
+    if(read == -1)
+    {
+      std::cout << "Socket had no data to read" << std::endl;
+      return;
+    }
 
-void buf_read_callback(struct bufferevent *incoming, void *arg)
-{
+    user->buffer.addToRead(buf, read);
 
-  User *user = (User *)arg;
+    delete[] buf;
 
-  int read   = 1;
+    user->buffer.reset();
 
-  uint8 *buf = new uint8[2048];
+    while(user->buffer >> (sint8&)user->action)
+    {
+      //Variable len package
+      if(PacketHandler::get().packets[user->action].len == PACKET_VARIABLE_LEN)
+      {
+        //Call specific function
+        int (PacketHandler::*function)(User *) =
+        PacketHandler::get().packets[user->action].function;
+        bool disconnecting = user->action == 0xFF;
+        int curpos = (PacketHandler::get().*function)(user);
+        if(curpos == PACKET_NEED_MORE_DATA)
+        {
+        user->waitForData = true;
+        event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
+        event_add(user->GetEvent(), NULL);
+        return;
+        }
 
-  //Push data to buffer
-  while(read = bufferevent_read(incoming, buf, 2048))
-  {
-	user->buffer.append(buf, read);
+        if(disconnecting) // disconnect -- player gone
+        {
+          return;
+        }
+      }
+      else if(PacketHandler::get().packets[user->action].len == PACKET_DOES_NOT_EXIST)
+      {
+        printf("Unknown action: 0x%x\n", user->action);
+
+        //event_del(user->GetEvent());
+
+        #ifdef WIN32
+        closesocket(user->fd);
+        #else
+        close(user->fd);
+        #endif
+        remUser(user->fd);
+      }
+      else
+      {
+        if(!user->buffer.haveData(PacketHandler::get().packets[user->action].len))
+        {
+          user->waitForData = true;
+          event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
+          event_add(user->GetEvent(), NULL);
+          return;
+        }
+
+        //Call specific function
+        int (PacketHandler::*function)(User *) = PacketHandler::get().packets[user->action].function;
+        (PacketHandler::get().*function)(user);
+
+      }
+    } //End while
   }
 
-  delete[] buf;
-
-  user->buffer.reset();
-
-  while(user->buffer >> (sint8&)user->action)
+  int writeLen = user->buffer.getWriteLen();
+  if(writeLen)
   {
-    //Variable len package
-    if(PacketHandler::get().packets[user->action].len == PACKET_VARIABLE_LEN)
+    int written = send(fd, (char*)user->buffer.getWrite(), writeLen, 0);
+    if(written == -1)
     {
-      //Call specific function
-      int (PacketHandler::*function)(User *) =
-        PacketHandler::get().packets[user->action].function;
-	  bool disconnecting = user->action == 0xFF;
-      int curpos = (PacketHandler::get().*function)(user);
-      if(curpos == PACKET_NEED_MORE_DATA)
+      if((errno != EAGAIN && errno != EINTR) || user->write_err_count>1000)
       {
-        user->waitForData = true;
+        std::cout << "Error writing to client" << std::endl;
+        //event_del(user->GetEvent());
+
+    #ifdef WIN32
+        closesocket(user->fd);
+    #else
+        close(user->fd);
+    #endif
+        remUser(user->fd);
         return;
       }
+      else
+      {
+        user->write_err_count++;
+      }
 
-	  if(disconnecting) // disconnect -- player gone
-		  return;
-    }
-    else if(PacketHandler::get().packets[user->action].len == PACKET_DOES_NOT_EXIST)
-    {
-      printf("Unknown action: 0x%x\n", user->action);
-      bufferevent_free(user->buf_ev);
-      #ifdef WIN32
-      closesocket(user->fd);
-      #else
-      close(user->fd);
-      #endif
-      remUser(user->fd);
     }
     else
     {
-	  if(!user->buffer.haveData(PacketHandler::get().packets[user->action].len))
-      {
-        user->waitForData = true;
-        return;
-      }
-
-	  //Call specific function
-      int (PacketHandler::*function)(User *) = PacketHandler::get().packets[user->action].function;
-      (PacketHandler::get().*function)(user);
-
+      user->buffer.clearWrite(written);
+      user->write_err_count=0;
     }
 
-  } //End while
+    if(user->buffer.getWriteLen())
+    {
+      event_set(user->GetEvent(), fd, EV_WRITE|EV_READ, client_callback, user);
+      event_add(user->GetEvent(), NULL);
+      return;
+    }
+  }
+
+  event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
+  event_add(user->GetEvent(), NULL);
 
 }
 
@@ -171,11 +225,7 @@ void accept_callback(int fd,
   User *client = addUser(client_fd, generateEID());
   setnonblock(client_fd);
 
-  client->buf_ev = bufferevent_new(client_fd,
-                                   buf_read_callback,
-                                   buf_write_callback,
-                                   buf_error_callback,
-                                   client);
+  event_set(client->GetEvent(), client_fd,EV_WRITE|EV_READ, client_callback, client);
+  event_add(client->GetEvent(), NULL);
 
-  bufferevent_enable(client->buf_ev, EV_READ);
 }

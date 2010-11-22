@@ -49,8 +49,10 @@
 #include <ctime>
 #include <vector>
 #include <zlib.h>
+#include <signal.h>
 
 #include "constants.h"
+#include "mineserver.h"
 
 #include "logger.h"
 
@@ -59,6 +61,7 @@
 #include "map.h"
 #include "user.h"
 #include "chat.h"
+#include "perlin.h"
 #include "mapgen.h"
 #include "config.h"
 #include "nbt.h"
@@ -86,9 +89,32 @@ int setnonblock(int fd)
   return 1;
 }
 
+//Handle signals
+void sighandler(int sig_num)
+{
+    Mineserver::Get().Stop();
+}
 
 int main(void)
 {
+  signal(SIGTERM, sighandler);
+  signal(SIGINT, sighandler);
+
+  return Mineserver::Get().Run();
+}
+
+Mineserver::Mineserver()
+{
+}
+
+event_base *Mineserver::GetEventBase()
+{
+  return m_eventBase;
+}
+
+int Mineserver::Run()
+{
+
   uint32 starttime = (uint32)time(0);
   uint32 tick      = (uint32)time(0);
 
@@ -107,10 +133,6 @@ int main(void)
 
   //Initialize map
   Map::get().initMap();
-  
-  MapGenArgs testA;
-  MapGen test(testA);
-  test.GenerateHeightmap();
 
   //Initialize packethandler
   PacketHandler::get().initPackets();
@@ -132,19 +154,17 @@ int main(void)
   }
 #endif
 
-  int socketlisten;
   struct sockaddr_in addresslisten;
-  struct event accept_event;
   int reuse             = 1;
 
-  event_base *eventbase = (event_base *)event_init();
+  m_eventBase = (event_base *)event_init();
 #ifdef WIN32
-  socketlisten = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  m_socketlisten = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 #else
-  socketlisten = socket(AF_INET, SOCK_STREAM, 0);
+  m_socketlisten = socket(AF_INET, SOCK_STREAM, 0);
 #endif
 
-  if(socketlisten < 0)
+  if(m_socketlisten < 0)
   {
     fprintf(stderr, "Failed to create listen socket\n");
     return 1;
@@ -156,23 +176,25 @@ int main(void)
   addresslisten.sin_addr.s_addr = INADDR_ANY;
   addresslisten.sin_port        = htons(port);
 
+  setsockopt(m_socketlisten, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse));
+
   //Bind to port
-  if(bind(socketlisten, (struct sockaddr *)&addresslisten, sizeof(addresslisten)) < 0)
+  if(bind(m_socketlisten, (struct sockaddr *)&addresslisten, sizeof(addresslisten)) < 0)
   {
     fprintf(stderr, "Failed to bind\n");
     return 1;
   }
 
-  if(listen(socketlisten, 5) < 0)
+  if(listen(m_socketlisten, 5) < 0)
   {
     fprintf(stderr, "Failed to listen to socket\n");
     return 1;
   }
 
-  setsockopt(socketlisten, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse));
-  setnonblock(socketlisten);
-  event_set(&accept_event, socketlisten, EV_READ|EV_PERSIST, accept_callback, NULL);
-  event_add(&accept_event, NULL);
+
+  setnonblock(m_socketlisten);
+  event_set(&m_listenEvent, m_socketlisten, EV_WRITE|EV_READ|EV_PERSIST, accept_callback, NULL);
+  event_add(&m_listenEvent, NULL);
 
   std::cout << std::endl<<
   "   _____  .__  "<<
@@ -196,8 +218,9 @@ int main(void)
   loopTime.tv_sec  = 0;
   loopTime.tv_usec = 200000; //200ms
 
-  event_base_loopexit(eventbase, &loopTime);
-  while(event_base_loop(eventbase, 0) == 0)
+  m_running=true;
+  event_base_loopexit(m_eventBase, &loopTime);
+  while(m_running && event_base_loop(m_eventBase, 0) == 0)
   {
     if(time(0)-starttime > 10)
     {
@@ -244,34 +267,24 @@ int main(void)
       //Loop users
       for(unsigned int i = 0; i < Users.size(); i++)
       {
-        //for(uint8 j=0;j<10;j++)
-        {
-          //Push new map data
-          Users[i]->pushMap();
-        }
-        //for(uint8 j=0;j<20;j++)
-        {
-          //Remove map far away
-          Users[i]->popMap();
-        }
+        Users[i]->pushMap();
+        Users[i]->popMap();
       }
     }
 
     //Physics simulation every 200ms
     Physics::get().update();
 
-    event_base_loopexit(eventbase, &loopTime);
+    event_base_loopexit(m_eventBase, &loopTime);
   }
 
   Map::get().freeMap();
 
-  //event_dispatch();
-
-#ifdef WIN32
-  closesocket(socketlisten);
-#else
-  close(socketlisten);
-#endif
+  #ifdef WIN32
+  closesocket(m_socketlisten);
+  #else
+    close(m_socketlisten);
+  #endif
 
   //Windows debug
 #ifdef WIN32
@@ -280,3 +293,10 @@ int main(void)
 
   return EXIT_SUCCESS;
 }
+
+bool Mineserver::Stop()
+{
+  m_running=false;
+
+  return true;
+};

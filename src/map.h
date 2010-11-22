@@ -34,10 +34,21 @@
 #include "user.h"
 #include "vec.h"
 
+struct sChunk
+{
+  uint8 *blocks;
+  uint8 *data;
+  uint8 *blocklight;
+  uint8 *skylight;
+  sint32 x;
+  sint32 z;
+  NBT_Value *nbt;
+};
+
 struct spawnedItem
 {
   int EID;
-  int item;
+  sint16 item;
   char count;
   sint16 health;
   vec pos;
@@ -103,7 +114,7 @@ private:
   ~Map()
   {
     // Free all memory
-    for(std::map<uint32, NBT_struct>::const_iterator it = maps.begin(); it != maps.end(); ++it)
+    for(std::map<uint32, sChunk>::const_iterator it = maps.begin(); it != maps.end(); it = maps.begin())
     {
       releaseMap(maps[it->first].x, maps[it->first].z);
     }
@@ -114,8 +125,8 @@ private:
       delete items[it->first];
     }
 
-    // Free level.dat info
-    freeNBT_struct(&levelInfo);
+    items.clear();
+
   }
 
 
@@ -127,9 +138,6 @@ public:
   // Map spawn position
   vec spawnPos;
 
-  // for level.dat file
-  NBT_struct levelInfo;
-
   // How blocks affect light
   int stopLight[256];
 
@@ -137,7 +145,7 @@ public:
   int emitLight[256];
 
   // Store all maps here
-  std::map<uint32, NBT_struct> maps;
+  std::map<uint32, sChunk> maps;
 
   // Store the time map chunk has been last used
   std::map<uint32, int> mapLastused;
@@ -159,7 +167,7 @@ public:
   void sendToUser(User *user, int x, int z);
 
   // Get pointer to struct
-  NBT_struct *getMapData(int x, int z);
+  sChunk *getMapData(int x, int z);
 
   // Load map chunk
   bool loadMap(int x, int z);
@@ -201,6 +209,8 @@ public:
   }
 
   bool sendPickupSpawn(spawnedItem item);
+
+  void setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity);
 
   static Map &get();
 };

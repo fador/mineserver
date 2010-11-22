@@ -72,7 +72,7 @@ void PacketHandler::initPackets()
   //Len 0
   packets[PACKET_KEEP_ALIVE]               = Packets(0, &PacketHandler::keep_alive);
   //Variable len
-  packets[PACKET_LOGIN_REQUEST]            = Packets(-1, &PacketHandler::login_request);
+  packets[PACKET_LOGIN_REQUEST]            = Packets(PACKET_VARIABLE_LEN, &PacketHandler::login_request);
   //Variable len
   packets[PACKET_HANDSHAKE]                = Packets(PACKET_VARIABLE_LEN, &PacketHandler::handshake);
   packets[PACKET_CHAT_MESSAGE]             = Packets(PACKET_VARIABLE_LEN,
@@ -100,8 +100,8 @@ void PacketHandler::initPackets()
 int PacketHandler::keep_alive(User *user)
 {
   //No need to do anything
-	user->buffer.removePacket();
-	return PACKET_OK;
+  user->buffer.removePacket();
+  return PACKET_OK;
 }
 
 // Login request (http://mc.kev009.com/wiki/Protocol#Login_Request_.280x01.29)
@@ -111,26 +111,22 @@ int PacketHandler::login_request(User *user)
   if(!user->buffer.haveData(12))
     return PACKET_NEED_MORE_DATA;
 
-  int i;
-
   sint32 version;
   std::string player, passwd;
   sint64 mapseed;
   sint8 dimension;
 
-
   user->buffer >> version >> player >> passwd >> mapseed >> dimension;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   user->buffer.removePacket();
 
-  std::cout << "Player " << user->UID << " login v." << version <<" : " << player <<":"<<
-  passwd << std::endl;
+  std::cout << "Player " << user->UID << " login v." << version <<" : " << player <<":"<< passwd << std::endl;
 
   // If version is not 2 or 3
-  if(version != 4 && version != 3 && version != 2)
+  if(version != 4)
   {
     user->kick(Conf::get().sValue("wrong_protocol_message"));
     return PACKET_OK;
@@ -149,90 +145,47 @@ int PacketHandler::login_request(User *user)
   user->loadData();
 
   //Login OK package
-  char data[9] = {0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-  putSint32((uint8 *)&data[1], user->UID);
-  bufferevent_write(user->buf_ev, (char *)&data[0], 9);
+  user->buffer << (sint8)PACKET_LOGIN_RESPONSE 
+    << (sint32)user->UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
 
   //Send server time (after dawn)
-  uint8 data3[9] = {0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0e, 0x00};
-  bufferevent_write(user->buf_ev, (char *)&data3[0], 9);
+  user->buffer << (sint8)PACKET_TIME_UPDATE << (sint64) 0x0e00;
 
   //Inventory
-  uint8 data4[7+36*5];
-  data4[0] = 0x05;
-  putSint32(&data4[1], -1);
-  data4[5] = 0;
-  data4[6] = 36;
-  int curpos2 = 7;
-  //Send main inventory
-  for(i = 0; i < 36; i++)
+  for(sint32 invType=-1; invType != -4; invType--)
   {
-    if(user->inv.main[i].count)
+    Item *inventory = NULL;
+  sint16 inventoryCount = 0;
+
+  if(invType == -1)
+  {
+    inventory = user->inv.main;
+    inventoryCount = 36;
+  }
+  else if(invType == -2)
+  {
+    inventory = user->inv.equipped;
+    inventoryCount = 4;
+  }
+  else if(invType == -3)
+  {
+    inventory = user->inv.crafting;
+    inventoryCount = 4;
+  }
+  user->buffer << (sint8)PACKET_PLAYER_INVENTORY << invType << inventoryCount;
+
+  for(int i=0; i<inventoryCount; i++)
+  {
+    if(inventory[i].count)
     {
-      putSint16(&data4[curpos2], user->inv.main[i].type);     //Type
-      curpos2       += 2;
-      data4[curpos2] = user->inv.main[i].count;               //Count
-      curpos2++;
-      putSint16(&data4[curpos2], user->inv.main[i].health); //Health
-      curpos2 += 2;
+      user->buffer << (sint16)inventory[i].type << (sint8)inventory[i].count << (sint16)inventory[i].health;
     }
     else
     {
-      //Empty slot
-      putSint16(&data4[curpos2], -1);
-      curpos2 += 2;
+      user->buffer << (sint16)-1;
     }
   }
-  bufferevent_write(user->buf_ev, (char *)&data4[0], curpos2);
-
-
-  //Send equipped inventory
-  putSint32(&data4[1], -3);
-  data4[6] = 4;
-  curpos2  = 7;
-  for(i = 0; i < 4; i++)
-  {
-    if(user->inv.equipped[i].count)
-    {
-      putSint16(&data4[curpos2], user->inv.equipped[i].type);     //Type
-      curpos2       += 2;
-      data4[curpos2] = user->inv.equipped[i].count;               //Count
-      curpos2++;
-      putSint16(&data4[curpos2], user->inv.equipped[i].health); //Health
-      curpos2 += 2;
-    }
-    else
-    {
-      //Empty slot
-      putSint16(&data4[curpos2], -1);
-      curpos2 += 2;
-    }
   }
-  bufferevent_write(user->buf_ev, (char *)&data4[0], curpos2);
-
-  //Send crafting inventory
-  putSint32(&data4[1], -2);
-  data4[6] = 4;
-  curpos2  = 7;
-  for(i = 0; i < 4; i++)
-  {
-    if(user->inv.crafting[i].count)
-    {
-      putSint16(&data4[curpos2], user->inv.crafting[i].type);     //Type
-      curpos2       += 2;
-      data4[curpos2] = user->inv.crafting[i].count;               //Count
-      curpos2++;
-      putSint16(&data4[curpos2], user->inv.crafting[i].health); //Health
-      curpos2 += 2;
-    }
-    else
-    {
-      //Empty slot
-      putSint16(&data4[curpos2], -1);
-      curpos2 += 2;
-    }
-  }
-  bufferevent_write(user->buf_ev, (char *)&data4[0], curpos2);
 
   // Send motd
   std::ifstream motdfs( MOTDFILE.c_str());
@@ -243,7 +196,9 @@ int PacketHandler::login_request(User *user)
   {
     // If not commentline
     if(temp[0] != COMMENTPREFIX)
-      Chat::get().sendMsg(user, temp, Chat::USER);
+  {
+      user->buffer << (sint8)PACKET_CHAT_MESSAGE << temp;
+  }
   }
   motdfs.close();
 
@@ -265,11 +220,6 @@ int PacketHandler::login_request(User *user)
   user->spawnUser((sint32)user->pos.x*32, ((sint32)user->pos.y+2)*32, (sint32)user->pos.z*32);
   //Spawn other users for connected user
   user->spawnOthers();
-
-
-  //Send "On Ground" signal
-  char data6[2] = {0x0A, 0x01};
-  bufferevent_write(user->buf_ev, (char *)&data6[0], 2);
 
   user->logged = true;
 
@@ -297,8 +247,7 @@ int PacketHandler::handshake(User *user)
   std::cout << "Handshake player: " << player << std::endl;
 
   //Send handshake package
-  char data2[4] = {0x02, 0x00, 0x01, '-'};
-  bufferevent_write(user->buf_ev, (char *)&data2[0], 4);
+  user->buffer << (sint8)PACKET_HANDSHAKE << std::string("-");
 
   return PACKET_OK;
 }
@@ -314,7 +263,7 @@ int PacketHandler::chat_message(User *user)
   user->buffer >> msg;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   user->buffer.removePacket();
 
@@ -335,7 +284,7 @@ int PacketHandler::player_inventory(User *user)
   user->buffer >> type >> count;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   int items   = 0;
   Item *slots = NULL;
@@ -368,27 +317,27 @@ int PacketHandler::player_inventory(User *user)
 
   for(i = 0; i < items; i++)
   {
-	  sint16 item_id;
-	  sint8 numberOfItems;
-	  sint16 health;
+    sint16 item_id = 0;
+    sint8 numberOfItems = 0;
+    sint16 health = 0;
 
-	  user->buffer >> item_id;
+    user->buffer >> item_id;
 
-	  if(!user->buffer)
-		  return PACKET_NEED_MORE_DATA;
+    if(!user->buffer)
+      return PACKET_NEED_MORE_DATA;
 
-	  if(item_id != -1)
-	  {
-		  user->buffer >> numberOfItems >> health;
+    if(item_id != -1)
+    {
+      user->buffer >> numberOfItems >> health;
 
-		  if(!user->buffer)
-			  return PACKET_NEED_MORE_DATA;
+      if(!user->buffer)
+        return PACKET_NEED_MORE_DATA;
 
-		  
-		  slots[i].type   = item_id;
-		  slots[i].count  = numberOfItems;
-		  slots[i].health = health;
-	  }
+      
+      slots[i].type   = item_id;
+      slots[i].count  = numberOfItems;
+      slots[i].health = health;
+    }
   }
 
   user->buffer.removePacket();
@@ -399,12 +348,12 @@ int PacketHandler::player_inventory(User *user)
 int PacketHandler::player(User *user)
 {
   //OnGround packet
-	sint8 onground;
-	user->buffer >> onground;
-	if(!user->buffer)
-		return PACKET_NEED_MORE_DATA;
-	user->buffer.removePacket();
-	return PACKET_OK;
+  sint8 onground;
+  user->buffer >> onground;
+  if(!user->buffer)
+    return PACKET_NEED_MORE_DATA;
+  user->buffer.removePacket();
+  return PACKET_OK;
 }
 
 int PacketHandler::player_position(User *user)
@@ -415,7 +364,7 @@ int PacketHandler::player_position(User *user)
   user->buffer >> x >> y >> stance >> z >> onground;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   user->updatePos(x, y, z, stance);
   user->buffer.removePacket();
@@ -431,7 +380,7 @@ int PacketHandler::player_look(User *user)
   user->buffer >> yaw >> pitch >> onground;
   
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   user->updateLook(yaw, pitch);
 
@@ -447,10 +396,10 @@ int PacketHandler::player_position_and_look(User *user)
   sint8 onground;
 
   user->buffer >> x >> y >> stance >> z 
-				>> yaw >> pitch >> onground;
+        >> yaw >> pitch >> onground;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   //Update user data
   user->updatePos(x, y, z, stance);
@@ -463,16 +412,16 @@ int PacketHandler::player_position_and_look(User *user)
 
 int PacketHandler::player_digging(User *user)
 {
-	sint8 status,y;
-	sint32 x,z;
-	sint8 direction;
+  sint8 status,y;
+  sint32 x,z;
+  sint8 direction;
 
-	user->buffer >> status >> x >> y >> z >> direction;
+  user->buffer >> status >> x >> y >> z >> direction;
 
-	if(!user->buffer)
-		return PACKET_NEED_MORE_DATA;
+  if(!user->buffer)
+    return PACKET_NEED_MORE_DATA;
 
-	user->buffer.removePacket();
+  user->buffer.removePacket();
 
   //If block broken
   if(status == BLOCK_STATUS_BLOCK_BROKEN)
@@ -522,7 +471,7 @@ int PacketHandler::player_digging(User *user)
         item.health = 0;
 
         // Spawn drop according to BLOCKDROPS
-        // Check propability
+        // Check probability
         if(BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand()%10000)
         {
           item.item  = BLOCKDROPS[block].item_id;
@@ -578,7 +527,6 @@ int PacketHandler::player_digging(User *user)
 
 int PacketHandler::player_block_placement(User *user)
 {
-  int curpos  = 0;
   int orig_x, orig_y, orig_z;
   bool change = false;
 
@@ -589,9 +537,13 @@ int PacketHandler::player_block_placement(User *user)
   user->buffer >> blockID >> x >> y >> z >> direction;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   user->buffer.removePacket();
+
+  // TODO: Handle processing of 
+  if(direction == -1)
+    return PACKET_OK;
 
   orig_x = x; orig_y = y; orig_z = z;
 
@@ -690,20 +642,41 @@ int PacketHandler::player_block_placement(User *user)
 
   }
 
-  // Check if player is standing there
-  double intX, intZ, fracX, fracZ;
-  // Check Y coordinate
-  if(y == user->pos.y || y-1 == user->pos.y)
+  // Check if the block is place-able "inside" the user
+  if ((blockID != BLOCK_TORCH && 
+       blockID != BLOCK_REDSTONE_TORCH_OFF &&
+       blockID != BLOCK_REDSTONE_TORCH_ON &&
+       blockID != BLOCK_AIR &&
+       blockID != BLOCK_WATER &&
+       blockID != BLOCK_STATIONARY_WATER &&
+       blockID != BLOCK_LAVA &&
+       blockID != BLOCK_STATIONARY_LAVA &&
+       blockID != BLOCK_BROWN_MUSHROOM &&
+       blockID != BLOCK_RED_MUSHROOM &&
+       blockID != BLOCK_YELLOW_FLOWER &&
+       blockID != BLOCK_RED_ROSE &&
+       blockID != BLOCK_SAPLING &&
+       blockID != BLOCK_FIRE &&
+       blockID != BLOCK_REDSTONE_WIRE &&
+       blockID != BLOCK_SIGN_POST &&
+       blockID != BLOCK_LADDER &&
+       blockID != BLOCK_MINECART_TRACKS &&
+       blockID != BLOCK_WALL_SIGN &&
+       blockID != BLOCK_STONE_PRESSURE_PLATE &&
+       blockID != BLOCK_WOODEN_PRESSURE_PLATE &&
+       blockID != BLOCK_STONE_BUTTON &&
+       blockID != BLOCK_PORTAL
+      ) &&
+      (((blockID == BLOCK_WOODEN_DOOR || blockID == BLOCK_IRON_DOOR || blockID == BLOCK_FENCE) && y >= user->pos.y - 0.5 && y <= user->pos.y + 2.5) ||
+        (y >= user->pos.y - 0.5 && y <= user->pos.y + 1.5))) //TODO: <- ^- Got values from tryes and guesses need to find the real values
   {
+    double intX, intZ, fracX, fracZ;
+    
     fracX = std::abs(std::modf(user->pos.x, &intX));
     fracZ = std::abs(std::modf(user->pos.z, &intZ));
-
-    // Mystics
-    intX--;
-    intZ--;
-
-    if((z == intZ || (z == intZ+1 && fracZ < 0.30) || (z == intZ-1 && fracZ > 0.70)) &&
-       (x == intX || (x == intX+1 && fracZ < 0.30) || (x == intX-1 && fracX > 0.70)))
+    
+    if((z == intZ || (z == intZ + 1 && fracZ < 0.30) || (z == intZ - 1 && fracZ > 0.70)) &&
+       (x == intX || (x == intX + 1 && fracZ < 0.30) || (x == intX - 1 && fracX > 0.70)))
       change = false;
   }
 
@@ -757,37 +730,33 @@ int PacketHandler::holding_change(User *user)
   user->buffer >> entityID >> itemID;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   user->buffer.removePacket();
 
   //Send holding change to others
-  uint8 holdingPackage[7];
-  holdingPackage[0] = 0x10;
-  putSint32(&holdingPackage[1], user->UID);
-  putSint16(&holdingPackage[5], itemID);
-  user->sendOthers(&holdingPackage[0], 7);
+  Packet pkt;
+  pkt << (sint8)PACKET_HOLDING_CHANGE << (sint32)user->UID << itemID;
+  user->sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
 
   return PACKET_OK;
 }
 
 int PacketHandler::arm_animation(User *user)
 {
-	sint32 userID;
-	sint8 animType;
-	
-	user->buffer >> userID >> animType;
+  sint32 userID;
+  sint8 animType;
+  
+  user->buffer >> userID >> animType;
 
-	if(!user->buffer)
-		return PACKET_NEED_MORE_DATA;
+  if(!user->buffer)
+    return PACKET_NEED_MORE_DATA;
 
-	user->buffer.removePacket();
+  user->buffer.removePacket();
 
-  uint8 animationPackage[6];
-  animationPackage[0] = 0x12;
-  putSint32(&animationPackage[1], user->UID);
-  animationPackage[5] = animType;
-  user->sendOthers(&animationPackage[0], 6);
+  Packet pkt;
+  pkt << (sint8)PACKET_ARM_ANIMATION << (sint32)user->UID << animType;
+  user->sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
 
   return PACKET_OK;
 }
@@ -796,17 +765,19 @@ int PacketHandler::pickup_spawn(User *user)
 {
   uint32 curpos = 4;
   spawnedItem item;
-  item.EID    = generateEID();
+  
   item.health = 0;
 
   sint8 yaw, pitch, roll;
 
+  user->buffer >> (sint32)item.EID;
+  item.EID    = generateEID();
   user->buffer >> (sint16&)item.item >> (sint8&)item.count ;
   user->buffer >> (sint32&)item.pos.x() >> (sint32&)item.pos.y() >> (sint32&)item.pos.z();
   user->buffer >> yaw >> pitch >> roll;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   item.spawnedBy = user->UID;
 
@@ -824,16 +795,13 @@ int PacketHandler::disconnect(User *user)
   user->buffer >> msg;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   user->buffer.removePacket();
 
   std::cout << "Disconnect: " << msg << std::endl;
 
-//  user->buffer.erase(user->buffer.begin(), user->buffer.begin()+curpos);
-
-  bufferevent_disable(user->buf_ev, EV_READ);
-  bufferevent_free(user->buf_ev);
+  event_del(user->GetEvent());
   
   #ifdef WIN32
   closesocket(user->fd);
@@ -852,21 +820,18 @@ int PacketHandler::complex_entities(User *user)
   if(!user->buffer.haveData(12))
     return PACKET_NEED_MORE_DATA;
 
-  unsigned int i;
-
-  int x,y,z;
-  sint32 len;
+  sint32 x,z;
+  sint16 len,y;
 
 
   user->buffer >> x >> y >> z >> len;
 
   if(!user->buffer)
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
   if(!user->buffer.haveData(len))
-	  return PACKET_NEED_MORE_DATA;
+    return PACKET_NEED_MORE_DATA;
 
-  //ToDo: check len
   uint8 *buffer = new uint8[len];
 
   user->buffer.getData(buffer, len);
@@ -884,284 +849,52 @@ int PacketHandler::complex_entities(User *user)
   }
 
 
-  //Calculate uncompressed size and allocate memory
-  uLongf uncompressedSize   = ALLOCATE_NBTFILE; //buffer[len-3] + (buffer[len-2]<<8) + (buffer[len-1]<<16) + (buffer[len]<<24);
-  uint8 *uncompressedBuffer = new uint8[uncompressedSize];
-  
   //Initialize zstream to handle gzip format
   z_stream zstream;
   zstream.zalloc    = (alloc_func)0;
   zstream.zfree     = (free_func)0;
   zstream.opaque    = (voidpf)0;
   zstream.next_in   = buffer;
-  zstream.next_out  = uncompressedBuffer;
+  zstream.next_out  = 0;
   zstream.avail_in  = len;
-  zstream.avail_out = uncompressedSize;
+  zstream.avail_out = 0;
   zstream.total_in  = 0;
   zstream.total_out = 0;
   zstream.data_type = Z_BINARY;
-  inflateInit2(&zstream, 1+MAX_WBITS);
+  inflateInit2(&zstream, 16+MAX_WBITS);
+
+  uLongf uncompressedSize   = ALLOCATE_NBTFILE;
+  uint8 *uncompressedBuffer = new uint8[uncompressedSize];
+
+  zstream.avail_out = uncompressedSize;
+  zstream.next_out = uncompressedBuffer;
+  
   //Uncompress
-  if(/*int state=*/inflate(&zstream, Z_FULL_FLUSH)!=Z_OK)
+  if(inflate(&zstream, Z_FULL_FLUSH)!=Z_STREAM_END)
   {
-      inflateEnd(&zstream);
+    std::cout << "Error in inflate!" << std::endl;
+    delete[] buffer;
+    return PACKET_OK;
   }
+
+  inflateEnd(&zstream);
+
   //Get size
   uncompressedSize  = zstream.total_out;
   
-  //Push data to NBT struct
-  NBT_struct newObject;
-  TAG_Compound(uncompressedBuffer, &newObject, true);
+  uint8 *ptr = uncompressedBuffer + 3; // skip blank compound
+  int remaining = uncompressedSize;
 
-  //These are not needed anymore
-  delete[] buffer;
-  delete[] uncompressedBuffer;
+  NBT_Value *entity = new NBT_Value(NBT_Value::TAG_COMPOUND, &ptr, remaining);
 
-  //Get chunk position
-  int block_x = blockToChunk(x);
-  int block_z = blockToChunk(z);
-  uint32 chunkID;
+#ifdef _DEBUG
+  std::cout << "Complex entity at (" << x << "," << y << "," << z << ")" << std::endl;
+  entity->Print();
+#endif
 
-  NBT_struct *theEntity = 0;
+  Map::get().setComplexEntity(x, y, z, entity);
 
-
-  //Load map
-  if(Map::get().loadMap(block_x, block_z))
-  {
-    Map::get().posToId(block_x, block_z, &chunkID);
-    NBT_struct mapData = Map::get().maps[chunkID];
-
-    //Try to find entitylist from the chunk
-    NBT_list *entitylist = get_NBT_list(&mapData, "TileEntities");
-
-    //If list exists
-    if(entitylist)
-    {
-      //Verify list type
-      if(entitylist->tagId != TAG_COMPOUND)
-      {
-        //If wrong type, recreate
-        freeNBT_list(entitylist);
-        for(i = 0; i < mapData.lists.size(); i++)
-        {
-          if(mapData.lists[i].name == "TileEntities")
-          {
-            //Destroy old list
-            freeNBT_list(&mapData.lists[i]);
-            mapData.lists.erase(mapData.lists.begin()+i);
-            break;
-          }
-        }
-        
-        //New list
-        NBT_list newlisting;  
-        newlisting.name   = "TileEntities";
-        newlisting.tagId  = TAG_COMPOUND;
-        newlisting.length = 0;
-        mapData.lists.push_back(newlisting);
-
-        entitylist = get_NBT_list(&mapData, "TileEntities");
-      }
-
-      NBT_struct **entities = (NBT_struct **)entitylist->items;
-      bool entityExists     = false;
-      int existingID        = -1;
-
-      //Search for mathing entity in the list
-      for(int i = 0; i < entitylist->length; i++)
-      {
-        NBT_struct *entity = entities[i];
-        std::string id;
-
-        //Get ID
-        if(get_NBT_value(entity, "id", &id))
-        {
-          int entity_x, entity_y, entity_z;
-          if(!get_NBT_value(entity, "x", &entity_x) ||
-             !get_NBT_value(entity, "y", &entity_y) ||
-             !get_NBT_value(entity, "z", &entity_z))
-          {
-            continue;
-          }
-
-          //Check for mathing blocktype and ID
-          if(block == BLOCK_CHEST && id == "Chest")
-          {
-            if(x == entity_x && y == entity_y && z == entity_z)
-            {
-              entityExists = true;
-              theEntity    = entity;
-              existingID   = i;
-              break;
-            }
-          }
-        }
-      } //End For entitylist
-
-      //Generate struct
-      theEntity = new NBT_struct;
-      NBT_value value;
-
-      //Push ID
-      value.type  = TAG_STRING;
-      value.name  = "id";
-      std::string *name =  new std::string;
-      value.value = (void *)name;
-      *(std::string *)value.value = "Chest";
-      theEntity->values.push_back(value);
-
-      //Position
-      value.type  = TAG_INT;
-      value.name  = "x";
-      value.value = (void *)new int;
-      *(int *)value.value = x;
-      theEntity->values.push_back(value);
-
-      value.name  = "y";
-      value.value = (void *)new int;
-      *(int *)value.value = y;
-      theEntity->values.push_back(value);
-
-      value.name  = "z";
-      value.value = (void *)new int;
-      *(int *)value.value = z;
-      theEntity->values.push_back(value);
-
-      //Put special chest items
-      if(block == BLOCK_CHEST)
-      {
-        NBT_list *newlist = get_NBT_list(&newObject, "Items");
-        if(!newlist)
-        {
-          //std::cout << "Items not found!" << std::endl;
-          return PACKET_OK;
-        }
-        NBT_list itemlist;
-        itemlist.name   = "Items";
-        itemlist.tagId  = TAG_COMPOUND;
-        itemlist.length = newlist->length;
-        itemlist.items  = (void **)new NBT_struct *[itemlist.length];
-
-        NBT_struct **structlist = (NBT_struct **)itemlist.items;
-        for(int i = 0; i < itemlist.length; i++)
-        {
-          structlist[i]        = new NBT_struct;
-          char type_char;
-          sint16 type_sint16;
-
-          //Generate struct
-          value.type             = TAG_BYTE;
-          value.name             = "Count";          
-          get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "Count", &type_char);
-          value.value            = (void *)new char;
-          *(char *)value.value   = type_char;
-          structlist[i]->values.push_back(value);
-
-          value.type             = TAG_BYTE;
-          value.name             = "Slot";
-          get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "Slot", &type_char);
-          value.value            = (void *)new char;
-          *(char *)value.value   = type_char;
-          structlist[i]->values.push_back(value);
-
-          value.type             = TAG_SHORT;
-          value.name             = "Damage";          
-          get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "Damage", &type_sint16);
-          value.value            = (void *)new sint16;
-          *(sint16 *)value.value = type_sint16;
-          structlist[i]->values.push_back(value);
-
-          value.type             = TAG_SHORT;
-          value.name             = "id";
-          get_NBT_value((NBT_struct *)((NBT_struct **)newlist->items)[i], "id", &type_sint16);
-          value.value            = (void *)new sint16;
-          *(sint16 *)value.value = type_sint16;
-          structlist[i]->values.push_back(value);
-        }
-
-        theEntity->lists.push_back(itemlist);
-      }
-      
-      //If entity doesn't exist in the list, resize the list to fit it in
-      if(!entityExists)
-      {
-        
-        //ToDo: try this!
-        NBT_struct **newlist = new NBT_struct *[entitylist->length+1];
-        NBT_struct **oldlist = (NBT_struct **)entitylist->items;
-        uint8 *structbuffer  = new uint8[ALLOCATE_NBTFILE];        
-        for(int i = 0; i < entitylist->length; i++)
-        {
-          newlist[i] = new NBT_struct;
-          dumpNBT_struct(oldlist[i],structbuffer);
-          TAG_Compound(structbuffer, newlist[i],true);
-          freeNBT_struct(oldlist[i]);
-          oldlist[i] = NULL;
-        }
-        
-        delete [] structbuffer;
-        entitylist->length++;
-        entitylist->items = (void **)newlist;
-        delete [] (NBT_struct **)oldlist;
-        newlist[entitylist->length-1] = theEntity;
-        
-      }
-      //If item exists, replace the old with the new
-      else
-      {
-        //Destroy old entitylist
-        NBT_struct **oldlist = (NBT_struct **)entitylist->items;
-        freeNBT_struct(oldlist[existingID]);
-        //Replace with the new
-        oldlist[existingID]  = theEntity;
-      }
-
-      //Mark chunk as changed
-      Map::get().mapChanged[chunkID] = true;
-      
-    } //If entity exists
-  } //If loaded map
-
-  //Send complex entity packet to others
-  if(theEntity)
-  {
-    uint8 *structdump = new uint8[ALLOCATE_NBTFILE];
-    uint8 *packetData = new uint8[ALLOCATE_NBTFILE];
-    int dumped        = dumpNBT_struct(theEntity, structdump);
-    uLongf written    = ALLOCATE_NBTFILE;
-
-    z_stream zstream2;
-    zstream2.zalloc    = Z_NULL;
-    zstream2.zfree     = Z_NULL;
-    zstream2.opaque    = Z_NULL;
-    zstream2.next_out  = &packetData[13];
-    zstream2.next_in   = structdump;
-    zstream2.avail_in  = dumped;
-    zstream2.avail_out = written;
-    zstream2.total_out = 0;
-    zstream2.total_in  = 0;
-    deflateInit2(&zstream2, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15+MAX_WBITS, 8,
-                 Z_DEFAULT_STRATEGY);
-
-    if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
-    {
-      std::cout << "Error in deflate: " << state << std::endl;
-      deflateEnd(&zstream2);
-    }
-    else
-    {
-      written = zstream2.total_out;
-      packetData[0] = 0x3b; //Complex Entities
-      putSint32(&packetData[1],x);
-      putSint16(&packetData[5],y);
-      putSint32(&packetData[7],z);
-      putSint16(&packetData[11], (sint16)written);
-      user->sendAll((uint8 *)&packetData[0], 13+written);
-    }
-
-    delete [] packetData;
-    delete [] structdump;
-  }
+  delete [] buffer;
 
   return PACKET_OK;
 }
@@ -1169,10 +902,10 @@ int PacketHandler::complex_entities(User *user)
 
 int PacketHandler::use_entity(User *user)
 {
-	sint32 userID,target;
-	user->buffer >> userID >> target;
-	if(!user->buffer)
-		return PACKET_NEED_MORE_DATA;
+  sint32 userID,target;
+  user->buffer >> userID >> target;
+  if(!user->buffer)
+    return PACKET_NEED_MORE_DATA;
 
-	return PACKET_OK;
+  return PACKET_OK;
 }

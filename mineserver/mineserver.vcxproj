@@ -51,6 +51,7 @@
     <ClCompile Include="..\src\mineserver.cpp" />
     <ClCompile Include="..\src\nbt.cpp" />
     <ClCompile Include="..\src\packets.cpp" />
+    <ClCompile Include="..\src\perlin.cpp" />
     <ClCompile Include="..\src\physics.cpp" />
     <ClCompile Include="..\src\sockets.cpp" />
     <ClCompile Include="..\src\tools.cpp" />
@@ -88,6 +89,7 @@
     <ClInclude Include="..\src\mapgen.h" />
     <ClInclude Include="..\src\nbt.h" />
     <ClInclude Include="..\src\packets.h" />
+    <ClInclude Include="..\src\perlin.h" />
     <ClInclude Include="..\src\physics.h" />
     <ClInclude Include="..\src\sockets.h" />
     <ClInclude Include="..\src\tools.h" />
@@ -148,14 +150,15 @@
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CONSOLE;FTLOG=main;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;ZLIB_WINAPI;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CONSOLE;FTLOG=main;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

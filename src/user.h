@@ -71,17 +71,20 @@ struct Inventory
 
 class User
 {
+private:
+  event m_event;
 public:
 
   User(int sock, uint32 EID);
   ~User();
 
   int fd;
-  struct bufferevent *buf_ev;
+
   //View distance in chunks -viewDistance <-> viewDistance
   static const int viewDistance = 10;
   uint8 action;
   bool waitForData;
+  uint32 write_err_count;
   bool logged;
   bool admin;
   unsigned int UID;
@@ -91,17 +94,15 @@ public:
   Inventory inv;
 
   //Input buffer
-  //std::deque<unsigned char> buffer;
   Packet buffer;
 
-
-  bool changeNick(std::string nick);
+  bool changeNick(std::string _nick);
   bool updatePos(double x, double y, double z, double stance);
   bool updateLook(float yaw, float pitch);
 
   bool sendOthers(uint8 *data, uint32 len);
-  bool sendAll(uint8 *data, uint32 len);
-  bool sendAdmins(uint8 *data, uint32 len);
+  static bool sendAll(uint8 *data, uint32 len);
+  static bool sendAdmins(uint8 *data, uint32 len);
 
   //Check inventory for space
   bool checkInventory(sint16 itemID, char count);
@@ -145,6 +146,8 @@ public:
   bool teleport(double x, double y, double z);
   bool spawnUser(int x, int y, int z);
   bool spawnOthers();
+
+  struct event *GetEvent();
 };
 
 User *addUser(int sock, uint32 EID);

@@ -215,6 +215,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\perlin.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\physics.cpp"
 				>
 			</File>
@@ -261,11 +265,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\mineserver.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\nbt.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\packets.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\perlin.h"
 				>
 			</File>
 			<File

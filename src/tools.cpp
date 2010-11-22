@@ -30,6 +30,9 @@
 
   #include <crtdbg.h>
   #include <conio.h>
+  #include <WinSock2.h>
+#else
+#include <netinet/in.h>
 #endif
 
 #include <cstdlib>
@@ -42,131 +45,78 @@
 #include <cctype>
 
 #include "tools.h"
+#include "string.h"
 
-void putSint64(uint8 *buf, long long value)
+void putSint64(uint8 *buf, sint64 value)
 {
-  uint8 *pointer = reinterpret_cast<uint8 *>(&value);
-  for(uint8 i = 0; i < 8; i++)
-  {
-    buf[i] = pointer[7-i];
-  }
-}
-
-void putUint32(uint8 *buf, uint32 value)
-{
-  uint8 *pointer = reinterpret_cast<uint8 *>(&value);
-  buf[0] = pointer[3];
-  buf[1] = pointer[2];
-  buf[2] = pointer[1];
-  buf[3] = pointer[0];
+  uint64 nval = ntohll(value);
+  memcpy(buf, &nval, 8);
 }
 
 void putSint32(uint8 *buf, sint32 value)
 {
-  uint8 *pointer = reinterpret_cast<uint8 *>(&value);
-  buf[0] = pointer[3];
-  buf[1] = pointer[2];
-  buf[2] = pointer[1];
-  buf[3] = pointer[0];
+  uint32 nval = htonl(value);
+  memcpy(buf, &nval, 4);
 }
 
 void putSint16(uint8 *buf, short value)
 {
-  uint8 *pointer = reinterpret_cast<uint8 *>(&value);
-  buf[0] = pointer[1];
-  buf[1] = pointer[0];
+  short value2=htons(value);
+  memcpy(buf, &value2, 2);
 }
 
 void putFloat(uint8 *buf, float value)
 {
-  uint8 *floatAddress = reinterpret_cast<uint8 *>(&value);
-  for(uint8 i = 0; i < 4; i++)
-  {
-    buf[i] = floatAddress[3-i];
-  }
+  uint32 nval;
+  memcpy(&nval, &value, 4);
+  nval = htonl(nval);
+  memcpy(buf, &nval, 4);
 }
 
 void putDouble(uint8 *buf, double value)
 {
-  uint8 *doubleAddress = reinterpret_cast<uint8 *>(&value);
-  for(uint8 i = 0; i < 8; i++)
-  {
-    buf[i] = doubleAddress[7-i];
-  }
+  uint64 nval;
+  memcpy(&nval, &value, 8);
+  nval = ntohll(nval);
+  memcpy(buf, &nval, 8);
 }
 
 double getDouble(uint8 *buf)
 {
-  double temp;
-  uint8 *doubleAddress = reinterpret_cast<uint8 *>(&temp);
-  for(uint8 i = 0; i < 8; i++)
-  {
-    doubleAddress[7-i] = buf[i];
-  }
-
-  return temp;
+  double val;
+  uint64 ival = *reinterpret_cast<const sint64*>(buf);
+  ival = ntohll(ival);
+  memcpy(&val, &ival, 8);
+  return val;
 }
 
 float getFloat(uint8 *buf)
 {
-  float temp;
-  uint8 *floatAddress = reinterpret_cast<uint8 *>(&temp);
-  for(uint8 i = 0; i < 4; i++)
-  {
-    floatAddress[3-i] = buf[i];
-  }
-
-  return temp;
+  float val;
+  int ival = ntohl(*reinterpret_cast<const sint32*>(buf));
+  memcpy(&val, &ival, 4);
+  return val;
 }
 
-uint32 getUint32(uint8 *buf)
+sint64 getSint64(uint8 *buf)
 {
-  return (buf[0]<<24)|(buf[1]<<16)|(buf[2]<<8)|(buf[3]);
-}
-
-uint32 getUint24(uint8 *buf)
-{
-  return (buf[0]<<16)|(buf[1]<<8)|(buf[2]);
-}
-
-uint32 getUint16(uint8 *buf)
-{
-  return (buf[0]<<8)|(buf[1]);
-}
-
-long long getSint64(uint8 *buf)
-{
-  long long temp;
-  uint8 *longAddress = reinterpret_cast<uint8 *>(&temp);
-  for(uint8 i = 0; i < 8; i++)
-  {
-    longAddress[7-i] = buf[i];
-  }
-  return temp;
+  sint64 val;
+  val = *reinterpret_cast<const sint64*>(buf);
+  val = ntohll(val);
+  return val;
 }
 
 sint32 getSint32(uint8 *buf)
 {
-  int temp;
-  uint8 *intAddress = reinterpret_cast<uint8 *>(&temp);
-  for(uint8 i = 0; i < 4; i++)
-  {
-    intAddress[3-i] = buf[i];
-  }
-
-  return temp;
+  int val = ntohl(*reinterpret_cast<const sint32*>(buf));
+  return val;
 }
 
 sint32 getSint16(uint8 *buf)
 {
-  short temp;
-  uint8 *shortAddress = reinterpret_cast<uint8 *>(&temp);
-  for(uint8 i = 0; i < 2; i++)
-  {
-    shortAddress[1-i] = buf[i];
-  }
+  short val = ntohs(*reinterpret_cast<const sint16*>(buf));
 
-  return temp;
+  return val;
 }
 
 std::string base36_encode(int value)
