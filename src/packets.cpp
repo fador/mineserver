@@ -557,7 +557,7 @@ int PacketHandler::player_block_placement(User *user)
   orig_x = x; orig_y = y; orig_z = z;
 
   //Invalid y value
-  if(y > 127 || y < 0)
+  if(y < 0) // need only to check <0, sint8 cannot be >127	
   {
     //std::cout << blockID << " (" << x << "," << (int)y_orig << "," << z << ") " << direction << std::endl;
     return PACKET_OK;

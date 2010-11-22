@@ -64,7 +64,7 @@ MapGen::~MapGen()
 
 void MapGen::CalculateHeightmap() 
 {
-  uint8 block; uint8 meta;
+ // uint8 block; uint8 meta;
   int index;
 
   for(char x = 0; x < 16; x++) 
@@ -144,11 +144,13 @@ void MapGen::generateChunk(int x, int z)
   std::vector<uint8> *t_data = (*val)["Data"]->GetByteArray();
   std::vector<uint8> *t_blocklight = (*val)["BlockLight"]->GetByteArray();
   std::vector<uint8> *t_skylight = (*val)["SkyLight"]->GetByteArray();
+  std::vector<uint8> *heightmap = (*val)["HeightMap"]->GetByteArray();
   
   Map::get().maps[chunkid].blocks = &((*t_blocks)[0]);
   Map::get().maps[chunkid].data = &((*t_data)[0]);
   Map::get().maps[chunkid].blocklight = &((*t_blocklight)[0]);
   Map::get().maps[chunkid].skylight = &((*t_skylight)[0]);
+  Map::get().maps[chunkid].heightmap = &((*heightmap)[0]);
 
   // Update last used time
   Map::get().mapLastused[chunkid] = (int)time(0);
