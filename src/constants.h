@@ -178,10 +178,10 @@ void initConstants();
 const int ALLOCATE_NBTFILE = 200000;
 
 // Chunk size
-const char DIMXY = 16;
-const char DIMX = 16;
-const char DIMY = 16;
-const char DIMH = 128;
+const uint8 DIMXY = 16;
+const uint8 DIMX = 16;
+const uint8 DIMY = 16;
+const uint8 DIMH = 128;
 const int BLOCKCOUNT = 32768;
 
 #endif

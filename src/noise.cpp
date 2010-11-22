@@ -25,12 +25,16 @@
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>
-#include <cmath>
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include <climits>
 #include <cfloat>
 
 #include "noise.h"
 #include "constants.h"
+
+using std::min;
+using std::max;
 
 void Noise::init(int _seed, NoiseInterpolationMode _interpolationMode) 
 {
@@ -169,7 +173,7 @@ float Noise::PerlinNoise(float x, float y, int startOctave, int endOctave, float
 {
   float total = 0;
 
-  float frequency = (float)pow(2, startOctave);
+  float frequency = (float)(1<<startOctave);
   float amplitude = (float)pow(decay, startOctave);
 
   for(int n = startOctave; n <= endOctave; n++) 
@@ -207,8 +211,8 @@ void Noise::Normalize(float** map, float low, float high)
   {
     for( int y = DIMY - 1; y >= 0; y-- ) 
     {
-      minV = std::min( minV, map[x][y] );
-      maxV = std::max( maxV, map[x][y] );
+      minV = min( minV, map[x][y] );
+      maxV = max( maxV, map[x][y] );
     }
   }
 
@@ -290,7 +294,7 @@ void Noise::ScaleAndClip(float** heightmap, float steepness)
   {
     for(int y = DIMY - 1; y >= 0; y--) 
     {
-      heightmap[x][y] = std::min( 1.0f, std::max( 0.0f, heightmap[x][y] * steepness * 2 - steepness ) );
+      heightmap[x][y] = min( 1.0f, max( 0.0f, heightmap[x][y] * steepness * 2 - steepness ) );
     }
   }
 }
@@ -308,7 +312,7 @@ void Noise::Invert(float** heightmap)
 
 float** Noise::BoxBlur(float** heightmap) 
 {
-  float divisor = 1 / 23.0;
+  float divisor = 1 / 23.0f;
   float** output = new float*[DIMX];
   for(int i=0;i<DIMX;i++)
   {
@@ -337,7 +341,7 @@ float** Noise::BoxBlur(float** heightmap)
 
 float** Noise::GaussianBlur5x5(float** heightmap) 
 {
-  float divisor = 1 / 273.0;
+  float divisor = 1 / 273.0f;
   float** output = new float*[DIMX];
   for(int i = 0; i < DIMX; i++)
   {
@@ -390,7 +394,7 @@ float** Noise::CalculateSlope(float** heightmap)
                         abs( heightmap[x - 1][y - 1] - heightmap[x][y] ) * 2 +
                         abs( heightmap[x + 1][y - 1] - heightmap[x][y] ) * 2 +
                         abs( heightmap[x - 1][y + 1] - heightmap[x][y] ) * 2 +
-                        abs( heightmap[x + 1][y + 1] - heightmap[x][y] ) * 2) / 20.0;
+                        abs( heightmap[x + 1][y + 1] - heightmap[x][y] ) * 2) / 20.0f;
       }
     }
   }
