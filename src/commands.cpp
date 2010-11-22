@@ -53,52 +53,53 @@
 namespace
 {
 
-void reportError(User *user, std::string message)
-{
-  Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + "Error! " + COLOR_RED + message, Chat::USER);
-}
+  void reportError(User *user, std::string message)
+  {
+    Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + "Error! " + COLOR_RED + message, Chat::USER);
+  }
 
-void playerList(User *user, std::string command, std::deque<std::string> args)
-{
-  Chat::get().sendUserlist(user);
-}
+  void playerList(User *user, std::string command, std::deque<std::string> args)
+  {
+    Chat::get().sendUserlist(user);
+  }
 
-void about(User *user, std::string command, std::deque<std::string> args)
+          void about(User *user, std::string command, std::deque<std::string> args)
 {
   Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + Conf::get().sValue("servername")+
                       "Running Mineserver v." + VERSION, Chat::USER);
 }
 
-// TODO: Check if rulesfile exists
-void rules(User *user, std::string command, std::deque<std::string> args)
-{
-  User *tUser = user;
-  if(!args.empty() && user->admin)
-    tUser = getUserByNick(args[0]);
-  if(tUser != NULL)
+  // TODO: Check if rulesfile exists
+  void rules(User *user, std::string command, std::deque<std::string> args)
   {
-    // Send rules
-    std::ifstream ifs( RULESFILE.c_str());
-    std::string temp;
-
-    if(ifs.fail())
+    User *tUser = user;
+    if(!args.empty() && user->admin)
+      tUser = getUserByNick(args[0]);
+    if(tUser != NULL)
     {
-      std::cout << "> Warning: " << RULESFILE << " not found." << std::endl;
-      return;
+      // Send rules
+      std::ifstream ifs( RULESFILE.c_str());
+      std::string temp;
+
+      if(ifs.fail())
+      {
+        std::cout << "> Warning: " << RULESFILE << " not found." << std::endl;
+        return;
+      }
+      else
+      {
+        while(getline(ifs, temp))
+        {
+          // If not a comment
+          if(!temp.empty() && temp[0] != COMMENTPREFIX)
+            Chat::get().sendMsg(tUser, temp, Chat::USER);
+        }
+        ifs.close();
+      }
     }
     else
-    {
-      while(getline(ifs, temp))
-      {
-        // If not a comment
-        if(!temp.empty() && temp[0] != COMMENTPREFIX)
-          Chat::get().sendMsg(tUser, temp, Chat::USER);
-      }
-      ifs.close();
-    }
+      reportError(user, "User " + args[0] + " not found (see /players)");
   }
-  else
-    reportError(user, "User " + args[0] + " not found (see /players)");
 }
 
 void home(User *user, std::string command, std::deque<std::string> args)
