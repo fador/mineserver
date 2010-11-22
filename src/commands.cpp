@@ -91,7 +91,7 @@ void rules(User *user, std::string command, std::deque<std::string> args)
       while(getline(ifs, temp))
       {
         // If not a comment
-        if(temp.empty() || temp[0] == COMMENTPREFIX)
+        if(temp.empty() || temp[0] != COMMENTPREFIX)
           Chat::get().sendMsg(tUser, temp, Chat::USER);
       }
       ifs.close();
@@ -292,7 +292,10 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
     }
   }
   else
+  {
     reportError(user, "Too few parameters.");
+	  return;
+  }
 
   if(tUser)
   {
@@ -319,8 +322,6 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
   }
   else
     reportError(user, "User " + args[0] + " not found (see /players)");
-}
-
 }
 
 void Chat::registerStandardCommands()
