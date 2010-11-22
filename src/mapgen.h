@@ -36,11 +36,14 @@ private:
   uint8 *skylight;
   uint8 *blocklight;
   uint8 *heightmap;
-  Noise noise;
+  
+  int randomSeed;
   
   int GetHeightmapIndex(char x, char z);
   void CalculateHeightmap();
   void LoadFlatgrass();
+  //void generateWithNoise();
+
 
 public:
   MapGen(int seed);

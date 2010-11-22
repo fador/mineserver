@@ -330,6 +330,7 @@ float** Noise::BoxBlur(float** heightmap)
       }
     }
   }
+  //delete [] output;
   return output;
 }
 

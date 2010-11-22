@@ -49,8 +49,7 @@ MapGen::MapGen(int seed)
   blocklight = new uint8[16*16*128/2];
   heightmap = new uint8[16*16];
   
-  
-  noise.init(seed, Noise::Bicubic);
+  randomSeed = seed;
 }
 
 MapGen::~MapGen()
@@ -159,22 +158,36 @@ void MapGen::generateChunk(int x, int z)
   
   Map::get().maps[chunkid].nbt = main;
 }
-/*
-void GenerateWithNoise() {
+
+/*void MapGen::generateWithNoise() 
+{
   // Ore arrays
-  byte[] oreX, oreY, oreZ, oreType;
+  uint8* oreX, oreY, oreZ, oreType;
 
   // Get main heightmap
-  float[,] heightMap = new float[16, 16];
-  Noise noise = new Noise((int)world.randomSeed, NoiseInterpolationMode.Bicubic);
+  float** heightMap = new float*[16];
+  for(int i=0;i<16;i++)
+  {
+    heightMap[i] = new float[16];
+  }
+  
+  Noise noise(randomSeed, Noise::Bicubic);
   noise.PerlinNoiseMap(heightMap, -2, 2, 0.4f, x, z);
 
   // Get secondary heightmap
-  float[,] steepnessMap = new float[16, 16];
-  Noise steepnessNoise = new Noise((int)world.randomSeed, NoiseInterpolationMode.Cosine);
+  float** steepnessMap = new float*[16];
+  for(int i=0;i<16;i++)
+  {
+    steepnessMap[i] = new float[16];
+  }
+  
+  Noise steepnessNoise(randomSeed, Noise::Cosine);
   steepnessNoise.PerlinNoiseMap(steepnessMap, -9, 0, 0.6f, x, z);
-  for (int i = 0; i < 16; i++) {
-      for (int j = 0; j < 16; j++) {
+  
+  for (int i = 0; i < 16; i++) 
+  {
+      for (int j = 0; j < 16; j++) 
+      {
           steepnessMap[i, j] = steepnessMap[i, j] / 10;
       }
   }
@@ -182,25 +195,45 @@ void GenerateWithNoise() {
   //Noise.Add(heightMap, steepnessMap);   // Sometimes made mountains too tall or valleys too low
 
   // Get cave heightmaps for upper caves (top & bottom)
-  float[,] caveTop = new float[16, 16];
-  Noise caveTopNoise = new Noise((int)world.randomSeed + new Random((int)world.randomSeed).Next(), NoiseInterpolationMode.Spline);
+  float** caveTop = new float*[16];
+  for(int i=0;i<16;i++)
+  {
+    caveTop[i] = new float[16];
+  }
+  
+  Noise caveTopNoise(randomSeed + new Random((int)world.randomSeed).Next(), Noise::Spline);
   caveTopNoise.PerlinNoiseMap(caveTop, 0, 4, 0.4f, x, z);
   Noise.Invert(caveTop);
   Noise.Marble(caveTop);
-  float[,] caveBottom = new float[16, 16];
-  Noise caveBottomNoise = new Noise((int)world.randomSeed + new Random((int)new Random((int)world.randomSeed).Next()).Next(), NoiseInterpolationMode.Spline);
+  
+  float** caveBottom = new float*[16];
+  for(int i=0;i<16;i++)
+  {
+    caveBottom[i] = new float[16];
+  }
+  Noise caveBottomNoise(randomSeed + new Random((int)new Random((int)world.randomSeed).Next()).Next(), NoiseI::Spline);
   caveBottomNoise.PerlinNoiseMap(caveBottom, 0, 4, 0.2f, x, z);
   Noise.Invert(caveBottom);
   Noise.Marble(caveBottom);
 
   // Get cave heightmaps for lower caves (top & bottom)
-  float[,] caveTop2 = new float[16, 16];
-  Noise caveTopNoise2 = new Noise((int)world.randomSeed + new Random((int)world.randomSeed + 1).Next(), NoiseInterpolationMode.Spline);
+  float** caveTop2 = new float*[16];
+  for(int i=0;i<16;i++)
+  {
+    caveTop2[i] = new float[16];
+  }
+  
+  Noise caveTopNoise2(randomSeed + new Random((int)world.randomSeed + 1).Next(), Noise::Spline);
   caveTopNoise2.PerlinNoiseMap(caveTop2, 0, 4, 0.4f, x, z);
   Noise.Invert(caveTop2);
   Noise.Marble(caveTop2);
-  float[,] caveBottom2 = new float[16, 16];
-  Noise caveBottomNoise2 = new Noise((int)world.randomSeed + new Random((int)new Random((int)world.randomSeed + 2).Next() + 1).Next(), NoiseInterpolationMode.Spline);
+  
+  float** caveBottom2 = new float*[16];
+  for(int i=0;i<16;i++)
+  {
+    caveBottom2[i] = new float[16];
+  }
+  Noise caveBottomNoise2(randomSeed + new Random((int)new Random((int)world.randomSeed + 2).Next() + 1).Next(), Noise::Spline);
   caveBottomNoise2.PerlinNoiseMap(caveBottom2, 0, 4, 0.2f, x, z);
   Noise.Invert(caveBottom2);
   Noise.Marble(caveBottom2);
