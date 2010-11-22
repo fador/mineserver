@@ -467,31 +467,40 @@ int PacketHandler::player_digging(User *user)
       if(block != BLOCK_SNOW && (int)block > 0 && (int)block < 255)
       {
         spawnedItem item;
-        item.EID    = generateEID();
-        item.health = 0;
-
+        bool spawnItem = false;
+        
         // Spawn drop according to BLOCKDROPS
         // Check probability
-        if(BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand()%10000)
+        if(BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand() % 10000)
         {
           item.item  = BLOCKDROPS[block].item_id;
           item.count = BLOCKDROPS[block].count;
+          spawnItem = true;
         }
-        else
+        else if(!BLOCKDROPS.count(block) || (BLOCKDROPS.count(block) && !BLOCKDROPS[block].exclusive))
         {
           item.item  = (int)block;
           item.count = 1;
+          spawnItem = true;
         }
-        item.pos.x()  = x*32;
-        item.pos.y()  = y*32;
-        item.pos.z()  = z*32;
-        //Randomize spawn position a bit
-        item.pos.x() += 5+(rand()%22);
-        item.pos.z() += 5+(rand()%22);
+        
+        if (spawnItem)
+        {
+          item.EID    = generateEID();
+          item.health = 0;
+          
+          item.pos.x()  = x * 32;
+          item.pos.y()  = y * 32;
+          item.pos.z()  = z * 32;
+          
+          //Randomize spawn position a bit
+          item.pos.x() += 5 + (rand() % 22);
+          item.pos.z() += 5 + (rand() % 22);
 
-        // If count is greater than 0
-        if(item.count > 0)
-          Map::get().sendPickupSpawn(item);
+          // If count is greater than 0
+          if(item.count > 0)
+            Map::get().sendPickupSpawn(item);
+        }
       }
 
       // Check liquid physics

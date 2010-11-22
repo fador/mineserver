@@ -150,16 +150,19 @@ struct Drop
   uint16 item_id;
   sint32 probability;
   uint8 count;
+  bool exclusive;
+  
   Drop()
   {
 
   }
 
-  Drop(uint16 item_id, uint32 probability, uint8 count)
+  Drop(uint16 item_id, uint32 probability, uint8 count, bool exclusive)
   {
     this->item_id     = item_id;
     this->probability = probability;
     this->count       = count;
+    this->exclusive   = exclusive;
   }
 };
 

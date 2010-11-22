@@ -50,18 +50,18 @@ void initConstants()
                                                          "Wrong client protocol"));
 
   // Block drops (10000 = 100%)
-  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_STONE, Drop(BLOCK_COBBLESTONE, 10000, 1)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_GRASS, Drop(BLOCK_DIRT, 10000, 1)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_GRAVEL, Drop(ITEM_FLINT, 850, 1)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_COAL_ORE, Drop(ITEM_COAL, 10000, 1)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_LEAVES, Drop(BLOCK_SAPLING, 1200, 1)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_DIAMOND_ORE, Drop(ITEM_DIAMOND, 10000, 1)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_REDSTONE_ORE, Drop(ITEM_REDSTONE, 10000, 4)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_CLAY, Drop(ITEM_CLAY_BALLS, 10000, 4)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_STONE, Drop(BLOCK_COBBLESTONE, 10000, 1, true)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_GRASS, Drop(BLOCK_DIRT, 10000, 1, true)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_GRAVEL, Drop(ITEM_FLINT, 850, 1, false)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_COAL_ORE, Drop(ITEM_COAL, 10000, 1, true)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_LEAVES, Drop(BLOCK_SAPLING, 1200, 1, true)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_DIAMOND_ORE, Drop(ITEM_DIAMOND, 10000, 1, true)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_REDSTONE_ORE, Drop(ITEM_REDSTONE, 10000, 4, true)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_CLAY, Drop(ITEM_CLAY_BALLS, 10000, 4, true)));
 
   // Blocks that drop nothing
-  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_TNT, Drop(BLOCK_TNT, 10000, 0)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_GLASS, Drop(BLOCK_GLASS, 10000, 0)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_MOB_SPAWNER, Drop(BLOCK_MOB_SPAWNER, 10000, 0)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_TNT, Drop(BLOCK_TNT, 10000, 0, true)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_GLASS, Drop(BLOCK_GLASS, 10000, 0, true)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_MOB_SPAWNER, Drop(BLOCK_MOB_SPAWNER, 10000, 0, true)));
 
 }
