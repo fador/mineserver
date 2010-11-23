@@ -1,5 +1,7 @@
 # Mineserver
-*by Fador & Nredor*
+*by Fador & Nredor and others*
+
+You can find the core team from #mineserver @ irc.esper.net
 
     Copyright (c) 2010, The Mineserver Project
 
@@ -31,7 +33,7 @@ We are trying to minimize memory and cpu usage compared to original Java server.
 ### ToDo (Arranged by priority)
  * Map generation with heightmap (In progress)
  * Getting chests, furnaces,signs etc to work (In progress)
- * Plugin support
+ * Plugin support (and Lua plugin for scripting)
  * Multithreading
  * Growing trees etc.
  * and more
@@ -64,17 +66,16 @@ Depends on (and tested with):
 
  * [zlib 1.2.5](http://www.zlib.org)
  * [libevent 1.4.14b](http://monkey.org/~provos/libevent/)
- * [lua 5.1.4](http://www.lua.org) (Not yet in use!)
 
  * Installing on Debian and Ubuntu:
 
-    `sudo apt-get install libevent-dev zlib1g zlib1g-dev liblua5.1-0-dev`
+    `sudo apt-get install libevent1 libevent-dev zlib1g zlib1g-dev`
 
  * Installing on CentOS and RHEL
 
     `# Install EPEL (Extra Packages for Enterprise Linux)`   
     `sudo su -c 'rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm'`   
-    `sudo yum install git libevent libevent-devel zlib zlib-devel lua lua-devel`   
+    `sudo yum install git libevent libevent-devel zlib zlib-devel`   
 
  * Installing on FreeBSD / PCBSD
 
@@ -100,14 +101,13 @@ Depends on (and tested with):
  * Add zlib libraries to project (zlibstat.lib or zlibwapi.lib which requires also zlibwapi.dll in the same dir with the executable)
  * Download and compile [libevent](http://monkey.org/~provos/libevent/)
  * Add libevent library to project (libevent.lib)
- * Add libraries to project and library headers to include path
  * Build
  * Run mineserver.exe
  
  An example using commandline compiler available at http://www.microsoft.com/express/Windows/ Please change the ZLIB_INC_DIR, LIBEVENT_INC_DIR, ZLIB_LIB_DIR and LIBEVENT_LIB_DIR to those you keep the includes/libs.
  
     call "%VS100COMNTOOLS%vsvars32.bat"
-    cl /I"ZLIB_INC_DIR;LIBEVENT_INC_DIR" /W3 /WX- /O2 /D WIN32 /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /EHsc *.cpp zlibwapi.lib libevent.lib Ws2_32.lib /link /OUT:mineserver.exe /LIBPATH:"ZLIB_LIB_DIR;LIBEVENT_LIB_DIR"
+    cl /I"ZLIB_INC_DIR;LIBEVENT_INC_DIR" /W3 /WX- /O2 /D ZLIB_WINAPI /D WIN32 /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /EHsc *.cpp zlibwapi.lib libevent.lib Ws2_32.lib /link /OUT:mineserver.exe /LIBPATH:"ZLIB_LIB_DIR;LIBEVENT_LIB_DIR"
 
 
  
