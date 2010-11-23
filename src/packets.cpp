@@ -555,12 +555,9 @@ int PacketHandler::player_digging(User *user)
 
 int PacketHandler::player_block_placement(User *user)
 {
-  int orig_x, orig_y, orig_z;
-  bool change = false;
-
-  sint8 y, direction;
+  sint8 y, oy, direction;
   sint16 blockID;
-  sint32 x, z;
+  sint32 x, z, ox, oz;
 
   user->buffer >> blockID >> x >> y >> z >> direction;
 
@@ -568,212 +565,189 @@ int PacketHandler::player_block_placement(User *user)
     return PACKET_NEED_MORE_DATA;
 
   user->buffer.removePacket();
-
+  
   // TODO: Handle processing of 
   if(direction == -1)
     return PACKET_OK;
-
-  orig_x = x; orig_y = y; orig_z = z;
-
-  //Invalid y value
-  if(y < 0) // need only to check <0, sint8 cannot be >127	
-  {
-    //std::cout << blockID << " (" << x << "," << (int)y_orig << "," << z << ") " << direction << std::endl;
+    
+  if(y < 0)
     return PACKET_OK;
-  }
-  //std::cout << blockID << " (" << x << "," << (int)y_orig << "," << z << ")" << direction << std::endl;
-
+    
   uint8 block;
   uint8 metadata;
   Map::get().getBlock(x, y, z, &block, &metadata);
-
+  
   switch(direction)
   {
-  case 0: y--; break;
-
-  case 1: y++; break;
-
-  case 2: z--; break;
-
-  case 3: z++; break;
-
-  case 4: x--; break;
-
-  case 5: x++; break;
+    case 0: y--; break;
+    case 1: y++; break;
+    case 2: z--; break;
+    case 3: z++; break;
+    case 4: x--; break;
+    case 5: x++; break;
   }
-
+  
   uint8 block_direction;
   uint8 metadata_direction;
   Map::get().getBlock(x, y, z, &block_direction, &metadata_direction);
-
-  // Check liquid physics
+  
   Physics::get().checkSurrounding(vec(x, y, z));
+  
+  
+  // If the "placing-on" block is a block that you cannot place blocks on
+  
+  if (block == BLOCK_WORKBENCH ||
+      block == BLOCK_FURNACE ||
+      block == BLOCK_BURNING_FURNACE ||
+      block == BLOCK_CHEST ||
+      block == BLOCK_JUKEBOX ||
+      block == BLOCK_TORCH)
+    return PACKET_OK;
+    
+    
+  // If the block is invalid
+    
+  if (blockID > 0xFF || blockID == -1)
+    return PACKET_OK;
+    
+    
+  // If you cannot place your block over it
+   
+  if (block_direction != BLOCK_AIR &&
+      block_direction != BLOCK_WATER &&
+      block_direction != BLOCK_STATIONARY_WATER &&
+      block_direction != BLOCK_LAVA &&
+      block_direction != BLOCK_STATIONARY_LAVA)
+    return PACKET_OK;
 
-  //If placing normal block and current block is empty
-  if(blockID < 0xff && blockID != -1 && (block_direction == BLOCK_AIR ||
-                                         block_direction == BLOCK_WATER ||
-                                         block_direction == BLOCK_STATIONARY_WATER ||
-                                         block_direction == BLOCK_LAVA ||
-                                         block_direction == BLOCK_STATIONARY_LAVA))
+
+  //If snow or torch or fire, overwrite
+ 
+  if (block == BLOCK_SNOW || 
+      block == BLOCK_TORCH || 
+      block == BLOCK_FIRE) 
   {
-    // DO NOT place a block if block is ...
-    if(block != BLOCK_WORKBENCH &&
-       block != BLOCK_FURNACE &&
-       block != BLOCK_BURNING_FURNACE &&
-       block != BLOCK_CHEST &&
-       block != BLOCK_JUKEBOX &&
-       block != BLOCK_TORCH)
-      change = true;
-    //std::cout << "Placing over " << (int)block_direction << std::endl;
+    x = ox;
+    y = oy;
+    z = oz;
   }
-
-  if(block == BLOCK_SNOW || block == BLOCK_TORCH || block == BLOCK_FIRE) //If snow or torch or fire, overwrite
-  {
-    change = true;
-    x      = orig_x;
-    y      = orig_y;
-    z      = orig_z;
-  }
-
+  
+  
   //Door status change
-  if((block == BLOCK_WOODEN_DOOR) || (block == BLOCK_IRON_DOOR))
+  
+  if (block == BLOCK_WOODEN_DOOR || 
+      block == BLOCK_IRON_DOOR)
   {
-    change  = true;
-
     blockID = block;
 
     //Toggle door state
-    if(metadata&0x4)
-      metadata &= (0x8|0x3);
+    if (metadata & 0x4)
+      metadata &= (0x8 | 0x3);
     else
       metadata |= 0x4;
 
     uint8 metadata2, block2;
 
-    int modifier = (metadata&0x8) ? -1 : 1;
+    int modifier = (metadata & 0x8) ? -1 : 1;
 
-    x = orig_x;
-    y = orig_y;
-    z = orig_z;
+    x = ox;
+    y = oy;
+    z = oz;
 
-    Map::get().getBlock(x, y+modifier, z, &block2, &metadata2);
-    if(block2 == block)
+    Map::get().getBlock(x, y + modifier, z, &block2, &metadata2);
+    
+    if (block2 == block)
     {
       metadata2 = metadata;
-      if(metadata&0x8)
-        metadata2 &= (0x7);
+      
+      if(metadata & 0x8)
+        metadata2 &= 0x7;
       else
         metadata2 |= 0x8;
 
-      Map::get().setBlock(x, y+modifier, z, block2, metadata2);
-      Map::get().sendBlockChange(x, y+modifier, z, (char)blockID, metadata2);
+      Map::get().setBlock(x, y + modifier, z, block2, metadata2);
+      Map::get().sendBlockChange(x, y + modifier, z, (char)blockID, metadata2);
+      
+      return PACKET_OK;
     }
-
   }
   
-  // Do not place a torch on a torch
-  if((block == BLOCK_TORCH ||
-      block == BLOCK_REDSTONE_TORCH_OFF ||
-      block == BLOCK_REDSTONE_TORCH_ON ||
-      block == BLOCK_BROWN_MUSHROOM ||
-      block == BLOCK_RED_MUSHROOM ||
-      block == BLOCK_YELLOW_FLOWER ||
-      block == BLOCK_RED_ROSE ||
-      block == BLOCK_SAPLING ||
-      block == BLOCK_REDSTONE_WIRE ||
-      block == BLOCK_SIGN_POST ||
-      block == BLOCK_LADDER ||
-      block == BLOCK_MINECART_TRACKS ||
-      block == BLOCK_WALL_SIGN ||
-      block == BLOCK_STONE_PRESSURE_PLATE ||
-      block == BLOCK_WOODEN_PRESSURE_PLATE ||
-      block == BLOCK_STONE_BUTTON ||
-      block == BLOCK_PORTAL)
-    &&
-     (blockID == BLOCK_TORCH ||
-      blockID == BLOCK_REDSTONE_TORCH_OFF ||
-      blockID == BLOCK_REDSTONE_TORCH_ON ||
-      blockID == BLOCK_BROWN_MUSHROOM ||
-      blockID == BLOCK_RED_MUSHROOM ||
-      blockID == BLOCK_YELLOW_FLOWER ||
-      blockID == BLOCK_RED_ROSE ||
-      blockID == BLOCK_SAPLING ||
-      blockID == BLOCK_REDSTONE_WIRE ||
-      blockID == BLOCK_SIGN_POST ||
-      blockID == BLOCK_LADDER ||
-      blockID == BLOCK_MINECART_TRACKS ||
-      blockID == BLOCK_WALL_SIGN ||
-      blockID == BLOCK_STONE_PRESSURE_PLATE ||
-      blockID == BLOCK_WOODEN_PRESSURE_PLATE ||
-      blockID == BLOCK_STONE_BUTTON ||
-      blockID == BLOCK_PORTAL)
-    )
+  if (blockID == BLOCK_SAPLING &&
+        (block != BLOCK_GRASS ||
+        block != BLOCK_DIRT))
+    return PACKET_OK;
+  
+  
+  // Check block placement
+  
+  if (blockID != BLOCK_TORCH && 
+      blockID != BLOCK_REDSTONE_TORCH_OFF &&
+      blockID != BLOCK_REDSTONE_TORCH_ON &&
+      blockID != BLOCK_AIR &&
+      blockID != BLOCK_WATER &&
+      blockID != BLOCK_STATIONARY_WATER &&
+      blockID != BLOCK_LAVA &&
+      blockID != BLOCK_STATIONARY_LAVA &&
+      blockID != BLOCK_BROWN_MUSHROOM &&
+      blockID != BLOCK_RED_MUSHROOM &&
+      blockID != BLOCK_YELLOW_FLOWER &&
+      blockID != BLOCK_RED_ROSE &&
+      blockID != BLOCK_SAPLING &&
+      blockID != BLOCK_FIRE &&
+      blockID != BLOCK_REDSTONE_WIRE &&
+      blockID != BLOCK_SIGN_POST &&
+      blockID != BLOCK_LADDER &&
+      blockID != BLOCK_MINECART_TRACKS &&
+      blockID != BLOCK_WALL_SIGN &&
+      blockID != BLOCK_STONE_PRESSURE_PLATE &&
+      blockID != BLOCK_WOODEN_PRESSURE_PLATE &&
+      blockID != BLOCK_STONE_BUTTON &&
+      blockID != BLOCK_PORTAL)
   {
-    change = false;
-  }
-
-  // Check if the block is place-able "inside" the user
-  if (change &&
-       blockID != BLOCK_TORCH && 
-       blockID != BLOCK_REDSTONE_TORCH_OFF &&
-       blockID != BLOCK_REDSTONE_TORCH_ON &&
-       blockID != BLOCK_AIR &&
-       blockID != BLOCK_WATER &&
-       blockID != BLOCK_STATIONARY_WATER &&
-       blockID != BLOCK_LAVA &&
-       blockID != BLOCK_STATIONARY_LAVA &&
-       blockID != BLOCK_BROWN_MUSHROOM &&
-       blockID != BLOCK_RED_MUSHROOM &&
-       blockID != BLOCK_YELLOW_FLOWER &&
-       blockID != BLOCK_RED_ROSE &&
-       blockID != BLOCK_SAPLING &&
-       blockID != BLOCK_FIRE &&
-       blockID != BLOCK_REDSTONE_WIRE &&
-       blockID != BLOCK_SIGN_POST &&
-       blockID != BLOCK_LADDER &&
-       blockID != BLOCK_MINECART_TRACKS &&
-       blockID != BLOCK_WALL_SIGN &&
-       blockID != BLOCK_STONE_PRESSURE_PLATE &&
-       blockID != BLOCK_WOODEN_PRESSURE_PLATE &&
-       blockID != BLOCK_STONE_BUTTON &&
-       blockID != BLOCK_PORTAL
-       &&
-      (((blockID == BLOCK_WOODEN_DOOR || blockID == BLOCK_IRON_DOOR || blockID == BLOCK_FENCE) && y >= user->pos.y - 0.5 && y <= user->pos.y + 2.5) ||
-        (y >= user->pos.y - 0.5 && y <= user->pos.y + 1.5))) //TODO: <- ^- Got values from tryes and guesses need to find the real values
-  {
-    double intX, intZ, fracX, fracZ;
+    double diffX = x - user->pos.x;
+    double diffY = y - user->pos.y;
+    double diffZ = z - user->pos.z;
     
-    fracX = std::abs(std::modf(user->pos.x, &intX));
-    fracZ = std::abs(std::modf(user->pos.z, &intZ));
+    std::cout << user->pos.x << ", " << user->pos.y << ", " << user->pos.z << "  =>  ";
+    std::cout << diffX << ", " << diffY << ", " << diffZ;
     
-    if((z == intZ || (z == intZ + 1 && fracZ < 0.3) || (z == intZ - 1 && fracZ > 0.7)) &&
-       (x == intX || (x == intX + 1 && fracX < 0.3) || (x == intX - 1 && fracX > 0.7)))
-      change = false;
+    // We check Y
+    if (diffY > -0.3 && diffY < 1.3 && 
+        diffX > -1.3 && diffX < 0.3 && 
+        diffZ > -1.3 && diffZ < 0.3)
+    {
+      std::cout << "   No, you do not go." << std::endl;
+      return PACKET_OK;
+    }
+    else
+    {
+      std::cout << "   Yes, go ahead." << std::endl;
+    }
   }
-
+  
+  
+  // Set the direction for the block
+  
   if(blockID == BLOCK_TORCH ||
      blockID == BLOCK_REDSTONE_TORCH_OFF ||
      blockID == BLOCK_REDSTONE_TORCH_ON)
   {
-
     metadata = 0;
     if (direction)
-       metadata = 6-direction;
-  }
-
-  if(change)
-  {
-    Map::get().setBlock(x, y, z, (char)blockID, metadata);
-    Map::get().sendBlockChange(x, y, z, (char)blockID, metadata);
-
-
-    if(blockID == BLOCK_WATER || blockID == BLOCK_STATIONARY_WATER ||
-       blockID == BLOCK_LAVA || blockID == BLOCK_STATIONARY_LAVA)
-      Physics::get().addSimulation(vec(x, y, z));
+       metadata = 6 - direction;
   }
   
-  return PACKET_OK;
+  
+  // Proceed to change the block
+  
+  Map::get().setBlock(x, y, z, (char)blockID, metadata);
+  Map::get().sendBlockChange(x, y, z, (char)blockID, metadata);
 
+  if (blockID == BLOCK_WATER || 
+      blockID == BLOCK_STATIONARY_WATER ||
+      blockID == BLOCK_LAVA || 
+      blockID == BLOCK_STATIONARY_LAVA)
+    Physics::get().addSimulation(vec(x, y, z));
 }
 
 int PacketHandler::holding_change(User *user)
