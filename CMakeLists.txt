@@ -37,11 +37,11 @@ if (NOT ZLIB_FOUND)
 endif()
 
 
-find_package(Lua51)
-if (NOT LUA51_FOUND)
-   set(errors "${errors}\t\t- LUA 5.1\n")
-   set(dependency_error True)
-endif()
+#find_package(Lua51)
+#if (NOT LUA51_FOUND)
+#   set(errors "${errors}\t\t- LUA 5.1\n")
+#   set(dependency_error True)
+#endif()
 
 
 find_library(EVENT_LIBRARY
@@ -66,13 +66,13 @@ endif ()
 
 if (NOT dependency_error)
    include_directories(${ZLIB_INCLUDE_DIR})
-   include_directories(${LUA_INCLUDE_DIR})
+#   include_directories(${LUA_INCLUDE_DIR})
    include_directories(${EVENT_INCLUDE_DIR})
 
    add_executable(mineserver ${exe} ${folder_source})
 
    target_link_libraries(mineserver ${ZLIB_LIBRARY})
-   target_link_libraries(mineserver ${LUA_LIBRARY})
+#   target_link_libraries(mineserver ${LUA_LIBRARY})
    target_link_libraries(mineserver ${EVENT_LIBRARY})
 else()
    message(FATAL_ERROR "\n\tNot all dependencies could be found:\n${errors}\n After installing them please rerun cmake.\n")
