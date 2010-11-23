@@ -725,8 +725,16 @@ int PacketHandler::player_block_placement(User *user)
     
     fracX = std::abs(std::modf(user->pos.x, &intX));
     fracZ = std::abs(std::modf(user->pos.z, &intZ));
+
+    std::cout << fracX << " " << fracZ << std::endl;
+    std::cout << intX-1 << " " << intZ << std::endl;
+    std::cout << x << " " << z << std::endl;
+
+    // DO NOT REMOVE THIS!!
+    intX--;
     
-    if((z == intZ || (z == intZ + 1 && fracZ < 0.3) || (z == intZ - 1 && fracZ > 0.7)) &&
+    // Also: DO NOT CHANGE THIS! It's working.
+    if((z == intZ || (z == intZ - 1 && fracZ < 0.3) || (z == intZ + 1 && fracZ > 0.7)) &&
        (x == intX || (x == intX + 1 && fracX < 0.3) || (x == intX - 1 && fracX > 0.7)))
       change = false;
   }
