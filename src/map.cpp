@@ -639,6 +639,24 @@ bool Map::sendPickupSpawn(spawnedItem item)
   return true;
 }
 
+void Map::createPickupSpawn(int x, int y, int z, int type, int count)
+{
+   spawnedItem item;
+   item.EID      = generateEID();
+   item.health   = 0;
+   item.item     = type;
+   item.count    = count;
+
+   item.pos.x()  = x*32;
+   item.pos.y()  = y*32;
+   item.pos.z()  = z*32;
+   //Randomize spawn position a bit
+   item.pos.x() += 5+(rand()%22);
+   item.pos.z() += 5+(rand()%22);
+
+   this->sendPickupSpawn(item);
+}
+
 bool Map::loadMap(int x, int z, bool generate)
 {
 #ifdef MSDBG
