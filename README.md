@@ -68,7 +68,7 @@ Depends on (and tested with):
 
  * Installing on Debian and Ubuntu:
 
-    `sudo apt-get install libevent1 libevent-dev zlib1g zlib1g-dev`
+    `sudo apt-get install libevent-dev zlib1g zlib1g-dev liblua5.1-0-dev`
 
  * Installing on CentOS and RHEL
 
