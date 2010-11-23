@@ -754,10 +754,6 @@ int PacketHandler::player_block_placement(User *user)
 
     int xFix = intX < 0.0 ? -1 : 1;
     int zFix = intZ < 0.0 ? -1 : 1;
-
-    //std::cout << fracX << " " << fracZ << std::endl;
-    //std::cout << intX << " " << intZ << std::endl;
-    //std::cout << x << " " << z << std::endl;
     
     // Also: DO NOT CHANGE THIS! It's working.
     if((z == intZ || (z == intZ - zFix && fracZ < 0.3) || (z == intZ + zFix && fracZ > 0.7)) &&

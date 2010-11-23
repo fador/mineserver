@@ -683,13 +683,11 @@ bool Map::loadMap(int x, int z, bool generate)
   struct stat stFileInfo;
   if(stat(infile.c_str(), &stFileInfo) != 0)
   {
-    std::cout << "Mappos: " << x << "," << z << std::endl;
+    //std::cout << "Mappos: " << x << "," << z << std::endl;
     
     // If generate (false only for lightmapgenerator)
     if(generate)
-    {
-      LOG("Generating chunk...");
-    
+    {    
       MapGen mapgen((int)time(NULL));
       mapgen.generateChunk(x,z);
       generateLightMaps(x, z);
