@@ -756,33 +756,9 @@ int PacketHandler::player_block_placement(User *user)
      blockID == BLOCK_REDSTONE_TORCH_ON)
   {
 
-    switch(direction)
-    {
-    case 0:
-      metadata = BLOCK_BOTTOM;
-      break;
-
-    case 1:
-      metadata = BLOCK_TOP;
-      break;
-
-    case 2:
-      metadata = BLOCK_WEST;
-      break;
-
-    case 3:
-      metadata = BLOCK_EAST;
-      break;
-
-    case 4:
-      // Torch switches if not set incorrectly
-      metadata = BLOCK_SOUTH;
-      break;
-
-    case 5:
-      metadata = BLOCK_NORTH;
-      break;
-    }
+    metadata = 0;
+    if (direction)
+       metadata = 6-direction;
   }
 
   if(change)
