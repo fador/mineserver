@@ -613,18 +613,18 @@ int PacketHandler::player_block_placement(User *user)
     
   // If you cannot place your block over it
    
-  if (block_direction != BLOCK_AIR &&
-      block_direction != BLOCK_WATER &&
-      block_direction != BLOCK_STATIONARY_WATER &&
-      block_direction != BLOCK_LAVA &&
-      block_direction != BLOCK_STATIONARY_LAVA &&
-      block_direction != BLOCK_REDSTONE_WIRE &&
-      block_direction != BLOCK_LADDER &&
-      block_direction != BLOCK_MINECART_TRACKS &&
-      block_direction != BLOCK_WALL_SIGN &&
-      block_direction != BLOCK_STONE_PRESSURE_PLATE &&
-      block_direction != BLOCK_WOODEN_PRESSURE_PLATE &&
-      block_direction != BLOCK_STONE_BUTTON)
+  if (block != BLOCK_AIR &&
+      block != BLOCK_WATER &&
+      block != BLOCK_STATIONARY_WATER &&
+      block != BLOCK_LAVA &&
+      block != BLOCK_STATIONARY_LAVA &&
+      block != BLOCK_REDSTONE_WIRE &&
+      block != BLOCK_LADDER &&
+      block != BLOCK_MINECART_TRACKS &&
+      block != BLOCK_WALL_SIGN &&
+      block != BLOCK_STONE_PRESSURE_PLATE &&
+      block != BLOCK_WOODEN_PRESSURE_PLATE &&
+      block != BLOCK_STONE_BUTTON)
     return PACKET_OK;
 
 
@@ -639,7 +639,7 @@ int PacketHandler::player_block_placement(User *user)
   }
   
   
-  //Overwrite over these blocks and drop the block
+  //Overwrite over these blocks and drop the blockitem
   
   if (block == BLOCK_TORCH || 
       block == BLOCK_REDSTONE_TORCH_OFF ||
@@ -696,6 +696,9 @@ int PacketHandler::player_block_placement(User *user)
       return PACKET_OK;
     }
   }
+  
+  
+  // We can place saplings only on dirt or grass
   
   if (blockID == BLOCK_SAPLING &&
         (block != BLOCK_GRASS ||
