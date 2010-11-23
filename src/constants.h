@@ -63,6 +63,12 @@ enum
 #define COLOR_YELLOW std::string("§e")
 #define COLOR_WHITE std::string("§f")
 
+// Direction
+enum Direction
+{
+   BLOCK_BOTTOM, BLOCK_NORTH, BLOCK_SOUTH, BLOCK_EAST, BLOCK_WEST, BLOCK_TOP
+};
+
 // Blocks
 enum Block
 {
