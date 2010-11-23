@@ -435,14 +435,14 @@ int PacketHandler::player_digging(User *user)
       uint8 topblock; uint8 topmeta;
 
       // Destroy items on sides
-      if(Map::get().getBlock(x+1, y, z, &topblock, &topmeta) && (topblock == BLOCK_TORCH && topmeta == BLOCK_SOUTH))
+      if(Map::get().getBlock(x+1, y, z, &topblock, &topmeta) && (topblock == BLOCK_TORCH && topmeta == BLOCK_NORTH))
       {
          Map::get().sendBlockChange(x+1, y, z, 0, 0);
          Map::get().setBlock(x+1, y, z, 0, 0);
          Map::get().createPickupSpawn(x+1, y, z, topblock, 1);
       }
 
-      if(Map::get().getBlock(x-1, y, z, &topblock, &topmeta) && (topblock == BLOCK_TORCH && topmeta == BLOCK_NORTH))
+      if(Map::get().getBlock(x-1, y, z, &topblock, &topmeta) && (topblock == BLOCK_TORCH && topmeta == BLOCK_SOUTH))
       {
          Map::get().sendBlockChange(x-1, y, z, 0, 0);
          Map::get().setBlock(x-1, y, z, 0, 0);
@@ -755,27 +755,32 @@ int PacketHandler::player_block_placement(User *user)
      blockID == BLOCK_REDSTONE_TORCH_OFF ||
      blockID == BLOCK_REDSTONE_TORCH_ON)
   {
+
     switch(direction)
     {
     case 0:
+      metadata = BLOCK_BOTTOM;
+      break;
+
     case 1:
-      metadata = 5;
+      metadata = BLOCK_TOP;
       break;
 
     case 2:
-      metadata = 4;
+      metadata = BLOCK_WEST;
       break;
 
     case 3:
-      metadata = 3;
+      metadata = BLOCK_EAST;
       break;
 
     case 4:
-      metadata = 1;
+      // Torch switches if not set incorrectly
+      metadata = BLOCK_SOUTH;
       break;
 
     case 5:
-      metadata = 2;
+      metadata = BLOCK_NORTH;
       break;
     }
   }
