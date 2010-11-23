@@ -60,6 +60,7 @@ We are trying to minimize memory and cpu usage compared to original Java server.
 *  /reload : Reload admins and configuration
 *  /give nick id/alias (count) : Gives nick count pieces of id/alias. count = 1 is used if it is not provided. Support for over 64 items. Aliases configurable with item_alias.cfg
 *  /rules nick : Shows server rules (from rules.txt) to nick
+*  /gps (nick) : Without nick shows own coordinates. With nick shows nick's coordinates
  
 ### Compiling
 Depends on (and tested with):
