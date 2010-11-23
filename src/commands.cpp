@@ -116,20 +116,17 @@ void kit(User *user, std::string command, std::deque<std::string> args)
     // If kit is found
     if(!kitItems.empty())
     {
-      for(std::vector<int>::iterator iter = kitItems.begin(), end = kitItems.end();
-          iter != end;
-          ++iter)
+      for(uint32 i=0;i<kitItems.size();i++)
       {
         spawnedItem item;
         item.EID     = generateEID();
-        item.item    = *iter;
+        item.item    = kitItems[i];
         item.count   = 1;
         item.health=0;
         item.pos.x() = static_cast<int>(user->pos.x*32 + (rand() % 30));
         item.pos.y() = static_cast<int>(user->pos.y*32);
         item.pos.z() = static_cast<int>(user->pos.z*32 + (rand() % 30));
         Map::get().sendPickupSpawn(item);
-        kitItems.pop_back();
       }
     }
     else
