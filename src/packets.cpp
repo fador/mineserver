@@ -435,28 +435,28 @@ int PacketHandler::player_digging(User *user)
       uint8 topblock; uint8 topmeta;
 
       // Destroy items on sides
-      if(Map::get().getBlock(x+1, y, z, &topblock, &topmeta) && topblock == BLOCK_TORCH)
+      if(Map::get().getBlock(x+1, y, z, &topblock, &topmeta) && (topblock == BLOCK_TORCH && topmeta == BLOCK_SOUTH))
       {
          Map::get().sendBlockChange(x+1, y, z, 0, 0);
          Map::get().setBlock(x+1, y, z, 0, 0);
          Map::get().createPickupSpawn(x+1, y, z, topblock, 1);
       }
 
-      if(Map::get().getBlock(x-1, y, z, &topblock, &topmeta) && topblock == BLOCK_TORCH)
+      if(Map::get().getBlock(x-1, y, z, &topblock, &topmeta) && (topblock == BLOCK_TORCH && topmeta == BLOCK_NORTH))
       {
          Map::get().sendBlockChange(x-1, y, z, 0, 0);
          Map::get().setBlock(x-1, y, z, 0, 0);
          Map::get().createPickupSpawn(x-1, y, z, topblock, 1);
       }
 
-      if(Map::get().getBlock(x, y, z+1, &topblock, &topmeta) && topblock == BLOCK_TORCH)
+      if(Map::get().getBlock(x, y, z+1, &topblock, &topmeta) && (topblock == BLOCK_TORCH && topmeta == BLOCK_EAST))
       {
          Map::get().sendBlockChange(x, y, z+1, 0, 0);
          Map::get().setBlock(x, y, z+1, 0, 0);
          Map::get().createPickupSpawn(x, y, z+1, topblock, 1);
       }
 
-      if(Map::get().getBlock(x, y, z-1, &topblock, &topmeta) && topblock == BLOCK_TORCH)
+      if(Map::get().getBlock(x, y, z-1, &topblock, &topmeta) && (topblock == BLOCK_TORCH && topmeta == BLOCK_WEST))
       {
          Map::get().sendBlockChange(x, y, z-1, 0, 0);
          Map::get().setBlock(x, y, z-1, 0, 0);
