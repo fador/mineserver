@@ -650,9 +650,51 @@ int PacketHandler::player_block_placement(User *user)
     }
 
   }
+  
+  // Do not place a torch on a torch
+  if((block == BLOCK_TORCH ||
+      block == BLOCK_REDSTONE_TORCH_OFF ||
+      block == BLOCK_REDSTONE_TORCH_ON ||
+      block == BLOCK_BROWN_MUSHROOM ||
+      block == BLOCK_RED_MUSHROOM ||
+      block == BLOCK_YELLOW_FLOWER ||
+      block == BLOCK_RED_ROSE ||
+      block == BLOCK_SAPLING ||
+      block == BLOCK_REDSTONE_WIRE ||
+      block == BLOCK_SIGN_POST ||
+      block == BLOCK_LADDER ||
+      block == BLOCK_MINECART_TRACKS ||
+      block == BLOCK_WALL_SIGN ||
+      block == BLOCK_STONE_PRESSURE_PLATE ||
+      block == BLOCK_WOODEN_PRESSURE_PLATE ||
+      block == BLOCK_STONE_BUTTON ||
+      block == BLOCK_PORTAL)
+    &&
+     (blockID == BLOCK_TORCH ||
+      blockID == BLOCK_REDSTONE_TORCH_OFF ||
+      blockID == BLOCK_REDSTONE_TORCH_ON ||
+      blockID == BLOCK_BROWN_MUSHROOM ||
+      blockID == BLOCK_RED_MUSHROOM ||
+      blockID == BLOCK_YELLOW_FLOWER ||
+      blockID == BLOCK_RED_ROSE ||
+      blockID == BLOCK_SAPLING ||
+      blockID == BLOCK_REDSTONE_WIRE ||
+      blockID == BLOCK_SIGN_POST ||
+      blockID == BLOCK_LADDER ||
+      blockID == BLOCK_MINECART_TRACKS ||
+      blockID == BLOCK_WALL_SIGN ||
+      blockID == BLOCK_STONE_PRESSURE_PLATE ||
+      blockID == BLOCK_WOODEN_PRESSURE_PLATE ||
+      blockID == BLOCK_STONE_BUTTON ||
+      blockID == BLOCK_PORTAL)
+    )
+  {
+    change = false;
+  }
 
   // Check if the block is place-able "inside" the user
-  if ((blockID != BLOCK_TORCH && 
+  if (change &&
+       blockID != BLOCK_TORCH && 
        blockID != BLOCK_REDSTONE_TORCH_OFF &&
        blockID != BLOCK_REDSTONE_TORCH_ON &&
        blockID != BLOCK_AIR &&
@@ -675,7 +717,7 @@ int PacketHandler::player_block_placement(User *user)
        blockID != BLOCK_WOODEN_PRESSURE_PLATE &&
        blockID != BLOCK_STONE_BUTTON &&
        blockID != BLOCK_PORTAL
-      ) &&
+       &&
       (((blockID == BLOCK_WOODEN_DOOR || blockID == BLOCK_IRON_DOOR || blockID == BLOCK_FENCE) && y >= user->pos.y - 0.5 && y <= user->pos.y + 2.5) ||
         (y >= user->pos.y - 0.5 && y <= user->pos.y + 1.5))) //TODO: <- ^- Got values from tryes and guesses need to find the real values
   {
@@ -684,8 +726,8 @@ int PacketHandler::player_block_placement(User *user)
     fracX = std::abs(std::modf(user->pos.x, &intX));
     fracZ = std::abs(std::modf(user->pos.z, &intZ));
     
-    if((z == intZ || (z == intZ + 1 && fracZ < 0.30) || (z == intZ - 1 && fracZ > 0.70)) &&
-       (x == intX || (x == intX + 1 && fracZ < 0.30) || (x == intX - 1 && fracX > 0.70)))
+    if((z == intZ || (z == intZ + 1 && fracZ < 0.3) || (z == intZ - 1 && fracZ > 0.7)) &&
+       (x == intX || (x == intX + 1 && fracX < 0.3) || (x == intX - 1 && fracX > 0.7)))
       change = false;
   }
 
@@ -728,6 +770,7 @@ int PacketHandler::player_block_placement(User *user)
        blockID == BLOCK_LAVA || blockID == BLOCK_STATIONARY_LAVA)
       Physics::get().addSimulation(vec(x, y, z));
   }
+  
   return PACKET_OK;
 
 }
