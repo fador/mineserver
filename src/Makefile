@@ -1,7 +1,7 @@
 SHELL = /bin/sh
 SYSTEM = $(shell uname)
 
-DFLAGS = -O2
+DFLAGS = 
 
 ifeq ($(SYSTEM),Darwin)
 DFLAGS += -D__APPLE__
