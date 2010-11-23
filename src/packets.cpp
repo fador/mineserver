@@ -504,6 +504,7 @@ int PacketHandler::player_digging(User *user)
         
         if (spawnItem)
         {
+
           item.EID    = generateEID();
           item.health = 0;
           
@@ -620,7 +621,8 @@ int PacketHandler::player_block_placement(User *user)
        block != BLOCK_FURNACE &&
        block != BLOCK_BURNING_FURNACE &&
        block != BLOCK_CHEST &&
-       block != BLOCK_JUKEBOX)
+       block != BLOCK_JUKEBOX &&
+       block != BLOCK_TORCH)
       change = true;
     //std::cout << "Placing over " << (int)block_direction << std::endl;
   }
