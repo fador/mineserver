@@ -837,7 +837,7 @@ int PacketHandler::pickup_spawn(User *user)
 
   sint8 yaw, pitch, roll;
 
-  user->buffer >> (sint32)item.EID;
+  user->buffer >> (sint32&)item.EID;
   item.EID    = generateEID();
   user->buffer >> (sint16&)item.item >> (sint8&)item.count ;
   user->buffer >> (sint32&)item.pos.x() >> (sint32&)item.pos.y() >> (sint32&)item.pos.z();
@@ -847,7 +847,6 @@ int PacketHandler::pickup_spawn(User *user)
     return PACKET_NEED_MORE_DATA;
 
   item.spawnedBy = user->UID;
-
   Map::get().sendPickupSpawn(item);
 
   return PACKET_OK;
