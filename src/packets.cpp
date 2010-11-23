@@ -433,6 +433,36 @@ int PacketHandler::player_digging(User *user)
       Map::get().setBlock(x, y, z, 0, 0);
 
       uint8 topblock; uint8 topmeta;
+
+      // Destroy items on sides
+      if(Map::get().getBlock(x+1, y, z, &topblock, &topmeta) && topblock == BLOCK_TORCH)
+      {
+         Map::get().sendBlockChange(x+1, y, z, 0, 0);
+         Map::get().setBlock(x+1, y, z, 0, 0);
+         Map::get().createPickupSpawn(x+1, y, z, topblock, 1);
+      }
+
+      if(Map::get().getBlock(x-1, y, z, &topblock, &topmeta) && topblock == BLOCK_TORCH)
+      {
+         Map::get().sendBlockChange(x-1, y, z, 0, 0);
+         Map::get().setBlock(x-1, y, z, 0, 0);
+         Map::get().createPickupSpawn(x-1, y, z, topblock, 1);
+      }
+
+      if(Map::get().getBlock(x, y, z+1, &topblock, &topmeta) && topblock == BLOCK_TORCH)
+      {
+         Map::get().sendBlockChange(x, y, z+1, 0, 0);
+         Map::get().setBlock(x, y, z+1, 0, 0);
+         Map::get().createPickupSpawn(x, y, z+1, topblock, 1);
+      }
+
+      if(Map::get().getBlock(x, y, z-1, &topblock, &topmeta) && topblock == BLOCK_TORCH)
+      {
+         Map::get().sendBlockChange(x, y, z-1, 0, 0);
+         Map::get().setBlock(x, y, z-1, 0, 0);
+         Map::get().createPickupSpawn(x, y, z-1, topblock, 1);
+      }
+
       //Destroy items on top
       if(Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && (topblock == BLOCK_SNOW ||
                                                                  topblock ==
@@ -440,27 +470,15 @@ int PacketHandler::player_digging(User *user)
                                                                  topblock == BLOCK_RED_MUSHROOM ||
                                                                  topblock == BLOCK_YELLOW_FLOWER ||
                                                                  topblock == BLOCK_RED_ROSE ||
-                                                                 topblock == BLOCK_SAPLING))
+                                                                 topblock == BLOCK_SAPLING ||
+                                                                 (topblock == BLOCK_TORCH && topmeta == BLOCK_TOP)))
       {
         Map::get().sendBlockChange(x, y+1, z, 0, 0);
         Map::get().setBlock(x, y+1, z, 0, 0);
         //Others than snow will spawn
         if(topblock != BLOCK_SNOW)
         {
-          spawnedItem item;
-          item.EID      = generateEID();
-          item.health   = 0;
-          item.item     = (int)topblock;
-          item.count    = 1;
-
-          item.pos.x()  = x*32;
-          item.pos.y()  = (y+1)*32;
-          item.pos.z()  = z*32;
-          //Randomize spawn position a bit
-          item.pos.x() += 5+(rand()%22);
-          item.pos.z() += 5+(rand()%22);
-
-          Map::get().sendPickupSpawn(item);
+          Map::get().createPickupSpawn(x, y+1, z, topblock, 1);
         }
       }
 
