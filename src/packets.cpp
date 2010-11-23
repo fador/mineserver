@@ -617,19 +617,44 @@ int PacketHandler::player_block_placement(User *user)
       block_direction != BLOCK_WATER &&
       block_direction != BLOCK_STATIONARY_WATER &&
       block_direction != BLOCK_LAVA &&
-      block_direction != BLOCK_STATIONARY_LAVA)
+      block_direction != BLOCK_STATIONARY_LAVA &&
+      block_direction != BLOCK_REDSTONE_WIRE &&
+      block_direction != BLOCK_LADDER &&
+      block_direction != BLOCK_MINECART_TRACKS &&
+      block_direction != BLOCK_WALL_SIGN &&
+      block_direction != BLOCK_STONE_PRESSURE_PLATE &&
+      block_direction != BLOCK_WOODEN_PRESSURE_PLATE &&
+      block_direction != BLOCK_STONE_BUTTON)
     return PACKET_OK;
 
 
-  //If snow or torch or fire, overwrite
+  //Overwrite over these blocks
  
   if (block == BLOCK_SNOW || 
-      block == BLOCK_TORCH || 
-      block == BLOCK_FIRE) 
+      block == BLOCK_FIRE)
   {
     x = ox;
     y = oy;
     z = oz;
+  }
+  
+  
+  //Overwrite over these blocks and drop the block
+  
+  if (block == BLOCK_TORCH || 
+      block == BLOCK_REDSTONE_TORCH_OFF ||
+      block == BLOCK_REDSTONE_TORCH_ON ||
+      block == BLOCK_BROWN_MUSHROOM ||
+      block == BLOCK_RED_MUSHROOM ||
+      block == BLOCK_YELLOW_FLOWER ||
+      block == BLOCK_RED_ROSE ||
+      block == BLOCK_SAPLING) 
+  {
+    x = ox;
+    y = oy;
+    z = oz;
+    
+    //TODO: drop the item
   }
   
   
@@ -715,14 +740,7 @@ int PacketHandler::player_block_placement(User *user)
     if (diffY > -0.3 && diffY < 1.3 && 
         diffX > -1.3 && diffX < 0.3 && 
         diffZ > -1.3 && diffZ < 0.3)
-    /*{
-      std::cout << "   No, you do not go." << std::endl;*/
       return PACKET_OK;
-    /*}
-    else
-    {
-      std::cout << "   Yes, go ahead." << std::endl;
-    }*/
   }
   
   
