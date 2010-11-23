@@ -707,22 +707,22 @@ int PacketHandler::player_block_placement(User *user)
     double diffX = x - user->pos.x;
     double diffY = y - user->pos.y;
     double diffZ = z - user->pos.z;
-    
+
     std::cout << user->pos.x << ", " << user->pos.y << ", " << user->pos.z << "  =>  ";
     std::cout << diffX << ", " << diffY << ", " << diffZ;
     
-    // We check Y
+    // We check Y, X then Z
     if (diffY > -0.3 && diffY < 1.3 && 
         diffX > -1.3 && diffX < 0.3 && 
         diffZ > -1.3 && diffZ < 0.3)
-    {
-      std::cout << "   No, you do not go." << std::endl;
+    /*{
+      std::cout << "   No, you do not go." << std::endl;*/
       return PACKET_OK;
-    }
+    /*}
     else
     {
       std::cout << "   Yes, go ahead." << std::endl;
-    }
+    }*/
   }
   
   
