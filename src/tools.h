@@ -61,6 +61,8 @@ void my_itoa(int value, std::string &buf, int base);
 std::string base36_encode(int value);
 std::string strToLower(std::string temp);
 
+std::string dtos(double n);
+
 inline uint64 ntohll(uint64 v)
 {
   if(htons(1) == 1) // check if already big-endian

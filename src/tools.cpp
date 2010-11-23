@@ -37,6 +37,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <cstdio>
 #include <ctime>
@@ -154,4 +155,11 @@ std::string strToLower(std::string temp)
   }
 
   return temp;
+}
+
+std::string dtos( double n )
+{
+  std::ostringstream result;
+  result << n;
+  return result.str();
 }

@@ -48,6 +48,7 @@
 #include "user.h"
 #include "chat.h"
 #include "config.h"
+#include "tools.h"
 #include "physics.h"
 
 namespace
@@ -63,13 +64,12 @@ namespace
     Chat::get().sendUserlist(user);
   }
 
-          void about(User *user, std::string command, std::deque<std::string> args)
-{
-  Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + Conf::get().sValue("servername")+
-                      "Running Mineserver v." + VERSION, Chat::USER);
-}
+  void about(User *user, std::string command, std::deque<std::string> args)
+  {
+    Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + Conf::get().sValue("servername")+
+                        "Running Mineserver v." + VERSION, Chat::USER);
+  }
 
-  // TODO: Check if rulesfile exists
   void rules(User *user, std::string command, std::deque<std::string> args)
   {
     User *tUser = user;
@@ -219,6 +219,30 @@ void userTeleport(User *user, std::string command, std::deque<std::string> args)
   }
 }
 
+void showPosition(User *user, std::string command, std::deque<std::string> args)
+{
+  if(args.size() == 1)
+  {
+    User *tUser = getUserByNick(args[0]);
+    if(tUser != NULL)
+      Chat::get().sendMsg(user, COLOR_MAGENTA + args[0] + " is at: " + dtos(tUser->pos.x)
+                                                                     + " " 
+                                                                     + dtos(tUser->pos.y)
+                                                                     + " " 
+                                                                     + dtos(tUser->pos.z), Chat::USER);
+    else
+      reportError(user, "User " + args[0] + " not found (see /players)");
+  }
+  else
+  {
+    Chat::get().sendMsg(user, COLOR_MAGENTA + "You are at: " + dtos(user->pos.x) 
+                                                             + " " 
+                                                             + dtos(user->pos.y) 
+                                                             + " " 
+                                                             + dtos(user->pos.z), Chat::USER);
+  }
+}
+
 void reloadConfiguration(User *user, std::string command, std::deque<std::string> args)
 {
   Chat::get().loadAdmins(ADMINFILE);
@@ -338,4 +362,5 @@ void Chat::registerStandardCommands()
   registerCommand("tp", userTeleport, true);
   registerCommand("reload", reloadConfiguration, true);
   registerCommand("give", giveItems, true);
+  registerCommand("gps", showPosition, true);
 }
