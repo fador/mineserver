@@ -42,7 +42,7 @@ private:
   int GetHeightmapIndex(char x, char z);
   void CalculateHeightmap();
   void LoadFlatgrass();
-  //void generateWithNoise();
+  void generateWithNoise(int x, int z);
 
 
 public:
