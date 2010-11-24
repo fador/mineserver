@@ -62,7 +62,7 @@ MapGen::~MapGen()
 }
 
 
-void MapGen::CalculateHeightmap() 
+void MapGen::calculateHeightmap() 
 {
  // uint8 block; uint8 meta;
   int index;
@@ -76,19 +76,19 @@ void MapGen::CalculateHeightmap()
         index = y + (z * 128) + (x * 128 * 16);
         if(blocks[index] == BLOCK_AIR)
           continue;
-        heightmap[GetHeightmapIndex(x, z)] = (char)(y + 1);
+        heightmap[getHeightmapIndex(x, z)] = (char)(y + 1);
         break;
       }
     }
   }
 }
 
-int MapGen::GetHeightmapIndex(char x, char z) 
+int MapGen::getHeightmapIndex(char x, char z) 
 {
   return z + (x * 16);
 }
 
-void MapGen::LoadFlatgrass() 
+void MapGen::loadFlatgrass() 
 {
   for (uint8 bX = 0; bX < 16; bX++) 
   {
@@ -116,9 +116,9 @@ void MapGen::generateChunk(int x, int z)
   NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
  
   if(Conf::get().bValue("map_flatland"))
-    LoadFlatgrass();
+    loadFlatgrass();
   else
-    LoadFlatgrass(); // generate with noise here
+    loadFlatgrass(); // generate with noise here
    
   val->Insert("Blocks", new NBT_Value(blocks, 16*16*128));
   val->Insert("Data", new NBT_Value(blockdata, 16*16*128/2));

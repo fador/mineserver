@@ -39,9 +39,9 @@ private:
   
   int randomSeed;
   
-  int GetHeightmapIndex(char x, char z);
-  void CalculateHeightmap();
-  void LoadFlatgrass();
+  int getHeightmapIndex(char x, char z);
+  void calculateHeightmap();
+  void loadFlatgrass();
   //void generateWithNoise(int x, int z);
 
 
