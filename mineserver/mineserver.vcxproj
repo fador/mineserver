@@ -20,7 +20,7 @@
     <ClCompile Include="..\src\mapgen.cpp" />
     <ClCompile Include="..\src\mineserver.cpp" />
     <ClCompile Include="..\src\nbt.cpp" />
-    <ClCompile Include="..\src\noise.cpp" />
+    <ClCompile Include="..\src\noiseutils.cpp" />
     <ClCompile Include="..\src\packets.cpp" />
     <ClCompile Include="..\src\physics.cpp" />
     <ClCompile Include="..\src\sockets.cpp" />
@@ -35,6 +35,7 @@
     <ClInclude Include="..\src\map.h" />
     <ClInclude Include="..\src\mapgen.h" />
     <ClInclude Include="..\src\nbt.h" />
+    <ClInclude Include="..\src\noiseutils.h" />
     <ClInclude Include="..\src\packets.h" />
     <ClInclude Include="..\src\physics.h" />
     <ClInclude Include="..\src\sockets.h" />
@@ -87,7 +88,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>zlibwapi.lib;ws2_32.lib;libevent.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libnoise.lib;zlibwapi.lib;ws2_32.lib;libevent.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>

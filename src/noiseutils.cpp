@@ -22,8 +22,14 @@
 
 #include <fstream>
 
+#ifdef WIN32
 #include <noise/interp.h>
 #include <noise/mathconsts.h>
+#else
+#include <libnoise/interp.h>
+#include <libnoise/mathconsts.h>
+#endif
+
 
 #include "noiseutils.h"
 

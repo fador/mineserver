@@ -26,8 +26,11 @@
 #ifndef _MAPGEN_H
 #define _MAPGEN_H
 
-#include "noise.h"
-#include <noise\noise.h>
+#ifdef WIN32
+#include <noise/noise.h>
+#else
+#include <libnoise/noise.h>
+#endif
 #include "noiseutils.h"
 
 class MapGen

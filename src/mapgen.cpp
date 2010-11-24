@@ -39,7 +39,11 @@
 #include "map.h"
 
 // libnoise
+#ifdef WIN32
 #include <noise/noise.h>
+#else
+#include <libnoise/noise.h>
+#endif
 #include "noiseutils.h"
 
 #include "mersenne.h"

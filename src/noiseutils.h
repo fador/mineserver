@@ -27,7 +27,11 @@
 #include <string.h>
 #include <string>
 
+#ifdef WIN32
 #include <noise/noise.h>
+#else
+#include <libnoise/noise.h>
+#endif
 
 //using namespace noise;
 
