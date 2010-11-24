@@ -93,6 +93,9 @@ public:
   vec curChunk;
   Inventory inv;
 
+  int recentSpawn[10];
+  uint8 recentSpawnPos;
+
   //Input buffer
   Packet buffer;
 
