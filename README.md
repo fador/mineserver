@@ -69,16 +69,17 @@ Depends on (and tested with):
 
  [zlib 1.2.5](http://www.zlib.org)   
  [libevent 1.4.14b](http://monkey.org/~provos/libevent/)
+ [libnoise 1.0](http://libnoise.sourceforge.net/)
 
  * Installing on Debian and Ubuntu:
 
-    `sudo apt-get install libevent1 libevent-dev zlib1g zlib1g-dev`
+    `sudo apt-get install libevent1 libevent-dev zlib1g zlib1g-dev libnoise-dev`
 
  * Installing on CentOS and RHEL
 
     `# Install EPEL (Extra Packages for Enterprise Linux)`   
     `sudo su -c 'rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm'`   
-    `sudo yum install git libevent libevent-devel zlib zlib-devel`   
+    `sudo yum install git libevent libevent-devel zlib zlib-devel libnoise-dev`   
 
  * Installing on FreeBSD / PCBSD
 
@@ -103,6 +104,7 @@ Depends on (and tested with):
  * Download and compile [zlib](http://www.zlib.org) or use [pre-built binaries](http://www.winimage.com/zLibDll/index.html)
  * Add zlib libraries to project (zlibstat.lib or zlibwapi.lib which requires also zlibwapi.dll in the same dir with the executable)
  * Download and compile [libevent](http://monkey.org/~provos/libevent/)
+ * Download [libnoise 1.0](http://libnoise.sourceforge.net/) and add header/library files to project
  * Add libevent library to project (libevent.lib)
  * Build
  * Run mineserver.exe
