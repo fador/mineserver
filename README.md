@@ -30,10 +30,11 @@ We are trying to minimize memory and cpu usage compared to original Java server.
  * Basic physics for gravel and sand
  * Experimental physics for water and lava
  * Flatland map generation
+ * Working chests
   
 ### ToDo (Arranged by priority)
  * Map generation with heightmap (In progress)
- * Getting chests, furnaces,signs etc to work (In progress)
+ * Getting furnaces and signs to work (In progress)
  * Plugin support (and Lua plugin for scripting)
  * Multithreading
  * Growing trees etc.
@@ -66,8 +67,8 @@ We are trying to minimize memory and cpu usage compared to original Java server.
 ### Compiling
 Depends on (and tested with):
 
- * [zlib 1.2.5](http://www.zlib.org)
- * [libevent 1.4.14b](http://monkey.org/~provos/libevent/)
+ [zlib 1.2.5](http://www.zlib.org)   
+ [libevent 1.4.14b](http://monkey.org/~provos/libevent/)
 
  * Installing on Debian and Ubuntu:
 

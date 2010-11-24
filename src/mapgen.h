@@ -36,13 +36,22 @@ private:
   uint8 *skylight;
   uint8 *blocklight;
   uint8 *heightmap;
+
+  float** heightMap;
+  float** steepnessMap;
+  float** caveTop;
+  float** caveBottom;
+  float** caveTop2;
+  float** caveBottom2;
   
   int randomSeed;
+  int oreDensity;
+  int seaLevel;
   
   int getHeightmapIndex(char x, char z);
   void calculateHeightmap();
   void loadFlatgrass();
-  //void generateWithNoise(int x, int z);
+  void generateWithNoise(int x, int z);
 
 
 public:

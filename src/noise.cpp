@@ -182,6 +182,8 @@ float Noise::PerlinNoise(float x, float y, int startOctave, int endOctave, float
     frequency *= 2;
     amplitude *= decay;
   }
+  std::cout << "XjaY Perlinnoise: " << x << " " << y << std::endl;
+  std::cout << "Noise: " << total << std::endl;
   return total;
 }
 
@@ -193,7 +195,8 @@ void Noise::PerlinNoiseMap(float** heightmap, int startOctave, int endOctave, fl
   {
     for(int y = 16 - 1; y >= 0; y--) 
     {
-      heightmap[x][y] += PerlinNoise(x * maxDim + offsetX, y * maxDim + offsetY, startOctave, endOctave, decay);
+      std::cout << "XjaY PerlinnoiseMAP: " << x << " " << y << std::endl;
+      heightmap[x][y] = PerlinNoise(x * maxDim + offsetX, y * maxDim + offsetY, startOctave, endOctave, decay);
     }
   }
 }
