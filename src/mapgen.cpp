@@ -161,7 +161,7 @@ void MapGen::generateChunk(int x, int z)
   Map::get().maps[chunkid].nbt = main;
 }
 
-void MapGen::generateWithNoise(int x, int z) 
+/*void MapGen::generateWithNoise(int x, int z) 
 {
   // Ore arrays
   uint8* oreX;
@@ -494,4 +494,4 @@ void MapGen::generateWithNoise(int x, int z)
     }
     CalculateHeightmap();
   }
-}
+}*/
