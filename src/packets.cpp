@@ -720,6 +720,7 @@ int PacketHandler::player_block_placement(User *user)
     //if (oy > y)
     //  return PACKET_OK;
     // ^ Replace this code with something to check if there is a block under it
+    // ^ ^ Or check if it's legal to place a stair with no block under it
 
     // We cannot place stairs without a direction
     if (y == oy && x == ox && z == oz)
