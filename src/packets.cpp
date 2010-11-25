@@ -716,6 +716,8 @@ int PacketHandler::player_block_placement(User *user)
     // +Z -> West   0x2
     // -Z -> East   0x3
     
+    //TODO: Check the surrounding for other stairs and allign it with them.
+    
     uint8 block_bottom;
     uint8 metadata_bottom;
     Map::get().getBlock(x, y - 1, z, &block_bottom, &metadata_bottom);
@@ -738,7 +740,7 @@ int PacketHandler::player_block_placement(User *user)
         block_bottom == BLOCK_FIRE)
       return PACKET_OK;
 
-    if (y == oy && (x != ox && y != oy && z != oz))
+    if (y == oy && (x != ox || y != oy || z != oz))
     {
       // We place according to the target block
 
@@ -778,10 +780,7 @@ int PacketHandler::player_block_placement(User *user)
       }
     }
   }
-  
-  std::cout << std::endl;
-  
-  
+
   // We can place saplings only on dirt or grass
   
   if (blockID == BLOCK_SAPLING &&
