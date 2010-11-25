@@ -172,11 +172,13 @@ bool Map::generateLight(int x, int z)
 
   // Sky light
   int light = 0;
+  bool foundheight = false;
   for(int block_x = 0; block_x < 16; block_x++)
   {
     for(int block_z = 0; block_z < 16; block_z++)
     {
       light = 15;
+      foundheight = false;
 
       for(int block_y = 127; block_y > 0; block_y--)
       {
@@ -187,9 +189,12 @@ bool Map::generateLight(int x, int z)
 
         light -= stopLight[block];
 
-        if (light < 1) {
+        if ((stopLight[block] > 0) && (foundheight == false)) {
           heightmap[block_z+(block_x<<4)] = ((block_y == 127) ? block_y : block_y + 1);
+          foundheight = true;
+        }
 
+        if (light < 1) {
           if (block_y > highest_y)
             highest_y = block_y;
 
@@ -284,22 +289,28 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight)
       bool spread = false;
 
       skylightNew = skylight-stopLight[block]-1;
+      if (skylightNew < 0)
+        skylightNew = 0;
+
       blocklightNew = blocklight-stopLight[block]-1;
+      if (blocklightNew < 0)
+        blocklightNew = 0;
 
       getLight(x_toset, y_toset, z_toset, &skylightCurrent, &blocklightCurrent);
 
       if (skylightNew > skylightCurrent) {
-        setLight(x_toset, y_toset, z_toset, skylightNew, 0, 1);
+        skylightCurrent = skylightNew;
         spread = true;
       }
 
       if (blocklightNew > blocklightCurrent) {
-        setLight(x_toset, y_toset, z_toset, 0, blocklightNew, 2);
+        blocklightCurrent = blocklightNew;
         spread = true;
       }
 
       if (spread) {
-        spreadLight(x_toset, y_toset, z_toset, skylightNew, blocklightNew);
+        setLight(x_toset, y_toset, z_toset, skylightCurrent, blocklightCurrent, 1);
+        spreadLight(x_toset, y_toset, z_toset, skylightCurrent, blocklightCurrent);
       }
     }
   }
@@ -602,8 +613,8 @@ void Map::createPickupSpawn(int x, int y, int z, int type, int count)
 bool Map::loadMap(int x, int z, bool generate)
 {
 #ifdef _DEBUG
-#endif
   printf("loadMap(x=%d, z=%d, generate=%d)\n", x, z, generate);
+#endif
 
   uint32 mapId;
   Map::posToId(x, z, &mapId);
@@ -817,8 +828,8 @@ void Map::sendToUser(User *user, int x, int z)
 
     memcpy(&mapdata[0], maps[mapId].blocks, 32768);
     memcpy(&mapdata[32768], maps[mapId].data, 16384);
-    memcpy(&mapdata[32768+16384], maps[mapId].skylight, 16384);
-    memcpy(&mapdata[32768+16384+16384], maps[mapId].blocklight, 16384);
+    memcpy(&mapdata[32768+16384], maps[mapId].blocklight, 16384);
+    memcpy(&mapdata[32768+16384+16384], maps[mapId].skylight, 16384);
 
     uLongf written = 81920;
     Bytef *buffer = new Bytef[written];
