@@ -27,6 +27,7 @@
 
 #include "plugin.h"
 #include "blocks/basic.h"
+#include "blocks/falling.h"
 
 Plugin &Plugin::get()
 {
@@ -38,14 +39,22 @@ void Plugin::init()
 {
    // Set default behaviours 
    Callback call;
-   BlockBasic* block = new BlockBasic();
-   call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(block));
-   call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(block));
+   /* FIXME: must remember to delete these somewhere */
+   BlockBasic* basicblock = new BlockBasic();
+   call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
+   call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
    setBlockCallback(BLOCK_STONE, call);
    setBlockCallback(BLOCK_GRASS, call);
    setBlockCallback(BLOCK_DIRT, call);
    setBlockCallback(BLOCK_COBBLESTONE, call);
    setBlockCallback(BLOCK_WOOD, call);
+
+   BlockFalling* fallingblock = new BlockFalling();
+   call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
+   call.add("onPlace", Function::from_method<BlockFalling, &BlockFalling::onPlace>(fallingblock));
+   call.add("onNeighbourBroken", Function::from_method<BlockFalling, &BlockFalling::onNeighbourBroken>(fallingblock));
+   setBlockCallback(BLOCK_SAND, call);
+   setBlockCallback(BLOCK_GRAVEL, call);
 }
 
 void Plugin::setBlockCallback(const int type, Callback call)

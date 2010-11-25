@@ -25,47 +25,52 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "basic.h"
+#include "falling.h"
 
-void BlockBasic::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFalling::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockBasic::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFalling::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockBasic::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFalling::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockBasic::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFalling::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-   uint8 block;
-   uint8 meta;
-   if (Map::get().getBlock(x, y, z, &block, &meta))
+}
+
+void BlockFalling::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+   uint8 block; uint8 meta;
+/*
+   if (Map::get().getBlock(x, y-1, z, &block, &meta) && block == BLOCK_AIR)
    {
-      Map::get().sendBlockChange(x, y, z, 0, 0);
-      Map::get().setBlock(x, y, z, 0, 0);
-
-      int count = 1;
-      if (BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand() % 10000)
-      {
-          block = BLOCKDROPS[block].item_id;
-          count = BLOCKDROPS[block].count;
-          Map::get().createPickupSpawn(x, y, z, block, count);
-      }
-   }
+       if (Map::get().getBlock(x, y, z, &block, &meta) && (block == BLOCK_SNOW ||
+                                                       block == BLOCK_BROWN_MUSHROOM ||
+                                                       block == BLOCK_RED_MUSHROOM ||
+                                                       block == BLOCK_YELLOW_FLOWER ||
+                                                       block == BLOCK_RED_ROSE ||
+                                                       block == BLOCK_SAPLING))
+       {
+         Map::get().sendBlockChange(x, y+1, z, 0, 0);
+         Map::get().setBlock(x, y+1, z, 0, 0);
+         //Others than snow will spawn
+         if(block != BLOCK_SNOW)
+         {
+            Map::get().createPickupSpawn(x, y+1, z, block, 1);
+         }
+       }
+   }*/
 }
 
-void BlockBasic::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
-
-void BlockBasic::onPlace(User* user, sint8 block, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFalling::onPlace(User* user, sint8 block, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
    uint8 topblock;
    uint8 topmeta;
