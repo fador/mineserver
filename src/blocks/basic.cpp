@@ -25,53 +25,44 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "basic.h"
 
-#include <string>
-#include <vector>
-#include <map>
-
-#include "constants.h"
-#include "delegate/delegate.hpp"
-
-#ifdef SRUTIL_DELEGATE_PREFERRED_SYNTAX
-typedef srutil::delegate<void (int, int)> Delegate;
-#else
-typedef srutil::delegate2<void, int, int> Delegate;
-#endif
-
-class Object
+void BlockBasic::setData(User* user, int x, int y, int z, int meta)
 {
-public:
-   Object(void* obj)
-   {
-      this->obj = obj;
-//      callbacks.insert(std::pair<std::string, Delegate>("onStartedDigging", Delegate::from_function<&obj->onStartedDigging>());
-   }
-   
-   ~Object()
-   {
-      if (this->obj) {
-         delete &this->obj;
-      }
-   }
-private:
-   void* obj;
-/*   typedef std::map<std::string, Delegate> Callbacks;
-   Callbacks callbacks;*/
-};
+   this->user = user;
+   this->x = x;
+   this->y = y;
+   this->z = z;
+   this->meta = meta;
+}
 
-class Plugin
+void BlockBasic::onStartedDigging()
 {
-private:
-   Plugin()
-   {
-   }
-   std::vector<Object*> blocks;
-public:
-   void initPlugin();
-   void setBlockObj(int type, void* obj);
-   Object* getBlockObj(int type);
-   static Plugin &get();
-};
+   printf("works\n");
+}
+
+void BlockBasic::onDigging()
+{
+
+}
+
+void BlockBasic::onStoppedDigging()
+{
+
+}
+
+void BlockBasic::onBreak()
+{
+
+}
+
+void BlockBasic::onNeighbourBreak(int x, int y, int z, int type, int meta)
+{
+
+}
+
+void BlockBasic::onPlace()
+{
+
+}
 

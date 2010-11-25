@@ -27,51 +27,26 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-#include <map>
+#include <stdio.h>
 
-#include "constants.h"
-#include "delegate/delegate.hpp"
+class User;
 
-#ifdef SRUTIL_DELEGATE_PREFERRED_SYNTAX
-typedef srutil::delegate<void (int, int)> Delegate;
-#else
-typedef srutil::delegate2<void, int, int> Delegate;
-#endif
-
-class Object
-{
-public:
-   Object(void* obj)
-   {
-      this->obj = obj;
-//      callbacks.insert(std::pair<std::string, Delegate>("onStartedDigging", Delegate::from_function<&obj->onStartedDigging>());
-   }
-   
-   ~Object()
-   {
-      if (this->obj) {
-         delete &this->obj;
-      }
-   }
-private:
-   void* obj;
-/*   typedef std::map<std::string, Delegate> Callbacks;
-   Callbacks callbacks;*/
-};
-
-class Plugin
+class BlockBasic
 {
 private:
-   Plugin()
-   {
-   }
-   std::vector<Object*> blocks;
+   User* user;
+   int x;
+   int y;
+   int z;
+   int meta;
+
 public:
-   void initPlugin();
-   void setBlockObj(int type, void* obj);
-   Object* getBlockObj(int type);
-   static Plugin &get();
+   void setData(User* user, int x, int y, int z, int meta);
+   void onStartedDigging();
+   void onDigging();
+   void onStoppedDigging();
+   void onBreak();
+   void onNeighbourBreak(int x, int y, int z, int type, int meta);
+   void onPlace();
 };
 

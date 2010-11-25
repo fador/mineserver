@@ -26,6 +26,7 @@
  */
 
 #include "plugin.h"
+#include "blocks/basic.h"
 
 Plugin &Plugin::get()
 {
@@ -35,29 +36,24 @@ Plugin &Plugin::get()
 
 void Plugin::initPlugin()
 {
-   // populate all block behaviour with default functions
-   this->setBlockBehaviour(BLOCK_STONE, newDelegate(BlockBasic));
-   this->setBlockBehaviour(BLOCK_GRASS, newDelegate(BlockBasic));
-   this->setBlockBehaviour(BLOCK_DIRT, newDelegate(BlockBasic));
-   this->setBlockBehaviour(BLOCK_COBBLESTONE, newDelegate(BlockBasic));   
+   // Set default behaviours 
+   this->setBlockObj(BLOCK_STONE, new BlockBasic);
 }
 
-bool Plugin::setBlockBehaviour(int type, std::string func, void* delegate)
+void Plugin::setBlockObj(int type, void* obj)
 {
-   if (!blocks.has(type))
-   {
-      Delegates block;
-      blocks.insert(block);
-   }
-   
-   Delegates block = blocks.at(type);
-   block.insert(std::pair<std::string,void*>(func, delegate));
-   blocks.insert(block);
-   return false;
+   Object* call = new Object(&obj);
+  
+   // remove old obj
+   if (this->blocks.at(type))
+      delete &this->blocks.at(type);
+
+   this->blocks[type] = call;
 }
 
-bool Plugin::setBlockBehaviour(int type, void* delegate)
+Object* Plugin::getBlockObj(int type)
 {
-   this->setBlockBehaviour(type, "onStartedDigging", delegate->onStartedDigging());
-   return false;
+   if (!this->blocks.at(type))
+      return this->blocks.at(type);
+   return 0;
 }
