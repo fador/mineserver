@@ -48,11 +48,18 @@ void BlockBasic::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
 {
    uint8 block;
    uint8 meta;
-   if (Map::get().getBlock(x+1, y, z, &block, &meta))
+   if (Map::get().getBlock(x, y, z, &block, &meta))
    {
       Map::get().sendBlockChange(x, y, z, 0, 0);
       Map::get().setBlock(x, y, z, 0, 0);
-      Map::get().createPickupSpawn(x, y, z+1, block, 1);
+
+      int count = 1;
+      if (BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand() % 10000)
+      {
+          block = BLOCKDROPS[block].item_id;
+          count = BLOCKDROPS[block].count;
+          Map::get().createPickupSpawn(x, y, z, block, count);
+      }
    }
 }
 
@@ -82,15 +89,12 @@ void BlockBasic::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, 
 
 void BlockBasic::onPlace(User* user, sint8 block, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-   Map::get().setBlock(x, y, z, (char)block, direction);
-   Map::get().sendBlockChange(x, y, z, (char)block, direction);
-
-   int count = 1;
-   if (BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand() % 10000)
+   uint8 topblock;
+   uint8 topmeta;
+   if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta))
    {
-       block  = BLOCKDROPS[block].item_id;
-       count = BLOCKDROPS[block].count;
-       Map::get().createPickupSpawn(x+1, y, z, (uint8)block, 1);
+      Map::get().setBlock(x, y+1, z, (char)block, direction);
+      Map::get().sendBlockChange(x, y+1, z, (char)block, direction);
    }
 }
 
