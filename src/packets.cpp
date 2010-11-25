@@ -710,6 +710,7 @@ int PacketHandler::player_block_placement(User *user)
   
   if (blockID == BLOCK_JACK_O_LANTERN)
   {
+    // Where the visage face
     // -Z -> East   0x0
     // +X -> South  0x1
     // +Z -> West   0x2
@@ -747,6 +748,7 @@ int PacketHandler::player_block_placement(User *user)
   if (blockID == BLOCK_WOODEN_STAIRS ||
       blockID == BLOCK_COBBLESTONE_STAIRS)
   {
+    // Where the stairs ascend
     // +X -> South  0x0
     // -X -> North  0x1
     // +Z -> West   0x2
