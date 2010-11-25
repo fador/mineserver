@@ -129,6 +129,22 @@ private:
 
     items.clear();
 
+    std::string infile = mapDirectory+"/level.dat";
+
+    NBT_Value *root = NBT_Value::LoadFromFile(infile);
+    if(root != NULL)
+    {
+      NBT_Value &data = *((*root)["Data"]);
+
+      //Get time from the map
+      *data["Time"] = mapTime;
+
+      root->SaveToFile(infile);
+
+      delete root;
+    }
+
+
   }
 
 
@@ -167,6 +183,9 @@ public:
   void initMap();
   void freeMap();
   void sendToUser(User *user, int x, int z);
+
+  //Time in the map
+  sint64 mapTime;
 
   // Get pointer to struct
   sChunk *getMapData(int x, int z, bool generate = true);

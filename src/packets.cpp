@@ -149,7 +149,7 @@ int PacketHandler::login_request(User *user)
     << (sint32)user->UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
 
   //Send server time (after dawn)
-  user->buffer << (sint8)PACKET_TIME_UPDATE << (sint64) 0x0e00;
+  user->buffer << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get().mapTime;
 
   //Inventory
   for(sint32 invType=-1; invType != -4; invType--)

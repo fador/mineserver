@@ -173,6 +173,15 @@ void kick(User *user, std::string command, std::deque<std::string> args)
     reportError(user, "Usage: /kick user [reason]");
 }
 
+void setTime(User *user, std::string command, std::deque<std::string> args)
+{
+  if(args.size() == 1)
+  {
+    Map::get().mapTime = (sint64)atoi(args[0].c_str());
+    Chat::get().sendMsg(user, COLOR_MAGENTA + "Time set", Chat::USER);
+  }
+}
+
 void coordinateTeleport(User *user, std::string command, std::deque<std::string> args)
 {
   if(args.size() > 2)
@@ -360,4 +369,5 @@ void Chat::registerStandardCommands()
   registerCommand("reload", reloadConfiguration, true);
   registerCommand("give", giveItems, true);
   registerCommand("gps", showPosition, true);
+  registerCommand("settime", setTime, true);
 }

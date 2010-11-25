@@ -107,8 +107,11 @@ void Map::initMap()
   spawnPos.y() = (sint32)*data["SpawnY"];
   spawnPos.z() = (sint32)*data["SpawnZ"];
 
+  //Get time from the map
+  mapTime      = (sint64)*data["Time"];
 
-  root->SaveToFile("test.nbt");
+
+  //root->SaveToFile("test.nbt");
 
   delete root;
 
