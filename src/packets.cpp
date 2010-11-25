@@ -65,6 +65,7 @@
 #include "nbt.h"
 #include "packets.h"
 #include "physics.h"
+#include "plugin.h"
 
 void PacketHandler::initPackets()
 {
@@ -415,7 +416,8 @@ int PacketHandler::player_digging(User *user)
   sint8 status,y;
   sint32 x,z;
   sint8 direction;
-
+  uint8 block;
+  uint8 meta;
   user->buffer >> status >> x >> y >> z >> direction;
 
   if(!user->buffer)
@@ -423,10 +425,22 @@ int PacketHandler::player_digging(User *user)
 
   user->buffer.removePacket();
 
+  if (status == BLOCK_STATUS_STARTED_DIGGING)
+  {
+      if(Map::get().getBlock(x, y, z, &block, &meta))
+      {
+         Function callback = Plugin::get().getBlockCallback(block).get("onStartedDigging");
+         if (callback)
+         {
+            Function::invoker_type inv;
+		      inv(callback);
+         }
+      }
+  }
+
   //If block broken
   if(status == BLOCK_STATUS_BLOCK_BROKEN)
   {
-    uint8 block; uint8 meta;
     if(Map::get().getBlock(x, y, z, &block, &meta))
     {
       Map::get().sendBlockChange(x, y, z, 0, 0);

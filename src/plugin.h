@@ -30,6 +30,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <stdio.h>
 
 #include "delegate/delegate.hpp"
 #include "constants.h"
@@ -50,13 +51,29 @@ public:
    {
       for (Events::iterator iter = callbacks.begin(); iter != callbacks.end(); ++iter)
       {
-         if (iter->first == name)
+         if ((*iter).first == name)
          {
               callbacks.erase(iter);
               return true;
          }
       }
       return false;
+   }
+
+   Function get(std::string name)
+   {
+      printf("%d number of delegates\n", callbacks.size());
+      for (Events::iterator iter = callbacks.begin(); iter != callbacks.end(); iter++)
+      {
+         if ((*iter).first == name)
+         {
+            printf("returning delegate\n");
+            return iter->second;
+         }
+      }
+      printf("Callback event not found\n");
+      Function empty;
+      return empty;
    }
 
 private:

@@ -33,20 +33,12 @@ class User;
 
 class BlockBasic
 {
-private:
-   User* user;
-   int x;
-   int y;
-   int z;
-   int meta;
-
 public:
-   void setData(User* user, int x, int y, int z, int meta);
    void onStartedDigging();
-   void onDigging();
-   void onStoppedDigging();
-   void onBreak();
+   void onDigging(User* user, int x, int y, int z, int meta);
+   void onStoppedDigging(User* user, int x, int y, int z, int meta);
+   void onBreak(User* user, int x, int y, int z, int meta);
    void onNeighbourBreak(int x, int y, int z, int type, int meta);
-   void onPlace();
+   void onPlace(User* user, int x, int y, int z, int meta);
 };
 

@@ -27,31 +27,22 @@
 
 #include "basic.h"
 
-void BlockBasic::setData(User* user, int x, int y, int z, int meta)
-{
-   this->user = user;
-   this->x = x;
-   this->y = y;
-   this->z = z;
-   this->meta = meta;
-}
-
 void BlockBasic::onStartedDigging()
 {
    printf("works\n");
 }
 
-void BlockBasic::onDigging()
+void BlockBasic::onDigging(User* user, int x, int y, int z, int meta)
 {
 
 }
 
-void BlockBasic::onStoppedDigging()
+void BlockBasic::onStoppedDigging(User* user, int x, int y, int z, int meta)
 {
 
 }
 
-void BlockBasic::onBreak()
+void BlockBasic::onBreak(User* user, int x, int y, int z, int meta)
 {
 
 }
@@ -61,7 +52,7 @@ void BlockBasic::onNeighbourBreak(int x, int y, int z, int type, int meta)
 
 }
 
-void BlockBasic::onPlace()
+void BlockBasic::onPlace(User* user, int x, int y, int z, int meta)
 {
 
 }
