@@ -613,32 +613,41 @@ int PacketHandler::player_block_placement(User *user)
     
   // If you cannot overwrite this block
   
-  if (block_direction != BLOCK_AIR &&
-      block_direction != BLOCK_WATER &&
-      block_direction != BLOCK_STATIONARY_WATER &&
-      block_direction != BLOCK_LAVA &&
-      block_direction != BLOCK_STATIONARY_LAVA)
-    return PACKET_OK;
+  //Blocks that drop items once overwritten
+  if (block_direction != BLOCK_SNOW &&
+      block_direction != BLOCK_FIRE &&
+      block_direction != BLOCK_TORCH && 
+      block_direction != BLOCK_REDSTONE_TORCH_OFF &&
+      block_direction != BLOCK_REDSTONE_TORCH_ON &&
+      block_direction != BLOCK_BROWN_MUSHROOM &&
+      block_direction != BLOCK_RED_MUSHROOM &&
+      block_direction != BLOCK_YELLOW_FLOWER &&
+      block_direction != BLOCK_RED_ROSE &&
+      block_direction != BLOCK_SAPLING)
+  {
+    //Blocks that are replaced
+    if (block_direction != BLOCK_AIR &&
+        block_direction != BLOCK_WATER &&
+        block_direction != BLOCK_STATIONARY_WATER &&
+        block_direction != BLOCK_LAVA &&
+        block_direction != BLOCK_STATIONARY_LAVA)
+      {
+        // It's not an overwritable block
+        return PACKET_OK;
+      }
+      
+      // It's ok, but do not drop anything
+  }
+  else
+  {
+    // Drop the item representing the block
+    //TODO: Drop the block
     
-   
-  /*if (block != BLOCK_AIR &&
-      block != BLOCK_WATER &&
-      block != BLOCK_STATIONARY_WATER &&
-      block != BLOCK_LAVA &&
-      block != BLOCK_STATIONARY_LAVA &&
-      block != BLOCK_REDSTONE_WIRE &&
-      block != BLOCK_LADDER &&
-      block != BLOCK_MINECART_TRACKS &&
-      block != BLOCK_WALL_SIGN &&
-      block != BLOCK_STONE_PRESSURE_PLATE &&
-      block != BLOCK_WOODEN_PRESSURE_PLATE &&
-      block != BLOCK_STONE_BUTTON)
-    return PACKET_OK;*/
-    
-  // ^ Logic fuckup, need to reask my brain it's idea.
+    // Overwrite over this block (Directed block)
+  }
 
 
-  //Overwrite over these blocks
+  // Overwrite over these blocks (Target block)
  
   if (block == BLOCK_SNOW || 
       block == BLOCK_FIRE ||
@@ -657,14 +666,14 @@ int PacketHandler::player_block_placement(User *user)
   }
   
   
-  //Door status change
+  // Door status change
   
   if (block == BLOCK_WOODEN_DOOR || 
       block == BLOCK_IRON_DOOR)
   {
     blockID = block;
 
-    //Toggle door state
+    // Toggle door state
     if (metadata & 0x4)
       metadata &= (0x8 | 0x3);
     else
