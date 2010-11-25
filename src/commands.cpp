@@ -257,8 +257,8 @@ void showPosition(User *user, std::string command, std::deque<std::string> args)
 
 void regenerateLighting(User *user, std::string command, std::deque<std::string> args)
 {
-  printf("Regenerating lighting for chunk %d,%d\n", blockToChunk(user->pos.x), blockToChunk(user->pos.z));
-  Map::get().generateLight(blockToChunk(user->pos.x), blockToChunk(user->pos.z));
+  printf("Regenerating lighting for chunk %d,%d\n", blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
+  Map::get().generateLight(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
 }
 
 void reloadConfiguration(User *user, std::string command, std::deque<std::string> args)

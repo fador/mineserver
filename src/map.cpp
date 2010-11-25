@@ -193,8 +193,6 @@ bool Map::generateLight(int x, int z)
         int absolute_z = z*16+block_z;
         uint8 block    = blocks[index];
 
-        setBlockLight(absolute_x, block_y, absolute_z, 0, light, 2);
-
         light -= stopLight[block];
         if (light < 0) { light = 0; }        
 
@@ -652,7 +650,7 @@ bool Map::loadMap(int x, int z, bool generate)
     // If generate (false only for lightmapgenerator)
     if(generate)
     {
-      MapGen mapgen(mapSeed);
+      MapGen mapgen((int)mapSeed);
       mapgen.generateChunk(x,z);
       generateLight(x, z);
       return true;
