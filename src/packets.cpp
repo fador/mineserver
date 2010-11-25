@@ -706,6 +706,42 @@ int PacketHandler::player_block_placement(User *user)
   }
   
   
+  // Jack-O-Lantern
+  
+  if (blockID == BLOCK_JACK_O_LANTERN)
+  {
+    // -Z -> East   0x0
+    // +X -> South  0x1
+    // +Z -> West   0x2
+    // -X -> North  0x3
+    // Anything else, no visage
+
+    // We place according to the player's position
+
+    double diffX = x - user->pos.x;
+    double diffZ = z - user->pos.z;
+    
+    if (std::abs(diffX) > std::abs(diffZ))
+    {
+      // We compare on the x axis
+      
+      if (diffX > 0)
+        metadata = 0x3;
+      else
+        metadata = 0x1;
+    }
+    else
+    {
+      // We compare on the z axis
+      
+      if (diffZ > 0)
+        metadata = 0x0;
+      else
+        metadata = 0x2;
+    }
+  }
+  
+  
   // If the block is stairs, place them in the right direction
   
   if (blockID == BLOCK_WOODEN_STAIRS ||
