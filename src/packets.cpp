@@ -595,6 +595,10 @@ int PacketHandler::player_block_placement(User *user)
   uint8 metadata_direction;
   Map::get().getBlock(x, y, z, &block_direction, &metadata_direction);
   
+  uint8 block_bottom;
+  uint8 metadata_bottom;
+  Map::get().getBlock(x, y - 1, z, &block_bottom, &metadata_bottom);
+  
   Physics::get().checkSurrounding(vec(x, y, z));
   
   
@@ -610,8 +614,16 @@ int PacketHandler::player_block_placement(User *user)
     
     
   // If the block is invalid
-    
+  
   if (blockID > 0xFF || blockID == -1)
+    return PACKET_OK;
+    
+    
+  // Can't place fire on water
+  
+  if (blockID == BLOCK_FIRE &&
+        (block_bottom == BLOCK_WATER ||
+        block_bottom == BLOCK_STATIONARY_WATER))
     return PACKET_OK;
     
     
@@ -755,11 +767,7 @@ int PacketHandler::player_block_placement(User *user)
     // -Z -> East   0x3
     
     //TODO: Check the surrounding for other stairs and allign it with them.
-    
-    uint8 block_bottom;
-    uint8 metadata_bottom;
-    Map::get().getBlock(x, y - 1, z, &block_bottom, &metadata_bottom);
-    
+
     // We cannot place stairs over a weak block
     if (block_bottom == BLOCK_TORCH ||
         block_bottom == BLOCK_REDSTONE_TORCH_OFF ||
