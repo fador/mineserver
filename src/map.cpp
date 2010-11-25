@@ -79,7 +79,7 @@ void Map::idToPos(uint32 id, int *x, int *z)
 
 void Map::initMap()
 {
-#ifdef MSDBG
+#ifdef _DEBUG
   printf("initMap()\n");
 #endif
 
@@ -127,15 +127,13 @@ void Map::freeMap()
 
 sChunk *Map::getMapData(int x, int z, bool generate)
 {
-#ifdef MSDBG
-  printf("getMapData(x=%d, z=%d)\n", x, z);
+#ifdef _DEBUG
+  printf("getMapData(x=%d, z=%d, generate=%d)\n", x, z, generate);
 #endif
 
   uint32 mapId;
   Map::posToId(x, z, &mapId);
-#ifdef MSDBG
-  printf("Getting data for chunk %u\n", mapId);
-#endif
+
   if(!maps.count(mapId) && (!generate || !loadMap(x, z, generate)))
     return 0;
 
@@ -148,40 +146,39 @@ sChunk *Map::getMapData(int x, int z, bool generate)
 
 bool Map::saveWholeMap()
 {
-#ifdef MSDBG
+#ifdef _DEBUG
   printf("saveWholeMap()\n");
 #endif
 
   for(std::map<uint32, sChunk>::const_iterator it = maps.begin(); it != maps.end(); ++it)
     saveMap(maps[it->first].x, maps[it->first].z);
+
   return true;
 }
 
-bool Map::generateLightMaps(int x, int z)
+bool Map::generateLight(int x, int z)
 {
-#ifdef MSDBG
-  printf("generateLightMaps(x=%d, z=%d)\n", x, z);
+#ifdef _DEBUG
+  printf("generateLight(x=%d, z=%d)\n", x, z);
 #endif
 
   uint32 mapId;
   Map::posToId(x, z, &mapId);
 
-  uint8 highest_y = 0;
-
+  uint8 *blocks     = maps[mapId].blocks;
   uint8 *skylight   = maps[mapId].skylight;
   uint8 *blocklight = maps[mapId].blocklight;
-  uint8 *blocks     = maps[mapId].blocks;
   uint8 *heightmap  = maps[mapId].heightmap;
 
+  int highest_y = 0;
+
   // Clear lightmaps
-  memset(blocklight, 0, 16*16*128/2);
   memset(skylight, 0, 16*16*128/2);
+  memset(blocklight, 0, 16*16*128/2);
 
-  // Skylight
-
+  // Sky light
   int light = 0;
   bool foundheight = false;
-  // First set sunlight for all blocks until hit ground
   for(int block_x = 0; block_x < 16; block_x++)
   {
     for(int block_z = 0; block_z < 16; block_z++)
@@ -207,64 +204,52 @@ bool Map::generateLightMaps(int x, int z)
           foundheight = true;
         }
 
-        if (light <= 0)
-        {
-          if(block_y > highest_y)
+        if (light < 1) {
+          if (block_y > highest_y)
             highest_y = block_y;
 
           break;
         }
+
+        setLight(absolute_x, block_y, absolute_z, light, 0, 1);
       }
     }
   }
   
-  // Loop again and now spread the light
-  for(int block_x = 0; block_x < 16; block_x++)
+  // Block light
+  for (int block_x = 0; block_x < 16; block_x++)
   {
-    for(int block_z = 0; block_z < 16; block_z++)
+    for (int block_z = 0; block_z < 16; block_z++)
     {
-      light = 15;
-      //Start from highest pos of the chunk, might still mess lighting
-      // if neighboring chunks are higher..
-      for(int block_y = highest_y; block_y >= 0; block_y--)
+      for (int block_y = highest_y; block_y >= 0; block_y--)
       {
         int index      = block_y + (block_z * 128) + (block_x * 128 * 16);
         int absolute_x = x*16+block_x;
         int absolute_z = z*16+block_z;
         uint8 block    = blocks[index];
 
-        if(stopLight[block] == 16)
-        {
-          setBlockLight(absolute_x, block_y, absolute_z, 0, light, 2);
-          break;
-        }
-        else
-        {
-          setBlockLight(absolute_x, block_y, absolute_z, 0, 15-stopLight[block], 2);
-          lightmapStep(absolute_x, block_y, absolute_z, 15-stopLight[block]);
-          light-=stopLight[block];
-        }
+        // If light emitting block
+        if(emitLight[block] > 0)
+          setLight(absolute_x, block_y, absolute_z, 0, emitLight[block], 2);
       }
     }
   }
   
-  // Blocklight
-  for(uint8 block_x = 0; block_x < 16; block_x++)
+  // Spread light
+  for (int block_x = 0; block_x < 16; block_x++)
   {
-    for(uint8 block_z = 0; block_z < 16; block_z++)
+    for (int block_z = 0; block_z < 16; block_z++)
     {
-      //Start searching from first block pos
-      for(int block_y = heightmap[block_z+(block_x<<4)]; block_y >= 0; block_y--)
+      for (int block_y = heightmap[block_z+(block_x<<4)]; block_y >= 0; block_y--)
       {
-        int index = block_y + (block_z * 128) + (block_x * 128 * 16);
+        int absolute_x = x*16+block_x;
+        int absolute_z = z*16+block_z;
+        uint8 skylight, blocklight;
 
-        // If light emitting block
-        if(emitLight[blocks[index]])
-        {
-          int absolute_x = x*16+block_x;
-          int absolute_z = z*16+block_z;
-          blocklightmapStep(absolute_x, block_y, absolute_z, emitLight[blocks[index]]);
-        }
+        getLight(absolute_x, block_y, absolute_z, &skylight, &blocklight);
+
+        if (skylight || blocklight)
+          spreadLight(absolute_x, block_y, absolute_z, skylight, blocklight);
       }
     }
   }
@@ -272,107 +257,73 @@ bool Map::generateLightMaps(int x, int z)
   return true;
 }
 
-bool Map::blocklightmapStep(int x, int y, int z, int light)
+bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight)
 {
-#ifdef MSDBG
-  printf("blocklightmapStep(x=%d, y=%d, z=%d, light=%d)\n", x, y, z, light);
+#ifdef _DEBUG
+  printf("spreadLight(x=%d, y=%d, z=%d, skylight=%d, blocklight=%d)\n", x, y, z, skylight, blocklight);
 #endif
 
   uint8 block, meta;
 
   // If no light, stop!
-  if(light < 1)
+  if((skylight < 1) && (blocklight < 1))
     return false;
 
-  for(uint8 i = 0; i < 6; i++)
+  for(int i = 0; i < 6; i++)
   {
     // Going too high
     if((y == 127) && (i == 2))
       i++;
     // going negative
-    else if((y == 0) && (i == 3))
+    if((y == 0) && (i == 3))
       i++;
 
-    int x_local = x;
-    int y_local = y;
-    int z_local = z;
+    int x_toset = x;
+    int y_toset = y;
+    int z_toset = z;
 
     switch(i)
     {
-      case 0: x_local++; break;
-      case 1: x_local--; break;
-      case 2: y_local++; break;
-      case 3: y_local--; break;
-      case 4: z_local++; break;
-      case 5: z_local--; break;
+      case 0: x_toset++; break;
+      case 1: x_toset--; break;
+      case 2: y_toset++; break;
+      case 3: y_toset--; break;
+      case 4: z_toset++; break;
+      case 5: z_toset--; break;
     }
 
-    if(getBlock(x_local, y_local, z_local, &block, &meta, false))
+    if (getBlock(x_toset, y_toset, z_toset, &block, &meta, false))
     {
-      uint8 blocklight, skylight;
+      uint8 skylightCurrent, blocklightCurrent;
+      int skylightNew, blocklightNew;
+      bool spread = false;
 
-      getBlockLight(x_local, y_local, z_local, &blocklight, &skylight);
+      skylightNew = skylight-stopLight[block]-1;
+      if (skylightNew < 0)
+        skylightNew = 0;
 
-      if(blocklight < light-stopLight[block]-1)
+      blocklightNew = blocklight-stopLight[block]-1;
+      if (blocklightNew < 0)
+        blocklightNew = 0;
+
+      getLight(x_toset, y_toset, z_toset, &skylightCurrent, &blocklightCurrent);
+
+      if (skylightNew > skylightCurrent)
       {
-        setBlockLight(x_local, y_local, z_local, light-stopLight[block]-1, 0, 1);
-
-        if(stopLight[block] != 16)
-          blocklightmapStep(x_local, y_local, z_local, light-stopLight[block]-1);
+        skylightCurrent = skylightNew;
+        spread = true;
       }
-    }
-  }
 
-  return true;
-}
-
-bool Map::lightmapStep(int x, int y, int z, int light)
-{
-#ifdef MSDBG
-  printf("lightmapStep(x=%d, y=%d, z=%d, light=%d)\n", x, y, z, light);
-#endif
-
-  uint8 block, meta;
-
-  // If no light, stop!
-  if(light < 1)
-    return false;
-
-  for(uint8 i = 0; i < 6; i++)
-  {
-    // Going too high
-    if(y == 127 && i == 2)
-      i++;
-    // going negative
-    else if(y == 0 && i == 3)
-      i++;
-
-    int x_local = x;
-    int y_local = y;
-    int z_local = z;
-
-    switch(i)
-    {
-      case 0: x_local++; break;
-      case 1: x_local--; break;
-      case 2: y_local++; break;
-      case 3: y_local--; break;
-      case 4: z_local++; break;
-      case 5: z_local--; break;
-    }
-
-    if(getBlock(x_local, y_local, z_local, &block, &meta, false))
-    {
-      uint8 blocklight, skylight;
-
-      getBlockLight(x_local, y_local, z_local, &blocklight, &skylight);
-
-      if(skylight < light-stopLight[block]-1)
+      if (blocklightNew > blocklightCurrent)
       {
-        setBlockLight(x_local, y_local, z_local, 0, light-stopLight[block]-1, 2);
+        blocklightCurrent = blocklightNew;
+        spread = true;
+      }
 
-        if(stopLight[block] != 16)
-          lightmapStep(x_local, y_local, z_local, light-stopLight[block]-1);
+      if (spread)
+      {
+        setLight(x_toset, y_toset, z_toset, skylightCurrent, blocklightCurrent, 4);
+        spreadLight(x_toset, y_toset, z_toset, skylightCurrent, blocklightCurrent);
       }
     }
   }
@@ -382,7 +333,7 @@ bool Map::lightmapStep(int x, int y, int z, int light)
 
 bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate)
 {
-#ifdef MSDBG
+#ifdef _DEBUG
   printf("getBlock(x=%d, y=%d, z=%d)\n", x, y, z);
 #endif
 
@@ -414,7 +365,7 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate)
   uint8 *blocks      = chunk->blocks;
   uint8 *metapointer = chunk->data;
   int index          = y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
-  *type = blocks[index];
+  *type              = blocks[index];
   uint8 metadata     = metapointer[(index)>>1];
 
   if(y%2)
@@ -431,39 +382,39 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate)
   return true;
 }
 
-bool Map::getBlockLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight)
+bool Map::getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight)
 {
-#ifdef MSDBG
-  printf("getBlockLight(x=%d, y=%d, z=%d)\n", x, y, z);
+#ifdef _DEBUG
+  printf("getLight(x=%d, y=%d, z=%d, skylight=%p, blocklight=%p)\n", x, y, z, skylight, blocklight);
 #endif
 
   if((y < 0) || (y > 127))
   {
-    LOG("Invalid y value (getBlockLight)");
+    LOG("Invalid y value (getLight)");
     return false;
   }
 
   // Map chunk pos from block pos
-  int chunk_x       = blockToChunk(x);
-  int chunk_z       = blockToChunk(z);
+  int chunk_x = blockToChunk(x);
+  int chunk_z = blockToChunk(z);
 
   sChunk *chunk = getMapData(chunk_x, chunk_z, false);
 
   if(!chunk)
   {
-    LOG("Loading chunk failed (getBlockLight)");
+    LOG("Loading chunk failed (getLight)");
     return false;
   }
 
   // Which block inside the chunk
-  int chunk_block_x        = blockToChunkBlock(x);
-  int chunk_block_z        = blockToChunkBlock(z);
+  int chunk_block_x = blockToChunkBlock(x);
+  int chunk_block_z = blockToChunkBlock(z);
 
-  uint8 *blocklightpointer = chunk->blocklight;
-  uint8 *skylightpointer   = chunk->skylight;
-  int index                = y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
-  *blocklight = blocklightpointer[(index)>>1];
-  *skylight   = skylightpointer[(index)>>1];
+  uint8 *blocklightPtr = chunk->blocklight;
+  uint8 *skylightPtr   = chunk->skylight;
+  int index            = y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
+  *blocklight = blocklightPtr[(index)>>1];
+  *skylight   = skylightPtr[(index)>>1];
 
   if(y%2)
   {
@@ -482,47 +433,47 @@ bool Map::getBlockLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight)
   return true;
 }
 
-bool Map::setBlockLight(int x, int y, int z, uint8 blocklight, uint8 skylight, uint8 setLight)
+bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type)
 {
-#ifdef MSDBG
-  printf("setBlockLight(x=%d, y=%d, z=%d, %u, %u)\n", x, z, blocklight, skylight, setLight);
+#ifdef _DEBUG
+  printf("setLight(x=%d, y=%d, z=%d, skylight=%d, blocklight=%d, type=%d)\n", x, y, z, skylight, blocklight, type);
 #endif
 
   if((y < 0) || (y > 127))
   {
-    LOG("Invalid y value (setBlockLight)");
+    LOG("Invalid y value (setLight)");
     return false;
   }
 
-  int chunk_x       = blockToChunk(x);
-  int chunk_z       = blockToChunk(z);
+  int chunk_x = blockToChunk(x);
+  int chunk_z = blockToChunk(z);
 
   sChunk *chunk = getMapData(chunk_x, chunk_z, false);
 
   if(!chunk)
   {
-    LOG("Loading chunk failed (setBlockLight)");
+    LOG("Loading chunk failed (setLight)");
     return false;
   }
 
   int chunk_block_x        = blockToChunkBlock(x);
   int chunk_block_z        = blockToChunkBlock(z);
 
-  uint8 *blocklightpointer = chunk->blocklight;
-  uint8 *skylightpointer   = chunk->skylight;
+  uint8 *blocklightPtr     = chunk->blocklight;
+  uint8 *skylightPtr       = chunk->skylight;
   int index                = y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
-  char skylight_local      = skylightpointer[index>>1];
-  char blocklight_local    = blocklightpointer[index>>1];
+  char skylight_local      = skylightPtr[index>>1];
+  char blocklight_local    = blocklightPtr[index>>1];
 
   if(y % 2)
   {
-    if(setLight & 0x6) // 2 or 4
+    if(type & 0x5) // 1 or 4
     {
       skylight_local &= 0x0f;
       skylight_local |= skylight<<4;
     }
 
-    if(setLight & 0x5) // 1 or 4
+    if(type & 0x6) // 2 or 4
     {
       blocklight_local &= 0x0f;
       blocklight_local |= blocklight<<4;
@@ -530,33 +481,31 @@ bool Map::setBlockLight(int x, int y, int z, uint8 blocklight, uint8 skylight, u
   }
   else
   {
-    if(setLight & 0x6) // 2 or 4
+    if(type & 0x5) // 1 or 4
     {
       skylight_local &= 0xf0;
       skylight_local |= skylight;
     }
 
-    if(setLight & 0x5) // 1 or 4
+    if(type & 0x6) // 2 or 4
     {
       blocklight_local &= 0xf0;
       blocklight_local |= blocklight;
     }
   }
 
-  if(setLight & 0x6) // 2 or 4
+  if(type & 0x5) // 1 or 4
+    skylightPtr[index>>1] = skylight_local;
 
-    skylightpointer[index>>1] = skylight_local;
-
-  if(setLight & 0x5) // 1 or 4
-
-    blocklightpointer[index>>1] = blocklight_local;
+  if(type & 0x6) // 2 or 4
+    blocklightPtr[index>>1] = blocklight_local;
 
   return true;
 }
 
 bool Map::setBlock(int x, int y, int z, char type, char meta)
 {
-#ifdef MSDBG
+#ifdef _DEBUG
   printf("setBlock(x=%d, y=%d, z=%d, type=%d, char=%d)\n", x, y, z, type, meta);
 #endif
 
@@ -573,7 +522,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   uint32 mapId;
   Map::posToId(chunk_x, chunk_z, &mapId);
 
-  sChunk *chunk = getMapData(chunk_x, chunk_z);
+  sChunk *chunk = getMapData(chunk_x, chunk_z, true);
 
   if(!chunk)
   {
@@ -611,7 +560,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
 
 bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
 {
-#ifdef MSDBG
+#ifdef _DEBUG
   printf("sendBlockChange(x=%d, y=%d, z=%d, type=%d, meta=%d)\n", x, y, z, type, meta);
 #endif
 
@@ -676,8 +625,8 @@ void Map::createPickupSpawn(int x, int y, int z, int type, int count)
 
 bool Map::loadMap(int x, int z, bool generate)
 {
-#ifdef MSDBG
-  printf("loadMap(x=%d, z=%d)\n", x, z);
+#ifdef _DEBUG
+  printf("loadMap(x=%d, z=%d, generate=%d)\n", x, z, generate);
 #endif
 
   uint32 mapId;
@@ -698,19 +647,17 @@ bool Map::loadMap(int x, int z, bool generate)
                        base36_encode(mapposx)+"."+base36_encode(mapposz)+".dat";
 
   struct stat stFileInfo;
-  if(stat(infile.c_str(), &stFileInfo) != 0)
+  if (stat(infile.c_str(), &stFileInfo) != 0)
   {
-    //std::cout << "Mappos: " << x << "," << z << std::endl;
-    
     // If generate (false only for lightmapgenerator)
     if(generate)
-    {    
+    {
       MapGen mapgen(mapSeed);
       mapgen.generateChunk(x,z);
-      generateLightMaps(x, z);
+      generateLight(x, z);
       return true;
-    } 
-    else 
+    }
+    else
     {
       return false;
     }
@@ -779,7 +726,7 @@ bool Map::loadMap(int x, int z, bool generate)
 
 bool Map::saveMap(int x, int z)
 {
-#ifdef MSDBG
+#ifdef _DEBUG
   printf("saveMap(x=%d, z=%d)\n", x, z);
 #endif
 
@@ -793,7 +740,7 @@ bool Map::saveMap(int x, int z)
     return false;
 
   // Recalculate light maps
-  generateLightMaps(x, z);
+  generateLight(x, z);
 
   // Generate map file name
 
@@ -871,7 +818,7 @@ bool Map::releaseMap(int x, int z)
 // Send chunk to user
 void Map::sendToUser(User *user, int x, int z)
 {
-#ifdef MSDBG
+#ifdef _DEBUG
   printf("sendToUser(x=%d, z=%d)\n", x, z);
 #endif
 
@@ -886,10 +833,10 @@ void Map::sendToUser(User *user, int x, int z)
   if(loadMap(x, z))
   {
     // Pre chunk
-  user->buffer << (sint8)PACKET_PRE_CHUNK << mapposx << mapposz << (sint8)1;
+    user->buffer << (sint8)PACKET_PRE_CHUNK << mapposx << mapposz << (sint8)1;
 
     // Chunk
-  user->buffer << (sint8)PACKET_MAP_CHUNK << (sint32)(mapposx * 16) << (sint16)0 << (sint32)(mapposz * 16) 
+    user->buffer << (sint8)PACKET_MAP_CHUNK << (sint32)(mapposx * 16) << (sint16)0 << (sint32)(mapposz * 16) 
       << (sint8)15 << (sint8)127 << (sint8)15;
 
     memcpy(&mapdata[0], maps[mapId].blocks, 32768);
