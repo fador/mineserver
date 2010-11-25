@@ -34,9 +34,11 @@
 
 #include "delegate/delegate.hpp"
 #include "constants.h"
+#include "tools.h"
 
+class User;
 
-typedef srutil::delegate0<void> Function;
+typedef srutil::delegate6<void, User*, sint8, sint32, sint8, sint32, sint8> Function;
 
 class Callback
 {
@@ -62,16 +64,12 @@ public:
 
    Function get(std::string name)
    {
-      printf("%d number of delegates\n", callbacks.size());
       for (Events::iterator iter = callbacks.begin(); iter != callbacks.end(); iter++)
       {
          if ((*iter).first == name)
-         {
-            printf("returning delegate\n");
             return iter->second;
-         }
       }
-      printf("Callback event not found\n");
+
       Function empty;
       return empty;
    }

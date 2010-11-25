@@ -29,6 +29,7 @@
 #define _CONSTANTS_H
 
 #include <map>
+#include <string>
 #include "tools.h"
 
 //

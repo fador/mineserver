@@ -425,18 +425,54 @@ int PacketHandler::player_digging(User *user)
 
   user->buffer.removePacket();
 
-  if (status == BLOCK_STATUS_STARTED_DIGGING)
+  if(!Map::get().getBlock(x, y, z, &block, &meta))
+    return PACKET_OK;
+
+  Callback callback = Plugin::get().getBlockCallback(block);
+  Function event;
+  Function::invoker_type inv(user, status, x, y, z, direction);
+
+  switch(status)
   {
-      if(Map::get().getBlock(x, y, z, &block, &meta))
-      {
-         Function callback = Plugin::get().getBlockCallback(block).get("onStartedDigging");
-         if (callback)
-         {
-            Function::invoker_type inv;
-		      inv(callback);
-         }
-      }
+     case BLOCK_STATUS_STARTED_DIGGING:
+       event = callback.get("onStartedDigging");
+       if (event) inv(event);
+     break;
+     case BLOCK_STATUS_DIGGING:
+     break;
+     case BLOCK_STATUS_STOPPED_DIGGING:
+     break;
+     case BLOCK_STATUS_BLOCK_BROKEN:
+       event = callback.get("onBroken");
+       if (event) inv(event);
+
+       inv = Function::invoker_type(user, status, x+1, y, z, direction);
+       event = callback.get("onNeighbourBroken");
+       if (event) inv(event);
+
+       inv = Function::invoker_type(user, status, x-1, y, z, direction);
+       event = callback.get("onNeighbourBroken");
+       if (event) inv(event);
+
+       inv = Function::invoker_type(user, status, x, y+1, z, direction);
+       event = callback.get("onNeighbourBroken");
+       if (event) inv(event);
+
+       inv = Function::invoker_type(user, status, x, y-1, z, direction);
+       event = callback.get("onNeighbourBroken");
+       if (event) inv(event);
+
+       inv = Function::invoker_type(user, status, x, y, z+1, direction);
+       event = callback.get("onNeighbourBroken");
+       if (event) inv(event);
+
+       inv = Function::invoker_type(user, status, x, y, z-1, direction);
+       event = callback.get("onNeighbourBroken");
+       if (event) inv(event);
+     break;
   }
+
+  return PACKET_OK;
 
   //If block broken
   if(status == BLOCK_STATUS_BLOCK_BROKEN)
@@ -587,6 +623,20 @@ int PacketHandler::player_block_placement(User *user)
   if(direction == -1)
     return PACKET_OK;
 
+  if (direction)
+    direction = 6-direction;
+
+  uint8 block;
+  uint8 metadata;
+  Map::get().getBlock(x, y, z, &block, &metadata);
+
+  Callback callback = Plugin::get().getBlockCallback(block);
+  Function::invoker_type inv(user, blockID, x, y, z, direction);
+  Function event = callback.get("onPlace");
+  if (event) inv(event);
+
+  return PACKET_OK;
+
   orig_x = x; orig_y = y; orig_z = z;
 
   //Invalid y value
@@ -597,8 +647,6 @@ int PacketHandler::player_block_placement(User *user)
   }
   //std::cout << blockID << " (" << x << "," << (int)y_orig << "," << z << ")" << direction << std::endl;
 
-  uint8 block;
-  uint8 metadata;
   Map::get().getBlock(x, y, z, &block, &metadata);
 
   switch(direction)

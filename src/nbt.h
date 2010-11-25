@@ -29,6 +29,7 @@
 #define _NBT_H
 
 #include <map>
+#include <vector>
 
 class NBT_Value
 {

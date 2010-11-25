@@ -26,34 +26,71 @@
  */
 
 #include "basic.h"
+#include "constants.h"
+#include "map.h"
 
-void BlockBasic::onStartedDigging()
-{
-   printf("works\n");
-}
-
-void BlockBasic::onDigging(User* user, int x, int y, int z, int meta)
+void BlockBasic::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockBasic::onStoppedDigging(User* user, int x, int y, int z, int meta)
+void BlockBasic::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockBasic::onBreak(User* user, int x, int y, int z, int meta)
+void BlockBasic::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockBasic::onNeighbourBreak(int x, int y, int z, int type, int meta)
+void BlockBasic::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-
+   uint8 block;
+   uint8 meta;
+   if (Map::get().getBlock(x+1, y, z, &block, &meta))
+   {
+      Map::get().sendBlockChange(x, y, z, 0, 0);
+      Map::get().setBlock(x, y, z, 0, 0);
+      Map::get().createPickupSpawn(x, y, z+1, block, 1);
+   }
 }
 
-void BlockBasic::onPlace(User* user, int x, int y, int z, int meta)
+void BlockBasic::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
+/*   uint8 block; uint8 meta;
 
+   if (Map::get().getBlock(x, y-1, z, &block, &meta) && block == BLOCK_AIR)
+   {
+       if (Map::get().getBlock(x, y, z, &block, &meta) && (block == BLOCK_SNOW ||
+                                                       block == BLOCK_BROWN_MUSHROOM ||
+                                                       block == BLOCK_RED_MUSHROOM ||
+                                                       block == BLOCK_YELLOW_FLOWER ||
+                                                       block == BLOCK_RED_ROSE ||
+                                                       block == BLOCK_SAPLING))
+       {
+         Map::get().sendBlockChange(x, y+1, z, 0, 0);
+         Map::get().setBlock(x, y+1, z, 0, 0);
+         //Others than snow will spawn
+         if(block != BLOCK_SNOW)
+         {
+            Map::get().createPickupSpawn(x, y+1, z, topblock, 1);
+         }
+       }
+   }*/
+}
+
+void BlockBasic::onPlace(User* user, sint8 block, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+   Map::get().setBlock(x, y, z, (char)block, direction);
+   Map::get().sendBlockChange(x, y, z, (char)block, direction);
+
+   int count = 1;
+   if (BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand() % 10000)
+   {
+       block  = BLOCKDROPS[block].item_id;
+       count = BLOCKDROPS[block].count;
+       Map::get().createPickupSpawn(x+1, y, z, (uint8)block, 1);
+   }
 }
 

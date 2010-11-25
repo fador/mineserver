@@ -39,8 +39,13 @@ void Plugin::init()
    // Set default behaviours 
    Callback call;
    BlockBasic* block = new BlockBasic();
-   call.add("onStartedDigging", Function::from_method<BlockBasic, &BlockBasic::onStartedDigging>(block));
+   call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(block));
+   call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(block));
+   setBlockCallback(BLOCK_STONE, call);
    setBlockCallback(BLOCK_GRASS, call);
+   setBlockCallback(BLOCK_DIRT, call);
+   setBlockCallback(BLOCK_COBBLESTONE, call);
+   setBlockCallback(BLOCK_WOOD, call);
 }
 
 void Plugin::setBlockCallback(const int type, Callback call)
@@ -58,7 +63,7 @@ Callback Plugin::getBlockCallback(const int type)
          return (*iter).second;
       }
    }
-   printf("Block callback not found\n");
+
    Callback call;
    return call;
 }

@@ -27,18 +27,20 @@
 
 #pragma once
 
-#include <stdio.h>
+#include <cstdlib>
+
+#include "tools.h"
 
 class User;
 
 class BlockBasic
 {
 public:
-   void onStartedDigging();
-   void onDigging(User* user, int x, int y, int z, int meta);
-   void onStoppedDigging(User* user, int x, int y, int z, int meta);
-   void onBreak(User* user, int x, int y, int z, int meta);
-   void onNeighbourBreak(int x, int y, int z, int type, int meta);
-   void onPlace(User* user, int x, int y, int z, int meta);
+   void onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onPlace(User* user, sint8 block, sint32 x, sint8 y, sint32 z, sint8 direction);
 };
 
