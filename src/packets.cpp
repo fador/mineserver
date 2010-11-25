@@ -611,9 +611,17 @@ int PacketHandler::player_block_placement(User *user)
     return PACKET_OK;
     
     
-  // If you cannot place your block over it
+  // If you cannot overwrite this block
+  
+  if (block_direction != BLOCK_AIR &&
+      block_direction != BLOCK_WATER &&
+      block_direction != BLOCK_STATIONARY_WATER &&
+      block_direction != BLOCK_LAVA &&
+      block_direction != BLOCK_STATIONARY_LAVA)
+    return PACKET_OK;
+    
    
-  if (block != BLOCK_AIR &&
+  /*if (block != BLOCK_AIR &&
       block != BLOCK_WATER &&
       block != BLOCK_STATIONARY_WATER &&
       block != BLOCK_LAVA &&
@@ -625,7 +633,9 @@ int PacketHandler::player_block_placement(User *user)
       block != BLOCK_STONE_PRESSURE_PLATE &&
       block != BLOCK_WOODEN_PRESSURE_PLATE &&
       block != BLOCK_STONE_BUTTON)
-    return PACKET_OK;
+    return PACKET_OK;*/
+    
+  // ^ Logic fuckup, need to reask my brain it's idea.
 
 
   //Overwrite over these blocks
@@ -725,8 +735,7 @@ int PacketHandler::player_block_placement(User *user)
     double diffY = y - user->pos.y;
     double diffZ = z - user->pos.z;
 
-    std::cout << user->pos.x << ", " << user->pos.y << ", " << user->pos.z << "  =>  ";
-    std::cout << diffX << ", " << diffY << ", " << diffZ;
+    //std::cout << user->pos.x << ", " << user->pos.y << ", " << user->pos.z << "  =>  " << diffX << ", " << diffY << ", " << diffZ << std::endl;
     
     // We check Y, X then Z
     if (diffY > -0.3 && diffY < 1.3 && 
