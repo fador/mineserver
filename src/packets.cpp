@@ -619,7 +619,7 @@ int PacketHandler::player_block_placement(User *user)
     return PACKET_OK;
     
     
-  // Can't place fire on water
+  // Can't place fire on/in water
   
   if (blockID == BLOCK_FIRE &&
         (block_bottom == BLOCK_WATER ||
