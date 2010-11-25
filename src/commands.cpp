@@ -240,6 +240,12 @@ void showPosition(User *user, std::string command, std::deque<std::string> args)
   }
 }
 
+void regenerateLighting(User *user, std::string command, std::deque<std::string> args)
+{
+  Map::get().generateLight((int)(user->pos.x/16), (int)(user->pos.z/16));
+  printf("Regenerated lighting for chunk %d,%d\n", (int)(user->pos.x/16), (int)(user->pos.z/16));
+}
+
 void reloadConfiguration(User *user, std::string command, std::deque<std::string> args)
 {
   Chat::get().loadAdmins(ADMINFILE);
@@ -360,4 +366,5 @@ void Chat::registerStandardCommands()
   registerCommand("reload", reloadConfiguration, true);
   registerCommand("give", giveItems, true);
   registerCommand("gps", showPosition, true);
+  registerCommand("regen", regenerateLighting, true);
 }
