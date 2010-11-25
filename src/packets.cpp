@@ -631,30 +631,19 @@ int PacketHandler::player_block_placement(User *user)
   //Overwrite over these blocks
  
   if (block == BLOCK_SNOW || 
-      block == BLOCK_FIRE)
-  {
-    x = ox;
-    y = oy;
-    z = oz;
-  }
-  
-  
-  //Overwrite over these blocks and drop the blockitem
-  
-  if (block == BLOCK_TORCH || 
+      block == BLOCK_FIRE ||
+      block == BLOCK_TORCH || 
       block == BLOCK_REDSTONE_TORCH_OFF ||
       block == BLOCK_REDSTONE_TORCH_ON ||
       block == BLOCK_BROWN_MUSHROOM ||
       block == BLOCK_RED_MUSHROOM ||
       block == BLOCK_YELLOW_FLOWER ||
       block == BLOCK_RED_ROSE ||
-      block == BLOCK_SAPLING) 
+      block == BLOCK_SAPLING)
   {
     x = ox;
     y = oy;
     z = oz;
-    
-    //TODO: drop the item
   }
   
   
