@@ -495,7 +495,7 @@ void MapGen::generateWithNoise(int x, int z)
           else 
           {
             if (bY <= seaLevel)
-              blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_WATER; // FF
+              blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_STATIONARY_WATER; // FF
             else
               blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_AIR; // FF
           }

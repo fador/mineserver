@@ -1,15 +1,15 @@
 # Mineserver
 *by Fador & Nredor and others*
 
-You can find the core team from #mineserver @ irc.esper.net
-Also mail to developers@mineserver.be will reach developers.
+You can find the core team from #mineserver @ irc.esper.net   
+Also mail to developers@mineserver.be will reach us.
 
     Copyright (c) 2010, The Mineserver Project
 
 Custom Minecraft Alpha server software written in C++.
 
 ### == NOTICE ==
-Currently in (early) development. (Alpha stage)
+Currently in (early) development. (Alpha stage)   
 Server still lacks some critical features and should be only used for testing.
 
 **Tested to build on**
@@ -31,13 +31,13 @@ We are trying to minimize memory and cpu usage compared to original Java server.
  * Experimental physics for water and lava
  * Flatland map generation
  * Working chests
+ * Terrain generation
   
 ### ToDo (Arranged by priority)
- * Map generation with heightmap (In progress)
  * Getting furnaces and signs to work (In progress)
  * Plugin support (and Lua plugin for scripting)
  * Multithreading
- * Growing trees etc.
+ * Growing trees and cactuses
  * and more
  
 ### Chat commands
