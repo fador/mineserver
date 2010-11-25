@@ -109,6 +109,8 @@ void Map::initMap()
 
   //Get time from the map
   mapTime      = (sint64)*data["Time"];
+  
+  mapSeed      = (sint64)*data["RandomSeed"];
 
 
   //root->SaveToFile("test.nbt");
@@ -703,7 +705,7 @@ bool Map::loadMap(int x, int z, bool generate)
     // If generate (false only for lightmapgenerator)
     if(generate)
     {    
-      MapGen mapgen(12345678);
+      MapGen mapgen(mapSeed);
       mapgen.generateChunk(x,z);
       generateLightMaps(x, z);
       return true;

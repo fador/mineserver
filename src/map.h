@@ -186,6 +186,9 @@ public:
 
   //Time in the map
   sint64 mapTime;
+  
+  // Map seed
+  sint64 mapSeed;
 
   // Get pointer to struct
   sChunk *getMapData(int x, int z, bool generate = true);
