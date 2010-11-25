@@ -821,8 +821,10 @@ int PacketHandler::player_block_placement(User *user)
 
     //std::cout << user->pos.x << ", " << user->pos.y << ", " << user->pos.z << "  =>  " << diffX << ", " << diffY << ", " << diffZ << std::endl;
     
+    //TODO: Check for doors and fences
+    
     // We check Y, X then Z
-    if (diffY > -0.3 && diffY < 1.3 && 
+    if (diffY > -0.5 && diffY < 1.5 && 
         diffX > -1.3 && diffX < 0.3 && 
         diffZ > -1.3 && diffZ < 0.3)
       return PACKET_OK;
