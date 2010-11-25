@@ -566,6 +566,10 @@ int PacketHandler::player_block_placement(User *user)
 
   user->buffer.removePacket();
   
+  ox = x;
+  oy = y;
+  oz = z;
+  
   // TODO: Handle processing of 
   if(direction == -1)
     return PACKET_OK;
@@ -611,9 +615,9 @@ int PacketHandler::player_block_placement(User *user)
     return PACKET_OK;
     
     
-  // If you cannot overwrite this block
+  // Check if the directed block is replace-able
   
-  //Blocks that drop items once overwritten
+  //Blocks that drop items once replaced
   if (block_direction != BLOCK_SNOW &&
       block_direction != BLOCK_FIRE &&
       block_direction != BLOCK_TORCH && 
@@ -625,7 +629,7 @@ int PacketHandler::player_block_placement(User *user)
       block_direction != BLOCK_RED_ROSE &&
       block_direction != BLOCK_SAPLING)
   {
-    //Blocks that are replaced
+    //Blocks that are simply replaced
     if (block_direction != BLOCK_AIR &&
         block_direction != BLOCK_WATER &&
         block_direction != BLOCK_STATIONARY_WATER &&
@@ -635,15 +639,11 @@ int PacketHandler::player_block_placement(User *user)
         // It's not an overwritable block
         return PACKET_OK;
       }
-      
-      // It's ok, but do not drop anything
   }
   else
   {
     // Drop the item representing the block
-    //TODO: Drop the block
-    
-    // Overwrite over this block (Directed block)
+    //TODO: Drop the item
   }
 
 
@@ -704,6 +704,69 @@ int PacketHandler::player_block_placement(User *user)
       return PACKET_OK;
     }
   }
+  
+  
+  // If the block is stairs, place them in the right direction
+  
+  if (blockID == BLOCK_WOODEN_STAIRS ||
+      blockID == BLOCK_COBBLESTONE_STAIRS)
+  {
+    // +X -> South  0x0
+    // -X -> North  0x1
+    // +Z -> West   0x2
+    // -Z -> East   0x3
+
+    // We cannot place stairs on the roof
+    //if (oy > y)
+    //  return PACKET_OK;
+    // ^ Replace this code with something to check if there is a block under it
+
+    // We cannot place stairs without a direction
+    if (y == oy && x == ox && z == oz)
+      return PACKET_OK;
+
+    if (y == oy)
+    {
+      // We place according to the target block
+
+      if (x > ox)
+        metadata = 0x1;
+      else if (x < ox)
+        metadata = 0x0;
+      else if (z > oz)
+        metadata = 0x3;
+      else
+        metadata = 0x2;
+    }
+    else
+    {
+      // We place according to the player's position
+
+      double diffX = x - user->pos.x;
+      double diffZ = z - user->pos.z;
+      
+      if (std::abs(diffX) > std::abs(diffZ))
+      {
+        // We compare on the x axis
+        
+        if (diffX > 0)
+          metadata = 0x0;
+        else
+          metadata = 0x1;
+      }
+      else
+      {
+        // We compare on the z axis
+        
+        if (diffZ > 0)
+          metadata = 0x2;
+        else
+          metadata = 0x3;
+      }
+    }
+  }
+  
+  std::cout << std::endl;
   
   
   // We can place saplings only on dirt or grass
