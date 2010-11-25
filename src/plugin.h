@@ -28,37 +28,41 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include <map>
+#include <vector>
 
-#include "constants.h"
 #include "delegate/delegate.hpp"
+#include "constants.h"
 
-#ifdef SRUTIL_DELEGATE_PREFERRED_SYNTAX
-typedef srutil::delegate<void (int, int)> Delegate;
-#else
-typedef srutil::delegate2<void, int, int> Delegate;
-#endif
+
+typedef srutil::delegate0<void> Function;
 
 class Callback
 {
 public:
-   Callback(void* obj)
+   void add(std::string name, Function func)
    {
-      this->obj = obj;
-//      callbacks.insert(std::pair<std::string, Delegate>("onStartedDigging", Delegate::from_function<&obj->onStartedDigging>());
+      remove(name);
+      callbacks.insert(std::pair<std::string, Function>(name, func));
    }
    
-   ~Callback()
+   bool remove(std::string name)
    {
-      if (this->obj) {
-         delete &this->obj;
+      for (Events::iterator iter = callbacks.begin(); iter != callbacks.end(); ++iter)
+      {
+         if (iter->first == name)
+         {
+              callbacks.erase(iter);
+              return true;
+         }
       }
+      return false;
    }
+
 private:
    void* obj;
-/*   typedef std::map<std::string, Delegate> Callbacks;
-   Callbacks callbacks;*/
+   typedef std::map<std::string, Function > Events;
+   Events callbacks;
 };
 
 class Plugin
@@ -67,12 +71,12 @@ private:
    Plugin()
    {
    }
-   typedef std::map<int, Callback*> Callbacks;
+   typedef std::map<int, Callback> Callbacks;
    Callbacks blockevents;
 public:
    void init();
-   void setBlockCallback(const int type, void* obj);
-   Callback* getBlockCallback(const int type);
+   void setBlockCallback(const int type, Callback call);
+   Callback getBlockCallback(const int type);
    bool removeBlockCallback(const int type);
    static Plugin &get();
 };

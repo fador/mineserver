@@ -37,18 +37,19 @@ Plugin &Plugin::get()
 void Plugin::init()
 {
    // Set default behaviours 
-   this->setBlockCallback(BLOCK_STONE, new BlockBasic);
+   Callback call;
+   BlockBasic block;
+   call.add("onStartedDigging", Function::from_method<BlockBasic, &BlockBasic::onStartedDigging>(&block));
+   setBlockCallback(BLOCK_STONE, call);
 }
 
-void Plugin::setBlockCallback(const int type, void* obj)
+void Plugin::setBlockCallback(const int type, Callback call)
 {
-   Callback* call = new Callback(&obj);
-   this->removeBlockCallback(type);
-
-   blockevents.insert(std::pair<int,Callback*>(type, call));
+   removeBlockCallback(type);
+   blockevents.insert(std::pair<int, Callback>(type, call));
 }
 
-Callback* Plugin::getBlockCallback(const int type)
+Callback Plugin::getBlockCallback(const int type)
 {
    for (Callbacks::iterator iter = blockevents.begin(); iter != blockevents.end(); ++iter)
    {
@@ -57,7 +58,8 @@ Callback* Plugin::getBlockCallback(const int type)
          return iter->second;
       }
    }
-   return NULL;
+   Callback call;
+   return call;
 }
 
 bool Plugin::removeBlockCallback(const int type)
