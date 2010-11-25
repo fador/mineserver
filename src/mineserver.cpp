@@ -91,7 +91,7 @@ int setnonblock(int fd)
 //Handle signals
 void sighandler(int sig_num)
 {
-    Mineserver::Get().Stop();
+  Mineserver::Get().Stop();
 }
 
 int main(void)

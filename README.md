@@ -1,14 +1,15 @@
 # Mineserver
 *by Fador & Nredor and others*
 
-You can find the core team from #mineserver @ irc.esper.net
+You can find the core team from #mineserver @ irc.esper.net   
+Also mail to developers@mineserver.be will reach us.
 
     Copyright (c) 2010, The Mineserver Project
 
 Custom Minecraft Alpha server software written in C++.
 
 ### == NOTICE ==
-Currently in (early) development. (Alpha stage)
+Currently in (early) development. (Alpha stage)   
 Server still lacks some critical features and should be only used for testing.
 
 **Tested to build on**
@@ -29,13 +30,14 @@ We are trying to minimize memory and cpu usage compared to original Java server.
  * Basic physics for gravel and sand
  * Experimental physics for water and lava
  * Flatland map generation
+ * Working chests
+ * Terrain generation
   
 ### ToDo (Arranged by priority)
- * Map generation with heightmap (In progress)
- * Getting chests, furnaces,signs etc to work (In progress)
+ * Getting furnaces and signs to work (In progress)
  * Plugin support (and Lua plugin for scripting)
  * Multithreading
- * Growing trees etc.
+ * Growing trees and cactuses
  * and more
  
 ### Chat commands
@@ -65,18 +67,19 @@ We are trying to minimize memory and cpu usage compared to original Java server.
 ### Compiling
 Depends on (and tested with):
 
- * [zlib 1.2.5](http://www.zlib.org)
- * [libevent 1.4.14b](http://monkey.org/~provos/libevent/)
+ [zlib 1.2.5](http://www.zlib.org)   
+ [libevent 1.4.14b](http://monkey.org/~provos/libevent/)
+ [libnoise 1.0](http://libnoise.sourceforge.net/)
 
  * Installing on Debian and Ubuntu:
 
-    `sudo apt-get install libevent1 libevent-dev zlib1g zlib1g-dev`
+    `sudo apt-get install libevent1 libevent-dev zlib1g zlib1g-dev libnoise-dev`
 
  * Installing on CentOS and RHEL
 
     `# Install EPEL (Extra Packages for Enterprise Linux)`   
     `sudo su -c 'rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm'`   
-    `sudo yum install git libevent libevent-devel zlib zlib-devel`   
+    `sudo yum install git libevent libevent-devel zlib zlib-devel libnoise-dev`   
 
  * Installing on FreeBSD / PCBSD
 
@@ -101,6 +104,7 @@ Depends on (and tested with):
  * Download and compile [zlib](http://www.zlib.org) or use [pre-built binaries](http://www.winimage.com/zLibDll/index.html)
  * Add zlib libraries to project (zlibstat.lib or zlibwapi.lib which requires also zlibwapi.dll in the same dir with the executable)
  * Download and compile [libevent](http://monkey.org/~provos/libevent/)
+ * Download [libnoise 1.0](http://libnoise.sourceforge.net/) and add header/library files to project
  * Add libevent library to project (libevent.lib)
  * Build
  * Run mineserver.exe
