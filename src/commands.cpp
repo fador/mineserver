@@ -178,12 +178,14 @@ void setTime(User *user, std::string command, std::deque<std::string> args)
   if(args.size() == 1)
   {
     Map::get().mapTime = (sint64)atoi(args[0].c_str());
-    Chat::get().sendMsg(user, COLOR_MAGENTA + "Time set", Chat::USER);
     Packet pkt;
     pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get().mapTime;
     if(Users.size())
-      Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());  
-  }
+      Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
+    Chat::get().sendMsg(user, COLOR_MAGENTA + "Time set to " + args[0], Chat::USER);
+  } 
+  else
+    reportError(user, "Usage: /settime time (time = 0-24000)");
 }
 
 void coordinateTeleport(User *user, std::string command, std::deque<std::string> args)
