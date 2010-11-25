@@ -37,23 +37,23 @@ Plugin &Plugin::get()
 void Plugin::initPlugin()
 {
    // Set default behaviours 
-   this->setBlockObj(BLOCK_STONE, new BlockBasic);
+   this->setBlockCallback(BLOCK_STONE, new BlockBasic);
 }
 
-void Plugin::setBlockObj(int type, void* obj)
+void Plugin::setBlockCallback(int type, void* obj)
 {
-   Object* call = new Object(&obj);
+   Callback* call = new Callback(&obj);
   
    // remove old obj
-   if (this->blocks.at(type))
-      delete &this->blocks.at(type);
+   if (this->blockevents.at(type))
+      delete &this->blockevents.at(type);
 
-   this->blocks[type] = call;
+   this->blockevents[type] = call;
 }
 
-Object* Plugin::getBlockObj(int type)
+Callback* Plugin::getBlockCallback(int type)
 {
-   if (!this->blocks.at(type))
-      return this->blocks.at(type);
+   if (!this->blockevents.at(type))
+      return this->blockevents.at(type);
    return 0;
 }

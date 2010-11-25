@@ -40,16 +40,16 @@ typedef srutil::delegate<void (int, int)> Delegate;
 typedef srutil::delegate2<void, int, int> Delegate;
 #endif
 
-class Object
+class Callback
 {
 public:
-   Object(void* obj)
+   Callback(void* obj)
    {
       this->obj = obj;
 //      callbacks.insert(std::pair<std::string, Delegate>("onStartedDigging", Delegate::from_function<&obj->onStartedDigging>());
    }
    
-   ~Object()
+   ~Callback()
    {
       if (this->obj) {
          delete &this->obj;
@@ -67,11 +67,11 @@ private:
    Plugin()
    {
    }
-   std::vector<Object*> blocks;
+   std::vector<Callback*> blockevents;
 public:
    void initPlugin();
-   void setBlockObj(int type, void* obj);
-   Object* getBlockObj(int type);
+   void setBlockCallback(int type, void* obj);
+   Callback* getBlockCallback(int type);
    static Plugin &get();
 };
 
