@@ -282,7 +282,7 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight)
       case 5: z_toset--; break;
     }
 
-    if(getBlock(x_toset, y_toset, z_toset, &block, &meta, false))
+    if (getBlock(x_toset, y_toset, z_toset, &block, &meta, false))
     {
       uint8 skylightCurrent, blocklightCurrent;
       int skylightNew, blocklightNew;
@@ -298,18 +298,21 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight)
 
       getLight(x_toset, y_toset, z_toset, &skylightCurrent, &blocklightCurrent);
 
-      if (skylightNew > skylightCurrent) {
+      if (skylightNew > skylightCurrent)
+      {
         skylightCurrent = skylightNew;
         spread = true;
       }
 
-      if (blocklightNew > blocklightCurrent) {
+      if (blocklightNew > blocklightCurrent)
+      {
         blocklightCurrent = blocklightNew;
         spread = true;
       }
 
-      if (spread) {
-        setLight(x_toset, y_toset, z_toset, skylightCurrent, blocklightCurrent, 1);
+      if (spread)
+      {
+        setLight(x_toset, y_toset, z_toset, skylightCurrent, blocklightCurrent, 4);
         spreadLight(x_toset, y_toset, z_toset, skylightCurrent, blocklightCurrent);
       }
     }
