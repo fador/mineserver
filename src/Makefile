@@ -18,8 +18,8 @@ endif
 RM = rm -f
 CXX = g++
 CC = $(CXX)
-LDFLAGS = -L/usr/local/lib -lpthread -levent -lz -lnoise
-CXXFLAGS = $(DFLAGS) -I. -I/usr/Local/include -I/usr/include -L/usr/local/lib -L/usr/lib
+LDFLAGS = -L/usr/local/lib -L/usr/lib -lpthread -levent -lz -lnoise
+CXXFLAGS = $(DFLAGS) -I. -I/usr/Local/include -I/usr/include -L/usr/local/lib
 
 OBJS = map.o chat.o commands.o config.o constants.o logger.o mapgen.o nbt.o packets.o physics.o sockets.o tools.o user.o noiseutils.o mersenne.o mineserver.o
 PROG = ./mineserver

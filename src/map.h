@@ -85,12 +85,12 @@ private:
 
 
     for(int i = 0; i < 256; i++)
-      stopLight[i] = -16;
+      stopLight[i] = 16;
     stopLight[0x00] = 0; // Empty
     stopLight[0x06] = 0; // Sapling
-    stopLight[0x08] = -3; // Water
-    stopLight[0x09] = -3; // Stationary water
-    stopLight[0x12] = -3; // Leaves
+    stopLight[0x08] = 3; // Water
+    stopLight[0x09] = 3; // Stationary water
+    stopLight[0x12] = 3; // Leaves
     stopLight[0x14] = 0; // Glass
     stopLight[0x25] = 0; // Yellow flower
     stopLight[0x26] = 0; // Red rose
@@ -107,11 +107,12 @@ private:
     stopLight[0x4b] = 0; // Redstone Torch (Off)
     stopLight[0x4C] = 0; // Redstone Torch (On)
     stopLight[0x4e] = 0; // Snow
-    stopLight[0x4f] = -3; // Ice
+    stopLight[0x4f] = 3; // Ice
     stopLight[0x55] = 0; // Fence
     stopLight[0x5A] = 0; // Portal
     stopLight[0x5B] = 0; // Jack-O-Lantern
   }
+
   ~Map()
   {
     // Free all memory

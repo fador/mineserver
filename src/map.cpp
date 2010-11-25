@@ -174,11 +174,16 @@ bool Map::generateLightMaps(int x, int z)
 
   // Skylight
 
+  int light = 0;
+  bool foundheight = false;
   // First set sunlight for all blocks until hit ground
   for(int block_x = 0; block_x < 16; block_x++)
   {
     for(int block_z = 0; block_z < 16; block_z++)
     {
+      light = 15;
+      foundheight = false;
+
       for(int block_y = 127; block_y > 0; block_y--)
       {
         int index      = block_y + (block_z * 128) + (block_x * 128 * 16);
@@ -186,16 +191,22 @@ bool Map::generateLightMaps(int x, int z)
         int absolute_z = z*16+block_z;
         uint8 block    = blocks[index];
 
-        setBlockLight(absolute_x, block_y, absolute_z, 0, 15, 2);
+        light -= stopLight[block];
+        if (light < 0) { light = 0; }
 
-        if(stopLight[block] == -16)
+        setBlockLight(absolute_x, block_y, absolute_z, 0, light, 2);
+
+        // Calculate heightmap while looping this
+        if ((stopLight[block] > 0) && (foundheight == false)) {
+          heightmap[block_z+(block_x<<4)] = ((block_y == 127) ? block_y : block_y + 1);
+          foundheight = true;
+        }
+
+        if (light <= 0)
         {
-          //Calculate heightmap while looping this
-          heightmap[block_z+(block_x<<4)] = ((block_y==127)?block_y:block_y+1);
-          if(block_y>highest_y)
-          {
-            highest_y=block_y;
-          }
+          if(block_y > highest_y)
+            highest_y = block_y;
+
           break;
         }
       }
@@ -216,15 +227,15 @@ bool Map::generateLightMaps(int x, int z)
         int absolute_z = z*16+block_z;
         uint8 block    = blocks[index];
 
-        if(stopLight[block] == -16)
+        if(stopLight[block] == 16)
         {
-          setBlockLight(absolute_x, block_y, absolute_z, 15+stopLight[block], 0, 2);
+          setBlockLight(absolute_x, block_y, absolute_z, 15-stopLight[block], 0, 2);
           break;
         }
         else
         {
           setBlockLight(absolute_x, block_y, absolute_z, 0, 0, 2);
-          lightmapStep(absolute_x, block_y, absolute_z, 15+stopLight[block]);
+          lightmapStep(absolute_x, block_y, absolute_z, 15-stopLight[block]);
         }
       }
     }
@@ -295,12 +306,12 @@ bool Map::blocklightmapStep(int x, int y, int z, int light)
 
       getBlockLight(x_local, y_local, z_local, &blocklight, &skylight);
 
-      if(blocklight < light+stopLight[block]-1)
+      if(blocklight < light-stopLight[block]-1)
       {
-        setBlockLight(x_local, y_local, z_local, light+stopLight[block]-1, 0, 1);
+        setBlockLight(x_local, y_local, z_local, light-stopLight[block]-1, 0, 1);
 
-        if(stopLight[block] != -16)
-          blocklightmapStep(x_local, y_local, z_local, light+stopLight[block]-1);
+        if(stopLight[block] != 16)
+          blocklightmapStep(x_local, y_local, z_local, light-stopLight[block]-1);
       }
     }
   }
@@ -343,19 +354,18 @@ bool Map::lightmapStep(int x, int y, int z, int light)
       case 5: z_local--; break;
     }
 
-    //printf("getBlock(%d, %d, %d) (lightmapStep)\n", x_local, y_local, z_local);
     if(getBlock(x_local, y_local, z_local, &block, &meta, false))
     {
       uint8 blocklight, skylight;
 
       getBlockLight(x_local, y_local, z_local, &blocklight, &skylight);
 
-      if(skylight < light+stopLight[block]-1)
+      if(skylight < light-stopLight[block]-1)
       {
-        setBlockLight(x_local, y_local, z_local, 0, light+stopLight[block]-1, 2);
+        setBlockLight(x_local, y_local, z_local, 0, light-stopLight[block]-1, 2);
 
-        if(stopLight[block] != -16)
-          lightmapStep(x_local, y_local, z_local, light+stopLight[block]-1);
+        if(stopLight[block] != 16)
+          lightmapStep(x_local, y_local, z_local, light-stopLight[block]-1);
       }
     }
   }

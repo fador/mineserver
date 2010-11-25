@@ -68,10 +68,10 @@ We are trying to minimize memory and cpu usage compared to original Java server.
 Depends on (and tested with):
 
  [zlib 1.2.5](http://www.zlib.org)   
- [libevent 1.4.14b](http://monkey.org/~provos/libevent/)
- [libnoise 1.0](http://libnoise.sourceforge.net/)
+ [libevent 1.4.14b](http://monkey.org/~provos/libevent/)   
+ [libnoise 1.0](http://libnoise.sourceforge.net/)   
 
- * Installing on Debian and Ubuntu:
+ * Installing on Debian and Ubuntu: (For Ubuntu libevent1 -> libevent-1.4-2)
 
     `sudo apt-get install libevent1 libevent-dev zlib1g zlib1g-dev libnoise-dev`
 
