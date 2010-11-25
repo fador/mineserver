@@ -891,6 +891,8 @@ int PacketHandler::player_block_placement(User *user)
       blockID == BLOCK_LAVA || 
       blockID == BLOCK_STATIONARY_LAVA)
     Physics::get().addSimulation(vec(x, y, z));
+
+  return PACKET_OK;
 }
 
 int PacketHandler::holding_change(User *user)

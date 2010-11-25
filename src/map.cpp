@@ -191,10 +191,10 @@ bool Map::generateLightMaps(int x, int z)
         int absolute_z = z*16+block_z;
         uint8 block    = blocks[index];
 
-        light -= stopLight[block];
-        if (light < 0) { light = 0; }
-
         setBlockLight(absolute_x, block_y, absolute_z, 0, light, 2);
+
+        light -= stopLight[block];
+        if (light < 0) { light = 0; }        
 
         // Calculate heightmap while looping this
         if ((stopLight[block] > 0) && (foundheight == false)) {
@@ -212,12 +212,13 @@ bool Map::generateLightMaps(int x, int z)
       }
     }
   }
-
+  
   // Loop again and now spread the light
   for(int block_x = 0; block_x < 16; block_x++)
   {
     for(int block_z = 0; block_z < 16; block_z++)
     {
+      light = 15;
       //Start from highest pos of the chunk, might still mess lighting
       // if neighboring chunks are higher..
       for(int block_y = highest_y; block_y >= 0; block_y--)
@@ -229,18 +230,19 @@ bool Map::generateLightMaps(int x, int z)
 
         if(stopLight[block] == 16)
         {
-          setBlockLight(absolute_x, block_y, absolute_z, 15-stopLight[block], 0, 2);
+          setBlockLight(absolute_x, block_y, absolute_z, 0, light, 2);
           break;
         }
         else
         {
-          setBlockLight(absolute_x, block_y, absolute_z, 0, 0, 2);
+          setBlockLight(absolute_x, block_y, absolute_z, 0, 15-stopLight[block], 2);
           lightmapStep(absolute_x, block_y, absolute_z, 15-stopLight[block]);
+          light-=stopLight[block];
         }
       }
     }
   }
-
+  
   // Blocklight
   for(uint8 block_x = 0; block_x < 16; block_x++)
   {
