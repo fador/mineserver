@@ -67,11 +67,13 @@ private:
    Plugin()
    {
    }
-   std::vector<Callback*> blockevents;
+   typedef std::map<int, Callback*> Callbacks;
+   Callbacks blockevents;
 public:
-   void initPlugin();
-   void setBlockCallback(int type, void* obj);
-   Callback* getBlockCallback(int type);
+   void init();
+   void setBlockCallback(const int type, void* obj);
+   Callback* getBlockCallback(const int type);
+   bool removeBlockCallback(const int type);
    static Plugin &get();
 };
 

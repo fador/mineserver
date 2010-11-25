@@ -34,26 +34,42 @@ Plugin &Plugin::get()
   return instance;
 }
 
-void Plugin::initPlugin()
+void Plugin::init()
 {
    // Set default behaviours 
    this->setBlockCallback(BLOCK_STONE, new BlockBasic);
 }
 
-void Plugin::setBlockCallback(int type, void* obj)
+void Plugin::setBlockCallback(const int type, void* obj)
 {
    Callback* call = new Callback(&obj);
-  
-   // remove old obj
-   if (this->blockevents.at(type))
-      delete &this->blockevents.at(type);
+   this->removeBlockCallback(type);
 
-   this->blockevents[type] = call;
+   blockevents.insert(std::pair<int,Callback*>(type, call));
 }
 
-Callback* Plugin::getBlockCallback(int type)
+Callback* Plugin::getBlockCallback(const int type)
 {
-   if (!this->blockevents.at(type))
-      return this->blockevents.at(type);
-   return 0;
+   for (Callbacks::iterator iter = blockevents.begin(); iter != blockevents.end(); ++iter)
+   {
+      if (iter->first == type)
+      {
+         return iter->second;
+      }
+   }
+   return NULL;
+}
+
+bool Plugin::removeBlockCallback(const int type)
+{
+   for (Callbacks::iterator iter = blockevents.begin(); iter != blockevents.end(); ++iter)
+   {
+      if (iter->first == type)
+      {
+           delete &iter->first;
+           blockevents.erase(iter);
+           return true;
+      }
+   }
+   return false;
 }

@@ -66,6 +66,7 @@
 #include "nbt.h"
 #include "packets.h"
 #include "physics.h"
+#include "plugin.h"
 
 
 #ifdef WIN32
@@ -142,6 +143,9 @@ int Mineserver::Run()
 
   // Load port from config
   int port = Conf::get().iValue("port");
+  
+  // Initialize plugins
+  Plugin::get().init();
 
 #ifdef WIN32
   _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
