@@ -618,9 +618,7 @@ int PacketHandler::player_block_placement(User *user)
   // Check if the directed block is replace-able
   
   //Blocks that drop items once replaced
-  if (block_direction != BLOCK_SNOW &&
-      block_direction != BLOCK_FIRE &&
-      block_direction != BLOCK_TORCH && 
+  if (block_direction != BLOCK_TORCH && 
       block_direction != BLOCK_REDSTONE_TORCH_OFF &&
       block_direction != BLOCK_REDSTONE_TORCH_ON &&
       block_direction != BLOCK_BROWN_MUSHROOM &&
@@ -634,7 +632,9 @@ int PacketHandler::player_block_placement(User *user)
         block_direction != BLOCK_WATER &&
         block_direction != BLOCK_STATIONARY_WATER &&
         block_direction != BLOCK_LAVA &&
-        block_direction != BLOCK_STATIONARY_LAVA)
+        block_direction != BLOCK_STATIONARY_LAVA &&
+        block_direction != BLOCK_SNOW &&
+        block_direction != BLOCK_FIRE)
       {
         // It's not an overwritable block
         return PACKET_OK;
@@ -715,29 +715,41 @@ int PacketHandler::player_block_placement(User *user)
     // -X -> North  0x1
     // +Z -> West   0x2
     // -Z -> East   0x3
-
-    // We cannot place stairs on the roof
-    //if (oy > y)
-    //  return PACKET_OK;
-    // ^ Replace this code with something to check if there is a block under it
-    // ^ ^ Or check if it's legal to place a stair with no block under it
-
-    // We cannot place stairs without a direction
-    if (y == oy && x == ox && z == oz)
+    
+    uint8 block_bottom;
+    uint8 metadata_bottom;
+    Map::get().getBlock(x, y - 1, z, &block_bottom, &metadata_bottom);
+    
+    // We cannot place stairs over a weak block
+    if (block_bottom == BLOCK_TORCH ||
+        block_bottom == BLOCK_REDSTONE_TORCH_OFF ||
+        block_bottom == BLOCK_REDSTONE_TORCH_ON ||
+        block_bottom == BLOCK_BROWN_MUSHROOM ||
+        block_bottom == BLOCK_RED_MUSHROOM ||
+        block_bottom == BLOCK_YELLOW_FLOWER ||
+        block_bottom == BLOCK_RED_ROSE ||
+        block_bottom == BLOCK_SAPLING ||
+        block_bottom == BLOCK_AIR ||
+        block_bottom == BLOCK_WATER ||
+        block_bottom == BLOCK_STATIONARY_WATER ||
+        block_bottom == BLOCK_LAVA ||
+        block_bottom == BLOCK_STATIONARY_LAVA ||
+        block_bottom == BLOCK_SNOW ||
+        block_bottom == BLOCK_FIRE)
       return PACKET_OK;
 
-    if (y == oy)
+    if (y == oy && (x != ox && y != oy && z != oz))
     {
       // We place according to the target block
 
-      if (x > ox)
-        metadata = 0x1;
-      else if (x < ox)
+      if (x < ox)
         metadata = 0x0;
-      else if (z > oz)
-        metadata = 0x3;
-      else
+      else if (x > ox)
+        metadata = 0x1;
+      else if (z < oz)
         metadata = 0x2;
+      else
+        metadata = 0x3;
     }
     else
     {
