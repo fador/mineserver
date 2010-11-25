@@ -218,12 +218,12 @@ bool Map::generateLightMaps(int x, int z)
 
         if(stopLight[block] == -16)
         {
-          setBlockLight(absolute_x, block_y, absolute_z, 15+stopLight[block], 0, 1);
+          setBlockLight(absolute_x, block_y, absolute_z, 15+stopLight[block], 0, 2);
           break;
         }
         else
         {
-          setBlockLight(absolute_x, block_y, absolute_z, 15, 0, 1);
+          setBlockLight(absolute_x, block_y, absolute_z, 0, 0, 2);
           lightmapStep(absolute_x, block_y, absolute_z, 15+stopLight[block]);
         }
       }
@@ -688,7 +688,7 @@ bool Map::loadMap(int x, int z, bool generate)
     // If generate (false only for lightmapgenerator)
     if(generate)
     {    
-      MapGen mapgen((int)time(NULL));
+      MapGen mapgen(12345678);
       mapgen.generateChunk(x,z);
       generateLightMaps(x, z);
       return true;
@@ -964,7 +964,6 @@ void Map::sendToUser(User *user, int x, int z)
   delete[] data4;
   delete[] mapdata;
 }
-
 
 void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
 {

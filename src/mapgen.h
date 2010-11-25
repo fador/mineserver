@@ -26,7 +26,12 @@
 #ifndef _MAPGEN_H
 #define _MAPGEN_H
 
-#include "noise.h"
+#ifdef WIN32
+#include <noise/noise.h>
+#else
+#include <libnoise/noise.h>
+#endif
+#include "noiseutils.h"
 
 class MapGen
 {
@@ -36,14 +41,38 @@ private:
   uint8 *skylight;
   uint8 *blocklight;
   uint8 *heightmap;
-  
-  int randomSeed;
-  
-  int GetHeightmapIndex(char x, char z);
-  void CalculateHeightmap();
-  void LoadFlatgrass();
-  //void generateWithNoise();
 
+  /*float** heightMap;
+  float** steepnessMap;
+  float** caveTop;
+  float** caveBottom;
+  float** caveTop2;
+  float** caveBottom2;*/
+  
+  int m_seed;
+  int oreDensity;
+  int seaLevel;
+
+  float perlinScale;
+  
+  //int getHeightmapIndex(char x, char z);
+  //void calculateHeightmap();
+  
+  void loadFlatgrass();
+  void generateWithNoise(int x, int z);
+
+  noise::module::Perlin perlinNoise;
+  noise::utils::NoiseMap heightMap;
+  noise::utils::NoiseMapBuilderPlane heightMapBuilder;
+
+  noise::module::RidgedMulti mountainTerrain;
+
+  noise::module::Billow baseFlatTerrain;
+  noise::module::ScaleBias flatTerrain;
+
+  noise::module::Perlin terrainType;
+
+  noise::module::Select finalTerrain;
 
 public:
   MapGen(int seed);

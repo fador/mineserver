@@ -126,7 +126,7 @@ int PacketHandler::login_request(User *user)
   std::cout << "Player " << user->UID << " login v." << version <<" : " << player <<":"<< passwd << std::endl;
 
   // If version is not 2 or 3
-  if(version != 4)
+  if(version != 5)
   {
     user->kick(Conf::get().sValue("wrong_protocol_message"));
     return PACKET_OK;
@@ -834,13 +834,28 @@ int PacketHandler::pickup_spawn(User *user)
   sint8 yaw, pitch, roll;
 
   user->buffer >> (sint32&)item.EID;
-  item.EID    = generateEID();
+  
   user->buffer >> (sint16&)item.item >> (sint8&)item.count ;
   user->buffer >> (sint32&)item.pos.x() >> (sint32&)item.pos.y() >> (sint32&)item.pos.z();
   user->buffer >> yaw >> pitch >> roll;
 
   if(!user->buffer)
     return PACKET_NEED_MORE_DATA;
+
+  //Client sends multiple packets with same EID, check for recent spawns
+  for(int i=0;i<10;i++)
+  {
+    if(user->recentSpawn[i] == item.EID)
+    {
+      return PACKET_OK;
+    }
+  }
+
+  //Put this EID in the next slot
+  user->recentSpawn[user->recentSpawnPos++] = item.EID;
+  if(user->recentSpawnPos==10) user->recentSpawnPos=0;
+
+  item.EID    = generateEID();
 
   item.spawnedBy = user->UID;
   Map::get().sendPickupSpawn(item);
