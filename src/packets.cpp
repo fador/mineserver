@@ -623,7 +623,9 @@ int PacketHandler::player_block_placement(User *user)
   
   if (blockID == BLOCK_FIRE &&
         (block_bottom == BLOCK_WATER ||
-        block_bottom == BLOCK_STATIONARY_WATER))
+         block_bottom == BLOCK_STATIONARY_WATER ||
+         block == BLOCK_WATER ||
+         block == BLOCK_STATIONARY_WATER))
     return PACKET_OK;
     
     
