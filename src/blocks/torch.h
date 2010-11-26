@@ -27,77 +27,22 @@
 
 #pragma once
 
-#include <string>
-#include <map>
-#include <vector>
-#include <stdio.h>
+#include <cstdlib>
 
-#include "delegate/delegate.hpp"
 #include "constants.h"
+#include "map.h"
 #include "tools.h"
 
 class User;
 
-typedef srutil::delegate6<void, User*, sint8, sint32, sint8, sint32, sint8> Function;
-
-class Callback
+class BlockTorch
 {
 public:
-   void add(std::string name, Function func)
-   {
-      remove(name);
-      callbacks.insert(std::pair<std::string, Function>(name, func));
-   }
-   
-   bool remove(std::string name)
-   {
-      for (Events::iterator iter = callbacks.begin(); iter != callbacks.end(); ++iter)
-      {
-         if ((*iter).first == name)
-         {
-              callbacks.erase(iter);
-              return true;
-         }
-      }
-      return false;
-   }
-
-   Function get(std::string name)
-   {
-      for (Events::iterator iter = callbacks.begin(); iter != callbacks.end(); iter++)
-      {
-         if ((*iter).first == name)
-            return iter->second;
-      }
-
-      Function empty;
-      return empty;
-   }
-
-   void reset()
-   {
-      callbacks.empty();
-   }
-
-private:
-   void* obj;
-   typedef std::map<std::string, Function > Events;
-   Events callbacks;
-};
-
-class Plugin
-{
-private:
-   Plugin()
-   {
-   }
-   typedef std::map<int, Callback> Callbacks;
-   Callbacks blockevents;
-public:
-   void init();
-   void setBlockCallback(const int type, Callback call);
-   Callback getBlockCallback(const int type);
-   bool removeBlockCallback(const int type);
-   static Plugin &get();
+   void onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onPlace(User* user, sint8 block, sint32 x, sint8 y, sint32 z, sint8 direction);
 };
 

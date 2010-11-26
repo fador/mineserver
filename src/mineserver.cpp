@@ -241,9 +241,10 @@ int Mineserver::Run()
         uint8 data = 0;
         Users[0]->sendAll(&data, 1);
 
-        //Send server time (after dawn)
-        uint8 data3[9] = {0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0e, 0x00};
-        Users[0]->sendAll((uint8 *)&data3[0], 9);
+        //Send server time
+        Packet pkt;
+        pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get().mapTime;
+        Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());        
       }
 
       //Try to load port from config
@@ -277,6 +278,8 @@ int Mineserver::Run()
         Users[i]->pushMap();
         Users[i]->popMap();
       }
+      Map::get().mapTime+=20;
+      if(Map::get().mapTime>=24000) Map::get().mapTime=0;
     }
 
     //Physics simulation every 200ms

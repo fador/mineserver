@@ -37,7 +37,9 @@ We are trying to minimize memory and cpu usage compared to original Java server.
  * Getting furnaces and signs to work (In progress)
  * Plugin support (and Lua plugin for scripting)
  * Multithreading
+ * Server console
  * Growing trees and cactuses
+ * One-click update
  * and more
  
 ### Chat commands
@@ -63,15 +65,16 @@ We are trying to minimize memory and cpu usage compared to original Java server.
 *  /give nick id/alias (count) : Gives nick count pieces of id/alias. count = 1 is used if it is not provided. Support for over 64 items. Aliases configurable with item_alias.cfg
 *  /rules nick : Shows server rules (from rules.txt) to nick
 *  /gps (nick) : Without nick shows own coordinates. With nick shows nick's coordinates
+*  /settime (time) : Sets server time. time = 0-24000 (0 and 24000 is day and about 15000 is night)
  
 ### Compiling
 Depends on (and tested with):
 
  [zlib 1.2.5](http://www.zlib.org)   
- [libevent 1.4.14b](http://monkey.org/~provos/libevent/)
- [libnoise 1.0](http://libnoise.sourceforge.net/)
+ [libevent 1.4.14b](http://monkey.org/~provos/libevent/)   
+ [libnoise 1.0](http://libnoise.sourceforge.net/)   
 
- * Installing on Debian and Ubuntu:
+ * Installing on Debian and Ubuntu: (For Ubuntu libevent1 -> libevent-1.4-2)
 
     `sudo apt-get install libevent1 libevent-dev zlib1g zlib1g-dev libnoise-dev`
 

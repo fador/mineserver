@@ -83,14 +83,13 @@ private:
     emitLight[0x5A] = 11; // Portal
     emitLight[0x5B] = 15; // Jack-O-Lantern
 
-
     for(int i = 0; i < 256; i++)
-      stopLight[i] = -16;
+      stopLight[i] = 16;
     stopLight[0x00] = 0; // Empty
     stopLight[0x06] = 0; // Sapling
-    stopLight[0x08] = -3; // Water
-    stopLight[0x09] = -3; // Stationary water
-    stopLight[0x12] = -3; // Leaves
+    stopLight[0x08] = 3; // Water
+    stopLight[0x09] = 3; // Stationary water
+    stopLight[0x12] = 3; // Leaves
     stopLight[0x14] = 0; // Glass
     stopLight[0x25] = 0; // Yellow flower
     stopLight[0x26] = 0; // Red rose
@@ -107,30 +106,40 @@ private:
     stopLight[0x4b] = 0; // Redstone Torch (Off)
     stopLight[0x4C] = 0; // Redstone Torch (On)
     stopLight[0x4e] = 0; // Snow
-    stopLight[0x4f] = -3; // Ice
+    stopLight[0x4f] = 3; // Ice
     stopLight[0x55] = 0; // Fence
     stopLight[0x5A] = 0; // Portal
     stopLight[0x5B] = 0; // Jack-O-Lantern
   }
+
   ~Map()
   {
     // Free all memory
     for(std::map<uint32, sChunk>::const_iterator it = maps.begin(); it != maps.end(); it = maps.begin())
-    {
       releaseMap(maps[it->first].x, maps[it->first].z);
-    }
 
     //Free item memory
     for(std::map<uint32, spawnedItem *>::const_iterator it = items.begin(); it != items.end(); ++it)
-    {
       delete items[it->first];
-    }
 
     items.clear();
+    std::string infile = mapDirectory+"/level.dat";
+
+    NBT_Value *root = NBT_Value::LoadFromFile(infile);
+    if(root != NULL)
+    {
+      NBT_Value &data = *((*root)["Data"]);
+
+      //Get time from the map
+      *data["Time"] = mapTime;
+
+      root->SaveToFile(infile);
+
+      delete root;
+    }
+
 
   }
-
-
 
 public:
 
@@ -167,6 +176,12 @@ public:
   void freeMap();
   void sendToUser(User *user, int x, int z);
 
+  //Time in the map
+  sint64 mapTime;
+  
+  // Map seed
+  sint64 mapSeed;
+
   // Get pointer to struct
   sChunk *getMapData(int x, int z, bool generate = true);
 
@@ -180,16 +195,15 @@ public:
   bool saveWholeMap();
 
   // Generate light maps for chunk
-  bool generateLightMaps(int x, int z);
+  bool generateLight(int x, int z);
 
   // Release/save map chunk
   bool releaseMap(int x, int z);
 
   // Light get/set
-  bool getBlockLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight);
-  bool setBlockLight(int x, int y, int z, uint8 blocklight, uint8 skylight, uint8 setLight);
-  bool lightmapStep(int x, int y, int z, int light);
-  bool blocklightmapStep(int x, int y, int z, int light);
+  bool getLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight);
+  bool setLight(int x, int y, int z, int blocklight, int skylight, int setLight);
+  bool spreadLight(int x, int y, int z, int skylight, int blocklight);
 
   // Block value/meta get/set
   bool getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate = true);

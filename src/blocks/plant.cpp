@@ -25,79 +25,58 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "plant.h"
 
-#include <string>
-#include <map>
-#include <vector>
-#include <stdio.h>
-
-#include "delegate/delegate.hpp"
-#include "constants.h"
-#include "tools.h"
-
-class User;
-
-typedef srutil::delegate6<void, User*, sint8, sint32, sint8, sint32, sint8> Function;
-
-class Callback
+void BlockPlant::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-public:
-   void add(std::string name, Function func)
-   {
-      remove(name);
-      callbacks.insert(std::pair<std::string, Function>(name, func));
-   }
-   
-   bool remove(std::string name)
-   {
-      for (Events::iterator iter = callbacks.begin(); iter != callbacks.end(); ++iter)
-      {
-         if ((*iter).first == name)
-         {
-              callbacks.erase(iter);
-              return true;
-         }
-      }
-      return false;
-   }
 
-   Function get(std::string name)
-   {
-      for (Events::iterator iter = callbacks.begin(); iter != callbacks.end(); iter++)
-      {
-         if ((*iter).first == name)
-            return iter->second;
-      }
+}
 
-      Function empty;
-      return empty;
-   }
-
-   void reset()
-   {
-      callbacks.empty();
-   }
-
-private:
-   void* obj;
-   typedef std::map<std::string, Function > Events;
-   Events callbacks;
-};
-
-class Plugin
+void BlockPlant::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-private:
-   Plugin()
+
+}
+
+void BlockPlant::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+
+}
+
+void BlockPlant::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+}
+
+void BlockPlant::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+   uint8 block; uint8 meta;
+   uint8 nblock; uint8 nmeta;
+   bool destroy = false;  
+   if (!Map::get().getBlock(x, y, z, &block, &meta))
+      return;
+      
+   if (meta == BLOCK_TOP && Map::get().getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
    {
+      // block broken under torch
+      destroy = true;
    }
-   typedef std::map<int, Callback> Callbacks;
-   Callbacks blockevents;
-public:
-   void init();
-   void setBlockCallback(const int type, Callback call);
-   Callback getBlockCallback(const int type);
-   bool removeBlockCallback(const int type);
-   static Plugin &get();
-};
+
+   if (destroy)
+   {
+      // Break torch and spawn torch item
+      Map::get().sendBlockChange(x, y, z, 0, 0);
+      Map::get().setBlock(x, y, z, 0, 0);
+      Map::get().createPickupSpawn(x, y, z, block, 1);
+   }   
+}
+
+void BlockPlant::onPlace(User* user, sint8 block, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+   uint8 topblock;
+   uint8 topmeta;
+   if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta))
+   {
+      Map::get().setBlock(x, y+1, z, (char)block, direction);
+      Map::get().sendBlockChange(x, y+1, z, (char)block, direction);
+   }
+}
 
