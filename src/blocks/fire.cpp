@@ -25,54 +25,67 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "snow.h"
+#include "fire.h"
 
-void BlockSnow::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFire::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockSnow::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFire::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockSnow::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFire::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockSnow::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFire::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 }
 
-void BlockSnow::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFire::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-   uint8 block; uint8 meta;
-   uint8 nblock; uint8 nmeta;
-   bool destroy = false;  
-   if (!Map::get().getBlock(x, y, z, &block, &meta))
-      return;
-      
-   if (meta == BLOCK_TOP && Map::get().getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
+
+}
+
+void BlockFire::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+   uint8 topblock;
+   uint8 topmeta;
+   uint8 oldblock;
+   uint8 oldmeta;
+
+   if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
    {
-      // block broken under snow
-      destroy = true;
+      switch(oldblock)
+      {
+         case BLOCK_FIRE:
+         case BLOCK_WATER:
+         case BLOCK_STATIONARY_WATER:
+         case BLOCK_WORKBENCH:
+         case BLOCK_FURNACE:
+         case BLOCK_BURNING_FURNACE:
+         case BLOCK_CHEST:
+         case BLOCK_JUKEBOX:
+         case BLOCK_TORCH:
+          return;
+         break;
+         default:
+            if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
+            {
+               Map::get().setBlock(x, y+1, z, (char)newblock, direction);
+               Map::get().sendBlockChange(x, y+1, z, (char)newblock, direction);
+            }
+         break;
+      }
    }
-
-   if (destroy)
-   {
-      // Break snow and do not spawn item
-      Map::get().sendBlockChange(x, y, z, 0, 0);
-      Map::get().setBlock(x, y, z, 0, 0);
-   }   
 }
 
-void BlockSnow::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFire::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-}
 
-void BlockSnow::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
 }
 

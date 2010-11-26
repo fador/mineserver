@@ -25,54 +25,61 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "snow.h"
+#include "liquid.h"
+#include "physics.h"
 
-void BlockSnow::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockLiquid::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockSnow::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockLiquid::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockSnow::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockLiquid::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockSnow::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockLiquid::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 }
 
-void BlockSnow::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockLiquid::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
    uint8 block; uint8 meta;
-   uint8 nblock; uint8 nmeta;
-   bool destroy = false;  
-   if (!Map::get().getBlock(x, y, z, &block, &meta))
-      return;
-      
-   if (meta == BLOCK_TOP && Map::get().getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
-   {
-      // block broken under snow
-      destroy = true;
-   }
+   physics(x,y,z);
+}
 
-   if (destroy)
+void BlockLiquid::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+   uint8 topblock;
+   uint8 topmeta;
+   if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
    {
-      // Break snow and do not spawn item
+      Map::get().setBlock(x, y+1, z, (char)newblock, direction);
+      Map::get().sendBlockChange(x, y+1, z, (char)newblock, direction);
+      physics(x,y+1,z);
+   }
+}
+
+void BlockLiquid::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+   uint8 oldblock;
+   uint8 oldmeta;
+
+   if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
+   {
       Map::get().sendBlockChange(x, y, z, 0, 0);
       Map::get().setBlock(x, y, z, 0, 0);
-   }   
+      physics(x,y,z);
+   }
 }
 
-void BlockSnow::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockLiquid::physics(sint32 x, sint8 y, sint32 z)
 {
-}
-
-void BlockSnow::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
+   Physics::get().checkSurrounding(vec(x, y, z));
 }
 

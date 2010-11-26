@@ -85,14 +85,65 @@ void BlockTorch::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, 
    }   
 }
 
-void BlockTorch::onPlace(User* user, sint8 block, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockTorch::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
+   uint8 oldblock;
+   uint8 oldmeta;
    uint8 topblock;
    uint8 topmeta;
-   if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta))
+
+   if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
    {
-      Map::get().setBlock(x, y+1, z, (char)block, direction);
-      Map::get().sendBlockChange(x, y+1, z, (char)block, direction);
+      /* Check block below allows blocks placed on top */
+      switch(oldblock)
+      {
+         case BLOCK_WORKBENCH:
+         case BLOCK_FURNACE:
+         case BLOCK_BURNING_FURNACE:
+         case BLOCK_CHEST:
+         case BLOCK_JUKEBOX:
+         case BLOCK_TORCH:
+          return;
+         break;
+         default:
+            if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
+            {
+               Map::get().setBlock(x, y+1, z, (char)newblock, direction);
+               Map::get().sendBlockChange(x, y+1, z, (char)newblock, direction);
+            }
+         break;
+      }
    }
 }
 
+void BlockTorch::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+   uint8 oldblock;
+   uint8 oldmeta;
+   
+   switch(newblock)
+   {
+      case BLOCK_WATER:
+      case BLOCK_STATIONARY_WATER:
+         if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
+         {
+            // spawn item
+            Map::get().sendBlockChange(x, y, z, 0, 0);
+            Map::get().setBlock(x, y, z, 0, 0);
+            Map::get().createPickupSpawn(x, y, z, oldblock, 1);
+         }
+      break;
+      case BLOCK_LAVA:
+      case BLOCK_STATIONARY_LAVA:
+         if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
+         {
+            // destroy
+            Map::get().sendBlockChange(x, y, z, 0, 0);
+            Map::get().setBlock(x, y, z, 0, 0);
+         }
+      break;
+      default:
+         return;
+      break;
+   }
+}

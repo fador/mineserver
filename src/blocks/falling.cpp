@@ -52,16 +52,41 @@ void BlockFalling::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y
    physics(x,y,z);
 }
 
-void BlockFalling::onPlace(User* user, sint8 block, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFalling::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
+   uint8 oldblock;
+   uint8 oldmeta;
    uint8 topblock;
    uint8 topmeta;
-   if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta))
+
+   if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
    {
-      Map::get().setBlock(x, y+1, z, (char)block, direction);
-      Map::get().sendBlockChange(x, y+1, z, (char)block, direction);
-      physics(x,y+1,z);
+      /* Check block below allows blocks placed on top */
+      switch(oldblock)
+      {
+         case BLOCK_WORKBENCH:
+         case BLOCK_FURNACE:
+         case BLOCK_BURNING_FURNACE:
+         case BLOCK_CHEST:
+         case BLOCK_JUKEBOX:
+         case BLOCK_TORCH:
+          return;
+         break;
+         default:
+            if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
+            {
+               Map::get().setBlock(x, y+1, z, (char)newblock, direction);
+               Map::get().sendBlockChange(x, y+1, z, (char)newblock, direction);
+               physics(x,y+1,z);
+            }
+         break;
+      }
    }
+}
+
+void BlockFalling::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+
 }
 
 void BlockFalling::physics(sint32 x, sint8 y, sint32 z)

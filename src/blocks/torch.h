@@ -43,6 +43,7 @@ public:
    void onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
    void onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
    void onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
-   void onPlace(User* user, sint8 block, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
 };
 

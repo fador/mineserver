@@ -31,6 +31,8 @@
 #include "blocks/torch.h"
 #include "blocks/plant.h"
 #include "blocks/snow.h"
+#include "blocks/liquid.h"
+#include "blocks/fire.h"
 
 Plugin &Plugin::get()
 {
@@ -107,6 +109,7 @@ void Plugin::init()
    call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
    call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
    call.add("onNeighbourBroken", Function::from_method<BlockTorch, &BlockTorch::onNeighbourBroken>(torchblock));
+   call.add("onReplace", Function::from_method<BlockBasic, &BlockBasic::onReplace>(basicblock));
    setBlockCallback(BLOCK_TORCH, call);
    setBlockCallback(BLOCK_REDSTONE_TORCH_OFF, call);
    setBlockCallback(BLOCK_REDSTONE_TORCH_ON, call);
@@ -116,6 +119,7 @@ void Plugin::init()
    call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
    call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
    call.add("onNeighbourBroken", Function::from_method<BlockPlant, &BlockPlant::onNeighbourBroken>(plantblock));
+   call.add("onReplace", Function::from_method<BlockBasic, &BlockBasic::onReplace>(basicblock));
    setBlockCallback(BLOCK_YELLOW_FLOWER, call);
    setBlockCallback(BLOCK_RED_ROSE, call);
    setBlockCallback(BLOCK_BROWN_MUSHROOM, call);
@@ -131,9 +135,20 @@ void Plugin::init()
    call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
    setBlockCallback(BLOCK_SNOW, call);
 
+   call.reset();
+   BlockLiquid* liquidblock = new BlockLiquid();
+   call.add("onPlace", Function::from_method<BlockLiquid, &BlockLiquid::onPlace>(liquidblock));
+   call.add("onNeighbourBroken", Function::from_method<BlockLiquid, &BlockLiquid::onNeighbourBroken>(liquidblock));
+   call.add("onReplace", Function::from_method<BlockLiquid, &BlockLiquid::onReplace>(liquidblock));
+   setBlockCallback(BLOCK_WATER, call);
+   setBlockCallback(BLOCK_STATIONARY_WATER, call);
+
+   BlockFire* fireblock = new BlockFire();
+   call.add("onPlace", Function::from_method<BlockFire, &BlockFire::onPlace>(fireblock));
+   setBlockCallback(BLOCK_FIRE, call);
+
+
   /* TODO: Unimplemented */
-  /* BLOCK_WATER, BLOCK_STATIONARY_WATER */
-  /* BLOCK_FIRE */
   /* BLOCK_LEAVES */
   /* BLOCK_SPONGE */
   /* BLOCK_TNT */

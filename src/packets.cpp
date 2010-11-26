@@ -471,21 +471,16 @@ int PacketHandler::player_digging(User *user)
        if (event) inv(event);
      break;
   }
-
   return PACKET_OK;
-/*
-      // Check liquid physics
-      Physics::get().checkSurrounding(vec(x, y, z));
-*/
 }
 
 int PacketHandler::player_block_placement(User *user)
 {
   sint8 y, oy, direction;
-  sint16 blockID;
+  sint16 newblock;
   sint32 x, z, ox, oz;
 
-  user->buffer >> blockID >> x >> y >> z >> direction;
+  user->buffer >> newblock >> x >> y >> z >> direction;
 
   if(!user->buffer)
     return PACKET_NEED_MORE_DATA;
@@ -496,7 +491,7 @@ int PacketHandler::player_block_placement(User *user)
   oy = y;
   oz = z;
 
-  if (blockID > 0xFF || blockID == -1)
+  if (newblock > 0xFF || newblock == -1)
     return PACKET_OK;
   
   // TODO: Handle processing of 
@@ -506,122 +501,28 @@ int PacketHandler::player_block_placement(User *user)
   if (direction)
     direction = 6-direction;
 
-  uint8 block;
+  uint8 oldblock;
   uint8 metadata;
-  Map::get().getBlock(x, y, z, &block, &metadata);
+  if (Map::get().getBlock(x, y, z, &oldblock, &metadata))
+  {
+     Callback callback;
+     Function event;
+     Function::invoker_type inv(user, newblock, x, y, z, direction);
 
-  Callback callback = Plugin::get().getBlockCallback(block);
-  Function::invoker_type inv(user, blockID, x, y, z, direction);
-  Function event = callback.get("onPlace");
-  if (event) inv(event);
+     callback = Plugin::get().getBlockCallback(oldblock);
+     event = callback.get("onReplace");
+     if (event) inv(event);  
 
+     callback = Plugin::get().getBlockCallback(newblock);
+     event = callback.get("onPlace");
+     if (event) inv(event);
+
+     /* TODO: Should be removed. Only needed for water related blocks? */
+     Physics::get().checkSurrounding(vec(x, y, z));
+  }
   return PACKET_OK;
 
-  /*
-  orig_x = x; orig_y = y; orig_z = z;
-   
-  if(y < 0)
-    return PACKET_OK;
-    
-  Map::get().getBlock(x, y, z, &block, &metadata);
-  
-  switch(direction)
-  {
-    case 0: y--; break;
-    case 1: y++; break;
-    case 2: z--; break;
-    case 3: z++; break;
-    case 4: x--; break;
-    case 5: x++; break;
-  }
-  
-  uint8 block_direction;
-  uint8 metadata_direction;
-  Map::get().getBlock(x, y, z, &block_direction, &metadata_direction);
-  
-  uint8 block_bottom;
-  uint8 metadata_bottom;
-  Map::get().getBlock(x, y - 1, z, &block_bottom, &metadata_bottom);
-  
-  Physics::get().checkSurrounding(vec(x, y, z));
-  
-  
-  // If the "placing-on" block is a block that you cannot place blocks on
-  
-  if (block == BLOCK_WORKBENCH ||
-      block == BLOCK_FURNACE ||
-      block == BLOCK_BURNING_FURNACE ||
-      block == BLOCK_CHEST ||
-      block == BLOCK_JUKEBOX ||
-      block == BLOCK_TORCH)
-    return PACKET_OK;
-    
-    
-  // If the block is invalid
-  
-  if (blockID > 0xFF || blockID == -1)
-    return PACKET_OK;
-    
-    
-  // Can't place fire on/in water
-  
-  if (blockID == BLOCK_FIRE &&
-        (block_bottom == BLOCK_WATER ||
-         block_bottom == BLOCK_STATIONARY_WATER ||
-         block == BLOCK_WATER ||
-         block == BLOCK_STATIONARY_WATER))
-    return PACKET_OK;
-    
-    
-  // Check if the directed block is replace-able
-  
-  //Blocks that drop items once replaced
-  if (block_direction != BLOCK_TORCH && 
-      block_direction != BLOCK_REDSTONE_TORCH_OFF &&
-      block_direction != BLOCK_REDSTONE_TORCH_ON &&
-      block_direction != BLOCK_BROWN_MUSHROOM &&
-      block_direction != BLOCK_RED_MUSHROOM &&
-      block_direction != BLOCK_YELLOW_FLOWER &&
-      block_direction != BLOCK_RED_ROSE &&
-      block_direction != BLOCK_SAPLING)
-  {
-    //Blocks that are simply replaced
-    if (block_direction != BLOCK_AIR &&
-        block_direction != BLOCK_WATER &&
-        block_direction != BLOCK_STATIONARY_WATER &&
-        block_direction != BLOCK_LAVA &&
-        block_direction != BLOCK_STATIONARY_LAVA &&
-        block_direction != BLOCK_SNOW &&
-        block_direction != BLOCK_FIRE)
-      {
-        // It's not an overwritable block
-        return PACKET_OK;
-      }
-  }
-  else
-  {
-    // Drop the item representing the block
-    //TODO: Drop the item
-  }
-
-
-  // Overwrite over these blocks (Target block)
- 
-  if (block == BLOCK_SNOW || 
-      block == BLOCK_FIRE ||
-      block == BLOCK_TORCH || 
-      block == BLOCK_REDSTONE_TORCH_OFF ||
-      block == BLOCK_REDSTONE_TORCH_ON ||
-      block == BLOCK_BROWN_MUSHROOM ||
-      block == BLOCK_RED_MUSHROOM ||
-      block == BLOCK_YELLOW_FLOWER ||
-      block == BLOCK_RED_ROSE ||
-      block == BLOCK_SAPLING)
-  {
-    x = ox;
-    y = oy;
-    z = oz;
-  }
+ /*
   
   
   // Door status change

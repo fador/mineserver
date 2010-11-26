@@ -69,14 +69,34 @@ void BlockPlant::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, 
    }   
 }
 
-void BlockPlant::onPlace(User* user, sint8 block, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockPlant::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
+   uint8 oldblock;
+   uint8 oldmeta;
    uint8 topblock;
    uint8 topmeta;
-   if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta))
+
+   if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
    {
-      Map::get().setBlock(x, y+1, z, (char)block, direction);
-      Map::get().sendBlockChange(x, y+1, z, (char)block, direction);
+      /* Only place of dirt or grass */
+      switch(oldblock)
+      {
+         case BLOCK_GRASS:
+         case BLOCK_SOIL:
+            if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
+            {
+               Map::get().setBlock(x, y+1, z, (char)newblock, direction);
+               Map::get().sendBlockChange(x, y+1, z, (char)newblock, direction);
+            }
+         break;
+         default:
+            return;
+         break;
+      }
    }
 }
 
+void BlockPlant::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+
+}
