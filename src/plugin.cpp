@@ -30,6 +30,7 @@
 #include "blocks/falling.h"
 #include "blocks/torch.h"
 #include "blocks/plant.h"
+#include "blocks/snow.h"
 
 Plugin &Plugin::get()
 {
@@ -123,8 +124,15 @@ void Plugin::init()
    setBlockCallback(BLOCK_CACTUS, call);
    setBlockCallback(BLOCK_REED, call);
    setBlockCallback(BLOCK_SAPLING, call);
+   
+   call.reset();
+   BlockSnow* snowblock = new BlockSnow();
+   call.add("onNeighbourBroken", Function::from_method<BlockSnow, &BlockSnow::onNeighbourBroken>(snowblock));
+   call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
+   setBlockCallback(BLOCK_SNOW, call);
 
   /* TODO: Unimplemented */
+  /* BLOCK_WATER, BLOCK_STATIONARY_WATER */
   /* BLOCK_FIRE */
   /* BLOCK_LEAVES */
   /* BLOCK_SPONGE */
@@ -141,7 +149,7 @@ void Plugin::init()
   /* BLOCK_WOODEN_PRESSURE_PLATE, BLOCK_STONE_PRESSURE_PLATE */
   /* BLOCK_FENCE */
   /* BLOCK_ICE */
-  /* BLOCK_SNOW, BLOCK_SNOW_BLOCK */
+  /* BLOCK_SNOW_BLOCK */
 }
 
 void Plugin::setBlockCallback(const int type, Callback call)

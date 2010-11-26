@@ -25,58 +25,24 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "plant.h"
+#pragma once
 
-void BlockPlant::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+#include <cstdlib>
+
+#include "constants.h"
+#include "map.h"
+#include "tools.h"
+
+class User;
+
+class BlockSnow
 {
-
-}
-
-void BlockPlant::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-
-}
-
-void BlockPlant::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-
-}
-
-void BlockPlant::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
-
-void BlockPlant::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   uint8 block; uint8 meta;
-   uint8 nblock; uint8 nmeta;
-   bool destroy = false;  
-   if (!Map::get().getBlock(x, y, z, &block, &meta))
-      return;
-      
-   if (meta == BLOCK_TOP && Map::get().getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
-   {
-      // block broken under plant
-      destroy = true;
-   }
-
-   if (destroy)
-   {
-      // Break plant and spawn plant item
-      Map::get().sendBlockChange(x, y, z, 0, 0);
-      Map::get().setBlock(x, y, z, 0, 0);
-      Map::get().createPickupSpawn(x, y, z, block, 1);
-   }   
-}
-
-void BlockPlant::onPlace(User* user, sint8 block, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   uint8 topblock;
-   uint8 topmeta;
-   if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta))
-   {
-      Map::get().setBlock(x, y+1, z, (char)block, direction);
-      Map::get().sendBlockChange(x, y+1, z, (char)block, direction);
-   }
-}
+public:
+   void onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onPlace(User* user, sint8 block, sint32 x, sint8 y, sint32 z, sint8 direction);
+};
 

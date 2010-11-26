@@ -25,28 +25,28 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "plant.h"
+#include "snow.h"
 
-void BlockPlant::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockSnow::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockPlant::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockSnow::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockPlant::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockSnow::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockPlant::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockSnow::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 }
 
-void BlockPlant::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockSnow::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
    uint8 block; uint8 meta;
    uint8 nblock; uint8 nmeta;
@@ -56,27 +56,19 @@ void BlockPlant::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, 
       
    if (meta == BLOCK_TOP && Map::get().getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
    {
-      // block broken under plant
+      // block broken under snow
       destroy = true;
    }
 
    if (destroy)
    {
-      // Break plant and spawn plant item
+      // Break snow and do not spawn item
       Map::get().sendBlockChange(x, y, z, 0, 0);
       Map::get().setBlock(x, y, z, 0, 0);
-      Map::get().createPickupSpawn(x, y, z, block, 1);
    }   
 }
 
-void BlockPlant::onPlace(User* user, sint8 block, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockSnow::onPlace(User* user, sint8 block, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-   uint8 topblock;
-   uint8 topmeta;
-   if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta))
-   {
-      Map::get().setBlock(x, y+1, z, (char)block, direction);
-      Map::get().sendBlockChange(x, y+1, z, (char)block, direction);
-   }
 }
 
