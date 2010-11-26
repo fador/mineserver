@@ -723,29 +723,10 @@ int PacketHandler::player_block_placement(User *user)
       return PACKET_OK;
   }
   
-  
-  // Set the direction for the block
-  
-  if(blockID == BLOCK_TORCH ||
-     blockID == BLOCK_REDSTONE_TORCH_OFF ||
-     blockID == BLOCK_REDSTONE_TORCH_ON)
-  {
-    metadata = 0;
-    if (direction)
-       metadata = 6 - direction;
-  }
-  
-  
   // Proceed to change the block
   
   Map::get().setBlock(x, y, z, (char)blockID, metadata);
   Map::get().sendBlockChange(x, y, z, (char)blockID, metadata);
-
-  if (blockID == BLOCK_WATER || 
-      blockID == BLOCK_STATIONARY_WATER ||
-      blockID == BLOCK_LAVA || 
-      blockID == BLOCK_STATIONARY_LAVA)
-    Physics::get().addSimulation(vec(x, y, z));
 
   return PACKET_OK;*/
 }

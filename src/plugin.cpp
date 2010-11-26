@@ -142,6 +142,8 @@ void Plugin::init()
    call.add("onReplace", Function::from_method<BlockLiquid, &BlockLiquid::onReplace>(liquidblock));
    setBlockCallback(BLOCK_WATER, call);
    setBlockCallback(BLOCK_STATIONARY_WATER, call);
+   setBlockCallback(BLOCK_LAVA, call);
+   setBlockCallback(BLOCK_STATIONARY_LAVA, call);
 
    BlockFire* fireblock = new BlockFire();
    call.add("onPlace", Function::from_method<BlockFire, &BlockFire::onPlace>(fireblock));

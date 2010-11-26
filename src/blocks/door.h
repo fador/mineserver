@@ -25,63 +25,25 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "liquid.h"
-#include "physics.h"
+#pragma once
 
-void BlockLiquid::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+#include <cstdlib>
+
+#include "constants.h"
+#include "map.h"
+#include "tools.h"
+
+class User;
+
+class BlockDoor
 {
-
-}
-
-void BlockLiquid::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-
-}
-
-void BlockLiquid::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-
-}
-
-void BlockLiquid::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
-
-void BlockLiquid::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   uint8 block; uint8 meta;
-   physics(x,y,z);
-}
-
-void BlockLiquid::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   uint8 topblock;
-   uint8 topmeta;
-   if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
-   {
-      Map::get().setBlock(x, y+1, z, (char)newblock, direction);
-      Map::get().sendBlockChange(x, y+1, z, (char)newblock, direction);
-      
-      Physics::get().addSimulation(vec(x, y, z));
-      physics(x,y+1,z);
-   }
-}
-
-void BlockLiquid::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   uint8 oldblock;
-   uint8 oldmeta;
-
-   if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
-   {
-      Map::get().sendBlockChange(x, y, z, 0, 0);
-      Map::get().setBlock(x, y, z, 0, 0);
-      physics(x,y,z);
-   }
-}
-
-void BlockLiquid::physics(sint32 x, sint8 y, sint32 z)
-{
-   Physics::get().checkSurrounding(vec(x, y, z));
-}
+public:
+   void onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+};
 
