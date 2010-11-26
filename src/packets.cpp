@@ -1090,7 +1090,7 @@ int PacketHandler::complex_entities(User *user)
   Map::get().getBlock(x, y, z, &block, &meta);
 
   //We only handle chest for now
-  if(block != BLOCK_CHEST)
+  if(block != BLOCK_CHEST || block != BLOCK_FURNACE || block != BLOCK_SIGN_POST || block != BLOCK_WALL_SIGN)
   {
     delete[] buffer;
     return PACKET_OK;
