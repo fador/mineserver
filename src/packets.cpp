@@ -598,56 +598,6 @@ int PacketHandler::player_block_placement(User *user)
      Physics::get().checkSurrounding(vec(x, y, z));
   }
   return PACKET_OK;
-
-  /*
-  
-  // Check block placement
-  
-  if (blockID != BLOCK_TORCH && 
-      blockID != BLOCK_REDSTONE_TORCH_OFF &&
-      blockID != BLOCK_REDSTONE_TORCH_ON &&
-      blockID != BLOCK_AIR &&
-      blockID != BLOCK_WATER &&
-      blockID != BLOCK_STATIONARY_WATER &&
-      blockID != BLOCK_LAVA &&
-      blockID != BLOCK_STATIONARY_LAVA &&
-      blockID != BLOCK_BROWN_MUSHROOM &&
-      blockID != BLOCK_RED_MUSHROOM &&
-      blockID != BLOCK_YELLOW_FLOWER &&
-      blockID != BLOCK_RED_ROSE &&
-      blockID != BLOCK_SAPLING &&
-      blockID != BLOCK_FIRE &&
-      blockID != BLOCK_REDSTONE_WIRE &&
-      blockID != BLOCK_SIGN_POST &&
-      blockID != BLOCK_LADDER &&
-      blockID != BLOCK_MINECART_TRACKS &&
-      blockID != BLOCK_WALL_SIGN &&
-      blockID != BLOCK_STONE_PRESSURE_PLATE &&
-      blockID != BLOCK_WOODEN_PRESSURE_PLATE &&
-      blockID != BLOCK_STONE_BUTTON &&
-      blockID != BLOCK_PORTAL)
-  {
-    double diffX = x - user->pos.x;
-    double diffY = y - user->pos.y;
-    double diffZ = z - user->pos.z;
-
-    //std::cout << user->pos.x << ", " << user->pos.y << ", " << user->pos.z << "  =>  " << diffX << ", " << diffY << ", " << diffZ << std::endl;
-    
-    //TODO: Check for doors and fences
-
-    // We check Y, X then Z
-    if (diffY > -0.9 && diffY < 1.3 && 
-        diffX > -1.3 && diffX < 0.3 && 
-        diffZ > -1.3 && diffZ < 0.3)
-      return PACKET_OK;
-  }
-  
-  // Proceed to change the block
-  
-  Map::get().setBlock(x, y, z, (char)blockID, metadata);
-  Map::get().sendBlockChange(x, y, z, (char)blockID, metadata);
-
-  return PACKET_OK;*/
 }
 
 int PacketHandler::holding_change(User *user)
