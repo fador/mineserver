@@ -86,8 +86,8 @@ void BlockPlant::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
          case BLOCK_DIRT:
             if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
             {
-               Map::get().setBlock(x, y+1, z, (char)newblock, direction);
-               Map::get().sendBlockChange(x, y+1, z, (char)newblock, direction);
+               Map::get().setBlock(x, y+1, z, (char)newblock, 0);
+               Map::get().sendBlockChange(x, y+1, z, (char)newblock, 0);
             }
          break;
          default:
