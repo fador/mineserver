@@ -84,9 +84,12 @@ void BlockFalling::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
    }
 }
 
+void BlockFalling::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+}
+
 void BlockFalling::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-
 }
 
 void BlockFalling::physics(sint32 x, sint8 y, sint32 z)

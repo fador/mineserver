@@ -446,29 +446,55 @@ int PacketHandler::player_digging(User *user)
        event = callback.get("onBroken");
        if (event) inv(event);
 
-       inv = Function::invoker_type(user, status, x+1, y, z, direction);
-       event = callback.get("onNeighbourBroken");
-       if (event) inv(event);
+       /* notify neighbour blocks of the broken block */
+       status = block;
+       if (!Map::get().getBlock(x+1, y, z, &block, &meta))
+       {
+          callback = Plugin::get().getBlockCallback(block);
+          inv = Function::invoker_type(user, status, x+1, y, z, direction);
+          event = callback.get("onNeighbourBroken");
+          if (event) inv(event);
+       }
+       
+       if (!Map::get().getBlock(x-1, y, z, &block, &meta))
+       {
+          callback = Plugin::get().getBlockCallback(block);
+          inv = Function::invoker_type(user, status, x-1, y, z, direction);
+          event = callback.get("onNeighbourBroken");
+          if (event) inv(event);
+       }
 
-       inv = Function::invoker_type(user, status, x-1, y, z, direction);
-       event = callback.get("onNeighbourBroken");
-       if (event) inv(event);
+       if (!Map::get().getBlock(x, y+1, z, &block, &meta))
+       {
+          callback = Plugin::get().getBlockCallback(block);
+          inv = Function::invoker_type(user, status, x, y+1, z, direction);
+          event = callback.get("onNeighbourBroken");
+          if (event) inv(event);
+       }
+       
+       if (!Map::get().getBlock(x, y-1, z, &block, &meta))
+       {
+          callback = Plugin::get().getBlockCallback(block);
+          inv = Function::invoker_type(user, status, x, y-1, z, direction);
+          event = callback.get("onNeighbourBroken");
+          if (event) inv(event);
+       }
 
-       inv = Function::invoker_type(user, status, x, y+1, z, direction);
-       event = callback.get("onNeighbourBroken");
-       if (event) inv(event);
-
-       inv = Function::invoker_type(user, status, x, y-1, z, direction);
-       event = callback.get("onNeighbourBroken");
-       if (event) inv(event);
-
-       inv = Function::invoker_type(user, status, x, y, z+1, direction);
-       event = callback.get("onNeighbourBroken");
-       if (event) inv(event);
-
-       inv = Function::invoker_type(user, status, x, y, z-1, direction);
-       event = callback.get("onNeighbourBroken");
-       if (event) inv(event);
+       if (!Map::get().getBlock(x, y, z+1, &block, &meta))
+       {
+          callback = Plugin::get().getBlockCallback(block);
+          inv = Function::invoker_type(user, status, x, y, z+1, direction);
+          event = callback.get("onNeighbourBroken");
+          if (event) inv(event);
+       }
+       
+       if (!Map::get().getBlock(x, y, z-1, &block, &meta))
+       {
+          callback = Plugin::get().getBlockCallback(block);
+          inv = Function::invoker_type(user, status, x, y, z-1, direction);
+          event = callback.get("onNeighbourBroken");
+          if (event) inv(event);
+       }
      break;
   }
   return PACKET_OK;
@@ -517,83 +543,63 @@ int PacketHandler::player_block_placement(User *user)
      event = callback.get("onPlace");
      if (event) inv(event);
 
+     /* notify neighbour blocks of the placed block */
+     uint8 block;
+     uint8 meta;
+     if (!Map::get().getBlock(x+1, y, z, &block, &meta))
+     {
+        callback = Plugin::get().getBlockCallback(block);
+        inv = Function::invoker_type(user, newblock, x+1, y, z, direction);
+        event = callback.get("onNeighbourPlace");
+        if (event) inv(event);
+     }
+    
+     if (!Map::get().getBlock(x-1, y, z, &block, &meta))
+     {
+        callback = Plugin::get().getBlockCallback(block);
+        inv = Function::invoker_type(user, newblock, x-1, y, z, direction);
+        event = callback.get("onNeighbourPlace");
+        if (event) inv(event);
+     }
+
+     if (!Map::get().getBlock(x, y+1, z, &block, &meta))
+     {
+        callback = Plugin::get().getBlockCallback(block);
+        inv = Function::invoker_type(user, newblock, x, y+1, z, direction);
+        event = callback.get("onNeighbourPlace");
+        if (event) inv(event);
+     }
+    
+     if (!Map::get().getBlock(x, y-1, z, &block, &meta))
+     {
+        callback = Plugin::get().getBlockCallback(block);
+        inv = Function::invoker_type(user, newblock, x, y-1, z, direction);
+        event = callback.get("onNeighbourPlace");
+        if (event) inv(event);
+     }
+
+     if (!Map::get().getBlock(x, y, z+1, &block, &meta))
+     {
+        callback = Plugin::get().getBlockCallback(block);
+        inv = Function::invoker_type(user, newblock, x, y, z+1, direction);
+        event = callback.get("onNeighbourPlace");
+        if (event) inv(event);
+     }
+    
+     if (!Map::get().getBlock(x, y, z-1, &block, &meta))
+     {
+        callback = Plugin::get().getBlockCallback(block);
+        inv = Function::invoker_type(user, newblock, x, y, z-1, direction);
+        event = callback.get("onNeighbourPlaced");
+        if (event) inv(event);
+     }
+
      /* TODO: Should be removed. Only needed for water related blocks? */
      Physics::get().checkSurrounding(vec(x, y, z));
   }
   return PACKET_OK;
 
   /*
-  // If the block is stairs, place them in the right direction
-  
-  if (blockID == BLOCK_WOODEN_STAIRS ||
-      blockID == BLOCK_COBBLESTONE_STAIRS)
-  {
-    // Where the stairs ascend
-    // +X -> South  0x0
-    // -X -> North  0x1
-    // +Z -> West   0x2
-    // -Z -> East   0x3
-    
-    //TODO: Check the surrounding for other stairs and allign it with them.
-
-    // We cannot place stairs over a weak block
-    if (block_bottom == BLOCK_TORCH ||
-        block_bottom == BLOCK_REDSTONE_TORCH_OFF ||
-        block_bottom == BLOCK_REDSTONE_TORCH_ON ||
-        block_bottom == BLOCK_BROWN_MUSHROOM ||
-        block_bottom == BLOCK_RED_MUSHROOM ||
-        block_bottom == BLOCK_YELLOW_FLOWER ||
-        block_bottom == BLOCK_RED_ROSE ||
-        block_bottom == BLOCK_SAPLING ||
-        block_bottom == BLOCK_AIR ||
-        block_bottom == BLOCK_WATER ||
-        block_bottom == BLOCK_STATIONARY_WATER ||
-        block_bottom == BLOCK_LAVA ||
-        block_bottom == BLOCK_STATIONARY_LAVA ||
-        block_bottom == BLOCK_SNOW ||
-        block_bottom == BLOCK_FIRE)
-      return PACKET_OK;
-
-    if (y == oy && (x != ox || y != oy || z != oz))
-    {
-      // We place according to the target block
-
-      if (x < ox)
-        metadata = 0x0;
-      else if (x > ox)
-        metadata = 0x1;
-      else if (z < oz)
-        metadata = 0x2;
-      else
-        metadata = 0x3;
-    }
-    else
-    {
-      // We place according to the player's position
-
-      double diffX = x - user->pos.x;
-      double diffZ = z - user->pos.z;
-      
-      if (std::abs(diffX) > std::abs(diffZ))
-      {
-        // We compare on the x axis
-        
-        if (diffX > 0)
-          metadata = 0x0;
-        else
-          metadata = 0x1;
-      }
-      else
-      {
-        // We compare on the z axis
-        
-        if (diffZ > 0)
-          metadata = 0x2;
-        else
-          metadata = 0x3;
-      }
-    }
-  }
   
   // Check block placement
   

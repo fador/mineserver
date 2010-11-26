@@ -72,6 +72,10 @@ void BlockSnow::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
 {
 }
 
+void BlockSnow::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+}
+
 void BlockSnow::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 }

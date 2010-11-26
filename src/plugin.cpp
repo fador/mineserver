@@ -33,6 +33,7 @@
 #include "blocks/snow.h"
 #include "blocks/liquid.h"
 #include "blocks/fire.h"
+#include "blocks/stair.h"
 
 Plugin &Plugin::get()
 {
@@ -84,10 +85,8 @@ void Plugin::init()
    setBlockCallback(BLOCK_MOSSY_COBBLESTONE, call);
    setBlockCallback(BLOCK_OBSIDIAN, call);
    setBlockCallback(BLOCK_MOB_SPAWNER, call);
-   setBlockCallback(BLOCK_WOODEN_STAIRS, call);
    setBlockCallback(BLOCK_DIAMOND_BLOCK, call);
    setBlockCallback(BLOCK_PUMPKIN, call);
-   setBlockCallback(BLOCK_COBBLESTONE_STAIRS, call);
    setBlockCallback(BLOCK_SIGN_POST, call);
    setBlockCallback(BLOCK_CLAY, call);
    setBlockCallback(BLOCK_NETHERSTONE, call);
@@ -149,6 +148,13 @@ void Plugin::init()
    call.add("onPlace", Function::from_method<BlockFire, &BlockFire::onPlace>(fireblock));
    setBlockCallback(BLOCK_FIRE, call);
 
+
+   BlockStair* stairblock = new BlockStair();
+   call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
+   call.add("onPlace", Function::from_method<BlockStair, &BlockStair::onPlace>(stairblock));
+   call.add("onNeighbourBroken", Function::from_method<BlockStair, &BlockStair::onNeighbourBroken>(stairblock));
+   setBlockCallback(BLOCK_WOODEN_STAIRS, call);
+   setBlockCallback(BLOCK_COBBLESTONE_STAIRS, call);
 
   /* TODO: Unimplemented */
   /* BLOCK_LEAVES */

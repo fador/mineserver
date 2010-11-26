@@ -63,14 +63,18 @@ void BlockFire::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
       switch(oldblock)
       {
          case BLOCK_FIRE:
-         case BLOCK_WATER:
-         case BLOCK_STATIONARY_WATER:
          case BLOCK_WORKBENCH:
          case BLOCK_FURNACE:
          case BLOCK_BURNING_FURNACE:
          case BLOCK_CHEST:
          case BLOCK_JUKEBOX:
          case BLOCK_TORCH:
+         case BLOCK_REDSTONE_TORCH_OFF:
+         case BLOCK_REDSTONE_TORCH_ON:
+         case BLOCK_WATER:
+         case BLOCK_STATIONARY_WATER:
+         case BLOCK_LAVA:
+         case BLOCK_STATIONARY_LAVA:
           return;
          break;
          default:
@@ -82,6 +86,10 @@ void BlockFire::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
          break;
       }
    }
+}
+
+void BlockFire::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
 }
 
 void BlockFire::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)

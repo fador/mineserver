@@ -70,6 +70,8 @@ void BlockDoor::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
          case BLOCK_CHEST:
          case BLOCK_JUKEBOX:
          case BLOCK_TORCH:
+         case BLOCK_REDSTONE_TORCH_OFF:
+         case BLOCK_REDSTONE_TORCH_ON:
           return;
          break;
          default:
@@ -142,6 +144,10 @@ void BlockDoor::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
          break;
       }
    }
+}
+
+void BlockDoor::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
 }
 
 void BlockDoor::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)

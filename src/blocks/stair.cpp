@@ -25,67 +25,33 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "torch.h"
+#include "stair.h"
 
-void BlockTorch::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockStair::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockTorch::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockStair::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockTorch::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockStair::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockTorch::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockStair::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 }
 
-void BlockTorch::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockStair::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-   uint8 block; uint8 meta;
-   uint8 nblock; uint8 nmeta;
-   bool destroy = false;  
-   if (!Map::get().getBlock(x, y, z, &block, &meta))
-      return;
-      
-   if (meta == BLOCK_TOP && Map::get().getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
-   {
-      // block broken under torch
-      destroy = true;
-   }
-   else if (meta == BLOCK_NORTH && Map::get().getBlock(x-1, y, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
-   {
-      destroy = true;
-   }
-   else if (meta == BLOCK_SOUTH && Map::get().getBlock(x+1, y, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
-   {
-      destroy = true;
-   }
-   else if (meta == BLOCK_EAST && Map::get().getBlock(x, y, z-1, &nblock, &nmeta) && nblock == BLOCK_AIR)
-   {
-      destroy = true;
-   }
-   else if (meta == BLOCK_WEST && Map::get().getBlock(x, y, z+1, &nblock, &nmeta) && nblock == BLOCK_AIR)
-   {
-      destroy = true;
-   }
-
-   if (destroy)
-   {
-      // Break torch and spawn torch item
-      Map::get().sendBlockChange(x, y, z, 0, 0);
-      Map::get().setBlock(x, y, z, 0, 0);
-      Map::get().createPickupSpawn(x, y, z, block, 1);
-   }   
+   /* TODO: add code to align stairs? */
 }
 
-void BlockTorch::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
    uint8 oldblock;
    uint8 oldmeta;
@@ -104,7 +70,7 @@ void BlockTorch::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
          case BLOCK_JUKEBOX:
          case BLOCK_TORCH:
          case BLOCK_REDSTONE_TORCH_OFF:
-         case BLOCK_REDSTONE_TORCH_ON:
+         case BLOCK_REDSTONE_TORCH_ON: 
          case BLOCK_WATER:
          case BLOCK_STATIONARY_WATER:
          case BLOCK_LAVA:
@@ -118,7 +84,50 @@ void BlockTorch::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
                topmeta = 0;
                if (direction)
                   topmeta = 6 - direction;
+               /*
+                  TODO: Compare result with code below
 
+                if (y == oy && (x != ox || y != oy || z != oz))
+                {
+                  // We place according to the target block
+
+                  if (x < ox)
+                    metadata = 0x0;
+                  else if (x > ox)
+                    metadata = 0x1;
+                  else if (z < oz)
+                    metadata = 0x2;
+                  else
+                    metadata = 0x3;
+                }
+                else
+                {
+                  // We place according to the player's position
+
+                  double diffX = x - user->pos.x;
+                  double diffZ = z - user->pos.z;
+                  
+                  if (std::abs(diffX) > std::abs(diffZ))
+                  {
+                    // We compare on the x axis
+                    
+                    if (diffX > 0)
+                      metadata = 0x0;
+                    else
+                      metadata = 0x1;
+                  }
+                  else
+                  {
+                    // We compare on the z axis
+                    
+                    if (diffZ > 0)
+                      metadata = 0x2;
+                    else
+                      metadata = 0x3;
+                  }
+                }
+               */
+                             
                Map::get().setBlock(x, y+1, z, (char)newblock, topmeta);
                Map::get().sendBlockChange(x, y+1, z, (char)newblock, topmeta);
             }
@@ -127,11 +136,12 @@ void BlockTorch::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
    }
 }
 
-void BlockTorch::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockStair::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
+   /* Align neighbour to this stair */
 }
 
-void BlockTorch::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockStair::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
    uint8 oldblock;
    uint8 oldmeta;

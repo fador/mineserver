@@ -67,6 +67,10 @@ void BlockLiquid::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
    }
 }
 
+void BlockLiquid::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+}
+
 void BlockLiquid::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
    uint8 oldblock;

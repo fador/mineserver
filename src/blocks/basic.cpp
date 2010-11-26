@@ -85,6 +85,12 @@ void BlockBasic::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
          case BLOCK_CHEST:
          case BLOCK_JUKEBOX:
          case BLOCK_TORCH:
+         case BLOCK_REDSTONE_TORCH_OFF:
+         case BLOCK_REDSTONE_TORCH_ON:
+         case BLOCK_WATER:
+         case BLOCK_STATIONARY_WATER:
+         case BLOCK_LAVA:
+         case BLOCK_STATIONARY_LAVA:
           return;
          break;
          default:
@@ -119,6 +125,10 @@ void BlockBasic::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
          break;
       }
    }
+}
+
+void BlockBasic::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
 }
 
 void BlockBasic::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)

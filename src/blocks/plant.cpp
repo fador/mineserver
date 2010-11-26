@@ -97,6 +97,10 @@ void BlockPlant::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
    }
 }
 
+void BlockPlant::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+}
+
 void BlockPlant::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
