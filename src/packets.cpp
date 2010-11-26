@@ -423,8 +423,56 @@ int PacketHandler::player_digging(User *user)
 
   user->buffer.removePacket();
 
+  //When player starts diggins
+  if(status == BLOCK_STATUS_STARTED_DIGGING)
+  {
+    uint8 block,metadata;
+    Map::get().getBlock(x, y, z, &block, &metadata);
+    // Door status change  
+    if (block == BLOCK_WOODEN_DOOR || 
+        block == BLOCK_IRON_DOOR)
+    {
+      
+      // Toggle door state
+      if (metadata & 0x4)
+      {
+        metadata &= (0x8 | 0x3);
+      }
+      else
+      {
+        metadata |= 0x4;
+      }
+
+      uint8 metadata2, block2;
+
+      int modifier = (metadata & 0x8) ? -1 : 1;
+
+      Map::get().setBlock(x, y, z, block, metadata);
+      Map::get().sendBlockChange(x, y, z, (char)block, metadata);  
+
+      Map::get().getBlock(x, y + modifier, z, &block2, &metadata2);
+
+      if (block2 == block)
+      {
+        metadata2 = metadata;
+      
+        if(metadata & 0x8)
+          metadata2 &= 0x7;
+        else
+          metadata2 |= 0x8;
+
+        Map::get().setBlock(x, y + modifier, z, block2, metadata2);
+        Map::get().sendBlockChange(x, y + modifier, z, (char)block, metadata2);     
+      
+      }
+      return PACKET_OK;
+    }
+
+  }
+
+
   //If block broken
-  if(status == BLOCK_STATUS_BLOCK_BROKEN)
+  else if(status == BLOCK_STATUS_BLOCK_BROKEN)
   {
     uint8 block; uint8 meta;
     if(Map::get().getBlock(x, y, z, &block, &meta))
@@ -604,27 +652,70 @@ int PacketHandler::player_block_placement(User *user)
   
   // If the "placing-on" block is a block that you cannot place blocks on
   
-  if (block == BLOCK_WORKBENCH ||
-      block == BLOCK_FURNACE ||
+  if (block == BLOCK_WORKBENCH       ||
+      block == BLOCK_FURNACE         ||
       block == BLOCK_BURNING_FURNACE ||
-      block == BLOCK_CHEST ||
-      block == BLOCK_JUKEBOX ||
+      block == BLOCK_CHEST           ||
+      block == BLOCK_JUKEBOX         ||
       block == BLOCK_TORCH)
-    return PACKET_OK;
-    
-    
-  // If the block is invalid
+    return PACKET_OK;    
   
+  // Door status change  
+  if (block == BLOCK_WOODEN_DOOR || 
+      block == BLOCK_IRON_DOOR)
+  {
+    blockID = block;
+    // Toggle door state
+    if (metadata & 0x4)
+    {
+      metadata &= (0x8 | 0x3);
+    }
+    else
+    {
+      metadata |= 0x4;
+    }
+
+    uint8 metadata2, block2;
+
+    int modifier = (metadata & 0x8) ? -1 : 1;
+
+    x = ox;
+    y = oy;
+    z = oz;
+
+    Map::get().setBlock(x, y, z, block, metadata);
+    Map::get().sendBlockChange(x, y, z, (char)blockID, metadata);  
+
+    Map::get().getBlock(x, y + modifier, z, &block2, &metadata2);
+
+    if (block2 == block)
+    {
+      metadata2 = metadata;
+      
+      if(metadata & 0x8)
+        metadata2 &= 0x7;
+      else
+        metadata2 |= 0x8;
+
+      Map::get().setBlock(x, y + modifier, z, block2, metadata2);
+      Map::get().sendBlockChange(x, y + modifier, z, (char)blockID, metadata2);     
+      
+    }
+    return PACKET_OK;
+  }
+
+
+  // If the block is invalid  
   if (blockID > 0xFF || blockID == -1)
     return PACKET_OK;
     
     
   // Can't place fire on/in water
   
-  if (blockID == BLOCK_FIRE &&
-        (block_bottom == BLOCK_WATER ||
+  if (blockID == BLOCK_FIRE                     &&
+        (block_bottom == BLOCK_WATER            ||
          block_bottom == BLOCK_STATIONARY_WATER ||
-         block == BLOCK_WATER ||
+         block == BLOCK_WATER                   ||
          block == BLOCK_STATIONARY_WATER))
     return PACKET_OK;
     
@@ -679,45 +770,6 @@ int PacketHandler::player_block_placement(User *user)
     z = oz;
   }
   
-  
-  // Door status change
-  
-  if (block == BLOCK_WOODEN_DOOR || 
-      block == BLOCK_IRON_DOOR)
-  {
-    blockID = block;
-
-    // Toggle door state
-    if (metadata & 0x4)
-      metadata &= (0x8 | 0x3);
-    else
-      metadata |= 0x4;
-
-    uint8 metadata2, block2;
-
-    int modifier = (metadata & 0x8) ? -1 : 1;
-
-    x = ox;
-    y = oy;
-    z = oz;
-
-    Map::get().getBlock(x, y + modifier, z, &block2, &metadata2);
-    
-    if (block2 == block)
-    {
-      metadata2 = metadata;
-      
-      if(metadata & 0x8)
-        metadata2 &= 0x7;
-      else
-        metadata2 |= 0x8;
-
-      Map::get().setBlock(x, y + modifier, z, block2, metadata2);
-      Map::get().sendBlockChange(x, y + modifier, z, (char)blockID, metadata2);
-      
-      return PACKET_OK;
-    }
-  }
   
   
   // Jack-O-Lantern
