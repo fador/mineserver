@@ -81,7 +81,7 @@ void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
             if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
             {
                // Get the correct orientation
-               topmeta = 0;
+               topmeta = 1;
                if (direction)
                   topmeta = 6 - direction;
                /*

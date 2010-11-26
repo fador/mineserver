@@ -96,6 +96,12 @@ void Plugin::init()
    setBlockCallback(BLOCK_JUKEBOX, call);
    setBlockCallback(BLOCK_MINECART_TRACKS, call);
    setBlockCallback(BLOCK_FENCE, call);
+   setBlockCallback(BLOCK_GOLD_ORE, call);
+   setBlockCallback(BLOCK_IRON_ORE, call);
+   setBlockCallback(BLOCK_COAL_ORE, call);
+   setBlockCallback(BLOCK_DIAMOND_ORE, call);
+   setBlockCallback(BLOCK_GLOWING_REDSTONE_ORE, call);
+   setBlockCallback(BLOCK_REDSTONE_ORE, call);
 
    /* Falling blocks (sand, etc) */
    call.reset();
@@ -117,6 +123,7 @@ void Plugin::init()
    setBlockCallback(BLOCK_TORCH, call);
    setBlockCallback(BLOCK_REDSTONE_TORCH_OFF, call);
    setBlockCallback(BLOCK_REDSTONE_TORCH_ON, call);
+   setBlockCallback(BLOCK_LADDER, call);
    
    /* Plants */
    call.reset();
@@ -162,7 +169,7 @@ void Plugin::init()
    call.reset();
    BlockStair* stairblock = new BlockStair();
    call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
-   call.add("onPlace", Function::from_method<BlockStair, &BlockStair::onPlace>(stairblock));
+   call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
    call.add("onNeighbourBroken", Function::from_method<BlockStair, &BlockStair::onNeighbourBroken>(stairblock));
    setBlockCallback(BLOCK_WOODEN_STAIRS, call);
    setBlockCallback(BLOCK_COBBLESTONE_STAIRS, call);
@@ -188,14 +195,17 @@ void Plugin::init()
    setBlockCallback(BLOCK_WOODEN_DOOR, call);
    setBlockCallback(BLOCK_IRON_DOOR, call);
 
+   /* leaves */
+   call.reset();
+   call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
+   setBlockCallback(BLOCK_LEAVES, call);
+
+
   /* TODO: Unimplemented */
-  /* BLOCK_LEAVES */
   /* BLOCK_SPONGE */
   /* BLOCK_REDSTONE_WIRE */
   /* BLOCK_PORTAL */
-  /* BLOCK_GOLD_ORE, BLOCK_IRON_ORE, BLOCK_COAL_ORE, BLOCK_DIAMOND_ORE, BLOCK_GLOWING_REDSTONE_ORE, BLOCK_REDSTONE_ORE */
   /* BLOCK_WALL_SIGN */
-  /* BLOCK_LADDER */
   /* BLOCK_LEVER, BLOCK_STONE_BUTTON */
   /* BLOCK_WOODEN_PRESSURE_PLATE, BLOCK_STONE_PRESSURE_PLATE */
   /* BLOCK_ICE */

@@ -56,9 +56,9 @@ void BlockBasic::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
       int count = 1;
       if (BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand() % 10000)
       {
-          block = BLOCKDROPS[block].item_id;
+          uint16 item_id = BLOCKDROPS[block].item_id;
           count = BLOCKDROPS[block].count;
-          Map::get().createPickupSpawn(x, y, z, block, count);
+          Map::get().createPickupSpawn(x, y, z, item_id, count);
       }
    }
 }
