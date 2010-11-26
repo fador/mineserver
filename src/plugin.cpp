@@ -34,6 +34,7 @@
 #include "blocks/liquid.h"
 #include "blocks/fire.h"
 #include "blocks/stair.h"
+#include "blocks/door.h"
 
 Plugin &Plugin::get()
 {
@@ -93,7 +94,10 @@ void Plugin::init()
    setBlockCallback(BLOCK_LIGHTSTONE, call);
    setBlockCallback(BLOCK_JACK_O_LANTERN, call);
    setBlockCallback(BLOCK_JUKEBOX, call);
+   setBlockCallback(BLOCK_MINECART_TRACKS, call);
+   
 
+   /* Falling blocks (sand, etc) */
    call.reset();
    BlockFalling* fallingblock = new BlockFalling();
    call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
@@ -103,6 +107,7 @@ void Plugin::init()
    setBlockCallback(BLOCK_SLOW_SAND, call);
    setBlockCallback(BLOCK_GRAVEL, call);
    
+   /* Torches */
    call.reset();
    BlockTorch* torchblock = new BlockTorch();
    call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
@@ -113,6 +118,7 @@ void Plugin::init()
    setBlockCallback(BLOCK_REDSTONE_TORCH_OFF, call);
    setBlockCallback(BLOCK_REDSTONE_TORCH_ON, call);
    
+   /* Plants */
    call.reset();
    BlockPlant* plantblock = new BlockPlant();
    call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
@@ -128,12 +134,14 @@ void Plugin::init()
    setBlockCallback(BLOCK_REED, call);
    setBlockCallback(BLOCK_SAPLING, call);
    
+   /* Snow */
    call.reset();
    BlockSnow* snowblock = new BlockSnow();
    call.add("onNeighbourBroken", Function::from_method<BlockSnow, &BlockSnow::onNeighbourBroken>(snowblock));
    call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
    setBlockCallback(BLOCK_SNOW, call);
 
+   /* Fire and Water */
    call.reset();
    BlockLiquid* liquidblock = new BlockLiquid();
    call.add("onPlace", Function::from_method<BlockLiquid, &BlockLiquid::onPlace>(liquidblock));
@@ -144,11 +152,13 @@ void Plugin::init()
    setBlockCallback(BLOCK_LAVA, call);
    setBlockCallback(BLOCK_STATIONARY_LAVA, call);
 
+   /* Fire */
    call.reset();
    BlockFire* fireblock = new BlockFire();
    call.add("onPlace", Function::from_method<BlockFire, &BlockFire::onPlace>(fireblock));
    setBlockCallback(BLOCK_FIRE, call);
 
+   /* Stairs */
    call.reset();
    BlockStair* stairblock = new BlockStair();
    call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
@@ -156,17 +166,34 @@ void Plugin::init()
    call.add("onNeighbourBroken", Function::from_method<BlockStair, &BlockStair::onNeighbourBroken>(stairblock));
    setBlockCallback(BLOCK_WOODEN_STAIRS, call);
    setBlockCallback(BLOCK_COBBLESTONE_STAIRS, call);
+   
+   /* TNT */
+   call.reset();
+   call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
+   setBlockCallback(BLOCK_TNT, call);
+   
+   /* Containers */
+   call.reset();
+   call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
+   setBlockCallback(BLOCK_CHEST, call);
+   setBlockCallback(BLOCK_WORKBENCH, call);
+   setBlockCallback(BLOCK_FURNACE, call);
+  /* TODO: Needs this? BLOCK_BURNING_FURNACE */
+
+   /* Doors */
+   call.reset();
+   BlockDoor* doorblock = new BlockDoor();
+   call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
+   call.add("onPlace", Function::from_method<BlockDoor, &BlockDoor::onPlace>(doorblock));
+   setBlockCallback(BLOCK_WOODEN_DOOR, call);
+   setBlockCallback(BLOCK_IRON_DOOR, call);
 
   /* TODO: Unimplemented */
   /* BLOCK_LEAVES */
   /* BLOCK_SPONGE */
-  /* BLOCK_TNT */
-  /* BLOCK_CHEST, BLOCK_WORKBENCH,BLOCK_FURNACE, BLOCK_BURNING_FURNACE */
   /* BLOCK_REDSTONE_WIRE */
   /* BLOCK_PORTAL */
   /* BLOCK_GOLD_ORE, BLOCK_IRON_ORE, BLOCK_COAL_ORE, BLOCK_DIAMOND_ORE, BLOCK_GLOWING_REDSTONE_ORE, BLOCK_REDSTONE_ORE */
-  /* BLOCK_MINECART_TRACKS */
-  /* BLOCK_WOODEN_DOOR, BLOCK_IRON_DOOR */
   /* BLOCK_WALL_SIGN */
   /* BLOCK_LADDER */
   /* BLOCK_LEVER, BLOCK_STONE_BUTTON */
