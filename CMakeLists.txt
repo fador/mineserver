@@ -58,6 +58,20 @@ if (NOT EVENT_LIBRARY OR NOT EVENT_INCLUDE_DIR)
    set(dependency_error True)
 endif()
 
+find_library(NOISE_LIBRARY
+   NAMES libnoise.so
+   PATHS /usr/lib /usr/local/lib
+)
+find_path(NOISE_INCLUDE_DIR
+  NAMES libnoise/noise.h noise/noise.h
+  PATHS /usr/include /usr/local/include
+)
+
+if (NOT NOISE_LIBRARY OR NOT NOISE_INCLUDE_DIR)
+   set(errors "${errors}\t\t- libNoise library\n")
+   set(dependency_error True)
+endif()
+
 
 if (WINDOWS)
    # even if 64bit this is set
@@ -68,12 +82,14 @@ if (NOT dependency_error)
    include_directories(${ZLIB_INCLUDE_DIR})
 #   include_directories(${LUA_INCLUDE_DIR})
    include_directories(${EVENT_INCLUDE_DIR})
+   include_directories(${NOISE_INCLUDE_DIR})
 
    add_executable(mineserver ${exe} ${folder_source})
 
    target_link_libraries(mineserver ${ZLIB_LIBRARY})
 #   target_link_libraries(mineserver ${LUA_LIBRARY})
    target_link_libraries(mineserver ${EVENT_LIBRARY})
+   target_link_libraries(mineserver ${NOISE_LIBRARY})
 else()
    message(FATAL_ERROR "\n\tNot all dependencies could be found:\n${errors}\n After installing them please rerun cmake.\n")
 endif()
