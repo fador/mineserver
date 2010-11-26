@@ -63,7 +63,7 @@ find_library(NOISE_LIBRARY
    PATHS /usr/lib /usr/local/lib
 )
 find_path(NOISE_INCLUDE_DIR
-  NAMES libnoise/noise.h
+  NAMES libnoise/noise.h noise/noise.h
   PATHS /usr/include /usr/local/include
 )
 
