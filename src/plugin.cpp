@@ -144,11 +144,12 @@ void Plugin::init()
    setBlockCallback(BLOCK_LAVA, call);
    setBlockCallback(BLOCK_STATIONARY_LAVA, call);
 
+   call.reset();
    BlockFire* fireblock = new BlockFire();
    call.add("onPlace", Function::from_method<BlockFire, &BlockFire::onPlace>(fireblock));
    setBlockCallback(BLOCK_FIRE, call);
 
-
+   call.reset();
    BlockStair* stairblock = new BlockStair();
    call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
    call.add("onPlace", Function::from_method<BlockStair, &BlockStair::onPlace>(stairblock));
