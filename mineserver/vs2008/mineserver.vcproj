@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../lib/zlib;../../lib/libevent2;../../src"
+				AdditionalIncludeDirectories="../../lib/zlib;../../lib/libevent2;../../src;../../lib"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,8 +61,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(ProjectDir)../../lib/zlib/zdll.lib $(ProjectDir)../../lib/libevent2/libevent.lib ws2_32.lib"
-				OutputFile="..\$(ProjectName).exe"
+				AdditionalDependencies="$(ProjectDir)../../lib/zlib/zdll.lib $(ProjectDir)../../lib/libevent2/libevent.lib ws2_32.lib ../../lib/noise/libnoise.lib"
+				OutputFile="..\..\bin\$(ProjectName).exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib"
 				GenerateDebugInformation="true"
@@ -203,6 +203,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\mersenne.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\mineserver.cpp"
 				>
 			</File>
@@ -211,11 +215,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\packets.cpp"
+				RelativePath="..\..\src\noiseutils.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\perlin.cpp"
+				RelativePath="..\..\src\packets.cpp"
 				>
 			</File>
 			<File
@@ -265,6 +269,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\mersenne.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\mineserver.h"
 				>
 			</File>
@@ -273,11 +281,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\packets.h"
+				RelativePath="..\..\src\noiseutils.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\perlin.h"
+				RelativePath="..\..\src\packets.h"
 				>
 			</File>
 			<File
