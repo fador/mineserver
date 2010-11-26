@@ -547,7 +547,8 @@ void NBT_Value::Write(std::vector<uint8> &buffer)
       buffer.resize(storeAt + 2 + stringLen);
       putSint16(&buffer[storeAt], (sint16)stringLen);
       storeAt += 2;
-      memcpy(&buffer[storeAt], m_value.stringVal->c_str(), stringLen);
+      if(stringLen>0)
+        memcpy(&buffer[storeAt], m_value.stringVal->c_str(), stringLen);
       break;
     }
   case TAG_LIST:
