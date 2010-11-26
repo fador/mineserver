@@ -522,86 +522,7 @@ int PacketHandler::player_block_placement(User *user)
   }
   return PACKET_OK;
 
- /*
-  
-  
-  // Door status change
-  
-  if (block == BLOCK_WOODEN_DOOR || 
-      block == BLOCK_IRON_DOOR)
-  {
-    blockID = block;
-
-    // Toggle door state
-    if (metadata & 0x4)
-      metadata &= (0x8 | 0x3);
-    else
-      metadata |= 0x4;
-
-    uint8 metadata2, block2;
-
-    int modifier = (metadata & 0x8) ? -1 : 1;
-
-    x = ox;
-    y = oy;
-    z = oz;
-
-    Map::get().getBlock(x, y + modifier, z, &block2, &metadata2);
-    
-    if (block2 == block)
-    {
-      metadata2 = metadata;
-      
-      if(metadata & 0x8)
-        metadata2 &= 0x7;
-      else
-        metadata2 |= 0x8;
-
-      Map::get().setBlock(x, y + modifier, z, block2, metadata2);
-      Map::get().sendBlockChange(x, y + modifier, z, (char)blockID, metadata2);
-      
-      return PACKET_OK;
-    }
-  }
-  
-  
-  // Jack-O-Lantern
-  
-  if (blockID == BLOCK_JACK_O_LANTERN)
-  {
-    // Where the visage face
-    // -Z -> East   0x0
-    // +X -> South  0x1
-    // +Z -> West   0x2
-    // -X -> North  0x3
-    // Anything else, no visage
-
-    // We place according to the player's position
-
-    double diffX = x - user->pos.x;
-    double diffZ = z - user->pos.z;
-    
-    if (std::abs(diffX) > std::abs(diffZ))
-    {
-      // We compare on the x axis
-      
-      if (diffX > 0)
-        metadata = 0x3;
-      else
-        metadata = 0x1;
-    }
-    else
-    {
-      // We compare on the z axis
-      
-      if (diffZ > 0)
-        metadata = 0x0;
-      else
-        metadata = 0x2;
-    }
-  }
-  
-  
+  /*
   // If the block is stairs, place them in the right direction
   
   if (blockID == BLOCK_WOODEN_STAIRS ||
@@ -673,14 +594,6 @@ int PacketHandler::player_block_placement(User *user)
       }
     }
   }
-
-  // We can place saplings only on dirt or grass
-  
-  if (blockID == BLOCK_SAPLING &&
-        (block != BLOCK_GRASS ||
-        block != BLOCK_DIRT))
-    return PACKET_OK;
-  
   
   // Check block placement
   

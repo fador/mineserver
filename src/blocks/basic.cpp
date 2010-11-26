@@ -27,6 +27,8 @@
 
 #include "basic.h"
 
+#include <cmath>
+
 void BlockBasic::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
@@ -88,8 +90,31 @@ void BlockBasic::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
          default:
             if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
             {
-               Map::get().setBlock(x, y+1, z, (char)newblock, direction);
-               Map::get().sendBlockChange(x, y+1, z, (char)newblock, direction);
+               // We place according to the player's position
+               double diffX = x - user->pos.x;
+               double diffZ = z - user->pos.z;
+
+               if (std::abs(diffX) > std::abs(diffZ))
+               {
+                  // compare on the x axis
+                  if (diffX > 0) {
+                    topmeta = 0x3;
+                  } else {
+                    topmeta = 0x1;
+                  }
+               }
+               else
+               {
+                  // compare on the z axis
+                  if (diffZ > 0) {
+                    topmeta = 0x0;
+                  } else {
+                    topmeta = 0x2;
+                  }
+               }
+
+               Map::get().setBlock(x, y+1, z, (char)newblock, topmeta);
+               Map::get().sendBlockChange(x, y+1, z, (char)newblock, topmeta);
             }
          break;
       }

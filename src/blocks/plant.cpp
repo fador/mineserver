@@ -83,6 +83,7 @@ void BlockPlant::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
       {
          case BLOCK_GRASS:
          case BLOCK_SOIL:
+         case BLOCK_DIRT:
             if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
             {
                Map::get().setBlock(x, y+1, z, (char)newblock, direction);

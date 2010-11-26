@@ -73,6 +73,46 @@ void BlockDoor::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
           return;
          break;
          default:
+         /*
+            TODO: Original code. Compare with version below.
+                 // Door status change
+            if (block == BLOCK_WOODEN_DOOR || block == BLOCK_IRON_DOOR)
+            {
+               blockID = block;
+
+               // Toggle door state
+               if (metadata & 0x4)
+               metadata &= (0x8 | 0x3);
+               else
+               metadata |= 0x4;
+
+               uint8 metadata2, block2;
+
+               int modifier = (metadata & 0x8) ? -1 : 1;
+
+               x = ox;
+               y = oy;
+               z = oz;
+
+               Map::get().getBlock(x, y + modifier, z, &block2, &metadata2);
+
+               if (block2 == block)
+               {
+                  metadata2 = metadata;
+
+                  if(metadata & 0x8)
+                    metadata2 &= 0x7;
+                  else
+                    metadata2 |= 0x8;
+
+                  Map::get().setBlock(x, y + modifier, z, block2, metadata2);
+                  Map::get().sendBlockChange(x, y + modifier, z, (char)blockID, metadata2);
+
+                  return PACKET_OK;
+               }
+            }
+         */
+
             if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
             {
                // Toggle door state
