@@ -95,7 +95,7 @@ void Plugin::init()
    setBlockCallback(BLOCK_JACK_O_LANTERN, call);
    setBlockCallback(BLOCK_JUKEBOX, call);
    setBlockCallback(BLOCK_MINECART_TRACKS, call);
-   
+   setBlockCallback(BLOCK_FENCE, call);
 
    /* Falling blocks (sand, etc) */
    call.reset();
@@ -198,7 +198,6 @@ void Plugin::init()
   /* BLOCK_LADDER */
   /* BLOCK_LEVER, BLOCK_STONE_BUTTON */
   /* BLOCK_WOODEN_PRESSURE_PLATE, BLOCK_STONE_PRESSURE_PLATE */
-  /* BLOCK_FENCE */
   /* BLOCK_ICE */
   /* BLOCK_SNOW_BLOCK */
 }
