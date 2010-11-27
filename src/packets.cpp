@@ -630,6 +630,7 @@ int PacketHandler::player_block_placement(User *user)
   #ifdef _DEBUG
     std::cout << "Block_placement: " << blockID << " (" << x << "," << (int)y << "," << z << ") dir: " << (int)direction << std::endl;
   #endif
+  
   uint8 block;
   uint8 metadata;
   Map::get().getBlock(x, y, z, &block, &metadata);
@@ -655,6 +656,161 @@ int PacketHandler::player_block_placement(User *user)
   Physics::get().checkSurrounding(vec(x, y, z));
   
   
+  //Sign placement
+  
+  if(blockID == ITEM_SIGN)
+  {
+    if(direction == 0)
+    {
+      return PACKET_OK;
+    }
+    
+    //This will make a sign post
+    else if(direction == 1)
+    {
+      // 0x0 -> West  West  West  West
+      // 0x1 -> West  West  West  North
+      // 0x2 -> West  West  North North
+      // 0x3 -> West  North North North
+      // 0x4 -> North North North North
+      // 0x5 -> North North North East
+      // 0x6 -> North North East  East
+      // 0x7 -> North East  East  East
+      // 0x8 -> East  East  East  East
+      // 0x9 -> East  East  East  South
+      // 0xA -> East  East  South South
+      // 0xB -> East  South South South
+      // 0xC -> South South South South
+      // 0xD -> South South South West
+      // 0xE -> South South West  West
+      // 0xF -> South West  West  West
+      
+      //           The values were the signs are facing
+      //
+      //                          North
+      //
+      //      -X |                  4
+      //         |              3       5
+      //         |           2             6
+      //         |         1       [=]       7
+      //  West   |        0         |         8           East
+      //         |         F                 9
+      //         |           E             A
+      //         |              D       B
+      //      +X |                  C
+      //           ----------------------------------
+      //           +Z                              -Z
+      //
+      //                          South
+      
+      
+      // Were it should be placed depending on the user's position
+      //
+      //                          North
+      //
+      //      -X |                  C
+      //         |              B       D
+      //         |           A      o      E
+      //         |         9       [ ]       F
+      //  West   |        8        | |         0           East
+      //         |         7                 1
+      //         |           6             2
+      //         |              5       3
+      //      +X |                  4
+      //           ----------------------------------
+      //           +Z                              -Z
+      //
+      //                          South
+      
+      blockID = BLOCK_SIGN_POST;
+      
+      // We place according to the player's position
+
+      double mdiffX = (x + 0.5) - user->pos.x; // + 0.5 to get the middle of the cube
+      double mdiffZ = (z + 0.5) - user->pos.z; // + 0.5 to get the middle of the cube
+      
+      double angleDegree;
+      
+      if (mdiffX != 0)
+        angleDegree = atan(std::abs(mdiffX) / std::abs(mdiffZ)) * 180 / M_PI;
+      else 
+        angleDegree = 90;
+
+      // +X -Z
+      if (mdiffX > 0 && mdiffZ <= 0)
+      {
+        if (angleDegree <= 11.25)
+          metadata = 0x0;
+        else if (angleDegree <= (11.25 + 22.5))
+          metadata = 0x1;
+        else if (angleDegree <= (11.25 + 22.5 + 22.5))
+          metadata = 0x2;
+        else if (angleDegree <= (11.25 + 22.5 + 22.5 + 22.5))
+          metadata = 0x3;
+        else
+          metadata = 0x4;
+      }
+      // +X +Z
+      else if (mdiffX > 0 && mdiffZ > 0)
+      {
+        if (angleDegree <= 11.25)
+          metadata = 0x8;
+        else if (angleDegree <= (11.25 + 22.5))
+          metadata = 0x7;
+        else if (angleDegree <= (11.25 + 22.5 + 22.5))
+          metadata = 0x6;
+        else if (angleDegree <= (11.25 + 22.5 + 22.5 + 22.5))
+          metadata = 0x5;
+        else
+          metadata = 0x4;
+      }
+      // -X +Z
+      else if (mdiffX <= 0 && mdiffZ > 0)
+      {
+        if (angleDegree <= 11.25)
+          metadata = 0x8;
+        else if (angleDegree <= (11.25 + 22.5))
+          metadata = 0x9;
+        else if (angleDegree <= (11.25 + 22.5 + 22.5))
+          metadata = 0xA;
+        else if (angleDegree <= (11.25 + 22.5 + 22.5 + 22.5))
+          metadata = 0xB;
+        else
+          metadata = 0xC;
+      }
+      // -X -Z
+      else
+      {
+        if (angleDegree <= 11.25)
+          metadata = 0x0;
+        else if (angleDegree <= (11.25 + 22.5))
+          metadata = 0xF;
+        else if (angleDegree <= (11.25 + 22.5 + 22.5))
+          metadata = 0xE;
+        else if (angleDegree <= (11.25 + 22.5 + 22.5 + 22.5))
+          metadata = 0xD;
+        else
+          metadata = 0xC;
+      }
+      
+      //std::cout << "mdiffX= " << mdiffX << "  mdiffZ= " << mdiffZ << "  andgleDegree= " << angleDegree << "  metadata= " << (int)metadata << std::endl;
+    }
+    
+    //Else wall sign
+    else
+    {
+      blockID = BLOCK_WALL_SIGN;
+      metadata = direction;
+    }
+  }
+  
+  
+  // If the block is invalid  
+  
+  if (blockID > 0xFF || blockID == -1)
+    return PACKET_OK;
+  
+  
   // If the "placing-on" block is a block that you cannot place blocks on
   
   if (block == BLOCK_WORKBENCH       ||
@@ -665,7 +821,9 @@ int PacketHandler::player_block_placement(User *user)
       block == BLOCK_TORCH)
     return PACKET_OK;    
   
+  
   // Door status change  
+  
   if (block == BLOCK_WOODEN_DOOR || 
       block == BLOCK_IRON_DOOR)
   {
@@ -708,32 +866,6 @@ int PacketHandler::player_block_placement(User *user)
     }
     return PACKET_OK;
   }
-
-  //Sign placement
-  if(blockID == ITEM_SIGN)
-  {
-    if(direction == 0)
-    {
-      return PACKET_OK;
-    }
-    //This will make a sign post
-    else if(direction == 1)
-    {
-      blockID = BLOCK_SIGN_POST;
-      //This should be calculated from player position!
-      metadata = 0;
-    }
-    //Else wall sign
-    else
-    {
-      blockID = BLOCK_WALL_SIGN;
-      metadata = direction;
-    }
-  }
-
-  // If the block is invalid  
-  if (blockID > 0xFF || blockID == -1)
-    return PACKET_OK;
     
     
   // Can't place fire on/in water
@@ -869,15 +1001,8 @@ int PacketHandler::player_block_placement(User *user)
     if (y == oy && (x != ox || y != oy || z != oz))
     {
       // We place according to the target block
-
-      if (x < ox)
-        metadata = 0x0;
-      else if (x > ox)
-        metadata = 0x1;
-      else if (z < oz)
-        metadata = 0x2;
-      else
-        metadata = 0x3;
+      
+      metadata = 5 - direction;
     }
     else
     {
