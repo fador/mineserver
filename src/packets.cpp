@@ -625,6 +625,9 @@ int PacketHandler::player_block_placement(User *user)
   if(y < 0)
     return PACKET_OK;
     
+  #ifdef _DEBUG
+    std::cout << "Block_placement: " << blockID << " (" << x << "," << (int)y << "," << z << ") dir: " << (int)direction << std::endl;
+  #endif
   uint8 block;
   uint8 metadata;
   Map::get().getBlock(x, y, z, &block, &metadata);
@@ -704,6 +707,27 @@ int PacketHandler::player_block_placement(User *user)
     return PACKET_OK;
   }
 
+  //Sign placement
+  if(blockID == ITEM_SIGN)
+  {
+    if(direction == 0)
+    {
+      return PACKET_OK;
+    }
+    //This will make a sign post
+    else if(direction == 1)
+    {
+      blockID = BLOCK_SIGN_POST;
+      //This should be calculated from player position!
+      metadata = 0;
+    }
+    //Else wall sign
+    else
+    {
+      blockID = BLOCK_WALL_SIGN;
+      metadata = direction;
+    }
+  }
 
   // If the block is invalid  
   if (blockID > 0xFF || blockID == -1)
@@ -1090,7 +1114,7 @@ int PacketHandler::complex_entities(User *user)
   Map::get().getBlock(x, y, z, &block, &meta);
 
   //We only handle chest for now
-  if(block != BLOCK_CHEST || block != BLOCK_FURNACE || block != BLOCK_SIGN_POST || block != BLOCK_WALL_SIGN)
+  if(block != BLOCK_CHEST && block != BLOCK_FURNACE && block != BLOCK_SIGN_POST && block != BLOCK_WALL_SIGN)
   {
     delete[] buffer;
     return PACKET_OK;

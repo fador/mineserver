@@ -110,6 +110,8 @@ private:
     stopLight[0x55] = 0; // Fence
     stopLight[0x5A] = 0; // Portal
     stopLight[0x5B] = 0; // Jack-O-Lantern
+    stopLight[BLOCK_SIGN_POST] = 0; // Sign post
+    stopLight[BLOCK_WALL_SIGN] = 0; // Wall sign
   }
 
   ~Map()
