@@ -1193,7 +1193,7 @@ int PacketHandler::use_entity(User *user)
       if(Users[i]->health <= 0)
       {
         Packet pkt;
-        pkt << PACKET_DEATH_ANIMATION << (sint32)Users[i]->UID << (sint8)1;
+        pkt << PACKET_DEATH_ANIMATION << (sint32)Users[i]->UID << (sint8)3;
         Users[i]->sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
       }
       break;
