@@ -240,7 +240,7 @@ int Mineserver::Run()
         //Send server time
         Packet pkt;
         pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get().mapTime;
-        Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());        
+        Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
       }
 
       //Try to load port from config
@@ -273,6 +273,9 @@ int Mineserver::Run()
       {
         Users[i]->pushMap();
         Users[i]->popMap();
+        //Go back to title page client bug fix.
+        if(Users[i]->health == 0)
+           Users[i]->sethealth(-100);
       }
       Map::get().mapTime+=20;
       if(Map::get().mapTime>=24000) Map::get().mapTime=0;
