@@ -190,6 +190,16 @@ void setTime(User *user, std::string command, std::deque<std::string> args)
     reportError(user, "Usage: /settime time (time = 0-24000)");
 }
 
+void setHealth(User *user, std::string command, std::deque<std::string> args)
+{
+  if(args.size() == 2)
+  {
+    user->sethealth(atoi(args[1].c_str()));
+  } 
+  else
+    reportError(user, "Usage: /sethealth [player] health (health = 0-20)");
+}
+
 void coordinateTeleport(User *user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 3)
@@ -266,7 +276,12 @@ void showPosition(User *user, std::string command, std::deque<std::string> args)
 void regenerateLighting(User *user, std::string command, std::deque<std::string> args)
 {
   printf("Regenerating lighting for chunk %d,%d\n", blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
-  Map::get().generateLight(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
+  //First load the map
+  if(Map::get().loadMap(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z)))
+  {
+    //Then regenerate lighting
+    Map::get().generateLight(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
+  }
 }
 
 void reloadConfiguration(User *user, std::string command, std::deque<std::string> args)
@@ -389,5 +404,7 @@ void Chat::registerStandardCommands()
   registerCommand("reload", reloadConfiguration, true);
   registerCommand("give", giveItems, true);
   registerCommand("gps", showPosition, true);
-  registerCommand("settime", setTime, true);  registerCommand("regen", regenerateLighting, true);
+  registerCommand("settime", setTime, true);
+  registerCommand("regen", regenerateLighting, true);
+  registerCommand("sethealth", setHealth, true);
 }

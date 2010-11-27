@@ -198,17 +198,22 @@ public:
 
   // Generate light maps for chunk
   bool generateLight(int x, int z);
+  bool generateLight(int x, int z, sChunk *chunk);
 
   // Release/save map chunk
   bool releaseMap(int x, int z);
 
   // Light get/set
   bool getLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight);
+  bool getLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight, sChunk *chunk);
   bool setLight(int x, int y, int z, int blocklight, int skylight, int setLight);
+  bool setLight(int x, int y, int z, int blocklight, int skylight, int setLight, sChunk *chunk);
   bool spreadLight(int x, int y, int z, int skylight, int blocklight);
+  bool spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk *chunk);
 
   // Block value/meta get/set
   bool getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate = true);
+  bool getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate, sChunk *chunk);
   bool getBlock(vec pos, uint8 *type, uint8 *meta)
   {
     return getBlock(pos.x(), pos.y(), pos.z(), type, meta);
