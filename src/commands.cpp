@@ -110,7 +110,7 @@ void home(User *user, std::string command, std::deque<std::string> args)
 
 void kit(User *user, std::string command, std::deque<std::string> args)
 {
-  if(!args.empty())
+  if(args.size() == 1)
   {
     std::vector<int> kitItems = Conf::get().vValue("kit_" + args[0]);
     // If kit is found
@@ -132,6 +132,8 @@ void kit(User *user, std::string command, std::deque<std::string> args)
     else
       reportError(user, "Kit " + args[0] + " not found");
   }
+  else
+    reportError(user, "Usage: /kit name");
 }
 
 void saveMap(User *user, std::string command, std::deque<std::string> args)
@@ -188,9 +190,19 @@ void setTime(User *user, std::string command, std::deque<std::string> args)
     reportError(user, "Usage: /settime time (time = 0-24000)");
 }
 
+void setHealth(User *user, std::string command, std::deque<std::string> args)
+{
+  if(args.size() == 2)
+  {
+    user->sethealth(atoi(args[1].c_str()));
+  } 
+  else
+    reportError(user, "Usage: /sethealth [player] health (health = 0-20)");
+}
+
 void coordinateTeleport(User *user, std::string command, std::deque<std::string> args)
 {
-  if(args.size() > 2)
+  if(args.size() == 3)
   {
     LOG(user->nick + " teleport to: " + args[0] + " " + args[1] + " " + args[2]);
     double x = atof(args[0].c_str());
@@ -198,6 +210,8 @@ void coordinateTeleport(User *user, std::string command, std::deque<std::string>
     double z = atof(args[2].c_str());
     user->teleport(x, y, z);
   }
+  else
+    reportError(user, "Usage: /ctp x y z");
 }
 
 void userTeleport(User *user, std::string command, std::deque<std::string> args)
@@ -229,6 +243,8 @@ void userTeleport(User *user, std::string command, std::deque<std::string> args)
                   " not found (see /players");
     }
   }
+  else
+    reportError(user, "Usage: /tp [player] targetplayer");
 }
 
 void showPosition(User *user, std::string command, std::deque<std::string> args)
@@ -245,7 +261,7 @@ void showPosition(User *user, std::string command, std::deque<std::string> args)
     else
       reportError(user, "User " + args[0] + " not found (see /players)");
   }
-  else
+  else if(args.size() == 0)
   {
     Chat::get().sendMsg(user, COLOR_MAGENTA + "You are at: " + dtos(user->pos.x) 
                                                              + " " 
@@ -253,12 +269,19 @@ void showPosition(User *user, std::string command, std::deque<std::string> args)
                                                              + " " 
                                                              + dtos(user->pos.z), Chat::USER);
   }
+  else
+    reportError(user, "Usage: /gps [player]");
 }
 
 void regenerateLighting(User *user, std::string command, std::deque<std::string> args)
 {
   printf("Regenerating lighting for chunk %d,%d\n", blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
-  Map::get().generateLight(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
+  //First load the map
+  if(Map::get().loadMap(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z)))
+  {
+    //Then regenerate lighting
+    Map::get().generateLight(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
+  }
 }
 
 void reloadConfiguration(User *user, std::string command, std::deque<std::string> args)
@@ -308,7 +331,7 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
   User *tUser = NULL;
   int itemId = 0, itemCount = 1, itemStacks = 1;
 
-  if(args.size() > 1)
+  if(args.size() == 2 || args.size() == 3)
   {
     tUser = getUserByNick(args[0]);
 
@@ -326,7 +349,7 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
       return;
     }
 
-    if(args.size() > 2)
+    if(args.size() == 3)
     {
       itemCount = atoi(args[2].c_str());
       // If multiple stacks
@@ -336,7 +359,7 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
   }
   else
   {
-    reportError(user, "Too few parameters.");
+    reportError(user, "Usage: /give player item [count]");
 	  return;
   }
 
@@ -381,5 +404,7 @@ void Chat::registerStandardCommands()
   registerCommand("reload", reloadConfiguration, true);
   registerCommand("give", giveItems, true);
   registerCommand("gps", showPosition, true);
-  registerCommand("settime", setTime, true);  registerCommand("regen", regenerateLighting, true);
+  registerCommand("settime", setTime, true);
+  registerCommand("regen", regenerateLighting, true);
+  registerCommand("sethealth", setHealth, true);
 }

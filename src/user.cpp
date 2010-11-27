@@ -68,11 +68,6 @@ User::User(int sock, uint32 EID)
   this->pos.y           = Map::get().spawnPos.y();
   this->pos.z           = Map::get().spawnPos.z();
   this->write_err_count = 0;
-
-  curItem = 0;
-  
-  memset(recentSpawn,0,10*sizeof(int));
-  recentSpawnPos=0;
 }
 
 bool User::changeNick(std::string _nick)
@@ -132,6 +127,8 @@ bool User::loadData()
   pos.x = (double)(*(*_pos)[0]);
   pos.y = (double)(*(*_pos)[1]);
   pos.z = (double)(*(*_pos)[2]);
+
+  health = *nbtPlayer["Health"];
 
   std::vector<NBT_Value*> *rot = nbtPlayer["Rotation"]->GetList();
   pos.yaw = (float)(*(*rot)[0]);
@@ -205,7 +202,7 @@ bool User::saveData()
   val.Insert("AttackTime", new NBT_Value((sint16)0));
   val.Insert("DeathTime", new NBT_Value((sint16)0));
   val.Insert("Fire", new NBT_Value((sint16)-20));
-  val.Insert("Health", new NBT_Value((sint16)20));
+  val.Insert("Health", new NBT_Value((sint16)health));
   val.Insert("HurtTime", new NBT_Value((sint16)0));
   val.Insert("FallDistance", new NBT_Value(54.f));
 
@@ -677,6 +674,48 @@ bool User::spawnOthers()
     buffer << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)Users[i]->UID << Users[i]->nick 
       << (sint32)(Users[i]->pos.x * 32) << (sint32)(Users[i]->pos.y * 32) << (sint32)(Users[i]->pos.z * 32) 
       << (sint8)0 << (sint8)0 << (sint16)0;
+    }
+  }
+  return true;
+}
+
+bool User::sethealth(int userHealth)
+{
+  health = userHealth;
+  buffer << (sint8)PACKET_UPDATE_HEALTH << (sint8)userHealth;
+  //ToDo: Send destroy entity and spawn entity again
+  return true;
+}
+
+bool User::respawn()
+{
+  health = 20;
+  buffer << (sint8)PACKET_RESPAWN;
+  return true;
+}
+
+bool User::dropInventory()
+{
+  for( int i = 0; i < 36; i++ )
+  {
+    if( inv.main[i].type != 0 )
+    {
+      Map::get().createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.main[i].type, inv.main[i].count);
+      inv.main[i] = Item();
+    }
+
+    if( i >= 0 && i < 4 )
+    {
+      if( inv.equipped[i].type != 0 )
+      {
+        Map::get().createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.equipped[i].type, inv.equipped[i].count);
+        inv.equipped[i] = Item();
+      }
+      if( inv.crafting[i].type != 0 )
+      {
+        Map::get().createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.crafting[i].type, inv.crafting[i].count);
+        inv.crafting[i] = Item();
+      }
     }
   }
   return true;

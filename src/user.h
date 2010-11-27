@@ -87,15 +87,13 @@ public:
   uint32 write_err_count;
   bool logged;
   bool admin;
+  sint16 health;
   unsigned int UID;
   std::string nick;
   position pos;
   vec curChunk;
   Inventory inv;
   sint16 curItem;
-
-  int recentSpawn[10];
-  uint8 recentSpawnPos;
 
   //Input buffer
   Packet buffer;
@@ -150,6 +148,9 @@ public:
   bool teleport(double x, double y, double z);
   bool spawnUser(int x, int y, int z);
   bool spawnOthers();
+  bool sethealth(int userHealth);
+  bool respawn();
+  bool dropInventory();
 
   struct event *GetEvent();
 };

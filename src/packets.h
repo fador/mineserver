@@ -47,6 +47,7 @@ enum
   PACKET_HANDSHAKE                 = 0x02,
   PACKET_CHAT_MESSAGE              = 0x03,
   PACKET_PLAYER_INVENTORY          = 0x05,
+  PACKET_RESPAWN                   = 0x09,
   PACKET_PLAYER                    = 0x0a,
   PACKET_PLAYER_POSITION           = 0x0b,
   PACKET_PLAYER_LOOK               = 0x0c,
@@ -60,6 +61,7 @@ enum
   PACKET_LOGIN_RESPONSE            = 0x01,
   PACKET_TIME_UPDATE               = 0x04,
   PACKET_SPAWN_POSITION            = 0x06,
+  PACKET_UPDATE_HEALTH             = 0x08,
   PACKET_ADD_TO_INVENTORY          = 0x11,
   PACKET_NAMED_ENTITY_SPAWN        = 0x14,
   PACKET_PICKUP_SPAWN              = 0x15,
@@ -72,6 +74,7 @@ enum
   PACKET_ENTITY_LOOK               = 0x20,
   PACKET_ENTITY_LOOK_RELATIVE_MOVE = 0x21,
   PACKET_ENTITY_TELEPORT           = 0x22,
+  PACKET_DEATH_ANIMATION           = 0x26,
   PACKET_PRE_CHUNK                 = 0x32,
   PACKET_MAP_CHUNK                 = 0x33,
   PACKET_MULTI_BLOCK_CHANGE        = 0x34,
@@ -417,10 +420,10 @@ public:
 
   //The packet functions
   int keep_alive(User *user);
-  int  login_request(User *user);
-  int  handshake(User *user);
-  int  chat_message(User *user);
-  int  player_inventory(User *user);
+  int login_request(User *user);
+  int handshake(User *user);
+  int chat_message(User *user);
+  int player_inventory(User *user);
   int player(User *user);
   int player_position(User *user);
   int player_look(User *user);
@@ -430,16 +433,12 @@ public:
   int holding_change(User *user);
   int arm_animation(User *user);
   int pickup_spawn(User *user);
-  int  disconnect(User *user);
-  int  complex_entities(User *user);
-
+  int disconnect(User *user);
+  int complex_entities(User *user);
   int use_entity(User *user);
-
+  int respawn(User *user);
 
 };
-
-
-
 
 
 #endif
