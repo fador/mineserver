@@ -617,6 +617,13 @@ bool User::spawnOthers()
   return true;
 }
 
+bool User::sethealth(int userHealth)
+{
+  health = userHealth;
+  buffer << (sint8)PACKET_UPDATE_HEALTH << (sint8)userHealth;
+  return true;
+}
+
 struct event *User::GetEvent()
 {
   return &m_event;

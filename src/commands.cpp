@@ -190,6 +190,16 @@ void setTime(User *user, std::string command, std::deque<std::string> args)
     reportError(user, "Usage: /settime time (time = 0-24000)");
 }
 
+void setHealth(User *user, std::string command, std::deque<std::string> args)
+{
+  if(args.size() == 2)
+  {
+     user->sethealth(atoi(args[1].c_str()));
+  } 
+  else
+    reportError(user, "Usage: /sethealth [player] health (health = 0-20)");
+}
+
 void coordinateTeleport(User *user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 3)
@@ -389,5 +399,7 @@ void Chat::registerStandardCommands()
   registerCommand("reload", reloadConfiguration, true);
   registerCommand("give", giveItems, true);
   registerCommand("gps", showPosition, true);
-  registerCommand("settime", setTime, true);  registerCommand("regen", regenerateLighting, true);
+  registerCommand("settime", setTime, true);
+  registerCommand("regen", regenerateLighting, true);
+  registerCommand("sethealth", setHealth, true);
 }
