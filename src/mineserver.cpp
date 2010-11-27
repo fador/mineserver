@@ -37,6 +37,7 @@
   #include <netinet/in.h>
   #include <arpa/inet.h>
   #include <string.h>
+  #include <netdb.h>
 #endif
 
 #include <sys/types.h>
@@ -67,7 +68,6 @@
 #include "packets.h"
 #include "physics.h"
 
-#include <netdb.h>
 
 #ifdef WIN32
 static bool quit = false;
