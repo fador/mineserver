@@ -36,6 +36,7 @@ std::map<uint8, Drop> BLOCKDROPS;
 void initConstants()
 {
   // Init configuration
+  defaultConf.insert(std::pair<std::string, std::string>("ip", "0.0.0.0"));
   defaultConf.insert(std::pair<std::string, std::string>("port", "25565"));
   defaultConf.insert(std::pair<std::string, std::string>("servername", "Minecraft server"));
   defaultConf.insert(std::pair<std::string, std::string>("mapdir", "testmap"));
