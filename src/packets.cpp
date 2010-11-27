@@ -729,69 +729,13 @@ int PacketHandler::player_block_placement(User *user)
       double mdiffX = (x + 0.5) - user->pos.x; // + 0.5 to get the middle of the cube
       double mdiffZ = (z + 0.5) - user->pos.z; // + 0.5 to get the middle of the cube
       
-      double angleDegree;
+      #ifdef WIN32
+      #define M_PI 3.141592653589793238462643
+      #endif
       
-      if (mdiffX != 0)
-        angleDegree = atan(std::abs(mdiffX) / std::abs(mdiffZ)) * 180 / M_PI;
-      else 
-        angleDegree = 90;
-
-      // +X -Z
-      if (mdiffX > 0 && mdiffZ <= 0)
-      {
-        if (angleDegree <= 11.25)
-          metadata = 0x0;
-        else if (angleDegree <= (11.25 + 22.5))
-          metadata = 0x1;
-        else if (angleDegree <= (11.25 + 22.5 + 22.5))
-          metadata = 0x2;
-        else if (angleDegree <= (11.25 + 22.5 + 22.5 + 22.5))
-          metadata = 0x3;
-        else
-          metadata = 0x4;
-      }
-      // +X +Z
-      else if (mdiffX > 0 && mdiffZ > 0)
-      {
-        if (angleDegree <= 11.25)
-          metadata = 0x8;
-        else if (angleDegree <= (11.25 + 22.5))
-          metadata = 0x7;
-        else if (angleDegree <= (11.25 + 22.5 + 22.5))
-          metadata = 0x6;
-        else if (angleDegree <= (11.25 + 22.5 + 22.5 + 22.5))
-          metadata = 0x5;
-        else
-          metadata = 0x4;
-      }
-      // -X +Z
-      else if (mdiffX <= 0 && mdiffZ > 0)
-      {
-        if (angleDegree <= 11.25)
-          metadata = 0x8;
-        else if (angleDegree <= (11.25 + 22.5))
-          metadata = 0x9;
-        else if (angleDegree <= (11.25 + 22.5 + 22.5))
-          metadata = 0xA;
-        else if (angleDegree <= (11.25 + 22.5 + 22.5 + 22.5))
-          metadata = 0xB;
-        else
-          metadata = 0xC;
-      }
-      // -X -Z
-      else
-      {
-        if (angleDegree <= 11.25)
-          metadata = 0x0;
-        else if (angleDegree <= (11.25 + 22.5))
-          metadata = 0xF;
-        else if (angleDegree <= (11.25 + 22.5 + 22.5))
-          metadata = 0xE;
-        else if (angleDegree <= (11.25 + 22.5 + 22.5 + 22.5))
-          metadata = 0xD;
-        else
-          metadata = 0xC;
-      }
+      double angleDegree = ((atan2(mdiffZ,mdiffX) * 180 / M_PI+90)/22);
+      if(angleDegree<0) angleDegree+=16;      
+      metadata = (uint8)(angleDegree+0.5);      
       
       //std::cout << "mdiffX= " << mdiffX << "  mdiffZ= " << mdiffZ << "  andgleDegree= " << angleDegree << "  metadata= " << (int)metadata << std::endl;
     }
