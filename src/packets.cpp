@@ -79,7 +79,7 @@ void PacketHandler::initPackets()
                                                      &PacketHandler::chat_message);
   packets[PACKET_PLAYER_INVENTORY]         = Packets(PACKET_VARIABLE_LEN,
                                                      &PacketHandler::player_inventory);
-  packets[PACKET_USE_ENTITY]               = Packets( 8, &PacketHandler::use_entity);
+  packets[PACKET_USE_ENTITY]               = Packets( 9, &PacketHandler::use_entity);
   packets[PACKET_PLAYER]                   = Packets( 1, &PacketHandler::player);
   packets[PACKET_PLAYER_POSITION]          = Packets(33, &PacketHandler::player_position);
   packets[PACKET_PLAYER_LOOK]              = Packets( 9, &PacketHandler::player_look);
@@ -93,6 +93,7 @@ void PacketHandler::initPackets()
                                                      &PacketHandler::disconnect);
   packets[PACKET_COMPLEX_ENTITIES]         = Packets(PACKET_VARIABLE_LEN,
                                                      &PacketHandler::complex_entities);
+  packets[PACKET_RESPAWN]                  = Packets( 0, &PacketHandler::respawn);
 
 }
 
@@ -221,6 +222,7 @@ int PacketHandler::login_request(User *user)
   //Spawn other users for connected user
   user->spawnOthers();
 
+  user->sethealth(user->health);
   user->logged = true;
 
   Chat::get().sendMsg(user, player+" connected!", Chat::ALL);
@@ -301,14 +303,14 @@ int PacketHandler::player_inventory(User *user)
     break;
 
   //Equipped armour
-  case -3:
+  case -2:
     //items = 4;
     memset(user->inv.equipped, 0, sizeof(Item)*4);
     slots = (Item *)&user->inv.equipped;
     break;
 
   //Crafting slots
-  case -2:
+  case -3:
     //items = 4;
     memset(user->inv.crafting, 0, sizeof(Item)*4);
     slots = (Item *)&user->inv.crafting;
@@ -1037,18 +1039,7 @@ int PacketHandler::pickup_spawn(User *user)
   if(!user->buffer)
     return PACKET_NEED_MORE_DATA;
 
-  //Client sends multiple packets with same EID, check for recent spawns
-  for(int i=0;i<10;i++)
-  {
-    if(user->recentSpawn[i] == item.EID)
-    {
-      return PACKET_OK;
-    }
-  }
-
-  //Put this EID in the next slot
-  user->recentSpawn[user->recentSpawnPos++] = item.EID;
-  if(user->recentSpawnPos==10) user->recentSpawnPos=0;
+  user->buffer.removePacket();
 
   item.EID    = generateEID();
 
@@ -1175,9 +1166,40 @@ int PacketHandler::complex_entities(User *user)
 int PacketHandler::use_entity(User *user)
 {
   sint32 userID,target;
-  user->buffer >> userID >> target;
+  sint8 targetType;
+  user->buffer >> userID >> target >> targetType;
   if(!user->buffer)
     return PACKET_NEED_MORE_DATA;
+  user->buffer.removePacket();
 
+  if(targetType != 1) return PACKET_OK;
+
+  //This is used when punching users
+  for(uint32 i=0;i<Users.size();i++)
+  {
+    if(Users[i]->UID == target)
+    {
+      Users[i]->health--;
+      Users[i]->sethealth(Users[i]->health);
+      if(Users[i]->health <= 0)
+      {
+        Packet pkt;
+        pkt << PACKET_DEATH_ANIMATION << (sint32)Users[i]->UID << (sint8)3;
+        Users[i]->sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
+      }
+      break;
+    }
+  }
+
+
+  return PACKET_OK;
+}
+
+int PacketHandler::respawn(User *user)
+{
+  user->dropInventory();
+  user->respawn();
+  user->teleport(Map::get().spawnPos.x(), Map::get().spawnPos.y() + 2, Map::get().spawnPos.z());
+  user->buffer.removePacket();
   return PACKET_OK;
 }
