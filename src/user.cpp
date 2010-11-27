@@ -401,7 +401,13 @@ bool User::updatePos(double x, double y, double z, double stance)
 				toTeleport.insert(*iter);
 				toAdd.erase(result);
 
+#ifdef _MSC_VER
 				iter = toRemove.erase(iter);
+#else
+				// TODO: Optimise
+				toRemove.erase(iter);
+				iter = toRemove.begin();
+#endif
 				end = toRemove.end();
 				if(iter == end)
 					break;

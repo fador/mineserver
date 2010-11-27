@@ -679,7 +679,7 @@ void Map::createPickupSpawn(int x, int y, int z, int type, int count)
 
 sChunk * Map::loadMap(int x, int z, bool generate)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("loadMap(x=%d, z=%d, generate=%d)\n", x, z, generate);
 #endif
 
