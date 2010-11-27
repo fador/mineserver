@@ -93,6 +93,7 @@ void PacketHandler::initPackets()
                                                      &PacketHandler::disconnect);
   packets[PACKET_COMPLEX_ENTITIES]         = Packets(PACKET_VARIABLE_LEN,
                                                      &PacketHandler::complex_entities);
+  packets[PACKET_RESPAWN]                  = Packets( 0, &PacketHandler::respawn);
 
 }
 
@@ -301,14 +302,14 @@ int PacketHandler::player_inventory(User *user)
     break;
 
   //Equipped armour
-  case -3:
+  case -2:
     //items = 4;
     memset(user->inv.equipped, 0, sizeof(Item)*4);
     slots = (Item *)&user->inv.equipped;
     break;
 
   //Crafting slots
-  case -2:
+  case -3:
     //items = 4;
     memset(user->inv.crafting, 0, sizeof(Item)*4);
     slots = (Item *)&user->inv.crafting;
@@ -1179,5 +1180,13 @@ int PacketHandler::use_entity(User *user)
   if(!user->buffer)
     return PACKET_NEED_MORE_DATA;
 
+  return PACKET_OK;
+}
+
+int PacketHandler::respawn(User *user)
+{
+  user->dropInventory();
+  user->respawn();
+  user->teleport(Map::get().spawnPos.x(), Map::get().spawnPos.y() + 2, Map::get().spawnPos.z());
   return PACKET_OK;
 }

@@ -162,7 +162,6 @@ void client_callback(int fd,
         //Call specific function
         int (PacketHandler::*function)(User *) = PacketHandler::get().packets[user->action].function;
         (PacketHandler::get().*function)(user);
-
       }
     } //End while
   }

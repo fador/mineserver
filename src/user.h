@@ -87,6 +87,7 @@ public:
   uint32 write_err_count;
   bool logged;
   bool admin;
+  unsigned int health;
   unsigned int UID;
   std::string nick;
   position pos;
@@ -149,6 +150,9 @@ public:
   bool teleport(double x, double y, double z);
   bool spawnUser(int x, int y, int z);
   bool spawnOthers();
+  bool sethealth(int userHealth);
+  bool respawn();
+  bool dropInventory();
 
   struct event *GetEvent();
 };
