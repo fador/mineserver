@@ -127,7 +127,7 @@ int Mineserver::Run()
   Chat::get().loadAdmins(ADMINFILE);
   Chat::get().checkMotd(MOTDFILE);
 
-  //Initialize conf
+  // Initialize conf
   Conf::get().load(CONFIGFILE);
   // Load item aliases
   Conf::get().load(ITEMALIASFILE);
@@ -140,6 +140,9 @@ int Mineserver::Run()
 
   //Initialize packethandler
   PacketHandler::get().initPackets();
+
+  // Load ip from config
+  std::string ip = Conf::get().sValue("ip");
 
   // Load port from config
   int port = Conf::get().iValue("port");
@@ -177,7 +180,7 @@ int Mineserver::Run()
   memset(&addresslisten, 0, sizeof(addresslisten));
 
   addresslisten.sin_family      = AF_INET;
-  addresslisten.sin_addr.s_addr = INADDR_ANY;
+  addresslisten.sin_addr.s_addr = inet_addr(ip.c_str());
   addresslisten.sin_port        = htons(port);
 
   setsockopt(m_socketlisten, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse));
@@ -229,6 +232,7 @@ int Mineserver::Run()
   }
   std::cout << std::endl;
 
+  std::cout << "Listening on " << ip << ":" << port << std::endl;
   std::cout << "Listening at port " << port << std::endl;
 
   timeval loopTime;
@@ -254,7 +258,7 @@ int Mineserver::Run()
         //Send server time
         Packet pkt;
         pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get().mapTime;
-        Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
+        Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());        
       }
 
       //Try to load release time from config
@@ -287,9 +291,6 @@ int Mineserver::Run()
       {
         Users[i]->pushMap();
         Users[i]->popMap();
-        //Go back to title page client bug fix.
-        if(Users[i]->health == 0)
-           Users[i]->sethealth(-100);
       }
       Map::get().mapTime+=20;
       if(Map::get().mapTime>=24000) Map::get().mapTime=0;
