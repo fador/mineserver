@@ -1039,18 +1039,7 @@ int PacketHandler::pickup_spawn(User *user)
   if(!user->buffer)
     return PACKET_NEED_MORE_DATA;
 
-  //Client sends multiple packets with same EID, check for recent spawns
-  for(int i=0;i<10;i++)
-  {
-    if(user->recentSpawn[i] == item.EID)
-    {
-      return PACKET_OK;
-    }
-  }
-
-  //Put this EID in the next slot
-  user->recentSpawn[user->recentSpawnPos++] = item.EID;
-  if(user->recentSpawnPos==10) user->recentSpawnPos=0;
+  user->buffer.removePacket();
 
   item.EID    = generateEID();
 
@@ -1181,10 +1170,12 @@ int PacketHandler::use_entity(User *user)
   user->buffer >> userID >> target >> targetType;
   if(!user->buffer)
     return PACKET_NEED_MORE_DATA;
+  user->buffer.removePacket();
+
   if(targetType != 1) return PACKET_OK;
 
   //This is used when punching users
-  for(sint32 i=0;i<Users.size();i++)
+  for(uint32 i=0;i<Users.size();i++)
   {
     if(Users[i]->UID == target)
     {
@@ -1200,6 +1191,7 @@ int PacketHandler::use_entity(User *user)
     }
   }
 
+
   return PACKET_OK;
 }
 
@@ -1208,5 +1200,6 @@ int PacketHandler::respawn(User *user)
   user->dropInventory();
   user->respawn();
   user->teleport(Map::get().spawnPos.x(), Map::get().spawnPos.y() + 2, Map::get().spawnPos.z());
+  user->buffer.removePacket();
   return PACKET_OK;
 }
