@@ -1176,9 +1176,22 @@ int PacketHandler::complex_entities(User *user)
 int PacketHandler::use_entity(User *user)
 {
   sint32 userID,target;
-  user->buffer >> userID >> target;
+  sint8 targetType;
+  user->buffer >> userID >> target >> targetType;
   if(!user->buffer)
     return PACKET_NEED_MORE_DATA;
+  if(targetType != 1) return PACKET_OK;
+
+  //This is used when punching users
+  for(sint32 i=0;i<Users.size();i++)
+  {
+    if(Users[i]->UID == target)
+    {
+      Users[i]->health--;
+      Users[i]->sethealth(Users[i]->health);
+      break;
+    }
+  }
 
   return PACKET_OK;
 }

@@ -131,6 +131,9 @@ bool User::loadData()
   pos.y = (double)(*(*_pos)[1]);
   pos.z = (double)(*(*_pos)[2]);
 
+  health = *nbtPlayer["Health"];
+  sethealth
+
   std::vector<NBT_Value*> *rot = nbtPlayer["Rotation"]->GetList();
   pos.yaw = (float)(*(*rot)[0]);
   pos.yaw = (float)(*(*rot)[1]);
@@ -203,7 +206,7 @@ bool User::saveData()
   val.Insert("AttackTime", new NBT_Value((sint16)0));
   val.Insert("DeathTime", new NBT_Value((sint16)0));
   val.Insert("Fire", new NBT_Value((sint16)-20));
-  val.Insert("Health", new NBT_Value((sint16)20));
+  val.Insert("Health", new NBT_Value((sint16)health));
   val.Insert("HurtTime", new NBT_Value((sint16)0));
   val.Insert("FallDistance", new NBT_Value(54.f));
 

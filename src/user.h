@@ -87,7 +87,7 @@ public:
   uint32 write_err_count;
   bool logged;
   bool admin;
-  unsigned int health;
+  sint16 health;
   unsigned int UID;
   std::string nick;
   position pos;
