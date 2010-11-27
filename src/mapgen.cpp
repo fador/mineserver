@@ -176,31 +176,38 @@ void MapGen::generateChunk(int x, int z)
   
   main->Insert("Level", val);
   
-  uint32 chunkid;
-  Map::get().posToId(x, z, &chunkid);
+//  uint32 chunkid;
+//  Map::get().posToId(x, z, &chunkid);
   
-  Map::get().maps[chunkid].x = x;
-  Map::get().maps[chunkid].z = z;
+//  Map::get().maps[chunkid].x = x;
+//  Map::get().maps[chunkid].z = z;
 
   std::vector<uint8> *t_blocks = (*val)["Blocks"]->GetByteArray();
   std::vector<uint8> *t_data = (*val)["Data"]->GetByteArray();
   std::vector<uint8> *t_blocklight = (*val)["BlockLight"]->GetByteArray();
   std::vector<uint8> *t_skylight = (*val)["SkyLight"]->GetByteArray();
   std::vector<uint8> *heightmap = (*val)["HeightMap"]->GetByteArray();
+
+  sChunk *chunk = new sChunk();
   
-  Map::get().maps[chunkid].blocks = &((*t_blocks)[0]);
-  Map::get().maps[chunkid].data = &((*t_data)[0]);
-  Map::get().maps[chunkid].blocklight = &((*t_blocklight)[0]);
-  Map::get().maps[chunkid].skylight = &((*t_skylight)[0]);
-  Map::get().maps[chunkid].heightmap = &((*heightmap)[0]);
+  chunk->x = x;
+  chunk->z = z;
+  chunk->blocks = &((*t_blocks)[0]);
+  chunk->data = &((*t_data)[0]);
+  chunk->blocklight = &((*t_blocklight)[0]);
+  chunk->skylight = &((*t_skylight)[0]);
+  chunk->heightmap = &((*heightmap)[0]);
+  chunk->nbt = main;
+
+  Map::get().chunks.LinkChunk(chunk, x, z);
 
   // Update last used time
-  Map::get().mapLastused[chunkid] = (int)time(0);
+  // TODO: Map::get().mapLastused[chunkid] = (int)time(0);
 
   // Not changed
-  Map::get().mapChanged[chunkid] = 0;
+  // TODO: Map::get().mapChanged[chunkid] = 0;
   
-  Map::get().maps[chunkid].nbt = main;
+  
 }
 
 void MapGen::generateWithNoise(int x, int z) 

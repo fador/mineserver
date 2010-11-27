@@ -68,6 +68,8 @@ User::User(int sock, uint32 EID)
   this->pos.y           = Map::get().spawnPos.y();
   this->pos.z           = Map::get().spawnPos.z();
   this->write_err_count = 0;
+
+  curItem = 0;
   
   memset(recentSpawn,0,10*sizeof(int));
   recentSpawnPos=0;
@@ -290,9 +292,72 @@ bool User::checkInventory(sint16 itemID, char count)
 }
 
 bool User::updatePos(double x, double y, double z, double stance)
-{
+{	
+  
   if(nick.size() && logged)
   {
+	sChunk *newChunk = Map::get().chunks.GetChunk(blockToChunk((sint32)x), blockToChunk((sint32)z));
+    sChunk *oldChunk = Map::get().chunks.GetChunk(blockToChunk((sint32)pos.x), blockToChunk((sint32)pos.z));
+	if(newChunk == oldChunk)
+	{
+		Packet telePacket;
+		telePacket << (sint8)PACKET_ENTITY_TELEPORT 
+		   << (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
+		newChunk->sendPacket(telePacket, this);
+	}
+	else
+	{
+		std::list<User*> toremove;
+		std::list<User*> toadd;
+		sChunk::UserBoundry(oldChunk, toremove, newChunk, toadd);
+
+		if(toremove.size())
+		{
+			Packet pkt;
+			pkt << (sint8)PACKET_DESTROY_ENTITY << (sint32)UID;
+			std::list<User*>::iterator iter = toremove.begin(), end = toremove.end();
+			for( ; iter != end ; iter++)
+			{
+				(*iter)->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
+			}
+		}
+
+		if(toadd.size())
+		{
+			Packet pkt;
+			pkt << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)UID << nick
+				<< (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch) << (sint16)curItem;
+
+			std::list<User*>::iterator iter = toadd.begin(), end = toadd.end();
+			for( ; iter != end ; iter++)
+			{
+				(*iter)->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
+			}
+		}
+
+		// TODO: Determine those who where present for both.
+		Packet telePacket;
+		telePacket << (sint8)PACKET_ENTITY_TELEPORT 
+		   << (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
+		newChunk->sendPacket(telePacket, this);
+
+		int chunkDiffX = newChunk->x - oldChunk->x;
+		int chunkDiffZ = newChunk->z - oldChunk->z;
+
+		// Send new chunk and clear old chunks
+		for(int mapx = newChunk->x-viewDistance; mapx <= newChunk->x+viewDistance; mapx++)
+        {
+          for(int mapz = newChunk->z-viewDistance; mapz <= newChunk->z+viewDistance; mapz++)
+          {
+		    if(abs(chunkDiffX - oldChunk->z) > 10 || abs(chunkDiffZ - oldChunk->z) > 10)
+				addQueue(mapx, mapz);
+
+			if(abs((mapx - chunkDiffX) - newChunk->x) > 10 || abs((mapz - chunkDiffZ) - newChunk->z) > 10)
+				addRemoveQueue(mapx-chunkDiffX, mapz-chunkDiffZ);
+          }
+        }
+	  }
+/*
     //Do we send relative or absolute move values
     if(0)  //abs(x-this->pos.x)<127
            //&& abs(y-this->pos.y)<127
@@ -327,59 +392,51 @@ bool User::updatePos(double x, double y, double z, double stance)
     sint32 chunk_x = blockToChunk((sint32)x);
     sint32 chunk_z = blockToChunk((sint32)z);
     uint32 chunkHash;
-    Map::get().posToId(chunk_x, chunk_z, &chunkHash);
-    if(Map::get().mapItems.count(chunkHash))
+    Map::get().posToId(chunk_x, chunk_z, &chunkHash); */
+  	if(newChunk->items.size())
     {
       //Loop through items and check if they are close enought to be picked up
-      for(sint32 i = Map::get().mapItems[chunkHash].size()-1; i >= 0; i--)
+      std::vector<spawnedItem*>::iterator iter = newChunk->items.begin(), end = newChunk->items.end();
+      for( ; iter != end ; iter++)
       {
         //No more than 2 blocks away
-        if(abs((sint32)x-Map::get().mapItems[chunkHash][i]->pos.x()/32) < 2 &&
-           abs((sint32)z-Map::get().mapItems[chunkHash][i]->pos.z()/32) < 2 &&
-           abs((sint32)y-Map::get().mapItems[chunkHash][i]->pos.y()/32) < 2)
-        {
+		if( abs((sint32)x-((*iter)->pos.x()/32)) < 2 && 
+            abs((sint32)y-((*iter)->pos.y()/32)) < 2 && 
+            abs((sint32)z-((*iter)->pos.z()/32)) < 2)
+		{
           //Dont pickup own spawns right away
-          if(Map::get().mapItems[chunkHash][i]->spawnedBy != this->UID ||
-             Map::get().mapItems[chunkHash][i]->spawnedAt+2 < time(0))
+          if((*iter)->spawnedBy != this->UID ||
+             (*iter)->spawnedAt+2 < time(0))
           {
             //Check player inventory for space!
-            if(checkInventory(Map::get().mapItems[chunkHash][i]->item,
-                              Map::get().mapItems[chunkHash][i]->count))
+            if(checkInventory((*iter)->item,
+                              (*iter)->count))
             {
               //Send player collect item packet
-              uint8 *packet = new uint8[9];
-              packet[0] = PACKET_COLLECT_ITEM;
-              putSint32(&packet[1], Map::get().mapItems[chunkHash][i]->EID);
-              putSint32(&packet[5], this->UID);
-        buffer.addToWrite(packet, 9);
+			  buffer << (sint8)PACKET_COLLECT_ITEM << (sint32)(*iter)->EID << (sint32)UID;
 
               //Send everyone destroy_entity-packet
-              packet[0] = PACKET_DESTROY_ENTITY;
-              putSint32(&packet[1], Map::get().mapItems[chunkHash][i]->EID);
-              //ToDo: Only send users in range
-              this->sendAll(packet, 5);
+			  Packet pkt;
+			  pkt << (sint8)PACKET_DESTROY_ENTITY << (sint32)(*iter)->EID;
+			  newChunk->sendPacket(pkt);
 
-              packet[0] = PACKET_ADD_TO_INVENTORY;
-              putSint16(&packet[1], Map::get().mapItems[chunkHash][i]->item);
-              packet[3] = Map::get().mapItems[chunkHash][i]->count;
-              putSint16(&packet[4], Map::get().mapItems[chunkHash][i]->health);
-
-        buffer.addToWrite(packet, 6);
-
-              //We're done, release packet memory
-              delete[] packet;
+			  buffer << (sint8)PACKET_ADD_TO_INVENTORY << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint16)(*iter)->health;
 
 
-              Map::get().items.erase(Map::get().mapItems[chunkHash][i]->EID);
-              delete Map::get().mapItems[chunkHash][i];
-              Map::get().mapItems[chunkHash].erase(Map::get().mapItems[chunkHash].begin()+i);
+			  Map::get().items.erase((*iter)->EID);
+			  delete *iter;
+			  iter = newChunk->items.erase(iter);
+			  end = newChunk->items.end();
+
+			  if(iter == end)
+				  break;
             }
           }
         }
       }
     }
-
-
+}
+/*
     //Chunk position changed, check for map updates
     if((int)(x/16) != curChunk.x() || (int)(z/16) != curChunk.z())
     {
@@ -406,7 +463,7 @@ bool User::updatePos(double x, double y, double z, double stance)
       }
     }
   }
-
+*/
   this->pos.x      = x;
   this->pos.y      = y;
   this->pos.z      = z;
@@ -416,12 +473,12 @@ bool User::updatePos(double x, double y, double z, double stance)
 
 bool User::updateLook(float yaw, float pitch)
 {
-  uint8 lookdata[7];
-  lookdata[0] = 0x20;
-  putSint32(&lookdata[1], (sint32)this->UID);
-  lookdata[5] = (char)(yaw);
-  lookdata[6] = (char)(pitch);
-  this->sendOthers(&lookdata[0], 7);
+  Packet pkt;
+  pkt << (sint8)PACKET_ENTITY_LOOK << (sint32)UID << angleToByte(yaw) << angleToByte(pitch);
+
+  sChunk *chunk = Map::get().chunks.GetChunk(blockToChunk((sint32)pos.x),blockToChunk((sint32)pos.z));
+  if(chunk != NULL)
+	chunk->sendPacket(pkt, this);
 
   this->pos.yaw   = yaw;
   this->pos.pitch = pitch;
@@ -493,6 +550,11 @@ bool User::addRemoveQueue(int x, int z)
 bool User::addKnown(int x, int z)
 {
   vec newMap(x, 0, z);
+  sChunk * chunk = Map::get().chunks.GetChunk(x,z);
+  if(chunk == NULL)
+	  return false;
+
+  chunk->users.insert(this);
   this->mapKnown.push_back(newMap);
 
   return true;
@@ -500,6 +562,9 @@ bool User::addKnown(int x, int z)
 
 bool User::delKnown(int x, int z)
 {
+  sChunk * chunk = Map::get().chunks.GetChunk(x,z);
+  if(chunk != NULL)
+    chunk->users.erase(this);
 
   for(unsigned int i = 0; i < mapKnown.size(); i++)
   {
@@ -519,7 +584,7 @@ bool User::popMap()
   while(this->mapRemoveQueue.size())
   {
     //Pre chunk
-  buffer << (sint8)PACKET_PRE_CHUNK << (sint32)mapRemoveQueue[0].x() << (sint32)mapRemoveQueue[0].z() << (sint8)0;
+    buffer << (sint8)PACKET_PRE_CHUNK << (sint32)mapRemoveQueue[0].x() << (sint32)mapRemoveQueue[0].z() << (sint8)0;
 
     //Delete from known list
     delKnown(mapRemoveQueue[0].x(), mapRemoveQueue[0].z());

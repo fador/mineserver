@@ -249,6 +249,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\chunkmap.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\config.h"
 				>
 			</File>

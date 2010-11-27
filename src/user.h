@@ -92,6 +92,7 @@ public:
   position pos;
   vec curChunk;
   Inventory inv;
+  sint16 curItem;
 
   int recentSpawn[10];
   uint8 recentSpawnPos;
