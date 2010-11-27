@@ -151,6 +151,8 @@ public:
   bool spawnUser(int x, int y, int z);
   bool spawnOthers();
   bool sethealth(int userHealth);
+  bool respawn();
+  bool dropInventory();
 
   struct event *GetEvent();
 };

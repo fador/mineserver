@@ -624,6 +624,32 @@ bool User::sethealth(int userHealth)
   return true;
 }
 
+bool User::respawn()
+{
+  buffer << (sint8)PACKET_RESPAWN;
+  return true;
+}
+
+bool User::dropInventory()
+{
+  Packet pkt;
+  pkt << PACKET_PLAYER_INVENTORY << -1 << 36;
+  for( int i = 0; i < 36; i++ )
+  {
+    if( inv.main[i].type != 0 )
+      Map::get().createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.main[i].type, inv.main[i].count);
+    if( i >= 0 && i <= 4)
+    {
+      if( inv.equipped[i].type != 0 )
+        Map::get().createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.equipped[i].type, inv.equipped[i].count);
+      if( inv.crafting[i].type != 0 )
+        Map::get().createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.crafting[i].type, inv.crafting[i].count);
+    }
+    pkt << -1 << 0 << 0;
+  }
+  return true;
+}
+
 struct event *User::GetEvent()
 {
   return &m_event;

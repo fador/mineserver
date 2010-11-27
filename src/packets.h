@@ -414,10 +414,10 @@ public:
 
   //The packet functions
   int keep_alive(User *user);
-  int  login_request(User *user);
-  int  handshake(User *user);
-  int  chat_message(User *user);
-  int  player_inventory(User *user);
+  int login_request(User *user);
+  int handshake(User *user);
+  int chat_message(User *user);
+  int player_inventory(User *user);
   int player(User *user);
   int player_position(User *user);
   int player_look(User *user);
@@ -427,16 +427,12 @@ public:
   int holding_change(User *user);
   int arm_animation(User *user);
   int pickup_spawn(User *user);
-  int  disconnect(User *user);
-  int  complex_entities(User *user);
-
+  int disconnect(User *user);
+  int complex_entities(User *user);
   int use_entity(User *user);
-
+  int respawn(User *user);
 
 };
-
-
-
 
 
 #endif

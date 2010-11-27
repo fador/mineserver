@@ -194,7 +194,7 @@ void setHealth(User *user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 2)
   {
-     user->sethealth(atoi(args[1].c_str()));
+    user->sethealth(atoi(args[1].c_str()));
   } 
   else
     reportError(user, "Usage: /sethealth [player] health (health = 0-20)");
