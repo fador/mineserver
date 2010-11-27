@@ -98,6 +98,12 @@ void client_callback(int fd,
     if(read == -1)
     {
       std::cout << "Socket had no data to read" << std::endl;
+      #ifdef WIN32
+          closesocket(user->fd);
+      #else
+          close(user->fd);
+      #endif
+          remUser(user->fd);
       return;
     }
 
@@ -167,7 +173,7 @@ void client_callback(int fd,
     int written = send(fd, (char*)user->buffer.getWrite(), writeLen, 0);
     if(written == -1)
     {
-      if((errno != EAGAIN && errno != EINTR) || user->write_err_count>1000)
+      if((errno != EAGAIN && errno != EINTR) || user->write_err_count>20)
       {
         std::cout << "Error writing to client" << std::endl;
         //event_del(user->GetEvent());

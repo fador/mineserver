@@ -1011,7 +1011,7 @@ void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
   buffer.push_back(0);
   entity->Write(buffer);
 
-    uint8 *compressedData = new uint8[ALLOCATE_NBTFILE];
+  uint8 *compressedData = new uint8[ALLOCATE_NBTFILE];
 
   z_stream zstream2;
   zstream2.zalloc = Z_NULL;
@@ -1040,6 +1040,7 @@ void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
     << x << (sint16)y << z << (sint16)zstream2.total_out;
   pkt.addToWrite(compressedData, zstream2.total_out);
 
+  delete [] compressedData;
 
   User::sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
 }
