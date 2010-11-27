@@ -79,7 +79,7 @@ void PacketHandler::initPackets()
                                                      &PacketHandler::chat_message);
   packets[PACKET_PLAYER_INVENTORY]         = Packets(PACKET_VARIABLE_LEN,
                                                      &PacketHandler::player_inventory);
-  packets[PACKET_USE_ENTITY]               = Packets( 8, &PacketHandler::use_entity);
+  packets[PACKET_USE_ENTITY]               = Packets( 9, &PacketHandler::use_entity);
   packets[PACKET_PLAYER]                   = Packets( 1, &PacketHandler::player);
   packets[PACKET_PLAYER_POSITION]          = Packets(33, &PacketHandler::player_position);
   packets[PACKET_PLAYER_LOOK]              = Packets( 9, &PacketHandler::player_look);
@@ -222,6 +222,7 @@ int PacketHandler::login_request(User *user)
   //Spawn other users for connected user
   user->spawnOthers();
 
+  user->sethealth(user->health);
   user->logged = true;
 
   Chat::get().sendMsg(user, player+" connected!", Chat::ALL);
@@ -1189,6 +1190,12 @@ int PacketHandler::use_entity(User *user)
     {
       Users[i]->health--;
       Users[i]->sethealth(Users[i]->health);
+      if(Users[i]->health <= 0)
+      {
+        Packet pkt;
+        pkt << PACKET_DEATH_ANIMATION << (sint32)Users[i]->UID << (sint8)1;
+        Users[i]->sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
+      }
       break;
     }
   }

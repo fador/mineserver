@@ -132,7 +132,6 @@ bool User::loadData()
   pos.z = (double)(*(*_pos)[2]);
 
   health = *nbtPlayer["Health"];
-  sethealth
 
   std::vector<NBT_Value*> *rot = nbtPlayer["Rotation"]->GetList();
   pos.yaw = (float)(*(*rot)[0]);
@@ -624,6 +623,7 @@ bool User::sethealth(int userHealth)
 {
   health = userHealth;
   buffer << (sint8)PACKET_UPDATE_HEALTH << (sint8)userHealth;
+  //ToDo: Send destroy entity and spawn entity again
   return true;
 }
 
