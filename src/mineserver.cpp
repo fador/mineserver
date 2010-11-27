@@ -41,7 +41,7 @@
 
 #include <sys/types.h>
 #include <fcntl.h>
-#include <cstdio>
+#include <cassert>
 #include <deque>
 #include <map>
 #include <iostream>
@@ -67,6 +67,7 @@
 #include "packets.h"
 #include "physics.h"
 
+#include <netdb.h>
 
 #ifdef WIN32
 static bool quit = false;
@@ -215,6 +216,19 @@ int Mineserver::Run()
   "Version " << VERSION <<" by Fador & Nredor"<<
   std::endl << std::endl;
 
+  // Print all local IPs
+  char name[255];
+  gethostname ( name, sizeof(name));
+  struct hostent *hostinfo = gethostbyname(name);
+  std::cout << "Server IP(s): ";
+  int ipIndex = 0;
+  while(hostinfo->h_addr_list[ipIndex]) {
+      if(ipIndex > 0) { std::cout << ", "; }
+      char *ip = inet_ntoa(*(struct in_addr *)hostinfo->h_addr_list[ipIndex++]);
+      std::cout << ip;
+  }
+  std::cout << std::endl;
+
   std::cout << "Listening at port " << port << std::endl;
 
   timeval loopTime;
@@ -243,7 +257,7 @@ int Mineserver::Run()
         Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());        
       }
 
-      //Try to load port from config
+      //Try to load release time from config
       int map_release_time = Conf::get().iValue("map_release_time");
 
       //Release chunks not used in <map_release_time> seconds
