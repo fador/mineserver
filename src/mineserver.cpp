@@ -219,21 +219,26 @@ int Mineserver::Run()
   "Version " << VERSION <<" by Fador & Nredor"<<
   std::endl << std::endl;
 
-  // Print all local IPs
-  char name[255];
-  gethostname ( name, sizeof(name));
-  struct hostent *hostinfo = gethostbyname(name);
-  std::cout << "Server IP(s): ";
-  int ipIndex = 0;
-  while(hostinfo->h_addr_list[ipIndex]) {
-      if(ipIndex > 0) { std::cout << ", "; }
-      char *ip = inet_ntoa(*(struct in_addr *)hostinfo->h_addr_list[ipIndex++]);
-      std::cout << ip;
+  if(ip == "0.0.0.0")
+  {
+    std::cout << "Listening on port " << port << std::endl;
+    // Print all local IPs
+    char name[255];
+    gethostname ( name, sizeof(name));
+    struct hostent *hostinfo = gethostbyname(name);
+    std::cout << "Server IP(s): ";
+    int ipIndex = 0;
+    while(hostinfo->h_addr_list[ipIndex]) {
+        if(ipIndex > 0) { std::cout << ", "; }
+        char *ip = inet_ntoa(*(struct in_addr *)hostinfo->h_addr_list[ipIndex++]);
+        std::cout << ip;
+    }
+    std::cout << std::endl;
   }
-  std::cout << std::endl;
-
-  std::cout << "Listening on " << ip << ":" << port << std::endl;
-  std::cout << "Listening at port " << port << std::endl;
+  else
+  {
+    std::cout << "Listening on " << ip << ":" << port << std::endl;
+  }
 
   timeval loopTime;
   loopTime.tv_sec  = 0;
