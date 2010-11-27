@@ -168,7 +168,7 @@ bool Map::generateLight(int x, int z)
 
 bool Map::generateLight(int x, int z, sChunk *chunk)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("generateLight(x=%d, z=%d, chunk=%p)\n", x, z, chunk);
 #endif
 
@@ -277,9 +277,6 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight)
   int chunk_x = blockToChunk(x);
   int chunk_z = blockToChunk(z);
 
-  uint32 mapId;
-  Map::posToId(chunk_x, chunk_z, &mapId);
-
   sChunk *chunk = getMapData(chunk_x, chunk_z, false);
 
   if(!chunk)
@@ -293,7 +290,7 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight)
 
 bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk *chunk)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("spreadLight(x=%d, y=%d, z=%d, skylight=%d, blocklight=%d, chunk=%p)\n", x, y, z, skylight, blocklight, chunk);
 #endif
 
@@ -395,15 +392,12 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate)
 
 bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate, sChunk *chunk)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("getBlock(x=%d, y=%d, z=%d, type=%p, meta=%p, generate=%d)\n", x, y, z, type, meta, generate);
 #endif
 
   int chunk_block_x  = blockToChunkBlock(x);
   int chunk_block_z  = blockToChunkBlock(z);
-
-  uint32 mapId;
-  Map::posToId(x, z, &mapId);
 
   uint8 *blocks      = chunk->blocks;
   uint8 *metapointer = chunk->data;
@@ -454,7 +448,7 @@ bool Map::getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight)
 
 bool Map::getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight, sChunk *chunk)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("getLight(x=%d, y=%d, z=%d, skylight=%p, blocklight=%p, chunk=%p)\n", x, y, z, skylight, blocklight, chunk);
 #endif
 
@@ -513,7 +507,7 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type)
 
 bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type, sChunk *chunk)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("setLight(x=%d, y=%d, z=%d, skylight=%d, blocklight=%d, type=%d, chunk=%p)\n", x, y, z, skylight, blocklight, type, chunk);
 #endif
 
@@ -566,7 +560,7 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type, 
 
 bool Map::setBlock(int x, int y, int z, char type, char meta)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("setBlock(x=%d, y=%d, z=%d, type=%d, char=%d)\n", x, y, z, type, meta);
 #endif
 

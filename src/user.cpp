@@ -293,8 +293,8 @@ bool User::updatePos(double x, double y, double z, double stance)
   
   if(nick.size() && logged)
   {
-	sChunk *newChunk = Map::get().chunks.GetChunk(blockToChunk((sint32)x), blockToChunk((sint32)z));
-    sChunk *oldChunk = Map::get().chunks.GetChunk(blockToChunk((sint32)pos.x), blockToChunk((sint32)pos.z));
+	sChunk *newChunk = Map::get().loadMap(blockToChunk((sint32)x), blockToChunk((sint32)z));
+    sChunk *oldChunk = Map::get().loadMap(blockToChunk((sint32)pos.x), blockToChunk((sint32)pos.z));
 	if(newChunk == oldChunk)
 	{
 		Packet telePacket;
@@ -302,10 +302,11 @@ bool User::updatePos(double x, double y, double z, double stance)
 		   << (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
 		newChunk->sendPacket(telePacket, this);
 	}
-	else
+	else if(abs(newChunk->x - oldChunk->x) <= 1  && abs(newChunk->z - oldChunk->z) <= 1)
 	{
 		std::list<User*> toremove;
 		std::list<User*> toadd;
+
 		sChunk::UserBoundry(oldChunk, toremove, newChunk, toadd);
 
 		if(toremove.size())
@@ -353,7 +354,84 @@ bool User::updatePos(double x, double y, double z, double stance)
 				addRemoveQueue(mapx-chunkDiffX, mapz-chunkDiffZ);
           }
         }
-	  }
+	}
+	else
+	{
+		std::set<User*> toRemove;
+		std::set<User*> toAdd;
+
+		int chunkDiffX = newChunk->x - oldChunk->x;
+		int chunkDiffZ = newChunk->z - oldChunk->z;
+		for(int mapx = newChunk->x-viewDistance; mapx <= newChunk->x+viewDistance; mapx++)
+        {
+          for(int mapz = newChunk->z-viewDistance; mapz <= newChunk->z+viewDistance; mapz++)
+          {
+		    if(abs(chunkDiffX - oldChunk->z) > 10 || abs(chunkDiffZ - oldChunk->z) > 10)
+			{
+				addQueue(mapx, mapz);
+				sChunk *chunk = Map::get().chunks.GetChunk(mapx, mapz);
+
+				if(chunk != NULL)
+				{
+					toAdd.insert(chunk->users.begin(), chunk->users.end());
+				}
+			}
+
+			if(abs((mapx - chunkDiffX) - newChunk->x) > 10 || abs((mapz - chunkDiffZ) - newChunk->z) > 10)
+			{
+				addRemoveQueue(mapx-chunkDiffX, mapz-chunkDiffZ);
+
+				sChunk *chunk = Map::get().chunks.GetChunk(mapx, mapz);
+
+				if(chunk != NULL)
+				{
+					toRemove.insert(chunk->users.begin(), chunk->users.end());
+				}
+			}
+          }
+        }
+
+		std::set<User*> toTeleport;
+		std::set<User*>::iterator iter = toRemove.begin(), end = toRemove.end();
+		for( ; iter != end ; iter++ )
+		{
+			std::set<User*>::iterator result = toAdd.find(*iter);
+			if(result != toAdd.end())
+			{
+				toTeleport.insert(*iter);
+				toAdd.erase(result);
+
+				iter = toRemove.erase(iter);
+				end = toRemove.end();
+				if(iter == end)
+					break;
+			}
+		}
+
+		Packet destroyPkt;
+		destroyPkt << (sint8)PACKET_DESTROY_ENTITY << (sint32)UID;
+
+		Packet spawnPkt;
+		spawnPkt << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)UID << nick
+			<< (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch) << (sint16)curItem;
+
+		Packet telePacket;
+		telePacket << (sint8)PACKET_ENTITY_TELEPORT 
+		   << (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
+
+
+		iter = toRemove.begin(); end = toRemove.end();
+		for( ; iter != end ; iter++ )
+			(*iter)->buffer.addToWrite(destroyPkt.getWrite(), destroyPkt.getWriteLen());
+
+		iter = toAdd.begin(); end = toAdd.end();
+		for( ; iter != end ; iter++ )
+			(*iter)->buffer.addToWrite(spawnPkt.getWrite(), spawnPkt.getWriteLen());
+
+		iter = toTeleport.begin(); end = toTeleport.end();
+		for( ; iter != end ; iter++ )
+			(*iter)->buffer.addToWrite(telePacket.getWrite(), telePacket.getWriteLen());
+	}
 /*
     //Do we send relative or absolute move values
     if(0)  //abs(x-this->pos.x)<127
