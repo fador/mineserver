@@ -87,6 +87,8 @@ public:
   uint32 write_err_count;
   bool logged;
   bool admin;
+  bool banned;
+  bool whitelist;
   sint16 health;
   unsigned int UID;
   std::string nick;
@@ -97,6 +99,8 @@ public:
   //Input buffer
   Packet buffer;
 
+  bool checkBanned(std::string _nick);
+  bool checkWhitelist(std::string _nick);
   bool changeNick(std::string _nick);
   bool updatePos(double x, double y, double z, double stance);
   bool updateLook(float yaw, float pitch);
