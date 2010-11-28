@@ -278,7 +278,26 @@ void unmute(User *user, std::string command, std::deque<std::string> args)
   else
     reportError(user, "Usage: /unmute user");
 }
-
+void showMOTD(User *user, std::string command, std::deque<std::string> args)
+{
+  // Open MOTD file
+  std::ifstream motdfs(Conf::get().sValue("motd_file").c_str());
+  
+  // Load MOTD into string and send to user if not a comment
+  std::string msgLine;
+  while(getline( motdfs, msgLine ))
+  {
+    // If not commentline
+    if(msgLine[0] != COMMENTPREFIX)
+    {
+      Chat::get().sendMsg(user, msgLine, Chat::USER);
+    }
+  }
+  
+  // Close motd file
+  motdfs.close();
+  
+}
 void setTime(User *user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 1)
@@ -499,4 +518,5 @@ void Chat::registerStandardCommands()
   registerCommand("regen", regenerateLighting, true);
   registerCommand("mute", mute, true);
   registerCommand("unmute", unmute, true);
+  registerCommand("motd", showMOTD, false);
 }
