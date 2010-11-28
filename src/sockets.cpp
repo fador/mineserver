@@ -26,12 +26,10 @@
  */
 
 #ifdef WIN32
-    #define _CRTDBG_MAP_ALLOC
     #include <stdlib.h>
-    #include <crtdbg.h>
     #include <conio.h>
     #include <winsock2.h>
-typedef  int socklen_t;
+    typedef  int socklen_t;
 #else
 #include <sys/types.h>
 #include <sys/socket.h>

@@ -27,11 +27,8 @@
 
 #include <stdlib.h>
 #ifdef WIN32
-  #define _CRTDBG_MAP_ALLOC
-  #include <crtdbg.h>
   #include <conio.h>
   #include <winsock2.h>
-//  #define ZLIB_WINAPI
 #else
   #include <sys/socket.h>
   #include <netinet/in.h>
@@ -140,6 +137,20 @@ int PacketHandler::login_request(User *user)
     return PACKET_OK;
   }
 
+  // Check if user is on the whitelist
+  if(!user->checkWhitelist(player))
+  {
+    user->kick(Conf::get().sValue("default_whitelist_message"));
+    return PACKET_OK;
+  }
+
+  // If user is banned
+  if(user->checkBanned(player))
+  {
+    user->kick(Conf::get().sValue("default_banned_message"));
+    return PACKET_OK;
+  }
+
   user->changeNick(player);
 
   //Load user data
@@ -189,7 +200,7 @@ int PacketHandler::login_request(User *user)
   }
 
   // Send motd
-  std::ifstream motdfs( MOTDFILE.c_str());
+  std::ifstream motdfs(Conf::get().sValue("motd_file").c_str());
 
   std::string temp;
 
@@ -726,79 +737,15 @@ int PacketHandler::player_block_placement(User *user)
       
       // We place according to the player's position
 
-      double mdiffX = (x + 0.5) - user->pos.x; // + 0.5 to get the middle of the cube
-      double mdiffZ = (z + 0.5) - user->pos.z; // + 0.5 to get the middle of the cube
-      
-      int angleDegree = (int)(((atan2(mdiffZ, mdiffX) * 180 / M_PI) + 112.5) / 22.5);
+      double mdiffX = (x + 0.5) - user->pos.x; // + 0.5 to get the middle of the square
+      double mdiffZ = (z + 0.5) - user->pos.z; // + 0.5 to get the middle of the square
+
+      double angleDegree = ((atan2(mdiffZ, mdiffX) * 180 / M_PI + 90) / 22.5);
       
       if (angleDegree < 0) 
         angleDegree += 16;
-        
-      metadata = angleDegree;
-      
-      /*double angleDegree;
-      
-      if (mdiffX != 0)
-        angleDegree = atan(std::abs(mdiffX) / std::abs(mdiffZ)) * 180 / M_PI;
-      else 
-        angleDegree = 90;
-
-      // +X -Z
-      if (mdiffX > 0 && mdiffZ <= 0)
-      {
-        if (angleDegree <= 11.25)
-          metadata = 0x0;
-        else if (angleDegree <= (11.25 + 22.5))
-          metadata = 0x1;
-        else if (angleDegree <= (11.25 + 22.5 + 22.5))
-          metadata = 0x2;
-        else if (angleDegree <= (11.25 + 22.5 + 22.5 + 22.5))
-          metadata = 0x3;
-        else
-          metadata = 0x4;
-      }
-      // +X +Z
-      else if (mdiffX > 0 && mdiffZ > 0)
-      {
-        if (angleDegree <= 11.25)
-          metadata = 0x8;
-        else if (angleDegree <= (11.25 + 22.5))
-          metadata = 0x7;
-        else if (angleDegree <= (11.25 + 22.5 + 22.5))
-          metadata = 0x6;
-        else if (angleDegree <= (11.25 + 22.5 + 22.5 + 22.5))
-          metadata = 0x5;
-        else
-          metadata = 0x4;
-      }
-      // -X +Z
-      else if (mdiffX <= 0 && mdiffZ > 0)
-      {
-        if (angleDegree <= 11.25)
-          metadata = 0x8;
-        else if (angleDegree <= (11.25 + 22.5))
-          metadata = 0x9;
-        else if (angleDegree <= (11.25 + 22.5 + 22.5))
-          metadata = 0xA;
-        else if (angleDegree <= (11.25 + 22.5 + 22.5 + 22.5))
-          metadata = 0xB;
-        else
-          metadata = 0xC;
-      }
-      // -X -Z
-      else
-      {
-        if (angleDegree <= 11.25)
-          metadata = 0x0;
-        else if (angleDegree <= (11.25 + 22.5))
-          metadata = 0xF;
-        else if (angleDegree <= (11.25 + 22.5 + 22.5))
-          metadata = 0xE;
-        else if (angleDegree <= (11.25 + 22.5 + 22.5 + 22.5))
-          metadata = 0xD;
-        else
-          metadata = 0xC;
-      }*/
+         
+      metadata = (uint8)(angleDegree + 0.5);
       
       //std::cout << "mdiffX= " << mdiffX << "  mdiffZ= " << mdiffZ << "  andgleDegree= " << angleDegree << "  metadata= " << (int)metadata << std::endl;
     }

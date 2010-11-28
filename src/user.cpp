@@ -50,9 +50,9 @@
 #include "nbt.h"
 #include "chat.h"
 #include "packets.h"
+#include "config.h" //dirty fix
 
 std::vector<User *> Users;
-
 
 User::User(int sock, uint32 EID)
 {
@@ -62,12 +62,43 @@ User::User(int sock, uint32 EID)
   this->UID             = EID;
   this->logged          = false;
   // ENABLED FOR DEBUG
-  this->admin           = true;
+  this->admin           = false;
 
   this->pos.x           = Map::get().spawnPos.x();
   this->pos.y           = Map::get().spawnPos.y();
   this->pos.z           = Map::get().spawnPos.z();
   this->write_err_count = 0;
+  this->health          = 20;
+}
+
+bool User::checkBanned(std::string _nick)
+{
+  nick = _nick;
+
+  // Check banstatus
+  for(unsigned int i = 0; i < Chat::get().banned.size(); i++)
+    if(Chat::get().banned[i] == nick)
+      return true;
+
+  return false;
+}
+
+bool User::checkWhitelist(std::string _nick)
+{
+  // Is the whitelist system enabled at all?
+  if(Conf::get().bValue("use_whitelist") == true)
+  {
+    nick = _nick;
+
+    // Check if nick is whitelisted, providing it is enabled
+    for(unsigned int i = 0; i < Chat::get().whitelist.size(); i++)
+      if(Chat::get().whitelist[i] == nick)
+        return true;
+
+    return false;
+  }
+
+  return true;
 }
 
 bool User::changeNick(std::string _nick)
