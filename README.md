@@ -51,6 +51,7 @@ We are trying to minimize memory and cpu usage compared to original Java server.
 *  /rules : Shows server rules
 *  /home : Teleports user to map spawn location
 *  /kit (name) : Gives kit. Items for kit defined in config.cfg with kit_(name) using itemId's
+*  /motd : Displays Message Of The Day
 
 **Admin only**
 
@@ -66,8 +67,10 @@ We are trying to minimize memory and cpu usage compared to original Java server.
 *  /reload : Reload admins and configuration
 *  /give nick id/alias (count) : Gives nick count pieces of id/alias. count = 1 is used if it is not provided. Support for over 64 items. Aliases configurable with item_alias.cfg
 *  /rules nick : Shows server rules (from rules.txt) to nick
-*  /gps (nick) : Without nick shows own coordinates. With nick shows nick's coordinates
+*  /gps (nick) : Without nick shows own coordinates & heading. With nick shows nick's coordinates & heading
 *  /settime (time) : Sets server time. time = 0-24000 (0 and 24000 is day and about 15000 is night)
+*  /mute nick (mutemsg) : Mutes user with optional mute message
+*  /unmute nick : Unmutes user
  
 ### Compiling
 Depends on (and tested with):
