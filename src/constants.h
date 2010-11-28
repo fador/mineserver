@@ -132,6 +132,16 @@ const char COMMENTPREFIX  = '#';
 const std::string ADMIN_FILE    = "admin.txt";
 const std::string ADMIN_CONTENT = "# This is default admin file. Add nicknames here for admins, one per line.";
 
+// Banned users file
+const std::string BANNEDFILE        = "banned.txt";
+const std::string DEFAULTBANNEDFILE =
+	"# This is default banned users file. Write nicks here one for each line";
+
+// Whitelist users file
+const std::string WHITELISTFILE        = "whitelist.txt";
+const std::string DEFAULTWHITELISTFILE =
+	"# This is default whitelist file. Write nicks to be whitelisted here one for each line";
+
 // Motdfile
 const std::string MOTD_FILE    = "motd.txt";
 const std::string MOTD_CONTENT = "This is the default motd! Please edit motd.txt to change this message.";

@@ -137,6 +137,20 @@ int PacketHandler::login_request(User *user)
     return PACKET_OK;
   }
 
+  // Check if user is on the whitelist
+  if(user->checkWhitelist(player))
+  {
+    user->kick(Conf::get().sValue("default_whitelist_message"));
+    return PACKET_OK;
+  }
+
+  // If user is banned
+  if(user->checkBanned(player))
+  {
+    user->kick(Conf::get().sValue("default_banned_message"));
+    return PACKET_OK;
+  }
+
   user->changeNick(player);
 
   //Load user data

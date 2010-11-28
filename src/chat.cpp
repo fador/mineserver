@@ -126,6 +126,74 @@ bool Chat::loadAdmins(std::string adminFile)
   return true;
 }
 
+bool Chat::loadBanned(std::string bannedFile)
+{
+  // Clear current banned-vector
+  banned.clear();
+
+  // Read banned to deque
+  std::ifstream ifs(bannedFile.c_str());
+
+  // If file does not exist
+  if(ifs.fail())
+  {
+    std::cout << "> Warning: " << bannedFile << " not found. Creating..." << std::endl;
+
+    std::ofstream bannedofs(bannedFile.c_str());
+    bannedofs << DEFAULTBANNEDFILE << std::endl;
+    bannedofs.close();
+
+    return true;
+  }
+
+  std::string temp;
+  while(getline(ifs, temp))
+  {
+    // If not commentline
+    if(temp[0] != COMMENTPREFIX)
+      banned.push_back(temp);
+  }
+  ifs.close();
+
+  std::cout << "Loaded banned users from " << bannedFile << std::endl;
+
+  return true;
+}
+
+bool Chat::loadWhitelist(std::string whitelistFile)
+{
+  // Clear current whitelist-vector
+  whitelist.clear();
+
+  // Read whitelist to deque
+  std::ifstream ifs(whitelistFile.c_str());
+
+  // If file does not exist
+  if(ifs.fail())
+  {
+    std::cout << "> Warning: " << whitelistFile << " not found. Creating..." << std::endl;
+
+    std::ofstream whitelistofs(whitelistFile.c_str());
+    whitelistofs << DEFAULTWHITELISTFILE << std::endl;
+    whitelistofs.close();
+
+    return true;
+  }
+
+  std::string temp;
+  while(getline(ifs, temp))
+  {
+    // If not commentline
+    if(temp[0] != COMMENTPREFIX)
+      whitelist.push_back(temp);
+  }
+  ifs.close();
+
+  std::cout << "Loaded whitelisted users from " << whitelistFile << std::endl;
+
+  return true;
+}
+
 bool Chat::sendUserlist(User *user)
 {
   this->sendMsg(user, COLOR_BLUE + "[ Players online ]", USER);
@@ -172,6 +240,7 @@ bool Chat::handleMsg(User *user, std::string msg)
 {
   // Timestamp
   time_t rawTime = time(NULL);
+
   struct tm *Tm  = localtime(&rawTime);
 
   std::string timeStamp (asctime(Tm));

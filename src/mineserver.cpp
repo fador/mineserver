@@ -140,6 +140,9 @@ int Mineserver::Run(int argc, char *argv[])
   // Load MOTD
   Chat::get().checkMotd(file_motd);
 
+  Chat::get().loadBanned(BANNEDFILE);
+  Chat::get().loadWhitelist(WHITELISTFILE);
+
   // Set physics enable state according to config
   Physics::get().enabled = (Conf::get().bValue("liquid_physics"));
 
