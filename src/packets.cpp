@@ -27,11 +27,8 @@
 
 #include <stdlib.h>
 #ifdef WIN32
-  #define _CRTDBG_MAP_ALLOC
-  #include <crtdbg.h>
   #include <conio.h>
   #include <winsock2.h>
-//  #define ZLIB_WINAPI
 #else
   #include <sys/socket.h>
   #include <netinet/in.h>
@@ -141,10 +138,13 @@ int PacketHandler::login_request(User *user)
   }
 
   // Check if user is on the whitelist
-  if(user->checkWhitelist(player))
-  {
-    user->kick(Conf::get().sValue("default_whitelist_message"));
-    return PACKET_OK;
+  // But first, is it enabled?
+  if(Conf::get().bValue("use_whitelist") == true) {
+	  if(user->checkWhitelist(player))
+	  {
+		user->kick(Conf::get().sValue("default_whitelist_message"));
+		return PACKET_OK;
+	  }
   }
 
   // If user is banned
@@ -203,7 +203,7 @@ int PacketHandler::login_request(User *user)
   }
 
   // Send motd
-  std::ifstream motdfs( MOTDFILE.c_str());
+  std::ifstream motdfs(Conf::get().sValue("motd_file").c_str());
 
   std::string temp;
 
