@@ -63,6 +63,12 @@
 #include "packets.h"
 #include "physics.h"
 
+#ifdef WIN32
+    #define M_PI 3.141592653589793238462643
+#endif
+#define DEGREES_TO_RADIANS(x) ((x) / 180.0 * M_PI)
+#define RADIANS_TO_DEGREES(x) ((x) / M_PI * 180.0)
+
 void PacketHandler::initPackets()
 {
 
@@ -740,10 +746,6 @@ int PacketHandler::player_block_placement(User *user)
       double mdiffX = (x + 0.5) - user->pos.x; // + 0.5 to get the middle of the cube
       double mdiffZ = (z + 0.5) - user->pos.z; // + 0.5 to get the middle of the cube
       
-      #ifdef WIN32
-      #define M_PI 3.141592653589793238462643
-      #endif
-      
       double angleDegree = ((atan2(mdiffZ,mdiffX) * 180 / M_PI+90)/22);
       if(angleDegree<0) angleDegree+=16;      
       metadata = (uint8)(angleDegree+0.5);      
@@ -1124,6 +1126,14 @@ int PacketHandler::pickup_spawn(User *user)
   item.EID    = generateEID();
 
   item.spawnedBy = user->UID;
+  
+  // Modify the position of the dropped item so that it appears in front of user instead of under user
+  int distanceToThrow = 64;
+  float angle = DEGREES_TO_RADIANS(user->pos.yaw + 45);     // For some reason, yaw seems to be off to the left by 45 degrees from where you're actually looking?
+  int x = int(cos(angle) * distanceToThrow - sin(angle) * distanceToThrow);
+  int z = int(sin(angle) * distanceToThrow + cos(angle) * distanceToThrow);
+  item.pos += vec(x, 0, z);
+ 
   Map::get().sendPickupSpawn(item);
 
   return PACKET_OK;
