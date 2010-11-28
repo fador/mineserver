@@ -73,35 +73,29 @@ User::User(int sock, uint32 EID)
 
 bool User::checkBanned(std::string _nick)
 {
-	nick = _nick;
+  nick = _nick;
 
-	// Check banstatus
-	for(unsigned int i = 0; i < Chat::get().banned.size(); i++)
-	{
-		if(Chat::get().banned[i] == nick)
-		{
-		return true;
-		}
-	}
+  // Check banstatus
+  for(unsigned int i = 0; i < Chat::get().banned.size(); i++)
+    if(Chat::get().banned[i] == nick)
+      return true;
 
   return false;
 }
 
 bool User::checkWhitelist(std::string _nick)
 {
-	// Is the whitelist system enabled at all?
-	if(Conf::get().bValue("use_whitelist") == true) { 
-	nick = _nick;
+  // Is the whitelist system enabled at all?
+  if(Conf::get().bValue("use_whitelist") == true)
+  {
+    nick = _nick;
 
-	// Check if nick is whitelisted, providing it is enabled
-	for(unsigned int i = 0; i < Chat::get().whitelist.size(); i++)
-	{
-		if(Chat::get().whitelist[i] == nick)
-		{
-		return false;
-		}
-	}
-	return true;
+    // Check if nick is whitelisted, providing it is enabled
+    for(unsigned int i = 0; i < Chat::get().whitelist.size(); i++)
+      if(Chat::get().whitelist[i] == nick)
+        return true;
+
+    return false;
   }
 
   return true;

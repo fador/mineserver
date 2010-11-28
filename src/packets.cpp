@@ -138,7 +138,7 @@ int PacketHandler::login_request(User *user)
   }
 
   // Check if user is on the whitelist
-  if(user->checkWhitelist(player))
+  if(!user->checkWhitelist(player))
   {
     user->kick(Conf::get().sValue("default_whitelist_message"));
     return PACKET_OK;
