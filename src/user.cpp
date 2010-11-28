@@ -561,6 +561,8 @@ bool User::updatePos(double x, double y, double z, double stance)
   this->pos.y      = y;
   this->pos.z      = z;
   this->pos.stance = stance;
+  curChunk.x() = (int)(x/16);
+  curChunk.z() = (int)(z/16);
   return true;
 }
 
