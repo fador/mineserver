@@ -27,11 +27,8 @@
 
 #include <stdlib.h>
 #ifdef WIN32
-  #define _CRTDBG_MAP_ALLOC
-  #include <crtdbg.h>
   #include <conio.h>
   #include <winsock2.h>
-//  #define ZLIB_WINAPI
 #else
   #include <sys/socket.h>
   #include <netinet/in.h>
