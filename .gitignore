@@ -1,0 +1,7 @@
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Default test map
+src/testmap
+
