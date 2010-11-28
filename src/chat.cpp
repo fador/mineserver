@@ -83,7 +83,7 @@ bool Chat::checkMotd(std::string motdFile)
     std::cout << "> Warning: " << motdFile << " not found. Creating..." << std::endl;
 
     std::ofstream motdofs(motdFile.c_str());
-    motdofs << DEFAULTMOTDFILE << std::endl;
+    motdofs << MOTD_CONTENT << std::endl;
     motdofs.close();
   }
 
@@ -106,7 +106,7 @@ bool Chat::loadAdmins(std::string adminFile)
     std::cout << "> Warning: " << adminFile << " not found. Creating..." << std::endl;
 
     std::ofstream adminofs(adminFile.c_str());
-    adminofs << DEFAULTADMINFILE << std::endl;
+    adminofs << ADMIN_CONTENT << std::endl;
     adminofs.close();
 
     return true;

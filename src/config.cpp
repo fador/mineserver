@@ -52,7 +52,7 @@ bool Conf::load(std::string configFile)
   std::ifstream ifs(configFile.c_str());
 
   // If configfile does not exist
-  if(ifs.fail() && configFile == CONFIGFILE)
+  if(ifs.fail() && configFile == CONFIG_FILE)
   {
     // TODO: Load default configuration from the internets!
     std::cout << ">>> " << configFile << " not found." << std::endl;
@@ -63,7 +63,7 @@ bool Conf::load(std::string configFile)
                "#"                                                  << std::endl;
     confofs.close();
 
-    this->load(CONFIGFILE);
+    this->load(CONFIG_FILE);
   }
 
   std::string temp;

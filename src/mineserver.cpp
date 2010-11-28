@@ -68,7 +68,6 @@
 #include "packets.h"
 #include "physics.h"
 
-
 #ifdef WIN32
 static bool quit = false;
 #endif
@@ -95,12 +94,12 @@ void sighandler(int sig_num)
   Mineserver::Get().Stop();
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
   signal(SIGTERM, sighandler);
   signal(SIGINT, sighandler);
 
-  return Mineserver::Get().Run();
+  return Mineserver::Get().Run(argc, argv);
 }
 
 Mineserver::Mineserver()
@@ -112,29 +111,45 @@ event_base *Mineserver::GetEventBase()
   return m_eventBase;
 }
 
-int Mineserver::Run()
+int Mineserver::Run(int argc, char *argv[])
 {
-
   uint32 starttime = (uint32)time(0);
   uint32 tick      = (uint32)time(0);
 
   initConstants();
 
-  Chat::get().loadAdmins(ADMINFILE);
-  Chat::get().checkMotd(MOTDFILE);
+  std::string file_config;
+  file_config.assign(CONFIG_FILE);
+  std::string file_admin;
+  file_admin.assign(ADMIN_FILE);
+  std::string file_items;
+  file_items.assign(ITEMS_FILE);
+  std::string file_motd;
+  file_motd.assign(MOTD_FILE);
+  std::string file_rules;
+  file_rules.assign(RULES_FILE);
+
+  if (argc > 1)
+    file_config.assign(argv[1]);
 
   // Initialize conf
-  Conf::get().load(CONFIGFILE);
+  Conf::get().load(file_config);
+
   // Load item aliases
-  Conf::get().load(ITEMALIASFILE);
+  Conf::get().load(file_items);
 
-  //Set physics enable state according to config
-  Physics::get().enabled = (Conf::get().iValue("liquid_physics") ? true : false);
+  // Load admins
+  Chat::get().loadAdmins(file_admin);
+  // Load MOTD
+  Chat::get().checkMotd(file_motd);
 
-  //Initialize map
+  // Set physics enable state according to config
+  Physics::get().enabled = (Conf::get().bValue("liquid_physics"));
+
+  // Initialize map
   Map::get().initMap();
 
-  //Initialize packethandler
+  // Initialize packethandler
   PacketHandler::get().initPackets();
 
   // Load ip from config

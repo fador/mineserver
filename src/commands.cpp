@@ -78,12 +78,12 @@ namespace
     if(tUser != NULL)
     {
       // Send rules
-      std::ifstream ifs( RULESFILE.c_str());
+      std::ifstream ifs(Conf::get().sValue("rules_file").c_str());
       std::string temp;
 
       if(ifs.fail())
       {
-        std::cout << "> Warning: " << RULESFILE << " not found." << std::endl;
+        std::cout << "> Warning: " << Conf::get().sValue("rules_file") << " not found." << std::endl;
         return;
       }
       else
@@ -286,14 +286,13 @@ void regenerateLighting(User *user, std::string command, std::deque<std::string>
 
 void reloadConfiguration(User *user, std::string command, std::deque<std::string> args)
 {
-  Chat::get().loadAdmins(ADMINFILE);
-  Conf::get().load(CONFIGFILE);
+  Chat::get().loadAdmins(Conf::get().sValue("admin_file"));
+  Conf::get().load(CONFIG_FILE);
 
   // Set physics enable state based on config
-  Physics::get().enabled = ((Conf::get().iValue("liquid_physics") == 0) ? false : true);
+  Physics::get().enabled = (Conf::get().bValue("liquid_physics"));
 
-  Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + "SERVER:" + COLOR_RED+
-                      " Reloaded admins and config", Chat::USER);
+  Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + "SERVER: "+COLOR_RED+"Reloaded admins and config", Chat::USER);
 
   // Note that the MOTD is loaded on-demand each time it is requested
 }

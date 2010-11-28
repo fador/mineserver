@@ -44,7 +44,6 @@ enum
   BLOCK_STATUS_BLOCK_BROKEN
 };
 
-
 // Chat colors
 #define COLOR_BLACK std::string("§0")
 #define COLOR_DARK_BLUE std::string("§1")
@@ -98,8 +97,7 @@ enum Block
 enum
 {
   ITEM_IRON_SPADE = 256, ITEM_IRON_PICKAXE, ITEM_IRON_AXE, ITEM_FLINT_AND_STEEL, ITEM_APPLE,
-  ITEM_BOW,
-  ITEM_ARROW, ITEM_COAL, ITEM_DIAMOND, ITEM_IRON_INGOT, ITEM_GOLD_INGOT, ITEM_IRON_SWORD,
+  ITEM_BOW, ITEM_ARROW, ITEM_COAL, ITEM_DIAMOND, ITEM_IRON_INGOT, ITEM_GOLD_INGOT, ITEM_IRON_SWORD,
   ITEM_WOODEN_SWORD, ITEM_WOODEN_SPADE, ITEM_WOODEN_PICKAXE, ITEM_WOODEN_AXE, ITEM_STONE_SWORD,
   ITEM_STONE_SPADE, ITEM_STONE_PICKAXE, ITEM_STONE_AXE, ITEM_DIAMOND_SWORD,
   ITEM_DIAMOND_SPADE, ITEM_DIAMOND_PICKAXE, ITEM_DIAMOND_AXE, ITEM_STICK, ITEM_BOWL,
@@ -121,29 +119,32 @@ enum
 };
 
 // Records
-enum { ITEM_GOLD_RECORD = 2256, ITEM_GREEN_RECORD };
+enum
+{
+  ITEM_GOLD_RECORD = 2256, ITEM_GREEN_RECORD
+};
 
 const std::string VERSION = "0.1.12 (Alpha)";
 
 const char COMMENTPREFIX  = '#';
 
 // Adminfile
-const std::string ADMINFILE        = "admin.txt";
-const std::string DEFAULTADMINFILE =
-  "# This is default admin file. Write admin nicks here one for each line";
+const std::string ADMIN_FILE    = "admin.txt";
+const std::string ADMIN_CONTENT = "# This is default admin file. Add nicknames here for admins, one per line.";
 
 // Motdfile
-const std::string MOTDFILE        = "motd.txt";
-const std::string DEFAULTMOTDFILE = "This is default motd! Please edit motd.txt";
+const std::string MOTD_FILE    = "motd.txt";
+const std::string MOTD_CONTENT = "This is the default motd! Please edit motd.txt to change this message.";
 
 // Configuration
-const std::string CONFIGFILE = "config.cfg";
+const std::string CONFIG_FILE = "config.cfg";
 
 // Item aliases
-const std::string ITEMALIASFILE = "item_alias.cfg";
+const std::string ITEMS_FILE = "item_alias.cfg";
 
 // Server rules
-const std::string RULESFILE = "rules.txt";
+const std::string RULES_FILE    = "rules.txt";
+const std::string RULES_CONTENT = "This is the default rules file. Please edit rules.txt to change this message.";
 
 // Default configuration
 extern std::map<std::string, std::string> defaultConf;
@@ -158,10 +159,7 @@ struct Drop
   uint8 count;
   bool exclusive;
   
-  Drop()
-  {
-
-  }
+  Drop() {}
 
   Drop(uint16 item_id, uint32 probability, uint8 count, bool exclusive)
   {
