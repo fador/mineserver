@@ -50,7 +50,6 @@
 #include "nbt.h"
 #include "chat.h"
 #include "packets.h"
-#include "config.h" //dirty fix
 
 std::vector<User *> Users;
 
@@ -85,10 +84,7 @@ bool User::checkBanned(std::string _nick)
 
 bool User::checkWhitelist(std::string _nick)
 {
-  // Is the whitelist system enabled at all?
-  if(Conf::get().bValue("use_whitelist") == true)
-  {
-    nick = _nick;
+	nick = _nick;
 
     // Check if nick is whitelisted, providing it is enabled
     for(unsigned int i = 0; i < Chat::get().whitelist.size(); i++)
@@ -96,7 +92,6 @@ bool User::checkWhitelist(std::string _nick)
         return true;
 
     return false;
-  }
 
   return true;
 }
