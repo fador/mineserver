@@ -132,6 +132,16 @@ const std::string ADMINFILE        = "admin.txt";
 const std::string DEFAULTADMINFILE =
   "# This is default admin file. Write admin nicks here one for each line";
 
+// Banned users file
+const std::string BANNEDFILE        = "banned.txt";
+const std::string DEFAULTBANNEDFILE =
+	"# This is default banned users file. Write nicks here one for each line";
+
+// Whitelist users file
+const std::string WHITELISTFILE        = "whitelist.txt";
+const std::string DEFAULTWHITELISTFILE =
+	"# This is default whitelist file. Write nicks to be whitelisted here one for each line";
+
 // Motdfile
 const std::string MOTDFILE        = "motd.txt";
 const std::string DEFAULTMOTDFILE = "This is default motd! Please edit motd.txt";
