@@ -182,7 +182,7 @@ int Mineserver::Run(int argc, char *argv[])
 
   if(m_socketlisten < 0)
   {
-    fprintf(stderr, "Failed to create listen socket\n");
+    std::cerr << "Failed to create listen socket" << std::endl;
     return 1;
   }
 
@@ -197,13 +197,13 @@ int Mineserver::Run(int argc, char *argv[])
   //Bind to port
   if(bind(m_socketlisten, (struct sockaddr *)&addresslisten, sizeof(addresslisten)) < 0)
   {
-    fprintf(stderr, "Failed to bind\n");
+    std::cerr << "Failed to bind" << std::endl;
     return 1;
   }
 
   if(listen(m_socketlisten, 5) < 0)
   {
-    fprintf(stderr, "Failed to listen to socket\n");
+    std::cerr << "Failed to listen to socket" << std::endl;
     return 1;
   }
 
