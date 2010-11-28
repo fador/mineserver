@@ -330,7 +330,7 @@ void reloadConfiguration(User *user, std::string command, std::deque<std::string
   Chat::get().loadAdmins(Conf::get().sValue("admin_file"));
   Chat::get().loadBanned(BANNEDFILE);
   Chat::get().loadWhitelist(WHITELISTFILE);
-  Conf::get().load(CONFIGFILE);
+  Conf::get().load(CONFIG_FILE);
 
   // Set physics enable state based on config
   Physics::get().enabled = (Conf::get().bValue("liquid_physics"));

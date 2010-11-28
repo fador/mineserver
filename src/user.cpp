@@ -103,6 +103,8 @@ bool User::checkWhitelist(std::string _nick)
 	}
 	return true;
   }
+
+  return true;
 }
 
 bool User::changeNick(std::string _nick)
