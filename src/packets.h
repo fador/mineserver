@@ -216,7 +216,7 @@ public:
   {
     uint32 nval;
     memcpy(&nval, &val , 4);
-    htonl(nval);
+    nval = htonl(nval);
     addToWrite(&nval, 4);
     return *this;
   }

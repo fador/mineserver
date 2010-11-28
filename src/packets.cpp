@@ -144,10 +144,13 @@ int PacketHandler::login_request(User *user)
   }
 
   // Check if user is on the whitelist
-  if(!user->checkWhitelist(player))
-  {
-    user->kick(Conf::get().sValue("default_whitelist_message"));
-    return PACKET_OK;
+  // But first, is it enabled?
+  if(Conf::get().bValue("use_whitelist") == true) {
+	  if(user->checkWhitelist(player))
+	  {
+		user->kick(Conf::get().sValue("default_whitelist_message"));
+		return PACKET_OK;
+	  }
   }
 
   // If user is banned
