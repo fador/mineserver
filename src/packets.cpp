@@ -189,7 +189,7 @@ int PacketHandler::login_request(User *user)
   }
 
   // Send motd
-  std::ifstream motdfs( MOTDFILE.c_str());
+  std::ifstream motdfs(Conf::get().sValue("motd_file").c_str());
 
   std::string temp;
 
