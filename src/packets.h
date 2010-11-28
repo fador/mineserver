@@ -35,6 +35,10 @@
 #define PACKET_VARIABLE_LEN   -1
 #define PACKET_OK             0
 
+#ifndef M_PI
+#define M_PI 3.141592653589793238462643
+#endif
+
 class PacketHandler;
 class User;
 
