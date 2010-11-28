@@ -729,7 +729,14 @@ int PacketHandler::player_block_placement(User *user)
       double mdiffX = (x + 0.5) - user->pos.x; // + 0.5 to get the middle of the cube
       double mdiffZ = (z + 0.5) - user->pos.z; // + 0.5 to get the middle of the cube
       
-      double angleDegree;
+      int angleDegree = (int)(((atan2(mdiffZ, mdiffX) * 180 / M_PI) + 112.5) / 22.5);
+      
+      if (angleDegree < 0) 
+        angleDegree += 16;
+        
+      metadata = angleDegree;
+      
+      /*double angleDegree;
       
       if (mdiffX != 0)
         angleDegree = atan(std::abs(mdiffX) / std::abs(mdiffZ)) * 180 / M_PI;
@@ -791,7 +798,7 @@ int PacketHandler::player_block_placement(User *user)
           metadata = 0xD;
         else
           metadata = 0xC;
-      }
+      }*/
       
       //std::cout << "mdiffX= " << mdiffX << "  mdiffZ= " << mdiffZ << "  andgleDegree= " << angleDegree << "  metadata= " << (int)metadata << std::endl;
     }
