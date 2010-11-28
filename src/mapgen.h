@@ -60,18 +60,29 @@ private:
   
   void loadFlatgrass();
   void generateWithNoise(int x, int z);
-
-  noise::module::Perlin perlinNoise;
+    
   noise::utils::NoiseMap heightMap;
   noise::utils::NoiseMapBuilderPlane heightMapBuilder;
+  
+  // This is for used for tuning heightmaps (Not for production)
+  noise::utils::NoiseMapBuilderPlane debugMapBuilder;
+  noise::utils::NoiseMap debugHeightMap;
 
-  noise::module::RidgedMulti mountainTerrain;
+  // Heightmap composition
+  noise::module::Perlin perlinNoise;
+  noise::module::ScaleBias perlinBiased;
 
-  noise::module::Billow baseFlatTerrain;
+  noise::module::Perlin baseFlatTerrain;  
   noise::module::ScaleBias flatTerrain;
+  
+  noise::module::Perlin seaFloor;
+  noise::module::ScaleBias seaBias;
 
   noise::module::Perlin terrainType;
 
+  noise::module::Perlin seaControl;
+  
+  noise::module::Select seaTerrain;
   noise::module::Select finalTerrain;
 
 public:
