@@ -57,6 +57,8 @@ We are trying to minimize memory and cpu usage compared to original Java server.
 *  %text : Servermessage 
 *  &text : Admin-only message
 *  /kick nick (kickmsg) : Kicks user with optional kick message
+*  /ban nick : Bans (and kicks if online) user from server
+*  /unban nick : Lift a ban
 *  /save : Manually save map to disc
 *  /ctp x y z : Teleport to coordinates (eg. /ctp 100 100 100)
 *  /tp nick : Teleport yourself to nick's position
