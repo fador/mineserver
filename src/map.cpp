@@ -501,6 +501,71 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type)
 
   return true;
 }
+bool Map::setBlock(int x, int y, int z, char type, char meta)
+{
+#ifdef _DEBUG
+  printf("setBlock(x=%d, y=%d, z=%d, type=%d, char=%d)\n", x, y, z, type, meta);
+#endif
+
+  if((y < 0) || (y > 127))
+  {
+    LOG("Invalid y value (setBlock)");
+    return false;
+  }
+
+  // Map chunk pos from block pos
+  int chunk_x = ((x < 0) ? (((x+1)/16)-1) : (x/16));
+  int chunk_z = ((z < 0) ? (((z+1)/16)-1) : (z/16));
+
+  uint32 mapId;
+  Map::posToId(chunk_x, chunk_z, &mapId);
+
+  sChunk *chunk = getMapData(chunk_x, chunk_z, true);
+
+  if(!chunk)
+  {
+
+    LOG("Loading chunk failed (setBlock)");
+    return false;
+  }
+
+  // Which block inside the chunk
+  int chunk_block_x  = ((x < 0) ? (15+((x+1)%16)) : (x%16));
+  int chunk_block_z  = ((z < 0) ? (15+((z+1)%16)) : (z%16));
+
+  uint8 *blocks      = chunk->blocks;
+  uint8 *metapointer = chunk->data;
+  int index          = y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
+  blocks[index] = type;
+  char metadata      = metapointer[index>>1];
+
+  if(y%2)
+  {
+    metadata &= 0x0f;
+    metadata |= meta<<4;
+  }
+  else
+  {
+    metadata &= 0xf0;
+    metadata |= meta;
+  }
+  metapointer[index >> 1] = metadata;
+
+  mapChanged[mapId]       = 1;
+  mapLastused[mapId]      = (int)time(0);
+
+  // Log the block update
+  event_t entry;
+  entry.x = x;
+  entry.y = y;
+  entry.z = z;
+  entry.nick = std::string("SERVER");
+
+  Map::getBlock(x,y,z, &entry.otype, &entry.ometa);
+  TRXLOG(entry);
+
+  return true;
+}
 
 bool Map::setBlock(int x, int y, int z, char type, char meta, std::string nick)
 {
@@ -559,7 +624,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta, std::string nick)
   entry.x = x;
   entry.y = y;
   entry.z = z;
-
+  entry.nick = nick;
   Map::getBlock(x,y,z, &entry.otype, &entry.ometa);
   TRXLOG(entry);
 

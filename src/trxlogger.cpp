@@ -30,11 +30,11 @@
 //
 
 #include <cstdio>
-//#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <time.h>
+#include <vector>
 
 #include "trxlogger.h"
 #include "logger.h"
@@ -58,19 +58,23 @@ void TrxLogger::log(event_t event)
 {
   if(!log_stream.good()) {
     LOG("Binary log stream is bad!");
+    return;
   }
+
   time_t seconds;
   seconds = time (NULL);
-  log_stream << event;
+  event.timestamp = seconds;
+
+  log_stream.write(reinterpret_cast<char *>(&event),sizeof(event_t));
 }
 
 // Get logs based on nick and timestamp
-bool TrxLogger:getLogs(time_t t, std::string nick, event_t *logs[]) {
+bool TrxLogger::getLogs(time_t t, std::string nick, std::vector<event_t> *logs) {
   return true;
 }
 
 // Get logs based on timestamp
-bool TrxLogger::getLogs(time_t t, event_t *logs[]) {
+bool TrxLogger::getLogs(time_t t, std::vector<event_t> *logs) {
   return true;
 }
 

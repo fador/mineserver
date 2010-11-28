@@ -28,8 +28,10 @@
 //
 // Mineserver trxlogger.h
 //
+
 #include <string>
 #include <fstream>
+#include <time.h>
 
 #include "tools.h"
 
@@ -39,6 +41,8 @@ struct event_t {
   int x;
   int y;
   int z;
+  std::string nick;
+  time_t timestamp;
   uint8 otype, ntype;
   uint8 ometa, nmeta;
 };
@@ -47,11 +51,11 @@ class TrxLogger {
 public:
   void log(event_t event);
   static TrxLogger &get();
-  bool getLogs(time_t t, std::string nick, event_t *logs[]);
-  bool getLogs(time_t t, event_t *logs[]);
+  bool getLogs(time_t time, std::string nick, std::vector<event_t> *logs);
+  bool getLogs(time_t time, std::vector<event_t> *logs);
 
 private:
-  std::ofstream log_stream;
+  std::fstream log_stream;
   TrxLogger(std::string filename);
   ~TrxLogger();
 };

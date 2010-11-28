@@ -219,6 +219,11 @@ public:
     return setBlock(pos.x(), pos.y(), pos.z(), type, meta, nick);
   }
 
+  bool setBlock(int x, int y, int z, char type, char meta);
+  bool setBlock(vec pos, char type, char meta)
+  {
+    return setBlock(pos.x(), pos.y(), pos.z(), type, meta);
+  }
   bool sendBlockChange(int x, int y, int z, char type, char meta);
   bool sendBlockChange(vec pos, char type, char meta)
   {

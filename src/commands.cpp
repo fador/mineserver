@@ -177,7 +177,7 @@ void kick(User *user, std::string command, std::deque<std::string> args)
 
 void rollBack(User *user, std::string command, std::deque<std::string> args)
 {
-  event_t logs[512];
+  std::vector<event_t> logs;
   if(!args.empty()) {
     time_t timestamp;
     std::stringstream ss (std::stringstream::in | std::stringstream::out);
@@ -185,13 +185,15 @@ void rollBack(User *user, std::string command, std::deque<std::string> args)
     ss >> timestamp; 
     if(args.size() > 1) {
       std::string victim = args[1];
-      TrxLogger::getLogs(timestamp, victim, &logs);
+      TrxLogger::get().getLogs(timestamp, victim, &logs);
     } else {
-      TrxLogger::getLogs(timestamp, &logs);
+      TrxLogger::get().getLogs(timestamp, &logs);
     }
-    for(i=0;i<sizeof(logs);i++) {
-      event_t event = logs[i];
-      Map::setBlock(event.x, event.y, event.z, event.otype, event.ometa);
+    while(!logs.empty()) {
+      event_t event = logs.back();
+      logs.pop_back();
+
+      Map::get().setBlock(event.x, event.y, event.z, event.otype, event.ometa, std::string("SERVER"));
     }
   } else {
     reportError(user, "Usage: /rollback <timestamp> [user]");
