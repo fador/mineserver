@@ -91,6 +91,18 @@ User::~User()
 {
   if(this->nick.size())
   {
+      for(int mapx = -viewDistance+curChunk.x(); mapx <= viewDistance+curChunk.x(); mapx++)
+      {
+        for(int mapz = -viewDistance+curChunk.z(); mapz <= viewDistance+curChunk.z(); mapz++)
+        {
+			sChunk *chunk = Map::get().chunks.GetChunk(mapx, mapz);
+			if(chunk != NULL)
+				chunk->users.erase(this);
+        }
+      }
+
+
+
     //Send signal to everyone that the entity is destroyed
     uint8 entityData[5];
     entityData[0] = 0x1d; //Destroy entity;

@@ -463,6 +463,12 @@ NBT_Value * NBT_Value::LoadFromFile(const std::string &filename)
   fread(&uncompressedSize, 4, 1, fp);
   fclose(fp);
 
+  if(uncompressedSize == 0)
+  {
+	  std::cout << "Unable to determine uncompressed size of " << filename << std::endl;
+	  uncompressedSize = ALLOCATE_NBTFILE;
+  }
+
   uint8 *uncompressedData = new uint8[uncompressedSize];
   gzFile nbtFile = gzopen(filename.c_str(), "rb");
   if(nbtFile == NULL)
