@@ -356,6 +356,27 @@ void userTeleport(User *user, std::string command, std::deque<std::string> args)
   }
 }
 
+std::string getHeadingString(User *user)
+{
+  // Compass heading labels
+  std::string headingLabels[8] = { "North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest" };
+  
+  // Get the user's heading and normalize
+  int headingAngle = int(user->pos.yaw) % 360;
+  if(headingAngle < 0)
+    headingAngle = 360 + headingAngle;
+      
+  // Work out the text heading based on 8 points of the compass
+  std::string headingText = "Unknown";
+  if((headingAngle > 337.5 && headingAngle <= 360) || (headingAngle >= 0 && headingAngle <= 22.5))   // Special case for North as it spans 360 to 0
+    headingText = headingLabels[0];
+  else {
+    int index = int(floor((headingAngle + 22.5) / 45));     // Add 22.5 so that we can identify the compass box correctly
+    headingText = headingLabels[index];
+  }
+  return headingText + " (" + dtos(headingAngle) + "')";
+
+}
 void showPosition(User *user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 1)
@@ -366,7 +387,9 @@ void showPosition(User *user, std::string command, std::deque<std::string> args)
                                                                      + " " 
                                                                      + dtos(tUser->pos.y)
                                                                      + " " 
-                                                                     + dtos(tUser->pos.z), Chat::USER);
+                                                                     + dtos(tUser->pos.z)
+                                                                     + " Heading: " + getHeadingString(tUser)
+                                                                     , Chat::USER);
     else
       reportError(user, "User " + args[0] + " not found (see /players)");
   }
@@ -376,7 +399,9 @@ void showPosition(User *user, std::string command, std::deque<std::string> args)
                                                              + " " 
                                                              + dtos(user->pos.y) 
                                                              + " " 
-                                                             + dtos(user->pos.z), Chat::USER);
+                                                             + dtos(user->pos.z)
+                                                             + " Heading: " + getHeadingString(user)
+                                                             , Chat::USER);
   }
 }
 
