@@ -97,10 +97,6 @@ void sighandler(int sig_num)
 
 int main(void)
 {
-  #ifdef WIN32
-  _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-  _CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_DEBUG );
-  #endif
   signal(SIGTERM, sighandler);
   signal(SIGINT, sighandler);
 
@@ -148,8 +144,6 @@ int Mineserver::Run()
   int port = Conf::get().iValue("port");
 
 #ifdef WIN32
-  _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-  _CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_DEBUG );
   WSADATA wsaData;
   int iResult;
   // Initialize Winsock
@@ -314,11 +308,6 @@ int Mineserver::Run()
   #else
     close(m_socketlisten);
   #endif
-
-  //Windows debug
-#ifdef WIN32
-  _CrtDumpMemoryLeaks();
-#endif
 
   return EXIT_SUCCESS;
 }
