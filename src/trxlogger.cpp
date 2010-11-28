@@ -41,7 +41,7 @@
 #include "config.h"
 
 TrxLogger::TrxLogger (std::string filename) {
-  log_stream.open(filename.c_str(), std::ios::in | std::ios::out | std::ios::app | std::ios::binary);
+  log_stream.open(filename.c_str(), std::ios::app);
   if (!log_stream.is_open()) {
     LOG("Failed to open binary log!");
   } 
