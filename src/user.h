@@ -89,6 +89,7 @@ public:
   bool admin;
   bool banned;
   bool whitelist;
+  bool muted;
   sint16 health;
   unsigned int UID;
   std::string nick;
@@ -119,6 +120,10 @@ public:
   // Kick player
   bool kick(std::string kickMsg);
 
+  // Mute
+  bool mute(std::string muteMsg);
+  bool unmute();
+  
   //Map related
 
   //Map queue
