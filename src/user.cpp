@@ -423,7 +423,7 @@ bool User::updatePos(double x, double y, double z, double stance)
 
 		Packet telePacket;
 		telePacket << (sint8)PACKET_ENTITY_TELEPORT 
-		   << (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
+		   << (sint32)UID << (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
 
 
 		iter = toRemove.begin(); end = toRemove.end();
