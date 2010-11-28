@@ -39,6 +39,7 @@ void initConstants()
   defaultConf.insert(std::pair<std::string, std::string>("ip", "0.0.0.0"));
   defaultConf.insert(std::pair<std::string, std::string>("port", "25565"));
   defaultConf.insert(std::pair<std::string, std::string>("servername", "Minecraft server"));
+  defaultConf.insert(std::pair<std::string, std::string>("use_whitelist", "false"));
   defaultConf.insert(std::pair<std::string, std::string>("mapdir", "testmap"));
   defaultConf.insert(std::pair<std::string, std::string>("userlimit", "20"));
   defaultConf.insert(std::pair<std::string, std::string>("map_release_time", "10"));
@@ -48,6 +49,10 @@ void initConstants()
   defaultConf.insert(std::pair<std::string, std::string>("seaLevel", "63"));
   defaultConf.insert(std::pair<std::string, std::string>("server_full_message",
                                                          "Server is currently full"));
+  defaultConf.insert(std::pair<std::string, std::string>("default_banned_message",
+                                                         "You have been banned from this server"));
+  defaultConf.insert(std::pair<std::string, std::string>("default_whitelist_message",
+                                                         "You are not on the whitelist"));
   defaultConf.insert(std::pair<std::string, std::string>("default_kick_message",
                                                          "You have been kicked"));
   defaultConf.insert(std::pair<std::string, std::string>("wrong_protocol_message",
