@@ -128,29 +128,24 @@ const std::string VERSION = "0.1.12 (Alpha)";
 
 const char COMMENTPREFIX  = '#';
 
+// Configuration
+const std::string CONFIG_FILE = "config.cfg";
+
 // Adminfile
 const std::string ADMIN_FILE    = "admin.txt";
 const std::string ADMIN_CONTENT = "# This is default admin file. Add nicknames here for admins, one per line.";
 
 // Banned users file
-const std::string BANNEDFILE        = "banned.txt";
-const std::string DEFAULTBANNEDFILE =
-	"# This is default banned users file. Write nicks here one for each line";
+const std::string BANNED_FILE    = "banned.txt";
+const std::string BANNED_CONTENT = "# This is default banned users file. Add nicknames here, one per line.";
 
 // Whitelist users file
-const std::string WHITELISTFILE        = "whitelist.txt";
-const std::string DEFAULTWHITELISTFILE =
-	"# This is default whitelist file. Write nicks to be whitelisted here one for each line";
+const std::string WHITELIST_FILE    = "whitelist.txt";
+const std::string WHITELIST_CONTENT = "# This is default whitelist file. Add nicknames here, one per line.";
 
 // Motdfile
 const std::string MOTD_FILE    = "motd.txt";
 const std::string MOTD_CONTENT = "This is the default motd! Please edit motd.txt to change this message.";
-
-// Configuration
-const std::string CONFIG_FILE = "config.cfg";
-
-// Item aliases
-const std::string ITEMS_FILE = "item_alias.cfg";
 
 // Server rules
 const std::string RULES_FILE    = "rules.txt";

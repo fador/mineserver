@@ -50,9 +50,11 @@ void initConstants()
   defaultConf.insert(std::pair<std::string, std::string>("server_full_message", "Server is currently full"));
   defaultConf.insert(std::pair<std::string, std::string>("default_kick_message", "You have been kicked"));
   defaultConf.insert(std::pair<std::string, std::string>("wrong_protocol_message", "Wrong client protocol"));
-  defaultConf.insert(std::pair<std::string, std::string>("admin_file", "admin.txt"));
-  defaultConf.insert(std::pair<std::string, std::string>("motd_file", "motd.txt"));
-  defaultConf.insert(std::pair<std::string, std::string>("rules_file", "rules.txt"));
+  defaultConf.insert(std::pair<std::string, std::string>("admin_file", ADMIN_FILE));
+  defaultConf.insert(std::pair<std::string, std::string>("banned_file", BANNED_FILE));
+  defaultConf.insert(std::pair<std::string, std::string>("whitelist_file", WHITELIST_FILE));
+  defaultConf.insert(std::pair<std::string, std::string>("motd_file", MOTD_FILE));
+  defaultConf.insert(std::pair<std::string, std::string>("rules_file", RULES_FILE));
 
   // Block drops (10000 = 100%)
   BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_STONE, Drop(BLOCK_COBBLESTONE, 10000, 1, true)));

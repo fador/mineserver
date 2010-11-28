@@ -176,7 +176,7 @@ void ban(User *user, std::string command, std::deque<std::string> args)
         Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + victim +" was banned in his absence!", Chat::USER);
 
     // Reload list with banned users
-    Chat::get().loadBanned(BANNEDFILE);
+    Chat::get().loadBanned(Conf::get().sValue("banned_file"));
   }
   else
     reportError(user, "Usage: /ban player [reason]");
@@ -190,9 +190,9 @@ void unban(User *user, std::string command, std::deque<std::string> args)
     User *tUser        = getUserByNick(victim);
 
     std::string line;
-      std::ifstream in("banned.txt");
+      std::ifstream in((Conf::get().sValue("banned_file")).c_str());
 
-      std::ofstream out("banned.tmp");
+      std::ofstream out((Conf::get().sValue("banned_file")+".tmp").c_str());
 
       while( getline(in,line) )
       {
@@ -202,11 +202,11 @@ void unban(User *user, std::string command, std::deque<std::string> args)
       in.close();
       out.close();
 
-      remove("banned.txt");
-      rename("banned.tmp","banned.txt");
+      remove((Conf::get().sValue("banned_file")).c_str());
+      rename((Conf::get().sValue("banned_file")+".tmp").c_str(), (Conf::get().sValue("banned_file")).c_str());
 
     // Reload list with banned users
-    Chat::get().loadBanned(BANNEDFILE);
+    Chat::get().loadBanned(Conf::get().sValue("banned_file"));
   }
   else
     reportError(user, "Usage: /unban player");
@@ -437,8 +437,8 @@ void regenerateLighting(User *user, std::string command, std::deque<std::string>
 void reloadConfiguration(User *user, std::string command, std::deque<std::string> args)
 {
   Chat::get().loadAdmins(Conf::get().sValue("admin_file"));
-  Chat::get().loadBanned(BANNEDFILE);
-  Chat::get().loadWhitelist(WHITELISTFILE);
+  Chat::get().loadBanned(Conf::get().sValue("banned_file"));
+  Chat::get().loadWhitelist(Conf::get().sValue("whitelist_file"));
   Conf::get().load(CONFIG_FILE);
 
   // Set physics enable state based on config
