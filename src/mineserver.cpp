@@ -124,6 +124,8 @@ int Mineserver::Run()
   initConstants();
 
   Chat::get().loadAdmins(ADMINFILE);
+  Chat::get().loadBanned(BANNEDFILE);
+  Chat::get().loadWhitelist(WHITELISTFILE);
   Chat::get().checkMotd(MOTDFILE);
 
   // Initialize conf
