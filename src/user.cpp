@@ -68,6 +68,7 @@ User::User(int sock, uint32 EID)
   this->pos.y           = Map::get().spawnPos.y();
   this->pos.z           = Map::get().spawnPos.z();
   this->write_err_count = 0;
+  this->health          = 20;
 }
 
 bool User::changeNick(std::string _nick)
