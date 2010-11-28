@@ -25,27 +25,55 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _CONFIG_H
-#define _CONFIG_H
+//
+// Mineserver trxlogger.cpp
+//
 
-#include <vector>
-#include <map>
+#include <cstdio>
+//#include <cstdlib>
+#include <iostream>
+#include <fstream>
 #include <string>
-class Conf
-{
-private:
-  Conf()
-  {
-  }
-  std::map<std::string, std::string> confSet;
-public:
-  bool load(std::string configFile);
-  int iValue(std::string name);
-  std::string sValue(std::string name);
-  bool bValue(std::string name);
-  std::vector<int> vValue(std::string name);
-  
-  static Conf &get();
-};
+#include <time.h>
 
-#endif
+#include "trxlogger.h"
+#include "logger.h"
+#include "config.h"
+
+TrxLogger::TrxLogger (std::string filename) {
+  log_stream.open(filename.c_str(), std::ios::in | std::ios::out | std::ios::app | std::ios::binary);
+  if (!log_stream.is_open()) {
+    LOG("Failed to open binary log!");
+  } 
+}
+
+TrxLogger &TrxLogger::get()
+{
+  static TrxLogger instance(Conf::get().sValue("binlog"));
+  return instance;
+}
+
+// Log action to binary log 
+void TrxLogger::log(event_t event)
+{
+  if(!log_stream.good()) {
+    LOG("Binary log stream is bad!");
+  }
+  time_t seconds;
+  seconds = time (NULL);
+  log_stream << event;
+}
+
+// Get logs based on nick and timestamp
+bool TrxLogger:getLogs(time_t t, std::string nick, event_t *logs[]) {
+  return true;
+}
+
+// Get logs based on timestamp
+bool TrxLogger::getLogs(time_t t, event_t *logs[]) {
+  return true;
+}
+
+TrxLogger::~TrxLogger() {
+  log_stream.close();
+}

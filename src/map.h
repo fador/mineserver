@@ -213,10 +213,10 @@ public:
   {
     return getBlock(pos.x(), pos.y(), pos.z(), type, meta);
   }
-  bool setBlock(int x, int y, int z, char type, char meta);
-  bool setBlock(vec pos, char type, char meta)
+  bool setBlock(int x, int y, int z, char type, char meta, std::string nick);
+  bool setBlock(vec pos, char type, char meta, std::string nick)
   {
-    return setBlock(pos.x(), pos.y(), pos.z(), type, meta);
+    return setBlock(pos.x(), pos.y(), pos.z(), type, meta, nick);
   }
 
   bool sendBlockChange(int x, int y, int z, char type, char meta);

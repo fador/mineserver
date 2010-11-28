@@ -49,6 +49,7 @@
 #include <sys/stat.h>
 
 #include "logger.h"
+#include "trxlogger.h"
 #include "tools.h"
 #include "map.h"
 #include "mapgen.h"
@@ -501,7 +502,7 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type)
   return true;
 }
 
-bool Map::setBlock(int x, int y, int z, char type, char meta)
+bool Map::setBlock(int x, int y, int z, char type, char meta, std::string nick)
 {
 #ifdef _DEBUG
   printf("setBlock(x=%d, y=%d, z=%d, type=%d, char=%d)\n", x, y, z, type, meta);
@@ -552,6 +553,15 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
 
   mapChanged[mapId]       = 1;
   mapLastused[mapId]      = (int)time(0);
+
+  // Log the block update
+  event_t entry;
+  entry.x = x;
+  entry.y = y;
+  entry.z = z;
+
+  Map::getBlock(x,y,z, &entry.otype, &entry.ometa);
+  TRXLOG(entry);
 
   return true;
 }

@@ -447,7 +447,7 @@ int PacketHandler::player_digging(User *user)
 
       int modifier = (metadata & 0x8) ? -1 : 1;
 
-      Map::get().setBlock(x, y, z, block, metadata);
+      Map::get().setBlock(x, y, z, block, metadata, user->nick);
       Map::get().sendBlockChange(x, y, z, (char)block, metadata);  
 
       Map::get().getBlock(x, y + modifier, z, &block2, &metadata2);
@@ -461,7 +461,7 @@ int PacketHandler::player_digging(User *user)
         else
           metadata2 |= 0x8;
 
-        Map::get().setBlock(x, y + modifier, z, block2, metadata2);
+        Map::get().setBlock(x, y + modifier, z, block2, metadata2, user->nick);
         Map::get().sendBlockChange(x, y + modifier, z, (char)block, metadata2);     
       
       }
@@ -478,7 +478,7 @@ int PacketHandler::player_digging(User *user)
     if(Map::get().getBlock(x, y, z, &block, &meta))
     {
       Map::get().sendBlockChange(x, y, z, 0, 0);
-      Map::get().setBlock(x, y, z, 0, 0);
+      Map::get().setBlock(x, y, z, 0, 0, user->nick);
 
       uint8 topblock; uint8 topmeta;
 
@@ -486,28 +486,28 @@ int PacketHandler::player_digging(User *user)
       if(Map::get().getBlock(x+1, y, z, &topblock, &topmeta) && (topblock == BLOCK_TORCH && topmeta == BLOCK_NORTH))
       {
          Map::get().sendBlockChange(x+1, y, z, 0, 0);
-         Map::get().setBlock(x+1, y, z, 0, 0);
+         Map::get().setBlock(x+1, y, z, 0, 0, user->nick);
          Map::get().createPickupSpawn(x+1, y, z, topblock, 1);
       }
 
       if(Map::get().getBlock(x-1, y, z, &topblock, &topmeta) && (topblock == BLOCK_TORCH && topmeta == BLOCK_SOUTH))
       {
          Map::get().sendBlockChange(x-1, y, z, 0, 0);
-         Map::get().setBlock(x-1, y, z, 0, 0);
+         Map::get().setBlock(x-1, y, z, 0, 0, user->nick);
          Map::get().createPickupSpawn(x-1, y, z, topblock, 1);
       }
 
       if(Map::get().getBlock(x, y, z+1, &topblock, &topmeta) && (topblock == BLOCK_TORCH && topmeta == BLOCK_EAST))
       {
          Map::get().sendBlockChange(x, y, z+1, 0, 0);
-         Map::get().setBlock(x, y, z+1, 0, 0);
+         Map::get().setBlock(x, y, z+1, 0, 0,user->nick);
          Map::get().createPickupSpawn(x, y, z+1, topblock, 1);
       }
 
       if(Map::get().getBlock(x, y, z-1, &topblock, &topmeta) && (topblock == BLOCK_TORCH && topmeta == BLOCK_WEST))
       {
          Map::get().sendBlockChange(x, y, z-1, 0, 0);
-         Map::get().setBlock(x, y, z-1, 0, 0);
+         Map::get().setBlock(x, y, z-1, 0, 0, user->nick);
          Map::get().createPickupSpawn(x, y, z-1, topblock, 1);
       }
 
@@ -522,7 +522,7 @@ int PacketHandler::player_digging(User *user)
                                                                  (topblock == BLOCK_TORCH && topmeta == BLOCK_TOP)))
       {
         Map::get().sendBlockChange(x, y+1, z, 0, 0);
-        Map::get().setBlock(x, y+1, z, 0, 0);
+        Map::get().setBlock(x, y+1, z, 0, 0, user->nick);
         //Others than snow will spawn
         if(topblock != BLOCK_SNOW)
         {
@@ -589,9 +589,9 @@ int PacketHandler::player_digging(User *user)
       {
         // Destroy original block
         Map::get().sendBlockChange(x, y+1, z, 0, 0);
-        Map::get().setBlock(x, y+1, z, 0, 0);
+        Map::get().setBlock(x, y+1, z, 0, 0, user->nick);
 
-        Map::get().setBlock(x, y, z, topblock, topmeta);
+        Map::get().setBlock(x, y, z, topblock, topmeta, user->nick);
         Map::get().sendBlockChange(x, y, z, topblock, topmeta);
 
         y++;
@@ -686,7 +686,7 @@ int PacketHandler::player_block_placement(User *user)
     y = oy;
     z = oz;
 
-    Map::get().setBlock(x, y, z, block, metadata);
+    Map::get().setBlock(x, y, z, block, metadata,user->nick);
     Map::get().sendBlockChange(x, y, z, (char)blockID, metadata);  
 
     Map::get().getBlock(x, y + modifier, z, &block2, &metadata2);
@@ -700,7 +700,7 @@ int PacketHandler::player_block_placement(User *user)
       else
         metadata2 |= 0x8;
 
-      Map::get().setBlock(x, y + modifier, z, block2, metadata2);
+      Map::get().setBlock(x, y + modifier, z, block2, metadata2, user->nick);
       Map::get().sendBlockChange(x, y + modifier, z, (char)blockID, metadata2);     
       
     }
@@ -969,7 +969,7 @@ int PacketHandler::player_block_placement(User *user)
   
   // Proceed to change the block
   
-  Map::get().setBlock(x, y, z, (char)blockID, metadata);
+  Map::get().setBlock(x, y, z, (char)blockID, metadata, user->nick);
   Map::get().sendBlockChange(x, y, z, (char)blockID, metadata);
 
   if (blockID == BLOCK_WATER || 

@@ -25,27 +25,33 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _CONFIG_H
-#define _CONFIG_H
-
-#include <vector>
-#include <map>
+//
+// Mineserver trxlogger.h
+//
 #include <string>
-class Conf
-{
-private:
-  Conf()
-  {
-  }
-  std::map<std::string, std::string> confSet;
-public:
-  bool load(std::string configFile);
-  int iValue(std::string name);
-  std::string sValue(std::string name);
-  bool bValue(std::string name);
-  std::vector<int> vValue(std::string name);
-  
-  static Conf &get();
+#include <fstream>
+
+#include "tools.h"
+
+#define TRXLOG(event) TrxLogger::get().log(event)
+
+struct event_t {
+  int x;
+  int y;
+  int z;
+  uint8 otype, ntype;
+  uint8 ometa, nmeta;
 };
 
-#endif
+class TrxLogger {
+public:
+  void log(event_t event);
+  static TrxLogger &get();
+  bool getLogs(time_t t, std::string nick, event_t *logs[]);
+  bool getLogs(time_t t, event_t *logs[]);
+
+private:
+  std::ofstream log_stream;
+  TrxLogger(std::string filename);
+  ~TrxLogger();
+};

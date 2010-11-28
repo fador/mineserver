@@ -28,6 +28,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>
+#include <sstream>
 #include <deque>
 #include <fstream>
 #include <vector>
@@ -41,6 +42,7 @@
 #endif
 
 #include "logger.h"
+#include "trxlogger.h"
 #include "constants.h"
 
 #include "tools.h"
@@ -171,6 +173,29 @@ void kick(User *user, std::string command, std::deque<std::string> args)
   }
   else
     reportError(user, "Usage: /kick user [reason]");
+}
+
+void rollBack(User *user, std::string command, std::deque<std::string> args)
+{
+  event_t logs[512];
+  if(!args.empty()) {
+    time_t timestamp;
+    std::stringstream ss (std::stringstream::in | std::stringstream::out);
+    ss << args[0];
+    ss >> timestamp; 
+    if(args.size() > 1) {
+      std::string victim = args[1];
+      TrxLogger::getLogs(timestamp, victim, &logs);
+    } else {
+      TrxLogger::getLogs(timestamp, &logs);
+    }
+    for(i=0;i<sizeof(logs);i++) {
+      event_t event = logs[i];
+      Map::setBlock(event.x, event.y, event.z, event.otype, event.ometa);
+    }
+  } else {
+    reportError(user, "Usage: /rollback <timestamp> [user]");
+  }
 }
 
 void setTime(User *user, std::string command, std::deque<std::string> args)
@@ -376,6 +401,7 @@ void Chat::registerStandardCommands()
   registerCommand("kit", kit, false);
   registerCommand("save", saveMap, true);
   registerCommand("kick", kick, true);
+  registerCommand("rollback", rollBack, true);
   registerCommand("ctp", coordinateTeleport, true);
   registerCommand("tp", userTeleport, true);
   registerCommand("reload", reloadConfiguration, true);

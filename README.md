@@ -36,6 +36,7 @@ We are trying to minimize memory and cpu usage compared to original Java server.
 ### ToDo (Arranged by priority)
  * Getting furnaces and signs to work (In progress)
  * Plugin support (and Lua plugin for scripting)
+ * Transaction Logging (In progress)
  * Multithreading
  * Server console
  * Growing trees and cactuses
