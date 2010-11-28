@@ -55,6 +55,7 @@ void initConstants()
   defaultConf.insert(std::pair<std::string, std::string>("whitelist_file", WHITELIST_FILE));
   defaultConf.insert(std::pair<std::string, std::string>("motd_file", MOTD_FILE));
   defaultConf.insert(std::pair<std::string, std::string>("rules_file", RULES_FILE));
+  defaultConf.insert(std::pair<std::string, std::string>("pid_file", PID_FILE));
 
   // Block drops (10000 = 100%)
   BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_STONE, Drop(BLOCK_COBBLESTONE, 10000, 1, true)));

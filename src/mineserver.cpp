@@ -43,11 +43,13 @@
 #include <deque>
 #include <map>
 #include <iostream>
+#include <fstream>
 #include <event.h>
 #include <ctime>
 #include <vector>
 #include <zlib.h>
 #include <signal.h>
+#include <unistd.h>
 
 #include "constants.h"
 #include "mineserver.h"
@@ -123,6 +125,12 @@ int Mineserver::Run(int argc, char *argv[])
 
   // Initialize conf
   Conf::get().load(file_config);
+
+  // Write PID to file
+  std::ofstream pid_out((Conf::get().sValue("pid_file")).c_str());
+  if (!pid_out.fail())
+    pid_out << getpid();
+  pid_out.close();
 
   // Load admin, banned and whitelisted users
   Chat::get().loadAdmins(Conf::get().sValue("admin_file"));

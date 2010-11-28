@@ -151,6 +151,9 @@ const std::string MOTD_CONTENT = "This is the default motd! Please edit motd.txt
 const std::string RULES_FILE    = "rules.txt";
 const std::string RULES_CONTENT = "This is the default rules file. Please edit rules.txt to change this message.";
 
+// PID file
+const std::string PID_FILE = "mineserver.pid";
+
 // Default configuration
 extern std::map<std::string, std::string> defaultConf;
 
