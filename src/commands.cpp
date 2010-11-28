@@ -232,6 +232,53 @@ void kick(User *user, std::string command, std::deque<std::string> args)
     reportError(user, "Usage: /kick user [reason]");
 }
 
+void mute(User *user, std::string command, std::deque<std::string> args)
+{
+  if(!args.empty())
+  {
+    std::string victim = args[0];
+
+    User *tUser        = getUserByNick(victim);
+
+    if(tUser != NULL)
+    {
+      args.pop_front();
+      std::string muteMsg;
+      while(!args.empty())
+      {
+        muteMsg += args[0] + " ";
+        args.pop_front();
+      }
+      
+      tUser->mute(muteMsg);
+      Chat::get().sendMsg(user, COLOR_RED + tUser->nick + " was muted by " + user->nick + ": " + muteMsg, Chat::ADMINS);
+    }
+    else
+      reportError(user, "User " + victim + " not found (see /players)");
+  }
+  else
+    reportError(user, "Usage: /mute user [reason]");
+}
+void unmute(User *user, std::string command, std::deque<std::string> args)
+{
+  if(!args.empty())
+  {
+    std::string victim = args[0];
+
+    User *tUser        = getUserByNick(victim);
+
+    if(tUser != NULL)
+    {      
+      tUser->unmute();
+      Chat::get().sendMsg(user, COLOR_RED + tUser->nick + " was unmuted by " + user->nick + ".", Chat::ADMINS);
+    }
+    else
+      reportError(user, "User " + victim + " not found (see /players)");
+  }
+  else
+    reportError(user, "Usage: /unmute user");
+}
+
 void setTime(User *user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 1)
@@ -448,5 +495,8 @@ void Chat::registerStandardCommands()
   registerCommand("reload", reloadConfiguration, true);
   registerCommand("give", giveItems, true);
   registerCommand("gps", showPosition, true);
-  registerCommand("settime", setTime, true);  registerCommand("regen", regenerateLighting, true);
+  registerCommand("settime", setTime, true);  
+  registerCommand("regen", regenerateLighting, true);
+  registerCommand("mute", mute, true);
+  registerCommand("unmute", unmute, true);
 }

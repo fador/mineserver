@@ -57,6 +57,7 @@ std::vector<User *> Users;
 User::User(int sock, uint32 EID)
 {
   this->action          = 0;
+  this->muted           = false;
   this->waitForData     = false;
   this->fd              = sock;
   this->UID             = EID;
@@ -136,6 +137,25 @@ bool User::kick(std::string kickMsg)
   buffer << (sint8)PACKET_KICK << kickMsg;
   std::cout << nick << " kicked. Reason: " << kickMsg << std::endl;
   return true;
+}
+bool User::mute(std::string muteMsg)
+{
+  if(!muteMsg.empty()) 
+    muteMsg = "You have been muted.  Reason: " + muteMsg;
+  else 
+    muteMsg = "You have been muted. ";
+    
+  Chat::get().sendMsg(this, muteMsg, Chat::USER);
+  this->muted = true;
+  std::cout << nick << " muted. Reason: " << muteMsg << std::endl;
+  return true;
+}
+bool User::unmute()
+{
+    Chat::get().sendMsg(this, "You have been unmuted.", Chat::USER);
+    this->muted = false;
+    std::cout << nick << " unmuted. " << std::endl;
+    return true;
 }
 
 bool User::loadData()

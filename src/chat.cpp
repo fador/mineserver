@@ -283,14 +283,21 @@ bool Chat::handleMsg(User *user, std::string msg)
   // Normal message
   else
   {
-    if(user->admin)
-      msg = timeStamp + " <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg;
-    else
-      msg = timeStamp + " <"+ user->nick + "> " + msg;
-
+    if(user->muted){
+      this->sendMsg(user, "You cannot chat while muted. ", USER);
+      return true;
+    }
+    else {
+      if(user->admin) 
+        msg = timeStamp + " <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg;
+      else 
+        msg = timeStamp + " <"+ user->nick + "> " + msg;
+    }
+      
     LOG(msg);
 
     this->sendMsg(user, msg, ALL);
+    
   }
 
   return true;
