@@ -547,7 +547,7 @@ int PacketHandler::player_block_placement(User *user)
     
   if(y < 0)
     return PACKET_OK;
-#define _DEBUG    
+    
   #ifdef _DEBUG
     std::cout << "Block_placement: " << newblock << " (" << x << "," << (int)y << "," << z << ") dir: " << (int)direction << std::endl;
   #endif
