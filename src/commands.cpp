@@ -179,10 +179,12 @@ void rollBack(User *user, std::string command, std::deque<std::string> args)
 {
   std::vector<event_t> logs;
   if(!args.empty()) {
+
     time_t timestamp;
     std::stringstream ss (std::stringstream::in | std::stringstream::out);
     ss << args[0];
-    ss >> timestamp; 
+    ss >> timestamp;
+
     if(args.size() > 1) {
       std::string victim = args[1];
       TrxLogger::get().getLogs(timestamp, victim, &logs);

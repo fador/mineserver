@@ -71,7 +71,7 @@ bool TrxLogger::getLogs(time_t t, std::string nick, std::vector<event_t> &logs) 
   log_stream.seekg(0, std::ios::beg);
 
   while(!log_stream.eof()) {
-    log_stream.read(reinterpret_cast<char *>(&event_t), sizeof(event_t));
+    log_stream.read(reinterpret_cast<char *>(&event), sizeof(event_t));
 
 /*    if(event.timestamp < t && event.nick == nick) {
  *     logs.insert(tmp);  
@@ -87,7 +87,7 @@ bool TrxLogger::getLogs(time_t t, std::vector<event_t> &logs) {
   log_stream.seekg(0, std::ios::beg);
 
   while(!log_stream.eof()) {
-    log_stream.read(reinterpret_cast<char *> event, sizeof(event_t));
+    log_stream.read(reinterpret_cast<char *>(&event), sizeof(event_t));
 /*
  *   if(event.timestamp < t) {
  *     logs.insert(tmp);
