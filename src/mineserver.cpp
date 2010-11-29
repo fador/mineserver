@@ -128,7 +128,11 @@ int Mineserver::Run(int argc, char *argv[])
   // Write PID to file
   std::ofstream pid_out((Conf::get().sValue("pid_file")).c_str());
   if (!pid_out.fail())
-    pid_out << _getpid();
+     #ifdef WIN32
+     pid_out << _getpid();
+     #else
+     pid_out << getpid();
+     #endif
   pid_out.close();
 
   // Load admin, banned and whitelisted users
