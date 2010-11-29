@@ -35,6 +35,7 @@
 #include "blocks/fire.h"
 #include "blocks/stair.h"
 #include "blocks/door.h"
+#include "blocks/sign.h"
 
 Plugin &Plugin::get()
 {
@@ -201,12 +202,19 @@ void Plugin::init()
    call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
    setBlockCallback(BLOCK_LEAVES, call);
 
+   /* signs */
+   call.reset();
+   BlockSign* signblock = new BlockSign();
+   call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
+   call.add("onPlace", Function::from_method<BlockSign, &BlockSign::onPlace>(signblock));
+   setBlockCallback(BLOCK_WALL_SIGN, call);
+   setBlockCallback(BLOCK_SIGN_POST, call);
+   setBlockCallback(ITEM_SIGN, call);
 
   /* TODO: Unimplemented */
   /* BLOCK_SPONGE */
   /* BLOCK_REDSTONE_WIRE */
   /* BLOCK_PORTAL */
-  /* BLOCK_WALL_SIGN */
   /* BLOCK_LEVER, BLOCK_STONE_BUTTON */
   /* BLOCK_WOODEN_PRESSURE_PLATE, BLOCK_STONE_PRESSURE_PLATE */
   /* BLOCK_ICE */
