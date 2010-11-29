@@ -11,6 +11,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\blocks\basic.cpp" />
+    <ClCompile Include="..\src\blocks\door.cpp" />
+    <ClCompile Include="..\src\blocks\falling.cpp" />
+    <ClCompile Include="..\src\blocks\fire.cpp" />
+    <ClCompile Include="..\src\blocks\liquid.cpp" />
+    <ClCompile Include="..\src\blocks\plant.cpp" />
+    <ClCompile Include="..\src\blocks\sign.cpp" />
+    <ClCompile Include="..\src\blocks\snow.cpp" />
+    <ClCompile Include="..\src\blocks\stair.cpp" />
+    <ClCompile Include="..\src\blocks\torch.cpp" />
     <ClCompile Include="..\src\chat.cpp" />
     <ClCompile Include="..\src\commands.cpp" />
     <ClCompile Include="..\src\config.cpp" />
@@ -23,11 +33,22 @@
     <ClCompile Include="..\src\noiseutils.cpp" />
     <ClCompile Include="..\src\packets.cpp" />
     <ClCompile Include="..\src\physics.cpp" />
+    <ClCompile Include="..\src\plugin.cpp" />
     <ClCompile Include="..\src\sockets.cpp" />
     <ClCompile Include="..\src\tools.cpp" />
     <ClCompile Include="..\src\user.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\blocks\basic.h" />
+    <ClInclude Include="..\src\blocks\door.h" />
+    <ClInclude Include="..\src\blocks\falling.h" />
+    <ClInclude Include="..\src\blocks\fire.h" />
+    <ClInclude Include="..\src\blocks\liquid.h" />
+    <ClInclude Include="..\src\blocks\plant.h" />
+    <ClInclude Include="..\src\blocks\sign.h" />
+    <ClInclude Include="..\src\blocks\snow.h" />
+    <ClInclude Include="..\src\blocks\stair.h" />
+    <ClInclude Include="..\src\blocks\torch.h" />
     <ClInclude Include="..\src\chat.h" />
     <ClInclude Include="..\src\config.h" />
     <ClInclude Include="..\src\constants.h" />
@@ -38,6 +59,7 @@
     <ClInclude Include="..\src\noiseutils.h" />
     <ClInclude Include="..\src\packets.h" />
     <ClInclude Include="..\src\physics.h" />
+    <ClInclude Include="..\src\plugin.h" />
     <ClInclude Include="..\src\sockets.h" />
     <ClInclude Include="..\src\tools.h" />
     <ClInclude Include="..\src\user.h" />
