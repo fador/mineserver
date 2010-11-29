@@ -55,8 +55,8 @@ void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
 {
    uint8 oldblock;
    uint8 oldmeta;
-   uint8 topblock;
-   uint8 topmeta;
+   signed short diffX;
+   signed short diffZ;
 
    if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
    {
@@ -70,7 +70,7 @@ void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
          case BLOCK_JUKEBOX:
          case BLOCK_TORCH:
          case BLOCK_REDSTONE_TORCH_OFF:
-         case BLOCK_REDSTONE_TORCH_ON: 
+         case BLOCK_REDSTONE_TORCH_ON:
          case BLOCK_WATER:
          case BLOCK_STATIONARY_WATER:
          case BLOCK_LAVA:
@@ -78,58 +78,55 @@ void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
           return;
          break;
          default:
-            if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
+            switch(direction)
             {
-               // Get the correct orientation
-               topmeta = 1;
-               if (direction)
-                  topmeta = 6 - direction;
-               /*
-                  TODO: Compare result with code below
+               case BLOCK_SOUTH:
+                  x--;
+               break;
+               case BLOCK_NORTH:
+                  x++;
+               break;
+               case BLOCK_EAST:
+                  z++;
+               break;
+               case BLOCK_WEST:
+                  z--;
+               break;
+               case BLOCK_TOP:
+                  y++;
+               break;
+               default:
+                  return;
+               break;
+            }
 
-                if (y == oy && (x != ox || y != oy || z != oz))
-                {
-                  // We place according to the target block
+            // We place according to the player's position
+            diffX = x - user->pos.x;
+            diffZ = z - user->pos.z;
 
-                  if (x < ox)
-                    metadata = 0x0;
-                  else if (x > ox)
-                    metadata = 0x1;
-                  else if (z < oz)
-                    metadata = 0x2;
-                  else
-                    metadata = 0x3;
-                }
-                else
-                {
-                  // We place according to the player's position
+            if (diffX > diffZ)
+            {
+              // We compare on the x axis
+              if (diffX > 0) {
+                direction = BLOCK_BOTTOM;
+              } else {
+                direction = BLOCK_EAST;
+              }
+            } else {
+              // We compare on the z axis
+              if (diffZ > 0) {
+                direction = BLOCK_SOUTH;
+              } else {
+                direction = BLOCK_NORTH;
+              }
+            }
 
-                  double diffX = x - user->pos.x;
-                  double diffZ = z - user->pos.z;
-                  
-                  if (std::abs(diffX) > std::abs(diffZ))
-                  {
-                    // We compare on the x axis
-                    
-                    if (diffX > 0)
-                      metadata = 0x0;
-                    else
-                      metadata = 0x1;
-                  }
-                  else
-                  {
-                    // We compare on the z axis
-                    
-                    if (diffZ > 0)
-                      metadata = 0x2;
-                    else
-                      metadata = 0x3;
-                  }
-                }
-               */
-                             
-               Map::get().setBlock(x, y+1, z, (char)newblock, topmeta);
-               Map::get().sendBlockChange(x, y+1, z, (char)newblock, topmeta);
+            uint8 block;
+            uint8 meta;
+            if (Map::get().getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
+            {
+               Map::get().setBlock(x, y, z, (char)newblock, direction);
+               Map::get().sendBlockChange(x, y, z, (char)newblock, direction);
             }
          break;
       }

@@ -175,7 +175,7 @@ void Plugin::init()
    call.reset();
    BlockStair* stairblock = new BlockStair();
    call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
-   call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
+   call.add("onPlace", Function::from_method<BlockStair, &BlockStair::onPlace>(stairblock));
    call.add("onNeighbourBroken", Function::from_method<BlockStair, &BlockStair::onNeighbourBroken>(stairblock));
    setBlockCallback(BLOCK_WOODEN_STAIRS, call);
    setBlockCallback(BLOCK_COBBLESTONE_STAIRS, call);
@@ -211,6 +211,7 @@ void Plugin::init()
    call.reset();
    BlockSign* signblock = new BlockSign();
    call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
+   call.add("onNeighbourBroken", Function::from_method<BlockTorch, &BlockTorch::onNeighbourBroken>(torchblock));
    call.add("onPlace", Function::from_method<BlockSign, &BlockSign::onPlace>(signblock));
    setBlockCallback(BLOCK_WALL_SIGN, call);
    setBlockCallback(BLOCK_SIGN_POST, call);
