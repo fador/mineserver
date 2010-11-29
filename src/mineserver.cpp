@@ -36,18 +36,19 @@
   #include <string.h>
   #include <netdb.h>
 #endif
-
 #include <sys/types.h>
 #include <fcntl.h>
 #include <cassert>
 #include <deque>
 #include <map>
 #include <iostream>
+#include <fstream>
 #include <event.h>
 #include <ctime>
 #include <vector>
 #include <zlib.h>
 #include <signal.h>
+#include <unistd.h>
 
 #include "constants.h"
 #include "mineserver.h"
@@ -97,6 +98,8 @@ int main(int argc, char *argv[])
   signal(SIGTERM, sighandler);
   signal(SIGINT, sighandler);
 
+  srand(time(NULL));
+
   return Mineserver::Get().Run(argc, argv);
 }
 
@@ -118,14 +121,6 @@ int Mineserver::Run(int argc, char *argv[])
 
   std::string file_config;
   file_config.assign(CONFIG_FILE);
-  std::string file_admin;
-  file_admin.assign(ADMIN_FILE);
-  std::string file_items;
-  file_items.assign(ITEMS_FILE);
-  std::string file_motd;
-  file_motd.assign(MOTD_FILE);
-  std::string file_rules;
-  file_rules.assign(RULES_FILE);
 
   if (argc > 1)
     file_config.assign(argv[1]);
@@ -133,16 +128,18 @@ int Mineserver::Run(int argc, char *argv[])
   // Initialize conf
   Conf::get().load(file_config);
 
-  // Load item aliases
-  Conf::get().load(file_items);
+  // Write PID to file
+  std::ofstream pid_out((Conf::get().sValue("pid_file")).c_str());
+  if (!pid_out.fail())
+    pid_out << getpid();
+  pid_out.close();
 
-  // Load admins
-  Chat::get().loadAdmins(file_admin);
+  // Load admin, banned and whitelisted users
+  Chat::get().loadAdmins(Conf::get().sValue("admin_file"));
+  Chat::get().loadBanned(Conf::get().sValue("banned_file"));
+  Chat::get().loadWhitelist(Conf::get().sValue("whitelist_file"));
   // Load MOTD
-  Chat::get().checkMotd(file_motd);
-
-  Chat::get().loadBanned(BANNEDFILE);
-  Chat::get().loadWhitelist(WHITELISTFILE);
+  Chat::get().checkMotd(Conf::get().sValue("motd_file"));
 
   // Set physics enable state according to config
   Physics::get().enabled = (Conf::get().bValue("liquid_physics"));

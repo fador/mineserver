@@ -140,7 +140,7 @@ bool Chat::loadBanned(std::string bannedFile)
     std::cout << "> Warning: " << bannedFile << " not found. Creating..." << std::endl;
 
     std::ofstream bannedofs(bannedFile.c_str());
-    bannedofs << DEFAULTBANNEDFILE << std::endl;
+    bannedofs << BANNED_CONTENT << std::endl;
     bannedofs.close();
 
     return true;
@@ -174,7 +174,7 @@ bool Chat::loadWhitelist(std::string whitelistFile)
     std::cout << "> Warning: " << whitelistFile << " not found. Creating..." << std::endl;
 
     std::ofstream whitelistofs(whitelistFile.c_str());
-    whitelistofs << DEFAULTWHITELISTFILE << std::endl;
+    whitelistofs << WHITELIST_CONTENT << std::endl;
     whitelistofs.close();
 
     return true;
