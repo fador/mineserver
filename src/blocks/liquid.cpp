@@ -26,7 +26,7 @@
  */
 
 #include "liquid.h"
-#include "physics.h"
+#include "../physics.h"
 
 void BlockLiquid::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {

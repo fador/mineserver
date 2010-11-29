@@ -26,7 +26,8 @@ CC = $(CXX)
 LDFLAGS += -L/usr/local/lib -L/usr/lib -levent -lz -lnoise $(LFLAGS)
 CXXFLAGS += $(DFLAGS) -I. -I/usr/Local/include -I/usr/include
 
-OBJS = map.o chat.o commands.o config.o constants.o logger.o mapgen.o nbt.o packets.o physics.o sockets.o tools.o user.o noiseutils.o mersenne.o mineserver.o
+OBJS  = map.o chat.o commands.o config.o constants.o logger.o mapgen.o nbt.o packets.o physics.o sockets.o tools.o user.o noiseutils.o mersenne.o mineserver.o plugin.o
+OBJS += blocks/basic.o blocks/door.o blocks/falling.o blocks/fire.o blocks/liquid.o blocks/plant.o blocks/sign.o blocks/snow.o blocks/stair.o blocks/torch.o
 PROG = ./mineserver
 PROGS = $(PROG)
 
@@ -53,3 +54,14 @@ user.o: user.cpp constants.h logger.h tools.h map.h user.h nbt.h chat.h packets.
 mineserver.o: mineserver.cpp constants.h logger.h sockets.h tools.h map.h user.h chat.h mapgen.h config.h nbt.h packets.h physics.h
 noiseutils.o: noiseutils.h noiseutils.cpp
 mersenne.o: mersenne.cpp mersenne.h
+plugin.o: plugin.cpp plugin.h blocks/basic.h blocks/door.h blocks/falling.h blocks/fire.h blocks/liquid.h blocks/plant.h blocks/sign.h blocks/snow.h blocks/stair.h blocks/torch.h
+blocks/basic.o: blocks/basic.cpp blocks/basic.h
+blocks/door.o: blocks/door.cpp blocks/basic.h blocks/door.h
+blocks/falling.o: blocks/falling.cpp blocks/basic.h blocks/falling.h
+blocks/fire.o: blocks/fire.cpp blocks/basic.h blocks/fire.h
+blocks/liquid.o: blocks/liquid.cpp physics.h blocks/basic.h blocks/liquid.h
+blocks/plant.o: blocks/plant.cpp blocks/basic.h blocks/plant.h
+blocks/sign.o: blocks/sign.cpp blocks/basic.h blocks/sign.h
+blocks/snow.o: blocks/snow.cpp blocks/basic.h blocks/snow.h
+blocks/stair.o: blocks/stair.cpp blocks/basic.h blocks/stair.h
+blocks/torch.o: blocks/torch.cpp blocks/basic.h blocks/torch.h
