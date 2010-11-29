@@ -27,6 +27,9 @@
 
 #include "torch.h"
 
+#include <stdio.h>
+#include <cmath>
+
 void BlockTorch::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
@@ -50,7 +53,8 @@ void BlockTorch::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, 
 {
    uint8 block; uint8 meta;
    uint8 nblock; uint8 nmeta;
-   bool destroy = false;  
+   bool destroy = false;
+
    if (!Map::get().getBlock(x, y, z, &block, &meta))
       return;
       
@@ -81,7 +85,13 @@ void BlockTorch::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, 
       // Break torch and spawn torch item
       Map::get().sendBlockChange(x, y, z, 0, 0);
       Map::get().setBlock(x, y, z, 0, 0);
-      Map::get().createPickupSpawn(x, y, z, block, 1);
+      int count = 1;
+      if (BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand() % 10000)
+      {
+          uint16 item_id = BLOCKDROPS[block].item_id;
+          count = BLOCKDROPS[block].count;
+          Map::get().createPickupSpawn(x, y, z, item_id, count);
+      }
    }   
 }
 
@@ -89,10 +99,8 @@ void BlockTorch::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
 {
    uint8 oldblock;
    uint8 oldmeta;
-   uint8 topblock;
-   uint8 topmeta;
 
-   if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
+   if (Map::get().getBlock(x, y-1, z, &oldblock, &oldmeta))
    {
       /* Check block below allows blocks placed on top */
       switch(oldblock)
@@ -112,15 +120,34 @@ void BlockTorch::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
           return;
          break;
          default:
-            if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
+            switch(direction)
             {
-               // Get the correct orientation
-               topmeta = 0;
-               if (direction)
-                  topmeta = 6 - direction;
+               case BLOCK_SOUTH:
+                  x--;
+               break;
+               case BLOCK_NORTH:
+                  x++;
+               break;
+               case BLOCK_EAST:
+                  z++;
+               break;
+               case BLOCK_WEST:
+                  z--;
+               break;
+               case BLOCK_TOP:
+                  y++;
+               break;
+               default:
+                  return;
+               break;
+            }
 
-               Map::get().setBlock(x, y+1, z, (char)newblock, topmeta);
-               Map::get().sendBlockChange(x, y+1, z, (char)newblock, topmeta);
+            uint8 block;
+            uint8 meta;
+            if (Map::get().getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
+            {
+               Map::get().setBlock(x, y, z, (char)newblock, direction);
+               Map::get().sendBlockChange(x, y, z, (char)newblock, direction);
             }
          break;
       }

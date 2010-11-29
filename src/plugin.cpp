@@ -117,7 +117,7 @@ void Plugin::init()
    call.reset();
    BlockTorch* torchblock = new BlockTorch();
    call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
-   call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
+   call.add("onPlace", Function::from_method<BlockTorch, &BlockTorch::onPlace>(torchblock));
    call.add("onNeighbourBroken", Function::from_method<BlockTorch, &BlockTorch::onNeighbourBroken>(torchblock));
    call.add("onReplace", Function::from_method<BlockBasic, &BlockBasic::onReplace>(basicblock));
    setBlockCallback(BLOCK_TORCH, call);

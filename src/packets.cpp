@@ -470,50 +470,50 @@ int PacketHandler::player_digging(User *user)
 
        /* notify neighbour blocks of the broken block */
        status = block;
-       if (!Map::get().getBlock(x+1, y, z, &block, &meta))
+       if (Map::get().getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
        {
           callback = Plugin::get().getBlockCallback(block);
-          inv = Function::invoker_type(user, status, x+1, y, z, direction);
+          inv = Function::invoker_type(user, status, x+1, y, z, BLOCK_SOUTH);
           event = callback.get("onNeighbourBroken");
           if (event) inv(event);
        }
        
-       if (!Map::get().getBlock(x-1, y, z, &block, &meta))
+       if (Map::get().getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
        {
           callback = Plugin::get().getBlockCallback(block);
-          inv = Function::invoker_type(user, status, x-1, y, z, direction);
+          inv = Function::invoker_type(user, status, x-1, y, z, BLOCK_NORTH);
           event = callback.get("onNeighbourBroken");
           if (event) inv(event);
        }
 
-       if (!Map::get().getBlock(x, y+1, z, &block, &meta))
+       if (Map::get().getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
        {
           callback = Plugin::get().getBlockCallback(block);
-          inv = Function::invoker_type(user, status, x, y+1, z, direction);
+          inv = Function::invoker_type(user, status, x, y+1, z, BLOCK_TOP);
           event = callback.get("onNeighbourBroken");
           if (event) inv(event);
        }
        
-       if (!Map::get().getBlock(x, y-1, z, &block, &meta))
+       if (Map::get().getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
        {
           callback = Plugin::get().getBlockCallback(block);
-          inv = Function::invoker_type(user, status, x, y-1, z, direction);
+          inv = Function::invoker_type(user, status, x, y-1, z, BLOCK_BOTTOM);
           event = callback.get("onNeighbourBroken");
           if (event) inv(event);
        }
 
-       if (!Map::get().getBlock(x, y, z+1, &block, &meta))
+       if (Map::get().getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
        {
           callback = Plugin::get().getBlockCallback(block);
-          inv = Function::invoker_type(user, status, x, y, z+1, direction);
+          inv = Function::invoker_type(user, status, x, y, z+1, BLOCK_WEST);
           event = callback.get("onNeighbourBroken");
           if (event) inv(event);
        }
        
-       if (!Map::get().getBlock(x, y, z-1, &block, &meta))
+       if (Map::get().getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
        {
           callback = Plugin::get().getBlockCallback(block);
-          inv = Function::invoker_type(user, status, x, y, z-1, direction);
+          inv = Function::invoker_type(user, status, x, y, z-1, BLOCK_EAST);
           event = callback.get("onNeighbourBroken");
           if (event) inv(event);
        }
@@ -575,7 +575,7 @@ int PacketHandler::player_block_placement(User *user)
      if (event) inv(event);
 
      /* notify neighbour blocks of the placed block */
-     if (!Map::get().getBlock(x+1, y, z, &block, &meta))
+     if (Map::get().getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
      {
         callback = Plugin::get().getBlockCallback(block);
         inv = Function::invoker_type(user, newblock, x+1, y, z, direction);
@@ -583,7 +583,7 @@ int PacketHandler::player_block_placement(User *user)
         if (event) inv(event);
      }
     
-     if (!Map::get().getBlock(x-1, y, z, &block, &meta))
+     if (Map::get().getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
      {
         callback = Plugin::get().getBlockCallback(block);
         inv = Function::invoker_type(user, newblock, x-1, y, z, direction);
@@ -591,7 +591,7 @@ int PacketHandler::player_block_placement(User *user)
         if (event) inv(event);
      }
 
-     if (!Map::get().getBlock(x, y+1, z, &block, &meta))
+     if (Map::get().getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
      {
         callback = Plugin::get().getBlockCallback(block);
         inv = Function::invoker_type(user, newblock, x, y+1, z, direction);
@@ -599,7 +599,7 @@ int PacketHandler::player_block_placement(User *user)
         if (event) inv(event);
      }
     
-     if (!Map::get().getBlock(x, y-1, z, &block, &meta))
+     if (Map::get().getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
      {
         callback = Plugin::get().getBlockCallback(block);
         inv = Function::invoker_type(user, newblock, x, y-1, z, direction);
@@ -607,7 +607,7 @@ int PacketHandler::player_block_placement(User *user)
         if (event) inv(event);
      }
 
-     if (!Map::get().getBlock(x, y, z+1, &block, &meta))
+     if (Map::get().getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
      {
         callback = Plugin::get().getBlockCallback(block);
         inv = Function::invoker_type(user, newblock, x, y, z+1, direction);

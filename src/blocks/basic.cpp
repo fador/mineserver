@@ -70,8 +70,6 @@ void BlockBasic::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
 {
    uint8 oldblock;
    uint8 oldmeta;
-   uint8 topblock;
-   uint8 topmeta;
 
    if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
    {
@@ -93,33 +91,37 @@ void BlockBasic::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
           return;
          break;
          default:
-            if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
+            switch(direction)
             {
-               // We place according to the player's position
-               double diffX = x - user->pos.x;
-               double diffZ = z - user->pos.z;
+               case BLOCK_SOUTH:
+                  x--;
+               break;
+               case BLOCK_NORTH:
+                  x++;
+               break;
+               case BLOCK_EAST:
+                  z++;
+               break;
+               case BLOCK_WEST:
+                  z--;
+               break;
+               case BLOCK_TOP:
+                  y++;
+               break;
+               case BLOCK_BOTTOM:
+                  y--;
+               break;
+               default:
+                  return;
+               break;
+            }
 
-               if (std::abs(diffX) > std::abs(diffZ))
-               {
-                  // compare on the x axis
-                  if (diffX > 0) {
-                    topmeta = 0x3;
-                  } else {
-                    topmeta = 0x1;
-                  }
-               }
-               else
-               {
-                  // compare on the z axis
-                  if (diffZ > 0) {
-                    topmeta = 0x0;
-                  } else {
-                    topmeta = 0x2;
-                  }
-               }
-
-               Map::get().setBlock(x, y+1, z, (char)newblock, topmeta);
-               Map::get().sendBlockChange(x, y+1, z, (char)newblock, topmeta);
+            uint8 block;
+            uint8 meta;
+            if (Map::get().getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
+            {
+               Map::get().setBlock(x, y, z, (char)newblock, direction);
+               Map::get().sendBlockChange(x, y, z, (char)newblock, direction);
             }
          break;
       }
