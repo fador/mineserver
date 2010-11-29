@@ -57,25 +57,25 @@ void BlockTorch::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, 
 
    if (!Map::get().getBlock(x, y, z, &block, &meta))
       return;
-      
-   if (meta == BLOCK_TOP && Map::get().getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
+
+   if (direction == BLOCK_TOP && Map::get().getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
    {
       // block broken under torch
       destroy = true;
    }
-   else if (meta == BLOCK_NORTH && Map::get().getBlock(x-1, y, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
+   else if (direction == BLOCK_NORTH && Map::get().getBlock(x-1, y, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
    {
       destroy = true;
    }
-   else if (meta == BLOCK_SOUTH && Map::get().getBlock(x+1, y, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
+   else if (direction == BLOCK_SOUTH && Map::get().getBlock(x+1, y, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
    {
       destroy = true;
    }
-   else if (meta == BLOCK_EAST && Map::get().getBlock(x, y, z-1, &nblock, &nmeta) && nblock == BLOCK_AIR)
+   else if (direction == BLOCK_EAST && Map::get().getBlock(x, y, z-1, &nblock, &nmeta) && nblock == BLOCK_AIR)
    {
       destroy = true;
    }
-   else if (meta == BLOCK_WEST && Map::get().getBlock(x, y, z+1, &nblock, &nmeta) && nblock == BLOCK_AIR)
+   else if (direction == BLOCK_WEST && Map::get().getBlock(x, y, z+1, &nblock, &nmeta) && nblock == BLOCK_AIR)
    {
       destroy = true;
    }
