@@ -36,7 +36,6 @@
   #include <string.h>
   #include <netdb.h>
 #endif
-
 #include <sys/types.h>
 #include <fcntl.h>
 #include <cassert>
@@ -97,6 +96,8 @@ int main(int argc, char *argv[])
 {
   signal(SIGTERM, sighandler);
   signal(SIGINT, sighandler);
+
+  srand(time(NULL));
 
   return Mineserver::Get().Run(argc, argv);
 }

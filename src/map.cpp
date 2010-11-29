@@ -48,7 +48,6 @@
 #include "tools.h"
 #include "map.h"
 #include "mapgen.h"
-
 #include "user.h"
 #include "nbt.h"
 #include "config.h"
@@ -89,15 +88,46 @@ void Map::initMap()
   std::string infile = mapDirectory+"/level.dat";
 
   struct stat stFileInfo;
-  if(stat(infile.c_str(), &stFileInfo) != 0)
+  if(stat(mapDirectory.c_str(), &stFileInfo) != 0)
   {
-    std::cout << "Error, map not found!" << std::endl;
-    exit(EXIT_FAILURE);
+    std::cout << "Warning: Map directory not found, creating it now." << std::endl;
+
+#ifdef WIN32
+    if(_mkdir(mapDirectory.c_str()) == -1)
+#else
+    if(mkdir(mapDirectory.c_str(), 0755) == -1)
+#endif
+    {
+      std::cout << "Error: Could not create map directory." << std::endl;
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  if(stat((infile).c_str(), &stFileInfo) != 0)
+  {
+    std::cout << "Warning: level.dat not found, creating it now." << std::endl;
+
+    NBT_Value level(NBT_Value::TAG_COMPOUND);
+    level.Insert("Data", new NBT_Value(NBT_Value::TAG_COMPOUND));
+    level["Data"]->Insert("Time", new NBT_Value((sint64)0));
+    level["Data"]->Insert("SpawnX", new NBT_Value((sint32)0));
+    level["Data"]->Insert("SpawnY", new NBT_Value((sint32)80));
+    level["Data"]->Insert("SpawnZ", new NBT_Value((sint32)0));
+    level["Data"]->Insert("RandomSeed", new NBT_Value((sint64)(rand()*65535)));
+
+    level.SaveToFile(infile);
+
+    if (stat(infile.c_str(), &stFileInfo) != 0)
+    {
+      std::cout << "Error: Could not create level.dat" << std::endl;
+      exit(EXIT_FAILURE);
+    }
   }
 
   NBT_Value *root = NBT_Value::LoadFromFile(infile);
-
   NBT_Value &data = *((*root)["Data"]);
+
+  (*root).Print();
 
   spawnPos.x() = (sint32)*data["SpawnX"];
   spawnPos.y() = (sint32)*data["SpawnY"];
@@ -105,11 +135,7 @@ void Map::initMap()
 
   //Get time from the map
   mapTime      = (sint64)*data["Time"];
-  
   mapSeed      = (sint64)*data["RandomSeed"];
-
-
-  //root->SaveToFile("test.nbt");
 
   delete root;
 

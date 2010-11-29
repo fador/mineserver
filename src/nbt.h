@@ -28,7 +28,11 @@
 #ifndef _NBT_H
 #define _NBT_H
 
+#include <string>
 #include <map>
+#include <vector>
+#include <zlib.h>
+#include "tools.h"
 
 class NBT_Value
 {
