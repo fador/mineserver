@@ -28,6 +28,7 @@
 #include "basic.h"
 
 #include <cmath>
+#include <stdio.h>
 
 void BlockBasic::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
@@ -70,6 +71,8 @@ void BlockBasic::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
 {
    uint8 oldblock;
    uint8 oldmeta;
+   signed short diffX;
+   signed short diffZ;
 
    if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
    {
@@ -116,15 +119,33 @@ void BlockBasic::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
                break;
             }
 
+            // We place according to the player's position
+            diffX = x - user->pos.x;
+            diffZ = z - user->pos.z;
+
+            if (diffX > diffZ)
+            {
+              // We compare on the x axis
+              if (diffX > 0) {
+                direction = BLOCK_BOTTOM;
+              } else {
+                direction = BLOCK_EAST;
+              }
+            } else {
+              // We compare on the z axis
+              if (diffZ > 0) {
+                direction = BLOCK_SOUTH;
+              } else {
+                direction = BLOCK_NORTH;
+              }
+            }
+
             uint8 block;
             uint8 meta;
             if (Map::get().getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
             {
-               meta = 0;
-               if (direction)
-                  meta = 6-direction;
-               Map::get().setBlock(x, y, z, (char)newblock, meta);
-               Map::get().sendBlockChange(x, y, z, (char)newblock, meta);
+               Map::get().setBlock(x, y, z, (char)newblock, direction);
+               Map::get().sendBlockChange(x, y, z, (char)newblock, direction);
             }
          break;
       }
