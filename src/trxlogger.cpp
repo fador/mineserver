@@ -100,30 +100,3 @@ bool TrxLogger::getLogs(time_t t, std::vector<event_t> &logs) {
 TrxLogger::~TrxLogger() {
   log_stream.close();
 }
-
-static std::ostream & operator<<( std::ostream & o, const event_t & e ) {
-  o << e.timestamp
-    << e.nick
-    << e.x
-    << e.y
-    << e.z
-    << e.otype
-    << e.ntype
-    << e.ometa
-    << e.nmeta;
-
-  return o;
-}
-
-static std::istream & operator>>( std::istream & i, const event_t & e ) {
-  i >> e.timestamp;
-  i >> e.nick;
-  i >> e.x;
-  i >> e.y;
-  i >> e.z;
-  i >> e.otype;
-  i >> e.ntype;
-  i >> e.ometa;
-
-  return i;
-}
