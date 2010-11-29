@@ -41,7 +41,7 @@
 #include "config.h"
 
 TrxLogger::TrxLogger (std::string filename) {
-  log_stream.open(filename.c_str(), std::ios::app);
+  log_stream.open(filename.c_str(), std::fstream::in | std::fstream::out | std::fstream::binary );
   if (!log_stream.is_open()) {
     LOG("Failed to open binary log!");
   } 
@@ -60,24 +60,74 @@ void TrxLogger::log(event_t event)
     LOG("Binary log stream is bad!");
     return;
   }
+  event.timestamp = time (NULL);
 
-  time_t seconds;
-  seconds = time (NULL);
-  event.timestamp = seconds;
-
-  log_stream.write(reinterpret_cast<char *>(&event),sizeof(event_t));
+  log_stream.write(reinterpret_cast<char *>(&event), sizeof(event_t));
 }
 
 // Get logs based on nick and timestamp
-bool TrxLogger::getLogs(time_t t, std::string nick, std::vector<event_t> *logs) {
+bool TrxLogger::getLogs(time_t t, std::string nick, std::vector<event_t> &logs) {
+  char * tmp[sizeof(event_t)];
+  event_t event;
+  log_stream.seekg(0, std::ios::beg);
+
+  while(!log_stream.eof()) {
+    log_stream.read(tmp, sizeof(event_t));
+    event = reinterpret_cast<char *> (&tmp);
+
+/*    if(tmp.timestamp < t && tmp.nick == nick) {
+ *     logs.insert(tmp);  
+ *   }
+ */
+  }
   return true;
 }
 
 // Get logs based on timestamp
-bool TrxLogger::getLogs(time_t t, std::vector<event_t> *logs) {
+bool TrxLogger::getLogs(time_t t, std::vector<event_t> &logs) {
+  char * tmp[sizeof(event_t)];
+  event_t event;
+  log_stream.seekg(0, std::ios::beg);
+
+  while(!log_stream.eof()) {
+    log_stream.read(tmp, sizeof(event_t));
+    event = reinterpret_cast<event_t> (&tmp);
+/*
+ *   if(tmp.timestamp < t) {
+ *     logs.insert(tmp);
+ *   }
+ */
+  }
   return true;
 }
 
 TrxLogger::~TrxLogger() {
   log_stream.close();
+}
+
+static std::ostream & operator<<( std::ostream & o, const event_t & e ) {
+  o << e.timestamp
+    << e.nick
+    << e.x
+    << e.y
+    << e.z
+    << e.otype
+    << e.ntype
+    << e.ometa
+    << e.nmeta;
+
+  return o;
+}
+
+static std::istream & operator>>( std::istream & i, const event_t & e ) {
+  i >> e.timestamp;
+  i >> e.nick;
+  i >> e.x;
+  i >> e.y;
+  i >> e.z;
+  i >> e.otype;
+  i >> e.ntype;
+  i >> e.ometa;
+
+  return i;
 }

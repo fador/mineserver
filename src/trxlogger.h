@@ -47,15 +47,18 @@ struct event_t {
   uint8 ometa, nmeta;
 };
 
-class TrxLogger {
+class TrxLogger 
+{
+
 public:
   void log(event_t event);
   static TrxLogger &get();
-  bool getLogs(time_t time, std::string nick, std::vector<event_t> *logs);
-  bool getLogs(time_t time, std::vector<event_t> *logs);
+  bool getLogs(time_t time, std::string nick, std::vector<event_t> &logs);
+  bool getLogs(time_t time, std::vector<event_t> &logs);
 
 private:
   std::fstream log_stream;
   TrxLogger(std::string filename);
   ~TrxLogger();
+
 };
