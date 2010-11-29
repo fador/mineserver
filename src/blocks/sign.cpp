@@ -50,11 +50,8 @@ void BlockSign::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, s
 
 void BlockSign::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-   uint8 metadata;
    uint8 oldblock;
    uint8 oldmeta;
-   signed short diffX;
-   signed short diffZ;
 
    if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
    {
@@ -76,52 +73,6 @@ void BlockSign::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
           return;
          break;
          default:
-            newblock = BLOCK_WALL_SIGN;
-            switch(direction)
-            {
-               case BLOCK_SOUTH:
-                  x--;
-               break;
-               case BLOCK_NORTH:
-                  x++;
-               break;
-               case BLOCK_EAST:
-                  z++;
-               break;
-               case BLOCK_WEST:
-                  z--;
-               break;
-               case BLOCK_TOP:
-                  y++;
-                  newblock = BLOCK_SIGN_POST;
-               break;
-               case BLOCK_BOTTOM:
-               default:
-                  return;
-               break;
-            }
-
-            // We place according to the player's position
-            diffX = x - user->pos.x;
-            diffZ = z - user->pos.z;
-
-            if (diffX > diffZ)
-            {
-              // We compare on the x axis
-              if (diffX > 0) {
-                direction = BLOCK_BOTTOM;
-              } else {
-                direction = BLOCK_EAST;
-              }
-            } else {
-              // We compare on the z axis
-              if (diffZ > 0) {
-                direction = BLOCK_SOUTH;
-              } else {
-                direction = BLOCK_NORTH;
-              }
-            }
-
             // 0x0 -> West  West  West  West
             // 0x1 -> West  West  West  North
             // 0x2 -> West  West  North North
@@ -177,20 +128,41 @@ void BlockSign::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
             //                          South
             
             // We place according to the player's position
+            double diffX = (x + 0.5) - user->pos.x; // + 0.5 to get the middle of the square
+            double diffZ = (z + 0.5) - user->pos.z; // + 0.5 to get the middle of the square
 
-            double mdiffX = (x + 0.5) - user->pos.x; // + 0.5 to get the middle of the square
-            double mdiffZ = (z + 0.5) - user->pos.z; // + 0.5 to get the middle of the square
+            double angleDegree = ((atan2(diffZ, diffX) * 180 / M_PI + 90) / 22.5);
 
-            double angleDegree = ((atan2(mdiffZ, mdiffX) * 180 / M_PI + 90) / 22.5);
-
+            uint8 metadata;
             if (angleDegree < 0)
-            { 
-               angleDegree += 16;
-               metadata = (uint8)(angleDegree + 0.5);
-            }
-            else
             {
-               metadata = direction;
+               angleDegree += 16;
+            }
+            newblock = BLOCK_WALL_SIGN;
+            metadata = 6-direction;
+            switch(direction)
+            {
+               case BLOCK_SOUTH:
+                  x--;
+               break;
+               case BLOCK_NORTH:
+                  x++;
+               break;
+               case BLOCK_EAST:
+                  z++;
+               break;
+               case BLOCK_WEST:
+                  z--;
+               break;
+               case BLOCK_TOP:
+                  y++;
+                  newblock = BLOCK_SIGN_POST;
+                  metadata = (uint8)(angleDegree + 0.5);
+               break;
+               case BLOCK_BOTTOM:
+               default:
+                  return;
+               break;
             }
 
             uint8 block;
