@@ -578,7 +578,7 @@ int PacketHandler::player_block_placement(User *user)
      if (Map::get().getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
      {
         callback = Plugin::get().getBlockCallback(block);
-        inv = Function::invoker_type(user, newblock, x+1, y, z, direction);
+        inv = Function::invoker_type(user, newblock, x+1, y, z, BLOCK_SOUTH);
         event = callback.get("onNeighbourPlace");
         if (event) inv(event);
      }
@@ -586,7 +586,7 @@ int PacketHandler::player_block_placement(User *user)
      if (Map::get().getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
      {
         callback = Plugin::get().getBlockCallback(block);
-        inv = Function::invoker_type(user, newblock, x-1, y, z, direction);
+        inv = Function::invoker_type(user, newblock, x-1, y, z, BLOCK_NORTH);
         event = callback.get("onNeighbourPlace");
         if (event) inv(event);
      }
@@ -594,7 +594,7 @@ int PacketHandler::player_block_placement(User *user)
      if (Map::get().getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
      {
         callback = Plugin::get().getBlockCallback(block);
-        inv = Function::invoker_type(user, newblock, x, y+1, z, direction);
+        inv = Function::invoker_type(user, newblock, x, y+1, z, BLOCK_TOP);
         event = callback.get("onNeighbourPlace");
         if (event) inv(event);
      }
@@ -602,7 +602,7 @@ int PacketHandler::player_block_placement(User *user)
      if (Map::get().getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
      {
         callback = Plugin::get().getBlockCallback(block);
-        inv = Function::invoker_type(user, newblock, x, y-1, z, direction);
+        inv = Function::invoker_type(user, newblock, x, y-1, z, BLOCK_BOTTOM);
         event = callback.get("onNeighbourPlace");
         if (event) inv(event);
      }
@@ -610,12 +610,20 @@ int PacketHandler::player_block_placement(User *user)
      if (Map::get().getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
      {
         callback = Plugin::get().getBlockCallback(block);
-        inv = Function::invoker_type(user, newblock, x, y, z+1, direction);
+        inv = Function::invoker_type(user, newblock, x, y, z+1, BLOCK_WEST);
+        event = callback.get("onNeighbourPlace");
+        if (event) inv(event);
+     }
+
+     if (Map::get().getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
+     {
+        callback = Plugin::get().getBlockCallback(block);
+        inv = Function::invoker_type(user, newblock, x, y, z-1, BLOCK_EAST);
         event = callback.get("onNeighbourPlace");
         if (event) inv(event);
      }
   }
-  /* TODO: Should be removed. Only needed for water related blocks? */
+  /* TODO: Should be removed from here. Only needed for liquid related blocks? */
   Physics::get().checkSurrounding(vec(x, y, z));
   return PACKET_OK;
 }
