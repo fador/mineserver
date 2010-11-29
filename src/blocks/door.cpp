@@ -29,7 +29,40 @@
 
 void BlockDoor::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
+    uint8 block,metadata;
+    Map::get().getBlock(x, y, z, &block, &metadata);
 
+   // Toggle door state
+   if (metadata & 0x4)
+   {
+     metadata &= (0x8 | 0x3);
+   }
+   else
+   {
+     metadata |= 0x4;
+   }
+
+   uint8 metadata2, block2;
+
+   int modifier = (metadata & 0x8) ? -1 : 1;
+
+   Map::get().setBlock(x, y, z, block, metadata);
+   Map::get().sendBlockChange(x, y, z, (char)block, metadata);  
+
+   Map::get().getBlock(x, y + modifier, z, &block2, &metadata2);
+
+   if (block2 == block)
+   {
+     metadata2 = metadata;
+   
+     if(metadata & 0x8)
+       metadata2 &= 0x7;
+     else
+       metadata2 |= 0x8;
+
+     Map::get().setBlock(x, y + modifier, z, block2, metadata2);
+     Map::get().sendBlockChange(x, y + modifier, z, (char)block, metadata2);
+   }
 }
 
 void BlockDoor::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)

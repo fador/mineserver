@@ -231,6 +231,8 @@ NBT_Value::NBT_Value(eTAG_Type type, uint8 **buf, int &remaining) : m_type(type)
       (*m_value.compoundVal)[key] = new NBT_Value((eTAG_Type)type, buf, remaining);
     }
     break;
+  case TAG_END:
+    break;
   }
 }
 
@@ -587,6 +589,8 @@ void NBT_Value::Write(std::vector<uint8> &buffer)
       buffer.push_back(TAG_END);
       break;
     }
+  case TAG_END:
+    break; //for completeness
   }
 }
 

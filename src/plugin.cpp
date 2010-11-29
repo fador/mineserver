@@ -190,6 +190,7 @@ void Plugin::init()
    /* Doors */
    call.reset();
    BlockDoor* doorblock = new BlockDoor();
+   call.add("onStartedDigging", Function::from_method<BlockDoor, &BlockDoor::onStartedDigging>(doorblock));
    call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
    call.add("onPlace", Function::from_method<BlockDoor, &BlockDoor::onPlace>(doorblock));
    setBlockCallback(BLOCK_WOODEN_DOOR, call);

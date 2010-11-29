@@ -27,11 +27,8 @@
 
 #include <stdlib.h>
 #ifdef WIN32
-  #define _CRTDBG_MAP_ALLOC
-  #include <crtdbg.h>
   #include <conio.h>
   #include <winsock2.h>
-//  #define ZLIB_WINAPI
 #else
   #include <sys/socket.h>
   #include <netinet/in.h>
@@ -67,6 +64,12 @@
 #include "physics.h"
 #include "plugin.h"
 
+#ifdef WIN32
+    #define M_PI 3.141592653589793238462643
+#endif
+#define DEGREES_TO_RADIANS(x) ((x) / 180.0 * M_PI)
+#define RADIANS_TO_DEGREES(x) ((x) / M_PI * 180.0)
+
 void PacketHandler::initPackets()
 {
 
@@ -80,7 +83,7 @@ void PacketHandler::initPackets()
                                                      &PacketHandler::chat_message);
   packets[PACKET_PLAYER_INVENTORY]         = Packets(PACKET_VARIABLE_LEN,
                                                      &PacketHandler::player_inventory);
-  packets[PACKET_USE_ENTITY]               = Packets( 8, &PacketHandler::use_entity);
+  packets[PACKET_USE_ENTITY]               = Packets( 9, &PacketHandler::use_entity);
   packets[PACKET_PLAYER]                   = Packets( 1, &PacketHandler::player);
   packets[PACKET_PLAYER_POSITION]          = Packets(33, &PacketHandler::player_position);
   packets[PACKET_PLAYER_LOOK]              = Packets( 9, &PacketHandler::player_look);
@@ -94,6 +97,7 @@ void PacketHandler::initPackets()
                                                      &PacketHandler::disconnect);
   packets[PACKET_COMPLEX_ENTITIES]         = Packets(PACKET_VARIABLE_LEN,
                                                      &PacketHandler::complex_entities);
+  packets[PACKET_RESPAWN]                  = Packets( 0, &PacketHandler::respawn);
 
 }
 
@@ -137,6 +141,23 @@ int PacketHandler::login_request(User *user)
   if((int)Users.size() >= Conf::get().iValue("userlimit"))
   {
     user->kick(Conf::get().sValue("server_full_message"));
+    return PACKET_OK;
+  }
+
+  // Check if user is on the whitelist
+  // But first, is it enabled?
+  if(Conf::get().bValue("use_whitelist") == true) {
+	  if(user->checkWhitelist(player))
+	  {
+		user->kick(Conf::get().sValue("default_whitelist_message"));
+		return PACKET_OK;
+	  }
+  }
+
+  // If user is banned
+  if(user->checkBanned(player))
+  {
+    user->kick(Conf::get().sValue("default_banned_message"));
     return PACKET_OK;
   }
 
@@ -189,7 +210,7 @@ int PacketHandler::login_request(User *user)
   }
 
   // Send motd
-  std::ifstream motdfs( MOTDFILE.c_str());
+  std::ifstream motdfs(Conf::get().sValue("motd_file").c_str());
 
   std::string temp;
 
@@ -222,6 +243,7 @@ int PacketHandler::login_request(User *user)
   //Spawn other users for connected user
   user->spawnOthers();
 
+  user->sethealth(user->health);
   user->logged = true;
 
   Chat::get().sendMsg(user, player+" connected!", Chat::ALL);
@@ -302,14 +324,14 @@ int PacketHandler::player_inventory(User *user)
     break;
 
   //Equipped armour
-  case -3:
+  case -2:
     //items = 4;
     memset(user->inv.equipped, 0, sizeof(Item)*4);
     slots = (Item *)&user->inv.equipped;
     break;
 
   //Crafting slots
-  case -2:
+  case -3:
     //items = 4;
     memset(user->inv.crafting, 0, sizeof(Item)*4);
     slots = (Item *)&user->inv.crafting;
@@ -502,9 +524,15 @@ int PacketHandler::player_digging(User *user)
 
 int PacketHandler::player_block_placement(User *user)
 {
-  sint8 y, oy, direction;
+  sint8 y, direction;
   sint16 newblock;
-  sint32 x, z, ox, oz;
+  sint32 x, z;
+  /* replacement of block */
+  uint8 oldblock;
+  uint8 metadata;
+  /* neighbour blocks */
+  uint8 block;
+  uint8 meta;
 
   user->buffer >> newblock >> x >> y >> z >> direction;
 
@@ -512,10 +540,6 @@ int PacketHandler::player_block_placement(User *user)
     return PACKET_NEED_MORE_DATA;
 
   user->buffer.removePacket();
-  
-  ox = x;
-  oy = y;
-  oz = z;
 
   if (newblock > 0xFF || newblock == -1)
     return PACKET_OK;
@@ -523,13 +547,20 @@ int PacketHandler::player_block_placement(User *user)
   // TODO: Handle processing of 
   if(direction == -1)
     return PACKET_OK;
+    
+  if(y < 0)
+    return PACKET_OK;
+    
+  #ifdef _DEBUG
+    std::cout << "Block_placement: " << newblock << " (" << x << "," << (int)y << "," << z << ") dir: " << (int)direction << std::endl;
+  #endif
+
+  Map::get().getBlock(x, y, z, &block, &metadata);
 
   if (direction)
     direction = 6-direction;
 
-  uint8 oldblock;
-  uint8 metadata;
-  if (Map::get().getBlock(x, y, z, &oldblock, &metadata))
+  if (Map::get().getBlock(x, y, z, &oldblock, &metadata)) 
   {
      Callback callback;
      Function event;
@@ -544,8 +575,6 @@ int PacketHandler::player_block_placement(User *user)
      if (event) inv(event);
 
      /* notify neighbour blocks of the placed block */
-     uint8 block;
-     uint8 meta;
      if (!Map::get().getBlock(x+1, y, z, &block, &meta))
      {
         callback = Plugin::get().getBlockCallback(block);
@@ -585,18 +614,9 @@ int PacketHandler::player_block_placement(User *user)
         event = callback.get("onNeighbourPlace");
         if (event) inv(event);
      }
-    
-     if (!Map::get().getBlock(x, y, z-1, &block, &meta))
-     {
-        callback = Plugin::get().getBlockCallback(block);
-        inv = Function::invoker_type(user, newblock, x, y, z-1, direction);
-        event = callback.get("onNeighbourPlaced");
-        if (event) inv(event);
-     }
-
-     /* TODO: Should be removed. Only needed for water related blocks? */
-     Physics::get().checkSurrounding(vec(x, y, z));
   }
+  /* TODO: Should be removed. Only needed for water related blocks? */
+  Physics::get().checkSurrounding(vec(x, y, z));
   return PACKET_OK;
 }
 
@@ -656,22 +676,19 @@ int PacketHandler::pickup_spawn(User *user)
   if(!user->buffer)
     return PACKET_NEED_MORE_DATA;
 
-  //Client sends multiple packets with same EID, check for recent spawns
-  for(int i=0;i<10;i++)
-  {
-    if(user->recentSpawn[i] == item.EID)
-    {
-      return PACKET_OK;
-    }
-  }
-
-  //Put this EID in the next slot
-  user->recentSpawn[user->recentSpawnPos++] = item.EID;
-  if(user->recentSpawnPos==10) user->recentSpawnPos=0;
+  user->buffer.removePacket();
 
   item.EID    = generateEID();
 
   item.spawnedBy = user->UID;
+  
+  // Modify the position of the dropped item so that it appears in front of user instead of under user
+  int distanceToThrow = 64;
+  float angle = DEGREES_TO_RADIANS(user->pos.yaw + 45);     // For some reason, yaw seems to be off to the left by 45 degrees from where you're actually looking?
+  int x = int(cos(angle) * distanceToThrow - sin(angle) * distanceToThrow);
+  int z = int(sin(angle) * distanceToThrow + cos(angle) * distanceToThrow);
+  item.pos += vec(x, 0, z);
+ 
   Map::get().sendPickupSpawn(item);
 
   return PACKET_OK;
@@ -733,7 +750,7 @@ int PacketHandler::complex_entities(User *user)
   Map::get().getBlock(x, y, z, &block, &meta);
 
   //We only handle chest for now
-  if(block != BLOCK_CHEST)
+  if(block != BLOCK_CHEST && block != BLOCK_FURNACE && block != BLOCK_SIGN_POST && block != BLOCK_WALL_SIGN)
   {
     delete[] buffer;
     return PACKET_OK;
@@ -794,9 +811,40 @@ int PacketHandler::complex_entities(User *user)
 int PacketHandler::use_entity(User *user)
 {
   sint32 userID,target;
-  user->buffer >> userID >> target;
+  sint8 targetType;
+  user->buffer >> userID >> target >> targetType;
   if(!user->buffer)
     return PACKET_NEED_MORE_DATA;
+  user->buffer.removePacket();
 
+  if(targetType != 1) return PACKET_OK;
+
+  //This is used when punching users
+  for(uint32 i=0;i<Users.size();i++)
+  {
+    if(Users[i]->UID == target)
+    {
+      Users[i]->health--;
+      Users[i]->sethealth(Users[i]->health);
+      if(Users[i]->health <= 0)
+      {
+        Packet pkt;
+        pkt << PACKET_DEATH_ANIMATION << (sint32)Users[i]->UID << (sint8)3;
+        Users[i]->sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
+      }
+      break;
+    }
+  }
+
+
+  return PACKET_OK;
+}
+
+int PacketHandler::respawn(User *user)
+{
+  user->dropInventory();
+  user->respawn();
+  user->teleport(Map::get().spawnPos.x(), Map::get().spawnPos.y() + 2, Map::get().spawnPos.z());
+  user->buffer.removePacket();
   return PACKET_OK;
 }

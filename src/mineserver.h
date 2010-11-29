@@ -33,22 +33,22 @@
 class Mineserver
 {
 private:
-	struct event m_listenEvent;
-	event_base *m_eventBase;
+  struct event m_listenEvent;
+  event_base *m_eventBase;
   int m_socketlisten;
   bool m_running;
 
 public:
-	static Mineserver &Get()
-	{
-		static Mineserver server;
-		return server;
-	}
+  static Mineserver &Get()
+  {
+    static Mineserver server;
+    return server;
+  }
 
-	Mineserver();
-	int Run();
+  Mineserver();
+  int Run(int argc, char *argv[]);
   bool Stop();
-	event_base *GetEventBase();
+  event_base *GetEventBase();
 };
 
 #endif

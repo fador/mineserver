@@ -15,11 +15,16 @@ ifeq ($(SYSTEM),SunOS)
 DFLAGS += -D__SOLARIS__
 endif
 
+ifeq ($(SYSTEM),mingw)
+LFLAGS = -lws2_32
+endif
+
+
 RM = rm -f
 CXX = g++
 CC = $(CXX)
-LDFLAGS = -L/usr/local/lib -L/usr/lib -lpthread -levent -lz -lnoise
-CXXFLAGS = $(DFLAGS) -I. -I/usr/Local/include -I/usr/include -L/usr/local/lib
+LDFLAGS = -L/usr/local/lib -L/usr/lib -levent -lz -lnoise $(LFLAGS)
+CXXFLAGS = $(DFLAGS) -I. -I/usr/Local/include -I/usr/include
 
 OBJS = map.o chat.o commands.o config.o constants.o logger.o mapgen.o nbt.o packets.o physics.o sockets.o tools.o user.o noiseutils.o mersenne.o mineserver.o
 PROG = ./mineserver

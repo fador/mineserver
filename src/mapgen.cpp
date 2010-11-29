@@ -62,29 +62,79 @@ MapGen::MapGen(int seed)
   // libnoise
   //
   perlinNoise.SetSeed(seed);
-  perlinNoise.SetOctaveCount(3);
-  perlinNoise.SetFrequency(1.0); // 1-16
-  perlinNoise.SetPersistence(0.25); // 0-1
+  perlinNoise.SetOctaveCount(2);
+  perlinNoise.SetFrequency(1.7); // 1-16
+  perlinNoise.SetPersistence(0.2); // 0-1
 
+  // Heighmap scale..
   perlinScale = 0.7f;
+  
+  perlinBiased.SetSourceModule(0, perlinNoise);
+  perlinBiased.SetBias(0.75);
 
-  terrainType.SetFrequency (0.5);
-  terrainType.SetPersistence (0.15);
-
-  baseFlatTerrain.SetFrequency(1.50);
+  baseFlatTerrain.SetSeed(seed+1);
+  baseFlatTerrain.SetOctaveCount(2);
+  baseFlatTerrain.SetFrequency(0.5);
+  baseFlatTerrain.SetPersistence(0.2);
+  
   flatTerrain.SetSourceModule(0, baseFlatTerrain);
-  flatTerrain.SetScale (0.125);
-  flatTerrain.SetBias (0);
+  //flatTerrain.SetScale(0.125);
+  flatTerrain.SetBias(0.4);
+  
+  seaFloor.SetSeed(seed+3);
+  seaFloor.SetOctaveCount(1);
+  seaFloor.SetPersistence(0.15);
+  
+  seaBias.SetSourceModule(0, seaFloor);
+  seaBias.SetBias(-1.00);
 
+  terrainType.SetSeed(seed+2);
+  terrainType.SetFrequency(0.5);
+  terrainType.SetPersistence(0.10);
+  
+  seaControl.SetSeed(seed+4);
+  seaControl.SetFrequency(0.15);
     
   finalTerrain.SetSourceModule(0, flatTerrain);
-  finalTerrain.SetSourceModule(1, perlinNoise);
+  finalTerrain.SetSourceModule(1, perlinBiased);
   finalTerrain.SetControlModule(terrainType);
-  finalTerrain.SetBounds(0.0, 1000.0);
+  finalTerrain.SetBounds(0.25, 1000.0);
   finalTerrain.SetEdgeFalloff(0.125);
+  
+  seaTerrain.SetSourceModule(0, seaBias);
+  seaTerrain.SetSourceModule(1, finalTerrain);
+  seaTerrain.SetControlModule(seaControl);
+  seaTerrain.SetBounds(-0.3, 1000.0);
+  seaTerrain.SetEdgeFalloff(0.1);
+  
+  //
+  // This block is used to tune heightmapgeneration
+  /* COMMENT OUT!
+  debugMapBuilder.SetSourceModule(finalTerrain);
+  debugMapBuilder.SetDestNoiseMap(debugHeightMap);
+  debugMapBuilder.SetDestSize(512, 512);
+  
+  debugMapBuilder.SetBounds(1000, 1000 + perlinScale, 1000, 1000 + perlinScale);
+  debugMapBuilder.Build();
+
+  // Image render
+  noise::utils::RendererImage renderer;
+  noise::utils::Image image;
+  renderer.SetSourceNoiseMap (debugHeightMap);
+  renderer.SetDestImage (image);
+  renderer.Render ();
+
+  noise::utils::WriterBMP writer;
+  writer.SetSourceImage (image);
+  writer.SetDestFilename ("debug.bmp");
+  writer.WriteDestFile ();
+  
+  //
+  // DEBUGBLOCK END
+  //*/
 
   // Generate heightmap
-  heightMapBuilder.SetSourceModule(finalTerrain);
+  heightMapBuilder.SetSourceModule(seaTerrain);
   heightMapBuilder.SetDestNoiseMap(heightMap);
   heightMapBuilder.SetDestSize(16, 16);
 
@@ -214,20 +264,6 @@ void MapGen::generateWithNoise(int x, int z)
   heightMapBuilder.SetBounds(1000 + x*perlinScale, 1000 + (x+1)*perlinScale, 1000 + z*perlinScale, 1000 + (z+1)*perlinScale);
   heightMapBuilder.Build();
 
-  // Image render
-  /*noise::utils::RendererImage renderer;
-  noise::utils::Image image;
-  renderer.SetSourceNoiseMap (heightMap);
-  renderer.SetDestImage (image);
-  renderer.Render ();
-
-  noise::utils::WriterBMP writer;
-  writer.SetSourceImage (image);
-  writer.SetDestFilename ("tutorial.bmp");
-  writer.WriteDestFile ();*/
-
-
-
   // Get cave heightmaps for upper caves (top & bottom)
   /*Noise caveTopNoise;
   Random rnd(randomSeed);
@@ -313,7 +349,7 @@ void MapGen::generateWithNoise(int x, int z)
     {
       for (uint8 bZ = 0; bZ < 16; bZ++) 
       {
-        currentHeight = (int)((heightMap.GetValue(bX,bZ) * 7.49674) + 64.15371);
+        currentHeight = (int)((heightMap.GetValue(bX,bZ) * 8.7) + 65.15371);
 
         //currentHeight = (int)((heightMap[bX][bZ] * 2.49674) + 82.15371);
 

@@ -31,7 +31,6 @@
 
 void BlockBasic::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-
 }
 
 void BlockBasic::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)

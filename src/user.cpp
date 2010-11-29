@@ -53,24 +53,48 @@
 
 std::vector<User *> Users;
 
-
 User::User(int sock, uint32 EID)
 {
   this->action          = 0;
+  this->muted           = false;
   this->waitForData     = false;
   this->fd              = sock;
   this->UID             = EID;
   this->logged          = false;
   // ENABLED FOR DEBUG
-  this->admin           = true;
+  this->admin           = false;
 
   this->pos.x           = Map::get().spawnPos.x();
   this->pos.y           = Map::get().spawnPos.y();
   this->pos.z           = Map::get().spawnPos.z();
   this->write_err_count = 0;
-  
-  memset(recentSpawn,0,10*sizeof(int));
-  recentSpawnPos=0;
+  this->health          = 20;
+}
+
+bool User::checkBanned(std::string _nick)
+{
+  nick = _nick;
+
+  // Check banstatus
+  for(unsigned int i = 0; i < Chat::get().banned.size(); i++)
+    if(Chat::get().banned[i] == nick)
+      return true;
+
+  return false;
+}
+
+bool User::checkWhitelist(std::string _nick)
+{
+	nick = _nick;
+
+    // Check if nick is whitelisted, providing it is enabled
+    for(unsigned int i = 0; i < Chat::get().whitelist.size(); i++)
+      if(Chat::get().whitelist[i] == nick)
+        return true;
+
+    return false;
+
+  return true;
 }
 
 bool User::changeNick(std::string _nick)
@@ -109,6 +133,25 @@ bool User::kick(std::string kickMsg)
   std::cout << nick << " kicked. Reason: " << kickMsg << std::endl;
   return true;
 }
+bool User::mute(std::string muteMsg)
+{
+  if(!muteMsg.empty()) 
+    muteMsg = "You have been muted.  Reason: " + muteMsg;
+  else 
+    muteMsg = "You have been muted. ";
+    
+  Chat::get().sendMsg(this, muteMsg, Chat::USER);
+  this->muted = true;
+  std::cout << nick << " muted. Reason: " << muteMsg << std::endl;
+  return true;
+}
+bool User::unmute()
+{
+    Chat::get().sendMsg(this, "You have been unmuted.", Chat::USER);
+    this->muted = false;
+    std::cout << nick << " unmuted. " << std::endl;
+    return true;
+}
 
 bool User::loadData()
 {
@@ -130,6 +173,8 @@ bool User::loadData()
   pos.x = (double)(*(*_pos)[0]);
   pos.y = (double)(*(*_pos)[1]);
   pos.z = (double)(*(*_pos)[2]);
+
+  health = *nbtPlayer["Health"];
 
   std::vector<NBT_Value*> *rot = nbtPlayer["Rotation"]->GetList();
   pos.yaw = (float)(*(*rot)[0]);
@@ -203,7 +248,7 @@ bool User::saveData()
   val.Insert("AttackTime", new NBT_Value((sint16)0));
   val.Insert("DeathTime", new NBT_Value((sint16)0));
   val.Insert("Fire", new NBT_Value((sint16)-20));
-  val.Insert("Health", new NBT_Value((sint16)20));
+  val.Insert("Health", new NBT_Value((sint16)health));
   val.Insert("HurtTime", new NBT_Value((sint16)0));
   val.Insert("FallDistance", new NBT_Value(54.f));
 
@@ -612,6 +657,48 @@ bool User::spawnOthers()
     buffer << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)Users[i]->UID << Users[i]->nick 
       << (sint32)(Users[i]->pos.x * 32) << (sint32)(Users[i]->pos.y * 32) << (sint32)(Users[i]->pos.z * 32) 
       << (sint8)0 << (sint8)0 << (sint16)0;
+    }
+  }
+  return true;
+}
+
+bool User::sethealth(int userHealth)
+{
+  health = userHealth;
+  buffer << (sint8)PACKET_UPDATE_HEALTH << (sint8)userHealth;
+  //ToDo: Send destroy entity and spawn entity again
+  return true;
+}
+
+bool User::respawn()
+{
+  health = 20;
+  buffer << (sint8)PACKET_RESPAWN;
+  return true;
+}
+
+bool User::dropInventory()
+{
+  for( int i = 0; i < 36; i++ )
+  {
+    if( inv.main[i].type != 0 )
+    {
+      Map::get().createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.main[i].type, inv.main[i].count);
+      inv.main[i] = Item();
+    }
+
+    if( i >= 0 && i < 4 )
+    {
+      if( inv.equipped[i].type != 0 )
+      {
+        Map::get().createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.equipped[i].type, inv.equipped[i].count);
+        inv.equipped[i] = Item();
+      }
+      if( inv.crafting[i].type != 0 )
+      {
+        Map::get().createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.crafting[i].type, inv.crafting[i].count);
+        inv.crafting[i] = Item();
+      }
     }
   }
   return true;
