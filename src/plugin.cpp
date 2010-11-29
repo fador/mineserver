@@ -102,6 +102,7 @@ void Plugin::init()
    setBlockCallback(BLOCK_DIAMOND_ORE, call);
    setBlockCallback(BLOCK_GLOWING_REDSTONE_ORE, call);
    setBlockCallback(BLOCK_REDSTONE_ORE, call);
+   setBlockCallback(BLOCK_LADDER, call);
 
    /* Falling blocks (sand, etc) */
    call.reset();
@@ -123,7 +124,6 @@ void Plugin::init()
    setBlockCallback(BLOCK_TORCH, call);
    setBlockCallback(BLOCK_REDSTONE_TORCH_OFF, call);
    setBlockCallback(BLOCK_REDSTONE_TORCH_ON, call);
-   setBlockCallback(BLOCK_LADDER, call);
    
    /* Plants */
    call.reset();

@@ -120,8 +120,11 @@ void BlockBasic::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
             uint8 meta;
             if (Map::get().getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
             {
-               Map::get().setBlock(x, y, z, (char)newblock, direction);
-               Map::get().sendBlockChange(x, y, z, (char)newblock, direction);
+               meta = 0;
+               if (direction)
+                  meta = 6-direction;
+               Map::get().setBlock(x, y, z, (char)newblock, meta);
+               Map::get().sendBlockChange(x, y, z, (char)newblock, meta);
             }
          break;
       }
