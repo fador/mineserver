@@ -29,9 +29,9 @@
 
 #include <cstdlib>
 
-#include "constants.h"
-#include "map.h"
-#include "tools.h"
+#include "../constants.h"
+#include "../map.h"
+#include "../tools.h"
 
 class User;
 

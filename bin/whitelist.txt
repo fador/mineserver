@@ -1,0 +1,1 @@
+# This is default whitelist file. Write nicks to be whitelisted here one for each line
