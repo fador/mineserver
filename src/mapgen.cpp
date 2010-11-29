@@ -41,11 +41,12 @@
 #include "map.h"
 
 // libnoise
-#ifdef WIN32
-#include <noise/noise.h>
-#else
+#ifdef DEBIAN
 #include <libnoise/noise.h>
+#else
+#include <noise/noise.h>
 #endif
+
 #include "noiseutils.h"
 
 //#include "mersenne.h"
