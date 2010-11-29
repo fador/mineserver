@@ -19,6 +19,10 @@ ifeq ($(SYSTEM),mingw)
 LFLAGS = -lws2_32
 endif
 
+ifeq ($(DEBIAN), 1)
+CXXFLAGS += -DDEBIAN
+endif
+
 
 RM = rm -f
 CXX = g++

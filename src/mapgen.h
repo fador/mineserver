@@ -28,11 +28,12 @@
 #ifndef _MAPGEN_H
 #define _MAPGEN_H
 
-#ifdef WIN32
-#include <noise/noise.h>
-#else
+#ifdef DEBIAN
 #include <libnoise/noise.h>
+#else
+#include <noise/noise.h>
 #endif
+
 #include "noiseutils.h"
 
 class MapGen
@@ -83,7 +84,6 @@ public:
   
   void init(int seed);
   void generateChunk(int x, int z);
-
 };
 
 
