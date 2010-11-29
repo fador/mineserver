@@ -540,9 +540,6 @@ int PacketHandler::player_block_placement(User *user)
     return PACKET_NEED_MORE_DATA;
 
   user->buffer.removePacket();
-
-  if (newblock > 0xFF || newblock == -1)
-    return PACKET_OK;
   
   // TODO: Handle processing of 
   if(direction == -1)
@@ -550,7 +547,7 @@ int PacketHandler::player_block_placement(User *user)
     
   if(y < 0)
     return PACKET_OK;
-    
+#define _DEBUG    
   #ifdef _DEBUG
     std::cout << "Block_placement: " << newblock << " (" << x << "," << (int)y << "," << z << ") dir: " << (int)direction << std::endl;
   #endif
