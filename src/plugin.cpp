@@ -102,7 +102,6 @@ void Plugin::init()
    setBlockCallback(BLOCK_DIAMOND_ORE, call);
    setBlockCallback(BLOCK_GLOWING_REDSTONE_ORE, call);
    setBlockCallback(BLOCK_REDSTONE_ORE, call);
-   setBlockCallback(BLOCK_LADDER, call);
 
    /* Falling blocks (sand, etc) */
    call.reset();
@@ -125,6 +124,13 @@ void Plugin::init()
    setBlockCallback(BLOCK_REDSTONE_TORCH_OFF, call);
    setBlockCallback(BLOCK_REDSTONE_TORCH_ON, call);
    
+   /* ladders */
+   call.reset();
+   call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
+   call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
+   call.add("onNeighbourBroken", Function::from_method<BlockTorch, &BlockTorch::onNeighbourBroken>(torchblock));
+   setBlockCallback(BLOCK_LADDER, call);
+
    /* Plants */
    call.reset();
    BlockPlant* plantblock = new BlockPlant();
