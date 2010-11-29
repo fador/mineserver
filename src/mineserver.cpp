@@ -29,12 +29,14 @@
 #ifdef WIN32
   #include <conio.h>
   #include <winsock2.h>
+  #include <process.h>
 #else
   #include <sys/socket.h>
   #include <netinet/in.h>
   #include <arpa/inet.h>
   #include <string.h>
   #include <netdb.h>
+  #include <unistd.h>
 #endif
 
 #include <sys/types.h>
@@ -49,13 +51,10 @@
 #include <vector>
 #include <zlib.h>
 #include <signal.h>
-#include <unistd.h>
 
 #include "constants.h"
 #include "mineserver.h"
-
 #include "logger.h"
-
 #include "sockets.h"
 #include "tools.h"
 #include "map.h"
@@ -129,7 +128,7 @@ int Mineserver::Run(int argc, char *argv[])
   // Write PID to file
   std::ofstream pid_out((Conf::get().sValue("pid_file")).c_str());
   if (!pid_out.fail())
-    pid_out << getpid();
+    pid_out << _getpid();
   pid_out.close();
 
   // Load admin, banned and whitelisted users
