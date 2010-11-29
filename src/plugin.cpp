@@ -89,7 +89,6 @@ void Plugin::init()
    setBlockCallback(BLOCK_MOB_SPAWNER, call);
    setBlockCallback(BLOCK_DIAMOND_BLOCK, call);
    setBlockCallback(BLOCK_PUMPKIN, call);
-   setBlockCallback(BLOCK_SIGN_POST, call);
    setBlockCallback(BLOCK_CLAY, call);
    setBlockCallback(BLOCK_NETHERSTONE, call);
    setBlockCallback(BLOCK_LIGHTSTONE, call);
