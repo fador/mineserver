@@ -168,8 +168,8 @@ void MapGen::generateChunk(int x, int z)
   NBT_Value *main = new NBT_Value(NBT_Value::TAG_COMPOUND);
   NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
  
-  if(Conf::get().bValue("map_flatland"))
-    loadFlatgrass();
+  if(Conf::get().bValue("map_flatgrass"))
+    generateFlatgrass();
   else
     generateWithNoise(x, z);
    
