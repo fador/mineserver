@@ -39,10 +39,15 @@
 
 #include "cavegen.h"
 
-CaveGen &CaveGen::get()
+CaveGen* CaveGen::mCaveGen;
+
+void CaveGen::free()
 {
-  static CaveGen instance;
-  return instance;
+   if (mCaveGen)
+   {
+      delete mCaveGen;
+      mCaveGen = 0;
+   }
 }
 
 // Cave generation method from Omen 0.70, used with osici's permission

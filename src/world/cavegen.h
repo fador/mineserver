@@ -33,13 +33,21 @@
 class CaveGen
 {
 public:
-  static CaveGen &get();
+  static CaveGen* get()
+  {
+     if(!mCaveGen) {
+        mCaveGen = new CaveGen();
+     }
+     return mCaveGen;
+  }
+  void free();
   void AddCaves(uint8 *m_blocks);
 
 private:
   CaveGen() {}
   Random rand;
   uint8 *blocks;
+  static CaveGen *mCaveGen;
 
   void AddSingleCave(uint8 bedrockType, uint8 fillingType, int length, double maxDiameter);
   void AddSingleVein(uint8 bedrockType, uint8 fillingType, int k, double maxDiameter, int l) ;
