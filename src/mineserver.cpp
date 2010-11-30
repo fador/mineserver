@@ -151,7 +151,7 @@ int Mineserver::Run(int argc, char *argv[])
   Map::get()->initMap();
 
   // Initialize packethandler
-  PacketHandler::get().initPackets();
+  PacketHandler::get()->initPackets();
 
   // Load ip from config
   std::string ip = Conf::get().sValue("ip");
@@ -329,6 +329,8 @@ int Mineserver::Run(int argc, char *argv[])
     event_base_loopexit(m_eventBase, &loopTime);
   }
 
+  /* Free memory */
+  PacketHandler::get()->freePackets();
   Map::get()->freeMap();
 
 #ifdef WIN32

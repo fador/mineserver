@@ -402,17 +402,20 @@ private:
   {
   }
 
+   static PacketHandler *mPacketHandler;
 public:
 
   void initPackets();
+  void freePackets();
 
-
-
-  static PacketHandler &get()
+  static PacketHandler* get()
   {
-    static PacketHandler instance;
-    return instance;
+    if(!mPacketHandler) {
+      mPacketHandler = new PacketHandler();
+    }
+    return mPacketHandler;
   }
+
   //Information of all the packets
   //around 2kB of memory
   Packets packets[256];

@@ -70,6 +70,14 @@
 #define DEGREES_TO_RADIANS(x) ((x) / 180.0 * M_PI)
 #define RADIANS_TO_DEGREES(x) ((x) / M_PI * 180.0)
 
+PacketHandler* PacketHandler::mPacketHandler;
+
+void PacketHandler::freePackets()
+{
+   delete mPacketHandler;
+   mPacketHandler = 0;
+}
+
 void PacketHandler::initPackets()
 {
 
