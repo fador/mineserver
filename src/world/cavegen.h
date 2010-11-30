@@ -46,11 +46,8 @@ private:
   
   noise::module::Perlin caveNoise1;
   noise::module::Perlin caveNoise2;
-
-  void AddSingleVein(uint8 bedrockType, uint8 fillingType, int k, double maxDiameter, int l) ;
-  void AddSingleVein(uint8 bedrockType, uint8 fillingType, int k, double maxDiameter, int l, int i1);
-
-  void SealLiquids(uint8 sealantType);
+  
+  double caveN1, caveN2;
   
   bool addCaves;
   int caveDensity;

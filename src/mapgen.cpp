@@ -277,7 +277,6 @@ void MapGen::generateWithNoise(int x, int z)
 
 void MapGen::AddBeaches() 
 {
-  //std::cout << "Adding beaches" << std::endl;
   int beachExtent = Conf::get().iValue("beachExtent");
   int beachHeight = Conf::get().iValue("beachHeight");
   
