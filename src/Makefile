@@ -23,6 +23,7 @@ ifeq ($(DEBIAN), 1)
 CXXFLAGS += -DDEBIAN
 endif
 
+CXXFLAGS += -DDEBIAN
 
 RM = rm -f
 CXX = g++

@@ -264,7 +264,7 @@ int Mineserver::Run(int argc, char *argv[])
     if(time(0)-starttime > 10)
     {
       starttime = (uint32)time(0);
-      std::cout << "Currently " << Users.size() << " users in!" << std::endl;
+//      std::cout << "Currently " << Users.size() << " users in!" << std::endl;
 
       //If users, ping them
       if(Users.size() > 0)

@@ -59,6 +59,7 @@ void Plugin::init()
    setBlockCallback(BLOCK_WOOD, call);
    setBlockCallback(BLOCK_LOG, call);
    setBlockCallback(BLOCK_SOIL, call);
+   setBlockCallback(BLOCK_GLASS, call);
    /* cloth */
    setBlockCallback(BLOCK_RED_CLOTH, call);
    setBlockCallback(BLOCK_ORANGE_CLOTH, call);
