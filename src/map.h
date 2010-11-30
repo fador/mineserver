@@ -236,7 +236,13 @@ public:
 
   void setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity);
 
-  static Map* get();
+  static Map* get()
+  {
+    if(!mMap) {
+      mMap = new Map();
+    }
+    return mMap;
+  }
 };
 
 #endif

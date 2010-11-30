@@ -76,11 +76,10 @@ public:
 
    void reset()
    {
-      callbacks.empty();
+      callbacks.clear();
    }
 
 private:
-   void* obj;
    typedef std::map<std::string, Function > Events;
    Events callbacks;
 };

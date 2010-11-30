@@ -187,6 +187,7 @@ void Plugin::init()
    
    /* Containers */
    call.reset();
+   call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
    call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
    setBlockCallback(BLOCK_CHEST, call);
    setBlockCallback(BLOCK_WORKBENCH, call);

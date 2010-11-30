@@ -54,15 +54,6 @@
 
 Map* Map::mMap;
 
-Map* Map::get()
-{
-   if(!mMap)
-   {
-      mMap = new Map();
-   }
-   return mMap;
-}
-
 void Map::posToId(int x, int z, uint32 *id)
 {
   uint8 *id_pointer = reinterpret_cast<uint8 *>(id);
