@@ -345,6 +345,7 @@ int Mineserver::Run(int argc, char *argv[])
   Chat::get()->free();
   Conf::get()->free();
   Plugin::get()->free();
+  Logger::get()->free();
 
   return EXIT_SUCCESS;
 }

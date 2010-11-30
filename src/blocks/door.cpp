@@ -129,7 +129,7 @@ void BlockDoor::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
                y = oy;
                z = oz;
 
-               Map::get().getBlock(x, y + modifier, z, &block2, &metadata2);
+               Map::get()->getBlock(x, y + modifier, z, &block2, &metadata2);
 
                if (block2 == block)
                {
@@ -140,8 +140,8 @@ void BlockDoor::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
                   else
                     metadata2 |= 0x8;
 
-                  Map::get().setBlock(x, y + modifier, z, block2, metadata2);
-                  Map::get().sendBlockChange(x, y + modifier, z, (char)blockID, metadata2);
+                  Map::get()->setBlock(x, y + modifier, z, block2, metadata2);
+                  Map::get()->sendBlockChange(x, y + modifier, z, (char)blockID, metadata2);
 
                   return PACKET_OK;
                }

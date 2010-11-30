@@ -104,7 +104,7 @@ public:
       if(!mPlugin) {
          mPlugin = new Plugin();
       }
-         return mPlugin;
-      }
+      return mPlugin;
+   }
 };
 
