@@ -52,10 +52,15 @@
 #include "nbt.h"
 #include "config.h"
 
-Map &Map::get()
+Map* Map::mMap;
+
+Map* Map::get()
 {
-  static Map instance;
-  return instance;
+   if(!mMap)
+   {
+      mMap = new Map();
+   }
+   return mMap;
 }
 
 void Map::posToId(int x, int z, uint32 *id)

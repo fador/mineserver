@@ -54,27 +54,27 @@ void BlockTorch::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, 
    uint8 nblock; uint8 nmeta;
    bool destroy = false;
 
-   if (!Map::get().getBlock(x, y, z, &block, &meta))
+   if (!Map::get()->getBlock(x, y, z, &block, &meta))
       return;
 
-   if (direction == BLOCK_TOP && Map::get().getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
+   if (direction == BLOCK_TOP && Map::get()->getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
    {
       // block broken under torch
       destroy = true;
    }
-   else if (direction == BLOCK_NORTH && Map::get().getBlock(x-1, y, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
+   else if (direction == BLOCK_NORTH && Map::get()->getBlock(x-1, y, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
    {
       destroy = true;
    }
-   else if (direction == BLOCK_SOUTH && Map::get().getBlock(x+1, y, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
+   else if (direction == BLOCK_SOUTH && Map::get()->getBlock(x+1, y, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
    {
       destroy = true;
    }
-   else if (direction == BLOCK_EAST && Map::get().getBlock(x, y, z-1, &nblock, &nmeta) && nblock == BLOCK_AIR)
+   else if (direction == BLOCK_EAST && Map::get()->getBlock(x, y, z-1, &nblock, &nmeta) && nblock == BLOCK_AIR)
    {
       destroy = true;
    }
-   else if (direction == BLOCK_WEST && Map::get().getBlock(x, y, z+1, &nblock, &nmeta) && nblock == BLOCK_AIR)
+   else if (direction == BLOCK_WEST && Map::get()->getBlock(x, y, z+1, &nblock, &nmeta) && nblock == BLOCK_AIR)
    {
       destroy = true;
    }
@@ -82,14 +82,14 @@ void BlockTorch::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, 
    if (destroy)
    {
       // Break torch and spawn torch item
-      Map::get().sendBlockChange(x, y, z, 0, 0);
-      Map::get().setBlock(x, y, z, 0, 0);
+      Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+      Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
       int count = 1;
       if (BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand() % 10000)
       {
           uint16 item_id = BLOCKDROPS[block].item_id;
           count = BLOCKDROPS[block].count;
-          Map::get().createPickupSpawn(x, y, z, item_id, count);
+          Map::get()->createPickupSpawn(x, y, z, item_id, count);
       }
    }   
 }
@@ -99,7 +99,7 @@ void BlockTorch::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
    uint8 oldblock;
    uint8 oldmeta;
 
-   if (Map::get().getBlock(x, y-1, z, &oldblock, &oldmeta))
+   if (Map::get()->getBlock(x, y-1, z, &oldblock, &oldmeta))
    {
       /* Check block below allows blocks placed on top */
       switch(oldblock)
@@ -143,10 +143,10 @@ void BlockTorch::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
 
             uint8 block;
             uint8 meta;
-            if (Map::get().getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
+            if (Map::get()->getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
             {
-               Map::get().setBlock(x, y, z, (char)newblock, direction);
-               Map::get().sendBlockChange(x, y, z, (char)newblock, direction);
+               Map::get()->setBlock(x, y, z, (char)newblock, direction);
+               Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
             }
          break;
       }
@@ -166,21 +166,21 @@ void BlockTorch::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
    {
       case BLOCK_WATER:
       case BLOCK_STATIONARY_WATER:
-         if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
+         if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
          {
             // spawn item
-            Map::get().sendBlockChange(x, y, z, 0, 0);
-            Map::get().setBlock(x, y, z, 0, 0);
-            Map::get().createPickupSpawn(x, y, z, oldblock, 1);
+            Map::get()->sendBlockChange(x, y, z, 0, 0);
+            Map::get()->setBlock(x, y, z, 0, 0);
+            Map::get()->createPickupSpawn(x, y, z, oldblock, 1);
          }
       break;
       case BLOCK_LAVA:
       case BLOCK_STATIONARY_LAVA:
-         if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
+         if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
          {
             // destroy
-            Map::get().sendBlockChange(x, y, z, 0, 0);
-            Map::get().setBlock(x, y, z, 0, 0);
+            Map::get()->sendBlockChange(x, y, z, 0, 0);
+            Map::get()->setBlock(x, y, z, 0, 0);
          }
       break;
       default:

@@ -105,7 +105,7 @@ namespace
 void home(User *user, std::string command, std::deque<std::string> args)
 {
   Chat::get().sendMsg(user, COLOR_BLUE + "Teleported you home!", Chat::USER);
-  user->teleport(Map::get().spawnPos.x(), Map::get().spawnPos.y() + 2, Map::get().spawnPos.z());
+  user->teleport(Map::get()->spawnPos.x(), Map::get()->spawnPos.y() + 2, Map::get()->spawnPos.z());
 }
 
 void kit(User *user, std::string command, std::deque<std::string> args)
@@ -126,7 +126,7 @@ void kit(User *user, std::string command, std::deque<std::string> args)
         item.pos.x() = static_cast<int>(user->pos.x*32 + (rand() % 30));
         item.pos.y() = static_cast<int>(user->pos.y*32);
         item.pos.z() = static_cast<int>(user->pos.z*32 + (rand() % 30));
-        Map::get().sendPickupSpawn(item);
+        Map::get()->sendPickupSpawn(item);
       }
       Chat::get().sendMsg(user, COLOR_BLUE + "Spawned Kit " + args[0], Chat::USER);
     }
@@ -139,7 +139,7 @@ void kit(User *user, std::string command, std::deque<std::string> args)
 
 void saveMap(User *user, std::string command, std::deque<std::string> args)
 {
-  Map::get().saveWholeMap();
+  Map::get()->saveWholeMap();
   Chat::get().handleMsg(user, "% Saved map.");
 }
 
@@ -365,9 +365,9 @@ void setTime(User *user, std::string command, std::deque<std::string> args)
     else if (timeValue == "night" || timeValue == "midnight")
       timeValue = "18000";
       
-    Map::get().mapTime = (sint64)atoi(timeValue.c_str());
+    Map::get()->mapTime = (sint64)atoi(timeValue.c_str());
     Packet pkt;
-    pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get().mapTime;
+    pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
     if(Users.size())
       Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
     Chat::get().handleMsg(user, "% World time changed.");
@@ -479,10 +479,10 @@ void regenerateLighting(User *user, std::string command, std::deque<std::string>
 {
   printf("Regenerating lighting for chunk %d,%d\n", blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
   //First load the map
-  if(Map::get().loadMap(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z)))
+  if(Map::get()->loadMap(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z)))
   {
     //Then regenerate lighting
-    Map::get().generateLight(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
+    Map::get()->generateLight(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
   }
 }
 
@@ -570,7 +570,7 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
           item.pos.x() = static_cast<int>(tUser->pos.x * 32);
           item.pos.y() = static_cast<int>(tUser->pos.y * 32);
           item.pos.z() = static_cast<int>(tUser->pos.z * 32);
-          Map::get().sendPickupSpawn(item);
+          Map::get()->sendPickupSpawn(item);
         }
 
         Chat::get().sendMsg(user, COLOR_RED + user->nick + " spawned " + args[1], Chat::ADMINS);
