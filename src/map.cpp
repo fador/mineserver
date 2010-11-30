@@ -74,7 +74,7 @@ void Map::init()
   printf("Map::init()\n");
 #endif
 
-  this->mapDirectory = Conf::get().sValue("mapdir");
+  this->mapDirectory = Conf::get()->sValue("mapdir");
   if(this->mapDirectory == "Not found!")
   {
     std::cout << "Error, mapdir not defined!" << std::endl;

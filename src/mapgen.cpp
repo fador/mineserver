@@ -133,7 +133,7 @@ void MapGen::init(int seed)
   heightMapBuilder.SetDestNoiseMap(heightMap);
   heightMapBuilder.SetDestSize(16, 16);
 
-  seaLevel = Conf::get().iValue("seaLevel");
+  seaLevel = Conf::get()->iValue("seaLevel");
   
   m_seed = seed;
 }
@@ -170,7 +170,7 @@ void MapGen::generateChunk(int x, int z)
   NBT_Value *main = new NBT_Value(NBT_Value::TAG_COMPOUND);
   NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
  
-  if(Conf::get().bValue("map_flatgrass"))
+  if(Conf::get()->bValue("map_flatgrass"))
     generateFlatgrass();
   else
     generateWithNoise(x, z);
@@ -267,15 +267,15 @@ void MapGen::generateWithNoise(int x, int z)
     }
   }
   //CaveGen::get().AddCaves(blocks);
-  if(Conf::get().bValue("addBeaches"))
+  if(Conf::get()->bValue("addBeaches"))
     AddBeaches();
 }
 
 void MapGen::AddBeaches() 
 {
   //std::cout << "Adding beaches" << std::endl;
-  int beachExtent = Conf::get().iValue("beachExtent");
-  int beachHeight = Conf::get().iValue("beachHeight");
+  int beachExtent = Conf::get()->iValue("beachExtent");
+  int beachHeight = Conf::get()->iValue("beachHeight");
   
   int beachExtentSqr = (beachExtent + 1) * (beachExtent + 1);
   for(int x = 0; x < 16; x++) 

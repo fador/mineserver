@@ -191,12 +191,12 @@ void CaveGen::AddCaves(uint8 *m_blocks)
 {
   blocks = m_blocks;
   
-  bool addCaves = Conf::get().bValue("addCaves");
-  int caveDensity = Conf::get().iValue("caveDensity");
-  int caveSize = Conf::get().iValue("caveSize");
-  bool addCaveLava = Conf::get().bValue("addCaveLava");
-  bool addCaveWater = Conf::get().bValue("addCaveWater");
-  bool addOre = Conf::get().bValue("addOre");
+  bool addCaves = Conf::get()->bValue("addCaves");
+  int caveDensity = Conf::get()->iValue("caveDensity");
+  int caveSize = Conf::get()->iValue("caveSize");
+  bool addCaveLava = Conf::get()->bValue("addCaveLava");
+  bool addCaveWater = Conf::get()->bValue("addCaveWater");
+  bool addOre = Conf::get()->bValue("addOre");
 
   if(addCaves)
   {

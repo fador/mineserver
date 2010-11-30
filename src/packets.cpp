@@ -144,23 +144,23 @@ int PacketHandler::login_request(User *user)
   // If version is not 2 or 3
   if(version != 5)
   {
-    user->kick(Conf::get().sValue("wrong_protocol_message"));
+    user->kick(Conf::get()->sValue("wrong_protocol_message"));
     return PACKET_OK;
   }
 
   // If userlimit is reached
-  if((int)Users.size() >= Conf::get().iValue("userlimit"))
+  if((int)Users.size() >= Conf::get()->iValue("userlimit"))
   {
-    user->kick(Conf::get().sValue("server_full_message"));
+    user->kick(Conf::get()->sValue("server_full_message"));
     return PACKET_OK;
   }
 
   // Check if user is on the whitelist
   // But first, is it enabled?
-  if(Conf::get().bValue("use_whitelist") == true) {
+  if(Conf::get()->bValue("use_whitelist") == true) {
 	  if(user->checkWhitelist(player))
 	  {
-		user->kick(Conf::get().sValue("default_whitelist_message"));
+		user->kick(Conf::get()->sValue("default_whitelist_message"));
 		return PACKET_OK;
 	  }
   }
@@ -168,7 +168,7 @@ int PacketHandler::login_request(User *user)
   // If user is banned
   if(user->checkBanned(player))
   {
-    user->kick(Conf::get().sValue("default_banned_message"));
+    user->kick(Conf::get()->sValue("default_banned_message"));
     return PACKET_OK;
   }
 
@@ -221,7 +221,7 @@ int PacketHandler::login_request(User *user)
   }
 
   // Send motd
-  std::ifstream motdfs(Conf::get().sValue("motd_file").c_str());
+  std::ifstream motdfs(Conf::get()->sValue("motd_file").c_str());
 
   std::string temp;
 
