@@ -134,7 +134,7 @@ void MapGen::init(int seed)
   heightMapBuilder.SetDestNoiseMap(heightMap);
   heightMapBuilder.SetDestSize(16, 16);
 
-  seaLevel = Conf::get().iValue("seaLevel");
+  seaLevel = Conf::get().iValue("sea_level");
   
   m_seed = seed;
 }
@@ -271,14 +271,14 @@ void MapGen::generateWithNoise(int x, int z)
     }
   }
   //CaveGen::get().AddCaves(blockslibnoise);
-  if(Conf::get().bValue("addBeaches"))
+  if(Conf::get().bValue("add_beaches"))
     AddBeaches();
 }
 
 void MapGen::AddBeaches() 
 {
-  int beachExtent = Conf::get().iValue("beachExtent");
-  int beachHeight = Conf::get().iValue("beachHeight");
+  int beachExtent = Conf::get().iValue("beach_extent");
+  int beachHeight = Conf::get().iValue("beach_height");
   
   int beachExtentSqr = (beachExtent + 1) * (beachExtent + 1);
   for(int x = 0; x < 16; x++) 

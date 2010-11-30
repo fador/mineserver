@@ -74,12 +74,7 @@ void Map::initMap()
   printf("initMap()\n");
 #endif
 
-  this->mapDirectory = Conf::get().sValue("mapdir");
-  if(this->mapDirectory == "Not found!")
-  {
-    std::cout << "Error, mapdir not defined!" << std::endl;
-    exit(EXIT_FAILURE);
-  }
+  this->mapDirectory = Conf::get().sValue("map_directory");
 
   std::string infile = mapDirectory+"/level.dat";
 
@@ -122,8 +117,6 @@ void Map::initMap()
 
   NBT_Value *root = NBT_Value::LoadFromFile(infile);
   NBT_Value &data = *((*root)["Data"]);
-
-  (*root).Print();
 
   spawnPos.x() = (sint32)*data["SpawnX"];
   spawnPos.y() = (sint32)*data["SpawnY"];
