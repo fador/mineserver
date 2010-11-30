@@ -305,11 +305,67 @@ void showMOTD(User *user, std::string command, std::deque<std::string> args)
   motdfs.close();
   
 }
+void emote(User *user, std::string command, std::deque<std::string> args)
+{
+  std::string emoteMsg;
+  while(!args.empty())
+  {
+    emoteMsg += args[0] + " ";
+    args.pop_front();
+  }
+  
+  if(emoteMsg.empty())
+    reportError(user, "Usage: /me message");
+  else
+    Chat::get().sendMsg(user, COLOR_DARK_ORANGE + "* " + user->nick + " " + emoteMsg, Chat::ALL);
+}
+void whisper(User *user, std::string command, std::deque<std::string> args)
+{
+  if(!args.empty())
+  {
+    std::string targetNick = args[0];
+
+    User *tUser        = getUserByNick(targetNick);
+
+    if(tUser != NULL)
+    {
+      args.pop_front();
+      std::string whisperMsg;
+      while(!args.empty())
+      {
+        whisperMsg += args[0] + " ";
+        args.pop_front();
+      }
+      
+      Chat::get().sendMsg(tUser, COLOR_YELLOW + user->nick + " whispers: " + COLOR_GREEN + whisperMsg, Chat::USER);
+      Chat::get().sendMsg(user, COLOR_YELLOW + "You whisper to " + tUser->nick + ": " + COLOR_GREEN + whisperMsg, Chat::USER);
+    }
+    else
+      reportError(user, "User " + targetNick + " not found (see /players)");
+  }
+  else
+    reportError(user, "Usage: /" + command + " player [message]");
+}
+
 void setTime(User *user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 1)
   {
-    Map::get().mapTime = (sint64)atoi(args[0].c_str());
+    std::string timeValue = args[0];
+    
+    // Check for time labels
+    if(timeValue == "day" || timeValue == "morning")
+      timeValue = "24000";
+    else if (timeValue == "dawn")
+      timeValue = "22500";
+    else if (timeValue == "noon")
+      timeValue = "6000";
+    else if (timeValue == "dusk")
+      timeValue = "12000";
+    else if (timeValue == "night" || timeValue == "midnight")
+      timeValue = "18000";
+      
+    Map::get().mapTime = (sint64)atoi(timeValue.c_str());
     Packet pkt;
     pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get().mapTime;
     if(Users.size())
@@ -547,27 +603,30 @@ void setHealth(User *user, std::string command, std::deque<std::string> args)
 void Chat::registerStandardCommands()
 {
   // Players
-  registerCommand("about", about, false);
-  registerCommand("home", home, false);
-  registerCommand("kit", kit, false);
-  registerCommand("motd", showMOTD, false);
-  registerCommand("players", playerList, false);
-  registerCommand("rules", rules, false);
+  registerCommand(parseCmd("about"), about, false);
+  registerCommand(parseCmd("home"), home, false);
+  registerCommand(parseCmd("kit"), kit, false);
+  registerCommand(parseCmd("motd"), showMOTD, false);
+  registerCommand(parseCmd("players"), playerList, false);
+  registerCommand(parseCmd("who"), playerList, false);
+  registerCommand(parseCmd("rules"), rules, false);
+  registerCommand(parseCmd("e em emote me"), emote, false);
+  registerCommand(parseCmd("whisper w tell t"), whisper, false);
 
   // Admins Only
-  registerCommand("ban", ban, true);
-  registerCommand("ctp", coordinateTeleport, true);
-  registerCommand("give", giveItems, true);
-  registerCommand("gps", showPosition, true);
-  registerCommand("kick", kick, true);
-  registerCommand("motd", showMOTD, false);
-  registerCommand("mute", mute, true);
-  registerCommand("regen", regenerateLighting, true);
-  registerCommand("reload", reloadConfiguration, true);
-  registerCommand("save", saveMap, true);  
-  registerCommand("sethealth", setHealth, true);
-  registerCommand("settime", setTime, true);
-  registerCommand("tp", userTeleport, true);
-  registerCommand("unban", unban, true);
-  registerCommand("unmute", unmute, true);
+  registerCommand(parseCmd("ban"), ban, true);
+  registerCommand(parseCmd("ctp"), coordinateTeleport, true);
+  registerCommand(parseCmd("give"), giveItems, true);
+  registerCommand(parseCmd("gps"), showPosition, true);
+  registerCommand(parseCmd("kick"), kick, true);
+  registerCommand(parseCmd("motd"), showMOTD, false);
+  registerCommand(parseCmd("mute"), mute, true);
+  registerCommand(parseCmd("regen"), regenerateLighting, true);
+  registerCommand(parseCmd("reload"), reloadConfiguration, true);
+  registerCommand(parseCmd("save"), saveMap, true);  
+  registerCommand(parseCmd("sethealth"), setHealth, true);
+  registerCommand(parseCmd("settime"), setTime, true);
+  registerCommand(parseCmd("tp"), userTeleport, true);
+  registerCommand(parseCmd("unban"), unban, true);
+  registerCommand(parseCmd("unmute"), unmute, true);
 }

@@ -50,7 +50,7 @@ public:
   bool loadBanned(std::string bannedFile);
   bool loadWhitelist(std::string whitelistFile);
   bool checkMotd(std::string motdFile);
-  void registerCommand(std::string name, ChatCommand command, bool adminOnly);
+  void registerCommand(std::deque<std::string> words, ChatCommand command, bool adminOnly);
   static Chat &get();
 private:
   typedef std::map<std::string, ChatCommand> CommandList;
