@@ -30,18 +30,18 @@ We are trying to minimize memory and cpu usage compared to original Java server.
  * Basic physics for gravel and sand
  * Experimental physics for water and lava
  * Flatland map generation
- * Working chests
+ * Working chests & signs
  * Terrain generation
   
 ### ToDo (Arranged by priority)
- * Getting furnaces and signs to work (In progress)
+ * Getting furnaces to work (In progress)
  * Plugin support (and Lua plugin for scripting)
  * Transaction Logging (In progress)
  * Multithreading
  * Server console
  * Growing trees and cactuses
  * One-click update
- * and more
+ * and more!
  
 ### Chat commands
 
@@ -50,23 +50,28 @@ We are trying to minimize memory and cpu usage compared to original Java server.
 *  /players : Lists online players
 *  /about : Server name & version
 *  /rules : Shows server rules
-*  /home : Teleports user to map spawn location
+*  /home : Teleports player to map spawn location
 *  /kit (name) : Gives kit. Items for kit defined in config.cfg with kit_(name) using itemId's
+*  /motd : Displays Message Of The Day
 
 **Admin only**
 
 *  %text : Servermessage 
 *  &text : Admin-only message
-*  /kick nick (kickmsg) : Kicks user with optional kick message
+*  /kick player [kickmsg] : Kicks player with optional kick message
+*  /ban player [reason] : Bans (and kicks if online) player from server
+*  /unban player : Lift a ban
 *  /save : Manually save map to disc
 *  /ctp x y z : Teleport to coordinates (eg. /ctp 100 100 100)
-*  /tp nick : Teleport yourself to nick's position
-*  /tp nick1 nick2 : Teleport nick1 to nick2
+*  /tp player : Teleport yourself to player's position
+*  /tp player1 player2 : Teleport player1 to player2
 *  /reload : Reload admins and configuration
-*  /give nick id/alias (count) : Gives nick count pieces of id/alias. count = 1 is used if it is not provided. Support for over 64 items. Aliases configurable with item_alias.cfg
-*  /rules nick : Shows server rules (from rules.txt) to nick
-*  /gps (nick) : Without nick shows own coordinates. With nick shows nick's coordinates
-*  /settime (time) : Sets server time. time = 0-24000 (0 and 24000 is day and about 15000 is night)
+*  /give player id/alias (count) : Gives player count pieces of id/alias. count = 1 is used if it is not provided. Support for over 64 items. Aliases configurable with item_alias.cfg
+*  /rules player : Shows server rules (from rules.txt) to player
+*  /gps [player] : Without player shows own coordinates & heading. With player shows player's coordinates & heading
+*  /settime time : Sets server time. time = 0-24000 (0 and 24000 is day and about 15000 is night)
+*  /mute player [reason] : Mutes player with optional reason
+*  /unmute player : Unmutes player
  
 ### Compiling
 Depends on (and tested with):
@@ -93,7 +98,7 @@ Depends on (and tested with):
 
  * Download and extract source or use `git clone git://github.com/fador/mineserver.git`
  * Go to mineserver/src/ directory
- * Run `make`
+ * Run `make` (!! With Debian based linux run `make DEBIAN=1` )
  * Run server with `./mineserver`
 
 **Compiling using FreeBSD / PCBSD (gmake & g++):**

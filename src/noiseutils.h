@@ -27,10 +27,10 @@
 #include <string.h>
 #include <string>
 
-#ifdef WIN32
-#include <noise/noise.h>
-#else
+#ifdef DEBIAN
 #include <libnoise/noise.h>
+#else
+#include <noise/noise.h>
 #endif
 
 //using namespace noise;

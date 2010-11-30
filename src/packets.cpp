@@ -27,11 +27,8 @@
 
 #include <stdlib.h>
 #ifdef WIN32
-  #define _CRTDBG_MAP_ALLOC
-  #include <crtdbg.h>
   #include <conio.h>
   #include <winsock2.h>
-//  #define ZLIB_WINAPI
 #else
   #include <sys/socket.h>
   #include <netinet/in.h>
@@ -65,6 +62,13 @@
 #include "nbt.h"
 #include "packets.h"
 #include "physics.h"
+#include "plugin.h"
+
+#ifdef WIN32
+    #define M_PI 3.141592653589793238462643
+#endif
+#define DEGREES_TO_RADIANS(x) ((x) / 180.0 * M_PI)
+#define RADIANS_TO_DEGREES(x) ((x) / M_PI * 180.0)
 
 void PacketHandler::initPackets()
 {
@@ -79,7 +83,7 @@ void PacketHandler::initPackets()
                                                      &PacketHandler::chat_message);
   packets[PACKET_PLAYER_INVENTORY]         = Packets(PACKET_VARIABLE_LEN,
                                                      &PacketHandler::player_inventory);
-  packets[PACKET_USE_ENTITY]               = Packets( 8, &PacketHandler::use_entity);
+  packets[PACKET_USE_ENTITY]               = Packets( 9, &PacketHandler::use_entity);
   packets[PACKET_PLAYER]                   = Packets( 1, &PacketHandler::player);
   packets[PACKET_PLAYER_POSITION]          = Packets(33, &PacketHandler::player_position);
   packets[PACKET_PLAYER_LOOK]              = Packets( 9, &PacketHandler::player_look);
@@ -93,6 +97,7 @@ void PacketHandler::initPackets()
                                                      &PacketHandler::disconnect);
   packets[PACKET_COMPLEX_ENTITIES]         = Packets(PACKET_VARIABLE_LEN,
                                                      &PacketHandler::complex_entities);
+  packets[PACKET_RESPAWN]                  = Packets( 0, &PacketHandler::respawn);
 
 }
 
@@ -136,6 +141,23 @@ int PacketHandler::login_request(User *user)
   if((int)Users.size() >= Conf::get().iValue("userlimit"))
   {
     user->kick(Conf::get().sValue("server_full_message"));
+    return PACKET_OK;
+  }
+
+  // Check if user is on the whitelist
+  // But first, is it enabled?
+  if(Conf::get().bValue("use_whitelist") == true) {
+	  if(user->checkWhitelist(player))
+	  {
+		user->kick(Conf::get().sValue("default_whitelist_message"));
+		return PACKET_OK;
+	  }
+  }
+
+  // If user is banned
+  if(user->checkBanned(player))
+  {
+    user->kick(Conf::get().sValue("default_banned_message"));
     return PACKET_OK;
   }
 
@@ -188,7 +210,7 @@ int PacketHandler::login_request(User *user)
   }
 
   // Send motd
-  std::ifstream motdfs( MOTDFILE.c_str());
+  std::ifstream motdfs(Conf::get().sValue("motd_file").c_str());
 
   std::string temp;
 
@@ -221,6 +243,7 @@ int PacketHandler::login_request(User *user)
   //Spawn other users for connected user
   user->spawnOthers();
 
+  user->sethealth(user->health);
   user->logged = true;
 
   Chat::get().sendMsg(user, player+" connected!", Chat::ALL);
@@ -301,14 +324,14 @@ int PacketHandler::player_inventory(User *user)
     break;
 
   //Equipped armour
-  case -3:
+  case -2:
     //items = 4;
     memset(user->inv.equipped, 0, sizeof(Item)*4);
     slots = (Item *)&user->inv.equipped;
     break;
 
   //Crafting slots
-  case -2:
+  case -3:
     //items = 4;
     memset(user->inv.crafting, 0, sizeof(Item)*4);
     slots = (Item *)&user->inv.crafting;
@@ -415,7 +438,8 @@ int PacketHandler::player_digging(User *user)
   sint8 status,y;
   sint32 x,z;
   sint8 direction;
-
+  uint8 block;
+  uint8 meta;
   user->buffer >> status >> x >> y >> z >> direction;
 
   if(!user->buffer)
@@ -423,200 +447,99 @@ int PacketHandler::player_digging(User *user)
 
   user->buffer.removePacket();
 
-  //When player starts diggins
-  if(status == BLOCK_STATUS_STARTED_DIGGING)
+  Callback callback = Plugin::get().getBlockCallback(block);
+  Function event;
+  Function::invoker_type inv(user, status, x, y, z, direction);
+
+  switch(status)
   {
-    uint8 block,metadata;
-    Map::get().getBlock(x, y, z, &block, &metadata);
-    // Door status change  
-    if (block == BLOCK_WOODEN_DOOR || 
-        block == BLOCK_IRON_DOOR)
-    {
-      
-      // Toggle door state
-      if (metadata & 0x4)
-      {
-        metadata &= (0x8 | 0x3);
-      }
-      else
-      {
-        metadata |= 0x4;
-      }
+     case BLOCK_STATUS_STARTED_DIGGING:
+       event = callback.get("onStartedDigging");
+       if (event) inv(event);
+     break;
+     case BLOCK_STATUS_DIGGING:
+     break;
+     case BLOCK_STATUS_STOPPED_DIGGING:
+     break;
+     case BLOCK_STATUS_BLOCK_BROKEN:
+       event = callback.get("onBroken");
+       if (event) inv(event);
 
-      uint8 metadata2, block2;
+       /* notify neighbour blocks of the broken block */
+       status = block;
+       if (Map::get().getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
+       {
+          callback = Plugin::get().getBlockCallback(block);
+          inv = Function::invoker_type(user, status, x+1, y, z, BLOCK_SOUTH);
+          event = callback.get("onNeighbourBroken");
+          if (event) inv(event);
+       }
+       
+       if (Map::get().getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
+       {
+          callback = Plugin::get().getBlockCallback(block);
+          inv = Function::invoker_type(user, status, x-1, y, z, BLOCK_NORTH);
+          event = callback.get("onNeighbourBroken");
+          if (event) inv(event);
+       }
 
-      int modifier = (metadata & 0x8) ? -1 : 1;
+       if (Map::get().getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
+       {
+          callback = Plugin::get().getBlockCallback(block);
+          inv = Function::invoker_type(user, status, x, y+1, z, BLOCK_TOP);
+          event = callback.get("onNeighbourBroken");
+          if (event) inv(event);
+       }
+       
+       if (Map::get().getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
+       {
+          callback = Plugin::get().getBlockCallback(block);
+          inv = Function::invoker_type(user, status, x, y-1, z, BLOCK_BOTTOM);
+          event = callback.get("onNeighbourBroken");
+          if (event) inv(event);
+       }
 
-      Map::get().setBlock(x, y, z, block, metadata, user->nick);
-      Map::get().sendBlockChange(x, y, z, (char)block, metadata);  
-
-      Map::get().getBlock(x, y + modifier, z, &block2, &metadata2);
-
-      if (block2 == block)
-      {
-        metadata2 = metadata;
-      
-        if(metadata & 0x8)
-          metadata2 &= 0x7;
-        else
-          metadata2 |= 0x8;
-
-        Map::get().setBlock(x, y + modifier, z, block2, metadata2, user->nick);
-        Map::get().sendBlockChange(x, y + modifier, z, (char)block, metadata2);     
-      
-      }
-      return PACKET_OK;
-    }
-
-  }
-
-
-  //If block broken
-  else if(status == BLOCK_STATUS_BLOCK_BROKEN)
-  {
-    uint8 block; uint8 meta;
-    if(Map::get().getBlock(x, y, z, &block, &meta))
-    {
-      Map::get().sendBlockChange(x, y, z, 0, 0);
-      Map::get().setBlock(x, y, z, 0, 0, user->nick);
-
-      uint8 topblock; uint8 topmeta;
-
-      // Destroy items on sides
-      if(Map::get().getBlock(x+1, y, z, &topblock, &topmeta) && (topblock == BLOCK_TORCH && topmeta == BLOCK_NORTH))
-      {
-         Map::get().sendBlockChange(x+1, y, z, 0, 0);
-         Map::get().setBlock(x+1, y, z, 0, 0, user->nick);
-         Map::get().createPickupSpawn(x+1, y, z, topblock, 1);
-      }
-
-      if(Map::get().getBlock(x-1, y, z, &topblock, &topmeta) && (topblock == BLOCK_TORCH && topmeta == BLOCK_SOUTH))
-      {
-         Map::get().sendBlockChange(x-1, y, z, 0, 0);
-         Map::get().setBlock(x-1, y, z, 0, 0, user->nick);
-         Map::get().createPickupSpawn(x-1, y, z, topblock, 1);
-      }
-
-      if(Map::get().getBlock(x, y, z+1, &topblock, &topmeta) && (topblock == BLOCK_TORCH && topmeta == BLOCK_EAST))
-      {
-         Map::get().sendBlockChange(x, y, z+1, 0, 0);
-         Map::get().setBlock(x, y, z+1, 0, 0,user->nick);
-         Map::get().createPickupSpawn(x, y, z+1, topblock, 1);
-      }
-
-      if(Map::get().getBlock(x, y, z-1, &topblock, &topmeta) && (topblock == BLOCK_TORCH && topmeta == BLOCK_WEST))
-      {
-         Map::get().sendBlockChange(x, y, z-1, 0, 0);
-         Map::get().setBlock(x, y, z-1, 0, 0, user->nick);
-         Map::get().createPickupSpawn(x, y, z-1, topblock, 1);
-      }
-
-      //Destroy items on top
-      if(Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && (topblock == BLOCK_SNOW ||
-                                                                 topblock ==
-                                                                 BLOCK_BROWN_MUSHROOM ||
-                                                                 topblock == BLOCK_RED_MUSHROOM ||
-                                                                 topblock == BLOCK_YELLOW_FLOWER ||
-                                                                 topblock == BLOCK_RED_ROSE ||
-                                                                 topblock == BLOCK_SAPLING ||
-                                                                 (topblock == BLOCK_TORCH && topmeta == BLOCK_TOP)))
-      {
-        Map::get().sendBlockChange(x, y+1, z, 0, 0);
-        Map::get().setBlock(x, y+1, z, 0, 0, user->nick);
-        //Others than snow will spawn
-        if(topblock != BLOCK_SNOW)
-        {
-          Map::get().createPickupSpawn(x, y+1, z, topblock, 1);
-        }
-      }
-
-      if(block != BLOCK_SNOW && (int)block > 0 && (int)block < 255)
-      {
-        spawnedItem item;
-        bool spawnItem = false;
-        
-        // Spawn drop according to BLOCKDROPS
-        // Check probability
-        if(BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand() % 10000)
-        {
-          item.item  = BLOCKDROPS[block].item_id;
-          item.count = BLOCKDROPS[block].count;
-          spawnItem = true;
-        }
-        else if(!BLOCKDROPS.count(block) || !BLOCKDROPS[block].exclusive)
-        {
-          item.item  = (int)block;
-          item.count = 1;
-          spawnItem = true;
-        }
-        
-        if (spawnItem)
-        {
-
-          item.EID    = generateEID();
-          item.health = 0;
-          
-          item.pos.x()  = x * 32;
-          item.pos.y()  = y * 32;
-          item.pos.z()  = z * 32;
-          
-          //Randomize spawn position a bit
-          item.pos.x() += 5 + (rand() % 22);
-          item.pos.z() += 5 + (rand() % 22);
-
-          // If count is greater than 0
-          if(item.count > 0)
-            Map::get().sendPickupSpawn(item);
-        }
-      }
-
-      // Check liquid physics
-      Physics::get().checkSurrounding(vec(x, y, z));
-
-
-      // Block physics for BLOCK_GRAVEL and BLOCK_SAND and BLOCK_SNOW
-      while(Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && (topblock == BLOCK_GRAVEL ||
-                                                                    topblock == BLOCK_SAND ||
-                                                                    topblock == BLOCK_SNOW ||
-                                                                    topblock ==
-                                                                    BLOCK_BROWN_MUSHROOM ||
-                                                                    topblock ==
-                                                                    BLOCK_RED_MUSHROOM ||
-                                                                    topblock ==
-                                                                    BLOCK_YELLOW_FLOWER ||
-                                                                    topblock == BLOCK_RED_ROSE ||
-                                                                    topblock == BLOCK_SAPLING))
-      {
-        // Destroy original block
-        Map::get().sendBlockChange(x, y+1, z, 0, 0);
-        Map::get().setBlock(x, y+1, z, 0, 0, user->nick);
-
-        Map::get().setBlock(x, y, z, topblock, topmeta, user->nick);
-        Map::get().sendBlockChange(x, y, z, topblock, topmeta);
-
-        y++;
-      }
-    }
+       if (Map::get().getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
+       {
+          callback = Plugin::get().getBlockCallback(block);
+          inv = Function::invoker_type(user, status, x, y, z+1, BLOCK_WEST);
+          event = callback.get("onNeighbourBroken");
+          if (event) inv(event);
+       }
+       
+       if (Map::get().getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
+       {
+          callback = Plugin::get().getBlockCallback(block);
+          inv = Function::invoker_type(user, status, x, y, z-1, BLOCK_EAST);
+          event = callback.get("onNeighbourBroken");
+          if (event) inv(event);
+       }
+     break;
   }
   return PACKET_OK;
 }
 
 int PacketHandler::player_block_placement(User *user)
 {
-  sint8 y, oy, direction;
-  sint16 blockID;
-  sint32 x, z, ox, oz;
+  sint8 y, direction;
+  sint16 newblock;
+  sint32 x, z;
+  /* replacement of block */
+  uint8 oldblock;
+  uint8 metadata;
+  /* neighbour blocks */
+  uint8 block;
+  uint8 meta;
 
-  user->buffer >> blockID >> x >> y >> z >> direction;
+  user->buffer >> newblock >> x >> y >> z >> direction;
 
   if(!user->buffer)
     return PACKET_NEED_MORE_DATA;
 
   user->buffer.removePacket();
-  
-  ox = x;
-  oy = y;
-  oz = z;
+
+  if ((newblock > 0xFF || newblock == -1) && newblock != ITEM_SIGN)
+     return PACKET_OK;
   
   // TODO: Handle processing of 
   if(direction == -1)
@@ -626,358 +549,77 @@ int PacketHandler::player_block_placement(User *user)
     return PACKET_OK;
     
   #ifdef _DEBUG
-    std::cout << "Block_placement: " << blockID << " (" << x << "," << (int)y << "," << z << ") dir: " << (int)direction << std::endl;
+    std::cout << "Block_placement: " << newblock << " (" << x << "," << (int)y << "," << z << ") dir: " << (int)direction << std::endl;
   #endif
-  uint8 block;
-  uint8 metadata;
-  Map::get().getBlock(x, y, z, &block, &metadata);
-  
-  switch(direction)
+
+  if (direction)
+    direction = 6-direction;
+
+  if (Map::get().getBlock(x, y, z, &oldblock, &metadata)) 
   {
-    case 0: y--; break;
-    case 1: y++; break;
-    case 2: z--; break;
-    case 3: z++; break;
-    case 4: x--; break;
-    case 5: x++; break;
+     Callback callback;
+     Function event;
+     Function::invoker_type inv(user, newblock, x, y, z, direction);
+
+     callback = Plugin::get().getBlockCallback(oldblock);
+     event = callback.get("onReplace");
+     if (event) inv(event);  
+
+     callback = Plugin::get().getBlockCallback(newblock);
+     event = callback.get("onPlace");
+     if (event) inv(event);
+
+     /* notify neighbour blocks of the placed block */
+     if (Map::get().getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
+     {
+        callback = Plugin::get().getBlockCallback(block);
+        inv = Function::invoker_type(user, newblock, x+1, y, z, BLOCK_SOUTH);
+        event = callback.get("onNeighbourPlace");
+        if (event) inv(event);
+     }
+    
+     if (Map::get().getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
+     {
+        callback = Plugin::get().getBlockCallback(block);
+        inv = Function::invoker_type(user, newblock, x-1, y, z, BLOCK_NORTH);
+        event = callback.get("onNeighbourPlace");
+        if (event) inv(event);
+     }
+
+     if (Map::get().getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
+     {
+        callback = Plugin::get().getBlockCallback(block);
+        inv = Function::invoker_type(user, newblock, x, y+1, z, BLOCK_TOP);
+        event = callback.get("onNeighbourPlace");
+        if (event) inv(event);
+     }
+    
+     if (Map::get().getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
+     {
+        callback = Plugin::get().getBlockCallback(block);
+        inv = Function::invoker_type(user, newblock, x, y-1, z, BLOCK_BOTTOM);
+        event = callback.get("onNeighbourPlace");
+        if (event) inv(event);
+     }
+
+     if (Map::get().getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
+     {
+        callback = Plugin::get().getBlockCallback(block);
+        inv = Function::invoker_type(user, newblock, x, y, z+1, BLOCK_WEST);
+        event = callback.get("onNeighbourPlace");
+        if (event) inv(event);
+     }
+
+     if (Map::get().getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
+     {
+        callback = Plugin::get().getBlockCallback(block);
+        inv = Function::invoker_type(user, newblock, x, y, z-1, BLOCK_EAST);
+        event = callback.get("onNeighbourPlace");
+        if (event) inv(event);
+     }
   }
-  
-  uint8 block_direction;
-  uint8 metadata_direction;
-  Map::get().getBlock(x, y, z, &block_direction, &metadata_direction);
-  
-  uint8 block_bottom;
-  uint8 metadata_bottom;
-  Map::get().getBlock(x, y - 1, z, &block_bottom, &metadata_bottom);
-  
+  /* TODO: Should be removed from here. Only needed for liquid related blocks? */
   Physics::get().checkSurrounding(vec(x, y, z));
-  
-  
-  // If the "placing-on" block is a block that you cannot place blocks on
-  
-  if (block == BLOCK_WORKBENCH       ||
-      block == BLOCK_FURNACE         ||
-      block == BLOCK_BURNING_FURNACE ||
-      block == BLOCK_CHEST           ||
-      block == BLOCK_JUKEBOX         ||
-      block == BLOCK_TORCH)
-    return PACKET_OK;    
-  
-  // Door status change  
-  if (block == BLOCK_WOODEN_DOOR || 
-      block == BLOCK_IRON_DOOR)
-  {
-    blockID = block;
-    // Toggle door state
-    if (metadata & 0x4)
-    {
-      metadata &= (0x8 | 0x3);
-    }
-    else
-    {
-      metadata |= 0x4;
-    }
-
-    uint8 metadata2, block2;
-
-    int modifier = (metadata & 0x8) ? -1 : 1;
-
-    x = ox;
-    y = oy;
-    z = oz;
-
-    Map::get().setBlock(x, y, z, block, metadata,user->nick);
-    Map::get().sendBlockChange(x, y, z, (char)blockID, metadata);  
-
-    Map::get().getBlock(x, y + modifier, z, &block2, &metadata2);
-
-    if (block2 == block)
-    {
-      metadata2 = metadata;
-      
-      if(metadata & 0x8)
-        metadata2 &= 0x7;
-      else
-        metadata2 |= 0x8;
-
-      Map::get().setBlock(x, y + modifier, z, block2, metadata2, user->nick);
-      Map::get().sendBlockChange(x, y + modifier, z, (char)blockID, metadata2);     
-      
-    }
-    return PACKET_OK;
-  }
-
-  //Sign placement
-  if(blockID == ITEM_SIGN)
-  {
-    if(direction == 0)
-    {
-      return PACKET_OK;
-    }
-    //This will make a sign post
-    else if(direction == 1)
-    {
-      blockID = BLOCK_SIGN_POST;
-      //This should be calculated from player position!
-      metadata = 0;
-    }
-    //Else wall sign
-    else
-    {
-      blockID = BLOCK_WALL_SIGN;
-      metadata = direction;
-    }
-  }
-
-  // If the block is invalid  
-  if (blockID > 0xFF || blockID == -1)
-    return PACKET_OK;
-    
-    
-  // Can't place fire on/in water
-  
-  if (blockID == BLOCK_FIRE                     &&
-        (block_bottom == BLOCK_WATER            ||
-         block_bottom == BLOCK_STATIONARY_WATER ||
-         block == BLOCK_WATER                   ||
-         block == BLOCK_STATIONARY_WATER))
-    return PACKET_OK;
-    
-    
-  // Check if the directed block is replace-able
-  
-  //Blocks that drop items once replaced
-  if (block_direction != BLOCK_TORCH && 
-      block_direction != BLOCK_REDSTONE_TORCH_OFF &&
-      block_direction != BLOCK_REDSTONE_TORCH_ON &&
-      block_direction != BLOCK_BROWN_MUSHROOM &&
-      block_direction != BLOCK_RED_MUSHROOM &&
-      block_direction != BLOCK_YELLOW_FLOWER &&
-      block_direction != BLOCK_RED_ROSE &&
-      block_direction != BLOCK_SAPLING)
-  {
-    //Blocks that are simply replaced
-    if (block_direction != BLOCK_AIR &&
-        block_direction != BLOCK_WATER &&
-        block_direction != BLOCK_STATIONARY_WATER &&
-        block_direction != BLOCK_LAVA &&
-        block_direction != BLOCK_STATIONARY_LAVA &&
-        block_direction != BLOCK_SNOW &&
-        block_direction != BLOCK_FIRE)
-      {
-        // It's not an overwritable block
-        return PACKET_OK;
-      }
-  }
-  else
-  {
-    // Drop the item representing the block
-    //TODO: Drop the item
-  }
-
-
-  // Overwrite over these blocks (Target block)
- 
-  if (block == BLOCK_SNOW || 
-      block == BLOCK_FIRE ||
-      block == BLOCK_TORCH || 
-      block == BLOCK_REDSTONE_TORCH_OFF ||
-      block == BLOCK_REDSTONE_TORCH_ON ||
-      block == BLOCK_BROWN_MUSHROOM ||
-      block == BLOCK_RED_MUSHROOM ||
-      block == BLOCK_YELLOW_FLOWER ||
-      block == BLOCK_RED_ROSE ||
-      block == BLOCK_SAPLING)
-  {
-    x = ox;
-    y = oy;
-    z = oz;
-  }
-  
-  
-  
-  // Jack-O-Lantern
-  
-  if (blockID == BLOCK_JACK_O_LANTERN)
-  {
-    // Where the visage face
-    // -Z -> East   0x0
-    // +X -> South  0x1
-    // +Z -> West   0x2
-    // -X -> North  0x3
-    // Anything else, no visage
-
-    // We place according to the player's position
-
-    double diffX = x - user->pos.x;
-    double diffZ = z - user->pos.z;
-    
-    if (std::abs(diffX) > std::abs(diffZ))
-    {
-      // We compare on the x axis
-      
-      if (diffX > 0)
-        metadata = 0x3;
-      else
-        metadata = 0x1;
-    }
-    else
-    {
-      // We compare on the z axis
-      
-      if (diffZ > 0)
-        metadata = 0x0;
-      else
-        metadata = 0x2;
-    }
-  }
-  
-  
-  // If the block is stairs, place them in the right direction
-  
-  if (blockID == BLOCK_WOODEN_STAIRS ||
-      blockID == BLOCK_COBBLESTONE_STAIRS)
-  {
-    // Where the stairs ascend
-    // +X -> South  0x0
-    // -X -> North  0x1
-    // +Z -> West   0x2
-    // -Z -> East   0x3
-    
-    //TODO: Check the surrounding for other stairs and allign it with them.
-
-    // We cannot place stairs over a weak block
-    if (block_bottom == BLOCK_TORCH ||
-        block_bottom == BLOCK_REDSTONE_TORCH_OFF ||
-        block_bottom == BLOCK_REDSTONE_TORCH_ON ||
-        block_bottom == BLOCK_BROWN_MUSHROOM ||
-        block_bottom == BLOCK_RED_MUSHROOM ||
-        block_bottom == BLOCK_YELLOW_FLOWER ||
-        block_bottom == BLOCK_RED_ROSE ||
-        block_bottom == BLOCK_SAPLING ||
-        block_bottom == BLOCK_AIR ||
-        block_bottom == BLOCK_WATER ||
-        block_bottom == BLOCK_STATIONARY_WATER ||
-        block_bottom == BLOCK_LAVA ||
-        block_bottom == BLOCK_STATIONARY_LAVA ||
-        block_bottom == BLOCK_SNOW ||
-        block_bottom == BLOCK_FIRE)
-      return PACKET_OK;
-
-    if (y == oy && (x != ox || y != oy || z != oz))
-    {
-      // We place according to the target block
-
-      if (x < ox)
-        metadata = 0x0;
-      else if (x > ox)
-        metadata = 0x1;
-      else if (z < oz)
-        metadata = 0x2;
-      else
-        metadata = 0x3;
-    }
-    else
-    {
-      // We place according to the player's position
-
-      double diffX = x - user->pos.x;
-      double diffZ = z - user->pos.z;
-      
-      if (std::abs(diffX) > std::abs(diffZ))
-      {
-        // We compare on the x axis
-        
-        if (diffX > 0)
-          metadata = 0x0;
-        else
-          metadata = 0x1;
-      }
-      else
-      {
-        // We compare on the z axis
-        
-        if (diffZ > 0)
-          metadata = 0x2;
-        else
-          metadata = 0x3;
-      }
-    }
-  }
-
-  // We can place saplings only on dirt or grass
-  
-  if (blockID == BLOCK_SAPLING &&
-        (block != BLOCK_GRASS ||
-        block != BLOCK_DIRT))
-    return PACKET_OK;
-  
-  
-  // Check block placement
-  
-  if (blockID != BLOCK_TORCH && 
-      blockID != BLOCK_REDSTONE_TORCH_OFF &&
-      blockID != BLOCK_REDSTONE_TORCH_ON &&
-      blockID != BLOCK_AIR &&
-      blockID != BLOCK_WATER &&
-      blockID != BLOCK_STATIONARY_WATER &&
-      blockID != BLOCK_LAVA &&
-      blockID != BLOCK_STATIONARY_LAVA &&
-      blockID != BLOCK_BROWN_MUSHROOM &&
-      blockID != BLOCK_RED_MUSHROOM &&
-      blockID != BLOCK_YELLOW_FLOWER &&
-      blockID != BLOCK_RED_ROSE &&
-      blockID != BLOCK_SAPLING &&
-      blockID != BLOCK_FIRE &&
-      blockID != BLOCK_REDSTONE_WIRE &&
-      blockID != BLOCK_SIGN_POST &&
-      blockID != BLOCK_LADDER &&
-      blockID != BLOCK_MINECART_TRACKS &&
-      blockID != BLOCK_WALL_SIGN &&
-      blockID != BLOCK_STONE_PRESSURE_PLATE &&
-      blockID != BLOCK_WOODEN_PRESSURE_PLATE &&
-      blockID != BLOCK_STONE_BUTTON &&
-      blockID != BLOCK_PORTAL)
-  {
-    double diffX = x - user->pos.x;
-    double diffY = y - user->pos.y;
-    double diffZ = z - user->pos.z;
-
-    //std::cout << user->pos.x << ", " << user->pos.y << ", " << user->pos.z << "  =>  " << diffX << ", " << diffY << ", " << diffZ << std::endl;
-    
-    //TODO: Check for doors and fences
-
-    // We check Y, X then Z
-    if (diffY > -0.9 && diffY < 1.3 && 
-        diffX > -1.3 && diffX < 0.3 && 
-        diffZ > -1.3 && diffZ < 0.3)
-      return PACKET_OK;
-  }
-  
-  
-  // Set the direction for the block
-  
-  if(blockID == BLOCK_TORCH ||
-     blockID == BLOCK_REDSTONE_TORCH_OFF ||
-     blockID == BLOCK_REDSTONE_TORCH_ON)
-  {
-    metadata = 0;
-    if (direction)
-       metadata = 6 - direction;
-  }
-  
-  
-  // Proceed to change the block
-  
-  Map::get().setBlock(x, y, z, (char)blockID, metadata, user->nick);
-  Map::get().sendBlockChange(x, y, z, (char)blockID, metadata);
-
-  if (blockID == BLOCK_WATER || 
-      blockID == BLOCK_STATIONARY_WATER ||
-      blockID == BLOCK_LAVA || 
-      blockID == BLOCK_STATIONARY_LAVA)
-    Physics::get().addSimulation(vec(x, y, z));
-
   return PACKET_OK;
 }
 
@@ -1037,22 +679,19 @@ int PacketHandler::pickup_spawn(User *user)
   if(!user->buffer)
     return PACKET_NEED_MORE_DATA;
 
-  //Client sends multiple packets with same EID, check for recent spawns
-  for(int i=0;i<10;i++)
-  {
-    if(user->recentSpawn[i] == item.EID)
-    {
-      return PACKET_OK;
-    }
-  }
-
-  //Put this EID in the next slot
-  user->recentSpawn[user->recentSpawnPos++] = item.EID;
-  if(user->recentSpawnPos==10) user->recentSpawnPos=0;
+  user->buffer.removePacket();
 
   item.EID    = generateEID();
 
   item.spawnedBy = user->UID;
+  
+  // Modify the position of the dropped item so that it appears in front of user instead of under user
+  int distanceToThrow = 64;
+  float angle = DEGREES_TO_RADIANS(user->pos.yaw + 45);     // For some reason, yaw seems to be off to the left by 45 degrees from where you're actually looking?
+  int x = int(cos(angle) * distanceToThrow - sin(angle) * distanceToThrow);
+  int z = int(sin(angle) * distanceToThrow + cos(angle) * distanceToThrow);
+  item.pos += vec(x, 0, z);
+ 
   Map::get().sendPickupSpawn(item);
 
   return PACKET_OK;
@@ -1175,9 +814,40 @@ int PacketHandler::complex_entities(User *user)
 int PacketHandler::use_entity(User *user)
 {
   sint32 userID,target;
-  user->buffer >> userID >> target;
+  sint8 targetType;
+  user->buffer >> userID >> target >> targetType;
   if(!user->buffer)
     return PACKET_NEED_MORE_DATA;
+  user->buffer.removePacket();
 
+  if(targetType != 1) return PACKET_OK;
+
+  //This is used when punching users
+  for(uint32 i=0;i<Users.size();i++)
+  {
+    if(Users[i]->UID == target)
+    {
+      Users[i]->health--;
+      Users[i]->sethealth(Users[i]->health);
+      if(Users[i]->health <= 0)
+      {
+        Packet pkt;
+        pkt << PACKET_DEATH_ANIMATION << (sint32)Users[i]->UID << (sint8)3;
+        Users[i]->sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
+      }
+      break;
+    }
+  }
+
+
+  return PACKET_OK;
+}
+
+int PacketHandler::respawn(User *user)
+{
+  user->dropInventory();
+  user->respawn();
+  user->teleport(Map::get().spawnPos.x(), Map::get().spawnPos.y() + 2, Map::get().spawnPos.z());
+  user->buffer.removePacket();
   return PACKET_OK;
 }

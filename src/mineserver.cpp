@@ -27,24 +27,24 @@
 
 #include <stdlib.h>
 #ifdef WIN32
-  #define _CRTDBG_MAP_ALLOC
-  #include <crtdbg.h>
   #include <conio.h>
   #include <winsock2.h>
-//  #define ZLIB_WINAPI
+  #include <process.h>
 #else
   #include <sys/socket.h>
   #include <netinet/in.h>
   #include <arpa/inet.h>
   #include <string.h>
+  #include <netdb.h>
+  #include <unistd.h>
 #endif
-
 #include <sys/types.h>
 #include <fcntl.h>
-#include <cstdio>
+#include <cassert>
 #include <deque>
 #include <map>
 #include <iostream>
+#include <fstream>
 #include <event.h>
 #include <ctime>
 #include <vector>
@@ -53,9 +53,7 @@
 
 #include "constants.h"
 #include "mineserver.h"
-
 #include "logger.h"
-
 #include "sockets.h"
 #include "tools.h"
 #include "map.h"
@@ -66,7 +64,7 @@
 #include "nbt.h"
 #include "packets.h"
 #include "physics.h"
-
+#include "plugin.h"
 
 #ifdef WIN32
 static bool quit = false;
@@ -94,16 +92,14 @@ void sighandler(int sig_num)
   Mineserver::Get().Stop();
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
-  #ifdef WIN32
-  _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-  _CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_DEBUG );
-  #endif
   signal(SIGTERM, sighandler);
   signal(SIGINT, sighandler);
 
-  return Mineserver::Get().Run();
+  srand(time(NULL));
+
+  return Mineserver::Get().Run(argc, argv);
 }
 
 Mineserver::Mineserver()
@@ -115,37 +111,58 @@ event_base *Mineserver::GetEventBase()
   return m_eventBase;
 }
 
-int Mineserver::Run()
+int Mineserver::Run(int argc, char *argv[])
 {
-
   uint32 starttime = (uint32)time(0);
   uint32 tick      = (uint32)time(0);
 
   initConstants();
 
-  Chat::get().loadAdmins(ADMINFILE);
-  Chat::get().checkMotd(MOTDFILE);
+  std::string file_config;
+  file_config.assign(CONFIG_FILE);
 
-  //Initialize conf
-  Conf::get().load(CONFIGFILE);
-  // Load item aliases
-  Conf::get().load(ITEMALIASFILE);
+  if (argc > 1)
+    file_config.assign(argv[1]);
 
-  //Set physics enable state according to config
-  Physics::get().enabled = (Conf::get().iValue("liquid_physics") ? true : false);
+  // Initialize conf
+  Conf::get().load(file_config);
 
-  //Initialize map
+  // Write PID to file
+  std::ofstream pid_out((Conf::get().sValue("pid_file")).c_str());
+  if (!pid_out.fail())
+     #ifdef WIN32
+     pid_out << _getpid();
+     #else
+     pid_out << getpid();
+     #endif
+  pid_out.close();
+
+  // Load admin, banned and whitelisted users
+  Chat::get().loadAdmins(Conf::get().sValue("admin_file"));
+  Chat::get().loadBanned(Conf::get().sValue("banned_file"));
+  Chat::get().loadWhitelist(Conf::get().sValue("whitelist_file"));
+  // Load MOTD
+  Chat::get().checkMotd(Conf::get().sValue("motd_file"));
+
+  // Set physics enable state according to config
+  Physics::get().enabled = (Conf::get().bValue("liquid_physics"));
+
+  // Initialize map
   Map::get().initMap();
 
-  //Initialize packethandler
+  // Initialize packethandler
   PacketHandler::get().initPackets();
+
+  // Load ip from config
+  std::string ip = Conf::get().sValue("ip");
 
   // Load port from config
   int port = Conf::get().iValue("port");
+  
+  // Initialize plugins
+  Plugin::get().init();
 
 #ifdef WIN32
-  _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-  _CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_DEBUG );
   WSADATA wsaData;
   int iResult;
   // Initialize Winsock
@@ -169,14 +186,14 @@ int Mineserver::Run()
 
   if(m_socketlisten < 0)
   {
-    fprintf(stderr, "Failed to create listen socket\n");
+    std::cerr << "Failed to create listen socket" << std::endl;
     return 1;
   }
 
   memset(&addresslisten, 0, sizeof(addresslisten));
 
   addresslisten.sin_family      = AF_INET;
-  addresslisten.sin_addr.s_addr = INADDR_ANY;
+  addresslisten.sin_addr.s_addr = inet_addr(ip.c_str());
   addresslisten.sin_port        = htons(port);
 
   setsockopt(m_socketlisten, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse));
@@ -184,13 +201,13 @@ int Mineserver::Run()
   //Bind to port
   if(bind(m_socketlisten, (struct sockaddr *)&addresslisten, sizeof(addresslisten)) < 0)
   {
-    fprintf(stderr, "Failed to bind\n");
+    std::cerr << "Failed to bind" << std::endl;
     return 1;
   }
 
   if(listen(m_socketlisten, 5) < 0)
   {
-    fprintf(stderr, "Failed to listen to socket\n");
+    std::cerr << "Failed to listen to socket" << std::endl;
     return 1;
   }
 
@@ -215,7 +232,26 @@ int Mineserver::Run()
   "Version " << VERSION <<" by Fador & Nredor"<<
   std::endl << std::endl;
 
-  std::cout << "Listening at port " << port << std::endl;
+  if(ip == "0.0.0.0")
+  {
+    std::cout << "Listening on port " << port << std::endl;
+    // Print all local IPs
+    char name[255];
+    gethostname ( name, sizeof(name));
+    struct hostent *hostinfo = gethostbyname(name);
+    std::cout << "Server IP(s): ";
+    int ipIndex = 0;
+    while(hostinfo->h_addr_list[ipIndex]) {
+        if(ipIndex > 0) { std::cout << ", "; }
+        char *ip = inet_ntoa(*(struct in_addr *)hostinfo->h_addr_list[ipIndex++]);
+        std::cout << ip;
+    }
+    std::cout << std::endl;
+  }
+  else
+  {
+    std::cout << "Listening on " << ip << ":" << port << std::endl;
+  }
 
   timeval loopTime;
   loopTime.tv_sec  = 0;
@@ -243,7 +279,7 @@ int Mineserver::Run()
         Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());        
       }
 
-      //Try to load port from config
+      //Try to load release time from config
       int map_release_time = Conf::get().iValue("map_release_time");
 
       //Release chunks not used in <map_release_time> seconds
@@ -291,11 +327,6 @@ int Mineserver::Run()
   #else
     close(m_socketlisten);
   #endif
-
-  //Windows debug
-#ifdef WIN32
-  _CrtDumpMemoryLeaks();
-#endif
 
   return EXIT_SUCCESS;
 }

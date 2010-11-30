@@ -26,12 +26,10 @@
  */
 
 #ifdef WIN32
-    #define _CRTDBG_MAP_ALLOC
     #include <stdlib.h>
-    #include <crtdbg.h>
     #include <conio.h>
     #include <winsock2.h>
-typedef  int socklen_t;
+    typedef  int socklen_t;
 #else
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -162,7 +160,6 @@ void client_callback(int fd,
         //Call specific function
         int (PacketHandler::*function)(User *) = PacketHandler::get().packets[user->action].function;
         (PacketHandler::get().*function)(user);
-
       }
     } //End while
   }
@@ -173,7 +170,7 @@ void client_callback(int fd,
     int written = send(fd, (char*)user->buffer.getWrite(), writeLen, 0);
     if(written == -1)
     {
-      if((errno != EAGAIN && errno != EINTR) || user->write_err_count>20)
+      if((errno != EAGAIN && errno != EINTR) || user->write_err_count>200)
       {
         std::cout << "Error writing to client" << std::endl;
         //event_del(user->GetEvent());

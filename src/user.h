@@ -87,18 +87,21 @@ public:
   uint32 write_err_count;
   bool logged;
   bool admin;
+  bool banned;
+  bool whitelist;
+  bool muted;
+  sint16 health;
   unsigned int UID;
   std::string nick;
   position pos;
   vec curChunk;
   Inventory inv;
 
-  int recentSpawn[10];
-  uint8 recentSpawnPos;
-
   //Input buffer
   Packet buffer;
 
+  bool checkBanned(std::string _nick);
+  bool checkWhitelist(std::string _nick);
   bool changeNick(std::string _nick);
   bool updatePos(double x, double y, double z, double stance);
   bool updateLook(float yaw, float pitch);
@@ -117,6 +120,10 @@ public:
   // Kick player
   bool kick(std::string kickMsg);
 
+  // Mute
+  bool mute(std::string muteMsg);
+  bool unmute();
+  
   //Map related
 
   //Map queue
@@ -149,6 +156,9 @@ public:
   bool teleport(double x, double y, double z);
   bool spawnUser(int x, int y, int z);
   bool spawnOthers();
+  bool sethealth(int userHealth);
+  bool respawn();
+  bool dropInventory();
 
   struct event *GetEvent();
 };

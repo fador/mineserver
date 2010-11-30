@@ -52,10 +52,10 @@ bool Conf::load(std::string configFile)
   std::ifstream ifs(configFile.c_str());
 
   // If configfile does not exist
-  if(ifs.fail() && configFile == CONFIGFILE)
+  if(ifs.fail() && configFile == CONFIG_FILE)
   {
     // TODO: Load default configuration from the internets!
-    std::cout << ">>> " << configFile << " not found." << std::endl;
+    std::cout << "Error: " << configFile << " not found!" << std::endl;
 
     std::ofstream confofs(configFile.c_str());
     confofs << "#"                                                  << std::endl<<
@@ -63,7 +63,14 @@ bool Conf::load(std::string configFile)
                "#"                                                  << std::endl;
     confofs.close();
 
-    this->load(CONFIGFILE);
+    this->load(CONFIG_FILE);
+  }
+
+  if (ifs.fail())
+  {
+    std::cout << "Warning: " << configFile << " not found!" << std::endl;
+    ifs.close();
+    return true;
   }
 
   std::string temp;
@@ -133,6 +140,13 @@ bool Conf::load(std::string configFile)
     }
     else
       text = line[1];
+
+    if (line[0] == "include")
+    {
+      std::cout << "Including config file " << text << std::endl;
+      load(text);
+      continue;
+    }
 
     // Update existing configuration and add new lines
     if(confSet.find(line[0]) != confSet.end())

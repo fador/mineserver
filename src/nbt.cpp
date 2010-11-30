@@ -33,25 +33,21 @@
 #ifdef WIN32
   #include <winsock2.h>
 #else
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <event.h>
-
+  #include <sys/types.h>
+  #include <sys/socket.h>
+  #include <netinet/in.h>
+  #include <arpa/inet.h>
+  #include <string.h>
+  #include <stdlib.h>
+  #include <stdio.h>
+  #include <fcntl.h>
+  #include <unistd.h>
 #endif
 
 #include <zlib.h>
 
 #include "tools.h"
 #include "nbt.h"
-#include "map.h"
-
 
 //NBT level file reading
 //More info: http://www.minecraft.net/docs/NBT.txt
@@ -231,6 +227,8 @@ NBT_Value::NBT_Value(eTAG_Type type, uint8 **buf, int &remaining) : m_type(type)
       (*m_value.compoundVal)[key] = new NBT_Value((eTAG_Type)type, buf, remaining);
     }
     break;
+  case TAG_END:
+    break;
   }
 }
 
@@ -249,7 +247,6 @@ NBT_Value * NBT_Value::operator[](const std::string &index)
 
   return (*m_value.compoundVal)[index];
 }
-
 
 NBT_Value * NBT_Value::operator[](const char *index)
 {
@@ -587,6 +584,8 @@ void NBT_Value::Write(std::vector<uint8> &buffer)
       buffer.push_back(TAG_END);
       break;
     }
+  case TAG_END:
+    break; //for completeness
   }
 }
 

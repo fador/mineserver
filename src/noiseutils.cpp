@@ -22,12 +22,12 @@
 
 #include <fstream>
 
-#ifdef WIN32
-#include <noise/interp.h>
-#include <noise/mathconsts.h>
-#else
+#ifdef DEBIAN
 #include <libnoise/interp.h>
 #include <libnoise/mathconsts.h>
+#else
+#include <noise/interp.h>
+#include <noise/mathconsts.h>
 #endif
 
 

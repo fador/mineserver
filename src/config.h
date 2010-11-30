@@ -28,24 +28,23 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
+#include <string>
+#include <map>
 #include <vector>
 #include <map>
 #include <string>
 class Conf
 {
 private:
-  Conf()
-  {
-  }
+  Conf() {}
   std::map<std::string, std::string> confSet;
 public:
+  static Conf &get();
   bool load(std::string configFile);
   int iValue(std::string name);
   std::string sValue(std::string name);
   bool bValue(std::string name);
   std::vector<int> vValue(std::string name);
-  
-  static Conf &get();
 };
 
 #endif

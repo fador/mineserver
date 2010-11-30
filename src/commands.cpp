@@ -68,7 +68,7 @@ namespace
 
   void about(User *user, std::string command, std::deque<std::string> args)
   {
-    Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + Conf::get().sValue("servername")+
+    Chat::get().sendMsg(user, COLOR_BLUE + Conf::get().sValue("servername")+
                         "Running Mineserver v." + VERSION, Chat::USER);
   }
 
@@ -80,12 +80,12 @@ namespace
     if(tUser != NULL)
     {
       // Send rules
-      std::ifstream ifs( RULESFILE.c_str());
+      std::ifstream ifs(Conf::get().sValue("rules_file").c_str());
       std::string temp;
 
       if(ifs.fail())
       {
-        std::cout << "> Warning: " << RULESFILE << " not found." << std::endl;
+        std::cout << "> Warning: " << Conf::get().sValue("rules_file") << " not found." << std::endl;
         return;
       }
       else
@@ -100,19 +100,19 @@ namespace
       }
     }
     else
-      reportError(user, "User " + args[0] + " not found (see /players)");
+      reportError(user, "Player " + args[0] + " not found (see /players)");
   }
 }
 
 void home(User *user, std::string command, std::deque<std::string> args)
 {
-  Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + "Teleported you home!", Chat::USER);
+  Chat::get().sendMsg(user, COLOR_BLUE + "Teleported you home!", Chat::USER);
   user->teleport(Map::get().spawnPos.x(), Map::get().spawnPos.y() + 2, Map::get().spawnPos.z());
 }
 
 void kit(User *user, std::string command, std::deque<std::string> args)
 {
-  if(!args.empty())
+  if(args.size() == 1)
   {
     std::vector<int> kitItems = Conf::get().vValue("kit_" + args[0]);
     // If kit is found
@@ -130,26 +130,92 @@ void kit(User *user, std::string command, std::deque<std::string> args)
         item.pos.z() = static_cast<int>(user->pos.z*32 + (rand() % 30));
         Map::get().sendPickupSpawn(item);
       }
+      Chat::get().sendMsg(user, COLOR_BLUE + "Spawned Kit " + args[0], Chat::USER);
     }
     else
       reportError(user, "Kit " + args[0] + " not found");
   }
+  else
+    reportError(user, "Usage: /kit name");
 }
 
 void saveMap(User *user, std::string command, std::deque<std::string> args)
 {
   Map::get().saveWholeMap();
-  Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + "SERVER:" + COLOR_RED + " Saved map to disc",
-                      Chat::USER);
+  Chat::get().handleMsg(user, "% Saved map.");
+}
+
+void ban(User *user, std::string command, std::deque<std::string> args)
+{
+  if(args.size() > 0)
+  {
+    User *tUser = getUserByNick(args[0]);
+
+    std::fstream bannedf;
+    bannedf.open("banned.txt",std::fstream::app);
+    bannedf << args[0] << std::endl;
+    bannedf.close();
+
+    if(tUser != NULL)
+    {
+      args.pop_front();
+      std::string kickMsg;
+      if(args.empty())
+        kickMsg = Conf::get().sValue("default_banned_message");
+      else
+      {
+        while(!args.empty())
+        {
+          kickMsg += args[0] + " ";
+          args.pop_front();
+        }
+      }
+      tUser->kick(kickMsg);
+      Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + tUser->nick + " was banned by " + user->nick + ": " + kickMsg, Chat::ALL);
+    }
+    else
+      Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + args[0] +" was banned in his absence!", Chat::ALL);
+
+    // Reload list with banned users
+    Chat::get().loadBanned(Conf::get().sValue("banned_file"));
+  }
+  else
+    reportError(user, "Usage: /ban player [reason]");
+}
+
+void unban(User *user, std::string command, std::deque<std::string> args)
+{
+  if(args.size() == 1)
+  {
+    std::string line;
+    std::ifstream in((Conf::get().sValue("banned_file")).c_str());
+    std::ofstream out((Conf::get().sValue("banned_file")+".tmp").c_str());
+
+    while( getline(in,line) )
+    {
+      if(line != args[0])
+        out << line << "\n";
+    }
+    in.close();
+    out.close();
+
+    remove((Conf::get().sValue("banned_file")).c_str());
+    rename((Conf::get().sValue("banned_file")+".tmp").c_str(), (Conf::get().sValue("banned_file")).c_str());
+
+    Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + args[0] + " was unbanned.", Chat::ALL);
+
+    // Reload list with banned users
+    Chat::get().loadBanned(Conf::get().sValue("banned_file"));
+  }
+  else
+    reportError(user, "Usage: /unban player");
 }
 
 void kick(User *user, std::string command, std::deque<std::string> args)
 {
   if(!args.empty())
   {
-    std::string victim = args[0];
-
-    User *tUser        = getUserByNick(victim);
+    User *tUser = getUserByNick(args[0]);
 
     if(tUser != NULL)
     {
@@ -169,12 +235,80 @@ void kick(User *user, std::string command, std::deque<std::string> args)
       tUser->kick(kickMsg);
     }
     else
+      reportError(user, "User " + args[0] + " not found (see /players)");
+  }
+  else
+    reportError(user, "Usage: /kick player [reason]");
+}
+
+void mute(User *user, std::string command, std::deque<std::string> args)
+{
+  if(!args.empty())
+  {
+    std::string victim = args[0];
+
+    User *tUser        = getUserByNick(victim);
+
+    if(tUser != NULL)
+    {
+      args.pop_front();
+      std::string muteMsg;
+      while(!args.empty())
+      {
+        muteMsg += args[0] + " ";
+        args.pop_front();
+      }
+      
+      tUser->mute(muteMsg);
+      Chat::get().sendMsg(user, COLOR_RED + tUser->nick + " was muted by " + user->nick + ": " + muteMsg, Chat::ADMINS);
+    }
+    else
       reportError(user, "User " + victim + " not found (see /players)");
   }
   else
-    reportError(user, "Usage: /kick user [reason]");
+    reportError(user, "Usage: /mute player [reason]");
 }
 
+void unmute(User *user, std::string command, std::deque<std::string> args)
+{
+  if(!args.empty())
+  {
+    std::string victim = args[0];
+    User *tUser        = getUserByNick(victim);
+
+    if(tUser != NULL)
+    {      
+      tUser->unmute();
+      Chat::get().sendMsg(user, COLOR_RED + tUser->nick + " was unmuted by " + user->nick + ".", Chat::ADMINS);
+    }
+    else
+      reportError(user, "User " + victim + " not found (see /players)");
+  }
+  else
+    reportError(user, "Usage: /unmute player");
+}
+void showMOTD(User *user, std::string command, std::deque<std::string> args)
+{
+  // Open MOTD file
+  std::ifstream motdfs(Conf::get().sValue("motd_file").c_str());
+  
+  // Load MOTD into string and send to user if not a comment
+  std::string msgLine;
+  while(getline( motdfs, msgLine ))
+  {
+    // If not commentline
+    if(msgLine[0] != COMMENTPREFIX)
+    {
+      Chat::get().sendMsg(user, msgLine, Chat::USER);
+    }
+  }
+  
+  // Close motd file
+  motdfs.close();
+  
+}
+
+// Rollback Transaction Logs
 void rollBack(User *user, std::string command, std::deque<std::string> args)
 {
   std::vector<event_t> logs;
@@ -211,7 +345,7 @@ void setTime(User *user, std::string command, std::deque<std::string> args)
     pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get().mapTime;
     if(Users.size())
       Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
-    Chat::get().sendMsg(user, COLOR_MAGENTA + "Time set to " + args[0], Chat::USER);
+    Chat::get().handleMsg(user, "% World time changed.");
   } 
   else
     reportError(user, "Usage: /settime time (time = 0-24000)");
@@ -219,14 +353,17 @@ void setTime(User *user, std::string command, std::deque<std::string> args)
 
 void coordinateTeleport(User *user, std::string command, std::deque<std::string> args)
 {
-  if(args.size() > 2)
+  if(args.size() == 3)
   {
     LOG(user->nick + " teleport to: " + args[0] + " " + args[1] + " " + args[2]);
     double x = atof(args[0].c_str());
     double y = atof(args[1].c_str());
     double z = atof(args[2].c_str());
     user->teleport(x, y, z);
+    Chat::get().sendMsg(user, COLOR_BLUE + "Teleported!", Chat::USER);
   }
+  else
+    reportError(user, "Usage: /ctp x y z");
 }
 
 void userTeleport(User *user, std::string command, std::deque<std::string> args)
@@ -236,7 +373,10 @@ void userTeleport(User *user, std::string command, std::deque<std::string> args)
     LOG(user->nick + " teleport to: " + args[0]);
     User *tUser = getUserByNick(args[0]);
     if(tUser != NULL)
+    {
       user->teleport(tUser->pos.x, tUser->pos.y + 2, tUser->pos.z);
+      Chat::get().sendMsg(user, COLOR_BLUE + "Teleported!", Chat::USER);
+    }
     else
       reportError(user, "User " + args[0] + " not found (see /players)");
   }
@@ -250,7 +390,7 @@ void userTeleport(User *user, std::string command, std::deque<std::string> args)
     if(whoUser != NULL && toUser != NULL)
     {
       whoUser->teleport(toUser->pos.x, toUser->pos.y + 2, toUser->pos.z);
-      Chat::get().sendMsg(user, COLOR_MAGENTA + "Teleported!", Chat::USER);
+      Chat::get().sendMsg(user, COLOR_BLUE + "Teleported!", Chat::USER);
     }
     else
     {
@@ -258,6 +398,28 @@ void userTeleport(User *user, std::string command, std::deque<std::string> args)
                   " not found (see /players");
     }
   }
+  else
+    reportError(user, "Usage: /tp [player] targetplayer");
+}
+
+std::string getHeadingString(User *user)
+{
+  // Compass heading labels
+  std::string headingLabels[8] = { "North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest" };
+  
+  // Get the user's heading and normalize
+  int headingAngle = int(user->pos.yaw) % 360;
+  if(headingAngle < 0)
+    headingAngle = 360 + headingAngle;
+      
+  // Work out the text heading based on 8 points of the compass
+  std::string headingText = "Unknown";
+  if((headingAngle > 337.5 && headingAngle <= 360) || (headingAngle >= 0 && headingAngle <= 22.5))   // Special case for North as it spans 360 to 0
+    headingText = headingLabels[0];
+  else
+    headingText = headingLabels[int(floor((headingAngle + 22.5) / 45))]; // Add 22.5 so that we can identify the compass box correctly
+
+  return headingText + " (" + dtos(headingAngle) + "')";
 }
 
 void showPosition(User *user, std::string command, std::deque<std::string> args)
@@ -266,40 +428,50 @@ void showPosition(User *user, std::string command, std::deque<std::string> args)
   {
     User *tUser = getUserByNick(args[0]);
     if(tUser != NULL)
-      Chat::get().sendMsg(user, COLOR_MAGENTA + args[0] + " is at: " + dtos(tUser->pos.x)
+      Chat::get().sendMsg(user, COLOR_BLUE + args[0] + " is at: " + dtos(tUser->pos.x)
                                                                      + " " 
                                                                      + dtos(tUser->pos.y)
                                                                      + " " 
-                                                                     + dtos(tUser->pos.z), Chat::USER);
+                                                                     + dtos(tUser->pos.z)
+                                                                     + " Heading: " + getHeadingString(tUser)
+                                                                     , Chat::USER);
     else
       reportError(user, "User " + args[0] + " not found (see /players)");
   }
-  else
-  {
-    Chat::get().sendMsg(user, COLOR_MAGENTA + "You are at: " + dtos(user->pos.x) 
+  else if(args.size() == 0)
+    Chat::get().sendMsg(user, COLOR_BLUE + "You are at: " + dtos(user->pos.x) 
                                                              + " " 
                                                              + dtos(user->pos.y) 
                                                              + " " 
-                                                             + dtos(user->pos.z), Chat::USER);
-  }
+                                                             + dtos(user->pos.z)
+                                                             + " Heading: " + getHeadingString(user)
+                                                             , Chat::USER);
+  else
+    reportError(user, "Usage: /gps [player]");
 }
 
 void regenerateLighting(User *user, std::string command, std::deque<std::string> args)
 {
   printf("Regenerating lighting for chunk %d,%d\n", blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
-  Map::get().generateLight(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
+  //First load the map
+  if(Map::get().loadMap(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z)))
+  {
+    //Then regenerate lighting
+    Map::get().generateLight(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
+  }
 }
 
 void reloadConfiguration(User *user, std::string command, std::deque<std::string> args)
 {
-  Chat::get().loadAdmins(ADMINFILE);
-  Conf::get().load(CONFIGFILE);
+  Chat::get().loadAdmins(Conf::get().sValue("admin_file"));
+  Chat::get().loadBanned(Conf::get().sValue("banned_file"));
+  Chat::get().loadWhitelist(Conf::get().sValue("whitelist_file"));
+  Conf::get().load(CONFIG_FILE);
 
   // Set physics enable state based on config
-  Physics::get().enabled = ((Conf::get().iValue("liquid_physics") == 0) ? false : true);
+  Physics::get().enabled = (Conf::get().bValue("liquid_physics"));
 
-  Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + "SERVER:" + COLOR_RED+
-                      " Reloaded admins and config", Chat::USER);
+  Chat::get().sendMsg(user, COLOR_DARK_MAGENTA + "Reloaded admins and config", Chat::USER);
 
   // Note that the MOTD is loaded on-demand each time it is requested
 }
@@ -326,20 +498,15 @@ bool isValidItem(int id)
 
 int roundUpTo(int x, int nearest) 
 { 
-  x += (nearest - 1); 
-  x /= nearest; 
-  x *= nearest; 
-  return x; 
+  return (((x + (nearest - 1)) / nearest) * nearest );
 } 
 
 void giveItems(User *user, std::string command, std::deque<std::string> args)
 {
-  User *tUser = NULL;
-  int itemId = 0, itemCount = 1, itemStacks = 1;
-
-  if(args.size() > 1)
+  if(args.size() == 2 || args.size() == 3)
   {
-    tUser = getUserByNick(args[0]);
+    User *tUser = getUserByNick(args[0]);
+    int itemId = 0;
 
     //First check if item is a number
     itemId = atoi(args[1].c_str());
@@ -349,67 +516,92 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
       itemId = Conf::get().iValue(args[1]);
 
     // Check item validity
-    if(!isValidItem(itemId))
+    if(isValidItem(itemId))
     {
+      if(tUser)
+      {
+        int itemCount = 1, itemStacks = 1;
+        
+        if(args.size() == 3)
+        {
+          itemCount = atoi(args[2].c_str());
+          // If multiple stacks
+          itemStacks = roundUpTo(itemCount, 64) / 64; 
+          itemCount  -= (itemStacks-1) * 64; 
+        }
+    
+        int amount = 64;
+        for(int i = 0; i < itemStacks; i++)
+        {
+          // if last stack
+          if(i == itemStacks - 1)
+            amount = itemCount;
+
+          spawnedItem item;
+          item.EID     = generateEID();
+          item.item    = itemId;
+          item.health  = 0;
+          item.count   = amount;
+          item.pos.x() = static_cast<int>(tUser->pos.x * 32);
+          item.pos.y() = static_cast<int>(tUser->pos.y * 32);
+          item.pos.z() = static_cast<int>(tUser->pos.z * 32);
+          Map::get().sendPickupSpawn(item);
+        }
+
+        Chat::get().sendMsg(user, COLOR_RED + user->nick + " spawned " + args[1], Chat::ADMINS);
+      }
+      else
+        reportError(user, "User " + args[0] + " not found (see /players)");
+    }
+    else
       reportError(user, "Item " + args[1] + " not found.");
-      return;
-    }
-
-    if(args.size() > 2)
-    {
-      itemCount = atoi(args[2].c_str());
-      // If multiple stacks
-      itemStacks = roundUpTo(itemCount, 64) / 64; 
-      itemCount  -= (itemStacks-1) * 64; 
-    }
   }
   else
+    reportError(user, "Usage: /give player item [count]");
+}
+
+void setHealth(User *user, std::string command, std::deque<std::string> args)
+{
+  if(args.size() == 2)
   {
-    reportError(user, "Too few parameters.");
-	  return;
-  }
-
-  if(tUser)
-  {
-    int amount = 64;
-    for(int i = 0; i < itemStacks; i++)
-    {
-      // if last stack
-      if(i == itemStacks - 1)
-        amount = itemCount;
-
-      spawnedItem item;
-      item.EID     = generateEID();
-      item.item    = itemId;
-      item.health  = 0;
-      item.count   = amount;
-      item.pos.x() = static_cast<int>(tUser->pos.x * 32);
-      item.pos.y() = static_cast<int>(tUser->pos.y * 32);
-      item.pos.z() = static_cast<int>(tUser->pos.z * 32);
-
-      Map::get().sendPickupSpawn(item);
-    }
-
-    Chat::get().sendMsg(user, COLOR_RED + user->nick + " spawned " + args[1], Chat::ADMINS);
+    User *tUser = getUserByNick(args[0]);
+    
+    if(tUser)
+      tUser->sethealth(atoi(args[1].c_str()));
+    else
+      reportError(user, "User " + args[0] + " not found (see /players)");
   }
   else
-    reportError(user, "User " + args[0] + " not found (see /players)");
+    reportError(user, "Usage: /sethealth [player] health (health = 0-20)");
 }
 
 void Chat::registerStandardCommands()
 {
-  registerCommand("players", playerList, false);
+  // Players
   registerCommand("about", about, false);
-  registerCommand("rules", rules, false);
   registerCommand("home", home, false);
   registerCommand("kit", kit, false);
   registerCommand("save", saveMap, true);
   registerCommand("kick", kick, true);
   registerCommand("rollback", rollBack, true);
+  registerCommand("motd", showMOTD, false);
+  registerCommand("players", playerList, false);
+  registerCommand("rules", rules, false);
+
+  // Admins Only
+  registerCommand("ban", ban, true);
   registerCommand("ctp", coordinateTeleport, true);
-  registerCommand("tp", userTeleport, true);
-  registerCommand("reload", reloadConfiguration, true);
   registerCommand("give", giveItems, true);
   registerCommand("gps", showPosition, true);
-  registerCommand("settime", setTime, true);  registerCommand("regen", regenerateLighting, true);
+  registerCommand("kick", kick, true);
+  registerCommand("motd", showMOTD, false);
+  registerCommand("mute", mute, true);
+  registerCommand("regen", regenerateLighting, true);
+  registerCommand("reload", reloadConfiguration, true);
+  registerCommand("save", saveMap, true);  
+  registerCommand("sethealth", setHealth, true);
+  registerCommand("settime", setTime, true);
+  registerCommand("tp", userTeleport, true);
+  registerCommand("unban", unban, true);
+  registerCommand("unmute", unmute, true);
 }
