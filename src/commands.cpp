@@ -305,11 +305,39 @@ void showMOTD(User *user, std::string command, std::deque<std::string> args)
   motdfs.close();
   
 }
+void emote(User *user, std::string command, std::deque<std::string> args)
+{
+  std::string emoteMsg;
+  while(!args.empty())
+  {
+    emoteMsg += args[0] + " ";
+    args.pop_front();
+  }
+  
+  if(emoteMsg.empty())
+    reportError(user, "Usage: /me message");
+  else
+    Chat::get().sendMsg(user, COLOR_WHITE + "* " + user->nick + " " + emoteMsg, Chat::ALL);
+}
 void setTime(User *user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 1)
   {
-    Map::get().mapTime = (sint64)atoi(args[0].c_str());
+    std::string timeValue = args[0];
+    
+    // Check for time labels
+    if(timeValue == "day" || timeValue == "morning")
+      timeValue = "24000";
+    else if (timeValue == "dawn")
+      timeValue = "22500";
+    else if (timeValue == "noon")
+      timeValue = "6000";
+    else if (timeValue == "dusk")
+      timeValue = "12000";
+    else if (timeValue == "night" || timeValue == "midnight")
+      timeValue = "18000";
+      
+    Map::get().mapTime = (sint64)atoi(timeValue.c_str());
     Packet pkt;
     pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get().mapTime;
     if(Users.size())
@@ -553,6 +581,7 @@ void Chat::registerStandardCommands()
   registerCommand("motd", showMOTD, false);
   registerCommand("players", playerList, false);
   registerCommand("rules", rules, false);
+  registerCommand("me", emote, false);
 
   // Admins Only
   registerCommand("ban", ban, true);
