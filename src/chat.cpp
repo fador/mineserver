@@ -62,12 +62,20 @@ Chat::Chat()
   registerStandardCommands();
 }
 
-void Chat::registerCommand(std::string name, ChatCommand command, bool adminOnly)
+void Chat::registerCommand(std::deque<std::string> words, ChatCommand command, bool adminOnly)
 {
-  if(adminOnly)
-    adminCommands[name] = command;
-  else
-    userCommands[name] = command;
+  // Loop thru all the words for this command
+  std::string currentWord;
+  while(!words.empty())
+  {
+    currentWord = words[0];
+    words.pop_front();
+  
+    if(adminOnly)
+      adminCommands[currentWord] = command;
+    else
+      userCommands[currentWord] = command;
+  }
 }
 
 bool Chat::checkMotd(std::string motdFile)
