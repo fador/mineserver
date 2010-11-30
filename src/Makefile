@@ -32,6 +32,7 @@ CXXFLAGS += $(DFLAGS) -I. -I/usr/Local/include -I/usr/include
 
 OBJS  = map.o chat.o commands.o config.o constants.o logger.o mapgen.o nbt.o packets.o physics.o sockets.o tools.o user.o noiseutils.o mersenne.o mineserver.o plugin.o
 OBJS += blocks/basic.o blocks/door.o blocks/falling.o blocks/fire.o blocks/liquid.o blocks/plant.o blocks/sign.o blocks/snow.o blocks/stair.o blocks/torch.o
+OBJS += world/cavegen.o
 PROG = ./mineserver
 PROGS = $(PROG)
 
@@ -69,3 +70,4 @@ blocks/sign.o: blocks/sign.cpp blocks/basic.h blocks/sign.h
 blocks/snow.o: blocks/snow.cpp blocks/basic.h blocks/snow.h
 blocks/stair.o: blocks/stair.cpp blocks/basic.h blocks/stair.h
 blocks/torch.o: blocks/torch.cpp blocks/basic.h blocks/torch.h
+world/cavegen.o: world/cavegen.cpp world/cavegen.h mersenne.h map.h constants.h logger.h tools.h config.h

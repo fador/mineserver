@@ -63,12 +63,12 @@ unsigned long Random::randgen()
     int a;
 
     for (int i = 0; i < N - 1; i++) {
-      rnd = (x[i] & UPPER_MASK) | x[i + 1] & LOWER_MASK;
+      rnd = ((x[i] & UPPER_MASK) | x[i + 1]) & LOWER_MASK;
       a = (rnd & 0x1UL) ? MATRIX_A : 0x0UL;
       x[i] = x[(i + M) % N] ^ (rnd >> 1) ^ a;
     }
 
-    rnd = (x[N - 1] & UPPER_MASK) | x[0] & LOWER_MASK;
+    rnd = ((x[N - 1] & UPPER_MASK) | x[0]) & LOWER_MASK;
     a = (rnd & 0x1UL) ? MATRIX_A : 0x0UL;
     x[N - 1] = x[M - 1] ^ (rnd >> 1) ^ a;
 

@@ -25,68 +25,27 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _MAPGEN_H
-#define _MAPGEN_H
+#ifndef _CAVEGEN_H
+#define _CAVEGEN_H
 
-#ifdef DEBIAN
-#include <libnoise/noise.h>
-#else
-#include <noise/noise.h>
-#endif
+#include "../mersenne.h"
 
-#include "noiseutils.h"
-
-class MapGen
+class CaveGen
 {
-private:
-  MapGen() {}
-
-  uint8 blocks[16*16*128];
-  uint8 blockdata[16*16*128/2];
-  uint8 skylight[16*16*128/2];
-  uint8 blocklight[16*16*128/2];
-  uint8 heightmap[16*16];
-  
-  int m_seed;
-  int seaLevel;
-
-  float perlinScale;
-  
-  void generateFlatgrass();
-  void generateWithNoise(int x, int z);
-  
-  void AddBeaches();
-    
-  noise::utils::NoiseMap heightMap;
-  noise::utils::NoiseMapBuilderPlane heightMapBuilder;
-  
-  // This is for used for tuning heightmaps (Not for production)
-  noise::utils::NoiseMapBuilderPlane debugMapBuilder;
-  noise::utils::NoiseMap debugHeightMap;
-
-  // Heightmap composition
-  noise::module::Perlin perlinNoise;
-  noise::module::ScaleBias perlinBiased;
-
-  noise::module::Perlin baseFlatTerrain;  
-  noise::module::ScaleBias flatTerrain;
-  
-  noise::module::Perlin seaFloor;
-  noise::module::ScaleBias seaBias;
-
-  noise::module::Perlin terrainType;
-
-  noise::module::Perlin seaControl;
-  
-  noise::module::Select seaTerrain;
-  noise::module::Select finalTerrain;
-
 public:
-  static MapGen &get();
-  
-  void init(int seed);
-  void generateChunk(int x, int z);
-};
+  static CaveGen &get();
+  void AddCaves(uint8 *m_blocks);
 
+private:
+  CaveGen() {}
+  Random rand;
+  uint8 *blocks;
+
+  void AddSingleCave(uint8 bedrockType, uint8 fillingType, int length, double maxDiameter);
+  void AddSingleVein(uint8 bedrockType, uint8 fillingType, int k, double maxDiameter, int l) ;
+  void AddSingleVein(uint8 bedrockType, uint8 fillingType, int k, double maxDiameter, int l, int i1);
+
+  void SealLiquids(uint8 sealantType);
+};
 
 #endif
