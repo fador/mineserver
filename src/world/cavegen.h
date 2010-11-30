@@ -34,18 +34,28 @@ class CaveGen
 {
 public:
   static CaveGen &get();
-  void AddCaves(uint8 *m_blocks);
+  void init(int seed);
+  void AddCaves(uint8 &block, double x, double y, double z);
 
 private:
   CaveGen() {}
   Random rand;
   uint8 *blocks;
+  
+  noise::module::Perlin caveNoise;
 
   void AddSingleCave(uint8 bedrockType, uint8 fillingType, int length, double maxDiameter);
   void AddSingleVein(uint8 bedrockType, uint8 fillingType, int k, double maxDiameter, int l) ;
   void AddSingleVein(uint8 bedrockType, uint8 fillingType, int k, double maxDiameter, int l, int i1);
 
   void SealLiquids(uint8 sealantType);
+  
+  bool addCaves;
+  int caveDensity;
+  int caveSize;
+  bool addCaveLava;
+  bool addCaveWater;
+  bool addOre;
 };
 
 #endif

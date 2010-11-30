@@ -37,12 +37,37 @@
 #include "../config.h"
 #include "../mersenne.h"
 
+// libnoise
+#ifdef DEBIAN
+#include <libnoise/noise.h>
+#else
+#include <noise/noise.h>
+#endif
+
 #include "cavegen.h"
 
 CaveGen &CaveGen::get()
 {
   static CaveGen instance;
   return instance;
+}
+
+void CaveGen::init(int seed)
+{
+  // Set up us the Perlin-noise module.
+  caveNoise.SetSeed (seed);
+  caveNoise.SetFrequency (0.7);
+  //caveNoise.SetLacunarity (0.5);
+  caveNoise.SetOctaveCount (3);
+  caveNoise.SetPersistence (0.2);
+  caveNoise.SetNoiseQuality (noise::QUALITY_STD);
+  
+  addCaves = Conf::get().bValue("addCaves");
+  caveDensity = Conf::get().iValue("caveDensity");
+  caveSize = Conf::get().iValue("caveSize");
+  addCaveLava = Conf::get().bValue("addCaveLava");
+  addCaveWater = Conf::get().bValue("addCaveWater");
+  addOre = Conf::get().bValue("addOre");
 }
 
 // Cave generation method from Omen 0.70, used with osici's permission
@@ -187,20 +212,17 @@ void CaveGen::SealLiquids(uint8 sealantType)
   }
 }
 
-void CaveGen::AddCaves(uint8 *m_blocks)
-{
-  blocks = m_blocks;
-  
-  bool addCaves = Conf::get().bValue("addCaves");
-  int caveDensity = Conf::get().iValue("caveDensity");
-  int caveSize = Conf::get().iValue("caveSize");
-  bool addCaveLava = Conf::get().bValue("addCaveLava");
-  bool addCaveWater = Conf::get().bValue("addCaveWater");
-  bool addOre = Conf::get().bValue("addOre");
-
+void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
+{  
   if(addCaves)
   {
-    for(int i1 = 0; i1 < 36 * caveDensity; i1++)
+    
+    if(y*16.0 < 63.0 && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER && caveNoise.GetValue(x, y, z) < -0.5)
+    {
+      block = BLOCK_AIR;
+      return;
+    }
+    /*for(int i1 = 0; i1 < 36 * caveDensity; i1++)
       AddSingleCave(BLOCK_BEDROCK, BLOCK_AIR, 30, 0.05 * caveSize);
 
     for(int j1 = 0; j1 < 9 * caveDensity; j1++)
@@ -208,7 +230,7 @@ void CaveGen::AddCaves(uint8 *m_blocks)
 
     for(int k1 = 0; k1 < 30 * caveDensity; k1++)
       AddSingleVein(BLOCK_BEDROCK, BLOCK_AIR, 300, 0.03 * caveSize, 1, 20);
-
+    */
 
     if(addCaveLava)
     {
@@ -230,7 +252,7 @@ void CaveGen::AddCaves(uint8 *m_blocks)
         AddSingleVein(BLOCK_BEDROCK, BLOCK_WATER, 1000, 0.015 * caveSize, 1);
     }
 
-    SealLiquids(BLOCK_BEDROCK);
+    //SealLiquids(BLOCK_BEDROCK);
   }
 
 

@@ -55,6 +55,7 @@
 
 void MapGen::init(int seed)
 {
+  CaveGen::get().init(seed+8);
   
   perlinNoise.SetSeed(seed);
   perlinNoise.SetOctaveCount(2);
@@ -263,10 +264,13 @@ void MapGen::generateWithNoise(int x, int z)
           else
             *curBlock = BLOCK_AIR; // FF
         }
+        
+        // Check if cave -> remove placed block
+        CaveGen::get().AddCaves(*curBlock, 1000.0 + x*perlinScale + (bX+1)/16.0*perlinScale, (bY+1)/16.0, 1000.0 + z*perlinScale + (bZ+1)/16.0*perlinScale);
       }
     }
   }
-  //CaveGen::get().AddCaves(blocks);
+  //CaveGen::get().AddCaves(blockslibnoise);
   if(Conf::get().bValue("addBeaches"))
     AddBeaches();
 }
