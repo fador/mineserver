@@ -57,9 +57,10 @@ void initConstants()
   // Map settings
   defaultConf.insert(std::pair<std::string, std::string>("map_directory", "world"));
   defaultConf.insert(std::pair<std::string, std::string>("map_release_time", "90"));
+  defaultConf.insert(std::pair<std::string, std::string>("map_generate_spawn", "true"));
   defaultConf.insert(std::pair<std::string, std::string>("save_unchanged_chunks", "true"));
   defaultConf.insert(std::pair<std::string, std::string>("liquid_physics", "true"));
-  defaultConf.insert(std::pair<std::string, std::string>("map_flatland", "false"));
+  defaultConf.insert(std::pair<std::string, std::string>("map_flatgrass", "false"));
   defaultConf.insert(std::pair<std::string, std::string>("ore_density", "24"));
   defaultConf.insert(std::pair<std::string, std::string>("sea_level", "63"));
   defaultConf.insert(std::pair<std::string, std::string>("add_beaches", "true"));
