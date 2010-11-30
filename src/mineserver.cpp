@@ -327,6 +327,8 @@ int Mineserver::Run(int argc, char *argv[])
   #else
     close(m_socketlisten);
   #endif
+  
+  unlink((Conf::get().sValue("pid_file")).c_str());
 
   return EXIT_SUCCESS;
 }
