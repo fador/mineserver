@@ -134,7 +134,7 @@ void Map::init()
   mapSeed      = (sint64)*data["RandomSeed"];
   
   // Init mapgenerator
-  MapGen::get().init(mapSeed);
+  MapGen::get()->init(mapSeed);
 
   delete root;
 
@@ -752,7 +752,7 @@ bool Map::loadMap(int x, int z, bool generate)
     // If generate (false only for lightmapgenerator)
     if(generate)
     {
-      MapGen::get().generateChunk(x,z);
+      MapGen::get()->generateChunk(x,z);
       generateLight(x, z);
       return true;
     }

@@ -81,10 +81,18 @@ private:
   noise::module::Select seaTerrain;
   noise::module::Select finalTerrain;
 
+  static MapGen *mMapGen;
 public:
-  static MapGen &get();
-  
+  static MapGen* get()
+  {
+     if(!mMapGen) {
+        mMapGen = new MapGen();
+     }
+     return mMapGen;
+  }
+
   void init(int seed);
+  void free();
   void generateChunk(int x, int z);
 };
 

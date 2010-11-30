@@ -53,6 +53,17 @@
 #include "world/cavegen.h"
 #include "mapgen.h"
 
+MapGen* MapGen::mMapGen;
+
+void MapGen::free()
+{
+   if (mMapGen)
+   {
+      delete mMapGen;
+      mMapGen = 0;
+   }
+}
+
 void MapGen::init(int seed)
 {
   
@@ -136,12 +147,6 @@ void MapGen::init(int seed)
   seaLevel = Conf::get()->iValue("seaLevel");
   
   m_seed = seed;
-}
-
-MapGen &MapGen::get()
-{
-  static MapGen instance;
-  return instance;
 }
 
 void MapGen::generateFlatgrass() 

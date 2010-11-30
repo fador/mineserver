@@ -346,6 +346,7 @@ int Mineserver::Run(int argc, char *argv[])
   Conf::get()->free();
   Plugin::get()->free();
   Logger::get()->free();
+  MapGen::get()->free();
 
   return EXIT_SUCCESS;
 }
