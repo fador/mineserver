@@ -51,7 +51,7 @@ void BlockBasic::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
    if (Map::get().getBlock(x, y, z, &block, &meta))
    {
       Map::get().sendBlockChange(x, y, z, 0, 0);
-      Map::get().setBlock(x, y, z, 0, 0);
+      Map::get().setBlock(x, y, z, 0, 0, user->nick);
 
       int count = 1;
       if (BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand() % 10000)
@@ -144,7 +144,7 @@ void BlockBasic::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
             uint8 meta;
             if (Map::get().getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
             {
-               Map::get().setBlock(x, y, z, (char)newblock, direction);
+               Map::get().setBlock(x, y, z, (char)newblock, direction, user->nick);
                Map::get().sendBlockChange(x, y, z, (char)newblock, direction);
             }
          break;
@@ -164,7 +164,7 @@ void BlockBasic::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
    if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
    {
       Map::get().sendBlockChange(x, y, z, 0, 0);
-      Map::get().setBlock(x, y, z, 0, 0);
+      Map::get().setBlock(x, y, z, 0, 0, user->nick);
       Map::get().createPickupSpawn(x, y, z, oldblock, 1);
    }
 }

@@ -41,9 +41,9 @@
 #include "config.h"
 
 TrxLogger::TrxLogger (std::string filename) {
-  log_stream.open(filename.c_str(), std::fstream::in | std::fstream::out | std::fstream::binary | std::fstream::app );
+  log_stream.open(filename.c_str(), std::fstream::in | std::fstream::out);
   if (!log_stream.is_open()) {
-    LOG("Failed to open binary log!");
+    LOG("ERROR: Problem opening binary log!");
   } 
 }
 
@@ -56,13 +56,13 @@ TrxLogger &TrxLogger::get()
 // Log action to binary log 
 void TrxLogger::log(event_t event)
 {
-  if(!log_stream.good()) {
-    LOG("Binary log stream is bad!");
-    return;
+  if(log_stream.good()) {
+  
+    event.timestamp = time (NULL);
+    log_stream.write(reinterpret_cast<char *>(&event), sizeof(event_t));
+  } else {
+    LOG("ERROR: Binary log is bad!");
   }
-  event.timestamp = time (NULL);
-
-  log_stream.write(reinterpret_cast<char *>(&event), sizeof(event_t));
 }
 
 // Get logs based on nick and timestamp
@@ -73,10 +73,9 @@ bool TrxLogger::getLogs(time_t t, std::string &nick, std::vector<event_t> &logs)
   while(!log_stream.eof()) {
     log_stream.read(reinterpret_cast<char *>(&event), sizeof(event_t));
 
-/*    if(event.timestamp < t && event.nick == nick) {
- *     logs.insert(tmp);  
- *   }
- */
+    if(event.timestamp < t && event.nick == nick) {
+      logs.push_back(event);  
+    }
   }
   return true;
 }
@@ -88,11 +87,10 @@ bool TrxLogger::getLogs(time_t t, std::vector<event_t> &logs) {
 
   while(!log_stream.eof()) {
     log_stream.read(reinterpret_cast<char *>(&event), sizeof(event_t));
-/*
- *   if(event.timestamp < t) {
- *     logs.insert(tmp);
- *   }
- */
+
+   if(event.timestamp < t) {
+     logs.push_back(event);
+   }
   }
   return true;
 }

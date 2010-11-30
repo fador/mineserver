@@ -169,7 +169,7 @@ void BlockSign::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
             uint8 meta;
             if (Map::get().getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
             {
-               Map::get().setBlock(x, y, z, (char)newblock, metadata);
+               Map::get().setBlock(x, y, z, (char)newblock, metadata, user->nick);
                Map::get().sendBlockChange(x, y, z, (char)newblock, metadata);
             }
          break;

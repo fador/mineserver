@@ -46,7 +46,7 @@ void BlockDoor::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, si
 
    int modifier = (metadata & 0x8) ? -1 : 1;
 
-   Map::get().setBlock(x, y, z, block, metadata);
+   Map::get().setBlock(x, y, z, block, metadata, user->nick);
    Map::get().sendBlockChange(x, y, z, (char)block, metadata);  
 
    Map::get().getBlock(x, y + modifier, z, &block2, &metadata2);
@@ -60,7 +60,7 @@ void BlockDoor::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, si
      else
        metadata2 |= 0x8;
 
-     Map::get().setBlock(x, y + modifier, z, block2, metadata2);
+     Map::get().setBlock(x, y + modifier, z, block2, metadata2, user->nick);
      Map::get().sendBlockChange(x, y + modifier, z, (char)block, metadata2);
    }
 }
@@ -140,7 +140,7 @@ void BlockDoor::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
                   else
                     metadata2 |= 0x8;
 
-                  Map::get().setBlock(x, y + modifier, z, block2, metadata2);
+                  Map::get().setBlock(x, y + modifier, z, block2, metadata2, user->nick);
                   Map::get().sendBlockChange(x, y + modifier, z, (char)blockID, metadata2);
 
                   return PACKET_OK;
@@ -170,7 +170,7 @@ void BlockDoor::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
                      toptopmeta |= 0x8;
                   }
 
-                  Map::get().setBlock(x, y + modifier, z, toptopblock, toptopmeta);
+                  Map::get().setBlock(x, y + modifier, z, toptopblock, toptopmeta, user->nick);
                   Map::get().sendBlockChange(x, y + modifier, z, (char)newblock, toptopmeta);
                }
             }

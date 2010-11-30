@@ -74,7 +74,7 @@ void BlockFalling::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
          default:
             if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
             {
-               Map::get().setBlock(x, y+1, z, (char)newblock, 0);
+               Map::get().setBlock(x, y+1, z, (char)newblock, 0, user->nick);
                Map::get().sendBlockChange(x, y+1, z, (char)newblock, 0);
                physics(x,y+1,z);
             }

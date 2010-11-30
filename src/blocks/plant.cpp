@@ -64,7 +64,7 @@ void BlockPlant::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, 
    {
       // Break plant and spawn plant item
       Map::get().sendBlockChange(x, y, z, 0, 0);
-      Map::get().setBlock(x, y, z, 0, 0);
+      Map::get().setBlock(x, y, z, 0, 0, user->nick);
       Map::get().createPickupSpawn(x, y, z, block, 1);
    }   
 }

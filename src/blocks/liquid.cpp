@@ -58,7 +58,7 @@ void BlockLiquid::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
    uint8 topmeta;
    if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
    {
-      Map::get().setBlock(x, y+1, z, (char)newblock, 0);
+      Map::get().setBlock(x, y+1, z, (char)newblock, 0, user->nick);
       Map::get().sendBlockChange(x, y+1, z, (char)newblock, 0);
       
       Physics::get().addSimulation(vec(x, y, z));
@@ -78,7 +78,7 @@ void BlockLiquid::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint3
    if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
    {
       Map::get().sendBlockChange(x, y, z, 0, 0);
-      Map::get().setBlock(x, y, z, 0, 0);
+      Map::get().setBlock(x, y, z, 0, 0, user->nick);
       physics(x,y,z);
    }
 }

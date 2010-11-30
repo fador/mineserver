@@ -447,6 +447,9 @@ int PacketHandler::player_digging(User *user)
 
   user->buffer.removePacket();
 
+  if(!Map::get().getBlock(x, y, z, &block, &meta))
+    return PACKET_OK;
+
   Callback callback = Plugin::get().getBlockCallback(block);
   Function event;
   Function::invoker_type inv(user, status, x, y, z, direction);

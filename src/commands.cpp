@@ -325,10 +325,11 @@ void rollBack(User *user, std::string command, std::deque<std::string> args)
     } else {
       TrxLogger::get().getLogs(timestamp, logs);
     }
+    
+    Chat::get().sendMsg(user, "rolling back...", Chat::USER);
     while(!logs.empty()) {
       event_t event = logs.back();
       logs.pop_back();
-
       Map::get().setBlock(event.x, event.y, event.z, event.otype, event.ometa, std::string("SERVER"));
     }
   } else {

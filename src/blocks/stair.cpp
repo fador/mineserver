@@ -125,7 +125,7 @@ void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
             uint8 meta;
             if (Map::get().getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
             {
-               Map::get().setBlock(x, y, z, (char)newblock, direction);
+               Map::get().setBlock(x, y, z, (char)newblock, direction, user->nick);
                Map::get().sendBlockChange(x, y, z, (char)newblock, direction);
             }
          break;
@@ -151,7 +151,7 @@ void BlockStair::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
          {
             // spawn item
             Map::get().sendBlockChange(x, y, z, 0, 0);
-            Map::get().setBlock(x, y, z, 0, 0);
+            Map::get().setBlock(x, y, z, 0, 0, user->nick);
             Map::get().createPickupSpawn(x, y, z, oldblock, 1);
          }
       break;
@@ -161,7 +161,7 @@ void BlockStair::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
          {
             // destroy
             Map::get().sendBlockChange(x, y, z, 0, 0);
-            Map::get().setBlock(x, y, z, 0, 0);
+            Map::get().setBlock(x, y, z, 0, 0, user->nick);
          }
       break;
       default:

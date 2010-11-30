@@ -64,7 +64,7 @@ void BlockSnow::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, s
    {
       // Break snow and do not spawn item
       Map::get().sendBlockChange(x, y, z, 0, 0);
-      Map::get().setBlock(x, y, z, 0, 0);
+      Map::get().setBlock(x, y, z, 0, 0, user->nick);
    }   
 }
 
