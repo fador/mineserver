@@ -80,84 +80,6 @@ void CaveGen::init(int seed)
   addOre = Conf::get().bValue("addOre");
 }
 
-void CaveGen::AddSingleVein(uint8 bedrockType, uint8 fillingType, int k, double maxDiameter, int l)
-{
-  AddSingleVein(bedrockType, fillingType, k, maxDiameter, l, 10 );
-}
-
-
-void CaveGen::AddSingleVein(uint8 bedrockType, uint8 fillingType, int k, double maxDiameter, int l, int i1)
-{
-
-  int j1 = rand.uniform(16);
-  int k1 = rand.uniform(128);
-  int l1 = rand.uniform(16);
-
-  double thirteenOverK = 1 / (double)k;
-
-  for(int i2 = 0; i2 < i1; i2++)
-  {
-    int j2 = j1 + (int)(.5 * (rand.uniform() - .5) * 16.0);
-    int k2 = k1 + (int)(.5 * (rand.uniform() - .5) * 128.0);
-    int l2 = l1 + (int)(.5 * (rand.uniform() - .5) * 16.0);
-
-    for(int l3 = 0; l3 < k; l3++)
-    {
-      int diameter = (int)(maxDiameter * rand.uniform() * 16);
-      if( diameter < 1 ) diameter = 2;
-      int radius = diameter / 2;
-      if( radius == 0 ) radius = 1;
-
-      int i3 = (int)((1 - thirteenOverK) * (double)j1 + thirteenOverK * (double)j2 + (double)(l * radius) * (rand.uniform() - .5));
-      int j3 = (int)((1 - thirteenOverK) * (double)k1 + thirteenOverK * (double)k2 + (double)(l * radius) * (rand.uniform() - .5));
-      int k3 = (int)((1 - thirteenOverK) * (double)l1 + thirteenOverK * (double)l2 + (double)(l * radius) * (rand.uniform() - .5));
-      for(int k4 = 0; k4 < diameter; k4++)
-      {
-        for(int l4 = 0; l4 < diameter; l4++)
-        {
-          for(int i5 = 0; i5 < diameter; i5++)
-          {
-            if((k4 - radius) * (k4 - radius) + (l4 - radius) * (l4 - radius) + (i5 - radius) * (i5 - radius) < radius * radius &&
-                i3 + k4 < 16 && j3 + l4 < 128 && k3 + i5 < 16 &&
-                i3 + k4 >= 0 && j3 + l4 >= 0 && k3 + i5 >= 0 )
-            {
-              int index = (j3+l4) + ((k3+i5) * 128 + ((i3+k4) * 128 * 16));
-              
-
-              if( blocks[index] == bedrockType )
-                blocks[index] = fillingType;
-            }
-          }
-        }
-      }
-    }
-    j1 = j2;
-    k1 = k2;
-    l1 = l2;
-  }
-}
-
-void CaveGen::SealLiquids(uint8 sealantType)
-{
-  for( int x = 1; x < 16 - 1; x++ )
-  {
-    for( int h = 1; h < 128; h++ )
-    {
-      for( int y = 1; y < 16 - 1; y++ )
-      {
-        int index = (h * 16 + y) * 16 + x;
-        if( (blocks[index] == 10 || blocks[index] == 11 || blocks[index] == 8 || blocks[index] == 9) &&
-            (blocks[(h * 16 + y) * 16 + (x-1)] == 0 || blocks[(h * 16 + y) * 16 + (x+1)] == 0 ||
-          blocks[(h * 16 + (y-1)) * 16 + x] == 0 || blocks[(h * 16 + (y+1)) * 16 + x] == 0 ||
-          blocks[((h-1) * 16 + y) * 16 + x] == 0) )
-        {
-          blocks[index] = sealantType;
-        }
-      }
-    }
-  }
-}
-
 void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
 {  
   if(addCaves)
@@ -165,76 +87,38 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
     x *= caveScale;
     z *= caveScale;
     
-    // Heightscale
-    //y *= 0.15;
-    
-    x += 1000.0;
-    z += 1000.0;
-    
-    double caveN1 = caveNoise1.GetValue(x,y*0.05,z);
-    double caveN2 = caveNoise2.GetValue(x,y*0.1,z);
+    caveN1 = caveNoise1.GetValue(x,y*0.05,z);
+    caveN2 = caveNoise2.GetValue(x,y*0.1,z);
     
     if(y < 63.0 && (caveN1 < -0.55 || caveN2 < -0.55) && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER)
     {
-      //if(caveN > -0.58)
-        block = BLOCK_LIGHTSTONE;
-      //else   
-      //  block = BLOCK_AIR;
+      // Add bottomlava
+      if(y < 10.0)
+      {
+        block = BLOCK_STATIONARY_LAVA;
+        return;
+      }
+      
+      if(caveN1 > -0.558)
+      {
+        if(y < 32.0 && caveN1 > -0.55999)
+        {
+          if(y < 16.0 && caveN1 > -0.559999)
+          {
+            block = BLOCK_DIAMOND_ORE;
+            return;
+          }
+          block = BLOCK_GOLD_ORE;
+          return;
+        }
         
+        block = BLOCK_IRON_ORE;
+        return;
+      }
+      
+      
+      block = BLOCK_AIR;
       return;
     }
-    /*for(int i1 = 0; i1 < 36 * caveDensity; i1++)
-      AddSingleCave(BLOCK_BEDROCK, BLOCK_AIR, 30, 0.05 * caveSize);
-
-    for(int j1 = 0; j1 < 9 * caveDensity; j1++)
-      AddSingleVein(BLOCK_BEDROCK, BLOCK_AIR, 500, 0.015 * caveSize, 1);
-
-    for(int k1 = 0; k1 < 30 * caveDensity; k1++)
-      AddSingleVein(BLOCK_BEDROCK, BLOCK_AIR, 300, 0.03 * caveSize, 1, 20);
-    */
-
-    /*if(addCaveLava)
-    {
-      for(int i = 0; i < 8 * caveDensity; i++)
-        AddSingleCave(BLOCK_BEDROCK, BLOCK_LAVA, 30, 0.05 * caveSize);
-
-      for(int j = 0; j < 3 * caveDensity; j++)
-        AddSingleVein(BLOCK_BEDROCK, BLOCK_LAVA, 1000, 0.015 * caveSize, 1);
-
-    }
-
-
-    if(addCaveWater)
-    {
-      for(int k = 0; k < 8 * caveDensity; k++)
-        AddSingleCave(BLOCK_BEDROCK, BLOCK_WATER, 30, 0.05 * caveSize);
-
-      for( int l = 0; l < 3 * caveDensity; l++ )
-        AddSingleVein(BLOCK_BEDROCK, BLOCK_WATER, 1000, 0.015 * caveSize, 1);
-    }*/
-
-    //SealLiquids(BLOCK_BEDROCK);
   }
-
-
-  /*if(addOre)
-  {
-    for(int l1 = 0; l1 < 12 * caveDensity; l1++)
-      AddSingleCave(BLOCK_BEDROCK, BLOCK_COAL_ORE, 500, 0.03);
-
-    for(int i2 = 0; i2 < 32 * caveDensity; i2++)
-    {
-      AddSingleVein(BLOCK_BEDROCK, BLOCK_COAL_ORE, 200, 0.015, 1);
-      AddSingleCave(BLOCK_BEDROCK, BLOCK_IRON_ORE, 500, 0.02);
-    }
-
-    for(int k2 = 0; k2 < 8 * caveDensity; k2++ )
-    {
-      AddSingleVein(BLOCK_BEDROCK, BLOCK_IRON_ORE, 200, 0.015, 1);
-      AddSingleVein(BLOCK_BEDROCK, BLOCK_GOLD_ORE, 200, 0.0145, 1);
-    }
-
-    for(int l2 = 0; l2 < 20 * caveDensity; l2++)
-      AddSingleCave(BLOCK_BEDROCK, BLOCK_GOLD_ORE, 400, 0.0175);
-  }*/
 }

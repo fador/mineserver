@@ -149,8 +149,8 @@ int PacketHandler::login_request(User *user)
   if(Conf::get().bValue("use_whitelist") == true) {
 	  if(user->checkWhitelist(player))
 	  {
-		user->kick(Conf::get().sValue("default_whitelist_message"));
-		return PACKET_OK;
+      user->kick(Conf::get().sValue("default_whitelist_message"));
+      return PACKET_OK;
 	  }
   }
 
