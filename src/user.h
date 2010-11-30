@@ -97,6 +97,8 @@ public:
   vec curChunk;
   Inventory inv;
 
+  sint32 attachedTo;
+
   //Input buffer
   Packet buffer;
 

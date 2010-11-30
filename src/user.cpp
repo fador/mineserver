@@ -69,6 +69,7 @@ User::User(int sock, uint32 EID)
   this->pos.z           = Map::get().spawnPos.z();
   this->write_err_count = 0;
   this->health          = 20;
+  this->attachedTo      = 0;
 }
 
 bool User::checkBanned(std::string _nick)
@@ -336,6 +337,14 @@ bool User::checkInventory(sint16 itemID, char count)
 
 bool User::updatePos(double x, double y, double z, double stance)
 {
+  //Riding on a minecart?
+  if(y==-999)
+  {
+    //attachedTo
+    //ToDo: Get pos from minecart
+    return false;
+  }
+
   if(nick.size() && logged)
   {
     //Do we send relative or absolute move values

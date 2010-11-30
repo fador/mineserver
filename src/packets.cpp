@@ -541,12 +541,26 @@ int PacketHandler::player_block_placement(User *user)
 
   user->buffer.removePacket();
 
-  if ((newblock > 0xFF || newblock == -1) && newblock != ITEM_SIGN)
-     return PACKET_OK;
-  
   // TODO: Handle processing of 
   if(direction == -1)
     return PACKET_OK;
+
+  //Minecart testing!!
+  if(newblock == ITEM_MINECART && Map::get().getBlock(x, y, z, &oldblock, &metadata))
+  {
+    if(oldblock != BLOCK_MINECART_TRACKS) return PACKET_OK;
+    std::cout << "Spawn minecart" << std::endl;
+    sint32 EID=generateEID();
+    Packet pkt; 
+    //                                              MINECART
+    pkt << PACKET_ADD_OBJECT << (sint32)EID <<  (sint8)10       << (sint32)(x*32+16) << (sint32)(y*32) << (sint32)(z*32+16);      
+    user->sendAll((uint8 *)pkt.getWrite(), pkt.getWriteLen());
+  }
+
+  if ((newblock > 0xFF || newblock == -1) && newblock != ITEM_SIGN)
+     return PACKET_OK;
+  
+
     
   if(y < 0)
     return PACKET_OK;
@@ -823,7 +837,25 @@ int PacketHandler::use_entity(User *user)
     return PACKET_NEED_MORE_DATA;
   user->buffer.removePacket();
 
-  if(targetType != 1) return PACKET_OK;
+  if(targetType != 1)
+  {
+    
+    Packet pkt;
+    //Attach
+    if(user->attachedTo == 0)
+    {
+      pkt << PACKET_ATTACH_ENTITY << (sint32)user->UID << (sint32)target;
+      user->attachedTo = target;
+    }
+    //Detach
+    else
+    {
+      pkt << PACKET_ATTACH_ENTITY << (sint32)user->UID << (sint32)-1;
+      user->attachedTo = 0;
+    }
+    user->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
+    return PACKET_OK;
+  }
 
   //This is used when punching users
   for(uint32 i=0;i<Users.size();i++)

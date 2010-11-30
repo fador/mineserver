@@ -309,6 +309,15 @@ int Mineserver::Run(int argc, char *argv[])
       {
         Users[i]->pushMap();
         Users[i]->popMap();
+
+        //Minecart hacks!!
+        if(Users[i]->attachedTo)
+        {
+          Packet pkt;
+          pkt << PACKET_ENTITY_VELOCITY << (sint32)Users[i]->attachedTo <<  (sint16)10000       << (sint16)0 << (sint16)0;
+          //pkt << PACKET_ENTITY_RELATIVE_MOVE << (sint32)Users[i]->attachedTo <<  (sint8)100       << (sint8)0 << (sint8)0;
+          Users[i]->sendAll((uint8 *)pkt.getWrite(), pkt.getWriteLen());
+        }
       }
       Map::get().mapTime+=20;
       if(Map::get().mapTime>=24000) Map::get().mapTime=0;
