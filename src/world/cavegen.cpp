@@ -55,12 +55,22 @@ CaveGen &CaveGen::get()
 void CaveGen::init(int seed)
 {
   // Set up us the Perlin-noise module.
-  caveNoise.SetSeed (seed);
-  caveNoise.SetFrequency (0.7);
+  caveNoise1.SetSeed (seed);
+  caveNoise1.SetFrequency (1.5);
   //caveNoise.SetLacunarity (0.5);
-  caveNoise.SetOctaveCount (3);
-  caveNoise.SetPersistence (0.2);
-  caveNoise.SetNoiseQuality (noise::QUALITY_STD);
+  caveNoise1.SetOctaveCount (2);
+  caveNoise1.SetPersistence (0.25);
+  caveNoise1.SetNoiseQuality (noise::QUALITY_STD);
+  
+  // Set up us the Perlin-noise module.
+  caveNoise2.SetSeed (seed+2);
+  caveNoise2.SetFrequency (1.5);
+  //caveNoise.SetLacunarity (0.5);
+  caveNoise2.SetOctaveCount (2);
+  caveNoise2.SetPersistence (0.25);
+  caveNoise2.SetNoiseQuality (noise::QUALITY_STD);
+  
+  caveScale = 0.9;
   
   addCaves = Conf::get().bValue("addCaves");
   caveDensity = Conf::get().iValue("caveDensity");
@@ -68,70 +78,6 @@ void CaveGen::init(int seed)
   addCaveLava = Conf::get().bValue("addCaveLava");
   addCaveWater = Conf::get().bValue("addCaveWater");
   addOre = Conf::get().bValue("addOre");
-}
-
-// Cave generation method from Omen 0.70, used with osici's permission
-void CaveGen::AddSingleCave(uint8 bedrockType, uint8 fillingType, int length, double maxDiameter)
-{
-  int startX = rand.uniform(15);
-  int startZ = rand.uniform(15);
-  int startY = rand.uniform(127);
-  
-  std::cout << startX << " " << startZ << " " << startY << std::endl;
-
-  int k1;
-  for(k1 = 0; blocks[(int)(startY + (startZ * 128 + (startX * 128 * 16)))] != bedrockType && k1 < 10000; k1++)
-  {
-    startX = rand.uniform(15);
-    startZ = rand.uniform(15);
-    startY = rand.uniform(127);
-  }
-
-  if( k1 >= 10000 )
-    return;
-
-  int x = startX;
-  int y = startZ;
-  int h = startY;
-
-  for(int k2 = 0; k2 < length; k2++)
-  {
-    int diameter = (int)(maxDiameter * rand.uniform() * 16);
-    if( diameter < 1 ) diameter = 2;
-    int radius = diameter / 2;
-    if( radius == 0 ) radius = 1;
-
-    x += (int)(0.7 * (rand.uniform() - 0.5) * diameter);
-    y += (int)(0.7 * (rand.uniform() - 0.5) * diameter);
-    h += (int)(0.7 * (rand.uniform() - 0.5) * diameter);
-
-    for(int j3 = 0; j3 < diameter; j3++)
-    {
-      for(int k3 = 0; k3 < diameter; k3++)
-      {
-        for(int l3 = 0; l3 < diameter; l3++)
-        {
-          if((j3 - radius) * (j3 - radius) + (k3 - radius) * (k3 - radius) + (l3 - radius) * (l3 - radius) >= radius * radius ||
-              x + j3 >= 16 || h + k3 >= 128 || y + l3 >= 16 ||
-              x + j3 < 0 || h + k3 < 0 || y + l3 < 0 )
-          {
-            continue;
-          }
-
-          int index = (startY+k3) + ((startZ+l3) * 128 + ((startX+j3) * 128 * 16));
-
-          if(blocks[index] == bedrockType)
-            blocks[index] = fillingType;
-
-          if((fillingType == 10 || fillingType == 11 || fillingType == 8 || fillingType == 9) &&
-              h + k3 < startY )
-            blocks[index] = 0;
-
-        }
-      }
-    }
-  }
-  std::cout << "Cave added" << std::endl;
 }
 
 void CaveGen::AddSingleVein(uint8 bedrockType, uint8 fillingType, int k, double maxDiameter, int l)
@@ -216,10 +162,25 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
 {  
   if(addCaves)
   {
+    x *= caveScale;
+    z *= caveScale;
     
-    if(y*16.0 < 63.0 && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER && caveNoise.GetValue(x, y, z) < -0.5)
+    // Heightscale
+    //y *= 0.15;
+    
+    x += 1000.0;
+    z += 1000.0;
+    
+    double caveN1 = caveNoise1.GetValue(x,y*0.05,z);
+    double caveN2 = caveNoise2.GetValue(x,y*0.1,z);
+    
+    if(y < 63.0 && (caveN1 < -0.55 || caveN2 < -0.55) && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER)
     {
-      block = BLOCK_AIR;
+      //if(caveN > -0.58)
+        block = BLOCK_LIGHTSTONE;
+      //else   
+      //  block = BLOCK_AIR;
+        
       return;
     }
     /*for(int i1 = 0; i1 < 36 * caveDensity; i1++)
@@ -232,7 +193,7 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
       AddSingleVein(BLOCK_BEDROCK, BLOCK_AIR, 300, 0.03 * caveSize, 1, 20);
     */
 
-    if(addCaveLava)
+    /*if(addCaveLava)
     {
       for(int i = 0; i < 8 * caveDensity; i++)
         AddSingleCave(BLOCK_BEDROCK, BLOCK_LAVA, 30, 0.05 * caveSize);
@@ -250,13 +211,13 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
 
       for( int l = 0; l < 3 * caveDensity; l++ )
         AddSingleVein(BLOCK_BEDROCK, BLOCK_WATER, 1000, 0.015 * caveSize, 1);
-    }
+    }*/
 
     //SealLiquids(BLOCK_BEDROCK);
   }
 
 
-  if(addOre)
+  /*if(addOre)
   {
     for(int l1 = 0; l1 < 12 * caveDensity; l1++)
       AddSingleCave(BLOCK_BEDROCK, BLOCK_COAL_ORE, 500, 0.03);
@@ -275,5 +236,5 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
 
     for(int l2 = 0; l2 < 20 * caveDensity; l2++)
       AddSingleCave(BLOCK_BEDROCK, BLOCK_GOLD_ORE, 400, 0.0175);
-  }
+  }*/
 }
