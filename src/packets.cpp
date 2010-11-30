@@ -666,7 +666,7 @@ int PacketHandler::arm_animation(User *user)
 
 int PacketHandler::pickup_spawn(User *user)
 {
-  uint32 curpos = 4;
+  //uint32 curpos = 4; //warning: unused variable ‘curpos’
   spawnedItem item;
   
   item.health = 0;
@@ -816,22 +816,26 @@ int PacketHandler::complex_entities(User *user)
 
 int PacketHandler::use_entity(User *user)
 {
-  sint32 userID,target;
+  sint32 userID, target;
   sint8 targetType;
+  
   user->buffer >> userID >> target >> targetType;
-  if(!user->buffer)
+  
+  if (!user->buffer)
     return PACKET_NEED_MORE_DATA;
+  
   user->buffer.removePacket();
 
   if(targetType != 1) return PACKET_OK;
 
   //This is used when punching users
-  for(uint32 i=0;i<Users.size();i++)
+  for(uint32 i = 0; i < Users.size(); i++)
   {
-    if(Users[i]->UID == target)
+    if(Users[i]->UID == (uint32)target)
     {
       Users[i]->health--;
       Users[i]->sethealth(Users[i]->health);
+      
       if(Users[i]->health <= 0)
       {
         Packet pkt;
@@ -841,7 +845,6 @@ int PacketHandler::use_entity(User *user)
       break;
     }
   }
-
 
   return PACKET_OK;
 }

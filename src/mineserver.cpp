@@ -336,4 +336,4 @@ bool Mineserver::Stop()
   m_running=false;
 
   return true;
-};
+}
