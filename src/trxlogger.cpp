@@ -41,7 +41,7 @@
 #include "config.h"
 
 TrxLogger::TrxLogger (std::string filename) {
-  log_stream.open(filename.c_str(), std::fstream::in | std::fstream::out );
+  log_stream.open(filename.c_str(), std::fstream::in | std::fstream::out | std::fstream::binary );
   if (!log_stream.is_open()) {
     LOG("Problem opening binary log!");
   } 
@@ -59,7 +59,9 @@ void TrxLogger::log(event_t event)
   if(log_stream.good()) {
   
     event.timestamp = time (NULL);
+    log_stream.seekg(0, std::ios::end);
     log_stream.write(reinterpret_cast<char *>(&event), sizeof(event_t));
+
   } else {
     LOG("Binary log is bad!");
   }
