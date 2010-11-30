@@ -330,7 +330,7 @@ void rollBack(User *user, std::string command, std::deque<std::string> args)
     while(!logs.empty()) {
       event_t event = logs.back();
       logs.pop_back();
-      Map::get().setBlock(event.x, event.y, event.z, event.otype, event.ometa, std::string("SERVER"));
+      Map::get()->setBlock(event.x, event.y, event.z, event.otype, event.ometa, std::string("SERVER"));
     }
   } else {
     reportError(user, "Usage: /rollback <timestamp> [user]");
@@ -636,17 +636,6 @@ void setHealth(User *user, std::string command, std::deque<std::string> args)
 void Chat::registerStandardCommands()
 {
   // Players
-<<<<<<< HEAD:src/commands.cpp
-  registerCommand("about", about, false);
-  registerCommand("home", home, false);
-  registerCommand("kit", kit, false);
-  registerCommand("save", saveMap, true);
-  registerCommand("kick", kick, true);
-  registerCommand("rollback", rollBack, true);
-  registerCommand("motd", showMOTD, false);
-  registerCommand("players", playerList, false);
-  registerCommand("rules", rules, false);
-=======
   registerCommand(parseCmd("about"), about, false);
   registerCommand(parseCmd("home"), home, false);
   registerCommand(parseCmd("kit"), kit, false);
@@ -656,7 +645,6 @@ void Chat::registerStandardCommands()
   registerCommand(parseCmd("rules"), rules, false);
   registerCommand(parseCmd("e em emote me"), emote, false);
   registerCommand(parseCmd("whisper w tell t"), whisper, false);
->>>>>>> upstream/master:src/commands.cpp
 
   // Admins Only
   registerCommand(parseCmd("ban"), ban, true);
@@ -664,6 +652,7 @@ void Chat::registerStandardCommands()
   registerCommand(parseCmd("give"), giveItems, true);
   registerCommand(parseCmd("gps"), showPosition, true);
   registerCommand(parseCmd("kick"), kick, true);
+  registerCommand(parseCmd("rollback"), rollBack, true);
   registerCommand(parseCmd("motd"), showMOTD, false);
   registerCommand(parseCmd("mute"), mute, true);
   registerCommand(parseCmd("regen"), regenerateLighting, true);

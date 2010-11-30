@@ -50,7 +50,7 @@ void BlockBasic::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
    if (Map::get()->getBlock(x, y, z, &block, &meta))
    {
       Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-      Map::get()->setBlock(x, y, z, BLOCK_AIR, 0, user->nicke);
+      Map::get()->setBlock(x, y, z, BLOCK_AIR, 0, user->nick);
 
       int count = 1;
       if (BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand() % 10000)

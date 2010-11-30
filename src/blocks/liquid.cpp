@@ -77,8 +77,8 @@ void BlockLiquid::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint3
 
    if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
    {
-      Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0, user->nick);
-      Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+      Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+      Map::get()->setBlock(x, y, z, BLOCK_AIR, 0, user->nick);
       physics(x,y,z);
    }
 }
