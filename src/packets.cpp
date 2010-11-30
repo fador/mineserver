@@ -72,13 +72,16 @@
 
 PacketHandler* PacketHandler::mPacketHandler;
 
-void PacketHandler::freePackets()
+void PacketHandler::free()
 {
-   delete mPacketHandler;
-   mPacketHandler = 0;
+   if (mPacketHandler)
+   {
+      delete mPacketHandler;
+      mPacketHandler = 0;
+   }
 }
 
-void PacketHandler::initPackets()
+void PacketHandler::init()
 {
 
   //Len 0
@@ -644,7 +647,7 @@ int PacketHandler::player_block_placement(User *user)
      }
   }
   /* TODO: Should be removed from here. Only needed for liquid related blocks? */
-  Physics::get().checkSurrounding(vec(x, y, z));
+  Physics::get()->checkSurrounding(vec(x, y, z));
   return PACKET_OK;
 }
 

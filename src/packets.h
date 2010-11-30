@@ -405,8 +405,8 @@ private:
    static PacketHandler *mPacketHandler;
 public:
 
-  void initPackets();
-  void freePackets();
+  void init();
+  void free();
 
   static PacketHandler* get()
   {

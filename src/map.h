@@ -175,8 +175,8 @@ public:
   void posToId(int x, int z, uint32 *id);
   void idToPos(uint32 id, int *x, int *z);
 
-  void initMap();
-  void freeMap();
+  void init();
+  void free();
   void sendToUser(User *user, int x, int z);
 
   //Time in the map

@@ -68,10 +68,10 @@ void Map::idToPos(uint32 id, int *x, int *z)
   *z = getSint16(&id_pointer[2]);
 }
 
-void Map::initMap()
+void Map::init()
 {
 #ifdef _DEBUG
-  printf("initMap()\n");
+  printf("Map::init()\n");
 #endif
 
   this->mapDirectory = Conf::get().sValue("mapdir");
@@ -142,10 +142,13 @@ void Map::initMap()
   std::endl;
 }
 
-void Map::freeMap()
+void Map::free()
 {
-   delete mMap;
-   mMap = 0;
+   if (mMap)
+   {
+      delete mMap;
+      mMap = 0;
+   }
 }
 
 sChunk *Map::getMapData(int x, int z, bool generate)

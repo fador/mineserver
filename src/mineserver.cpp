@@ -145,13 +145,13 @@ int Mineserver::Run(int argc, char *argv[])
   Chat::get().checkMotd(Conf::get().sValue("motd_file"));
 
   // Set physics enable state according to config
-  Physics::get().enabled = (Conf::get().bValue("liquid_physics"));
+  Physics::get()->enabled = (Conf::get().bValue("liquid_physics"));
 
   // Initialize map
-  Map::get()->initMap();
+  Map::get()->init();
 
   // Initialize packethandler
-  PacketHandler::get()->initPackets();
+  PacketHandler::get()->init();
 
   // Load ip from config
   std::string ip = Conf::get().sValue("ip");
@@ -324,14 +324,15 @@ int Mineserver::Run(int argc, char *argv[])
     }
 
     //Physics simulation every 200ms
-    Physics::get().update();
+    Physics::get()->update();
 
     event_base_loopexit(m_eventBase, &loopTime);
   }
 
   /* Free memory */
-  PacketHandler::get()->freePackets();
-  Map::get()->freeMap();
+  PacketHandler::get()->free();
+  Map::get()->free();
+  Physics::get()->free();
 
 #ifdef WIN32
   closesocket(m_socketlisten);
