@@ -130,11 +130,11 @@ int Mineserver::Run(int argc, char *argv[])
   // Write PID to file
   std::ofstream pid_out((Conf::get().sValue("pid_file")).c_str());
   if (!pid_out.fail())
-     #ifdef WIN32
+#ifdef WIN32
      pid_out << _getpid();
-     #else
+#else
      pid_out << getpid();
-     #endif
+#endif
   pid_out.close();
 
   // Load admin, banned and whitelisted users
@@ -322,11 +322,14 @@ int Mineserver::Run(int argc, char *argv[])
 
   Map::get().freeMap();
 
-  #ifdef WIN32
+#ifdef WIN32
   closesocket(m_socketlisten);
-  #else
-    close(m_socketlisten);
-  #endif
+#else
+  close(m_socketlisten);
+#endif
+
+  // Remove the PID file
+  remove((Conf::get().sValue("pid_file")).c_str());
 
   return EXIT_SUCCESS;
 }
