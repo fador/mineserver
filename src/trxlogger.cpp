@@ -66,7 +66,7 @@ void TrxLogger::log(event_t event)
 }
 
 // Get logs based on nick and timestamp
-bool TrxLogger::getLogs(time_t t, std::string nick, std::vector<event_t> &logs) {
+bool TrxLogger::getLogs(time_t t, std::string &nick, std::vector<event_t> &logs) {
   event_t event;
   log_stream.seekg(0, std::ios::beg);
 
