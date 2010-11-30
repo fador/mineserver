@@ -46,12 +46,6 @@
 
 #include "cavegen.h"
 
-CaveGen &CaveGen::get()
-{
-  static CaveGen instance;
-  return instance;
-}
-
 void CaveGen::init(int seed)
 {
   // Set up us the Perlin-noise module.

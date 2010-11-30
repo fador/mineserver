@@ -55,7 +55,7 @@
 
 void MapGen::init(int seed)
 {
-  CaveGen::get().init(seed+8);
+  cave.init(seed+8);
   
   perlinNoise.SetSeed(seed);
   perlinNoise.SetOctaveCount(2);
@@ -266,7 +266,7 @@ void MapGen::generateWithNoise(int x, int z)
         }
         
         // Add caves
-        CaveGen::get().AddCaves(*curBlock, x + (bX+1)/16.0, (bY+1), z + (bZ+1)/16.0);
+        cave.AddCaves(*curBlock, x + (bX+1)/16.0, (bY+1), z + (bZ+1)/16.0);
       }
     }
   }
