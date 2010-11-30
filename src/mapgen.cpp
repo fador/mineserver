@@ -265,8 +265,8 @@ void MapGen::generateWithNoise(int x, int z)
             *curBlock = BLOCK_AIR; // FF
         }
         
-        // Check if cave -> remove placed block
-        CaveGen::get().AddCaves(*curBlock, 1000.0 + x*perlinScale + (bX+1)/16.0*perlinScale, (bY+1)/16.0, 1000.0 + z*perlinScale + (bZ+1)/16.0*perlinScale);
+        // Add caves
+        CaveGen::get().AddCaves(*curBlock, x + (bX+1)/16.0, (bY+1), z + (bZ+1)/16.0);
       }
     }
   }
@@ -277,7 +277,6 @@ void MapGen::generateWithNoise(int x, int z)
 
 void MapGen::AddBeaches() 
 {
-  //std::cout << "Adding beaches" << std::endl;
   int beachExtent = Conf::get().iValue("beachExtent");
   int beachHeight = Conf::get().iValue("beachHeight");
   
