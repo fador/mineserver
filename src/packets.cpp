@@ -131,7 +131,7 @@ int PacketHandler::login_request(User *user)
   std::cout << "Player " << user->UID << " login v." << version <<" : " << player <<":"<< passwd << std::endl;
 
   // If version is not 2 or 3
-  if(version != 5)
+  if(version != PROTOCOL_VERSION)
   {
     user->kick(Conf::get().sValue("wrong_protocol_message"));
     return PACKET_OK;
