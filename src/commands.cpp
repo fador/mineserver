@@ -607,8 +607,7 @@ void Chat::registerStandardCommands()
   registerCommand(parseCmd("home"), home, false);
   registerCommand(parseCmd("kit"), kit, false);
   registerCommand(parseCmd("motd"), showMOTD, false);
-  registerCommand(parseCmd("players"), playerList, false);
-  registerCommand(parseCmd("who"), playerList, false);
+  registerCommand(parseCmd("players who"), playerList, false);
   registerCommand(parseCmd("rules"), rules, false);
   registerCommand(parseCmd("e em emote me"), emote, false);
   registerCommand(parseCmd("whisper w tell t"), whisper, false);
