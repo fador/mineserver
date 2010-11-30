@@ -62,16 +62,17 @@ find_library(NOISE_LIBRARY
    NAMES libnoise.so
    PATHS /usr/lib /usr/local/lib
 )
-find_path(NOISE_INCLUDE_DIR
-  NAMES libnoise/noise.h noise/noise.h
-  PATHS /usr/include /usr/local/include
-)
+find_path(NOISE_INCLUDE_DIR noise.h /usr/include/noise /usr/include/libnoise /usr/local/include/noise)
 
-if (NOT NOISE_LIBRARY OR NOT NOISE_INCLUDE_DIR)
+if (NOT NOISE_LIBRARY OR NOISE_INCLUDE_DIR-NOTFOUND)
    set(errors "${errors}\t\t- libNoise library\n")
    set(dependency_error True)
 endif()
 
+#Debian?
+if(NOISE_INCLUDE_DIR MATCHES ".*libnoise$")
+  add_definitions(-DDEBIAN)
+endif()
 
 if (WINDOWS)
    # even if 64bit this is set
