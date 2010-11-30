@@ -321,9 +321,9 @@ void rollBack(User *user, std::string command, std::deque<std::string> args)
 
     if(args.size() > 1) {
       std::string victim = args[1];
-      TrxLogger::get().getLogs(timestamp, victim, logs);
+      TrxLogger::get().getLogs(timestamp, victim, &logs);
     } else {
-      TrxLogger::get().getLogs(timestamp, logs);
+      TrxLogger::get().getLogs(timestamp, &logs);
     }
     
     Chat::get().sendMsg(user, "rolling back...", Chat::USER);

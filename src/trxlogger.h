@@ -53,8 +53,8 @@ class TrxLogger
 public:
   void log(event_t event);
   static TrxLogger &get();
-  bool getLogs(time_t t, std::string &nick, std::vector<event_t> &logs);
-  bool getLogs(time_t t, std::vector<event_t> &logs);
+  bool getLogs(time_t t, std::string &nick, std::vector<event_t> *logs);
+  bool getLogs(time_t t, std::vector<event_t> *logs);
 
 private:
   std::fstream log_stream;
