@@ -144,6 +144,8 @@ void Map::initMap()
 
 void Map::freeMap()
 {
+   delete mMap;
+   mMap = 0;
 }
 
 sChunk *Map::getMapData(int x, int z, bool generate)
