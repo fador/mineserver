@@ -37,10 +37,15 @@
 #include "blocks/door.h"
 #include "blocks/sign.h"
 
-Plugin &Plugin::get()
+Plugin* Plugin::mPlugin;
+
+void Plugin::free()
 {
-  static Plugin instance;
-  return instance;
+   if (mPlugin)
+   {
+      delete mPlugin;
+      mPlugin = 0;
+   }
 }
 
 void Plugin::init()

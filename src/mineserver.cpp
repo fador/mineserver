@@ -160,7 +160,7 @@ int Mineserver::Run(int argc, char *argv[])
   int port = Conf::get()->iValue("port");
   
   // Initialize plugins
-  Plugin::get().init();
+  Plugin::get()->init();
 
 #ifdef WIN32
   WSADATA wsaData;
@@ -344,6 +344,7 @@ int Mineserver::Run(int argc, char *argv[])
   Physics::get()->free();
   Chat::get()->free();
   Conf::get()->free();
+  Plugin::get()->free();
 
   return EXIT_SUCCESS;
 }
