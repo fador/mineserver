@@ -30,7 +30,7 @@
 void BlockDoor::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
     uint8 block,metadata;
-    Map::get().getBlock(x, y, z, &block, &metadata);
+    Map::get()->getBlock(x, y, z, &block, &metadata);
 
    // Toggle door state
    if (metadata & 0x4)
@@ -46,10 +46,10 @@ void BlockDoor::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, si
 
    int modifier = (metadata & 0x8) ? -1 : 1;
 
-   Map::get().setBlock(x, y, z, block, metadata, user->nick);
-   Map::get().sendBlockChange(x, y, z, (char)block, metadata);  
+   Map::get()->setBlock(x, y, z, block, metadata, user->nick);
+   Map::get()->sendBlockChange(x, y, z, (char)block, metadata);  
 
-   Map::get().getBlock(x, y + modifier, z, &block2, &metadata2);
+   Map::get()->getBlock(x, y + modifier, z, &block2, &metadata2);
 
    if (block2 == block)
    {
@@ -60,8 +60,8 @@ void BlockDoor::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, si
      else
        metadata2 |= 0x8;
 
-     Map::get().setBlock(x, y + modifier, z, block2, metadata2, user->nick);
-     Map::get().sendBlockChange(x, y + modifier, z, (char)block, metadata2);
+     Map::get()->setBlock(x, y + modifier, z, block2, metadata2, user->nick);
+     Map::get()->sendBlockChange(x, y + modifier, z, (char)block, metadata2);
    }
 }
 
@@ -92,7 +92,7 @@ void BlockDoor::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
    uint8 toptopmeta;
    uint8 toptopblock;
 
-   if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
+   if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
    {
       /* Check block below allows blocks placed on top */
       switch(oldblock)
@@ -148,7 +148,7 @@ void BlockDoor::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
             }
          */
 
-            if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
+            if (Map::get()->getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
             {
                // Toggle door state
                if (topmeta & 0x4) {
@@ -158,7 +158,7 @@ void BlockDoor::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
                }
                int modifier = (topmeta & 0x8) ? -1 : 1;
 
-               Map::get().getBlock(x, y + modifier, z, &toptopblock, &toptopmeta);
+               Map::get()->getBlock(x, y + modifier, z, &toptopblock, &toptopmeta);
 
                if (toptopblock == topblock)
                {
@@ -170,8 +170,8 @@ void BlockDoor::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
                      toptopmeta |= 0x8;
                   }
 
-                  Map::get().setBlock(x, y + modifier, z, toptopblock, toptopmeta, user->nick);
-                  Map::get().sendBlockChange(x, y + modifier, z, (char)newblock, toptopmeta);
+                  Map::get()->setBlock(x, y + modifier, z, toptopblock, toptopmeta, user->nick);
+                  Map::get()->sendBlockChange(x, y + modifier, z, (char)newblock, toptopmeta);
                }
             }
          break;

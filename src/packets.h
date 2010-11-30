@@ -90,7 +90,7 @@ enum
   //v4 Packets
   PACKET_USE_ENTITY      = 0x07,
   PACKET_ENTITY_VELOCITY = 0x1c,
-  PACKET_ATTACH_ENTITY   = 0x27,
+  PACKET_ATTACH_ENTITY   = 0x27
 };
 
 class Packet

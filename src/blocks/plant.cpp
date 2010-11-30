@@ -51,10 +51,10 @@ void BlockPlant::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, 
    uint8 block; uint8 meta;
    uint8 nblock; uint8 nmeta;
    bool destroy = false;  
-   if (!Map::get().getBlock(x, y, z, &block, &meta))
+   if (!Map::get()->getBlock(x, y, z, &block, &meta))
       return;
       
-   if (meta == BLOCK_TOP && Map::get().getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
+   if (meta == BLOCK_TOP && Map::get()->getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
    {
       // block broken under plant
       destroy = true;
@@ -63,9 +63,9 @@ void BlockPlant::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, 
    if (destroy)
    {
       // Break plant and spawn plant item
-      Map::get().sendBlockChange(x, y, z, 0, 0);
-      Map::get().setBlock(x, y, z, 0, 0, user->nick);
-      Map::get().createPickupSpawn(x, y, z, block, 1);
+      Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+      Map::get()->setBlock(x, y, z, BLOCK_AIR, 0, user->nick);
+      Map::get()->createPickupSpawn(x, y, z, block, 1);
    }   
 }
 
@@ -76,7 +76,7 @@ void BlockPlant::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
    uint8 topblock;
    uint8 topmeta;
 
-   if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
+   if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
    {
       /* Only place of dirt or grass */
       switch(oldblock)
@@ -84,10 +84,10 @@ void BlockPlant::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
          case BLOCK_GRASS:
          case BLOCK_SOIL:
          case BLOCK_DIRT:
-            if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
+            if (Map::get()->getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
             {
-               Map::get().setBlock(x, y+1, z, (char)newblock, 0);
-               Map::get().sendBlockChange(x, y+1, z, (char)newblock, 0);
+               Map::get()->setBlock(x, y+1, z, (char)newblock, 0);
+               Map::get()->sendBlockChange(x, y+1, z, (char)newblock, 0);
             }
          break;
          default:

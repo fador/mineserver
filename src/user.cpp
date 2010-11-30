@@ -64,11 +64,12 @@ User::User(int sock, uint32 EID)
   // ENABLED FOR DEBUG
   this->admin           = false;
 
-  this->pos.x           = Map::get().spawnPos.x();
-  this->pos.y           = Map::get().spawnPos.y();
-  this->pos.z           = Map::get().spawnPos.z();
+  this->pos.x           = Map::get()->spawnPos.x();
+  this->pos.y           = Map::get()->spawnPos.y();
+  this->pos.z           = Map::get()->spawnPos.z();
   this->write_err_count = 0;
   this->health          = 20;
+  this->attachedTo      = 0;
 }
 
 bool User::checkBanned(std::string _nick)
@@ -155,7 +156,7 @@ bool User::unmute()
 
 bool User::loadData()
 {
-  std::string infile = Map::get().mapDirectory+"/players/"+this->nick+".dat";
+  std::string infile = Map::get()->mapDirectory+"/players/"+this->nick+".dat";
 
   struct stat stFileInfo;
   if(stat(infile.c_str(), &stFileInfo) != 0)
@@ -223,12 +224,12 @@ bool User::loadData()
 
 bool User::saveData()
 {
-  std::string outfile = Map::get().mapDirectory+"/players/"+this->nick+".dat";
+  std::string outfile = Map::get()->mapDirectory+"/players/"+this->nick+".dat";
   // Try to create parent directories if necessary
   struct stat stFileInfo;
   if(stat(outfile.c_str(), &stFileInfo) != 0)
   {
-    std::string outdir = Map::get().mapDirectory+"/players";
+    std::string outdir = Map::get()->mapDirectory+"/players";
 
     if(stat(outdir.c_str(), &stFileInfo) != 0)
     {
@@ -336,6 +337,14 @@ bool User::checkInventory(sint16 itemID, char count)
 
 bool User::updatePos(double x, double y, double z, double stance)
 {
+  //Riding on a minecart?
+  if(y==-999)
+  {
+    //attachedTo
+    //ToDo: Get pos from minecart
+    return false;
+  }
+
   if(nick.size() && logged)
   {
     //Do we send relative or absolute move values
@@ -372,42 +381,42 @@ bool User::updatePos(double x, double y, double z, double stance)
     sint32 chunk_x = blockToChunk((sint32)x);
     sint32 chunk_z = blockToChunk((sint32)z);
     uint32 chunkHash;
-    Map::get().posToId(chunk_x, chunk_z, &chunkHash);
-    if(Map::get().mapItems.count(chunkHash))
+    Map::get()->posToId(chunk_x, chunk_z, &chunkHash);
+    if(Map::get()->mapItems.count(chunkHash))
     {
       //Loop through items and check if they are close enought to be picked up
-      for(sint32 i = Map::get().mapItems[chunkHash].size()-1; i >= 0; i--)
+      for(sint32 i = Map::get()->mapItems[chunkHash].size()-1; i >= 0; i--)
       {
         //No more than 2 blocks away
-        if(abs((sint32)x-Map::get().mapItems[chunkHash][i]->pos.x()/32) < 2 &&
-           abs((sint32)z-Map::get().mapItems[chunkHash][i]->pos.z()/32) < 2 &&
-           abs((sint32)y-Map::get().mapItems[chunkHash][i]->pos.y()/32) < 2)
+        if(abs((sint32)x-Map::get()->mapItems[chunkHash][i]->pos.x()/32) < 2 &&
+           abs((sint32)z-Map::get()->mapItems[chunkHash][i]->pos.z()/32) < 2 &&
+           abs((sint32)y-Map::get()->mapItems[chunkHash][i]->pos.y()/32) < 2)
         {
           //Dont pickup own spawns right away
-          if(Map::get().mapItems[chunkHash][i]->spawnedBy != this->UID ||
-             Map::get().mapItems[chunkHash][i]->spawnedAt+2 < time(0))
+          if(Map::get()->mapItems[chunkHash][i]->spawnedBy != this->UID ||
+             Map::get()->mapItems[chunkHash][i]->spawnedAt+2 < time(0))
           {
             //Check player inventory for space!
-            if(checkInventory(Map::get().mapItems[chunkHash][i]->item,
-                              Map::get().mapItems[chunkHash][i]->count))
+            if(checkInventory(Map::get()->mapItems[chunkHash][i]->item,
+                              Map::get()->mapItems[chunkHash][i]->count))
             {
               //Send player collect item packet
               uint8 *packet = new uint8[9];
               packet[0] = PACKET_COLLECT_ITEM;
-              putSint32(&packet[1], Map::get().mapItems[chunkHash][i]->EID);
+              putSint32(&packet[1], Map::get()->mapItems[chunkHash][i]->EID);
               putSint32(&packet[5], this->UID);
         buffer.addToWrite(packet, 9);
 
               //Send everyone destroy_entity-packet
               packet[0] = PACKET_DESTROY_ENTITY;
-              putSint32(&packet[1], Map::get().mapItems[chunkHash][i]->EID);
+              putSint32(&packet[1], Map::get()->mapItems[chunkHash][i]->EID);
               //ToDo: Only send users in range
               this->sendAll(packet, 5);
 
               packet[0] = PACKET_ADD_TO_INVENTORY;
-              putSint16(&packet[1], Map::get().mapItems[chunkHash][i]->item);
-              packet[3] = Map::get().mapItems[chunkHash][i]->count;
-              putSint16(&packet[4], Map::get().mapItems[chunkHash][i]->health);
+              putSint16(&packet[1], Map::get()->mapItems[chunkHash][i]->item);
+              packet[3] = Map::get()->mapItems[chunkHash][i]->count;
+              putSint16(&packet[4], Map::get()->mapItems[chunkHash][i]->health);
 
         buffer.addToWrite(packet, 6);
 
@@ -415,9 +424,9 @@ bool User::updatePos(double x, double y, double z, double stance)
               delete[] packet;
 
 
-              Map::get().items.erase(Map::get().mapItems[chunkHash][i]->EID);
-              delete Map::get().mapItems[chunkHash][i];
-              Map::get().mapItems[chunkHash].erase(Map::get().mapItems[chunkHash].begin()+i);
+              Map::get()->items.erase(Map::get()->mapItems[chunkHash][i]->EID);
+              delete Map::get()->mapItems[chunkHash][i];
+              Map::get()->mapItems[chunkHash].erase(Map::get()->mapItems[chunkHash].begin()+i);
             }
           }
         }
@@ -615,7 +624,7 @@ bool User::pushMap()
                static_cast<int>(pos.z / 16));
     sort(mapQueue.begin(), mapQueue.end(), DistanceComparator(target));
 
-    Map::get().sendToUser(this, mapQueue[0].x(), mapQueue[0].z());
+    Map::get()->sendToUser(this, mapQueue[0].x(), mapQueue[0].z());
 
     // Add this to known list
     addKnown(mapQueue[0].x(), mapQueue[0].z());
@@ -683,7 +692,7 @@ bool User::dropInventory()
   {
     if( inv.main[i].type != 0 )
     {
-      Map::get().createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.main[i].type, inv.main[i].count);
+      Map::get()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.main[i].type, inv.main[i].count);
       inv.main[i] = Item();
     }
 
@@ -691,12 +700,12 @@ bool User::dropInventory()
     {
       if( inv.equipped[i].type != 0 )
       {
-        Map::get().createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.equipped[i].type, inv.equipped[i].count);
+        Map::get()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.equipped[i].type, inv.equipped[i].count);
         inv.equipped[i] = Item();
       }
       if( inv.crafting[i].type != 0 )
       {
-        Map::get().createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.crafting[i].type, inv.crafting[i].count);
+        Map::get()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.crafting[i].type, inv.crafting[i].count);
         inv.crafting[i] = Item();
       }
     }

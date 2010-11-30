@@ -53,11 +53,7 @@
 #include "nbt.h"
 #include "config.h"
 
-Map &Map::get()
-{
-  static Map instance;
-  return instance;
-}
+Map* Map::mMap;
 
 void Map::posToId(int x, int z, uint32 *id)
 {
@@ -149,6 +145,8 @@ void Map::initMap()
 
 void Map::freeMap()
 {
+   delete mMap;
+   mMap = 0;
 }
 
 sChunk *Map::getMapData(int x, int z, bool generate)

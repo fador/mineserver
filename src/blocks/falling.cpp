@@ -58,7 +58,7 @@ void BlockFalling::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
    uint8 topblock;
    uint8 topmeta;
 
-   if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
+   if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
    {
       /* Check block below allows blocks placed on top */
       switch(oldblock)
@@ -72,10 +72,10 @@ void BlockFalling::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
           return;
          break;
          default:
-            if (Map::get().getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
+            if (Map::get()->getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
             {
-               Map::get().setBlock(x, y+1, z, (char)newblock, 0, user->nick);
-               Map::get().sendBlockChange(x, y+1, z, (char)newblock, 0);
+               Map::get()->setBlock(x, y+1, z, (char)newblock, 0, user->nick);
+               Map::get()->sendBlockChange(x, y+1, z, (char)newblock, 0);
                physics(x,y+1,z);
             }
          break;
@@ -95,14 +95,14 @@ void BlockFalling::physics(sint32 x, sint8 y, sint32 z)
 {
    uint8 block;
    uint8 meta;
-   while(Map::get().getBlock(x, y-1, z, &block, &meta) && (block == BLOCK_AIR))
+   while(Map::get()->getBlock(x, y-1, z, &block, &meta) && (block == BLOCK_AIR))
    {
      // Destroy original block
-     Map::get().sendBlockChange(x, y, z, 0, 0);
-     Map::get().setBlock(x, y--, z, 0, 0);
+     Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+     Map::get()->setBlock(x, y--, z, BLOCK_AIR, 0);
 
-     Map::get().setBlock(x, y, z, block, meta);
-     Map::get().sendBlockChange(x, y, z, block, meta);
+     Map::get()->setBlock(x, y, z, block, meta);
+     Map::get()->sendBlockChange(x, y, z, block, meta);
 
      y--;
    }

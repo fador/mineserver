@@ -55,6 +55,7 @@
 
 void MapGen::init(int seed)
 {
+  CaveGen::get().init(seed+8);
   
   perlinNoise.SetSeed(seed);
   perlinNoise.SetOctaveCount(2);
@@ -190,10 +191,10 @@ void MapGen::generateChunk(int x, int z)
   main->Insert("Level", val);
   
   uint32 chunkid;
-  Map::get().posToId(x, z, &chunkid);
+  Map::get()->posToId(x, z, &chunkid);
   
-  Map::get().maps[chunkid].x = x;
-  Map::get().maps[chunkid].z = z;
+  Map::get()->maps[chunkid].x = x;
+  Map::get()->maps[chunkid].z = z;
 
   std::vector<uint8> *t_blocks = (*val)["Blocks"]->GetByteArray();
   std::vector<uint8> *t_data = (*val)["Data"]->GetByteArray();
@@ -201,19 +202,19 @@ void MapGen::generateChunk(int x, int z)
   std::vector<uint8> *t_skylight = (*val)["SkyLight"]->GetByteArray();
   std::vector<uint8> *heightmap = (*val)["HeightMap"]->GetByteArray();
   
-  Map::get().maps[chunkid].blocks = &((*t_blocks)[0]);
-  Map::get().maps[chunkid].data = &((*t_data)[0]);
-  Map::get().maps[chunkid].blocklight = &((*t_blocklight)[0]);
-  Map::get().maps[chunkid].skylight = &((*t_skylight)[0]);
-  Map::get().maps[chunkid].heightmap = &((*heightmap)[0]);
+  Map::get()->maps[chunkid].blocks = &((*t_blocks)[0]);
+  Map::get()->maps[chunkid].data = &((*t_data)[0]);
+  Map::get()->maps[chunkid].blocklight = &((*t_blocklight)[0]);
+  Map::get()->maps[chunkid].skylight = &((*t_skylight)[0]);
+  Map::get()->maps[chunkid].heightmap = &((*heightmap)[0]);
 
   // Update last used time
-  Map::get().mapLastused[chunkid] = (int)time(0);
+  Map::get()->mapLastused[chunkid] = (int)time(0);
 
   // Not changed
-  Map::get().mapChanged[chunkid] = 0;
+  Map::get()->mapChanged[chunkid] = 0;
   
-  Map::get().maps[chunkid].nbt = main;
+  Map::get()->maps[chunkid].nbt = main;
 }
 
 void MapGen::generateWithNoise(int x, int z) 
@@ -263,17 +264,19 @@ void MapGen::generateWithNoise(int x, int z)
           else
             *curBlock = BLOCK_AIR; // FF
         }
+        
+        // Add caves
+        CaveGen::get().AddCaves(*curBlock, x + (bX+1)/16.0, (bY+1), z + (bZ+1)/16.0);
       }
     }
   }
-  //CaveGen::get().AddCaves(blocks);
+  //CaveGen::get().AddCaves(blockslibnoise);
   if(Conf::get().bValue("addBeaches"))
     AddBeaches();
 }
 
 void MapGen::AddBeaches() 
 {
-  //std::cout << "Adding beaches" << std::endl;
   int beachExtent = Conf::get().iValue("beachExtent");
   int beachHeight = Conf::get().iValue("beachHeight");
   
@@ -310,15 +313,15 @@ void MapGen::AddBeaches()
         uint8 block;
         uint8 meta;
 
-        Map::get().sendBlockChange(x, h, z, BLOCK_WATER, 0);
-        Map::get().setBlock(x, h, z, BLOCK_WATER, 0);
+        Map::get()->sendBlockChange(x, h, z, BLOCK_WATER, 0);
+        Map::get()->setBlock(x, h, z, BLOCK_WATER, 0);
         
-        Map::get().getBlock(x, h-1, z, &block, &meta);
+        Map::get()->getBlock(x, h-1, z, &block, &meta);
         
         if( h > 0 && block == BLOCK_DIRT )
         {
-          Map::get().sendBlockChange(x, h-1, z, BLOCK_WATER, 0);
-          Map::get().setBlock(x, h-1, z, BLOCK_WATER, 0);
+          Map::get()->sendBlockChange(x, h-1, z, BLOCK_WATER, 0);
+          Map::get()->setBlock(x, h-1, z, BLOCK_WATER, 0);
         }
       }
     }

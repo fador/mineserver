@@ -53,7 +53,7 @@ void BlockSign::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
    uint8 oldblock;
    uint8 oldmeta;
 
-   if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
+   if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
    {
       /* Check block below allows blocks placed on top */
       switch(oldblock)
@@ -167,10 +167,10 @@ void BlockSign::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
 
             uint8 block;
             uint8 meta;
-            if (Map::get().getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
+            if (Map::get()->getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
             {
-               Map::get().setBlock(x, y, z, (char)newblock, metadata, user->nick);
-               Map::get().sendBlockChange(x, y, z, (char)newblock, metadata);
+               Map::get()->setBlock(x, y, z, (char)newblock, metadata, user->nick);
+               Map::get()->sendBlockChange(x, y, z, (char)newblock, metadata);
             }
          break;
       }

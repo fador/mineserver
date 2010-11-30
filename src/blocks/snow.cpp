@@ -51,10 +51,10 @@ void BlockSnow::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, s
    uint8 block; uint8 meta;
    uint8 nblock; uint8 nmeta;
    bool destroy = false;  
-   if (!Map::get().getBlock(x, y, z, &block, &meta))
+   if (!Map::get()->getBlock(x, y, z, &block, &meta))
       return;
       
-   if (meta == BLOCK_TOP && Map::get().getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
+   if (meta == BLOCK_TOP && Map::get()->getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
    {
       // block broken under snow
       destroy = true;
@@ -63,8 +63,8 @@ void BlockSnow::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, s
    if (destroy)
    {
       // Break snow and do not spawn item
-      Map::get().sendBlockChange(x, y, z, 0, 0);
-      Map::get().setBlock(x, y, z, 0, 0, user->nick);
+      Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+      Map::get()->setBlock(x, y, z, BLOCK_AIR, 0, user->nick);
    }   
 }
 

@@ -130,11 +130,11 @@ int Mineserver::Run(int argc, char *argv[])
   // Write PID to file
   std::ofstream pid_out((Conf::get().sValue("pid_file")).c_str());
   if (!pid_out.fail())
-     #ifdef WIN32
+#ifdef WIN32
      pid_out << _getpid();
-     #else
+#else
      pid_out << getpid();
-     #endif
+#endif
   pid_out.close();
 
   // Load admin, banned and whitelisted users
@@ -148,7 +148,7 @@ int Mineserver::Run(int argc, char *argv[])
   Physics::get().enabled = (Conf::get().bValue("liquid_physics"));
 
   // Initialize map
-  Map::get().initMap();
+  Map::get()->initMap();
 
   // Initialize packethandler
   PacketHandler::get().initPackets();
@@ -275,7 +275,7 @@ int Mineserver::Run(int argc, char *argv[])
 
         //Send server time
         Packet pkt;
-        pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get().mapTime;
+        pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
         Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());        
       }
 
@@ -284,19 +284,19 @@ int Mineserver::Run(int argc, char *argv[])
 
       //Release chunks not used in <map_release_time> seconds
       std::vector<uint32> toRelease;
-      for(std::map<uint32, int>::const_iterator it = Map::get().mapLastused.begin();
-          it != Map::get().mapLastused.end();
+      for(std::map<uint32, int>::const_iterator it = Map::get()->mapLastused.begin();
+          it != Map::get()->mapLastused.end();
           ++it)
       {
-        if(Map::get().mapLastused[it->first] <= time(0)-map_release_time)
+        if(Map::get()->mapLastused[it->first] <= time(0)-map_release_time)
           toRelease.push_back(it->first);
       }
 
       int x_temp, z_temp;
       for(unsigned i = 0; i < toRelease.size(); i++)
       {
-        Map::get().idToPos(toRelease[i], &x_temp, &z_temp);
-        Map::get().releaseMap(x_temp, z_temp);
+        Map::get()->idToPos(toRelease[i], &x_temp, &z_temp);
+        Map::get()->releaseMap(x_temp, z_temp);
       }
     }
 
@@ -309,9 +309,18 @@ int Mineserver::Run(int argc, char *argv[])
       {
         Users[i]->pushMap();
         Users[i]->popMap();
+
+        //Minecart hacks!!
+        if(Users[i]->attachedTo)
+        {
+          Packet pkt;
+          pkt << PACKET_ENTITY_VELOCITY << (sint32)Users[i]->attachedTo <<  (sint16)10000       << (sint16)0 << (sint16)0;
+          //pkt << PACKET_ENTITY_RELATIVE_MOVE << (sint32)Users[i]->attachedTo <<  (sint8)100       << (sint8)0 << (sint8)0;
+          Users[i]->sendAll((uint8 *)pkt.getWrite(), pkt.getWriteLen());
+        }
       }
-      Map::get().mapTime+=20;
-      if(Map::get().mapTime>=24000) Map::get().mapTime=0;
+      Map::get()->mapTime+=20;
+      if(Map::get()->mapTime>=24000) Map::get()->mapTime=0;
     }
 
     //Physics simulation every 200ms
@@ -320,13 +329,16 @@ int Mineserver::Run(int argc, char *argv[])
     event_base_loopexit(m_eventBase, &loopTime);
   }
 
-  Map::get().freeMap();
+  Map::get()->freeMap();
 
-  #ifdef WIN32
+#ifdef WIN32
   closesocket(m_socketlisten);
-  #else
-    close(m_socketlisten);
-  #endif
+#else
+  close(m_socketlisten);
+#endif
+  
+  // Remove the PID file
+  unlink((Conf::get().sValue("pid_file")).c_str());
 
   return EXIT_SUCCESS;
 }
@@ -336,4 +348,4 @@ bool Mineserver::Stop()
   m_running=false;
 
   return true;
-};
+}

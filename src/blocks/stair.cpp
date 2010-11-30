@@ -58,7 +58,7 @@ void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
    signed short diffX;
    signed short diffZ;
 
-   if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
+   if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
    {
       /* Check block below allows blocks placed on top */
       switch(oldblock)
@@ -123,10 +123,10 @@ void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
 
             uint8 block;
             uint8 meta;
-            if (Map::get().getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
+            if (Map::get()->getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
             {
-               Map::get().setBlock(x, y, z, (char)newblock, direction, user->nick);
-               Map::get().sendBlockChange(x, y, z, (char)newblock, direction);
+               Map::get()->setBlock(x, y, z, (char)newblock, direction, user->nick);
+               Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
             }
          break;
       }
@@ -147,21 +147,21 @@ void BlockStair::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
    {
       case BLOCK_WATER:
       case BLOCK_STATIONARY_WATER:
-         if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
+         if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
          {
             // spawn item
-            Map::get().sendBlockChange(x, y, z, 0, 0);
-            Map::get().setBlock(x, y, z, 0, 0, user->nick);
-            Map::get().createPickupSpawn(x, y, z, oldblock, 1);
+            Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+            Map::get()->setBlock(x, y, z, BLOCK_AIR, 0, user->nick);
+            Map::get()->createPickupSpawn(x, y, z, oldblock, 1);
          }
       break;
       case BLOCK_LAVA:
       case BLOCK_STATIONARY_LAVA:
-         if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
+         if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
          {
             // destroy
-            Map::get().sendBlockChange(x, y, z, 0, 0);
-            Map::get().setBlock(x, y, z, 0, 0, user->nick);
+            Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+            Map::get()->setBlock(x, y, z, BLOCK_AIR, 0, user->nick);
          }
       break;
       default:

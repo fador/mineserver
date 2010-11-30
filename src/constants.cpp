@@ -68,13 +68,13 @@ void initConstants()
   BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_SAPLING, Drop(BLOCK_SAPLING, 10000, 1, true)));
   BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_SAND, Drop(BLOCK_SAND, 10000, 1, true)));
   BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_COAL_ORE, Drop(ITEM_COAL, 10000, 1, true)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_IRON_ORE, Drop(ITEM_IRON_INGOT, 10000, 1, true)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_GOLD_ORE, Drop(ITEM_GOLD_INGOT, 10000, 1, true)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_IRON_ORE, Drop(BLOCK_IRON_ORE, 10000, 1, true)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_GOLD_ORE, Drop(BLOCK_GOLD_ORE, 10000, 1, true)));
   BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_DIAMOND_ORE, Drop(ITEM_DIAMOND, 10000, 1, true)));
   BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_LOG, Drop(BLOCK_LOG, 10000, 1, true)));
   BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_WOODEN_STAIRS, Drop(BLOCK_WOOD, 10000, 1, true)));
   BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_RED_ROSE, Drop(BLOCK_RED_ROSE, 10000, 1, true)));
-  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_YELLOW_FLOWER, Drop(BLOCK_RED_ROSE, 10000, 1, true)));
+  BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_YELLOW_FLOWER, Drop(BLOCK_YELLOW_FLOWER, 10000, 1, true)));
   BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_BROWN_MUSHROOM, Drop(BLOCK_BROWN_MUSHROOM, 10000, 1, true)));
   BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_RED_MUSHROOM, Drop(BLOCK_RED_MUSHROOM, 10000, 1, true)));
   BLOCKDROPS.insert(std::pair<uint8, Drop>(BLOCK_LADDER, Drop(BLOCK_LADDER, 10000, 1, true)));
