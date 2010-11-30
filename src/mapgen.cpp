@@ -50,6 +50,7 @@
 #include "noiseutils.h"
 
 //#include "mersenne.h"
+#include "world/cavegen.h"
 #include "mapgen.h"
 
 void MapGen::init(int seed)
@@ -261,6 +262,63 @@ void MapGen::generateWithNoise(int x, int z)
             *curBlock = BLOCK_STATIONARY_WATER; // FF
           else
             *curBlock = BLOCK_AIR; // FF
+        }
+      }
+    }
+  }
+  //CaveGen::get().AddCaves(blocks);
+  if(Conf::get().bValue("addBeaches"))
+    AddBeaches();
+}
+
+void MapGen::AddBeaches() 
+{
+  //std::cout << "Adding beaches" << std::endl;
+  int beachExtent = Conf::get().iValue("beachExtent");
+  int beachHeight = Conf::get().iValue("beachHeight");
+  
+  int beachExtentSqr = (beachExtent + 1) * (beachExtent + 1);
+  for(int x = 0; x < 16; x++) 
+  {
+    for(int z = 0; z < 16; z++) 
+    {
+      int h = -1;
+      h = heightMap.GetValue(x, z);
+      if(h < 0) continue;
+      
+      bool found = false;
+      for(int dx = -beachExtent; !found && dx <= beachExtent; dx++) 
+      {
+        for(int dz = -beachExtent; !found && dz <= beachExtent; dz++) 
+        {
+          for(int dh = -beachHeight; !found && dh <= 0; dh++) 
+          {
+            if(dx * dx + dz * dz + dh * dh > beachExtentSqr) continue;
+            int xx = x + dx;
+            int zz = z + dz;
+            int hh = h + dh;
+            if(xx < 0 || xx >= 15 || zz < 0 || zz >= 15 || hh < 0 || hh >= 127 ) continue;
+            int index = hh + (zz * 128 + (xx * 128 * 16));
+            if( blocks[index] == BLOCK_WATER || blocks[index] == BLOCK_STATIONARY_WATER ) {
+              found = true;
+              break;
+            }
+          }
+        }
+      }
+      if( found ) {
+        uint8 block;
+        uint8 meta;
+
+        Map::get().sendBlockChange(x, h, z, BLOCK_WATER, 0);
+        Map::get().setBlock(x, h, z, BLOCK_WATER, 0);
+        
+        Map::get().getBlock(x, h-1, z, &block, &meta);
+        
+        if( h > 0 && block == BLOCK_DIRT )
+        {
+          Map::get().sendBlockChange(x, h-1, z, BLOCK_WATER, 0);
+          Map::get().setBlock(x, h-1, z, BLOCK_WATER, 0);
         }
       }
     }
