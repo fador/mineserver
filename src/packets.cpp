@@ -257,7 +257,7 @@ int PacketHandler::login_request(User *user)
   user->sethealth(user->health);
   user->logged = true;
 
-  Chat::get().sendMsg(user, player+" connected!", Chat::ALL);
+  Chat::get()->sendMsg(user, player+" connected!", Chat::ALL);
 
   return PACKET_OK;
 }
@@ -301,7 +301,7 @@ int PacketHandler::chat_message(User *user)
 
   user->buffer.removePacket();
 
-  Chat::get().handleMsg( user, msg );
+  Chat::get()->handleMsg( user, msg );
 
   return PACKET_OK;
 }

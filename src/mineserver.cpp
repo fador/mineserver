@@ -138,11 +138,11 @@ int Mineserver::Run(int argc, char *argv[])
   pid_out.close();
 
   // Load admin, banned and whitelisted users
-  Chat::get().loadAdmins(Conf::get()->sValue("admin_file"));
-  Chat::get().loadBanned(Conf::get()->sValue("banned_file"));
-  Chat::get().loadWhitelist(Conf::get()->sValue("whitelist_file"));
+  Chat::get()->loadAdmins(Conf::get()->sValue("admin_file"));
+  Chat::get()->loadBanned(Conf::get()->sValue("banned_file"));
+  Chat::get()->loadWhitelist(Conf::get()->sValue("whitelist_file"));
   // Load MOTD
-  Chat::get().checkMotd(Conf::get()->sValue("motd_file"));
+  Chat::get()->checkMotd(Conf::get()->sValue("motd_file"));
 
   // Set physics enable state according to config
   Physics::get()->enabled = (Conf::get()->bValue("liquid_physics"));
@@ -329,10 +329,6 @@ int Mineserver::Run(int argc, char *argv[])
     event_base_loopexit(m_eventBase, &loopTime);
   }
 
-  /* Free memory */
-  PacketHandler::get()->free();
-  Map::get()->free();
-  Physics::get()->free();
 #ifdef WIN32
   closesocket(m_socketlisten);
 #else
@@ -342,6 +338,11 @@ int Mineserver::Run(int argc, char *argv[])
   // Remove the PID file
   unlink((Conf::get()->sValue("pid_file")).c_str());
 
+  /* Free memory */
+  PacketHandler::get()->free();
+  Map::get()->free();
+  Physics::get()->free();
+  Chat::get()->free();
   Conf::get()->free();
 
   return EXIT_SUCCESS;
