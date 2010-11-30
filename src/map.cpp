@@ -649,7 +649,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   }
   metapointer[index >> 1] = metadata;
 
-  mapChanged[mapId]       = 1;
+  mapChanged[mapId]       = true;
   mapLastused[mapId]      = (int)time(0);
 
   return true;
@@ -762,8 +762,7 @@ bool Map::loadMap(int x, int z, bool generate)
   {
     maps[mapId].nbt = NBT_Value::LoadFromFile(infile.c_str());
   }
-  
-  
+
   if(maps[mapId].nbt == NULL)
   {
     LOG("Error in loading map (unable to load file)");
@@ -815,7 +814,7 @@ bool Map::loadMap(int x, int z, bool generate)
   mapLastused[mapId] = (int)time(0);
 
   // Not changed
-  mapChanged[mapId] = 0;
+  mapChanged[mapId] = false;
 
   return true;
 }
@@ -888,7 +887,7 @@ bool Map::saveMap(int x, int z)
   maps[mapId].nbt->SaveToFile(outfile);
 
   // Set "not changed"
-  mapChanged[mapId] = 0;
+  mapChanged[mapId] = false;
 
   return true;
 }

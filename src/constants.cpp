@@ -43,6 +43,7 @@ void initConstants()
   defaultConf.insert(std::pair<std::string, std::string>("mapdir", "testmap"));
   defaultConf.insert(std::pair<std::string, std::string>("userlimit", "20"));
   defaultConf.insert(std::pair<std::string, std::string>("map_release_time", "10"));
+  defaultConf.insert(std::pair<std::string, std::string>("save_unchanged_chunks", "true"));
   defaultConf.insert(std::pair<std::string, std::string>("liquid_physics", "true"));
   defaultConf.insert(std::pair<std::string, std::string>("map_flatland", "false"));
   defaultConf.insert(std::pair<std::string, std::string>("oreDensity", "24"));

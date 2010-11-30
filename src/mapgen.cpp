@@ -212,7 +212,7 @@ void MapGen::generateChunk(int x, int z)
   Map::get()->mapLastused[chunkid] = (int)time(0);
 
   // Not changed
-  Map::get()->mapChanged[chunkid] = 0;
+  Map::get()->mapChanged[chunkid] = Conf::get().bValue("save_unchanged_chunks");
   
   Map::get()->maps[chunkid].nbt = main;
 }
