@@ -23,6 +23,10 @@ ifeq ($(DEBIAN), 1)
 CXXFLAGS += -DDEBIAN
 endif
 
+ifeq ($(PEDANTIC), 1)
+LDFLAGS += -Wall -pedantic
+CXXFLAGS += -Wall -pedantic
+endif
 
 RM = rm -f
 CXX = g++
