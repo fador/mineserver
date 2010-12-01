@@ -339,6 +339,14 @@ void whisper(User *user, std::string command, std::deque<std::string> args)
 
     User *tUser        = getUserByNick(targetNick);
 
+    // Don't whisper or tell if DND is set
+    if(tUser->dnd)
+    {
+      Chat::get().sendMsg(user, COLOR_YELLOW + tUser->nick + " currently doesn't want to be disturbed.", Chat::USER);
+      Chat::get().sendMsg(user, COLOR_YELLOW + "Message not sent.", Chat::USER);
+      return;
+    }
+    
     if(tUser != NULL)
     {
       args.pop_front();

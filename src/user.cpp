@@ -138,9 +138,9 @@ bool User::kick(std::string kickMsg)
 bool User::mute(std::string muteMsg)
 {
   if(!muteMsg.empty()) 
-    muteMsg = "You have been muted.  Reason: " + muteMsg;
+    muteMsg = COLOR_YELLOW + "You have been muted.  Reason: " + muteMsg;
   else 
-    muteMsg = "You have been muted. ";
+    muteMsg = COLOR_YELLOW + "You have been muted. ";
     
   Chat::get().sendMsg(this, muteMsg, Chat::USER);
   this->muted = true;
@@ -149,7 +149,7 @@ bool User::mute(std::string muteMsg)
 }
 bool User::unmute()
 {
-    Chat::get().sendMsg(this, "You have been unmuted.", Chat::USER);
+    Chat::get().sendMsg(this, COLOR_YELLOW + "You have been unmuted.", Chat::USER);
     this->muted = false;
     std::cout << nick << " unmuted. " << std::endl;
     return true;
@@ -157,16 +157,16 @@ bool User::unmute()
 bool User::toggleDND()
 {	
 	if(!this->dnd) {
-		Chat::get().sendMsg(this, "You have enabled 'Do Not Disturb' mode.", Chat::USER);
-		Chat::get().sendMsg(this, "You will no longer see chat or private messages.", Chat::USER);
-		Chat::get().sendMsg(this, "Type /dnd again to disable 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get().sendMsg(this, COLOR_YELLOW + "You have enabled 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get().sendMsg(this, COLOR_YELLOW + "You will no longer see chat or private messages.", Chat::USER);
+		Chat::get().sendMsg(this, COLOR_YELLOW + "Type /dnd again to disable 'Do Not Disturb' mode.", Chat::USER);
 		this->dnd = true;
 	}
 	else {
 		this->dnd = false;
-		Chat::get().sendMsg(this, "You have disabled 'Do Not Disturb' mode.", Chat::USER);
-		Chat::get().sendMsg(this, "You can now see chat and private messages.", Chat::USER);
-		Chat::get().sendMsg(this, "Type /dnd again to enable 'Do Not Disturb' mode.", Chat::USER);		
+		Chat::get().sendMsg(this, COLOR_YELLOW + "You have disabled 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get().sendMsg(this, COLOR_YELLOW + "You can now see chat and private messages.", Chat::USER);
+		Chat::get().sendMsg(this, COLOR_YELLOW + "Type /dnd again to enable 'Do Not Disturb' mode.", Chat::USER);		
 	}
 	return this->dnd;
 }
@@ -177,12 +177,12 @@ bool User::isAbleToCommunicate(std::string communicateCommand)
 		communicateCommand = "/" + communicateCommand;
 		
 	if(this->muted) {
-		Chat::get().sendMsg(this, "You cannot " + communicateCommand + " while muted.", Chat::USER);
+		Chat::get().sendMsg(this, COLOR_YELLOW + "You cannot " + communicateCommand + " while muted.", Chat::USER);
 		return false;
 	}
 	if(this->dnd) {
-		Chat::get().sendMsg(this, "You cannot " + communicateCommand + " while in 'Do Not Disturb' mode.", Chat::USER);
-		Chat::get().sendMsg(this, "Type /dnd to disable.", Chat::USER);
+		Chat::get().sendMsg(this, COLOR_YELLOW + "You cannot " + communicateCommand + " while in 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get().sendMsg(this, COLOR_YELLOW + "Type /dnd to disable.", Chat::USER);
 		return false;
 	}
 	return true;
@@ -520,7 +520,13 @@ bool User::sendOthers(uint8 *data, uint32 len)
   for(unsigned int i = 0; i < Users.size(); i++)
   {
     if(Users[i]->fd != this->fd && Users[i]->logged)
-    	Users[i]->buffer.addToWrite(data, len);
+    {
+      // Don't send to his user if he is DND and the message is a chat message
+      if(!(Users[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
+      {
+    	  Users[i]->buffer.addToWrite(data, len);
+  	  }
+  	}
   }
   return true;
 }
@@ -530,7 +536,13 @@ bool User::sendAll(uint8 *data, uint32 len)
   for(unsigned int i = 0; i < Users.size(); i++)
   {
     if(Users[i]->fd && Users[i]->logged)
-    	Users[i]->buffer.addToWrite(data, len);
+    {
+      // Don't send to his user if he is DND and the message is a chat message
+      if(!(Users[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
+      {
+    	  Users[i]->buffer.addToWrite(data, len);
+  	  }
+  	}
   }
   return true;
 }

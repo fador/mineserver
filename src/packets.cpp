@@ -289,10 +289,8 @@ int PacketHandler::chat_message(User *user)
     return PACKET_NEED_MORE_DATA;
 
   user->buffer.removePacket();
-
   Chat::get().handleMsg( user, msg );
-	LOG(user->nick + " " + msg);
-  return PACKET_OK;
+	return PACKET_OK;
 }
 
 int PacketHandler::player_inventory(User *user)

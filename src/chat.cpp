@@ -307,7 +307,7 @@ bool Chat::handleMsg(User *user, std::string msg)
         msg = timeStamp + " <"+ user->nick + "> " + msg;
     }
       
-    LOG(user->nick + msg);
+    LOG(msg);
 
     this->sendMsg(user, msg, ALL);
     
