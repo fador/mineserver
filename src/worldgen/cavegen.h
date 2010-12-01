@@ -28,19 +28,17 @@
 #ifndef _CAVEGEN_H
 #define _CAVEGEN_H
 
-#include "../mersenne.h"
+#include "mersenne.h"
 
 class CaveGen
 {
 public:
-  static CaveGen &get();
   void init(int seed);
   void AddCaves(uint8 &block, double x, double y, double z);
   
   float caveScale;
 
 private:
-  CaveGen() {}
   Random rand;
   uint8 *blocks;
   

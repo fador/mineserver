@@ -17,4 +17,9 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		AMDCaPersistentConfig = Release|Win32
+		AMDCaPersistentStartup = mineserver
+		AMDCaProjectFile = C:\projektit\minecraft\mineserver\mineserver\CodeAnalyst\mineserver.caw
+	EndGlobalSection
 EndGlobal

@@ -37,8 +37,17 @@ class Conf
 private:
   Conf() {}
   std::map<std::string, std::string> confSet;
+  static Conf *mConf;
 public:
-  static Conf &get();
+  static Conf* get()
+  {
+    if(!mConf) {
+      mConf = new Conf();
+    }
+    return mConf;
+  }
+  void free();
+
   bool load(std::string configFile);
   int iValue(std::string name);
   std::string sValue(std::string name);

@@ -33,12 +33,12 @@
 #include <vector>
 #include <cmath>
 
-#include "logger.h"
-#include "constants.h"
+#include "../logger.h"
+#include "../constants.h"
 
-#include "config.h"
-#include "nbt.h"
-#include "map.h"
+#include "../config.h"
+#include "../nbt.h"
+#include "../map.h"
 
 // libnoise
 #ifdef DEBIAN
@@ -50,12 +50,23 @@
 #include "noiseutils.h"
 
 //#include "mersenne.h"
-#include "world/cavegen.h"
+#include "cavegen.h"
 #include "mapgen.h"
+
+MapGen* MapGen::mMapGen;
+
+void MapGen::free()
+{
+   if (mMapGen)
+   {
+      delete mMapGen;
+      mMapGen = 0;
+   }
+}
 
 void MapGen::init(int seed)
 {
-  CaveGen::get().init(seed+8);
+  cave.init(seed+8);
   
   perlinNoise.SetSeed(seed);
   perlinNoise.SetOctaveCount(2);
@@ -134,15 +145,9 @@ void MapGen::init(int seed)
   heightMapBuilder.SetDestNoiseMap(heightMap);
   heightMapBuilder.SetDestSize(16, 16);
 
-  seaLevel = Conf::get().iValue("seaLevel");
+  seaLevel = Conf::get()->iValue("sea_level");
   
   m_seed = seed;
-}
-
-MapGen &MapGen::get()
-{
-  static MapGen instance;
-  return instance;
 }
 
 void MapGen::generateFlatgrass() 
@@ -171,7 +176,7 @@ void MapGen::generateChunk(int x, int z)
   NBT_Value *main = new NBT_Value(NBT_Value::TAG_COMPOUND);
   NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
  
-  if(Conf::get().bValue("map_flatgrass"))
+  if(Conf::get()->bValue("map_flatgrass"))
     generateFlatgrass();
   else
     generateWithNoise(x, z);
@@ -212,18 +217,22 @@ void MapGen::generateChunk(int x, int z)
   Map::get()->mapLastused[chunkid] = (int)time(0);
 
   // Not changed
-  Map::get()->mapChanged[chunkid] = 0;
+  Map::get()->mapChanged[chunkid] = Conf::get()->bValue("save_unchanged_chunks");
   
   Map::get()->maps[chunkid].nbt = main;
 }
 
 void MapGen::generateWithNoise(int x, int z) 
 {
+  // Debug..
+  //struct timeval start, end;    
+  //gettimeofday(&start, NULL);
+
   heightMapBuilder.SetBounds(1000 + x*perlinScale, 1000 + (x+1)*perlinScale, 1000 + z*perlinScale, 1000 + (z+1)*perlinScale);
   heightMapBuilder.Build();
 
   // Populate blocks in chunk
-  int currentHeight;
+  uint8 currentHeight;
   uint8 *curBlock;
   for (uint8 bX = 0; bX < 16; bX++) 
   {
@@ -232,7 +241,7 @@ void MapGen::generateWithNoise(int x, int z)
       for (uint8 bZ = 0; bZ < 16; bZ++) 
       {
         curBlock = &blocks[bY + (bZ * 128 + (bX * 128 * 16))];
-        currentHeight = (int)((heightMap.GetValue(bX,bZ) * 8.7) + 65.15371);
+        currentHeight = (uint8)((heightMap.GetValue(bX,bZ) * 8.7) + 65.15371);
         
         // Place bedrock
         if(bY == 0) 
@@ -243,7 +252,7 @@ void MapGen::generateWithNoise(int x, int z)
         
         if(bY < currentHeight) 
         {
-          if (bY < (int)(currentHeight * 0.94)) 
+          if (bY < (uint8)(currentHeight * 0.94)) 
             *curBlock = BLOCK_STONE;
           else
             *curBlock = BLOCK_DIRT;
@@ -266,19 +275,21 @@ void MapGen::generateWithNoise(int x, int z)
         }
         
         // Add caves
-        CaveGen::get().AddCaves(*curBlock, x + (bX+1)/16.0, (bY+1), z + (bZ+1)/16.0);
+        cave.AddCaves(*curBlock, x + (bX+1.0)/16.0, (bY+1.0), z + (bZ+1.0)/16.0);
       }
     }
   }
-  //CaveGen::get().AddCaves(blockslibnoise);
-  if(Conf::get().bValue("addBeaches"))
+  if(Conf::get()->bValue("add_beaches"))
     AddBeaches();
+    
+  //gettimeofday(&end, NULL);
+  //std::cout << end.tv_usec - start.tv_usec << std::endl;
 }
 
 void MapGen::AddBeaches() 
 {
-  int beachExtent = Conf::get().iValue("beachExtent");
-  int beachHeight = Conf::get().iValue("beachHeight");
+  int beachExtent = Conf::get()->iValue("beach_extent");
+  int beachHeight = Conf::get()->iValue("beach_height");
   
   int beachExtentSqr = (beachExtent + 1) * (beachExtent + 1);
   for(int x = 0; x < 16; x++) 
