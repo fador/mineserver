@@ -33,14 +33,6 @@
 class CaveGen
 {
 public:
-  static CaveGen* get()
-  {
-     if(!mCaveGen) {
-        mCaveGen = new CaveGen();
-     }
-     return mCaveGen;
-  }
-  void free();
   void init(int seed);
   void AddCaves(uint8 &block, double x, double y, double z);
   
@@ -49,7 +41,6 @@ public:
 private:
   Random rand;
   uint8 *blocks;
-  static CaveGen *mCaveGen;
   
   noise::module::Perlin caveNoise1;
   noise::module::Perlin caveNoise2;

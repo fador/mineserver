@@ -46,17 +46,6 @@
 
 #include "cavegen.h"
 
-CaveGen* CaveGen::mCaveGen;
-
-void CaveGen::free()
-{
-   if (mCaveGen)
-   {
-      delete mCaveGen;
-      mCaveGen = 0;
-   }
-}
-
 void CaveGen::init(int seed)
 {
   // Set up us the Perlin-noise module.
@@ -95,10 +84,10 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
     caveN1 = caveNoise1.GetValue(x,y*0.05,z);
     caveN2 = caveNoise2.GetValue(x,y*0.1,z);
     
-    if(y < 63.0 && (caveN1 < -0.55 || caveN2 < -0.55) && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER)
+    if(y < 63 && (caveN1 < -0.55 || caveN2 < -0.55) && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER)
     {
       // Add bottomlava
-      if(y < 10.0)
+      if(y < 10)
       {
         block = BLOCK_STATIONARY_LAVA;
         return;
@@ -106,9 +95,9 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
       
       if(caveN1 > -0.558)
       {
-        if(y < 32.0 && caveN1 > -0.55999)
+        if(y < 32 && caveN1 > -0.559999)
         {
-          if(y < 16.0 && caveN1 > -0.559999)
+          if(y < 16 && caveN1 > -0.5599999)
           {
             block = BLOCK_DIAMOND_ORE;
             return;

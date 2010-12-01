@@ -228,7 +228,7 @@ void MapGen::generateWithNoise(int x, int z)
   heightMapBuilder.Build();
 
   // Populate blocks in chunk
-  int currentHeight;
+  uint8 currentHeight;
   uint8 *curBlock;
   for (uint8 bX = 0; bX < 16; bX++) 
   {
@@ -237,7 +237,7 @@ void MapGen::generateWithNoise(int x, int z)
       for (uint8 bZ = 0; bZ < 16; bZ++) 
       {
         curBlock = &blocks[bY + (bZ * 128 + (bX * 128 * 16))];
-        currentHeight = (int)((heightMap.GetValue(bX,bZ) * 8.7) + 65.15371);
+        currentHeight = (uint8)((heightMap.GetValue(bX,bZ) * 8.7) + 65.15371);
         
         // Place bedrock
         if(bY == 0) 
@@ -248,7 +248,7 @@ void MapGen::generateWithNoise(int x, int z)
         
         if(bY < currentHeight) 
         {
-          if (bY < (int)(currentHeight * 0.94)) 
+          if (bY < (uint8)(currentHeight * 0.94)) 
             *curBlock = BLOCK_STONE;
           else
             *curBlock = BLOCK_DIRT;
@@ -271,12 +271,10 @@ void MapGen::generateWithNoise(int x, int z)
         }
         
         // Add caves
-        cave.AddCaves(*curBlock, x + (bX+1)/16.0, (bY+1), z + (bZ+1)/16.0);
+        cave.AddCaves(*curBlock, (x + (bX+1))>>4, (bY+1), (z + (bZ+1))>>4);
       }
     }
   }
-
-  //CaveGen::get().AddCaves(blockslibnoise);
   if(Conf::get()->bValue("add_beaches"))
     AddBeaches();
 }
