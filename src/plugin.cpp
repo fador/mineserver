@@ -248,6 +248,18 @@ Callback Plugin::getBlockCallback(const int type)
    return call;
 }
 
+bool Plugin::runBlockCallback(const int type, const std::string name, const Function::invoker_type function)
+{
+   for (Callbacks::iterator iter = blockevents.begin(); iter != blockevents.end(); iter++)
+   {
+      if ((*iter).first == type)
+      {
+         return (*iter).second.run(name, function);
+      }
+   }
+   return false;
+}
+
 bool Plugin::removeBlockCallback(const int type)
 {
    for (Callbacks::iterator iter = blockevents.begin(); iter != blockevents.end(); ++iter)
