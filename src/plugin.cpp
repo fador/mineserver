@@ -26,6 +26,7 @@
  */
 
 #include "plugin.h"
+#include "logger.h"
 #include "blocks/basic.h"
 #include "blocks/falling.h"
 #include "blocks/torch.h"
@@ -231,7 +232,11 @@ void Plugin::init()
 
 void Plugin::setBlockCallback(const int type, Callback call)
 {
-   removeBlockCallback(type);
+   if (getBlockCallback(type))
+   {
+      LOG("Block type set more then once.");
+      removeBlockCallback(type);
+   }
    blockevents.insert(std::pair<int, Callback>(type, call));
 }
 
