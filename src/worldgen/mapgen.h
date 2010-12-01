@@ -35,7 +35,7 @@
 #endif
 
 #include "noiseutils.h"
-#include "world/cavegen.h"
+#include "cavegen.h"
 
 class MapGen
 {

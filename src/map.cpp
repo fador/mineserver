@@ -47,7 +47,7 @@
 #include "logger.h"
 #include "tools.h"
 #include "map.h"
-#include "mapgen.h"
+#include "worldgen/mapgen.h"
 #include "user.h"
 #include "nbt.h"
 #include "config.h"

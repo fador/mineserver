@@ -28,7 +28,7 @@
 #ifndef _CAVEGEN_H
 #define _CAVEGEN_H
 
-#include "../mersenne.h"
+#include "mersenne.h"
 
 class CaveGen
 {

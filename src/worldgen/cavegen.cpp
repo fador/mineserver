@@ -35,7 +35,7 @@
 #include "../tools.h"
 #include "../map.h"
 #include "../config.h"
-#include "../mersenne.h"
+#include "mersenne.h"
 
 // libnoise
 #ifdef DEBIAN
@@ -75,7 +75,7 @@ void CaveGen::init(int seed)
 }
 
 void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
-{  
+{ 
   if(addCaves)
   {
     x *= caveScale;

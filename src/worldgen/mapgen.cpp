@@ -50,7 +50,7 @@
 #include "noiseutils.h"
 
 //#include "mersenne.h"
-#include "world/cavegen.h"
+#include "cavegen.h"
 #include "mapgen.h"
 
 MapGen* MapGen::mMapGen;
@@ -224,6 +224,10 @@ void MapGen::generateChunk(int x, int z)
 
 void MapGen::generateWithNoise(int x, int z) 
 {
+  // Debug..
+  //struct timeval start, end;    
+  //gettimeofday(&start, NULL);
+
   heightMapBuilder.SetBounds(1000 + x*perlinScale, 1000 + (x+1)*perlinScale, 1000 + z*perlinScale, 1000 + (z+1)*perlinScale);
   heightMapBuilder.Build();
 
@@ -277,6 +281,9 @@ void MapGen::generateWithNoise(int x, int z)
   }
   if(Conf::get()->bValue("add_beaches"))
     AddBeaches();
+    
+  //gettimeofday(&end, NULL);
+  //std::cout << end.tv_usec - start.tv_usec << std::endl;
 }
 
 void MapGen::AddBeaches() 

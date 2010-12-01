@@ -59,7 +59,7 @@
 #include "map.h"
 #include "user.h"
 #include "chat.h"
-#include "mapgen.h"
+#include "worldgen/mapgen.h"
 #include "config.h"
 #include "nbt.h"
 #include "packets.h"
