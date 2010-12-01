@@ -335,7 +335,7 @@ void rollBack(User *user, std::string command, std::deque<std::string> args)
     std::vector<event_t>::iterator event;
 
     Chat::get().sendMsg(user, "Rolling back map...", Chat::USER);
-    for(event = logs.begin(); event < logs.end(); event++) {
+    for(event = logs.begin(); event != logs.end(); event++) {
       Chat::get().sendMsg(user, "setloop...", Chat::USER);
       Map::get()->setBlock(event->x, event->y, event->z, event->otype, event->ometa, std::string("SERVER"));
     }
