@@ -262,7 +262,6 @@ bool Plugin::removeBlockCallback(const int type)
    if (iter == blockevents.end())
       return false;
 
-   delete &iter->first;
    blockevents.erase(iter);
    return true;
 }
