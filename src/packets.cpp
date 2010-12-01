@@ -291,7 +291,7 @@ int PacketHandler::chat_message(User *user)
   user->buffer.removePacket();
 
   Chat::get().handleMsg( user, msg );
-
+	LOG(user->nick + " " + msg);
   return PACKET_OK;
 }
 

@@ -257,8 +257,14 @@ void mute(User *user, std::string command, std::deque<std::string> args)
         args.pop_front();
       }
       
+			// Tell the user they're muted
       tUser->mute(muteMsg);
-      Chat::get().sendMsg(user, COLOR_RED + tUser->nick + " was muted by " + user->nick + ": " + muteMsg, Chat::ADMINS);
+			
+			// Tell the admins what happened
+			std::string adminMsg = COLOR_RED + tUser->nick + " was muted by " + user->nick + ". ";
+			if(!muteMsg.empty())
+				adminMsg += " Reason: " + muteMsg;				
+      Chat::get().sendMsg(user, adminMsg, Chat::ADMINS);
     }
     else
       reportError(user, "User " + victim + " not found (see /players)");
@@ -307,6 +313,9 @@ void showMOTD(User *user, std::string command, std::deque<std::string> args)
 }
 void emote(User *user, std::string command, std::deque<std::string> args)
 {
+	if(user->isAbleToCommunicate(command) == false)
+		return;
+		
   std::string emoteMsg;
   while(!args.empty())
   {
@@ -315,12 +324,15 @@ void emote(User *user, std::string command, std::deque<std::string> args)
   }
   
   if(emoteMsg.empty())
-    reportError(user, "Usage: /me message");
+    reportError(user, "Usage: /" + command + " message");
   else
     Chat::get().sendMsg(user, COLOR_DARK_ORANGE + "* " + user->nick + " " + emoteMsg, Chat::ALL);
 }
 void whisper(User *user, std::string command, std::deque<std::string> args)
 {
+	if(user->isAbleToCommunicate(command) == false)
+		return;
+		
   if(!args.empty())
   {
     std::string targetNick = args[0];
@@ -346,7 +358,10 @@ void whisper(User *user, std::string command, std::deque<std::string> args)
   else
     reportError(user, "Usage: /" + command + " player [message]");
 }
-
+void doNotDisturb(User *user, std::string command, std::deque<std::string> args)
+{
+	user->toggleDND();
+}
 void setTime(User *user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 1)
@@ -611,14 +626,14 @@ void Chat::registerStandardCommands()
   registerCommand(parseCmd("rules"), rules, false);
   registerCommand(parseCmd("e em emote me"), emote, false);
   registerCommand(parseCmd("whisper w tell t"), whisper, false);
-
+	registerCommand(parseCmd("dnd"), doNotDisturb, false);
+	
   // Admins Only
   registerCommand(parseCmd("ban"), ban, true);
   registerCommand(parseCmd("ctp"), coordinateTeleport, true);
   registerCommand(parseCmd("give"), giveItems, true);
   registerCommand(parseCmd("gps"), showPosition, true);
   registerCommand(parseCmd("kick"), kick, true);
-  registerCommand(parseCmd("motd"), showMOTD, false);
   registerCommand(parseCmd("mute"), mute, true);
   registerCommand(parseCmd("regen"), regenerateLighting, true);
   registerCommand(parseCmd("reload"), reloadConfiguration, true);

@@ -204,11 +204,17 @@ bool Chat::loadWhitelist(std::string whitelistFile)
 
 bool Chat::sendUserlist(User *user)
 {
-  this->sendMsg(user, COLOR_BLUE + "[ Players online ]", USER);
+  this->sendMsg(user, COLOR_BLUE + "[ " + dtos(Users.size()) + " players online ]", USER);
 
   for(unsigned int i = 0; i < Users.size(); i++)
   {
-    this->sendMsg(user, "> " + Users[i]->nick, USER);
+	std::string playerDesc = "> " + Users[i]->nick;
+	if(Users[i]->muted)
+		playerDesc += COLOR_YELLOW + " (muted)";
+	if(Users[i]->dnd)
+		playerDesc += COLOR_YELLOW + " (dnd)";
+	
+    this->sendMsg(user, playerDesc, USER);
   }
 
   return true;
@@ -291,10 +297,9 @@ bool Chat::handleMsg(User *user, std::string msg)
   // Normal message
   else
   {
-    if(user->muted){
-      this->sendMsg(user, "You cannot chat while muted. ", USER);
-      return true;
-    }
+		if(user->isAbleToCommunicate("chat") == false) {
+			return true;
+		}
     else {
       if(user->admin) 
         msg = timeStamp + " <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg;
@@ -302,7 +307,7 @@ bool Chat::handleMsg(User *user, std::string msg)
         msg = timeStamp + " <"+ user->nick + "> " + msg;
     }
       
-    LOG(msg);
+    LOG(user->nick + msg);
 
     this->sendMsg(user, msg, ALL);
     
@@ -330,7 +335,7 @@ bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
     break;
 
   case USER:
-    user->buffer.addToWrite(tmpArray, tmpArrayLen);
+   	user->buffer.addToWrite(tmpArray, tmpArrayLen);
     break;
 
   case ADMINS:

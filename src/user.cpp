@@ -57,6 +57,7 @@ User::User(int sock, uint32 EID)
 {
   this->action          = 0;
   this->muted           = false;
+	this->dnd							= false;
   this->waitForData     = false;
   this->fd              = sock;
   this->UID             = EID;
@@ -153,7 +154,39 @@ bool User::unmute()
     std::cout << nick << " unmuted. " << std::endl;
     return true;
 }
-
+bool User::toggleDND()
+{	
+	if(!this->dnd) {
+		Chat::get().sendMsg(this, "You have enabled 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get().sendMsg(this, "You will no longer see chat or private messages.", Chat::USER);
+		Chat::get().sendMsg(this, "Type /dnd again to disable 'Do Not Disturb' mode.", Chat::USER);
+		this->dnd = true;
+	}
+	else {
+		this->dnd = false;
+		Chat::get().sendMsg(this, "You have disabled 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get().sendMsg(this, "You can now see chat and private messages.", Chat::USER);
+		Chat::get().sendMsg(this, "Type /dnd again to enable 'Do Not Disturb' mode.", Chat::USER);		
+	}
+	return this->dnd;
+}
+bool User::isAbleToCommunicate(std::string communicateCommand) 
+{
+	// Check if this is chat or a regular command and prefix with a slash accordingly
+	if(communicateCommand != "chat")
+		communicateCommand = "/" + communicateCommand;
+		
+	if(this->muted) {
+		Chat::get().sendMsg(this, "You cannot " + communicateCommand + " while muted.", Chat::USER);
+		return false;
+	}
+	if(this->dnd) {
+		Chat::get().sendMsg(this, "You cannot " + communicateCommand + " while in 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get().sendMsg(this, "Type /dnd to disable.", Chat::USER);
+		return false;
+	}
+	return true;
+}
 bool User::loadData()
 {
   std::string infile = Map::get()->mapDirectory+"/players/"+this->nick+".dat";
@@ -487,7 +520,7 @@ bool User::sendOthers(uint8 *data, uint32 len)
   for(unsigned int i = 0; i < Users.size(); i++)
   {
     if(Users[i]->fd != this->fd && Users[i]->logged)
-    Users[i]->buffer.addToWrite(data, len);
+    	Users[i]->buffer.addToWrite(data, len);
   }
   return true;
 }
@@ -497,7 +530,7 @@ bool User::sendAll(uint8 *data, uint32 len)
   for(unsigned int i = 0; i < Users.size(); i++)
   {
     if(Users[i]->fd && Users[i]->logged)
-    Users[i]->buffer.addToWrite(data, len);
+    	Users[i]->buffer.addToWrite(data, len);
   }
   return true;
 }
@@ -507,7 +540,7 @@ bool User::sendAdmins(uint8 *data, uint32 len)
   for(unsigned int i = 0; i < Users.size(); i++)
   {
     if(Users[i]->fd && Users[i]->logged && Users[i]->admin)
-    Users[i]->buffer.addToWrite(data, len);
+    	Users[i]->buffer.addToWrite(data, len);
   }
   return true;
 }
