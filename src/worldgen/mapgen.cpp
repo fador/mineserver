@@ -33,12 +33,12 @@
 #include <vector>
 #include <cmath>
 
-#include "logger.h"
-#include "constants.h"
+#include "../logger.h"
+#include "../constants.h"
 
-#include "config.h"
-#include "nbt.h"
-#include "map.h"
+#include "../config.h"
+#include "../nbt.h"
+#include "../map.h"
 
 // libnoise
 #ifdef DEBIAN
