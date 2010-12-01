@@ -46,12 +46,15 @@ We are trying to minimize memory and cpu usage compared to original Java server.
 
 **For all players**
 
-*  /players : Lists online players
+*  /players, /who : Lists online players
 *  /about : Server name & version
 *  /rules : Shows server rules
 *  /home : Teleports player to map spawn location
 *  /kit (name) : Gives kit. Items for kit defined in config.cfg with kit_(name) using itemId's
 *  /motd : Displays Message Of The Day
+*  /dnd : Do Not Disturb - toggles whether the player receives chat & private messages
+*  /emote, /em, /e, /me : Emote
+*  /whisper, /w, /tell, /t : Send a private message to another player
 
 **Admin only**
 

@@ -399,14 +399,26 @@ bool User::updatePos(double x, double y, double z, double stance)
       this->pos.y      = y;
       this->pos.z      = z;
       this->pos.stance = stance;
+      
+      // Fix yaw & pitch to be a 1 byte fraction of 360 (no negatives)
+      int fixedYaw = int(this->pos.yaw) % 360;
+      if(fixedYaw < 0)
+        fixedYaw = 360 + fixedYaw;
+      fixedYaw = int(float(fixedYaw) * float(255.0f/360.0f));  
+
+      int fixedPitch = int(this->pos.pitch) % 360;
+      if(fixedPitch < 0)
+        fixedPitch = 360 + fixedPitch;
+      fixedPitch = int(float(fixedPitch) * float(255.0f/360.0f));
+            
       uint8 teleportData[19];
-      teleportData[0]  = 0x22; //Teleport
+      teleportData[0]  = PACKET_ENTITY_TELEPORT; 
       putSint32(&teleportData[1], this->UID);
       putSint32(&teleportData[5], (int)(this->pos.x*32));
       putSint32(&teleportData[9], (int)(this->pos.y*32));
       putSint32(&teleportData[13], (int)(this->pos.z*32));
-      teleportData[17] = (char)this->pos.yaw;
-      teleportData[18] = (char)this->pos.pitch;
+      teleportData[17] = (char)fixedYaw;
+      teleportData[18] = (char)fixedPitch;
       this->sendOthers(&teleportData[0], 19);
     }
 
@@ -503,11 +515,22 @@ bool User::updatePos(double x, double y, double z, double stance)
 
 bool User::updateLook(float yaw, float pitch)
 {
+  // Fix yaw & pitch to be a 1 byte fraction of 360 (no negatives)
+  int fixedYaw = int(yaw) % 360;
+  if(fixedYaw < 0)
+    fixedYaw = 360 + fixedYaw;
+  fixedYaw = int(float(fixedYaw) * float(255.0f/360.0f));  
+  
+  int fixedPitch = int(pitch) % 360;
+  if(fixedPitch < 0)
+    fixedPitch = 360 + fixedPitch;
+  fixedPitch = int(float(fixedPitch) * float(255.0f/360.0f));  
+      
   uint8 lookdata[7];
-  lookdata[0] = 0x20;
+  lookdata[0] = PACKET_ENTITY_LOOK;
   putSint32(&lookdata[1], (sint32)this->UID);
-  lookdata[5] = (char)(yaw);
-  lookdata[6] = (char)(pitch);
+  lookdata[5] = (char)(fixedYaw);
+  lookdata[6] = (char)(fixedPitch);
   this->sendOthers(&lookdata[0], 7);
 
   this->pos.yaw   = yaw;
