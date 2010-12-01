@@ -275,7 +275,7 @@ void MapGen::generateWithNoise(int x, int z)
         }
         
         // Add caves
-        cave.AddCaves(*curBlock, (x + (bX+1))>>4, (bY+1), (z + (bZ+1))>>4);
+        cave.AddCaves(*curBlock, x + (bX+1.0)/16.0, (bY+1.0), z + (bZ+1.0)/16.0);
       }
     }
   }
