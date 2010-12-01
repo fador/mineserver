@@ -30,7 +30,7 @@
 //
 #include <string>
 
-#define LOG(msg) Logger::get()->log(msg, std::string(__FILE__), __LINE__)
+#define LOG(msg) Logger::get().log(msg, std::string(((strrchr(__FILE__, '/') ?: __FILE__ - 1) + 1)), __LINE__)
 
 class Logger
 {
