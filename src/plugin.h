@@ -51,39 +51,34 @@ public:
    
    bool remove(const std::string name)
    {
-      for (Events::iterator iter = callbacks.begin(); iter != callbacks.end(); ++iter)
-      {
-         if ((*iter).first == name)
-         {
-              callbacks.erase(iter);
-              return true;
-         }
-      }
-      return false;
+      Events::iterator iter = callbacks.find(name);
+
+      if (iter == callbacks.end())
+         return false;
+      
+      callbacks.erase(iter);
+      return true;
    }
 
    Function* get(const std::string name)
    {
-      for (Events::iterator iter = callbacks.begin(); iter != callbacks.end(); iter++)
-      {
-         if ((*iter).first == name)
-            return &iter->second;
-      }
+      Events::iterator iter = callbacks.find(name);
 
-      return 0;
+      if (iter == callbacks.end())
+         return NULL;
+
+      return &iter->second;
    }
    
    bool run(const std::string name, const Function::invoker_type function)
    {
-      for (Events::iterator iter = callbacks.begin(); iter != callbacks.end(); iter++)
-      {
-         if ((*iter).first == name)
-         {
-            function(iter->second);
-            return true;
-         }
-      }
-      return false;
+      Events::iterator iter = callbacks.find(name);
+
+      if (iter == callbacks.end())
+         return false;
+
+      function(iter->second);
+      return true;
    }
 
    void reset()
