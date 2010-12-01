@@ -23,7 +23,9 @@ ifeq ($(DEBIAN), 1)
 CXXFLAGS += -DDEBIAN
 endif
 
+ifeq ($(SYSTEM),Linux)
 CXXFLAGS += -DDEBIAN
+endif
 
 RM = rm -f
 CXX = g++

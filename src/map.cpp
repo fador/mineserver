@@ -54,6 +54,13 @@
 
 Map* Map::mMap;
 
+void Map::addSapling(User* user, int x, int y, int z)
+{
+  std::cout << "Place sapling " << x << " " << y << " " << z << std::endl;
+
+  saplings.push_back( sTree(x,y,z,mapTime,user->UID) );
+}
+
 void Map::posToId(int x, int z, uint32 *id)
 {
   uint8 *id_pointer = reinterpret_cast<uint8 *>(id);
@@ -111,6 +118,8 @@ void Map::initMap()
     level["Data"]->Insert("SpawnZ", new NBT_Value((sint32)0));
     level["Data"]->Insert("RandomSeed", new NBT_Value((sint64)(rand()*65535)));
 
+    level.Insert("Trees", new NBT_Value(NBT_Value::TAG_LIST));
+
     level.SaveToFile(infile);
 
     if (stat(infile.c_str(), &stFileInfo) != 0)
@@ -132,7 +141,41 @@ void Map::initMap()
   //Get time from the map
   mapTime      = (sint64)*data["Time"];
   mapSeed      = (sint64)*data["RandomSeed"];
-  
+
+  /////////////
+  // Basic tree handling
+
+  // Get list of saplings from map:
+  NBT_Value *trees = ((*root)["Trees"]);
+
+  if(!trees || trees->GetListType() != NBT_Value::TAG_COMPOUND)
+  {
+
+    std::cout << "No Trees in level.dat, creating.." << std::endl;
+    root->Insert("Trees", new NBT_Value(NBT_Value::TAG_LIST,NBT_Value::TAG_COMPOUND));
+    trees = ((*root)["Trees"]);
+    root->SaveToFile(infile);
+  }
+
+  trees->Print();
+
+  std::vector<NBT_Value*> *tree_list = trees->GetList();
+
+  std::cout << (*tree_list).size() << " saplings" << std::endl;
+
+  for(std::vector<NBT_Value*>::iterator iter = (*tree_list).begin(); iter != (*tree_list).end(); ++iter)
+  {
+    sint32 x = (sint32)(*(*iter))["X"];
+    sint32 y = (sint32)(*(*iter))["Y"];
+    sint32 z = (sint32)(*(*iter))["Z"];
+    sint32 plantedTime = (sint32)(*(*iter))["plantedTime"];
+    uint32 plantedBy = (uint32)(*(*iter))["plantedBy"];
+    saplings.push_back( sTree(x,y,z,plantedTime,plantedBy) );
+    std::cout << "sapling: " << x << " " << y << " " << z << std::endl;
+  }
+
+  /////////////////
+
   // Init mapgenerator
   MapGen::get().init(mapSeed);
 
@@ -176,6 +219,42 @@ bool Map::saveWholeMap()
   for(std::map<uint32, sChunk>::const_iterator it = maps.begin(); it != maps.end(); ++it)
     saveMap(maps[it->first].x, maps[it->first].z);
 
+    /////////////////////
+    // Save map details
+
+    std::string infile = mapDirectory+"/level.dat";
+
+    NBT_Value *root = NBT_Value::LoadFromFile(infile);
+    if(root != NULL)
+    {
+      NBT_Value &data = *((*root)["Data"]);
+
+      //Get time from the map
+      *data["Time"] = mapTime;
+      NBT_Value *trees = ((*root)["Trees"]);
+
+      if(trees)
+      {
+        std::vector<NBT_Value*>* tree_vec = trees->GetList();
+
+        tree_vec->clear();
+
+        for(std::list<sTree>::iterator iter = saplings.begin(); iter != saplings.end(); ++iter)
+        {
+          //(*trees)[i] = (*iter)
+          NBT_Value* tree = new NBT_Value(NBT_Value::TAG_COMPOUND);
+          tree->Insert("X", new NBT_Value( (sint32)(*iter).x));
+          tree->Insert("Y", new NBT_Value( (sint32)(*iter).y));
+          tree->Insert("Z", new NBT_Value( (sint32)(*iter).z));
+          tree->Insert("plantedTime", new NBT_Value( (sint32)(*iter).plantedTime));
+          tree->Insert("plantedBy", new NBT_Value( (sint32)(*iter).plantedBy));
+          tree_vec->push_back(tree);
+        }
+      }
+      root->SaveToFile(infile);
+
+      delete root;
+    }
   return true;
 }
 

@@ -136,7 +136,7 @@ void Plugin::init()
    call.reset();
    BlockPlant* plantblock = new BlockPlant();
    call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
-   call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
+   call.add("onPlace", Function::from_method<BlockPlant, &BlockPlant::onPlace>(plantblock));
    call.add("onNeighbourBroken", Function::from_method<BlockPlant, &BlockPlant::onNeighbourBroken>(plantblock));
    call.add("onReplace", Function::from_method<BlockBasic, &BlockBasic::onReplace>(basicblock));
    setBlockCallback(BLOCK_YELLOW_FLOWER, call);

@@ -574,6 +574,12 @@ int PacketHandler::player_block_placement(User *user)
 
   if (Map::get()->getBlock(x, y, z, &oldblock, &metadata)) 
   {
+    if(oldblock == BLOCK_CHEST)
+    {
+      std::cout << "Tried to replace CHEST!" << std::endl;
+      return PACKET_OK;
+    }
+
      Callback callback;
      Function event;
      Function::invoker_type inv(user, newblock, x, y, z, direction);
@@ -792,11 +798,11 @@ int PacketHandler::complex_entities(User *user)
   inflateInit2(&zstream, 16+MAX_WBITS);
 
   uLongf uncompressedSize   = ALLOCATE_NBTFILE;
-  uint8 *uncompressedBuffer = new uint8[uncompressedSize];
+  uint8 *uncompressedBuffer = new uint8[uncompressedSize];  // mem leak?!?
 
   zstream.avail_out = uncompressedSize;
   zstream.next_out = uncompressedBuffer;
-  
+
   //Uncompress
   if(inflate(&zstream, Z_FULL_FLUSH)!=Z_STREAM_END)
   {
@@ -809,7 +815,7 @@ int PacketHandler::complex_entities(User *user)
 
   //Get size
   uncompressedSize  = zstream.total_out;
-  
+
   uint8 *ptr = uncompressedBuffer + 3; // skip blank compound
   int remaining = uncompressedSize;
 
@@ -819,6 +825,8 @@ int PacketHandler::complex_entities(User *user)
   std::cout << "Complex entity at (" << x << "," << y << "," << z << ")" << std::endl;
   entity->Print();
 #endif
+
+  delete [] uncompressedBuffer;  // EEP!
 
   Map::get()->setComplexEntity(x, y, z, entity);
 

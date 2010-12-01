@@ -88,6 +88,9 @@ void BlockPlant::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
             {
                Map::get()->setBlock(x, y+1, z, (char)newblock, 0);
                Map::get()->sendBlockChange(x, y+1, z, (char)newblock, 0);
+               
+               if(newblock == BLOCK_SAPLING)
+                 Map::get()->addSapling(user,x,y+1,z);
             }
          break;
          default:

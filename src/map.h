@@ -29,10 +29,23 @@
 #define _MAP_H_
 
 #include <map>
+#include <list>
 #include <ctime>
 #include "nbt.h"
 #include "user.h"
 #include "vec.h"
+
+struct sTree
+{
+  sint32 x,y,z;
+  sint32 plantedTime;
+  uint32 plantedBy;
+  
+  sTree(sint32 _x,sint32 _y, sint32 _z, sint32 _plantedTime, uint32 _plantedBy) :
+    x(_x),y(_y),z(_z),
+    plantedTime(_plantedTime),plantedBy(_plantedBy) {}
+
+};
 
 struct sChunk
 {
@@ -135,6 +148,27 @@ private:
       //Get time from the map
       *data["Time"] = mapTime;
 
+      NBT_Value *trees = ((*root)["Trees"]);
+
+      if(trees)
+      {
+        std::vector<NBT_Value*>* tree_vec = trees->GetList();
+
+        tree_vec->clear();
+
+        for(std::list<sTree>::iterator iter = saplings.begin(); iter != saplings.end(); ++iter)
+        {
+          //(*trees)[i] = (*iter)
+          NBT_Value* tree = new NBT_Value(NBT_Value::TAG_COMPOUND);
+          tree->Insert("X", new NBT_Value( (sint32)(*iter).x));
+          tree->Insert("Y", new NBT_Value( (sint32)(*iter).y));
+          tree->Insert("Z", new NBT_Value( (sint32)(*iter).z));
+          tree->Insert("plantedTime", new NBT_Value( (sint32)(*iter).plantedTime));
+          tree->Insert("plantedBy", new NBT_Value( (sint32)(*iter).plantedBy));
+          tree_vec->push_back(tree);
+        }
+      }
+
       root->SaveToFile(infile);
 
       delete root;
@@ -147,6 +181,10 @@ private:
 public:
 
   std::string mapDirectory;
+
+  // List of saplings ready to grow
+  std::list<sTree> saplings;
+  void addSapling(User* user, int x, int y, int z);
 
   // Map spawn position
   vec spawnPos;
