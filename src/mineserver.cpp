@@ -125,10 +125,10 @@ int Mineserver::Run(int argc, char *argv[])
     file_config.assign(argv[1]);
 
   // Initialize conf
-  Conf::get().load(file_config);
+  Conf::get()->load(file_config);
 
   // Write PID to file
-  std::ofstream pid_out((Conf::get().sValue("pid_file")).c_str());
+  std::ofstream pid_out((Conf::get()->sValue("pid_file")).c_str());
   if (!pid_out.fail())
 #ifdef WIN32
      pid_out << _getpid();
@@ -138,29 +138,38 @@ int Mineserver::Run(int argc, char *argv[])
   pid_out.close();
 
   // Load admin, banned and whitelisted users
-  Chat::get().loadAdmins(Conf::get().sValue("admin_file"));
-  Chat::get().loadBanned(Conf::get().sValue("banned_file"));
-  Chat::get().loadWhitelist(Conf::get().sValue("whitelist_file"));
+  Chat::get()->loadAdmins(Conf::get()->sValue("admin_file"));
+  Chat::get()->loadBanned(Conf::get()->sValue("banned_file"));
+  Chat::get()->loadWhitelist(Conf::get()->sValue("whitelist_file"));
   // Load MOTD
-  Chat::get().checkMotd(Conf::get().sValue("motd_file"));
+  Chat::get()->checkMotd(Conf::get()->sValue("motd_file"));
 
   // Set physics enable state according to config
-  Physics::get().enabled = (Conf::get().bValue("liquid_physics"));
+  Physics::get()->enabled = (Conf::get()->bValue("liquid_physics"));
 
   // Initialize map
-  Map::get().initMap();
+  Map::get()->init();
+
+  if (Conf::get()->bValue("map_generate_spawn"))
+  {
+    std::cout << "Generating spawn area...\n";
+    for (int x=0;x<12;x++)
+      for (int z=0;z<12;z++)
+        Map::get()->loadMap(x-6, z-6);
+    std::cout << "Spawn area ready!\n";
+  }
 
   // Initialize packethandler
-  PacketHandler::get().initPackets();
+  PacketHandler::get()->init();
 
   // Load ip from config
-  std::string ip = Conf::get().sValue("ip");
+  std::string ip = Conf::get()->sValue("ip");
 
   // Load port from config
-  int port = Conf::get().iValue("port");
+  int port = Conf::get()->iValue("port");
   
   // Initialize plugins
-  Plugin::get().init();
+  Plugin::get()->init();
 
 #ifdef WIN32
   WSADATA wsaData;
@@ -275,28 +284,28 @@ int Mineserver::Run(int argc, char *argv[])
 
         //Send server time
         Packet pkt;
-        pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get().mapTime;
+        pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
         Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());        
       }
 
       //Try to load release time from config
-      int map_release_time = Conf::get().iValue("map_release_time");
+      int map_release_time = Conf::get()->iValue("map_release_time");
 
       //Release chunks not used in <map_release_time> seconds
       std::vector<uint32> toRelease;
-      for(std::map<uint32, int>::const_iterator it = Map::get().mapLastused.begin();
-          it != Map::get().mapLastused.end();
+      for(std::map<uint32, int>::const_iterator it = Map::get()->mapLastused.begin();
+          it != Map::get()->mapLastused.end();
           ++it)
       {
-        if(Map::get().mapLastused[it->first] <= time(0)-map_release_time)
+        if(Map::get()->mapLastused[it->first] <= time(0)-map_release_time)
           toRelease.push_back(it->first);
       }
 
       int x_temp, z_temp;
       for(unsigned i = 0; i < toRelease.size(); i++)
       {
-        Map::get().idToPos(toRelease[i], &x_temp, &z_temp);
-        Map::get().releaseMap(x_temp, z_temp);
+        Map::get()->idToPos(toRelease[i], &x_temp, &z_temp);
+        Map::get()->releaseMap(x_temp, z_temp);
       }
     }
 
@@ -319,17 +328,15 @@ int Mineserver::Run(int argc, char *argv[])
           Users[i]->sendAll((uint8 *)pkt.getWrite(), pkt.getWriteLen());
         }
       }
-      Map::get().mapTime+=20;
-      if(Map::get().mapTime>=24000) Map::get().mapTime=0;
+      Map::get()->mapTime+=20;
+      if(Map::get()->mapTime>=24000) Map::get()->mapTime=0;
     }
 
     //Physics simulation every 200ms
-    Physics::get().update();
+    Physics::get()->update();
 
     event_base_loopexit(m_eventBase, &loopTime);
   }
-
-  Map::get().freeMap();
 
 #ifdef WIN32
   closesocket(m_socketlisten);
@@ -338,7 +345,17 @@ int Mineserver::Run(int argc, char *argv[])
 #endif
   
   // Remove the PID file
-  unlink((Conf::get().sValue("pid_file")).c_str());
+  unlink((Conf::get()->sValue("pid_file")).c_str());
+
+  /* Free memory */
+  PacketHandler::get()->free();
+  Map::get()->free();
+  Physics::get()->free();
+  Chat::get()->free();
+  Conf::get()->free();
+  Plugin::get()->free();
+  Logger::get()->free();
+  MapGen::get()->free();
 
   return EXIT_SUCCESS;
 }

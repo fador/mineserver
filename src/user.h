@@ -90,6 +90,7 @@ public:
   bool banned;
   bool whitelist;
   bool muted;
+	bool dnd;
   sint16 health;
   unsigned int UID;
   std::string nick;
@@ -122,10 +123,12 @@ public:
   // Kick player
   bool kick(std::string kickMsg);
 
-  // Mute
+  // Chat blocking
   bool mute(std::string muteMsg);
   bool unmute();
-  
+	bool toggleDND();
+	bool isAbleToCommunicate(std::string communicateCommand);
+
   //Map related
 
   //Map queue

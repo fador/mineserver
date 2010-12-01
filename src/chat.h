@@ -51,8 +51,16 @@ public:
   bool loadWhitelist(std::string whitelistFile);
   bool checkMotd(std::string motdFile);
   void registerCommand(std::deque<std::string> words, ChatCommand command, bool adminOnly);
-  static Chat &get();
+  static Chat* get()
+  {
+    if(!mChat) {
+      mChat = new Chat();
+    }
+    return mChat;
+  }
+  void free();
 private:
+  static Chat *mChat;
   typedef std::map<std::string, ChatCommand> CommandList;
   CommandList userCommands;
   CommandList adminCommands;

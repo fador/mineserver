@@ -67,9 +67,19 @@ private:
     enabled = true;
   }
   std::vector<Sim> simList;
+  static Physics *mPhysics;
 public:
   bool enabled;
-  static Physics &get();
+
+  void free();
+  static Physics* get()
+  {
+    if(!mPhysics) {
+      mPhysics = new Physics();
+    }
+    return mPhysics;
+  }
+
   bool update();
   bool addSimulation(vec pos);
   bool checkSurrounding(vec pos);

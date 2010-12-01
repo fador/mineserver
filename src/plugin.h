@@ -76,11 +76,10 @@ public:
 
    void reset()
    {
-      callbacks.empty();
+      callbacks.clear();
    }
 
 private:
-   void* obj;
    typedef std::map<std::string, Function > Events;
    Events callbacks;
 };
@@ -93,11 +92,19 @@ private:
    }
    typedef std::map<int, Callback> Callbacks;
    Callbacks blockevents;
+   static Plugin *mPlugin;
 public:
    void init();
+   void free();
    void setBlockCallback(const int type, Callback call);
    Callback getBlockCallback(const int type);
    bool removeBlockCallback(const int type);
-   static Plugin &get();
+   static Plugin* get()
+   {
+      if(!mPlugin) {
+         mPlugin = new Plugin();
+      }
+      return mPlugin;
+   }
 };
 

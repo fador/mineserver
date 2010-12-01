@@ -37,10 +37,15 @@
 #include "blocks/door.h"
 #include "blocks/sign.h"
 
-Plugin &Plugin::get()
+Plugin* Plugin::mPlugin;
+
+void Plugin::free()
 {
-  static Plugin instance;
-  return instance;
+   if (mPlugin)
+   {
+      delete mPlugin;
+      mPlugin = 0;
+   }
 }
 
 void Plugin::init()
@@ -187,6 +192,7 @@ void Plugin::init()
    
    /* Containers */
    call.reset();
+   call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
    call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
    setBlockCallback(BLOCK_CHEST, call);
    setBlockCallback(BLOCK_WORKBENCH, call);

@@ -28,7 +28,6 @@
 #include "basic.h"
 
 #include <cmath>
-#include <stdio.h>
 
 void BlockBasic::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
@@ -48,17 +47,17 @@ void BlockBasic::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
 {
    uint8 block;
    uint8 meta;
-   if (Map::get().getBlock(x, y, z, &block, &meta))
+   if (Map::get()->getBlock(x, y, z, &block, &meta))
    {
-      Map::get().sendBlockChange(x, y, z, 0, 0);
-      Map::get().setBlock(x, y, z, 0, 0);
+      Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+      Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
 
       int count = 1;
       if (BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand() % 10000)
       {
           uint16 item_id = BLOCKDROPS[block].item_id;
           count = BLOCKDROPS[block].count;
-          Map::get().createPickupSpawn(x, y, z, item_id, count);
+          Map::get()->createPickupSpawn(x, y, z, item_id, count);
       }
    }
 }
@@ -74,7 +73,7 @@ void BlockBasic::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
    signed short diffX;
    signed short diffZ;
 
-   if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
+   if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
    {
       /* Check block below allows blocks placed on top */
       switch(oldblock)
@@ -142,10 +141,10 @@ void BlockBasic::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
 
             uint8 block;
             uint8 meta;
-            if (Map::get().getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
+            if (Map::get()->getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
             {
-               Map::get().setBlock(x, y, z, (char)newblock, direction);
-               Map::get().sendBlockChange(x, y, z, (char)newblock, direction);
+               Map::get()->setBlock(x, y, z, (char)newblock, direction);
+               Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
             }
          break;
       }
@@ -161,11 +160,11 @@ void BlockBasic::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
    uint8 oldblock;
    uint8 oldmeta;
 
-   if (Map::get().getBlock(x, y, z, &oldblock, &oldmeta))
+   if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
    {
-      Map::get().sendBlockChange(x, y, z, 0, 0);
-      Map::get().setBlock(x, y, z, 0, 0);
-      Map::get().createPickupSpawn(x, y, z, oldblock, 1);
+      Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+      Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+      Map::get()->createPickupSpawn(x, y, z, oldblock, 1);
    }
 }
 

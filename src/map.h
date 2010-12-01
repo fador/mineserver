@@ -142,6 +142,7 @@ private:
 
 
   }
+   static Map *mMap;
 
 public:
 
@@ -174,8 +175,8 @@ public:
   void posToId(int x, int z, uint32 *id);
   void idToPos(uint32 id, int *x, int *z);
 
-  void initMap();
-  void freeMap();
+  void init();
+  void free();
   void sendToUser(User *user, int x, int z);
 
   //Time in the map
@@ -235,7 +236,13 @@ public:
 
   void setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity);
 
-  static Map &get();
+  static Map* get()
+  {
+    if(!mMap) {
+      mMap = new Map();
+    }
+    return mMap;
+  }
 };
 
 #endif
