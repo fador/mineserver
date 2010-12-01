@@ -264,7 +264,7 @@ void mute(User *user, std::string command, std::deque<std::string> args)
 			std::string adminMsg = COLOR_RED + tUser->nick + " was muted by " + user->nick + ". ";
 			if(!muteMsg.empty())
 				adminMsg += " Reason: " + muteMsg;				
-      Chat::get().sendMsg(user, adminMsg, Chat::ADMINS);
+      Chat::get()->sendMsg(user, adminMsg, Chat::ADMINS);
     }
     else
       reportError(user, "User " + victim + " not found (see /players)");
@@ -342,8 +342,8 @@ void whisper(User *user, std::string command, std::deque<std::string> args)
     // Don't whisper or tell if DND is set
     if(tUser->dnd)
     {
-      Chat::get().sendMsg(user, COLOR_YELLOW + tUser->nick + " currently doesn't want to be disturbed.", Chat::USER);
-      Chat::get().sendMsg(user, COLOR_YELLOW + "Message not sent.", Chat::USER);
+      Chat::get()->sendMsg(user, COLOR_YELLOW + tUser->nick + " currently doesn't want to be disturbed.", Chat::USER);
+      Chat::get()->sendMsg(user, COLOR_YELLOW + "Message not sent.", Chat::USER);
       return;
     }
     
