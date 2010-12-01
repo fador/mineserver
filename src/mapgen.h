@@ -35,6 +35,7 @@
 #endif
 
 #include "noiseutils.h"
+#include "world/cavegen.h"
 
 class MapGen
 {
@@ -56,6 +57,8 @@ private:
   void generateWithNoise(int x, int z);
   
   void AddBeaches();
+  
+  CaveGen cave;
     
   noise::utils::NoiseMap heightMap;
   noise::utils::NoiseMapBuilderPlane heightMapBuilder;

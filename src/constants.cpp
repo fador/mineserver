@@ -36,26 +36,42 @@ std::map<uint8, Drop> BLOCKDROPS;
 void initConstants()
 {
   // Init configuration
+  // General settings
   defaultConf.insert(std::pair<std::string, std::string>("ip", "0.0.0.0"));
   defaultConf.insert(std::pair<std::string, std::string>("port", "25565"));
-  defaultConf.insert(std::pair<std::string, std::string>("servername", "Minecraft server"));
+  defaultConf.insert(std::pair<std::string, std::string>("server_name", "Minecraft server"));
+  defaultConf.insert(std::pair<std::string, std::string>("user_limit", "20"));
   defaultConf.insert(std::pair<std::string, std::string>("use_whitelist", "false"));
-  defaultConf.insert(std::pair<std::string, std::string>("mapdir", "testmap"));
-  defaultConf.insert(std::pair<std::string, std::string>("userlimit", "20"));
-  defaultConf.insert(std::pair<std::string, std::string>("map_release_time", "10"));
-  defaultConf.insert(std::pair<std::string, std::string>("liquid_physics", "true"));
-  defaultConf.insert(std::pair<std::string, std::string>("map_flatland", "false"));
-  defaultConf.insert(std::pair<std::string, std::string>("oreDensity", "24"));
-  defaultConf.insert(std::pair<std::string, std::string>("seaLevel", "63"));
+  defaultConf.insert(std::pair<std::string, std::string>("show_version", "true"));
+  // Messages
   defaultConf.insert(std::pair<std::string, std::string>("server_full_message", "Server is currently full"));
   defaultConf.insert(std::pair<std::string, std::string>("default_kick_message", "You have been kicked"));
   defaultConf.insert(std::pair<std::string, std::string>("wrong_protocol_message", "Wrong client protocol"));
+  // File settings
   defaultConf.insert(std::pair<std::string, std::string>("admin_file", ADMIN_FILE));
   defaultConf.insert(std::pair<std::string, std::string>("banned_file", BANNED_FILE));
   defaultConf.insert(std::pair<std::string, std::string>("whitelist_file", WHITELIST_FILE));
   defaultConf.insert(std::pair<std::string, std::string>("motd_file", MOTD_FILE));
   defaultConf.insert(std::pair<std::string, std::string>("rules_file", RULES_FILE));
   defaultConf.insert(std::pair<std::string, std::string>("pid_file", PID_FILE));
+  // Map settings
+  defaultConf.insert(std::pair<std::string, std::string>("map_directory", "world"));
+  defaultConf.insert(std::pair<std::string, std::string>("map_release_time", "90"));
+  defaultConf.insert(std::pair<std::string, std::string>("map_generate_spawn", "true"));
+  defaultConf.insert(std::pair<std::string, std::string>("save_unchanged_chunks", "true"));
+  defaultConf.insert(std::pair<std::string, std::string>("liquid_physics", "true"));
+  defaultConf.insert(std::pair<std::string, std::string>("map_flatgrass", "false"));
+  defaultConf.insert(std::pair<std::string, std::string>("ore_density", "24"));
+  defaultConf.insert(std::pair<std::string, std::string>("sea_level", "63"));
+  defaultConf.insert(std::pair<std::string, std::string>("add_beaches", "true"));
+  defaultConf.insert(std::pair<std::string, std::string>("beach_extent", "7"));
+  defaultConf.insert(std::pair<std::string, std::string>("beach_height", "2"));
+  defaultConf.insert(std::pair<std::string, std::string>("add_caves", "false"));
+  defaultConf.insert(std::pair<std::string, std::string>("cave_density", "2"));
+  defaultConf.insert(std::pair<std::string, std::string>("cave_size", "1"));
+  defaultConf.insert(std::pair<std::string, std::string>("cave_water", "false"));
+  defaultConf.insert(std::pair<std::string, std::string>("cave_lava", "false"));
+  defaultConf.insert(std::pair<std::string, std::string>("cave_ore", "false"));
 
   // Block drops (10000 = 100%)
 

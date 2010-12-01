@@ -138,7 +138,7 @@ int PacketHandler::login_request(User *user)
   }
 
   // If userlimit is reached
-  if((int)Users.size() >= Conf::get().iValue("userlimit"))
+  if((int)Users.size() >= Conf::get().iValue("user_limit"))
   {
     user->kick(Conf::get().sValue("server_full_message"));
     return PACKET_OK;

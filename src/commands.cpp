@@ -66,8 +66,8 @@ namespace
 
   void about(User *user, std::string command, std::deque<std::string> args)
   {
-    Chat::get().sendMsg(user, COLOR_BLUE + Conf::get().sValue("servername")+
-                        "Running Mineserver v." + VERSION, Chat::USER);
+    if (Conf::get().bValue("show_version"))
+      Chat::get().sendMsg(user, COLOR_BLUE + Conf::get().sValue("server_name") + "Running Mineserver v." + VERSION, Chat::USER);
   }
 
   void rules(User *user, std::string command, std::deque<std::string> args)
