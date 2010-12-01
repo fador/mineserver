@@ -235,18 +235,14 @@ void Plugin::setBlockCallback(const int type, Callback call)
    blockevents.insert(std::pair<int, Callback>(type, call));
 }
 
-Callback Plugin::getBlockCallback(const int type)
+Callback* Plugin::getBlockCallback(const int type)
 {
-   for (Callbacks::iterator iter = blockevents.begin(); iter != blockevents.end(); iter++)
-   {
-      if ((*iter).first == type)
-      {
-         return (*iter).second;
-      }
-   }
+   Callbacks::iterator iter = blockevents.find(type);
 
-   Callback call;
-   return call;
+   if (iter == blockevents.end())
+      return NULL;
+
+   return &(*iter).second;
 }
 
 bool Plugin::runBlockCallback(const int type, const std::string name, const Function::invoker_type function)

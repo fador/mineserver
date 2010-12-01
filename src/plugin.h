@@ -102,7 +102,7 @@ private:
 public:
    void init();
    void setBlockCallback(const int type, Callback call);
-   Callback getBlockCallback(const int type);
+   Callback* getBlockCallback(const int type);
    bool runBlockCallback(const int type, const std::string name, const Function::invoker_type function);
    bool removeBlockCallback(const int type);
    static Plugin &get();
