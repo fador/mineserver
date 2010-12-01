@@ -56,12 +56,11 @@ TrxLogger &TrxLogger::get()
 // Log action to binary log 
 void TrxLogger::log(event_t event)
 {
-  if(log_stream.good()) {
-  
+  if(!log_stream.bad()) {
     event.timestamp = time (NULL);
+
     log_stream.seekg(0, std::ios::end);
     log_stream.write(reinterpret_cast<char *>(&event), sizeof(event_t));
-
   } else {
     LOG("Binary log is bad!");
   }
@@ -77,6 +76,8 @@ bool TrxLogger::getLogs(time_t t, std::string &nick, std::vector<event_t> *logs)
     if(event.timestamp < t && event.nick == nick) {
       logs->push_back(event);  
     }
+    if(log_stream.eof())
+      break;
   }
   return true;
 }
@@ -88,11 +89,13 @@ bool TrxLogger::getLogs(time_t t, std::vector<event_t> *logs) {
   log_stream.seekg(0, std::ios::beg);
 
   while(log_stream.getline(reinterpret_cast<char *>(&event), sizeof(event_t))) {
-    log_stream.read(reinterpret_cast<char *>(&event), sizeof(event_t));
-
-   if(event.timestamp < t) {
-     logs->push_back(event);
-   }
+     log_stream.read(reinterpret_cast<char *>(&event), sizeof(event_t));
+  
+    if(event.timestamp < t) {
+      logs->push_back(event);
+    }
+    if(log_stream.eof()) 
+      break;
   }
   return true;
 }

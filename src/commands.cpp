@@ -311,6 +311,9 @@ void showMOTD(User *user, std::string command, std::deque<std::string> args)
 // Rollback Transaction Logs
 void rollBack(User *user, std::string command, std::deque<std::string> args)
 {
+#ifdef _DEBUG
+  printf("starting rollback");
+#endif
   std::vector<event_t> logs;
   if(!args.empty()) {
 
@@ -327,14 +330,17 @@ void rollBack(User *user, std::string command, std::deque<std::string> args)
     }
     
     Chat::get().sendMsg(user, "rolling back...", Chat::USER);
-    while(!logs.empty()) {
-      event_t event = logs.back();
-      logs.pop_back();
-      Map::get()->setBlock(event.x, event.y, event.z, event.otype, event.ometa, std::string("SERVER"));
+    for(std::vector<event_t>::iterator event = logs.begin(); event != logs.end(); event++) {
+      Chat::get().sendMsg(user, "setloop...", Chat::USER);
+      Map::get()->setBlock(event->x, event->y, event->z, event->otype, event->ometa, std::string("SERVER"));
     }
+    Chat::get().sendMsg(user, "roll back completed!", Chat::USER);
   } else {
     reportError(user, "Usage: /rollback <timestamp> [user]");
   }
+#ifdef _DEBUG
+  printf("rollback complete");
+#endif
 }
 
 void emote(User *user, std::string command, std::deque<std::string> args)

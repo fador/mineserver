@@ -606,6 +606,14 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   printf("setBlock(x=%d, y=%d, z=%d, type=%d, char=%d)\n", x, y, z, type, meta);
 #endif
 
+  event_t entry;
+  entry.x = x;
+  entry.y = y;
+  entry.z = z;
+  entry.nick = std::string("SERVER");
+
+  Map::getBlock(x,y,z, &entry.otype, &entry.ometa);
+
   if((y < 0) || (y > 127))
   {
     LOG("Invalid y value (setBlock)");
@@ -654,13 +662,6 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   mapLastused[mapId]      = (int)time(0);
 
   // Log the block update
-  event_t entry;
-  entry.x = x;
-  entry.y = y;
-  entry.z = z;
-  entry.nick = std::string("SERVER");
-
-  Map::getBlock(x,y,z, &entry.otype, &entry.ometa);
   TRXLOG(entry);
 
   return true;
@@ -671,6 +672,13 @@ bool Map::setBlock(int x, int y, int z, char type, char meta, std::string nick)
 #ifdef _DEBUG
   printf("setBlock(x=%d, y=%d, z=%d, type=%d, char=%d)\n", x, y, z, type, meta);
 #endif
+  event_t entry;
+  entry.x = x;
+  entry.y = y;
+  entry.z = z;
+  entry.nick = nick;
+
+  Map::getBlock(x,y,z, &entry.otype, &entry.ometa);
 
   if((y < 0) || (y > 127))
   {
@@ -719,12 +727,6 @@ bool Map::setBlock(int x, int y, int z, char type, char meta, std::string nick)
   mapLastused[mapId]      = (int)time(0);
 
   // Log the block update
-  event_t entry;
-  entry.x = x;
-  entry.y = y;
-  entry.z = z;
-  entry.nick = nick;
-  Map::getBlock(x,y,z, &entry.otype, &entry.ometa);
   TRXLOG(entry);
 
   return true;
