@@ -62,16 +62,28 @@ public:
       return false;
    }
 
-   Function get(std::string name)
+   Function* get(const std::string name)
    {
       for (Events::iterator iter = callbacks.begin(); iter != callbacks.end(); iter++)
       {
          if ((*iter).first == name)
-            return iter->second;
+            return &iter->second;
       }
 
-      Function empty;
-      return empty;
+      return 0;
+   }
+   
+   bool run(const std::string name, const Function::invoker_type function)
+   {
+      for (Events::iterator iter = callbacks.begin(); iter != callbacks.end(); iter++)
+      {
+         if ((*iter).first == name)
+         {
+            function(iter->second);
+            return true;
+         }
+      }
+      return false;
    }
 
    void reset()
