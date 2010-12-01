@@ -41,7 +41,7 @@ struct event_t {
   int x;
   int y;
   int z;
-  std::string nick;
+  char nick[16];
   time_t timestamp;
   uint8 otype, ntype;
   uint8 ometa, nmeta;

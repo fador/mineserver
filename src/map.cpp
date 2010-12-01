@@ -610,7 +610,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   entry.x = x;
   entry.y = y;
   entry.z = z;
-  entry.nick = std::string("SERVER");
+  strcpy(entry.nick, std::string("SERVER").c_str());
 
   Map::getBlock(x,y,z, &entry.otype, &entry.ometa);
 
@@ -676,7 +676,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta, std::string nick)
   entry.x = x;
   entry.y = y;
   entry.z = z;
-  entry.nick = nick;
+  strcpy(entry.nick, nick.c_str());
 
   Map::getBlock(x,y,z, &entry.otype, &entry.ometa);
 
