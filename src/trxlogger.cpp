@@ -89,8 +89,6 @@ bool TrxLogger::getLogs(time_t t, std::vector<event_t> *logs) {
   log_stream.seekg(0, std::ios::beg);
 
   while(log_stream.getline(reinterpret_cast<char *>(&event), sizeof(event_t))) {
-     log_stream.read(reinterpret_cast<char *>(&event), sizeof(event_t));
-  
     if(event.timestamp > t) {
       logs->push_back(event);
     }

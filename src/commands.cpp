@@ -328,13 +328,18 @@ void rollBack(User *user, std::string command, std::deque<std::string> args)
     } else {
       TrxLogger::get().getLogs(timestamp, &logs);
     }
-    
-    Chat::get().sendMsg(user, "rolling back...", Chat::USER);
-    for(std::vector<event_t>::iterator event = logs.begin(); event != logs.end(); event++) {
+
+#ifdef _DEBUG
+    printf("Found %d events in binary log\n", sizeof(logs));
+#endif
+    std::vector<event_t>::iterator event;
+
+    Chat::get().sendMsg(user, "Rolling back map...", Chat::USER);
+    for(event = logs.begin(); event < logs.end(); event++) {
       Chat::get().sendMsg(user, "setloop...", Chat::USER);
       Map::get()->setBlock(event->x, event->y, event->z, event->otype, event->ometa, std::string("SERVER"));
     }
-    Chat::get().sendMsg(user, "roll back completed!", Chat::USER);
+    Chat::get().sendMsg(user, "Map roll back completed!", Chat::USER);
   } else {
     reportError(user, "Usage: /rollback <timestamp> [user]");
   }
