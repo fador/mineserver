@@ -43,13 +43,13 @@ typedef srutil::delegate6<void, User*, sint8, sint32, sint8, sint32, sint8> Func
 class Callback
 {
 public:
-   void add(std::string name, Function func)
+   void add(const std::string name, Function func)
    {
       remove(name);
       callbacks.insert(std::pair<std::string, Function>(name, func));
    }
    
-   bool remove(std::string name)
+   bool remove(const std::string name)
    {
       for (Events::iterator iter = callbacks.begin(); iter != callbacks.end(); ++iter)
       {

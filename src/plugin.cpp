@@ -37,6 +37,7 @@
 #include "blocks/door.h"
 #include "blocks/sign.h"
 
+
 Plugin &Plugin::get()
 {
   static Plugin instance;
