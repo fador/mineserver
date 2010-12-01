@@ -330,6 +330,8 @@ int Mineserver::Run(int argc, char *argv[])
       }
       Map::get()->mapTime+=20;
       if(Map::get()->mapTime>=24000) Map::get()->mapTime=0;
+      
+      Map::get()->checkGenTrees();
     }
 
     //Physics simulation every 200ms

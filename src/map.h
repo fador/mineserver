@@ -185,6 +185,7 @@ public:
   // List of saplings ready to grow
   std::list<sTree> saplings;
   void addSapling(User* user, int x, int y, int z);
+  void checkGenTrees();
 
   // Map spawn position
   vec spawnPos;

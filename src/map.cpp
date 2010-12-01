@@ -61,6 +61,42 @@ void Map::addSapling(User* user, int x, int y, int z)
   saplings.push_back( sTree(x,y,z,mapTime,user->UID) );
 }
 
+void Map::checkGenTrees()
+{
+  std::list<sTree>::iterator iter = saplings.begin(); 
+  
+  while (iter != saplings.end())
+  {
+    if(rand() % 50 == 0)
+    {
+      std::cout << "Grow tree!" << std::endl;
+      
+      sint32 x = (*iter).x;
+      sint32 y = (*iter).y;
+      sint32 z = (*iter).z;
+
+      // grow tree!
+      setBlock( x, y, z, BLOCK_LOG, 0);
+      setBlock( x, y+1, z, BLOCK_LOG, 0);
+      setBlock( x, y+2, z, BLOCK_LOG, 0);
+      setBlock( x, y+3, z, BLOCK_LEAVES, 0);
+
+      sendBlockChange( x, y, z, BLOCK_LOG, 0);
+      sendBlockChange( x, y+1, z, BLOCK_LOG, 0);
+      sendBlockChange( x, y+2, z, BLOCK_LOG, 0);
+      sendBlockChange( x, y+3, z, BLOCK_LEAVES, 0);
+
+        saplings.erase(iter++);  // alternatively, i = items.erase(i);
+    }
+    else
+    {
+        //other_code_involving(*i);
+        ++iter;
+    }
+  }
+
+}
+
 void Map::posToId(int x, int z, uint32 *id)
 {
   uint8 *id_pointer = reinterpret_cast<uint8 *>(id);
@@ -158,11 +194,12 @@ void Map::init()
 
   for(std::vector<NBT_Value*>::iterator iter = (*tree_list).begin(); iter != (*tree_list).end(); ++iter)
   {
-    sint32 x = (sint32)(*(*iter))["X"];
-    sint32 y = (sint32)(*(*iter))["Y"];
-    sint32 z = (sint32)(*(*iter))["Z"];
-    sint32 plantedTime = (sint32)(*(*iter))["plantedTime"];
-    uint32 plantedBy = (uint32)(*(*iter))["plantedBy"];
+    NBT_Value &tree = *(*iter);
+    sint32 x = (sint32)*tree["X"];
+    sint32 y = (sint32)*tree["Y"];
+    sint32 z = (sint32)*tree["Z"];
+    sint32 plantedTime = (sint32)*tree["plantedTime"];
+    sint32 plantedBy = (sint32)*tree["plantedBy"];
     saplings.push_back( sTree(x,y,z,plantedTime,plantedBy) );
     std::cout << "sapling: " << x << " " << y << " " << z << std::endl;
   }
