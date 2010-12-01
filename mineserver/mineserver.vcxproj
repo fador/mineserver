@@ -28,6 +28,7 @@
     <ClCompile Include="..\src\logger.cpp" />
     <ClCompile Include="..\src\map.cpp" />
     <ClCompile Include="..\src\mapgen.cpp" />
+    <ClCompile Include="..\src\mersenne.cpp" />
     <ClCompile Include="..\src\mineserver.cpp" />
     <ClCompile Include="..\src\nbt.cpp" />
     <ClCompile Include="..\src\noiseutils.cpp" />
@@ -37,6 +38,7 @@
     <ClCompile Include="..\src\sockets.cpp" />
     <ClCompile Include="..\src\tools.cpp" />
     <ClCompile Include="..\src\user.cpp" />
+    <ClCompile Include="..\src\world\cavegen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\blocks\basic.h" />
@@ -55,6 +57,7 @@
     <ClInclude Include="..\src\logger.h" />
     <ClInclude Include="..\src\map.h" />
     <ClInclude Include="..\src\mapgen.h" />
+    <ClInclude Include="..\src\mersenne.h" />
     <ClInclude Include="..\src\nbt.h" />
     <ClInclude Include="..\src\noiseutils.h" />
     <ClInclude Include="..\src\packets.h" />
@@ -64,6 +67,7 @@
     <ClInclude Include="..\src\tools.h" />
     <ClInclude Include="..\src\user.h" />
     <ClInclude Include="..\src\vec.h" />
+    <ClInclude Include="..\src\world\cavegen.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7F6D1DAB-AA49-4343-B28E-C3E647BE5007}</ProjectGuid>
