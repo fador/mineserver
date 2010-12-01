@@ -53,6 +53,17 @@
 #include "world/cavegen.h"
 #include "mapgen.h"
 
+MapGen* MapGen::mMapGen;
+
+void MapGen::free()
+{
+   if (mMapGen)
+   {
+      delete mMapGen;
+      mMapGen = 0;
+   }
+}
+
 void MapGen::init(int seed)
 {
   cave.init(seed+8);
@@ -134,15 +145,9 @@ void MapGen::init(int seed)
   heightMapBuilder.SetDestNoiseMap(heightMap);
   heightMapBuilder.SetDestSize(16, 16);
 
-  seaLevel = Conf::get().iValue("sea_level");
+  seaLevel = Conf::get()->iValue("sea_level");
   
   m_seed = seed;
-}
-
-MapGen &MapGen::get()
-{
-  static MapGen instance;
-  return instance;
 }
 
 void MapGen::generateFlatgrass() 
@@ -171,7 +176,7 @@ void MapGen::generateChunk(int x, int z)
   NBT_Value *main = new NBT_Value(NBT_Value::TAG_COMPOUND);
   NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
  
-  if(Conf::get().bValue("map_flatgrass"))
+  if(Conf::get()->bValue("map_flatgrass"))
     generateFlatgrass();
   else
     generateWithNoise(x, z);
@@ -212,7 +217,7 @@ void MapGen::generateChunk(int x, int z)
   Map::get()->mapLastused[chunkid] = (int)time(0);
 
   // Not changed
-  Map::get()->mapChanged[chunkid] = Conf::get().bValue("save_unchanged_chunks");
+  Map::get()->mapChanged[chunkid] = Conf::get()->bValue("save_unchanged_chunks");
   
   Map::get()->maps[chunkid].nbt = main;
 }
@@ -270,15 +275,16 @@ void MapGen::generateWithNoise(int x, int z)
       }
     }
   }
+
   //CaveGen::get().AddCaves(blockslibnoise);
-  if(Conf::get().bValue("add_beaches"))
+  if(Conf::get()->bValue("add_beaches"))
     AddBeaches();
 }
 
 void MapGen::AddBeaches() 
 {
-  int beachExtent = Conf::get().iValue("beach_extent");
-  int beachHeight = Conf::get().iValue("beach_height");
+  int beachExtent = Conf::get()->iValue("beach_extent");
+  int beachHeight = Conf::get()->iValue("beach_height");
   
   int beachExtentSqr = (beachExtent + 1) * (beachExtent + 1);
   for(int x = 0; x < 16; x++) 

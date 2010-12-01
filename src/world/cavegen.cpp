@@ -46,6 +46,17 @@
 
 #include "cavegen.h"
 
+CaveGen* CaveGen::mCaveGen;
+
+void CaveGen::free()
+{
+   if (mCaveGen)
+   {
+      delete mCaveGen;
+      mCaveGen = 0;
+   }
+}
+
 void CaveGen::init(int seed)
 {
   // Set up us the Perlin-noise module.
@@ -66,12 +77,12 @@ void CaveGen::init(int seed)
   
   caveScale = 0.9;
   
-  addCaves = Conf::get().bValue("add_caves");
-  caveDensity = Conf::get().iValue("cave_density");
-  caveSize = Conf::get().iValue("cave_size");
-  addCaveLava = Conf::get().bValue("cave_lava");
-  addCaveWater = Conf::get().bValue("cave_water");
-  addOre = Conf::get().bValue("cave_ore");
+  addCaves = Conf::get()->bValue("add_caves");
+  caveDensity = Conf::get()->iValue("cave_density");
+  caveSize = Conf::get()->iValue("cave_size");
+  addCaveLava = Conf::get()->bValue("cave_lava");
+  addCaveWater = Conf::get()->bValue("cave_water");
+  addOre = Conf::get()->bValue("cave_ore");
 }
 
 void CaveGen::AddCaves(uint8 &block, double x, double y, double z)

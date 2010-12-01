@@ -39,10 +39,16 @@
 
 #include "config.h"
 
-Conf &Conf::get()
+
+Conf* Conf::mConf;
+
+void Conf::free()
 {
-  static Conf instance;
-  return instance;
+   if (mConf)
+   {
+      delete mConf;
+      mConf = 0;
+   }
 }
 
 // Load/reload configuration

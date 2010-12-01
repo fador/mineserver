@@ -51,10 +51,15 @@
 #include "physics.h"
 
 
-Chat &Chat::get()
+Chat* Chat::mChat;
+
+void Chat::free()
 {
-  static Chat instance;
-  return instance;
+   if (mChat)
+   {
+      delete mChat;
+      mChat = 0;
+   }
 }
 
 Chat::Chat()

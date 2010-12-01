@@ -78,8 +78,8 @@ bool User::checkBanned(std::string _nick)
   nick = _nick;
 
   // Check banstatus
-  for(unsigned int i = 0; i < Chat::get().banned.size(); i++)
-    if(Chat::get().banned[i] == nick)
+  for(unsigned int i = 0; i < Chat::get()->banned.size(); i++)
+    if(Chat::get()->banned[i] == nick)
       return true;
 
   return false;
@@ -90,8 +90,8 @@ bool User::checkWhitelist(std::string _nick)
 	nick = _nick;
 
     // Check if nick is whitelisted, providing it is enabled
-    for(unsigned int i = 0; i < Chat::get().whitelist.size(); i++)
-      if(Chat::get().whitelist[i] == nick)
+    for(unsigned int i = 0; i < Chat::get()->whitelist.size(); i++)
+      if(Chat::get()->whitelist[i] == nick)
         return true;
 
     return false;
@@ -104,9 +104,9 @@ bool User::changeNick(std::string _nick)
   nick = _nick;
 
   // Check adminstatus
-  for(unsigned int i = 0; i < Chat::get().admins.size(); i++)
+  for(unsigned int i = 0; i < Chat::get()->admins.size(); i++)
   {
-    if(Chat::get().admins[i] == nick)
+    if(Chat::get()->admins[i] == nick)
     {
       admin = true;
       break;
@@ -142,7 +142,7 @@ bool User::mute(std::string muteMsg)
   else 
     muteMsg = COLOR_YELLOW + "You have been muted. ";
     
-  Chat::get().sendMsg(this, muteMsg, Chat::USER);
+  Chat::get()->sendMsg(this, muteMsg, Chat::USER);
   this->muted = true;
   std::cout << nick << " muted. Reason: " << muteMsg << std::endl;
   return true;
@@ -802,7 +802,7 @@ bool remUser(int sock)
     {
       if(Users[i]->nick.size())
       {
-        Chat::get().sendMsg(Users[i], Users[i]->nick+" disconnected!", Chat::OTHERS);
+        Chat::get()->sendMsg(Users[i], Users[i]->nick+" disconnected!", Chat::OTHERS);
         Users[i]->saveData();
       }
       delete Users[i];
