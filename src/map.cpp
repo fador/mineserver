@@ -47,7 +47,7 @@
 #include "logger.h"
 #include "tools.h"
 #include "map.h"
-#include "mapgen.h"
+#include "worldgen/mapgen.h"
 #include "user.h"
 #include "nbt.h"
 #include "config.h"
@@ -75,18 +75,13 @@ void Map::idToPos(uint32 id, int *x, int *z)
   *z = getSint16(&id_pointer[2]);
 }
 
-void Map::initMap()
+void Map::init()
 {
 #ifdef _DEBUG
-  printf("initMap()\n");
+  printf("Map::init()\n");
 #endif
 
-  this->mapDirectory = Conf::get().sValue("mapdir");
-  if(this->mapDirectory == "Not found!")
-  {
-    std::cout << "Error, mapdir not defined!" << std::endl;
-    exit(EXIT_FAILURE);
-  }
+  this->mapDirectory = Conf::get()->sValue("map_directory");
 
   std::string infile = mapDirectory+"/level.dat";
 
@@ -132,8 +127,6 @@ void Map::initMap()
   NBT_Value *root = NBT_Value::LoadFromFile(infile);
   NBT_Value &data = *((*root)["Data"]);
 
-  (*root).Print();
-
   spawnPos.x() = (sint32)*data["SpawnX"];
   spawnPos.y() = (sint32)*data["SpawnY"];
   spawnPos.z() = (sint32)*data["SpawnZ"];
@@ -177,7 +170,7 @@ void Map::initMap()
   /////////////////
 
   // Init mapgenerator
-  MapGen::get().init(mapSeed);
+  MapGen::get()->init(mapSeed);
 
   delete root;
 
@@ -185,10 +178,13 @@ void Map::initMap()
   std::endl;
 }
 
-void Map::freeMap()
+void Map::free()
 {
-   delete mMap;
-   mMap = 0;
+   if (mMap)
+   {
+      delete mMap;
+      mMap = 0;
+   }
 }
 
 sChunk *Map::getMapData(int x, int z, bool generate)
@@ -728,7 +724,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   }
   metapointer[index >> 1] = metadata;
 
-  mapChanged[mapId]       = 1;
+  mapChanged[mapId]       = true;
   mapLastused[mapId]      = (int)time(0);
 
   return true;
@@ -828,7 +824,7 @@ bool Map::loadMap(int x, int z, bool generate)
     // If generate (false only for lightmapgenerator)
     if(generate)
     {
-      MapGen::get().generateChunk(x,z);
+      MapGen::get()->generateChunk(x,z);
       generateLight(x, z);
       return true;
     }
@@ -841,8 +837,7 @@ bool Map::loadMap(int x, int z, bool generate)
   {
     maps[mapId].nbt = NBT_Value::LoadFromFile(infile.c_str());
   }
-  
-  
+
   if(maps[mapId].nbt == NULL)
   {
     LOG("Error in loading map (unable to load file)");
@@ -894,7 +889,7 @@ bool Map::loadMap(int x, int z, bool generate)
   mapLastused[mapId] = (int)time(0);
 
   // Not changed
-  mapChanged[mapId] = 0;
+  mapChanged[mapId] = false;
 
   return true;
 }
@@ -967,7 +962,7 @@ bool Map::saveMap(int x, int z)
   maps[mapId].nbt->SaveToFile(outfile);
 
   // Set "not changed"
-  mapChanged[mapId] = 0;
+  mapChanged[mapId] = false;
 
   return true;
 }

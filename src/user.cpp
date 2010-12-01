@@ -57,6 +57,7 @@ User::User(int sock, uint32 EID)
 {
   this->action          = 0;
   this->muted           = false;
+	this->dnd							= false;
   this->waitForData     = false;
   this->fd              = sock;
   this->UID             = EID;
@@ -77,8 +78,8 @@ bool User::checkBanned(std::string _nick)
   nick = _nick;
 
   // Check banstatus
-  for(unsigned int i = 0; i < Chat::get().banned.size(); i++)
-    if(Chat::get().banned[i] == nick)
+  for(unsigned int i = 0; i < Chat::get()->banned.size(); i++)
+    if(Chat::get()->banned[i] == nick)
       return true;
 
   return false;
@@ -89,8 +90,8 @@ bool User::checkWhitelist(std::string _nick)
 	nick = _nick;
 
     // Check if nick is whitelisted, providing it is enabled
-    for(unsigned int i = 0; i < Chat::get().whitelist.size(); i++)
-      if(Chat::get().whitelist[i] == nick)
+    for(unsigned int i = 0; i < Chat::get()->whitelist.size(); i++)
+      if(Chat::get()->whitelist[i] == nick)
         return true;
 
     return false;
@@ -103,9 +104,9 @@ bool User::changeNick(std::string _nick)
   nick = _nick;
 
   // Check adminstatus
-  for(unsigned int i = 0; i < Chat::get().admins.size(); i++)
+  for(unsigned int i = 0; i < Chat::get()->admins.size(); i++)
   {
-    if(Chat::get().admins[i] == nick)
+    if(Chat::get()->admins[i] == nick)
     {
       admin = true;
       break;
@@ -137,23 +138,55 @@ bool User::kick(std::string kickMsg)
 bool User::mute(std::string muteMsg)
 {
   if(!muteMsg.empty()) 
-    muteMsg = "You have been muted.  Reason: " + muteMsg;
+    muteMsg = COLOR_YELLOW + "You have been muted.  Reason: " + muteMsg;
   else 
-    muteMsg = "You have been muted. ";
+    muteMsg = COLOR_YELLOW + "You have been muted. ";
     
-  Chat::get().sendMsg(this, muteMsg, Chat::USER);
+  Chat::get()->sendMsg(this, muteMsg, Chat::USER);
   this->muted = true;
   std::cout << nick << " muted. Reason: " << muteMsg << std::endl;
   return true;
 }
 bool User::unmute()
 {
-    Chat::get().sendMsg(this, "You have been unmuted.", Chat::USER);
+    Chat::get()->sendMsg(this, COLOR_YELLOW + "You have been unmuted.", Chat::USER);
     this->muted = false;
     std::cout << nick << " unmuted. " << std::endl;
     return true;
 }
-
+bool User::toggleDND()
+{	
+	if(!this->dnd) {
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "You have enabled 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "You will no longer see chat or private messages.", Chat::USER);
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "Type /dnd again to disable 'Do Not Disturb' mode.", Chat::USER);
+		this->dnd = true;
+	}
+	else {
+		this->dnd = false;
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "You have disabled 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "You can now see chat and private messages.", Chat::USER);
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "Type /dnd again to enable 'Do Not Disturb' mode.", Chat::USER);		
+	}
+	return this->dnd;
+}
+bool User::isAbleToCommunicate(std::string communicateCommand) 
+{
+	// Check if this is chat or a regular command and prefix with a slash accordingly
+	if(communicateCommand != "chat")
+		communicateCommand = "/" + communicateCommand;
+		
+	if(this->muted) {
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "You cannot " + communicateCommand + " while muted.", Chat::USER);
+		return false;
+	}
+	if(this->dnd) {
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "You cannot " + communicateCommand + " while in 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "Type /dnd to disable.", Chat::USER);
+		return false;
+	}
+	return true;
+}
 bool User::loadData()
 {
   std::string infile = Map::get()->mapDirectory+"/players/"+this->nick+".dat";
@@ -366,14 +399,26 @@ bool User::updatePos(double x, double y, double z, double stance)
       this->pos.y      = y;
       this->pos.z      = z;
       this->pos.stance = stance;
+      
+      // Fix yaw & pitch to be a 1 byte fraction of 360 (no negatives)
+      int fixedYaw = int(this->pos.yaw) % 360;
+      if(fixedYaw < 0)
+        fixedYaw = 360 + fixedYaw;
+      fixedYaw = int(float(fixedYaw) * float(255.0f/360.0f));  
+
+      int fixedPitch = int(this->pos.pitch) % 360;
+      if(fixedPitch < 0)
+        fixedPitch = 360 + fixedPitch;
+      fixedPitch = int(float(fixedPitch) * float(255.0f/360.0f));
+            
       uint8 teleportData[19];
-      teleportData[0]  = 0x22; //Teleport
+      teleportData[0]  = PACKET_ENTITY_TELEPORT; 
       putSint32(&teleportData[1], this->UID);
       putSint32(&teleportData[5], (int)(this->pos.x*32));
       putSint32(&teleportData[9], (int)(this->pos.y*32));
       putSint32(&teleportData[13], (int)(this->pos.z*32));
-      teleportData[17] = (char)this->pos.yaw;
-      teleportData[18] = (char)this->pos.pitch;
+      teleportData[17] = (char)fixedYaw;
+      teleportData[18] = (char)fixedPitch;
       this->sendOthers(&teleportData[0], 19);
     }
 
@@ -470,11 +515,22 @@ bool User::updatePos(double x, double y, double z, double stance)
 
 bool User::updateLook(float yaw, float pitch)
 {
+  // Fix yaw & pitch to be a 1 byte fraction of 360 (no negatives)
+  int fixedYaw = int(yaw) % 360;
+  if(fixedYaw < 0)
+    fixedYaw = 360 + fixedYaw;
+  fixedYaw = int(float(fixedYaw) * float(255.0f/360.0f));  
+  
+  int fixedPitch = int(pitch) % 360;
+  if(fixedPitch < 0)
+    fixedPitch = 360 + fixedPitch;
+  fixedPitch = int(float(fixedPitch) * float(255.0f/360.0f));  
+      
   uint8 lookdata[7];
-  lookdata[0] = 0x20;
+  lookdata[0] = PACKET_ENTITY_LOOK;
   putSint32(&lookdata[1], (sint32)this->UID);
-  lookdata[5] = (char)(yaw);
-  lookdata[6] = (char)(pitch);
+  lookdata[5] = (char)(fixedYaw);
+  lookdata[6] = (char)(fixedPitch);
   this->sendOthers(&lookdata[0], 7);
 
   this->pos.yaw   = yaw;
@@ -487,7 +543,13 @@ bool User::sendOthers(uint8 *data, uint32 len)
   for(unsigned int i = 0; i < Users.size(); i++)
   {
     if(Users[i]->fd != this->fd && Users[i]->logged)
-    Users[i]->buffer.addToWrite(data, len);
+    {
+      // Don't send to his user if he is DND and the message is a chat message
+      if(!(Users[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
+      {
+    	  Users[i]->buffer.addToWrite(data, len);
+  	  }
+  	}
   }
   return true;
 }
@@ -497,7 +559,13 @@ bool User::sendAll(uint8 *data, uint32 len)
   for(unsigned int i = 0; i < Users.size(); i++)
   {
     if(Users[i]->fd && Users[i]->logged)
-    Users[i]->buffer.addToWrite(data, len);
+    {
+      // Don't send to his user if he is DND and the message is a chat message
+      if(!(Users[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
+      {
+    	  Users[i]->buffer.addToWrite(data, len);
+  	  }
+  	}
   }
   return true;
 }
@@ -507,7 +575,7 @@ bool User::sendAdmins(uint8 *data, uint32 len)
   for(unsigned int i = 0; i < Users.size(); i++)
   {
     if(Users[i]->fd && Users[i]->logged && Users[i]->admin)
-    Users[i]->buffer.addToWrite(data, len);
+    	Users[i]->buffer.addToWrite(data, len);
   }
   return true;
 }
@@ -734,7 +802,7 @@ bool remUser(int sock)
     {
       if(Users[i]->nick.size())
       {
-        Chat::get().sendMsg(Users[i], Users[i]->nick+" disconnected!", Chat::OTHERS);
+        Chat::get()->sendMsg(Users[i], Users[i]->nick+" disconnected!", Chat::OTHERS);
         Users[i]->saveData();
       }
       delete Users[i];

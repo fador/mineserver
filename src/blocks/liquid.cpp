@@ -61,7 +61,7 @@ void BlockLiquid::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
       Map::get()->setBlock(x, y+1, z, (char)newblock, 0);
       Map::get()->sendBlockChange(x, y+1, z, (char)newblock, 0);
       
-      Physics::get().addSimulation(vec(x, y, z));
+      Physics::get()->addSimulation(vec(x, y, z));
       physics(x,y+1,z);
    }
 }
@@ -85,6 +85,6 @@ void BlockLiquid::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint3
 
 void BlockLiquid::physics(sint32 x, sint8 y, sint32 z)
 {
-   Physics::get().checkSurrounding(vec(x, y, z));
+   Physics::get()->checkSurrounding(vec(x, y, z));
 }
 

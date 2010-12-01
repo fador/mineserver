@@ -19,9 +19,9 @@ Server still lacks some critical features and should be only used for testing.
  * Mac OS X
  * FreeBSD / PCBSD
  
-We are trying to minimize memory and cpu usage compared to original Java server.
+We are trying to minimize memory and CPU usage compared to original Java server.
 
-### Features
+### Features (Some features are currently not operational because of major code rewrite)
  * Various chat commands, more to come..
  * NBT parsing/saving
  * Lightmap generation
@@ -31,48 +31,13 @@ We are trying to minimize memory and cpu usage compared to original Java server.
  * Experimental physics for water and lava
  * Flatland map generation
  * Working chests & signs
- * Terrain generation
+ * Terrain map generation
   
-### ToDo (Arranged by priority)
- * Getting furnaces to work (In progress)
- * Plugin support (and Lua plugin for scripting)
- * Multithreading
- * Server console
- * Growing trees and cactuses
- * One-click update
- * and more!
+### ToDo is located at [http://redmine.fknsrs.biz/projects/mineserver](http://redmine.fknsrs.biz/projects/mineserver)
  
-### Chat commands
-
-**For all players**
-
-*  /players : Lists online players
-*  /about : Server name & version
-*  /rules : Shows server rules
-*  /home : Teleports player to map spawn location
-*  /kit (name) : Gives kit. Items for kit defined in config.cfg with kit_(name) using itemId's
-*  /motd : Displays Message Of The Day
-
-**Admin only**
-
-*  %text : Servermessage 
-*  &text : Admin-only message
-*  /kick player [kickmsg] : Kicks player with optional kick message
-*  /ban player [reason] : Bans (and kicks if online) player from server
-*  /unban player : Lift a ban
-*  /save : Manually save map to disc
-*  /ctp x y z : Teleport to coordinates (eg. /ctp 100 100 100)
-*  /tp player : Teleport yourself to player's position
-*  /tp player1 player2 : Teleport player1 to player2
-*  /reload : Reload admins and configuration
-*  /give player id/alias (count) : Gives player count pieces of id/alias. count = 1 is used if it is not provided. Support for over 64 items. Aliases configurable with item_alias.cfg
-*  /rules player : Shows server rules (from rules.txt) to player
-*  /gps [player] : Without player shows own coordinates & heading. With player shows player's coordinates & heading
-*  /settime time : Sets server time. time = 0-24000 (0 and 24000 is day and about 15000 is night)
-*  /mute player [reason] : Mutes player with optional reason
-*  /unmute player : Unmutes player
+### Chat commands can be found at [wiki](http://www.mineserver.be/wiki)
  
-### Compiling
+### Compiling (Better instructions in [wiki](http://www.mineserver.be/wiki))
 Depends on (and tested with):
 
  [zlib 1.2.5](http://www.zlib.org)   

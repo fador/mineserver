@@ -90,10 +90,15 @@ bool mayFallThrough(int id)
 
 }
 
-Physics &Physics::get()
+Physics* Physics::mPhysics;
+
+void Physics::free()
 {
-  static Physics instance;
-  return instance;
+   if (mPhysics)
+   {
+      delete mPhysics;
+      mPhysics = 0;
+   }
 }
 
 // Physics loop
