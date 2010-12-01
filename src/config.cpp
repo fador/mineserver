@@ -61,12 +61,20 @@ bool Conf::load(std::string configFile)
   if(ifs.fail() && configFile == CONFIG_FILE)
   {
     // TODO: Load default configuration from the internets!
-    std::cout << "Error: " << configFile << " not found!" << std::endl;
+    std::cout << "Warning: " << configFile << " not found! Generating it now." << std::endl;
 
+    // Open config file
     std::ofstream confofs(configFile.c_str());
-    confofs << "#"                                                  << std::endl<<
-               "# Load configuration example from: <address here>"  << std::endl<<
-               "#"                                                  << std::endl;
+
+    // Write header
+    confofs << "# This is the default config, please see http://mineserver.be/wiki/Configuration for more information." << std::endl << std::endl;
+
+    // Write all the default settings
+    std::map<std::string, std::string>::iterator iter;
+    for(iter=defaultConf.begin();iter!=defaultConf.end();++iter)
+      confofs << iter->first << " = " << iter->second << std::endl;
+
+    // Close the config file
     confofs.close();
 
     this->load(CONFIG_FILE);

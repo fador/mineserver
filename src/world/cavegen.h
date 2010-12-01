@@ -41,19 +41,28 @@ public:
      return mCaveGen;
   }
   void free();
-  void AddCaves(uint8 *m_blocks);
+  void init(int seed);
+  void AddCaves(uint8 &block, double x, double y, double z);
+  
+  float caveScale;
 
 private:
-  CaveGen() {}
   Random rand;
   uint8 *blocks;
   static CaveGen *mCaveGen;
+  
+  noise::module::Perlin caveNoise1;
+  noise::module::Perlin caveNoise2;
+  
+  double caveN1, caveN2;
+  
+  bool addCaves;
+  int caveDensity;
+  int caveSize;
+  bool addCaveLava;
+  bool addCaveWater;
+  bool addOre;
 
-  void AddSingleCave(uint8 bedrockType, uint8 fillingType, int length, double maxDiameter);
-  void AddSingleVein(uint8 bedrockType, uint8 fillingType, int k, double maxDiameter, int l) ;
-  void AddSingleVein(uint8 bedrockType, uint8 fillingType, int k, double maxDiameter, int l, int i1);
-
-  void SealLiquids(uint8 sealantType);
 };
 
 #endif

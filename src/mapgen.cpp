@@ -66,6 +66,7 @@ void MapGen::free()
 
 void MapGen::init(int seed)
 {
+  cave.init(seed+8);
   
   perlinNoise.SetSeed(seed);
   perlinNoise.SetOctaveCount(2);
@@ -144,7 +145,7 @@ void MapGen::init(int seed)
   heightMapBuilder.SetDestNoiseMap(heightMap);
   heightMapBuilder.SetDestSize(16, 16);
 
-  seaLevel = Conf::get()->iValue("seaLevel");
+  seaLevel = Conf::get()->iValue("sea_level");
   
   m_seed = seed;
 }
@@ -216,7 +217,7 @@ void MapGen::generateChunk(int x, int z)
   Map::get()->mapLastused[chunkid] = (int)time(0);
 
   // Not changed
-  Map::get()->mapChanged[chunkid] = 0;
+  Map::get()->mapChanged[chunkid] = Conf::get()->bValue("save_unchanged_chunks");
   
   Map::get()->maps[chunkid].nbt = main;
 }
@@ -268,19 +269,22 @@ void MapGen::generateWithNoise(int x, int z)
           else
             *curBlock = BLOCK_AIR; // FF
         }
+        
+        // Add caves
+        cave.AddCaves(*curBlock, x + (bX+1)/16.0, (bY+1), z + (bZ+1)/16.0);
       }
     }
   }
-  //CaveGen::get().AddCaves(blocks);
-  if(Conf::get()->bValue("addBeaches"))
+
+  //CaveGen::get().AddCaves(blockslibnoise);
+  if(Conf::get()->bValue("add_beaches"))
     AddBeaches();
 }
 
 void MapGen::AddBeaches() 
 {
-  //std::cout << "Adding beaches" << std::endl;
-  int beachExtent = Conf::get()->iValue("beachExtent");
-  int beachHeight = Conf::get()->iValue("beachHeight");
+  int beachExtent = Conf::get()->iValue("beach_extent");
+  int beachHeight = Conf::get()->iValue("beach_height");
   
   int beachExtentSqr = (beachExtent + 1) * (beachExtent + 1);
   for(int x = 0; x < 16; x++) 
