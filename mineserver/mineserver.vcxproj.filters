@@ -19,6 +19,12 @@
     <Filter Include="Header Files\blocks">
       <UniqueIdentifier>{f8adaa3c-7ce8-4860-8fb2-305620e4f527}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\world">
+      <UniqueIdentifier>{67561735-9ec3-4f30-bc24-0c9768904c82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\world">
+      <UniqueIdentifier>{df9fe047-e832-4669-b0be-34ad4724c27b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\user.cpp">
@@ -99,6 +105,12 @@
     <ClCompile Include="..\src\blocks\torch.cpp">
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\world\cavegen.cpp">
+      <Filter>Source Files\world</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mersenne.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\user.h">
@@ -175,6 +187,12 @@
     </ClInclude>
     <ClInclude Include="..\src\blocks\torch.h">
       <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\world\cavegen.h">
+      <Filter>Header Files\world</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mersenne.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
