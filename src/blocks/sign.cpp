@@ -165,6 +165,14 @@ void BlockSign::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
                break;
             }
 
+            /* TODO: Get Users by chunk rather then whole list */
+            for(unsigned int i = 0; i < Users.size(); i++)
+            {
+               /* don't allow block placement on top of player */
+               if (Users[i]->checkOnBlock(x,y,z))
+                  return;
+            }
+
             uint8 block;
             uint8 meta;
             if (Map::get()->getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
