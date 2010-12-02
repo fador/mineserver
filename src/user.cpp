@@ -468,6 +468,18 @@ bool User::updatePos(double x, double y, double z, double stance)
   return true;
 }
 
+bool User::checkOnBlock(sint32 x, sint8 y, sint32 z)
+{
+   double diffX = x - this->pos.x;
+   double diffZ = z - this->pos.z;
+   
+   if ((y == (int)this->pos.y)
+         && (diffZ > -1.3 && diffZ < 0.3)
+         && (diffX > -1.3 && diffX < 0.3))
+      return true;
+   return false;
+}
+
 bool User::updateLook(float yaw, float pitch)
 {
   uint8 lookdata[7];
