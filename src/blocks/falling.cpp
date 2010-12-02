@@ -26,7 +26,7 @@
  */
 
 #include "falling.h"
-#include <stdio.h>
+
 void BlockFalling::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
