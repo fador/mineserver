@@ -82,6 +82,7 @@ public:
 
   bool update();
   bool addSimulation(vec pos);
+  bool removeSimulation(vec pos);
   bool checkSurrounding(vec pos);
 };
 
