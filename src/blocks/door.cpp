@@ -92,14 +92,6 @@ void BlockDoor::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
    uint8 toptopmeta;
    uint8 toptopblock;
    
-   /* TODO: Get Users by chunk rather then whole list */
-   for(unsigned int i = 0; i < Users.size(); i++)
-   {
-      /* don't allow block placement on top of player */
-      if (Users[i]->checkOnBlock(x,y+1,z))
-         return;
-   }
-
    if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
    {
       /* Check block below allows blocks placed on top */
@@ -176,6 +168,14 @@ void BlockDoor::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
                      toptopmeta &= 0x7;
                   } else {
                      toptopmeta |= 0x8;
+                  }
+                  
+                  /* TODO: Get Users by chunk rather then whole list */
+                  for(unsigned int i = 0; i < Users.size(); i++)
+                  {
+                     /* don't allow block placement on top of player */
+                     if (Users[i]->checkOnBlock(x, y + modifier, z))
+                        return;
                   }
 
                   Map::get()->setBlock(x, y + modifier, z, toptopblock, toptopmeta);

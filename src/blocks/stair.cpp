@@ -58,14 +58,6 @@ void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
    signed short diffX;
    signed short diffZ;
    
-   /* TODO: Get Users by chunk rather then whole list */
-   for(unsigned int i = 0; i < Users.size(); i++)
-   {
-      /* don't allow block placement on top of player */
-      if (Users[i]->checkOnBlock(x,y+1,z))
-         return;
-   }
-
    if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
    {
       /* Check block below allows blocks placed on top */
@@ -106,6 +98,14 @@ void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
                default:
                   return;
                break;
+            }
+            
+            /* TODO: Get Users by chunk rather then whole list */
+            for(unsigned int i = 0; i < Users.size(); i++)
+            {
+               /* don't allow block placement on top of player */
+               if (Users[i]->checkOnBlock(x,y,z))
+                  return;
             }
 
             // We place according to the player's position
