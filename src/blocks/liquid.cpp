@@ -68,18 +68,19 @@ void BlockLiquid::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
 
 void BlockLiquid::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
+   physics(x,y,z);
 }
 
 void BlockLiquid::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
    uint8 oldblock;
    uint8 oldmeta;
-
    if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
    {
+      Physics::get()->removeSimulation(vec(x,y,z));
+      physics(x,y,z);
       Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
       Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
-      physics(x,y,z);
    }
 }
 

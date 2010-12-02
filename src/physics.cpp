@@ -282,6 +282,11 @@ bool Physics::update()
         toRemove.push_back(simIt);
       }
     }
+    else
+    {
+      //Remove this block from simulation
+      toRemove.push_back(simIt);
+    }
   }
 
   std::vector<int>::reverse_iterator rit;
@@ -322,6 +327,23 @@ bool Physics::addSimulation(vec pos)
   return false;
 }
 
+bool Physics::removeSimulation(vec pos)
+{
+  if(!enabled)
+    return true;
+
+  // Iterate each simulation
+  for(std::vector<Sim>::iterator simIt = simList.begin(); simIt != simList.end(); simIt++)
+  {
+    vec itpos = simIt->blocks[0].pos;
+    if (itpos.x() == pos.x() && itpos.y() == pos.y() && itpos.z() == pos.z())
+    {
+      simList.erase(simIt);
+      return true;
+    }
+  }
+  return false;
+}
 
 
 bool Physics::checkSurrounding(vec pos)

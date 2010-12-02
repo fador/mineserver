@@ -583,16 +583,60 @@ int PacketHandler::player_block_placement(User *user)
   if (direction)
     direction = 6-direction;
 
+  Callback callback;
+  Function event;
+  Function::invoker_type inv(user, newblock, x, y, z, direction);
+
   if (Map::get()->getBlock(x, y, z, &oldblock, &metadata)) 
   {
-     Callback callback;
-     Function event;
-     Function::invoker_type inv(user, newblock, x, y, z, direction);
+     uint8 oldblocktop;
+     uint8 metadatatop;
+     sint8 check_y = y;
+     sint32 check_x = x;
+     sint32 check_z = z;
 
-     callback = Plugin::get()->getBlockCallback(oldblock);
-     event = callback.get("onReplace");
-     if (event) inv(event);  
+     /* client doesn't give us the correct block for lava
+        and water, check block above */
+     switch(direction)
+     {
+        case BLOCK_TOP:
+            check_y++;
+        break;
+        case BLOCK_NORTH:
+            check_x++;
+        break;
+        case BLOCK_SOUTH:
+            check_x--;
+        break;
+        case BLOCK_EAST:
+            check_z++;
+        break;
+        case BLOCK_WEST:
+            check_z--;
+        break;
+        default:
+        break;
+     }
 
+     if (Map::get()->getBlock(check_x, check_y, check_z, &oldblocktop, &metadatatop)
+     && (oldblocktop == BLOCK_LAVA || oldblocktop == BLOCK_STATIONARY_LAVA
+         || oldblocktop == BLOCK_WATER || oldblocktop == BLOCK_STATIONARY_WATER))
+     {
+       /* block above needs replacing rather then the block send by the client */
+       inv = Function::invoker_type(user, newblock, check_x, check_y, check_z, direction);        
+       callback = Plugin::get()->getBlockCallback(oldblocktop);
+       event = callback.get("onReplace");
+       if (event) inv(event);
+     }
+     else
+     {
+       inv = Function::invoker_type(user, newblock, x, y, z, direction);
+       callback = Plugin::get()->getBlockCallback(oldblock);
+       event = callback.get("onReplace");
+       if (event) inv(event);
+     }
+
+     inv = Function::invoker_type(user, newblock, x, y, z, direction);
      callback = Plugin::get()->getBlockCallback(newblock);
      event = callback.get("onPlace");
      if (event) inv(event);
