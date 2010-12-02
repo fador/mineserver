@@ -26,7 +26,7 @@
  */
 
 #include "falling.h"
-
+#include <stdio.h>
 void BlockFalling::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
@@ -55,16 +55,6 @@ void BlockFalling::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
 {
    uint8 oldblock;
    uint8 oldmeta;
-   uint8 topblock;
-   uint8 topmeta;
-   
-   /* TODO: Get Users by chunk rather then whole list */
-   for(unsigned int i = 0; i < Users.size(); i++)
-   {
-      /* don't allow block placement on top of player */
-      if (Users[i]->checkOnBlock(x,y+1,z))
-         return;
-   }
 
    if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
    {
@@ -77,14 +67,76 @@ void BlockFalling::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
          case BLOCK_CHEST:
          case BLOCK_JUKEBOX:
          case BLOCK_TORCH:
+         case BLOCK_REDSTONE_TORCH_OFF:
+         case BLOCK_REDSTONE_TORCH_ON:
+         case BLOCK_WATER:
+         case BLOCK_STATIONARY_WATER:
+         case BLOCK_LAVA:
+         case BLOCK_STATIONARY_LAVA:
           return;
          break;
          default:
-            if (Map::get()->getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
+            switch(direction)
             {
-               Map::get()->setBlock(x, y+1, z, (char)newblock, 0);
-               Map::get()->sendBlockChange(x, y+1, z, (char)newblock, 0);
-               physics(x,y+1,z);
+               case BLOCK_SOUTH:
+                  x--;
+               break;
+               case BLOCK_NORTH:
+                  x++;
+               break;
+               case BLOCK_EAST:
+                  z++;
+               break;
+               case BLOCK_WEST:
+                  z--;
+               break;
+               case BLOCK_TOP:
+                  y++;
+               break;
+               case BLOCK_BOTTOM:
+                  y--;
+               break;
+               default:
+                  return;
+               break;
+            }
+            
+            /* TODO: Get Users by chunk rather then whole list */
+            for(unsigned int i = 0; i < Users.size(); i++)
+            {
+               /* don't allow block placement on top of player */
+               if (Users[i]->checkOnBlock(x,y,z))
+                  return;
+            }
+            
+            signed short diffX, diffZ;
+            diffX = x - user->pos.x;
+            diffZ = z - user->pos.z;
+
+            if (diffX > diffZ)
+            {
+              // We compare on the x axis
+              if (diffX > 0) {
+                direction = BLOCK_BOTTOM;
+              } else {
+                direction = BLOCK_EAST;
+              }
+            } else {
+              // We compare on the z axis
+              if (diffZ > 0) {
+                direction = BLOCK_SOUTH;
+              } else {
+                direction = BLOCK_NORTH;
+              }
+            }
+
+            uint8 block;
+            uint8 meta;
+            if (Map::get()->getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
+            {
+               Map::get()->setBlock(x, y, z, (char)newblock, direction);
+               Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
+               physics(x,y,z);
             }
          break;
       }
@@ -101,18 +153,36 @@ void BlockFalling::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint
 
 void BlockFalling::physics(sint32 x, sint8 y, sint32 z)
 {
-   uint8 block;
-   uint8 meta;
-   while(Map::get()->getBlock(x, y-1, z, &block, &meta) && (block == BLOCK_AIR))
+   uint8 fallblock, block;
+   uint8 fallmeta, meta;
+   
+   if (!Map::get()->getBlock(x, y, z, &fallblock, &fallmeta))
+      return;
+   
+   while(Map::get()->getBlock(x, y-1, z, &block, &meta))
    {
+     switch(block)
+     {
+       case BLOCK_AIR:
+       case BLOCK_WATER:
+       case BLOCK_STATIONARY_WATER:
+       case BLOCK_LAVA:
+       case BLOCK_STATIONARY_LAVA:
+       break;
+       default:
+         /* stop falling */
+         return;
+       break;
+     }
+
      // Destroy original block
      Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-     Map::get()->setBlock(x, y--, z, BLOCK_AIR, 0);
-
-     Map::get()->setBlock(x, y, z, block, meta);
-     Map::get()->sendBlockChange(x, y, z, block, meta);
+     Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
 
      y--;
+
+     Map::get()->setBlock(x, y, z, fallblock, fallmeta);
+     Map::get()->sendBlockChange(x, y, z, fallblock, fallmeta);
    }
 }
 
