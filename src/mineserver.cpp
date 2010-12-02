@@ -238,7 +238,7 @@ int Mineserver::Run(int argc, char *argv[])
   std::endl<<
   "        \\/        \\/     \\/     \\/     \\/                 \\/       "<<
   std::endl<<
-  "Version " << VERSION <<" by Fador & Nredor"<<
+  "Version " << VERSION <<" by The Mineserver Project"<<
   std::endl << std::endl;
 
   if(ip == "0.0.0.0")

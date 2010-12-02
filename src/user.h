@@ -107,6 +107,8 @@ public:
   bool checkWhitelist(std::string _nick);
   bool changeNick(std::string _nick);
   bool updatePos(double x, double y, double z, double stance);
+  /** Check if the user is standing on this block */
+  bool checkOnBlock(sint32 x, sint8 y, sint32 z);
   bool updateLook(float yaw, float pitch);
 
   bool sendOthers(uint8 *data, uint32 len);
