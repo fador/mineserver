@@ -50,7 +50,9 @@ public:
   bool loadBanned(std::string bannedFile);
   bool loadWhitelist(std::string whitelistFile);
   bool checkMotd(std::string motdFile);
-  void registerCommand(std::deque<std::string> words, ChatCommand command, bool adminOnly);
+  void registerCommand(std::deque<std::string> words, std::string argumentString, std::string description, ChatCommand command, bool adminOnly);
+  void sendUserHelp(User* user, std::deque<std::string> args);
+  void sendAdminHelp(User* user, std::deque<std::string> args);
   static Chat* get()
   {
     if(!mChat) {
@@ -61,9 +63,16 @@ public:
   void free();
 private:
   static Chat *mChat;
+
   typedef std::map<std::string, ChatCommand> CommandList;
+  typedef std::pair<std::string, std::string> CommandArgsAndDescription;
+  typedef std::map<std::string, CommandArgsAndDescription> CommandDescriptionList;
+
   CommandList userCommands;
   CommandList adminCommands;
+  CommandDescriptionList userCommandDescriptions;
+  CommandDescriptionList adminCommandDescriptions;
+
   Chat();
   void registerStandardCommands();
   std::deque<std::string> parseCmd(std::string cmd);

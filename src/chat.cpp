@@ -67,7 +67,7 @@ Chat::Chat()
   registerStandardCommands();
 }
 
-void Chat::registerCommand(std::deque<std::string> words, ChatCommand command, bool adminOnly)
+void Chat::registerCommand(std::deque<std::string> words, std::string argumentString, std::string description, ChatCommand command, bool adminOnly)
 {
   // Loop thru all the words for this command
   std::string currentWord;
@@ -75,11 +75,14 @@ void Chat::registerCommand(std::deque<std::string> words, ChatCommand command, b
   {
     currentWord = words[0];
     words.pop_front();
-  
-    if(adminOnly)
+
+    if(adminOnly) {
       adminCommands[currentWord] = command;
-    else
+      adminCommandDescriptions[currentWord] = std::pair<std::string,std::string>(argumentString, description);
+    } else {
       userCommands[currentWord] = command;
+      userCommandDescriptions[currentWord] = std::pair<std::string,std::string>(argumentString, description);
+    }
   }
 }
 
@@ -218,7 +221,7 @@ bool Chat::sendUserlist(User *user)
 		playerDesc += COLOR_YELLOW + " (muted)";
 	if(Users[i]->dnd)
 		playerDesc += COLOR_YELLOW + " (dnd)";
-	
+
     this->sendMsg(user, playerDesc, USER);
   }
 
@@ -306,16 +309,16 @@ bool Chat::handleMsg(User *user, std::string msg)
 			return true;
 		}
     else {
-      if(user->admin) 
+      if(user->admin)
         msg = timeStamp + " <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg;
-      else 
+      else
         msg = timeStamp + " <"+ user->nick + "> " + msg;
     }
-      
+
     LOG(msg);
 
     this->sendMsg(user, msg, ALL);
-    
+
   }
 
   return true;
@@ -355,4 +358,50 @@ bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
   delete[] tmpArray;
 
   return true;
+}
+
+void Chat::sendUserHelp(User* user, std::deque<std::string> args)
+{
+  if(args.size() == 0) {
+    for(CommandDescriptionList::iterator it = userCommandDescriptions.begin();
+        it != userCommandDescriptions.end();
+        it++) {
+      std::string args = it->second.first;
+      std::string description = it->second.second;
+      sendMsg(user, COLOR_BLUE + CHATCMDPREFIX + it->first + " " + args + " : " + COLOR_YELLOW + description, Chat::USER);
+    }
+  } else {
+    CommandDescriptionList::iterator iter;
+    if((iter = userCommandDescriptions.find(args.front())) != userCommandDescriptions.end()) {
+      std::string args = iter->second.first;
+      std::string description = iter->second.second;
+      sendMsg(user, COLOR_BLUE + CHATCMDPREFIX + iter->first + args, Chat::USER);
+      sendMsg(user, COLOR_YELLOW + CHATCMDPREFIX + description, Chat::USER);
+    } else {
+      sendMsg(user, COLOR_RED + "Unknown Command: " + args.front(), Chat::USER);
+    }
+  }
+}
+
+void Chat::sendAdminHelp(User* user, std::deque<std::string> args)
+{
+  if(args.size() == 0) {
+    for(CommandDescriptionList::iterator it = adminCommandDescriptions.begin();
+        it != adminCommandDescriptions.end();
+        it++) {
+      std::string args = it->second.first;
+      std::string description = it->second.second;
+      sendMsg(user, COLOR_RED + CHATCMDPREFIX + it->first + " " + args + " : " + COLOR_YELLOW + description, Chat::USER);
+    }
+  } else {
+    CommandDescriptionList::iterator iter;
+    if((iter = adminCommandDescriptions.find(args.front())) != adminCommandDescriptions.end()) {
+      std::string args = iter->second.first;
+      std::string description = iter->second.second;
+      sendMsg(user, COLOR_RED + CHATCMDPREFIX + iter->first + args, Chat::USER);
+      sendMsg(user, COLOR_YELLOW + CHATCMDPREFIX + description, Chat::USER);
+    } else {
+      sendMsg(user, COLOR_RED + "Unknown Command: " + args.front(), Chat::USER);
+    }
+  }
 }

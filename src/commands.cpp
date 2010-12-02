@@ -256,14 +256,14 @@ void mute(User *user, std::string command, std::deque<std::string> args)
         muteMsg += args[0] + " ";
         args.pop_front();
       }
-      
+
 			// Tell the user they're muted
       tUser->mute(muteMsg);
-			
+
 			// Tell the admins what happened
 			std::string adminMsg = COLOR_RED + tUser->nick + " was muted by " + user->nick + ". ";
 			if(!muteMsg.empty())
-				adminMsg += " Reason: " + muteMsg;				
+				adminMsg += " Reason: " + muteMsg;
       Chat::get()->sendMsg(user, adminMsg, Chat::ADMINS);
     }
     else
@@ -281,7 +281,7 @@ void unmute(User *user, std::string command, std::deque<std::string> args)
     User *tUser        = getUserByNick(victim);
 
     if(tUser != NULL)
-    {      
+    {
       tUser->unmute();
       Chat::get()->sendMsg(user, COLOR_RED + tUser->nick + " was unmuted by " + user->nick + ".", Chat::ADMINS);
     }
@@ -295,7 +295,7 @@ void showMOTD(User *user, std::string command, std::deque<std::string> args)
 {
   // Open MOTD file
   std::ifstream motdfs(Conf::get()->sValue("motd_file").c_str());
-  
+
   // Load MOTD into string and send to user if not a comment
   std::string msgLine;
   while(getline( motdfs, msgLine ))
@@ -306,23 +306,23 @@ void showMOTD(User *user, std::string command, std::deque<std::string> args)
       Chat::get()->sendMsg(user, msgLine, Chat::USER);
     }
   }
-  
+
   // Close motd file
   motdfs.close();
-  
+
 }
 void emote(User *user, std::string command, std::deque<std::string> args)
 {
 	if(user->isAbleToCommunicate(command) == false)
 		return;
-		
+
   std::string emoteMsg;
   while(!args.empty())
   {
     emoteMsg += args[0] + " ";
     args.pop_front();
   }
-  
+
   if(emoteMsg.empty())
     reportError(user, "Usage: /" + command + " message");
   else
@@ -332,7 +332,7 @@ void whisper(User *user, std::string command, std::deque<std::string> args)
 {
 	if(user->isAbleToCommunicate(command) == false)
 		return;
-		
+
   if(!args.empty())
   {
     std::string targetNick = args[0];
@@ -346,7 +346,7 @@ void whisper(User *user, std::string command, std::deque<std::string> args)
       Chat::get()->sendMsg(user, COLOR_YELLOW + "Message not sent.", Chat::USER);
       return;
     }
-    
+
     if(tUser != NULL)
     {
       args.pop_front();
@@ -356,7 +356,7 @@ void whisper(User *user, std::string command, std::deque<std::string> args)
         whisperMsg += args[0] + " ";
         args.pop_front();
       }
-      
+
       Chat::get()->sendMsg(tUser, COLOR_YELLOW + user->nick + " whispers: " + COLOR_GREEN + whisperMsg, Chat::USER);
       Chat::get()->sendMsg(user, COLOR_YELLOW + "You whisper to " + tUser->nick + ": " + COLOR_GREEN + whisperMsg, Chat::USER);
     }
@@ -370,12 +370,24 @@ void doNotDisturb(User *user, std::string command, std::deque<std::string> args)
 {
 	user->toggleDND();
 }
+
+void userHelp(User *user, std::string command, std::deque<std::string> args)
+{
+  Chat::get()->sendUserHelp(user, args);
+}
+
+void adminHelp(User *user, std::string command, std::deque<std::string> args)
+{
+  Chat::get()->sendAdminHelp(user, args);
+}
+
+
 void setTime(User *user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 1)
   {
     std::string timeValue = args[0];
-    
+
     // Check for time labels
     if(timeValue == "day" || timeValue == "morning")
       timeValue = "24000";
@@ -387,14 +399,14 @@ void setTime(User *user, std::string command, std::deque<std::string> args)
       timeValue = "12000";
     else if (timeValue == "night" || timeValue == "midnight")
       timeValue = "18000";
-      
+
     Map::get()->mapTime = (sint64)atoi(timeValue.c_str());
     Packet pkt;
     pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
     if(Users.size())
       Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
     Chat::get()->handleMsg(user, "% World time changed.");
-  } 
+  }
   else
     reportError(user, "Usage: /settime time (time = 0-24000)");
 }
@@ -454,12 +466,12 @@ std::string getHeadingString(User *user)
 {
   // Compass heading labels
   std::string headingLabels[8] = { "North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest" };
-  
+
   // Get the user's heading and normalize
   int headingAngle = int(user->pos.yaw) % 360;
   if(headingAngle < 0)
     headingAngle = 360 + headingAngle;
-      
+
   // Work out the text heading based on 8 points of the compass
   std::string headingText = "Unknown";
   if((headingAngle > 337.5 && headingAngle <= 360) || (headingAngle >= 0 && headingAngle <= 22.5))   // Special case for North as it spans 360 to 0
@@ -477,9 +489,9 @@ void showPosition(User *user, std::string command, std::deque<std::string> args)
     User *tUser = getUserByNick(args[0]);
     if(tUser != NULL)
       Chat::get()->sendMsg(user, COLOR_BLUE + args[0] + " is at: " + dtos(tUser->pos.x)
-                                                                     + " " 
+                                                                     + " "
                                                                      + dtos(tUser->pos.y)
-                                                                     + " " 
+                                                                     + " "
                                                                      + dtos(tUser->pos.z)
                                                                      + " Heading: " + getHeadingString(tUser)
                                                                      , Chat::USER);
@@ -487,10 +499,10 @@ void showPosition(User *user, std::string command, std::deque<std::string> args)
       reportError(user, "User " + args[0] + " not found (see /players)");
   }
   else if(args.size() == 0)
-    Chat::get()->sendMsg(user, COLOR_BLUE + "You are at: " + dtos(user->pos.x) 
-                                                             + " " 
-                                                             + dtos(user->pos.y) 
-                                                             + " " 
+    Chat::get()->sendMsg(user, COLOR_BLUE + "You are at: " + dtos(user->pos.x)
+                                                             + " "
+                                                             + dtos(user->pos.y)
+                                                             + " "
                                                              + dtos(user->pos.z)
                                                              + " Heading: " + getHeadingString(user)
                                                              , Chat::USER);
@@ -544,10 +556,10 @@ bool isValidItem(int id)
   return true;
 }
 
-int roundUpTo(int x, int nearest) 
-{ 
+int roundUpTo(int x, int nearest)
+{
   return (((x + (nearest - 1)) / nearest) * nearest );
-} 
+}
 
 void giveItems(User *user, std::string command, std::deque<std::string> args)
 {
@@ -569,15 +581,15 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
       if(tUser)
       {
         int itemCount = 1, itemStacks = 1;
-        
+
         if(args.size() == 3)
         {
           itemCount = atoi(args[2].c_str());
           // If multiple stacks
-          itemStacks = roundUpTo(itemCount, 64) / 64; 
-          itemCount  -= (itemStacks-1) * 64; 
+          itemStacks = roundUpTo(itemCount, 64) / 64;
+          itemCount  -= (itemStacks-1) * 64;
         }
-    
+
         int amount = 64;
         for(int i = 0; i < itemStacks; i++)
         {
@@ -613,7 +625,7 @@ void setHealth(User *user, std::string command, std::deque<std::string> args)
   if(args.size() == 2)
   {
     User *tUser = getUserByNick(args[0]);
-    
+
     if(tUser)
       tUser->sethealth(atoi(args[1].c_str()));
     else
@@ -626,29 +638,31 @@ void setHealth(User *user, std::string command, std::deque<std::string> args)
 void Chat::registerStandardCommands()
 {
   // Players
-  registerCommand(parseCmd("about"), about, false);
-  registerCommand(parseCmd("home"), home, false);
-  registerCommand(parseCmd("kit"), kit, false);
-  registerCommand(parseCmd("motd"), showMOTD, false);
-  registerCommand(parseCmd("players who"), playerList, false);
-  registerCommand(parseCmd("rules"), rules, false);
-  registerCommand(parseCmd("e em emote me"), emote, false);
-  registerCommand(parseCmd("whisper w tell t"), whisper, false);
-	registerCommand(parseCmd("dnd"), doNotDisturb, false);
-	
+  registerCommand(parseCmd("about"), "", "Display server name & version", about, false);
+  registerCommand(parseCmd("home"), "", "Teleport to map spawn location", home, false);
+  registerCommand(parseCmd("kit"), "<name>", "Gives kit", kit, false);
+  registerCommand(parseCmd("motd"), "", "Display Message Of The Day", showMOTD, false);
+  registerCommand(parseCmd("players who"), "", "Lists online players", playerList, false);
+  registerCommand(parseCmd("rules"), "", "Display server rules", rules, false);
+  registerCommand(parseCmd("e em emote me"), "", "Emote", emote, false);
+  registerCommand(parseCmd("whisper w tell t"), "<player> <message>", "Send a private message", whisper, false);
+  registerCommand(parseCmd("dnd"), "", "Do Not Disturb - toggles receiving chat messages", doNotDisturb, false);
+  registerCommand(parseCmd("help"), "[<commandName>]", "Display this help message.", userHelp, false);
+
   // Admins Only
-  registerCommand(parseCmd("ban"), ban, true);
-  registerCommand(parseCmd("ctp"), coordinateTeleport, true);
-  registerCommand(parseCmd("give"), giveItems, true);
-  registerCommand(parseCmd("gps"), showPosition, true);
-  registerCommand(parseCmd("kick"), kick, true);
-  registerCommand(parseCmd("mute"), mute, true);
-  registerCommand(parseCmd("regen"), regenerateLighting, true);
-  registerCommand(parseCmd("reload"), reloadConfiguration, true);
-  registerCommand(parseCmd("save"), saveMap, true);  
-  registerCommand(parseCmd("sethealth"), setHealth, true);
-  registerCommand(parseCmd("settime"), setTime, true);
-  registerCommand(parseCmd("tp"), userTeleport, true);
-  registerCommand(parseCmd("unban"), unban, true);
-  registerCommand(parseCmd("unmute"), unmute, true);
+  registerCommand(parseCmd("ban"), "<player>", "Bans (and kicks if online) <player> from server", ban, true);
+  registerCommand(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport, true);
+  registerCommand(parseCmd("give"), "<player> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems, true);
+  registerCommand(parseCmd("gps"), "[<player>]", "Show own coordinates or show <player>'s coordinates", showPosition, true);
+  registerCommand(parseCmd("kick"), "<player>", "Kicks a player with optional kick message", kick, true);
+  registerCommand(parseCmd("mute"), "<player>", "Mutes a player with optional message", mute, true);
+  registerCommand(parseCmd("regen"), "", "Regenerates lightning", regenerateLighting, true);
+  registerCommand(parseCmd("reload"), "", "Reload admins and configuration", reloadConfiguration, true);
+  registerCommand(parseCmd("save"), "", "Manually save map to disc", saveMap, true);
+  registerCommand(parseCmd("sethealth"), "<player>", "Set a player's health. <health> = 0-20", setHealth, true);
+  registerCommand(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime, true);
+  registerCommand(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport, true);
+  registerCommand(parseCmd("unban"), "<player>", "Lift a ban of a player", unban, true);
+  registerCommand(parseCmd("unmute"), "<player>", "Unmutes a given player", unmute, true);
+  registerCommand(parseCmd("adminhelp"), "[<commandName>]", "Displays help messages for admin commands.", adminHelp, true);
 }
