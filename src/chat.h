@@ -38,7 +38,26 @@ public:
     OTHERS,
     ADMINS
   };
-  typedef void (*ChatCommand)(User *, std::string, std::deque<std::string> );
+  typedef void (*CommandCallback)(User *, std::string, std::deque<std::string> );
+
+  struct Command
+  {
+    std::deque<std::string> names;
+    std::string arguments;
+    std::string description;
+    CommandCallback callback;
+    bool adminOnly;
+
+    Command(std::deque<std::string> names, std::string arguments, std::string description, CommandCallback callback, bool adminOnly)
+    : names(names),
+      arguments(arguments),
+      description(description),
+      callback(callback),
+      adminOnly(adminOnly)
+    {
+    }
+  };
+
   //Chat();
   std::deque<std::string> admins;
   std::deque<std::string> banned;
@@ -50,7 +69,9 @@ public:
   bool loadBanned(std::string bannedFile);
   bool loadWhitelist(std::string whitelistFile);
   bool checkMotd(std::string motdFile);
-  void registerCommand(std::deque<std::string> words, ChatCommand command, bool adminOnly);
+  void registerCommand(Command *command);
+  void sendUserHelp(User *user, std::deque<std::string> args);
+  void sendAdminHelp(User *user, std::deque<std::string> args);
   static Chat* get()
   {
     if(!mChat) {
@@ -61,12 +82,16 @@ public:
   void free();
 private:
   static Chat *mChat;
-  typedef std::map<std::string, ChatCommand> CommandList;
+
+  typedef std::map<std::string, Command*> CommandList;
+
   CommandList userCommands;
   CommandList adminCommands;
+
   Chat();
   void registerStandardCommands();
   std::deque<std::string> parseCmd(std::string cmd);
+  void sendHelp(User *user, std::deque<std::string> args, bool adminOnly);
 };
 
 #endif
