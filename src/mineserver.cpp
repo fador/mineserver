@@ -156,7 +156,9 @@ int Mineserver::Run(int argc, char *argv[])
     for (int x=0;x<12;x++)
       for (int z=0;z<12;z++)
         Map::get()->loadMap(x-6, z-6);
+#ifdef _DEBUG
     std::cout << "Spawn area ready!\n";
+#endif
   }
 
   // Initialize packethandler
@@ -225,7 +227,7 @@ int Mineserver::Run(int argc, char *argv[])
   event_set(&m_listenEvent, m_socketlisten, EV_WRITE|EV_READ|EV_PERSIST, accept_callback, NULL);
   event_add(&m_listenEvent, NULL);
 
-  std::cout << std::endl<<
+  std::cout <<
   "   _____  .__  "<<
   std::endl<<
   "  /     \\ |__| ____   ____   ______ ______________  __ ___________ "<<
@@ -243,17 +245,16 @@ int Mineserver::Run(int argc, char *argv[])
 
   if(ip == "0.0.0.0")
   {
-    std::cout << "Listening on port " << port << std::endl;
     // Print all local IPs
     char name[255];
     gethostname ( name, sizeof(name));
     struct hostent *hostinfo = gethostbyname(name);
-    std::cout << "Server IP(s): ";
+    std::cout << "Listening on: ";
     int ipIndex = 0;
     while(hostinfo->h_addr_list[ipIndex]) {
         if(ipIndex > 0) { std::cout << ", "; }
         char *ip = inet_ntoa(*(struct in_addr *)hostinfo->h_addr_list[ipIndex++]);
-        std::cout << ip;
+        std::cout << ip << ":" << port;
     }
     std::cout << std::endl;
   }
@@ -261,6 +262,7 @@ int Mineserver::Run(int argc, char *argv[])
   {
     std::cout << "Listening on " << ip << ":" << port << std::endl;
   }
+  std::cout << std::endl;
 
   timeval loopTime;
   loopTime.tv_sec  = 0;
@@ -335,6 +337,10 @@ int Mineserver::Run(int argc, char *argv[])
     //Physics simulation every 200ms
     Physics::get()->update();
 
+    //Underwater check / drowning
+    for( unsigned int i = 0; i < Users.size(); i++ )
+      Users[i]->isUnderwater();
+
     event_base_loopexit(m_eventBase, &loopTime);
   }
 
@@ -345,7 +351,11 @@ int Mineserver::Run(int argc, char *argv[])
 #endif
   
   // Remove the PID file
+#ifdef WIN32
+  _unlink((Conf::get()->sValue("pid_file")).c_str());
+#else
   unlink((Conf::get()->sValue("pid_file")).c_str());
+#endif
 
   /* Free memory */
   PacketHandler::get()->free();

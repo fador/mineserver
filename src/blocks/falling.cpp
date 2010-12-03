@@ -26,6 +26,7 @@
  */
 
 #include "falling.h"
+#include "../plugin.h"
 
 void BlockFalling::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
@@ -48,7 +49,17 @@ void BlockFalling::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 
 
 void BlockFalling::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-   physics(x,y,z);
+   uint8 block;
+   uint8 meta;
+   if (Map::get()->getBlock(x, y, z, &block, &meta))
+   {
+      physics(x,y,z);
+      if (Map::get()->getBlock(x, y+1, z, &block, &meta))
+      {
+         Function::invoker_type inv(user, block, x, y+1, z, BLOCK_TOP);
+         Plugin::get()->runBlockCallback(block, "onNeighbourMove", inv);
+      }
+   }
 }
 
 void BlockFalling::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
@@ -149,6 +160,21 @@ void BlockFalling::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 
 
 void BlockFalling::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
+}
+
+void BlockFalling::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+   uint8 block;
+   uint8 meta;
+   if (Map::get()->getBlock(x, y, z, &block, &meta))
+   {
+      physics(x,y,z);
+      if (Map::get()->getBlock(x, y+1, z, &block, &meta))
+      {
+         Function::invoker_type inv(user, block, x, y+1, z, BLOCK_TOP);
+         Plugin::get()->runBlockCallback(block, "onNeighbourMove", inv);
+      }
+   }
 }
 
 void BlockFalling::physics(sint32 x, sint8 y, sint32 z)

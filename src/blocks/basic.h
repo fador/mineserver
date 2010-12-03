@@ -51,6 +51,7 @@ public:
       @param direction The direction that the user is facing
     */
    void onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+
    /** Fired when the player is digging
       @param user The user who is digging
       @param status
@@ -60,6 +61,7 @@ public:
       @param direction The direction that the user is facing
     */
    void onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+
    /** Fired when the player stops digging but hasn't broken the block
       @param user The user who has stopped digging
       @param status
@@ -69,6 +71,7 @@ public:
       @param direction The direction that the user is facing
     */
    void onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+
    /** Fired when the player has broken the block
       @param user The user who has broken the block
       @param status
@@ -78,24 +81,27 @@ public:
       @param direction The direction that the user is facing
     */
    void onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+
    /** Fired when a neighbour block is broken.
       @param user The user who broke the block
       @param oldblock The type of block that was just broken
       @param x The x position of the current neighbour block being called
       @param y The y position of the current neighbour block being called
       @param z The z position of the current neighbour block being called
-      @param direction The direction that the user is facing
+      @param direction The direction of the neighbour block that was broken
     */
    void onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+
    /** Fired when a block is placed
       @param user The user who placed the block
       @param newblock The block that is attempting to be placed
       @param x The x position of where the block was placed
       @param y The y position of where the block was placed
       @param z The z position of where the block was placed
-      @param direction The direction of the neighbour block that was broken
+      @param direction The direction that the user is facing
     */
    void onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+
    /** Fired when a neighbour block is placed
       @param user The user who placed the block
       @param newblock The block that is attempting to be placed
@@ -109,6 +115,7 @@ public:
       of a block with the block you're replacing it with.
     */
    void onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+
    /** Fired when a block is to be placed
       @param user The user who placed the block
       @param newblock The block that is attempting to replaced this block
@@ -122,5 +129,15 @@ public:
       in the onPlace callback.
     */
    void onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+
+   /** Fired when a neighbour block is moving position.
+      @param user The user who broke the block
+      @param oldblock The type of block that has moved
+      @param x The x position of the current neighbour block being called
+      @param y The y position of the current neighbour block being called
+      @param z The z position of the current neighbour block being called
+      @param direction The direction that the block was in
+    */
+   void onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
 };
 
