@@ -104,7 +104,7 @@ void BlockTorch::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
    uint8 oldblock;
    uint8 oldmeta;
 
-   if (Map::get()->getBlock(x, y-1, z, &oldblock, &oldmeta))
+   if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
    {
       /* Check block below allows blocks placed on top */
       switch(oldblock)
