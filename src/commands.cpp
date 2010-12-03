@@ -637,32 +637,32 @@ void setHealth(User *user, std::string command, std::deque<std::string> args)
 
 void Chat::registerStandardCommands()
 {
-  // Players
-  registerCommand(parseCmd("about"), "", "Display server name & version", about, false);
-  registerCommand(parseCmd("home"), "", "Teleport to map spawn location", home, false);
-  registerCommand(parseCmd("kit"), "<name>", "Gives kit", kit, false);
-  registerCommand(parseCmd("motd"), "", "Display Message Of The Day", showMOTD, false);
-  registerCommand(parseCmd("players who"), "", "Lists online players", playerList, false);
-  registerCommand(parseCmd("rules"), "", "Display server rules", rules, false);
-  registerCommand(parseCmd("e em emote me"), "", "Emote", emote, false);
-  registerCommand(parseCmd("whisper w tell t"), "<player> <message>", "Send a private message", whisper, false);
-  registerCommand(parseCmd("dnd"), "", "Do Not Disturb - toggles receiving chat messages", doNotDisturb, false);
-  registerCommand(parseCmd("help"), "[<commandName>]", "Display this help message.", userHelp, false);
+  // // Players
+  registerCommand(new Command(parseCmd("about"), "", "Display server name & version", about, false));
+  registerCommand(new Command(parseCmd("home"), "", "Teleport to map spawn location", home, false));
+  registerCommand(new Command(parseCmd("kit"), "<name>", "Gives kit", kit, false));
+  registerCommand(new Command(parseCmd("motd"), "", "Display Message Of The Day", showMOTD, false));
+  registerCommand(new Command(parseCmd("players who"), "", "Lists online players", playerList, false));
+  registerCommand(new Command(parseCmd("rules"), "", "Display server rules", rules, false));
+  registerCommand(new Command(parseCmd("e em emote me"), "", "Emote", emote, false));
+  registerCommand(new Command(parseCmd("whisper w tell t"), "<player> <message>", "Send a private message", whisper, false));
+  registerCommand(new Command(parseCmd("dnd"), "", "Do Not Disturb - toggles receiving chat messages", doNotDisturb, false));
+  registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", userHelp, false));
 
   // Admins Only
-  registerCommand(parseCmd("ban"), "<player>", "Bans (and kicks if online) <player> from server", ban, true);
-  registerCommand(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport, true);
-  registerCommand(parseCmd("give"), "<player> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems, true);
-  registerCommand(parseCmd("gps"), "[<player>]", "Show own coordinates or show <player>'s coordinates", showPosition, true);
-  registerCommand(parseCmd("kick"), "<player>", "Kicks a player with optional kick message", kick, true);
-  registerCommand(parseCmd("mute"), "<player>", "Mutes a player with optional message", mute, true);
-  registerCommand(parseCmd("regen"), "", "Regenerates lightning", regenerateLighting, true);
-  registerCommand(parseCmd("reload"), "", "Reload admins and configuration", reloadConfiguration, true);
-  registerCommand(parseCmd("save"), "", "Manually save map to disc", saveMap, true);
-  registerCommand(parseCmd("sethealth"), "<player>", "Set a player's health. <health> = 0-20", setHealth, true);
-  registerCommand(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime, true);
-  registerCommand(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport, true);
-  registerCommand(parseCmd("unban"), "<player>", "Lift a ban of a player", unban, true);
-  registerCommand(parseCmd("unmute"), "<player>", "Unmutes a given player", unmute, true);
-  registerCommand(parseCmd("adminhelp"), "[<commandName>]", "Displays help messages for admin commands.", adminHelp, true);
+  registerCommand(new Command(parseCmd("ban"), "<player>", "Bans (and kicks if online) <player> from server", ban, true));
+  registerCommand(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport, true));
+  registerCommand(new Command(parseCmd("give"), "<player> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems, true));
+  registerCommand(new Command(parseCmd("gps"), "[<player>]", "Show own coordinates or show <player>'s coordinates", showPosition, true));
+  registerCommand(new Command(parseCmd("kick"), "<player>", "Kicks a player with optional kick message", kick, true));
+  registerCommand(new Command(parseCmd("mute"), "<player>", "Mutes a player with optional message", mute, true));
+  registerCommand(new Command(parseCmd("regen"), "", "Regenerates lightning", regenerateLighting, true));
+  registerCommand(new Command(parseCmd("reload"), "", "Reload admins and configuration", reloadConfiguration, true));
+  registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap, true));
+  registerCommand(new Command(parseCmd("sethealth"), "<player>", "Set a player's health. <health> = 0-20", setHealth, true));
+  registerCommand(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime, true));
+  registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport, true));
+  registerCommand(new Command(parseCmd("unban"), "<player>", "Lift a ban of a player", unban, true));
+  registerCommand(new Command(parseCmd("unmute"), "<player>", "Unmutes a given player", unmute, true));
+  registerCommand(new Command(parseCmd("adminhelp"), "[<commandName>]", "Displays help messages for admin commands.", adminHelp, true));
 }
