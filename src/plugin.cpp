@@ -26,6 +26,7 @@
  */
 
 #include "plugin.h"
+#include "logger.h"
 #include "blocks/basic.h"
 #include "blocks/falling.h"
 #include "blocks/torch.h"
@@ -107,6 +108,7 @@ void Plugin::init()
    setBlockCallback(BLOCK_DIAMOND_ORE, call);
    setBlockCallback(BLOCK_GLOWING_REDSTONE_ORE, call);
    setBlockCallback(BLOCK_REDSTONE_ORE, call);
+   setBlockCallback(BLOCK_GLASS, call);
 
    /* Falling blocks (sand, etc) */
    call.reset();
@@ -188,6 +190,8 @@ void Plugin::init()
    /* TNT */
    call.reset();
    call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
+   call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
+   /* TODO: Currently works like glass. Explosion is not implemented yet. */
    setBlockCallback(BLOCK_TNT, call);
    
    /* Containers */
@@ -235,34 +239,41 @@ void Plugin::init()
 
 void Plugin::setBlockCallback(const int type, Callback call)
 {
-   removeBlockCallback(type);
+   if (getBlockCallback(type))
+   {
+      LOG("Block type set more then once.");
+      removeBlockCallback(type);
+   }
    blockevents.insert(std::pair<int, Callback>(type, call));
 }
 
-Callback Plugin::getBlockCallback(const int type)
+Callback* Plugin::getBlockCallback(const int type)
 {
-   for (Callbacks::iterator iter = blockevents.begin(); iter != blockevents.end(); iter++)
-   {
-      if ((*iter).first == type)
-      {
-         return (*iter).second;
-      }
-   }
+   Callbacks::iterator iter = blockevents.find(type);
 
-   Callback call;
-   return call;
+   if (iter == blockevents.end())
+      return NULL;
+
+   return &(*iter).second;
+}
+
+bool Plugin::runBlockCallback(const int type, const std::string name, const Function::invoker_type function)
+{
+   Callbacks::iterator iter = blockevents.find(type);
+
+   if (iter == blockevents.end())
+      return false;
+
+   return (*iter).second.run(name, function);
 }
 
 bool Plugin::removeBlockCallback(const int type)
 {
-   for (Callbacks::iterator iter = blockevents.begin(); iter != blockevents.end(); ++iter)
-   {
-      if (iter->first == type)
-      {
-           delete &iter->first;
-           blockevents.erase(iter);
-           return true;
-      }
-   }
-   return false;
+   Callbacks::iterator iter = blockevents.find(type);
+
+   if (iter == blockevents.end())
+      return false;
+
+   blockevents.erase(iter);
+   return true;
 }

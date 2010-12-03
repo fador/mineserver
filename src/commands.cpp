@@ -659,7 +659,7 @@ void Chat::registerStandardCommands()
   registerCommand(new Command(parseCmd("regen"), "", "Regenerates lightning", regenerateLighting, true));
   registerCommand(new Command(parseCmd("reload"), "", "Reload admins and configuration", reloadConfiguration, true));
   registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap, true));
-  registerCommand(new Command(parseCmd("sethealth"), "<player>", "Set a player's health. <health> = 0-20", setHealth, true));
+  registerCommand(new Command(parseCmd("sethealth"), "<player> <health>", "Set a player's health. <health> = 0-20", setHealth, true));
   registerCommand(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime, true));
   registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport, true));
   registerCommand(new Command(parseCmd("unban"), "<player>", "Lift a ban of a player", unban, true));
