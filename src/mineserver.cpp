@@ -335,6 +335,10 @@ int Mineserver::Run(int argc, char *argv[])
     //Physics simulation every 200ms
     Physics::get()->update();
 
+    //Underwater check / drowning
+    for( unsigned int i = 0; i < Users.size(); i++ )
+      Users[i]->isUnderwater();
+
     event_base_loopexit(m_eventBase, &loopTime);
   }
 
