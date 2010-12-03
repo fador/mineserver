@@ -5,3 +5,4 @@ Thumbs.db
 # Default test map
 src/testmap
 
+bin/.gitignore
