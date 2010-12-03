@@ -54,7 +54,9 @@ void Conf::free()
 // Load/reload configuration
 bool Conf::load(std::string configFile)
 {
+  #ifdef _DEBUG
   std::cout << "Loading data from " << configFile << std::endl;
+  #endif
   std::ifstream ifs(configFile.c_str());
 
   // If configfile does not exist
@@ -157,7 +159,9 @@ bool Conf::load(std::string configFile)
 
     if (line[0] == "include")
     {
+      #ifdef _DEBUG
       std::cout << "Including config file " << text << std::endl;
+      #endif
       load(text);
       continue;
     }
@@ -175,8 +179,9 @@ bool Conf::load(std::string configFile)
     lineNum++;
   }
   ifs.close();
-
+  #ifdef _DEBUG
   std::cout << "Loaded " << lineNum << " lines from " << configFile << std::endl;
+  #endif
 
   return true;
 }

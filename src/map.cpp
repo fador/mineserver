@@ -130,9 +130,10 @@ void Map::init()
   MapGen::get()->init(mapSeed);
 
   delete root;
-
+#ifdef _DEBUG
   std::cout << "Spawn: (" << spawnPos.x() << "," << spawnPos.y() << "," << spawnPos.z() << ")"<<
   std::endl;
+#endif
 }
 
 void Map::free()
