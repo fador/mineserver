@@ -190,6 +190,8 @@ void Plugin::init()
    /* TNT */
    call.reset();
    call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
+   call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
+   /* TODO: Currently works like glass. Explosion is not implemented yet. */
    setBlockCallback(BLOCK_TNT, call);
    
    /* Containers */
