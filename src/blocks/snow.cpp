@@ -46,7 +46,7 @@ void BlockSnow::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, 
 {
 }
 
-void BlockSnow::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockSnow::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
    uint8 block; uint8 meta;
    uint8 nblock; uint8 nmeta;
@@ -54,7 +54,8 @@ void BlockSnow::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, s
    if (!Map::get()->getBlock(x, y, z, &block, &meta))
       return;
       
-   if (meta == BLOCK_TOP && Map::get()->getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
+   if (direction == BLOCK_TOP && meta == BLOCK_TOP 
+         && Map::get()->getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
    {
       // block broken under snow
       destroy = true;
