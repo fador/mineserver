@@ -46,7 +46,7 @@ void BlockFalling::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 
 {
 }
 
-void BlockFalling::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFalling::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
    physics(x,y,z);
 }

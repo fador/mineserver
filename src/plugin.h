@@ -43,35 +43,42 @@ typedef srutil::delegate6<void, User*, sint8, sint32, sint8, sint32, sint8> Func
 class Callback
 {
 public:
-   void add(std::string name, Function func)
+   void add(const std::string name, Function func)
    {
       remove(name);
       callbacks.insert(std::pair<std::string, Function>(name, func));
    }
    
-   bool remove(std::string name)
+   bool remove(const std::string name)
    {
-      for (Events::iterator iter = callbacks.begin(); iter != callbacks.end(); ++iter)
-      {
-         if ((*iter).first == name)
-         {
-              callbacks.erase(iter);
-              return true;
-         }
-      }
-      return false;
+      Events::iterator iter = callbacks.find(name);
+
+      if (iter == callbacks.end())
+         return false;
+      
+      callbacks.erase(iter);
+      return true;
    }
 
-   Function get(std::string name)
+   Function* get(const std::string name)
    {
-      for (Events::iterator iter = callbacks.begin(); iter != callbacks.end(); iter++)
-      {
-         if ((*iter).first == name)
-            return iter->second;
-      }
+      Events::iterator iter = callbacks.find(name);
 
-      Function empty;
-      return empty;
+      if (iter == callbacks.end())
+         return NULL;
+
+      return &iter->second;
+   }
+   
+   bool run(const std::string name, const Function::invoker_type function)
+   {
+      Events::iterator iter = callbacks.find(name);
+
+      if (iter == callbacks.end())
+         return false;
+
+      function(iter->second);
+      return true;
    }
 
    void reset()
@@ -97,7 +104,8 @@ public:
    void init();
    void free();
    void setBlockCallback(const int type, Callback call);
-   Callback getBlockCallback(const int type);
+   Callback* getBlockCallback(const int type);
+   bool runBlockCallback(const int type, const std::string name, const Function::invoker_type function);
    bool removeBlockCallback(const int type);
    static Plugin* get()
    {
