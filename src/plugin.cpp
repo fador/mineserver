@@ -108,6 +108,7 @@ void Plugin::init()
    setBlockCallback(BLOCK_DIAMOND_ORE, call);
    setBlockCallback(BLOCK_GLOWING_REDSTONE_ORE, call);
    setBlockCallback(BLOCK_REDSTONE_ORE, call);
+   setBlockCallback(BLOCK_GLASS, call);
 
    /* Falling blocks (sand, etc) */
    call.reset();
