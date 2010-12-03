@@ -116,6 +116,7 @@ void Plugin::init()
    call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
    call.add("onPlace", Function::from_method<BlockFalling, &BlockFalling::onPlace>(fallingblock));
    call.add("onNeighbourBroken", Function::from_method<BlockFalling, &BlockFalling::onNeighbourBroken>(fallingblock));
+   call.add("onNeighbourMove", Function::from_method<BlockFalling, &BlockFalling::onNeighbourMove>(fallingblock));
    setBlockCallback(BLOCK_SAND, call);
    setBlockCallback(BLOCK_SLOW_SAND, call);
    setBlockCallback(BLOCK_GRAVEL, call);

@@ -51,6 +51,7 @@ public:
    void onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
    void onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
    void onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onNeighbourMove(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
 private:
    void physics(sint32 x, sint8 y, sint32 z);
 };
