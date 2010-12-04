@@ -294,7 +294,7 @@ int Mineserver::Run(int argc, char *argv[])
       int map_release_time = Conf::get()->iValue("map_release_time");
 
       //Release chunks not used in <map_release_time> seconds
-/*      std::vector<uint32> toRelease;
+   /*   std::vector<uint32> toRelease;
       for(std::map<uint32, int>::const_iterator it = Map::get()->mapLastused.begin();
           it != Map::get()->mapLastused.end();
           ++it)
@@ -308,8 +308,8 @@ int Mineserver::Run(int argc, char *argv[])
       {
         Map::get()->idToPos(toRelease[i], &x_temp, &z_temp);
         Map::get()->releaseMap(x_temp, z_temp);
-      } */
-    }
+      }
+    } */
 
     //Every second
     if(time(0)-tick > 0)
