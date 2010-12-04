@@ -52,8 +52,8 @@
 #include "nbt.h"
 #include "config.h"
 
-Map* Map::mMap;
-
+Map* Map::mMap = NULL;
+/*
 void Map::posToId(int x, int z, uint32 *id)
 {
   uint8 *id_pointer = reinterpret_cast<uint8 *>(id);
@@ -66,7 +66,7 @@ void Map::idToPos(uint32 id, int *x, int *z)
   uint8 *id_pointer = reinterpret_cast<uint8 *>(&id);
   *x = getSint16(&id_pointer[0]);
   *z = getSint16(&id_pointer[2]);
-}
+} */
 
 void Map::init()
 {

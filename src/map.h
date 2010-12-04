@@ -165,8 +165,8 @@ public:
   //All spawned items on map
   std::map<uint32, spawnedItem *> items;
 
-  void posToId(int x, int z, uint32 *id);
-  void idToPos(uint32 id, int *x, int *z);
+//  void posToId(int x, int z, uint32 *id);
+//  void idToPos(uint32 id, int *x, int *z);
 
   void init();
   void free();

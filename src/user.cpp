@@ -400,7 +400,7 @@ bool User::updatePos(double x, double y, double z, double stance)
 	{
 		Packet telePacket;
 		telePacket << (sint8)PACKET_ENTITY_TELEPORT 
-		   << (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
+		   << (sint32)UID << (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
 		newChunk->sendPacket(telePacket, this);
 	}
 	else if(abs(newChunk->x - oldChunk->x) <= 1  && abs(newChunk->z - oldChunk->z) <= 1)
@@ -425,7 +425,8 @@ bool User::updatePos(double x, double y, double z, double stance)
 		{
 			Packet pkt;
 			pkt << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)UID << nick
-				<< (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch) << (sint16)curItem;
+				<< (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) 
+				<< angleToByte(pos.yaw) << angleToByte(pos.pitch) << (sint16)curItem;
 
 			std::list<User*>::iterator iter = toadd.begin(), end = toadd.end();
 			for( ; iter != end ; iter++)
