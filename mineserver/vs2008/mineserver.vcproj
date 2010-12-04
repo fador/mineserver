@@ -61,8 +61,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(ProjectDir)../../lib/zlib/zdll.lib $(ProjectDir)../../lib/libevent2/libevent.lib ws2_32.lib ../../lib/noise/libnoise.lib"
-				OutputFile="..\..\bin\$(ProjectName).exe"
+				AdditionalDependencies="../../lib/zlib/zdll.lib ../../lib/libevent2/libevent.lib ws2_32.lib ../../lib/noise/libnoise.lib"
+				OutputFile="..\..\bin\$(ProjectName)-d.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib"
 				GenerateDebugInformation="true"
@@ -118,6 +118,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="../../lib/zlib;../../lib/libevent2;../../src;../../lib"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -136,7 +137,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LinkIncremental="1"
+				AdditionalDependencies="../../lib/zlib/zdll.lib ../../lib/libevent2/libevent.lib ws2_32.lib ../../lib/noise/libnoise.lib"
+				OutputFile="..\..\bin\$(ProjectName).exe"
+				AdditionalLibraryDirectories="../../lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
