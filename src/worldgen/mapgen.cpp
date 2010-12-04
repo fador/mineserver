@@ -221,28 +221,45 @@ void MapGen::generateChunk(int x, int z)
   Map::get()->maps[chunkid].nbt = main;
 }
 
+//#define PRINT_MAPGEN_TIME
+
 void MapGen::generateWithNoise(int x, int z) 
 {
   // Debug..
-  //struct timeval start, end;    
-  //gettimeofday(&start, NULL);
+  #ifdef PRINT_MAPGEN_TIME
+  #ifdef WIN32    
+    DWORD t_begin,t_end;
+    t_begin = timeGetTime ();
+  #else
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+  #endif
+  #endif
+  
 
   //heightMapBuilder.SetBounds(1000 + x*perlinScale, 1000 + (x+1)*perlinScale, 1000 + z*perlinScale, 1000 + (z+1)*perlinScale);
   //heightMapBuilder.Build();
 
   // Populate blocks in chunk
   uint8 currentHeight;
+  uint8 ymax;
   uint8 *curBlock;
+  memset(blocks, 0, 16*16*128);
+
   double xBlockpos=x<<4;
   double zBlockpos=z<<4;
   for (uint8 bX = 0; bX < 16; bX++) 
   {
-    for (uint8 bY = 0; bY < 128; bY++) 
+    for (uint8 bZ = 0; bZ < 16; bZ++) 
     {
-      for (uint8 bZ = 0; bZ < 16; bZ++) 
+      
+      heightmap[(bZ<<4)+bX] = ymax = currentHeight = (uint8)((ridgedMultiNoise.GetValue(xBlockpos+bX,0, zBlockpos+bZ) * 15) + 64);
+      if(ymax<seaLevel) ymax=seaLevel;
+
+      for (uint8 bY = 0; bY <= ymax; bY++) 
       {
         curBlock = &blocks[bY + ((bZ << 7) + (bX << 11))];
-        heightmap[(bZ<<4)+bX] = currentHeight = (uint8)((ridgedMultiNoise.GetValue(xBlockpos+bX,0, zBlockpos+bZ) * 15) + 64);
+        
         // Place bedrock
         if(bY == 0) 
         {
@@ -252,8 +269,12 @@ void MapGen::generateWithNoise(int x, int z)
         
         if(bY < currentHeight) 
         {
-          if (bY < (uint8)(currentHeight * 0.94)) 
+          if (bY < (uint8)(currentHeight * 0.94))
+          {
             *curBlock = BLOCK_STONE;
+            // Add caves
+            cave.AddCaves(*curBlock, xBlockpos + bX, bY, zBlockpos + bZ);
+          }
           else
             *curBlock = BLOCK_DIRT;
         } 
@@ -272,18 +293,24 @@ void MapGen::generateWithNoise(int x, int z)
             *curBlock = BLOCK_STATIONARY_WATER; // FF
           else
             *curBlock = BLOCK_AIR; // FF
-        }
+        }        
         
-        // Add caves
-        cave.AddCaves(*curBlock, xBlockpos + bX, bY, zBlockpos + bZ);
       }
     }
   }
   if(Conf::get()->bValue("add_beaches"))
     AddBeaches();
     
-  //gettimeofday(&end, NULL);
-  //std::cout << "Mapgen: " << end.tv_usec - start.tv_usec << std::endl;
+  #ifdef PRINT_MAPGEN_TIME
+  #ifdef WIN32
+    t_end = timeGetTime ();
+    std::cout << "Mapgen: " << (t_end-t_begin) << "ms" << std::endl;
+  #else
+    gettimeofday(&end, NULL);
+    std::cout << "Mapgen: " << end.tv_usec - start.tv_usec << std::endl;
+  #endif
+  #endif
+  
 }
 
 void MapGen::AddBeaches() 

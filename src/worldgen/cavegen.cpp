@@ -50,7 +50,7 @@ void CaveGen::init(int seed)
 {
   // Set up us the Perlin-noise module.
   caveNoise1.SetSeed (seed);
-  caveNoise1.SetFrequency (1.5/30);
+  caveNoise1.SetFrequency (1.5/20);
   //caveNoise.SetLacunarity (0.5);
   caveNoise1.SetOctaveCount (2);
 
@@ -72,6 +72,9 @@ void CaveGen::init(int seed)
   addCaveLava = Conf::get()->bValue("cave_lava");
   addCaveWater = Conf::get()->bValue("cave_water");
   addOre = Conf::get()->bValue("cave_ore");
+
+
+  seaLevel = Conf::get()->iValue("sea_level");
 }
 
 void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
@@ -81,11 +84,12 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
     x *= caveScale;
     z *= caveScale;
     
-    caveN1 = caveNoise1.GetValue(x,y,z);
+    
     caveN2 = caveNoise2.GetValue(x,y,z);
     
-    if(y < 60.0 && (caveN1 > 0.45 || caveN2 > 0.3) && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER)
+    if(caveN2 > 0.45 && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER)
     {
+      
       // Add bottomlava
       if(y < 10.0)
       {
@@ -93,26 +97,30 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
         return;
       }
       
-      if(caveN1 > 0.458)
+      block = BLOCK_AIR;
+      return;
+    }
+
+    
+    if(y < 60)
+    {      
+      caveN1 = caveNoise1.GetValue(x,y,z);
+      if(caveN1 > 0.56)
       {
-        if(y < 32.0 && caveN1 > 0.459999)
+        if(y < 32.0 && caveN1 > 0.67)
         {
-          if(y < 16.0 && caveN1 > 0.4599999)
+          if(y < 16.0 && caveN1 > 0.79)
           {
             block = BLOCK_DIAMOND_ORE;
             return;
           }
           block = BLOCK_GOLD_ORE;
           return;
-        }
-        
+        }        
         block = BLOCK_IRON_ORE;
-        return;
       }
-      
-      
-      block = BLOCK_AIR;
       return;
     }
+
   }
 }
