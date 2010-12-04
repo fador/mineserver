@@ -99,9 +99,6 @@
     <ClCompile Include="..\src\blocks\torch.cpp">
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\worldgen\noiseutils.cpp">
-      <Filter>Source Files\worldgen</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\worldgen\mapgen.cpp">
       <Filter>Source Files\worldgen</Filter>
     </ClCompile>
@@ -181,9 +178,6 @@
     </ClInclude>
     <ClInclude Include="..\src\blocks\torch.h">
       <Filter>Header Files\blocks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\worldgen\noiseutils.h">
-      <Filter>Header Files\worldgen</Filter>
     </ClInclude>
     <ClInclude Include="..\src\worldgen\mapgen.h">
       <Filter>Header Files\worldgen</Filter>

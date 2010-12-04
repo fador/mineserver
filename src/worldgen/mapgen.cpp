@@ -32,6 +32,7 @@
 #include <algorithm>
 #include <vector>
 #include <cmath>
+#include <ctime>
 
 #include "../logger.h"
 #include "../constants.h"
@@ -46,8 +47,6 @@
 #else
 #include <noise/noise.h>
 #endif
-
-#include "noiseutils.h"
 
 //#include "mersenne.h"
 #include "cavegen.h"
@@ -68,16 +67,14 @@ void MapGen::init(int seed)
 {
   cave.init(seed+8);
   
-  perlinNoise.SetSeed(seed);
-  perlinNoise.SetOctaveCount(2);
-  perlinNoise.SetFrequency(1.7); // 1-16
-  perlinNoise.SetPersistence(0.2); // 0-1
+  ridgedMultiNoise.SetSeed(seed);
+  ridgedMultiNoise.SetOctaveCount(4);
+  ridgedMultiNoise.SetFrequency(1.0/180.0); // 1-16
+  ridgedMultiNoise.SetLacunarity(2.0);
+//  perlinNoise.SetPersistence(0.1); // 0-1
 
   // Heighmap scale..
   perlinScale = 0.7f;
-  
-  perlinBiased.SetSourceModule(0, perlinNoise);
-  perlinBiased.SetBias(0.75);
 
   baseFlatTerrain.SetSeed(seed+1);
   baseFlatTerrain.SetOctaveCount(2);
@@ -141,9 +138,11 @@ void MapGen::init(int seed)
   //*/
 
   // Generate heightmap
+  /*
   heightMapBuilder.SetSourceModule(seaTerrain);
   heightMapBuilder.SetDestNoiseMap(heightMap);
   heightMapBuilder.SetDestSize(16, 16);
+  */
 
   seaLevel = Conf::get()->iValue("sea_level");
   
@@ -228,21 +227,22 @@ void MapGen::generateWithNoise(int x, int z)
   //struct timeval start, end;    
   //gettimeofday(&start, NULL);
 
-  heightMapBuilder.SetBounds(1000 + x*perlinScale, 1000 + (x+1)*perlinScale, 1000 + z*perlinScale, 1000 + (z+1)*perlinScale);
-  heightMapBuilder.Build();
+  //heightMapBuilder.SetBounds(1000 + x*perlinScale, 1000 + (x+1)*perlinScale, 1000 + z*perlinScale, 1000 + (z+1)*perlinScale);
+  //heightMapBuilder.Build();
 
   // Populate blocks in chunk
   uint8 currentHeight;
   uint8 *curBlock;
+  double xBlockpos=x<<4;
+  double zBlockpos=z<<4;
   for (uint8 bX = 0; bX < 16; bX++) 
   {
     for (uint8 bY = 0; bY < 128; bY++) 
     {
       for (uint8 bZ = 0; bZ < 16; bZ++) 
       {
-        curBlock = &blocks[bY + (bZ * 128 + (bX * 128 * 16))];
-        currentHeight = (uint8)((heightMap.GetValue(bX,bZ) * 8.7) + 65.15371);
-        
+        curBlock = &blocks[bY + ((bZ << 7) + (bX << 11))];
+        heightmap[(bZ<<4)+bX] = currentHeight = (uint8)((ridgedMultiNoise.GetValue(xBlockpos+bX,0, zBlockpos+bZ) * 10) + 64);
         // Place bedrock
         if(bY == 0) 
         {
@@ -275,7 +275,7 @@ void MapGen::generateWithNoise(int x, int z)
         }
         
         // Add caves
-        cave.AddCaves(*curBlock, x + (bX+1.0)/16.0, (bY+1.0), z + (bZ+1.0)/16.0);
+        cave.AddCaves(*curBlock, xBlockpos + bX, bY, zBlockpos + bZ);
       }
     }
   }
@@ -283,7 +283,7 @@ void MapGen::generateWithNoise(int x, int z)
     AddBeaches();
     
   //gettimeofday(&end, NULL);
-  //std::cout << end.tv_usec - start.tv_usec << std::endl;
+  //std::cout << "Mapgen: " << end.tv_usec - start.tv_usec << std::endl;
 }
 
 void MapGen::AddBeaches() 
@@ -297,7 +297,7 @@ void MapGen::AddBeaches()
     for(int z = 0; z < 16; z++) 
     {
       int h = -1;
-      h = heightMap.GetValue(x, z);
+      h = heightmap[(z<<4)+x];
       if(h < 0) continue;
       
       bool found = false;

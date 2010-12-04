@@ -42,8 +42,8 @@ private:
   Random rand;
   uint8 *blocks;
   
-  noise::module::Perlin caveNoise1;
-  noise::module::Perlin caveNoise2;
+  noise::module::RidgedMulti caveNoise1;
+  noise::module::RidgedMulti caveNoise2;
   
   double caveN1, caveN2;
   

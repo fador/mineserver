@@ -38,7 +38,6 @@
     <ClCompile Include="..\src\worldgen\cavegen.cpp" />
     <ClCompile Include="..\src\worldgen\mapgen.cpp" />
     <ClCompile Include="..\src\worldgen\mersenne.cpp" />
-    <ClCompile Include="..\src\worldgen\noiseutils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\blocks\basic.h" />
@@ -67,7 +66,6 @@
     <ClInclude Include="..\src\worldgen\cavegen.h" />
     <ClInclude Include="..\src\worldgen\mapgen.h" />
     <ClInclude Include="..\src\worldgen\mersenne.h" />
-    <ClInclude Include="..\src\worldgen\noiseutils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7F6D1DAB-AA49-4343-B28E-C3E647BE5007}</ProjectGuid>
