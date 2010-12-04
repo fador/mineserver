@@ -275,7 +275,7 @@ int Mineserver::Run(int argc, char *argv[])
     if(time(0)-starttime > 10)
     {
       starttime = (uint32)time(0);
-      std::cout << "Currently " << Users.size() << " users in!" << std::endl;
+//      std::cout << "Currently " << Users.size() << " users in!" << std::endl;
 
       //If users, ping them
       if(Users.size() > 0)
@@ -332,6 +332,8 @@ int Mineserver::Run(int argc, char *argv[])
       }
       Map::get()->mapTime+=20;
       if(Map::get()->mapTime>=24000) Map::get()->mapTime=0;
+      
+      Map::get()->checkGenTrees();
     }
 
     //Physics simulation every 200ms

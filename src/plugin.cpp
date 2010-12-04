@@ -65,6 +65,7 @@ void Plugin::init()
    setBlockCallback(BLOCK_WOOD, call);
    setBlockCallback(BLOCK_LOG, call);
    setBlockCallback(BLOCK_SOIL, call);
+   setBlockCallback(BLOCK_GLASS, call);
    /* cloth */
    setBlockCallback(BLOCK_RED_CLOTH, call);
    setBlockCallback(BLOCK_ORANGE_CLOTH, call);
@@ -143,7 +144,7 @@ void Plugin::init()
    call.reset();
    BlockPlant* plantblock = new BlockPlant();
    call.add("onBroken", Function::from_method<BlockBasic, &BlockBasic::onBroken>(basicblock));
-   call.add("onPlace", Function::from_method<BlockBasic, &BlockBasic::onPlace>(basicblock));
+   call.add("onPlace", Function::from_method<BlockPlant, &BlockPlant::onPlace>(plantblock));
    call.add("onNeighbourBroken", Function::from_method<BlockPlant, &BlockPlant::onNeighbourBroken>(plantblock));
    call.add("onReplace", Function::from_method<BlockBasic, &BlockBasic::onReplace>(basicblock));
    setBlockCallback(BLOCK_YELLOW_FLOWER, call);
