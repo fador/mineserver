@@ -53,21 +53,51 @@
 
 std::vector<User *> Users;
 
-
 User::User(int sock, uint32 EID)
 {
   this->action          = 0;
+  this->muted           = false;
+	this->dnd							= false;
   this->waitForData     = false;
   this->fd              = sock;
   this->UID             = EID;
   this->logged          = false;
   // ENABLED FOR DEBUG
-  this->admin           = true;
+  this->admin           = false;
 
-  this->pos.x           = Map::get().spawnPos.x();
-  this->pos.y           = Map::get().spawnPos.y();
-  this->pos.z           = Map::get().spawnPos.z();
+  this->pos.x           = Map::get()->spawnPos.x();
+  this->pos.y           = Map::get()->spawnPos.y();
+  this->pos.z           = Map::get()->spawnPos.z();
   this->write_err_count = 0;
+  this->health          = 20;
+  this->attachedTo      = 0;
+  this->timeUnderwater  = 0;
+}
+
+bool User::checkBanned(std::string _nick)
+{
+  nick = _nick;
+
+  // Check banstatus
+  for(unsigned int i = 0; i < Chat::get()->banned.size(); i++)
+    if(Chat::get()->banned[i] == nick)
+      return true;
+
+  return false;
+}
+
+bool User::checkWhitelist(std::string _nick)
+{
+	nick = _nick;
+
+    // Check if nick is whitelisted, providing it is enabled
+    for(unsigned int i = 0; i < Chat::get()->whitelist.size(); i++)
+      if(Chat::get()->whitelist[i] == nick)
+        return true;
+
+    return false;
+
+  return true;
 }
 
 bool User::changeNick(std::string _nick)
@@ -75,9 +105,9 @@ bool User::changeNick(std::string _nick)
   nick = _nick;
 
   // Check adminstatus
-  for(unsigned int i = 0; i < Chat::get().admins.size(); i++)
+  for(unsigned int i = 0; i < Chat::get()->admins.size(); i++)
   {
-    if(Chat::get().admins[i] == nick)
+    if(Chat::get()->admins[i] == nick)
     {
       admin = true;
       break;
@@ -95,7 +125,7 @@ User::~User()
       {
         for(int mapz = -viewDistance+curChunk.z(); mapz <= viewDistance+curChunk.z(); mapz++)
         {
-			sChunk *chunk = Map::get().chunks.GetChunk(mapx, mapz);
+			sChunk *chunk = Map::get()->chunks.GetChunk(mapx, mapz);
 			if(chunk != NULL)
 				chunk->users.erase(this);
         }
@@ -118,10 +148,61 @@ bool User::kick(std::string kickMsg)
   std::cout << nick << " kicked. Reason: " << kickMsg << std::endl;
   return true;
 }
-
+bool User::mute(std::string muteMsg)
+{
+  if(!muteMsg.empty()) 
+    muteMsg = COLOR_YELLOW + "You have been muted.  Reason: " + muteMsg;
+  else 
+    muteMsg = COLOR_YELLOW + "You have been muted. ";
+    
+  Chat::get()->sendMsg(this, muteMsg, Chat::USER);
+  this->muted = true;
+  std::cout << nick << " muted. Reason: " << muteMsg << std::endl;
+  return true;
+}
+bool User::unmute()
+{
+    Chat::get()->sendMsg(this, COLOR_YELLOW + "You have been unmuted.", Chat::USER);
+    this->muted = false;
+    std::cout << nick << " unmuted. " << std::endl;
+    return true;
+}
+bool User::toggleDND()
+{	
+	if(!this->dnd) {
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "You have enabled 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "You will no longer see chat or private messages.", Chat::USER);
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "Type /dnd again to disable 'Do Not Disturb' mode.", Chat::USER);
+		this->dnd = true;
+	}
+	else {
+		this->dnd = false;
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "You have disabled 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "You can now see chat and private messages.", Chat::USER);
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "Type /dnd again to enable 'Do Not Disturb' mode.", Chat::USER);		
+	}
+	return this->dnd;
+}
+bool User::isAbleToCommunicate(std::string communicateCommand) 
+{
+	// Check if this is chat or a regular command and prefix with a slash accordingly
+	if(communicateCommand != "chat")
+		communicateCommand = "/" + communicateCommand;
+		
+	if(this->muted) {
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "You cannot " + communicateCommand + " while muted.", Chat::USER);
+		return false;
+	}
+	if(this->dnd) {
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "You cannot " + communicateCommand + " while in 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "Type /dnd to disable.", Chat::USER);
+		return false;
+	}
+	return true;
+}
 bool User::loadData()
 {
-  std::string infile = Map::get().mapDirectory+"/players/"+this->nick+".dat";
+  std::string infile = Map::get()->mapDirectory+"/players/"+this->nick+".dat";
 
   struct stat stFileInfo;
   if(stat(infile.c_str(), &stFileInfo) != 0)
@@ -189,12 +270,12 @@ bool User::loadData()
 
 bool User::saveData()
 {
-  std::string outfile = Map::get().mapDirectory+"/players/"+this->nick+".dat";
+  std::string outfile = Map::get()->mapDirectory+"/players/"+this->nick+".dat";
   // Try to create parent directories if necessary
   struct stat stFileInfo;
   if(stat(outfile.c_str(), &stFileInfo) != 0)
   {
-    std::string outdir = Map::get().mapDirectory+"/players";
+    std::string outdir = Map::get()->mapDirectory+"/players";
 
     if(stat(outdir.c_str(), &stFileInfo) != 0)
     {
@@ -303,10 +384,18 @@ bool User::checkInventory(sint16 itemID, char count)
 bool User::updatePos(double x, double y, double z, double stance)
 {	
   
+  //Riding on a minecart?
+  if(y==-999)
+  {
+    //attachedTo
+    //ToDo: Get pos from minecart
+    return false;
+  }
+
   if(nick.size() && logged)
   {
-	sChunk *newChunk = Map::get().loadMap(blockToChunk((sint32)x), blockToChunk((sint32)z));
-    sChunk *oldChunk = Map::get().loadMap(blockToChunk((sint32)pos.x), blockToChunk((sint32)pos.z));
+	sChunk *newChunk = Map::get()->loadMap(blockToChunk((sint32)x), blockToChunk((sint32)z));
+    sChunk *oldChunk = Map::get()->loadMap(blockToChunk((sint32)pos.x), blockToChunk((sint32)pos.z));
 	if(newChunk == oldChunk)
 	{
 		Packet telePacket;
@@ -378,10 +467,10 @@ bool User::updatePos(double x, double y, double z, double stance)
         {
           for(int mapz = newChunk->z-viewDistance; mapz <= newChunk->z+viewDistance; mapz++)
           {
-		    if(abs(chunkDiffX - oldChunk->z) > 10 || abs(chunkDiffZ - oldChunk->z) > 10)
+		    if(abs(chunkDiffX - oldChunk->x) > 10 || abs(chunkDiffZ - oldChunk->z) > 10)
 			{
 				addQueue(mapx, mapz);
-				sChunk *chunk = Map::get().chunks.GetChunk(mapx, mapz);
+				sChunk *chunk = Map::get()->chunks.GetChunk(mapx, mapz);
 
 				if(chunk != NULL)
 				{
@@ -393,7 +482,7 @@ bool User::updatePos(double x, double y, double z, double stance)
 			{
 				addRemoveQueue(mapx-chunkDiffX, mapz-chunkDiffZ);
 
-				sChunk *chunk = Map::get().chunks.GetChunk(mapx, mapz);
+				sChunk *chunk = Map::get()->chunks.GetChunk(mapx, mapz);
 
 				if(chunk != NULL)
 				{
@@ -470,14 +559,26 @@ bool User::updatePos(double x, double y, double z, double stance)
       this->pos.y      = y;
       this->pos.z      = z;
       this->pos.stance = stance;
+      
+      // Fix yaw & pitch to be a 1 byte fraction of 360 (no negatives)
+      int fixedYaw = int(this->pos.yaw) % 360;
+      if(fixedYaw < 0)
+        fixedYaw = 360 + fixedYaw;
+      fixedYaw = int(float(fixedYaw) * float(255.0f/360.0f));  
+
+      int fixedPitch = int(this->pos.pitch) % 360;
+      if(fixedPitch < 0)
+        fixedPitch = 360 + fixedPitch;
+      fixedPitch = int(float(fixedPitch) * float(255.0f/360.0f));
+            
       uint8 teleportData[19];
-      teleportData[0]  = 0x22; //Teleport
+      teleportData[0]  = PACKET_ENTITY_TELEPORT; 
       putSint32(&teleportData[1], this->UID);
       putSint32(&teleportData[5], (int)(this->pos.x*32));
       putSint32(&teleportData[9], (int)(this->pos.y*32));
       putSint32(&teleportData[13], (int)(this->pos.z*32));
-      teleportData[17] = (char)this->pos.yaw;
-      teleportData[18] = (char)this->pos.pitch;
+      teleportData[17] = (char)fixedYaw;
+      teleportData[18] = (char)fixedPitch;
       this->sendOthers(&teleportData[0], 19);
     }
 
@@ -512,17 +613,55 @@ bool User::updatePos(double x, double y, double z, double stance)
 			  Packet pkt;
 			  pkt << (sint8)PACKET_DESTROY_ENTITY << (sint32)(*iter)->EID;
 			  newChunk->sendPacket(pkt);
+/*
+	Map::get()->posToId(chunk_x, chunk_z, &chunkHash);
+    if(Map::get()->mapItems.count(chunkHash))
+    {
+      //Loop through items and check if they are close enought to be picked up
+      for(sint32 i = Map::get()->mapItems[chunkHash].size()-1; i >= 0; i--)
+      {
+        //No more than 2 blocks away
+        if(abs((sint32)x-Map::get()->mapItems[chunkHash][i]->pos.x()/32) < 2 &&
+           abs((sint32)z-Map::get()->mapItems[chunkHash][i]->pos.z()/32) < 2 &&
+           abs((sint32)y-Map::get()->mapItems[chunkHash][i]->pos.y()/32) < 2)
+        {
+          //Dont pickup own spawns right away
+          if(Map::get()->mapItems[chunkHash][i]->spawnedBy != this->UID ||
+             Map::get()->mapItems[chunkHash][i]->spawnedAt+2 < time(0))
+          {
+            //Check player inventory for space!
+            if(checkInventory(Map::get()->mapItems[chunkHash][i]->item,
+                              Map::get()->mapItems[chunkHash][i]->count))
+            {
+              //Send player collect item packet
+              uint8 *packet = new uint8[9];
+              packet[0] = PACKET_COLLECT_ITEM;
+              putSint32(&packet[1], Map::get()->mapItems[chunkHash][i]->EID);
+              putSint32(&packet[5], this->UID);
+        buffer.addToWrite(packet, 9);
 
+              //Send everyone destroy_entity-packet
+              packet[0] = PACKET_DESTROY_ENTITY;
+              putSint32(&packet[1], Map::get()->mapItems[chunkHash][i]->EID);
+              //ToDo: Only send users in range
+              this->sendAll(packet, 5);
+
+              packet[0] = PACKET_ADD_TO_INVENTORY;
+              putSint16(&packet[1], Map::get()->mapItems[chunkHash][i]->item);
+              packet[3] = Map::get()->mapItems[chunkHash][i]->count;
+              putSint16(&packet[4], Map::get()->mapItems[chunkHash][i]->health);
+*/
 			  buffer << (sint8)PACKET_ADD_TO_INVENTORY << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint16)(*iter)->health;
 
 
-			  Map::get().items.erase((*iter)->EID);
+			  Map::get()->items.erase((*iter)->EID);
 			  delete *iter;
 			  iter = newChunk->items.erase(iter);
 			  end = newChunk->items.end();
 
 			  if(iter == end)
 				  break;
+
             }
           }
         }
@@ -566,12 +705,24 @@ bool User::updatePos(double x, double y, double z, double stance)
   return true;
 }
 
+bool User::checkOnBlock(sint32 x, sint8 y, sint32 z)
+{
+   double diffX = x - this->pos.x;
+   double diffZ = z - this->pos.z;
+   
+   if ((y == (int)this->pos.y)
+         && (diffZ > -1.3 && diffZ < 0.3)
+         && (diffX > -1.3 && diffX < 0.3))
+      return true;
+   return false;
+}
+
 bool User::updateLook(float yaw, float pitch)
 {
   Packet pkt;
   pkt << (sint8)PACKET_ENTITY_LOOK << (sint32)UID << angleToByte(yaw) << angleToByte(pitch);
 
-  sChunk *chunk = Map::get().chunks.GetChunk(blockToChunk((sint32)pos.x),blockToChunk((sint32)pos.z));
+  sChunk *chunk = Map::get()->chunks.GetChunk(blockToChunk((sint32)pos.x),blockToChunk((sint32)pos.z));
   if(chunk != NULL)
 	chunk->sendPacket(pkt, this);
 
@@ -585,7 +736,13 @@ bool User::sendOthers(uint8 *data, uint32 len)
   for(unsigned int i = 0; i < Users.size(); i++)
   {
     if(Users[i]->fd != this->fd && Users[i]->logged)
-    Users[i]->buffer.addToWrite(data, len);
+    {
+      // Don't send to his user if he is DND and the message is a chat message
+      if(!(Users[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
+      {
+    	  Users[i]->buffer.addToWrite(data, len);
+  	  }
+  	}
   }
   return true;
 }
@@ -595,7 +752,13 @@ bool User::sendAll(uint8 *data, uint32 len)
   for(unsigned int i = 0; i < Users.size(); i++)
   {
     if(Users[i]->fd && Users[i]->logged)
-    Users[i]->buffer.addToWrite(data, len);
+    {
+      // Don't send to his user if he is DND and the message is a chat message
+      if(!(Users[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
+      {
+    	  Users[i]->buffer.addToWrite(data, len);
+  	  }
+  	}
   }
   return true;
 }
@@ -605,7 +768,7 @@ bool User::sendAdmins(uint8 *data, uint32 len)
   for(unsigned int i = 0; i < Users.size(); i++)
   {
     if(Users[i]->fd && Users[i]->logged && Users[i]->admin)
-    Users[i]->buffer.addToWrite(data, len);
+    	Users[i]->buffer.addToWrite(data, len);
   }
   return true;
 }
@@ -645,7 +808,7 @@ bool User::addRemoveQueue(int x, int z)
 bool User::addKnown(int x, int z)
 {
   vec newMap(x, 0, z);
-  sChunk * chunk = Map::get().chunks.GetChunk(x,z);
+  sChunk * chunk = Map::get()->chunks.GetChunk(x,z);
   if(chunk == NULL)
 	  return false;
 
@@ -657,7 +820,7 @@ bool User::addKnown(int x, int z)
 
 bool User::delKnown(int x, int z)
 {
-  sChunk * chunk = Map::get().chunks.GetChunk(x,z);
+  sChunk * chunk = Map::get()->chunks.GetChunk(x,z);
   if(chunk != NULL)
     chunk->users.erase(this);
 
@@ -730,7 +893,7 @@ bool User::pushMap()
                static_cast<int>(pos.z / 16));
     sort(mapQueue.begin(), mapQueue.end(), DistanceComparator(target));
 
-    Map::get().sendToUser(this, mapQueue[0].x(), mapQueue[0].z());
+    Map::get()->sendToUser(this, mapQueue[0].x(), mapQueue[0].z());
 
     // Add this to known list
     addKnown(mapQueue[0].x(), mapQueue[0].z());
@@ -787,7 +950,8 @@ bool User::sethealth(int userHealth)
 
 bool User::respawn()
 {
-  health = 20;
+  this->health = 20;
+  this->timeUnderwater = 0;
   buffer << (sint8)PACKET_RESPAWN;
   return true;
 }
@@ -798,7 +962,7 @@ bool User::dropInventory()
   {
     if( inv.main[i].type != 0 )
     {
-      Map::get().createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.main[i].type, inv.main[i].count);
+      Map::get()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.main[i].type, inv.main[i].count);
       inv.main[i] = Item();
     }
 
@@ -806,17 +970,36 @@ bool User::dropInventory()
     {
       if( inv.equipped[i].type != 0 )
       {
-        Map::get().createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.equipped[i].type, inv.equipped[i].count);
+        Map::get()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.equipped[i].type, inv.equipped[i].count);
         inv.equipped[i] = Item();
       }
       if( inv.crafting[i].type != 0 )
       {
-        Map::get().createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.crafting[i].type, inv.crafting[i].count);
+        Map::get()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.crafting[i].type, inv.crafting[i].count);
         inv.crafting[i] = Item();
       }
     }
   }
   return true;
+}
+
+bool User::isUnderwater()
+{
+   uint8 topblock, topmeta;
+   int y = ( pos.y - int(pos.y) <= 0.25 ) ? (int)pos.y + 1: (int)pos.y + 2;
+   
+   Map::get()->getBlock((int)pos.x, y, (int)pos.z, &topblock, &topmeta);
+   
+   if( topblock == BLOCK_WATER || topblock == BLOCK_STATIONARY_WATER )
+   {
+      if( (timeUnderwater / 5) > 15 && timeUnderwater % 5 == 0 )// 13 is Trial and Erorr
+        sethealth( health - 2 );
+      timeUnderwater += 1;
+      return true;
+   }
+
+   timeUnderwater = 0;
+   return false;
 }
 
 struct event *User::GetEvent()
@@ -840,7 +1023,7 @@ bool remUser(int sock)
     {
       if(Users[i]->nick.size())
       {
-        Chat::get().sendMsg(Users[i], Users[i]->nick+" disconnected!", Chat::OTHERS);
+        Chat::get()->sendMsg(Users[i], Users[i]->nick+" disconnected!", Chat::OTHERS);
         Users[i]->saveData();
       }
       delete Users[i];

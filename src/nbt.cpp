@@ -48,6 +48,7 @@
 
 #include "tools.h"
 #include "nbt.h"
+#include "constants.h"
 
 //NBT level file reading
 //More info: http://www.minecraft.net/docs/NBT.txt

@@ -199,14 +199,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\mapgen.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\mersenne.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\mineserver.cpp"
 				>
 			</File>
@@ -215,15 +207,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\noiseutils.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\packets.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\physics.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\plugin.cpp"
 				>
 			</File>
 			<File
@@ -238,6 +230,70 @@
 				RelativePath="..\..\src\user.cpp"
 				>
 			</File>
+			<Filter
+				Name="worldgen"
+				>
+				<File
+					RelativePath="..\..\src\worldgen\cavegen.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\mapgen.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\mersenne.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\noiseutils.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="blocks"
+				>
+				<File
+					RelativePath="..\..\src\blocks\basic.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\door.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\falling.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\fire.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\liquid.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\plant.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\sign.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\snow.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\stair.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\torch.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -269,23 +325,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\mapgen.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\mersenne.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\mineserver.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\nbt.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\noiseutils.h"
 				>
 			</File>
 			<File
@@ -312,6 +356,70 @@
 				RelativePath="..\..\src\vec.h"
 				>
 			</File>
+			<Filter
+				Name="worldgen"
+				>
+				<File
+					RelativePath="..\..\src\worldgen\cavegen.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\mapgen.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\mersenne.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\noiseutils.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="blocks"
+				>
+				<File
+					RelativePath="..\..\src\blocks\basic.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\door.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\falling.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\fire.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\liquid.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\plant.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\sign.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\snow.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\stair.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\torch.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

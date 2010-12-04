@@ -26,10 +26,6 @@
  */
 
 #ifdef WIN32
-  #define _CRTDBG_MAP_ALLOC
-//  #define ZLIB_WINAPI
-
-  #include <crtdbg.h>
   #include <conio.h>
   #include <direct.h>
   #include <winsock2.h>
@@ -51,17 +47,12 @@
 #include "logger.h"
 #include "tools.h"
 #include "map.h"
-#include "mapgen.h"
-
+#include "worldgen/mapgen.h"
 #include "user.h"
 #include "nbt.h"
 #include "config.h"
 
-Map &Map::get()
-{
-  static Map instance;
-  return instance;
-}
+Map* Map::mMap;
 
 void Map::posToId(int x, int z, uint32 *id)
 {
@@ -77,13 +68,13 @@ void Map::idToPos(uint32 id, int *x, int *z)
   *z = getSint16(&id_pointer[2]);
 }
 
-void Map::initMap()
+void Map::init()
 {
 #ifdef _DEBUG
-  printf("initMap()\n");
+  printf("Map::init()\n");
 #endif
 
-  mapDirectory = Conf::get().sValue("mapdir");
+  mapDirectory = Conf::get()->sValue("map_directory");
   if(mapDirectory == "Not found!")
   {
     std::cout << "Error, mapdir not defined!" << std::endl;
@@ -93,14 +84,43 @@ void Map::initMap()
   std::string infile = mapDirectory+"/level.dat";
 
   struct stat stFileInfo;
-  if(stat(infile.c_str(), &stFileInfo) != 0)
+  if(stat(mapDirectory.c_str(), &stFileInfo) != 0)
   {
-    std::cout << "Error, map not found!" << std::endl;
-    exit(EXIT_FAILURE);
+    std::cout << "Warning: Map directory not found, creating it now." << std::endl;
+
+#ifdef WIN32
+    if(_mkdir(mapDirectory.c_str()) == -1)
+#else
+    if(mkdir(mapDirectory.c_str(), 0755) == -1)
+#endif
+    {
+      std::cout << "Error: Could not create map directory." << std::endl;
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  if(stat((infile).c_str(), &stFileInfo) != 0)
+  {
+    std::cout << "Warning: level.dat not found, creating it now." << std::endl;
+
+    NBT_Value level(NBT_Value::TAG_COMPOUND);
+    level.Insert("Data", new NBT_Value(NBT_Value::TAG_COMPOUND));
+    level["Data"]->Insert("Time", new NBT_Value((sint64)0));
+    level["Data"]->Insert("SpawnX", new NBT_Value((sint32)0));
+    level["Data"]->Insert("SpawnY", new NBT_Value((sint32)80));
+    level["Data"]->Insert("SpawnZ", new NBT_Value((sint32)0));
+    level["Data"]->Insert("RandomSeed", new NBT_Value((sint64)(rand()*65535)));
+
+    level.SaveToFile(infile);
+
+    if (stat(infile.c_str(), &stFileInfo) != 0)
+    {
+      std::cout << "Error: Could not create level.dat" << std::endl;
+      exit(EXIT_FAILURE);
+    }
   }
 
   NBT_Value *root = NBT_Value::LoadFromFile(infile);
-
   NBT_Value &data = *((*root)["Data"]);
 
   spawnPos.x() = (sint32)*data["SpawnX"];
@@ -109,17 +129,25 @@ void Map::initMap()
 
   //Get time from the map
   mapTime      = (sint64)*data["Time"];
-  
   mapSeed      = (sint64)*data["RandomSeed"];
+  
+  // Init mapgenerator
+  MapGen::get()->init(mapSeed);
 
   delete root;
-
+#ifdef _DEBUG
   std::cout << "Spawn: (" << spawnPos.x() << "," << spawnPos.y() << "," << spawnPos.z() << ")"<<
   std::endl;
+#endif
 }
 
-void Map::freeMap()
+void Map::free()
 {
+   if (mMap)
+   {
+      delete mMap;
+      mMap = 0;
+   }
 }
 
 sChunk *Map::getMapData(int x, int z, bool generate)
@@ -607,7 +635,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   }
   metapointer[index >> 1] = metadata;
 
-//  mapChanged[mapId]       = 1;
+//  mapChanged[mapId]       = true;
 //  mapLastused[mapId]      = (int)time(0);
 
   return true;
@@ -709,8 +737,7 @@ sChunk * Map::loadMap(int x, int z, bool generate)
     // If generate (false only for lightmapgenerator)
     if(generate)
     {
-      MapGen mapgen((int)mapSeed);
-      mapgen.generateChunk(x,z);
+      MapGen::get()->generateChunk(x,z);
       generateLight(x, z);
       return chunks.GetChunk(x,z);
     }
@@ -781,7 +808,7 @@ sChunk * Map::loadMap(int x, int z, bool generate)
   //mapLastused[mapId] = (int)time(0);
 
   // Not changed
-  //mapChanged[mapId] = 0;
+  //mapChanged[mapId] = false;
 
   return chunk;
 }
@@ -851,7 +878,7 @@ bool Map::saveMap(int x, int z)
   chunk->nbt->SaveToFile(outfile);
 
   // Set "not changed"
-  //TODO: mapChanged[mapId] = 0;
+  //mapChanged[mapId] = false;
 
   return true;
 }
