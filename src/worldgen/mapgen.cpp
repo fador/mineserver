@@ -242,7 +242,7 @@ void MapGen::generateWithNoise(int x, int z)
       for (uint8 bZ = 0; bZ < 16; bZ++) 
       {
         curBlock = &blocks[bY + ((bZ << 7) + (bX << 11))];
-        heightmap[(bZ<<4)+bX] = currentHeight = (uint8)((ridgedMultiNoise.GetValue(xBlockpos+bX,0, zBlockpos+bZ) * 10) + 64);
+        heightmap[(bZ<<4)+bX] = currentHeight = (uint8)((ridgedMultiNoise.GetValue(xBlockpos+bX,0, zBlockpos+bZ) * 15) + 64);
         // Place bedrock
         if(bY == 0) 
         {

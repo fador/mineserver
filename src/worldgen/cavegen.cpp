@@ -84,10 +84,10 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
     caveN1 = caveNoise1.GetValue(x,y,z);
     caveN2 = caveNoise2.GetValue(x,y,z);
     
-    if(y < 63 && (caveN1 > 0.45 || caveN2 > 0.3) && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER)
+    if(y < 60.0 && (caveN1 > 0.45 || caveN2 > 0.3) && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER)
     {
       // Add bottomlava
-      if(y < 10)
+      if(y < 10.0)
       {
         block = BLOCK_STATIONARY_LAVA;
         return;
@@ -95,9 +95,9 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
       
       if(caveN1 > 0.458)
       {
-        if(y < 32 && caveN1 > 0.459999)
+        if(y < 32.0 && caveN1 > 0.459999)
         {
-          if(y < 16 && caveN1 > 0.4599999)
+          if(y < 16.0 && caveN1 > 0.4599999)
           {
             block = BLOCK_DIAMOND_ORE;
             return;
