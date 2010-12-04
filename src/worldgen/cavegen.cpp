@@ -91,7 +91,7 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
     {
       
       // Add bottomlava
-      if(y < 10.0)
+      if(y < 10.0 && addCaveLava)
       {
         block = BLOCK_STATIONARY_LAVA;
         return;
@@ -102,7 +102,7 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
     }
 
     
-    if(y < 60)
+    if(y < 60 && addOre)
     {      
       caveN1 = caveNoise1.GetValue(x,y,z);
       if(caveN1 > 0.56)
