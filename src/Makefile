@@ -36,7 +36,7 @@ CXXFLAGS += $(DFLAGS) -I. -I/usr/Local/include -I/usr/include
 
 OBJS  = map.o chat.o commands.o config.o constants.o logger.o nbt.o packets.o physics.o sockets.o tools.o user.o mineserver.o plugin.o
 OBJS += blocks/basic.o blocks/door.o blocks/falling.o blocks/fire.o blocks/liquid.o blocks/plant.o blocks/sign.o blocks/snow.o blocks/stair.o blocks/torch.o
-OBJS += worldgen/mapgen.o worldgen/cavegen.o worldgen/noiseutils.o worldgen/mersenne.o
+OBJS += worldgen/mapgen.o worldgen/cavegen.o worldgen/mersenne.o
 PROG = ./mineserver
 PROGS = $(PROG)
 
@@ -72,6 +72,5 @@ blocks/snow.o: blocks/snow.cpp blocks/basic.h blocks/snow.h
 blocks/stair.o: blocks/stair.cpp blocks/basic.h blocks/stair.h
 blocks/torch.o: blocks/torch.cpp blocks/basic.h blocks/torch.h
 worldgen/cavegen.o: worldgen/cavegen.cpp worldgen/cavegen.h worldgen/mersenne.h map.h constants.h logger.h tools.h config.h
-worldgen/mapgen.o: worldgen/mapgen.cpp worldgen/mapgen.h logger.h constants.h config.h worldgen/mersenne.h worldgen/noiseutils.h worldgen/cavegen.h
-worldgen/noiseutils.o: worldgen/noiseutils.h worldgen/noiseutils.cpp
+worldgen/mapgen.o: worldgen/mapgen.cpp worldgen/mapgen.h logger.h constants.h config.h worldgen/mersenne.h worldgen/cavegen.h
 worldgen/mersenne.o: worldgen/mersenne.cpp worldgen/mersenne.h
