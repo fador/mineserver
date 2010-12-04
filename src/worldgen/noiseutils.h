@@ -27,10 +27,10 @@
 #include <string.h>
 #include <string>
 
-#ifdef WIN32
-#include <noise/noise.h>
-#else
+#ifdef DEBIAN
 #include <libnoise/noise.h>
+#else
+#include <noise/noise.h>
 #endif
 
 //using namespace noise;
@@ -137,18 +137,18 @@ namespace noise
           red (r), green (g), blue (b), alpha (a)
         {
         }
-
-        /// Value of the alpha (transparency) channel.
-        noise::uint8 alpha;
-
+        
+        /// Value of the red channel.
+        noise::uint8 red;
+        
+        /// Value of the green channel.
+        noise::uint8 green;
+        
         /// Value of the blue channel.
         noise::uint8 blue;
 
-        /// Value of the green channel.
-        noise::uint8 green;
-
-        /// Value of the red channel.
-        noise::uint8 red;
+        /// Value of the alpha (transparency) channel.
+        noise::uint8 alpha;
 
     };
 
@@ -1300,12 +1300,12 @@ namespace noise
         /// Name of the file to write.
         std::string m_destFilename;
 
+        /// A pointer to the noise map that will be written to the file.
+        NoiseMap* m_pSourceNoiseMap;
+
         /// The distance separating adjacent points in the noise map, in
         /// meters.
         float m_metersPerPoint;
-
-        /// A pointer to the noise map that will be written to the file.
-        NoiseMap* m_pSourceNoiseMap;
 
     };
 

@@ -62,16 +62,17 @@ find_library(NOISE_LIBRARY
    NAMES libnoise.so
    PATHS /usr/lib /usr/local/lib
 )
-find_path(NOISE_INCLUDE_DIR
-  NAMES libnoise/noise.h noise/noise.h
-  PATHS /usr/include /usr/local/include
-)
+find_path(NOISE_INCLUDE_DIR noise.h /usr/include/noise /usr/include/libnoise /usr/local/include/noise)
 
-if (NOT NOISE_LIBRARY OR NOT NOISE_INCLUDE_DIR)
+if (NOT NOISE_LIBRARY OR NOISE_INCLUDE_DIR-NOTFOUND)
    set(errors "${errors}\t\t- libNoise library\n")
    set(dependency_error True)
 endif()
 
+#Debian?
+if(NOISE_INCLUDE_DIR MATCHES ".*libnoise$")
+  add_definitions(-DDEBIAN)
+endif()
 
 if (WINDOWS)
    # even if 64bit this is set
@@ -93,3 +94,15 @@ if (NOT dependency_error)
 else()
    message(FATAL_ERROR "\n\tNot all dependencies could be found:\n${errors}\n After installing them please rerun cmake.\n")
 endif()
+
+set(CPACK_PACKAGE_NAME "Mineserver")
+set(CPACK_PACKAGE_VENDOR "The Mineserver Project")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Mineserver Developers <developers@mineserver.be>")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Mineserver - C++ Minecraft server software")
+set(CPACK_PACKAGE_VERSION "0.1.12")
+set(CPACK_PACKAGE_VERSION_MAJOR "0")
+set(CPACK_PACKAGE_VERSION_MINOR "1")
+set(CPACK_PACKAGE_VERSION_PATCH "12")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "/usr/local/bin")
+
+include(CPack)

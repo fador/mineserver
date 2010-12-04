@@ -11,37 +11,63 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\blocks\basic.cpp" />
+    <ClCompile Include="..\src\blocks\door.cpp" />
+    <ClCompile Include="..\src\blocks\falling.cpp" />
+    <ClCompile Include="..\src\blocks\fire.cpp" />
+    <ClCompile Include="..\src\blocks\liquid.cpp" />
+    <ClCompile Include="..\src\blocks\plant.cpp" />
+    <ClCompile Include="..\src\blocks\sign.cpp" />
+    <ClCompile Include="..\src\blocks\snow.cpp" />
+    <ClCompile Include="..\src\blocks\stair.cpp" />
+    <ClCompile Include="..\src\blocks\torch.cpp" />
     <ClCompile Include="..\src\chat.cpp" />
     <ClCompile Include="..\src\commands.cpp" />
     <ClCompile Include="..\src\config.cpp" />
     <ClCompile Include="..\src\constants.cpp" />
     <ClCompile Include="..\src\logger.cpp" />
     <ClCompile Include="..\src\map.cpp" />
-    <ClCompile Include="..\src\mapgen.cpp" />
     <ClCompile Include="..\src\mineserver.cpp" />
     <ClCompile Include="..\src\nbt.cpp" />
-    <ClCompile Include="..\src\noiseutils.cpp" />
     <ClCompile Include="..\src\packets.cpp" />
     <ClCompile Include="..\src\physics.cpp" />
+    <ClCompile Include="..\src\plugin.cpp" />
     <ClCompile Include="..\src\sockets.cpp" />
     <ClCompile Include="..\src\tools.cpp" />
     <ClCompile Include="..\src\user.cpp" />
+    <ClCompile Include="..\src\worldgen\cavegen.cpp" />
+    <ClCompile Include="..\src\worldgen\mapgen.cpp" />
+    <ClCompile Include="..\src\worldgen\mersenne.cpp" />
+    <ClCompile Include="..\src\worldgen\noiseutils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\blocks\basic.h" />
+    <ClInclude Include="..\src\blocks\door.h" />
+    <ClInclude Include="..\src\blocks\falling.h" />
+    <ClInclude Include="..\src\blocks\fire.h" />
+    <ClInclude Include="..\src\blocks\liquid.h" />
+    <ClInclude Include="..\src\blocks\plant.h" />
+    <ClInclude Include="..\src\blocks\sign.h" />
+    <ClInclude Include="..\src\blocks\snow.h" />
+    <ClInclude Include="..\src\blocks\stair.h" />
+    <ClInclude Include="..\src\blocks\torch.h" />
     <ClInclude Include="..\src\chat.h" />
     <ClInclude Include="..\src\config.h" />
     <ClInclude Include="..\src\constants.h" />
     <ClInclude Include="..\src\logger.h" />
     <ClInclude Include="..\src\map.h" />
-    <ClInclude Include="..\src\mapgen.h" />
     <ClInclude Include="..\src\nbt.h" />
-    <ClInclude Include="..\src\noiseutils.h" />
     <ClInclude Include="..\src\packets.h" />
     <ClInclude Include="..\src\physics.h" />
+    <ClInclude Include="..\src\plugin.h" />
     <ClInclude Include="..\src\sockets.h" />
     <ClInclude Include="..\src\tools.h" />
     <ClInclude Include="..\src\user.h" />
     <ClInclude Include="..\src\vec.h" />
+    <ClInclude Include="..\src\worldgen\cavegen.h" />
+    <ClInclude Include="..\src\worldgen\mapgen.h" />
+    <ClInclude Include="..\src\worldgen\mersenne.h" />
+    <ClInclude Include="..\src\worldgen\noiseutils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7F6D1DAB-AA49-4343-B28E-C3E647BE5007}</ProjectGuid>

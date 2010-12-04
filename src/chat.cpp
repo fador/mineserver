@@ -51,10 +51,15 @@
 #include "physics.h"
 
 
-Chat &Chat::get()
+Chat* Chat::mChat;
+
+void Chat::free()
 {
-  static Chat instance;
-  return instance;
+   if (mChat)
+   {
+      delete mChat;
+      mChat = 0;
+   }
 }
 
 Chat::Chat()
@@ -62,12 +67,22 @@ Chat::Chat()
   registerStandardCommands();
 }
 
-void Chat::registerCommand(std::string name, ChatCommand command, bool adminOnly)
+void Chat::registerCommand(Command *command)
 {
-  if(adminOnly)
-    adminCommands[name] = command;
-  else
-    userCommands[name] = command;
+  // Loop thru all the words for this command
+  std::string currentWord;
+  std::deque<std::string> words = command->names;
+  while(!words.empty())
+  {
+    currentWord = words[0];
+    words.pop_front();
+
+    if(command->adminOnly) {
+      adminCommands[currentWord] = command;
+    } else {
+      userCommands[currentWord] = command;
+    }
+  }
 }
 
 bool Chat::checkMotd(std::string motdFile)
@@ -83,7 +98,7 @@ bool Chat::checkMotd(std::string motdFile)
     std::cout << "> Warning: " << motdFile << " not found. Creating..." << std::endl;
 
     std::ofstream motdofs(motdFile.c_str());
-    motdofs << DEFAULTMOTDFILE << std::endl;
+    motdofs << MOTD_CONTENT << std::endl;
     motdofs.close();
   }
 
@@ -106,7 +121,7 @@ bool Chat::loadAdmins(std::string adminFile)
     std::cout << "> Warning: " << adminFile << " not found. Creating..." << std::endl;
 
     std::ofstream adminofs(adminFile.c_str());
-    adminofs << DEFAULTADMINFILE << std::endl;
+    adminofs << ADMIN_CONTENT << std::endl;
     adminofs.close();
 
     return true;
@@ -120,19 +135,96 @@ bool Chat::loadAdmins(std::string adminFile)
       admins.push_back(temp);
   }
   ifs.close();
-
+#ifdef _DEBUG
   std::cout << "Loaded admins from " << adminFile << std::endl;
+#endif
+
+  return true;
+}
+
+bool Chat::loadBanned(std::string bannedFile)
+{
+  // Clear current banned-vector
+  banned.clear();
+
+  // Read banned to deque
+  std::ifstream ifs(bannedFile.c_str());
+
+  // If file does not exist
+  if(ifs.fail())
+  {
+    std::cout << "> Warning: " << bannedFile << " not found. Creating..." << std::endl;
+
+    std::ofstream bannedofs(bannedFile.c_str());
+    bannedofs << BANNED_CONTENT << std::endl;
+    bannedofs.close();
+
+    return true;
+  }
+
+  std::string temp;
+  while(getline(ifs, temp))
+  {
+    // If not commentline
+    if(temp[0] != COMMENTPREFIX)
+      banned.push_back(temp);
+  }
+  ifs.close();
+#ifdef _DEBUG
+  std::cout << "Loaded banned users from " << bannedFile << std::endl;
+#endif
+
+  return true;
+}
+
+bool Chat::loadWhitelist(std::string whitelistFile)
+{
+  // Clear current whitelist-vector
+  whitelist.clear();
+
+  // Read whitelist to deque
+  std::ifstream ifs(whitelistFile.c_str());
+
+  // If file does not exist
+  if(ifs.fail())
+  {
+    std::cout << "> Warning: " << whitelistFile << " not found. Creating..." << std::endl;
+
+    std::ofstream whitelistofs(whitelistFile.c_str());
+    whitelistofs << WHITELIST_CONTENT << std::endl;
+    whitelistofs.close();
+
+    return true;
+  }
+
+  std::string temp;
+  while(getline(ifs, temp))
+  {
+    // If not commentline
+    if(temp[0] != COMMENTPREFIX)
+      whitelist.push_back(temp);
+  }
+  ifs.close();
+#ifdef _DEBUG
+  std::cout << "Loaded whitelisted users from " << whitelistFile << std::endl;
+#endif
 
   return true;
 }
 
 bool Chat::sendUserlist(User *user)
 {
-  this->sendMsg(user, COLOR_BLUE + "[ Players online ]", USER);
+  this->sendMsg(user, COLOR_BLUE + "[ " + dtos(Users.size()) + " players online ]", USER);
 
   for(unsigned int i = 0; i < Users.size(); i++)
   {
-    this->sendMsg(user, "> " + Users[i]->nick, USER);
+	std::string playerDesc = "> " + Users[i]->nick;
+	if(Users[i]->muted)
+		playerDesc += COLOR_YELLOW + " (muted)";
+	if(Users[i]->dnd)
+		playerDesc += COLOR_YELLOW + " (dnd)";
+
+    this->sendMsg(user, playerDesc, USER);
   }
 
   return true;
@@ -172,6 +264,7 @@ bool Chat::handleMsg(User *user, std::string msg)
 {
   // Timestamp
   time_t rawTime = time(NULL);
+
   struct tm *Tm  = localtime(&rawTime);
 
   std::string timeStamp (asctime(Tm));
@@ -207,21 +300,27 @@ bool Chat::handleMsg(User *user, std::string msg)
     // User commands
     CommandList::iterator iter;
     if((iter = userCommands.find(command)) != userCommands.end())
-      iter->second(user, command, cmd);
+      iter->second->callback(user, command, cmd);
     else if(user->admin && (iter = adminCommands.find(command)) != adminCommands.end())
-      iter->second(user, command, cmd);
+      iter->second->callback(user, command, cmd);
   }
   // Normal message
   else
   {
-    if(user->admin)
-      msg = timeStamp + " <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg;
-    else
-      msg = timeStamp + " <"+ user->nick + "> " + msg;
+		if(user->isAbleToCommunicate("chat") == false) {
+			return true;
+		}
+    else {
+      if(user->admin)
+        msg = timeStamp + " <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg;
+      else
+        msg = timeStamp + " <"+ user->nick + "> " + msg;
+    }
 
     LOG(msg);
 
     this->sendMsg(user, msg, ALL);
+
   }
 
   return true;
@@ -246,7 +345,7 @@ bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
     break;
 
   case USER:
-    user->buffer.addToWrite(tmpArray, tmpArrayLen);
+   	user->buffer.addToWrite(tmpArray, tmpArrayLen);
     break;
 
   case ADMINS:
@@ -261,4 +360,44 @@ bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
   delete[] tmpArray;
 
   return true;
+}
+
+void Chat::sendUserHelp(User* user, std::deque<std::string> args)
+{
+  sendHelp(user, args, false);
+}
+
+void Chat::sendAdminHelp(User* user, std::deque<std::string> args)
+{
+  sendHelp(user, args, true);
+}
+
+void Chat::sendHelp(User *user, std::deque<std::string> args, bool adminOnly)
+{
+  CommandList *commandList = &userCommands;
+  std::string commandColor = COLOR_BLUE;
+  if(adminOnly) {
+    commandList = &adminCommands;
+    commandColor = COLOR_RED; // different color for admin commands
+  }
+
+  if(args.size() == 0) {
+    for(CommandList::iterator it = commandList->begin();
+        it != commandList->end();
+        it++) {
+      std::string args = it->second->arguments;
+      std::string description = it->second->description;
+      sendMsg(user, commandColor + CHATCMDPREFIX + it->first + " " + args + " : " + COLOR_YELLOW + description, Chat::USER);
+    }
+  } else {
+    CommandList::iterator iter;
+    if((iter = commandList->find(args.front())) != commandList->end()) {
+      std::string args = iter->second->arguments;
+      std::string description = iter->second->description;
+      sendMsg(user, commandColor + CHATCMDPREFIX + iter->first + args, Chat::USER);
+      sendMsg(user, COLOR_YELLOW + CHATCMDPREFIX + description, Chat::USER);
+    } else {
+      sendMsg(user, COLOR_RED + "Unknown Command: " + args.front(), Chat::USER);
+    }
+  }
 }

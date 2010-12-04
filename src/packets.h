@@ -35,6 +35,10 @@
 #define PACKET_VARIABLE_LEN   -1
 #define PACKET_OK             0
 
+#ifndef M_PI
+#define M_PI 3.141592653589793238462643
+#endif
+
 class PacketHandler;
 class User;
 
@@ -86,7 +90,7 @@ enum
   //v4 Packets
   PACKET_USE_ENTITY      = 0x07,
   PACKET_ENTITY_VELOCITY = 0x1c,
-  PACKET_ATTACH_ENTITY   = 0x27,
+  PACKET_ATTACH_ENTITY   = 0x27
 };
 
 class Packet
@@ -216,7 +220,7 @@ public:
   {
     uint32 nval;
     memcpy(&nval, &val , 4);
-    htonl(nval);
+    nval = htonl(nval);
     addToWrite(&nval, 4);
     return *this;
   }
@@ -403,17 +407,20 @@ private:
   {
   }
 
+   static PacketHandler *mPacketHandler;
 public:
 
-  void initPackets();
+  void init();
+  void free();
 
-
-
-  static PacketHandler &get()
+  static PacketHandler* get()
   {
-    static PacketHandler instance;
-    return instance;
+    if(!mPacketHandler) {
+      mPacketHandler = new PacketHandler();
+    }
+    return mPacketHandler;
   }
+
   //Information of all the packets
   //around 2kB of memory
   Packets packets[256];

@@ -1,7 +1,0 @@
-#
-# Write message of the day here. 
-# Lines beginning with # are commentlines and will not be sent to player
-#
-> §aWelcome to Mineserver!
-> §bThis is MOTD
-> §fThis is third line of MOTD :E

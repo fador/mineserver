@@ -19,9 +19,9 @@ Server still lacks some critical features and should be only used for testing.
  * Mac OS X
  * FreeBSD / PCBSD
  
-We are trying to minimize memory and cpu usage compared to original Java server.
+We are trying to minimize memory and CPU usage compared to original Java server.
 
-### Features
+### Features (Some features are currently not operational because of major code rewrite)
  * Various chat commands, more to come..
  * NBT parsing/saving
  * Lightmap generation
@@ -30,44 +30,14 @@ We are trying to minimize memory and cpu usage compared to original Java server.
  * Basic physics for gravel and sand
  * Experimental physics for water and lava
  * Flatland map generation
- * Working chests
- * Terrain generation
+ * Working chests & signs
+ * Terrain map generation
   
-### ToDo (Arranged by priority)
- * Getting furnaces and signs to work (In progress)
- * Plugin support (and Lua plugin for scripting)
- * Multithreading
- * Server console
- * Growing trees and cactuses
- * One-click update
- * and more
+### ToDo is located at [http://redmine.fknsrs.biz/projects/mineserver](http://redmine.fknsrs.biz/projects/mineserver)
  
-### Chat commands
-
-**For all players**
-
-*  /players : Lists online players
-*  /about : Server name & version
-*  /rules : Shows server rules
-*  /home : Teleports user to map spawn location
-*  /kit (name) : Gives kit. Items for kit defined in config.cfg with kit_(name) using itemId's
-
-**Admin only**
-
-*  %text : Servermessage 
-*  &text : Admin-only message
-*  /kick nick (kickmsg) : Kicks user with optional kick message
-*  /save : Manually save map to disc
-*  /ctp x y z : Teleport to coordinates (eg. /ctp 100 100 100)
-*  /tp nick : Teleport yourself to nick's position
-*  /tp nick1 nick2 : Teleport nick1 to nick2
-*  /reload : Reload admins and configuration
-*  /give nick id/alias (count) : Gives nick count pieces of id/alias. count = 1 is used if it is not provided. Support for over 64 items. Aliases configurable with item_alias.cfg
-*  /rules nick : Shows server rules (from rules.txt) to nick
-*  /gps (nick) : Without nick shows own coordinates. With nick shows nick's coordinates
-*  /settime (time) : Sets server time. time = 0-24000 (0 and 24000 is day and about 15000 is night)
+### Chat commands can be found at [wiki](http://www.mineserver.be/wiki)
  
-### Compiling
+### Compiling (Better instructions in [wiki](http://www.mineserver.be/wiki))
 Depends on (and tested with):
 
  [zlib 1.2.5](http://www.zlib.org)   

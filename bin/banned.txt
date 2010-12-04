@@ -1,0 +1,1 @@
+# This is default banfile. Write nicks to be banned here one for each line

@@ -22,12 +22,12 @@
 
 #include <fstream>
 
-#ifdef WIN32
-#include <noise/interp.h>
-#include <noise/mathconsts.h>
-#else
+#ifdef DEBIAN
 #include <libnoise/interp.h>
 #include <libnoise/mathconsts.h>
+#else
+#include <noise/interp.h>
+#include <noise/mathconsts.h>
 #endif
 
 
@@ -677,7 +677,7 @@ void WriterTER::WriteDestFile ()
   int height = m_pSourceNoiseMap->GetHeight ();
 
   int bufferSize = CalcWidthByteCount (width);
-  int destSize   = bufferSize * height;
+  //int destSize   = bufferSize * height;
 
   // This buffer holds one horizontal line in the destination file.
   noise::uint8* pLineBuffer = NULL;
@@ -964,7 +964,7 @@ RendererImage::RendererImage ():
   m_recalcLightValues (true)
 {
   BuildGrayscaleGradient ();
-};
+}
 
 void RendererImage::AddGradientPoint (double gradientPos,
   const Color& gradientColor)
@@ -1217,7 +1217,7 @@ RendererNormalMap::RendererNormalMap ():
   m_pDestImage      (NULL),
   m_pSourceNoiseMap (NULL)
 {
-};
+}
 
 Color RendererNormalMap::CalcNormalColor (double nc, double nr, double nu,
   double bumpHeight) const

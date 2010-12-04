@@ -26,9 +26,6 @@
  */
 
 #ifdef WIN32
-  #define _CRTDBG_MAP_ALLOC
-
-  #include <crtdbg.h>
   #include <conio.h>
   #include <WinSock2.h>
 #else
@@ -39,6 +36,8 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <string>
+#include <string.h>
 #include <cstdio>
 #include <ctime>
 #include <cmath>
@@ -46,7 +45,6 @@
 #include <cctype>
 
 #include "tools.h"
-#include "string.h"
 
 void putSint64(uint8 *buf, sint64 value)
 {
