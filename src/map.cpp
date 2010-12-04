@@ -864,6 +864,46 @@ bool Map::loadMap(int x, int z, bool generate)
     {
       MapGen::get()->generateChunk(x,z);
       generateLight(x, z);
+
+      //If we generated spawn pos, make sure the position is not underground!
+      if(x == blockToChunk(spawnPos.x()) &&
+         z == blockToChunk(spawnPos.z()))
+      {
+        uint8 block,meta;
+        bool foundAir=false;
+        if(getBlock(spawnPos.x(),spawnPos.y(),spawnPos.z(), &block, &meta,false) && block != BLOCK_AIR)
+        {
+          uint8 new_y;
+          for(new_y = spawnPos.y(); new_y < 128 ; new_y++)
+          {
+            if(getBlock(spawnPos.x(),new_y,spawnPos.z(), &block, &meta,false) && block == BLOCK_AIR)
+            {
+              foundAir=true;
+              break;
+            }
+          }
+          if(foundAir)
+          {
+            spawnPos.y() = new_y;
+
+            std::string infile = mapDirectory+"/level.dat";
+
+            NBT_Value *root = NBT_Value::LoadFromFile(infile);
+            if(root != NULL)
+            {
+              NBT_Value &data = *((*root)["Data"]);
+              *data["SpawnX"] = (sint32)spawnPos.x();
+              *data["SpawnY"] = (sint32)spawnPos.y();
+              *data["SpawnZ"] = (sint32)spawnPos.z();
+
+              root->SaveToFile(infile);
+
+              delete root;
+            }
+          }
+        }
+        
+      }
       return true;
     }
     else
