@@ -350,7 +350,7 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
         if (light < 0) { light = 0; }        
 
         // Calculate heightmap while looping this
-        if ((stopLight[block] > 0) && (foundheight == false)) {
+        if ((block != BLOCK_AIR) && (foundheight == false)) {
           heightmap[block_z+(block_x<<4)] = ((block_y == 127) ? block_y : block_y + 1);
           foundheight = true;
         }
