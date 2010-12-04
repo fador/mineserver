@@ -170,6 +170,12 @@ public:
   bool dropInventory();
   bool isUnderwater();
 
+
+  bool withinViewDistance(int a, int b)
+  {
+	  return a > b ? (a-b)<viewDistance : (b-a)<viewDistance;
+  }
+
   struct event *GetEvent();
 };
 

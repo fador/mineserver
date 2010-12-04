@@ -449,10 +449,10 @@ bool User::updatePos(double x, double y, double z, double stance)
         {
           for(int mapz = newChunk->z-viewDistance; mapz <= newChunk->z+viewDistance; mapz++)
           {
-		    if(abs(chunkDiffX - oldChunk->z) > 10 || abs(chunkDiffZ - oldChunk->z) > 10)
+		    if(!withinViewDistance(chunkDiffX, oldChunk->x) || !withinViewDistance(chunkDiffZ, oldChunk->z))
 				addQueue(mapx, mapz);
 
-			if(abs((mapx - chunkDiffX) - newChunk->x) > 10 || abs((mapz - chunkDiffZ) - newChunk->z) > 10)
+			if(!withinViewDistance((mapx - chunkDiffX), newChunk->x) || !withinViewDistance((mapz - chunkDiffZ), newChunk->z))
 				addRemoveQueue(mapx-chunkDiffX, mapz-chunkDiffZ);
           }
         }
@@ -462,13 +462,13 @@ bool User::updatePos(double x, double y, double z, double stance)
 		std::set<User*> toRemove;
 		std::set<User*> toAdd;
 
-		int chunkDiffX = newChunk->x - oldChunk->x;
+ 		int chunkDiffX = newChunk->x - oldChunk->x;
 		int chunkDiffZ = newChunk->z - oldChunk->z;
 		for(int mapx = newChunk->x-viewDistance; mapx <= newChunk->x+viewDistance; mapx++)
         {
           for(int mapz = newChunk->z-viewDistance; mapz <= newChunk->z+viewDistance; mapz++)
           {
-		    if(abs(chunkDiffX - oldChunk->x) > 10 || abs(chunkDiffZ - oldChunk->z) > 10)
+		    if(!withinViewDistance(chunkDiffX, oldChunk->x) || !withinViewDistance(chunkDiffZ, oldChunk->z))
 			{
 				addQueue(mapx, mapz);
 				sChunk *chunk = Map::get()->chunks.GetChunk(mapx, mapz);
@@ -479,11 +479,11 @@ bool User::updatePos(double x, double y, double z, double stance)
 				}
 			}
 
-			if(abs((mapx - chunkDiffX) - newChunk->x) > 10 || abs((mapz - chunkDiffZ) - newChunk->z) > 10)
+			if(!withinViewDistance((mapx - chunkDiffX), newChunk->x) || !withinViewDistance((mapz - chunkDiffZ), newChunk->z))
 			{
 				addRemoveQueue(mapx-chunkDiffX, mapz-chunkDiffZ);
 
-				sChunk *chunk = Map::get()->chunks.GetChunk(mapx, mapz);
+				sChunk *chunk = Map::get()->chunks.GetChunk((mapx - chunkDiffX), (mapz - chunkDiffZ));
 
 				if(chunk != NULL)
 				{
@@ -492,6 +492,8 @@ bool User::updatePos(double x, double y, double z, double stance)
 			}
           }
         }
+
+		toRemove.erase(this);
 
 		std::set<User*> toTeleport;
 		std::set<User*>::iterator iter = toRemove.begin(), end = toRemove.end();
