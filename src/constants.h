@@ -134,9 +134,13 @@ const char COMMENTPREFIX  = '#';
 // Configuration
 const std::string CONFIG_FILE = "config.cfg";
 
-// Adminfile
-const std::string ADMIN_FILE    = "admin.txt";
-const std::string ADMIN_CONTENT = "# This is default admin file. Add nicknames here for admins, one per line.";
+// Commands file
+const std::string COMMANDS_FILE    = "commands.cfg";
+const std::string COMMANDS_CONTENT = "# This is default command permissions file. Add minimum permission rank after each command.";
+
+// Permissions file
+const std::string PERMISSIONS_FILE    = "permissions.cfg";
+const std::string PERMISSIONS_CONTENT = "# This is default player permissions file. Add nicknames here for admins, operators or members.";
 
 // Banned users file
 const std::string BANNED_FILE    = "banned.txt";
@@ -169,7 +173,7 @@ struct Drop
   sint32 probability;
   uint8 count;
   bool exclusive;
-  
+
   Drop() {}
 
   Drop(uint16 item_id, uint32 probability, uint8 count, bool exclusive)

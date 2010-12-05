@@ -48,7 +48,7 @@ void initConstants()
   defaultConf.insert(std::pair<std::string, std::string>("default_kick_message", "You have been kicked"));
   defaultConf.insert(std::pair<std::string, std::string>("wrong_protocol_message", "Wrong client protocol"));
   // File settings
-  defaultConf.insert(std::pair<std::string, std::string>("admin_file", ADMIN_FILE));
+  defaultConf.insert(std::pair<std::string, std::string>("permissions_file", PERMISSIONS_FILE));
   defaultConf.insert(std::pair<std::string, std::string>("banned_file", BANNED_FILE));
   defaultConf.insert(std::pair<std::string, std::string>("whitelist_file", WHITELIST_FILE));
   defaultConf.insert(std::pair<std::string, std::string>("motd_file", MOTD_FILE));

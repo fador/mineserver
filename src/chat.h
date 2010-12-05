@@ -65,7 +65,7 @@ public:
   bool handleMsg( User *user, std::string msg );
   bool sendMsg( User *user, std::string msg, MessageTarget action = ALL );
   bool sendUserlist( User *user );
-  bool loadAdmins(std::string adminFile);
+  bool loadPermissions(std::string permissionsFile);
   bool loadBanned(std::string bannedFile);
   bool loadWhitelist(std::string whitelistFile);
   bool checkMotd(std::string motdFile);
