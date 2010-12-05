@@ -42,5 +42,6 @@ class BlockBasic
       bool translateDirection(sint32 *x, sint8 *y, sint32 *z, const sint8 direction);
       bool isBlockEmpty(const sint32 x, const sint8 y, const sint32 z);
       bool spawnBlockItem(const sint32 x, const sint8 y, const sint32 z, const uint8 block);
+      void notifyNeighbours(const sint32 x, const sint8 y, const sint32 z, const std::string callback, User* user,const uint8 oldblock, const sint8 ignore_direction);
 };
 

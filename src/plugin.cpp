@@ -129,6 +129,7 @@ void Plugin::init()
    call.add("onPlace", Function::from_method<BlockTorch, &BlockTorch::onPlace>(torchblock));
    call.add("onNeighbourBroken", Function::from_method<BlockTorch, &BlockTorch::onNeighbourBroken>(torchblock));
    call.add("onReplace", Function::from_method<BlockDefault, &BlockDefault::onReplace>(defaultblock));
+   call.add("onNeighbourMove", Function::from_method<BlockTorch, &BlockTorch::onNeighbourMove>(torchblock));
    setBlockCallback(BLOCK_TORCH, call);
    setBlockCallback(BLOCK_REDSTONE_TORCH_OFF, call);
    setBlockCallback(BLOCK_REDSTONE_TORCH_ON, call);

@@ -27,6 +27,7 @@
 
 #include "basic.h"
 
+#include "plugin.h"
 #include <cmath>
 #include <cstdlib>
 
@@ -118,4 +119,53 @@ bool BlockBasic::spawnBlockItem(const sint32 x, const sint8 y, const sint32 z, c
        }
    }
    return false;
+}
+
+void BlockBasic::notifyNeighbours(const sint32 x, const sint8 y, const sint32 z, const std::string callback, User* user,const uint8 oldblock, const sint8 ignore_direction)
+{
+   uint8 block;
+   uint8 meta;
+   Function::invoker_type inv(user, oldblock, x, y, z, 0);
+
+   if (ignore_direction != BLOCK_SOUTH 
+        && Map::get()->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
+   {
+      inv = Function::invoker_type(user, oldblock, x+1, y, z, BLOCK_SOUTH);
+      Plugin::get()->runBlockCallback(block, callback, inv);
+   }
+
+   if (ignore_direction != BLOCK_NORTH
+        && Map::get()->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
+   {
+      inv = Function::invoker_type(user, oldblock, x-1, y, z, BLOCK_NORTH);
+      Plugin::get()->runBlockCallback(block, callback, inv);
+   }
+
+   if (ignore_direction != BLOCK_TOP
+        && Map::get()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
+   {
+      inv = Function::invoker_type(user, oldblock, x, y+1, z, BLOCK_TOP);
+      Plugin::get()->runBlockCallback(block, callback, inv);
+   }
+
+   if (ignore_direction != BLOCK_BOTTOM
+        && Map::get()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
+   {
+      inv = Function::invoker_type(user, oldblock, x, y-1, z, BLOCK_BOTTOM);
+      Plugin::get()->runBlockCallback(block, callback, inv);
+   }
+
+   if (ignore_direction != BLOCK_WEST
+        && Map::get()->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
+   {
+      inv = Function::invoker_type(user, oldblock, x, y, z+1, BLOCK_WEST);
+      Plugin::get()->runBlockCallback(block, callback, inv);
+   }
+
+   if (ignore_direction != BLOCK_EAST
+        && Map::get()->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
+   {
+      inv = Function::invoker_type(user, oldblock, x, y, z-1, BLOCK_EAST);
+      Plugin::get()->runBlockCallback(block, callback, inv);
+   }
 }

@@ -100,14 +100,8 @@ void BlockFalling::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y
 
    physics(x,y,z);
 
-   /* notify block above of the move */
-   if (!Map::get()->getBlock(x, y+1, z, &block, &meta))
-      return;
-
-   /* recursive behaviour will stop after not finding a block without
-   using the onNeighbourMove callback or reaching the highest block */
-   Function::invoker_type inv(user, block, x, y+1, z, BLOCK_TOP);
-   Plugin::get()->runBlockCallback(block, "onNeighbourMove", inv);
+   /* notify neighbour blocks about the move apart from the bottom */
+   this->notifyNeighbours(x, y, z, "onNeighbourMove", user, block, BLOCK_BOTTOM);
 }
 
 void BlockFalling::physics(sint32 x, sint8 y, sint32 z)
