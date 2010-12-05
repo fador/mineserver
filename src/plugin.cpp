@@ -187,7 +187,7 @@ void Plugin::init()
    call.reset();
    BlockStair* stairblock = new BlockStair();
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
-   call.add("onPlace", Function::from_method<BlockStair, &BlockStair::onPlace>(stairblock));
+   call.add("onPlace", Function::from_method<BlockDefault, &BlockDefault::onPlace>(defaultblock));
    call.add("onNeighbourBroken", Function::from_method<BlockStair, &BlockStair::onNeighbourBroken>(stairblock));
    setBlockCallback(BLOCK_WOODEN_STAIRS, call);
    setBlockCallback(BLOCK_COBBLESTONE_STAIRS, call);
