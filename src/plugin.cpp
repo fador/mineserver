@@ -173,6 +173,8 @@ void Plugin::init()
    setBlockCallback(BLOCK_STATIONARY_WATER, call);
    setBlockCallback(BLOCK_LAVA, call);
    setBlockCallback(BLOCK_STATIONARY_LAVA, call);
+   setBlockCallback(ITEM_WATER_BUCKET, call);
+   setBlockCallback(ITEM_LAVA_BUCKET, call);
 
    /* Fire */
    call.reset();
