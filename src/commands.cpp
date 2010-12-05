@@ -615,6 +615,64 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
     reportError(user, "Usage: /give player item [count]");
 }
 
+
+void giveItemsSelf(User *user, std::string command, std::deque<std::string> args)
+{
+  if(args.size() == 1 || args.size() == 2)
+  {
+    User *tUser = user;
+    int itemId = 0;
+
+    //First check if item is a number
+    itemId = atoi(args[0].c_str());
+
+    //If item was not a number, search the name from config
+    if(itemId == 0)
+      itemId = Conf::get()->iValue(args[0]);
+
+    // Check item validity
+    if(isValidItem(itemId))
+    {
+      if(tUser)
+      {
+        int itemCount = 1, itemStacks = 1;
+
+        if(args.size() == 2)
+        {
+          itemCount = atoi(args[1].c_str());
+          // If multiple stacks
+          itemStacks = roundUpTo(itemCount, 64) / 64;
+          itemCount  -= (itemStacks-1) * 64;
+        }
+
+        int amount = 64;
+        for(int i = 0; i < itemStacks; i++)
+        {
+          // if last stack
+          if(i == itemStacks - 1)
+            amount = itemCount;
+
+          spawnedItem item;
+          item.EID     = generateEID();
+          item.item    = itemId;
+          item.health  = 0;
+          item.count   = amount;
+          item.pos.x() = static_cast<int>(tUser->pos.x * 32);
+          item.pos.y() = static_cast<int>(tUser->pos.y * 32);
+          item.pos.z() = static_cast<int>(tUser->pos.z * 32);
+          Map::get()->sendPickupSpawn(item);
+        }
+
+        Chat::get()->sendMsg(user, COLOR_RED + user->nick + " spawned " + args[0], Chat::ADMINS);
+      }
+    }
+    else
+      reportError(user, "Item " + args[0] + " not found.");
+  }
+  else
+    reportError(user, "Usage: /igive item [count]");
+}
+
 void setHealth(User *user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 2)
@@ -647,7 +705,8 @@ void Chat::registerStandardCommands()
   // Admins Only
   registerCommand(new Command(parseCmd("ban"), "<player>", "Bans (and kicks if online) <player> from server", ban, Conf::get()->commandPermission("ban")));
   registerCommand(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport, Conf::get()->commandPermission("ctp")));
-  registerCommand(new Command(parseCmd("give"), "<player> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems, Conf::get()->commandPermission("give")));
+  registerCommand(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems, Conf::get()->commandPermission("give")));
+  registerCommand(new Command(parseCmd("igive"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf, Conf::get()->commandPermission("give")));
   registerCommand(new Command(parseCmd("gps"), "[<player>]", "Show own coordinates or show <player>'s coordinates", showPosition, Conf::get()->commandPermission("gps")));
   registerCommand(new Command(parseCmd("kick"), "<player>", "Kicks a player with optional kick message", kick, Conf::get()->commandPermission("kick")));
   registerCommand(new Command(parseCmd("mute"), "<player>", "Mutes a player with optional message", mute, Conf::get()->commandPermission("mute")));

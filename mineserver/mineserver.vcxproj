@@ -59,6 +59,7 @@
     <ClInclude Include="..\src\map.h" />
     <ClInclude Include="..\src\nbt.h" />
     <ClInclude Include="..\src\packets.h" />
+    <ClInclude Include="..\src\permissions.h" />
     <ClInclude Include="..\src\physics.h" />
     <ClInclude Include="..\src\plugin.h" />
     <ClInclude Include="..\src\sockets.h" />
