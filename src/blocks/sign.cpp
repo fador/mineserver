@@ -152,9 +152,6 @@ void BlockSign::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
       break;
    }
 
-   if (this->isUserOnBlock(x,y,z))
-      return;
-
    if (!this->isBlockEmpty(x,y,z))
       return;
 

@@ -48,25 +48,17 @@ void BlockPlant::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
 
 void BlockPlant::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-   uint8 block; uint8 meta;
-   uint8 nblock; uint8 nmeta;
-   bool destroy = false;  
+   uint8 block;
+   uint8 meta;
    if (!Map::get()->getBlock(x, y, z, &block, &meta))
       return;
    
-   if (direction == BLOCK_TOP && meta == BLOCK_TOP
-      && Map::get()->getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
-   {
-      // block broken under plant
-      destroy = true;
-   }
-
-   if (destroy)
+   if (direction == BLOCK_TOP && this->isBlockEmpty(x, y-1, z))
    {
       // Break plant and spawn plant item
       Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
       Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
-      this->spawnBlockItem(x,y,z,block);
+      this->spawnBlockItem(x, y, z, block);
    }   
 }
 
