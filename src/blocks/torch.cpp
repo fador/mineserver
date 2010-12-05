@@ -126,7 +126,7 @@ void BlockTorch::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
             // spawn item
             Map::get()->sendBlockChange(x, y, z, 0, 0);
             Map::get()->setBlock(x, y, z, 0, 0);
-            Map::get()->createPickupSpawn(x, y, z, oldblock, 1);
+            this->spawnBlockItem(x, y, z, oldblock);
          }
       break;
       case BLOCK_LAVA:
