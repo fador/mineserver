@@ -38,7 +38,7 @@ public:
     OTHERS,
     ADMINS
   };
-  typedef void (*CommandCallback)(User *, std::string, std::deque<std::string> );
+  typedef void (*CommandCallback)(User *, std::string, std::deque<std::string>);
 
   struct Command
   {
