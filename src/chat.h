@@ -60,11 +60,14 @@ public:
 
   //Chat();
   std::deque<std::string> admins;
+  std::deque<std::string> ops;
+  std::deque<std::string> members;
   std::deque<std::string> banned;
   std::deque<std::string> whitelist;
   bool handleMsg( User *user, std::string msg );
   bool sendMsg( User *user, std::string msg, MessageTarget action = ALL );
   bool sendUserlist( User *user );
+  bool loadCommands(std::string commandsFile);
   bool loadRoles(std::string rolesFile);
   bool loadBanned(std::string bannedFile);
   bool loadWhitelist(std::string whitelistFile);

@@ -523,7 +523,8 @@ void regenerateLighting(User *user, std::string command, std::deque<std::string>
 
 void reloadConfiguration(User *user, std::string command, std::deque<std::string> args)
 {
-  Chat::get()->loadAdmins(Conf::get()->sValue("admin_file"));
+  Chat::get()->loadCommands(Conf::get()->sValue("commands_file"));
+  Chat::get()->loadRoles(Conf::get()->sValue("roles_file"));
   Chat::get()->loadBanned(Conf::get()->sValue("banned_file"));
   Chat::get()->loadWhitelist(Conf::get()->sValue("whitelist_file"));
   Conf::get()->load(CONFIG_FILE);

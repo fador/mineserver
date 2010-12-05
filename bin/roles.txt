@@ -1,9 +1,8 @@
-# admin
+# admins
 Psoden
 fador
+bakkdoor
 
+# ops
 
-# op
-
-
-# member
+# members

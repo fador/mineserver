@@ -33,6 +33,9 @@
 #include <vector>
 #include <ctime>
 #include <math.h>
+#include <algorithm>
+#include <string>
+
 #ifdef WIN32
   #include <winsock2.h>
 #else
@@ -107,10 +110,17 @@ bool Chat::checkMotd(std::string motdFile)
   return true;
 }
 
+bool Chat::loadCommands(std::string commandsFile)
+{
+  return false;
+}
+
 bool Chat::loadRoles(std::string rolesFile)
 {
   // Clear current admin-vector
   admins.clear();
+  ops.clear();
+  members.clear();
 
   // Read admins to deque
   std::ifstream ifs(rolesFile.c_str());
@@ -127,12 +137,27 @@ bool Chat::loadRoles(std::string rolesFile)
     return true;
   }
 
+  std::deque<std::string> *role_list = &members; // default is member role
   std::string temp;
   while(getline(ifs, temp))
   {
-    // If not commentline
-    if(temp[0] != COMMENTPREFIX)
-      admins.push_back(temp);
+    if(temp[0] == COMMENTPREFIX) {
+      temp = temp.substr(1); // ignore COMMENTPREFIX
+      temp.erase(std::remove(temp.begin(), temp.end(), ' '), temp.end());
+
+      // get the name of the role from the comment
+      if(temp == "admins") {
+        role_list = &admins;
+      }
+      if(temp == "ops") {
+        role_list = &ops;
+      }
+      if(temp == "members") {
+        role_list = &members;
+      }
+    } else {
+      role_list->push_back(temp);
+    }
   }
   ifs.close();
 #ifdef _DEBUG
