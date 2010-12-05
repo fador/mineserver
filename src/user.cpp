@@ -103,12 +103,34 @@ bool User::changeNick(std::string _nick)
 {
   nick = _nick;
 
+  SET_GUEST(permissions); // default
+
   // Check adminstatus
   for(unsigned int i = 0; i < Chat::get()->admins.size(); i++)
   {
     if(Chat::get()->admins[i] == nick)
     {
-      SET_ADMIN(this);
+      SET_ADMIN(permissions);
+      break;
+    }
+  }
+
+  // Check op status
+  for(unsigned int i = 0; i < Chat::get()->ops.size(); i++)
+  {
+    if(Chat::get()->ops[i] == nick)
+    {
+      SET_OP(permissions);
+      break;
+    }
+  }
+
+  // Check member status
+  for(unsigned int i = 0; i < Chat::get()->members.size(); i++)
+  {
+    if(Chat::get()->members[i] == nick)
+    {
+      SET_MEMBER(permissions);
       break;
     }
   }
@@ -586,7 +608,27 @@ bool User::sendAdmins(uint8 *data, uint32 len)
 {
   for(unsigned int i = 0; i < Users.size(); i++)
   {
-    if(Users[i]->fd && Users[i]->logged && IS_ADMIN(Users[i]))
+    if(Users[i]->fd && Users[i]->logged && IS_ADMIN(Users[i]->permissions))
+    	Users[i]->buffer.addToWrite(data, len);
+  }
+  return true;
+}
+
+bool User::sendOps(uint8 *data, uint32 len)
+{
+  for(unsigned int i = 0; i < Users.size(); i++)
+  {
+    if(Users[i]->fd && Users[i]->logged && IS_ADMIN(Users[i]->permissions))
+    	Users[i]->buffer.addToWrite(data, len);
+  }
+  return true;
+}
+
+bool User::sendGuests(uint8 *data, uint32 len)
+{
+  for(unsigned int i = 0; i < Users.size(); i++)
+  {
+    if(Users[i]->fd && Users[i]->logged && IS_ADMIN(Users[i]->permissions))
     	Users[i]->buffer.addToWrite(data, len);
   }
   return true;

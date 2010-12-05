@@ -136,6 +136,7 @@ const std::string CONFIG_FILE = "config.cfg";
 
 // Commands file
 const std::string COMMANDS_FILE    = "commands.cfg";
+const std::string COMMANDS_NAME_PREFIX = "cmd_";
 const std::string COMMANDS_CONTENT = "# This is default command permissions file. Add minimum permission rank after each command.";
 
 // Roles file

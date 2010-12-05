@@ -1,7 +1,6 @@
 # admins
 Psoden
 fador
-bakkdoor
 
 # ops
 

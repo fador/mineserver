@@ -80,10 +80,31 @@ void Chat::registerCommand(Command *command)
     currentWord = words[0];
     words.pop_front();
 
-    if(command->adminOnly) {
+    if(IS_ADMIN(command->permissions)) {
       adminCommands[currentWord] = command;
-    } else {
-      userCommands[currentWord] = command;
+      continue;
+    }
+
+    if(IS_OP(command->permissions)) {
+      opCommands[currentWord] = command;
+      adminCommands[currentWord] = command;
+    std::cout << "registering " << command->names[0] << " with perm: " << command->permissions << std::endl;
+      continue;
+    }
+
+    if(IS_MEMBER(command->permissions)) {
+      memberCommands[currentWord] = command;
+      opCommands[currentWord] = command;
+      adminCommands[currentWord] = command;
+      continue;
+    }
+
+    if(IS_GUEST(command->permissions)) {
+      // insert into all
+      guestCommands[currentWord] = command;
+      memberCommands[currentWord] = command;
+      opCommands[currentWord] = command;
+      adminCommands[currentWord] = command;
     }
   }
 }
@@ -108,11 +129,6 @@ bool Chat::checkMotd(std::string motdFile)
   ifs.close();
 
   return true;
-}
-
-bool Chat::loadCommands(std::string commandsFile)
-{
-  return false;
 }
 
 bool Chat::loadRoles(std::string rolesFile)
@@ -156,7 +172,10 @@ bool Chat::loadRoles(std::string rolesFile)
         role_list = &members;
       }
     } else {
-      role_list->push_back(temp);
+      temp.erase(std::remove(temp.begin(), temp.end(), ' '), temp.end());
+      if(temp != "") {
+        role_list->push_back(temp);
+      }
     }
   }
   ifs.close();
@@ -300,7 +319,7 @@ bool Chat::handleMsg(User *user, std::string msg)
   //
 
   // Servermsg (Admin-only)
-  if(msg[0] == SERVERMSGPREFIX && IS_ADMIN(user))
+  if(msg[0] == SERVERMSGPREFIX && IS_ADMIN(user->permissions))
   {
     // Decorate server message
     msg = COLOR_RED + "[!] " + COLOR_GREEN + msg.substr(1);
@@ -308,7 +327,7 @@ bool Chat::handleMsg(User *user, std::string msg)
   }
 
   // Adminchat
-  else if(msg[0] == ADMINCHATPREFIX && IS_ADMIN(user))
+  else if(msg[0] == ADMINCHATPREFIX && IS_ADMIN(user->permissions))
   {
     msg = timeStamp + " @@ <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg.substr(1);
     this->sendMsg(user, msg, ADMINS);
@@ -324,9 +343,9 @@ bool Chat::handleMsg(User *user, std::string msg)
 
     // User commands
     CommandList::iterator iter;
-    if((iter = userCommands.find(command)) != userCommands.end())
+    if((iter = memberCommands.find(command)) != memberCommands.end())
       iter->second->callback(user, command, cmd);
-    else if(IS_ADMIN(user) && (iter = adminCommands.find(command)) != adminCommands.end())
+    else if(IS_ADMIN(user->permissions) && (iter = adminCommands.find(command)) != adminCommands.end())
       iter->second->callback(user, command, cmd);
   }
   // Normal message
@@ -336,7 +355,7 @@ bool Chat::handleMsg(User *user, std::string msg)
 			return true;
 		}
     else {
-      if(IS_ADMIN(user))
+      if(IS_ADMIN(user->permissions))
         msg = timeStamp + " <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg;
       else
         msg = timeStamp + " <"+ user->nick + "> " + msg;
@@ -377,6 +396,14 @@ bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
     user->sendAdmins(tmpArray, tmpArrayLen);
     break;
 
+  case OPS:
+    user->sendOps(tmpArray, tmpArrayLen);
+    break;
+
+  case GUESTS:
+    user->sendGuests(tmpArray, tmpArrayLen);
+    break;
+
   case OTHERS:
     user->sendOthers(tmpArray, tmpArrayLen);
     break;
@@ -387,23 +414,22 @@ bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
   return true;
 }
 
-void Chat::sendUserHelp(User* user, std::deque<std::string> args)
+void Chat::sendHelp(User *user, std::deque<std::string> args)
 {
-  sendHelp(user, args, false);
-}
+  // TODO: Add paging support, since not all commands will fit into
+  // the screen at once.
 
-void Chat::sendAdminHelp(User* user, std::deque<std::string> args)
-{
-  sendHelp(user, args, true);
-}
-
-void Chat::sendHelp(User *user, std::deque<std::string> args, bool adminOnly)
-{
-  CommandList *commandList = &userCommands;
+  CommandList *commandList = &guestCommands; // defaults
   std::string commandColor = COLOR_BLUE;
-  if(adminOnly) {
+
+  if(IS_ADMIN(user->permissions)) {
     commandList = &adminCommands;
     commandColor = COLOR_RED; // different color for admin commands
+  } else if(IS_OP(user->permissions)) {
+    commandList = &opCommands;
+    commandColor = COLOR_GREEN;
+  } else if(IS_MEMBER(user->permissions)) {
+    commandList = &memberCommands;
   }
 
   if(args.size() == 0) {

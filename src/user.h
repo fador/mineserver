@@ -118,6 +118,8 @@ public:
   bool sendOthers(uint8 *data, uint32 len);
   static bool sendAll(uint8 *data, uint32 len);
   static bool sendAdmins(uint8 *data, uint32 len);
+  static bool sendOps(uint8 *data, uint32 len);
+  static bool sendGuests(uint8 *data, uint32 len);
 
   //Check inventory for space
   bool checkInventory(sint16 itemID, char count);

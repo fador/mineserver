@@ -120,12 +120,15 @@ int Mineserver::Run(int argc, char *argv[])
 
   std::string file_config;
   file_config.assign(CONFIG_FILE);
+  std::string file_commands;
+  file_commands.assign(COMMANDS_FILE);
 
   if (argc > 1)
     file_config.assign(argv[1]);
 
   // Initialize conf
   Conf::get()->load(file_config);
+  Conf::get()->load(file_commands, COMMANDS_NAME_PREFIX);
 
   // Write PID to file
   std::ofstream pid_out((Conf::get()->sValue("pid_file")).c_str());
@@ -138,7 +141,6 @@ int Mineserver::Run(int argc, char *argv[])
   pid_out.close();
 
   // Load admin, banned and whitelisted users
-  Chat::get()->loadCommands(Conf::get()->sValue("commands_file"));
   Chat::get()->loadRoles(Conf::get()->sValue("roles_file"));
   Chat::get()->loadBanned(Conf::get()->sValue("banned_file"));
   Chat::get()->loadWhitelist(Conf::get()->sValue("whitelist_file"));
