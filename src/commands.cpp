@@ -703,20 +703,19 @@ void Chat::registerStandardCommands()
   registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", help, Conf::get()->commandPermission("help")));
 
   // Admins Only
-  registerCommand(new Command(parseCmd("ban"), "<player>", "Bans (and kicks if online) <player> from server", ban, Conf::get()->commandPermission("ban")));
-  registerCommand(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport, Conf::get()->commandPermission("ctp")));
-  registerCommand(new Command(parseCmd("give"), "<player> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems, Conf::get()->commandPermission("give")));
-  registerCommand(new Command(parseCmd("igive"), "[count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf, Conf::get()->commandPermission("give")));
-  registerCommand(new Command(parseCmd("gps"), "[<player>]", "Show own coordinates or show <player>'s coordinates", showPosition, Conf::get()->commandPermission("gps")));
-  registerCommand(new Command(parseCmd("kick"), "<player>", "Kicks a player with optional kick message", kick, Conf::get()->commandPermission("kick")));
-  registerCommand(new Command(parseCmd("mute"), "<player>", "Mutes a player with optional message", mute, Conf::get()->commandPermission("mute")));
-  registerCommand(new Command(parseCmd("regen"), "", "Regenerates lightning", regenerateLighting, Conf::get()->commandPermission("regen")));
-  registerCommand(new Command(parseCmd("reload"), "", "Reload admins and configuration", reloadConfiguration, Conf::get()->commandPermission("reload")));
-  registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap, Conf::get()->commandPermission("save")));
-  registerCommand(new Command(parseCmd("sethealth"), "<player> <health>", "Set a player's health. <health> = 0-20", setHealth, Conf::get()->commandPermission("sethealth")));
-  registerCommand(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime, Conf::get()->commandPermission("settime")));
-  registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport, Conf::get()->commandPermission("tp")));
-  registerCommand(new Command(parseCmd("unban"), "<player>", "Lift a ban of a player", unban, Conf::get()->commandPermission("unban")));
-  registerCommand(new Command(parseCmd("unmute"), "<player>", "Unmutes a given player", unmute, Conf::get()->commandPermission("unmute")));
-  registerCommand(new Command(parseCmd("adminhelp"), "[<commandName>]", "Displays help messages for admin commands.", adminHelp, Conf::get()->commandPermission("help")));
+  registerCommand(new Command(parseCmd("ban"), "<player>", "Bans (and kicks if online) <player> from server", ban, true));
+  registerCommand(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport, true));
+  registerCommand(new Command(parseCmd("give"), "<player> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems, true));
+  registerCommand(new Command(parseCmd("igive"), "[count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf, true));
+  registerCommand(new Command(parseCmd("gps"), "[<player>]", "Show own coordinates or show <player>'s coordinates", showPosition, true));
+  registerCommand(new Command(parseCmd("kick"), "<player>", "Kicks a player with optional kick message", kick, true));
+  registerCommand(new Command(parseCmd("mute"), "<player>", "Mutes a player with optional message", mute, true));
+  registerCommand(new Command(parseCmd("regen"), "", "Regenerates lightning", regenerateLighting, true));
+  registerCommand(new Command(parseCmd("reload"), "", "Reload admins and configuration", reloadConfiguration, true));
+  registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap, true));
+  registerCommand(new Command(parseCmd("sethealth"), "<player> <health>", "Set a player's health. <health> = 0-20", setHealth, true));
+  registerCommand(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime, true));
+  registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport, true));
+  registerCommand(new Command(parseCmd("unban"), "<player>", "Lift a ban of a player", unban, true));
+  registerCommand(new Command(parseCmd("unmute"), "<player>", "Unmutes a given player", unmute, true));
 }
