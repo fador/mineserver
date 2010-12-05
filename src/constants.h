@@ -138,9 +138,9 @@ const std::string CONFIG_FILE = "config.cfg";
 const std::string COMMANDS_FILE    = "commands.cfg";
 const std::string COMMANDS_CONTENT = "# This is default command permissions file. Add minimum permission rank after each command.";
 
-// Permissions file
-const std::string PERMISSIONS_FILE    = "permissions.cfg";
-const std::string PERMISSIONS_CONTENT = "# This is default player permissions file. Add nicknames here for admins, operators or members.";
+// Roles file
+const std::string ROLES_FILE    = "roles.txt";
+const std::string ROLES_CONTENT = "# This is default player roles file. Add nicknames here for admins, operators or members, one per line";
 
 // Banned users file
 const std::string BANNED_FILE    = "banned.txt";

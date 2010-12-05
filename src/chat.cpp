@@ -107,21 +107,21 @@ bool Chat::checkMotd(std::string motdFile)
   return true;
 }
 
-bool Chat::loadPermissions(std::string permissionsFile)
+bool Chat::loadRoles(std::string rolesFile)
 {
   // Clear current admin-vector
   admins.clear();
 
   // Read admins to deque
-  std::ifstream ifs(permissionsFile.c_str());
+  std::ifstream ifs(rolesFile.c_str());
 
   // If file does not exist
   if(ifs.fail())
   {
-    std::cout << "> Warning: " << permissionsFile << " not found. Creating..." << std::endl;
+    std::cout << "> Warning: " << rolesFile << " not found. Creating..." << std::endl;
 
-    std::ofstream adminofs(permissionsFile.c_str());
-    adminofs << PERMISSIONS_CONTENT << std::endl;
+    std::ofstream adminofs(rolesFile.c_str());
+    adminofs << ROLES_CONTENT << std::endl;
     adminofs.close();
 
     return true;
@@ -136,7 +136,7 @@ bool Chat::loadPermissions(std::string permissionsFile)
   }
   ifs.close();
 #ifdef _DEBUG
-  std::cout << "Loaded permissions from " << permissionsFile << std::endl;
+  std::cout << "Loaded roles from " << rolesFile << std::endl;
 #endif
 
   return true;
