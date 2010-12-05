@@ -73,7 +73,7 @@ namespace
   void rules(User *user, std::string command, std::deque<std::string> args)
   {
     User *tUser = user;
-    if(!args.empty() && user->admin)
+    if(!args.empty() && IS_ADMIN(user->permissions))
       tUser = getUserByNick(args[0]);
     if(tUser != NULL)
     {
@@ -371,16 +371,10 @@ void doNotDisturb(User *user, std::string command, std::deque<std::string> args)
 	user->toggleDND();
 }
 
-void userHelp(User *user, std::string command, std::deque<std::string> args)
+void help(User *user, std::string command, std::deque<std::string> args)
 {
-  Chat::get()->sendUserHelp(user, args);
+  Chat::get()->sendHelp(user, args);
 }
-
-void adminHelp(User *user, std::string command, std::deque<std::string> args)
-{
-  Chat::get()->sendAdminHelp(user, args);
-}
-
 
 void setTime(User *user, std::string command, std::deque<std::string> args)
 {
@@ -523,10 +517,11 @@ void regenerateLighting(User *user, std::string command, std::deque<std::string>
 
 void reloadConfiguration(User *user, std::string command, std::deque<std::string> args)
 {
-  Chat::get()->loadAdmins(Conf::get()->sValue("admin_file"));
+  Chat::get()->loadRoles(Conf::get()->sValue("roles_file"));
   Chat::get()->loadBanned(Conf::get()->sValue("banned_file"));
   Chat::get()->loadWhitelist(Conf::get()->sValue("whitelist_file"));
   Conf::get()->load(CONFIG_FILE);
+  Conf::get()->load(COMMANDS_FILE, COMMANDS_NAME_PREFIX);
 
   // Set physics enable state based on config
   Physics::get()->enabled = (Conf::get()->bValue("liquid_physics"));
@@ -696,32 +691,32 @@ void setHealth(User *user, std::string command, std::deque<std::string> args)
 void Chat::registerStandardCommands()
 {
   // // Players
-  registerCommand(new Command(parseCmd("about"), "", "Display server name & version", about, false));
-  registerCommand(new Command(parseCmd("home"), "", "Teleport to map spawn location", home, false));
-  registerCommand(new Command(parseCmd("kit"), "<name>", "Gives kit", kit, false));
-  registerCommand(new Command(parseCmd("motd"), "", "Display Message Of The Day", showMOTD, false));
-  registerCommand(new Command(parseCmd("players who"), "", "Lists online players", playerList, false));
-  registerCommand(new Command(parseCmd("rules"), "", "Display server rules", rules, false));
-  registerCommand(new Command(parseCmd("e em emote me"), "", "Emote", emote, false));
-  registerCommand(new Command(parseCmd("whisper w tell t"), "<player> <message>", "Send a private message", whisper, false));
-  registerCommand(new Command(parseCmd("dnd"), "", "Do Not Disturb - toggles receiving chat messages", doNotDisturb, false));
-  registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", userHelp, false));
+  registerCommand(new Command(parseCmd("about"), "", "Display server name & version", about, Conf::get()->commandPermission("about")));
+  registerCommand(new Command(parseCmd("home"), "", "Teleport to map spawn location", home, Conf::get()->commandPermission("home")));
+  registerCommand(new Command(parseCmd("kit"), "<name>", "Gives kit", kit, Conf::get()->commandPermission("kit")));
+  registerCommand(new Command(parseCmd("motd"), "", "Display Message Of The Day", showMOTD, Conf::get()->commandPermission("motd")));
+  registerCommand(new Command(parseCmd("players who"), "", "Lists online players", playerList, Conf::get()->commandPermission("who")));
+  registerCommand(new Command(parseCmd("rules"), "", "Display server rules", rules, Conf::get()->commandPermission("rules")));
+  registerCommand(new Command(parseCmd("e em emote me"), "", "Emote", emote, Conf::get()->commandPermission("emote")));
+  registerCommand(new Command(parseCmd("whisper w tell t"), "<player> <message>", "Send a private message", whisper, Conf::get()->commandPermission("whisper")));
+  registerCommand(new Command(parseCmd("dnd"), "", "Do Not Disturb - toggles receiving chat messages", doNotDisturb, Conf::get()->commandPermission("dnd")));
+  registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", help, Conf::get()->commandPermission("help")));
 
   // Admins Only
-  registerCommand(new Command(parseCmd("ban"), "<player>", "Bans (and kicks if online) <player> from server", ban, true));
-  registerCommand(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport, true));
-  registerCommand(new Command(parseCmd("give"), "<player> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems, true));
-  registerCommand(new Command(parseCmd("igive"), "[count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf, true));
-  registerCommand(new Command(parseCmd("gps"), "[<player>]", "Show own coordinates or show <player>'s coordinates", showPosition, true));
-  registerCommand(new Command(parseCmd("kick"), "<player>", "Kicks a player with optional kick message", kick, true));
-  registerCommand(new Command(parseCmd("mute"), "<player>", "Mutes a player with optional message", mute, true));
-  registerCommand(new Command(parseCmd("regen"), "", "Regenerates lightning", regenerateLighting, true));
-  registerCommand(new Command(parseCmd("reload"), "", "Reload admins and configuration", reloadConfiguration, true));
-  registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap, true));
-  registerCommand(new Command(parseCmd("sethealth"), "<player> <health>", "Set a player's health. <health> = 0-20", setHealth, true));
-  registerCommand(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime, true));
-  registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport, true));
-  registerCommand(new Command(parseCmd("unban"), "<player>", "Lift a ban of a player", unban, true));
-  registerCommand(new Command(parseCmd("unmute"), "<player>", "Unmutes a given player", unmute, true));
-  registerCommand(new Command(parseCmd("adminhelp"), "[<commandName>]", "Displays help messages for admin commands.", adminHelp, true));
+  registerCommand(new Command(parseCmd("ban"), "<player>", "Bans (and kicks if online) <player> from server", ban, Conf::get()->commandPermission("ban")));
+  registerCommand(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport, Conf::get()->commandPermission("ctp")));
+  registerCommand(new Command(parseCmd("give"), "<player> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems, Conf::get()->commandPermission("give")));
+  registerCommand(new Command(parseCmd("igive"), "[count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf, Conf::get()->commandPermission("give")));
+  registerCommand(new Command(parseCmd("gps"), "[<player>]", "Show own coordinates or show <player>'s coordinates", showPosition, Conf::get()->commandPermission("gps")));
+  registerCommand(new Command(parseCmd("kick"), "<player>", "Kicks a player with optional kick message", kick, Conf::get()->commandPermission("kick")));
+  registerCommand(new Command(parseCmd("mute"), "<player>", "Mutes a player with optional message", mute, Conf::get()->commandPermission("mute")));
+  registerCommand(new Command(parseCmd("regen"), "", "Regenerates lightning", regenerateLighting, Conf::get()->commandPermission("regen")));
+  registerCommand(new Command(parseCmd("reload"), "", "Reload admins and configuration", reloadConfiguration, Conf::get()->commandPermission("reload")));
+  registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap, Conf::get()->commandPermission("save")));
+  registerCommand(new Command(parseCmd("sethealth"), "<player> <health>", "Set a player's health. <health> = 0-20", setHealth, Conf::get()->commandPermission("sethealth")));
+  registerCommand(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime, Conf::get()->commandPermission("settime")));
+  registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport, Conf::get()->commandPermission("tp")));
+  registerCommand(new Command(parseCmd("unban"), "<player>", "Lift a ban of a player", unban, Conf::get()->commandPermission("unban")));
+  registerCommand(new Command(parseCmd("unmute"), "<player>", "Unmutes a given player", unmute, Conf::get()->commandPermission("unmute")));
+  registerCommand(new Command(parseCmd("adminhelp"), "[<commandName>]", "Displays help messages for admin commands.", adminHelp, Conf::get()->commandPermission("help")));
 }

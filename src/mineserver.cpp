@@ -120,12 +120,15 @@ int Mineserver::Run(int argc, char *argv[])
 
   std::string file_config;
   file_config.assign(CONFIG_FILE);
+  std::string file_commands;
+  file_commands.assign(COMMANDS_FILE);
 
   if (argc > 1)
     file_config.assign(argv[1]);
 
   // Initialize conf
   Conf::get()->load(file_config);
+  Conf::get()->load(file_commands, COMMANDS_NAME_PREFIX);
 
   // Write PID to file
   std::ofstream pid_out((Conf::get()->sValue("pid_file")).c_str());
@@ -138,7 +141,7 @@ int Mineserver::Run(int argc, char *argv[])
   pid_out.close();
 
   // Load admin, banned and whitelisted users
-  Chat::get()->loadAdmins(Conf::get()->sValue("admin_file"));
+  Chat::get()->loadRoles(Conf::get()->sValue("roles_file"));
   Chat::get()->loadBanned(Conf::get()->sValue("banned_file"));
   Chat::get()->loadWhitelist(Conf::get()->sValue("whitelist_file"));
   // Load MOTD
@@ -169,7 +172,7 @@ int Mineserver::Run(int argc, char *argv[])
 
   // Load port from config
   int port = Conf::get()->iValue("port");
-  
+
   // Initialize plugins
   Plugin::get()->init();
 
@@ -287,7 +290,7 @@ int Mineserver::Run(int argc, char *argv[])
         //Send server time
         Packet pkt;
         pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
-        Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());        
+        Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
       }
 
       //Try to load release time from config
@@ -332,7 +335,7 @@ int Mineserver::Run(int argc, char *argv[])
       }
       Map::get()->mapTime+=20;
       if(Map::get()->mapTime>=24000) Map::get()->mapTime=0;
-      
+
       Map::get()->checkGenTrees();
     }
 
@@ -351,7 +354,7 @@ int Mineserver::Run(int argc, char *argv[])
 #else
   close(m_socketlisten);
 #endif
-  
+
   // Remove the PID file
 #ifdef WIN32
   _unlink((Conf::get()->sValue("pid_file")).c_str());

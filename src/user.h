@@ -34,6 +34,8 @@
 #include "tools.h"
 #include "constants.h"
 #include "packets.h"
+#include "permissions.h"
+
 
 struct position
 {
@@ -86,7 +88,6 @@ public:
   bool waitForData;
   uint32 write_err_count;
   bool logged;
-  bool admin;
   bool banned;
   bool whitelist;
   bool muted;
@@ -98,6 +99,8 @@ public:
   position pos;
   vec curChunk;
   Inventory inv;
+
+  int permissions; // bitmask for permissions. See permissions.h
 
   sint32 attachedTo;
 
@@ -116,6 +119,8 @@ public:
   bool sendOthers(uint8 *data, uint32 len);
   static bool sendAll(uint8 *data, uint32 len);
   static bool sendAdmins(uint8 *data, uint32 len);
+  static bool sendOps(uint8 *data, uint32 len);
+  static bool sendGuests(uint8 *data, uint32 len);
 
   //Check inventory for space
   bool checkInventory(sint16 itemID, char count);

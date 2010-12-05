@@ -36,9 +36,11 @@ public:
     ALL,
     USER,
     OTHERS,
-    ADMINS
+    ADMINS,
+    OPS,
+    GUESTS
   };
-  typedef void (*CommandCallback)(User *, std::string, std::deque<std::string> );
+  typedef void (*CommandCallback)(User *, std::string, std::deque<std::string>);
 
   struct Command
   {
@@ -46,32 +48,33 @@ public:
     std::string arguments;
     std::string description;
     CommandCallback callback;
-    bool adminOnly;
+    int permissions;
 
-    Command(std::deque<std::string> names, std::string arguments, std::string description, CommandCallback callback, bool adminOnly)
+    Command(std::deque<std::string> names, std::string arguments, std::string description, CommandCallback callback, int permissions)
     : names(names),
       arguments(arguments),
       description(description),
       callback(callback),
-      adminOnly(adminOnly)
+      permissions(permissions)
     {
     }
   };
 
   //Chat();
   std::deque<std::string> admins;
+  std::deque<std::string> ops;
+  std::deque<std::string> members;
   std::deque<std::string> banned;
   std::deque<std::string> whitelist;
   bool handleMsg( User *user, std::string msg );
   bool sendMsg( User *user, std::string msg, MessageTarget action = ALL );
   bool sendUserlist( User *user );
-  bool loadAdmins(std::string adminFile);
+  bool loadRoles(std::string rolesFile);
   bool loadBanned(std::string bannedFile);
   bool loadWhitelist(std::string whitelistFile);
   bool checkMotd(std::string motdFile);
   void registerCommand(Command *command);
-  void sendUserHelp(User *user, std::deque<std::string> args);
-  void sendAdminHelp(User *user, std::deque<std::string> args);
+  void sendHelp(User *user, std::deque<std::string> args);
   static Chat* get()
   {
     if(!mChat) {
@@ -85,13 +88,14 @@ private:
 
   typedef std::map<std::string, Command*> CommandList;
 
-  CommandList userCommands;
   CommandList adminCommands;
+  CommandList opCommands;
+  CommandList memberCommands;
+  CommandList guestCommands;
 
   Chat();
   void registerStandardCommands();
   std::deque<std::string> parseCmd(std::string cmd);
-  void sendHelp(User *user, std::deque<std::string> args, bool adminOnly);
 };
 
 #endif

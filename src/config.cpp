@@ -36,6 +36,7 @@
 
 #include "logger.h"
 #include "constants.h"
+#include "permissions.h"
 
 #include "config.h"
 
@@ -52,7 +53,7 @@ void Conf::free()
 }
 
 // Load/reload configuration
-bool Conf::load(std::string configFile)
+bool Conf::load(std::string configFile, std::string namePrefix)
 {
   #ifdef _DEBUG
   std::cout << "Loading data from " << configFile << std::endl;
@@ -99,7 +100,7 @@ bool Conf::load(std::string configFile)
   while(getline(ifs, temp))
   {
     //If empty line
-    if(temp.size() == 0) 
+    if(temp.size() == 0)
       continue;
 
     // If commentline -> skip to next
@@ -167,12 +168,12 @@ bool Conf::load(std::string configFile)
     }
 
     // Update existing configuration and add new lines
-    if(confSet.find(line[0]) != confSet.end())
-      confSet[line[0]] = text;
+    if(confSet.find(namePrefix + line[0]) != confSet.end())
+      confSet[namePrefix + line[0]] = text;
     else
     {
       // Push to configuration
-      confSet.insert(std::pair<std::string, std::string>(line[0], text));
+      confSet.insert(std::pair<std::string, std::string>(namePrefix + line[0], text));
     }
 
     // Count line numbers
@@ -261,4 +262,25 @@ std::vector<int> Conf::vValue(std::string name)
     return temp;
   }
 
+}
+
+int Conf::commandPermission(std::string commandName)
+{
+  std::string permissionName = sValue(COMMANDS_NAME_PREFIX + commandName);
+
+  if(permissionName == "admin")
+    return PERM_ADMIN;
+
+  if(permissionName == "op")
+    return PERM_OP;
+
+  if(permissionName == "member")
+    return PERM_MEMBER;
+
+  if(permissionName == "guest")
+    return PERM_GUEST;
+
+  std::cout << "Warning! Unknown command permission: " << permissionName << " for command: " << commandName << std::endl;
+
+  return PERM_GUEST; // default
 }
