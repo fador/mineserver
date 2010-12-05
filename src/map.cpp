@@ -312,7 +312,7 @@ bool Map::generateLight(int x, int z)
   return generateLight(x, z, chunk);
 }
 
-//#define PRINT_LIGHTGEN_TIME
+#define PRINT_LIGHTGEN_TIME
 
 bool Map::generateLight(int x, int z, sChunk *chunk)
 {
@@ -349,10 +349,11 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
     {
       light = 15;
       foundheight = false;
+      sint32 blockx_blockz=(block_z << 7) + (block_x << 11);
 
       for(int block_y = 127; block_y > 0; block_y--)
       {
-        int index      = block_y + (block_z * 128) + (block_x * 128 * 16);
+        int index      = block_y + blockx_blockz;
         int absolute_x = x*16+block_x;
         int absolute_z = z*16+block_z;
         uint8 block    = blocks[index];
@@ -383,9 +384,10 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
   {
     for (int block_z = 0; block_z < 16; block_z++)
     {
+      sint32 blockx_blockz=(block_z << 7) + (block_x << 11);
       for (int block_y = highest_y; block_y >= 0; block_y--)
       {
-        int index      = block_y + (block_z * 128) + (block_x * 128 * 16);
+        int index      = block_y + blockx_blockz;
         int absolute_x = x*16+block_x;
         int absolute_z = z*16+block_z;
         uint8 block    = blocks[index];
@@ -767,7 +769,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
 
   uint8 *blocks      = chunk->blocks;
   uint8 *metapointer = chunk->data;
-  int index          = y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
+  int index          = y + (chunk_block_z << 7) + (chunk_block_x << 11);
   blocks[index] = type;
   char metadata      = metapointer[index>>1];
 
