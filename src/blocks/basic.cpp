@@ -27,154 +27,76 @@
 
 #include "basic.h"
 
-#include <cmath>
-
-void BlockBasic::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+bool BlockBasic::isBlockStackable(const uint8 block)
 {
+   /* Check block below allows blocks placed on top */
+   switch(block)
+   {
+      case BLOCK_WORKBENCH:
+      case BLOCK_FURNACE:
+      case BLOCK_BURNING_FURNACE:
+      case BLOCK_CHEST:
+      case BLOCK_JUKEBOX:
+      case BLOCK_TORCH:
+      case BLOCK_REDSTONE_TORCH_OFF:
+      case BLOCK_REDSTONE_TORCH_ON:
+      case BLOCK_WATER:
+      case BLOCK_STATIONARY_WATER:
+      case BLOCK_LAVA:
+      case BLOCK_STATIONARY_LAVA:
+      case BLOCK_AIR:
+       return false;
+      break;
+      default:
+      break;
+   }
+   return true;
 }
 
-void BlockBasic::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+bool BlockBasic::isUserOnBlock(const sint32 x, const sint8 y, const sint32 z)
 {
-
+   /* TODO: Get Users by chunk rather then whole list */
+   for(unsigned int i = 0; i < Users.size(); i++)
+   {
+      /* don't allow block placement on top of player */
+      if (Users[i]->checkOnBlock(x,y,z))
+         return true;
+   }
+   return false;
 }
 
-void BlockBasic::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+bool BlockBasic::translateDirection(sint32 *x, sint8 *y, sint32 *z, const sint8 direction)
 {
-
+   switch(direction)
+   {
+      case BLOCK_SOUTH:
+         *x-=1;
+      break;
+      case BLOCK_NORTH:
+         *x+=1;
+      break;
+      case BLOCK_EAST:
+         *z+=1;
+      break;
+      case BLOCK_WEST:
+         *z-=1;
+      break;
+      case BLOCK_TOP:
+         *y+=1;
+      break;
+      case BLOCK_BOTTOM:
+         *y-=1;
+      break;
+      default:
+         return false;
+      break;
+   }
+   return true;
 }
 
-void BlockBasic::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+bool BlockBasic::isBlockEmpty(const sint32 x, const sint8 y, const sint32 z)
 {
    uint8 block;
    uint8 meta;
-   if (Map::get()->getBlock(x, y, z, &block, &meta))
-   {
-      Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-      Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
-
-      int count = 1;
-      if (BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand() % 10000)
-      {
-          uint16 item_id = BLOCKDROPS[block].item_id;
-          count = BLOCKDROPS[block].count;
-          Map::get()->createPickupSpawn(x, y, z, item_id, count);
-      }
-   }
+   return Map::get()->getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR;
 }
-
-void BlockBasic::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
-
-void BlockBasic::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   uint8 oldblock;
-   uint8 oldmeta;
-
-   if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
-   {
-      /* Check block below allows blocks placed on top */
-      switch(oldblock)
-      {
-         case BLOCK_WORKBENCH:
-         case BLOCK_FURNACE:
-         case BLOCK_BURNING_FURNACE:
-         case BLOCK_CHEST:
-         case BLOCK_JUKEBOX:
-         case BLOCK_TORCH:
-         case BLOCK_REDSTONE_TORCH_OFF:
-         case BLOCK_REDSTONE_TORCH_ON:
-         case BLOCK_WATER:
-         case BLOCK_STATIONARY_WATER:
-         case BLOCK_LAVA:
-         case BLOCK_STATIONARY_LAVA:
-          return;
-         break;
-         default:
-            switch(direction)
-            {
-               case BLOCK_SOUTH:
-                  x--;
-               break;
-               case BLOCK_NORTH:
-                  x++;
-               break;
-               case BLOCK_EAST:
-                  z++;
-               break;
-               case BLOCK_WEST:
-                  z--;
-               break;
-               case BLOCK_TOP:
-                  y++;
-               break;
-               case BLOCK_BOTTOM:
-                  y--;
-               break;
-               default:
-                  return;
-               break;
-            }
-            
-            /* TODO: Get Users by chunk rather then whole list */
-            for(unsigned int i = 0; i < Users.size(); i++)
-            {
-               /* don't allow block placement on top of player */
-               if (Users[i]->checkOnBlock(x,y,z))
-                  return;
-            }
-            
-            signed short diffX, diffZ;
-            diffX = x - user->pos.x;
-            diffZ = z - user->pos.z;
-
-            if (diffX > diffZ)
-            {
-              // We compare on the x axis
-              if (diffX > 0) {
-                direction = BLOCK_BOTTOM;
-              } else {
-                direction = BLOCK_EAST;
-              }
-            } else {
-              // We compare on the z axis
-              if (diffZ > 0) {
-                direction = BLOCK_SOUTH;
-              } else {
-                direction = BLOCK_NORTH;
-              }
-            }
-
-            uint8 block;
-            uint8 meta;
-            if (Map::get()->getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
-            {
-               Map::get()->setBlock(x, y, z, (char)newblock, direction);
-               Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
-            }
-         break;
-      }
-   }
-}
-
-void BlockBasic::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
-
-void BlockBasic::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   uint8 oldblock;
-   uint8 oldmeta;
-
-   if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
-   {
-      Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-      Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
-      Map::get()->createPickupSpawn(x, y, z, oldblock, 1);
-   }
-}
-
-void BlockBasic::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
-

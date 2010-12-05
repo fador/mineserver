@@ -566,6 +566,32 @@ bool User::sendOthers(uint8 *data, uint32 len)
   return true;
 }
 
+sint8 User::relativeToBlock(const sint32 x, const sint8 y, const sint32 z)
+{
+   sint8 direction;
+   signed short diffX, diffZ;
+   diffX = x - this->pos.x;
+   diffZ = z - this->pos.z;
+
+   if (diffX > diffZ)
+   {
+     // We compare on the x axis
+     if (diffX > 0) {
+       direction = BLOCK_BOTTOM;
+     } else {
+       direction = BLOCK_EAST;
+     }
+   } else {
+     // We compare on the z axis
+     if (diffZ > 0) {
+       direction = BLOCK_SOUTH;
+     } else {
+       direction = BLOCK_NORTH;
+     }
+   }
+   return direction;
+}
+
 bool User::sendAll(uint8 *data, uint32 len)
 {
   for(unsigned int i = 0; i < Users.size(); i++)
