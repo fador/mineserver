@@ -69,9 +69,6 @@
     <ClCompile Include="..\src\plugin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\blocks\basic.cpp">
-      <Filter>Source Files\blocks</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\blocks\door.cpp">
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
@@ -107,6 +104,12 @@
     </ClCompile>
     <ClCompile Include="..\src\worldgen\cavegen.cpp">
       <Filter>Source Files\worldgen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\blocks\default.cpp">
+      <Filter>Source Files\blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\blocks\basic.cpp">
+      <Filter>Source Files\blocks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -149,9 +152,6 @@
     <ClInclude Include="..\src\plugin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\blocks\basic.h">
-      <Filter>Header Files\blocks</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\blocks\door.h">
       <Filter>Header Files\blocks</Filter>
     </ClInclude>
@@ -187,6 +187,12 @@
     </ClInclude>
     <ClInclude Include="..\src\worldgen\cavegen.h">
       <Filter>Header Files\worldgen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\default.h">
+      <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\basic.h">
+      <Filter>Header Files\blocks</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

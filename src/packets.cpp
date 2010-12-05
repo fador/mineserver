@@ -554,10 +554,11 @@ int PacketHandler::player_block_placement(User *user)
     user->sendAll((uint8 *)pkt.getWrite(), pkt.getWriteLen());
   }
 
-  if ((newblock > 0xFF || newblock == -1) && newblock != ITEM_SIGN)
+  if (newblock == -1 && newblock != ITEM_SIGN)
+  {
+     std::cout << "ignoring:" << newblock << std::endl;
      return PACKET_OK;
-  
-
+  }
     
   if(y < 0)
     return PACKET_OK;

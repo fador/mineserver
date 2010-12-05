@@ -97,7 +97,7 @@ private:
    Plugin()
    {
    }
-   typedef std::map<int, Callback> Callbacks;
+   typedef std::map<sint16, Callback> Callbacks;
    Callbacks blockevents;
    static Plugin *mPlugin;
 public:
