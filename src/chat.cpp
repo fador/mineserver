@@ -275,7 +275,7 @@ bool Chat::handleMsg(User *user, std::string msg)
   //
 
   // Servermsg (Admin-only)
-  if(msg[0] == SERVERMSGPREFIX && user->admin)
+  if(msg[0] == SERVERMSGPREFIX && IS_ADMIN(user))
   {
     // Decorate server message
     msg = COLOR_RED + "[!] " + COLOR_GREEN + msg.substr(1);
@@ -283,7 +283,7 @@ bool Chat::handleMsg(User *user, std::string msg)
   }
 
   // Adminchat
-  else if(msg[0] == ADMINCHATPREFIX && user->admin)
+  else if(msg[0] == ADMINCHATPREFIX && IS_ADMIN(user))
   {
     msg = timeStamp + " @@ <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg.substr(1);
     this->sendMsg(user, msg, ADMINS);
@@ -301,7 +301,7 @@ bool Chat::handleMsg(User *user, std::string msg)
     CommandList::iterator iter;
     if((iter = userCommands.find(command)) != userCommands.end())
       iter->second->callback(user, command, cmd);
-    else if(user->admin && (iter = adminCommands.find(command)) != adminCommands.end())
+    else if(IS_ADMIN(user) && (iter = adminCommands.find(command)) != adminCommands.end())
       iter->second->callback(user, command, cmd);
   }
   // Normal message
@@ -311,7 +311,7 @@ bool Chat::handleMsg(User *user, std::string msg)
 			return true;
 		}
     else {
-      if(user->admin)
+      if(IS_ADMIN(user))
         msg = timeStamp + " <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg;
       else
         msg = timeStamp + " <"+ user->nick + "> " + msg;

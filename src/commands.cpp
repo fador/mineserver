@@ -73,7 +73,7 @@ namespace
   void rules(User *user, std::string command, std::deque<std::string> args)
   {
     User *tUser = user;
-    if(!args.empty() && user->admin)
+    if(!args.empty() && IS_ADMIN(user))
       tUser = getUserByNick(args[0]);
     if(tUser != NULL)
     {
