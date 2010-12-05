@@ -102,7 +102,7 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
     }
 
     
-    if(y < 60 && addOre)
+    if(y < 60.0 && addOre)
     {      
       caveN1 = caveNoise1.GetValue(x,y,z);
       if(caveN1 > 0.56)

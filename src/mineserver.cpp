@@ -37,6 +37,7 @@
   #include <string.h>
   #include <netdb.h>
   #include <unistd.h>
+  #include <sys/times.h>
 #endif
 #include <sys/types.h>
 #include <fcntl.h>
@@ -157,11 +158,36 @@ int Mineserver::Run(int argc, char *argv[])
   {
     std::cout << "Generating spawn area...\n";
     int size=Conf::get()->iValue("map_generate_spawn_size");
+    bool show_progress = Conf::get()->bValue("map_generate_spawn_show_progress");
+    #ifdef WIN32    
+      DWORD t_begin,t_end;
+    #else
+      clock_t t_begin,t_end;
+    #endif
+
     for (int x=-size;x<=size;x++)
     {
+    #ifdef WIN32  
+      if(show_progress)
+        t_begin = timeGetTime();
+    #else    
+      if(show_progress)
+        t_begin = clock();
+    #endif
       for (int z=-size;z<=size;z++)
       {
         Map::get()->loadMap(x, z);
+      }
+      if(show_progress)
+      {
+        #ifdef WIN32
+          t_end = timeGetTime ();
+          std::cout << ((x+size+1)*(size*2+1)) << "/" << (size*2+1)*(size*2+1) << " done. " << (t_end-t_begin)/(size*2+1) << "ms per chunk" << std::endl;
+        #else
+          t_end = clock();
+          std::cout << ((x+size+1)*(size*2+1)) << "/" << (size*2+1)*(size*2+1) << " done. " << ((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1) << "ms per chunk" << std::endl;
+        #endif
+        
       }
     }
 #ifdef _DEBUG
