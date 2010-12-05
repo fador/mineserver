@@ -49,17 +49,7 @@ void BlockFalling::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 
 
 void BlockFalling::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-   uint8 block;
-   uint8 meta;
-   if (Map::get()->getBlock(x, y, z, &block, &meta))
-   {
-      physics(x,y,z);
-      if (Map::get()->getBlock(x, y+1, z, &block, &meta))
-      {
-         Function::invoker_type inv(user, block, x, y+1, z, BLOCK_TOP);
-         Plugin::get()->runBlockCallback(block, "onNeighbourMove", inv);
-      }
-   }
+   this->onNeighbourMove(user, oldblock, x, y, z, direction);
 }
 
 void BlockFalling::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
@@ -67,91 +57,29 @@ void BlockFalling::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
    uint8 oldblock;
    uint8 oldmeta;
 
-   if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
-   {
-      /* Check block below allows blocks placed on top */
-      switch(oldblock)
-      {
-         case BLOCK_WORKBENCH:
-         case BLOCK_FURNACE:
-         case BLOCK_BURNING_FURNACE:
-         case BLOCK_CHEST:
-         case BLOCK_JUKEBOX:
-         case BLOCK_TORCH:
-         case BLOCK_REDSTONE_TORCH_OFF:
-         case BLOCK_REDSTONE_TORCH_ON:
-         case BLOCK_WATER:
-         case BLOCK_STATIONARY_WATER:
-         case BLOCK_LAVA:
-         case BLOCK_STATIONARY_LAVA:
-          return;
-         break;
-         default:
-            switch(direction)
-            {
-               case BLOCK_SOUTH:
-                  x--;
-               break;
-               case BLOCK_NORTH:
-                  x++;
-               break;
-               case BLOCK_EAST:
-                  z++;
-               break;
-               case BLOCK_WEST:
-                  z--;
-               break;
-               case BLOCK_TOP:
-                  y++;
-               break;
-               case BLOCK_BOTTOM:
-                  y--;
-               break;
-               default:
-                  return;
-               break;
-            }
-            
-            /* TODO: Get Users by chunk rather then whole list */
-            for(unsigned int i = 0; i < Users.size(); i++)
-            {
-               /* don't allow block placement on top of player */
-               if (Users[i]->checkOnBlock(x,y,z))
-                  return;
-            }
-            
-            signed short diffX, diffZ;
-            diffX = x - user->pos.x;
-            diffZ = z - user->pos.z;
+   if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
+      return;
 
-            if (diffX > diffZ)
-            {
-              // We compare on the x axis
-              if (diffX > 0) {
-                direction = BLOCK_BOTTOM;
-              } else {
-                direction = BLOCK_EAST;
-              }
-            } else {
-              // We compare on the z axis
-              if (diffZ > 0) {
-                direction = BLOCK_SOUTH;
-              } else {
-                direction = BLOCK_NORTH;
-              }
-            }
+   /* Check block below allows blocks placed on top */
+   if (!this->isBlockStackable(oldblock))
+      return;
 
-            uint8 block;
-            uint8 meta;
-            if (Map::get()->getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR)
-            {
-               Map::get()->setBlock(x, y, z, (char)newblock, direction);
-               Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
-               physics(x,y,z);
-            }
-         break;
-      }
-   }
+   /* move the x,y,z coords dependent upon placement direction */
+   if (!this->translateDirection(&x,&y,&z,direction))
+      return;
+
+   if (this->isUserOnBlock(x,y,z))
+      return;
+
+   if (!this->isBlockEmpty(x,y,z))
+      return;
+
+   direction = user->relativeToBlock(x, y, z);
+
+   Map::get()->setBlock(x, y, z, (char)newblock, direction);
+   Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
+
+   physics(x,y,z);
 }
 
 void BlockFalling::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
@@ -166,15 +94,20 @@ void BlockFalling::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y
 {
    uint8 block;
    uint8 meta;
-   if (Map::get()->getBlock(x, y, z, &block, &meta))
-   {
-      physics(x,y,z);
-      if (Map::get()->getBlock(x, y+1, z, &block, &meta))
-      {
-         Function::invoker_type inv(user, block, x, y+1, z, BLOCK_TOP);
-         Plugin::get()->runBlockCallback(block, "onNeighbourMove", inv);
-      }
-   }
+
+   if (!Map::get()->getBlock(x, y, z, &block, &meta))
+      return;
+
+   physics(x,y,z);
+
+   /* notify block above of the move */
+   if (!Map::get()->getBlock(x, y+1, z, &block, &meta))
+      return;
+
+   /* recursive behaviour will stop after not finding a block without
+   using the onNeighbourMove callback or reaching the highest block */
+   Function::invoker_type inv(user, block, x, y+1, z, BLOCK_TOP);
+   Plugin::get()->runBlockCallback(block, "onNeighbourMove", inv);
 }
 
 void BlockFalling::physics(sint32 x, sint8 y, sint32 z)

@@ -27,9 +27,6 @@
 
 #include "default.h"
 
-#include <cmath>
-#include <cstdlib>
-
 void BlockDefault::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 }
@@ -48,19 +45,13 @@ void BlockDefault::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 
 {
    uint8 block;
    uint8 meta;
-   if (Map::get()->getBlock(x, y, z, &block, &meta))
-   {
-      Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-      Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
 
-      int count = 1;
-      if (BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand() % 10000)
-      {
-          uint16 item_id = BLOCKDROPS[block].item_id;
-          count = BLOCKDROPS[block].count;
-          Map::get()->createPickupSpawn(x, y, z, item_id, count);
-      }
-   }
+   if (!Map::get()->getBlock(x, y, z, &block, &meta))
+      return;
+
+   Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+   Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+   this->spawnBlockItem(x,y,z,block);
 }
 
 void BlockDefault::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
@@ -104,12 +95,12 @@ void BlockDefault::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint
    uint8 oldblock;
    uint8 oldmeta;
 
-   if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
-   {
-      Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-      Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
-      Map::get()->createPickupSpawn(x, y, z, oldblock, 1);
-   }
+   if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
+      return;
+
+   Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+   Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+   Map::get()->createPickupSpawn(x, y, z, oldblock, 1);
 }
 
 void BlockDefault::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)

@@ -26,7 +26,7 @@
  */
 
 #pragma once
-#include <stdio.h>
+
 #include "basic.h"
 class User;
 

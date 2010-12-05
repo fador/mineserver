@@ -27,6 +27,9 @@
 
 #include "basic.h"
 
+#include <cmath>
+#include <cstdlib>
+
 bool BlockBasic::isBlockStackable(const uint8 block)
 {
    /* Check block below allows blocks placed on top */
@@ -99,4 +102,20 @@ bool BlockBasic::isBlockEmpty(const sint32 x, const sint8 y, const sint32 z)
    uint8 block;
    uint8 meta;
    return Map::get()->getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR;
+}
+
+bool BlockBasic::spawnBlockItem(const sint32 x, const sint8 y, const sint32 z, const uint8 block)
+{
+   if (BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand() % 10000)
+   {
+       int count = 0;
+       uint16 item_id = BLOCKDROPS[block].item_id;
+       count = BLOCKDROPS[block].count;
+       if (count)
+       {
+          Map::get()->createPickupSpawn(x, y, z, item_id, count);
+          return true;
+       }
+   }
+   return false;
 }

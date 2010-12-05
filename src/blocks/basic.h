@@ -41,5 +41,6 @@ class BlockBasic
       bool isUserOnBlock(const sint32 x, const sint8 y, const sint32 z);
       bool translateDirection(sint32 *x, sint8 *y, sint32 *z, const sint8 direction);
       bool isBlockEmpty(const sint32 x, const sint8 y, const sint32 z);
+      bool spawnBlockItem(const sint32 x, const sint8 y, const sint32 z, const uint8 block);
 };
 

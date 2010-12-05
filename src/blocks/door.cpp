@@ -27,8 +27,6 @@
 
 #include "door.h"
 
-#include <stdio.h>
-
 void BlockDoor::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
     uint8 block,metadata;
