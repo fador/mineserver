@@ -205,6 +205,9 @@ public:
   // Store if map has been modified
   std::map<uint32, bool> mapChanged;
 
+  // Do we need light regeneration
+  std::map<uint32, bool> mapLightRegen;
+
   // Store item pointers for each chunk
   std::map<uint32, std::vector<spawnedItem *> > mapItems;
 

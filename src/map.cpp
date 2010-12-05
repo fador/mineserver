@@ -786,6 +786,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   metapointer[index >> 1] = metadata;
 
   mapChanged[mapId]       = true;
+  mapLightRegen[mapId]    = true;
   mapLastused[mapId]      = (int)time(0);
 
   return true;
@@ -887,6 +888,7 @@ bool Map::loadMap(int x, int z, bool generate)
     {
       MapGen::get()->generateChunk(x,z);
       generateLight(x, z);
+      mapLightRegen[mapId] = false;
 
       //If we generated spawn pos, make sure the position is not underground!
       if(x == blockToChunk(spawnPos.x()) &&
@@ -990,7 +992,8 @@ bool Map::loadMap(int x, int z, bool generate)
   mapLastused[mapId] = (int)time(0);
 
   // Not changed
-  mapChanged[mapId] = false;
+  mapChanged[mapId]    = false;
+  mapLightRegen[mapId] = false;
 
   return true;
 }
@@ -1011,7 +1014,8 @@ bool Map::saveMap(int x, int z)
     return false;
 
   // Recalculate light maps
-  generateLight(x, z, &maps[mapId]);
+  if(mapLightRegen[mapId])
+    generateLight(x, z, &maps[mapId]);
 
   // Generate map file name
 
@@ -1063,7 +1067,8 @@ bool Map::saveMap(int x, int z)
   maps[mapId].nbt->SaveToFile(outfile);
 
   // Set "not changed"
-  mapChanged[mapId] = false;
+  mapChanged[mapId]   = false;
+  mapLightRegen[mapId]= false;
 
   return true;
 }
@@ -1103,6 +1108,12 @@ void Map::sendToUser(User *user, int x, int z)
 
   if(loadMap(x, z))
   {
+    //Regenerate lighting if needed
+    if(mapLightRegen[mapId])
+    {
+      generateLight(x, z, &maps[mapId]);
+      mapLightRegen[mapId] = false;
+    }
     // Pre chunk
     user->buffer << (sint8)PACKET_PRE_CHUNK << mapposx << mapposz << (sint8)1;
 
