@@ -163,7 +163,7 @@ void Plugin::init()
    call.add("onPlace", Function::from_method<BlockDefault, &BlockDefault::onPlace>(defaultblock));
    setBlockCallback(BLOCK_SNOW, call);
 
-   /* Fire and Water */
+   /* Lava and Water */
    call.reset();
    BlockLiquid* liquidblock = new BlockLiquid();
    call.add("onPlace", Function::from_method<BlockLiquid, &BlockLiquid::onPlace>(liquidblock));
@@ -179,6 +179,7 @@ void Plugin::init()
    BlockFire* fireblock = new BlockFire();
    call.add("onPlace", Function::from_method<BlockFire, &BlockFire::onPlace>(fireblock));
    setBlockCallback(BLOCK_FIRE, call);
+   setBlockCallback(ITEM_FLINT_AND_STEEL, call);
 
    /* Stairs */
    call.reset();
