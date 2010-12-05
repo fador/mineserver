@@ -213,6 +213,8 @@ void Plugin::init()
    call.add("onPlace", Function::from_method<BlockDoor, &BlockDoor::onPlace>(doorblock));
    setBlockCallback(BLOCK_WOODEN_DOOR, call);
    setBlockCallback(BLOCK_IRON_DOOR, call);
+   setBlockCallback(ITEM_WOODEN_DOOR, call);
+   setBlockCallback(ITEM_IRON_DOOR, call);
 
    /* leaves */
    call.reset();
