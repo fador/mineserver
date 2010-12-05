@@ -156,9 +156,14 @@ int Mineserver::Run(int argc, char *argv[])
   if (Conf::get()->bValue("map_generate_spawn"))
   {
     std::cout << "Generating spawn area...\n";
-    for (int x=0;x<12;x++)
-      for (int z=0;z<12;z++)
-        Map::get()->loadMap(x-6, z-6);
+    int size=Conf::get()->iValue("map_generate_spawn_size");
+    for (int x=-size;x<=size;x++)
+    {
+      for (int z=-size;z<=size;z++)
+      {
+        Map::get()->loadMap(x, z);
+      }
+    }
 #ifdef _DEBUG
     std::cout << "Spawn area ready!\n";
 #endif

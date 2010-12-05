@@ -59,6 +59,7 @@ void initConstants()
   defaultConf.insert(std::pair<std::string, std::string>("map_directory", "world"));
   defaultConf.insert(std::pair<std::string, std::string>("map_release_time", "90"));
   defaultConf.insert(std::pair<std::string, std::string>("map_generate_spawn", "true"));
+  defaultConf.insert(std::pair<std::string, std::string>("map_generate_spawn_size", "6"));
   defaultConf.insert(std::pair<std::string, std::string>("save_unchanged_chunks", "true"));
   defaultConf.insert(std::pair<std::string, std::string>("liquid_physics", "true"));
   defaultConf.insert(std::pair<std::string, std::string>("map_flatgrass", "false"));
