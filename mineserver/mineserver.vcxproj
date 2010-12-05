@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\blocks\basic.cpp" />
+    <ClCompile Include="..\src\blocks\default.cpp" />
     <ClCompile Include="..\src\blocks\door.cpp" />
     <ClCompile Include="..\src\blocks\falling.cpp" />
     <ClCompile Include="..\src\blocks\fire.cpp" />
@@ -41,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\blocks\basic.h" />
+    <ClInclude Include="..\src\blocks\default.h" />
     <ClInclude Include="..\src\blocks\door.h" />
     <ClInclude Include="..\src\blocks\falling.h" />
     <ClInclude Include="..\src\blocks\fire.h" />
