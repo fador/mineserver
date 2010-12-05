@@ -27,7 +27,7 @@
 
 #include "basic.h"
 
-#include "plugin.h"
+#include "../plugin.h"
 #include <cmath>
 #include <cstdlib>
 
