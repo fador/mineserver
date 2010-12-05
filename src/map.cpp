@@ -54,6 +54,49 @@
 
 Map* Map::mMap;
 
+void Map::addSapling(User* user, int x, int y, int z)
+{
+  std::cout << "Place sapling " << x << " " << y << " " << z << std::endl;
+
+  saplings.push_back( sTree(x,y,z,mapTime,user->UID) );
+}
+
+void Map::checkGenTrees()
+{
+  std::list<sTree>::iterator iter = saplings.begin(); 
+  
+  while (iter != saplings.end())
+  {
+    if(rand() % 50 == 0)
+    {
+      std::cout << "Grow tree!" << std::endl;
+      
+      sint32 x = (*iter).x;
+      sint32 y = (*iter).y;
+      sint32 z = (*iter).z;
+
+      // grow tree!
+      setBlock( x, y, z, BLOCK_LOG, 0);
+      setBlock( x, y+1, z, BLOCK_LOG, 0);
+      setBlock( x, y+2, z, BLOCK_LOG, 0);
+      setBlock( x, y+3, z, BLOCK_LEAVES, 0);
+
+      sendBlockChange( x, y, z, BLOCK_LOG, 0);
+      sendBlockChange( x, y+1, z, BLOCK_LOG, 0);
+      sendBlockChange( x, y+2, z, BLOCK_LOG, 0);
+      sendBlockChange( x, y+3, z, BLOCK_LEAVES, 0);
+
+        saplings.erase(iter++);  // alternatively, i = items.erase(i);
+    }
+    else
+    {
+        //other_code_involving(*i);
+        ++iter;
+    }
+  }
+
+}
+
 void Map::posToId(int x, int z, uint32 *id)
 {
   uint8 *id_pointer = reinterpret_cast<uint8 *>(id);
@@ -106,6 +149,8 @@ void Map::init()
     level["Data"]->Insert("SpawnZ", new NBT_Value((sint32)0));
     level["Data"]->Insert("RandomSeed", new NBT_Value((sint64)(rand()*65535)));
 
+    level.Insert("Trees", new NBT_Value(NBT_Value::TAG_LIST));
+
     level.SaveToFile(infile);
 
     if (stat(infile.c_str(), &stFileInfo) != 0)
@@ -125,14 +170,50 @@ void Map::init()
   //Get time from the map
   mapTime      = (sint64)*data["Time"];
   mapSeed      = (sint64)*data["RandomSeed"];
-  
+
+  /////////////
+  // Basic tree handling
+
+  // Get list of saplings from map:
+  NBT_Value *trees = ((*root)["Trees"]);
+
+  if(!trees || trees->GetListType() != NBT_Value::TAG_COMPOUND)
+  {
+
+    std::cout << "No Trees in level.dat, creating.." << std::endl;
+    root->Insert("Trees", new NBT_Value(NBT_Value::TAG_LIST,NBT_Value::TAG_COMPOUND));
+    trees = ((*root)["Trees"]);
+    root->SaveToFile(infile);
+  }
+
+  trees->Print();
+
+  std::vector<NBT_Value*> *tree_list = trees->GetList();
+
+  std::cout << (*tree_list).size() << " saplings" << std::endl;
+
+  for(std::vector<NBT_Value*>::iterator iter = (*tree_list).begin(); iter != (*tree_list).end(); ++iter)
+  {
+    NBT_Value &tree = *(*iter);
+    sint32 x = (sint32)*tree["X"];
+    sint32 y = (sint32)*tree["Y"];
+    sint32 z = (sint32)*tree["Z"];
+    sint32 plantedTime = (sint32)*tree["plantedTime"];
+    sint32 plantedBy = (sint32)*tree["plantedBy"];
+    saplings.push_back( sTree(x,y,z,plantedTime,plantedBy) );
+    std::cout << "sapling: " << x << " " << y << " " << z << std::endl;
+  }
+
+  /////////////////
+
   // Init mapgenerator
   MapGen::get()->init(mapSeed);
 
   delete root;
-
+#ifdef _DEBUG
   std::cout << "Spawn: (" << spawnPos.x() << "," << spawnPos.y() << "," << spawnPos.z() << ")"<<
   std::endl;
+#endif
 }
 
 void Map::free()
@@ -172,6 +253,42 @@ bool Map::saveWholeMap()
   for(std::map<uint32, sChunk>::const_iterator it = maps.begin(); it != maps.end(); ++it)
     saveMap(maps[it->first].x, maps[it->first].z);
 
+    /////////////////////
+    // Save map details
+
+    std::string infile = mapDirectory+"/level.dat";
+
+    NBT_Value *root = NBT_Value::LoadFromFile(infile);
+    if(root != NULL)
+    {
+      NBT_Value &data = *((*root)["Data"]);
+
+      //Get time from the map
+      *data["Time"] = mapTime;
+      NBT_Value *trees = ((*root)["Trees"]);
+
+      if(trees)
+      {
+        std::vector<NBT_Value*>* tree_vec = trees->GetList();
+
+        tree_vec->clear();
+
+        for(std::list<sTree>::iterator iter = saplings.begin(); iter != saplings.end(); ++iter)
+        {
+          //(*trees)[i] = (*iter)
+          NBT_Value* tree = new NBT_Value(NBT_Value::TAG_COMPOUND);
+          tree->Insert("X", new NBT_Value( (sint32)(*iter).x));
+          tree->Insert("Y", new NBT_Value( (sint32)(*iter).y));
+          tree->Insert("Z", new NBT_Value( (sint32)(*iter).z));
+          tree->Insert("plantedTime", new NBT_Value( (sint32)(*iter).plantedTime));
+          tree->Insert("plantedBy", new NBT_Value( (sint32)(*iter).plantedBy));
+          tree_vec->push_back(tree);
+        }
+      }
+      root->SaveToFile(infile);
+
+      delete root;
+    }
   return true;
 }
 
@@ -233,7 +350,7 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
         if (light < 0) { light = 0; }        
 
         // Calculate heightmap while looping this
-        if ((stopLight[block] > 0) && (foundheight == false)) {
+        if ((block != BLOCK_AIR) && (foundheight == false)) {
           heightmap[block_z+(block_x<<4)] = ((block_y == 127) ? block_y : block_y + 1);
           foundheight = true;
         }
@@ -747,6 +864,46 @@ bool Map::loadMap(int x, int z, bool generate)
     {
       MapGen::get()->generateChunk(x,z);
       generateLight(x, z);
+
+      //If we generated spawn pos, make sure the position is not underground!
+      if(x == blockToChunk(spawnPos.x()) &&
+         z == blockToChunk(spawnPos.z()))
+      {
+        uint8 block,meta;
+        bool foundAir=false;
+        if(getBlock(spawnPos.x(),spawnPos.y(),spawnPos.z(), &block, &meta,false) && block != BLOCK_AIR)
+        {
+          uint8 new_y;
+          for(new_y = spawnPos.y(); new_y < 128 ; new_y++)
+          {
+            if(getBlock(spawnPos.x(),new_y,spawnPos.z(), &block, &meta,false) && block == BLOCK_AIR)
+            {
+              foundAir=true;
+              break;
+            }
+          }
+          if(foundAir)
+          {
+            spawnPos.y() = new_y;
+
+            std::string infile = mapDirectory+"/level.dat";
+
+            NBT_Value *root = NBT_Value::LoadFromFile(infile);
+            if(root != NULL)
+            {
+              NBT_Value &data = *((*root)["Data"]);
+              *data["SpawnX"] = (sint32)spawnPos.x();
+              *data["SpawnY"] = (sint32)spawnPos.y();
+              *data["SpawnZ"] = (sint32)spawnPos.z();
+
+              root->SaveToFile(infile);
+
+              delete root;
+            }
+          }
+        }
+        
+      }
       return true;
     }
     else

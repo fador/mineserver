@@ -92,6 +92,7 @@ public:
   bool muted;
 	bool dnd;
   sint16 health;
+  uint16 timeUnderwater;
   unsigned int UID;
   std::string nick;
   position pos;
@@ -167,6 +168,7 @@ public:
   bool sethealth(int userHealth);
   bool respawn();
   bool dropInventory();
+  bool isUnderwater();
 
   struct event *GetEvent();
 };

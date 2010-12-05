@@ -71,6 +71,7 @@ User::User(int sock, uint32 EID)
   this->write_err_count = 0;
   this->health          = 20;
   this->attachedTo      = 0;
+  this->timeUnderwater  = 0;
 }
 
 bool User::checkBanned(std::string _nick)
@@ -787,7 +788,8 @@ bool User::sethealth(int userHealth)
 
 bool User::respawn()
 {
-  health = 20;
+  this->health = 20;
+  this->timeUnderwater = 0;
   buffer << (sint8)PACKET_RESPAWN;
   return true;
 }
@@ -817,6 +819,25 @@ bool User::dropInventory()
     }
   }
   return true;
+}
+
+bool User::isUnderwater()
+{
+   uint8 topblock, topmeta;
+   int y = ( pos.y - int(pos.y) <= 0.25 ) ? (int)pos.y + 1: (int)pos.y + 2;
+   
+   Map::get()->getBlock((int)pos.x, y, (int)pos.z, &topblock, &topmeta);
+   
+   if( topblock == BLOCK_WATER || topblock == BLOCK_STATIONARY_WATER )
+   {
+      if( (timeUnderwater / 5) > 15 && timeUnderwater % 5 == 0 )// 13 is Trial and Erorr
+        sethealth( health - 2 );
+      timeUnderwater += 1;
+      return true;
+   }
+
+   timeUnderwater = 0;
+   return false;
 }
 
 struct event *User::GetEvent()

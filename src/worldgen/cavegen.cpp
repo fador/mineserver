@@ -50,18 +50,18 @@ void CaveGen::init(int seed)
 {
   // Set up us the Perlin-noise module.
   caveNoise1.SetSeed (seed);
-  caveNoise1.SetFrequency (1.5);
+  caveNoise1.SetFrequency (1.5/20);
   //caveNoise.SetLacunarity (0.5);
   caveNoise1.SetOctaveCount (2);
-  caveNoise1.SetPersistence (0.25);
+
   caveNoise1.SetNoiseQuality (noise::QUALITY_STD);
   
   // Set up us the Perlin-noise module.
   caveNoise2.SetSeed (seed+2);
-  caveNoise2.SetFrequency (1.5);
+  caveNoise2.SetFrequency (1.5/20);
   //caveNoise.SetLacunarity (0.5);
   caveNoise2.SetOctaveCount (2);
-  caveNoise2.SetPersistence (0.25);
+
   caveNoise2.SetNoiseQuality (noise::QUALITY_STD);
   
   caveScale = 0.9;
@@ -72,6 +72,9 @@ void CaveGen::init(int seed)
   addCaveLava = Conf::get()->bValue("cave_lava");
   addCaveWater = Conf::get()->bValue("cave_water");
   addOre = Conf::get()->bValue("cave_ore");
+
+
+  seaLevel = Conf::get()->iValue("sea_level");
 }
 
 void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
@@ -81,38 +84,43 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
     x *= caveScale;
     z *= caveScale;
     
-    caveN1 = caveNoise1.GetValue(x,y*0.05,z);
-    caveN2 = caveNoise2.GetValue(x,y*0.1,z);
     
-    if(y < 63 && (caveN1 < -0.55 || caveN2 < -0.55) && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER)
+    caveN2 = caveNoise2.GetValue(x,y,z);
+    
+    if(caveN2 > 0.45 && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER)
     {
+      
       // Add bottomlava
-      if(y < 10)
+      if(y < 10.0 && addCaveLava)
       {
         block = BLOCK_STATIONARY_LAVA;
         return;
       }
       
-      if(caveN1 > -0.558)
+      block = BLOCK_AIR;
+      return;
+    }
+
+    
+    if(y < 60 && addOre)
+    {      
+      caveN1 = caveNoise1.GetValue(x,y,z);
+      if(caveN1 > 0.56)
       {
-        if(y < 32 && caveN1 > -0.559999)
+        if(y < 32.0 && caveN1 > 0.67)
         {
-          if(y < 16 && caveN1 > -0.5599999)
+          if(y < 16.0 && caveN1 > 0.79)
           {
             block = BLOCK_DIAMOND_ORE;
             return;
           }
           block = BLOCK_GOLD_ORE;
           return;
-        }
-        
+        }        
         block = BLOCK_IRON_ORE;
-        return;
       }
-      
-      
-      block = BLOCK_AIR;
       return;
     }
+
   }
 }

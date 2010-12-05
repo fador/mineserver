@@ -135,8 +135,9 @@ bool Chat::loadAdmins(std::string adminFile)
       admins.push_back(temp);
   }
   ifs.close();
-
+#ifdef _DEBUG
   std::cout << "Loaded admins from " << adminFile << std::endl;
+#endif
 
   return true;
 }
@@ -169,8 +170,9 @@ bool Chat::loadBanned(std::string bannedFile)
       banned.push_back(temp);
   }
   ifs.close();
-
+#ifdef _DEBUG
   std::cout << "Loaded banned users from " << bannedFile << std::endl;
+#endif
 
   return true;
 }
@@ -203,8 +205,9 @@ bool Chat::loadWhitelist(std::string whitelistFile)
       whitelist.push_back(temp);
   }
   ifs.close();
-
+#ifdef _DEBUG
   std::cout << "Loaded whitelisted users from " << whitelistFile << std::endl;
+#endif
 
   return true;
 }
