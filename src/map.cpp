@@ -312,11 +312,22 @@ bool Map::generateLight(int x, int z)
   return generateLight(x, z, chunk);
 }
 
+//#define PRINT_LIGHTGEN_TIME
+
 bool Map::generateLight(int x, int z, sChunk *chunk)
 {
 #ifdef _DEBUG
   printf("generateLight(x=%d, z=%d, chunk=%p)\n", x, z, chunk);
 #endif
+  #ifdef PRINT_LIGHTGEN_TIME
+  #ifdef WIN32  
+     DWORD t_begin,t_end;
+     t_begin = timeGetTime();
+  #else    
+    clock_t t_begin,t_end;
+    t_begin = clock();
+  #endif
+  #endif
 
   uint8 *blocks     = chunk->blocks;
   uint8 *skylight   = chunk->skylight;
@@ -404,6 +415,16 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
       }
     }
   }
+  #ifdef PRINT_LIGHTGEN_TIME
+  #ifdef WIN32
+    t_end = timeGetTime ();
+    std::cout << "Lightgen: " << (t_end-t_begin) << "ms" << std::endl;
+  #else
+    t_end = clock();
+    std::cout << "Lightgen: " << (t_end-t_begin)/(CLOCKS_PER_SEC/1000)) << "ms" << std::endl;
+  #endif
+  #endif
+
 
   return true;
 }
@@ -556,11 +577,11 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate,
 
   uint8 *blocks      = chunk->blocks;
   uint8 *metapointer = chunk->data;
-  int index          = y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
+  int index          = y + (chunk_block_z << 7) + (chunk_block_x << 11);
   *type              = blocks[index];
   uint8 metadata     = metapointer[(index)>>1];
 
-  if(y%2)
+  if(y & 1)
   {
     metadata  &= 0xf0;
     metadata >>= 4;
@@ -613,7 +634,7 @@ bool Map::getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight, sChu
 
   uint8 *blocklightPtr = chunk->blocklight;
   uint8 *skylightPtr   = chunk->skylight;
-  int index            = y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
+  int index            = y + (chunk_block_z << 7) + (chunk_block_x << 11);
   *blocklight = blocklightPtr[(index)>>1];
   *skylight   = skylightPtr[(index)>>1];
 
@@ -671,11 +692,11 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type, 
 
   uint8 *blocklightPtr     = chunk->blocklight;
   uint8 *skylightPtr       = chunk->skylight;
-  int index                = y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
+  int index                = y + (chunk_block_z << 7) + (chunk_block_x << 11);
   char skylight_local      = skylightPtr[index>>1];
   char blocklight_local    = blocklightPtr[index>>1];
 
-  if (y % 2)
+  if (y & 1)
   {
     if (type & 0x5) // 1 or 4
     {
@@ -726,8 +747,8 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   }
 
   // Map chunk pos from block pos
-  int chunk_x = ((x < 0) ? (((x+1)/16)-1) : (x/16));
-  int chunk_z = ((z < 0) ? (((z+1)/16)-1) : (z/16));
+  int chunk_x = blockToChunk(x);
+  int chunk_z = blockToChunk(z);
 
   uint32 mapId;
   Map::posToId(chunk_x, chunk_z, &mapId);
@@ -741,8 +762,8 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   }
 
   // Which block inside the chunk
-  int chunk_block_x  = ((x < 0) ? (15+((x+1)%16)) : (x%16));
-  int chunk_block_z  = ((z < 0) ? (15+((z+1)%16)) : (z%16));
+  int chunk_block_x  = blockToChunkBlock(x);
+  int chunk_block_z  = blockToChunkBlock(z);
 
   uint8 *blocks      = chunk->blocks;
   uint8 *metapointer = chunk->data;
@@ -750,7 +771,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   blocks[index] = type;
   char metadata      = metapointer[index>>1];
 
-  if(y%2)
+  if(y & 1)
   {
     metadata &= 0x0f;
     metadata |= meta<<4;
