@@ -75,6 +75,7 @@ Furnace::Furnace(NBT_Value *entity)
   // Reset our active duration
   this->fuelBurningTime = 0;
   this->activeCookDuration = 0;
+  this->burning = false;
   
   // Make sure we're the right kind of block based on our current status
   this->updateBlock();
@@ -85,20 +86,25 @@ void Furnace::updateBlock()
   // Get a pointer to this furnace's current block
   uint8 block;
   uint8 meta;
-  Map::get()->getBlock(this->x, this->y, this->z, &block, &meta);
   
   // Now make sure that it's got the correct block type based on it's current status
-  if(block == BLOCK_FURNACE && this->isBurningFuel()) {
+  if(isBurningFuel() && !burning)
+  {
+    Map::get()->getBlock(this->x, this->y, this->z, &block, &meta);
     // Switch to burning furnace
     Map::get()->setBlock(this->x, this->y, this->z, BLOCK_BURNING_FURNACE, meta);
     Map::get()->sendBlockChange(this->x, this->y, this->z, BLOCK_BURNING_FURNACE, meta);
     this->sendToAllUsers();
+    burning = true;
   }
-  if(block == BLOCK_BURNING_FURNACE && (this->isBurningFuel() == false)) {
+  else if(!isBurningFuel() && burning)
+  {
+    Map::get()->getBlock(this->x, this->y, this->z, &block, &meta);
     // Switch to regular furnace
     Map::get()->setBlock(this->x, this->y, this->z, BLOCK_FURNACE, meta);
     Map::get()->sendBlockChange(this->x, this->y, this->z, BLOCK_FURNACE, meta);
     this->sendToAllUsers();
+    burning = false;
   }
 }
 

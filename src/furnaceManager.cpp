@@ -73,16 +73,16 @@ void FurnaceManager::update() {
       
     // Update all clients
     currentFurnace->sendToAllUsers();
+
+    // Update it's block style
+    currentFurnace->updateBlock();  
         
     // Remove this furnace from the list once it stops burning it's current fuel
     if(!currentFurnace->isBurningFuel())
     {
       delete activeFurnaces[index];
       activeFurnaces.erase(activeFurnaces.begin() + index);
-    }
-    
-    // Update it's block style
-    currentFurnace->updateBlock();    
+    }  
   }
 }
 
@@ -113,10 +113,12 @@ void FurnaceManager::handleActivity(NBT_Value *entity)
   else
   {
     delete furnace;
+    furnace = NULL;
   }
   
   // Let everyone know about this furnace
-  furnace->sendToAllUsers();
+  if(furnace)
+    furnace->sendToAllUsers();
   
 }
 
