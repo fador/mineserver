@@ -220,6 +220,8 @@ void Furnace::consumeFuel()
   
   // Now decrement the fuel & reset
   slots[SLOT_FUEL].count--;
+  if(slots[SLOT_FUEL].count < 0)
+    slots[SLOT_FUEL].count = 0;  
   
   // Update our block type if need be
   this->updateBlock();
