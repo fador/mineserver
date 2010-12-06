@@ -312,7 +312,7 @@ bool Map::generateLight(int x, int z)
   return generateLight(x, z, chunk);
 }
 
-#define PRINT_LIGHTGEN_TIME
+//#define PRINT_LIGHTGEN_TIME
 
 bool Map::generateLight(int x, int z, sChunk *chunk)
 {
