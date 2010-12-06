@@ -59,7 +59,7 @@ void FurnaceManager::update() {
     if (!currentFurnace->isBurningFuel() && currentFurnace->hasValidIngredient()) {
       currentFurnace->consumeFuel();
     }
-    std::cout << "Furnace " << index << " " << currentFurnace->isCooking() << std::endl;
+    //std::cout << "Furnace " << index << " " << currentFurnace->isCooking() << std::endl;
     
     // If we're cooking, increment the activity and check if we're ready to smelt the output
     if(currentFurnace->isCooking()) {
