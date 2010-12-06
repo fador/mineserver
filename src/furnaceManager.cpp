@@ -59,7 +59,7 @@ void FurnaceManager::update() {
     if (!currentFurnace->isBurningFuel() && currentFurnace->hasValidIngredient()) {
       currentFurnace->consumeFuel();
     }
-    //std::cout << "Furnace " << index << " " << currentFurnace->fuelBurningTime << std::endl;
+    //std::cout << "Furnace " << index << " " << currentFurnace->isCooking() << std::endl;
     
     // If we're cooking, increment the activity and check if we're ready to smelt the output
     if(currentFurnace->isCooking()) {
@@ -86,10 +86,10 @@ void FurnaceManager::update() {
   }
 }
 
-void FurnaceManager::handleActivity(NBT_Value *entity) 
+void FurnaceManager::handleActivity(NBT_Value *entity, uint8 blockType) 
 {
   // Create a furnace
-  Furnace *furnace = new Furnace(entity);
+  Furnace *furnace = new Furnace(entity, blockType);
       
   // Loop thru all active furnaces, to see if this one is here
   for(int index = 0; index < activeFurnaces.size(); index++) {
