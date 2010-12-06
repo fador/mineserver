@@ -232,9 +232,6 @@ sint16 Furnace::burnTime()
   if(fuelBurningTime < 0)
     fuelBurningTime = 0;
   return fuelBurningTime;
-  
-  // Just return the number of secs we're burning for
-  //return (sint16)this->fuelBurningTime;
 }
 sint16 Furnace::cookTime() 
 {
