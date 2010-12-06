@@ -47,7 +47,7 @@ public:
   } 
   void free(); 
   void update();
-  void handleActivity(NBT_Value *entity);
+  void handleActivity(NBT_Value *entity, uint8 blockType);
     
 };
 

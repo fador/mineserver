@@ -30,7 +30,7 @@
 
 //#define _DEBUG
 
-Furnace::Furnace(NBT_Value *entity)
+Furnace::Furnace(NBT_Value *entity, uint8 blockType)
 {
   // Setup this furnace
   this->x = (sint32)(*(*entity)["x"]);
@@ -75,7 +75,12 @@ Furnace::Furnace(NBT_Value *entity)
   // Reset our active duration
   this->fuelBurningTime = 0;
   this->activeCookDuration = 0;
-  this->burning = false;
+  
+  // Check if this is a burning block
+  if(blockType == BLOCK_BURNING_FURNACE)
+    this->burning = true;
+  else
+    this->burning = false;
   
   // Make sure we're the right kind of block based on our current status
   this->updateBlock();

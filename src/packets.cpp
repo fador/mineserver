@@ -853,7 +853,7 @@ int PacketHandler::complex_entities(User *user)
 
     // Check if this is a Furnace and handle if so
     if(block == BLOCK_FURNACE || block == BLOCK_BURNING_FURNACE) {
-      FurnaceManager::get()->handleActivity(entity);
+      FurnaceManager::get()->handleActivity(entity, block);
     }
     else {
       Map::get()->setComplexEntity(x, y, z, entity);  
