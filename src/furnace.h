@@ -56,6 +56,7 @@ private:
   
 public:
   sint16 fuelBurningTime;
+  sint16 initialBurningTime;
   sint16 cookingTime;
   sint16 activeCookDuration;
  // sint16 activeBurnDuration;  
