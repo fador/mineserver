@@ -249,10 +249,10 @@ public:
   bool releaseMap(int x, int z);
 
   // Light get/set
-  bool getLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight);
-  bool getLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight, sChunk *chunk);
-  bool setLight(int x, int y, int z, int blocklight, int skylight, int setLight);
-  bool setLight(int x, int y, int z, int blocklight, int skylight, int setLight, sChunk *chunk);
+  bool getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight);
+  bool getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight, sChunk *chunk);
+  bool setLight(int x, int y, int z, int skylight, int blocklight, int setLight);
+  bool setLight(int x, int y, int z, int skylight, int blocklight, int setLight, sChunk *chunk);
   bool spreadLight(int x, int y, int z, int skylight, int blocklight);
   bool spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk *chunk);
 

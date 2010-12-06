@@ -52,6 +52,8 @@
 #include "nbt.h"
 #include "config.h"
 
+#include "lighting.h"
+
 Map* Map::mMap;
 
 void Map::addSapling(User* user, int x, int y, int z)
@@ -314,8 +316,12 @@ bool Map::generateLight(int x, int z)
 
 //#define PRINT_LIGHTGEN_TIME
 
+
+
 bool Map::generateLight(int x, int z, sChunk *chunk)
 {
+
+  
 #ifdef _DEBUG
   printf("generateLight(x=%d, z=%d, chunk=%p)\n", x, z, chunk);
 #endif
@@ -329,6 +335,8 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
   #endif
   #endif
 
+  Lighting::get()->generateLight(x,z,chunk);
+    /*
   uint8 *blocks     = chunk->blocks;
   uint8 *skylight   = chunk->skylight;
   uint8 *blocklight = chunk->blocklight;
@@ -417,6 +425,7 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
       }
     }
   }
+  */
   #ifdef PRINT_LIGHTGEN_TIME
   #ifdef WIN32
     t_end = timeGetTime ();
@@ -427,7 +436,7 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
   #endif
   #endif
 
-
+  
   return true;
 }
 
@@ -640,7 +649,7 @@ bool Map::getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight, sChu
   *blocklight = blocklightPtr[(index)>>1];
   *skylight   = skylightPtr[(index)>>1];
 
-  if(y%2)
+  if(y & 1)
   {
     *blocklight  &= 0xf0;
     *blocklight >>= 4;
