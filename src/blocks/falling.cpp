@@ -79,7 +79,7 @@ void BlockFalling::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
    Map::get()->setBlock(x, y, z, (char)newblock, direction);
    Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
 
-   physics(x,y,z);
+   physics(user,x,y,z);
 }
 
 void BlockFalling::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
@@ -98,13 +98,10 @@ void BlockFalling::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y
    if (!Map::get()->getBlock(x, y, z, &block, &meta))
       return;
 
-   physics(x,y,z);
-
-   /* notify neighbour blocks about the move apart from the bottom */
-   this->notifyNeighbours(x, y, z, "onNeighbourMove", user, block, BLOCK_BOTTOM);
+   physics(user,x,y,z);
 }
 
-void BlockFalling::physics(sint32 x, sint8 y, sint32 z)
+void BlockFalling::physics(User* user, sint32 x, sint8 y, sint32 z)
 {
    uint8 fallblock, block;
    uint8 fallmeta, meta;
@@ -136,6 +133,8 @@ void BlockFalling::physics(sint32 x, sint8 y, sint32 z)
 
      Map::get()->setBlock(x, y, z, fallblock, fallmeta);
      Map::get()->sendBlockChange(x, y, z, fallblock, fallmeta);
+
+     this->notifyNeighbours(x, y+1, z, "onNeighbourMove", user, block, BLOCK_BOTTOM);
    }
 }
 
