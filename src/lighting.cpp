@@ -121,8 +121,6 @@ bool Lighting::generateLight(int x, int z, sChunk *chunk)
           }
           break;
         }
-        //for(int i=0;i<8;i++)        
-//          setLight(absolute_x, (block_y<<3)+i, absolute_z, 15, 0, 1, chunk);
         //These 8 blocks are full lit
         skylight32[index] = 0xffffffff;        
       }
@@ -136,7 +134,7 @@ bool Lighting::generateLight(int x, int z, sChunk *chunk)
       int absolute_z = (z<<4)+block_z;
       if(heightmap[block_z+(block_x<<4)] < highest_y)
       {
-        for(int i=highest_y;i>heightmap[block_z+(block_x<<4)];i--)
+        for(int i=highest_y-1;i>heightmap[block_z+(block_x<<4)];i--)
         {
           lightQueue.push(lightInfo(absolute_x,i,absolute_z,15));
         }
@@ -146,7 +144,7 @@ bool Lighting::generateLight(int x, int z, sChunk *chunk)
 
   spreadLight(&lightQueue,chunk);
 
-
+  
   //Get light from border chunks
   for(int block_x = 0; block_x < 16; block_x+=15)
   {
@@ -182,7 +180,7 @@ bool Lighting::generateLight(int x, int z, sChunk *chunk)
               {
                 lightQueue.push(lightInfo(absolute_x,block_y,absolute_z,skyl-stopLight[block]-1, skipdir));
               }
-              setLight(absolute_x, block_y, absolute_z, skyl-1, 0, 1, chunk);   
+              setLight(absolute_x, block_y, absolute_z, skyl-stopLight[block]-1, 0, 1, chunk);   
             }
             if(blockl-stopLight[block]-1>curblocklight)
             {
@@ -235,14 +233,16 @@ bool Lighting::spreadLight(std::queue<lightInfo> *lightQueue, sChunk *chunk)
       //Stop of this block light value already higher
       if(getLight(xdir, ydir, zdir,&skyl,&blockl,chunk) && skyl<info.light-1)
       {        
-        if(Map::get()->getBlock(xdir,ydir,zdir,&block,&meta,false))
+        if(Map::get()->getBlock(info.x,info.y,info.z,&block,&meta,false) &&  skyl<info.light-stopLight[block]-1)
         {
           //If still light left, generate for this block also!
-          if(info.light-stopLight[block] > 1)
+          int light=info.light-stopLight[block]-1;
+          if(light<=0) { light=0; }
+          else
           {
-            lightQueue->push(lightInfo(xdir,ydir,zdir,info.light-stopLight[block]-1,skipdir));
+            lightQueue->push(lightInfo(xdir,ydir,zdir,light,skipdir));
           }
-          setLight(xdir, ydir, zdir, info.light-1, 0, 1, chunk);          
+          setLight(xdir, ydir, zdir, light, 0, 1, chunk);          
         }
       }
     }
