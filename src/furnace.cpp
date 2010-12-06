@@ -135,6 +135,12 @@ void Furnace::smelt()
       inputSlot.count--;
       outputSlot.damage = inputSlot.damage;
       
+      // Bounds check all
+      if(outputSlot.count > 64)
+        outputSlot.count = 64;
+      if(inputSlot.count < 0)
+        inputSlot.count = 0;
+      
       // Update the slots
       this->slots[SLOT_INPUT]  = inputSlot;
       this->slots[SLOT_FUEL]   = fuelSlot;
@@ -192,19 +198,20 @@ void Furnace::consumeFuel()
   // Increment the fuel burning time based on fuel type
   // http://www.minecraftwiki.net/wiki/Furnace#Fuel_efficiency
   sSlot fuelSlot = slots[SLOT_FUEL];
-  this->fuelBurningTime = 0;
-  if(fuelSlot.id == ITEM_COAL)           { this->fuelBurningTime += 80; }
-  if(fuelSlot.id == BLOCK_WOOD)          { this->fuelBurningTime += 15; }
-  if(fuelSlot.id == ITEM_STICK)          { this->fuelBurningTime += 5; }
-  if(fuelSlot.id == BLOCK_LOG)           { this->fuelBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_WORKBENCH)     { this->fuelBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_CHEST)         { this->fuelBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_BOOKSHELF)     { this->fuelBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_JUKEBOX)       { this->fuelBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_FENCE)         { this->fuelBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_WOODEN_STAIRS) { this->fuelBurningTime += 15; }
-  if(fuelSlot.id == ITEM_LAVA_BUCKET)    { this->fuelBurningTime += 1000; }
-    
+  this->initialBurningTime = 0;
+  if(fuelSlot.id == ITEM_COAL)           { this->initialBurningTime += 80; }
+  if(fuelSlot.id == BLOCK_WOOD)          { this->initialBurningTime += 15; }
+  if(fuelSlot.id == ITEM_STICK)          { this->initialBurningTime += 5; }
+  if(fuelSlot.id == BLOCK_LOG)           { this->initialBurningTime += 15; }
+  if(fuelSlot.id == BLOCK_WORKBENCH)     { this->initialBurningTime += 15; }
+  if(fuelSlot.id == BLOCK_CHEST)         { this->initialBurningTime += 15; }
+  if(fuelSlot.id == BLOCK_BOOKSHELF)     { this->initialBurningTime += 15; }
+  if(fuelSlot.id == BLOCK_JUKEBOX)       { this->initialBurningTime += 15; }
+  if(fuelSlot.id == BLOCK_FENCE)         { this->initialBurningTime += 15; }
+  if(fuelSlot.id == BLOCK_WOODEN_STAIRS) { this->initialBurningTime += 15; }
+  if(fuelSlot.id == ITEM_LAVA_BUCKET)    { this->initialBurningTime += 1000; }
+  this->fuelBurningTime += this->initialBurningTime;
+  
   // Now decrement the fuel & reset
   slots[SLOT_FUEL].count--;
   
@@ -213,8 +220,13 @@ void Furnace::consumeFuel()
 }
 sint16 Furnace::burnTime() 
 {
+  sint16 fuelBurningTime = (sint16)((200.0f / this->initialBurningTime) * this->fuelBurningTime);
+  if(fuelBurningTime < 0)
+    fuelBurningTime = 0;
+  return fuelBurningTime;
+  
   // Just return the number of secs we're burning for
-  return (sint16)this->fuelBurningTime;
+  //return (sint16)this->fuelBurningTime;
 }
 sint16 Furnace::cookTime() 
 {
