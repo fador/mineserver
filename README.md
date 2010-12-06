@@ -10,7 +10,7 @@ Custom Minecraft Alpha server software written in C++.
 
 ### == NOTICE ==
 Currently in (early) development. (Alpha stage)
-Server still lacks some critical features and should be only used for testing.
+Server still lacks some features and should be only used for testing.
 
 **Tested to build on**
 
@@ -28,10 +28,10 @@ We are trying to minimize memory and CPU usage compared to original Java server.
  * Config file
  * Normal mining/item spawning/item pickups
  * Basic physics for gravel and sand
- * Experimental physics for water and lava
+ * Experimental physics for water
  * Flatland map generation
- * Working chests & signs
- * Terrain map generation
+ * Working chests, furnaces & signs
+ * Terrain map generation with caves and minerals
 
 ### ToDo is located at [http://redmine.fknsrs.biz/projects/mineserver](http://redmine.fknsrs.biz/projects/mineserver)
 

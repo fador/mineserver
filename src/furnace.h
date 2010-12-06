@@ -64,6 +64,8 @@ public:
   sint32 y;
   sint32 z;
   sSlot slots[3];
+
+  bool burning;
   
   Furnace(NBT_Value *entity);
   
