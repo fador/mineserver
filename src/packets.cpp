@@ -63,12 +63,15 @@
 #include "packets.h"
 #include "physics.h"
 #include "plugin.h"
+#include "furnaceManager.h"
 
 #ifdef WIN32
     #define M_PI 3.141592653589793238462643
 #endif
 #define DEGREES_TO_RADIANS(x) ((x) / 180.0 * M_PI)
 #define RADIANS_TO_DEGREES(x) ((x) / M_PI * 180.0)
+
+//#define _DEBUG
 
 PacketHandler* PacketHandler::mPacketHandler;
 
@@ -798,7 +801,7 @@ int PacketHandler::complex_entities(User *user)
   Map::get()->getBlock(x, y, z, &block, &meta);
 
   //We only handle chest for now
-  if(block != BLOCK_CHEST && block != BLOCK_FURNACE && block != BLOCK_SIGN_POST && block != BLOCK_WALL_SIGN)
+  if(block != BLOCK_CHEST && block != BLOCK_FURNACE && block != BLOCK_BURNING_FURNACE && block != BLOCK_SIGN_POST && block != BLOCK_WALL_SIGN)
   {
     delete[] buffer;
     return PACKET_OK;
@@ -848,7 +851,13 @@ int PacketHandler::complex_entities(User *user)
   entity->Print();
 #endif
 
-  Map::get()->setComplexEntity(x, y, z, entity);
+    // Check if this is a Furnace and handle if so
+    if(block == BLOCK_FURNACE || block == BLOCK_BURNING_FURNACE) {
+      FurnaceManager::get()->handleActivity(entity);
+    }
+    else {
+      Map::get()->setComplexEntity(x, y, z, entity);  
+    }
 
   delete [] buffer;
 

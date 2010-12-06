@@ -26,6 +26,9 @@
     <ClCompile Include="..\src\commands.cpp" />
     <ClCompile Include="..\src\config.cpp" />
     <ClCompile Include="..\src\constants.cpp" />
+    <ClCompile Include="..\src\furnace.cpp" />
+    <ClCompile Include="..\src\furnaceManager.cpp" />
+    <ClCompile Include="..\src\lighting.cpp" />
     <ClCompile Include="..\src\logger.cpp" />
     <ClCompile Include="..\src\map.cpp" />
     <ClCompile Include="..\src\mineserver.cpp" />
@@ -55,6 +58,9 @@
     <ClInclude Include="..\src\chat.h" />
     <ClInclude Include="..\src\config.h" />
     <ClInclude Include="..\src\constants.h" />
+    <ClInclude Include="..\src\furnace.h" />
+    <ClInclude Include="..\src\furnaceManager.h" />
+    <ClInclude Include="..\src\lighting.h" />
     <ClInclude Include="..\src\logger.h" />
     <ClInclude Include="..\src\map.h" />
     <ClInclude Include="..\src\nbt.h" />

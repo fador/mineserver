@@ -66,6 +66,7 @@
 #include "packets.h"
 #include "physics.h"
 #include "plugin.h"
+#include "furnaceManager.h"
 
 #ifdef WIN32
 static bool quit = false;
@@ -368,6 +369,10 @@ int Mineserver::Run(int argc, char *argv[])
       if(Map::get()->mapTime>=24000) Map::get()->mapTime=0;
 
       Map::get()->checkGenTrees();
+
+      // Check for Furnace activity
+      FurnaceManager::get()->update();
+    
     }
 
     //Physics simulation every 200ms
@@ -397,6 +402,7 @@ int Mineserver::Run(int argc, char *argv[])
   PacketHandler::get()->free();
   Map::get()->free();
   Physics::get()->free();
+  FurnaceManager::get()->free();
   Chat::get()->free();
   Conf::get()->free();
   Plugin::get()->free();
