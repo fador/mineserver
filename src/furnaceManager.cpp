@@ -101,6 +101,7 @@ void FurnaceManager::handleActivity(NBT_Value *entity)
       furnace->fuelBurningTime = currentFurnace->fuelBurningTime;
       furnace->activeCookDuration = currentFurnace->activeCookDuration;
       // Now delete it (we'll add back later if it's active)
+      delete activeFurnaces[index];
       activeFurnaces.erase(activeFurnaces.begin() + index);
     }
   }

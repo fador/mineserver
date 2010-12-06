@@ -39,15 +39,15 @@ Furnace::Furnace(NBT_Value *entity)
   //this->fuelBurningTime = (sint16)(*(*entity)["BurnTime"]);
   
   // Clean out the slots
-  this->slots[SLOT_INPUT].count = 0;
+  this->slots[SLOT_INPUT].count  = 0;
   this->slots[SLOT_INPUT].damage = 0;
-  this->slots[SLOT_INPUT].id = 0;
-  this->slots[SLOT_FUEL].count = 0;
-  this->slots[SLOT_FUEL].damage = 0;
-  this->slots[SLOT_FUEL].id = 0;
+  this->slots[SLOT_INPUT].id     = 0;
+  this->slots[SLOT_FUEL].count   = 0;
+  this->slots[SLOT_FUEL].damage  = 0;
+  this->slots[SLOT_FUEL].id      = 0;
   this->slots[SLOT_OUTPUT].count = 0;
-  this->slots[SLOT_OUTPUT].damage = 0;
-  this->slots[SLOT_OUTPUT].id = 0;
+  this->slots[SLOT_OUTPUT].damage= 0;
+  this->slots[SLOT_OUTPUT].id    = 0;
   
   // Set the slots to what was passed
   NBT_Value *slotList = (NBT_Value *)(*entity)["Items"];
