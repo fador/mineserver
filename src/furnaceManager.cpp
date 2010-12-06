@@ -26,6 +26,7 @@
  */
 
 #include "furnaceManager.h"
+#include "furnace.h"
 #include <iostream>
 
 //#define _DEBUG
@@ -48,7 +49,7 @@ void FurnaceManager::update() {
   // Loop thru all the furnaces
   for(int index = 0; index < activeFurnaces.size(); index++) {
     // Get a pointer to this furnace
-    Furnace::Furnace *currentFurnace = (Furnace::Furnace *)activeFurnaces[index];
+    Furnace *currentFurnace = (Furnace *)activeFurnaces[index];
     
     // If we're burning, decrememnt the fuel
     if(currentFurnace->isBurningFuel()) {
@@ -74,7 +75,9 @@ void FurnaceManager::update() {
     currentFurnace->sendToAllUsers();
         
     // Remove this furnace from the list once it stops burning it's current fuel
-    if(!currentFurnace->isBurningFuel()) {
+    if(!currentFurnace->isBurningFuel())
+    {
+      delete activeFurnaces[index];
       activeFurnaces.erase(activeFurnaces.begin() + index);
     }
     
@@ -86,12 +89,12 @@ void FurnaceManager::update() {
 void FurnaceManager::handleActivity(NBT_Value *entity) 
 {
   // Create a furnace
-  Furnace::Furnace *furnace = new Furnace::Furnace(entity);
+  Furnace *furnace = new Furnace(entity);
       
   // Loop thru all active furnaces, to see if this one is here
   for(int index = 0; index < activeFurnaces.size(); index++) {
     
-    Furnace::Furnace *currentFurnace = (Furnace::Furnace *)activeFurnaces[index];
+    Furnace *currentFurnace = (Furnace *)activeFurnaces[index];
     if(currentFurnace->x == furnace->x && currentFurnace->y == furnace->y && currentFurnace->z == furnace->z)
     {
       // Preserve the current burning time
@@ -105,6 +108,10 @@ void FurnaceManager::handleActivity(NBT_Value *entity)
   // Check if this furnace is active
   if(furnace->isBurningFuel() || furnace->slots[SLOT_FUEL].count > 0) {
     activeFurnaces.push_back(furnace);
+  }
+  else
+  {
+    delete furnace;
   }
   
   // Let everyone know about this furnace

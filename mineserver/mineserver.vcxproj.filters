@@ -111,6 +111,15 @@
     <ClCompile Include="..\src\blocks\basic.cpp">
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\lighting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\furnaceManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\furnace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\user.h">
@@ -195,6 +204,15 @@
       <Filter>Header Files\blocks</Filter>
     </ClInclude>
     <ClInclude Include="..\src\permissions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lighting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\furnaceManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\furnace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
