@@ -88,7 +88,6 @@ void Chat::registerCommand(Command *command)
     if(IS_OP(command->permissions)) {
       opCommands[currentWord] = command;
       adminCommands[currentWord] = command;
-    std::cout << "registering " << command->names[0] << " with perm: " << command->permissions << std::endl;
       continue;
     }
 
