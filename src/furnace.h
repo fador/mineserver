@@ -67,7 +67,7 @@ public:
 
   bool burning;
   
-  Furnace(NBT_Value *entity);
+  Furnace(NBT_Value *entity, uint8 blockType);
   
   void sendToAllUsers();
   NBT_Value* getSlotEntity(sint8 slotNumber);
