@@ -27,18 +27,14 @@
 
 #pragma once
 
-#include <cstdlib>
-
-#include "../constants.h"
-#include "../map.h"
-#include "../tools.h"
+#include "basic.h"
 
 class User;
 
 /** BlockPlant deals specifically with plant block functionality
 @see BlockBasic
 */
-class BlockPlant
+class BlockPlant: public BlockBasic
 {
 public:
    void onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);

@@ -25,41 +25,29 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "stair.h"
+#pragma once
 
-void BlockStair::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+#include <cstdlib>
+#include "furnace.h"
+
+class FurnaceManager
 {
+private:
+  typedef std::vector<Furnace *> container;
+  container activeFurnaces;
+  static FurnaceManager *mFurnaceManager; 
 
-}
+public:
+  FurnaceManager();
+  static FurnaceManager* get() {
+    if(!mFurnaceManager) {
+      mFurnaceManager = new FurnaceManager();
+    }
+    return mFurnaceManager;
+  } 
+  void free(); 
+  void update();
+  void handleActivity(NBT_Value *entity);
+    
+};
 
-void BlockStair::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-
-}
-
-void BlockStair::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-
-}
-
-void BlockStair::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
-
-void BlockStair::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   /* TODO: add code to align stairs? */
-}
-
-void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
-
-void BlockStair::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   /* Align neighbour to this stair */
-}
-
-void BlockStair::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}

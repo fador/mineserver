@@ -63,7 +63,6 @@ User::User(int sock, uint32 EID)
   this->UID             = EID;
   this->logged          = false;
   // ENABLED FOR DEBUG
-  this->admin           = false;
 
   this->pos.x           = Map::get()->spawnPos.x();
   this->pos.y           = Map::get()->spawnPos.y();
@@ -104,12 +103,34 @@ bool User::changeNick(std::string _nick)
 {
   nick = _nick;
 
+  SET_GUEST(permissions); // default
+
   // Check adminstatus
   for(unsigned int i = 0; i < Chat::get()->admins.size(); i++)
   {
     if(Chat::get()->admins[i] == nick)
     {
-      admin = true;
+      SET_ADMIN(permissions);
+      break;
+    }
+  }
+
+  // Check op status
+  for(unsigned int i = 0; i < Chat::get()->ops.size(); i++)
+  {
+    if(Chat::get()->ops[i] == nick)
+    {
+      SET_OP(permissions);
+      break;
+    }
+  }
+
+  // Check member status
+  for(unsigned int i = 0; i < Chat::get()->members.size(); i++)
+  {
+    if(Chat::get()->members[i] == nick)
+    {
+      SET_MEMBER(permissions);
       break;
     }
   }
@@ -138,11 +159,11 @@ bool User::kick(std::string kickMsg)
 }
 bool User::mute(std::string muteMsg)
 {
-  if(!muteMsg.empty()) 
+  if(!muteMsg.empty())
     muteMsg = COLOR_YELLOW + "You have been muted.  Reason: " + muteMsg;
-  else 
+  else
     muteMsg = COLOR_YELLOW + "You have been muted. ";
-    
+
   Chat::get()->sendMsg(this, muteMsg, Chat::USER);
   this->muted = true;
   std::cout << nick << " muted. Reason: " << muteMsg << std::endl;
@@ -156,7 +177,7 @@ bool User::unmute()
     return true;
 }
 bool User::toggleDND()
-{	
+{
 	if(!this->dnd) {
 		Chat::get()->sendMsg(this, COLOR_YELLOW + "You have enabled 'Do Not Disturb' mode.", Chat::USER);
 		Chat::get()->sendMsg(this, COLOR_YELLOW + "You will no longer see chat or private messages.", Chat::USER);
@@ -167,16 +188,16 @@ bool User::toggleDND()
 		this->dnd = false;
 		Chat::get()->sendMsg(this, COLOR_YELLOW + "You have disabled 'Do Not Disturb' mode.", Chat::USER);
 		Chat::get()->sendMsg(this, COLOR_YELLOW + "You can now see chat and private messages.", Chat::USER);
-		Chat::get()->sendMsg(this, COLOR_YELLOW + "Type /dnd again to enable 'Do Not Disturb' mode.", Chat::USER);		
+		Chat::get()->sendMsg(this, COLOR_YELLOW + "Type /dnd again to enable 'Do Not Disturb' mode.", Chat::USER);
 	}
 	return this->dnd;
 }
-bool User::isAbleToCommunicate(std::string communicateCommand) 
+bool User::isAbleToCommunicate(std::string communicateCommand)
 {
 	// Check if this is chat or a regular command and prefix with a slash accordingly
 	if(communicateCommand != "chat")
 		communicateCommand = "/" + communicateCommand;
-		
+
 	if(this->muted) {
 		Chat::get()->sendMsg(this, COLOR_YELLOW + "You cannot " + communicateCommand + " while muted.", Chat::USER);
 		return false;
@@ -330,7 +351,7 @@ bool User::saveData()
   nbtPos->GetList()->push_back(new NBT_Value((double)pos.y));
   nbtPos->GetList()->push_back(new NBT_Value((double)pos.z));
   val.Insert("Pos", nbtPos);
-  
+
 
   NBT_Value *nbtRot = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_FLOAT);
   nbtRot->GetList()->push_back(new NBT_Value((float)pos.yaw));
@@ -400,20 +421,20 @@ bool User::updatePos(double x, double y, double z, double stance)
       this->pos.y      = y;
       this->pos.z      = z;
       this->pos.stance = stance;
-      
+
       // Fix yaw & pitch to be a 1 byte fraction of 360 (no negatives)
       int fixedYaw = int(this->pos.yaw) % 360;
       if(fixedYaw < 0)
         fixedYaw = 360 + fixedYaw;
-      fixedYaw = int(float(fixedYaw) * float(255.0f/360.0f));  
+      fixedYaw = int(float(fixedYaw) * float(255.0f/360.0f));
 
       int fixedPitch = int(this->pos.pitch) % 360;
       if(fixedPitch < 0)
         fixedPitch = 360 + fixedPitch;
       fixedPitch = int(float(fixedPitch) * float(255.0f/360.0f));
-            
+
       uint8 teleportData[19];
-      teleportData[0]  = PACKET_ENTITY_TELEPORT; 
+      teleportData[0]  = PACKET_ENTITY_TELEPORT;
       putSint32(&teleportData[1], this->UID);
       putSint32(&teleportData[5], (int)(this->pos.x*32));
       putSint32(&teleportData[9], (int)(this->pos.y*32));
@@ -518,7 +539,7 @@ bool User::checkOnBlock(sint32 x, sint8 y, sint32 z)
 {
    double diffX = x - this->pos.x;
    double diffZ = z - this->pos.z;
-   
+
    if ((y == (int)this->pos.y)
          && (diffZ > -1.3 && diffZ < 0.3)
          && (diffX > -1.3 && diffX < 0.3))
@@ -532,13 +553,13 @@ bool User::updateLook(float yaw, float pitch)
   int fixedYaw = int(yaw) % 360;
   if(fixedYaw < 0)
     fixedYaw = 360 + fixedYaw;
-  fixedYaw = int(float(fixedYaw) * float(255.0f/360.0f));  
-  
+  fixedYaw = int(float(fixedYaw) * float(255.0f/360.0f));
+
   int fixedPitch = int(pitch) % 360;
   if(fixedPitch < 0)
     fixedPitch = 360 + fixedPitch;
-  fixedPitch = int(float(fixedPitch) * float(255.0f/360.0f));  
-      
+  fixedPitch = int(float(fixedPitch) * float(255.0f/360.0f));
+
   uint8 lookdata[7];
   lookdata[0] = PACKET_ENTITY_LOOK;
   putSint32(&lookdata[1], (sint32)this->UID);
@@ -567,6 +588,32 @@ bool User::sendOthers(uint8 *data, uint32 len)
   return true;
 }
 
+sint8 User::relativeToBlock(const sint32 x, const sint8 y, const sint32 z)
+{
+   sint8 direction;
+   signed short diffX, diffZ;
+   diffX = x - this->pos.x;
+   diffZ = z - this->pos.z;
+
+   if (diffX > diffZ)
+   {
+     // We compare on the x axis
+     if (diffX > 0) {
+       direction = BLOCK_BOTTOM;
+     } else {
+       direction = BLOCK_EAST;
+     }
+   } else {
+     // We compare on the z axis
+     if (diffZ > 0) {
+       direction = BLOCK_SOUTH;
+     } else {
+       direction = BLOCK_NORTH;
+     }
+   }
+   return direction;
+}
+
 bool User::sendAll(uint8 *data, uint32 len)
 {
   for(unsigned int i = 0; i < Users.size(); i++)
@@ -587,7 +634,27 @@ bool User::sendAdmins(uint8 *data, uint32 len)
 {
   for(unsigned int i = 0; i < Users.size(); i++)
   {
-    if(Users[i]->fd && Users[i]->logged && Users[i]->admin)
+    if(Users[i]->fd && Users[i]->logged && IS_ADMIN(Users[i]->permissions))
+    	Users[i]->buffer.addToWrite(data, len);
+  }
+  return true;
+}
+
+bool User::sendOps(uint8 *data, uint32 len)
+{
+  for(unsigned int i = 0; i < Users.size(); i++)
+  {
+    if(Users[i]->fd && Users[i]->logged && IS_ADMIN(Users[i]->permissions))
+    	Users[i]->buffer.addToWrite(data, len);
+  }
+  return true;
+}
+
+bool User::sendGuests(uint8 *data, uint32 len)
+{
+  for(unsigned int i = 0; i < Users.size(); i++)
+  {
+    if(Users[i]->fd && Users[i]->logged && IS_ADMIN(Users[i]->permissions))
     	Users[i]->buffer.addToWrite(data, len);
   }
   return true;
@@ -719,7 +786,7 @@ bool User::pushMap()
 
 bool User::teleport(double x, double y, double z)
 {
-  buffer << (sint8)PACKET_PLAYER_POSITION_AND_LOOK << x << y << (double)0.0 << z 
+  buffer << (sint8)PACKET_PLAYER_POSITION_AND_LOOK << x << y << (double)0.0 << z
     << (float)0.f << (float)0.f << (sint8)0;
 
   //Also update pos for other players
@@ -744,8 +811,8 @@ bool User::spawnOthers()
   {
     if(Users[i]->UID != this->UID && Users[i]->nick != this->nick)
     {
-    buffer << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)Users[i]->UID << Users[i]->nick 
-      << (sint32)(Users[i]->pos.x * 32) << (sint32)(Users[i]->pos.y * 32) << (sint32)(Users[i]->pos.z * 32) 
+    buffer << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)Users[i]->UID << Users[i]->nick
+      << (sint32)(Users[i]->pos.x * 32) << (sint32)(Users[i]->pos.y * 32) << (sint32)(Users[i]->pos.z * 32)
       << (sint8)0 << (sint8)0 << (sint16)0;
     }
   }
@@ -799,9 +866,9 @@ bool User::isUnderwater()
 {
    uint8 topblock, topmeta;
    int y = ( pos.y - int(pos.y) <= 0.25 ) ? (int)pos.y + 1: (int)pos.y + 2;
-   
+
    Map::get()->getBlock((int)pos.x, y, (int)pos.z, &topblock, &topmeta);
-   
+
    if( topblock == BLOCK_WATER || topblock == BLOCK_STATIONARY_WATER )
    {
       if( (timeUnderwater / 5) > 15 && timeUnderwater % 5 == 0 )// 13 is Trial and Erorr

@@ -25,41 +25,57 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "stair.h"
+#pragma once
 
-void BlockStair::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+#include <cstdlib>
+
+#include "constants.h"
+#include "map.h"
+#include "tools.h"
+
+class User;
+
+struct sSlot
 {
+  sint8 count;
+  sint16 damage;
+  sint16 id;
+};
 
-}
-
-void BlockStair::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+enum
 {
+  SLOT_INPUT,
+  SLOT_FUEL,
+  SLOT_OUTPUT
+};
 
-}
-
-void BlockStair::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+class Furnace
 {
+private:
+  
+  
+public:
+  sint16 fuelBurningTime;
+  sint16 cookingTime;
+  sint16 activeCookDuration;
+ // sint16 activeBurnDuration;  
+  sint32 x;
+  sint32 y;
+  sint32 z;
+  sSlot slots[3];
+  
+  Furnace(NBT_Value *entity);
+  
+  void sendToAllUsers();
+  NBT_Value* getSlotEntity(sint8 slotNumber);
+  void smelt();
+  bool isBurningFuel();
+  bool isCooking();
+  bool hasValidIngredient();
+  void consumeFuel();
+  void updateBlock();
+  sint16 burnTime();
+  sint16 cookTime();
+};
 
-}
 
-void BlockStair::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
-
-void BlockStair::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   /* TODO: add code to align stairs? */
-}
-
-void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
-
-void BlockStair::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   /* Align neighbour to this stair */
-}
-
-void BlockStair::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}

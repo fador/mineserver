@@ -35,7 +35,7 @@ We are trying to minimize memory and CPU usage compared to original Java server.
 
 ### ToDo is located at [http://redmine.fknsrs.biz/projects/mineserver](http://redmine.fknsrs.biz/projects/mineserver)
 
-### Chat commands can be found at [wiki](http://www.mineserver.be/wiki) or by typing `/help` and `/adminhelp` within the client's chat
+### Chat commands can be found at [wiki](http://www.mineserver.be/wiki) or by typing `/help` within the client's chat
 
 ### Compiling (Better instructions in [wiki](http://www.mineserver.be/wiki))
 Depends on (and tested with):

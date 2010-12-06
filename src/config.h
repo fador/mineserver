@@ -48,11 +48,12 @@ public:
   }
   void free();
 
-  bool load(std::string configFile);
+  bool load(std::string configFile, std::string namePrefix = "");
   int iValue(std::string name);
   std::string sValue(std::string name);
   bool bValue(std::string name);
   std::vector<int> vValue(std::string name);
+  int commandPermission(std::string commandName);
 };
 
 #endif

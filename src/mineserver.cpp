@@ -37,6 +37,7 @@
   #include <string.h>
   #include <netdb.h>
   #include <unistd.h>
+  #include <sys/times.h>
 #endif
 #include <sys/types.h>
 #include <fcntl.h>
@@ -121,12 +122,15 @@ int Mineserver::Run(int argc, char *argv[])
 
   std::string file_config;
   file_config.assign(CONFIG_FILE);
+  std::string file_commands;
+  file_commands.assign(COMMANDS_FILE);
 
   if (argc > 1)
     file_config.assign(argv[1]);
 
   // Initialize conf
   Conf::get()->load(file_config);
+  Conf::get()->load(file_commands, COMMANDS_NAME_PREFIX);
 
   // Write PID to file
   std::ofstream pid_out((Conf::get()->sValue("pid_file")).c_str());
@@ -139,7 +143,7 @@ int Mineserver::Run(int argc, char *argv[])
   pid_out.close();
 
   // Load admin, banned and whitelisted users
-  Chat::get()->loadAdmins(Conf::get()->sValue("admin_file"));
+  Chat::get()->loadRoles(Conf::get()->sValue("roles_file"));
   Chat::get()->loadBanned(Conf::get()->sValue("banned_file"));
   Chat::get()->loadWhitelist(Conf::get()->sValue("whitelist_file"));
   // Load MOTD
@@ -154,9 +158,39 @@ int Mineserver::Run(int argc, char *argv[])
   if (Conf::get()->bValue("map_generate_spawn"))
   {
     std::cout << "Generating spawn area...\n";
-    for (int x=0;x<12;x++)
-      for (int z=0;z<12;z++)
-        Map::get()->loadMap(x-6, z-6);
+    int size=Conf::get()->iValue("map_generate_spawn_size");
+    bool show_progress = Conf::get()->bValue("map_generate_spawn_show_progress");
+    #ifdef WIN32    
+      DWORD t_begin,t_end;
+    #else
+      clock_t t_begin,t_end;
+    #endif
+
+    for (int x=-size;x<=size;x++)
+    {
+    #ifdef WIN32  
+      if(show_progress)
+        t_begin = timeGetTime();
+    #else    
+      if(show_progress)
+        t_begin = clock();
+    #endif
+      for (int z=-size;z<=size;z++)
+      {
+        Map::get()->loadMap(x, z);
+      }
+      if(show_progress)
+      {
+        #ifdef WIN32
+          t_end = timeGetTime ();
+          std::cout << ((x+size+1)*(size*2+1)) << "/" << (size*2+1)*(size*2+1) << " done. " << (t_end-t_begin)/(size*2+1) << "ms per chunk" << std::endl;
+        #else
+          t_end = clock();
+          std::cout << ((x+size+1)*(size*2+1)) << "/" << (size*2+1)*(size*2+1) << " done. " << ((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1) << "ms per chunk" << std::endl;
+        #endif
+        
+      }
+    }
 #ifdef _DEBUG
     std::cout << "Spawn area ready!\n";
 #endif
@@ -170,7 +204,7 @@ int Mineserver::Run(int argc, char *argv[])
 
   // Load port from config
   int port = Conf::get()->iValue("port");
-  
+
   // Initialize plugins
   Plugin::get()->init();
 
@@ -288,7 +322,7 @@ int Mineserver::Run(int argc, char *argv[])
         //Send server time
         Packet pkt;
         pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
-        Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());        
+        Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
       }
 
       //Try to load release time from config
@@ -333,7 +367,7 @@ int Mineserver::Run(int argc, char *argv[])
       }
       Map::get()->mapTime+=20;
       if(Map::get()->mapTime>=24000) Map::get()->mapTime=0;
-      
+
       Map::get()->checkGenTrees();
 
       // Check for Furnace activity
@@ -356,7 +390,7 @@ int Mineserver::Run(int argc, char *argv[])
 #else
   close(m_socketlisten);
 #endif
-  
+
   // Remove the PID file
 #ifdef WIN32
   _unlink((Conf::get()->sValue("pid_file")).c_str());

@@ -111,10 +111,12 @@ private:
     stopLight[0x32] = 0; // Torch
     stopLight[0x33] = 0; // Fire
     stopLight[0x34] = 0; // Mob spawner
+    stopLight[0x35] = 0; // Wooden stairs
     stopLight[0x37] = 0; // Redstone wire
     stopLight[0x40] = 0; // Wooden door
     stopLight[0x41] = 0; // Ladder
     stopLight[0x42] = 0; // Minecart track
+    stopLight[0x43] = 0; // Cobblestone stairs
     stopLight[0x47] = 0; // Iron door
     stopLight[0x4b] = 0; // Redstone Torch (Off)
     stopLight[0x4C] = 0; // Redstone Torch (On)
@@ -204,6 +206,9 @@ public:
 
   // Store if map has been modified
   std::map<uint32, bool> mapChanged;
+
+  // Do we need light regeneration
+  std::map<uint32, bool> mapLightRegen;
 
   // Store item pointers for each chunk
   std::map<uint32, std::vector<spawnedItem *> > mapItems;
