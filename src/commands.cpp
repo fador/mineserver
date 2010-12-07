@@ -75,7 +75,7 @@ namespace
   {
     User *tUser = user;
     if(!args.empty() && IS_ADMIN(user->permissions))
-      tUser = getUserByNick(args[0]);
+      tUser = User::byNick(args[0]);
     if(tUser != NULL)
     {
       // Send rules
@@ -122,7 +122,7 @@ void kit(User *user, std::string command, std::deque<std::string> args)
       if(args.size() > 1)
       {
         origUser = user;
-        user = getUserByNick(args[1]);
+        user = User::byNick(args[1]);
         if(!user) {
           user = origUser;
           Chat::get()->sendMsg(user, COLOR_RED + "User not found: " + args[1], Chat::USER);
@@ -167,7 +167,7 @@ void ban(User *user, std::string command, std::deque<std::string> args)
 {
   if(args.size() > 0)
   {
-    User *tUser = getUserByNick(args[0]);
+    User *tUser = User::byNick(args[0]);
 
     std::fstream bannedf;
     bannedf.open("banned.txt",std::fstream::app);
@@ -195,7 +195,7 @@ void ban(User *user, std::string command, std::deque<std::string> args)
       Chat::get()->sendMsg(user, COLOR_DARK_MAGENTA + args[0] +" was banned in his absence!", Chat::ALL);
 
     // Reload list with banned users
-    Chat::get()->loadBanned(Conf::get()->sValue("banned_file"));
+    User::loadBanned(Conf::get()->sValue("banned_file"));
   }
   else
     reportError(user, "Usage: /ban player [reason]");
@@ -223,7 +223,7 @@ void unban(User *user, std::string command, std::deque<std::string> args)
     Chat::get()->sendMsg(user, COLOR_DARK_MAGENTA + args[0] + " was unbanned.", Chat::ALL);
 
     // Reload list with banned users
-    Chat::get()->loadBanned(Conf::get()->sValue("banned_file"));
+    User::loadBanned(Conf::get()->sValue("banned_file"));
   }
   else
     reportError(user, "Usage: /unban player");
@@ -233,7 +233,7 @@ void kick(User *user, std::string command, std::deque<std::string> args)
 {
   if(!args.empty())
   {
-    User *tUser = getUserByNick(args[0]);
+    User *tUser = User::byNick(args[0]);
 
     if(tUser != NULL)
     {
@@ -265,7 +265,7 @@ void mute(User *user, std::string command, std::deque<std::string> args)
   {
     std::string victim = args[0];
 
-    User *tUser        = getUserByNick(victim);
+    User *tUser        = User::byNick(victim);
 
     if(tUser != NULL)
     {
@@ -298,7 +298,7 @@ void unmute(User *user, std::string command, std::deque<std::string> args)
   {
     std::string victim = args[0];
 
-    User *tUser        = getUserByNick(victim);
+    User *tUser        = User::byNick(victim);
 
     if(tUser != NULL)
     {
@@ -357,7 +357,7 @@ void whisper(User *user, std::string command, std::deque<std::string> args)
   {
     std::string targetNick = args[0];
 
-    User *tUser        = getUserByNick(targetNick);
+    User *tUser        = User::byNick(targetNick);
 
     // Don't whisper or tell if DND is set
     if(tUser->dnd)
@@ -417,8 +417,8 @@ void setTime(User *user, std::string command, std::deque<std::string> args)
     Map::get()->mapTime = (sint64)atoi(timeValue.c_str());
     Packet pkt;
     pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
-    if(Users.size())
-      Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
+    if(User::all().size())
+      User::all()[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
     Chat::get()->handleMsg(user, "% World time changed.");
   }
   else
@@ -445,7 +445,7 @@ void userTeleport(User *user, std::string command, std::deque<std::string> args)
   if(args.size() == 1)
   {
     LOG(user->nick + " teleport to: " + args[0]);
-    User *tUser = getUserByNick(args[0]);
+    User *tUser = User::byNick(args[0]);
     if(tUser != NULL)
     {
       user->teleport(tUser->pos.x, tUser->pos.y + 2, tUser->pos.z);
@@ -458,8 +458,8 @@ void userTeleport(User *user, std::string command, std::deque<std::string> args)
   {
     LOG(user->nick + ": teleport " + args[0] + " to " + args[1]);
 
-    User *whoUser = getUserByNick(args[0]);
-    User *toUser   = getUserByNick(args[1]);
+    User *whoUser = User::byNick(args[0]);
+    User *toUser   = User::byNick(args[1]);
 
     if(whoUser != NULL && toUser != NULL)
     {
@@ -500,7 +500,7 @@ void showPosition(User *user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 1)
   {
-    User *tUser = getUserByNick(args[0]);
+    User *tUser = User::byNick(args[0]);
     if(tUser != NULL)
       Chat::get()->sendMsg(user, COLOR_BLUE + args[0] + " is at: " + dtos(tUser->pos.x)
                                                                      + " "
@@ -537,9 +537,9 @@ void regenerateLighting(User *user, std::string command, std::deque<std::string>
 
 void reloadConfiguration(User *user, std::string command, std::deque<std::string> args)
 {
-  Chat::get()->loadRoles(Conf::get()->sValue("roles_file"));
-  Chat::get()->loadBanned(Conf::get()->sValue("banned_file"));
-  Chat::get()->loadWhitelist(Conf::get()->sValue("whitelist_file"));
+  User::loadRoles(Conf::get()->sValue("roles_file"));
+  User::loadBanned(Conf::get()->sValue("banned_file"));
+  User::loadWhitelist(Conf::get()->sValue("whitelist_file"));
   Conf::get()->load(CONFIG_FILE);
   Conf::get()->load(COMMANDS_FILE, COMMANDS_NAME_PREFIX);
 
@@ -580,7 +580,7 @@ void giveItems(User *user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 2 || args.size() == 3)
   {
-    User *tUser = getUserByNick(args[0]);
+    User *tUser = User::byNick(args[0]);
     int itemId = 0;
 
     //First check if item is a number
@@ -697,7 +697,7 @@ void setHealth(User *user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 2)
   {
-    User *tUser = getUserByNick(args[0]);
+    User *tUser = User::byNick(args[0]);
 
     if(tUser)
       tUser->sethealth(atoi(args[1].c_str()));

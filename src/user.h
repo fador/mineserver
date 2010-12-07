@@ -36,7 +36,6 @@
 #include "packets.h"
 #include "permissions.h"
 
-
 struct position
 {
   double x;
@@ -71,10 +70,23 @@ struct Inventory
   }
 };
 
+uint32 generateEID();
+
 class User
 {
 private:
   event m_event;
+
+  // holds all connected users
+  static std::vector<User *>     __users;
+
+  // predefined usernames in roles.txt, banned.txt & whitelist.txt
+  static std::deque<std::string> __admins;
+  static std::deque<std::string> __ops;
+  static std::deque<std::string> __members;
+  static std::deque<std::string> __banned;
+  static std::deque<std::string> __whitelist;
+
 public:
 
   User(int sock, uint32 EID);
@@ -106,6 +118,15 @@ public:
 
   //Input buffer
   Packet buffer;
+
+  static bool loadRoles(std::string rolesFile);
+  static bool loadBanned(std::string bannedFile);
+  static bool loadWhitelist(std::string whitelistFile);
+
+  static std::vector<User *> & all();
+  static bool remove(int sock);
+  static bool isUser(int sock);
+  static User* byNick(std::string nick);
 
   bool checkBanned(std::string _nick);
   bool checkWhitelist(std::string _nick);
@@ -177,14 +198,5 @@ public:
 
   struct event *GetEvent();
 };
-
-User *addUser(int sock, uint32 EID);
-bool remUser(int sock);
-bool isUser(int sock);
-uint32 generateEID();
-
-extern std::vector<User *> Users;
-
-User *getUserByNick(std::string nick);
 
 #endif
