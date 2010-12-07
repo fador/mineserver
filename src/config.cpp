@@ -44,6 +44,14 @@
 
 Conf* Conf::mConf;
 
+Conf::~Conf()
+{
+  for(std::map<std::string, Kit*>::iterator it = kits.begin(); it != kits.end(); it++)
+  {
+    delete it->second;
+  }
+}
+
 void Conf::free()
 {
    if (mConf)

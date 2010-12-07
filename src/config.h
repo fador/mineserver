@@ -44,6 +44,9 @@ class Conf
     }
     return mConf;
   }
+
+  ~Conf();
+
   void free();
 
   bool load(std::string configFile, std::string namePrefix = "");
