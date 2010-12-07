@@ -118,11 +118,11 @@ void MapGen::init(int seed)
 
 void MapGen::generateFlatgrass() 
 {
-  for (sint8 bX = 0; bX < 16; bX++) 
+  for (int bX = 0; bX < 16; bX++) 
   {
-    for (uint8 bY = 0; bY < 128; bY++) 
+    for (int bY = 0; bY < 128; bY++) 
     {
-      for (sint8 bZ = 0; bZ < 16; bZ++) 
+      for (int bZ = 0; bZ < 16; bZ++) 
       {
         if (bY == 0) 
           blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_BEDROCK; 
@@ -211,9 +211,9 @@ void MapGen::generateWithNoise(int x, int z)
 
   double xBlockpos=x<<4;
   double zBlockpos=z<<4;
-  for (sint32 bX = 0; bX < 16; bX++) 
+  for (int bX = 0; bX < 16; bX++) 
   {
-    for (sint32 bZ = 0; bZ < 16; bZ++) 
+    for (int bZ = 0; bZ < 16; bZ++) 
     {
       
       heightmap[(bZ<<4)+bX] = ymax = currentHeight = (uint8)((ridgedMultiNoise.GetValue(xBlockpos+bX,0, zBlockpos+bZ) * 15) + 64);
@@ -224,7 +224,7 @@ void MapGen::generateWithNoise(int x, int z)
       if(ymax < seaLevel) 
         ymax = seaLevel;
 
-      for(sint32 bY = 0; bY <= ymax; bY++) 
+      for(int bY = 0; bY <= ymax; bY++) 
       {
         curBlock = &blocks[bYbX++];
         
