@@ -37,6 +37,7 @@
 #include "blocks/stair.h"
 #include "blocks/door.h"
 #include "blocks/sign.h"
+#include "blocks/tracks.h"
 
 Plugin* Plugin::mPlugin;
 
@@ -86,7 +87,7 @@ void Plugin::init()
    /* metals */
    setBlockCallback(BLOCK_GOLD_BLOCK, call);
    setBlockCallback(BLOCK_IRON_BLOCK, call);
-
+   
    setBlockCallback(BLOCK_DOUBLE_STEP, call);
    setBlockCallback(BLOCK_STEP, call);
    setBlockCallback(BLOCK_BRICK, call);
@@ -101,7 +102,6 @@ void Plugin::init()
    setBlockCallback(BLOCK_LIGHTSTONE, call);
    setBlockCallback(BLOCK_JACK_O_LANTERN, call);
    setBlockCallback(BLOCK_JUKEBOX, call);
-   setBlockCallback(BLOCK_MINECART_TRACKS, call);
    setBlockCallback(BLOCK_FENCE, call);
    setBlockCallback(BLOCK_GOLD_ORE, call);
    setBlockCallback(BLOCK_IRON_ORE, call);
@@ -234,6 +234,17 @@ void Plugin::init()
    setBlockCallback(BLOCK_WALL_SIGN, call);
    setBlockCallback(BLOCK_SIGN_POST, call);
    setBlockCallback(ITEM_SIGN, call);
+   
+   /* minecart tracks */
+   call.reset();
+   BlockTracks* tracksblock = new BlockTracks();
+   call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
+   call.add("onPlace", Function::from_method<BlockTracks, &BlockTracks::onPlace>(tracksblock));
+   call.add("onNeighbourBroken", Function::from_method<BlockTracks, &BlockTracks::onNeighbourBroken>(tracksblock));
+//   call.add("onNeighbourPlace", Function::from_method<BlockTracks, &BlockTracks::onNeighbourPlace>(tracksblock));
+//   call.add("onNeighbourMove", Function::from_method<BlockTracks, &BlockTracks::onNeighbourMove>(tracksblock));
+   setBlockCallback(BLOCK_MINECART_TRACKS, call);
+
 
   /* TODO: Unimplemented */
   /* BLOCK_SPONGE */

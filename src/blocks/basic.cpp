@@ -49,6 +49,7 @@ bool BlockBasic::isBlockStackable(const uint8 block)
       case BLOCK_LAVA:
       case BLOCK_STATIONARY_LAVA:
       case BLOCK_AIR:
+      case BLOCK_MINECART_TRACKS:
        return false;
       break;
       default:
