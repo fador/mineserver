@@ -26,7 +26,7 @@
  */
 
 #include "tracks.h"
-#include <iostream>
+//#include <iostream>
 
 enum {
   FLAT_NS = 0,
@@ -102,16 +102,16 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // SOUTH
   if(isTrack(x, y, z-1, meta) && isStartPiece(x, y, z-1))
   {
-    std::cout << "SOUTH" << std::endl;
+    //std::cout << "SOUTH" << std::endl;
     metadata = FLAT_NS;
     
     if(isTrack(x+1, y, z, meta) && isStartPiece(x+1, y, z))
     {
-      metadata = CORNER_NW;
+      metadata = CORNER_NE;
     }
     if(isTrack(x-1, y, z, meta) && isStartPiece(x-1, y, z))
     {
-      metadata = CORNER_SW;
+      metadata = CORNER_NW;
     }
     
     // Modify previous trackpiece to form corner
@@ -120,7 +120,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
       Map::get()->setBlock(x, y, z-1, (char)newblock, CORNER_SW);
       Map::get()->sendBlockChange(x, y, z-1, (char)newblock, CORNER_SW);
     }
-    else if(isTrack(x+1, y, z-1, meta) && meta != FLAT_NS && meta != CORNER_SW)
+    else if(isTrack(x+1, y, z-1, meta) && meta != FLAT_NS && meta != CORNER_NE && meta != CORNER_SE)
     {
       Map::get()->setBlock(x, y, z-1, (char)newblock, CORNER_SE);
       Map::get()->sendBlockChange(x, y, z-1, (char)newblock, CORNER_SE);
@@ -130,18 +130,17 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // NORTH
   if(isTrack(x, y, z+1, meta) && isStartPiece(x, y, z+1))
   {
-    std::cout << "NORTH" << std::endl;
+    //std::cout << "NORTH" << std::endl;
 
     metadata = FLAT_NS;
     
     if(isTrack(x+1, y, z, meta) && isStartPiece(x+1, y, z))
     {
-      metadata = CORNER_NE;
+      metadata = CORNER_SE;
     }
-    // NORTHWEST TURN (SE Corner)
     if(isTrack(x-1, y, z, meta) && isStartPiece(x-1, y, z))
     {
-      metadata = CORNER_SE;
+      metadata = CORNER_SW;
     }
     
     // Modify previous trackpiece to form corner
@@ -150,7 +149,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
       Map::get()->setBlock(x, y, z+1, (char)newblock, CORNER_NE);
       Map::get()->sendBlockChange(x, y, z+1, (char)newblock, CORNER_NE);
     }
-    else if(isTrack(x-1, y, z+1, meta) && meta != FLAT_NS && meta != CORNER_NE && meta != CORNER_SE)
+    else if(isTrack(x-1, y, z+1, meta) && meta != FLAT_NS && meta != CORNER_NW && meta != CORNER_SW)
     { 
       Map::get()->setBlock(x, y, z+1, (char)newblock, CORNER_NW);
       Map::get()->sendBlockChange(x, y, z+1, (char)newblock, CORNER_NW);
@@ -160,7 +159,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // EAST
   if(isTrack(x-1, y, z, meta) && isStartPiece(x-1, y, z))
   {
-    std::cout << "EAST" << std::endl;
+    //std::cout << "EAST" << std::endl;
     metadata = FLAT_EW;
     // Change previous block meta
     Map::get()->setBlock(x-1, y, z, (char)newblock, FLAT_EW);
@@ -176,12 +175,12 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
     }
     
     // Modify previous trackpiece to form corner
-    if(isTrack(x-1, y, z-1, meta) && meta != FLAT_EW && meta != CORNER_SE && meta != CORNER_SW)
+    if(isTrack(x-1, y, z-1, meta) && meta != FLAT_EW && meta != CORNER_NE && meta != CORNER_NW)
     {
       Map::get()->setBlock(x-1, y, z, (char)newblock, CORNER_NE);
       Map::get()->sendBlockChange(x-1, y, z, (char)newblock, CORNER_NE);
     }
-    else if(isTrack(x-1, y, z+1, meta) && meta != FLAT_EW && meta != CORNER_NW && meta != CORNER_SW)
+    else if(isTrack(x-1, y, z+1, meta) && meta != FLAT_EW && meta != CORNER_SW && meta != CORNER_SE)
     {
       Map::get()->setBlock(x-1, y, z, (char)newblock, CORNER_SE);
       Map::get()->sendBlockChange(x-1, y, z, (char)newblock, CORNER_SE);
@@ -191,7 +190,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // WEST
   if(isTrack(x+1, y, z, meta) && isStartPiece(x+1, y, z))
   {
-    std::cout << "WEST" << std::endl;
+    //std::cout << "WEST" << std::endl;
     metadata = FLAT_EW;
     // Change previous block meta
 
@@ -221,7 +220,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   }
   
   
-  std::cout << std::endl;
+  //std::cout << std::endl;
   Map::get()->setBlock(x, y, z, (char)newblock, metadata);
   Map::get()->sendBlockChange(x, y, z, (char)newblock, metadata);
 }
@@ -255,6 +254,7 @@ bool BlockTracks::isStartPiece(sint32 x, sint8 y, sint32 z)
   sint32 x1, x2, z1, z2;
   x1 = x2 = x;
   z1 = z2 = z;
+  
   sint8 y1, y2;
   y1 = y2 = y;
   
