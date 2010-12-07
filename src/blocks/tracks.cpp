@@ -29,8 +29,8 @@
 #include <iostream>
 
 enum {
-  FLAT_EW = 0,
-  FLAT_NS,
+  FLAT_NS = 0,
+  FLAT_EW,
   ASCEND_S,
   ASCEND_N,
   ASCEND_E,
@@ -97,31 +97,30 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   if (!this->isBlockEmpty(x,y,z))
      return;
    
-  uint8 metadata = FLAT_EW;
+  uint8 metadata = FLAT_NS;
   
   // SOUTH
-  if(isTrack(x, y, z-1, meta))
+  if(isTrack(x, y, z-1, meta) && isStartPiece(x, y, z-1))
   {
     std::cout << "SOUTH" << std::endl;
-    metadata = FLAT_EW;
-    // SOUTHEAST TURN (NORTHWEST CORNER)
+    metadata = FLAT_NS;
+    
     if(isTrack(x+1, y, z, meta) && isStartPiece(x+1, y, z))
     {
       metadata = CORNER_NW;
     }
-    // NORTHEAST TURN (SOUTHWEST CORNER)
     if(isTrack(x-1, y, z, meta) && isStartPiece(x-1, y, z))
     {
       metadata = CORNER_SW;
     }
     
     // Modify previous trackpiece to form corner
-    if(isTrack(x-1, y, z-1, meta) && isStartPiece(x, y, z-1))
+    if(isTrack(x-1, y, z-1, meta) && meta != FLAT_NS && meta != CORNER_NW && meta != CORNER_SW)
     {
       Map::get()->setBlock(x, y, z-1, (char)newblock, CORNER_SW);
       Map::get()->sendBlockChange(x, y, z-1, (char)newblock, CORNER_SW);
     }
-    else if(isTrack(x+1, y, z-1, meta) && isStartPiece(x, y, z-1))
+    else if(isTrack(x+1, y, z-1, meta) && meta != FLAT_NS && meta != CORNER_SW)
     {
       Map::get()->setBlock(x, y, z-1, (char)newblock, CORNER_SE);
       Map::get()->sendBlockChange(x, y, z-1, (char)newblock, CORNER_SE);
@@ -129,13 +128,12 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   }
   
   // NORTH
-  if(isTrack(x, y, z+1, meta))
+  if(isTrack(x, y, z+1, meta) && isStartPiece(x, y, z+1))
   {
     std::cout << "NORTH" << std::endl;
 
-    metadata = FLAT_EW;
+    metadata = FLAT_NS;
     
-    // SOUTHWEST TURN (NE Corner)
     if(isTrack(x+1, y, z, meta) && isStartPiece(x+1, y, z))
     {
       metadata = CORNER_NE;
@@ -147,30 +145,27 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
     }
     
     // Modify previous trackpiece to form corner
-    if(isTrack(x+1, y, z+1, meta) && isStartPiece(x, y, z+1))
+    if(isTrack(x+1, y, z+1, meta) && meta != FLAT_NS && meta != CORNER_NE && meta != CORNER_SE)
     {
       Map::get()->setBlock(x, y, z+1, (char)newblock, CORNER_NE);
       Map::get()->sendBlockChange(x, y, z+1, (char)newblock, CORNER_NE);
     }
-    else if(isTrack(x-1, y, z+1, meta) && isStartPiece(x, y, z+1))
-    {
+    else if(isTrack(x-1, y, z+1, meta) && meta != FLAT_NS && meta != CORNER_NE && meta != CORNER_SE)
+    { 
       Map::get()->setBlock(x, y, z+1, (char)newblock, CORNER_NW);
       Map::get()->sendBlockChange(x, y, z+1, (char)newblock, CORNER_NW);
     }
   }
     
   // EAST
-  if(isTrack(x-1, y, z, meta))
+  if(isTrack(x-1, y, z, meta) && isStartPiece(x-1, y, z))
   {
     std::cout << "EAST" << std::endl;
-    metadata = FLAT_NS;
+    metadata = FLAT_EW;
     // Change previous block meta
-    if(isStartPiece(x-1, y, z))
-    {
-      Map::get()->setBlock(x-1, y, z, (char)newblock, FLAT_NS);
-      Map::get()->sendBlockChange(x-1, y, z, (char)newblock, FLAT_NS);
-    }
-    
+    Map::get()->setBlock(x-1, y, z, (char)newblock, FLAT_EW);
+    Map::get()->sendBlockChange(x-1, y, z, (char)newblock, FLAT_EW);
+  
     if(isTrack(x, y, z+1, meta) && isStartPiece(x, y, z+1))
     {
       metadata = CORNER_SW;
@@ -181,12 +176,12 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
     }
     
     // Modify previous trackpiece to form corner
-    if(isTrack(x-1, y, z-1, meta) && isStartPiece(x-1, y, z))
+    if(isTrack(x-1, y, z-1, meta) && meta != FLAT_EW && meta != CORNER_SE && meta != CORNER_SW)
     {
       Map::get()->setBlock(x-1, y, z, (char)newblock, CORNER_NE);
       Map::get()->sendBlockChange(x-1, y, z, (char)newblock, CORNER_NE);
     }
-    else if(isTrack(x-1, y, z+1, meta) && isStartPiece(x-1, y, z))
+    else if(isTrack(x-1, y, z+1, meta) && meta != FLAT_EW && meta != CORNER_NW && meta != CORNER_SW)
     {
       Map::get()->setBlock(x-1, y, z, (char)newblock, CORNER_SE);
       Map::get()->sendBlockChange(x-1, y, z, (char)newblock, CORNER_SE);
@@ -194,35 +189,31 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   }
   
   // WEST
-  if(isTrack(x+1, y, z, meta))
+  if(isTrack(x+1, y, z, meta) && isStartPiece(x+1, y, z))
   {
     std::cout << "WEST" << std::endl;
-    metadata = FLAT_NS;
+    metadata = FLAT_EW;
     // Change previous block meta
-    if(isStartPiece(x+1, y, z))
-    {
-      Map::get()->setBlock(x+1, y, z, (char)newblock, FLAT_NS);
-      Map::get()->sendBlockChange(x+1, y, z, (char)newblock, FLAT_NS);
-    }
-    
-    // SOUTHWEST TURN (NE Corner)
+
+    Map::get()->setBlock(x+1, y, z, (char)newblock, FLAT_EW);
+    Map::get()->sendBlockChange(x+1, y, z, (char)newblock, FLAT_EW);
+
     if(isTrack(x, y, z+1, meta) && isStartPiece(x, y, z+1))
     {
       metadata = CORNER_SE;
     }
-    // SOUTHEAST TURN (NW Corner)
     if(isTrack(x, y, z-1, meta) && isStartPiece(x, y, z-1))
     {
       metadata = CORNER_NE;
     }
     
     // Modify previous trackpiece to form corner
-    if(isTrack(x+1, y, z-1, meta) && isStartPiece(x+1, y, z))
+    if(isTrack(x+1, y, z-1, meta) && meta != FLAT_EW && meta != CORNER_NW && meta != CORNER_NE)
     {
       Map::get()->setBlock(x+1, y, z, (char)newblock, CORNER_NW);
       Map::get()->sendBlockChange(x+1, y, z, (char)newblock, CORNER_NW);
     }
-    else if(isTrack(x+1, y, z+1, meta) && isStartPiece(x+1, y, z))
+    else if(isTrack(x+1, y, z+1, meta) && meta != FLAT_EW && meta != CORNER_SW && meta != CORNER_SE)
     {
       Map::get()->setBlock(x+1, y, z, (char)newblock, CORNER_SW);
       Map::get()->sendBlockChange(x+1, y, z, (char)newblock, CORNER_SW);
@@ -271,26 +262,26 @@ bool BlockTracks::isStartPiece(sint32 x, sint8 y, sint32 z)
   switch(meta)
   {
     case FLAT_EW:
+      x1--;
+      x2++;
+      break;
+    case FLAT_NS:
       z1--;
       z2++;
       break;
-    case FLAT_NS:
-      x1--;
-      x2++;
-      break;
-    case CORNER_NE:
-      z1++;
-      x2++;
-      break;
-    case CORNER_NW:
-      x1++;
-      z2--;
-      break;
     case CORNER_SE:
-      x1--;
+      x1++;
       z2++;
       break;
     case CORNER_SW:
+      z1++;
+      x2--;
+      break;
+    case CORNER_NE:
+      x1++;
+      z2--;
+      break;
+    case CORNER_NW:
       x1--;
       z2--;
       break;
