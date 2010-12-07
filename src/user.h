@@ -73,9 +73,6 @@ uint32 generateEID();
 
 class User
 {
-private:
-  event m_event;
-
 public:
 
   User(int sock, uint32 EID);
@@ -182,6 +179,9 @@ public:
   bool isUnderwater();
 
   struct event *GetEvent();
+
+private:
+  event m_event;
 };
 
 #endif
