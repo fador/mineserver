@@ -444,7 +444,7 @@ void Chat::sendHelp(User *user, std::deque<std::string> args)
     if((iter = commandList->find(args.front())) != commandList->end()) {
       std::string args = iter->second->arguments;
       std::string description = iter->second->description;
-      sendMsg(user, commandColor + CHATCMDPREFIX + iter->first + args, Chat::USER);
+      sendMsg(user, commandColor + CHATCMDPREFIX + iter->first + " " + args, Chat::USER);
       sendMsg(user, COLOR_YELLOW + CHATCMDPREFIX + description, Chat::USER);
     } else {
       sendMsg(user, COLOR_RED + "Unknown Command: " + args.front(), Chat::USER);
