@@ -73,27 +73,26 @@ public:
 
   static Chat* get()
   {
-    if(!mChat) {
-      mChat = new Chat();
+    if(!_instance) {
+      _instance = new Chat();
     }
-    return mChat;
+    return _instance;
   }
 
   void free();
 
 private:
-  static Chat *mChat;
-
-  typedef std::map<std::string, Command*> CommandList;
-
-  CommandList adminCommands;
-  CommandList opCommands;
-  CommandList memberCommands;
-  CommandList guestCommands;
+  static Chat *_instance;
 
   Chat();
   void registerStandardCommands();
   std::deque<std::string> parseCmd(std::string cmd);
+
+  typedef std::map<std::string, Command*> CommandList;
+  CommandList m_adminCommands;
+  CommandList m_opCommands;
+  CommandList m_memberCommands;
+  CommandList m_guestCommands;
 };
 
 #endif

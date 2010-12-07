@@ -85,7 +85,9 @@ bool Conf::load(std::string configFile, std::string namePrefix)
     // Write all the default settings
     std::map<std::string, std::string>::iterator iter;
     for(iter=defaultConf.begin();iter!=defaultConf.end();++iter)
+    {
       confofs << iter->first << " = " << iter->second << std::endl;
+    }
 
     // Close the config file
     confofs.close();
@@ -111,15 +113,21 @@ bool Conf::load(std::string configFile, std::string namePrefix)
   {
     //If empty line
     if(temp.size() == 0)
+    {
       continue;
+    }
 
     // If commentline -> skip to next
     if(temp[0] == COMMENTPREFIX)
+    {
       continue;
+    }
 
     // If not enough characters (Absolute min is 5: "a = s")
     if(temp.length() < 5)
+    {
       continue;
+    }
 
     // Init vars
     del = 0;
@@ -130,7 +138,9 @@ bool Conf::load(std::string configFile, std::string namePrefix)
     {
       // Remove white spaces and = characters -_-
       while(temp[0] == ' ' || temp[0] == '=')
+      {
         temp = temp.substr(1);
+      }
 
       // Split words
       del = temp.find(' ');
@@ -166,7 +176,9 @@ bool Conf::load(std::string configFile, std::string namePrefix)
       text = text.substr(1, text.length()-3);
     }
     else
+    {
       text = line[1];
+    }
 
     if (line[0] == "include")
     {
@@ -179,7 +191,9 @@ bool Conf::load(std::string configFile, std::string namePrefix)
 
     // Update existing configuration and add new lines
     if(m_confSet.find(namePrefix + line[0]) != m_confSet.end())
+    {
       m_confSet[namePrefix + line[0]] = text;
+    }
     else
     {
       // Push to configuration
@@ -201,7 +215,9 @@ bool Conf::load(std::string configFile, std::string namePrefix)
 std::string Conf::sValue(std::string name)
 {
   if(m_confSet.find(name) != m_confSet.end())
+  {
     return m_confSet[name];
+  }
   else
   {
     std::cout << "Warning! " << name << " not defined in configuration. Using default value: "<<
@@ -213,7 +229,9 @@ std::string Conf::sValue(std::string name)
 int Conf::iValue(std::string name)
 {
   if(m_confSet.find(name) != m_confSet.end())
+  {
     return atoi(m_confSet[name].c_str());
+  }
   else
   {
     std::cout << "Warning! " << name << " not defined in configuration. Using default value: "<<
@@ -225,7 +243,9 @@ int Conf::iValue(std::string name)
 bool Conf::bValue(std::string name)
 {
   if(m_confSet.find(name) != m_confSet.end())
+  {
     return (m_confSet[name] == "true")?true:false;
+  }
   else
   {
     std::cout << "Warning! " << name << " not defined in configuration. Using default value: "<<
@@ -255,16 +275,24 @@ int Conf::commandPermission(std::string commandName)
 int Conf::permissionByName(std::string permissionName)
 {
   if(permissionName == "admin")
+  {
     return PERM_ADMIN;
+  }
 
   if(permissionName == "op")
+  {
     return PERM_OP;
+  }
 
   if(permissionName == "member")
+  {
     return PERM_MEMBER;
+  }
 
   if(permissionName == "guest")
+  {
     return PERM_GUEST;
+  }
 
   std::cout << "Warning! Unknown permission name: " << permissionName << " - Using GUEST permission by default!" << std::endl;
 
@@ -306,7 +334,9 @@ std::vector<int> Conf::stringToVec(std::string& str)
   {
     // Remove white spaces characters
     while(str[0] == ' ')
+    {
       str = str.substr(1);
+    }
 
     // Split words
     del = str.find(',');
@@ -355,23 +385,30 @@ bool Conf::loadRoles()
   std::string temp;
   while(getline(ifs, temp))
   {
-    if(temp[0] == COMMENTPREFIX) {
+    if(temp[0] == COMMENTPREFIX)
+    {
       temp = temp.substr(1); // ignore COMMENTPREFIX
       temp.erase(std::remove(temp.begin(), temp.end(), ' '), temp.end());
 
       // get the name of the role from the comment
-      if(temp == "admins") {
+      if(temp == "admins")
+      {
         role_list = &m_admins;
       }
-      if(temp == "ops") {
+      if(temp == "ops")
+      {
         role_list = &m_ops;
       }
-      if(temp == "members") {
+      if(temp == "members")
+      {
         role_list = &m_members;
       }
-    } else {
+    }
+    else
+    {
       temp.erase(std::remove(temp.begin(), temp.end(), ' '), temp.end());
-      if(temp != "") {
+      if(temp != "")
+      {
         role_list->push_back(temp);
       }
     }
@@ -411,7 +448,9 @@ bool Conf::loadBanned()
   {
     // If not commentline
     if(temp[0] != COMMENTPREFIX)
+    {
       m_banned.push_back(temp);
+    }
   }
   ifs.close();
 #ifdef _DEBUG
@@ -448,7 +487,9 @@ bool Conf::loadWhitelist()
   {
     // If not commentline
     if(temp[0] != COMMENTPREFIX)
+    {
       m_whitelist.push_back(temp);
+    }
   }
   ifs.close();
 #ifdef _DEBUG
