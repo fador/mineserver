@@ -53,7 +53,6 @@ void CaveGen::init(int seed)
   caveNoise1.SetFrequency (1.0/20);
   //caveNoise.SetLacunarity (0.5);
   caveNoise1.SetOctaveCount (2);
-  //caveNoise1.SetPersistence (0.12);
 
   caveNoise1.SetNoiseQuality (noise::QUALITY_STD);
   
@@ -64,16 +63,13 @@ void CaveGen::init(int seed)
   caveNoise2.SetOctaveCount (2);
 
   caveNoise2.SetNoiseQuality (noise::QUALITY_STD);
-  
-  caveScale = 0.9;
-  
+
   addCaves = Conf::get()->bValue("add_caves");
   caveDensity = Conf::get()->iValue("cave_density");
   caveSize = Conf::get()->iValue("cave_size");
   addCaveLava = Conf::get()->bValue("cave_lava");
   addCaveWater = Conf::get()->bValue("cave_water");
   addOre = Conf::get()->bValue("cave_ore");
-
 
   seaLevel = Conf::get()->iValue("sea_level");
 }
@@ -82,10 +78,7 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
 { 
   if(addCaves)
   {
-    //x *= caveScale;
-    //z *= caveScale;
-    
-    
+   
     caveN1 = caveNoise1.GetValue(x,y,z);
     
     if(caveN1 < 0.1)// && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER)
