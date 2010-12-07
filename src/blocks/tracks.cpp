@@ -28,8 +28,8 @@
 #include "tracks.h"
 
 enum {
-  FLAT_EW, //x
-  FLAT_NS,//z
+  FLAT_EW,
+  FLAT_NS,
   ASCEND_S,
   ASCEND_N,
   ASCEND_E,
@@ -83,82 +83,167 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
 
   if (!this->isBlockEmpty(x,y,z))
      return;
-
-  //direction = user->relativeToBlock(x, y, z);
    
   uint8 metadata = FLAT_EW;
+  //
+  //    =[X] WEST
+  //
+  //    [x]= EAST
+  //
+  //    | |
+  //    [x] NORTH
+  //    
+  //    [x]
+  //    | | SOUTH
   
-  // If north south track.
-  if(isTrack(x-1, y, z) || isTrack(x+1, y, z))
+  
+  // EAST
+  if(isTrack(x, y, z-1))
+  {
+    metadata = FLAT_EW;
+    // SOUTHEAST TURN (NORTHWEST CORNER)
+    if(isTrack(x+1, y, z))
+    {
+      metadata = CORNER_NW;
+    }
+    // NORTHEAST TURN (SOUTHWEST CORNER)
+    if(isTrack(x-1, y, z))
+    {
+      metadata = CORNER_SW;
+    }
+    // STRAIGHT
+    if(isTrack(x-1, y, z) && isTrack(x+1, y, z))
+    {
+      metadata = FLAT_EW;
+    }
+  }
+  
+  // WEST
+  if(isTrack(x, y, z+1))
+  {
+    metadata = FLAT_EW;
+    
+    // SOUTHWEST TURN (NE Corner)
+    if(isTrack(x+1, y, z))
+    {
+      metadata = CORNER_NE;
+    }
+    // NORTHWEST TURN (SE Corner)
+    if(isTrack(x-1, y, z))
+    {
+      metadata = CORNER_SE;
+    }
+    // STRAIGHT
+    if(isTrack(x-1, y, z) && isTrack(x+1, y, z))
+    {
+      metadata = FLAT_EW;
+    }
+  }
+    
+  // NORTH
+  if(isTrack(x-1, y, z))
   {
     metadata = FLAT_NS;
+    // Change previous block meta
+    if(!isTrack(x-1, y, z+1) || !isTrack(x-1, y, z-1))
+    {
+      Map::get()->setBlock(x-1, y, z, (char)newblock, FLAT_NS);
+      Map::get()->sendBlockChange(x-1, y, z, (char)newblock, FLAT_NS);
+    }
+    
+    // NORTHWEST TURN (SE Corner)
+    if(isTrack(x, y, z+1))
+    {
+      metadata = CORNER_SE;
+    }
+    // NORTHEAST TURN (SW Corner)
+    if(isTrack(x, y, z-1))
+    {
+      metadata = CORNER_SW;
+    }
+    // STRAIGHT
+    if(isTrack(x, y, z-1) && isTrack(x, y, z+1))
+    {
+      metadata = FLAT_NS;
+    }
   }
   
-  // Corners
-  if(isTrack(x, y, z+1)  && isTrack(x+1, y, z))
+  // SOUTH
+  if(isTrack(x+1, y, z))
   {
-    metadata = CORNER_NE;
-  }
-  if(isTrack(x, y, z-1)  && isTrack(x-1, y, z) )
-  {
-    metadata = CORNER_SW;
-  }
-  if(isTrack(x, y, z+1) && isTrack(x-1, y, z))
-  {
-    metadata = CORNER_SE;
-  }
-  if(isTrack(x, y, z-1) && isTrack(x+1, y, z))
-  {
-    metadata = CORNER_NW;
+    metadata = FLAT_NS;
+    // Change previous block meta
+    if(!isTrack(x+1, y, z+1) || !isTrack(x+1, y, z-1))
+    {
+      Map::get()->setBlock(x+1, y, z, (char)newblock, FLAT_NS);
+      Map::get()->sendBlockChange(x+1, y, z, (char)newblock, FLAT_NS);
+    }
+    
+    // SOUTHWEST TURN (NE Corner)
+    if(isTrack(x, y, z+1))
+    {
+      metadata = CORNER_NE;
+    }
+    // SOUTHEAST TURN (NW Corner)
+    if(isTrack(x, y, z-1))
+    {
+      metadata = CORNER_NW;
+    }
+    // STRAIGHT
+    if(isTrack(x, y, z-1) && isTrack(x, y, z+1))
+    {
+      metadata = FLAT_NS;
+    }
   }
   
-  // NW & SW
+  
+  /* NW & SW
   if(isTrack(x, y, z-1) && isTrack(x-1, y, z-1) && !isTrack(x+1, y, z-1))
-  {
-    Map::get()->setBlock(x, y, z-1, (char)newblock, CORNER_NW);
-    Map::get()->sendBlockChange(x, y, z-1, (char)newblock, CORNER_NW);
-  }
-  if(isTrack(x, y, z-1) && !isTrack(x-1, y, z-1) && isTrack(x+1, y, z-1))
   {
     Map::get()->setBlock(x, y, z-1, (char)newblock, CORNER_SW);
     Map::get()->sendBlockChange(x, y, z-1, (char)newblock, CORNER_SW);
   }
+  else if(isTrack(x, y, z-1) && !isTrack(x-1, y, z-1) && isTrack(x+1, y, z-1))
+  {
+    Map::get()->setBlock(x, y, z-1, (char)newblock, CORNER_NE);
+    Map::get()->sendBlockChange(x, y, z-1, (char)newblock, CORNER_NE);
+  }
 
   // SE & SW
-  if(isTrack(x-1, y, z) && isTrack(x-1, y, z-1) && !isTrack(x-1, y, z+1))
+  else if(isTrack(x-1, y, z) && isTrack(x-1, y, z-1) && !isTrack(x-1, y, z+1))
   {
-    Map::get()->setBlock(x-1, y, z, (char)newblock, CORNER_SE);
-    Map::get()->sendBlockChange(x-1, y, z, (char)newblock, CORNER_SE);
+    Map::get()->setBlock(x-1, y, z, (char)newblock, CORNER_NW);
+    Map::get()->sendBlockChange(x-1, y, z, (char)newblock, CORNER_NW);
   }
-  if(isTrack(x-1, y, z) && !isTrack(x-1, y, z-1) && isTrack(x-1, y, z+1))
+  else if(isTrack(x-1, y, z) && !isTrack(x-1, y, z-1) && isTrack(x-1, y, z+1))
   {
-    Map::get()->setBlock(x-1, y, z, (char)newblock, CORNER_SW);
-    Map::get()->sendBlockChange(x-1, y, z, (char)newblock, CORNER_SW);
+    Map::get()->setBlock(x-1, y, z, (char)newblock, CORNER_NE);
+    Map::get()->sendBlockChange(x-1, y, z, (char)newblock, CORNER_NE);
   }
   
   // NW & NE
-  if(isTrack(x, y, z+1) && isTrack(x+1, y, z+1) && !isTrack(x-1, y, z+1))
+  else if(isTrack(x, y, z+1) && isTrack(x+1, y, z+1) && !isTrack(x-1, y, z+1))
   {
-    Map::get()->setBlock(x, y, z+1, (char)newblock, CORNER_NW);
-    Map::get()->sendBlockChange(x, y, z+1, (char)newblock, CORNER_NW);
+    Map::get()->setBlock(x, y, z+1, (char)newblock, CORNER_SW);
+    Map::get()->sendBlockChange(x, y, z+1, (char)newblock, CORNER_SW);
   }
-  if(isTrack(x, y, z+1) && !isTrack(x+1, y, z+1) && isTrack(x-1, y, z+1))
+  else if(isTrack(x, y, z+1) && isTrack(x-1, y, z+1) && !isTrack(x+1, y, z+1))
   {
     Map::get()->setBlock(x, y, z+1, (char)newblock, CORNER_NE);
     Map::get()->sendBlockChange(x, y, z+1, (char)newblock, CORNER_NE);
   }
   
   // SW & SE
-  if(isTrack(x-1, y, z) && isTrack(x-1, y, z+1) && !isTrack(x-1, y, z-1))
+  else if(isTrack(x-1, y, z) && isTrack(x-1, y, z+1) && !isTrack(x-1, y, z-1))
+  {
+    Map::get()->setBlock(x-1, y, z, (char)newblock, CORNER_NW);
+    Map::get()->sendBlockChange(x-1, y, z, (char)newblock, CORNER_NW);
+  }
+  else if(isTrack(x-1, y, z) && !isTrack(x-1, y, z+1) && isTrack(x-1, y, z-1))
   {
     Map::get()->setBlock(x-1, y, z, (char)newblock, CORNER_SW);
     Map::get()->sendBlockChange(x-1, y, z, (char)newblock, CORNER_SW);
-  }
-  if(isTrack(x-1, y, z) && !isTrack(x-1, y, z+1) && isTrack(x-1, y, z-1))
-  {
-    Map::get()->setBlock(x, y, z+1, (char)newblock, CORNER_SE);
-    Map::get()->sendBlockChange(x, y, z+1, (char)newblock, CORNER_SE);
-  }
+  }*/
   
   Map::get()->setBlock(x, y, z, (char)newblock, metadata);
   Map::get()->sendBlockChange(x, y, z, (char)newblock, metadata);
