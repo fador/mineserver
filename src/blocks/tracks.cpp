@@ -90,7 +90,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // SOUTH
   if(isTrack(x, y, z-1, meta))
   {
-    //std::cout << "SOUTH" << std::endl;
+    std::cout << "SOUTH" << std::endl;
     metadata = FLAT_EW;
     // SOUTHEAST TURN (NORTHWEST CORNER)
     if(isTrack(x+1, y, z, meta) && isStartPiece(x+1, y, z))
@@ -119,7 +119,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // NORTH
   if(isTrack(x, y, z+1, meta))
   {
-    //std::cout << "NORTH" << std::endl;
+    std::cout << "NORTH" << std::endl;
 
     metadata = FLAT_EW;
     
@@ -150,7 +150,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // EAST
   if(isTrack(x-1, y, z, meta))
   {
-    //std::cout << "EAST" << std::endl;
+    std::cout << "EAST" << std::endl;
     metadata = FLAT_NS;
     // Change previous block meta
     if(isStartPiece(x-1, y, z))
@@ -159,15 +159,13 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
       Map::get()->sendBlockChange(x-1, y, z, (char)newblock, FLAT_NS);
     }
     
-    // NORTHWEST TURN (SE Corner)    
     if(isTrack(x, y, z+1, meta) && isStartPiece(x, y, z+1))
     {
-      metadata = CORNER_SE;
+      metadata = CORNER_SW;
     }
-    // NORTHEAST TURN (SW Corner)
     if(isTrack(x, y, z-1, meta) && isStartPiece(x, y, z-1))
     {
-      metadata = CORNER_SW;
+      metadata = CORNER_NW;
     }
     
     // Modify previous trackpiece to form corner
@@ -186,8 +184,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // WEST
   if(isTrack(x+1, y, z, meta))
   {
-    
-    //std::cout << "WEST" << std::endl;
+    std::cout << "WEST" << std::endl;
     metadata = FLAT_NS;
     // Change previous block meta
     if(isStartPiece(x+1, y, z))
@@ -199,12 +196,12 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
     // SOUTHWEST TURN (NE Corner)
     if(isTrack(x, y, z+1, meta) && isStartPiece(x, y, z+1))
     {
-      metadata = CORNER_NE;
+      metadata = CORNER_SE;
     }
     // SOUTHEAST TURN (NW Corner)
     if(isTrack(x, y, z-1, meta) && isStartPiece(x, y, z-1))
     {
-      metadata = CORNER_NW;
+      metadata = CORNER_NE;
     }
     
     // Modify previous trackpiece to form corner
@@ -221,7 +218,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   }
   
   
-  //std::cout << std::endl;
+  std::cout << std::endl;
   Map::get()->setBlock(x, y, z, (char)newblock, metadata);
   Map::get()->sendBlockChange(x, y, z, (char)newblock, metadata);
 }
