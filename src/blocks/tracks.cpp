@@ -63,7 +63,19 @@ void BlockTracks::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z
 
 void BlockTracks::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
+  uint8 block;
+  uint8 meta;
+  
+  if (!Map::get()->getBlock(x, y, z, &block, &meta))
+    return;
 
+  if (this->isBlockEmpty(x, y-1, z))
+  {
+    // Break torch and spawn torch item
+    Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+    Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+    this->spawnBlockItem(x, y, z, block);
+  }
 }
 
 void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
@@ -225,57 +237,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
 
 void BlockTracks::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-   uint8 oldblock;
-   uint8 oldmeta;
 
-   if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
-      return;
-  
-   /* move the x,y,z coords dependent upon placement direction */
-   //if (!this->translateDirection(&x,&y,&z,direction))
-   //   return;
-  
-   uint8 metadata = FLAT_EW;
-   /*if((Map::get()->getBlock(x, y, z-1, &oldblock, &oldmeta) && oldblock == BLOCK_MINECART_TRACKS) ||
-      (Map::get()->getBlock(x, y, z+1, &oldblock, &oldmeta) && oldblock == BLOCK_MINECART_TRACKS))
-     metadata = FLAT_NS;
-     
-   if((Map::get()->getBlock(x-1, y, z, &oldblock, &oldmeta) && oldblock == BLOCK_MINECART_TRACKS) ||
-      (Map::get()->getBlock(x+1, y, z, &oldblock, &oldmeta) && oldblock == BLOCK_MINECART_TRACKS))
-     metadata = FLAT_EW;*/
-     
-  if (direction == BLOCK_NORTH && Map::get()->getBlock(x+1, y, z, &oldblock, &oldmeta) && oldblock == BLOCK_MINECART_TRACKS)
-  {
-     //x++;
-     metadata = FLAT_NS;
-  }
-  else if (direction == BLOCK_SOUTH && Map::get()->getBlock(x-1, y, z, &oldblock, &oldmeta) && oldblock == BLOCK_MINECART_TRACKS)
-  {
-     //x--;
-     metadata = FLAT_NS;
-  }
-  /*else if (direction == BLOCK_EAST && meta == BLOCK_WEST && this->isBlockEmpty(x, y, z+1))
-  {
-      destroy = true;
-   }
-   else if (direction == BLOCK_WEST && meta == BLOCK_EAST && this->isBlockEmpty(x, y, z-1))
-   {
-      destroy = true;
-   }*/
-  
-   /*if(newblock == BLOCK_MINECART_TRACKS)
-   {
-     switch(direction)
-     {
-       case BLOCK_SOUTH:
-       case BLOCK_NORTH:
-         metadata = FLAT_NS;
-         break;
-     }
-   }*/
-     
-   Map::get()->setBlock(x, y, z, (char)oldblock, metadata);
-   Map::get()->sendBlockChange(x, y, z, (char)oldblock, metadata);
 }
 
 void BlockTracks::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
