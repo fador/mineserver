@@ -22,6 +22,7 @@
     <ClCompile Include="..\src\blocks\snow.cpp" />
     <ClCompile Include="..\src\blocks\stair.cpp" />
     <ClCompile Include="..\src\blocks\torch.cpp" />
+    <ClCompile Include="..\src\blocks\tracks.cpp" />
     <ClCompile Include="..\src\chat.cpp" />
     <ClCompile Include="..\src\commands.cpp" />
     <ClCompile Include="..\src\config.cpp" />
@@ -55,6 +56,7 @@
     <ClInclude Include="..\src\blocks\snow.h" />
     <ClInclude Include="..\src\blocks\stair.h" />
     <ClInclude Include="..\src\blocks\torch.h" />
+    <ClInclude Include="..\src\blocks\tracks.h" />
     <ClInclude Include="..\src\chat.h" />
     <ClInclude Include="..\src\config.h" />
     <ClInclude Include="..\src\constants.h" />

@@ -74,14 +74,14 @@ bool Lighting::generateLight(int x, int z, sChunk *chunk)
   {
     for(int block_z = 0; block_z < 16; block_z++)
     {
-      int blockx_blockz=((block_z << 7) + (block_x << 11))>>3;
-      int absolute_x = (x<<4)+block_x;
-      int absolute_z = (z<<4)+block_z;
+      int blockx_blockz = ((block_z << 7) + (block_x << 11))>>3;
+      int absolute_x    = (x<<4)+block_x;
+      int absolute_z    = (z<<4)+block_z;
 
       for(int block_y = (127/8)-1; block_y >= 0; block_y--)
       {
         int index      = block_y + blockx_blockz;
-        uint64 block64    = blocks64[index];
+        uint64 block64 = blocks64[index];
 
         // if one of these 8 blocks is 
         if(block64 != 0)
@@ -90,19 +90,18 @@ bool Lighting::generateLight(int x, int z, sChunk *chunk)
           for(int i=7;i>=0;i--)
           {            
             //Set light value if air
-            setLight(absolute_x, (block_y<<3)+i, absolute_z, 15,0, 1, chunk);
+            setLight(absolute_x, (block_y<<3)+i, absolute_z, 16,0, 1, chunk);
             light = 15;
             int block = blocks[(index<<3)+i];
             if(block != BLOCK_AIR)
             {
-              lightQueue.push(lightInfo(absolute_x,(block_y<<3)+i+1,absolute_z,15));
+              //lightQueue.push(lightInfo(absolute_x,(block_y<<3)+i+1,absolute_z,16));
               heightmap[block_z+(block_x<<4)] = (block_y<<3)+i;
-
               for(int block_yy = (block_y<<3)+i; block_yy >= 0; block_yy --)
               {
+                block = blocks[(blockx_blockz<<3)+block_yy];
                 light -= stopLight[block];
-                if (light < 0) { light = 0; }
-        
+
                 if (light < 1)
                 {
                   break;
@@ -110,9 +109,8 @@ bool Lighting::generateLight(int x, int z, sChunk *chunk)
                 setLight(absolute_x, block_yy, absolute_z, light, 0, 1, chunk);
                 lightQueue.push(lightInfo(absolute_x,block_yy,absolute_z,light));
               }
-
               break;
-            }            
+            }
           }
           
           if(heightmap[block_z+(block_x<<4)] > highest_y)
@@ -126,21 +124,29 @@ bool Lighting::generateLight(int x, int z, sChunk *chunk)
       }
     }
   }
+  /*
   for(int block_x = 0; block_x < 16; block_x++)
   {
     for(int block_z = 0; block_z < 16; block_z++)
     {
       int absolute_x = (x<<4)+block_x;
       int absolute_z = (z<<4)+block_z;
+
+      //int height = highest_y;
+      //if(block_x == 0 || block_x == 15 || block_z == 0 || block_z == 15)
+      //{
+      //}      
       if(heightmap[block_z+(block_x<<4)] < highest_y)
       {
-        for(int i=highest_y-1;i>heightmap[block_z+(block_x<<4)];i--)
+        for(int i = heightmap[block_z+(block_x<<4)]+1; i <= highest_y; i++)
         {
-          lightQueue.push(lightInfo(absolute_x,i,absolute_z,15));
+          lightQueue.push(lightInfo(absolute_x,i,absolute_z,16));
         }
       }
     }
   }
+  */
+  
 
   spreadLight(&lightQueue,chunk);
 
@@ -172,13 +178,12 @@ bool Lighting::generateLight(int x, int z, sChunk *chunk)
              getLight(absolute_x, block_y, absolute_z,&curskylight,&curblocklight,chunk))
           {
             if(skyl-stopLight[block]-1>curskylight)
-            {
-              
+            {              
               uint8 curblock,curmeta;
-              if(Map::get()->getBlock(xdir,block_y,zdir,&curblock,&curmeta,false) && 
-                skyl-stopLight[block] > 1)
+              if(Map::get()->getBlock(absolute_x,block_y,absolute_z,&curblock,&curmeta,false) && 
+                skyl-stopLight[curblock] > 1)
               {
-                lightQueue.push(lightInfo(absolute_x,block_y,absolute_z,skyl-stopLight[block]-1, skipdir));
+                lightQueue.push(lightInfo(absolute_x,block_y,absolute_z,skyl-stopLight[curblock]-1, skipdir));
               }
               setLight(absolute_x, block_y, absolute_z, skyl-stopLight[block]-1, 0, 1, chunk);   
             }
@@ -233,17 +238,17 @@ bool Lighting::spreadLight(std::queue<lightInfo> *lightQueue, sChunk *chunk)
       //Stop of this block light value already higher
       if(getLight(xdir, ydir, zdir,&skyl,&blockl,chunk) && skyl<info.light-1)
       {        
-        if(Map::get()->getBlock(info.x,info.y,info.z,&block,&meta,false) &&  skyl<info.light-stopLight[block]-1)
+        int light=info.light-1;
+
+        //If still light left, generate for this block also!
+        if(light>1)
         {
-          //If still light left, generate for this block also!
-          int light=info.light-stopLight[block]-1;
-          if(light<=0) { light=0; }
-          else
+          if(Map::get()->getBlock(xdir,ydir,zdir,&block,&meta,false) && light-stopLight[block]>1)
           {
-            lightQueue->push(lightInfo(xdir,ydir,zdir,light,skipdir));
+            lightQueue->push(lightInfo(xdir,ydir,zdir,info.light-stopLight[block]-1,skipdir));
           }
-          setLight(xdir, ydir, zdir, light, 0, 1, chunk);          
         }
+        setLight(xdir, ydir, zdir, light, 0, 1, chunk);          
       }
     }
   }

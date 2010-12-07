@@ -146,6 +146,8 @@ void client_callback(int fd,
         close(user->fd);
         #endif
         delete user;
+
+        return;
       }
       else
       {
