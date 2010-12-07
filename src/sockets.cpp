@@ -70,10 +70,10 @@ void client_callback(int fd,
                      void *arg)
 {
   User *user = (User *)arg;
-  
+
   if(ev & EV_READ)
   {
-  
+
     int read   = 1;
 
     uint8 *buf = new uint8[2048];
@@ -89,7 +89,7 @@ void client_callback(int fd,
 #else
     close(user->fd);
 #endif
-    remUser(user->fd);
+    delete user;
     return;
     }
 
@@ -101,7 +101,7 @@ void client_callback(int fd,
       #else
           close(user->fd);
       #endif
-          remUser(user->fd);
+          delete user;
       return;
     }
 
@@ -145,7 +145,7 @@ void client_callback(int fd,
         #else
         close(user->fd);
         #endif
-        remUser(user->fd);
+        delete user;
       }
       else
       {
@@ -180,7 +180,7 @@ void client_callback(int fd,
     #else
         close(user->fd);
     #endif
-        remUser(user->fd);
+        delete user;
         return;
       }
       else
@@ -225,7 +225,7 @@ void accept_callback(int fd,
     LOG("Client: accept() failed");
     return;
   }
-  User *client = addUser(client_fd, generateEID());
+  User *client = new User(client_fd, generateEID());
   setnonblock(client_fd);
 
   event_set(client->GetEvent(), client_fd,EV_WRITE|EV_READ, client_callback, client);

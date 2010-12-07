@@ -68,8 +68,8 @@ void MapGen::init(int seed)
   cave.init(seed+8);
   
   ridgedMultiNoise.SetSeed(seed);
-  ridgedMultiNoise.SetOctaveCount(4);
-  ridgedMultiNoise.SetFrequency(1.0/180.0); // 1-16
+  ridgedMultiNoise.SetOctaveCount(6);
+  ridgedMultiNoise.SetFrequency(1.0/180.0);
   ridgedMultiNoise.SetLacunarity(2.0);
 //  perlinNoise.SetPersistence(0.1); // 0-1
 
@@ -110,39 +110,6 @@ void MapGen::init(int seed)
   seaTerrain.SetControlModule(seaControl);
   seaTerrain.SetBounds(-0.3, 1000.0);
   seaTerrain.SetEdgeFalloff(0.1);
-  
-  //
-  // This block is used to tune heightmapgeneration
-  /* COMMENT OUT!
-  debugMapBuilder.SetSourceModule(finalTerrain);
-  debugMapBuilder.SetDestNoiseMap(debugHeightMap);
-  debugMapBuilder.SetDestSize(512, 512);
-  
-  debugMapBuilder.SetBounds(1000, 1000 + perlinScale, 1000, 1000 + perlinScale);
-  debugMapBuilder.Build();
-
-  // Image render
-  noise::utils::RendererImage renderer;
-  noise::utils::Image image;
-  renderer.SetSourceNoiseMap (debugHeightMap);
-  renderer.SetDestImage (image);
-  renderer.Render ();
-
-  noise::utils::WriterBMP writer;
-  writer.SetSourceImage (image);
-  writer.SetDestFilename ("debug.bmp");
-  writer.WriteDestFile ();
-  
-  //
-  // DEBUGBLOCK END
-  //*/
-
-  // Generate heightmap
-  /*
-  heightMapBuilder.SetSourceModule(seaTerrain);
-  heightMapBuilder.SetDestNoiseMap(heightMap);
-  heightMapBuilder.SetDestSize(16, 16);
-  */
 
   seaLevel = Conf::get()->iValue("sea_level");
   
@@ -151,11 +118,11 @@ void MapGen::init(int seed)
 
 void MapGen::generateFlatgrass() 
 {
-  for (uint8 bX = 0; bX < 16; bX++) 
+  for (int bX = 0; bX < 16; bX++) 
   {
-    for (uint8 bY = 0; bY < 128; bY++) 
+    for (int bY = 0; bY < 128; bY++) 
     {
-      for (uint8 bZ = 0; bZ < 16; bZ++) 
+      for (int bZ = 0; bZ < 16; bZ++) 
       {
         if (bY == 0) 
           blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_BEDROCK; 
@@ -235,10 +202,6 @@ void MapGen::generateWithNoise(int x, int z)
     gettimeofday(&start, NULL);
   #endif
   #endif
-  
-
-  //heightMapBuilder.SetBounds(1000 + x*perlinScale, 1000 + (x+1)*perlinScale, 1000 + z*perlinScale, 1000 + (z+1)*perlinScale);
-  //heightMapBuilder.Build();
 
   // Populate blocks in chunk
   sint32 currentHeight;
@@ -248,18 +211,20 @@ void MapGen::generateWithNoise(int x, int z)
 
   double xBlockpos=x<<4;
   double zBlockpos=z<<4;
-  for (sint32 bX = 0; bX < 16; bX++) 
+  for (int bX = 0; bX < 16; bX++) 
   {
-    for (sint32 bZ = 0; bZ < 16; bZ++) 
+    for (int bZ = 0; bZ < 16; bZ++) 
     {
       
       heightmap[(bZ<<4)+bX] = ymax = currentHeight = (uint8)((ridgedMultiNoise.GetValue(xBlockpos+bX,0, zBlockpos+bZ) * 15) + 64);
-      sint32 stoneHeight=(sint32)(currentHeight * 0.94);
-      sint32 bYbX=((bZ << 7) + (bX << 11));
+      
+      sint32 stoneHeight = (sint32)(currentHeight * 0.94);
+      sint32 bYbX = ((bZ << 7) + (bX << 11));
 
-      if(ymax<seaLevel) ymax=seaLevel;
+      if(ymax < seaLevel) 
+        ymax = seaLevel;
 
-      for (sint32 bY = 0; bY <= ymax; bY++) 
+      for(int bY = 0; bY <= ymax; bY++) 
       {
         curBlock = &blocks[bYbX++];
         
@@ -297,7 +262,6 @@ void MapGen::generateWithNoise(int x, int z)
           else
             *curBlock = BLOCK_AIR; // FF
         }        
-        
       }
     }
   }

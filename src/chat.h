@@ -42,6 +42,10 @@ public:
   };
   typedef void (*CommandCallback)(User *, std::string, std::deque<std::string>);
 
+  /**
+   * Chat command a user can enter.
+   * Requires the right permissions by the user (e.g. for admin-only commands).
+   */
   struct Command
   {
     std::deque<std::string> names;
@@ -60,42 +64,35 @@ public:
     }
   };
 
-  //Chat();
-  std::deque<std::string> admins;
-  std::deque<std::string> ops;
-  std::deque<std::string> members;
-  std::deque<std::string> banned;
-  std::deque<std::string> whitelist;
   bool handleMsg( User *user, std::string msg );
   bool sendMsg( User *user, std::string msg, MessageTarget action = ALL );
   bool sendUserlist( User *user );
-  bool loadRoles(std::string rolesFile);
-  bool loadBanned(std::string bannedFile);
-  bool loadWhitelist(std::string whitelistFile);
   bool checkMotd(std::string motdFile);
   void registerCommand(Command *command);
   void sendHelp(User *user, std::deque<std::string> args);
+
   static Chat* get()
   {
-    if(!mChat) {
-      mChat = new Chat();
+    if(!_instance) {
+      _instance = new Chat();
     }
-    return mChat;
+    return _instance;
   }
+
   void free();
+
 private:
-  static Chat *mChat;
-
-  typedef std::map<std::string, Command*> CommandList;
-
-  CommandList adminCommands;
-  CommandList opCommands;
-  CommandList memberCommands;
-  CommandList guestCommands;
+  static Chat *_instance;
 
   Chat();
   void registerStandardCommands();
   std::deque<std::string> parseCmd(std::string cmd);
+
+  typedef std::map<std::string, Command*> CommandList;
+  CommandList m_adminCommands;
+  CommandList m_opCommands;
+  CommandList m_memberCommands;
+  CommandList m_guestCommands;
 };
 
 #endif

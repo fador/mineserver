@@ -65,14 +65,14 @@ void Map::addSapling(User* user, int x, int y, int z)
 
 void Map::checkGenTrees()
 {
-  std::list<sTree>::iterator iter = saplings.begin(); 
-  
+  std::list<sTree>::iterator iter = saplings.begin();
+
   while (iter != saplings.end())
   {
     if(rand() % 50 == 0)
     {
       std::cout << "Grow tree!" << std::endl;
-      
+
       sint32 x = (*iter).x;
       sint32 y = (*iter).y;
       sint32 z = (*iter).z;
@@ -237,7 +237,9 @@ sChunk *Map::getMapData(int x, int z, bool generate)
   Map::posToId(x, z, &mapId);
 
   if(!maps.count(mapId) && !(generate && loadMap(x, z, generate)))
+  {
     return 0;
+  }
 
   // Update last used time
   mapLastused[mapId] = (int)time(0);
@@ -253,44 +255,47 @@ bool Map::saveWholeMap()
 #endif
 
   for(std::map<uint32, sChunk>::const_iterator it = maps.begin(); it != maps.end(); ++it)
+  {
     saveMap(maps[it->first].x, maps[it->first].z);
+  }
 
-    /////////////////////
-    // Save map details
+  /////////////////////
+  // Save map details
 
-    std::string infile = mapDirectory+"/level.dat";
+  std::string infile = mapDirectory+"/level.dat";
 
-    NBT_Value *root = NBT_Value::LoadFromFile(infile);
-    if(root != NULL)
+  NBT_Value *root = NBT_Value::LoadFromFile(infile);
+  if(root != NULL)
+  {
+    NBT_Value &data = *((*root)["Data"]);
+
+    //Get time from the map
+    *data["Time"] = mapTime;
+    NBT_Value *trees = ((*root)["Trees"]);
+
+    if(trees)
     {
-      NBT_Value &data = *((*root)["Data"]);
+      std::vector<NBT_Value*>* tree_vec = trees->GetList();
 
-      //Get time from the map
-      *data["Time"] = mapTime;
-      NBT_Value *trees = ((*root)["Trees"]);
+      tree_vec->clear();
 
-      if(trees)
+      for(std::list<sTree>::iterator iter = saplings.begin(); iter != saplings.end(); ++iter)
       {
-        std::vector<NBT_Value*>* tree_vec = trees->GetList();
-
-        tree_vec->clear();
-
-        for(std::list<sTree>::iterator iter = saplings.begin(); iter != saplings.end(); ++iter)
-        {
-          //(*trees)[i] = (*iter)
-          NBT_Value* tree = new NBT_Value(NBT_Value::TAG_COMPOUND);
-          tree->Insert("X", new NBT_Value( (sint32)(*iter).x));
-          tree->Insert("Y", new NBT_Value( (sint32)(*iter).y));
-          tree->Insert("Z", new NBT_Value( (sint32)(*iter).z));
-          tree->Insert("plantedTime", new NBT_Value( (sint32)(*iter).plantedTime));
-          tree->Insert("plantedBy", new NBT_Value( (sint32)(*iter).plantedBy));
-          tree_vec->push_back(tree);
-        }
+        //(*trees)[i] = (*iter)
+        NBT_Value* tree = new NBT_Value(NBT_Value::TAG_COMPOUND);
+        tree->Insert("X", new NBT_Value( (sint32)(*iter).x));
+        tree->Insert("Y", new NBT_Value( (sint32)(*iter).y));
+        tree->Insert("Z", new NBT_Value( (sint32)(*iter).z));
+        tree->Insert("plantedTime", new NBT_Value( (sint32)(*iter).plantedTime));
+        tree->Insert("plantedBy", new NBT_Value( (sint32)(*iter).plantedBy));
+        tree_vec->push_back(tree);
       }
-      root->SaveToFile(infile);
-
-      delete root;
     }
+    root->SaveToFile(infile);
+
+    delete root;
+  }
+
   return true;
 }
 
@@ -326,10 +331,10 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
   printf("generateLight(x=%d, z=%d, chunk=%p)\n", x, z, chunk);
 #endif
   #ifdef PRINT_LIGHTGEN_TIME
-  #ifdef WIN32  
+  #ifdef WIN32
      DWORD t_begin,t_end;
      t_begin = timeGetTime();
-  #else    
+  #else
     clock_t t_begin,t_end;
     t_begin = clock();
   #endif
@@ -367,17 +372,24 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
         uint8 block    = blocks[index];
 
         light -= stopLight[block];
-        if (light < 0) { light = 0; }        
+        if (light < 0)
+        {
+          light = 0;
+        }
 
         // Calculate heightmap while looping this
-        if ((block != BLOCK_AIR) && (foundheight == false)) {
+        if ((block != BLOCK_AIR) && (foundheight == false))
+        {
           heightmap[block_z+(block_x<<4)] = ((block_y == 127) ? block_y : block_y + 1);
           foundheight = true;
         }
 
-        if (light < 1) {
+        if (light < 1)
+        {
           if (block_y > highest_y)
+          {
             highest_y = block_y;
+          }
 
           break;
         }
@@ -386,7 +398,7 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
       }
     }
   }
-  
+
   // Block light
   for (int block_x = 0; block_x < 16; block_x++)
   {
@@ -402,11 +414,13 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
 
         // If light emitting block
         if(emitLight[block] > 0)
+        {
           setLight(absolute_x, block_y, absolute_z, 0, emitLight[block], 2, chunk);
+        }
       }
     }
   }
-  
+
   // Spread light
   for (int block_x = 0; block_x < 16; block_x++)
   {
@@ -421,7 +435,9 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
         getLight(absolute_x, block_y, absolute_z, &skylight_s, &blocklight_s, chunk);
 
         if (skylight_s || blocklight_s)
+        {
           spreadLight(absolute_x, block_y, absolute_z, skylight_s, blocklight_s);
+        }
       }
     }
   }
@@ -512,11 +528,15 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk 
 
       skylightNew = skylight-stopLight[block]-1;
       if (skylightNew < 0)
+      {
         skylightNew = 0;
+      }
 
       blocklightNew = blocklight-stopLight[block]-1;
       if (blocklightNew < 0)
+      {
         blocklightNew = 0;
+      }
 
       getLight(x_toset, y_toset, z_toset, &skylightCurrent, &blocklightCurrent, chunk);
 
@@ -567,7 +587,10 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate)
   if(!chunk)
   {
     if(generate)
+    {
      LOG("Loading chunk failed (getBlock)");
+    }
+
     return false;
   }
 
@@ -598,7 +621,9 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate,
     metadata >>= 4;
   }
   else
+  {
     metadata &= 0x0f;
+  }
 
   *meta              = metadata;
   mapLastused[mapId] = (int)time(0);
@@ -737,10 +762,14 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type, 
   }
 
   if (type & 0x5) // 1 or 4
+  {
     skylightPtr[index>>1] = skylight_local;
+  }
 
   if (type & 0x6) // 2 or 4
+  {
     blocklightPtr[index>>1] = blocklight_local;
+  }
 
   return true;
 }
@@ -812,9 +841,9 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
 
 
   // TODO: only send to users in range
-  for(unsigned int i = 0; i < Users.size(); i++)
+  for(unsigned int i = 0; i < User::all().size(); i++)
   {
-    Users[i]->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
+    User::all()[i]->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
   }
 
   return true;
@@ -836,13 +865,13 @@ bool Map::sendPickupSpawn(spawnedItem item)
 
   Packet pkt;
   pkt << PACKET_PICKUP_SPAWN << (sint32)item.EID << (sint16)item.item << (sint8)item.count
-    << (sint32)item.pos.x() << (sint32)item.pos.y() << (sint32)item.pos.z()
-    << (sint8)0 << (sint8)0 << (sint8)0;
+      << (sint32)item.pos.x() << (sint32)item.pos.y() << (sint32)item.pos.z()
+      << (sint8)0 << (sint8)0 << (sint8)0;
 
   // TODO: only send to users in range
-  for(unsigned int i = 0; i < Users.size(); i++)
+  for(unsigned int i = 0; i < User::all().size(); i++)
   {
-    Users[i]->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
+    User::all()[i]->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
   }
 
   return true;
@@ -876,7 +905,9 @@ bool Map::loadMap(int x, int z, bool generate)
   Map::posToId(x, z, &mapId);
 
   if(maps.count(mapId))
+  {
     return true;
+  }
 
   // Generate map file name
 
@@ -936,7 +967,7 @@ bool Map::loadMap(int x, int z, bool generate)
             }
           }
         }
-        
+
       }
       return true;
     }
@@ -945,7 +976,7 @@ bool Map::loadMap(int x, int z, bool generate)
       return false;
     }
   }
-  else 
+  else
   {
     maps[mapId].nbt = NBT_Value::LoadFromFile(infile.c_str());
   }
@@ -1017,27 +1048,37 @@ bool Map::saveMap(int x, int z)
   Map::posToId(x, z, &mapId);
 
   if(!mapChanged[mapId])
+  {
     return true;
+  }
 
   if(!maps.count(mapId))
+  {
     return false;
+  }
 
   // Recalculate light maps
   if(mapLightRegen[mapId])
+  {
     generateLight(x, z, &maps[mapId]);
+  }
 
   // Generate map file name
 
   int mapposx = x;
   int modulox = (mapposx);
   while(modulox < 0)
+  {
     modulox += 64;
+  }
   modulox %= 64;
 
   int mapposz = z;
   int moduloz = (mapposz);
   while(moduloz < 0)
+  {
     moduloz += 64;
+  }
   moduloz %= 64;
 
   std::string outfile = mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+
@@ -1127,7 +1168,7 @@ void Map::sendToUser(User *user, int x, int z)
     user->buffer << (sint8)PACKET_PRE_CHUNK << mapposx << mapposz << (sint8)1;
 
     // Chunk
-    user->buffer << (sint8)PACKET_MAP_CHUNK << (sint32)(mapposx * 16) << (sint16)0 << (sint32)(mapposz * 16) 
+    user->buffer << (sint8)PACKET_MAP_CHUNK << (sint32)(mapposx * 16) << (sint16)0 << (sint32)(mapposz * 16)
       << (sint8)15 << (sint8)127 << (sint8)15;
 
     memcpy(&mapdata[0], maps[mapId].blocks, 32768);
@@ -1195,7 +1236,7 @@ void Map::sendToUser(User *user, int x, int z)
           //Gzip the data
           if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
           {
-            std::cout << "Error in deflate: " << state << std::endl;            
+            std::cout << "Error in deflate: " << state << std::endl;
           }
 
           sint32 entityX = *(**iter)["x"];
@@ -1203,7 +1244,7 @@ void Map::sendToUser(User *user, int x, int z)
           sint32 entityZ = *(**iter)["z"];
 
           // !!!! Complex Entity packet! !!!!
-          user->buffer << (sint8)PACKET_COMPLEX_ENTITIES 
+          user->buffer << (sint8)PACKET_COMPLEX_ENTITIES
             << (sint32)entityX << (sint16)entityY << (sint32)entityZ << (sint16)zstream2.total_out;
           user->buffer.addToWrite(compressedData, zstream2.total_out);
 
@@ -1223,12 +1264,14 @@ void Map::sendToUser(User *user, int x, int z)
 void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
 {
   uint32 mapId;
-  
+
   int block_x = blockToChunk(x);
   int block_z = blockToChunk(z);
 
   if(!loadMap(block_x, block_z))
+  {
     return;
+  }
 
   Map::posToId(block_x, block_z, &mapId);
 
@@ -1256,39 +1299,41 @@ void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
 
   if(entityList->GetType() == NBT_Value::TAG_LIST)
   {
-   if(entityList->GetListType() != NBT_Value::TAG_COMPOUND)
-     entityList->SetType(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
-
-   std::vector<NBT_Value*> *entities = entityList->GetList();
-   std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
-
-   bool done = false;
-
-   for( ; iter != end; iter++ )
-   {
-     if((**iter)["x"] == NULL || (**iter)["y"] == NULL || (**iter)["z"] == NULL ||
-      (**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
-      (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
-      (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
+    if(entityList->GetListType() != NBT_Value::TAG_COMPOUND)
     {
-      continue;
+      entityList->SetType(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
     }
 
-    if((sint32)(*(**iter)["x"]) == x && (sint32)(*(**iter)["y"]) == y && (sint32)(*(**iter)["z"]) == z)
-    {
-      // Replace entity
-      delete *iter;
-      *iter = entity;
-      done = true;
-      break;
-    }
-   }
+    std::vector<NBT_Value*> *entities = entityList->GetList();
+    std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
 
-   if(!done)
-   {
-    // Add new entity
-    entityList->GetList()->push_back(entity);
-   }
+    bool done = false;
+
+    for( ; iter != end; iter++ )
+    {
+      if((**iter)["x"] == NULL || (**iter)["y"] == NULL || (**iter)["z"] == NULL ||
+         (**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
+         (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
+         (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
+      {
+        continue;
+      }
+
+      if((sint32)(*(**iter)["x"]) == x && (sint32)(*(**iter)["y"]) == y && (sint32)(*(**iter)["z"]) == z)
+      {
+        // Replace entity
+        delete *iter;
+        *iter = entity;
+        done = true;
+        break;
+      }
+    }
+
+    if(!done)
+    {
+      // Add new entity
+      entityList->GetList()->push_back(entity);
+    }
   }
   else
   {
@@ -1322,14 +1367,14 @@ void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
   //Gzip the data
   if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
   {
-    std::cout << "Error in deflate: " << state << std::endl;            
+    std::cout << "Error in deflate: " << state << std::endl;
   }
 
   deflateEnd(&zstream2);
 
 
   Packet pkt;
-  pkt << (sint8)PACKET_COMPLEX_ENTITIES 
+  pkt << (sint8)PACKET_COMPLEX_ENTITIES
     << x << (sint16)y << z << (sint16)zstream2.total_out;
   pkt.addToWrite(compressedData, zstream2.total_out);
 

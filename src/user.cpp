@@ -31,6 +31,9 @@
 #include <iostream>
 #include <deque>
 #include <algorithm>
+#include <fstream>
+#include <map>
+
 #include <sys/stat.h>
 #ifdef WIN32
   #include <winsock2.h>
@@ -50,8 +53,16 @@
 #include "nbt.h"
 #include "chat.h"
 #include "packets.h"
+#include "mineserver.h"
+#include "config.h"
 
-std::vector<User *> Users;
+//Generate "unique" entity ID
+uint32 generateEID()
+{
+  static uint32 EID = 0;
+  return ++EID;
+}
+
 
 User::User(int sock, uint32 EID)
 {
@@ -71,16 +82,23 @@ User::User(int sock, uint32 EID)
   this->health          = 20;
   this->attachedTo      = 0;
   this->timeUnderwater  = 0;
+
+  Mineserver::get().users().push_back(this);
 }
+
 
 bool User::checkBanned(std::string _nick)
 {
   nick = _nick;
 
   // Check banstatus
-  for(unsigned int i = 0; i < Chat::get()->banned.size(); i++)
-    if(Chat::get()->banned[i] == nick)
+  for(unsigned int i = 0; i < Conf::get()->banned().size(); i++)
+  {
+    if(Conf::get()->banned()[i] == nick)
+    {
       return true;
+    }
+  }
 
   return false;
 }
@@ -90,13 +108,15 @@ bool User::checkWhitelist(std::string _nick)
 	nick = _nick;
 
     // Check if nick is whitelisted, providing it is enabled
-    for(unsigned int i = 0; i < Chat::get()->whitelist.size(); i++)
-      if(Chat::get()->whitelist[i] == nick)
-        return true;
+  for(unsigned int i = 0; i < Conf::get()->whitelist().size(); i++)
+  {
+    if(Conf::get()->whitelist()[i] == nick)
+    {
+      return true;
+    }
+  }
 
-    return false;
-
-  return true;
+  return false;
 }
 
 bool User::changeNick(std::string _nick)
@@ -106,9 +126,9 @@ bool User::changeNick(std::string _nick)
   SET_GUEST(permissions); // default
 
   // Check adminstatus
-  for(unsigned int i = 0; i < Chat::get()->admins.size(); i++)
+  for(unsigned int i = 0; i < Conf::get()->admins().size(); i++)
   {
-    if(Chat::get()->admins[i] == nick)
+    if(Conf::get()->admins()[i] == nick)
     {
       SET_ADMIN(permissions);
       break;
@@ -116,9 +136,9 @@ bool User::changeNick(std::string _nick)
   }
 
   // Check op status
-  for(unsigned int i = 0; i < Chat::get()->ops.size(); i++)
+  for(unsigned int i = 0; i < Conf::get()->ops().size(); i++)
   {
-    if(Chat::get()->ops[i] == nick)
+    if(Conf::get()->ops()[i] == nick)
     {
       SET_OP(permissions);
       break;
@@ -126,9 +146,9 @@ bool User::changeNick(std::string _nick)
   }
 
   // Check member status
-  for(unsigned int i = 0; i < Chat::get()->members.size(); i++)
+  for(unsigned int i = 0; i < Conf::get()->members().size(); i++)
   {
-    if(Chat::get()->members[i] == nick)
+    if(Conf::get()->members()[i] == nick)
     {
       SET_MEMBER(permissions);
       break;
@@ -140,8 +160,22 @@ bool User::changeNick(std::string _nick)
 
 User::~User()
 {
+  for(std::vector<User*>::iterator it = Mineserver::get().users().begin();
+      it != Mineserver::get().users().end();
+      it++)
+  {
+    if((*it) == this)
+    {
+      Mineserver::get().users().erase(it);
+      break;
+    }
+  }
+
   if(this->nick.size())
   {
+    Chat::get()->sendMsg(this, this->nick + " disconnected!", Chat::OTHERS);
+    this->saveData();
+
     //Send signal to everyone that the entity is destroyed
     uint8 entityData[5];
     entityData[0] = 0x1d; //Destroy entity;
@@ -574,14 +608,14 @@ bool User::updateLook(float yaw, float pitch)
 
 bool User::sendOthers(uint8 *data, uint32 len)
 {
-  for(unsigned int i = 0; i < Users.size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
-    if(Users[i]->fd != this->fd && Users[i]->logged)
+    if(Mineserver::get().users()[i]->fd != this->fd && Mineserver::get().users()[i]->logged)
     {
       // Don't send to his user if he is DND and the message is a chat message
-      if(!(Users[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
+      if(!(Mineserver::get().users()[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
       {
-    	  Users[i]->buffer.addToWrite(data, len);
+    	  Mineserver::get().users()[i]->buffer.addToWrite(data, len);
   	  }
   	}
   }
@@ -616,14 +650,14 @@ sint8 User::relativeToBlock(const sint32 x, const sint8 y, const sint32 z)
 
 bool User::sendAll(uint8 *data, uint32 len)
 {
-  for(unsigned int i = 0; i < Users.size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
-    if(Users[i]->fd && Users[i]->logged)
+    if(Mineserver::get().users()[i]->fd && Mineserver::get().users()[i]->logged)
     {
       // Don't send to his user if he is DND and the message is a chat message
-      if(!(Users[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
+      if(!(Mineserver::get().users()[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
       {
-    	  Users[i]->buffer.addToWrite(data, len);
+    	  Mineserver::get().users()[i]->buffer.addToWrite(data, len);
   	  }
   	}
   }
@@ -632,30 +666,30 @@ bool User::sendAll(uint8 *data, uint32 len)
 
 bool User::sendAdmins(uint8 *data, uint32 len)
 {
-  for(unsigned int i = 0; i < Users.size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
-    if(Users[i]->fd && Users[i]->logged && IS_ADMIN(Users[i]->permissions))
-    	Users[i]->buffer.addToWrite(data, len);
+    if(Mineserver::get().users()[i]->fd && Mineserver::get().users()[i]->logged && IS_ADMIN(Mineserver::get().users()[i]->permissions))
+    	Mineserver::get().users()[i]->buffer.addToWrite(data, len);
   }
   return true;
 }
 
 bool User::sendOps(uint8 *data, uint32 len)
 {
-  for(unsigned int i = 0; i < Users.size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
-    if(Users[i]->fd && Users[i]->logged && IS_ADMIN(Users[i]->permissions))
-    	Users[i]->buffer.addToWrite(data, len);
+    if(Mineserver::get().users()[i]->fd && Mineserver::get().users()[i]->logged && IS_ADMIN(Mineserver::get().users()[i]->permissions))
+    	Mineserver::get().users()[i]->buffer.addToWrite(data, len);
   }
   return true;
 }
 
 bool User::sendGuests(uint8 *data, uint32 len)
 {
-  for(unsigned int i = 0; i < Users.size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
-    if(Users[i]->fd && Users[i]->logged && IS_ADMIN(Users[i]->permissions))
-    	Users[i]->buffer.addToWrite(data, len);
+    if(Mineserver::get().users()[i]->fd && Mineserver::get().users()[i]->logged && IS_ADMIN(Mineserver::get().users()[i]->permissions))
+    	Mineserver::get().users()[i]->buffer.addToWrite(data, len);
   }
   return true;
 }
@@ -807,12 +841,12 @@ bool User::spawnUser(int x, int y, int z)
 bool User::spawnOthers()
 {
 
-  for(unsigned int i = 0; i < Users.size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
-    if(Users[i]->UID != this->UID && Users[i]->nick != this->nick)
+    if(Mineserver::get().users()[i]->UID != this->UID && Mineserver::get().users()[i]->nick != this->nick)
     {
-    buffer << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)Users[i]->UID << Users[i]->nick
-      << (sint32)(Users[i]->pos.x * 32) << (sint32)(Users[i]->pos.y * 32) << (sint32)(Users[i]->pos.z * 32)
+    buffer << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)Mineserver::get().users()[i]->UID << Mineserver::get().users()[i]->nick
+      << (sint32)(Mineserver::get().users()[i]->pos.x * 32) << (sint32)(Mineserver::get().users()[i]->pos.y * 32) << (sint32)(Mineserver::get().users()[i]->pos.z * 32)
       << (sint8)0 << (sint8)0 << (sint16)0;
     }
   }
@@ -886,59 +920,30 @@ struct event *User::GetEvent()
   return &m_event;
 }
 
-User *addUser(int sock, uint32 EID)
+std::vector<User *> & User::all()
 {
-  User *newuser = new User(sock, EID);
-  Users.push_back(newuser);
-
-  return newuser;
+  return Mineserver::get().users();
 }
 
-bool remUser(int sock)
-{
-  for(int i = 0; i < (int)Users.size(); i++)
-  {
-    if(Users[i]->fd == sock)
-    {
-      if(Users[i]->nick.size())
-      {
-        Chat::get()->sendMsg(Users[i], Users[i]->nick+" disconnected!", Chat::OTHERS);
-        Users[i]->saveData();
-      }
-      delete Users[i];
-      Users.erase(Users.begin()+i);
-      return true;
-    }
-  }
-  return false;
-}
-
-bool isUser(int sock)
+bool User::isUser(int sock)
 {
   uint8 i;
-  for(i = 0; i < Users.size(); i++)
+  for(i = 0; i < Mineserver::get().users().size(); i++)
   {
-    if(Users[i]->fd == sock)
+    if(Mineserver::get().users()[i]->fd == sock)
       return true;
   }
   return false;
-}
-
-//Generate "unique" entity ID
-uint32 generateEID()
-{
-  static uint32 EID = 0;
-  return ++EID;
 }
 
 //Not case-sensitive search
-User *getUserByNick(std::string nick)
+User* User::byNick(std::string nick)
 {
   // Get coordinates
-  for(unsigned int i = 0; i < Users.size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
-    if(strToLower(Users[i]->nick) == strToLower(nick))
-      return Users[i];
+    if(strToLower(Mineserver::get().users()[i]->nick) == strToLower(nick))
+      return Mineserver::get().users()[i];
   }
   return NULL;
 }

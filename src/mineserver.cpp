@@ -91,7 +91,7 @@ int setnonblock(int fd)
 //Handle signals
 void sighandler(int sig_num)
 {
-  Mineserver::Get().Stop();
+  Mineserver::get().stop();
 }
 
 int main(int argc, char *argv[])
@@ -101,19 +101,19 @@ int main(int argc, char *argv[])
 
   srand(time(NULL));
 
-  return Mineserver::Get().Run(argc, argv);
+  return Mineserver::get().run(argc, argv);
 }
 
 Mineserver::Mineserver()
 {
 }
 
-event_base *Mineserver::GetEventBase()
+event_base *Mineserver::getEventBase()
 {
   return m_eventBase;
 }
 
-int Mineserver::Run(int argc, char *argv[])
+int Mineserver::run(int argc, char *argv[])
 {
   uint32 starttime = (uint32)time(0);
   uint32 tick      = (uint32)time(0);
@@ -143,9 +143,9 @@ int Mineserver::Run(int argc, char *argv[])
   pid_out.close();
 
   // Load admin, banned and whitelisted users
-  Chat::get()->loadRoles(Conf::get()->sValue("roles_file"));
-  Chat::get()->loadBanned(Conf::get()->sValue("banned_file"));
-  Chat::get()->loadWhitelist(Conf::get()->sValue("whitelist_file"));
+  Conf::get()->loadRoles();
+  Conf::get()->loadBanned();
+  Conf::get()->loadWhitelist();
   // Load MOTD
   Chat::get()->checkMotd(Conf::get()->sValue("motd_file"));
 
@@ -160,7 +160,7 @@ int Mineserver::Run(int argc, char *argv[])
     std::cout << "Generating spawn area...\n";
     int size=Conf::get()->iValue("map_generate_spawn_size");
     bool show_progress = Conf::get()->bValue("map_generate_spawn_show_progress");
-    #ifdef WIN32    
+    #ifdef WIN32
       DWORD t_begin,t_end;
     #else
       clock_t t_begin,t_end;
@@ -168,10 +168,10 @@ int Mineserver::Run(int argc, char *argv[])
 
     for (int x=-size;x<=size;x++)
     {
-    #ifdef WIN32  
+    #ifdef WIN32
       if(show_progress)
         t_begin = timeGetTime();
-    #else    
+    #else
       if(show_progress)
         t_begin = clock();
     #endif
@@ -188,7 +188,7 @@ int Mineserver::Run(int argc, char *argv[])
           t_end = clock();
           std::cout << ((x+size+1)*(size*2+1)) << "/" << (size*2+1)*(size*2+1) << " done. " << ((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1) << "ms per chunk" << std::endl;
         #endif
-        
+
       }
     }
 #ifdef _DEBUG
@@ -313,16 +313,16 @@ int Mineserver::Run(int argc, char *argv[])
 //      std::cout << "Currently " << Users.size() << " users in!" << std::endl;
 
       //If users, ping them
-      if(Users.size() > 0)
+      if(User::all().size() > 0)
       {
         //0x00 package
         uint8 data = 0;
-        Users[0]->sendAll(&data, 1);
+        User::all()[0]->sendAll(&data, 1);
 
         //Send server time
         Packet pkt;
         pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
-        Users[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
+        User::all()[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
       }
 
       //Try to load release time from config
@@ -351,18 +351,18 @@ int Mineserver::Run(int argc, char *argv[])
     {
       tick = (uint32)time(0);
       //Loop users
-      for(unsigned int i = 0; i < Users.size(); i++)
+      for(unsigned int i = 0; i < User::all().size(); i++)
       {
-        Users[i]->pushMap();
-        Users[i]->popMap();
+        User::all()[i]->pushMap();
+        User::all()[i]->popMap();
 
         //Minecart hacks!!
-        if(Users[i]->attachedTo)
+        if(User::all()[i]->attachedTo)
         {
           Packet pkt;
-          pkt << PACKET_ENTITY_VELOCITY << (sint32)Users[i]->attachedTo <<  (sint16)10000       << (sint16)0 << (sint16)0;
-          //pkt << PACKET_ENTITY_RELATIVE_MOVE << (sint32)Users[i]->attachedTo <<  (sint8)100       << (sint8)0 << (sint8)0;
-          Users[i]->sendAll((uint8 *)pkt.getWrite(), pkt.getWriteLen());
+          pkt << PACKET_ENTITY_VELOCITY << (sint32)User::all()[i]->attachedTo <<  (sint16)10000       << (sint16)0 << (sint16)0;
+          //pkt << PACKET_ENTITY_RELATIVE_MOVE << (sint32)User::all()[i]->attachedTo <<  (sint8)100       << (sint8)0 << (sint8)0;
+          User::all()[i]->sendAll((uint8 *)pkt.getWrite(), pkt.getWriteLen());
         }
       }
       Map::get()->mapTime+=20;
@@ -372,15 +372,15 @@ int Mineserver::Run(int argc, char *argv[])
 
       // Check for Furnace activity
       FurnaceManager::get()->update();
-    
+
     }
 
     //Physics simulation every 200ms
     Physics::get()->update();
 
     //Underwater check / drowning
-    for( unsigned int i = 0; i < Users.size(); i++ )
-      Users[i]->isUnderwater();
+    for( unsigned int i = 0; i < User::all().size(); i++ )
+      User::all()[i]->isUnderwater();
 
     event_base_loopexit(m_eventBase, &loopTime);
   }
@@ -412,9 +412,10 @@ int Mineserver::Run(int argc, char *argv[])
   return EXIT_SUCCESS;
 }
 
-bool Mineserver::Stop()
+bool Mineserver::stop()
 {
   m_running=false;
 
   return true;
 }
+
