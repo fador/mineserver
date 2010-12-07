@@ -47,7 +47,7 @@ void FurnaceManager::update() {
   #endif  
   
   // Loop thru all the furnaces
-  for(int index = 0; index < activeFurnaces.size(); index++) {
+  for(int index = 0; index < (int)activeFurnaces.size(); index++) {
     // Get a pointer to this furnace
     Furnace *currentFurnace = (Furnace *)activeFurnaces[index];
     
@@ -92,7 +92,7 @@ void FurnaceManager::handleActivity(NBT_Value *entity, uint8 blockType)
   Furnace *furnace = new Furnace(entity, blockType);
       
   // Loop thru all active furnaces, to see if this one is here
-  for(int index = 0; index < activeFurnaces.size(); index++) {
+  for(int index = 0; index < (int)activeFurnaces.size(); index++) {
     
     Furnace *currentFurnace = (Furnace *)activeFurnaces[index];
     if(currentFurnace->x == furnace->x && currentFurnace->y == furnace->y && currentFurnace->z == furnace->z)
