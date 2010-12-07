@@ -32,22 +32,21 @@
 
 class FurnaceManager
 {
-private:
-  typedef std::vector<Furnace *> container;
-  container activeFurnaces;
-  static FurnaceManager *mFurnaceManager; 
-
 public:
   FurnaceManager();
   static FurnaceManager* get() {
-    if(!mFurnaceManager) {
-      mFurnaceManager = new FurnaceManager();
+    if(!_instance) {
+      _instance = new FurnaceManager();
     }
-    return mFurnaceManager;
-  } 
-  void free(); 
+    return _instance;
+  }
+  void free();
   void update();
   void handleActivity(NBT_Value *entity, uint8 blockType);
-    
+
+private:
+  typedef std::vector<Furnace *> FurnaceContainer;
+  FurnaceContainer m_activeFurnaces;
+  static FurnaceManager *_instance;
 };
 
