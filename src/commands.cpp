@@ -847,7 +847,7 @@ void Chat::registerStandardCommands()
   registerCommand(new Command(parseCmd("ban"), "<player>", "Bans (and kicks if online) <player> from server", ban, Conf::get()->commandPermission("ban")));
   registerCommand(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport, Conf::get()->commandPermission("ctp")));
   registerCommand(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems, Conf::get()->commandPermission("give")));
-  registerCommand(new Command(parseCmd("igive"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf, Conf::get()->commandPermission("igive")));
+  registerCommand(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf, Conf::get()->commandPermission("igive")));
   registerCommand(new Command(parseCmd("gps"), "[<player>]", "Show own coordinates or show <player>'s coordinates", showPosition, Conf::get()->commandPermission("gps")));
   registerCommand(new Command(parseCmd("kick"), "<player>", "Kicks a player with optional kick message", kick, Conf::get()->commandPermission("kick")));
   registerCommand(new Command(parseCmd("mute"), "<player>", "Mutes a player with optional message", mute, Conf::get()->commandPermission("mute")));
