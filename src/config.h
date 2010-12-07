@@ -32,13 +32,11 @@
 #include <map>
 #include <vector>
 
+struct Kit;
+
 class Conf
 {
-private:
-  Conf() {}
-  std::map<std::string, std::string> confSet;
-  static Conf *mConf;
-public:
+ public:
   static Conf* get()
   {
     if(!mConf) {
@@ -54,6 +52,15 @@ public:
   bool bValue(std::string name);
   std::vector<int> vValue(std::string name);
   int commandPermission(std::string commandName);
+  int permissionByName(std::string permissionName);
+  Kit* kit(const std::string& kitname);
+
+ private:
+  Conf() {}
+  std::vector<int> stringToVec(std::string& val);
+  std::map<std::string, std::string> confSet;
+  std::map<std::string, Kit*> kits;
+  static Conf *mConf;
 };
 
 #endif
