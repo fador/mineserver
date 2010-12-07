@@ -25,45 +25,22 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _CONFIG_H
-#define _CONFIG_H
+#ifndef _KIT_H
+#define _KIT_H
 
 #include <string>
-#include <map>
 #include <vector>
 
-struct Kit;
+struct Kit {
+  std::string name;
+  std::vector<int> items;
+  int permissions;
 
-class Conf
-{
- public:
-  static Conf* get()
-  {
-    if(!mConf) {
-      mConf = new Conf();
-    }
-    return mConf;
-  }
-
-  ~Conf();
-
-  void free();
-
-  bool load(std::string configFile, std::string namePrefix = "");
-  int iValue(std::string name);
-  std::string sValue(std::string name);
-  bool bValue(std::string name);
-  std::vector<int> vValue(std::string name);
-  int commandPermission(std::string commandName);
-  int permissionByName(std::string permissionName);
-  Kit* kit(const std::string& kitname);
-
- private:
-  Conf() {}
-  std::vector<int> stringToVec(std::string& val);
-  std::map<std::string, std::string> confSet;
-  std::map<std::string, Kit*> kits;
-  static Conf *mConf;
+  Kit(std::string name, std::vector<int> items, int permissions)
+  : name(name),
+    items(items),
+    permissions(permissions)
+  {}
 };
 
-#endif
+#endif /* _KIT_H */

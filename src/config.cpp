@@ -39,9 +39,18 @@
 #include "permissions.h"
 
 #include "config.h"
+#include "kit.h"
 
 
 Conf* Conf::mConf;
+
+Conf::~Conf()
+{
+  for(std::map<std::string, Kit*>::iterator it = kits.begin(); it != kits.end(); it++)
+  {
+    delete it->second;
+  }
+}
 
 void Conf::free()
 {
@@ -226,48 +235,24 @@ bool Conf::bValue(std::string name)
 
 std::vector<int> Conf::vValue(std::string name)
 {
-  std::vector<int> temp;
-  std::string tmpStr;
-  int del;
   if(confSet.find(name) != confSet.end())
   {
-    tmpStr = confSet[name];
-
-    // Process "array"
-    while(tmpStr.length() > 0)
-    {
-      // Remove white spaces characters
-      while(tmpStr[0] == ' ')
-        tmpStr = tmpStr.substr(1);
-
-      // Split words
-      del = tmpStr.find(',');
-      if(del > -1)
-      {
-        temp.push_back(atoi(tmpStr.substr(0, del).c_str()));
-        tmpStr = tmpStr.substr(del+1);
-      }
-      else
-      {
-        temp.push_back(atoi(tmpStr.c_str()));
-        break;
-      }
-    }
-
-    return temp;
+    return stringToVec(confSet[name]);
   }
   else
   {
     std::cout << "Warning! " << name << " not defined in configuration." << std::endl;
-    return temp;
+    return std::vector<int>();
   }
-
 }
 
 int Conf::commandPermission(std::string commandName)
 {
-  std::string permissionName = sValue(COMMANDS_NAME_PREFIX + commandName);
+  return permissionByName(sValue(COMMANDS_NAME_PREFIX + commandName));
+}
 
+int Conf::permissionByName(std::string permissionName)
+{
   if(permissionName == "admin")
     return PERM_ADMIN;
 
@@ -280,7 +265,61 @@ int Conf::commandPermission(std::string commandName)
   if(permissionName == "guest")
     return PERM_GUEST;
 
-  std::cout << "Warning! Unknown command permission: " << permissionName << " for command: " << commandName << std::endl;
+  std::cout << "Warning! Unknown permission name: " << permissionName << " - Using GUEST permission by default!" << std::endl;
 
   return PERM_GUEST; // default
+}
+
+Kit* Conf::kit(const std::string& kitname)
+{
+  if(kits.find(kitname) != kits.end()) {
+    return kits[kitname];
+  } else {
+    std::string keyname = "kit_" + kitname;
+    if(confSet.find(keyname) != confSet.end())
+    {
+      std::string valueString, permissionName, itemsString;
+      valueString = confSet[keyname];
+      size_t pos = valueString.find_first_of(",");
+
+      permissionName = valueString.substr(0, pos);
+      itemsString = valueString.substr(pos + 1);
+      std::vector<int> items = stringToVec(itemsString);
+
+      Kit* kit = new Kit(kitname, items, permissionByName(permissionName));
+      kits[kitname] = kit; // save kit for later, if used again
+      return kit;
+    } else {
+      std::cout << "Warning! " << keyname << " not defined in configuration." << std::endl;
+      return NULL;
+    }
+  }
+}
+
+std::vector<int> Conf::stringToVec(std::string& str)
+{
+  std::vector<int> temp;
+  int del;
+  // Process "array"
+  while(str.length() > 0)
+  {
+    // Remove white spaces characters
+    while(str[0] == ' ')
+      str = str.substr(1);
+
+    // Split words
+    del = str.find(',');
+    if(del > -1)
+    {
+      temp.push_back(atoi(str.substr(0, del).c_str()));
+      str = str.substr(del+1);
+    }
+    else
+    {
+      temp.push_back(atoi(str.c_str()));
+      break;
+    }
+  }
+
+  return temp;
 }

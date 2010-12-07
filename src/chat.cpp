@@ -88,7 +88,6 @@ void Chat::registerCommand(Command *command)
     if(IS_OP(command->permissions)) {
       opCommands[currentWord] = command;
       adminCommands[currentWord] = command;
-    std::cout << "registering " << command->names[0] << " with perm: " << command->permissions << std::endl;
       continue;
     }
 
@@ -445,7 +444,7 @@ void Chat::sendHelp(User *user, std::deque<std::string> args)
     if((iter = commandList->find(args.front())) != commandList->end()) {
       std::string args = iter->second->arguments;
       std::string description = iter->second->description;
-      sendMsg(user, commandColor + CHATCMDPREFIX + iter->first + args, Chat::USER);
+      sendMsg(user, commandColor + CHATCMDPREFIX + iter->first + " " + args, Chat::USER);
       sendMsg(user, COLOR_YELLOW + CHATCMDPREFIX + description, Chat::USER);
     } else {
       sendMsg(user, COLOR_RED + "Unknown Command: " + args.front(), Chat::USER);
