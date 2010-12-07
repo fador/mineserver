@@ -55,6 +55,8 @@ public:
   void onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
 private:
   TrackData trackLog[2];
-  bool isTrack(sint32 x, sint8 y, sint32 z);
+  bool isTrack(sint32 x, sint8 y, sint32 z, uint8& meta);
+  bool isStartPiece(sint32 x, sint8 y, sint32 z);
+
 };
 
