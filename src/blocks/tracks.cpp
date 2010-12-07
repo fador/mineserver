@@ -26,15 +26,15 @@
  */
 
 #include "tracks.h"
-//#include <iostream>
+#include <iostream>
 
 enum {
   FLAT_NS = 0,
   FLAT_EW,
+  ASCEND_W,
+  ASCEND_E,
   ASCEND_S,
   ASCEND_N,
-  ASCEND_E,
-  ASCEND_W,
   CORNER_SE,
   CORNER_SW,
   CORNER_NW,
@@ -102,8 +102,14 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // SOUTH
   if(isTrack(x, y, z-1, meta) && isStartPiece(x, y, z-1))
   {
-    //std::cout << "SOUTH" << std::endl;
+    std::cout << "SOUTH" << std::endl;
     metadata = FLAT_NS;
+    
+    // Rising & falling tracks
+    if(isTrack(x, y+1, z+1, meta) && isStartPiece(x, y+1, z+1))
+    {
+      metadata = ASCEND_N;
+    }
     
     if(isTrack(x+1, y, z, meta) && isStartPiece(x+1, y, z))
     {
@@ -130,9 +136,14 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // NORTH
   if(isTrack(x, y, z+1, meta) && isStartPiece(x, y, z+1))
   {
-    //std::cout << "NORTH" << std::endl;
+    std::cout << "NORTH" << std::endl;
 
     metadata = FLAT_NS;
+    // Rising & falling tracks
+    if(isTrack(x, y+1, z-1, meta) && isStartPiece(x, y+1, z-1))
+    {
+      metadata = ASCEND_S;
+    }
     
     if(isTrack(x+1, y, z, meta) && isStartPiece(x+1, y, z))
     {
@@ -159,11 +170,20 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // EAST
   if(isTrack(x-1, y, z, meta) && isStartPiece(x-1, y, z))
   {
-    //std::cout << "EAST" << std::endl;
+    std::cout << "EAST" << std::endl;
     metadata = FLAT_EW;
-    // Change previous block meta
-    Map::get()->setBlock(x-1, y, z, (char)newblock, FLAT_EW);
-    Map::get()->sendBlockChange(x-1, y, z, (char)newblock, FLAT_EW);
+    
+    // Rising & falling tracks
+    if(isTrack(x+1, y+1, z, meta) && isStartPiece(x+1, y+1, z))
+    {
+      metadata = ASCEND_W;
+    } 
+    else
+    {
+      // Change previous block meta
+      Map::get()->setBlock(x-1, y, z, (char)newblock, FLAT_EW);
+      Map::get()->sendBlockChange(x-1, y, z, (char)newblock, FLAT_EW);
+    }
   
     if(isTrack(x, y, z+1, meta) && isStartPiece(x, y, z+1))
     {
@@ -190,12 +210,20 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // WEST
   if(isTrack(x+1, y, z, meta) && isStartPiece(x+1, y, z))
   {
-    //std::cout << "WEST" << std::endl;
+    std::cout << "WEST" << std::endl;
     metadata = FLAT_EW;
     // Change previous block meta
-
-    Map::get()->setBlock(x+1, y, z, (char)newblock, FLAT_EW);
-    Map::get()->sendBlockChange(x+1, y, z, (char)newblock, FLAT_EW);
+    
+    // Rising & falling tracks
+    if(isTrack(x-1, y+1, z, meta) && isStartPiece(x-1, y+1, z))
+    {
+      metadata = ASCEND_E;
+    } 
+    else
+    {
+      Map::get()->setBlock(x+1, y, z, (char)newblock, FLAT_EW);
+      Map::get()->sendBlockChange(x+1, y, z, (char)newblock, FLAT_EW);
+    }
 
     if(isTrack(x, y, z+1, meta) && isStartPiece(x, y, z+1))
     {
@@ -220,7 +248,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   }
   
   
-  //std::cout << std::endl;
+  std::cout << std::endl;
   Map::get()->setBlock(x, y, z, (char)newblock, metadata);
   Map::get()->sendBlockChange(x, y, z, (char)newblock, metadata);
 }
@@ -284,6 +312,26 @@ bool BlockTracks::isStartPiece(sint32 x, sint8 y, sint32 z)
     case CORNER_NW:
       x1--;
       z2--;
+      break;
+    case ASCEND_E:
+      y1++;
+      x1--;
+      x2++;
+      break;
+    case ASCEND_N:
+      y1++;
+      z1++;
+      z2--;
+      break;
+    case ASCEND_S:
+      y1++;
+      z1--;
+      z2++;
+      break;
+    case ASCEND_W:
+      y1++;
+      x1++;
+      x2--;
       break;
   }
   
