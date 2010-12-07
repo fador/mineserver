@@ -89,7 +89,7 @@ void client_callback(int fd,
 #else
     close(user->fd);
 #endif
-    User::remove(user->fd);
+    delete user;
     return;
     }
 
@@ -101,7 +101,7 @@ void client_callback(int fd,
       #else
           close(user->fd);
       #endif
-          User::remove(user->fd);
+          delete user;
       return;
     }
 
@@ -145,7 +145,7 @@ void client_callback(int fd,
         #else
         close(user->fd);
         #endif
-        User::remove(user->fd);
+        delete user;
       }
       else
       {
@@ -180,7 +180,7 @@ void client_callback(int fd,
     #else
         close(user->fd);
     #endif
-        User::remove(user->fd);
+        delete user;
         return;
       }
       else

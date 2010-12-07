@@ -106,7 +106,6 @@ public:
   Packet buffer;
 
   static std::vector<User *> & all();
-  static bool remove(int sock);
   static bool isUser(int sock);
   static User* byNick(std::string nick);
 
