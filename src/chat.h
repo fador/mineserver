@@ -42,6 +42,10 @@ public:
   };
   typedef void (*CommandCallback)(User *, std::string, std::deque<std::string>);
 
+  /**
+   * Chat command a user can enter.
+   * Requires the right permissions by the user (e.g. for admin-only commands).
+   */
   struct Command
   {
     std::deque<std::string> names;
@@ -60,21 +64,13 @@ public:
     }
   };
 
-  //Chat();
-  std::deque<std::string> admins;
-  std::deque<std::string> ops;
-  std::deque<std::string> members;
-  std::deque<std::string> banned;
-  std::deque<std::string> whitelist;
   bool handleMsg( User *user, std::string msg );
   bool sendMsg( User *user, std::string msg, MessageTarget action = ALL );
   bool sendUserlist( User *user );
-  bool loadRoles(std::string rolesFile);
-  bool loadBanned(std::string bannedFile);
-  bool loadWhitelist(std::string whitelistFile);
   bool checkMotd(std::string motdFile);
   void registerCommand(Command *command);
   void sendHelp(User *user, std::deque<std::string> args);
+
   static Chat* get()
   {
     if(!mChat) {
@@ -82,7 +78,9 @@ public:
     }
     return mChat;
   }
+
   void free();
+
 private:
   static Chat *mChat;
 

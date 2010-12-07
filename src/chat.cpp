@@ -130,141 +130,16 @@ bool Chat::checkMotd(std::string motdFile)
   return true;
 }
 
-bool Chat::loadRoles(std::string rolesFile)
-{
-  // Clear current admin-vector
-  admins.clear();
-  ops.clear();
-  members.clear();
-
-  // Read admins to deque
-  std::ifstream ifs(rolesFile.c_str());
-
-  // If file does not exist
-  if(ifs.fail())
-  {
-    std::cout << "> Warning: " << rolesFile << " not found. Creating..." << std::endl;
-
-    std::ofstream adminofs(rolesFile.c_str());
-    adminofs << ROLES_CONTENT << std::endl;
-    adminofs.close();
-
-    return true;
-  }
-
-  std::deque<std::string> *role_list = &members; // default is member role
-  std::string temp;
-  while(getline(ifs, temp))
-  {
-    if(temp[0] == COMMENTPREFIX) {
-      temp = temp.substr(1); // ignore COMMENTPREFIX
-      temp.erase(std::remove(temp.begin(), temp.end(), ' '), temp.end());
-
-      // get the name of the role from the comment
-      if(temp == "admins") {
-        role_list = &admins;
-      }
-      if(temp == "ops") {
-        role_list = &ops;
-      }
-      if(temp == "members") {
-        role_list = &members;
-      }
-    } else {
-      temp.erase(std::remove(temp.begin(), temp.end(), ' '), temp.end());
-      if(temp != "") {
-        role_list->push_back(temp);
-      }
-    }
-  }
-  ifs.close();
-#ifdef _DEBUG
-  std::cout << "Loaded roles from " << rolesFile << std::endl;
-#endif
-
-  return true;
-}
-
-bool Chat::loadBanned(std::string bannedFile)
-{
-  // Clear current banned-vector
-  banned.clear();
-
-  // Read banned to deque
-  std::ifstream ifs(bannedFile.c_str());
-
-  // If file does not exist
-  if(ifs.fail())
-  {
-    std::cout << "> Warning: " << bannedFile << " not found. Creating..." << std::endl;
-
-    std::ofstream bannedofs(bannedFile.c_str());
-    bannedofs << BANNED_CONTENT << std::endl;
-    bannedofs.close();
-
-    return true;
-  }
-
-  std::string temp;
-  while(getline(ifs, temp))
-  {
-    // If not commentline
-    if(temp[0] != COMMENTPREFIX)
-      banned.push_back(temp);
-  }
-  ifs.close();
-#ifdef _DEBUG
-  std::cout << "Loaded banned users from " << bannedFile << std::endl;
-#endif
-
-  return true;
-}
-
-bool Chat::loadWhitelist(std::string whitelistFile)
-{
-  // Clear current whitelist-vector
-  whitelist.clear();
-
-  // Read whitelist to deque
-  std::ifstream ifs(whitelistFile.c_str());
-
-  // If file does not exist
-  if(ifs.fail())
-  {
-    std::cout << "> Warning: " << whitelistFile << " not found. Creating..." << std::endl;
-
-    std::ofstream whitelistofs(whitelistFile.c_str());
-    whitelistofs << WHITELIST_CONTENT << std::endl;
-    whitelistofs.close();
-
-    return true;
-  }
-
-  std::string temp;
-  while(getline(ifs, temp))
-  {
-    // If not commentline
-    if(temp[0] != COMMENTPREFIX)
-      whitelist.push_back(temp);
-  }
-  ifs.close();
-#ifdef _DEBUG
-  std::cout << "Loaded whitelisted users from " << whitelistFile << std::endl;
-#endif
-
-  return true;
-}
-
 bool Chat::sendUserlist(User *user)
 {
-  this->sendMsg(user, COLOR_BLUE + "[ " + dtos(Users.size()) + " players online ]", USER);
+  this->sendMsg(user, COLOR_BLUE + "[ " + dtos(User::all().size()) + " players online ]", USER);
 
-  for(unsigned int i = 0; i < Users.size(); i++)
+  for(unsigned int i = 0; i < User::all().size(); i++)
   {
-	std::string playerDesc = "> " + Users[i]->nick;
-	if(Users[i]->muted)
+	std::string playerDesc = "> " + User::all()[i]->nick;
+	if(User::all()[i]->muted)
 		playerDesc += COLOR_YELLOW + " (muted)";
-	if(Users[i]->dnd)
+	if(User::all()[i]->dnd)
 		playerDesc += COLOR_YELLOW + " (dnd)";
 
     this->sendMsg(user, playerDesc, USER);

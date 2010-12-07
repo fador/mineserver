@@ -63,14 +63,14 @@ void Map::addSapling(User* user, int x, int y, int z)
 
 void Map::checkGenTrees()
 {
-  std::list<sTree>::iterator iter = saplings.begin(); 
-  
+  std::list<sTree>::iterator iter = saplings.begin();
+
   while (iter != saplings.end())
   {
     if(rand() % 50 == 0)
     {
       std::cout << "Grow tree!" << std::endl;
-      
+
       sint32 x = (*iter).x;
       sint32 y = (*iter).y;
       sint32 z = (*iter).z;
@@ -320,10 +320,10 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
   printf("generateLight(x=%d, z=%d, chunk=%p)\n", x, z, chunk);
 #endif
   #ifdef PRINT_LIGHTGEN_TIME
-  #ifdef WIN32  
+  #ifdef WIN32
      DWORD t_begin,t_end;
      t_begin = timeGetTime();
-  #else    
+  #else
     clock_t t_begin,t_end;
     t_begin = clock();
   #endif
@@ -359,7 +359,7 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
         uint8 block    = blocks[index];
 
         light -= stopLight[block];
-        if (light < 0) { light = 0; }        
+        if (light < 0) { light = 0; }
 
         // Calculate heightmap while looping this
         if ((block != BLOCK_AIR) && (foundheight == false)) {
@@ -378,7 +378,7 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
       }
     }
   }
-  
+
   // Block light
   for (int block_x = 0; block_x < 16; block_x++)
   {
@@ -398,7 +398,7 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
       }
     }
   }
-  
+
   // Spread light
   for (int block_x = 0; block_x < 16; block_x++)
   {
@@ -803,9 +803,9 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
 
 
   // TODO: only send to users in range
-  for(unsigned int i = 0; i < Users.size(); i++)
+  for(unsigned int i = 0; i < User::all().size(); i++)
   {
-    Users[i]->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
+    User::all()[i]->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
   }
 
   return true;
@@ -831,9 +831,9 @@ bool Map::sendPickupSpawn(spawnedItem item)
     << (sint8)0 << (sint8)0 << (sint8)0;
 
   // TODO: only send to users in range
-  for(unsigned int i = 0; i < Users.size(); i++)
+  for(unsigned int i = 0; i < User::all().size(); i++)
   {
-    Users[i]->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
+    User::all()[i]->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
   }
 
   return true;
@@ -927,7 +927,7 @@ bool Map::loadMap(int x, int z, bool generate)
             }
           }
         }
-        
+
       }
       return true;
     }
@@ -936,7 +936,7 @@ bool Map::loadMap(int x, int z, bool generate)
       return false;
     }
   }
-  else 
+  else
   {
     maps[mapId].nbt = NBT_Value::LoadFromFile(infile.c_str());
   }
@@ -1118,7 +1118,7 @@ void Map::sendToUser(User *user, int x, int z)
     user->buffer << (sint8)PACKET_PRE_CHUNK << mapposx << mapposz << (sint8)1;
 
     // Chunk
-    user->buffer << (sint8)PACKET_MAP_CHUNK << (sint32)(mapposx * 16) << (sint16)0 << (sint32)(mapposz * 16) 
+    user->buffer << (sint8)PACKET_MAP_CHUNK << (sint32)(mapposx * 16) << (sint16)0 << (sint32)(mapposz * 16)
       << (sint8)15 << (sint8)127 << (sint8)15;
 
     memcpy(&mapdata[0], maps[mapId].blocks, 32768);
@@ -1186,7 +1186,7 @@ void Map::sendToUser(User *user, int x, int z)
           //Gzip the data
           if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
           {
-            std::cout << "Error in deflate: " << state << std::endl;            
+            std::cout << "Error in deflate: " << state << std::endl;
           }
 
           sint32 entityX = *(**iter)["x"];
@@ -1194,7 +1194,7 @@ void Map::sendToUser(User *user, int x, int z)
           sint32 entityZ = *(**iter)["z"];
 
           // !!!! Complex Entity packet! !!!!
-          user->buffer << (sint8)PACKET_COMPLEX_ENTITIES 
+          user->buffer << (sint8)PACKET_COMPLEX_ENTITIES
             << (sint32)entityX << (sint16)entityY << (sint32)entityZ << (sint16)zstream2.total_out;
           user->buffer.addToWrite(compressedData, zstream2.total_out);
 
@@ -1214,7 +1214,7 @@ void Map::sendToUser(User *user, int x, int z)
 void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
 {
   uint32 mapId;
-  
+
   int block_x = blockToChunk(x);
   int block_z = blockToChunk(z);
 
@@ -1313,14 +1313,14 @@ void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
   //Gzip the data
   if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
   {
-    std::cout << "Error in deflate: " << state << std::endl;            
+    std::cout << "Error in deflate: " << state << std::endl;
   }
 
   deflateEnd(&zstream2);
 
 
   Packet pkt;
-  pkt << (sint8)PACKET_COMPLEX_ENTITIES 
+  pkt << (sint8)PACKET_COMPLEX_ENTITIES
     << x << (sint16)y << z << (sint16)zstream2.total_out;
   pkt.addToWrite(compressedData, zstream2.total_out);
 

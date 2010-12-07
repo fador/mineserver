@@ -60,10 +60,10 @@ bool BlockBasic::isBlockStackable(const uint8 block)
 bool BlockBasic::isUserOnBlock(const sint32 x, const sint8 y, const sint32 z)
 {
    /* TODO: Get Users by chunk rather then whole list */
-   for(unsigned int i = 0; i < Users.size(); i++)
+   for(unsigned int i = 0; i < User::all().size(); i++)
    {
       /* don't allow block placement on top of player */
-      if (Users[i]->checkOnBlock(x,y,z))
+      if (User::all()[i]->checkOnBlock(x,y,z))
          return true;
    }
    return false;
@@ -127,7 +127,7 @@ void BlockBasic::notifyNeighbours(const sint32 x, const sint8 y, const sint32 z,
    uint8 meta;
    Function::invoker_type inv(user, oldblock, x, y, z, 0);
 
-   if (ignore_direction != BLOCK_SOUTH 
+   if (ignore_direction != BLOCK_SOUTH
         && Map::get()->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
    {
       inv = Function::invoker_type(user, oldblock, x+1, y, z, BLOCK_SOUTH);
