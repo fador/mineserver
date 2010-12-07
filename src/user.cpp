@@ -160,8 +160,22 @@ bool User::changeNick(std::string _nick)
 
 User::~User()
 {
+  for(std::vector<User*>::iterator it = Mineserver::get().users().begin();
+      it != Mineserver::get().users().end();
+      it++)
+  {
+    if((*it) == this)
+    {
+      Mineserver::get().users().erase(it);
+      break;
+    }
+  }
+
   if(this->nick.size())
   {
+    Chat::get()->sendMsg(this, this->nick + " disconnected!", Chat::OTHERS);
+    this->saveData();
+
     //Send signal to everyone that the entity is destroyed
     uint8 entityData[5];
     entityData[0] = 0x1d; //Destroy entity;
@@ -909,25 +923,6 @@ struct event *User::GetEvent()
 std::vector<User *> & User::all()
 {
   return Mineserver::get().users();
-}
-
-bool User::remove(int sock)
-{
-  for(int i = 0; i < (int)Mineserver::get().users().size(); i++)
-  {
-    if(Mineserver::get().users()[i]->fd == sock)
-    {
-      if(Mineserver::get().users()[i]->nick.size())
-      {
-        Chat::get()->sendMsg(Mineserver::get().users()[i], Mineserver::get().users()[i]->nick+" disconnected!", Chat::OTHERS);
-        Mineserver::get().users()[i]->saveData();
-      }
-      delete Mineserver::get().users()[i];
-      Mineserver::get().users().erase(Mineserver::get().users().begin()+i);
-      return true;
-    }
-  }
-  return false;
 }
 
 bool User::isUser(int sock)

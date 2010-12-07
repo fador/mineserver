@@ -768,8 +768,7 @@ int PacketHandler::disconnect(User *user)
   close(user->fd);
   #endif
 
-  User::remove(user->fd);
-
+  delete user;
 
   return PACKET_OK;
 }
