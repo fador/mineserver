@@ -91,7 +91,7 @@ int setnonblock(int fd)
 //Handle signals
 void sighandler(int sig_num)
 {
-  Mineserver::Get().Stop();
+  Mineserver::get().stop();
 }
 
 int main(int argc, char *argv[])
@@ -101,19 +101,19 @@ int main(int argc, char *argv[])
 
   srand(time(NULL));
 
-  return Mineserver::Get().Run(argc, argv);
+  return Mineserver::get().run(argc, argv);
 }
 
 Mineserver::Mineserver()
 {
 }
 
-event_base *Mineserver::GetEventBase()
+event_base *Mineserver::getEventBase()
 {
   return m_eventBase;
 }
 
-int Mineserver::Run(int argc, char *argv[])
+int Mineserver::run(int argc, char *argv[])
 {
   uint32 starttime = (uint32)time(0);
   uint32 tick      = (uint32)time(0);
@@ -143,9 +143,9 @@ int Mineserver::Run(int argc, char *argv[])
   pid_out.close();
 
   // Load admin, banned and whitelisted users
-  User::loadRoles(Conf::get()->sValue("roles_file"));
-  User::loadBanned(Conf::get()->sValue("banned_file"));
-  User::loadWhitelist(Conf::get()->sValue("whitelist_file"));
+  Conf::get()->loadRoles();
+  Conf::get()->loadBanned();
+  Conf::get()->loadWhitelist();
   // Load MOTD
   Chat::get()->checkMotd(Conf::get()->sValue("motd_file"));
 
@@ -412,9 +412,10 @@ int Mineserver::Run(int argc, char *argv[])
   return EXIT_SUCCESS;
 }
 
-bool Mineserver::Stop()
+bool Mineserver::stop()
 {
   m_running=false;
 
   return true;
 }
+

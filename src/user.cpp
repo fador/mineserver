@@ -53,14 +53,8 @@
 #include "nbt.h"
 #include "chat.h"
 #include "packets.h"
-
-std::vector<User *>     User::__users;
-std::deque<std::string> User::__admins;
-std::deque<std::string> User::__ops;
-std::deque<std::string> User::__members;
-std::deque<std::string> User::__banned;
-std::deque<std::string> User::__whitelist;
-
+#include "mineserver.h"
+#include "config.h"
 
 //Generate "unique" entity ID
 uint32 generateEID()
@@ -89,143 +83,22 @@ User::User(int sock, uint32 EID)
   this->attachedTo      = 0;
   this->timeUnderwater  = 0;
 
-  __users.push_back(this);
+  Mineserver::get().users().push_back(this);
 }
 
-
-bool User::loadRoles(std::string rolesFile)
-{
-  // Clear current admin-vector
-  __admins.clear();
-  __ops.clear();
-  __members.clear();
-
-  // Read admins to deque
-  std::ifstream ifs(rolesFile.c_str());
-
-  // If file does not exist
-  if(ifs.fail())
-  {
-    std::cout << "> Warning: " << rolesFile << " not found. Creating..." << std::endl;
-
-    std::ofstream adminofs(rolesFile.c_str());
-    adminofs << ROLES_CONTENT << std::endl;
-    adminofs.close();
-
-    return true;
-  }
-
-  std::deque<std::string> *role_list = &__members; // default is member role
-  std::string temp;
-  while(getline(ifs, temp))
-  {
-    if(temp[0] == COMMENTPREFIX) {
-      temp = temp.substr(1); // ignore COMMENTPREFIX
-      temp.erase(std::remove(temp.begin(), temp.end(), ' '), temp.end());
-
-      // get the name of the role from the comment
-      if(temp == "admins") {
-        role_list = &__admins;
-      }
-      if(temp == "ops") {
-        role_list = &__ops;
-      }
-      if(temp == "members") {
-        role_list = &__members;
-      }
-    } else {
-      temp.erase(std::remove(temp.begin(), temp.end(), ' '), temp.end());
-      if(temp != "") {
-        role_list->push_back(temp);
-      }
-    }
-  }
-  ifs.close();
-#ifdef _DEBUG
-  std::cout << "Loaded roles from " << rolesFile << std::endl;
-#endif
-
-  return true;
-}
-
-bool User::loadBanned(std::string bannedFile)
-{
-  // Clear current banned-vector
-  __banned.clear();
-
-  // Read banned to deque
-  std::ifstream ifs(bannedFile.c_str());
-
-  // If file does not exist
-  if(ifs.fail())
-  {
-    std::cout << "> Warning: " << bannedFile << " not found. Creating..." << std::endl;
-
-    std::ofstream bannedofs(bannedFile.c_str());
-    bannedofs << BANNED_CONTENT << std::endl;
-    bannedofs.close();
-
-    return true;
-  }
-
-  std::string temp;
-  while(getline(ifs, temp))
-  {
-    // If not commentline
-    if(temp[0] != COMMENTPREFIX)
-      __banned.push_back(temp);
-  }
-  ifs.close();
-#ifdef _DEBUG
-  std::cout << "Loaded banned users from " << bannedFile << std::endl;
-#endif
-
-  return true;
-}
-
-bool User::loadWhitelist(std::string whitelistFile)
-{
-  // Clear current whitelist-vector
-  __whitelist.clear();
-
-  // Read whitelist to deque
-  std::ifstream ifs(whitelistFile.c_str());
-
-  // If file does not exist
-  if(ifs.fail())
-  {
-    std::cout << "> Warning: " << whitelistFile << " not found. Creating..." << std::endl;
-
-    std::ofstream whitelistofs(whitelistFile.c_str());
-    whitelistofs << WHITELIST_CONTENT << std::endl;
-    whitelistofs.close();
-
-    return true;
-  }
-
-  std::string temp;
-  while(getline(ifs, temp))
-  {
-    // If not commentline
-    if(temp[0] != COMMENTPREFIX)
-      __whitelist.push_back(temp);
-  }
-  ifs.close();
-#ifdef _DEBUG
-  std::cout << "Loaded whitelisted users from " << whitelistFile << std::endl;
-#endif
-
-  return true;
-}
 
 bool User::checkBanned(std::string _nick)
 {
   nick = _nick;
 
   // Check banstatus
-  for(unsigned int i = 0; i < __banned.size(); i++)
-    if(__banned[i] == nick)
+  for(unsigned int i = 0; i < Conf::get()->banned().size(); i++)
+  {
+    if(Conf::get()->banned()[i] == nick)
+    {
       return true;
+    }
+  }
 
   return false;
 }
@@ -235,13 +108,15 @@ bool User::checkWhitelist(std::string _nick)
 	nick = _nick;
 
     // Check if nick is whitelisted, providing it is enabled
-    for(unsigned int i = 0; i < __whitelist.size(); i++)
-      if(__whitelist[i] == nick)
-        return true;
+  for(unsigned int i = 0; i < Conf::get()->whitelist().size(); i++)
+  {
+    if(Conf::get()->whitelist()[i] == nick)
+    {
+      return true;
+    }
+  }
 
-    return false;
-
-  return true;
+  return false;
 }
 
 bool User::changeNick(std::string _nick)
@@ -251,9 +126,9 @@ bool User::changeNick(std::string _nick)
   SET_GUEST(permissions); // default
 
   // Check adminstatus
-  for(unsigned int i = 0; i < __admins.size(); i++)
+  for(unsigned int i = 0; i < Conf::get()->admins().size(); i++)
   {
-    if(__admins[i] == nick)
+    if(Conf::get()->admins()[i] == nick)
     {
       SET_ADMIN(permissions);
       break;
@@ -261,9 +136,9 @@ bool User::changeNick(std::string _nick)
   }
 
   // Check op status
-  for(unsigned int i = 0; i < __ops.size(); i++)
+  for(unsigned int i = 0; i < Conf::get()->ops().size(); i++)
   {
-    if(__ops[i] == nick)
+    if(Conf::get()->ops()[i] == nick)
     {
       SET_OP(permissions);
       break;
@@ -271,9 +146,9 @@ bool User::changeNick(std::string _nick)
   }
 
   // Check member status
-  for(unsigned int i = 0; i < __members.size(); i++)
+  for(unsigned int i = 0; i < Conf::get()->members().size(); i++)
   {
-    if(__members[i] == nick)
+    if(Conf::get()->members()[i] == nick)
     {
       SET_MEMBER(permissions);
       break;
@@ -719,14 +594,14 @@ bool User::updateLook(float yaw, float pitch)
 
 bool User::sendOthers(uint8 *data, uint32 len)
 {
-  for(unsigned int i = 0; i < __users.size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
-    if(__users[i]->fd != this->fd && __users[i]->logged)
+    if(Mineserver::get().users()[i]->fd != this->fd && Mineserver::get().users()[i]->logged)
     {
       // Don't send to his user if he is DND and the message is a chat message
-      if(!(__users[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
+      if(!(Mineserver::get().users()[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
       {
-    	  __users[i]->buffer.addToWrite(data, len);
+    	  Mineserver::get().users()[i]->buffer.addToWrite(data, len);
   	  }
   	}
   }
@@ -761,14 +636,14 @@ sint8 User::relativeToBlock(const sint32 x, const sint8 y, const sint32 z)
 
 bool User::sendAll(uint8 *data, uint32 len)
 {
-  for(unsigned int i = 0; i < __users.size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
-    if(__users[i]->fd && __users[i]->logged)
+    if(Mineserver::get().users()[i]->fd && Mineserver::get().users()[i]->logged)
     {
       // Don't send to his user if he is DND and the message is a chat message
-      if(!(__users[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
+      if(!(Mineserver::get().users()[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
       {
-    	  __users[i]->buffer.addToWrite(data, len);
+    	  Mineserver::get().users()[i]->buffer.addToWrite(data, len);
   	  }
   	}
   }
@@ -777,30 +652,30 @@ bool User::sendAll(uint8 *data, uint32 len)
 
 bool User::sendAdmins(uint8 *data, uint32 len)
 {
-  for(unsigned int i = 0; i < __users.size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
-    if(__users[i]->fd && __users[i]->logged && IS_ADMIN(__users[i]->permissions))
-    	__users[i]->buffer.addToWrite(data, len);
+    if(Mineserver::get().users()[i]->fd && Mineserver::get().users()[i]->logged && IS_ADMIN(Mineserver::get().users()[i]->permissions))
+    	Mineserver::get().users()[i]->buffer.addToWrite(data, len);
   }
   return true;
 }
 
 bool User::sendOps(uint8 *data, uint32 len)
 {
-  for(unsigned int i = 0; i < __users.size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
-    if(__users[i]->fd && __users[i]->logged && IS_ADMIN(__users[i]->permissions))
-    	__users[i]->buffer.addToWrite(data, len);
+    if(Mineserver::get().users()[i]->fd && Mineserver::get().users()[i]->logged && IS_ADMIN(Mineserver::get().users()[i]->permissions))
+    	Mineserver::get().users()[i]->buffer.addToWrite(data, len);
   }
   return true;
 }
 
 bool User::sendGuests(uint8 *data, uint32 len)
 {
-  for(unsigned int i = 0; i < __users.size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
-    if(__users[i]->fd && __users[i]->logged && IS_ADMIN(__users[i]->permissions))
-    	__users[i]->buffer.addToWrite(data, len);
+    if(Mineserver::get().users()[i]->fd && Mineserver::get().users()[i]->logged && IS_ADMIN(Mineserver::get().users()[i]->permissions))
+    	Mineserver::get().users()[i]->buffer.addToWrite(data, len);
   }
   return true;
 }
@@ -952,12 +827,12 @@ bool User::spawnUser(int x, int y, int z)
 bool User::spawnOthers()
 {
 
-  for(unsigned int i = 0; i < __users.size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
-    if(__users[i]->UID != this->UID && __users[i]->nick != this->nick)
+    if(Mineserver::get().users()[i]->UID != this->UID && Mineserver::get().users()[i]->nick != this->nick)
     {
-    buffer << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)__users[i]->UID << __users[i]->nick
-      << (sint32)(__users[i]->pos.x * 32) << (sint32)(__users[i]->pos.y * 32) << (sint32)(__users[i]->pos.z * 32)
+    buffer << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)Mineserver::get().users()[i]->UID << Mineserver::get().users()[i]->nick
+      << (sint32)(Mineserver::get().users()[i]->pos.x * 32) << (sint32)(Mineserver::get().users()[i]->pos.y * 32) << (sint32)(Mineserver::get().users()[i]->pos.z * 32)
       << (sint8)0 << (sint8)0 << (sint16)0;
     }
   }
@@ -1033,22 +908,22 @@ struct event *User::GetEvent()
 
 std::vector<User *> & User::all()
 {
-  return __users;
+  return Mineserver::get().users();
 }
 
 bool User::remove(int sock)
 {
-  for(int i = 0; i < (int)__users.size(); i++)
+  for(int i = 0; i < (int)Mineserver::get().users().size(); i++)
   {
-    if(__users[i]->fd == sock)
+    if(Mineserver::get().users()[i]->fd == sock)
     {
-      if(__users[i]->nick.size())
+      if(Mineserver::get().users()[i]->nick.size())
       {
-        Chat::get()->sendMsg(__users[i], __users[i]->nick+" disconnected!", Chat::OTHERS);
-        __users[i]->saveData();
+        Chat::get()->sendMsg(Mineserver::get().users()[i], Mineserver::get().users()[i]->nick+" disconnected!", Chat::OTHERS);
+        Mineserver::get().users()[i]->saveData();
       }
-      delete __users[i];
-      __users.erase(__users.begin()+i);
+      delete Mineserver::get().users()[i];
+      Mineserver::get().users().erase(Mineserver::get().users().begin()+i);
       return true;
     }
   }
@@ -1058,9 +933,9 @@ bool User::remove(int sock)
 bool User::isUser(int sock)
 {
   uint8 i;
-  for(i = 0; i < __users.size(); i++)
+  for(i = 0; i < Mineserver::get().users().size(); i++)
   {
-    if(__users[i]->fd == sock)
+    if(Mineserver::get().users()[i]->fd == sock)
       return true;
   }
   return false;
@@ -1070,10 +945,10 @@ bool User::isUser(int sock)
 User* User::byNick(std::string nick)
 {
   // Get coordinates
-  for(unsigned int i = 0; i < __users.size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
-    if(strToLower(__users[i]->nick) == strToLower(nick))
-      return __users[i];
+    if(strToLower(Mineserver::get().users()[i]->nick) == strToLower(nick))
+      return Mineserver::get().users()[i];
   }
   return NULL;
 }

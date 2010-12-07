@@ -33,6 +33,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 #include "logger.h"
 #include "constants.h"
@@ -42,11 +43,11 @@
 #include "kit.h"
 
 
-Conf* Conf::mConf;
+Conf* Conf::_conf;
 
 Conf::~Conf()
 {
-  for(std::map<std::string, Kit*>::iterator it = kits.begin(); it != kits.end(); it++)
+  for(std::map<std::string, Kit*>::iterator it = m_kits.begin(); it != m_kits.end(); it++)
   {
     delete it->second;
   }
@@ -54,10 +55,10 @@ Conf::~Conf()
 
 void Conf::free()
 {
-   if (mConf)
+   if (_conf)
    {
-      delete mConf;
-      mConf = 0;
+      delete _conf;
+      _conf = 0;
    }
 }
 
@@ -177,12 +178,12 @@ bool Conf::load(std::string configFile, std::string namePrefix)
     }
 
     // Update existing configuration and add new lines
-    if(confSet.find(namePrefix + line[0]) != confSet.end())
-      confSet[namePrefix + line[0]] = text;
+    if(m_confSet.find(namePrefix + line[0]) != m_confSet.end())
+      m_confSet[namePrefix + line[0]] = text;
     else
     {
       // Push to configuration
-      confSet.insert(std::pair<std::string, std::string>(namePrefix + line[0], text));
+      m_confSet.insert(std::pair<std::string, std::string>(namePrefix + line[0], text));
     }
 
     // Count line numbers
@@ -199,8 +200,8 @@ bool Conf::load(std::string configFile, std::string namePrefix)
 // Return values
 std::string Conf::sValue(std::string name)
 {
-  if(confSet.find(name) != confSet.end())
-    return confSet[name];
+  if(m_confSet.find(name) != m_confSet.end())
+    return m_confSet[name];
   else
   {
     std::cout << "Warning! " << name << " not defined in configuration. Using default value: "<<
@@ -211,8 +212,8 @@ std::string Conf::sValue(std::string name)
 
 int Conf::iValue(std::string name)
 {
-  if(confSet.find(name) != confSet.end())
-    return atoi(confSet[name].c_str());
+  if(m_confSet.find(name) != m_confSet.end())
+    return atoi(m_confSet[name].c_str());
   else
   {
     std::cout << "Warning! " << name << " not defined in configuration. Using default value: "<<
@@ -223,8 +224,8 @@ int Conf::iValue(std::string name)
 
 bool Conf::bValue(std::string name)
 {
-  if(confSet.find(name) != confSet.end())
-    return (confSet[name] == "true")?true:false;
+  if(m_confSet.find(name) != m_confSet.end())
+    return (m_confSet[name] == "true")?true:false;
   else
   {
     std::cout << "Warning! " << name << " not defined in configuration. Using default value: "<<
@@ -235,9 +236,9 @@ bool Conf::bValue(std::string name)
 
 std::vector<int> Conf::vValue(std::string name)
 {
-  if(confSet.find(name) != confSet.end())
+  if(m_confSet.find(name) != m_confSet.end())
   {
-    return stringToVec(confSet[name]);
+    return stringToVec(m_confSet[name]);
   }
   else
   {
@@ -272,14 +273,14 @@ int Conf::permissionByName(std::string permissionName)
 
 Kit* Conf::kit(const std::string& kitname)
 {
-  if(kits.find(kitname) != kits.end()) {
-    return kits[kitname];
+  if(m_kits.find(kitname) != m_kits.end()) {
+    return m_kits[kitname];
   } else {
     std::string keyname = "kit_" + kitname;
-    if(confSet.find(keyname) != confSet.end())
+    if(m_confSet.find(keyname) != m_confSet.end())
     {
       std::string valueString, permissionName, itemsString;
-      valueString = confSet[keyname];
+      valueString = m_confSet[keyname];
       size_t pos = valueString.find_first_of(",");
 
       permissionName = valueString.substr(0, pos);
@@ -287,7 +288,7 @@ Kit* Conf::kit(const std::string& kitname)
       std::vector<int> items = stringToVec(itemsString);
 
       Kit* kit = new Kit(kitname, items, permissionByName(permissionName));
-      kits[kitname] = kit; // save kit for later, if used again
+      m_kits[kitname] = kit; // save kit for later, if used again
       return kit;
     } else {
       std::cout << "Warning! " << keyname << " not defined in configuration." << std::endl;
@@ -322,4 +323,137 @@ std::vector<int> Conf::stringToVec(std::string& str)
   }
 
   return temp;
+}
+
+
+
+bool Conf::loadRoles()
+{
+  std::string rolesFile = sValue("roles_file");
+
+  // Clear current admin-vector
+  m_admins.clear();
+  m_ops.clear();
+  m_members.clear();
+
+  // Read admins to deque
+  std::ifstream ifs(rolesFile.c_str());
+
+  // If file does not exist
+  if(ifs.fail())
+  {
+    std::cout << "> Warning: " << rolesFile << " not found. Creating..." << std::endl;
+
+    std::ofstream adminofs(rolesFile.c_str());
+    adminofs << ROLES_CONTENT << std::endl;
+    adminofs.close();
+
+    return true;
+  }
+
+  std::deque<std::string> *role_list = &m_members; // default is member role
+  std::string temp;
+  while(getline(ifs, temp))
+  {
+    if(temp[0] == COMMENTPREFIX) {
+      temp = temp.substr(1); // ignore COMMENTPREFIX
+      temp.erase(std::remove(temp.begin(), temp.end(), ' '), temp.end());
+
+      // get the name of the role from the comment
+      if(temp == "admins") {
+        role_list = &m_admins;
+      }
+      if(temp == "ops") {
+        role_list = &m_ops;
+      }
+      if(temp == "members") {
+        role_list = &m_members;
+      }
+    } else {
+      temp.erase(std::remove(temp.begin(), temp.end(), ' '), temp.end());
+      if(temp != "") {
+        role_list->push_back(temp);
+      }
+    }
+  }
+  ifs.close();
+#ifdef _DEBUG
+  std::cout << "Loaded roles from " << rolesFile << std::endl;
+#endif
+
+  return true;
+}
+
+bool Conf::loadBanned()
+{
+  std::string bannedFile = sValue("banned_file");
+
+  // Clear current banned-vector
+  m_banned.clear();
+
+  // Read banned to deque
+  std::ifstream ifs(bannedFile.c_str());
+
+  // If file does not exist
+  if(ifs.fail())
+  {
+    std::cout << "> Warning: " << bannedFile << " not found. Creating..." << std::endl;
+
+    std::ofstream bannedofs(bannedFile.c_str());
+    bannedofs << BANNED_CONTENT << std::endl;
+    bannedofs.close();
+
+    return true;
+  }
+
+  std::string temp;
+  while(getline(ifs, temp))
+  {
+    // If not commentline
+    if(temp[0] != COMMENTPREFIX)
+      m_banned.push_back(temp);
+  }
+  ifs.close();
+#ifdef _DEBUG
+  std::cout << "Loaded banned users from " << bannedFile << std::endl;
+#endif
+
+  return true;
+}
+
+bool Conf::loadWhitelist()
+{
+  std::string whitelistFile = sValue("whitelist_file");
+
+  // Clear current whitelist-vector
+  m_whitelist.clear();
+
+  // Read whitelist to deque
+  std::ifstream ifs(whitelistFile.c_str());
+
+  // If file does not exist
+  if(ifs.fail())
+  {
+    std::cout << "> Warning: " << whitelistFile << " not found. Creating..." << std::endl;
+
+    std::ofstream whitelistofs(whitelistFile.c_str());
+    whitelistofs << WHITELIST_CONTENT << std::endl;
+    whitelistofs.close();
+
+    return true;
+  }
+
+  std::string temp;
+  while(getline(ifs, temp))
+  {
+    // If not commentline
+    if(temp[0] != COMMENTPREFIX)
+      m_whitelist.push_back(temp);
+  }
+  ifs.close();
+#ifdef _DEBUG
+  std::cout << "Loaded whitelisted users from " << whitelistFile << std::endl;
+#endif
+
+  return true;
 }

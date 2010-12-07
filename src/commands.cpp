@@ -195,7 +195,7 @@ void ban(User *user, std::string command, std::deque<std::string> args)
       Chat::get()->sendMsg(user, COLOR_DARK_MAGENTA + args[0] +" was banned in his absence!", Chat::ALL);
 
     // Reload list with banned users
-    User::loadBanned(Conf::get()->sValue("banned_file"));
+    Conf::get()->loadBanned();
   }
   else
     reportError(user, "Usage: /ban player [reason]");
@@ -223,7 +223,7 @@ void unban(User *user, std::string command, std::deque<std::string> args)
     Chat::get()->sendMsg(user, COLOR_DARK_MAGENTA + args[0] + " was unbanned.", Chat::ALL);
 
     // Reload list with banned users
-    User::loadBanned(Conf::get()->sValue("banned_file"));
+    Conf::get()->loadBanned();
   }
   else
     reportError(user, "Usage: /unban player");
@@ -537,9 +537,9 @@ void regenerateLighting(User *user, std::string command, std::deque<std::string>
 
 void reloadConfiguration(User *user, std::string command, std::deque<std::string> args)
 {
-  User::loadRoles(Conf::get()->sValue("roles_file"));
-  User::loadBanned(Conf::get()->sValue("banned_file"));
-  User::loadWhitelist(Conf::get()->sValue("whitelist_file"));
+  Conf::get()->loadRoles();
+  Conf::get()->loadBanned();
+  Conf::get()->loadWhitelist();
   Conf::get()->load(CONFIG_FILE);
   Conf::get()->load(COMMANDS_FILE, COMMANDS_NAME_PREFIX);
 
