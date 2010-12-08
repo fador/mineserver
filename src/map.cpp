@@ -671,8 +671,8 @@ bool Map::getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight, sChu
   uint8 *blocklightPtr = chunk->blocklight;
   uint8 *skylightPtr   = chunk->skylight;
   int index            = y + (chunk_block_z << 7) + (chunk_block_x << 11);
-  *blocklight = blocklightPtr[(index)>>1];
-  *skylight   = skylightPtr[(index)>>1];
+  *blocklight          = blocklightPtr[(index)>>1];
+  *skylight            = skylightPtr[(index)>>1];
 
   if(y & 1)
   {

@@ -619,6 +619,8 @@ void regenerateLighting(User *user, std::string command, std::deque<std::string>
   {
     //Then regenerate lighting
     Map::get()->generateLight(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
+    Map::get()->sendToUser(user,blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
+    
   }
 }
 
