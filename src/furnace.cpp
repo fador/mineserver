@@ -328,3 +328,4 @@ void Furnace::sendToAllUsers()
   Map::get()->setComplexEntity(m_x, m_y, m_z, newEntity);
 
 }
+
