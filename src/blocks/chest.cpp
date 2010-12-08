@@ -26,7 +26,7 @@
  */
 
 #include "chest.h"
-#include <iostream>
+
 #include "../chat.h"
 #include "../nbt.h"
 #include "../map.h"
@@ -35,6 +35,7 @@
 
 void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
+  // Locksystem
   if(user->currentItem() == ITEM_WOODEN_AXE)
   {
     uint32 mapId;
@@ -87,6 +88,16 @@ void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, s
               locked = *(*nbtLockdata)["locked"];
               locked = (locked==1)?0:1;
               *(*nbtLockdata)["locked"] = locked;
+              
+              if(locked == 1)
+              {
+                Chat::get()->sendMsg(user, COLOR_RED + "Chest locked", Chat::USER);
+              }
+              else
+              {
+                Chat::get()->sendMsg(user, COLOR_RED + "Chest opened", Chat::USER);
+              }
+          
             }
           } 
           else 
@@ -96,20 +107,7 @@ void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, s
             nbtLock->Insert("player", new NBT_Value(user->nick));
             nbtLock->Insert("locked", new NBT_Value((sint8)1));
             (*iter)->Insert("Lockdata", nbtLock);
-            
-            locked = 1;
           }
-          std::string msg;
-          if(locked == 1)
-          {
-            msg = "locked";
-          }
-          else
-          {
-            msg = "opened";
-          }
-          Chat::get()->sendMsg(user, COLOR_RED + "Chest " + msg, Chat::USER);
-
           break;
         }
       }

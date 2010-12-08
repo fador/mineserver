@@ -51,6 +51,8 @@
 #include "user.h"
 #include "nbt.h"
 #include "config.h"
+#include "permissions.h"
+#include "chat.h"
 
 Map* Map::mMap;
 
@@ -1196,19 +1198,38 @@ void Map::sendToUser(User *user, int x, int z)
         std::string *id = idVal->GetString();
         if(id && (*id=="Chest" || *id=="Furnace" || *id=="Sign"))
         {
+          
           if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
             (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
             (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
           {
             continue;
           }
+          
+          if(*id == "Chest")
+          {
+            NBT_Value *lockData = (**iter)["Lockdata"];
+            if(lockData != NULL)
+            {
+              std::cout << "NO NULL" << std::endl;
+              if((*lockData)["locked"] != NULL)
+              {
+                sint8 locked = *(*lockData)["locked"];
+                if(locked == 1 && !IS_ADMIN(user->permissions))
+                {
+                  Chat::get()->sendMsg(user, COLOR_BLUE + "Chest is locked.", Chat::USER);
+                  continue;
+                }
+              }
+            }
+          }
 
-            buffer.push_back(NBT_Value::TAG_COMPOUND);
-            buffer.push_back(0);
-            buffer.push_back(0);
-            (*iter)->Write(buffer);
-            buffer.push_back(0);
-            buffer.push_back(0);
+          buffer.push_back(NBT_Value::TAG_COMPOUND);
+          buffer.push_back(0);
+          buffer.push_back(0);
+          (*iter)->Write(buffer);
+          buffer.push_back(0);
+          buffer.push_back(0);
 
 
           z_stream zstream2;
