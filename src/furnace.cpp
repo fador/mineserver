@@ -73,7 +73,6 @@ Furnace::Furnace(NBT_Value *entity, uint8 blockType)
   if(inputSlot.id == ITEM_RAW_FISH)      { this->m_cookingTime = 10; }
 
   // Reset our active duration
-<<<<<<< HEAD
   this->m_fuelBurningTime = 0;
   this->m_activeCookDuration = 0;
 
@@ -83,17 +82,6 @@ Furnace::Furnace(NBT_Value *entity, uint8 blockType)
   else
     this->m_burning = false;
 
-=======
-  this->fuelBurningTime = 0;
-  this->activeCookDuration = 0;
-  
-  // Check if this is a burning block
-  if(blockType == BLOCK_BURNING_FURNACE)
-    this->burning = true;
-  else
-    this->burning = false;
-  
->>>>>>> c15b6794c310562e6512bc941cbfcc13f3820e2e
   // Make sure we're the right kind of block based on our current status
   this->updateBlock();
 }
@@ -337,7 +325,6 @@ void Furnace::sendToAllUsers()
   #endif
 
   // Update our map with this guy
-  Map::get()->setComplexEntity(m_x, m_y, m_z, newEntity);
+  Map::get()->setComplexEntity(NULL, m_x, m_y, m_z, newEntity);
 
 }
-

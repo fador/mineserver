@@ -65,11 +65,7 @@ void FurnaceManager::update() {
       currentFurnace->consumeFuel();
     }
     //std::cout << "Furnace " << index << " " << currentFurnace->isCooking() << std::endl;
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> c15b6794c310562e6512bc941cbfcc13f3820e2e
     // If we're cooking, increment the activity and check if we're ready to smelt the output
     if(currentFurnace->isCooking())
     {
@@ -96,19 +92,11 @@ void FurnaceManager::update() {
   }
 }
 
-<<<<<<< HEAD
 void FurnaceManager::handleActivity(NBT_Value *entity, uint8 blockType)
 {
   // Create a furnace
   Furnace *furnace = new Furnace(entity, blockType);
 
-=======
-void FurnaceManager::handleActivity(NBT_Value *entity, uint8 blockType) 
-{
-  // Create a furnace
-  Furnace *furnace = new Furnace(entity, blockType);
-      
->>>>>>> c15b6794c310562e6512bc941cbfcc13f3820e2e
   // Loop thru all active furnaces, to see if this one is here
   for(unsigned int index = 0; index < m_activeFurnaces.size(); index++)
   {
@@ -151,7 +139,6 @@ void FurnaceManager::free()
       _instance = 0;
    }
 }
-
 
 
 
