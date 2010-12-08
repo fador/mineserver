@@ -278,7 +278,7 @@ public:
   bool sendPickupSpawn(spawnedItem item);
   void createPickupSpawn(int x, int y, int z, int type, int count);
 
-  void setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity);
+  void setComplexEntity(User *user, sint32 x, sint32 y, sint32 z, NBT_Value *entity);
 
   static Map* get()
   {

@@ -25,76 +25,28 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _CHAT_H
-#define _CHAT_H
+#pragma once
 
-#include <deque>
+#include "basic.h"
 
-class Chat
+class User;
+
+/** BlockChest deals specifically with chests
+@see BlockBasic
+*/
+class BlockChest: public BlockBasic
 {
 public:
-  enum MessageTarget
-  {
-    ALL,
-    USER,
-    OTHERS,
-    ADMINS,
-    OPS,
-    GUESTS
-  };
-  typedef void (*CommandCallback)(User *, std::string, std::deque<std::string>);
-
-  /**
-   * Chat command a user can enter.
-   * Requires the right permissions by the user (e.g. for admin-only commands).
-   */
-  struct Command
-  {
-    std::deque<std::string> names;
-    std::string arguments;
-    std::string description;
-    CommandCallback callback;
-    int permissions;
-
-    Command(std::deque<std::string> names, std::string arguments, std::string description, CommandCallback callback, int permissions)
-    : names(names),
-      arguments(arguments),
-      description(description),
-      callback(callback),
-      permissions(permissions)
-    {
-    }
-  };
-
-  bool handleMsg( User *user, std::string msg );
-  bool sendMsg( User *user, std::string msg, MessageTarget action = ALL );
-  bool sendUserlist( User *user );
-  bool checkMotd(std::string motdFile);
-  void registerCommand(Command *command);
-  void sendHelp(User *user, std::deque<std::string> args);
-
-  static Chat* get()
-  {
-    if(!_instance) {
-      _instance = new Chat();
-    }
-    return _instance;
-  }
-
-  void free();
-
+  void onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
 private:
-  static Chat *_instance;
 
-  Chat();
-  void registerStandardCommands();
-  std::deque<std::string> parseCmd(std::string cmd);
-
-  typedef std::map<std::string, Command*> CommandList;
-  CommandList m_adminCommands;
-  CommandList m_opCommands;
-  CommandList m_memberCommands;
-  CommandList m_guestCommands;
 };
 
-#endif

@@ -289,13 +289,19 @@ bool User::loadData()
         inv.main[(uint8)slot].count  = count;
         inv.main[(uint8)slot].health = damage;
         inv.main[(uint8)slot].type   = item_id;
+        
+        // Add item at slot 0 to currentItem
+        if(slot == 0)
+        {
+          m_currentItem = item_id;
+        }
       }
       //Crafting
       else if(slot >= 80 && slot <= 83)
       {
         inv.crafting[(uint8)slot-80].count  = count;
         inv.crafting[(uint8)slot-80].health = damage;
-        inv.crafting[(uint8)slot-80].type   = item_id;
+        inv.crafting[(uint8)slot-80].type   = item_id;   
       }
       //Equipped
       else if(slot >= 100 && slot <= 103)
@@ -946,4 +952,15 @@ User* User::byNick(std::string nick)
       return Mineserver::get().users()[i];
   }
   return NULL;
+}
+
+// Getter/Setter for item currently in hold
+sint16 User::currentItem()
+{
+  return m_currentItem;
+}
+
+void User::setCurrentItem(sint16 item_id)
+{
+  m_currentItem = item_id;
 }

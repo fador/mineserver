@@ -48,7 +48,6 @@
 #include "user.h"
 #include "chat.h"
 #include "config.h"
-#include "tools.h"
 #include "physics.h"
 #include "kit.h"
 
