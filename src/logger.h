@@ -38,15 +38,16 @@ private:
   Logger()
   {
   }
-  static Logger *mLogger;
+  static Logger *_instance;
 public:
   void log(std::string msg, std::string file, int line);
   static Logger* get()
   {
-     if(!mLogger) {
-        mLogger = new Logger();
-     }
-     return mLogger;
+    if(!_instance)
+    {
+      _instance = new Logger();
+    }
+     return _instance;
   }
   void free();
 };

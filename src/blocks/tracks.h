@@ -27,76 +27,36 @@
 
 #pragma once
 
-#include <cstdlib>
-
-#include "constants.h"
-#include "map.h"
-#include "tools.h"
+#include "basic.h"
 
 class User;
 
-enum
+struct TrackData
 {
-  SLOT_INPUT,
-  SLOT_FUEL,
-  SLOT_OUTPUT
+  uint32 x;
+  uint8 y;
+  uint32 z;
 };
 
-class Furnace
+/** BlockTracks deals specifically with minecart tracks
+@see BlockBasic
+*/
+class BlockTracks: public BlockBasic
 {
-
-  struct Slot
-  {
-    sint8 count;
-    sint16 damage;
-    sint16 id;
-  };
-
 public:
-  Furnace(NBT_Value *entity, uint8 blockType);
-
-  void sendToAllUsers();
-  NBT_Value* getSlotEntity(sint8 slotNumber);
-  void smelt();
-  bool isBurningFuel();
-  bool isCooking();
-  bool hasValidIngredient();
-  void consumeFuel();
-  void updateBlock();
-
-  /**
-   * Getter & setter methods
-   */
-
-  sint16 burnTime();
-  sint16 cookTime();
-
-  sint16 fuelBurningTime() { return m_fuelBurningTime; }
-  void setFuelBurningTime(sint16 fuelBurningTime) { m_fuelBurningTime = fuelBurningTime; }
-
-  sint16 activeCookDuration() { return m_activeCookDuration; }
-  void setActiveCookDuration(sint16 activeCookDuration) { m_activeCookDuration = activeCookDuration; }
-
-  sint16 cookingTime() { return m_cookingTime; }
-
-  sint32 x() { return m_x; }
-  sint32 y() { return m_y; }
-  sint32 z() { return m_z; }
-
-  Slot* slots() { return m_slots; };
-
+  void onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
 private:
-  sint16 m_fuelBurningTime;
-  sint16 m_initialBurningTime;
-  sint16 m_cookingTime;
-  sint16 m_activeCookDuration;
- // sint16 activeBurnDuration;
-  sint32 m_x;
-  sint32 m_y;
-  sint32 m_z;
-  Slot m_slots[3];
+  TrackData trackLog[2];
+  bool isTrack(sint32 x, sint8 y, sint32 z, uint8& meta);
+  bool isStartPiece(sint32 x, sint8 y, sint32 z);
 
-  bool m_burning;
 };
-
 

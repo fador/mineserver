@@ -30,25 +30,34 @@
 
 #include <event.h>
 
+class User;
+
 class Mineserver
 {
-private:
-  struct event m_listenEvent;
-  event_base *m_eventBase;
-  int m_socketlisten;
-  bool m_running;
-
 public:
-  static Mineserver &Get()
+  static Mineserver& get()
   {
     static Mineserver server;
     return server;
   }
 
   Mineserver();
-  int Run(int argc, char *argv[]);
-  bool Stop();
-  event_base *GetEventBase();
+  int run(int argc, char *argv[]);
+  bool stop();
+  event_base *getEventBase();
+
+  std::vector<User *> & users() { return m_users; }
+
+private:
+
+  struct event m_listenEvent;
+  event_base *m_eventBase;
+  int m_socketlisten;
+  bool m_running;
+
+  // holds all connected users
+  std::vector<User *> m_users;
+
 };
 
 #endif

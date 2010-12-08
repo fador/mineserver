@@ -28,14 +28,12 @@
 #ifndef _USER_H
 #define _USER_H
 
-#include <deque>
 #include <event.h>
 #include "vec.h"
 #include "tools.h"
 #include "constants.h"
 #include "packets.h"
 #include "permissions.h"
-
 
 struct position
 {
@@ -71,10 +69,10 @@ struct Inventory
   }
 };
 
+uint32 generateEID();
+
 class User
 {
-private:
-  event m_event;
 public:
 
   User(int sock, uint32 EID);
@@ -106,6 +104,10 @@ public:
 
   //Input buffer
   Packet buffer;
+
+  static std::vector<User *> & all();
+  static bool isUser(int sock);
+  static User* byNick(std::string nick);
 
   bool checkBanned(std::string _nick);
   bool checkWhitelist(std::string _nick);
@@ -176,15 +178,9 @@ public:
   bool isUnderwater();
 
   struct event *GetEvent();
+
+private:
+  event m_event;
 };
-
-User *addUser(int sock, uint32 EID);
-bool remUser(int sock);
-bool isUser(int sock);
-uint32 generateEID();
-
-extern std::vector<User *> Users;
-
-User *getUserByNick(std::string nick);
 
 #endif
