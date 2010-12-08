@@ -687,6 +687,9 @@ int PacketHandler::holding_change(User *user)
   pkt << (sint8)PACKET_HOLDING_CHANGE << (sint32)user->UID << itemID;
   user->sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
 
+  // Set current itemID to user
+  user->setCurrentItem(itemID);
+
   return PACKET_OK;
 }
 

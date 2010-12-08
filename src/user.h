@@ -176,11 +176,18 @@ public:
   bool respawn();
   bool dropInventory();
   bool isUnderwater();
+  
+  // Getter/Setter for item currently in hold
+  sint16 currentItem();
+  void setCurrentItem(sint16 item_id);
 
   struct event *GetEvent();
 
 private:
   event m_event;
+  
+  // Item currently in hold
+  sint16 m_currentItem;
 };
 
 #endif
