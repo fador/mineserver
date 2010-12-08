@@ -112,7 +112,7 @@ void FurnaceManager::handleActivity(NBT_Value *entity, uint8 blockType)
       m_activeFurnaces.erase(m_activeFurnaces.begin() + index);
     }
   }
- 
+
   // Check if this furnace is active
   if(furnace->isBurningFuel() || furnace->slots()[SLOT_FUEL].count > 0)
   {
@@ -139,6 +139,7 @@ void FurnaceManager::free()
       _instance = 0;
    }
 }
+
 
 
 
