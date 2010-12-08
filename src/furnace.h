@@ -53,8 +53,25 @@ class Furnace
   };
 
 public:
+<<<<<<< HEAD
   Furnace(NBT_Value *entity, uint8 blockType);
 
+=======
+  sint16 fuelBurningTime;
+  sint16 initialBurningTime;
+  sint16 cookingTime;
+  sint16 activeCookDuration;
+ // sint16 activeBurnDuration;  
+  sint32 x;
+  sint32 y;
+  sint32 z;
+  sSlot slots[3];
+
+  bool burning;
+  
+  Furnace(NBT_Value *entity, uint8 blockType);
+  
+>>>>>>> c15b6794c310562e6512bc941cbfcc13f3820e2e
   void sendToAllUsers();
   NBT_Value* getSlotEntity(sint8 slotNumber);
   void smelt();

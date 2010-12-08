@@ -43,10 +43,14 @@ public:
   void free();
   void update();
   void handleActivity(NBT_Value *entity, uint8 blockType);
+<<<<<<< HEAD
 
 private:
   typedef std::vector<Furnace *> FurnaceContainer;
   FurnaceContainer m_activeFurnaces;
   static FurnaceManager *_instance;
+=======
+    
+>>>>>>> c15b6794c310562e6512bc941cbfcc13f3820e2e
 };
 
