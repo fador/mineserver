@@ -1252,9 +1252,16 @@ void Map::sendToUser(User *user, int x, int z)
   delete[] mapdata;
 }
 
-void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
+void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *entity)
 {
   uint32 mapId;
+  
+  std::string player = "";
+  if(user != NULL)
+  {
+    player = user->nick;
+  }
+  sint8 locked = 0;
 
   int block_x = blockToChunk(x);
   int block_z = blockToChunk(z);
@@ -1312,6 +1319,14 @@ void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
 
       if((sint32)(*(**iter)["x"]) == x && (sint32)(*(**iter)["y"]) == y && (sint32)(*(**iter)["z"]) == z)
       {
+        NBT_Value *nbtLockdata = (**iter)["Lockdata"];
+
+        if(nbtLockdata != NULL)
+        {
+          player = *(*nbtLockdata)["player"]->GetString();
+          locked = *(*nbtLockdata)["locked"];
+        }
+        
         // Replace entity
         delete *iter;
         *iter = entity;
@@ -1322,6 +1337,14 @@ void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
 
     if(!done)
     {
+      if(user != NULL)
+      {
+        NBT_Value *nbtLockdata = new NBT_Value(NBT_Value::TAG_COMPOUND);
+        nbtLockdata->Insert("player", new NBT_Value(player));
+        nbtLockdata->Insert("locked", new NBT_Value(locked));
+        entity->Insert("Lockdata", nbtLockdata);
+      }
+  
       // Add new entity
       entityList->GetList()->push_back(entity);
     }

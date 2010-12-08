@@ -858,7 +858,7 @@ int PacketHandler::complex_entities(User *user)
       FurnaceManager::get()->handleActivity(entity, block);
     }
     else {
-      Map::get()->setComplexEntity(x, y, z, entity);
+      Map::get()->setComplexEntity(user, x, y, z, entity);
     }
 
   delete [] buffer;
