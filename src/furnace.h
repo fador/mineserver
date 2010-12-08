@@ -63,7 +63,7 @@ public:
   bool hasValidIngredient();
   void consumeFuel();
   void updateBlock();
-
+ 
   /**
    * Getter & setter methods
    */

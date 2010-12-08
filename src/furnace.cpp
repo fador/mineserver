@@ -133,7 +133,7 @@ void Furnace::smelt()
 
     // Update other params if we actually converted
     if(creationID != 0) {
-
+ 
       // Ok - now check if the current output slot contains the same stuff
       if(outputSlot.id != creationID) {
         // No so overwrite it
