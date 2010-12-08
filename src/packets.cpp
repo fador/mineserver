@@ -48,6 +48,8 @@
 #include <vector>
 #include <zlib.h>
 #include <stdint.h>
+#include <functional>
+#include <curl/curl.h>
 
 #include "constants.h"
 
@@ -150,6 +152,49 @@ int PacketHandler::login_request(User *user)
     user->kick(Conf::get()->sValue("wrong_protocol_message"));
     return PACKET_OK;
   }
+
+	// Check if we're to do user validation
+	if(Conf::get()->bValue("user_validation") == true)
+	{
+		std::string url = "http://www.minecraft.net/game/checkserver.jsp?user=" + player + "&serverId=" + hash(player);
+		std::cout << "Validating " << player << " against minecraft.net: ";
+		
+		// Use curl to get the YES / NOT YET signal
+		CURL *curl = curl_easy_init();
+		if(curl) 
+		{
+			// Setup curl 
+			std::string curlBuffer;
+      curl_easy_setopt(curl, CURLOPT_URL, url.c_str());  
+      curl_easy_setopt(curl, CURLOPT_HEADER, 0);  
+      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);  
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriter);  
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &curlBuffer);  
+  
+      // Attempt to retrieve the remote page  
+      CURLcode result = curl_easy_perform(curl);  
+  
+      // Always cleanup  
+      curl_easy_cleanup(curl);  
+  
+      // Did we succeed?  
+      if (result == CURLE_OK)  
+      {  
+        std::cout << curlBuffer << std::endl;
+				if(curlBuffer != "YES")
+				{
+				  user->kick("Failed to verify username!");
+			    return PACKET_OK;
+				}
+      }  
+      else  
+      {  
+        std::cout << "Error: [" << result << "] - " << std::endl;
+				user->kick("Couldn't verify your username.");
+		    return PACKET_OK; 
+      }			
+		}
+	}
 
   // If userlimit is reached
   if((int)Users.size() >= Conf::get()->iValue("user_limit"))
@@ -274,18 +319,28 @@ int PacketHandler::handshake(User *user)
 
   user->buffer >> player;
 
-  //Check for data
+  // Check for data
   if(!user->buffer)
     return PACKET_NEED_MORE_DATA;
 
-  user->buffer.removePacket();
+  // Remove package from buffer
+	user->buffer.removePacket();
 
-  //Remove package from buffer
-  std::cout << "Handshake player: " << player << std::endl;
-
-  //Send handshake package
-  user->buffer << (sint8)PACKET_HANDSHAKE << std::string("-");
-
+	// Check whether we're to validate against minecraft.net
+	if(Conf::get()->bValue("user_validation") == true)
+	{
+		// Send the unique hash for this player to prompt the client to go to minecraft.net to validate
+		std::cout << "Handshake: Requesting minecraft.net validation for player: " << player << " " << hash(player) << std::endl;
+		user->buffer << (sint8)PACKET_HANDSHAKE << hash(player);
+	}
+	else
+	{
+  	// Send "no validation or password needed" validation
+		std::cout << "Handshake: No validation for player: " << player << std::endl;
+  	user->buffer << (sint8)PACKET_HANDSHAKE << std::string("-");
+	}
+	// TODO: Add support for prompting user for Server password (once client supports it)
+	
   return PACKET_OK;
 }
 
