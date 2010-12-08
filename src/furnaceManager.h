@@ -49,3 +49,4 @@ private:
   FurnaceContainer m_activeFurnaces;
   static FurnaceManager *_instance;
 };
+
