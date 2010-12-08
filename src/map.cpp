@@ -1215,7 +1215,7 @@ void Map::sendToUser(User *user, int x, int z)
               {
                 sint8 locked = *(*lockData)["locked"];
                 std::string chestowner = *(*lockData)["player"]->GetString();
-                if(locked == 1)
+                if (locked == 1)
                 {
                   std::cout << chestowner << " " << user->nick << " je" << std::endl;
                   
