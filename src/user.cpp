@@ -184,6 +184,104 @@ User::~User()
   }
 }
 
+
+bool User::sendLoginInfo()
+{
+  std::string player = temp_nick;
+  User *user = this;
+
+
+
+  user->changeNick(player);
+
+  //Load user data
+  user->loadData();
+
+  //Login OK package
+  user->buffer << (sint8)PACKET_LOGIN_RESPONSE
+    << (sint32)user->UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
+
+  //Send server time (after dawn)
+  user->buffer << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
+
+  //Inventory
+  for(sint32 invType=-1; invType != -4; invType--)
+  {
+    Item *inventory = NULL;
+  sint16 inventoryCount = 0;
+
+  if(invType == -1)
+  {
+    inventory = user->inv.main;
+    inventoryCount = 36;
+  }
+  else if(invType == -2)
+  {
+    inventory = user->inv.equipped;
+    inventoryCount = 4;
+  }
+  else if(invType == -3)
+  {
+    inventory = user->inv.crafting;
+    inventoryCount = 4;
+  }
+  user->buffer << (sint8)PACKET_PLAYER_INVENTORY << invType << inventoryCount;
+
+  for(int i=0; i<inventoryCount; i++)
+  {
+    if(inventory[i].count)
+    {
+      user->buffer << (sint16)inventory[i].type << (sint8)inventory[i].count << (sint16)inventory[i].health;
+    }
+    else
+    {
+      user->buffer << (sint16)-1;
+    }
+  }
+  }
+
+  // Send motd
+  std::ifstream motdfs(Conf::get()->sValue("motd_file").c_str());
+
+  std::string temp;
+
+  while(getline( motdfs, temp ))
+  {
+    // If not commentline
+    if(temp[0] != COMMENTPREFIX)
+  {
+      user->buffer << (sint8)PACKET_CHAT_MESSAGE << temp;
+  }
+  }
+  motdfs.close();
+
+  //Teleport player
+  user->teleport(user->pos.x, user->pos.y+2, user->pos.z);
+
+  //Put nearby chunks to queue
+  for(int x = -user->viewDistance; x <= user->viewDistance; x++)
+  {
+    for(int z = -user->viewDistance; z <= user->viewDistance; z++)
+    {
+      user->addQueue((sint32)user->pos.x/16+x, (sint32)user->pos.z/16+z);
+    }
+  }
+  // Push chunks to user
+  user->pushMap();
+
+  //Spawn this user to others
+  user->spawnUser((sint32)user->pos.x*32, ((sint32)user->pos.y+2)*32, (sint32)user->pos.z*32);
+  //Spawn other users for connected user
+  user->spawnOthers();
+
+  user->sethealth(user->health);
+  user->logged = true;
+
+  Chat::get()->sendMsg(user, player+" connected!", Chat::ALL);
+
+  return true;
+}
+
 // Kick player
 bool User::kick(std::string kickMsg)
 {

@@ -94,6 +94,7 @@ public:
   uint16 timeUnderwater;
   unsigned int UID;
   std::string nick;
+  std::string temp_nick;
   position pos;
   vec curChunk;
   Inventory inv;
@@ -126,6 +127,9 @@ public:
 
   //Check inventory for space
   bool checkInventory(sint16 itemID, char count);
+
+  //Login
+  bool sendLoginInfo();
 
   //Load/save player data from/to a file at <mapdir>/players/<nick>.dat
   bool saveData();

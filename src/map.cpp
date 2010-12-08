@@ -1215,7 +1215,7 @@ void Map::sendToUser(User *user, int x, int z)
               {
                 sint8 locked = *(*lockData)["locked"];
                 std::string chestowner = *(*lockData)["player"]->GetString();
-                if((locked == 1 && !IS_ADMIN(user->permissions)) || chestowner == user->nick)
+                if((locked == 1 && !IS_ADMIN(user->permissions)) || chestowner == user->nick)
                 {
                   Chat::get()->sendMsg(user, COLOR_BLUE + "Chest is locked.", Chat::USER);
                   continue;

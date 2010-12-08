@@ -42,6 +42,7 @@
 #include <deque>
 #include <iostream>
 #include <event.h>
+#include <evhttp.h>
 #include <fstream>
 #include <ctime>
 #include <cmath>
@@ -49,7 +50,7 @@
 #include <zlib.h>
 #include <stdint.h>
 #include <functional>
-#include <curl/curl.h>
+
 
 #include "constants.h"
 
@@ -125,6 +126,27 @@ int PacketHandler::keep_alive(User *user)
   return PACKET_OK;
 }
 
+void
+http_verification_done(struct evhttp_request *req, void *arg)
+{
+  User *user = (User *)arg;
+
+	if (req->response_code == HTTP_OK && EVBUFFER_LENGTH(req->input_buffer) == 3 &&
+      memcmp(EVBUFFER_DATA(req->input_buffer), "YES", 3) == 0)
+  {
+    std::cout << " Verified!" << std::endl;
+    user->sendLoginInfo();
+	}
+  else
+  {
+    std::cout << "Failed, response: " << EVBUFFER_DATA(req->input_buffer) << std::endl;
+    user->kick("Failed to verify username!");
+  }
+
+  //evhttp_request_free(req);
+}
+
+
 // Login request (http://mc.kev009.com/wiki/Protocol#Login_Request_.280x01.29)
 int PacketHandler::login_request(User *user)
 {
@@ -146,6 +168,8 @@ int PacketHandler::login_request(User *user)
 
   std::cout << "Player " << user->UID << " login v." << version <<" : " << player <<":"<< passwd << std::endl;
 
+  user->temp_nick=player;
+
   // If version is not 2 or 3
   if(version != PROTOCOL_VERSION)
   {
@@ -153,50 +177,7 @@ int PacketHandler::login_request(User *user)
     return PACKET_OK;
   }
 
-	// Check if we're to do user validation
-	if(Conf::get()->bValue("user_validation") == true)
-	{
-		std::string url = "http://www.minecraft.net/game/checkserver.jsp?user=" + player + "&serverId=" + hash(player);
-		std::cout << "Validating " << player << " against minecraft.net: ";
-		
-		// Use curl to get the YES / NOT YET signal
-		CURL *curl = curl_easy_init();
-		if(curl) 
-		{
-			// Setup curl 
-			std::string curlBuffer;
-      curl_easy_setopt(curl, CURLOPT_URL, url.c_str());  
-      curl_easy_setopt(curl, CURLOPT_HEADER, 0);  
-      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);  
-      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriter);  
-      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &curlBuffer);  
-  
-      // Attempt to retrieve the remote page  
-      CURLcode result = curl_easy_perform(curl);  
-  
-      // Always cleanup  
-      curl_easy_cleanup(curl);  
-  
-      // Did we succeed?  
-      if (result == CURLE_OK)  
-      {  
-        std::cout << curlBuffer << std::endl;
-				if(curlBuffer != "YES")
-				{
-				  user->kick("Failed to verify username!");
-			    return PACKET_OK;
-				}
-      }  
-      else  
-      {  
-        std::cout << "Error: [" << result << "] - " << std::endl;
-				user->kick("Couldn't verify your username.");
-		    return PACKET_OK; 
-      }			
-		}
-	}
-
-  // If userlimit is reached
+    // If userlimit is reached
   if((int)User::all().size() >= Conf::get()->iValue("user_limit"))
   {
     user->kick(Conf::get()->sValue("server_full_message"));
@@ -220,92 +201,40 @@ int PacketHandler::login_request(User *user)
     return PACKET_OK;
   }
 
-  user->changeNick(player);
 
-  //Load user data
-  user->loadData();
+	// Check if we're to do user validation
+	if(Conf::get()->bValue("user_validation") == true)
+	{    
+		std::string url = "/game/checkserver.jsp?user=" + player + "&serverId=" + hash(player);
+		std::cout << "Validating " << player << " against minecraft.net: ";
 
-  //Login OK package
-  user->buffer << (sint8)PACKET_LOGIN_RESPONSE
-    << (sint32)user->UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
+    static struct evhttp_connection *evcon;
+		static struct evhttp_request *req;
 
-  //Send server time (after dawn)
-  user->buffer << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
-
-  //Inventory
-  for(sint32 invType=-1; invType != -4; invType--)
-  {
-    Item *inventory = NULL;
-  sint16 inventoryCount = 0;
-
-  if(invType == -1)
-  {
-    inventory = user->inv.main;
-    inventoryCount = 36;
-  }
-  else if(invType == -2)
-  {
-    inventory = user->inv.equipped;
-    inventoryCount = 4;
-  }
-  else if(invType == -3)
-  {
-    inventory = user->inv.crafting;
-    inventoryCount = 4;
-  }
-  user->buffer << (sint8)PACKET_PLAYER_INVENTORY << invType << inventoryCount;
-
-  for(int i=0; i<inventoryCount; i++)
-  {
-    if(inventory[i].count)
+    evcon = evhttp_connection_new("www.minecraft.net", 80);
+	  if (evcon == NULL)
     {
-      user->buffer << (sint16)inventory[i].type << (sint8)inventory[i].count << (sint16)inventory[i].health;
-    }
-    else
+		  user->kick("Couldn't verify your username.");
+		  return PACKET_OK; 
+	  }
+
+    req = evhttp_request_new(http_verification_done, user);
+
+    evhttp_add_header(req->output_headers, "Host", "www.minecraft.net");
+
+    if (evhttp_make_request(evcon, req, EVHTTP_REQ_GET, url.c_str()) == -1)
     {
-      user->buffer << (sint16)-1;
-    }
+			user->kick("Failed to verify username!");
+			return PACKET_OK;
+	  }
+
+	  event_dispatch();
+
+    //evhttp_connection_free(evcon);
+
+		return PACKET_OK;
   }
-  }
-
-  // Send motd
-  std::ifstream motdfs(Conf::get()->sValue("motd_file").c_str());
-
-  std::string temp;
-
-  while(getline( motdfs, temp ))
-  {
-    // If not commentline
-    if(temp[0] != COMMENTPREFIX)
-  {
-      user->buffer << (sint8)PACKET_CHAT_MESSAGE << temp;
-  }
-  }
-  motdfs.close();
-
-  //Teleport player
-  user->teleport(user->pos.x, user->pos.y+2, user->pos.z);
-
-  //Put nearby chunks to queue
-  for(int x = -user->viewDistance; x <= user->viewDistance; x++)
-  {
-    for(int z = -user->viewDistance; z <= user->viewDistance; z++)
-    {
-      user->addQueue((sint32)user->pos.x/16+x, (sint32)user->pos.z/16+z);
-    }
-  }
-  // Push chunks to user
-  user->pushMap();
-
-  //Spawn this user to others
-  user->spawnUser((sint32)user->pos.x*32, ((sint32)user->pos.y+2)*32, (sint32)user->pos.z*32);
-  //Spawn other users for connected user
-  user->spawnOthers();
-
-  user->sethealth(user->health);
-  user->logged = true;
-
-  Chat::get()->sendMsg(user, player+" connected!", Chat::ALL);
+  user->sendLoginInfo();
 
   return PACKET_OK;
 }
