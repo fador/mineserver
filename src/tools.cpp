@@ -161,3 +161,40 @@ std::string dtos( double n )
   result << n;
   return result.str();
 }
+
+std::string hash(std::string value)
+{
+	// Hash the player's name along with a secret to generate a unique hash for this player
+	// Uses the DJB2 algorithm
+	unsigned long hash = 5381;
+	int c;
+	
+	char *cvalue = const_cast<char *>(value.c_str());
+	
+	while (c = *cvalue++)
+		hash = ((hash <<5) + hash) + c;	/* hash * 33 + c */
+		
+	std::ostringstream hashString;
+	hashString << hash;
+		
+	return hashString.str();
+}
+
+// This is the writer call back function used by curl to fill a string buffer with web content
+int curlWriter(char *data, size_t size, size_t nmemb, std::string *buffer)  
+{  
+  // What we will return  
+  int result = 0;  
+  
+  // Is there anything in the buffer?  
+  if (buffer != NULL)  
+  {  
+    // Append the data to the buffer  
+    buffer->append(data, size * nmemb);  
+  
+    // How much did we write?  
+    result = size * nmemb;  
+  }  
+  
+  return result;  
+}
