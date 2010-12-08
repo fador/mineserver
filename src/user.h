@@ -28,7 +28,6 @@
 #ifndef _USER_H
 #define _USER_H
 
-#include <deque>
 #include <event.h>
 #include "vec.h"
 #include "tools.h"
@@ -74,19 +73,6 @@ uint32 generateEID();
 
 class User
 {
-private:
-  event m_event;
-
-  // holds all connected users
-  static std::vector<User *>     __users;
-
-  // predefined usernames in roles.txt, banned.txt & whitelist.txt
-  static std::deque<std::string> __admins;
-  static std::deque<std::string> __ops;
-  static std::deque<std::string> __members;
-  static std::deque<std::string> __banned;
-  static std::deque<std::string> __whitelist;
-
 public:
 
   User(int sock, uint32 EID);
@@ -119,12 +105,7 @@ public:
   //Input buffer
   Packet buffer;
 
-  static bool loadRoles(std::string rolesFile);
-  static bool loadBanned(std::string bannedFile);
-  static bool loadWhitelist(std::string whitelistFile);
-
   static std::vector<User *> & all();
-  static bool remove(int sock);
   static bool isUser(int sock);
   static User* byNick(std::string nick);
 
@@ -197,6 +178,9 @@ public:
   bool isUnderwater();
 
   struct event *GetEvent();
+
+private:
+  event m_event;
 };
 
 #endif

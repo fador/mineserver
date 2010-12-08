@@ -35,13 +35,6 @@
 
 class User;
 
-struct sSlot
-{
-  sint8 count;
-  sint16 damage;
-  sint16 id;
-};
-
 enum
 {
   SLOT_INPUT,
@@ -51,24 +44,17 @@ enum
 
 class Furnace
 {
-private:
-  
-  
-public:
-  sint16 fuelBurningTime;
-  sint16 initialBurningTime;
-  sint16 cookingTime;
-  sint16 activeCookDuration;
- // sint16 activeBurnDuration;  
-  sint32 x;
-  sint32 y;
-  sint32 z;
-  sSlot slots[3];
 
-  bool burning;
-  
+  struct Slot
+  {
+    sint8 count;
+    sint16 damage;
+    sint16 id;
+  };
+
+public:
   Furnace(NBT_Value *entity, uint8 blockType);
-  
+
   void sendToAllUsers();
   NBT_Value* getSlotEntity(sint8 slotNumber);
   void smelt();
@@ -77,8 +63,40 @@ public:
   bool hasValidIngredient();
   void consumeFuel();
   void updateBlock();
+
+  /**
+   * Getter & setter methods
+   */
+
   sint16 burnTime();
   sint16 cookTime();
+
+  sint16 fuelBurningTime() { return m_fuelBurningTime; }
+  void setFuelBurningTime(sint16 fuelBurningTime) { m_fuelBurningTime = fuelBurningTime; }
+
+  sint16 activeCookDuration() { return m_activeCookDuration; }
+  void setActiveCookDuration(sint16 activeCookDuration) { m_activeCookDuration = activeCookDuration; }
+
+  sint16 cookingTime() { return m_cookingTime; }
+
+  sint32 x() { return m_x; }
+  sint32 y() { return m_y; }
+  sint32 z() { return m_z; }
+
+  Slot* slots() { return m_slots; };
+
+private:
+  sint16 m_fuelBurningTime;
+  sint16 m_initialBurningTime;
+  sint16 m_cookingTime;
+  sint16 m_activeCookDuration;
+ // sint16 activeBurnDuration;
+  sint32 m_x;
+  sint32 m_y;
+  sint32 m_z;
+  Slot m_slots[3];
+
+  bool m_burning;
 };
 
 

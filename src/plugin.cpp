@@ -240,7 +240,7 @@ void Plugin::init()
    BlockTracks* tracksblock = new BlockTracks();
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    call.add("onPlace", Function::from_method<BlockTracks, &BlockTracks::onPlace>(tracksblock));
-//   call.add("onNeighbourBroken", Function::from_method<BlockTracks, &BlockTracks::onNeighbourBroken>(tracksblock));
+   call.add("onNeighbourBroken", Function::from_method<BlockTracks, &BlockTracks::onNeighbourBroken>(tracksblock));
 //   call.add("onNeighbourPlace", Function::from_method<BlockTracks, &BlockTracks::onNeighbourPlace>(tracksblock));
 //   call.add("onNeighbourMove", Function::from_method<BlockTracks, &BlockTracks::onNeighbourMove>(tracksblock));
    setBlockCallback(BLOCK_MINECART_TRACKS, call);

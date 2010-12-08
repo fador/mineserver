@@ -31,103 +31,112 @@
 
 //#define _DEBUG
 
-FurnaceManager* FurnaceManager::mFurnaceManager;
+FurnaceManager* FurnaceManager::_instance;
 
 FurnaceManager::FurnaceManager() {
 }
 
 void FurnaceManager::update() {
-  
+
   // Bail if we don't have any furnaces
-  if(activeFurnaces.size() == 0)
+  if(m_activeFurnaces.size() == 0)
+  {
     return;
-  
-  #ifdef _DEBUG
-    std::cout << "Checking Furnaces: " << dtos(activeFurnaces.size()) << " active furnaces." << std::endl;
-  #endif  
-  
+  }
+
+#ifdef _DEBUG
+  std::cout << "Checking Furnaces: " << dtos(m_activeFurnaces.size()) << " active furnaces." << std::endl;
+#endif
+
   // Loop thru all the furnaces
-  for(int index = 0; index < activeFurnaces.size(); index++) {
+  for(unsigned int index = 0; index < m_activeFurnaces.size(); index++)
+  {
     // Get a pointer to this furnace
-    Furnace *currentFurnace = (Furnace *)activeFurnaces[index];
-    
+    Furnace *currentFurnace = (Furnace *)m_activeFurnaces[index];
+
     // If we're burning, decrememnt the fuel
-    if(currentFurnace->isBurningFuel()) {
-      currentFurnace->fuelBurningTime--;  
-    } 
+    if(currentFurnace->isBurningFuel())
+    {
+      currentFurnace->setFuelBurningTime(currentFurnace->fuelBurningTime() - 1);
+    }
     // Now that we've decremented, if we're no longer burning fuel but still have stuff to cook, consume fuel
-    if (!currentFurnace->isBurningFuel() && currentFurnace->hasValidIngredient()) {
+    if (!currentFurnace->isBurningFuel() && currentFurnace->hasValidIngredient())
+    {
       currentFurnace->consumeFuel();
     }
     //std::cout << "Furnace " << index << " " << currentFurnace->isCooking() << std::endl;
-    
+
     // If we're cooking, increment the activity and check if we're ready to smelt the output
-    if(currentFurnace->isCooking()) {
-      currentFurnace->activeCookDuration++;
-      if(currentFurnace->activeCookDuration >= currentFurnace->cookingTime)
+    if(currentFurnace->isCooking())
+    {
+      currentFurnace->setActiveCookDuration(currentFurnace->activeCookDuration() + 1);
+      if(currentFurnace->activeCookDuration() >= currentFurnace->cookingTime())
       {
         // Finished cooking time, so create the output
         currentFurnace->smelt();
       }
     }
-      
+
     // Update all clients
     currentFurnace->sendToAllUsers();
 
     // Update it's block style
-    currentFurnace->updateBlock();  
-        
+    currentFurnace->updateBlock();
+
     // Remove this furnace from the list once it stops burning it's current fuel
     if(!currentFurnace->isBurningFuel())
     {
-      delete activeFurnaces[index];
-      activeFurnaces.erase(activeFurnaces.begin() + index);
-    }  
+      delete m_activeFurnaces[index];
+      m_activeFurnaces.erase(m_activeFurnaces.begin() + index);
+    }
   }
 }
 
-void FurnaceManager::handleActivity(NBT_Value *entity, uint8 blockType) 
+void FurnaceManager::handleActivity(NBT_Value *entity, uint8 blockType)
 {
   // Create a furnace
   Furnace *furnace = new Furnace(entity, blockType);
-      
+
   // Loop thru all active furnaces, to see if this one is here
-  for(int index = 0; index < activeFurnaces.size(); index++) {
-    
-    Furnace *currentFurnace = (Furnace *)activeFurnaces[index];
-    if(currentFurnace->x == furnace->x && currentFurnace->y == furnace->y && currentFurnace->z == furnace->z)
+  for(unsigned int index = 0; index < m_activeFurnaces.size(); index++)
+  {
+
+    Furnace *currentFurnace = (Furnace *)m_activeFurnaces[index];
+    if(currentFurnace->x() == furnace->x() && currentFurnace->y() == furnace->y() && currentFurnace->z() == furnace->z())
     {
       // Preserve the current burning time
-      furnace->fuelBurningTime = currentFurnace->fuelBurningTime;
-      furnace->activeCookDuration = currentFurnace->activeCookDuration;
+      furnace->setFuelBurningTime(currentFurnace->fuelBurningTime());
+      furnace->setActiveCookDuration(currentFurnace->activeCookDuration());
       // Now delete it (we'll add back later if it's active)
-      delete activeFurnaces[index];
-      activeFurnaces.erase(activeFurnaces.begin() + index);
+      delete m_activeFurnaces[index];
+      m_activeFurnaces.erase(m_activeFurnaces.begin() + index);
     }
   }
 
   // Check if this furnace is active
-  if(furnace->isBurningFuel() || furnace->slots[SLOT_FUEL].count > 0) {
-    activeFurnaces.push_back(furnace);
+  if(furnace->isBurningFuel() || furnace->slots()[SLOT_FUEL].count > 0)
+  {
+    m_activeFurnaces.push_back(furnace);
   }
   else
   {
     delete furnace;
     furnace = NULL;
   }
-  
+
   // Let everyone know about this furnace
   if(furnace)
+  {
     furnace->sendToAllUsers();
-  
+  }
 }
 
 void FurnaceManager::free()
 {
-   if (mFurnaceManager)
+   if(_instance)
    {
-      delete mFurnaceManager;
-      mFurnaceManager = 0;
+      delete _instance;
+      _instance = 0;
    }
 }
 

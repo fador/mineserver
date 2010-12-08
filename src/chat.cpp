@@ -53,15 +53,14 @@
 #include "config.h"
 #include "physics.h"
 
-
-Chat* Chat::mChat;
+Chat* Chat::_instance;
 
 void Chat::free()
 {
-   if (mChat)
+   if(_instance)
    {
-      delete mChat;
-      mChat = 0;
+      delete _instance;
+      _instance = 0;
    }
 }
 
@@ -80,30 +79,34 @@ void Chat::registerCommand(Command *command)
     currentWord = words[0];
     words.pop_front();
 
-    if(IS_ADMIN(command->permissions)) {
-      adminCommands[currentWord] = command;
+    if(IS_ADMIN(command->permissions))
+    {
+      m_adminCommands[currentWord] = command;
       continue;
     }
 
-    if(IS_OP(command->permissions)) {
-      opCommands[currentWord] = command;
-      adminCommands[currentWord] = command;
+    if(IS_OP(command->permissions))
+    {
+      m_opCommands[currentWord] = command;
+      m_adminCommands[currentWord] = command;
       continue;
     }
 
-    if(IS_MEMBER(command->permissions)) {
-      memberCommands[currentWord] = command;
-      opCommands[currentWord] = command;
-      adminCommands[currentWord] = command;
+    if(IS_MEMBER(command->permissions))
+    {
+      m_memberCommands[currentWord] = command;
+      m_opCommands[currentWord] = command;
+      m_adminCommands[currentWord] = command;
       continue;
     }
 
-    if(IS_GUEST(command->permissions)) {
+    if(IS_GUEST(command->permissions))
+    {
       // insert into all
-      guestCommands[currentWord] = command;
-      memberCommands[currentWord] = command;
-      opCommands[currentWord] = command;
-      adminCommands[currentWord] = command;
+      m_guestCommands[currentWord] = command;
+      m_memberCommands[currentWord] = command;
+      m_opCommands[currentWord] = command;
+      m_adminCommands[currentWord] = command;
     }
   }
 }
@@ -136,11 +139,15 @@ bool Chat::sendUserlist(User *user)
 
   for(unsigned int i = 0; i < User::all().size(); i++)
   {
-	std::string playerDesc = "> " + User::all()[i]->nick;
-	if(User::all()[i]->muted)
-		playerDesc += COLOR_YELLOW + " (muted)";
-	if(User::all()[i]->dnd)
-		playerDesc += COLOR_YELLOW + " (dnd)";
+    std::string playerDesc = "> " + User::all()[i]->nick;
+    if(User::all()[i]->muted)
+    {
+        playerDesc += COLOR_YELLOW + " (muted)";
+    }
+    if(User::all()[i]->dnd)
+    {
+      playerDesc += COLOR_YELLOW + " (dnd)";
+    }
 
     this->sendMsg(user, playerDesc, USER);
   }
@@ -156,7 +163,9 @@ std::deque<std::string> Chat::parseCmd(std::string cmd)
   while(cmd.length() > 0)
   {
     while(cmd[0] == ' ')
+    {
       cmd = cmd.substr(1);
+    }
 
     del = cmd.find(' ');
 
@@ -173,7 +182,9 @@ std::deque<std::string> Chat::parseCmd(std::string cmd)
   }
 
   if(temp.empty())
+  {
     temp.push_back("empty");
+  }
 
   return temp;
 }
@@ -217,28 +228,37 @@ bool Chat::handleMsg(User *user, std::string msg)
 
     // User commands
     CommandList::iterator iter;
-    if((iter = memberCommands.find(command)) != memberCommands.end())
+    if((iter = m_memberCommands.find(command)) != m_memberCommands.end())
+    {
       iter->second->callback(user, command, cmd);
-    else if(IS_ADMIN(user->permissions) && (iter = adminCommands.find(command)) != adminCommands.end())
+    }
+    else if(IS_ADMIN(user->permissions) && (iter = m_adminCommands.find(command)) != m_adminCommands.end())
+    {
       iter->second->callback(user, command, cmd);
+    }
   }
   // Normal message
   else
   {
-		if(user->isAbleToCommunicate("chat") == false) {
+		if(user->isAbleToCommunicate("chat") == false)
+    {
 			return true;
 		}
-    else {
+    else
+    {
       if(IS_ADMIN(user->permissions))
+      {
         msg = timeStamp + " <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg;
+      }
       else
+      {
         msg = timeStamp + " <"+ user->nick + "> " + msg;
+      }
     }
 
     LOG(msg);
 
     this->sendMsg(user, msg, ALL);
-
   }
 
   return true;
@@ -254,7 +274,9 @@ bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
   tmpArray[2] = msg.size()&0xff;
 
   for(unsigned int i = 0; i < msg.size(); i++)
+  {
     tmpArray[i+3] = msg[i];
+  }
 
   switch(action)
   {
@@ -293,35 +315,47 @@ void Chat::sendHelp(User *user, std::deque<std::string> args)
   // TODO: Add paging support, since not all commands will fit into
   // the screen at once.
 
-  CommandList *commandList = &guestCommands; // defaults
+  CommandList *commandList = &m_guestCommands; // defaults
   std::string commandColor = COLOR_BLUE;
 
-  if(IS_ADMIN(user->permissions)) {
-    commandList = &adminCommands;
+  if(IS_ADMIN(user->permissions))
+  {
+    commandList = &m_adminCommands;
     commandColor = COLOR_RED; // different color for admin commands
-  } else if(IS_OP(user->permissions)) {
-    commandList = &opCommands;
+  }
+  else if(IS_OP(user->permissions))
+  {
+    commandList = &m_opCommands;
     commandColor = COLOR_GREEN;
-  } else if(IS_MEMBER(user->permissions)) {
-    commandList = &memberCommands;
+  }
+  else if(IS_MEMBER(user->permissions))
+  {
+    commandList = &m_memberCommands;
   }
 
-  if(args.size() == 0) {
+  if(args.size() == 0)
+  {
     for(CommandList::iterator it = commandList->begin();
         it != commandList->end();
-        it++) {
+        it++)
+    {
       std::string args = it->second->arguments;
       std::string description = it->second->description;
       sendMsg(user, commandColor + CHATCMDPREFIX + it->first + " " + args + " : " + COLOR_YELLOW + description, Chat::USER);
     }
-  } else {
+  }
+  else
+  {
     CommandList::iterator iter;
-    if((iter = commandList->find(args.front())) != commandList->end()) {
+    if((iter = commandList->find(args.front())) != commandList->end())
+    {
       std::string args = iter->second->arguments;
       std::string description = iter->second->description;
       sendMsg(user, commandColor + CHATCMDPREFIX + iter->first + " " + args, Chat::USER);
       sendMsg(user, COLOR_YELLOW + CHATCMDPREFIX + description, Chat::USER);
-    } else {
+    }
+    else
+    {
       sendMsg(user, COLOR_RED + "Unknown Command: " + args.front(), Chat::USER);
     }
   }

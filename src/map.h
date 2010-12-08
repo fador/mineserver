@@ -40,7 +40,7 @@ struct sTree
   sint32 x,y,z;
   sint32 plantedTime;
   uint32 plantedBy;
-  
+
   sTree(sint32 _x,sint32 _y, sint32 _z, sint32 _plantedTime, uint32 _plantedBy) :
     x(_x),y(_y),z(_z),
     plantedTime(_plantedTime),plantedBy(_plantedBy) {}
@@ -178,7 +178,7 @@ private:
 
 
   }
-   static Map *mMap;
+  static Map *mMap;
 
 public:
 
@@ -225,7 +225,7 @@ public:
 
   //Time in the map
   sint64 mapTime;
-  
+
   // Map seed
   sint64 mapSeed;
 
