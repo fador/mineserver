@@ -127,7 +127,76 @@ void BlockChest::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, s
 
 void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-  
+  uint8 block;
+  uint8 meta;
+
+  if (!Map::get()->getBlock(x, y, z, &block, &meta))
+    return;
+    
+  uint32 mapId;
+  bool destroy = false;
+    
+  int block_x = blockToChunk(x);
+  int block_z = blockToChunk(z);
+    
+  Map::get()->posToId(block_x, block_z, &mapId);
+    
+  NBT_Value *entityList = (*(*(Map::get()->maps[mapId].nbt))["Level"])["TileEntities"];
+
+  if(!entityList)
+  {
+    entityList = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
+    Map::get()->maps[mapId].nbt->Insert("TileEntities", entityList);
+  }
+
+  if(entityList->GetType() == NBT_Value::TAG_LIST)
+  {
+    if(entityList->GetListType() != NBT_Value::TAG_COMPOUND)
+    {
+      entityList->SetType(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
+    }
+
+    std::vector<NBT_Value*> *entities = entityList->GetList();
+    std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
+
+    
+    for( ; iter != end; iter++ )
+    {
+      if((**iter)["x"] == NULL || (**iter)["y"] == NULL || (**iter)["z"] == NULL ||
+         (**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
+         (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
+         (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
+      {
+        continue;
+      }
+
+      if((sint32)(*(**iter)["x"]) == x && (sint32)(*(**iter)["y"]) == y && (sint32)(*(**iter)["z"]) == z)
+      {          
+        NBT_Value *nbtLockdata = (**iter)["Lockdata"];
+        if(nbtLockdata != NULL)
+        {
+          std::string player = *(*nbtLockdata)["player"]->GetString();
+          // Destroy block.
+          if(player == user->nick && IS_ADMIN(user->permissions))
+          {
+            destroy = true;
+          }
+        } else {
+          destroy = true;
+        }
+        break;
+      }
+    }
+  } 
+  if(destroy) 
+  {
+    Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+    Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+    this->spawnBlockItem(x,y,z,block);
+    // TODO: spawn items in chest
+  } else {
+    Chat::get()->sendMsg(user, COLOR_RED + "Can't destroy chests that are not your!", Chat::USER);
+  }
 }
 
 void BlockChest::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
