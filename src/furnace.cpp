@@ -133,7 +133,7 @@ void Furnace::smelt()
 
     // Update other params if we actually converted
     if(creationID != 0) {
- 
+
       // Ok - now check if the current output slot contains the same stuff
       if(outputSlot.id != creationID) {
         // No so overwrite it
@@ -208,7 +208,6 @@ void Furnace::consumeFuel()
 
   // Increment the fuel burning time based on fuel type
   // http://www.minecraftwiki.net/wiki/Furnace#Fuel_efficiency
-<<<<<<< HEAD
   Slot fuelSlot = m_slots[SLOT_FUEL];
   this->m_initialBurningTime = 0;
   if(fuelSlot.id == ITEM_COAL)           { this->m_initialBurningTime += 80; }
@@ -224,23 +223,6 @@ void Furnace::consumeFuel()
   if(fuelSlot.id == ITEM_LAVA_BUCKET)    { this->m_initialBurningTime += 1000; }
   this->m_fuelBurningTime += this->m_initialBurningTime;
 
-=======
-  sSlot fuelSlot = slots[SLOT_FUEL];
-  this->initialBurningTime = 0;
-  if(fuelSlot.id == ITEM_COAL)           { this->initialBurningTime += 80; }
-  if(fuelSlot.id == BLOCK_WOOD)          { this->initialBurningTime += 15; }
-  if(fuelSlot.id == ITEM_STICK)          { this->initialBurningTime += 5; }
-  if(fuelSlot.id == BLOCK_LOG)           { this->initialBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_WORKBENCH)     { this->initialBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_CHEST)         { this->initialBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_BOOKSHELF)     { this->initialBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_JUKEBOX)       { this->initialBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_FENCE)         { this->initialBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_WOODEN_STAIRS) { this->initialBurningTime += 15; }
-  if(fuelSlot.id == ITEM_LAVA_BUCKET)    { this->initialBurningTime += 1000; }
-  this->fuelBurningTime += this->initialBurningTime;
-  
->>>>>>> 0a67fd7... Added bounds check for furnace input & output and also send correct burntime now for burn animations!
   // Now decrement the fuel & reset
   m_slots[SLOT_FUEL].count--;
   if(m_slots[SLOT_FUEL].count < 0)
@@ -251,20 +233,10 @@ void Furnace::consumeFuel()
 }
 sint16 Furnace::burnTime()
 {
-<<<<<<< HEAD
   sint16 m_fuelBurningTime = (sint16)((200.0f / this->m_initialBurningTime) * this->m_fuelBurningTime);
   if(m_fuelBurningTime < 0)
     m_fuelBurningTime = 0;
   return m_fuelBurningTime;
-=======
-  sint16 fuelBurningTime = (sint16)((200.0f / this->initialBurningTime) * this->fuelBurningTime);
-  if(fuelBurningTime < 0)
-    fuelBurningTime = 0;
-  return fuelBurningTime;
-  
-  // Just return the number of secs we're burning for
-  //return (sint16)this->fuelBurningTime;
->>>>>>> 0a67fd7... Added bounds check for furnace input & output and also send correct burntime now for burn animations!
 }
 sint16 Furnace::cookTime()
 {
@@ -356,4 +328,3 @@ void Furnace::sendToAllUsers()
   Map::get()->setComplexEntity(m_x, m_y, m_z, newEntity);
 
 }
-
