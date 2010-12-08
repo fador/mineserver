@@ -1198,14 +1198,14 @@ void Map::sendToUser(User *user, int x, int z)
         std::string *id = idVal->GetString();
         if(id && (*id=="Chest" || *id=="Furnace" || *id=="Sign"))
         {
-          
+
           if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
             (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
             (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
           {
             continue;
           }
-          
+
           if(*id == "Chest")
           {
             NBT_Value *lockData = (**iter)["Lockdata"];
@@ -1215,10 +1215,15 @@ void Map::sendToUser(User *user, int x, int z)
               {
                 sint8 locked = *(*lockData)["locked"];
                 std::string chestowner = *(*lockData)["player"]->GetString();
-                if((locked == 1 && !IS_ADMIN(user->permissions)) || chestowner == user->nick)
+                if(locked == 1)
                 {
-                  Chat::get()->sendMsg(user, COLOR_BLUE + "Chest is locked.", Chat::USER);
-                  continue;
+                  std::cout << chestowner << " " << user->nick << " je" << std::endl;
+                  
+                  if(!(chestowner == user->nick || IS_ADMIN(user->permissions)))
+                  {
+                    Chat::get()->sendMsg(user, COLOR_BLUE + "Chest is locked.", Chat::USER);
+                    continue;
+                  }
                 }
               }
             }
@@ -1276,13 +1281,13 @@ void Map::sendToUser(User *user, int x, int z)
 void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *entity)
 {
   uint32 mapId;
-  
+
   std::string player = "";
   if(user != NULL)
   {
     player = user->nick;
   }
-  sint8 locked = 0;
+  sint8 locked = Conf::get()->bValue("chests_locked_by_default")?1:0;
 
   int block_x = blockToChunk(x);
   int block_z = blockToChunk(z);
@@ -1346,12 +1351,17 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *
         {
           player = *(*nbtLockdata)["player"]->GetString();
           locked = *(*nbtLockdata)["locked"];
+          
+          if(locked == 1)
+          {
+            if(!(user != NULL && player != user->nick))
+            {
+              return;
+            }
+          }
         }
-        
-        if(locked == 1)
-        {
-          return;
-        }
+
+
         // Replace entity
         delete *iter;
         *iter = entity;
@@ -1369,7 +1379,7 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *
         nbtLockdata->Insert("locked", new NBT_Value(locked));
         entity->Insert("Lockdata", nbtLockdata);
       }
-  
+
       // Add new entity
       entityList->GetList()->push_back(entity);
     }
