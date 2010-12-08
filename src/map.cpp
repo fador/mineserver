@@ -1211,11 +1211,11 @@ void Map::sendToUser(User *user, int x, int z)
             NBT_Value *lockData = (**iter)["Lockdata"];
             if(lockData != NULL)
             {
-              std::cout << "NO NULL" << std::endl;
               if((*lockData)["locked"] != NULL)
               {
                 sint8 locked = *(*lockData)["locked"];
-                if(locked == 1 && !IS_ADMIN(user->permissions))
+                std::string chestowner = *(*lockData)["player"]->GetString();
+                if((locked == 1 && !IS_ADMIN(user->permissions)) || chestowner == user->nick)
                 {
                   Chat::get()->sendMsg(user, COLOR_BLUE + "Chest is locked.", Chat::USER);
                   continue;
@@ -1348,6 +1348,10 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *
           locked = *(*nbtLockdata)["locked"];
         }
         
+        if(locked == 1)
+        {
+          return;
+        }
         // Replace entity
         delete *iter;
         *iter = entity;
