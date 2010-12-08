@@ -63,7 +63,7 @@ public:
   bool hasValidIngredient();
   void consumeFuel();
   void updateBlock();
- 
+
   /**
    * Getter & setter methods
    */
@@ -98,3 +98,4 @@ private:
 
   bool m_burning;
 };
+
