@@ -98,5 +98,3 @@ private:
 
   bool m_burning;
 };
-
-
