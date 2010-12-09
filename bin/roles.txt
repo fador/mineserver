@@ -1,4 +1,5 @@
 # admins
+[Server]
 Psoden
 fador
 

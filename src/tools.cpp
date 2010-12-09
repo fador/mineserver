@@ -180,21 +180,14 @@ std::string hash(std::string value)
 	return hashString.str();
 }
 
-// This is the writer call back function used by curl to fill a string buffer with web content
-int curlWriter(char *data, size_t size, size_t nmemb, std::string *buffer)  
-{  
-  // What we will return  
-  int result = 0;  
-  
-  // Is there anything in the buffer?  
-  if (buffer != NULL)  
-  {  
-    // Append the data to the buffer  
-    buffer->append(data, size * nmemb);  
-  
-    // How much did we write?  
-    result = size * nmemb;  
-  }  
-  
-  return result;  
+int kbhit()
+{
+    struct timeval tv;
+    fd_set fds;
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+    FD_ZERO(&fds);
+    FD_SET(STDIN_FILENO, &fds); //STDIN_FILENO is 0
+    select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
+    return FD_ISSET(STDIN_FILENO, &fds);
 }
