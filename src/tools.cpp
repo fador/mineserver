@@ -171,7 +171,7 @@ std::string hash(std::string value)
 	
 	char *cvalue = const_cast<char *>(value.c_str());
 	
-	while (c = *cvalue++)
+	while ((c = *cvalue++))
 		hash = ((hash <<5) + hash) + c;	/* hash * 33 + c */
 		
 	std::ostringstream hashString;
@@ -191,3 +191,4 @@ int kbhit()
     select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
     return FD_ISSET(STDIN_FILENO, &fds);
 }
+

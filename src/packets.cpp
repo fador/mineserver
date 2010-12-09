@@ -145,7 +145,7 @@ int socket_connect(char *host, int port)
   sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
   struct timeval tv;
-  tv.tv_sec = 3;
+  tv.tv_sec = 2;
   setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO,(const char *)&tv,sizeof(struct timeval));
   setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO,(const char *)&tv,sizeof(struct timeval));
 
@@ -227,7 +227,7 @@ int PacketHandler::login_request(User *user)
                              +"Host: www.minecraft.net\r\n"
                              +"Connection: close\r\n\r\n";
 
-    int fd=socket_connect("www.minecraft.net", 80);
+    int fd=socket_connect((char*)"www.minecraft.net", 80);
     if(fd)
     {
       #ifdef WIN32
@@ -256,8 +256,15 @@ int PacketHandler::login_request(User *user)
       close(fd);
       #endif
 
+      bool allow_access = false;
+      //No response data, timeout
+      if(stringbuffer.size() == 0 && Conf::get()->bValue("allow_connect_on_auth_timeout"))
+      {
+        std::cout << " auth skipped on timeout, ";
+        allow_access = true;
+      }
       
-      if(stringbuffer.length()>=3 && stringbuffer.find("\r\n\r\nYES",0) != std::string::npos)
+      if(allow_access || (stringbuffer.size()>=3 && stringbuffer.find("\r\n\r\nYES",0) != std::string::npos))
       {
         std::cout << " Verified!" << std::endl;
         user->sendLoginInfo();
