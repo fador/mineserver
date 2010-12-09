@@ -63,7 +63,7 @@ void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, s
       std::vector<NBT_Value*> *entities = entityList->GetList();
       std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
 
-      bool done = false;
+      //bool done = false; // Unused variable
 
       for( ; iter != end; iter++ )
       {
