@@ -180,6 +180,7 @@ std::string hash(std::string value)
 	return hashString.str();
 }
 
+#ifndef WIN32
 int kbhit()
 {
     struct timeval tv;
@@ -191,4 +192,4 @@ int kbhit()
     select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
     return FD_ISSET(STDIN_FILENO, &fds);
 }
-
+#endif
