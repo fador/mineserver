@@ -43,8 +43,6 @@
 #include <deque>
 #include <iostream>
 #include <event.h>
-
-#include <evhttp.h>
 #include <fstream>
 #include <ctime>
 #include <cmath>
@@ -128,30 +126,32 @@ int PacketHandler::keep_alive(User *user)
   return PACKET_OK;
 }
 
-static bool user_req_done=false;
-static event_base *eventBase = NULL;
-
-void http_verification_done(struct evhttp_request *req, void *arg)
+//Source: http://wiki.linuxquestions.org/wiki/Connecting_a_socket_in_C
+int socket_connect(char *host, int port)
 {
-  std::cout << "http_verification_done()" << std::endl;
-  User *user = (User *)arg;
-  user_req_done=true;
-  if (req->response_code == HTTP_OK && EVBUFFER_LENGTH(req->input_buffer) == 3 &&
-      memcmp(EVBUFFER_DATA(req->input_buffer), "YES", 3) == 0)
+  struct hostent *hp;
+  struct sockaddr_in addr;
+  int on = 1, sock;     
+
+  if((hp = gethostbyname(host)) == NULL)
   {
-    user_req_done=true;
-    std::cout << " Verified!" << std::endl;
-    user->sendLoginInfo();
-  }  
-  else
-  {
-    user_req_done=true;
-    std::cout << "Failed, response: " << EVBUFFER_DATA(req->input_buffer) << std::endl;
-    user->kick("Failed to verify username!");
+      return 0;
   }
-  
-  std::cout << "event_base_loopexit()" << std::endl;
-  event_base_loopexit(eventBase,NULL);
+
+  memmove(&addr.sin_addr,hp->h_addr,  hp->h_length);
+  addr.sin_port = htons(port);
+  addr.sin_family = AF_INET;
+  sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+  setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const char *)&on, sizeof(int));
+  if(sock == -1)
+  {
+    return 0;
+  }
+  if(connect(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1)
+  {
+    return 0;
+  }
+  return sock;
 }
 
 
@@ -175,7 +175,7 @@ int PacketHandler::login_request(User *user)
   user->buffer.removePacket();
 
   std::cout << "Player " << user->UID << " login v." << version <<" : " << player <<":"<< passwd << std::endl;
-
+  
   user->temp_nick=player;
 
   // If version is not 2 or 3
@@ -216,85 +216,58 @@ int PacketHandler::login_request(User *user)
     std::string url = "/game/checkserver.jsp?user=" + player + "&serverId=" + hash(player);
     std::cout << "Validating " << player << " against minecraft.net: ";
 
-    static struct evhttp_connection *evcon = NULL;
-    if(evcon != NULL)
+    std::string http_request ="GET " + url + " HTTP/1.1\r\n"
+                             +"Host: www.mineserver.net\r\n"
+                             +"Connection: close\r\n\r\n";
+
+    int fd=socket_connect("www.mineserver.net", 80);
+    if(fd)
     {
-      evhttp_connection_free(evcon);
+      #ifdef WIN32
+      send(fd, http_request.c_str(), http_request.length(),NULL);
+      #else
+      write(fd, http_request.c_str(), http_request.length());
+      #endif
+
+      #define BUFFER_SIZE 1024
+      char *buffer = new char[BUFFER_SIZE];
+      std::string stringbuffer;
+
+      #ifdef WIN32
+      while(int received=recv(fd, buffer, BUFFER_SIZE - 1, NULL) != 0)
+      {
+      #else
+      while(read(fd, buffer, BUFFER_SIZE - 1) != 0)
+      {
+      #endif
+        stringbuffer+=std::string(buffer);
+      }
+      delete [] buffer;
+      #ifdef WIN32
+      closesocket(fd);
+      #else
+      close(fd);
+      #endif
+
+      
+
+      if(stringbuffer.length()>=3 && stringbuffer.substr(stringbuffer.length()-3,3) == "YES")
+      {
+        std::cout << " Verified!" << std::endl;
+        user->sendLoginInfo();
+      }
+      else
+      {
+        std::cout << "Failed" << stringbuffer << std::endl;
+        user->kick("Failed to verify username!");
+      }
     }
-    static struct evhttp_request *req = NULL;
-    if(req != NULL)
+    else
     {
-      evhttp_request_free(req);
-    }    
-    if(eventBase != NULL)
-    {
-      event_base_free(eventBase);
-    }
-
-    eventBase = (event_base *)event_init();
-
-    evcon = evhttp_connection_new(/*"www.minecraft.net"*/"sakura.tontut.fi", 80);
-    if (evcon == NULL)
-    {
-      user->kick("Couldn't verify your username.");
-      return PACKET_OK; 
-    }
-
-    user_req_done=false;
-
-    std::cout << "evhttp_connection_set_timeout()" << std::endl;
-    evhttp_connection_set_timeout(evcon,2);
-
-    std::cout << "evhttp_request_new()" << std::endl;
-    req = evhttp_request_new(http_verification_done, user);
-
-    std::cout << "evhttp_add_header()" << std::endl;
-    evhttp_add_header(req->output_headers, "Host", /*"www.minecraft.net"*/"sakura.tontut.fi");
-
-    std::cout << "evhttp_make_request()" << std::endl;
-    if (evhttp_make_request(evcon, req, EVHTTP_REQ_GET, url.c_str()) == -1)
-    {
-      user->kick("Failed to verify username!");
-      return PACKET_OK;
-    }
-
-    timeval loopTime;
-    loopTime.tv_sec  = 0;
-    loopTime.tv_usec = 100;
-
-    std::cout << "event_base_loopexit()" << std::endl;
-    event_base_loopexit(eventBase, &loopTime);
-    
-    std::cout << "event_base_loop()" << std::endl;
-    while(!user_req_done && event_base_loop(eventBase, 0) == 0)
-    {
-      std::cout << ".";
-    }
-    std::cout << std::endl;
-
-    std::cout << "end." << std::endl;
-    //event_base_dispatch(eventBase);
-    //event_dispatch();
-
-
-
-    /*
-    event_base_loopexit(eventBase, &loopTime);
-    while(event_base_loop(eventBase,NULL));
-    //
-    if(!user->nick.length())
-    {
+      std::cout << "Failed" << std::endl;
       user->kick("Failed to verify username!");
     }
 
-    /*
-    evhttp_connection_free(evcon);
-    evcon = NULL;
-    evhttp_request_free(req);
-    req = NULL;    
-    event_base_free(eventBase);
-    eventBase = NULL;  
-    */
     return PACKET_OK;
   }
   user->sendLoginInfo();
