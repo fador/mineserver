@@ -34,7 +34,8 @@
   #include <netinet/in.h>
   #include <arpa/inet.h>
   #include <string.h>
-  #include <sys/queue.h>
+  #include <netdb.h>
+  #include <netinet/tcp.h>
 #endif
 
 #include <sys/types.h>
@@ -142,6 +143,12 @@ int socket_connect(char *host, int port)
   addr.sin_port = htons(port);
   addr.sin_family = AF_INET;
   sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+  struct timeval tv;
+  tv.tv_sec = 3;
+  setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO,(const char *)&tv,sizeof(struct timeval));
+  setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO,(const char *)&tv,sizeof(struct timeval));
+
   setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const char *)&on, sizeof(int));
   if(sock == -1)
   {
@@ -217,10 +224,10 @@ int PacketHandler::login_request(User *user)
     std::cout << "Validating " << player << " against minecraft.net: ";
 
     std::string http_request ="GET " + url + " HTTP/1.1\r\n"
-                             +"Host: www.mineserver.net\r\n"
+                             +"Host: www.minecraft.net\r\n"
                              +"Connection: close\r\n\r\n";
 
-    int fd=socket_connect("www.mineserver.net", 80);
+    int fd=socket_connect("www.minecraft.net", 80);
     if(fd)
     {
       #ifdef WIN32
@@ -250,15 +257,14 @@ int PacketHandler::login_request(User *user)
       #endif
 
       
-
-      if(stringbuffer.length()>=3 && stringbuffer.substr(stringbuffer.length()-3,3) == "YES")
+      if(stringbuffer.length()>=3 && stringbuffer.find("\r\n\r\nYES",0) != std::string::npos)
       {
         std::cout << " Verified!" << std::endl;
         user->sendLoginInfo();
       }
       else
       {
-        std::cout << "Failed" << stringbuffer << std::endl;
+        std::cout << "Failed"  << stringbuffer.substr(stringbuffer.size()-3) << std::endl;
         user->kick("Failed to verify username!");
       }
     }

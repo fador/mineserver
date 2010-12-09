@@ -31,7 +31,7 @@ endif
 RM = rm -f
 CXX = g++
 CC = $(CXX)
-LDFLAGS += -L/usr/local/lib -L/usr/lib -levent -lz -lnoise -lcurl $(LFLAGS)
+LDFLAGS += -L/usr/local/lib -L/usr/lib -levent -lz -lnoise $(LFLAGS)
 CXXFLAGS += $(DFLAGS) -I. -I/usr/Local/include -I/usr/include
 
 OBJS  = map.o chat.o commands.o config.o constants.o logger.o nbt.o furnace.o furnaceManager.o packets.o physics.o sockets.o tools.o user.o mineserver.o plugin.o
