@@ -48,11 +48,14 @@ public:
 
   std::vector<User *> & users() { return m_users; }
 
+  struct event m_listenEvent;
+  int m_socketlisten;
+
 private:
 
-  struct event m_listenEvent;
+
   event_base *m_eventBase;
-  int m_socketlisten;
+
   bool m_running;
 
   // holds all connected users

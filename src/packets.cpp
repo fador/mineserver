@@ -34,6 +34,8 @@
   #include <netinet/in.h>
   #include <arpa/inet.h>
   #include <string.h>
+  #include <netdb.h>
+  #include <netinet/tcp.h>
 #endif
 
 #include <sys/types.h>
@@ -49,7 +51,7 @@
 #include <zlib.h>
 #include <stdint.h>
 #include <functional>
-#include <curl/curl.h>
+
 
 #include "constants.h"
 
@@ -125,6 +127,41 @@ int PacketHandler::keep_alive(User *user)
   return PACKET_OK;
 }
 
+//Source: http://wiki.linuxquestions.org/wiki/Connecting_a_socket_in_C
+int socket_connect(char *host, int port)
+{
+  struct hostent *hp;
+  struct sockaddr_in addr;
+  int on = 1, sock;     
+
+  if((hp = gethostbyname(host)) == NULL)
+  {
+      return 0;
+  }
+
+  memmove(&addr.sin_addr,hp->h_addr,  hp->h_length);
+  addr.sin_port = htons(port);
+  addr.sin_family = AF_INET;
+  sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+  struct timeval tv;
+  tv.tv_sec = 3;
+  setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO,(const char *)&tv,sizeof(struct timeval));
+  setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO,(const char *)&tv,sizeof(struct timeval));
+
+  setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const char *)&on, sizeof(int));
+  if(sock == -1)
+  {
+    return 0;
+  }
+  if(connect(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1)
+  {
+    return 0;
+  }
+  return sock;
+}
+
+
 // Login request (http://mc.kev009.com/wiki/Protocol#Login_Request_.280x01.29)
 int PacketHandler::login_request(User *user)
 {
@@ -145,6 +182,8 @@ int PacketHandler::login_request(User *user)
   user->buffer.removePacket();
 
   std::cout << "Player " << user->UID << " login v." << version <<" : " << player <<":"<< passwd << std::endl;
+  
+  user->temp_nick=player;
 
   // If version is not 2 or 3
   if(version != PROTOCOL_VERSION)
@@ -153,50 +192,7 @@ int PacketHandler::login_request(User *user)
     return PACKET_OK;
   }
 
-	// Check if we're to do user validation
-	if(Conf::get()->bValue("user_validation") == true)
-	{
-		std::string url = "http://www.minecraft.net/game/checkserver.jsp?user=" + player + "&serverId=" + hash(player);
-		std::cout << "Validating " << player << " against minecraft.net: ";
-		
-		// Use curl to get the YES / NOT YET signal
-		CURL *curl = curl_easy_init();
-		if(curl) 
-		{
-			// Setup curl 
-			std::string curlBuffer;
-      curl_easy_setopt(curl, CURLOPT_URL, url.c_str());  
-      curl_easy_setopt(curl, CURLOPT_HEADER, 0);  
-      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);  
-      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriter);  
-      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &curlBuffer);  
-  
-      // Attempt to retrieve the remote page  
-      CURLcode result = curl_easy_perform(curl);  
-  
-      // Always cleanup  
-      curl_easy_cleanup(curl);  
-  
-      // Did we succeed?  
-      if (result == CURLE_OK)  
-      {  
-        std::cout << curlBuffer << std::endl;
-				if(curlBuffer != "YES")
-				{
-				  user->kick("Failed to verify username!");
-			    return PACKET_OK;
-				}
-      }  
-      else  
-      {  
-        std::cout << "Error: [" << result << "] - " << std::endl;
-				user->kick("Couldn't verify your username.");
-		    return PACKET_OK; 
-      }			
-		}
-	}
-
-  // If userlimit is reached
+    // If userlimit is reached
   if((int)User::all().size() >= Conf::get()->iValue("user_limit"))
   {
     user->kick(Conf::get()->sValue("server_full_message"));
@@ -206,11 +202,11 @@ int PacketHandler::login_request(User *user)
   // Check if user is on the whitelist
   // But first, is it enabled?
   if(Conf::get()->bValue("use_whitelist") == true) {
-	  if(user->checkWhitelist(player))
-	  {
+    if(user->checkWhitelist(player))
+    {
       user->kick(Conf::get()->sValue("default_whitelist_message"));
       return PACKET_OK;
-	  }
+    }
   }
 
   // If user is banned
@@ -220,92 +216,67 @@ int PacketHandler::login_request(User *user)
     return PACKET_OK;
   }
 
-  user->changeNick(player);
 
-  //Load user data
-  user->loadData();
+  // Check if we're to do user validation
+  if(Conf::get()->bValue("user_validation") == true)
+  {    
+    std::string url = "/game/checkserver.jsp?user=" + player + "&serverId=" + hash(player);
+    std::cout << "Validating " << player << " against minecraft.net: ";
 
-  //Login OK package
-  user->buffer << (sint8)PACKET_LOGIN_RESPONSE
-    << (sint32)user->UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
+    std::string http_request ="GET " + url + " HTTP/1.1\r\n"
+                             +"Host: www.minecraft.net\r\n"
+                             +"Connection: close\r\n\r\n";
 
-  //Send server time (after dawn)
-  user->buffer << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
-
-  //Inventory
-  for(sint32 invType=-1; invType != -4; invType--)
-  {
-    Item *inventory = NULL;
-  sint16 inventoryCount = 0;
-
-  if(invType == -1)
-  {
-    inventory = user->inv.main;
-    inventoryCount = 36;
-  }
-  else if(invType == -2)
-  {
-    inventory = user->inv.equipped;
-    inventoryCount = 4;
-  }
-  else if(invType == -3)
-  {
-    inventory = user->inv.crafting;
-    inventoryCount = 4;
-  }
-  user->buffer << (sint8)PACKET_PLAYER_INVENTORY << invType << inventoryCount;
-
-  for(int i=0; i<inventoryCount; i++)
-  {
-    if(inventory[i].count)
+    int fd=socket_connect("www.minecraft.net", 80);
+    if(fd)
     {
-      user->buffer << (sint16)inventory[i].type << (sint8)inventory[i].count << (sint16)inventory[i].health;
+      #ifdef WIN32
+      send(fd, http_request.c_str(), http_request.length(),NULL);
+      #else
+      write(fd, http_request.c_str(), http_request.length());
+      #endif
+
+      #define BUFFER_SIZE 1024
+      char *buffer = new char[BUFFER_SIZE];
+      std::string stringbuffer;
+
+      #ifdef WIN32
+      while(int received=recv(fd, buffer, BUFFER_SIZE - 1, NULL) != 0)
+      {
+      #else
+      while(read(fd, buffer, BUFFER_SIZE - 1) != 0)
+      {
+      #endif
+        stringbuffer+=std::string(buffer);
+      }
+      delete [] buffer;
+      #ifdef WIN32
+      closesocket(fd);
+      #else
+      close(fd);
+      #endif
+
+      
+      if(stringbuffer.length()>=3 && stringbuffer.find("\r\n\r\nYES",0) != std::string::npos)
+      {
+        std::cout << " Verified!" << std::endl;
+        user->sendLoginInfo();
+      }
+      else
+      {
+        std::cout << "Failed"  << stringbuffer.substr(stringbuffer.size()-3) << std::endl;
+        user->kick("Failed to verify username!");
+      }
     }
     else
     {
-      user->buffer << (sint16)-1;
+      std::cout << "Failed" << std::endl;
+      user->kick("Failed to verify username!");
     }
+
+    return PACKET_OK;
   }
-  }
-
-  // Send motd
-  std::ifstream motdfs(Conf::get()->sValue("motd_file").c_str());
-
-  std::string temp;
-
-  while(getline( motdfs, temp ))
-  {
-    // If not commentline
-    if(temp[0] != COMMENTPREFIX)
-  {
-      user->buffer << (sint8)PACKET_CHAT_MESSAGE << temp;
-  }
-  }
-  motdfs.close();
-
-  //Teleport player
-  user->teleport(user->pos.x, user->pos.y+2, user->pos.z);
-
-  //Put nearby chunks to queue
-  for(int x = -user->viewDistance; x <= user->viewDistance; x++)
-  {
-    for(int z = -user->viewDistance; z <= user->viewDistance; z++)
-    {
-      user->addQueue((sint32)user->pos.x/16+x, (sint32)user->pos.z/16+z);
-    }
-  }
-  // Push chunks to user
-  user->pushMap();
-
-  //Spawn this user to others
-  user->spawnUser((sint32)user->pos.x*32, ((sint32)user->pos.y+2)*32, (sint32)user->pos.z*32);
-  //Spawn other users for connected user
-  user->spawnOthers();
-
-  user->sethealth(user->health);
-  user->logged = true;
-
-  Chat::get()->sendMsg(user, player+" connected!", Chat::ALL);
+  user->sendLoginInfo();
 
   return PACKET_OK;
 }
@@ -324,23 +295,23 @@ int PacketHandler::handshake(User *user)
     return PACKET_NEED_MORE_DATA;
 
   // Remove package from buffer
-	user->buffer.removePacket();
+  user->buffer.removePacket();
 
-	// Check whether we're to validate against minecraft.net
-	if(Conf::get()->bValue("user_validation") == true)
-	{
-		// Send the unique hash for this player to prompt the client to go to minecraft.net to validate
-		std::cout << "Handshake: Requesting minecraft.net validation for player: " << player << " " << hash(player) << std::endl;
-		user->buffer << (sint8)PACKET_HANDSHAKE << hash(player);
-	}
-	else
-	{
-  	// Send "no validation or password needed" validation
-		std::cout << "Handshake: No validation for player: " << player << std::endl;
-  	user->buffer << (sint8)PACKET_HANDSHAKE << std::string("-");
-	}
-	// TODO: Add support for prompting user for Server password (once client supports it)
-	
+  // Check whether we're to validate against minecraft.net
+  if(Conf::get()->bValue("user_validation") == true)
+  {
+    // Send the unique hash for this player to prompt the client to go to minecraft.net to validate
+    std::cout << "Handshake: Requesting minecraft.net validation for player: " << player << " " << hash(player) << std::endl;
+    user->buffer << (sint8)PACKET_HANDSHAKE << hash(player);
+  }
+  else
+  {
+    // Send "no validation or password needed" validation
+    std::cout << "Handshake: No validation for player: " << player << std::endl;
+    user->buffer << (sint8)PACKET_HANDSHAKE << std::string("-");
+  }
+  // TODO: Add support for prompting user for Server password (once client supports it)
+  
   return PACKET_OK;
 }
 

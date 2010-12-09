@@ -310,7 +310,7 @@ int Mineserver::run(int argc, char *argv[])
     if(time(0)-starttime > 10)
     {
       starttime = (uint32)time(0);
-//      std::cout << "Currently " << Users.size() << " users in!" << std::endl;
+      //std::cout << "Currently " << User::all().size() << " users in!" << std::endl;
 
       //If users, ping them
       if(User::all().size() > 0)
@@ -381,6 +381,9 @@ int Mineserver::run(int argc, char *argv[])
     //Underwater check / drowning
     for( unsigned int i = 0; i < User::all().size(); i++ )
       User::all()[i]->isUnderwater();
+
+    event_set(&m_listenEvent, m_socketlisten, EV_WRITE|EV_READ|EV_PERSIST, accept_callback, NULL);
+    event_add(&m_listenEvent, NULL);
 
     event_base_loopexit(m_eventBase, &loopTime);
   }
