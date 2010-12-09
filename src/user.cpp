@@ -55,6 +55,7 @@
 #include "packets.h"
 #include "mineserver.h"
 #include "config.h"
+#include "sockets.h"
 
 //Generate "unique" entity ID
 uint32 generateEID()
@@ -190,8 +191,6 @@ bool User::sendLoginInfo()
   std::string player = temp_nick;
   User *user = this;
 
-
-
   user->changeNick(player);
 
   //Load user data
@@ -208,36 +207,36 @@ bool User::sendLoginInfo()
   for(sint32 invType=-1; invType != -4; invType--)
   {
     Item *inventory = NULL;
-  sint16 inventoryCount = 0;
+    sint16 inventoryCount = 0;
 
-  if(invType == -1)
-  {
-    inventory = user->inv.main;
-    inventoryCount = 36;
-  }
-  else if(invType == -2)
-  {
-    inventory = user->inv.equipped;
-    inventoryCount = 4;
-  }
-  else if(invType == -3)
-  {
-    inventory = user->inv.crafting;
-    inventoryCount = 4;
-  }
-  user->buffer << (sint8)PACKET_PLAYER_INVENTORY << invType << inventoryCount;
+    if(invType == -1)
+    {
+      inventory = user->inv.main;
+      inventoryCount = 36;
+    }
+    else if(invType == -2)
+    {
+      inventory = user->inv.equipped;
+      inventoryCount = 4;
+    }
+    else if(invType == -3)
+    {
+      inventory = user->inv.crafting;
+      inventoryCount = 4;
+    }
+    user->buffer << (sint8)PACKET_PLAYER_INVENTORY << invType << inventoryCount;
 
-  for(int i=0; i<inventoryCount; i++)
-  {
-    if(inventory[i].count)
+    for(int i=0; i<inventoryCount; i++)
     {
-      user->buffer << (sint16)inventory[i].type << (sint8)inventory[i].count << (sint16)inventory[i].health;
+      if(inventory[i].count)
+      {
+        user->buffer << (sint16)inventory[i].type << (sint8)inventory[i].count << (sint16)inventory[i].health;
+      }
+      else
+      {
+        user->buffer << (sint16)-1;
+      }
     }
-    else
-    {
-      user->buffer << (sint16)-1;
-    }
-  }
   }
 
   // Send motd
@@ -249,9 +248,9 @@ bool User::sendLoginInfo()
   {
     // If not commentline
     if(temp[0] != COMMENTPREFIX)
-  {
-      user->buffer << (sint8)PACKET_CHAT_MESSAGE << temp;
-  }
+    {
+        user->buffer << (sint8)PACKET_CHAT_MESSAGE << temp;
+    }
   }
   motdfs.close();
 
@@ -571,15 +570,11 @@ bool User::updatePos(double x, double y, double z, double stance)
         fixedPitch = 360 + fixedPitch;
       fixedPitch = int(float(fixedPitch) * float(255.0f/360.0f));
 
-      uint8 teleportData[19];
-      teleportData[0]  = PACKET_ENTITY_TELEPORT;
-      putSint32(&teleportData[1], this->UID);
-      putSint32(&teleportData[5], (int)(this->pos.x*32));
-      putSint32(&teleportData[9], (int)(this->pos.y*32));
-      putSint32(&teleportData[13], (int)(this->pos.z*32));
-      teleportData[17] = (char)fixedYaw;
-      teleportData[18] = (char)fixedPitch;
-      this->sendOthers(&teleportData[0], 19);
+      Packet pkt;
+      pkt << PACKET_ENTITY_TELEPORT << (sint32)this->UID;
+      pkt << (sint32)(this->pos.x*32) << (sint32)(this->pos.y*32) << (sint32)(this->pos.z*32);
+      pkt << (sint8)fixedYaw << (sint8) fixedPitch;
+      this->sendOthers((uint8 *)pkt.getWrite(), pkt.getWriteLen());
     }
 
     //Check if there are items in this chunk!

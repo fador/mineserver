@@ -34,6 +34,7 @@
   #include <netinet/in.h>
   #include <arpa/inet.h>
   #include <string.h>
+  #include <sys/queue.h>
 #endif
 
 #include <sys/types.h>
@@ -42,6 +43,7 @@
 #include <deque>
 #include <iostream>
 #include <event.h>
+
 #include <evhttp.h>
 #include <fstream>
 #include <ctime>
@@ -126,24 +128,30 @@ int PacketHandler::keep_alive(User *user)
   return PACKET_OK;
 }
 
-void
-http_verification_done(struct evhttp_request *req, void *arg)
-{
-  User *user = (User *)arg;
+static bool user_req_done=false;
+static event_base *eventBase = NULL;
 
-	if (req->response_code == HTTP_OK && EVBUFFER_LENGTH(req->input_buffer) == 3 &&
+void http_verification_done(struct evhttp_request *req, void *arg)
+{
+  std::cout << "http_verification_done()" << std::endl;
+  User *user = (User *)arg;
+  user_req_done=true;
+  if (req->response_code == HTTP_OK && EVBUFFER_LENGTH(req->input_buffer) == 3 &&
       memcmp(EVBUFFER_DATA(req->input_buffer), "YES", 3) == 0)
   {
+    user_req_done=true;
     std::cout << " Verified!" << std::endl;
     user->sendLoginInfo();
-	}
+  }  
   else
   {
+    user_req_done=true;
     std::cout << "Failed, response: " << EVBUFFER_DATA(req->input_buffer) << std::endl;
     user->kick("Failed to verify username!");
   }
-
-  //evhttp_request_free(req);
+  
+  std::cout << "event_base_loopexit()" << std::endl;
+  event_base_loopexit(eventBase,NULL);
 }
 
 
@@ -187,11 +195,11 @@ int PacketHandler::login_request(User *user)
   // Check if user is on the whitelist
   // But first, is it enabled?
   if(Conf::get()->bValue("use_whitelist") == true) {
-	  if(user->checkWhitelist(player))
-	  {
+    if(user->checkWhitelist(player))
+    {
       user->kick(Conf::get()->sValue("default_whitelist_message"));
       return PACKET_OK;
-	  }
+    }
   }
 
   // If user is banned
@@ -202,37 +210,92 @@ int PacketHandler::login_request(User *user)
   }
 
 
-	// Check if we're to do user validation
-	if(Conf::get()->bValue("user_validation") == true)
-	{    
-		std::string url = "/game/checkserver.jsp?user=" + player + "&serverId=" + hash(player);
-		std::cout << "Validating " << player << " against minecraft.net: ";
+  // Check if we're to do user validation
+  if(Conf::get()->bValue("user_validation") == true)
+  {    
+    std::string url = "/game/checkserver.jsp?user=" + player + "&serverId=" + hash(player);
+    std::cout << "Validating " << player << " against minecraft.net: ";
 
-    static struct evhttp_connection *evcon;
-		static struct evhttp_request *req;
-
-    evcon = evhttp_connection_new("www.minecraft.net", 80);
-	  if (evcon == NULL)
+    static struct evhttp_connection *evcon = NULL;
+    if(evcon != NULL)
     {
-		  user->kick("Couldn't verify your username.");
-		  return PACKET_OK; 
-	  }
+      evhttp_connection_free(evcon);
+    }
+    static struct evhttp_request *req = NULL;
+    if(req != NULL)
+    {
+      evhttp_request_free(req);
+    }    
+    if(eventBase != NULL)
+    {
+      event_base_free(eventBase);
+    }
 
+    eventBase = (event_base *)event_init();
+
+    evcon = evhttp_connection_new(/*"www.minecraft.net"*/"sakura.tontut.fi", 80);
+    if (evcon == NULL)
+    {
+      user->kick("Couldn't verify your username.");
+      return PACKET_OK; 
+    }
+
+    user_req_done=false;
+
+    std::cout << "evhttp_connection_set_timeout()" << std::endl;
+    evhttp_connection_set_timeout(evcon,2);
+
+    std::cout << "evhttp_request_new()" << std::endl;
     req = evhttp_request_new(http_verification_done, user);
 
-    evhttp_add_header(req->output_headers, "Host", "www.minecraft.net");
+    std::cout << "evhttp_add_header()" << std::endl;
+    evhttp_add_header(req->output_headers, "Host", /*"www.minecraft.net"*/"sakura.tontut.fi");
 
+    std::cout << "evhttp_make_request()" << std::endl;
     if (evhttp_make_request(evcon, req, EVHTTP_REQ_GET, url.c_str()) == -1)
     {
-			user->kick("Failed to verify username!");
-			return PACKET_OK;
-	  }
+      user->kick("Failed to verify username!");
+      return PACKET_OK;
+    }
 
-	  event_dispatch();
+    timeval loopTime;
+    loopTime.tv_sec  = 0;
+    loopTime.tv_usec = 100;
 
-    //evhttp_connection_free(evcon);
+    std::cout << "event_base_loopexit()" << std::endl;
+    event_base_loopexit(eventBase, &loopTime);
+    
+    std::cout << "event_base_loop()" << std::endl;
+    while(!user_req_done && event_base_loop(eventBase, 0) == 0)
+    {
+      std::cout << ".";
+    }
+    std::cout << std::endl;
 
-		return PACKET_OK;
+    std::cout << "end." << std::endl;
+    //event_base_dispatch(eventBase);
+    //event_dispatch();
+
+
+
+    /*
+    event_base_loopexit(eventBase, &loopTime);
+    while(event_base_loop(eventBase,NULL));
+    //
+    if(!user->nick.length())
+    {
+      user->kick("Failed to verify username!");
+    }
+
+    /*
+    evhttp_connection_free(evcon);
+    evcon = NULL;
+    evhttp_request_free(req);
+    req = NULL;    
+    event_base_free(eventBase);
+    eventBase = NULL;  
+    */
+    return PACKET_OK;
   }
   user->sendLoginInfo();
 
@@ -253,23 +316,23 @@ int PacketHandler::handshake(User *user)
     return PACKET_NEED_MORE_DATA;
 
   // Remove package from buffer
-	user->buffer.removePacket();
+  user->buffer.removePacket();
 
-	// Check whether we're to validate against minecraft.net
-	if(Conf::get()->bValue("user_validation") == true)
-	{
-		// Send the unique hash for this player to prompt the client to go to minecraft.net to validate
-		std::cout << "Handshake: Requesting minecraft.net validation for player: " << player << " " << hash(player) << std::endl;
-		user->buffer << (sint8)PACKET_HANDSHAKE << hash(player);
-	}
-	else
-	{
-  	// Send "no validation or password needed" validation
-		std::cout << "Handshake: No validation for player: " << player << std::endl;
-  	user->buffer << (sint8)PACKET_HANDSHAKE << std::string("-");
-	}
-	// TODO: Add support for prompting user for Server password (once client supports it)
-	
+  // Check whether we're to validate against minecraft.net
+  if(Conf::get()->bValue("user_validation") == true)
+  {
+    // Send the unique hash for this player to prompt the client to go to minecraft.net to validate
+    std::cout << "Handshake: Requesting minecraft.net validation for player: " << player << " " << hash(player) << std::endl;
+    user->buffer << (sint8)PACKET_HANDSHAKE << hash(player);
+  }
+  else
+  {
+    // Send "no validation or password needed" validation
+    std::cout << "Handshake: No validation for player: " << player << std::endl;
+    user->buffer << (sint8)PACKET_HANDSHAKE << std::string("-");
+  }
+  // TODO: Add support for prompting user for Server password (once client supports it)
+  
   return PACKET_OK;
 }
 
