@@ -227,7 +227,7 @@ int PacketHandler::login_request(User *user)
                              +"Host: www.minecraft.net\r\n"
                              +"Connection: close\r\n\r\n";
 
-    int fd=socket_connect("www.minecraft.net", 80);
+    int fd=socket_connect((char*)"www.minecraft.net", 80);
     if(fd)
     {
       #ifdef WIN32
