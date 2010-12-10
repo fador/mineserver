@@ -325,7 +325,7 @@ void Furnace::sendToAllUsers()
   #endif
 
   // Update our map with this guy
-  Map::get()->setComplexEntity(m_x, m_y, m_z, newEntity);
+  Map::get()->setComplexEntity(NULL, m_x, m_y, m_z, newEntity);
 
 }
 

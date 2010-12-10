@@ -55,6 +55,7 @@
 #include "packets.h"
 #include "mineserver.h"
 #include "config.h"
+#include "sockets.h"
 
 //Generate "unique" entity ID
 uint32 generateEID()
@@ -83,7 +84,9 @@ User::User(int sock, uint32 EID)
   this->attachedTo      = 0;
   this->timeUnderwater  = 0;
 
-  Mineserver::get().users().push_back(this);
+	// Ignore this user if it's a negative socket - means it's the server console
+	if(sock != -1)
+  	Mineserver::get().users().push_back(this);
 }
 
 
@@ -182,6 +185,102 @@ User::~User()
     putSint32(&entityData[1], this->UID);
     this->sendOthers(&entityData[0], 5);
   }
+}
+
+
+bool User::sendLoginInfo()
+{
+  std::string player = temp_nick;
+  User *user = this;
+
+  user->changeNick(player);
+
+  //Load user data
+  user->loadData();
+
+  //Login OK package
+  user->buffer << (sint8)PACKET_LOGIN_RESPONSE
+    << (sint32)user->UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
+
+  //Send server time (after dawn)
+  user->buffer << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
+
+  //Inventory
+  for(sint32 invType=-1; invType != -4; invType--)
+  {
+    Item *inventory = NULL;
+    sint16 inventoryCount = 0;
+
+    if(invType == -1)
+    {
+      inventory = user->inv.main;
+      inventoryCount = 36;
+    }
+    else if(invType == -2)
+    {
+      inventory = user->inv.equipped;
+      inventoryCount = 4;
+    }
+    else if(invType == -3)
+    {
+      inventory = user->inv.crafting;
+      inventoryCount = 4;
+    }
+    user->buffer << (sint8)PACKET_PLAYER_INVENTORY << invType << inventoryCount;
+
+    for(int i=0; i<inventoryCount; i++)
+    {
+      if(inventory[i].count)
+      {
+        user->buffer << (sint16)inventory[i].type << (sint8)inventory[i].count << (sint16)inventory[i].health;
+      }
+      else
+      {
+        user->buffer << (sint16)-1;
+      }
+    }
+  }
+
+  // Send motd
+  std::ifstream motdfs(Conf::get()->sValue("motd_file").c_str());
+
+  std::string temp;
+
+  while(getline( motdfs, temp ))
+  {
+    // If not commentline
+    if(temp[0] != COMMENTPREFIX)
+    {
+        user->buffer << (sint8)PACKET_CHAT_MESSAGE << temp;
+    }
+  }
+  motdfs.close();
+
+  //Teleport player
+  user->teleport(user->pos.x, user->pos.y+2, user->pos.z);
+
+  //Put nearby chunks to queue
+  for(int x = -user->viewDistance; x <= user->viewDistance; x++)
+  {
+    for(int z = -user->viewDistance; z <= user->viewDistance; z++)
+    {
+      user->addQueue((sint32)user->pos.x/16+x, (sint32)user->pos.z/16+z);
+    }
+  }
+  // Push chunks to user
+  user->pushMap();
+
+  //Spawn this user to others
+  user->spawnUser((sint32)user->pos.x*32, ((sint32)user->pos.y+2)*32, (sint32)user->pos.z*32);
+  //Spawn other users for connected user
+  user->spawnOthers();
+
+  user->sethealth(user->health);
+  user->logged = true;
+
+  Chat::get()->sendMsg(user, player+" connected!", Chat::ALL);
+
+  return true;
 }
 
 // Kick player
@@ -289,13 +388,19 @@ bool User::loadData()
         inv.main[(uint8)slot].count  = count;
         inv.main[(uint8)slot].health = damage;
         inv.main[(uint8)slot].type   = item_id;
+        
+        // Add item at slot 0 to currentItem
+        if(slot == 0)
+        {
+          m_currentItem = item_id;
+        }
       }
       //Crafting
       else if(slot >= 80 && slot <= 83)
       {
         inv.crafting[(uint8)slot-80].count  = count;
         inv.crafting[(uint8)slot-80].health = damage;
-        inv.crafting[(uint8)slot-80].type   = item_id;
+        inv.crafting[(uint8)slot-80].type   = item_id;   
       }
       //Equipped
       else if(slot >= 100 && slot <= 103)
@@ -467,15 +572,11 @@ bool User::updatePos(double x, double y, double z, double stance)
         fixedPitch = 360 + fixedPitch;
       fixedPitch = int(float(fixedPitch) * float(255.0f/360.0f));
 
-      uint8 teleportData[19];
-      teleportData[0]  = PACKET_ENTITY_TELEPORT;
-      putSint32(&teleportData[1], this->UID);
-      putSint32(&teleportData[5], (int)(this->pos.x*32));
-      putSint32(&teleportData[9], (int)(this->pos.y*32));
-      putSint32(&teleportData[13], (int)(this->pos.z*32));
-      teleportData[17] = (char)fixedYaw;
-      teleportData[18] = (char)fixedPitch;
-      this->sendOthers(&teleportData[0], 19);
+      Packet pkt;
+      pkt << PACKET_ENTITY_TELEPORT << (sint32)this->UID;
+      pkt << (sint32)(this->pos.x*32) << (sint32)(this->pos.y*32) << (sint32)(this->pos.z*32);
+      pkt << (sint8)fixedYaw << (sint8) fixedPitch;
+      this->sendOthers((uint8 *)pkt.getWrite(), pkt.getWriteLen());
     }
 
     //Check if there are items in this chunk!
@@ -946,4 +1047,15 @@ User* User::byNick(std::string nick)
       return Mineserver::get().users()[i];
   }
   return NULL;
+}
+
+// Getter/Setter for item currently in hold
+sint16 User::currentItem()
+{
+  return m_currentItem;
+}
+
+void User::setCurrentItem(sint16 item_id)
+{
+  m_currentItem = item_id;
 }

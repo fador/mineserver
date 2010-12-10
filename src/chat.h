@@ -28,6 +28,8 @@
 #ifndef _CHAT_H
 #define _CHAT_H
 
+#include <deque>
+
 class Chat
 {
 public:

@@ -51,6 +51,8 @@
 #include "user.h"
 #include "nbt.h"
 #include "config.h"
+#include "permissions.h"
+#include "chat.h"
 
 #include "lighting.h"
 
@@ -1205,6 +1207,7 @@ void Map::sendToUser(User *user, int x, int z)
         std::string *id = idVal->GetString();
         if(id && (*id=="Chest" || *id=="Furnace" || *id=="Sign"))
         {
+
           if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
             (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
             (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
@@ -1212,12 +1215,35 @@ void Map::sendToUser(User *user, int x, int z)
             continue;
           }
 
-            buffer.push_back(NBT_Value::TAG_COMPOUND);
-            buffer.push_back(0);
-            buffer.push_back(0);
-            (*iter)->Write(buffer);
-            buffer.push_back(0);
-            buffer.push_back(0);
+          if(*id == "Chest")
+          {
+            NBT_Value *lockData = (**iter)["Lockdata"];
+            if(lockData != NULL)
+            {
+              if((*lockData)["locked"] != NULL)
+              {
+                sint8 locked = *(*lockData)["locked"];
+                std::string chestowner = *(*lockData)["player"]->GetString();
+                // If locked
+                if (locked == 1)
+                {
+                  // Check permission to access
+                  if(!(chestowner == user->nick || IS_ADMIN(user->permissions)))
+                  {
+                    Chat::get()->sendMsg(user, COLOR_BLUE + "Chest is locked.", Chat::USER);
+                    continue;
+                  }
+                }
+              }
+            }
+          }
+
+          buffer.push_back(NBT_Value::TAG_COMPOUND);
+          buffer.push_back(0);
+          buffer.push_back(0);
+          (*iter)->Write(buffer);
+          buffer.push_back(0);
+          buffer.push_back(0);
 
 
           z_stream zstream2;
@@ -1261,9 +1287,16 @@ void Map::sendToUser(User *user, int x, int z)
   delete[] mapdata;
 }
 
-void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
+void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *entity)
 {
   uint32 mapId;
+
+  std::string player = "";
+  if(user != NULL)
+  {
+    player = user->nick;
+  }
+  sint8 locked = Conf::get()->bValue("chests_locked_by_default")?1:0;
 
   int block_x = blockToChunk(x);
   int block_z = blockToChunk(z);
@@ -1321,6 +1354,23 @@ void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
 
       if((sint32)(*(**iter)["x"]) == x && (sint32)(*(**iter)["y"]) == y && (sint32)(*(**iter)["z"]) == z)
       {
+        NBT_Value *nbtLockdata = (**iter)["Lockdata"];
+
+        if(nbtLockdata != NULL)
+        {
+          player = *(*nbtLockdata)["player"]->GetString();
+          locked = *(*nbtLockdata)["locked"];
+          
+          if(locked == 1)
+          {
+            if(!(user != NULL && player != user->nick))
+            {
+              return;
+            }
+          }
+        }
+
+
         // Replace entity
         delete *iter;
         *iter = entity;
@@ -1331,6 +1381,14 @@ void Map::setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity)
 
     if(!done)
     {
+      if(user != NULL)
+      {
+        NBT_Value *nbtLockdata = new NBT_Value(NBT_Value::TAG_COMPOUND);
+        nbtLockdata->Insert("player", new NBT_Value(player));
+        nbtLockdata->Insert("locked", new NBT_Value(locked));
+        entity->Insert("Lockdata", nbtLockdata);
+      }
+
       // Add new entity
       entityList->GetList()->push_back(entity);
     }

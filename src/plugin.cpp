@@ -38,6 +38,7 @@
 #include "blocks/door.h"
 #include "blocks/sign.h"
 #include "blocks/tracks.h"
+#include "blocks/chest.h"
 
 Plugin* Plugin::mPlugin;
 
@@ -200,14 +201,21 @@ void Plugin::init()
    /* TODO: Currently works like glass. Explosion is not implemented yet. */
    setBlockCallback(BLOCK_TNT, call);
    
-   /* Containers */
+   /* Workbench and furnace */
    call.reset();
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    call.add("onPlace", Function::from_method<BlockDefault, &BlockDefault::onPlace>(defaultblock));
-   setBlockCallback(BLOCK_CHEST, call);
    setBlockCallback(BLOCK_WORKBENCH, call);
    setBlockCallback(BLOCK_FURNACE, call);
-  /* TODO: Needs this? BLOCK_BURNING_FURNACE */
+   /* TODO: Needs this? BLOCK_BURNING_FURNACE */
+  
+   /* Chests */
+   call.reset();
+   BlockChest* chestblock = new BlockChest();
+   call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
+   call.add("onPlace", Function::from_method<BlockChest, &BlockChest::onPlace>(chestblock));
+   call.add("onStartedDigging", Function::from_method<BlockChest, &BlockChest::onStartedDigging>(chestblock));
+   setBlockCallback(BLOCK_CHEST, call);
 
    /* Doors */
    call.reset();

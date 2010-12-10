@@ -305,12 +305,37 @@ int Mineserver::run(int argc, char *argv[])
 
   m_running=true;
   event_base_loopexit(m_eventBase, &loopTime);
+
+  User *serverUser = new User(-1, -1);
+  serverUser->changeNick("[Server]");
+  
   while(m_running && event_base_loop(m_eventBase, 0) == 0)
   {
+    
+    // Check for key input from server console (get's triggered when console hits return)
+    if (kbhit() != 0)
+    {
+      // Loop thru all chars up until CRLF
+      std::string consoleCommand;
+      char c;
+      do
+      {
+        c = fgetc (stdin);
+        consoleCommand.push_back(c);
+      } while (c != '\n');
+
+      // Now handle this command as normal
+      if (consoleCommand[0] == '/' || consoleCommand[0] == '&' || consoleCommand[0] == '%')
+      {
+        Chat::get()->handleMsg(serverUser, consoleCommand);
+        std::cout << "Command sent" << std::endl;
+      }
+    }
+    
     if(time(0)-starttime > 10)
     {
       starttime = (uint32)time(0);
-//      std::cout << "Currently " << Users.size() << " users in!" << std::endl;
+      //std::cout << "Currently " << User::all().size() << " users in!" << std::endl;
 
       //If users, ping them
       if(User::all().size() > 0)
@@ -381,6 +406,9 @@ int Mineserver::run(int argc, char *argv[])
     //Underwater check / drowning
     for( unsigned int i = 0; i < User::all().size(); i++ )
       User::all()[i]->isUnderwater();
+
+    event_set(&m_listenEvent, m_socketlisten, EV_WRITE|EV_READ|EV_PERSIST, accept_callback, NULL);
+    event_add(&m_listenEvent, NULL);
 
     event_base_loopexit(m_eventBase, &loopTime);
   }
