@@ -133,6 +133,7 @@ bool Lighting::generateLight(int x, int z, sChunk *chunk)
       int absolute_x = (x<<4)+block_x;
       int absolute_z = (z<<4)+block_z;
 
+      //ToDo: heigth according to neighboring blocks
       //int height = highest_y;
       //if(block_x == 0 || block_x == 15 || block_z == 0 || block_z == 15)
       //{
