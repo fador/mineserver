@@ -57,6 +57,12 @@ namespace
   void reportError(User *user, std::string message)
   {
     Chat::get()->sendMsg(user, MC_COLOR_DARK_MAGENTA + "Error! " + MC_COLOR_RED + message, Chat::USER);
+    
+    // Let the console know
+    if(user->UID == -1)
+    {
+      Screen::get()->log(LOG_CHAT, message);
+    }
   }
 
   void playerList(User *user, std::string command, std::deque<std::string> args)
@@ -406,7 +412,7 @@ void whisper(User *user, std::string command, std::deque<std::string> args)
     User *tUser        = User::byNick(targetNick);
 
     // Don't whisper or tell if DND is set
-    if(tUser->dnd)
+    if(tUser != NULL && tUser->dnd)
     {
       Chat::get()->sendMsg(user, MC_COLOR_YELLOW + tUser->nick + " currently doesn't want to be disturbed.", Chat::USER);
       Chat::get()->sendMsg(user, MC_COLOR_YELLOW + "Message not sent.", Chat::USER);
