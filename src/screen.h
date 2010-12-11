@@ -38,7 +38,8 @@ enum
   LOG_GENERAL,
   LOG_CHAT,
   LOG_PLAYERS,
-	LOG_ERROR
+	LOG_ERROR,
+	LOG_COMMAND
 };
 enum
 {
@@ -67,9 +68,12 @@ public:
 	void destroyWindow(WINDOW *local_win);
 	void log(std::string message);
 	void log(int logType, std::string message);
-	void updatePlayerList(std::vector<User *> users);
+  void updatePlayerList(std::vector<User *> users);
 	void end();
-	
+	WINDOW *commandLog;
+  bool hasCommand();
+  std::string getCommand();
+  
 private:
   static Screen *_instance;
 
@@ -77,5 +81,9 @@ private:
 	WINDOW *generalLog;
 	WINDOW *chatLog;
 	WINDOW *playerList;
+	
+	std::string currentCommand;
+	char commandBuffer[80];
+  
 };
 

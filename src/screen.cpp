@@ -27,7 +27,7 @@
 
 #include "screen.h"
 
-//#define _DEBUG
+//#define _DEBUG 
 
 Screen* Screen::_instance;
 
@@ -36,18 +36,27 @@ Screen::Screen() {
 void Screen::init(std::string version) {
 	
 	// Start our NCurses session
-	initscr();			
+	initscr();
+  timeout(0);   // Non blocking?			
+  //noecho();
+  echo();
 	refresh();
 	
-	// Work out our dimensions
-	int logHeight = int((LINES - 7) / 2);
-	int chatHeight = logHeight;
+	// Work out our dimensions - 7 for top row - 7 for bottom command row
+  int titleHeight = 5;
+  int commandHeight = 5;
+	int logHeight = int((LINES - titleHeight - commandHeight) / 2);
+	int chatHeight = LINES - titleHeight - commandHeight - logHeight - 3;
 	
 	// Create our windows
-	title = createWindow(COLS, 5, 0, 0);
-	generalLog = createWindow(COLS - 21, logHeight, 0, 5);
-	chatLog = createWindow(COLS - 21, chatHeight, 0, logHeight + 6);
-	playerList = createWindow(20, LINES - 6, COLS - 20, 5);
+	title = createWindow(COLS, titleHeight, 0, 0);
+	generalLog = createWindow(COLS - 21, logHeight, 0, titleHeight);
+	chatLog = createWindow(COLS - 21, chatHeight, 0, logHeight + titleHeight + 1);
+	commandLog = createWindow(COLS, 5, 0, LINES - 5);	
+	playerList = createWindow(20, LINES - 14, COLS - 20, 5);
+
+  // Make sure nothing waits for input
+  wtimeout(commandLog, 0);
 
 	// Setup color if we haz it
 	if(has_colors())
@@ -68,20 +77,30 @@ void Screen::init(std::string version) {
 
 	// Write our border lines on the regular stdscr
 	attron(COLOR_PAIR(TEXT_COLOR_MAGENTA));
-	for(int i = 0; i < COLS; i++)
+	for(int x = 0; x < COLS; x++)               // Top row
 	{
-		mvaddch(4,i,'=');
+		mvaddch(titleHeight - 1, x, '=');
 	}
-	for(int i = 0; i < COLS-21; i++)
+	for(int x = 0; x < COLS-21; x++)            // Middle row
 	{
-		mvaddch(logHeight + 5,i,'=');
+		mvaddch(logHeight + titleHeight, x, '=');
 	}
+	for(int x = 0; x < COLS; x++)               // Bottom row
+	{
+		mvaddch((logHeight + chatHeight + titleHeight + 2), x, '=');
+	}	
+	for(int y = 5; y < (logHeight + chatHeight + titleHeight + 2); y++)          // Far col divider
+	{
+		mvaddch(y, COLS-21, '|');
+	} 
 	attroff(COLOR_PAIR(TEXT_COLOR_MAGENTA));
+	
 	// Write the window labels
 	attron(COLOR_PAIR(TEXT_COLOR_WHITE));
-	mvprintw(4, 2, " Log ");
-	mvprintw(4, COLS - 20, " Players ");
-	mvprintw(logHeight + 5, 2, " Chat ");
+	mvprintw(titleHeight - 1, 2, " Log ");
+	mvprintw(titleHeight - 1, COLS - 15, " Players ");
+	mvprintw(logHeight + titleHeight, 2, " Chat ");
+	mvprintw((logHeight + chatHeight + titleHeight + 2), 2, " Command History ");
 	attroff(COLOR_PAIR(TEXT_COLOR_WHITE));
 	refresh();
 	
@@ -95,8 +114,43 @@ void Screen::init(std::string version) {
 	wprintw(title, ("v" + version).c_str());
 	wattroff(title, COLOR_PAIR(TEXT_COLOR_YELLOW));
 	wrefresh(title);
-}
+	
+	// Fill up the command window
+//  log(LOG_COMMAND, "");
+//  log(LOG_COMMAND, "");
+//  log(LOG_COMMAND, "");
+//  log(LOG_COMMAND, "");
+//  log(LOG_COMMAND, "");   	
 
+}
+bool Screen::hasCommand()
+{
+  // Get the chars in the buffer
+//  int crlfEntered = wgetnstr(commandLog, commandBuffer, 80);
+wmove(commandLog, 4, currentCommand.size() + 1);
+  int crlfEntered = wgetnstr(commandLog, commandBuffer, 80);
+  wmove(commandLog, 4, currentCommand.size() + 1);
+ // log("D");
+  // Add to our string buffer
+  currentCommand.append(commandBuffer);
+  
+  // Print at the bottom of the Command window (cos echo is off)
+ // wprintw(commandLog, currentCommand.c_str(), 5, 2);
+  
+  // Check if we've got a full command waiting
+  if(crlfEntered == OK)
+    return true;
+  else
+    return false;
+}
+std::string Screen::getCommand()
+{
+  // Get a copy of the current command, clear it and return the copy
+  std::string tempCmd = currentCommand;
+  currentCommand.clear();
+  //log(LOG_COMMAND, "");
+  return tempCmd;
+}
 WINDOW* Screen::createWindow(int width, int height, int startx, int starty)
 {	
 	WINDOW *local_win;
@@ -129,7 +183,6 @@ void Screen::destroyWindow(WINDOW *local_win)
 	wrefresh(local_win);
 	delwin(local_win);
 }
-
 void Screen::end()
 {
 	// Kill our windows
@@ -141,7 +194,6 @@ void Screen::end()
 	// Stop NCurses
 	endwin();
 }
-
 void Screen::log(std::string message)
 {
 	// Default to general log
@@ -154,7 +206,8 @@ void Screen::log(int logType, std::string message)
 	if(logType == LOG_ERROR) { window = generalLog; }	
 	if(logType == LOG_CHAT) { window = chatLog; }
 	if(logType == LOG_PLAYERS) { window = playerList; }
-	
+	if(logType == LOG_COMMAND) { window = commandLog; }
+  	
 	// Set the color
 	if(logType == LOG_ERROR) {	wattron(window, COLOR_PAIR(TEXT_COLOR_RED));	}
 	
@@ -165,6 +218,8 @@ void Screen::log(int logType, std::string message)
 	// Print the message to the correct window
 	if(window == title || window == playerList)
 		waddstr(window, (message + "\n").c_str());
+	else if (window == commandLog)
+	  waddstr(window, (message + "\n").c_str());
 	else
 		waddstr(window, ("\n " + message).c_str());
 		
@@ -172,6 +227,11 @@ void Screen::log(int logType, std::string message)
 	if(logType == LOG_ERROR) {	wattroff(window, COLOR_PAIR(TEXT_COLOR_RED)); }
 	
 	wrefresh(window);	
+	
+//  wprintw(commandLog, "> ", 5, 0);
+//  wmove(commandLog, 5, 2);
+//  wrefresh(commandLog);
+	
 }
 void Screen::updatePlayerList(std::vector<User *> users)
 {

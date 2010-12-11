@@ -319,30 +319,17 @@ int Mineserver::run(int argc, char *argv[])
   m_running=true;
   event_base_loopexit(m_eventBase, &loopTime);
 
+  // Create our Server Console user so we can issue commands
   User *serverUser = new User(-1, -1);
   serverUser->changeNick("[Server]");
-
+ 
   while(m_running && event_base_loop(m_eventBase, 0) == 0)
   {
-    
-    // Check for key input from server console (get's triggered when console hits return)
-    if (kbhit() != 0)
+    // Append current command and check if user entered return
+    if(Screen::get()->hasCommand())
     {
-      // Loop thru all chars up until CRLF
-      std::string consoleCommand;
-      char c;
-      do
-      {
-        c = fgetc (stdin);
-        consoleCommand.push_back(c);
-      } while (c != '\n');
-
       // Now handle this command as normal
-      if (consoleCommand[0] == '/' || consoleCommand[0] == '&' || consoleCommand[0] == '%')
-      {
-        Chat::get()->handleMsg(serverUser, consoleCommand);
-        Screen::get()->log("Command sent");
-      }
+      Chat::get()->handleMsg(serverUser, Screen::get()->getCommand().c_str());
     }
     
     if(time(0)-starttime > 10)
