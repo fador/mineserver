@@ -194,7 +194,7 @@ int Mineserver::run(int argc, char *argv[])
       {
         #ifdef WIN32
           t_end = timeGetTime ();
-          Screen::get()->log("" << ((x+size+1)*(size*2+1)) << "/" << (size*2+1)*(size*2+1) << " done. " << (t_end-t_begin)/(size*2+1) << "ms per chunk" << "");
+          Screen::get()->log(dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos((t_end-t_begin)/(size*2+1)) + "ms per chunk");
         #else
           t_end = clock();
           Screen::get()->log(dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos(((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1)) + "ms per chunk");
