@@ -126,16 +126,13 @@ void Screen::init(std::string version) {
 bool Screen::hasCommand()
 {
   // Get the chars in the buffer
-//  int crlfEntered = wgetnstr(commandLog, commandBuffer, 80);
-wmove(commandLog, 4, currentCommand.size() + 1);
+  wmove(commandLog, 4, currentCommand.size() + 1);
   int crlfEntered = wgetnstr(commandLog, commandBuffer, 80);
   wmove(commandLog, 4, currentCommand.size() + 1);
- // log("D");
+  wrefresh(commandLog);
+
   // Add to our string buffer
   currentCommand.append(commandBuffer);
-  
-  // Print at the bottom of the Command window (cos echo is off)
- // wprintw(commandLog, currentCommand.c_str(), 5, 2);
   
   // Check if we've got a full command waiting
   if(crlfEntered == OK)
