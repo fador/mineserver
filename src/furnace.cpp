@@ -306,7 +306,7 @@ void Furnace::sendToAllUsers()
 
   // Gzip the data
   if(int state=deflate(&zstream, Z_FULL_FLUSH)!=Z_OK) {
-    std::cout << "Error in deflate: " << state << std::endl;
+    Screen::get()->log(LOG_ERROR, "Error in deflate: " + state);
   }
   deflateEnd(&zstream);
 
@@ -320,7 +320,7 @@ void Furnace::sendToAllUsers()
   User::sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
 
   #ifdef _DEBUG
-    std::cout << "Furnace entity data: " << std::endl;
+    Screen::get()->log("Furnace entity data: ");
     newEntity->Print();
   #endif
 

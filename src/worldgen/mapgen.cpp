@@ -271,10 +271,10 @@ void MapGen::generateWithNoise(int x, int z)
   #ifdef PRINT_MAPGEN_TIME
   #ifdef WIN32
     t_end = timeGetTime ();
-    std::cout << "Mapgen: " << (t_end-t_begin) << "ms" << std::endl;
+    Screen::get()->log("Mapgen: " + dtos(t_end-t_begin) + "ms");
   #else
     gettimeofday(&end, NULL);
-    std::cout << "Mapgen: " << end.tv_usec - start.tv_usec << std::endl;
+    Screen::get()->log("Mapgen: " + dtos(end.tv_usec - start.tv_usec));
   #endif
   #endif
   

@@ -34,6 +34,7 @@ class User;
 
 class Mineserver
 {
+	
 public:
   static Mineserver& get()
   {
@@ -50,7 +51,7 @@ public:
 
   struct event m_listenEvent;
   int m_socketlisten;
-
+	void updatePlayerList();
 private:
 
 

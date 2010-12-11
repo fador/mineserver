@@ -66,7 +66,7 @@ void Conf::free()
 bool Conf::load(std::string configFile, std::string namePrefix)
 {
   #ifdef _DEBUG
-  std::cout << "Loading data from " << configFile << std::endl;
+  Screen::get()->log("Loading data from " + configFile);
   #endif
   std::ifstream ifs(configFile.c_str());
 
@@ -74,7 +74,7 @@ bool Conf::load(std::string configFile, std::string namePrefix)
   if(ifs.fail() && configFile == CONFIG_FILE)
   {
     // TODO: Load default configuration from the internets!
-    std::cout << "Warning: " << configFile << " not found! Generating it now." << std::endl;
+    Screen::get()->log(LOG_ERROR, "Warning: " + configFile + " not found! Generating it now.");
 
     // Open config file
     std::ofstream confofs(configFile.c_str());
@@ -97,7 +97,7 @@ bool Conf::load(std::string configFile, std::string namePrefix)
 
   if (ifs.fail())
   {
-    std::cout << "Warning: " << configFile << " not found!" << std::endl;
+    Screen::get()->log(LOG_ERROR, "Warning: " + configFile + " not found!");
     ifs.close();
     return true;
   }
@@ -159,7 +159,7 @@ bool Conf::load(std::string configFile, std::string namePrefix)
     // If under two words skip the line and log skipping.
     if(line.size() < 2)
     {
-      std::cout << "Invalid configuration at line " << lineNum << " of " << configFile;
+      Screen::get()->log(LOG_ERROR, "Invalid configuration at line " + dtos(lineNum) + " of " + configFile);
       continue;
     }
 
@@ -183,7 +183,7 @@ bool Conf::load(std::string configFile, std::string namePrefix)
     if (line[0] == "include")
     {
       #ifdef _DEBUG
-      std::cout << "Including config file " << text << std::endl;
+      Screen::get()->log("Including config file " + text);
       #endif
       load(text);
       continue;
@@ -205,7 +205,7 @@ bool Conf::load(std::string configFile, std::string namePrefix)
   }
   ifs.close();
   #ifdef _DEBUG
-  std::cout << "Loaded " << lineNum << " lines from " << configFile << std::endl;
+  Screen::get()->log("Loaded " + lineNum + " lines from " + configFile);
   #endif
 
   return true;
@@ -220,8 +220,7 @@ std::string Conf::sValue(std::string name)
   }
   else
   {
-    std::cout << "Warning! " << name << " not defined in configuration. Using default value: "<<
-    defaultConf[name] << std::endl;
+		Screen::get()->log("Warning! " + name + " not defined in configuration. Using default value: " + defaultConf[name]);
     return defaultConf[name];
   }
 }
@@ -234,8 +233,7 @@ int Conf::iValue(std::string name)
   }
   else
   {
-    std::cout << "Warning! " << name << " not defined in configuration. Using default value: "<<
-    defaultConf[name] << std::endl;
+    Screen::get()->log("Warning! " + name + " not defined in configuration. Using default value: " + defaultConf[name]);
     return atoi(defaultConf[name].c_str());
   }
 }
@@ -248,8 +246,7 @@ bool Conf::bValue(std::string name)
   }
   else
   {
-    std::cout << "Warning! " << name << " not defined in configuration. Using default value: "<<
-    defaultConf[name] << std::endl;
+    Screen::get()->log("Warning! " + name + " not defined in configuration. Using default value: " + defaultConf[name]);
     return (defaultConf[name] == "true")?true:false;
   }
 }
@@ -262,7 +259,7 @@ std::vector<int> Conf::vValue(std::string name)
   }
   else
   {
-    std::cout << "Warning! " << name << " not defined in configuration." << std::endl;
+    Screen::get()->log("Warning! " + name + " not defined in configuration.");
     return std::vector<int>();
   }
 }
@@ -294,7 +291,7 @@ int Conf::permissionByName(std::string permissionName)
     return PERM_GUEST;
   }
 
-  std::cout << "Warning! Unknown permission name: " << permissionName << " - Using GUEST permission by default!" << std::endl;
+  Screen::get()->log("Warning! Unknown permission name: " + permissionName + " - Using GUEST permission by default!");
 
   return PERM_GUEST; // default
 }
@@ -319,7 +316,7 @@ Kit* Conf::kit(const std::string& kitname)
       m_kits[kitname] = kit; // save kit for later, if used again
       return kit;
     } else {
-      std::cout << "Warning! " << keyname << " not defined in configuration." << std::endl;
+      Screen::get()->log("Warning! " + keyname + " not defined in configuration.");
       return NULL;
     }
   }
@@ -372,7 +369,7 @@ bool Conf::loadRoles()
   // If file does not exist
   if(ifs.fail())
   {
-    std::cout << "> Warning: " << rolesFile << " not found. Creating..." << std::endl;
+    Screen::get()->log("> Warning: " + rolesFile + " not found. Creating...");
 
     std::ofstream adminofs(rolesFile.c_str());
     adminofs << ROLES_CONTENT << std::endl;
@@ -415,7 +412,7 @@ bool Conf::loadRoles()
   }
   ifs.close();
 #ifdef _DEBUG
-  std::cout << "Loaded roles from " << rolesFile << std::endl;
+  Screen::get()->log("Loaded roles from " + rolesFile);
 #endif
 
   return true;
@@ -434,7 +431,7 @@ bool Conf::loadBanned()
   // If file does not exist
   if(ifs.fail())
   {
-    std::cout << "> Warning: " << bannedFile << " not found. Creating..." << std::endl;
+    Screen::get()->log("> Warning: " + bannedFile + " not found. Creating...");
 
     std::ofstream bannedofs(bannedFile.c_str());
     bannedofs << BANNED_CONTENT << std::endl;
@@ -454,7 +451,7 @@ bool Conf::loadBanned()
   }
   ifs.close();
 #ifdef _DEBUG
-  std::cout << "Loaded banned users from " << bannedFile << std::endl;
+  Screen::get()->log("Loaded banned users from " + bannedFile);
 #endif
 
   return true;
@@ -473,7 +470,7 @@ bool Conf::loadWhitelist()
   // If file does not exist
   if(ifs.fail())
   {
-    std::cout << "> Warning: " << whitelistFile << " not found. Creating..." << std::endl;
+    Screen::get()->log("> Warning: " + whitelistFile + " not found. Creating...");
 
     std::ofstream whitelistofs(whitelistFile.c_str());
     whitelistofs << WHITELIST_CONTENT << std::endl;
@@ -493,7 +490,7 @@ bool Conf::loadWhitelist()
   }
   ifs.close();
 #ifdef _DEBUG
-  std::cout << "Loaded whitelisted users from " << whitelistFile << std::endl;
+  Screen::get()->log("Loaded whitelisted users from " + whitelistFile);
 #endif
 
   return true;

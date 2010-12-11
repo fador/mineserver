@@ -86,7 +86,9 @@ User::User(int sock, uint32 EID)
 
 	// Ignore this user if it's a negative socket - means it's the server console
 	if(sock != -1)
+	{
   	Mineserver::get().users().push_back(this);
+	}
 }
 
 
@@ -158,6 +160,9 @@ bool User::changeNick(std::string _nick)
     }
   }
 
+	// Update the player list with the new name!
+	Mineserver::get().updatePlayerList();
+	
   return true;
 }
 
@@ -170,6 +175,10 @@ User::~User()
     if((*it) == this)
     {
       Mineserver::get().users().erase(it);
+			
+			// Update the player list
+			Mineserver::get().updatePlayerList();
+
       break;
     }
   }
@@ -287,41 +296,41 @@ bool User::sendLoginInfo()
 bool User::kick(std::string kickMsg)
 {
   buffer << (sint8)PACKET_KICK << kickMsg;
-  std::cout << nick << " kicked. Reason: " << kickMsg << std::endl;
+  Screen::get()->log(nick + " kicked. Reason: " + kickMsg);
   return true;
 }
 bool User::mute(std::string muteMsg)
 {
   if(!muteMsg.empty())
-    muteMsg = COLOR_YELLOW + "You have been muted.  Reason: " + muteMsg;
+    muteMsg = MC_COLOR_YELLOW + "You have been muted.  Reason: " + muteMsg;
   else
-    muteMsg = COLOR_YELLOW + "You have been muted. ";
+    muteMsg = MC_COLOR_YELLOW + "You have been muted. ";
 
   Chat::get()->sendMsg(this, muteMsg, Chat::USER);
   this->muted = true;
-  std::cout << nick << " muted. Reason: " << muteMsg << std::endl;
+  Screen::get()->log(nick + " muted. Reason: " + muteMsg);
   return true;
 }
 bool User::unmute()
 {
-    Chat::get()->sendMsg(this, COLOR_YELLOW + "You have been unmuted.", Chat::USER);
+    Chat::get()->sendMsg(this, MC_COLOR_YELLOW + "You have been unmuted.", Chat::USER);
     this->muted = false;
-    std::cout << nick << " unmuted. " << std::endl;
+    Screen::get()->log(nick + " unmuted. ");
     return true;
 }
 bool User::toggleDND()
 {
 	if(!this->dnd) {
-		Chat::get()->sendMsg(this, COLOR_YELLOW + "You have enabled 'Do Not Disturb' mode.", Chat::USER);
-		Chat::get()->sendMsg(this, COLOR_YELLOW + "You will no longer see chat or private messages.", Chat::USER);
-		Chat::get()->sendMsg(this, COLOR_YELLOW + "Type /dnd again to disable 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get()->sendMsg(this, MC_COLOR_YELLOW + "You have enabled 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get()->sendMsg(this, MC_COLOR_YELLOW + "You will no longer see chat or private messages.", Chat::USER);
+		Chat::get()->sendMsg(this, MC_COLOR_YELLOW + "Type /dnd again to disable 'Do Not Disturb' mode.", Chat::USER);
 		this->dnd = true;
 	}
 	else {
 		this->dnd = false;
-		Chat::get()->sendMsg(this, COLOR_YELLOW + "You have disabled 'Do Not Disturb' mode.", Chat::USER);
-		Chat::get()->sendMsg(this, COLOR_YELLOW + "You can now see chat and private messages.", Chat::USER);
-		Chat::get()->sendMsg(this, COLOR_YELLOW + "Type /dnd again to enable 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get()->sendMsg(this, MC_COLOR_YELLOW + "You have disabled 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get()->sendMsg(this, MC_COLOR_YELLOW + "You can now see chat and private messages.", Chat::USER);
+		Chat::get()->sendMsg(this, MC_COLOR_YELLOW + "Type /dnd again to enable 'Do Not Disturb' mode.", Chat::USER);
 	}
 	return this->dnd;
 }
@@ -332,12 +341,12 @@ bool User::isAbleToCommunicate(std::string communicateCommand)
 		communicateCommand = "/" + communicateCommand;
 
 	if(this->muted) {
-		Chat::get()->sendMsg(this, COLOR_YELLOW + "You cannot " + communicateCommand + " while muted.", Chat::USER);
+		Chat::get()->sendMsg(this, MC_COLOR_YELLOW + "You cannot " + communicateCommand + " while muted.", Chat::USER);
 		return false;
 	}
 	if(this->dnd) {
-		Chat::get()->sendMsg(this, COLOR_YELLOW + "You cannot " + communicateCommand + " while in 'Do Not Disturb' mode.", Chat::USER);
-		Chat::get()->sendMsg(this, COLOR_YELLOW + "Type /dnd to disable.", Chat::USER);
+		Chat::get()->sendMsg(this, MC_COLOR_YELLOW + "You cannot " + communicateCommand + " while in 'Do Not Disturb' mode.", Chat::USER);
+		Chat::get()->sendMsg(this, MC_COLOR_YELLOW + "Type /dnd to disable.", Chat::USER);
 		return false;
 	}
 	return true;
@@ -726,7 +735,7 @@ bool User::sendOthers(uint8 *data, uint32 len)
 sint8 User::relativeToBlock(const sint32 x, const sint8 y, const sint32 z)
 {
    sint8 direction;
-   signed short diffX, diffZ;
+   double diffX, diffZ;
    diffX = x - this->pos.x;
    diffZ = z - this->pos.z;
 

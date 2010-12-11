@@ -591,47 +591,48 @@ void NBT_Value::Write(std::vector<uint8> &buffer)
 
 void NBT_Value::Print(const std::string &name, int tabs)
 {
+	std::string tabPrefix = "";
   for(int i=0;i<tabs;i++)
-    std::cout << "  ";
+    tabPrefix += "  ";
   switch(m_type)
   {
   case TAG_END:
-    std::cout << "TAG_End(\"" << name << "\")" << std::endl;
+    Screen::get()->log(tabPrefix + "TAG_End(\"" + name + "\")");
     break;
   case TAG_BYTE:
-    std::cout << "TAG_Byte(\"" << name << "\"): " << (int)m_value.byteVal << std::endl;
+    Screen::get()->log(tabPrefix + "TAG_Byte(\"" + name + "\"): " + dtos((int)m_value.byteVal));
     break;
   case TAG_SHORT:
-    std::cout << "TAG_Short(\"" << name << "\"): " << m_value.shortVal << std::endl;
+    Screen::get()->log(tabPrefix + "TAG_Short(\"" + name + "\"): " + dtos(m_value.shortVal));
     break;
   case TAG_INT:
-    std::cout << "TAG_Int(\"" << name << "\"): " << m_value.intVal << std::endl;
+    Screen::get()->log(tabPrefix + "TAG_Int(\"" + name + "\"): " + dtos(m_value.intVal));
     break;
   case TAG_LONG:
-    std::cout << "TAG_Long(\"" << name << "\"): " << m_value.longVal << std::endl;
+    Screen::get()->log(tabPrefix + "TAG_Long(\"" + name + "\"): " + dtos(m_value.longVal));
     break;
   case TAG_FLOAT:
-    std::cout << "TAG_Float(\"" << name << "\"): " << m_value.floatVal << std::endl;
+    Screen::get()->log(tabPrefix + "TAG_Float(\"" + name + "\"): " + dtos(m_value.floatVal));
     break;
   case TAG_DOUBLE:
-    std::cout << "TAG_Double(\"" << name << "\"): " << m_value.doubleVal << std::endl;
+    Screen::get()->log(tabPrefix + "TAG_Double(\"" + name + "\"): " + dtos(m_value.doubleVal));
     break;
   case TAG_BYTE_ARRAY:
-    std::cout << "TAG_Byte_Array(\"" << name << "\"): ";
+    Screen::get()->log(tabPrefix + "TAG_Byte_Array(\"" + name + "\"): ");
     if(m_value.byteArrayVal != NULL)
-      std::cout << m_value.byteArrayVal->size() << " bytes" << std::endl;
+      Screen::get()->log(tabPrefix + dtos(m_value.byteArrayVal->size()) + " bytes");
     else
-      std::cout << "0 bytes" << std::endl;
+      Screen::get()->log(tabPrefix + "0 bytes");
     break;
   case TAG_STRING:
-    std::cout << "TAG_String(\"" << name << "\"): ";
+    Screen::get()->log(tabPrefix + "TAG_String(\"" + name + "\"): ");
     if(m_value.stringVal != NULL)
-      std::cout << *m_value.stringVal << std::endl;
+      Screen::get()->log(tabPrefix + *m_value.stringVal);
     else
-      std::cout << std::endl;
+      Screen::get()->log(tabPrefix + "");
     break;
   case TAG_LIST:
-    std::cout << "TAG_List(\"" << name << "\"): Type " << m_value.listVal.type << std::endl;
+    Screen::get()->log(tabPrefix + "TAG_List(\"" + name + "\"): Type " + dtos(m_value.listVal.type));
     if(m_value.listVal.data != NULL)
     {
       std::vector<NBT_Value*>::iterator iter = m_value.listVal.data->begin(), end = m_value.listVal.data->end();
@@ -640,7 +641,7 @@ void NBT_Value::Print(const std::string &name, int tabs)
     }
     break;
   case TAG_COMPOUND:
-    std::cout << "TAG_Compound(\"" << name << "\"):" << std::endl;
+    Screen::get()->log(tabPrefix + "TAG_Compound(\"" + name + "\"):");
     if(m_value.compoundVal != NULL)
     {
       std::map<std::string, NBT_Value*>::iterator iter = m_value.compoundVal->begin(), end = m_value.compoundVal->end();
@@ -649,7 +650,7 @@ void NBT_Value::Print(const std::string &name, int tabs)
     }
     break;
   default:
-    std::cout << "Invalid TAG:" << m_type << std::endl;
+    Screen::get()->log(tabPrefix + "Invalid TAG:" + dtos(m_type));
   }
 }
 

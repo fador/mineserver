@@ -181,7 +181,7 @@ int PacketHandler::login_request(User *user)
 
   user->buffer.removePacket();
 
-  std::cout << "Player " << user->UID << " login v." << version <<" : " << player <<":"<< passwd << std::endl;
+  Screen::get()->log("Player " + dtos(user->UID) + " login v." + dtos(version) + " : " + player + ":" + passwd);
   
   user->temp_nick=player;
 
@@ -221,7 +221,7 @@ int PacketHandler::login_request(User *user)
   if(Conf::get()->bValue("user_validation") == true)
   {    
     std::string url = "/game/checkserver.jsp?user=" + player + "&serverId=" + hash(player);
-    std::cout << "Validating " << player << " against minecraft.net: ";
+    Screen::get()->log("Validating " + player + " against minecraft.net: ");
 
     std::string http_request ="GET " + url + " HTTP/1.1\r\n"
                              +"Host: www.minecraft.net\r\n"
@@ -260,24 +260,24 @@ int PacketHandler::login_request(User *user)
       //No response data, timeout
       if(stringbuffer.size() == 0 && Conf::get()->bValue("allow_connect_on_auth_timeout"))
       {
-        std::cout << " auth skipped on timeout, ";
+        Screen::get()->log("  Auth skipped on timeout ");
         allow_access = true;
       }
       
       if(allow_access || (stringbuffer.size()>=3 && stringbuffer.find("\r\n\r\nYES",0) != std::string::npos))
       {
-        std::cout << " Verified!" << std::endl;
+        Screen::get()->log("  Verified!");
         user->sendLoginInfo();
       }
       else
       {
-        std::cout << "Failed"  << stringbuffer.substr(stringbuffer.size()-3) << std::endl;
+        Screen::get()->log("  Failed"  + stringbuffer.substr(stringbuffer.size()-3));
         user->kick("Failed to verify username!");
       }
     }
     else
     {
-      std::cout << "Failed" << std::endl;
+      Screen::get()->log("  Failed");
       user->kick("Failed to verify username!");
     }
 
@@ -308,13 +308,13 @@ int PacketHandler::handshake(User *user)
   if(Conf::get()->bValue("user_validation") == true)
   {
     // Send the unique hash for this player to prompt the client to go to minecraft.net to validate
-    std::cout << "Handshake: Requesting minecraft.net validation for player: " << player << " " << hash(player) << std::endl;
+    Screen::get()->log("Handshake: Requesting minecraft.net validation for player: " + player + " " + hash(player));
     user->buffer << (sint8)PACKET_HANDSHAKE << hash(player);
   }
   else
   {
     // Send "no validation or password needed" validation
-    std::cout << "Handshake: No validation for player: " << player << std::endl;
+    Screen::get()->log("Handshake: No validation for player: " + player);
     user->buffer << (sint8)PACKET_HANDSHAKE << std::string("-");
   }
   // TODO: Add support for prompting user for Server password (once client supports it)
@@ -582,7 +582,7 @@ int PacketHandler::player_block_placement(User *user)
   if(newblock == ITEM_MINECART && Map::get()->getBlock(x, y, z, &oldblock, &metadata))
   {
     if(oldblock != BLOCK_MINECART_TRACKS) return PACKET_OK;
-    std::cout << "Spawn minecart" << std::endl;
+    Screen::get()->log("Spawn minecart");
     sint32 EID=generateEID();
     Packet pkt;
     //                                              MINECART
@@ -592,7 +592,7 @@ int PacketHandler::player_block_placement(User *user)
 
   if (newblock == -1 && newblock != ITEM_SIGN)
   {
-     std::cout << "ignoring:" << newblock << std::endl;
+     Screen::get()->log("ignoring:" + newblock);
      return PACKET_OK;
   }
 
@@ -600,7 +600,7 @@ int PacketHandler::player_block_placement(User *user)
     return PACKET_OK;
 
   #ifdef _DEBUG
-    std::cout << "Block_placement: " << newblock << " (" << x << "," << (int)y << "," << z << ") dir: " << (int)direction << std::endl;
+    Screen::get()->log("Block_placement: " + newblock + " (" + dtos(x) + "," + dtos((int)y) + "," + dtos(z) + ") dir: " + dtos((int)direction);
   #endif
 
   if (direction)
@@ -794,7 +794,7 @@ int PacketHandler::disconnect(User *user)
 
   user->buffer.removePacket();
 
-  std::cout << "Disconnect: " << msg << std::endl;
+  Screen::get()->log("Disconnect: " + msg);
 
   event_del(user->GetEvent());
 
@@ -866,7 +866,7 @@ int PacketHandler::complex_entities(User *user)
   //Uncompress
   if(inflate(&zstream, Z_FULL_FLUSH)!=Z_STREAM_END)
   {
-    std::cout << "Error in inflate!" << std::endl;
+    Screen::get()->log(LOG_ERROR, "Error in inflate!");
     delete[] buffer;
     return PACKET_OK;
   }
@@ -882,7 +882,7 @@ int PacketHandler::complex_entities(User *user)
   NBT_Value *entity = new NBT_Value(NBT_Value::TAG_COMPOUND, &ptr, remaining);
 
 #ifdef _DEBUG
-  std::cout << "Complex entity at (" << x << "," << y << "," << z << ")" << std::endl;
+  Screen::get()->log("Complex entity at (" + dtos(x) + "," + dtos(y) + "," + dtos(z) + ")");
   entity->Print();
 #endif
 
