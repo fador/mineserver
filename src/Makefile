@@ -28,7 +28,7 @@ RM = rm -f
 CXX = g++
 CC = $(CXX)
 LDFLAGS += -L/usr/local/lib -L/usr/lib -levent -lz -lnoise $(LFLAGS)
-CXXFLAGS += $(DFLAGS) -I. -I/usr/Local/include -I/usr/include
+CXXFLAGS += $(DFLAGS) -I. -I/usr/Local/include -I/usr/include 
 
 OBJS = map.o chat.o commands.o config.o constants.o logger.o trxlogger.o mapgen.o nbt.o packets.o plugin.o physics.o sockets.o tools.o user.o noiseutils.o mersenne.o mineserver.o
 OBJS += blocks/basic.o blocks/door.o blocks/falling.o blocks/fire.o blocks/liquid.o blocks/plant.o blocks/sign.o blocks/snow.o blocks/stair.o blocks/torch.o
