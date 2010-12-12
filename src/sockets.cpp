@@ -203,7 +203,14 @@ void client_callback(int fd,
     }
   }
 
-  event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
+  if(user->mapQueue.size() == 0)
+  {
+    event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
+  }
+  else
+  {
+    event_set(user->GetEvent(), fd, EV_WRITE|EV_READ, client_callback, user);
+  }
   event_add(user->GetEvent(), NULL);
 }
 
