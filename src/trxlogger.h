@@ -38,13 +38,14 @@
 #define TRXLOG(event) TrxLogger::get().log(event)
 
 struct event_t {
+  time_t timestamp;
   int x;
   int y;
   int z;
-  char nick[16];
-  time_t timestamp;
   uint8 otype, ntype;
   uint8 ometa, nmeta;
+  int nsize;
+  char nick[17];
 };
 
 class TrxLogger 
@@ -55,6 +56,7 @@ public:
   static TrxLogger &get();
   bool getLogs(time_t t, std::string &nick, std::vector<event_t> *logs);
   bool getLogs(time_t t, std::vector<event_t> *logs);
+  bool getLogs(std::vector<event_t> *logs);
 
 private:
   std::fstream log_stream;

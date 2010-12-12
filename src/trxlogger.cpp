@@ -29,7 +29,6 @@
 // Mineserver trxlogger.cpp
 //
 
-#include <cstdio>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -52,48 +51,107 @@ TrxLogger &TrxLogger::get()
   static TrxLogger instance(Conf::get().sValue("binlog"));
   return instance;
 }
-
+ 
 // Log action to binary log 
 void TrxLogger::log(event_t event)
 {
   if(!log_stream.bad()) {
     event.timestamp = time (NULL);
+    event.nsize = strlen(event.nick);
 
-    log_stream.seekg(0, std::ios::end);
-    log_stream.write(reinterpret_cast<char *>(&event), sizeof(event_t));
+    log_stream.seekp(0, std::ios::end);
+    log_stream.write((char *) &event.timestamp, sizeof(time_t));
+    log_stream.write((char *) &event.x, sizeof(int));
+    log_stream.write((char *) &event.y, sizeof(int));
+    log_stream.write((char *) &event.z, sizeof(int));
+    log_stream.write((char *) &event.otype, sizeof(uint8));
+    log_stream.write((char *) &event.ntype, sizeof(uint8));
+    log_stream.write((char *) &event.ometa, sizeof(uint8));
+    log_stream.write((char *) &event.nmeta, sizeof(uint8));
+    log_stream.write((char *) &event.nsize, sizeof(int));
+    log_stream.write((char *) &event.nick, event.nsize+1);
+
   } else {
     LOG("Binary log is bad!");
   }
 }
-
 // Get logs based on nick and timestamp
 bool TrxLogger::getLogs(time_t t, std::string &nick, std::vector<event_t> *logs) {
-  event_t event;
-  log_stream.flush();
-  log_stream.seekg(0, std::ios::beg);
+ 
+  std::vector<event_t> tmp;
+  std::vector<event_t>::iterator event; 
 
-  while(log_stream.getline(reinterpret_cast<char *>(&event), sizeof(event_t))) {
-    if(event.timestamp > t && event.nick == nick) {
-      logs->push_back(event);  
+  this->getLogs(&tmp);
+
+  for(event = tmp.begin(); event != tmp.end(); event++) {
+    if(event->timestamp > t && event->nick == nick.c_str()) {
+      event_t e;
+
+      e.nsize = event->nsize;
+      strcpy(e.nick, event->nick);
+      e.x     = event->x;
+      e.y     = event->y;
+      e.z     = event->z;
+      e.otype = event->otype;
+      e.ntype = event->ntype;
+      e.ometa = event->ometa;
+      e.nmeta = event->nmeta;
+
+      logs->push_back(e);
     }
-    if(log_stream.eof())
-      break;
   }
   return true;
 }
 
 // Get logs based on timestamp
 bool TrxLogger::getLogs(time_t t, std::vector<event_t> *logs) {
+
+  std::vector<event_t> tmp;
+  std::vector<event_t>::iterator event;
+
+  this->getLogs(&tmp);
+
+  for(event = tmp.begin(); event != tmp.end(); event++) {
+    if(event->timestamp > t) {
+      event_t e;
+
+      e.nsize = event->nsize;
+      strcpy(e.nick, event->nick);
+      e.x     = event->x;
+      e.y     = event->y;
+      e.z     = event->z;
+      e.otype = event->otype;
+      e.ntype = event->ntype;
+      e.ometa = event->ometa;
+      e.nmeta = event->nmeta;
+
+      logs->push_back(e);
+    }
+  }
+  return true;
+}
+
+// Get all logs
+bool TrxLogger::getLogs(std::vector<event_t> *logs) {
   event_t event;
+
   log_stream.flush();
   log_stream.seekg(0, std::ios::beg);
 
-  while(log_stream.getline(reinterpret_cast<char *>(&event), sizeof(event_t))) {
-    if(event.timestamp > t) {
-      logs->push_back(event);
-    }
-    if(log_stream.eof()) 
-      break;
+  while(log_stream.good()) {
+                        
+    log_stream.get((char *) &event.timestamp, sizeof(time_t));
+    log_stream.get((char *) &event.x, sizeof(int));
+    log_stream.get((char *) &event.y, sizeof(int));
+    log_stream.get((char *) &event.z, sizeof(int));
+    log_stream.get((char *) &event.otype, sizeof(uint8));
+    log_stream.get((char *) &event.ntype, sizeof(uint8));
+    log_stream.get((char *) &event.ometa, sizeof(uint8));
+    log_stream.get((char *) &event.nmeta, sizeof(uint8));
+    log_stream.get((char *) &event.nsize, sizeof(int));
+    log_stream.get((char *) &event.nick, event.nsize+1);
+
+    logs->push_back(event);
   }
   return true;
 }

@@ -311,40 +311,46 @@ void showMOTD(User *user, std::string command, std::deque<std::string> args)
 // Rollback Transaction Logs
 void rollBack(User *user, std::string command, std::deque<std::string> args)
 {
+#define _DEBUG
 #ifdef _DEBUG
-  printf("starting rollback");
+  printf("Starting map rollback\n");
 #endif
   std::vector<event_t> logs;
-  if(!args.empty()) {
+  time_t timestamp;
 
-    time_t timestamp;
+  if(args.size() > 0) {
     std::stringstream ss (std::stringstream::in | std::stringstream::out);
     ss << args[0];
     ss >> timestamp;
+  }
 
-    if(args.size() > 1) {
-      std::string victim = args[1];
-      TrxLogger::get().getLogs(timestamp, victim, &logs);
-    } else {
-      TrxLogger::get().getLogs(timestamp, &logs);
-    }
+  if(args.size() == 2 ) {
+    std::string victim = args[1];
+    TrxLogger::get().getLogs(timestamp, victim, &logs);
+  } else if (args.size() == 1) {
+    TrxLogger::get().getLogs(timestamp, &logs);
+  } else {
+    TrxLogger::get().getLogs(&logs);
+  }
 
 #ifdef _DEBUG
-    printf("Found %d events in binary log\n", sizeof(logs));
+    printf("Found %d events in binary log\n", logs.size());
 #endif
-    std::vector<event_t>::iterator event;
 
+  std::vector<event_t>::iterator event;
+  if(logs.size() > 0) {
     Chat::get().sendMsg(user, "Rolling back map...", Chat::USER);
     for(event = logs.begin(); event != logs.end(); event++) {
       Chat::get().sendMsg(user, "setloop...", Chat::USER);
       Map::get()->setBlock(event->x, event->y, event->z, event->otype, event->ometa, std::string("SERVER"));
+      Map::get()->sendBlockChange(event->x, event->y, event->z, (char)event->otype, event->ometa);
     }
     Chat::get().sendMsg(user, "Map roll back completed!", Chat::USER);
   } else {
-    reportError(user, "Usage: /rollback <timestamp> [user]");
+    reportError(user, "No binary logs found!");
   }
 #ifdef _DEBUG
-  printf("rollback complete");
+  printf("Map rollback completed.\n");
 #endif
 }
 
