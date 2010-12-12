@@ -43,6 +43,9 @@ void initConstants()
   defaultConf.insert(std::pair<std::string, std::string>("user_limit", "20"));
   defaultConf.insert(std::pair<std::string, std::string>("use_whitelist", "false"));
   defaultConf.insert(std::pair<std::string, std::string>("show_version", "true"));
+  defaultConf.insert(std::pair<std::string, std::string>("user_validation", "true"));
+  defaultConf.insert(std::pair<std::string, std::string>("allow_connect_on_auth_timeout", "false"));
+
   // Messages
   defaultConf.insert(std::pair<std::string, std::string>("server_full_message", "Server is currently full"));
   defaultConf.insert(std::pair<std::string, std::string>("default_kick_message", "You have been kicked"));

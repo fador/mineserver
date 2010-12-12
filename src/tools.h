@@ -63,6 +63,8 @@ std::string base36_encode(int value);
 std::string strToLower(std::string temp);
 
 std::string dtos(double n);
+std::string hash(std::string value);
+int kbhit();
 
 inline uint64 ntohll(uint64 v)
 {

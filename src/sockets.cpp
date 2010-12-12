@@ -123,10 +123,10 @@ void client_callback(int fd,
         int curpos = (PacketHandler::get()->*function)(user);
         if(curpos == PACKET_NEED_MORE_DATA)
         {
-        user->waitForData = true;
-        event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
-        event_add(user->GetEvent(), NULL);
-        return;
+          user->waitForData = true;
+          event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
+          event_add(user->GetEvent(), NULL);
+          return;
         }
 
         if(disconnecting) // disconnect -- player gone
@@ -205,7 +205,6 @@ void client_callback(int fd,
 
   event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
   event_add(user->GetEvent(), NULL);
-
 }
 
 void accept_callback(int fd,
