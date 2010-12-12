@@ -34,6 +34,7 @@
 #include "nbt.h"
 #include "user.h"
 #include "vec.h"
+#include "chunkmap.h"
 
 struct sTree
 {
@@ -47,7 +48,7 @@ struct sTree
 
 };
 
-struct sChunk
+/*struct sChunk
 {
   uint8 *blocks;
   uint8 *data;
@@ -57,7 +58,7 @@ struct sChunk
   sint32 x;
   sint32 z;
   NBT_Value *nbt;
-};
+};*/
 
 struct spawnedItem
 {
@@ -201,6 +202,9 @@ public:
   // Store all maps here
   std::map<uint32, sChunk> maps;
 
+  // Store chunks here (remove maps)
+  ChunkMap chunks;
+
   // Store the time map chunk has been last used
   std::map<uint32, int> mapLastused;
 
@@ -211,13 +215,13 @@ public:
   std::map<uint32, bool> mapLightRegen;
 
   // Store item pointers for each chunk
-  std::map<uint32, std::vector<spawnedItem *> > mapItems;
+  //std::map<uint32, std::vector<spawnedItem *> > mapItems;
 
   //All spawned items on map
   std::map<uint32, spawnedItem *> items;
 
-  void posToId(int x, int z, uint32 *id);
-  void idToPos(uint32 id, int *x, int *z);
+//  void posToId(int x, int z, uint32 *id);
+//  void idToPos(uint32 id, int *x, int *z);
 
   void init();
   void free();
@@ -233,7 +237,7 @@ public:
   sChunk *getMapData(int x, int z, bool generate = true);
 
   // Load map chunk
-  bool loadMap(int x, int z, bool generate = true);
+  sChunk *loadMap(int x, int z, bool generate = true);
 
   // Save map chunk to disc
   bool saveMap(int x, int z);

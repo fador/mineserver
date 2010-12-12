@@ -54,7 +54,8 @@
 #include "permissions.h"
 #include "chat.h"
 
-Map* Map::mMap;
+
+Map* Map::mMap = NULL;
 
 void Map::addSapling(User* user, int x, int y, int z)
 {
@@ -99,27 +100,18 @@ void Map::checkGenTrees()
 
 }
 
-void Map::posToId(int x, int z, uint32 *id)
-{
-  uint8 *id_pointer = reinterpret_cast<uint8 *>(id);
-  putSint16(&id_pointer[0], x);
-  putSint16(&id_pointer[2], z);
-}
-
-void Map::idToPos(uint32 id, int *x, int *z)
-{
-  uint8 *id_pointer = reinterpret_cast<uint8 *>(&id);
-  *x = getSint16(&id_pointer[0]);
-  *z = getSint16(&id_pointer[2]);
-}
-
 void Map::init()
 {
 #ifdef _DEBUG
   printf("Map::init()\n");
 #endif
 
-  this->mapDirectory = Conf::get()->sValue("map_directory");
+  mapDirectory = Conf::get()->sValue("map_directory");
+  if(mapDirectory == "Not found!")
+  {
+    std::cout << "Error, mapdir not defined!" << std::endl;
+    exit(EXIT_FAILURE);
+  }
 
   std::string infile = mapDirectory+"/level.dat";
 
@@ -229,23 +221,18 @@ void Map::free()
 
 sChunk *Map::getMapData(int x, int z, bool generate)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("getMapData(x=%d, z=%d, generate=%d)\n", x, z, generate);
 #endif
 
-  uint32 mapId;
-  Map::posToId(x, z, &mapId);
+  sChunk *chunk = chunks.GetChunk(x,z);
 
-  if(!maps.count(mapId) && !(generate && loadMap(x, z, generate)))
-  {
-    return 0;
-  }
+  if(chunk != NULL || generate == false)
+	  return chunk;
 
-  // Update last used time
-  mapLastused[mapId] = (int)time(0);
+  // TODO: mapLastUsed[]
+  return loadMap(x,z, generate);
 
-  // Data in memory
-  return &maps[mapId];
 }
 
 bool Map::saveWholeMap()
@@ -301,16 +288,12 @@ bool Map::saveWholeMap()
 
 bool Map::generateLight(int x, int z)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("generateLight(x=%d, z=%d)\n", x, z);
 #endif
 
-  uint32 mapId;
-  Map::posToId(x, z, &mapId);
-
-  sChunk *chunk = getMapData(x, z, false);
-
-  if (!chunk)
+  sChunk *chunk = chunks.GetChunk(x,z);
+  if(chunk == NULL)
   {
     LOG("Loading chunk failed (generateLight)");
     return false;
@@ -323,7 +306,7 @@ bool Map::generateLight(int x, int z)
 
 bool Map::generateLight(int x, int z, sChunk *chunk)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("generateLight(x=%d, z=%d, chunk=%p)\n", x, z, chunk);
 #endif
   #ifdef PRINT_LIGHTGEN_TIME
@@ -451,7 +434,7 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
 
 bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("spreadLight(x=%d, y=%d, z=%d, skylight=%d, blocklight=%d)\n", x, y, z, skylight, blocklight);
 #endif
 
@@ -463,9 +446,6 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight)
 
   int chunk_x = blockToChunk(x);
   int chunk_z = blockToChunk(z);
-
-  uint32 mapId;
-  Map::posToId(chunk_x, chunk_z, &mapId);
 
   sChunk *chunk = getMapData(chunk_x, chunk_z, false);
 
@@ -480,7 +460,7 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight)
 
 bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk *chunk)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("spreadLight(x=%d, y=%d, z=%d, skylight=%d, blocklight=%d, chunk=%p)\n", x, y, z, skylight, blocklight, chunk);
 #endif
 
@@ -558,7 +538,7 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk 
 
 bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("getBlock(x=%d, y=%d, z=%d, type=%p, meta=%p, generate=%d)\n", x, y, z, type, meta, generate);
 #endif
 
@@ -571,9 +551,6 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate)
 
   int chunk_x = blockToChunk(x);
   int chunk_z = blockToChunk(z);
-
-  uint32 mapId;
-  Map::posToId(chunk_x, chunk_z, &mapId);
 
   sChunk *chunk = getMapData(chunk_x, chunk_z, generate);
 
@@ -592,15 +569,12 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate)
 
 bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate, sChunk *chunk)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("getBlock(x=%d, y=%d, z=%d, type=%p, meta=%p, generate=%d)\n", x, y, z, type, meta, generate);
 #endif
 
   int chunk_block_x  = blockToChunkBlock(x);
   int chunk_block_z  = blockToChunkBlock(z);
-
-  uint32 mapId;
-  Map::posToId(x, z, &mapId);
 
   uint8 *blocks      = chunk->blocks;
   uint8 *metapointer = chunk->data;
@@ -619,14 +593,14 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate,
   }
 
   *meta              = metadata;
-  mapLastused[mapId] = (int)time(0);
+  // TODO: mapLastused[mapId] = (int)time(0);
 
   return true;
 }
 
 bool Map::getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("getLight(x=%d, y=%d, z=%d, skylight=%p, blocklight=%p)\n", x, y, z, skylight, blocklight);
 #endif
 
@@ -653,7 +627,7 @@ bool Map::getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight)
 
 bool Map::getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight, sChunk *chunk)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("getLight(x=%d, y=%d, z=%d, skylight=%p, blocklight=%p, chunk=%p)\n", x, y, z, skylight, blocklight, chunk);
 #endif
 
@@ -686,7 +660,7 @@ bool Map::getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight, sChu
 
 bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("setLight(x=%d, y=%d, z=%d, skylight=%d, blocklight=%d, type=%d)\n", x, y, z, skylight, blocklight, type);
 #endif
 
@@ -712,7 +686,7 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type)
 
 bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type, sChunk *chunk)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("setLight(x=%d, y=%d, z=%d, skylight=%d, blocklight=%d, type=%d, chunk=%p)\n", x, y, z, skylight, blocklight, type, chunk);
 #endif
 
@@ -769,7 +743,7 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type, 
 
 bool Map::setBlock(int x, int y, int z, char type, char meta)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("setBlock(x=%d, y=%d, z=%d, type=%d, char=%d)\n", x, y, z, type, meta);
 #endif
 
@@ -783,8 +757,8 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   int chunk_x = blockToChunk(x);
   int chunk_z = blockToChunk(z);
 
-  uint32 mapId;
-  Map::posToId(chunk_x, chunk_z, &mapId);
+  //uint32 mapId;
+  //Map::posToId(chunk_x, chunk_z, &mapId);
 
   sChunk *chunk = getMapData(chunk_x, chunk_z, true);
 
@@ -816,9 +790,9 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   }
   metapointer[index >> 1] = metadata;
 
-  mapChanged[mapId]       = true;
-  mapLightRegen[mapId]    = true;
-  mapLastused[mapId]      = (int)time(0);
+//  mapChanged[mapId]       = true;
+//  mapLightRegen[mapId]    = true;
+//  mapLastused[mapId]      = (int)time(0);
 
   return true;
 }
@@ -832,12 +806,11 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
   Packet pkt;
   pkt << PACKET_BLOCK_CHANGE << (sint32)x << (sint8)y << (sint32)z << (sint8)type << (sint8)meta;
 
+  sChunk *chunk = chunks.GetChunk(blockToChunk(x), blockToChunk(z));
+  if(chunk == NULL)
+	  return false;
 
-  // TODO: only send to users in range
-  for(unsigned int i = 0; i < User::all().size(); i++)
-  {
-    User::all()[i]->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
-  }
+  chunk->sendPacket(pkt);
 
   return true;
 }
@@ -852,20 +825,19 @@ bool Map::sendPickupSpawn(spawnedItem item)
   //Push to local item storage
   int chunk_x = blockToChunk(item.pos.x()/32);
   int chunk_z = blockToChunk(item.pos.z()/32);
-  uint32 chunkHash;
-  posToId(chunk_x, chunk_z, &chunkHash);
-  mapItems[chunkHash].push_back(storedItem);
+
+  sChunk *chunk = chunks.GetChunk(chunk_x, chunk_z);
+  if(chunk == NULL)
+	  return false;
+
+  chunk->items.push_back(storedItem);
 
   Packet pkt;
   pkt << PACKET_PICKUP_SPAWN << (sint32)item.EID << (sint16)item.item << (sint8)item.count
       << (sint32)item.pos.x() << (sint32)item.pos.y() << (sint32)item.pos.z()
       << (sint8)0 << (sint8)0 << (sint8)0;
 
-  // TODO: only send to users in range
-  for(unsigned int i = 0; i < User::all().size(); i++)
-  {
-    User::all()[i]->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
-  }
+  chunk->sendPacket(pkt);
 
   return true;
 }
@@ -885,30 +857,26 @@ void Map::createPickupSpawn(int x, int y, int z, int type, int count)
    item.pos.x() += 5+(rand()%22);
    item.pos.z() += 5+(rand()%22);
 
-   this->sendPickupSpawn(item);
+   sendPickupSpawn(item);
 }
 
-bool Map::loadMap(int x, int z, bool generate)
+sChunk * Map::loadMap(int x, int z, bool generate)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("loadMap(x=%d, z=%d, generate=%d)\n", x, z, generate);
 #endif
 
-  uint32 mapId;
-  Map::posToId(x, z, &mapId);
-
-  if(maps.count(mapId))
-  {
-    return true;
-  }
+  sChunk *chunk = chunks.GetChunk(x,z);
+  if(chunk != NULL)
+	  return chunk;
 
   // Generate map file name
 
   int mapposx = x;
-  int modulox = (mapposx) & 0x3F;
+  int modulox = mapposx & 0x3F;
 
   int mapposz = z;
-  int moduloz = (mapposz) & 0x3F;
+  int moduloz = mapposz & 0x3F;
 
   std::string infile = mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+
                        base36_encode(mapposx)+"."+base36_encode(mapposz)+".dat";
@@ -921,7 +889,8 @@ bool Map::loadMap(int x, int z, bool generate)
     {
       MapGen::get()->generateChunk(x,z);
       generateLight(x, z);
-      mapLightRegen[mapId] = false;
+
+	  //mapLightRegen[mapId] = false;
 
       //If we generated spawn pos, make sure the position is not underground!
       if(x == blockToChunk(spawnPos.x()) &&
@@ -962,33 +931,36 @@ bool Map::loadMap(int x, int z, bool generate)
         }
 
       }
-      return true;
+
+	  return chunks.GetChunk(x,z);
     }
     else
     {
-      return false;
+      return NULL;
     }
   }
-  else
-  {
-    maps[mapId].nbt = NBT_Value::LoadFromFile(infile.c_str());
-  }
 
-  if(maps[mapId].nbt == NULL)
+  chunk = new sChunk();
+
+  chunk->nbt = NBT_Value::LoadFromFile(infile.c_str());
+  
+  
+  if(chunk->nbt == NULL)
   {
     LOG("Error in loading map (unable to load file)");
     return false;
   }
 
-  NBT_Value &level = *(*maps[mapId].nbt)["Level"];
+  NBT_Value &level = *(*chunk->nbt)["Level"];
 
-  maps[mapId].x = (sint32)(*level["xPos"]);
-  maps[mapId].z = (sint32)(*level["zPos"]);
+  chunk->x = (sint32)(*level["xPos"]);
+  chunk->z = (sint32)(*level["zPos"]);
 
-  if(maps[mapId].x != x || maps[mapId].z != z)
+  if(chunk->x != x || chunk->z != z)
   {
     LOG("Error in loading map (incorrect chunk)");
-    return false;
+	delete chunk;
+    return NULL;
   }
 
   std::vector<uint8> *blocks = level["Blocks"]->GetByteArray();
@@ -1000,7 +972,8 @@ bool Map::loadMap(int x, int z, bool generate)
   if(blocks == 0 || data == 0 || blocklight == 0 || skylight == 0 || heightmap == 0)
   {
     LOG("Error in loading map (chunk missing data)");
-    return false;
+	delete chunk;
+    return NULL;
   }
 
   size_t fullLen = (16 * 128 * 16);
@@ -1012,23 +985,26 @@ bool Map::loadMap(int x, int z, bool generate)
     skylight->size() != halfLen)
   {
     LOG("Error in loading map (corrupt?)");
-    return false;
+	delete chunk;
+    return NULL;
   }
 
-  maps[mapId].blocks = &((*blocks)[0]);
-  maps[mapId].data = &((*data)[0]);
-  maps[mapId].blocklight = &((*blocklight)[0]);
-  maps[mapId].skylight = &((*skylight)[0]);
-  maps[mapId].heightmap = &((*heightmap)[0]);
+  chunk->blocks = &((*blocks)[0]);
+  chunk->data = &((*data)[0]);
+  chunk->blocklight = &((*blocklight)[0]);
+  chunk->skylight = &((*skylight)[0]);
+  chunk->heightmap = &((*heightmap)[0]);
+
+  chunks.LinkChunk(chunk, x, z);
 
   // Update last used time
-  mapLastused[mapId] = (int)time(0);
+  //mapLastused[mapId] = (int)time(0);
 
   // Not changed
-  mapChanged[mapId]    = false;
-  mapLightRegen[mapId] = false;
+//  mapChanged[mapId]    = false;
+//  mapLightRegen[mapId] = false;
 
-  return true;
+  return chunk;
 }
 
 bool Map::saveMap(int x, int z)
@@ -1037,42 +1013,31 @@ bool Map::saveMap(int x, int z)
   printf("saveMap(x=%d, z=%d)\n", x, z);
 #endif
 
-  uint32 mapId;
-  Map::posToId(x, z, &mapId);
+//  uint32 mapId;
+//  Map::posToId(x, z, &mapId);
 
-  if(!mapChanged[mapId])
-  {
-    return true;
-  }
+// TODO: Implement this in hash map
+//  if(!mapChanged[mapId])
+//    return true;
 
-  if(!maps.count(mapId))
-  {
-    return false;
-  }
+//  if(!maps.count(mapId))
+//    return false;
+
+  sChunk * chunk = chunks.GetChunk(x, z);
 
   // Recalculate light maps
-  if(mapLightRegen[mapId])
+//  if(mapLightRegen[mapId])
   {
-    generateLight(x, z, &maps[mapId]);
+    generateLight(x, z, chunk);
   }
 
   // Generate map file name
 
   int mapposx = x;
-  int modulox = (mapposx);
-  while(modulox < 0)
-  {
-    modulox += 64;
-  }
-  modulox %= 64;
+  int modulox = mapposx & 0x3F;
 
   int mapposz = z;
-  int moduloz = (mapposz);
-  while(moduloz < 0)
-  {
-    moduloz += 64;
-  }
-  moduloz %= 64;
+  int moduloz = mapposz & 0x3F;
 
   std::string outfile = mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+
                         base36_encode(mapposx)+"."+base36_encode(mapposz)+".dat";
@@ -1107,11 +1072,11 @@ bool Map::saveMap(int x, int z)
     }
   }
 
-  maps[mapId].nbt->SaveToFile(outfile);
+  chunk->nbt->SaveToFile(outfile);
 
   // Set "not changed"
-  mapChanged[mapId]   = false;
-  mapLightRegen[mapId]= false;
+  //mapChanged[mapId] = false;
+  //mapLightRegen[mapId]= false;
 
   return true;
 }
@@ -1121,17 +1086,24 @@ bool Map::releaseMap(int x, int z)
   // save first
   saveMap(x, z);
 
-  uint32 mapId;
-  Map::posToId(x, z, &mapId);
+  sChunk *chunk = chunks.GetChunk(x,z);
+  if(chunk == NULL)
+	  return false;
+  chunks.UnlinkChunk(x, z);
+  delete chunk;
+  return true;
 
-  mapChanged.erase(mapId);
-  mapLastused.erase(mapId);
-  if(maps.count(mapId))
-  {
-    delete maps[mapId].nbt;
-  }
+  //uint32 mapId;
+  //Map::posToId(x, z, &mapId);
 
-  return maps.erase(mapId) ? true : false;
+  //mapChanged.erase(mapId);
+  //mapLastused.erase(mapId);
+  //if(maps.count(mapId))
+  //{
+//    delete maps[mapId].nbt;
+  //}
+
+//  return maps.erase(mapId) ? true : false;
 }
 
 // Send chunk to user
@@ -1141,21 +1113,22 @@ void Map::sendToUser(User *user, int x, int z)
   printf("sendToUser(x=%d, z=%d)\n", x, z);
 #endif
 
-  uint32 mapId;
-  Map::posToId(x, z, &mapId);
+//  uint32 mapId;
+//  Map::posToId(x, z, &mapId);
+  sChunk *chunk = loadMap(x, z);
+  if(chunk == NULL)
+	  return;
 
   uint8 *data4   = new uint8[18+81920];
   uint8 *mapdata = new uint8[81920];
   sint32 mapposx    = x;
   sint32 mapposz    = z;
 
-  if(loadMap(x, z))
-  {
     //Regenerate lighting if needed
-    if(mapLightRegen[mapId])
+//    if(mapLightRegen[mapId])
     {
-      generateLight(x, z, &maps[mapId]);
-      mapLightRegen[mapId] = false;
+      generateLight(x, z, chunk);
+  //    mapLightRegen[mapId] = false;
     }
     // Pre chunk
     user->buffer << (sint8)PACKET_PRE_CHUNK << mapposx << mapposz << (sint8)1;
@@ -1164,47 +1137,47 @@ void Map::sendToUser(User *user, int x, int z)
     user->buffer << (sint8)PACKET_MAP_CHUNK << (sint32)(mapposx * 16) << (sint16)0 << (sint32)(mapposz * 16)
       << (sint8)15 << (sint8)127 << (sint8)15;
 
-    memcpy(&mapdata[0], maps[mapId].blocks, 32768);
-    memcpy(&mapdata[32768], maps[mapId].data, 16384);
-    memcpy(&mapdata[32768+16384], maps[mapId].blocklight, 16384);
-    memcpy(&mapdata[32768+16384+16384], maps[mapId].skylight, 16384);
+  memcpy(&mapdata[0], chunk->blocks, 32768);
+  memcpy(&mapdata[32768], chunk->data, 16384);
+  memcpy(&mapdata[32768+16384], chunk->blocklight, 16384);
+  memcpy(&mapdata[32768+16384+16384], chunk->skylight, 16384);
 
-    uLongf written = 81920;
-    Bytef *buffer = new Bytef[written];
+  uLongf written = 81920;
+  Bytef *buffer = new Bytef[written];
 
-    // Compress data with zlib deflate
-    compress(buffer, &written, &mapdata[0], 81920);
+  // Compress data with zlib deflate
+  compress(buffer, &written, &mapdata[0], 81920);
 
-    user->buffer << (sint32)written;
-    user->buffer.addToWrite(buffer, written);
+  user->buffer << (sint32)written;
+  user->buffer.addToWrite(buffer, written);
 
-    //Get list of chests,furnaces etc on the chunk
-    NBT_Value *entityList = (*(*maps[mapId].nbt)["Level"])["TileEntities"];
+  //Get list of chests,furnaces etc on the chunk
+  NBT_Value *entityList = (*(*chunk->nbt)["Level"])["TileEntities"];
 
-    //Verify the type
-    if(entityList && entityList->GetType() == NBT_Value::TAG_LIST && entityList->GetListType() == NBT_Value::TAG_COMPOUND)
+  //Verify the type
+  if(entityList && entityList->GetType() == NBT_Value::TAG_LIST && entityList->GetListType() == NBT_Value::TAG_COMPOUND)
+  {
+    std::vector<NBT_Value*> *entities = entityList->GetList();
+    std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
+
+    uint8 *compressedData = new uint8[ALLOCATE_NBTFILE];
+
+    for( ; iter != end ; iter++)
     {
-      std::vector<NBT_Value*> *entities = entityList->GetList();
-      std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
-
-      uint8 *compressedData = new uint8[ALLOCATE_NBTFILE];
-
-      for( ; iter != end ; iter++)
+      std::vector<uint8> buffer;
+      NBT_Value *idVal = (**iter)["id"];
+      if(idVal == NULL)
+        continue;
+      std::string *id = idVal->GetString();
+      if(id && (*id=="Chest" || *id=="Furnace" || *id=="Sign"))
       {
-        std::vector<uint8> buffer;
-        NBT_Value *idVal = (**iter)["id"];
-        if(idVal == NULL)
-          continue;
-        std::string *id = idVal->GetString();
-        if(id && (*id=="Chest" || *id=="Furnace" || *id=="Sign"))
+        if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
+          (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
+          (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
         {
+          continue;
+        }
 
-          if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
-            (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
-            (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
-          {
-            continue;
-          }
 
           if(*id == "Chest")
           {
@@ -1267,12 +1240,10 @@ void Map::sendToUser(User *user, int x, int z)
 
           deflateEnd(&zstream2);
         }
-      }
-      delete [] compressedData;
     }
-    delete [] buffer;
+    delete [] compressedData;
   }
-
+  delete [] buffer;
 
   delete[] data4;
   delete[] mapdata;
@@ -1280,7 +1251,14 @@ void Map::sendToUser(User *user, int x, int z)
 
 void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *entity)
 {
-  uint32 mapId;
+//  uint32 mapId;
+  
+  int chunk_x = blockToChunk(x);
+  int chunk_z = blockToChunk(z);
+
+  sChunk *chunk = loadMap(chunk_x, chunk_z);
+  if(chunk == NULL)
+	  return;
 
   std::string player = "";
   if(user != NULL)
@@ -1288,16 +1266,6 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *
     player = user->nick;
   }
   sint8 locked = Conf::get()->bValue("chests_locked_by_default")?1:0;
-
-  int block_x = blockToChunk(x);
-  int block_z = blockToChunk(z);
-
-  if(!loadMap(block_x, block_z))
-  {
-    return;
-  }
-
-  Map::posToId(block_x, block_z, &mapId);
 
   if(entity->GetType() != NBT_Value::TAG_COMPOUND)
   {
@@ -1313,12 +1281,12 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *
     return;
   }
 
-  NBT_Value *entityList = (*(*maps[mapId].nbt)["Level"])["TileEntities"];
+  NBT_Value *entityList = (*(*chunk->nbt)["Level"])["TileEntities"];
 
   if(!entityList)
   {
     entityList = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
-    maps[mapId].nbt->Insert("TileEntities", entityList);
+    chunk->nbt->Insert("TileEntities", entityList);
   }
 
   if(entityList->GetType() == NBT_Value::TAG_LIST)
@@ -1390,7 +1358,7 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *
     return;
   }
 
-  mapChanged[mapId] = true;
+  // TODO: mapChanged[mapId] = true;
 
   std::vector<uint8> buffer;
   buffer.push_back(NBT_Value::TAG_COMPOUND);
@@ -1421,13 +1389,14 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *
 
   deflateEnd(&zstream2);
 
-
   Packet pkt;
   pkt << (sint8)PACKET_COMPLEX_ENTITIES
     << x << (sint16)y << z << (sint16)zstream2.total_out;
   pkt.addToWrite(compressedData, zstream2.total_out);
 
+  chunk->sendPacket(pkt);
+
   delete [] compressedData;
 
-  User::sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
+  //User::sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
 }

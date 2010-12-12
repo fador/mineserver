@@ -48,6 +48,7 @@
 
 #include "tools.h"
 #include "nbt.h"
+#include "constants.h"
 
 //NBT level file reading
 //More info: http://www.minecraft.net/docs/NBT.txt
@@ -459,6 +460,12 @@ NBT_Value * NBT_Value::LoadFromFile(const std::string &filename)
   uint32 uncompressedSize = 0;
   fread(&uncompressedSize, 4, 1, fp);
   fclose(fp);
+
+  if(uncompressedSize == 0)
+  {
+	  std::cout << "Unable to determine uncompressed size of " << filename << std::endl;
+	  uncompressedSize = ALLOCATE_NBTFILE;
+  }
 
   uint8 *uncompressedData = new uint8[uncompressedSize];
   gzFile nbtFile = gzopen(filename.c_str(), "rb");

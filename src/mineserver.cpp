@@ -286,7 +286,7 @@ int Mineserver::run(int argc, char *argv[])
     struct hostent *hostinfo = gethostbyname(name);
     std::cout << "Listening on: ";
     int ipIndex = 0;
-    while(hostinfo->h_addr_list[ipIndex]) {
+    while(hostinfo && hostinfo->h_addr_list[ipIndex]) {
         if(ipIndex > 0) { std::cout << ", "; }
         char *ip = inet_ntoa(*(struct in_addr *)hostinfo->h_addr_list[ipIndex++]);
         std::cout << ip << ":" << port;
@@ -354,7 +354,7 @@ int Mineserver::run(int argc, char *argv[])
       int map_release_time = Conf::get()->iValue("map_release_time");
 
       //Release chunks not used in <map_release_time> seconds
-      std::vector<uint32> toRelease;
+   /*   std::vector<uint32> toRelease;
       for(std::map<uint32, int>::const_iterator it = Map::get()->mapLastused.begin();
           it != Map::get()->mapLastused.end();
           ++it)
@@ -368,8 +368,8 @@ int Mineserver::run(int argc, char *argv[])
       {
         Map::get()->idToPos(toRelease[i], &x_temp, &z_temp);
         Map::get()->releaseMap(x_temp, z_temp);
-      }
-    }
+      } */
+    } 
 
     //Every second
     if(time(0)-tick > 0)
@@ -407,8 +407,8 @@ int Mineserver::run(int argc, char *argv[])
     for( unsigned int i = 0; i < User::all().size(); i++ )
       User::all()[i]->isUnderwater();
 
-    event_set(&m_listenEvent, m_socketlisten, EV_WRITE|EV_READ|EV_PERSIST, accept_callback, NULL);
-    event_add(&m_listenEvent, NULL);
+ //   event_set(&m_listenEvent, m_socketlisten, EV_WRITE|EV_READ|EV_PERSIST, accept_callback, NULL);
+ //   event_add(&m_listenEvent, NULL);
 
     event_base_loopexit(m_eventBase, &loopTime);
   }

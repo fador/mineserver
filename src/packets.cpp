@@ -715,6 +715,8 @@ int PacketHandler::holding_change(User *user)
 
   user->buffer.removePacket();
 
+  user->curItem = itemID;
+
   //Send holding change to others
   Packet pkt;
   pkt << (sint8)PACKET_HOLDING_CHANGE << (sint32)user->UID << itemID;

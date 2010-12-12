@@ -98,6 +98,7 @@ public:
   position pos;
   vec curChunk;
   Inventory inv;
+  sint16 curItem;
 
   int permissions; // bitmask for permissions. See permissions.h
 
@@ -184,6 +185,12 @@ public:
   // Getter/Setter for item currently in hold
   sint16 currentItem();
   void setCurrentItem(sint16 item_id);
+
+
+  bool withinViewDistance(int a, int b)
+  {
+	  return a > b ? (a-b)<viewDistance : (b-a)<viewDistance;
+  }
 
   struct event *GetEvent();
 

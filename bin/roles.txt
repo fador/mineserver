@@ -2,6 +2,7 @@
 [Server]
 Psoden
 fador
+ReDucTor
 
 # ops
 
