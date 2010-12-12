@@ -29,7 +29,12 @@
 
 #include <cstdlib>
 #include <iostream>
+#ifdef WIN32
+  #include <winsock2.h>
+  #include <curses.h>
+#else
 #include <ncurses.h>
+#endif
 #include <vector>
 #include "user.h"
 enum

@@ -37,6 +37,7 @@
     <ClCompile Include="..\src\packets.cpp" />
     <ClCompile Include="..\src\physics.cpp" />
     <ClCompile Include="..\src\plugin.cpp" />
+    <ClCompile Include="..\src\screen.cpp" />
     <ClCompile Include="..\src\sockets.cpp" />
     <ClCompile Include="..\src\tools.cpp" />
     <ClCompile Include="..\src\user.cpp" />
@@ -70,6 +71,7 @@
     <ClInclude Include="..\src\permissions.h" />
     <ClInclude Include="..\src\physics.h" />
     <ClInclude Include="..\src\plugin.h" />
+    <ClInclude Include="..\src\screen.h" />
     <ClInclude Include="..\src\sockets.h" />
     <ClInclude Include="..\src\tools.h" />
     <ClInclude Include="..\src\user.h" />
@@ -150,7 +152,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Winmm.lib;libnoise.lib;zlibwapi.lib;libevent.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>pdcurses.lib;Winmm.lib;libnoise.lib;zlibwapi.lib;libevent.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
