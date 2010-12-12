@@ -25,41 +25,71 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "stair.h"
+#ifndef _MAPGEN_H
+#define _MAPGEN_H
 
-void BlockStair::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+#ifdef DEBIAN
+#include <libnoise/noise.h>
+#else
+#include <noise/noise.h>
+#endif
+
+#include "cavegen.h"
+
+class MapGen
 {
+private:
+  MapGen() {}
 
-}
+  uint8 blocks[16*16*128];
+  uint8 blockdata[16*16*128/2];
+  uint8 skylight[16*16*128/2];
+  uint8 blocklight[16*16*128/2];
+  uint8 heightmap[16*16];
+  
+  int m_seed;
+  int seaLevel;
 
-void BlockStair::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
+  float perlinScale;
+  
+  void generateFlatgrass();
+  void generateWithNoise(int x, int z);
+  
+  void AddBeaches();
+  
+  CaveGen cave;
 
-}
+  // Heightmap composition
+  noise::module::RidgedMulti ridgedMultiNoise;
+  noise::module::ScaleBias perlinBiased;
 
-void BlockStair::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
+  noise::module::Perlin baseFlatTerrain;  
+  noise::module::ScaleBias flatTerrain;
+  
+  noise::module::Perlin seaFloor;
+  noise::module::ScaleBias seaBias;
 
-}
+  noise::module::Perlin terrainType;
 
-void BlockStair::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
+  noise::module::Perlin seaControl;
+  
+  noise::module::Select seaTerrain;
+  noise::module::Select finalTerrain;
 
-void BlockStair::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   /* TODO: add code to align stairs? */
-}
+  static MapGen *mMapGen;
+public:
+  static MapGen* get()
+  {
+     if(!mMapGen) {
+        mMapGen = new MapGen();
+     }
+     return mMapGen;
+  }
 
-void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
+  void init(int seed);
+  void free();
+  void generateChunk(int x, int z);
+};
 
-void BlockStair::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   /* Align neighbour to this stair */
-}
 
-void BlockStair::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
+#endif

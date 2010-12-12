@@ -25,37 +25,26 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _CAVEGEN_H
-#define _CAVEGEN_H
+#ifndef _KIT_H
+#define _KIT_H
 
-#include "../mersenne.h"
+#include <string>
+#include <vector>
 
-class CaveGen
-{
-public:
-  static CaveGen &get();
-  void init(int seed);
-  void AddCaves(uint8 &block, double x, double y, double z);
-  
-  float caveScale;
+/**
+ * A Kit represents a list of items that a player can spawn (if given
+ * the required permissions a Kit has), via the /kit command.
+ */
+struct Kit {
+  std::string name;
+  std::vector<int> items;
+  int permissions;
 
-private:
-  CaveGen() {}
-  Random rand;
-  uint8 *blocks;
-  
-  noise::module::Perlin caveNoise1;
-  noise::module::Perlin caveNoise2;
-  
-  double caveN1, caveN2;
-  
-  bool addCaves;
-  int caveDensity;
-  int caveSize;
-  bool addCaveLava;
-  bool addCaveWater;
-  bool addOre;
-
+  Kit(std::string name, std::vector<int> items, int permissions)
+  : name(name),
+    items(items),
+    permissions(permissions)
+  {}
 };
 
-#endif
+#endif /* _KIT_H */

@@ -25,41 +25,28 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "stair.h"
+#pragma once
 
-void BlockStair::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+#include "basic.h"
+
+class User;
+
+/** BlockChest deals specifically with chests
+@see BlockBasic
+*/
+class BlockChest: public BlockBasic
 {
+public:
+  void onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+private:
 
-}
+};
 
-void BlockStair::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-
-}
-
-void BlockStair::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-
-}
-
-void BlockStair::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
-
-void BlockStair::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   /* TODO: add code to align stairs? */
-}
-
-void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
-
-void BlockStair::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   /* Align neighbour to this stair */
-}
-
-void BlockStair::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}

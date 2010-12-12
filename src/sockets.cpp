@@ -70,10 +70,10 @@ void client_callback(int fd,
                      void *arg)
 {
   User *user = (User *)arg;
-  
+
   if(ev & EV_READ)
   {
-  
+
     int read   = 1;
 
     uint8 *buf = new uint8[2048];
@@ -89,7 +89,7 @@ void client_callback(int fd,
 #else
     close(user->fd);
 #endif
-    remUser(user->fd);
+    delete user;
     return;
     }
 
@@ -101,7 +101,7 @@ void client_callback(int fd,
       #else
           close(user->fd);
       #endif
-          remUser(user->fd);
+          delete user;
       return;
     }
 
@@ -114,19 +114,19 @@ void client_callback(int fd,
     while(user->buffer >> (sint8&)user->action)
     {
       //Variable len package
-      if(PacketHandler::get().packets[user->action].len == PACKET_VARIABLE_LEN)
+      if(PacketHandler::get()->packets[user->action].len == PACKET_VARIABLE_LEN)
       {
         //Call specific function
         int (PacketHandler::*function)(User *) =
-        PacketHandler::get().packets[user->action].function;
+        PacketHandler::get()->packets[user->action].function;
         bool disconnecting = user->action == 0xFF;
-        int curpos = (PacketHandler::get().*function)(user);
+        int curpos = (PacketHandler::get()->*function)(user);
         if(curpos == PACKET_NEED_MORE_DATA)
         {
-        user->waitForData = true;
-        event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
-        event_add(user->GetEvent(), NULL);
-        return;
+          user->waitForData = true;
+          event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
+          event_add(user->GetEvent(), NULL);
+          return;
         }
 
         if(disconnecting) // disconnect -- player gone
@@ -134,7 +134,7 @@ void client_callback(int fd,
           return;
         }
       }
-      else if(PacketHandler::get().packets[user->action].len == PACKET_DOES_NOT_EXIST)
+      else if(PacketHandler::get()->packets[user->action].len == PACKET_DOES_NOT_EXIST)
       {
         printf("Unknown action: 0x%x\n", user->action);
 
@@ -145,11 +145,11 @@ void client_callback(int fd,
         #else
         close(user->fd);
         #endif
-        remUser(user->fd);
+        delete user;
       }
       else
       {
-        if(!user->buffer.haveData(PacketHandler::get().packets[user->action].len))
+        if(!user->buffer.haveData(PacketHandler::get()->packets[user->action].len))
         {
           user->waitForData = true;
           event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
@@ -158,8 +158,8 @@ void client_callback(int fd,
         }
 
         //Call specific function
-        int (PacketHandler::*function)(User *) = PacketHandler::get().packets[user->action].function;
-        (PacketHandler::get().*function)(user);
+        int (PacketHandler::*function)(User *) = PacketHandler::get()->packets[user->action].function;
+        (PacketHandler::get()->*function)(user);
       }
     } //End while
   }
@@ -180,7 +180,7 @@ void client_callback(int fd,
     #else
         close(user->fd);
     #endif
-        remUser(user->fd);
+        delete user;
         return;
       }
       else
@@ -205,7 +205,6 @@ void client_callback(int fd,
 
   event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
   event_add(user->GetEvent(), NULL);
-
 }
 
 void accept_callback(int fd,
@@ -225,7 +224,7 @@ void accept_callback(int fd,
     LOG("Client: accept() failed");
     return;
   }
-  User *client = addUser(client_fd, generateEID());
+  User *client = new User(client_fd, generateEID());
   setnonblock(client_fd);
 
   event_set(client->GetEvent(), client_fd,EV_WRITE|EV_READ, client_callback, client);

@@ -25,41 +25,37 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "stair.h"
+#ifndef _CAVEGEN_H
+#define _CAVEGEN_H
 
-void BlockStair::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+#include "mersenne.h"
+
+class CaveGen
 {
+public:
+  void init(int seed);
+  void AddCaves(uint8 &block, double x, double y, double z);
+  
+  float caveScale;
 
-}
+private:
+  Random rand;
+  uint8 *blocks;
+  
+  noise::module::RidgedMulti caveNoise1;
+  noise::module::RidgedMulti caveNoise2;
+  
+  double caveN1, caveN2;
+  
+  bool addCaves;
+  int caveDensity;
+  int caveSize;
+  bool addCaveLava;
+  bool addCaveWater;
+  bool addOre;
 
-void BlockStair::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
+  int seaLevel;
 
-}
+};
 
-void BlockStair::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-
-}
-
-void BlockStair::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
-
-void BlockStair::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   /* TODO: add code to align stairs? */
-}
-
-void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
-
-void BlockStair::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   /* Align neighbour to this stair */
-}
-
-void BlockStair::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
+#endif

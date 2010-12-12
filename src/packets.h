@@ -308,6 +308,11 @@ public:
     return &m_writeBuffer[0];
   }
 
+  const void *getWrite() const
+  {
+    return &m_writeBuffer[0];
+  }
+
   size_t getWriteLen() const
   {
     return m_writeBuffer.size();
@@ -402,17 +407,20 @@ private:
   {
   }
 
+   static PacketHandler *mPacketHandler;
 public:
 
-  void initPackets();
+  void init();
+  void free();
 
-
-
-  static PacketHandler &get()
+  static PacketHandler* get()
   {
-    static PacketHandler instance;
-    return instance;
+    if(!mPacketHandler) {
+      mPacketHandler = new PacketHandler();
+    }
+    return mPacketHandler;
   }
+
   //Information of all the packets
   //around 2kB of memory
   Packets packets[256];

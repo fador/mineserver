@@ -28,6 +28,8 @@
 #ifndef _CHAT_H
 #define _CHAT_H
 
+#include <deque>
+
 class Chat
 {
 public:
@@ -36,29 +38,63 @@ public:
     ALL,
     USER,
     OTHERS,
-    ADMINS
+    ADMINS,
+    OPS,
+    GUESTS
   };
-  typedef void (*ChatCommand)(User *, std::string, std::deque<std::string> );
-  //Chat();
-  std::deque<std::string> admins;
-  std::deque<std::string> banned;
-  std::deque<std::string> whitelist;
+  typedef void (*CommandCallback)(User *, std::string, std::deque<std::string>);
+
+  /**
+   * Chat command a user can enter.
+   * Requires the right permissions by the user (e.g. for admin-only commands).
+   */
+  struct Command
+  {
+    std::deque<std::string> names;
+    std::string arguments;
+    std::string description;
+    CommandCallback callback;
+    int permissions;
+
+    Command(std::deque<std::string> names, std::string arguments, std::string description, CommandCallback callback, int permissions)
+    : names(names),
+      arguments(arguments),
+      description(description),
+      callback(callback),
+      permissions(permissions)
+    {
+    }
+  };
+
   bool handleMsg( User *user, std::string msg );
   bool sendMsg( User *user, std::string msg, MessageTarget action = ALL );
   bool sendUserlist( User *user );
-  bool loadAdmins(std::string adminFile);
-  bool loadBanned(std::string bannedFile);
-  bool loadWhitelist(std::string whitelistFile);
   bool checkMotd(std::string motdFile);
-  void registerCommand(std::deque<std::string> words, ChatCommand command, bool adminOnly);
-  static Chat &get();
+  void registerCommand(Command *command);
+  void sendHelp(User *user, std::deque<std::string> args);
+
+  static Chat* get()
+  {
+    if(!_instance) {
+      _instance = new Chat();
+    }
+    return _instance;
+  }
+
+  void free();
+
 private:
-  typedef std::map<std::string, ChatCommand> CommandList;
-  CommandList userCommands;
-  CommandList adminCommands;
+  static Chat *_instance;
+
   Chat();
   void registerStandardCommands();
   std::deque<std::string> parseCmd(std::string cmd);
+
+  typedef std::map<std::string, Command*> CommandList;
+  CommandList m_adminCommands;
+  CommandList m_opCommands;
+  CommandList m_memberCommands;
+  CommandList m_guestCommands;
 };
 
 #endif

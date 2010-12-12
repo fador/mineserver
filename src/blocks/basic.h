@@ -27,24 +27,21 @@
 
 #pragma once
 
-#include <cstdlib>
-
 #include "../constants.h"
 #include "../map.h"
 #include "../tools.h"
-
 class User;
 
+/** The BlockBasic can be used to extend your own block classes. It contains
+useful methods for reuse in your own block extensions. */
 class BlockBasic
 {
-public:
-   void onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
-   void onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
-   void onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
-   void onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
-   void onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
-   void onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
-   void onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
-   void onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+   protected:
+      bool isBlockStackable(const uint8 block);
+      bool isUserOnBlock(const sint32 x, const sint8 y, const sint32 z);
+      bool translateDirection(sint32 *x, sint8 *y, sint32 *z, const sint8 direction);
+      bool isBlockEmpty(const sint32 x, const sint8 y, const sint32 z);
+      bool spawnBlockItem(const sint32 x, const sint8 y, const sint32 z, const uint8 block);
+      void notifyNeighbours(const sint32 x, const sint8 y, const sint32 z, const std::string callback, User* user,const uint8 oldblock, const sint8 ignore_direction);
 };
 

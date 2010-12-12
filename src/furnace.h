@@ -25,41 +25,78 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "stair.h"
+#pragma once
 
-void BlockStair::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+#include <cstdlib>
+
+#include "constants.h"
+#include "map.h"
+#include "tools.h"
+
+class User;
+
+enum
+{
+  SLOT_INPUT,
+  SLOT_FUEL,
+  SLOT_OUTPUT
+};
+
+class Furnace
 {
 
-}
+  struct Slot
+  {
+    sint8 count;
+    sint16 damage;
+    sint16 id;
+  };
 
-void BlockStair::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
+public:
+  Furnace(NBT_Value *entity, uint8 blockType);
 
-}
+  void sendToAllUsers();
+  NBT_Value* getSlotEntity(sint8 slotNumber);
+  void smelt();
+  bool isBurningFuel();
+  bool isCooking();
+  bool hasValidIngredient();
+  void consumeFuel();
+  void updateBlock();
 
-void BlockStair::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
+  /**
+   * Getter & setter methods
+   */
 
-}
+  sint16 burnTime();
+  sint16 cookTime();
 
-void BlockStair::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
+  sint16 fuelBurningTime() { return m_fuelBurningTime; }
+  void setFuelBurningTime(sint16 fuelBurningTime) { m_fuelBurningTime = fuelBurningTime; }
 
-void BlockStair::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   /* TODO: add code to align stairs? */
-}
+  sint16 activeCookDuration() { return m_activeCookDuration; }
+  void setActiveCookDuration(sint16 activeCookDuration) { m_activeCookDuration = activeCookDuration; }
 
-void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
+  sint16 cookingTime() { return m_cookingTime; }
 
-void BlockStair::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   /* Align neighbour to this stair */
-}
+  sint32 x() { return m_x; }
+  sint32 y() { return m_y; }
+  sint32 z() { return m_z; }
 
-void BlockStair::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
+  Slot* slots() { return m_slots; };
+
+private:
+  sint16 m_fuelBurningTime;
+  sint16 m_initialBurningTime;
+  sint16 m_cookingTime;
+  sint16 m_activeCookDuration;
+ // sint16 activeBurnDuration;
+  sint32 m_x;
+  sint32 m_y;
+  sint32 m_z;
+  Slot m_slots[3];
+
+  bool m_burning;
+};
+
+

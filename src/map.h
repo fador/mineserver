@@ -29,12 +29,26 @@
 #define _MAP_H_
 
 #include <map>
+#include <list>
 #include <ctime>
 #include "nbt.h"
 #include "user.h"
 #include "vec.h"
+#include "chunkmap.h"
 
-struct sChunk
+struct sTree
+{
+  sint32 x,y,z;
+  sint32 plantedTime;
+  uint32 plantedBy;
+
+  sTree(sint32 _x,sint32 _y, sint32 _z, sint32 _plantedTime, uint32 _plantedBy) :
+    x(_x),y(_y),z(_z),
+    plantedTime(_plantedTime),plantedBy(_plantedBy) {}
+
+};
+
+/*struct sChunk
 {
   uint8 *blocks;
   uint8 *data;
@@ -44,7 +58,7 @@ struct sChunk
   sint32 x;
   sint32 z;
   NBT_Value *nbt;
-};
+};*/
 
 struct spawnedItem
 {
@@ -98,10 +112,12 @@ private:
     stopLight[0x32] = 0; // Torch
     stopLight[0x33] = 0; // Fire
     stopLight[0x34] = 0; // Mob spawner
+    stopLight[0x35] = 0; // Wooden stairs
     stopLight[0x37] = 0; // Redstone wire
     stopLight[0x40] = 0; // Wooden door
     stopLight[0x41] = 0; // Ladder
     stopLight[0x42] = 0; // Minecart track
+    stopLight[0x43] = 0; // Cobblestone stairs
     stopLight[0x47] = 0; // Iron door
     stopLight[0x4b] = 0; // Redstone Torch (Off)
     stopLight[0x4C] = 0; // Redstone Torch (On)
@@ -135,6 +151,27 @@ private:
       //Get time from the map
       *data["Time"] = mapTime;
 
+      NBT_Value *trees = ((*root)["Trees"]);
+
+      if(trees)
+      {
+        std::vector<NBT_Value*>* tree_vec = trees->GetList();
+
+        tree_vec->clear();
+
+        for(std::list<sTree>::iterator iter = saplings.begin(); iter != saplings.end(); ++iter)
+        {
+          //(*trees)[i] = (*iter)
+          NBT_Value* tree = new NBT_Value(NBT_Value::TAG_COMPOUND);
+          tree->Insert("X", new NBT_Value( (sint32)(*iter).x));
+          tree->Insert("Y", new NBT_Value( (sint32)(*iter).y));
+          tree->Insert("Z", new NBT_Value( (sint32)(*iter).z));
+          tree->Insert("plantedTime", new NBT_Value( (sint32)(*iter).plantedTime));
+          tree->Insert("plantedBy", new NBT_Value( (sint32)(*iter).plantedBy));
+          tree_vec->push_back(tree);
+        }
+      }
+
       root->SaveToFile(infile);
 
       delete root;
@@ -142,11 +179,16 @@ private:
 
 
   }
-   static Map *mMap;
+  static Map *mMap;
 
 public:
 
   std::string mapDirectory;
+
+  // List of saplings ready to grow
+  std::list<sTree> saplings;
+  void addSapling(User* user, int x, int y, int z);
+  void checkGenTrees();
 
   // Map spawn position
   vec spawnPos;
@@ -160,28 +202,34 @@ public:
   // Store all maps here
   std::map<uint32, sChunk> maps;
 
+  // Store chunks here (remove maps)
+  ChunkMap chunks;
+
   // Store the time map chunk has been last used
   std::map<uint32, int> mapLastused;
 
   // Store if map has been modified
   std::map<uint32, bool> mapChanged;
 
+  // Do we need light regeneration
+  std::map<uint32, bool> mapLightRegen;
+
   // Store item pointers for each chunk
-  std::map<uint32, std::vector<spawnedItem *> > mapItems;
+  //std::map<uint32, std::vector<spawnedItem *> > mapItems;
 
   //All spawned items on map
   std::map<uint32, spawnedItem *> items;
 
-  void posToId(int x, int z, uint32 *id);
-  void idToPos(uint32 id, int *x, int *z);
+//  void posToId(int x, int z, uint32 *id);
+//  void idToPos(uint32 id, int *x, int *z);
 
-  void initMap();
-  void freeMap();
+  void init();
+  void free();
   void sendToUser(User *user, int x, int z);
 
   //Time in the map
   sint64 mapTime;
-  
+
   // Map seed
   sint64 mapSeed;
 
@@ -189,7 +237,7 @@ public:
   sChunk *getMapData(int x, int z, bool generate = true);
 
   // Load map chunk
-  bool loadMap(int x, int z, bool generate = true);
+  sChunk *loadMap(int x, int z, bool generate = true);
 
   // Save map chunk to disc
   bool saveMap(int x, int z);
@@ -239,7 +287,7 @@ public:
   bool sendPickupSpawn(spawnedItem item);
   void createPickupSpawn(int x, int y, int z, int type, int count);
 
-  void setComplexEntity(sint32 x, sint32 y, sint32 z, NBT_Value *entity);
+  void setComplexEntity(User *user, sint32 x, sint32 y, sint32 z, NBT_Value *entity);
 
   static Map* get()
   {

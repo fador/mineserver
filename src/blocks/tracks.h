@@ -25,68 +25,38 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _MAPGEN_H
-#define _MAPGEN_H
+#pragma once
 
-#ifdef DEBIAN
-#include <libnoise/noise.h>
-#else
-#include <noise/noise.h>
-#endif
+#include "basic.h"
 
-#include "noiseutils.h"
+class User;
 
-class MapGen
+struct TrackData
 {
-private:
-  MapGen() {}
-
-  uint8 blocks[16*16*128];
-  uint8 blockdata[16*16*128/2];
-  uint8 skylight[16*16*128/2];
-  uint8 blocklight[16*16*128/2];
-  uint8 heightmap[16*16];
-  
-  int m_seed;
-  int seaLevel;
-
-  float perlinScale;
-  
-  void generateFlatgrass();
-  void generateWithNoise(int x, int z);
-  
-  void AddBeaches();
-    
-  noise::utils::NoiseMap heightMap;
-  noise::utils::NoiseMapBuilderPlane heightMapBuilder;
-  
-  // This is for used for tuning heightmaps (Not for production)
-  //noise::utils::NoiseMapBuilderPlane debugMapBuilder;
-  //noise::utils::NoiseMap debugHeightMap;
-
-  // Heightmap composition
-  noise::module::Perlin perlinNoise;
-  noise::module::ScaleBias perlinBiased;
-
-  noise::module::Perlin baseFlatTerrain;  
-  noise::module::ScaleBias flatTerrain;
-  
-  noise::module::Perlin seaFloor;
-  noise::module::ScaleBias seaBias;
-
-  noise::module::Perlin terrainType;
-
-  noise::module::Perlin seaControl;
-  
-  noise::module::Select seaTerrain;
-  noise::module::Select finalTerrain;
-
-public:
-  static MapGen &get();
-  
-  void init(int seed);
-  void generateChunk(int x, int z);
+  uint32 x;
+  uint8 y;
+  uint32 z;
 };
 
+/** BlockTracks deals specifically with minecart tracks
+@see BlockBasic
+*/
+class BlockTracks: public BlockBasic
+{
+public:
+  void onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+private:
+  TrackData trackLog[2];
+  bool isTrack(sint32 x, sint8 y, sint32 z, uint8& meta);
+  bool isStartPiece(sint32 x, sint8 y, sint32 z);
 
-#endif
+};
+

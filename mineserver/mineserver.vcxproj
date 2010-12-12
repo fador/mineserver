@@ -12,6 +12,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\blocks\basic.cpp" />
+    <ClCompile Include="..\src\blocks\chest.cpp" />
+    <ClCompile Include="..\src\blocks\default.cpp" />
     <ClCompile Include="..\src\blocks\door.cpp" />
     <ClCompile Include="..\src\blocks\falling.cpp" />
     <ClCompile Include="..\src\blocks\fire.cpp" />
@@ -21,25 +23,31 @@
     <ClCompile Include="..\src\blocks\snow.cpp" />
     <ClCompile Include="..\src\blocks\stair.cpp" />
     <ClCompile Include="..\src\blocks\torch.cpp" />
+    <ClCompile Include="..\src\blocks\tracks.cpp" />
     <ClCompile Include="..\src\chat.cpp" />
     <ClCompile Include="..\src\commands.cpp" />
     <ClCompile Include="..\src\config.cpp" />
     <ClCompile Include="..\src\constants.cpp" />
+    <ClCompile Include="..\src\furnace.cpp" />
+    <ClCompile Include="..\src\furnaceManager.cpp" />
     <ClCompile Include="..\src\logger.cpp" />
     <ClCompile Include="..\src\map.cpp" />
-    <ClCompile Include="..\src\mapgen.cpp" />
     <ClCompile Include="..\src\mineserver.cpp" />
     <ClCompile Include="..\src\nbt.cpp" />
-    <ClCompile Include="..\src\noiseutils.cpp" />
     <ClCompile Include="..\src\packets.cpp" />
     <ClCompile Include="..\src\physics.cpp" />
     <ClCompile Include="..\src\plugin.cpp" />
     <ClCompile Include="..\src\sockets.cpp" />
     <ClCompile Include="..\src\tools.cpp" />
     <ClCompile Include="..\src\user.cpp" />
+    <ClCompile Include="..\src\worldgen\cavegen.cpp" />
+    <ClCompile Include="..\src\worldgen\mapgen.cpp" />
+    <ClCompile Include="..\src\worldgen\mersenne.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\blocks\basic.h" />
+    <ClInclude Include="..\src\blocks\chest.h" />
+    <ClInclude Include="..\src\blocks\default.h" />
     <ClInclude Include="..\src\blocks\door.h" />
     <ClInclude Include="..\src\blocks\falling.h" />
     <ClInclude Include="..\src\blocks\fire.h" />
@@ -49,21 +57,26 @@
     <ClInclude Include="..\src\blocks\snow.h" />
     <ClInclude Include="..\src\blocks\stair.h" />
     <ClInclude Include="..\src\blocks\torch.h" />
+    <ClInclude Include="..\src\blocks\tracks.h" />
     <ClInclude Include="..\src\chat.h" />
     <ClInclude Include="..\src\config.h" />
     <ClInclude Include="..\src\constants.h" />
+    <ClInclude Include="..\src\furnace.h" />
+    <ClInclude Include="..\src\furnaceManager.h" />
     <ClInclude Include="..\src\logger.h" />
     <ClInclude Include="..\src\map.h" />
-    <ClInclude Include="..\src\mapgen.h" />
     <ClInclude Include="..\src\nbt.h" />
-    <ClInclude Include="..\src\noiseutils.h" />
     <ClInclude Include="..\src\packets.h" />
+    <ClInclude Include="..\src\permissions.h" />
     <ClInclude Include="..\src\physics.h" />
     <ClInclude Include="..\src\plugin.h" />
     <ClInclude Include="..\src\sockets.h" />
     <ClInclude Include="..\src\tools.h" />
     <ClInclude Include="..\src\user.h" />
     <ClInclude Include="..\src\vec.h" />
+    <ClInclude Include="..\src\worldgen\cavegen.h" />
+    <ClInclude Include="..\src\worldgen\mapgen.h" />
+    <ClInclude Include="..\src\worldgen\mersenne.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7F6D1DAB-AA49-4343-B28E-C3E647BE5007}</ProjectGuid>
@@ -74,7 +87,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -110,7 +123,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libnoise.lib;zlibwapi.lib;ws2_32.lib;libevent.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Winmm.lib;libnoise.lib;zlibwapi.lib;ws2_32.lib;libevent.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
@@ -128,16 +141,18 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libnoise.lib;zlibwapi.lib;libevent.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Winmm.lib;libnoise.lib;zlibwapi.lib;libevent.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
+      <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

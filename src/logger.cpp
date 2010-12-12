@@ -35,10 +35,15 @@
 #include <string>
 #include "logger.h"
 
-Logger &Logger::get()
+Logger* Logger::_instance;
+
+void Logger::free()
 {
-  static Logger instance;
-  return instance;
+   if (_instance)
+   {
+      delete _instance;
+      _instance = 0;
+   }
 }
 
 // Log to terminal

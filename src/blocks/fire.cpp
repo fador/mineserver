@@ -46,46 +46,42 @@ void BlockFire::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, 
 {
 }
 
-void BlockFire::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFire::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
 void BlockFire::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-   uint8 topblock;
-   uint8 topmeta;
    uint8 oldblock;
    uint8 oldmeta;
 
-   if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
-   {
-      switch(oldblock)
-      {
-         case BLOCK_FIRE:
-         case BLOCK_WORKBENCH:
-         case BLOCK_FURNACE:
-         case BLOCK_BURNING_FURNACE:
-         case BLOCK_CHEST:
-         case BLOCK_JUKEBOX:
-         case BLOCK_TORCH:
-         case BLOCK_REDSTONE_TORCH_OFF:
-         case BLOCK_REDSTONE_TORCH_ON:
-         case BLOCK_WATER:
-         case BLOCK_STATIONARY_WATER:
-         case BLOCK_LAVA:
-         case BLOCK_STATIONARY_LAVA:
-          return;
-         break;
-         default:
-            if (Map::get()->getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
-            {
-               Map::get()->setBlock(x, y+1, z, (char)newblock, 0, user->nick);
-               Map::get()->sendBlockChange(x, y+1, z, (char)newblock, 0);
-            }
-         break;
-      }
-   }
+   if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
+      return;
+
+   /* Check block below allows blocks placed on top */
+   if (!this->isBlockStackable(oldblock))
+      return;
+
+   /* burning block regardless of direction */
+   y++;
+
+   /* FIXME: Need this or should be just let em burn? */
+   if (this->isUserOnBlock(x,y,z))
+      return;
+
+   /* if the block isn't empty then you can't burn it */
+   if (!this->isBlockEmpty(x,y,z))
+      return;
+
+   direction = user->relativeToBlock(x, y, z);
+
+   int block = 256+newblock;
+   if (block == ITEM_FLINT_AND_STEEL)
+      newblock = BLOCK_FIRE;
+
+   Map::get()->setBlock(x, y, z, (char)newblock, direction, user->nick);
+   Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
 }
 
 void BlockFire::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)

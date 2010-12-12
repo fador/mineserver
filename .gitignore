@@ -5,3 +5,12 @@ Thumbs.db
 # Default test map
 src/testmap
 
+bin/.gitignore
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/*
+CPackConfig.cmake
+CPackSourceConfig.cmake
+Makefile
+cmake_install.cmake

@@ -79,7 +79,7 @@ void BlockDoor::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, 
 {
 }
 
-void BlockDoor::onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockDoor::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 }
 
@@ -87,96 +87,59 @@ void BlockDoor::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
 {
    uint8 oldblock;
    uint8 oldmeta;
-   uint8 topblock;
-   uint8 topmeta;
-   uint8 toptopmeta;
-   uint8 toptopblock;
 
-   if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
+   if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
+      return;
+
+   /* Check block below allows blocks placed on top */
+   if (!this->isBlockStackable(oldblock))
+      return;
+
+   /* move the x,y,z coords dependent upon placement direction */
+   if (!this->translateDirection(&x,&y,&z,direction))
+      return;
+
+   if (this->isUserOnBlock(x,y,z))
+      return;
+
+   if (!this->isBlockEmpty(x,y,z))
+      return;
+
+   // checking for an item rather then a block
+   int block = newblock + 256;
+
+   if (block == ITEM_WOODEN_DOOR)
+      newblock = BLOCK_WOODEN_DOOR;
+
+   if (block == ITEM_IRON_DOOR)
+      newblock = BLOCK_IRON_DOOR;
+
+   direction = user->relativeToBlock(x, y, z);
+
+   switch(direction)
    {
-      /* Check block below allows blocks placed on top */
-      switch(oldblock)
-      {
-         case BLOCK_WORKBENCH:
-         case BLOCK_FURNACE:
-         case BLOCK_BURNING_FURNACE:
-         case BLOCK_CHEST:
-         case BLOCK_JUKEBOX:
-         case BLOCK_TORCH:
-         case BLOCK_REDSTONE_TORCH_OFF:
-         case BLOCK_REDSTONE_TORCH_ON:
-          return;
-         break;
-         default:
-         /*
-            TODO: Original code. Compare with version below.
-                 // Door status change
-            if (block == BLOCK_WOODEN_DOOR || block == BLOCK_IRON_DOOR)
-            {
-               blockID = block;
-
-               // Toggle door state
-               if (metadata & 0x4)
-               metadata &= (0x8 | 0x3);
-               else
-               metadata |= 0x4;
-
-               uint8 metadata2, block2;
-
-               int modifier = (metadata & 0x8) ? -1 : 1;
-
-               x = ox;
-               y = oy;
-               z = oz;
-
-               Map::get().getBlock(x, y + modifier, z, &block2, &metadata2);
-
-               if (block2 == block)
-               {
-                  metadata2 = metadata;
-
-                  if(metadata & 0x8)
-                    metadata2 &= 0x7;
-                  else
-                    metadata2 |= 0x8;
-
-                  Map::get().setBlock(x, y + modifier, z, block2, metadata2, user->nick);
-                  Map::get().sendBlockChange(x, y + modifier, z, (char)blockID, metadata2);
-
-                  return PACKET_OK;
-               }
-            }
-         */
-
-            if (Map::get()->getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
-            {
-               // Toggle door state
-               if (topmeta & 0x4) {
-                  topmeta &= (0x8 | 0x3);
-               } else {
-                  topmeta |= 0x4;
-               }
-               int modifier = (topmeta & 0x8) ? -1 : 1;
-
-               Map::get()->getBlock(x, y + modifier, z, &toptopblock, &toptopmeta);
-
-               if (toptopblock == topblock)
-               {
-                  toptopmeta = topmeta;
-
-                  if(topmeta & 0x8) {
-                     toptopmeta &= 0x7;
-                  } else {
-                     toptopmeta |= 0x8;
-                  }
-
-                  Map::get()->setBlock(x, y + modifier, z, toptopblock, toptopmeta, user->nick);
-                  Map::get()->sendBlockChange(x, y + modifier, z, (char)newblock, toptopmeta);
-               }
-            }
-         break;
-      }
+      case BLOCK_EAST:
+         direction = BLOCK_WEST;
+      break;
+      case BLOCK_WEST:
+         direction = BLOCK_EAST;
+      break;
+      case BLOCK_NORTH:
+         direction = BLOCK_SOUTH;
+      break;
+      case BLOCK_SOUTH:
+         direction = BLOCK_NORTH;
+      break;
    }
+
+   Map::get()->setBlock(x, y, z, (char)newblock, direction, user->nick);
+   Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
+
+   /* Get correct direction for top of the door */
+   direction = 8+(direction);
+
+   Map::get()->setBlock(x, y+1, z, (char)newblock, direction, user->nick);
+   Map::get()->sendBlockChange(x, y+1, z, (char)newblock, direction);
 }
 
 void BlockDoor::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)

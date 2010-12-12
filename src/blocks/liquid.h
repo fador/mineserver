@@ -27,22 +27,22 @@
 
 #pragma once
 
-#include <cstdlib>
-
-#include "../constants.h"
-#include "../map.h"
-#include "../tools.h"
+#include "basic.h"
 
 class User;
 
-class BlockLiquid
+/** BlockLiquid deals specifically with block that have liquid functionality and need
+physics applied to them.
+@see BlockBasic
+*/
+class BlockLiquid: public BlockBasic
 {
 public:
    void onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
    void onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
    void onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
    void onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
-   void onNeighbourBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
    void onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
    void onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
    void onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);

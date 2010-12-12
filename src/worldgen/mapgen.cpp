@@ -32,13 +32,14 @@
 #include <algorithm>
 #include <vector>
 #include <cmath>
+#include <ctime>
 
-#include "logger.h"
-#include "constants.h"
+#include "../logger.h"
+#include "../constants.h"
 
-#include "config.h"
-#include "nbt.h"
-#include "map.h"
+#include "../config.h"
+#include "../nbt.h"
+#include "../map.h"
 
 // libnoise
 #ifdef DEBIAN
@@ -47,26 +48,33 @@
 #include <noise/noise.h>
 #endif
 
-#include "noiseutils.h"
-
 //#include "mersenne.h"
-#include "world/cavegen.h"
+#include "cavegen.h"
 #include "mapgen.h"
+
+MapGen* MapGen::mMapGen;
+
+void MapGen::free()
+{
+   if (mMapGen)
+   {
+      delete mMapGen;
+      mMapGen = 0;
+   }
+}
 
 void MapGen::init(int seed)
 {
-  CaveGen::get().init(seed+8);
+  cave.init(seed+8);
   
-  perlinNoise.SetSeed(seed);
-  perlinNoise.SetOctaveCount(2);
-  perlinNoise.SetFrequency(1.7); // 1-16
-  perlinNoise.SetPersistence(0.2); // 0-1
+  ridgedMultiNoise.SetSeed(seed);
+  ridgedMultiNoise.SetOctaveCount(6);
+  ridgedMultiNoise.SetFrequency(1.0/180.0);
+  ridgedMultiNoise.SetLacunarity(2.0);
+//  perlinNoise.SetPersistence(0.1); // 0-1
 
   // Heighmap scale..
   perlinScale = 0.7f;
-  
-  perlinBiased.SetSourceModule(0, perlinNoise);
-  perlinBiased.SetBias(0.75);
 
   baseFlatTerrain.SetSeed(seed+1);
   baseFlatTerrain.SetOctaveCount(2);
@@ -102,56 +110,19 @@ void MapGen::init(int seed)
   seaTerrain.SetControlModule(seaControl);
   seaTerrain.SetBounds(-0.3, 1000.0);
   seaTerrain.SetEdgeFalloff(0.1);
-  
-  //
-  // This block is used to tune heightmapgeneration
-  /* COMMENT OUT!
-  debugMapBuilder.SetSourceModule(finalTerrain);
-  debugMapBuilder.SetDestNoiseMap(debugHeightMap);
-  debugMapBuilder.SetDestSize(512, 512);
-  
-  debugMapBuilder.SetBounds(1000, 1000 + perlinScale, 1000, 1000 + perlinScale);
-  debugMapBuilder.Build();
 
-  // Image render
-  noise::utils::RendererImage renderer;
-  noise::utils::Image image;
-  renderer.SetSourceNoiseMap (debugHeightMap);
-  renderer.SetDestImage (image);
-  renderer.Render ();
-
-  noise::utils::WriterBMP writer;
-  writer.SetSourceImage (image);
-  writer.SetDestFilename ("debug.bmp");
-  writer.WriteDestFile ();
-  
-  //
-  // DEBUGBLOCK END
-  //*/
-
-  // Generate heightmap
-  heightMapBuilder.SetSourceModule(seaTerrain);
-  heightMapBuilder.SetDestNoiseMap(heightMap);
-  heightMapBuilder.SetDestSize(16, 16);
-
-  seaLevel = Conf::get().iValue("seaLevel");
+  seaLevel = Conf::get()->iValue("sea_level");
   
   m_seed = seed;
 }
 
-MapGen &MapGen::get()
-{
-  static MapGen instance;
-  return instance;
-}
-
 void MapGen::generateFlatgrass() 
 {
-  for (uint8 bX = 0; bX < 16; bX++) 
+  for (int bX = 0; bX < 16; bX++) 
   {
-    for (uint8 bY = 0; bY < 128; bY++) 
+    for (int bY = 0; bY < 128; bY++) 
     {
-      for (uint8 bZ = 0; bZ < 16; bZ++) 
+      for (int bZ = 0; bZ < 16; bZ++) 
       {
         if (bY == 0) 
           blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_BEDROCK; 
@@ -171,7 +142,7 @@ void MapGen::generateChunk(int x, int z)
   NBT_Value *main = new NBT_Value(NBT_Value::TAG_COMPOUND);
   NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
  
-  if(Conf::get().bValue("map_flatgrass"))
+  if(Conf::get()->bValue("map_flatgrass"))
     generateFlatgrass();
   else
     generateWithNoise(x, z);
@@ -190,11 +161,11 @@ void MapGen::generateChunk(int x, int z)
   
   main->Insert("Level", val);
   
-  uint32 chunkid;
+/*  uint32 chunkid;
   Map::get()->posToId(x, z, &chunkid);
   
   Map::get()->maps[chunkid].x = x;
-  Map::get()->maps[chunkid].z = z;
+  Map::get()->maps[chunkid].z = z; */
 
   std::vector<uint8> *t_blocks = (*val)["Blocks"]->GetByteArray();
   std::vector<uint8> *t_data = (*val)["Data"]->GetByteArray();
@@ -202,37 +173,66 @@ void MapGen::generateChunk(int x, int z)
   std::vector<uint8> *t_skylight = (*val)["SkyLight"]->GetByteArray();
   std::vector<uint8> *heightmap = (*val)["HeightMap"]->GetByteArray();
   
-  Map::get()->maps[chunkid].blocks = &((*t_blocks)[0]);
-  Map::get()->maps[chunkid].data = &((*t_data)[0]);
-  Map::get()->maps[chunkid].blocklight = &((*t_blocklight)[0]);
-  Map::get()->maps[chunkid].skylight = &((*t_skylight)[0]);
-  Map::get()->maps[chunkid].heightmap = &((*heightmap)[0]);
+  sChunk *chunk = new sChunk();
+  chunk->blocks = &((*t_blocks)[0]);
+  chunk->data = &((*t_data)[0]);
+  chunk->blocklight = &((*t_blocklight)[0]);
+  chunk->skylight = &((*t_skylight)[0]);
+  chunk->heightmap = &((*heightmap)[0]);
+  chunk->nbt = main;
+  chunk->x = x;
+  chunk->z = z;
+
+  Map::get()->chunks.LinkChunk(chunk, x, z);
 
   // Update last used time
-  Map::get()->mapLastused[chunkid] = (int)time(0);
+  //Map::get()->mapLastused[chunkid] = (int)time(0);
 
   // Not changed
-  Map::get()->mapChanged[chunkid] = 0;
+  //Map::get()->mapChanged[chunkid] = Conf::get()->bValue("save_unchanged_chunks");
   
-  Map::get()->maps[chunkid].nbt = main;
+  //Map::get()->maps[chunkid].nbt = main;
 }
+
+//#define PRINT_MAPGEN_TIME
 
 void MapGen::generateWithNoise(int x, int z) 
 {
-  heightMapBuilder.SetBounds(1000 + x*perlinScale, 1000 + (x+1)*perlinScale, 1000 + z*perlinScale, 1000 + (z+1)*perlinScale);
-  heightMapBuilder.Build();
+  // Debug..
+  #ifdef PRINT_MAPGEN_TIME
+  #ifdef WIN32    
+    DWORD t_begin,t_end;
+    t_begin = timeGetTime ();
+  #else
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+  #endif
+  #endif
 
   // Populate blocks in chunk
-  int currentHeight;
+  sint32 currentHeight;
+  sint32 ymax;
   uint8 *curBlock;
-  for (uint8 bX = 0; bX < 16; bX++) 
+  memset(blocks, 0, 16*16*128);
+
+  double xBlockpos=x<<4;
+  double zBlockpos=z<<4;
+  for (int bX = 0; bX < 16; bX++) 
   {
-    for (uint8 bY = 0; bY < 128; bY++) 
+    for (int bZ = 0; bZ < 16; bZ++) 
     {
-      for (uint8 bZ = 0; bZ < 16; bZ++) 
+      
+      heightmap[(bZ<<4)+bX] = ymax = currentHeight = (uint8)((ridgedMultiNoise.GetValue(xBlockpos+bX,0, zBlockpos+bZ) * 15) + 64);
+      
+      sint32 stoneHeight = (sint32)(currentHeight * 0.94);
+      sint32 bYbX = ((bZ << 7) + (bX << 11));
+
+      if(ymax < seaLevel) 
+        ymax = seaLevel;
+
+      for(int bY = 0; bY <= ymax; bY++) 
       {
-        curBlock = &blocks[bY + (bZ * 128 + (bX * 128 * 16))];
-        currentHeight = (int)((heightMap.GetValue(bX,bZ) * 8.7) + 65.15371);
+        curBlock = &blocks[bYbX++];
         
         // Place bedrock
         if(bY == 0) 
@@ -243,8 +243,12 @@ void MapGen::generateWithNoise(int x, int z)
         
         if(bY < currentHeight) 
         {
-          if (bY < (int)(currentHeight * 0.94)) 
+          if (bY < stoneHeight)
+          {
             *curBlock = BLOCK_STONE;
+            // Add caves
+            cave.AddCaves(*curBlock, xBlockpos + bX, bY, zBlockpos + bZ);
+          }
           else
             *curBlock = BLOCK_DIRT;
         } 
@@ -263,22 +267,29 @@ void MapGen::generateWithNoise(int x, int z)
             *curBlock = BLOCK_STATIONARY_WATER; // FF
           else
             *curBlock = BLOCK_AIR; // FF
-        }
-        
-        // Add caves
-        CaveGen::get().AddCaves(*curBlock, x + (bX+1)/16.0, (bY+1), z + (bZ+1)/16.0);
+        }        
       }
     }
   }
-  //CaveGen::get().AddCaves(blockslibnoise);
-  if(Conf::get().bValue("addBeaches"))
+  if(Conf::get()->bValue("add_beaches"))
     AddBeaches();
+    
+  #ifdef PRINT_MAPGEN_TIME
+  #ifdef WIN32
+    t_end = timeGetTime ();
+    std::cout << "Mapgen: " << (t_end-t_begin) << "ms" << std::endl;
+  #else
+    gettimeofday(&end, NULL);
+    std::cout << "Mapgen: " << end.tv_usec - start.tv_usec << std::endl;
+  #endif
+  #endif
+  
 }
 
 void MapGen::AddBeaches() 
 {
-  int beachExtent = Conf::get().iValue("beachExtent");
-  int beachHeight = Conf::get().iValue("beachHeight");
+  int beachExtent = Conf::get()->iValue("beach_extent");
+  int beachHeight = Conf::get()->iValue("beach_height");
   
   int beachExtentSqr = (beachExtent + 1) * (beachExtent + 1);
   for(int x = 0; x < 16; x++) 
@@ -286,7 +297,7 @@ void MapGen::AddBeaches()
     for(int z = 0; z < 16; z++) 
     {
       int h = -1;
-      h = heightMap.GetValue(x, z);
+      h = heightmap[(z<<4)+x];
       if(h < 0) continue;
       
       bool found = false;
