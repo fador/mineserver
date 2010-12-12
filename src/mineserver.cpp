@@ -351,7 +351,7 @@ int Mineserver::run(int argc, char *argv[])
       }
 
       //Try to load release time from config
-      int map_release_time = Conf::get()->iValue("map_release_time");
+      //int map_release_time = Conf::get()->iValue("map_release_time"); // Unused variable
 
       //Release chunks not used in <map_release_time> seconds
    /*   std::vector<uint32> toRelease;
