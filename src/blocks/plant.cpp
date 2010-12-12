@@ -48,25 +48,17 @@ void BlockPlant::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
 
 void BlockPlant::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-   uint8 block; uint8 meta;
-   uint8 nblock; uint8 nmeta;
-   bool destroy = false;  
+   uint8 block;
+   uint8 meta;
    if (!Map::get()->getBlock(x, y, z, &block, &meta))
       return;
    
-   if (direction == BLOCK_TOP && meta == BLOCK_TOP
-      && Map::get()->getBlock(x, y-1, z, &nblock, &nmeta) && nblock == BLOCK_AIR)
-   {
-      // block broken under plant
-      destroy = true;
-   }
-
-   if (destroy)
+   if (direction == BLOCK_TOP && this->isBlockEmpty(x, y-1, z))
    {
       // Break plant and spawn plant item
       Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
       Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
-      Map::get()->createPickupSpawn(x, y, z, block, 1);
+      this->spawnBlockItem(x, y, z, block);
    }   
 }
 
@@ -74,28 +66,39 @@ void BlockPlant::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
 {
    uint8 oldblock;
    uint8 oldmeta;
-   uint8 topblock;
-   uint8 topmeta;
 
-   if (Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
+   /* move the x,y,z coords dependent upon placement direction */
+   if (!this->translateDirection(&x,&y,&z,direction))
+      return;
+
+   if (this->isBlockEmpty(x,y-1,z) || !this->isBlockEmpty(x,y,z))
+      return;
+
+   if (!Map::get()->getBlock(x, y-1, z, &oldblock, &oldmeta))
+      return;
+
+   if (!this->isBlockStackable(oldblock))
+      return;
+
+   /* Only place on dirt or grass */
+   switch(oldblock)
    {
-      /* Only place of dirt or grass */
-      switch(oldblock)
-      {
-         case BLOCK_GRASS:
-         case BLOCK_SOIL:
-         case BLOCK_DIRT:
-            if (Map::get()->getBlock(x, y+1, z, &topblock, &topmeta) && topblock == BLOCK_AIR)
-            {
-               Map::get()->setBlock(x, y+1, z, (char)newblock, 0);
-               Map::get()->sendBlockChange(x, y+1, z, (char)newblock, 0);
-            }
-         break;
-         default:
-            return;
-         break;
-      }
+      case BLOCK_SOIL:
+         /* change to dirt block */
+         Map::get()->setBlock(x, y-1, z, (char)BLOCK_DIRT, 0);
+         Map::get()->sendBlockChange(x, y-1, z, (char)BLOCK_DIRT, 0);
+      case BLOCK_GRASS:
+      case BLOCK_DIRT:
+         Map::get()->setBlock(x, y, z, (char)newblock, 0);
+         Map::get()->sendBlockChange(x, y, z, (char)newblock, 0);
+      break;
+      default:
+         return;
+      break;
    }
+
+   if(newblock == BLOCK_SAPLING)
+      Map::get()->addSapling(user,x,y,z);
 }
 
 void BlockPlant::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)

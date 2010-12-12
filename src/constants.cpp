@@ -43,12 +43,16 @@ void initConstants()
   defaultConf.insert(std::pair<std::string, std::string>("user_limit", "20"));
   defaultConf.insert(std::pair<std::string, std::string>("use_whitelist", "false"));
   defaultConf.insert(std::pair<std::string, std::string>("show_version", "true"));
+  defaultConf.insert(std::pair<std::string, std::string>("user_validation", "true"));
+  defaultConf.insert(std::pair<std::string, std::string>("allow_connect_on_auth_timeout", "false"));
+
   // Messages
   defaultConf.insert(std::pair<std::string, std::string>("server_full_message", "Server is currently full"));
   defaultConf.insert(std::pair<std::string, std::string>("default_kick_message", "You have been kicked"));
   defaultConf.insert(std::pair<std::string, std::string>("wrong_protocol_message", "Wrong client protocol"));
   // File settings
-  defaultConf.insert(std::pair<std::string, std::string>("admin_file", ADMIN_FILE));
+  defaultConf.insert(std::pair<std::string, std::string>("commands_file", COMMANDS_FILE));
+  defaultConf.insert(std::pair<std::string, std::string>("roles_file", ROLES_FILE));
   defaultConf.insert(std::pair<std::string, std::string>("banned_file", BANNED_FILE));
   defaultConf.insert(std::pair<std::string, std::string>("whitelist_file", WHITELIST_FILE));
   defaultConf.insert(std::pair<std::string, std::string>("motd_file", MOTD_FILE));
@@ -58,6 +62,8 @@ void initConstants()
   defaultConf.insert(std::pair<std::string, std::string>("map_directory", "world"));
   defaultConf.insert(std::pair<std::string, std::string>("map_release_time", "90"));
   defaultConf.insert(std::pair<std::string, std::string>("map_generate_spawn", "true"));
+  defaultConf.insert(std::pair<std::string, std::string>("map_generate_spawn_size", "6"));
+  defaultConf.insert(std::pair<std::string, std::string>("map_generate_spawn_show_progress", "true"));
   defaultConf.insert(std::pair<std::string, std::string>("save_unchanged_chunks", "true"));
   defaultConf.insert(std::pair<std::string, std::string>("liquid_physics", "true"));
   defaultConf.insert(std::pair<std::string, std::string>("map_flatgrass", "false"));

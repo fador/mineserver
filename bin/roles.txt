@@ -1,0 +1,9 @@
+# admins
+[Server]
+Psoden
+fador
+ReDucTor
+
+# ops
+
+# members

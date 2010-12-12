@@ -27,18 +27,14 @@
 
 #pragma once
 
-#include <cstdlib>
-
-#include "../constants.h"
-#include "../map.h"
-#include "../tools.h"
+#include "basic.h"
 
 class User;
 
 /** BlockStair deals specifically with blocks that are stairs and require different functionality
 @see BlockBasic
 */
-class BlockStair
+class BlockStair: public BlockBasic
 {
 public:
    void onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);

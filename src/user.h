@@ -28,12 +28,12 @@
 #ifndef _USER_H
 #define _USER_H
 
-#include <deque>
 #include <event.h>
 #include "vec.h"
 #include "tools.h"
 #include "constants.h"
 #include "packets.h"
+#include "permissions.h"
 
 struct position
 {
@@ -69,10 +69,10 @@ struct Inventory
   }
 };
 
+uint32 generateEID();
+
 class User
 {
-private:
-  event m_event;
 public:
 
   User(int sock, uint32 EID);
@@ -86,7 +86,6 @@ public:
   bool waitForData;
   uint32 write_err_count;
   bool logged;
-  bool admin;
   bool banned;
   bool whitelist;
   bool muted;
@@ -95,15 +94,22 @@ public:
   uint16 timeUnderwater;
   unsigned int UID;
   std::string nick;
+  std::string temp_nick;
   position pos;
   vec curChunk;
   Inventory inv;
   sint16 curItem;
 
+  int permissions; // bitmask for permissions. See permissions.h
+
   sint32 attachedTo;
 
   //Input buffer
   Packet buffer;
+
+  static std::vector<User *> & all();
+  static bool isUser(int sock);
+  static User* byNick(std::string nick);
 
   bool checkBanned(std::string _nick);
   bool checkWhitelist(std::string _nick);
@@ -112,13 +118,19 @@ public:
   /** Check if the user is standing on this block */
   bool checkOnBlock(sint32 x, sint8 y, sint32 z);
   bool updateLook(float yaw, float pitch);
+  sint8 relativeToBlock(const sint32 x, const sint8 y, const sint32 z);
 
   bool sendOthers(uint8 *data, uint32 len);
   static bool sendAll(uint8 *data, uint32 len);
   static bool sendAdmins(uint8 *data, uint32 len);
+  static bool sendOps(uint8 *data, uint32 len);
+  static bool sendGuests(uint8 *data, uint32 len);
 
   //Check inventory for space
   bool checkInventory(sint16 itemID, char count);
+
+  //Login
+  bool sendLoginInfo();
 
   //Load/save player data from/to a file at <mapdir>/players/<nick>.dat
   bool saveData();
@@ -169,6 +181,10 @@ public:
   bool respawn();
   bool dropInventory();
   bool isUnderwater();
+  
+  // Getter/Setter for item currently in hold
+  sint16 currentItem();
+  void setCurrentItem(sint16 item_id);
 
 
   bool withinViewDistance(int a, int b)
@@ -177,15 +193,12 @@ public:
   }
 
   struct event *GetEvent();
+
+private:
+  event m_event;
+  
+  // Item currently in hold
+  sint16 m_currentItem;
 };
-
-User *addUser(int sock, uint32 EID);
-bool remUser(int sock);
-bool isUser(int sock);
-uint32 generateEID();
-
-extern std::vector<User *> Users;
-
-User *getUserByNick(std::string nick);
 
 #endif

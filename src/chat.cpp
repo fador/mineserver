@@ -33,6 +33,9 @@
 #include <vector>
 #include <ctime>
 #include <math.h>
+#include <algorithm>
+#include <string>
+
 #ifdef WIN32
   #include <winsock2.h>
 #else
@@ -50,15 +53,14 @@
 #include "config.h"
 #include "physics.h"
 
-
-Chat* Chat::mChat;
+Chat* Chat::_instance;
 
 void Chat::free()
 {
-   if (mChat)
+   if(_instance)
    {
-      delete mChat;
-      mChat = 0;
+      delete _instance;
+      _instance = 0;
    }
 }
 
@@ -77,10 +79,34 @@ void Chat::registerCommand(Command *command)
     currentWord = words[0];
     words.pop_front();
 
-    if(command->adminOnly) {
-      adminCommands[currentWord] = command;
-    } else {
-      userCommands[currentWord] = command;
+    if(IS_ADMIN(command->permissions))
+    {
+      m_adminCommands[currentWord] = command;
+      continue;
+    }
+
+    if(IS_OP(command->permissions))
+    {
+      m_opCommands[currentWord] = command;
+      m_adminCommands[currentWord] = command;
+      continue;
+    }
+
+    if(IS_MEMBER(command->permissions))
+    {
+      m_memberCommands[currentWord] = command;
+      m_opCommands[currentWord] = command;
+      m_adminCommands[currentWord] = command;
+      continue;
+    }
+
+    if(IS_GUEST(command->permissions))
+    {
+      // insert into all
+      m_guestCommands[currentWord] = command;
+      m_memberCommands[currentWord] = command;
+      m_opCommands[currentWord] = command;
+      m_adminCommands[currentWord] = command;
     }
   }
 }
@@ -107,122 +133,21 @@ bool Chat::checkMotd(std::string motdFile)
   return true;
 }
 
-bool Chat::loadAdmins(std::string adminFile)
-{
-  // Clear current admin-vector
-  admins.clear();
-
-  // Read admins to deque
-  std::ifstream ifs(adminFile.c_str());
-
-  // If file does not exist
-  if(ifs.fail())
-  {
-    std::cout << "> Warning: " << adminFile << " not found. Creating..." << std::endl;
-
-    std::ofstream adminofs(adminFile.c_str());
-    adminofs << ADMIN_CONTENT << std::endl;
-    adminofs.close();
-
-    return true;
-  }
-
-  std::string temp;
-  while(getline(ifs, temp))
-  {
-    // If not commentline
-    if(temp[0] != COMMENTPREFIX)
-      admins.push_back(temp);
-  }
-  ifs.close();
-#ifdef _DEBUG
-  std::cout << "Loaded admins from " << adminFile << std::endl;
-#endif
-
-  return true;
-}
-
-bool Chat::loadBanned(std::string bannedFile)
-{
-  // Clear current banned-vector
-  banned.clear();
-
-  // Read banned to deque
-  std::ifstream ifs(bannedFile.c_str());
-
-  // If file does not exist
-  if(ifs.fail())
-  {
-    std::cout << "> Warning: " << bannedFile << " not found. Creating..." << std::endl;
-
-    std::ofstream bannedofs(bannedFile.c_str());
-    bannedofs << BANNED_CONTENT << std::endl;
-    bannedofs.close();
-
-    return true;
-  }
-
-  std::string temp;
-  while(getline(ifs, temp))
-  {
-    // If not commentline
-    if(temp[0] != COMMENTPREFIX)
-      banned.push_back(temp);
-  }
-  ifs.close();
-#ifdef _DEBUG
-  std::cout << "Loaded banned users from " << bannedFile << std::endl;
-#endif
-
-  return true;
-}
-
-bool Chat::loadWhitelist(std::string whitelistFile)
-{
-  // Clear current whitelist-vector
-  whitelist.clear();
-
-  // Read whitelist to deque
-  std::ifstream ifs(whitelistFile.c_str());
-
-  // If file does not exist
-  if(ifs.fail())
-  {
-    std::cout << "> Warning: " << whitelistFile << " not found. Creating..." << std::endl;
-
-    std::ofstream whitelistofs(whitelistFile.c_str());
-    whitelistofs << WHITELIST_CONTENT << std::endl;
-    whitelistofs.close();
-
-    return true;
-  }
-
-  std::string temp;
-  while(getline(ifs, temp))
-  {
-    // If not commentline
-    if(temp[0] != COMMENTPREFIX)
-      whitelist.push_back(temp);
-  }
-  ifs.close();
-#ifdef _DEBUG
-  std::cout << "Loaded whitelisted users from " << whitelistFile << std::endl;
-#endif
-
-  return true;
-}
-
 bool Chat::sendUserlist(User *user)
 {
-  this->sendMsg(user, COLOR_BLUE + "[ " + dtos(Users.size()) + " players online ]", USER);
+  this->sendMsg(user, COLOR_BLUE + "[ " + dtos(User::all().size()) + " players online ]", USER);
 
-  for(unsigned int i = 0; i < Users.size(); i++)
+  for(unsigned int i = 0; i < User::all().size(); i++)
   {
-	std::string playerDesc = "> " + Users[i]->nick;
-	if(Users[i]->muted)
-		playerDesc += COLOR_YELLOW + " (muted)";
-	if(Users[i]->dnd)
-		playerDesc += COLOR_YELLOW + " (dnd)";
+    std::string playerDesc = "> " + User::all()[i]->nick;
+    if(User::all()[i]->muted)
+    {
+        playerDesc += COLOR_YELLOW + " (muted)";
+    }
+    if(User::all()[i]->dnd)
+    {
+      playerDesc += COLOR_YELLOW + " (dnd)";
+    }
 
     this->sendMsg(user, playerDesc, USER);
   }
@@ -238,7 +163,9 @@ std::deque<std::string> Chat::parseCmd(std::string cmd)
   while(cmd.length() > 0)
   {
     while(cmd[0] == ' ')
+    {
       cmd = cmd.substr(1);
+    }
 
     del = cmd.find(' ');
 
@@ -255,7 +182,9 @@ std::deque<std::string> Chat::parseCmd(std::string cmd)
   }
 
   if(temp.empty())
+  {
     temp.push_back("empty");
+  }
 
   return temp;
 }
@@ -275,7 +204,7 @@ bool Chat::handleMsg(User *user, std::string msg)
   //
 
   // Servermsg (Admin-only)
-  if(msg[0] == SERVERMSGPREFIX && user->admin)
+  if(msg[0] == SERVERMSGPREFIX && IS_ADMIN(user->permissions))
   {
     // Decorate server message
     msg = COLOR_RED + "[!] " + COLOR_GREEN + msg.substr(1);
@@ -283,7 +212,7 @@ bool Chat::handleMsg(User *user, std::string msg)
   }
 
   // Adminchat
-  else if(msg[0] == ADMINCHATPREFIX && user->admin)
+  else if(msg[0] == ADMINCHATPREFIX && IS_ADMIN(user->permissions))
   {
     msg = timeStamp + " @@ <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg.substr(1);
     this->sendMsg(user, msg, ADMINS);
@@ -299,28 +228,37 @@ bool Chat::handleMsg(User *user, std::string msg)
 
     // User commands
     CommandList::iterator iter;
-    if((iter = userCommands.find(command)) != userCommands.end())
+    if((iter = m_memberCommands.find(command)) != m_memberCommands.end())
+    {
       iter->second->callback(user, command, cmd);
-    else if(user->admin && (iter = adminCommands.find(command)) != adminCommands.end())
+    }
+    else if(IS_ADMIN(user->permissions) && (iter = m_adminCommands.find(command)) != m_adminCommands.end())
+    {
       iter->second->callback(user, command, cmd);
+    }
   }
   // Normal message
   else
   {
-		if(user->isAbleToCommunicate("chat") == false) {
+		if(user->isAbleToCommunicate("chat") == false)
+    {
 			return true;
 		}
-    else {
-      if(user->admin)
+    else
+    {
+      if(IS_ADMIN(user->permissions))
+      {
         msg = timeStamp + " <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg;
+      }
       else
+      {
         msg = timeStamp + " <"+ user->nick + "> " + msg;
+      }
     }
 
     LOG(msg);
 
     this->sendMsg(user, msg, ALL);
-
   }
 
   return true;
@@ -336,7 +274,9 @@ bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
   tmpArray[2] = msg.size()&0xff;
 
   for(unsigned int i = 0; i < msg.size(); i++)
+  {
     tmpArray[i+3] = msg[i];
+  }
 
   switch(action)
   {
@@ -352,6 +292,14 @@ bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
     user->sendAdmins(tmpArray, tmpArrayLen);
     break;
 
+  case OPS:
+    user->sendOps(tmpArray, tmpArrayLen);
+    break;
+
+  case GUESTS:
+    user->sendGuests(tmpArray, tmpArrayLen);
+    break;
+
   case OTHERS:
     user->sendOthers(tmpArray, tmpArrayLen);
     break;
@@ -362,41 +310,52 @@ bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
   return true;
 }
 
-void Chat::sendUserHelp(User* user, std::deque<std::string> args)
+void Chat::sendHelp(User *user, std::deque<std::string> args)
 {
-  sendHelp(user, args, false);
-}
+  // TODO: Add paging support, since not all commands will fit into
+  // the screen at once.
 
-void Chat::sendAdminHelp(User* user, std::deque<std::string> args)
-{
-  sendHelp(user, args, true);
-}
-
-void Chat::sendHelp(User *user, std::deque<std::string> args, bool adminOnly)
-{
-  CommandList *commandList = &userCommands;
+  CommandList *commandList = &m_guestCommands; // defaults
   std::string commandColor = COLOR_BLUE;
-  if(adminOnly) {
-    commandList = &adminCommands;
+
+  if(IS_ADMIN(user->permissions))
+  {
+    commandList = &m_adminCommands;
     commandColor = COLOR_RED; // different color for admin commands
   }
+  else if(IS_OP(user->permissions))
+  {
+    commandList = &m_opCommands;
+    commandColor = COLOR_GREEN;
+  }
+  else if(IS_MEMBER(user->permissions))
+  {
+    commandList = &m_memberCommands;
+  }
 
-  if(args.size() == 0) {
+  if(args.size() == 0)
+  {
     for(CommandList::iterator it = commandList->begin();
         it != commandList->end();
-        it++) {
+        it++)
+    {
       std::string args = it->second->arguments;
       std::string description = it->second->description;
       sendMsg(user, commandColor + CHATCMDPREFIX + it->first + " " + args + " : " + COLOR_YELLOW + description, Chat::USER);
     }
-  } else {
+  }
+  else
+  {
     CommandList::iterator iter;
-    if((iter = commandList->find(args.front())) != commandList->end()) {
+    if((iter = commandList->find(args.front())) != commandList->end())
+    {
       std::string args = iter->second->arguments;
       std::string description = iter->second->description;
-      sendMsg(user, commandColor + CHATCMDPREFIX + iter->first + args, Chat::USER);
+      sendMsg(user, commandColor + CHATCMDPREFIX + iter->first + " " + args, Chat::USER);
       sendMsg(user, COLOR_YELLOW + CHATCMDPREFIX + description, Chat::USER);
-    } else {
+    }
+    else
+    {
       sendMsg(user, COLOR_RED + "Unknown Command: " + args.front(), Chat::USER);
     }
   }

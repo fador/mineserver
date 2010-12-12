@@ -35,14 +35,14 @@
 #include <string>
 #include "logger.h"
 
-Logger* Logger::mLogger;
+Logger* Logger::_instance;
 
 void Logger::free()
 {
-   if (mLogger)
+   if (_instance)
    {
-      delete mLogger;
-      mLogger = 0;
+      delete _instance;
+      _instance = 0;
    }
 }
 

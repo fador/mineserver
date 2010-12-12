@@ -25,41 +25,26 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "stair.h"
+#ifndef _KIT_H
+#define _KIT_H
 
-void BlockStair::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
+#include <string>
+#include <vector>
 
-}
+/**
+ * A Kit represents a list of items that a player can spawn (if given
+ * the required permissions a Kit has), via the /kit command.
+ */
+struct Kit {
+  std::string name;
+  std::vector<int> items;
+  int permissions;
 
-void BlockStair::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
+  Kit(std::string name, std::vector<int> items, int permissions)
+  : name(name),
+    items(items),
+    permissions(permissions)
+  {}
+};
 
-}
-
-void BlockStair::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-
-}
-
-void BlockStair::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
-
-void BlockStair::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   /* TODO: add code to align stairs? */
-}
-
-void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
-
-void BlockStair::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   /* Align neighbour to this stair */
-}
-
-void BlockStair::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-}
+#endif /* _KIT_H */

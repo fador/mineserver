@@ -34,7 +34,6 @@
 #include <noise/noise.h>
 #endif
 
-#include "noiseutils.h"
 #include "cavegen.h"
 
 class MapGen
@@ -59,16 +58,9 @@ private:
   void AddBeaches();
   
   CaveGen cave;
-    
-  noise::utils::NoiseMap heightMap;
-  noise::utils::NoiseMapBuilderPlane heightMapBuilder;
-  
-  // This is for used for tuning heightmaps (Not for production)
-  //noise::utils::NoiseMapBuilderPlane debugMapBuilder;
-  //noise::utils::NoiseMap debugHeightMap;
 
   // Heightmap composition
-  noise::module::Perlin perlinNoise;
+  noise::module::RidgedMulti ridgedMultiNoise;
   noise::module::ScaleBias perlinBiased;
 
   noise::module::Perlin baseFlatTerrain;  

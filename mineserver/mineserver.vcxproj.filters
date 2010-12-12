@@ -69,9 +69,6 @@
     <ClCompile Include="..\src\plugin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\blocks\basic.cpp">
-      <Filter>Source Files\blocks</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\blocks\door.cpp">
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
@@ -99,9 +96,6 @@
     <ClCompile Include="..\src\blocks\torch.cpp">
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\worldgen\noiseutils.cpp">
-      <Filter>Source Files\worldgen</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\worldgen\mapgen.cpp">
       <Filter>Source Files\worldgen</Filter>
     </ClCompile>
@@ -110,6 +104,24 @@
     </ClCompile>
     <ClCompile Include="..\src\worldgen\cavegen.cpp">
       <Filter>Source Files\worldgen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\blocks\default.cpp">
+      <Filter>Source Files\blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\blocks\basic.cpp">
+      <Filter>Source Files\blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\furnaceManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\furnace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\blocks\chest.cpp">
+      <Filter>Source Files\blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\blocks\tracks.cpp">
+      <Filter>Source Files\blocks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -152,9 +164,6 @@
     <ClInclude Include="..\src\plugin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\blocks\basic.h">
-      <Filter>Header Files\blocks</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\blocks\door.h">
       <Filter>Header Files\blocks</Filter>
     </ClInclude>
@@ -182,9 +191,6 @@
     <ClInclude Include="..\src\blocks\torch.h">
       <Filter>Header Files\blocks</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\worldgen\noiseutils.h">
-      <Filter>Header Files\worldgen</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\worldgen\mapgen.h">
       <Filter>Header Files\worldgen</Filter>
     </ClInclude>
@@ -193,6 +199,27 @@
     </ClInclude>
     <ClInclude Include="..\src\worldgen\cavegen.h">
       <Filter>Header Files\worldgen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\default.h">
+      <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\basic.h">
+      <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\permissions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\furnaceManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\furnace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\chest.h">
+      <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\tracks.h">
+      <Filter>Header Files\blocks</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -63,6 +63,10 @@ std::string base36_encode(int value);
 std::string strToLower(std::string temp);
 
 std::string dtos(double n);
+std::string hash(std::string value);
+#ifndef WIN32
+int kbhit();
+#endif
 
 inline uint64 ntohll(uint64 v)
 {
@@ -74,13 +78,13 @@ inline uint64 ntohll(uint64 v)
 //Converts block-coordinates to chunk coordinate
 inline sint32 blockToChunk(sint32 value)
 {
-  return (value < 0) ? (((value+1)/16)-1) : (value/16);
+  return value>>4;//(value < 0) ? (((value+1)/16)-1) : (value/16);
 }
 
 //Converts absolute block-coordinates to chunk-block-coordinates
 inline sint32 blockToChunkBlock(sint32 value)
 {
-  return (value < 0) ? (15+((value+1)%16)) : (value%16);
+  return value&15;//(value < 0) ? (15+((value+1)%16)) : (value%16);
 }
 
 inline sint8 angleToByte(float angle)

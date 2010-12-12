@@ -21,7 +21,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="1"
+			CharacterSet="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../lib/zlib/zdll.lib ../../lib/libevent2/libevent.lib ws2_32.lib ../../lib/noise/libnoise.lib"
+				AdditionalDependencies="winmm.lib ../../lib/zlib/zdll.lib ../../lib/libevent2/libevent.lib ws2_32.lib ../../lib/noise/libnoise.lib"
 				OutputFile="..\..\bin\$(ProjectName)-d.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib"
@@ -137,7 +137,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../lib/zlib/zdll.lib ../../lib/libevent2/libevent.lib ws2_32.lib ../../lib/noise/libnoise.lib"
+				AdditionalDependencies="winmm.lib ../../lib/zlib/zdll.lib ../../lib/libevent2/libevent.lib ws2_32.lib ../../lib/noise/libnoise.lib"
 				OutputFile="..\..\bin\$(ProjectName).exe"
 				AdditionalLibraryDirectories="../../lib"
 				GenerateDebugInformation="true"
@@ -191,6 +191,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\constants.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\furnace.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\furnaceManager.cpp"
 				>
 			</File>
 			<File
@@ -248,16 +256,20 @@
 					RelativePath="..\..\src\worldgen\mersenne.cpp"
 					>
 				</File>
-				<File
-					RelativePath="..\..\src\worldgen\noiseutils.cpp"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="blocks"
 				>
 				<File
 					RelativePath="..\..\src\blocks\basic.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\chest.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\default.cpp"
 					>
 				</File>
 				<File
@@ -296,6 +308,10 @@
 					RelativePath="..\..\src\blocks\torch.cpp"
 					>
 				</File>
+				<File
+					RelativePath="..\..\src\blocks\tracks.cpp"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -317,6 +333,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\constants.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\furnace.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\furnaceManager.h"
 				>
 			</File>
 			<File
@@ -374,16 +398,20 @@
 					RelativePath="..\..\src\worldgen\mersenne.h"
 					>
 				</File>
-				<File
-					RelativePath="..\..\src\worldgen\noiseutils.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="blocks"
 				>
 				<File
 					RelativePath="..\..\src\blocks\basic.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\chest.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\default.h"
 					>
 				</File>
 				<File
@@ -420,6 +448,10 @@
 				</File>
 				<File
 					RelativePath="..\..\src\blocks\torch.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\tracks.h"
 					>
 				</File>
 			</Filter>

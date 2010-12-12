@@ -161,3 +161,35 @@ std::string dtos( double n )
   result << n;
   return result.str();
 }
+
+std::string hash(std::string value)
+{
+	// Hash the player's name along with a secret to generate a unique hash for this player
+	// Uses the DJB2 algorithm
+	unsigned long hash = 5381;
+	int c;
+	
+	char *cvalue = const_cast<char *>(value.c_str());
+	
+	while ((c = *cvalue++))
+		hash = ((hash <<5) + hash) + c;	/* hash * 33 + c */
+		
+	std::ostringstream hashString;
+	hashString << hash;
+		
+	return hashString.str();
+}
+
+#ifndef WIN32
+int kbhit()
+{
+    struct timeval tv;
+    fd_set fds;
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+    FD_ZERO(&fds);
+    FD_SET(STDIN_FILENO, &fds); //STDIN_FILENO is 0
+    select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
+    return FD_ISSET(STDIN_FILENO, &fds);
+}
+#endif

@@ -25,34 +25,40 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "falling.h"
-#include "../plugin.h"
+#include "default.h"
 
-void BlockFalling::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockDefault::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+{
+}
+
+void BlockDefault::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockFalling::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockDefault::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 
 }
 
-void BlockFalling::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockDefault::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
+   uint8 block;
+   uint8 meta;
 
+   if (!Map::get()->getBlock(x, y, z, &block, &meta))
+      return;
+
+   Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+   Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+   this->spawnBlockItem(x,y,z,block);
 }
 
-void BlockFalling::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockDefault::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 }
 
-void BlockFalling::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   this->onNeighbourMove(user, oldblock, x, y, z, direction);
-}
-
-void BlockFalling::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockDefault::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
    uint8 oldblock;
    uint8 oldmeta;
@@ -78,63 +84,26 @@ void BlockFalling::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
 
    Map::get()->setBlock(x, y, z, (char)newblock, direction);
    Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
-
-   physics(user,x,y,z);
 }
 
-void BlockFalling::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockDefault::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
 }
 
-void BlockFalling::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockDefault::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-}
+   uint8 oldblock;
+   uint8 oldmeta;
 
-void BlockFalling::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
-{
-   uint8 block;
-   uint8 meta;
-
-   if (!Map::get()->getBlock(x, y, z, &block, &meta))
+   if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
       return;
 
-   physics(user,x,y,z);
+   Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+   Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+   Map::get()->createPickupSpawn(x, y, z, oldblock, 1);
 }
 
-void BlockFalling::physics(User* user, sint32 x, sint8 y, sint32 z)
+void BlockDefault::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-   uint8 fallblock, block;
-   uint8 fallmeta, meta;
-   
-   if (!Map::get()->getBlock(x, y, z, &fallblock, &fallmeta))
-      return;
-   
-   while(Map::get()->getBlock(x, y-1, z, &block, &meta))
-   {
-     switch(block)
-     {
-       case BLOCK_AIR:
-       case BLOCK_WATER:
-       case BLOCK_STATIONARY_WATER:
-       case BLOCK_LAVA:
-       case BLOCK_STATIONARY_LAVA:
-       break;
-       default:
-         /* stop falling */
-         return;
-       break;
-     }
-
-     // Destroy original block
-     Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-     Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
-
-     y--;
-
-     Map::get()->setBlock(x, y, z, fallblock, fallmeta);
-     Map::get()->sendBlockChange(x, y, z, fallblock, fallmeta);
-
-     this->notifyNeighbours(x, y+1, z, "onNeighbourMove", user, block, BLOCK_BOTTOM);
-   }
 }
 
