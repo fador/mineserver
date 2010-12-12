@@ -56,7 +56,16 @@ void Screen::init(std::string version) {
 	playerList = createWindow(20, LINES - 14, COLS - 20, 5);
 
   // Make sure nothing waits for input
+  wtimeout(title, 0);
+  wtimeout(generalLog, 0);
+  wtimeout(chatLog, 0);
   wtimeout(commandLog, 0);
+  wtimeout(playerList, 0);
+  nodelay(title,true);
+  nodelay(generalLog,true);
+  nodelay(chatLog,true);
+  nodelay(commandLog,true);
+  nodelay(playerList,true);
 
 	// Setup color if we haz it
 	if(has_colors())
@@ -125,17 +134,46 @@ void Screen::init(std::string version) {
 }
 bool Screen::hasCommand()
 {
+
   // Get the chars in the buffer
   wmove(commandLog, 4, currentCommand.size() + 1);
-  int crlfEntered = wgetnstr(commandLog, commandBuffer, 80);
+  char readchar;
+  bool run=true;
+  do
+  {
+    readchar=wgetch(commandLog);
+    // Add to our string buffer
+    if(readchar!=ERR)
+    {
+      //Backspace
+      if(readchar == '\b')
+      {
+        currentCommand.erase(currentCommand.end()-1);
+      }
+      else if(readchar == '\n')
+      {
+        run = false;
+      }
+      else
+      {
+        currentCommand += readchar;
+      }
+
+    }
+    else
+    {
+      run = false;
+    }
+  }
+  while(run);
+  //int crlfEntered = wgetnstr(commandLog, commandBuffer, 80);
   wmove(commandLog, 4, currentCommand.size() + 1);
   wrefresh(commandLog);
 
-  // Add to our string buffer
-  currentCommand.append(commandBuffer);
+
   
   // Check if we've got a full command waiting
-  if(crlfEntered == OK)
+  if(readchar == '\n')//crlfEntered == OK)
     return true;
   else
     return false;
