@@ -590,7 +590,8 @@ bool User::updatePos(double x, double y, double z, double stance)
 			std::list<User*>::iterator iter = toadd.begin(), end = toadd.end();
 			for( ; iter != end ; iter++)
 			{
-				(*iter)->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
+				if((*iter) != this)
+				  (*iter)->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
 			}
 		}
 
@@ -652,8 +653,6 @@ bool User::updatePos(double x, double y, double z, double stance)
           }
         }
 
-		toRemove.erase(this);
-
 		std::set<User*> toTeleport;
 		std::set<User*>::iterator iter = toRemove.begin(), end = toRemove.end();
 		for( ; iter != end ; iter++ )
@@ -688,6 +687,9 @@ bool User::updatePos(double x, double y, double z, double stance)
 		telePacket << (sint8)PACKET_ENTITY_TELEPORT 
 		   << (sint32)UID << (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
 
+		toTeleport.erase(this);
+		toAdd.erase(this);
+		toRemove.erase(this);
 
 		iter = toRemove.begin(); end = toRemove.end();
 		for( ; iter != end ; iter++ )
@@ -1130,7 +1132,9 @@ bool User::spawnUser(int x, int y, int z)
   pkt << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)UID << nick
     << (sint32)x << (sint32)y << (sint32)z << (sint8)0 << (sint8)0
     << (sint16)0;
-  sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
+  sChunk *chunk = Map::get()->chunks.GetChunk(blockToChunk((sint32)x), blockToChunk((sint32)y));
+  if(chunk != NULL)
+	  chunk->sendPacket(pkt, this);
   return true;
 }
 
