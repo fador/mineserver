@@ -46,22 +46,22 @@ enum
 };
 
 // Chat colors
-#define COLOR_BLACK std::string("§0")
-#define COLOR_DARK_BLUE std::string("§1")
-#define COLOR_DARK_GREEN std::string("§2")
-#define COLOR_DARK_CYAN std::string("§3")
-#define COLOR_DARK_RED std::string("§4")
-#define COLOR_DARK_MAGENTA std::string("§5")
-#define COLOR_DARK_ORANGE std::string("§6")
-#define COLOR_GREY std::string("§7")
-#define COLOR_DARK_GREY std::string("§8")
-#define COLOR_BLUE std::string("§9")
-#define COLOR_GREEN std::string("§a")
-#define COLOR_CYAN std::string("§b")
-#define COLOR_RED std::string("§c")
-#define COLOR_MAGENTA std::string("§d")
-#define COLOR_YELLOW std::string("§e")
-#define COLOR_WHITE std::string("§f")
+#define MC_COLOR_BLACK std::string("§0")
+#define MC_COLOR_DARK_BLUE std::string("§1")
+#define MC_COLOR_DARK_GREEN std::string("§2")
+#define MC_COLOR_DARK_CYAN std::string("§3")
+#define MC_COLOR_DARK_RED std::string("§4")
+#define MC_COLOR_DARK_MAGENTA std::string("§5")
+#define MC_COLOR_DARK_ORANGE std::string("§6")
+#define MC_COLOR_GREY std::string("§7")
+#define MC_COLOR_DARK_GREY std::string("§8")
+#define MC_COLOR_BLUE std::string("§9")
+#define MC_COLOR_GREEN std::string("§a")
+#define MC_COLOR_CYAN std::string("§b")
+#define MC_COLOR_RED std::string("§c")
+#define MC_COLOR_MAGENTA std::string("§d")
+#define MC_COLOR_YELLOW std::string("§e")
+#define MC_COLOR_WHITE std::string("§f")
 
 // Direction
 enum Direction

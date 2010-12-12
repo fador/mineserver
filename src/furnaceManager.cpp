@@ -45,7 +45,7 @@ void FurnaceManager::update() {
   }
 
 #ifdef _DEBUG
-  std::cout << "Checking Furnaces: " << dtos(m_activeFurnaces.size()) << " active furnaces." << std::endl;
+  Screen::get()->log("Checking Furnaces: " + dtos(m_activeFurnaces.size()) + " active furnaces.");
 #endif
 
   // Loop thru all the furnaces
@@ -64,7 +64,6 @@ void FurnaceManager::update() {
     {
       currentFurnace->consumeFuel();
     }
-    //std::cout << "Furnace " << index << " " << currentFurnace->isCooking() << std::endl;
 
     // If we're cooking, increment the activity and check if we're ready to smelt the output
     if(currentFurnace->isCooking())

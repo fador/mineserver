@@ -32,6 +32,8 @@
 #include <map>
 #include <vector>
 #include <deque>
+#include "mineserver.h"
+#include "screen.h"
 
 struct Kit;
 
