@@ -55,6 +55,7 @@ TrxLogger &TrxLogger::get()
 // Log action to binary log 
 void TrxLogger::log(event_t event)
 {
+
   if(!log_stream.bad()) {
     event.timestamp = time (NULL);
     event.nsize = strlen(event.nick);
@@ -140,16 +141,16 @@ bool TrxLogger::getLogs(std::vector<event_t> *logs) {
 
   while(log_stream.good()) {
                         
-    log_stream.get((char *) &event.timestamp, sizeof(time_t));
-    log_stream.get((char *) &event.x, sizeof(int));
-    log_stream.get((char *) &event.y, sizeof(int));
-    log_stream.get((char *) &event.z, sizeof(int));
-    log_stream.get((char *) &event.otype, sizeof(uint8));
-    log_stream.get((char *) &event.ntype, sizeof(uint8));
-    log_stream.get((char *) &event.ometa, sizeof(uint8));
-    log_stream.get((char *) &event.nmeta, sizeof(uint8));
-    log_stream.get((char *) &event.nsize, sizeof(int));
-    log_stream.get((char *) &event.nick, event.nsize+1);
+    log_stream.read((char *) &event.timestamp, sizeof(time_t));
+    log_stream.read((char *) &event.x, sizeof(int));
+    log_stream.read((char *) &event.y, sizeof(int));
+    log_stream.read((char *) &event.z, sizeof(int));
+    log_stream.read((char *) &event.otype, sizeof(uint8));
+    log_stream.read((char *) &event.ntype, sizeof(uint8));
+    log_stream.read((char *) &event.ometa, sizeof(uint8));
+    log_stream.read((char *) &event.nmeta, sizeof(uint8));
+    log_stream.read((char *) &event.nsize, sizeof(int));
+    log_stream.read((char *) &event.nick, event.nsize+1);
 
     logs->push_back(event);
   }
