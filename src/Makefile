@@ -48,6 +48,10 @@ $(PROG):
 clean: 
 	$(RM) $(OBJS) $(PROGS)
 
+dist:
+	tar cvzf ../mineserver-latest-`uname`-bin.tar.gz -C ../bin/ . ../LICENSE
+	zip -j ../mineserver-latest-`uname`-bin.zip ../bin/* ../LICENSE
+
 all: $(PROGS)
 
 chat.o: chat.cpp logger.h constants.h tools.h map.h user.h chat.h config.h physics.h
