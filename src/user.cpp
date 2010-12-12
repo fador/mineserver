@@ -1123,6 +1123,8 @@ bool User::teleport(double x, double y, double z)
 
   //Also update pos for other players
   updatePos(x, y, z, 0);
+
+  pushMap();
   return true;
 }
 
@@ -1132,7 +1134,7 @@ bool User::spawnUser(int x, int y, int z)
   pkt << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)UID << nick
     << (sint32)x << (sint32)y << (sint32)z << (sint8)0 << (sint8)0
     << (sint16)0;
-  sChunk *chunk = Map::get()->chunks.GetChunk(blockToChunk((sint32)x), blockToChunk((sint32)z));
+  sChunk *chunk = Map::get()->chunks.GetChunk(blockToChunk(x >> 5), blockToChunk(z >> 5));
   if(chunk != NULL)
 	  chunk->sendPacket(pkt, this);
   return true;
