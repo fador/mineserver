@@ -286,7 +286,7 @@ int Mineserver::run(int argc, char *argv[])
     struct hostent *hostinfo = gethostbyname(name);
     std::cout << "Listening on: ";
     int ipIndex = 0;
-    while(hostinfo->h_addr_list[ipIndex]) {
+    while(hostinfo && hostinfo->h_addr_list[ipIndex]) {
         if(ipIndex > 0) { std::cout << ", "; }
         char *ip = inet_ntoa(*(struct in_addr *)hostinfo->h_addr_list[ipIndex++]);
         std::cout << ip << ":" << port;
