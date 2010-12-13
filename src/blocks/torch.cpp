@@ -26,7 +26,6 @@
  */
 
 #include "torch.h"
-#include <iostream>
 
 void BlockTorch::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
