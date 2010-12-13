@@ -34,7 +34,7 @@ class User;
 
 class Mineserver
 {
-	
+
 public:
   static Mineserver& get()
   {
@@ -43,11 +43,11 @@ public:
   }
 
   Mineserver();
-  int run(int argc, char *argv[]);
+  int run(int argc, char* argv[]);
   bool stop();
-  event_base *getEventBase();
+  event_base* getEventBase();
 
-  std::vector<User *> & users() { return m_users; }
+  std::vector<User*>& users() { return m_users; }
 
   struct event m_listenEvent;
   int m_socketlisten;
@@ -55,12 +55,12 @@ public:
 private:
 
 
-  event_base *m_eventBase;
+  event_base* m_eventBase;
 
   bool m_running;
 
   // holds all connected users
-  std::vector<User *> m_users;
+  std::vector<User*> m_users;
 
 };
 

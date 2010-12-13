@@ -54,7 +54,7 @@ class Furnace
   };
 
 public:
-  Furnace(NBT_Value *entity, uint8 blockType);
+  Furnace(NBT_Value* entity, uint8 blockType);
 
   void sendToAllUsers();
   NBT_Value* getSlotEntity(sint8 slotNumber);
