@@ -59,7 +59,7 @@ namespace
     Chat::get()->sendMsg(user, MC_COLOR_DARK_MAGENTA + "Error! " + MC_COLOR_RED + message, Chat::USER);
     
     // Let the console know
-    if(user->UID == -1)
+    if(user->UID == SERVER_CONSOLE_UID)
     {
       Screen::get()->log(LOG_CHAT, message);
     }
@@ -395,6 +395,7 @@ void emote(User *user, std::string command, std::deque<std::string> args)
   }
   else
   {
+    Screen::get()->log(LOG_CHAT, "* "+ user->nick + " " + emoteMsg);
     Chat::get()->sendMsg(user, MC_COLOR_DARK_ORANGE + "* " + user->nick + " " + emoteMsg, Chat::ALL);
   }
 }

@@ -320,7 +320,7 @@ int Mineserver::run(int argc, char *argv[])
   event_base_loopexit(m_eventBase, &loopTime);
 
   // Create our Server Console user so we can issue commands
-  User *serverUser = new User(-1, -1);
+  User *serverUser = new User(-1, SERVER_CONSOLE_UID);
   serverUser->changeNick("[Server]");
  
   while(m_running && event_base_loop(m_eventBase, 0) == 0)

@@ -96,9 +96,9 @@ void Screen::init(std::string version) {
 	}
 	for(int x = 0; x < COLS; x++)               // Bottom row
 	{
-		mvaddch((logHeight + chatHeight + titleHeight + 2), x, '=');
+		mvaddch((logHeight + chatHeight + titleHeight + 1), x, '=');
 	}	
-	for(int y = 5; y < (logHeight + chatHeight + titleHeight + 2); y++)          // Far col divider
+	for(int y = 5; y < (logHeight + chatHeight + titleHeight + 1); y++)          // Far col divider
 	{
 		mvaddch(y, COLS-21, '|');
 	} 
@@ -109,7 +109,7 @@ void Screen::init(std::string version) {
 	mvprintw(titleHeight - 1, 2, " Log ");
 	mvprintw(titleHeight - 1, COLS - 15, " Players ");
 	mvprintw(logHeight + titleHeight, 2, " Chat ");
-	mvprintw((logHeight + chatHeight + titleHeight + 2), 2, " Command History ");
+	mvprintw((logHeight + chatHeight + titleHeight + 1), 2, " Command History ");
 	attroff(COLOR_PAIR(TEXT_COLOR_WHITE));
 	refresh();
 	
@@ -183,7 +183,7 @@ std::string Screen::getCommand()
   // Get a copy of the current command, clear it and return the copy
   std::string tempCmd = currentCommand;
   currentCommand.clear();
-  //log(LOG_COMMAND, "");
+  log(LOG_COMMAND, "");
   return tempCmd;
 }
 WINDOW* Screen::createWindow(int width, int height, int startx, int starty)
@@ -251,12 +251,42 @@ void Screen::log(int logType, std::string message)
 	getyx(window, y, x);
 
 	// Print the message to the correct window
-	if(window == title || window == playerList)
-		waddstr(window, (message + "\n").c_str());
-	else if (window == commandLog)
-	  waddstr(window, (message + "\n").c_str());
+	if (window == chatLog)
+	{
+	  // Timestamp
+    time_t rawTime = time(NULL);
+    struct tm *Tm  = localtime(&rawTime);
+    std::string timeStamp (asctime(Tm));
+    timeStamp = timeStamp.substr(11, 5);
+    
+    // Display the timestamp
+    waddstr(window, (timeStamp + " ").c_str());
+    
+    // Check for special messages
+    if(message.substr(0,3) == "[!]" || message.substr(0,3) == "[@]")    // Server or AdminChat message
+    {
+      wattron(window, COLOR_PAIR(TEXT_COLOR_RED));  
+      waddstr(window, message.substr(0,3).c_str());
+      wattroff(window, COLOR_PAIR(TEXT_COLOR_RED));  
+      if(message.substr(0,3) == "[!]") { wattron(window, COLOR_PAIR(TEXT_COLOR_GREEN)); }      
+      waddstr(window, (message.substr(3) + "\n").c_str());
+      if(message.substr(0,3) == "[!]") { wattroff(window, COLOR_PAIR(TEXT_COLOR_GREEN)); }          
+    }
+    else if(message.substr(0, 1) == "*")                                // Emotes
+    {
+      wattron(window, COLOR_PAIR(TEXT_COLOR_YELLOW));  
+      waddstr(window, (message + "\n").c_str());
+      wattroff(window, COLOR_PAIR(TEXT_COLOR_YELLOW));  
+    }
+  	else                                                                // Regular chat
+  	{
+  	   waddstr(window, (message + "\n").c_str());
+  	}    
+	}
 	else
-		waddstr(window, ("\n " + message).c_str());
+	{
+		waddstr(window, (message + "\n").c_str());
+	}
 		
 	// Turn off color again
 	if(logType == LOG_ERROR) {	wattroff(window, COLOR_PAIR(TEXT_COLOR_RED)); }
