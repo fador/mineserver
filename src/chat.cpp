@@ -43,7 +43,6 @@
   #include <string.h>
 #endif
 
-#include "logger.h"
 #include "constants.h"
 
 #include "tools.h"
@@ -52,6 +51,7 @@
 #include "chat.h"
 #include "config.h"
 #include "physics.h"
+#include "constants.h"
 
 Chat* Chat::_instance;
 
@@ -121,7 +121,7 @@ bool Chat::checkMotd(std::string motdFile)
   // If file does not exist
   if(ifs.fail())
   {
-    std::cout << "> Warning: " << motdFile << " not found. Creating..." << std::endl;
+    Screen::get()->log("> Warning: " + motdFile + " not found. Creating...");
 
     std::ofstream motdofs(motdFile.c_str());
     motdofs << MOTD_CONTENT << std::endl;
@@ -135,18 +135,18 @@ bool Chat::checkMotd(std::string motdFile)
 
 bool Chat::sendUserlist(User *user)
 {
-  this->sendMsg(user, COLOR_BLUE + "[ " + dtos(User::all().size()) + " players online ]", USER);
+  this->sendMsg(user, MC_COLOR_BLUE + "[ " + dtos(User::all().size()) + " players online ]", USER);
 
   for(unsigned int i = 0; i < User::all().size(); i++)
   {
     std::string playerDesc = "> " + User::all()[i]->nick;
     if(User::all()[i]->muted)
     {
-        playerDesc += COLOR_YELLOW + " (muted)";
+        playerDesc += MC_COLOR_YELLOW + " (muted)";
     }
     if(User::all()[i]->dnd)
     {
-      playerDesc += COLOR_YELLOW + " (dnd)";
+      playerDesc += MC_COLOR_YELLOW + " (dnd)";
     }
 
     this->sendMsg(user, playerDesc, USER);
@@ -193,9 +193,7 @@ bool Chat::handleMsg(User *user, std::string msg)
 {
   // Timestamp
   time_t rawTime = time(NULL);
-
   struct tm *Tm  = localtime(&rawTime);
-
   std::string timeStamp (asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
@@ -207,14 +205,16 @@ bool Chat::handleMsg(User *user, std::string msg)
   if(msg[0] == SERVERMSGPREFIX && IS_ADMIN(user->permissions))
   {
     // Decorate server message
-    msg = COLOR_RED + "[!] " + COLOR_GREEN + msg.substr(1);
+    Screen::get()->log(LOG_CHAT, "[!] " + msg.substr(1));
+    msg = MC_COLOR_RED + "[!] " + MC_COLOR_GREEN + msg.substr(1);
     this->sendMsg(user, msg, ALL);
   }
 
   // Adminchat
   else if(msg[0] == ADMINCHATPREFIX && IS_ADMIN(user->permissions))
   {
-    msg = timeStamp + " @@ <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg.substr(1);
+    Screen::get()->log(LOG_CHAT, "[@] <"+ user->nick + "> " + msg.substr(1));
+    msg = timeStamp +  MC_COLOR_RED + " [@]" + MC_COLOR_WHITE + " <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg.substr(1);
     this->sendMsg(user, msg, ADMINS);
   }
 
@@ -246,17 +246,23 @@ bool Chat::handleMsg(User *user, std::string msg)
 		}
     else
     {
-      if(IS_ADMIN(user->permissions))
+      // Check for Admins or Server Console
+      if (user->UID == SERVER_CONSOLE_UID)
       {
-        msg = timeStamp + " <"+ COLOR_DARK_MAGENTA + user->nick + COLOR_WHITE + "> " + msg;
+        Screen::get()->log(LOG_CHAT, user->nick + " " + msg);
+        msg = timeStamp + " " + MC_COLOR_RED + user->nick + MC_COLOR_WHITE + " " + msg;
+      }
+      else if(IS_ADMIN(user->permissions))
+      {
+        Screen::get()->log(LOG_CHAT, "<"+ user->nick + "> " + msg);
+        msg = timeStamp + " <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg;
       }
       else
       {
+        Screen::get()->log(LOG_CHAT, "<"+ user->nick + "> " + dtos(user->UID) + " " + msg);
         msg = timeStamp + " <"+ user->nick + "> " + msg;
       }
     }
-
-    LOG(msg);
 
     this->sendMsg(user, msg, ALL);
   }
@@ -316,17 +322,17 @@ void Chat::sendHelp(User *user, std::deque<std::string> args)
   // the screen at once.
 
   CommandList *commandList = &m_guestCommands; // defaults
-  std::string commandColor = COLOR_BLUE;
+  std::string commandColor = MC_COLOR_BLUE;
 
   if(IS_ADMIN(user->permissions))
   {
     commandList = &m_adminCommands;
-    commandColor = COLOR_RED; // different color for admin commands
+    commandColor = MC_COLOR_RED; // different color for admin commands
   }
   else if(IS_OP(user->permissions))
   {
     commandList = &m_opCommands;
-    commandColor = COLOR_GREEN;
+    commandColor = MC_COLOR_GREEN;
   }
   else if(IS_MEMBER(user->permissions))
   {
@@ -341,7 +347,7 @@ void Chat::sendHelp(User *user, std::deque<std::string> args)
     {
       std::string args = it->second->arguments;
       std::string description = it->second->description;
-      sendMsg(user, commandColor + CHATCMDPREFIX + it->first + " " + args + " : " + COLOR_YELLOW + description, Chat::USER);
+      sendMsg(user, commandColor + CHATCMDPREFIX + it->first + " " + args + " : " + MC_COLOR_YELLOW + description, Chat::USER);
     }
   }
   else
@@ -352,11 +358,11 @@ void Chat::sendHelp(User *user, std::deque<std::string> args)
       std::string args = iter->second->arguments;
       std::string description = iter->second->description;
       sendMsg(user, commandColor + CHATCMDPREFIX + iter->first + " " + args, Chat::USER);
-      sendMsg(user, COLOR_YELLOW + CHATCMDPREFIX + description, Chat::USER);
+      sendMsg(user, MC_COLOR_YELLOW + CHATCMDPREFIX + description, Chat::USER);
     }
     else
     {
-      sendMsg(user, COLOR_RED + "Unknown Command: " + args.front(), Chat::USER);
+      sendMsg(user, MC_COLOR_RED + "Unknown Command: " + args.front(), Chat::USER);
     }
   }
 }

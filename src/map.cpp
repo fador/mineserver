@@ -59,7 +59,7 @@ Map* Map::mMap = NULL;
 
 void Map::addSapling(User* user, int x, int y, int z)
 {
-  std::cout << "Place sapling " << x << " " << y << " " << z << std::endl;
+  Screen::get()->log("Place sapling " + dtos(x) + " " + dtos(y) + " " + dtos(z));
 
   saplings.push_back( sTree(x,y,z,mapTime,user->UID) );
 }
@@ -72,7 +72,7 @@ void Map::checkGenTrees()
   {
     if(rand() % 50 == 0)
     {
-      std::cout << "Grow tree!" << std::endl;
+      Screen::get()->log("Grow tree!");
 
       sint32 x = (*iter).x;
       sint32 y = (*iter).y;
@@ -118,7 +118,7 @@ void Map::init()
   struct stat stFileInfo;
   if(stat(mapDirectory.c_str(), &stFileInfo) != 0)
   {
-    std::cout << "Warning: Map directory not found, creating it now." << std::endl;
+    Screen::get()->log("Warning: Map directory not found, creating it now.");
 
 #ifdef WIN32
     if(_mkdir(mapDirectory.c_str()) == -1)
@@ -126,14 +126,14 @@ void Map::init()
     if(mkdir(mapDirectory.c_str(), 0755) == -1)
 #endif
     {
-      std::cout << "Error: Could not create map directory." << std::endl;
+      Screen::get()->log("Error: Could not create map directory.");
       exit(EXIT_FAILURE);
     }
   }
 
   if(stat((infile).c_str(), &stFileInfo) != 0)
   {
-    std::cout << "Warning: level.dat not found, creating it now." << std::endl;
+    Screen::get()->log("Warning: level.dat not found, creating it now.");
 
     NBT_Value level(NBT_Value::TAG_COMPOUND);
     level.Insert("Data", new NBT_Value(NBT_Value::TAG_COMPOUND));
@@ -149,7 +149,7 @@ void Map::init()
 
     if (stat(infile.c_str(), &stFileInfo) != 0)
     {
-      std::cout << "Error: Could not create level.dat" << std::endl;
+      Screen::get()->log("Error: Could not create level.dat");
       exit(EXIT_FAILURE);
     }
   }
@@ -174,7 +174,7 @@ void Map::init()
   if(!trees || trees->GetListType() != NBT_Value::TAG_COMPOUND)
   {
 
-    std::cout << "No Trees in level.dat, creating.." << std::endl;
+    Screen::get()->log("No Trees in level.dat, creating..");
     root->Insert("Trees", new NBT_Value(NBT_Value::TAG_LIST,NBT_Value::TAG_COMPOUND));
     trees = ((*root)["Trees"]);
     root->SaveToFile(infile);
@@ -184,7 +184,7 @@ void Map::init()
 
   std::vector<NBT_Value*> *tree_list = trees->GetList();
 
-  std::cout << (*tree_list).size() << " saplings" << std::endl;
+  Screen::get()->log(dtos((*tree_list).size()) + " saplings");
 
   for(std::vector<NBT_Value*>::iterator iter = (*tree_list).begin(); iter != (*tree_list).end(); ++iter)
   {
@@ -195,7 +195,7 @@ void Map::init()
     sint32 plantedTime = (sint32)*tree["plantedTime"];
     sint32 plantedBy = (sint32)*tree["plantedBy"];
     saplings.push_back( sTree(x,y,z,plantedTime,plantedBy) );
-    std::cout << "sapling: " << x << " " << y << " " << z << std::endl;
+    Screen::get()->log("sapling: " + dtos(x) + " " + dtos(y) + " " + dtos(z));
   }
 
   /////////////////
@@ -205,8 +205,7 @@ void Map::init()
 
   delete root;
 #ifdef _DEBUG
-  std::cout << "Spawn: (" << spawnPos.x() << "," << spawnPos.y() << "," << spawnPos.z() << ")"<<
-  std::endl;
+  Screen::get()->log("Spawn: (" + spawnPos.x() + "," + spawnPos.y() + "," + spawnPos.z() + ")");
 #endif
 }
 
@@ -421,10 +420,10 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
   #ifdef PRINT_LIGHTGEN_TIME
   #ifdef WIN32
     t_end = timeGetTime ();
-    std::cout << "Lightgen: " << (t_end-t_begin) << "ms" << std::endl;
+    Screen::get()->log("Lightgen: " + dtos(t_end-t_begin) + "ms");
   #else
     t_end = clock();
-    std::cout << "Lightgen: " << (t_end-t_begin)/(CLOCKS_PER_SEC/1000)) << "ms" << std::endl;
+    Screen::get()->log("Lightgen: " + dtos((t_end-t_begin)/(CLOCKS_PER_SEC/1000))) + "ms");
   #endif
   #endif
 
@@ -1194,7 +1193,7 @@ void Map::sendToUser(User *user, int x, int z)
                   // Check permission to access
                   if(!(chestowner == user->nick || IS_ADMIN(user->permissions)))
                   {
-                    Chat::get()->sendMsg(user, COLOR_BLUE + "Chest is locked.", Chat::USER);
+                    Chat::get()->sendMsg(user, MC_COLOR_BLUE + "Chest is locked.", Chat::USER);
                     continue;
                   }
                 }
@@ -1226,7 +1225,7 @@ void Map::sendToUser(User *user, int x, int z)
           //Gzip the data
           if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
           {
-            std::cout << "Error in deflate: " << state << std::endl;
+            Screen::get()->log("Error in deflate: " + dtos(state));
           }
 
           sint32 entityX = *(**iter)["x"];
@@ -1384,7 +1383,7 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *
   //Gzip the data
   if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
   {
-    std::cout << "Error in deflate: " << state << std::endl;
+    Screen::get()->log("Error in deflate: " + dtos(state));
   }
 
   deflateEnd(&zstream2);

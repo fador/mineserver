@@ -29,6 +29,8 @@
 // Mineserver logger.h
 //
 #include <string>
+#include "screen.h"
+#include "tools.h"
 
 #define LOG(msg) Logger::get()->log(msg, std::string(((strrchr(__FILE__, '/') ?"": __FILE__ - 1) + 1)), __LINE__)
 

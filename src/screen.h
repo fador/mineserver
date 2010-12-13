@@ -25,67 +25,70 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _CONFIG_H
-#define _CONFIG_H
+#pragma once
 
-#include <string>
-#include <map>
+#include <cstdlib>
+#include <iostream>
+#ifdef WIN32
+  #include <winsock2.h>
+  #include <curses.h>
+#else
+#include <ncurses.h>
+#endif
 #include <vector>
-#include <deque>
-#include "mineserver.h"
-
-struct Kit;
-
-class Conf
+#include "user.h"
+enum
 {
- public:
-  static Conf* get()
-  {
-    if(!_conf) {
-      _conf = new Conf();
-    }
-    return _conf;
-  }
-
-  ~Conf();
-
-  void free();
-
-  bool load(std::string configFile, std::string namePrefix = "");
-  int iValue(std::string name);
-  std::string sValue(std::string name);
-  bool bValue(std::string name);
-  std::vector<int> vValue(std::string name);
-  int commandPermission(std::string commandName);
-  int permissionByName(std::string permissionName);
-  Kit* kit(const std::string& kitname);
-
-  bool loadRoles();
-  bool loadBanned();
-  bool loadWhitelist();
-
-  std::deque<std::string> & admins() { return m_admins; }
-  std::deque<std::string> & ops() { return m_ops; }
-  std::deque<std::string> & members() { return m_members; }
-  std::deque<std::string> & banned() { return m_banned; }
-  std::deque<std::string> & whitelist() { return m_whitelist; }
-
- private:
-  static Conf *_conf;
-
-  Conf() {}
-  std::vector<int> stringToVec(std::string& val);
-
-  std::map<std::string, std::string> m_confSet;
-  std::map<std::string, Kit*> m_kits;
-
-  // predefined usernames in roles.txt, banned.txt & whitelist.txt
-  std::deque<std::string> m_admins;
-  std::deque<std::string> m_ops;
-  std::deque<std::string> m_members;
-  std::deque<std::string> m_banned;
-  std::deque<std::string> m_whitelist;
-
+	LOG_TITLE,
+  LOG_GENERAL,
+  LOG_CHAT,
+  LOG_PLAYERS,
+	LOG_ERROR,
+	LOG_COMMAND
+};
+enum
+{
+	TEXT_COLOR_RED = 1,
+	TEXT_COLOR_GREEN,
+	TEXT_COLOR_YELLOW,
+	TEXT_COLOR_BLUE,
+	TEXT_COLOR_MAGENTA,
+	TEXT_COLOR_CYAN,
+	TEXT_COLOR_WHITE,
+	TEXT_COLOR_INVERSE
 };
 
-#endif
+class Screen
+{
+public:
+  Screen();
+  static Screen* get() {
+    if(!_instance) {
+      _instance = new Screen();
+    }
+    return _instance;
+  }
+	void init(std::string version);
+	WINDOW* createWindow(int width, int height, int startx, int starty);
+	void destroyWindow(WINDOW *local_win);
+	void log(std::string message);
+	void log(int logType, std::string message);
+  void updatePlayerList(std::vector<User *> users);
+	void end();
+	WINDOW *commandLog;
+  bool hasCommand();
+  std::string getCommand();
+  
+private:
+  static Screen *_instance;
+
+	WINDOW *title;
+	WINDOW *generalLog;
+	WINDOW *chatLog;
+	WINDOW *playerList;
+	
+	std::string currentCommand;
+	char commandBuffer[80];
+  
+};
+

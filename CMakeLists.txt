@@ -74,6 +74,16 @@ if(NOISE_INCLUDE_DIR MATCHES ".*libnoise$")
   add_definitions(-DDEBIAN)
 endif()
 
+find_library(NCURSES_LIBRARY
+   NAMES libncurses.so
+   PATHS /usr/lib /usr/local/lib
+)
+find_path(NCURSES_INCLUDE_DIR
+  NAMES ncurses.h
+  PATHS /usr/include /usr/local/include
+)
+
+
 if (WINDOWS)
    # even if 64bit this is set
    set(exe "WIN32")
@@ -84,6 +94,7 @@ if (NOT dependency_error)
 #   include_directories(${LUA_INCLUDE_DIR})
    include_directories(${EVENT_INCLUDE_DIR})
    include_directories(${NOISE_INCLUDE_DIR})
+   include_directories(${NCURSES_INCLUDE_DIR})
 
    add_executable(mineserver ${exe} ${folder_source})
 
@@ -91,6 +102,7 @@ if (NOT dependency_error)
 #   target_link_libraries(mineserver ${LUA_LIBRARY})
    target_link_libraries(mineserver ${EVENT_LIBRARY})
    target_link_libraries(mineserver ${NOISE_LIBRARY})
+   target_link_libraries(mineserver ${NCURSES_LIBRARY})
 else()
    message(FATAL_ERROR "\n\tNot all dependencies could be found:\n${errors}\n After installing them please rerun cmake.\n")
 endif()

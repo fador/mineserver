@@ -116,7 +116,7 @@ bool Physics::update()
   std::vector<sint32> toRemove;
   std::vector<vec> toAdd;
 
-  std::cout << "Simulating " << simList.size() << " items!" << std::endl;
+  Screen::get()->log("Simulating " + dtos(simList.size()) + " items!");
   uint32 listSize = simList.size();
   // Iterate each simulation
   for(uint32 simIt = 0; simIt < listSize; simIt++)
@@ -297,7 +297,7 @@ bool Physics::update()
 
   
   clock_t endtime = clock()-starttime;
-  std::cout << "Exit simulation, took " << endtime*1000/CLOCKS_PER_SEC << " ms, " << simList.size() << " items left" << std::endl;
+  Screen::get()->log("Exit simulation, took " + dtos(endtime*1000/CLOCKS_PER_SEC) + " ms, " + dtos(simList.size()) + " items left");
   return true;
 }
 

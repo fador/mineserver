@@ -32,6 +32,7 @@
 #include "constants.h"
 #include "map.h"
 #include "tools.h"
+#include "screen.h"
 
 class User;
 
