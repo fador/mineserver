@@ -959,6 +959,7 @@ sChunk * Map::loadMap(int x, int z, bool generate)
   if(chunk->x != x || chunk->z != z)
   {
     LOG("Error in loading map (incorrect chunk)");
+	delete chunk->nbt;
 	delete chunk;
     return NULL;
   }
@@ -972,6 +973,7 @@ sChunk * Map::loadMap(int x, int z, bool generate)
   if(blocks == 0 || data == 0 || blocklight == 0 || skylight == 0 || heightmap == 0)
   {
     LOG("Error in loading map (chunk missing data)");
+	delete chunk->nbt;
 	delete chunk;
     return NULL;
   }
@@ -985,6 +987,7 @@ sChunk * Map::loadMap(int x, int z, bool generate)
     skylight->size() != halfLen)
   {
     LOG("Error in loading map (corrupt?)");
+	delete chunk->nbt;
 	delete chunk;
     return NULL;
   }
@@ -1090,7 +1093,9 @@ bool Map::releaseMap(int x, int z)
   if(chunk == NULL)
 	  return false;
   chunks.UnlinkChunk(x, z);
+  delete chunk->nbt;
   delete chunk;
+  
   return true;
 
   //uint32 mapId;

@@ -182,7 +182,13 @@ User::~User()
         {
 			sChunk *chunk = Map::get()->chunks.GetChunk(mapx, mapz);
 			if(chunk != NULL)
+			{
 				chunk->users.erase(this);
+				if(chunk->users.size() == 0)
+				{
+					Map::get()->releaseMap(mapx, mapz);
+				}
+			}
         }
       }
 
@@ -1028,7 +1034,13 @@ bool User::delKnown(int x, int z)
 {
   sChunk * chunk = Map::get()->chunks.GetChunk(x,z);
   if(chunk != NULL)
+  {
     chunk->users.erase(this);
+	if(chunk->users.size() == 0)
+	{
+		Map::get()->releaseMap(x,z);
+	}
+  }
 
   for(unsigned int i = 0; i < mapKnown.size(); i++)
   {
