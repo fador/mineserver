@@ -64,11 +64,11 @@ class Conf
   bool loadBanned();
   bool loadWhitelist();
 
-  std::deque<std::string> & admins() { return m_admins; }
-  std::deque<std::string> & ops() { return m_ops; }
-  std::deque<std::string> & members() { return m_members; }
-  std::deque<std::string> & banned() { return m_banned; }
-  std::deque<std::string> & whitelist() { return m_whitelist; }
+  std::deque<std::string>& admins() { return m_admins; }
+  std::deque<std::string>& ops() { return m_ops; }
+  std::deque<std::string>& members() { return m_members; }
+  std::deque<std::string>& banned() { return m_banned; }
+  std::deque<std::string>& whitelist() { return m_whitelist; }
 
  private:
   static Conf *_conf;

@@ -95,7 +95,7 @@ void sighandler(int sig_num)
   Mineserver::get().stop();
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
   signal(SIGTERM, sighandler);
   signal(SIGINT, sighandler);
@@ -109,12 +109,12 @@ Mineserver::Mineserver()
 {
 }
 
-event_base *Mineserver::getEventBase()
+event_base* Mineserver::getEventBase()
 {
   return m_eventBase;
 }
 
-void Mineserver::updatePlayerList() 
+void Mineserver::updatePlayerList()
 {
 	// Update the player window
 	Screen::get()->updatePlayerList(users());
@@ -128,7 +128,7 @@ int Mineserver::run(int argc, char *argv[])
 	Screen::get()->init(VERSION);
 	Screen::get()->log("Welcome to Mineserver v" + VERSION);
 	updatePlayerList();
-	
+
   initConstants();
 
   std::string file_config;
@@ -137,7 +137,9 @@ int Mineserver::run(int argc, char *argv[])
   file_commands.assign(COMMANDS_FILE);
 
   if (argc > 1)
+  {
     file_config.assign(argv[1]);
+  }
 
   // Initialize conf
   Conf::get()->load(file_config);
@@ -146,13 +148,15 @@ int Mineserver::run(int argc, char *argv[])
   // Write PID to file
   std::ofstream pid_out((Conf::get()->sValue("pid_file")).c_str());
   if (!pid_out.fail())
+  {
 #ifdef WIN32
      pid_out << _getpid();
 #else
      pid_out << getpid();
 #endif
+  }
   pid_out.close();
-	
+
   // Load admin, banned and whitelisted users
   Conf::get()->loadRoles();
   Conf::get()->loadBanned();
@@ -169,37 +173,40 @@ int Mineserver::run(int argc, char *argv[])
   if (Conf::get()->bValue("map_generate_spawn"))
   {
     Screen::get()->log("Generating spawn area...");
-    int size=Conf::get()->iValue("map_generate_spawn_size");
+    int size = Conf::get()->iValue("map_generate_spawn_size");
     bool show_progress = Conf::get()->bValue("map_generate_spawn_show_progress");
-    #ifdef WIN32
-      DWORD t_begin,t_end;
-    #else
-      clock_t t_begin,t_end;
-    #endif
+#ifdef WIN32
+    DWORD t_begin,t_end;
+#else
+    clock_t t_begin,t_end;
+#endif
 
     for (int x=-size;x<=size;x++)
     {
-    #ifdef WIN32
+#ifdef WIN32
       if(show_progress)
+      {
         t_begin = timeGetTime();
-    #else
+      }
+#else
       if(show_progress)
+      {
         t_begin = clock();
-    #endif
-      for (int z=-size;z<=size;z++)
+      }
+#endif
+      for (int z = -size; z <= size; z++)
       {
         Map::get()->loadMap(x, z);
       }
       if(show_progress)
       {
-        #ifdef WIN32
-          t_end = timeGetTime ();
-          Screen::get()->log(dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos((t_end-t_begin)/(size*2+1)) + "ms per chunk");
-        #else
-          t_end = clock();
-          Screen::get()->log(dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos(((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1)) + "ms per chunk");
-        #endif
-
+#ifdef WIN32
+        t_end = timeGetTime ();
+        Screen::get()->log(dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos((t_end-t_begin)/(size*2+1)) + "ms per chunk");
+#else
+        t_end = clock();
+        Screen::get()->log(dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos(((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1)) + "ms per chunk");
+#endif
       }
     }
 #ifdef _DEBUG
@@ -233,9 +240,9 @@ int Mineserver::run(int argc, char *argv[])
 #endif
 
   struct sockaddr_in addresslisten;
-  int reuse             = 1;
+  int reuse = 1;
 
-  m_eventBase = (event_base *)event_init();
+  m_eventBase = (event_base*)event_init();
 #ifdef WIN32
   m_socketlisten = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 #else
@@ -255,10 +262,10 @@ int Mineserver::run(int argc, char *argv[])
   addresslisten.sin_addr.s_addr = inet_addr(ip.c_str());
   addresslisten.sin_port        = htons(port);
 
-  setsockopt(m_socketlisten, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse));
+  setsockopt(m_socketlisten, SOL_SOCKET, SO_REUSEADDR, (char*)&reuse, sizeof(reuse));
 
   //Bind to port
-  if(bind(m_socketlisten, (struct sockaddr *)&addresslisten, sizeof(addresslisten)) < 0)
+  if(bind(m_socketlisten, (struct sockaddr*)&addresslisten, sizeof(addresslisten)) < 0)
   {
     Screen::get()->log(LOG_ERROR, "Failed to bind");
     return 1;
@@ -297,11 +304,11 @@ int Mineserver::run(int argc, char *argv[])
     // Print all local IPs
     char name[255];
     gethostname ( name, sizeof(name));
-    struct hostent *hostinfo = gethostbyname(name);
+    struct hostent* hostinfo = gethostbyname(name);
     Screen::get()->log("Listening on: ");
     int ipIndex = 0;
     while(hostinfo && hostinfo->h_addr_list[ipIndex]) {
-        std::string ip(inet_ntoa(*(struct in_addr *)hostinfo->h_addr_list[ipIndex++]));
+        std::string ip(inet_ntoa(*(struct in_addr*)hostinfo->h_addr_list[ipIndex++]));
         Screen::get()->log(" " + ip + ":" + dtos(port));
     }
   }
@@ -322,7 +329,7 @@ int Mineserver::run(int argc, char *argv[])
   // Create our Server Console user so we can issue commands
   User *serverUser = new User(-1, -1);
   serverUser->changeNick("[Server]");
- 
+
   while(m_running && event_base_loop(m_eventBase, 0) == 0)
   {
     // Append current command and check if user entered return
@@ -331,7 +338,7 @@ int Mineserver::run(int argc, char *argv[])
       // Now handle this command as normal
       Chat::get()->handleMsg(serverUser, Screen::get()->getCommand().c_str());
     }
-    
+
     if(time(0)-starttime > 10)
     {
       starttime = (uint32)time(0);
@@ -369,7 +376,7 @@ int Mineserver::run(int argc, char *argv[])
         Map::get()->idToPos(toRelease[i], &x_temp, &z_temp);
         Map::get()->releaseMap(x_temp, z_temp);
       } */
-    } 
+    }
 
     //Every second
     if(time(0)-tick > 0)
@@ -387,7 +394,7 @@ int Mineserver::run(int argc, char *argv[])
           Packet pkt;
           pkt << PACKET_ENTITY_VELOCITY << (sint32)User::all()[i]->attachedTo <<  (sint16)10000       << (sint16)0 << (sint16)0;
           //pkt << PACKET_ENTITY_RELATIVE_MOVE << (sint32)User::all()[i]->attachedTo <<  (sint8)100       << (sint8)0 << (sint8)0;
-          User::all()[i]->sendAll((uint8 *)pkt.getWrite(), pkt.getWriteLen());
+          User::all()[i]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
         }
       }
       Map::get()->mapTime+=20;

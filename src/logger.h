@@ -40,7 +40,7 @@ private:
   Logger()
   {
   }
-  static Logger *_instance;
+  static Logger* _instance;
 public:
   void log(std::string msg, std::string file, int line);
   static Logger* get()
