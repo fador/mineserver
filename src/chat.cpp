@@ -51,6 +51,7 @@
 #include "chat.h"
 #include "config.h"
 #include "physics.h"
+#include "constants.h"
 
 Chat* Chat::_instance;
 
@@ -192,9 +193,7 @@ bool Chat::handleMsg(User *user, std::string msg)
 {
   // Timestamp
   time_t rawTime = time(NULL);
-
   struct tm *Tm  = localtime(&rawTime);
-
   std::string timeStamp (asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
@@ -206,6 +205,7 @@ bool Chat::handleMsg(User *user, std::string msg)
   if(msg[0] == SERVERMSGPREFIX && IS_ADMIN(user->permissions))
   {
     // Decorate server message
+    Screen::get()->log(LOG_CHAT, "[!] " + msg.substr(1));
     msg = MC_COLOR_RED + "[!] " + MC_COLOR_GREEN + msg.substr(1);
     this->sendMsg(user, msg, ALL);
   }
@@ -213,7 +213,8 @@ bool Chat::handleMsg(User *user, std::string msg)
   // Adminchat
   else if(msg[0] == ADMINCHATPREFIX && IS_ADMIN(user->permissions))
   {
-    msg = timeStamp + " @@ <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg.substr(1);
+    Screen::get()->log(LOG_CHAT, "[@] <"+ user->nick + "> " + msg.substr(1));
+    msg = timeStamp +  MC_COLOR_RED + " [@]" + MC_COLOR_WHITE + " <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg.substr(1);
     this->sendMsg(user, msg, ADMINS);
   }
 
@@ -245,17 +246,23 @@ bool Chat::handleMsg(User *user, std::string msg)
 		}
     else
     {
-      if(IS_ADMIN(user->permissions))
+      // Check for Admins or Server Console
+      if (user->UID == SERVER_CONSOLE_UID)
       {
+        Screen::get()->log(LOG_CHAT, user->nick + " " + msg);
+        msg = timeStamp + " " + MC_COLOR_RED + user->nick + MC_COLOR_WHITE + " " + msg;
+      }
+      else if(IS_ADMIN(user->permissions))
+      {
+        Screen::get()->log(LOG_CHAT, "<"+ user->nick + "> " + msg);
         msg = timeStamp + " <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg;
       }
       else
       {
+        Screen::get()->log(LOG_CHAT, "<"+ user->nick + "> " + dtos(user->UID) + " " + msg);
         msg = timeStamp + " <"+ user->nick + "> " + msg;
       }
     }
-
-    Screen::get()->log(LOG_CHAT, msg);
 
     this->sendMsg(user, msg, ALL);
   }

@@ -84,8 +84,8 @@ User::User(int sock, uint32 EID)
   this->attachedTo      = 0;
   this->timeUnderwater  = 0;
 
-	// Ignore this user if it's a negative socket - means it's the server console
-	if(sock != -1)
+	// Ignore this user if it's the server console
+	if(this->UID != SERVER_CONSOLE_UID)
 	{
   	Mineserver::get().users().push_back(this);
 	}
