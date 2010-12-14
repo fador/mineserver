@@ -41,11 +41,11 @@ struct sChunk
   sChunk() : refCount(0)
   {
   }
-  uint8 *blocks;
-  uint8 *data;
-  uint8 *blocklight;
-  uint8 *skylight;
-  uint8 *heightmap;
+  uint8* blocks;
+  uint8* data;
+  uint8* blocklight;
+  uint8* skylight;
+  uint8* heightmap;
   sint32 x;
   sint32 z;
   NBT_Value *nbt;
@@ -60,7 +60,7 @@ struct sChunk
   void sendPacket(const Packet &packet, User *dontsend = NULL)
   {
 	  std::set<User*>::iterator iter = users.begin(), end = users.end();
-	  
+
 	  for( ; iter != end ; iter++ )
 	  {
 		  if((*iter) != dontsend)
@@ -80,7 +80,7 @@ struct sChunk
 			 diff = true;
 		 }
 	 }
-	 
+
 	 iter = right->users.begin(), end = right->users.end();
 	 for( ; iter != end ; iter++)
 	 {
@@ -98,17 +98,17 @@ struct sChunk
 
 struct sChunkNode
 {
-  sChunkNode(sChunk *_chunk, sChunkNode *_next) 
+  sChunkNode(sChunk* _chunk, sChunkNode* _next)
     : chunk(_chunk), next(_next)
   {}
-  sChunk *chunk;
-  sChunkNode *next;
+  sChunk* chunk;
+  sChunkNode* next;
 };
 
 class ChunkMap
 {
 private:
-	sChunkNode *m_buckets[441];
+	sChunkNode* m_buckets[441];
 public:
 	ChunkMap()
 	{
@@ -128,9 +128,9 @@ public:
 		return x + z * 21;
 	}
 
-	sChunk *GetChunk(int x, int z)
+	sChunk* GetChunk(int x, int z)
 	{
-		sChunkNode *node = m_buckets[Hash(x,z)];
+		sChunkNode* node = m_buckets[Hash(x,z)];
 		if(node == NULL)
 			return NULL;
 
@@ -149,7 +149,7 @@ public:
 	{
 		int _hash = Hash(x, z);
 
-		sChunkNode *node = m_buckets[_hash];
+		sChunkNode* node = m_buckets[_hash];
 		if(node == NULL)
 			return;
 
@@ -161,7 +161,7 @@ public:
 		}
 		else
 		{
-			sChunkNode *prev = node;
+			sChunkNode* prev = node;
 			node = node->next;
 			while(node != NULL)
 			{
@@ -181,7 +181,7 @@ public:
 		}
 	}
 
-	void LinkChunk(sChunk *chunk, int x, int z)
+	void LinkChunk(sChunk* chunk, int x, int z)
 	{
 		int _hash = Hash(x, z);
 		chunk->refCount++;
@@ -190,12 +190,12 @@ public:
 
 	void Clear()
 	{
-		for(int i=0;i<21*21;i++)
+		for(int i = 0; i < 21 * 21; i++)
 		{
-			sChunkNode *node = m_buckets[i];
+			sChunkNode* node = m_buckets[i];
 			while(node != NULL)
 			{
-				sChunkNode *next = node->next;
+				sChunkNode* next = node->next;
 				delete node;
 				node = next;
 			}

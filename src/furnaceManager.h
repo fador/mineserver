@@ -42,11 +42,11 @@ public:
   }
   void free();
   void update();
-  void handleActivity(NBT_Value *entity, uint8 blockType);
+  void handleActivity(NBT_Value* entity, uint8 blockType);
 
 private:
-  typedef std::vector<Furnace *> FurnaceContainer;
+  typedef std::vector<Furnace*> FurnaceContainer;
   FurnaceContainer m_activeFurnaces;
-  static FurnaceManager *_instance;
+  static FurnaceManager* _instance;
 };
 

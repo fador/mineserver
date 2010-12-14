@@ -58,6 +58,13 @@ void BlockTorch::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y
    if (direction == BLOCK_TOP && meta == BLOCK_TOP && this->isBlockEmpty(x, y-1, z))
    {
       destroy = true;
+      // Crude fix for weird sign destruction
+      uint8 tempblock;
+      uint8 tempmeta;
+      if(Map::get()->getBlock(x, y, z, &tempblock, &tempmeta) && tempblock == BLOCK_WALL_SIGN) 
+      {
+        destroy = false;
+      }
    }
    else if (direction == BLOCK_NORTH && meta == BLOCK_SOUTH && this->isBlockEmpty(x+1, y, z))
    {

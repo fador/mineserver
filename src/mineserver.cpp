@@ -67,6 +67,7 @@
 #include "physics.h"
 #include "plugin.h"
 #include "furnaceManager.h"
+#include "screen.h"
 
 #ifdef WIN32
 static bool quit = false;
@@ -94,7 +95,7 @@ void sighandler(int sig_num)
   Mineserver::get().stop();
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
   signal(SIGTERM, sighandler);
   signal(SIGINT, sighandler);
@@ -108,15 +109,25 @@ Mineserver::Mineserver()
 {
 }
 
-event_base *Mineserver::getEventBase()
+event_base* Mineserver::getEventBase()
 {
   return m_eventBase;
 }
 
+void Mineserver::updatePlayerList()
+{
+	// Update the player window
+	Screen::get()->updatePlayerList(users());
+}
 int Mineserver::run(int argc, char *argv[])
 {
   uint32 starttime = (uint32)time(0);
   uint32 tick      = (uint32)time(0);
+
+	// Init our Screen
+	Screen::get()->init(VERSION);
+	Screen::get()->log("Welcome to Mineserver v" + VERSION);
+	updatePlayerList();
 
   initConstants();
 
@@ -126,7 +137,9 @@ int Mineserver::run(int argc, char *argv[])
   file_commands.assign(COMMANDS_FILE);
 
   if (argc > 1)
+  {
     file_config.assign(argv[1]);
+  }
 
   // Initialize conf
   Conf::get()->load(file_config);
@@ -135,11 +148,13 @@ int Mineserver::run(int argc, char *argv[])
   // Write PID to file
   std::ofstream pid_out((Conf::get()->sValue("pid_file")).c_str());
   if (!pid_out.fail())
+  {
 #ifdef WIN32
      pid_out << _getpid();
 #else
      pid_out << getpid();
 #endif
+  }
   pid_out.close();
 
   // Load admin, banned and whitelisted users
@@ -157,42 +172,45 @@ int Mineserver::run(int argc, char *argv[])
 
   if (Conf::get()->bValue("map_generate_spawn"))
   {
-    std::cout << "Generating spawn area...\n";
-    int size=Conf::get()->iValue("map_generate_spawn_size");
+    Screen::get()->log("Generating spawn area...");
+    int size = Conf::get()->iValue("map_generate_spawn_size");
     bool show_progress = Conf::get()->bValue("map_generate_spawn_show_progress");
-    #ifdef WIN32
-      DWORD t_begin,t_end;
-    #else
-      clock_t t_begin,t_end;
-    #endif
+#ifdef WIN32
+    DWORD t_begin,t_end;
+#else
+    clock_t t_begin,t_end;
+#endif
 
     for (int x=-size;x<=size;x++)
     {
-    #ifdef WIN32
+#ifdef WIN32
       if(show_progress)
+      {
         t_begin = timeGetTime();
-    #else
+      }
+#else
       if(show_progress)
+      {
         t_begin = clock();
-    #endif
-      for (int z=-size;z<=size;z++)
+      }
+#endif
+      for (int z = -size; z <= size; z++)
       {
         Map::get()->loadMap(x, z);
       }
       if(show_progress)
       {
-        #ifdef WIN32
-          t_end = timeGetTime ();
-          std::cout << ((x+size+1)*(size*2+1)) << "/" << (size*2+1)*(size*2+1) << " done. " << (t_end-t_begin)/(size*2+1) << "ms per chunk" << std::endl;
-        #else
-          t_end = clock();
-          std::cout << ((x+size+1)*(size*2+1)) << "/" << (size*2+1)*(size*2+1) << " done. " << ((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1) << "ms per chunk" << std::endl;
-        #endif
-
+#ifdef WIN32
+        t_end = timeGetTime ();
+        Screen::get()->log(dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos((t_end-t_begin)/(size*2+1)) + "ms per chunk");
+#else
+        t_end = clock();
+        Screen::get()->log(dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos(((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1)) + "ms per chunk");
+#endif
       }
     }
 #ifdef _DEBUG
-    std::cout << "Spawn area ready!\n";
+    Screen::get()->log("Spawn area ready!");
 #endif
   }
 
@@ -216,14 +234,15 @@ int Mineserver::run(int argc, char *argv[])
   if(iResult != 0)
   {
     printf("WSAStartup failed with error: %d\n", iResult);
+		Screen::get()->end();
     return EXIT_FAILURE;
   }
 #endif
 
   struct sockaddr_in addresslisten;
-  int reuse             = 1;
+  int reuse = 1;
 
-  m_eventBase = (event_base *)event_init();
+  m_eventBase = (event_base*)event_init();
 #ifdef WIN32
   m_socketlisten = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 #else
@@ -232,7 +251,8 @@ int Mineserver::run(int argc, char *argv[])
 
   if(m_socketlisten < 0)
   {
-    std::cerr << "Failed to create listen socket" << std::endl;
+    Screen::get()->log(LOG_ERROR, "Failed to create listen socket");
+		Screen::get()->end();
     return 1;
   }
 
@@ -242,18 +262,19 @@ int Mineserver::run(int argc, char *argv[])
   addresslisten.sin_addr.s_addr = inet_addr(ip.c_str());
   addresslisten.sin_port        = htons(port);
 
-  setsockopt(m_socketlisten, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse));
+  setsockopt(m_socketlisten, SOL_SOCKET, SO_REUSEADDR, (char*)&reuse, sizeof(reuse));
 
   //Bind to port
-  if(bind(m_socketlisten, (struct sockaddr *)&addresslisten, sizeof(addresslisten)) < 0)
+  if(bind(m_socketlisten, (struct sockaddr*)&addresslisten, sizeof(addresslisten)) < 0)
   {
-    std::cerr << "Failed to bind" << std::endl;
+    Screen::get()->log(LOG_ERROR, "Failed to bind");
     return 1;
   }
 
   if(listen(m_socketlisten, 5) < 0)
   {
-    std::cerr << "Failed to listen to socket" << std::endl;
+    Screen::get()->log(LOG_ERROR, "Failed to listen to socket");
+		Screen::get()->end();
     return 1;
   }
 
@@ -262,7 +283,7 @@ int Mineserver::run(int argc, char *argv[])
   event_set(&m_listenEvent, m_socketlisten, EV_WRITE|EV_READ|EV_PERSIST, accept_callback, NULL);
   event_add(&m_listenEvent, NULL);
 
-  std::cout <<
+ /* std::cout <<
   "   _____  .__  "<<
   std::endl<<
   "  /     \\ |__| ____   ____   ______ ______________  __ ___________ "<<
@@ -277,27 +298,26 @@ int Mineserver::run(int argc, char *argv[])
   std::endl<<
   "Version " << VERSION <<" by The Mineserver Project"<<
   std::endl << std::endl;
-
+*/
   if(ip == "0.0.0.0")
   {
     // Print all local IPs
     char name[255];
     gethostname ( name, sizeof(name));
-    struct hostent *hostinfo = gethostbyname(name);
-    std::cout << "Listening on: ";
+    struct hostent* hostinfo = gethostbyname(name);
+    Screen::get()->log("Listening on: ");
     int ipIndex = 0;
     while(hostinfo && hostinfo->h_addr_list[ipIndex]) {
-        if(ipIndex > 0) { std::cout << ", "; }
-        char *ip = inet_ntoa(*(struct in_addr *)hostinfo->h_addr_list[ipIndex++]);
-        std::cout << ip << ":" << port;
+        std::string ip(inet_ntoa(*(struct in_addr*)hostinfo->h_addr_list[ipIndex++]));
+        Screen::get()->log(" " + ip + ":" + dtos(port));
     }
-    std::cout << std::endl;
   }
   else
   {
-    std::cout << "Listening on " << ip << ":" << port << std::endl;
+		std::string myip(ip);
+    Screen::get()->log("Listening on " + myip + ":" + dtos(port));
   }
-  std::cout << std::endl;
+  //std::cout << std::endl;
 
   timeval loopTime;
   loopTime.tv_sec  = 0;
@@ -306,36 +326,23 @@ int Mineserver::run(int argc, char *argv[])
   m_running=true;
   event_base_loopexit(m_eventBase, &loopTime);
 
-  User *serverUser = new User(-1, -1);
+  // Create our Server Console user so we can issue commands
+  User *serverUser = new User(-1, SERVER_CONSOLE_UID);
   serverUser->changeNick("[Server]");
-  
+
   while(m_running && event_base_loop(m_eventBase, 0) == 0)
   {
-    
-    // Check for key input from server console (get's triggered when console hits return)
-    if (kbhit() != 0)
+    // Append current command and check if user entered return
+    if(Screen::get()->hasCommand())
     {
-      // Loop thru all chars up until CRLF
-      std::string consoleCommand;
-      char c;
-      do
-      {
-        c = fgetc (stdin);
-        consoleCommand.push_back(c);
-      } while (c != '\n');
-
       // Now handle this command as normal
-      if (consoleCommand[0] == '/' || consoleCommand[0] == '&' || consoleCommand[0] == '%')
-      {
-        Chat::get()->handleMsg(serverUser, consoleCommand);
-        std::cout << "Command sent" << std::endl;
-      }
+      Chat::get()->handleMsg(serverUser, Screen::get()->getCommand().c_str());
     }
-    
+
     if(time(0)-starttime > 10)
     {
       starttime = (uint32)time(0);
-      //std::cout << "Currently " << User::all().size() << " users in!" << std::endl;
+      //Screen::get()->log("Currently " + User::all().size() + " users in!");
 
       //If users, ping them
       if(User::all().size() > 0)
@@ -369,7 +376,7 @@ int Mineserver::run(int argc, char *argv[])
         Map::get()->idToPos(toRelease[i], &x_temp, &z_temp);
         Map::get()->releaseMap(x_temp, z_temp);
       } */
-    } 
+    }
 
     //Every second
     if(time(0)-tick > 0)
@@ -387,7 +394,7 @@ int Mineserver::run(int argc, char *argv[])
           Packet pkt;
           pkt << PACKET_ENTITY_VELOCITY << (sint32)User::all()[i]->attachedTo <<  (sint16)10000       << (sint16)0 << (sint16)0;
           //pkt << PACKET_ENTITY_RELATIVE_MOVE << (sint32)User::all()[i]->attachedTo <<  (sint8)100       << (sint8)0 << (sint8)0;
-          User::all()[i]->sendAll((uint8 *)pkt.getWrite(), pkt.getWriteLen());
+          User::all()[i]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
         }
       }
       Map::get()->mapTime+=20;
@@ -436,6 +443,10 @@ int Mineserver::run(int argc, char *argv[])
   Plugin::get()->free();
   Logger::get()->free();
   MapGen::get()->free();
+
+	// End our NCurses session
+	Screen::get()->end();
+
 
   return EXIT_SUCCESS;
 }

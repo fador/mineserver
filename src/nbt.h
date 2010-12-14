@@ -32,6 +32,7 @@
 #include <map>
 #include <vector>
 #include <zlib.h>
+#include "screen.h"
 #include "tools.h"
 
 class NBT_Value
