@@ -60,7 +60,8 @@ if (NOT NOISE_FOUND)
 endif()
 
 #Debian?
-if(NOISE_INCLUDE_DIR MATCHES ".*libnoise$")
+FIND_PATH(NOISE_ON_DEBIANISH libnoise/noise.h ${NOISE_INCLUDE_DIR})
+if(NOISE_ON_DEBIANISH)
   add_definitions(-DDEBIAN)
 endif()
 
