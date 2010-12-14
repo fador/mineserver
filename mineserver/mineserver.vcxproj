@@ -30,6 +30,7 @@
     <ClCompile Include="..\src\constants.cpp" />
     <ClCompile Include="..\src\furnace.cpp" />
     <ClCompile Include="..\src\furnaceManager.cpp" />
+    <ClCompile Include="..\src\lighting.cpp" />
     <ClCompile Include="..\src\logger.cpp" />
     <ClCompile Include="..\src\map.cpp" />
     <ClCompile Include="..\src\mineserver.cpp" />
@@ -63,6 +64,7 @@
     <ClInclude Include="..\src\constants.h" />
     <ClInclude Include="..\src\furnace.h" />
     <ClInclude Include="..\src\furnaceManager.h" />
+    <ClInclude Include="..\src\lighting.h" />
     <ClInclude Include="..\src\logger.h" />
     <ClInclude Include="..\src\map.h" />
     <ClInclude Include="..\src\nbt.h" />
@@ -110,6 +112,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\bin\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

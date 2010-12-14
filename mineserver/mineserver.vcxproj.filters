@@ -123,6 +123,9 @@
     <ClCompile Include="..\src\blocks\tracks.cpp">
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\lighting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\user.h">
@@ -220,6 +223,9 @@
     </ClInclude>
     <ClInclude Include="..\src\blocks\tracks.h">
       <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lighting.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

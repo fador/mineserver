@@ -1,7 +1,6 @@
 # admins
 [Server]
-Psoden
-fador
+
 
 # ops
 

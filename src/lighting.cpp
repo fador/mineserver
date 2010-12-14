@@ -69,7 +69,7 @@ bool Lighting::generateLight(int x, int z, sChunk *chunk)
 
   int light = 0;
 
-  // Sky light 8 bytes per cycle search
+  // Sky light optimized search
   for(int block_x = 0; block_x < 16; block_x++)
   {
     for(int block_z = 0; block_z < 16; block_z++)
@@ -151,7 +151,7 @@ bool Lighting::generateLight(int x, int z, sChunk *chunk)
   
   
 
-  //spreadLight(&lightQueue,chunk);
+  spreadLight(&lightQueue,chunk);
 
   
   //Get light from border chunks
