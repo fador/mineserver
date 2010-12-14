@@ -7,6 +7,9 @@ set( ${PROJECT_NAME}_MAJOR_VERSION 0 )
 set( ${PROJECT_NAME}_MINOR_VERSION 1 )
 set( ${PROJECT_NAME}_PATCH_LEVEL 0 )
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
+
+
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
@@ -44,45 +47,26 @@ endif()
 #endif()
 
 
-find_library(EVENT_LIBRARY
-   NAMES libevent.so
-   PATHS /usr/lib /usr/local/lib
-)
-find_path(EVENT_INCLUDE_DIR
-  NAMES event.h
-  PATHS /usr/include /usr/local/include
-)
-
-if (NOT EVENT_LIBRARY OR NOT EVENT_INCLUDE_DIR)
+find_package(Event REQUIRED)
+if (NOT EVENT_FOUND)
    set(errors "${errors}\t\t- Event library\n")
    set(dependency_error True)
 endif()
 
-find_library(NOISE_LIBRARY
-   NAMES libnoise.so
-   PATHS /usr/lib /usr/local/lib
-)
-find_path(NOISE_INCLUDE_DIR noise.h /usr/include/noise /usr/include/libnoise /usr/local/include/noise)
-
-if (NOT NOISE_LIBRARY OR NOISE_INCLUDE_DIR-NOTFOUND)
+find_package(Noise REQUIRED)
+if (NOT NOISE_FOUND)
    set(errors "${errors}\t\t- libNoise library\n")
    set(dependency_error True)
 endif()
 
 #Debian?
-if(NOISE_INCLUDE_DIR MATCHES ".*libnoise$")
+FIND_PATH(NOISE_ON_DEBIANISH libnoise/noise.h ${NOISE_INCLUDE_DIR})
+if(NOISE_ON_DEBIANISH)
   add_definitions(-DDEBIAN)
 endif()
 
-find_library(NCURSES_LIBRARY
-   NAMES libncurses.so
-   PATHS /usr/lib /usr/local/lib
-)
-find_path(NCURSES_INCLUDE_DIR
-  NAMES ncurses.h
-  PATHS /usr/include /usr/local/include
-)
-
+#Provides ncurses, too
+find_package(Curses)
 
 if (WINDOWS)
    # even if 64bit this is set
@@ -94,7 +78,7 @@ if (NOT dependency_error)
 #   include_directories(${LUA_INCLUDE_DIR})
    include_directories(${EVENT_INCLUDE_DIR})
    include_directories(${NOISE_INCLUDE_DIR})
-   include_directories(${NCURSES_INCLUDE_DIR})
+   include_directories(${CURSES_INCLUDE_DIR})
 
    add_executable(mineserver ${exe} ${folder_source})
 
@@ -102,7 +86,7 @@ if (NOT dependency_error)
 #   target_link_libraries(mineserver ${LUA_LIBRARY})
    target_link_libraries(mineserver ${EVENT_LIBRARY})
    target_link_libraries(mineserver ${NOISE_LIBRARY})
-   target_link_libraries(mineserver ${NCURSES_LIBRARY})
+   target_link_libraries(mineserver ${CURSES_LIBRARY})
 else()
    message(FATAL_ERROR "\n\tNot all dependencies could be found:\n${errors}\n After installing them please rerun cmake.\n")
 endif()
