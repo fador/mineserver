@@ -31,6 +31,7 @@
 #include <iostream>
 
 #ifdef WIN32
+  #pragma warning( disable: 4005)
   #include <winsock2.h>
   #include <curses.h>
 #else
@@ -94,6 +95,4 @@ private:
   
   std::string currentCommand;
   std::string commandHistory[25];
-
-  char commandBuffer[80];
 };
