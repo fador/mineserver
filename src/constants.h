@@ -193,7 +193,7 @@ const char SERVERMSGPREFIX = '%';
 const char CHATCMDPREFIX   = '/';
 const char ADMINCHATPREFIX = '&';
 
-const int SERVER_CONSOLE_UID = -1;
+const unsigned int SERVER_CONSOLE_UID = -1;
 
 void initConstants();
 

@@ -249,10 +249,10 @@ void Furnace::consumeFuel()
 }
 sint16 Furnace::burnTime()
 {
-  sint16 m_fuelBurningTime = (sint16)((200.0f / m_initialBurningTime) * m_fuelBurningTime);
-  if(m_fuelBurningTime < 0)
-    m_fuelBurningTime = 0;
-  return m_fuelBurningTime;
+  sint16 fuelBurningTime = (sint16)((200.0f / m_initialBurningTime) * m_fuelBurningTime);
+  if(fuelBurningTime < 0)
+    fuelBurningTime = 0;
+  return fuelBurningTime;
 }
 sint16 Furnace::cookTime()
 {
