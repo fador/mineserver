@@ -25,43 +25,74 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _MINESERVER_H
-#define _MINESERVER_H
+#pragma once
 
-#include <event.h>
+#include <cstdlib>
+#include <iostream>
 
-class User;
+#ifdef WIN32
+  #pragma warning( disable: 4005)
+  #include <winsock2.h>
+  #include <curses.h>
+#else
+  #include <ncurses.h>
+#endif
 
-class Mineserver
+#include <vector>
+#include "user.h"
+
+enum
 {
-
-public:
-  static Mineserver& get()
-  {
-    static Mineserver server;
-    return server;
-  }
-
-  Mineserver();
-  int run(int argc, char* argv[]);
-  bool stop();
-  event_base* getEventBase();
-
-  std::vector<User*>& users() { return m_users; }
-
-  struct event m_listenEvent;
-  int m_socketlisten;
-	void updatePlayerList();
-private:
-
-
-  event_base* m_eventBase;
-
-  bool m_running;
-
-  // holds all connected users
-  std::vector<User*> m_users;
-
+  LOG_TITLE,
+  LOG_GENERAL,
+  LOG_CHAT,
+  LOG_PLAYERS,
+  LOG_ERROR,
+  LOG_COMMAND
 };
 
-#endif
+enum
+{
+  TEXT_COLOR_RED = 1,
+  TEXT_COLOR_GREEN,
+  TEXT_COLOR_YELLOW,
+  TEXT_COLOR_BLUE,
+  TEXT_COLOR_MAGENTA,
+  TEXT_COLOR_CYAN,
+  TEXT_COLOR_WHITE,
+  TEXT_COLOR_INVERSE
+};
+
+class Screen
+{
+public:
+  static Screen* get() {
+	static Screen instance;
+    return &instance;
+  }
+
+  void init(std::string version);
+  WINDOW* createWindow(int width, int height, int startx, int starty);
+  void destroyWindow(WINDOW *local_win);
+  void log(std::string message);
+  void log(int logType, std::string message);
+  void updatePlayerList(std::vector<User *> users);
+  void end();
+  WINDOW *commandLog;
+  bool hasCommand();
+  std::string getCommand();
+
+protected:
+  Screen();
+
+private:
+  std::string currentTimestamp(bool seconds);
+
+  WINDOW *title;
+  WINDOW *generalLog;
+  WINDOW *chatLog;
+  WINDOW *playerList;
+  
+  std::string currentCommand;
+  std::string commandHistory[25];
+};

@@ -49,5 +49,5 @@ void Logger::free()
 // Log to terminal
 void Logger::log(std::string msg, std::string file, int line)
 {
-  std::cout << "[" << file << "@" << line << "]: " << msg << std::endl;
+  Screen::get()->log("[" + file + "@" + dtos(line) + "]: " + msg);
 }

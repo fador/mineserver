@@ -37,20 +37,21 @@ void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, s
 {
   // Locksystem
   if(user->currentItem() == ITEM_WOODEN_AXE)
-  {
-    uint32 mapId;
+  {    
+    int chunk_x = blockToChunk(x);
+    int chunk_z = blockToChunk(z);
+
+	sChunk *chunk = Map::get()->loadMap(chunk_x, chunk_z);
+
+	if(chunk == NULL)
+		return;
     
-    int block_x = blockToChunk(x);
-    int block_z = blockToChunk(z);
-    
-    Map::get()->posToId(block_x, block_z, &mapId);
-    
-    NBT_Value *entityList = (*(*(Map::get()->maps[mapId].nbt))["Level"])["TileEntities"];
+    NBT_Value *entityList = (*(*(chunk->nbt))["Level"])["TileEntities"];
 
     if(!entityList)
     {
       entityList = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
-      Map::get()->maps[mapId].nbt->Insert("TileEntities", entityList);
+      chunk->nbt->Insert("TileEntities", entityList);
     }
 
     if(entityList->GetType() == NBT_Value::TAG_LIST)
@@ -132,21 +133,23 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
 
   if (!Map::get()->getBlock(x, y, z, &block, &meta))
     return;
-    
-  uint32 mapId;
+
   bool destroy = false;
     
-  int block_x = blockToChunk(x);
-  int block_z = blockToChunk(z);
+  int chunk_x = blockToChunk(x);
+  int chunk_z = blockToChunk(z);
+
+  sChunk *chunk = Map::get()->loadMap(chunk_x, chunk_z);
+   
+  if(chunk == NULL)
+	  return;
     
-  Map::get()->posToId(block_x, block_z, &mapId);
-    
-  NBT_Value *entityList = (*(*(Map::get()->maps[mapId].nbt))["Level"])["TileEntities"];
+  NBT_Value *entityList = (*(*(chunk->nbt))["Level"])["TileEntities"];
 
   if(!entityList)
   {
     entityList = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
-    Map::get()->maps[mapId].nbt->Insert("TileEntities", entityList);
+    chunk->nbt->Insert("TileEntities", entityList);
   }
 
   if(entityList->GetType() == NBT_Value::TAG_LIST)

@@ -58,11 +58,21 @@ Depends on (and tested with):
 
     `sudo pkg_add -r libevent`
 
+ * Installing on Mac OS X
+    * Install libevent using your favourite tool, e.g., homebrew, fink or macports.
+    * Installing libnoise can be painful. Howerver, there is a homebrew formular
+      on [krono's homebrew fork](http://github.com/krono/homebrew).
+
+    So for homebrew do
+    
+    `brew install libevent libnoise`
+
+
 **Compiling using linux (make & gcc):**
 
  * Download and extract source or use `git clone git://github.com/fador/mineserver.git`
  * Go to mineserver/src/ directory
- * Run `make`
+ * Run `make` or `make DEBIAN=1` for Debian/Ubuntu
  * Run server with `./mineserver`
 
 **Compiling using FreeBSD / PCBSD (gmake & g++):**

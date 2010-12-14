@@ -161,11 +161,11 @@ void MapGen::generateChunk(int x, int z)
   
   main->Insert("Level", val);
   
-  uint32 chunkid;
+/*  uint32 chunkid;
   Map::get()->posToId(x, z, &chunkid);
   
   Map::get()->maps[chunkid].x = x;
-  Map::get()->maps[chunkid].z = z;
+  Map::get()->maps[chunkid].z = z; */
 
   std::vector<uint8> *t_blocks = (*val)["Blocks"]->GetByteArray();
   std::vector<uint8> *t_data = (*val)["Data"]->GetByteArray();
@@ -173,19 +173,25 @@ void MapGen::generateChunk(int x, int z)
   std::vector<uint8> *t_skylight = (*val)["SkyLight"]->GetByteArray();
   std::vector<uint8> *heightmap = (*val)["HeightMap"]->GetByteArray();
   
-  Map::get()->maps[chunkid].blocks = &((*t_blocks)[0]);
-  Map::get()->maps[chunkid].data = &((*t_data)[0]);
-  Map::get()->maps[chunkid].blocklight = &((*t_blocklight)[0]);
-  Map::get()->maps[chunkid].skylight = &((*t_skylight)[0]);
-  Map::get()->maps[chunkid].heightmap = &((*heightmap)[0]);
+  sChunk *chunk = new sChunk();
+  chunk->blocks = &((*t_blocks)[0]);
+  chunk->data = &((*t_data)[0]);
+  chunk->blocklight = &((*t_blocklight)[0]);
+  chunk->skylight = &((*t_skylight)[0]);
+  chunk->heightmap = &((*heightmap)[0]);
+  chunk->nbt = main;
+  chunk->x = x;
+  chunk->z = z;
+
+  Map::get()->chunks.LinkChunk(chunk, x, z);
 
   // Update last used time
-  Map::get()->mapLastused[chunkid] = (int)time(0);
+  //Map::get()->mapLastused[chunkid] = (int)time(0);
 
   // Not changed
-  Map::get()->mapChanged[chunkid] = Conf::get()->bValue("save_unchanged_chunks");
+  //Map::get()->mapChanged[chunkid] = Conf::get()->bValue("save_unchanged_chunks");
   
-  Map::get()->maps[chunkid].nbt = main;
+  //Map::get()->maps[chunkid].nbt = main;
 }
 
 //#define PRINT_MAPGEN_TIME
@@ -271,10 +277,10 @@ void MapGen::generateWithNoise(int x, int z)
   #ifdef PRINT_MAPGEN_TIME
   #ifdef WIN32
     t_end = timeGetTime ();
-    std::cout << "Mapgen: " << (t_end-t_begin) << "ms" << std::endl;
+    Screen::get()->log("Mapgen: " + dtos(t_end-t_begin) + "ms");
   #else
     gettimeofday(&end, NULL);
-    std::cout << "Mapgen: " << end.tv_usec - start.tv_usec << std::endl;
+    Screen::get()->log("Mapgen: " + dtos(end.tv_usec - start.tv_usec));
   #endif
   #endif
   

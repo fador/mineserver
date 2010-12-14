@@ -308,6 +308,11 @@ public:
     return &m_writeBuffer[0];
   }
 
+  const void *getWrite() const
+  {
+    return &m_writeBuffer[0];
+  }
+
   size_t getWriteLen() const
   {
     return m_writeBuffer.size();

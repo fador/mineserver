@@ -30,28 +30,28 @@
 
 //#define _DEBUG
 
-Furnace::Furnace(NBT_Value *entity, uint8 blockType)
+Furnace::Furnace(NBT_Value* entity, uint8 blockType)
 {
   // Setup this furnace
-  this->m_x = (sint32)(*(*entity)["x"]);
-  this->m_y = (sint32)(*(*entity)["y"]);
-  this->m_z = (sint32)(*(*entity)["z"]);
-  //this->m_fuelBurningTime = (sint16)(*(*entity)["BurnTime"]);
+  m_x = (sint32)(*(*entity)["x"]);
+  m_y = (sint32)(*(*entity)["y"]);
+  m_z = (sint32)(*(*entity)["z"]);
+  //m_fuelBurningTime = (sint16)(*(*entity)["BurnTime"]);
 
   // Clean out the slots
-  this->m_slots[SLOT_INPUT].count  = 0;
-  this->m_slots[SLOT_INPUT].damage = 0;
-  this->m_slots[SLOT_INPUT].id     = 0;
-  this->m_slots[SLOT_FUEL].count   = 0;
-  this->m_slots[SLOT_FUEL].damage  = 0;
-  this->m_slots[SLOT_FUEL].id      = 0;
-  this->m_slots[SLOT_OUTPUT].count = 0;
-  this->m_slots[SLOT_OUTPUT].damage= 0;
-  this->m_slots[SLOT_OUTPUT].id    = 0;
+  m_slots[SLOT_INPUT].count  = 0;
+  m_slots[SLOT_INPUT].damage = 0;
+  m_slots[SLOT_INPUT].id     = 0;
+  m_slots[SLOT_FUEL].count   = 0;
+  m_slots[SLOT_FUEL].damage  = 0;
+  m_slots[SLOT_FUEL].id      = 0;
+  m_slots[SLOT_OUTPUT].count = 0;
+  m_slots[SLOT_OUTPUT].damage= 0;
+  m_slots[SLOT_OUTPUT].id    = 0;
 
   // Set the slots to what was passed
-  NBT_Value *slotList = (NBT_Value *)(*entity)["Items"];
-  std::vector<NBT_Value*> *slotEntities = slotList->GetList();
+  NBT_Value* slotList = (NBT_Value*)(*entity)["Items"];
+  std::vector<NBT_Value*>* slotEntities = slotList->GetList();
   std::vector<NBT_Value*>::iterator iter = slotEntities->begin(), end = slotEntities->end();
   for( ; iter != end; iter++ )
   {
@@ -64,26 +64,30 @@ Furnace::Furnace(NBT_Value *entity, uint8 blockType)
   // Set the cooking time based on input type (currently all smelting takes 10 secs but this gives us flexivibility in future)
   Slot inputSlot = m_slots[SLOT_INPUT];
   m_cookingTime = 0;
-  if(inputSlot.id == BLOCK_IRON_ORE)     { this->m_cookingTime = 10; }
-  if(inputSlot.id == BLOCK_GOLD_ORE)     { this->m_cookingTime = 10; }
-  if(inputSlot.id == BLOCK_SAND)         { this->m_cookingTime = 10; }
-  if(inputSlot.id == BLOCK_COBBLESTONE)  { this->m_cookingTime = 10; }
-  if(inputSlot.id == ITEM_PORK)          { this->m_cookingTime = 10; }
-  if(inputSlot.id == ITEM_CLAY_BALLS)    { this->m_cookingTime = 10; }
-  if(inputSlot.id == ITEM_RAW_FISH)      { this->m_cookingTime = 10; }
+  if(inputSlot.id == BLOCK_IRON_ORE)     { m_cookingTime = 10; }
+  if(inputSlot.id == BLOCK_GOLD_ORE)     { m_cookingTime = 10; }
+  if(inputSlot.id == BLOCK_SAND)         { m_cookingTime = 10; }
+  if(inputSlot.id == BLOCK_COBBLESTONE)  { m_cookingTime = 10; }
+  if(inputSlot.id == ITEM_PORK)          { m_cookingTime = 10; }
+  if(inputSlot.id == ITEM_CLAY_BALLS)    { m_cookingTime = 10; }
+  if(inputSlot.id == ITEM_RAW_FISH)      { m_cookingTime = 10; }
 
   // Reset our active duration
-  this->m_fuelBurningTime = 0;
-  this->m_activeCookDuration = 0;
+  m_fuelBurningTime = 0;
+  m_activeCookDuration = 0;
 
   // Check if this is a burning block
   if(blockType == BLOCK_BURNING_FURNACE)
-    this->m_burning = true;
+  {
+    m_burning = true;
+  }
   else
-    this->m_burning = false;
+  {
+    m_burning = false;
+  }
 
   // Make sure we're the right kind of block based on our current status
-  this->updateBlock();
+  updateBlock();
 }
 
 void Furnace::updateBlock()
@@ -95,20 +99,20 @@ void Furnace::updateBlock()
   // Now make sure that it's got the correct block type based on it's current status
   if(isBurningFuel() && !m_burning)
   {
-    Map::get()->getBlock(this->m_x, this->m_y, this->m_z, &block, &meta);
+    Map::get()->getBlock(m_x, m_y, m_z, &block, &meta);
     // Switch to burning furnace
-    Map::get()->setBlock(this->m_x, this->m_y, this->m_z, BLOCK_BURNING_FURNACE, meta);
-    Map::get()->sendBlockChange(this->m_x, this->m_y, this->m_z, BLOCK_BURNING_FURNACE, meta);
-    this->sendToAllUsers();
+    Map::get()->setBlock(m_x, m_y, m_z, BLOCK_BURNING_FURNACE, meta);
+    Map::get()->sendBlockChange(m_x, m_y, m_z, BLOCK_BURNING_FURNACE, meta);
+    sendToAllUsers();
     m_burning = true;
   }
   else if(!isBurningFuel() && m_burning)
   {
-    Map::get()->getBlock(this->m_x, this->m_y, this->m_z, &block, &meta);
+    Map::get()->getBlock(m_x, m_y, m_z, &block, &meta);
     // Switch to regular furnace
-    Map::get()->setBlock(this->m_x, this->m_y, this->m_z, BLOCK_FURNACE, meta);
-    Map::get()->sendBlockChange(this->m_x, this->m_y, this->m_z, BLOCK_FURNACE, meta);
-    this->sendToAllUsers();
+    Map::get()->setBlock(m_x, m_y, m_z, BLOCK_FURNACE, meta);
+    Map::get()->sendBlockChange(m_x, m_y, m_z, BLOCK_FURNACE, meta);
+    sendToAllUsers();
     m_burning = false;
   }
 }
@@ -116,8 +120,8 @@ void Furnace::updateBlock()
 void Furnace::smelt()
 {
   // Check if we're cooking
-  if(this->isCooking()) {
-
+  if(isCooking())
+  {
     // Convert where applicable
     Slot inputSlot  = m_slots[SLOT_INPUT];
     Slot fuelSlot   = m_slots[SLOT_FUEL];
@@ -132,10 +136,11 @@ void Furnace::smelt()
     if(inputSlot.id == ITEM_RAW_FISH)     { creationID = ITEM_COOKED_FISH; }
 
     // Update other params if we actually converted
-    if(creationID != 0) {
-
+    if(creationID != 0)
+    {
       // Ok - now check if the current output slot contains the same stuff
-      if(outputSlot.id != creationID) {
+      if(outputSlot.id != creationID)
+      {
         // No so overwrite it
         outputSlot.id = creationID;
         outputSlot.count = 0;
@@ -148,37 +153,48 @@ void Furnace::smelt()
 
       // Bounds check all
       if(outputSlot.count > 64)
+      {
         outputSlot.count = 64;
+      }
+
       if(inputSlot.count < 0)
+      {
         inputSlot.count = 0;
+      }
 
       // Update the m_slots
-      this->m_slots[SLOT_INPUT]  = inputSlot;
-      this->m_slots[SLOT_FUEL]   = fuelSlot;
-      this->m_slots[SLOT_OUTPUT] = outputSlot;
+      m_slots[SLOT_INPUT]  = inputSlot;
+      m_slots[SLOT_FUEL]   = fuelSlot;
+      m_slots[SLOT_OUTPUT] = outputSlot;
     }
   }
 
   // Reset our active cook durations
-  this->m_activeCookDuration = 0;
+  m_activeCookDuration = 0;
 }
 bool Furnace::isBurningFuel()
 {
   // Check if this furnace is currently burning
-  if(this->m_fuelBurningTime > 0) {
+  if(m_fuelBurningTime > 0)
+  {
       return true;
-    }
-    else {
+  }
+  else
+  {
       return false;
-    }
+  }
 }
 bool Furnace::isCooking()
 {
   // If we're burning fuel and have valid ingredients, we're cooking!
-  if(this->isBurningFuel() && this->hasValidIngredient())
+  if(isBurningFuel() && hasValidIngredient())
+  {
     return true;
+  }
   else
+  {
     return false;
+  }
 }
 bool Furnace::hasValidIngredient()
 {
@@ -209,19 +225,19 @@ void Furnace::consumeFuel()
   // Increment the fuel burning time based on fuel type
   // http://www.minecraftwiki.net/wiki/Furnace#Fuel_efficiency
   Slot fuelSlot = m_slots[SLOT_FUEL];
-  this->m_initialBurningTime = 0;
-  if(fuelSlot.id == ITEM_COAL)           { this->m_initialBurningTime += 80; }
-  if(fuelSlot.id == BLOCK_WOOD)          { this->m_initialBurningTime += 15; }
-  if(fuelSlot.id == ITEM_STICK)          { this->m_initialBurningTime += 5; }
-  if(fuelSlot.id == BLOCK_LOG)           { this->m_initialBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_WORKBENCH)     { this->m_initialBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_CHEST)         { this->m_initialBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_BOOKSHELF)     { this->m_initialBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_JUKEBOX)       { this->m_initialBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_FENCE)         { this->m_initialBurningTime += 15; }
-  if(fuelSlot.id == BLOCK_WOODEN_STAIRS) { this->m_initialBurningTime += 15; }
-  if(fuelSlot.id == ITEM_LAVA_BUCKET)    { this->m_initialBurningTime += 1000; }
-  this->m_fuelBurningTime += this->m_initialBurningTime;
+  m_initialBurningTime = 0;
+  if(fuelSlot.id == ITEM_COAL)           { m_initialBurningTime += 80; }
+  if(fuelSlot.id == BLOCK_WOOD)          { m_initialBurningTime += 15; }
+  if(fuelSlot.id == ITEM_STICK)          { m_initialBurningTime += 5; }
+  if(fuelSlot.id == BLOCK_LOG)           { m_initialBurningTime += 15; }
+  if(fuelSlot.id == BLOCK_WORKBENCH)     { m_initialBurningTime += 15; }
+  if(fuelSlot.id == BLOCK_CHEST)         { m_initialBurningTime += 15; }
+  if(fuelSlot.id == BLOCK_BOOKSHELF)     { m_initialBurningTime += 15; }
+  if(fuelSlot.id == BLOCK_JUKEBOX)       { m_initialBurningTime += 15; }
+  if(fuelSlot.id == BLOCK_FENCE)         { m_initialBurningTime += 15; }
+  if(fuelSlot.id == BLOCK_WOODEN_STAIRS) { m_initialBurningTime += 15; }
+  if(fuelSlot.id == ITEM_LAVA_BUCKET)    { m_initialBurningTime += 1000; }
+  m_fuelBurningTime += m_initialBurningTime;
 
   // Now decrement the fuel & reset
   m_slots[SLOT_FUEL].count--;
@@ -229,11 +245,11 @@ void Furnace::consumeFuel()
     m_slots[SLOT_FUEL].count = 0;
 
   // Update our block type if need be
-  this->updateBlock();
+  updateBlock();
 }
 sint16 Furnace::burnTime()
 {
-  sint16 m_fuelBurningTime = (sint16)((200.0f / this->m_initialBurningTime) * this->m_fuelBurningTime);
+  sint16 m_fuelBurningTime = (sint16)((200.0f / m_initialBurningTime) * m_fuelBurningTime);
   if(m_fuelBurningTime < 0)
     m_fuelBurningTime = 0;
   return m_fuelBurningTime;
@@ -241,16 +257,20 @@ sint16 Furnace::burnTime()
 sint16 Furnace::cookTime()
 {
   // Express cook time as a fraction of total cooking time
-  sint16 tempCookTime = (sint16)((200.0f / this->m_cookingTime) * this->m_activeCookDuration);
+  sint16 tempCookTime = (sint16)((200.0f / m_cookingTime) * m_activeCookDuration);
   if(tempCookTime < 0)
+  {
     tempCookTime = 0;
+  }
   return tempCookTime;
 }
 NBT_Value* Furnace::getSlotEntity(sint8 slotNumber)
 {
   // Return null of we don't have anything in this slot
   if(m_slots[slotNumber].count == 0)
+  {
     return NULL;
+  }
 
   // Create a new slot NBT entity and add it's data
   NBT_Value* slot = new NBT_Value(NBT_Value::TAG_COMPOUND);
@@ -265,19 +285,22 @@ void Furnace::sendToAllUsers()
 {
   // Create a new compound tag and set it's direct properties
   NBT_Value* newEntity = new NBT_Value(NBT_Value::TAG_COMPOUND);
-  newEntity->Insert("BurnTime", new NBT_Value(this->burnTime()));
-  newEntity->Insert("CookTime", new NBT_Value(this->cookTime()));
+  newEntity->Insert("BurnTime", new NBT_Value(burnTime()));
+  newEntity->Insert("CookTime", new NBT_Value(cookTime()));
   newEntity->Insert("id", new NBT_Value("Furnace"));
-  newEntity->Insert("x", new NBT_Value(this->m_x));
-  newEntity->Insert("y", new NBT_Value(this->m_y));
-  newEntity->Insert("z", new NBT_Value(this->m_z));
+  newEntity->Insert("x", new NBT_Value(m_x));
+  newEntity->Insert("y", new NBT_Value(m_y));
+  newEntity->Insert("z", new NBT_Value(m_z));
 
   // Add our 3 child compounds for each slot that contains something
-  NBT_Value *slotList = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
-  for(int i = 0; i <= 2; i++) {
-    NBT_Value *slot = getSlotEntity(i);
+  NBT_Value* slotList = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
+  for(int i = 0; i <= 2; i++)
+  {
+    NBT_Value* slot = getSlotEntity(i);
     if(slot != NULL)
+    {
       slotList->GetList()->push_back(slot);
+    }
   }
   newEntity->Insert("Items", slotList);
 
@@ -291,7 +314,7 @@ void Furnace::sendToAllUsers()
   buffer.push_back(0);
 
   // Compress the data
-  uint8 *compressedData = new uint8[ALLOCATE_NBTFILE];
+  uint8* compressedData = new uint8[ALLOCATE_NBTFILE];
   z_stream zstream;
   zstream.zalloc = Z_NULL;
   zstream.zfree = Z_NULL;
@@ -305,22 +328,23 @@ void Furnace::sendToAllUsers()
   deflateInit2(&zstream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15+MAX_WBITS, 8, Z_DEFAULT_STRATEGY);
 
   // Gzip the data
-  if(int state=deflate(&zstream, Z_FULL_FLUSH)!=Z_OK) {
-    std::cout << "Error in deflate: " << state << std::endl;
+  if(int state = deflate(&zstream, Z_FULL_FLUSH) != Z_OK)
+  {
+    Screen::get()->log(LOG_ERROR, "Error in deflate: " + state);
   }
   deflateEnd(&zstream);
 
   // Create a new packet to send back to client
   Packet pkt;
-  pkt << (sint8)PACKET_COMPLEX_ENTITIES  << this->m_x << (sint16)this->m_y << this->m_z << (sint16)zstream.total_out;
+  pkt << (sint8)PACKET_COMPLEX_ENTITIES  << m_x << (sint16)m_y << m_z << (sint16)zstream.total_out;
   pkt.addToWrite(compressedData, zstream.total_out);
-  delete [] compressedData;
+  delete[] compressedData;
 
   // Tell all users about this guy
   User::sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
 
   #ifdef _DEBUG
-    std::cout << "Furnace entity data: " << std::endl;
+    Screen::get()->log("Furnace entity data: ");
     newEntity->Print();
   #endif
 

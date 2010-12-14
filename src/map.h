@@ -34,6 +34,7 @@
 #include "nbt.h"
 #include "user.h"
 #include "vec.h"
+#include "chunkmap.h"
 
 struct sTree
 {
@@ -47,7 +48,7 @@ struct sTree
 
 };
 
-struct sChunk
+/*struct sChunk
 {
   uint8 *blocks;
   uint8 *data;
@@ -57,7 +58,7 @@ struct sChunk
   sint32 x;
   sint32 z;
   NBT_Value *nbt;
-};
+};*/
 
 struct spawnedItem
 {
@@ -83,7 +84,9 @@ private:
   Map()
   {
     for(int i = 0; i < 256; i++)
+    {
       emitLight[i] = 0;
+    }
     emitLight[0x0A] = 15; // Lava
     emitLight[0x0B] = 15; // Stationary Lava
     emitLight[0x27] = 1;  // Brown mushroom
@@ -97,7 +100,9 @@ private:
     emitLight[0x5B] = 15; // Jack-O-Lantern
 
     for(int i = 0; i < 256; i++)
+    {
       stopLight[i] = 16;
+    }
     stopLight[0x00] = 0; // Empty
     stopLight[0x06] = 0; // Sapling
     stopLight[0x08] = 3; // Water
@@ -133,16 +138,20 @@ private:
   {
     // Free all memory
     for(std::map<uint32, sChunk>::const_iterator it = maps.begin(); it != maps.end(); it = maps.begin())
+    {
       releaseMap(maps[it->first].x, maps[it->first].z);
+    }
 
     //Free item memory
     for(std::map<uint32, spawnedItem *>::const_iterator it = items.begin(); it != items.end(); ++it)
+    {
       delete items[it->first];
+    }
 
     items.clear();
     std::string infile = mapDirectory+"/level.dat";
 
-    NBT_Value *root = NBT_Value::LoadFromFile(infile);
+    NBT_Value* root = NBT_Value::LoadFromFile(infile);
     if(root != NULL)
     {
       NBT_Value &data = *((*root)["Data"]);
@@ -150,7 +159,7 @@ private:
       //Get time from the map
       *data["Time"] = mapTime;
 
-      NBT_Value *trees = ((*root)["Trees"]);
+      NBT_Value* trees = ((*root)["Trees"]);
 
       if(trees)
       {
@@ -178,7 +187,7 @@ private:
 
 
   }
-  static Map *mMap;
+  static Map* _instance;
 
 public:
 
@@ -201,6 +210,9 @@ public:
   // Store all maps here
   std::map<uint32, sChunk> maps;
 
+  // Store chunks here (remove maps)
+  ChunkMap chunks;
+
   // Store the time map chunk has been last used
   std::map<uint32, int> mapLastused;
 
@@ -211,13 +223,13 @@ public:
   std::map<uint32, bool> mapLightRegen;
 
   // Store item pointers for each chunk
-  std::map<uint32, std::vector<spawnedItem *> > mapItems;
+  //std::map<uint32, std::vector<spawnedItem *> > mapItems;
 
   //All spawned items on map
-  std::map<uint32, spawnedItem *> items;
+  std::map<uint32, spawnedItem*> items;
 
-  void posToId(int x, int z, uint32 *id);
-  void idToPos(uint32 id, int *x, int *z);
+//  void posToId(int x, int z, uint32 *id);
+//  void idToPos(uint32 id, int *x, int *z);
 
   void init();
   void free();
@@ -230,10 +242,10 @@ public:
   sint64 mapSeed;
 
   // Get pointer to struct
-  sChunk *getMapData(int x, int z, bool generate = true);
+  sChunk* getMapData(int x, int z, bool generate = true);
 
   // Load map chunk
-  bool loadMap(int x, int z, bool generate = true);
+  sChunk* loadMap(int x, int z, bool generate = true);
 
   // Save map chunk to disc
   bool saveMap(int x, int z);
@@ -243,7 +255,7 @@ public:
 
   // Generate light maps for chunk
   bool generateLight(int x, int z);
-  bool generateLight(int x, int z, sChunk *chunk);
+  bool generateLight(int x, int z, sChunk* chunk);
 
   // Release/save map chunk
   bool releaseMap(int x, int z);
@@ -254,12 +266,12 @@ public:
   bool setLight(int x, int y, int z, int skylight, int blocklight, int setLight);
   bool setLight(int x, int y, int z, int skylight, int blocklight, int setLight, sChunk *chunk);
   bool spreadLight(int x, int y, int z, int skylight, int blocklight);
-  bool spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk *chunk);
+  bool spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk* chunk);
 
   // Block value/meta get/set
-  bool getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate = true);
-  bool getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate, sChunk *chunk);
-  bool getBlock(vec pos, uint8 *type, uint8 *meta)
+  bool getBlock(int x, int y, int z, uint8* type, uint8* meta, bool generate = true);
+  bool getBlock(int x, int y, int z, uint8* type, uint8* meta, bool generate, sChunk* chunk);
+  bool getBlock(vec pos, uint8* type, uint8* meta)
   {
     return getBlock(pos.x(), pos.y(), pos.z(), type, meta);
   }
@@ -278,14 +290,14 @@ public:
   bool sendPickupSpawn(spawnedItem item);
   void createPickupSpawn(int x, int y, int z, int type, int count);
 
-  void setComplexEntity(User *user, sint32 x, sint32 y, sint32 z, NBT_Value *entity);
+  void setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value* entity);
 
   static Map* get()
   {
-    if(!mMap) {
-      mMap = new Map();
+    if(!_instance) {
+      _instance = new Map();
     }
-    return mMap;
+    return _instance;
   }
 };
 

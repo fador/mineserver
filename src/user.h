@@ -98,6 +98,7 @@ public:
   position pos;
   vec curChunk;
   Inventory inv;
+  sint16 curItem;
 
   int permissions; // bitmask for permissions. See permissions.h
 
@@ -106,7 +107,7 @@ public:
   //Input buffer
   Packet buffer;
 
-  static std::vector<User *> & all();
+  static std::vector<User*>& all();
   static bool isUser(int sock);
   static User* byNick(std::string nick);
 
@@ -119,11 +120,11 @@ public:
   bool updateLook(float yaw, float pitch);
   sint8 relativeToBlock(const sint32 x, const sint8 y, const sint32 z);
 
-  bool sendOthers(uint8 *data, uint32 len);
-  static bool sendAll(uint8 *data, uint32 len);
-  static bool sendAdmins(uint8 *data, uint32 len);
-  static bool sendOps(uint8 *data, uint32 len);
-  static bool sendGuests(uint8 *data, uint32 len);
+  bool sendOthers(uint8* data, uint32 len);
+  static bool sendAll(uint8* data, uint32 len);
+  static bool sendAdmins(uint8* data, uint32 len);
+  static bool sendOps(uint8* data, uint32 len);
+  static bool sendGuests(uint8* data, uint32 len);
 
   //Check inventory for space
   bool checkInventory(sint16 itemID, char count);
@@ -180,16 +181,22 @@ public:
   bool respawn();
   bool dropInventory();
   bool isUnderwater();
-  
+
   // Getter/Setter for item currently in hold
   sint16 currentItem();
   void setCurrentItem(sint16 item_id);
 
-  struct event *GetEvent();
+
+  bool withinViewDistance(int a, int b)
+  {
+	  return a > b ? (a-b)<viewDistance : (b-a)<viewDistance;
+  }
+
+  struct event* GetEvent();
 
 private:
   event m_event;
-  
+
   // Item currently in hold
   sint16 m_currentItem;
 };

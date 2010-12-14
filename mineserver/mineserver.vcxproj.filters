@@ -123,7 +123,7 @@
     <ClCompile Include="..\src\blocks\tracks.cpp">
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\lighting.cpp">
+    <ClCompile Include="..\src\lighting.cpp">      <Filter>Source Files</Filter>    </ClCompile>    <ClCompile Include="..\src\screen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -225,6 +225,9 @@
       <Filter>Header Files\blocks</Filter>
     </ClInclude>
     <ClInclude Include="..\src\lighting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\screen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

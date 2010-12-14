@@ -21,7 +21,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="1"
+			CharacterSet="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -61,8 +61,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(ProjectDir)../../lib/zlib/zdll.lib $(ProjectDir)../../lib/libevent2/libevent.lib ws2_32.lib ../../lib/noise/libnoise.lib"
-				OutputFile="..\..\bin\$(ProjectName).exe"
+				AdditionalDependencies="winmm.lib ../../lib/zlib/zdll.lib ../../lib/libevent2/libevent.lib ws2_32.lib ../../lib/noise/libnoise.lib"
+				OutputFile="..\..\bin\$(ProjectName)-d.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib"
 				GenerateDebugInformation="true"
@@ -118,6 +118,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="../../lib/zlib;../../lib/libevent2;../../src;../../lib"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -136,7 +137,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LinkIncremental="1"
+				AdditionalDependencies="winmm.lib ../../lib/zlib/zdll.lib ../../lib/libevent2/libevent.lib ws2_32.lib ../../lib/noise/libnoise.lib"
+				OutputFile="..\..\bin\$(ProjectName).exe"
+				AdditionalLibraryDirectories="../../lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -191,19 +194,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\furnace.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\furnaceManager.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\logger.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\map.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\mapgen.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\mersenne.cpp"
 				>
 			</File>
 			<File
@@ -215,15 +218,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\noiseutils.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\packets.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\physics.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\plugin.cpp"
 				>
 			</File>
 			<File
@@ -238,6 +241,78 @@
 				RelativePath="..\..\src\user.cpp"
 				>
 			</File>
+			<Filter
+				Name="worldgen"
+				>
+				<File
+					RelativePath="..\..\src\worldgen\cavegen.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\mapgen.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\mersenne.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="blocks"
+				>
+				<File
+					RelativePath="..\..\src\blocks\basic.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\chest.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\default.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\door.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\falling.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\fire.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\liquid.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\plant.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\sign.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\snow.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\stair.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\torch.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\tracks.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -249,11 +324,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\chunkmap.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\config.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\constants.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\furnace.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\furnaceManager.h"
 				>
 			</File>
 			<File
@@ -265,23 +352,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\mapgen.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\mersenne.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\mineserver.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\nbt.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\noiseutils.h"
 				>
 			</File>
 			<File
@@ -308,6 +383,78 @@
 				RelativePath="..\..\src\vec.h"
 				>
 			</File>
+			<Filter
+				Name="worldgen"
+				>
+				<File
+					RelativePath="..\..\src\worldgen\cavegen.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\mapgen.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\mersenne.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="blocks"
+				>
+				<File
+					RelativePath="..\..\src\blocks\basic.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\chest.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\default.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\door.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\falling.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\fire.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\liquid.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\plant.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\sign.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\snow.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\stair.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\torch.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\tracks.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

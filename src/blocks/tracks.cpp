@@ -102,7 +102,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // SOUTH
   if(isTrack(x, y, z-1, meta) && isStartPiece(x, y, z-1))
   {
-    std::cout << "SOUTH" << std::endl;
+    Screen::get()->log("SOUTH");
     metadata = FLAT_NS;
     
     // Rising & falling tracks
@@ -136,7 +136,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // NORTH
   if(isTrack(x, y, z+1, meta) && isStartPiece(x, y, z+1))
   {
-    std::cout << "NORTH" << std::endl;
+    Screen::get()->log("NORTH");
 
     metadata = FLAT_NS;
     // Rising & falling tracks
@@ -170,7 +170,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // EAST
   if(isTrack(x-1, y, z, meta) && isStartPiece(x-1, y, z))
   {
-    std::cout << "EAST" << std::endl;
+    Screen::get()->log("EAST");
     metadata = FLAT_EW;
     
     // Rising & falling tracks
@@ -210,7 +210,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // WEST
   if(isTrack(x+1, y, z, meta) && isStartPiece(x+1, y, z))
   {
-    std::cout << "WEST" << std::endl;
+    Screen::get()->log("WEST");
     metadata = FLAT_EW;
     // Change previous block meta
     
@@ -247,8 +247,6 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
     }
   }
   
-  
-  std::cout << std::endl;
   Map::get()->setBlock(x, y, z, (char)newblock, metadata);
   Map::get()->sendBlockChange(x, y, z, (char)newblock, metadata);
 }

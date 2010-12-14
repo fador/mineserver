@@ -31,10 +31,10 @@ endif
 RM = rm -f
 CXX = g++
 CC = $(CXX)
-LDFLAGS += -L/usr/local/lib -L/usr/lib -levent -lz -lnoise $(LFLAGS)
+LDFLAGS += -L/usr/local/lib -L/usr/lib -levent -lz -lnoise -lncurses $(LFLAGS)
 CXXFLAGS += $(DFLAGS) -I. -I/usr/Local/include -I/usr/include
 
-OBJS  = map.o chat.o commands.o config.o constants.o logger.o nbt.o furnace.o furnaceManager.o packets.o physics.o sockets.o tools.o user.o mineserver.o plugin.o
+OBJS  = map.o chat.o commands.o config.o constants.o logger.o nbt.o furnace.o furnaceManager.o packets.o physics.o sockets.o tools.o user.o mineserver.o screen.o plugin.o
 OBJS += blocks/basic.o blocks/door.o blocks/falling.o blocks/fire.o blocks/liquid.o blocks/plant.o blocks/sign.o blocks/snow.o blocks/stair.o blocks/torch.o blocks/tracks.o blocks/default.o blocks/chest.o
 OBJS += worldgen/mapgen.o worldgen/cavegen.o worldgen/mersenne.o
 PROG = ./mineserver
@@ -42,8 +42,15 @@ PROGS = $(PROG)
 
 $(PROGS): $(OBJS)
 
+$(PROG):
+	$(CXX) $(LDFLAGS) $(OBJS) -o ../bin/mineserver
+
 clean: 
 	$(RM) $(OBJS) $(PROGS)
+
+dist:
+	tar cvzf ../mineserver-latest-`uname`-bin.tar.gz -C ../bin/ . ../LICENSE
+	zip -j ../mineserver-latest-`uname`-bin.zip ../bin/* ../LICENSE
 
 all: $(PROGS)
 
@@ -58,6 +65,7 @@ furnace.o: furnace.cpp furnace.h
 furnaceManager.o: furnaceManager.cpp furnaceManager.h
 packets.o: packets.cpp constants.h logger.h sockets.h tools.h map.h user.h chat.h config.h nbt.h packets.h physics.h
 physics.o: physics.cpp logger.h constants.h config.h user.h map.h vec.h physics.h
+screen.o:	screen.cpp mineserver.h screen.h
 sockets.o: sockets.cpp logger.h constants.h tools.h user.h map.h chat.h nbt.h packets.h
 tools.o: tools.cpp tools.h
 user.o: user.cpp constants.h logger.h tools.h map.h user.h nbt.h chat.h packets.h
