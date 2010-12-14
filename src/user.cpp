@@ -225,7 +225,7 @@ bool User::sendLoginInfo()
 
   //Login OK package
   user->buffer << (sint8)PACKET_LOGIN_RESPONSE
-    << (sint32)user->UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
+               << (sint32)user->UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
 
   //Send server time (after dawn)
   user->buffer << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
@@ -276,7 +276,7 @@ bool User::sendLoginInfo()
     // If not commentline
     if(temp[0] != COMMENTPREFIX)
     {
-        user->buffer << (sint8)PACKET_CHAT_MESSAGE << temp;
+      user->buffer << (sint8)PACKET_CHAT_MESSAGE << temp;
     }
   }
   motdfs.close();
@@ -318,9 +318,13 @@ bool User::kick(std::string kickMsg)
 bool User::mute(std::string muteMsg)
 {
   if(!muteMsg.empty())
+  {
     muteMsg = MC_COLOR_YELLOW + "You have been muted.  Reason: " + muteMsg;
+  }
   else
+  {
     muteMsg = MC_COLOR_YELLOW + "You have been muted. ";
+  }
 
   Chat::get()->sendMsg(this, muteMsg, Chat::USER);
   this->muted = true;
@@ -336,13 +340,15 @@ bool User::unmute()
 }
 bool User::toggleDND()
 {
-  if(!this->dnd) {
+  if(!this->dnd)
+  {
     Chat::get()->sendMsg(this, MC_COLOR_YELLOW + "You have enabled 'Do Not Disturb' mode.", Chat::USER);
     Chat::get()->sendMsg(this, MC_COLOR_YELLOW + "You will no longer see chat or private messages.", Chat::USER);
     Chat::get()->sendMsg(this, MC_COLOR_YELLOW + "Type /dnd again to disable 'Do Not Disturb' mode.", Chat::USER);
     this->dnd = true;
   }
-  else {
+  else
+  {
     this->dnd = false;
     Chat::get()->sendMsg(this, MC_COLOR_YELLOW + "You have disabled 'Do Not Disturb' mode.", Chat::USER);
     Chat::get()->sendMsg(this, MC_COLOR_YELLOW + "You can now see chat and private messages.", Chat::USER);
@@ -579,7 +585,8 @@ bool User::updatePos(double x, double y, double z, double stance)
     {
       Packet telePacket;
       telePacket << (sint8)PACKET_ENTITY_TELEPORT
-         << (sint32)UID << (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
+                 << (sint32)UID << (sint32)(x * 32) << (sint32)(y * 32) 
+                 << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
       newChunk->sendPacket(telePacket, this);
     }
     else if(abs(newChunk->x - oldChunk->x) <= 1  && abs(newChunk->z - oldChunk->z) <= 1)
@@ -604,8 +611,8 @@ bool User::updatePos(double x, double y, double z, double stance)
       {
         Packet pkt;
         pkt << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)UID << nick
-          << (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32)
-          << angleToByte(pos.yaw) << angleToByte(pos.pitch) << (sint16)curItem;
+            << (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32)
+            << angleToByte(pos.yaw) << angleToByte(pos.pitch) << (sint16)curItem;
 
         std::list<User*>::iterator iter = toadd.begin(), end = toadd.end();
         for( ; iter != end ; iter++)
@@ -749,7 +756,7 @@ bool User::updatePos(double x, double y, double z, double stance)
         {
           //Dont pickup own spawns right away
           if((*iter)->spawnedBy != this->UID ||
-              (*iter)->spawnedAt+2 < time(0))
+             (*iter)->spawnedAt+2 < time(0))
           {
             //Check player inventory for space!
             if(checkInventory((*iter)->item,

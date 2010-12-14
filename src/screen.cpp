@@ -140,7 +140,7 @@ void Screen::init(std::string version)
 
 bool Screen::hasCommand()
 {
-  char readchar;
+  int readchar;
   bool running = true;
 
   // Get the chars in the buffer
