@@ -376,7 +376,6 @@ void showMOTD(User *user, std::string command, std::deque<std::string> args)
 // Rollback Transaction Logs
 void rollBack(User *user, std::string command, std::deque<std::string> args)
 {
-#define _DEBUG
 #ifdef _DEBUG
   printf("Starting map rollback\n");
 #endif
@@ -406,7 +405,6 @@ void rollBack(User *user, std::string command, std::deque<std::string> args)
   if(logs.size() > 0) {
     Chat::get()->sendMsg(user, "Rolling back map...", Chat::USER);
     for(event = logs.begin(); event != logs.end(); event++) {
-      Chat::get()->sendMsg(user, ".", Chat::USER);
       Map::get()->setBlock(event->x, event->y, event->z, event->otype, event->ometa);
       Map::get()->sendBlockChange(event->x, event->y, event->z, (char)event->otype, event->ometa);
     }
