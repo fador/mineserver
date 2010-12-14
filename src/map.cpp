@@ -747,14 +747,6 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   printf("setBlock(x=%d, y=%d, z=%d, type=%d, char=%d)\n", x, y, z, type, meta);
 #endif
 
-  event_t entry;
-  entry.x = x;
-  entry.y = y;
-  entry.z = z;
-  strcpy(entry.nick, std::string("SERVER").c_str());
-
-  Map::getBlock(x,y,z, &entry.otype, &entry.ometa);
-
   if((y < 0) || (y > 127))
   {
     LOG("Invalid y value (setBlock)");
@@ -803,9 +795,6 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
 //  mapLightRegen[mapId]    = true;
 //  mapLastused[mapId]      = (int)time(0);
 
-  // Log the block update
-  TRXLOG(entry);
-
   return true;
 }
 
@@ -833,7 +822,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta, std::string nick)
   int chunk_z = ((z < 0) ? (((z+1)/16)-1) : (z/16));
 
   uint32 mapId;
-  Map::posToId(chunk_x, chunk_z, &mapId);
+  //Map::posToId(chunk_x, chunk_z, &mapId);
 
   sChunk *chunk = getMapData(chunk_x, chunk_z, true);
 

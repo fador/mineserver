@@ -404,13 +404,13 @@ void rollBack(User *user, std::string command, std::deque<std::string> args)
 
   std::vector<event_t>::iterator event;
   if(logs.size() > 0) {
-    Chat::get().sendMsg(user, "Rolling back map...", Chat::USER);
+    Chat::get()->sendMsg(user, "Rolling back map...", Chat::USER);
     for(event = logs.begin(); event != logs.end(); event++) {
-      Chat::get().sendMsg(user, "setloop...", Chat::USER);
-      Map::get()->setBlock(event->x, event->y, event->z, event->otype, event->ometa, std::string("SERVER"));
+      Chat::get()->sendMsg(user, ".", Chat::USER);
+      Map::get()->setBlock(event->x, event->y, event->z, event->otype, event->ometa);
       Map::get()->sendBlockChange(event->x, event->y, event->z, (char)event->otype, event->ometa);
     }
-    Chat::get().sendMsg(user, "Map roll back completed!", Chat::USER);
+    Chat::get()->sendMsg(user, "Map roll back completed!", Chat::USER);
   } else {
     reportError(user, "No binary logs found!");
   }

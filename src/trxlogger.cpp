@@ -48,7 +48,7 @@ TrxLogger::TrxLogger (std::string filename) {
 
 TrxLogger &TrxLogger::get()
 {
-  static TrxLogger instance(Conf::get().sValue("binlog"));
+  static TrxLogger instance(Conf::get()->sValue("binlog"));
   return instance;
 }
  
@@ -76,29 +76,16 @@ void TrxLogger::log(event_t event)
     LOG("Binary log is bad!");
   }
 }
+
 // Get logs based on nick and timestamp
 bool TrxLogger::getLogs(time_t t, std::string &nick, std::vector<event_t> *logs) {
- 
-  std::vector<event_t> tmp;
-  std::vector<event_t>::iterator event; 
+  event_t event; 
 
-  this->getLogs(&tmp);
-
-  for(event = tmp.begin(); event != tmp.end(); event++) {
-    if(event->timestamp > t && event->nick == nick.c_str()) {
-      event_t e;
-
-      e.nsize = event->nsize;
-      strcpy(e.nick, event->nick);
-      e.x     = event->x;
-      e.y     = event->y;
-      e.z     = event->z;
-      e.otype = event->otype;
-      e.ntype = event->ntype;
-      e.ometa = event->ometa;
-      e.nmeta = event->nmeta;
-
-      logs->push_back(e);
+  log_stream.flush();
+  log_stream.seekg(0, std::ios::beg);
+  while(this->getEvent(&event)) {
+    if(event.timestamp > t && event.nick == nick.c_str()) {
+      logs->push_back(event);
     }
   }
   return true;
@@ -106,27 +93,13 @@ bool TrxLogger::getLogs(time_t t, std::string &nick, std::vector<event_t> *logs)
 
 // Get logs based on timestamp
 bool TrxLogger::getLogs(time_t t, std::vector<event_t> *logs) {
+  event_t event;
 
-  std::vector<event_t> tmp;
-  std::vector<event_t>::iterator event;
-
-  this->getLogs(&tmp);
-
-  for(event = tmp.begin(); event != tmp.end(); event++) {
-    if(event->timestamp > t) {
-      event_t e;
-
-      e.nsize = event->nsize;
-      strcpy(e.nick, event->nick);
-      e.x     = event->x;
-      e.y     = event->y;
-      e.z     = event->z;
-      e.otype = event->otype;
-      e.ntype = event->ntype;
-      e.ometa = event->ometa;
-      e.nmeta = event->nmeta;
-
-      logs->push_back(e);
+  log_stream.flush();
+  log_stream.seekg(0, std::ios::beg);
+  while(this->getEvent(&event)) {
+    if(event.timestamp > t) {
+      logs->push_back(event);
     }
   }
   return true;
@@ -138,23 +111,43 @@ bool TrxLogger::getLogs(std::vector<event_t> *logs) {
 
   log_stream.flush();
   log_stream.seekg(0, std::ios::beg);
-
-  while(log_stream.good()) {
-                        
-    log_stream.read((char *) &event.timestamp, sizeof(time_t));
-    log_stream.read((char *) &event.x, sizeof(int));
-    log_stream.read((char *) &event.y, sizeof(int));
-    log_stream.read((char *) &event.z, sizeof(int));
-    log_stream.read((char *) &event.otype, sizeof(uint8));
-    log_stream.read((char *) &event.ntype, sizeof(uint8));
-    log_stream.read((char *) &event.ometa, sizeof(uint8));
-    log_stream.read((char *) &event.nmeta, sizeof(uint8));
-    log_stream.read((char *) &event.nsize, sizeof(int));
-    log_stream.read((char *) &event.nick, event.nsize+1);
-
+  while(this->getEvent(&event)) {
     logs->push_back(event);
   }
   return true;
+}
+
+// Get event from log
+bool TrxLogger::getEvent(event_t *event) {
+
+  if(!log_stream.eof()) {
+    log_stream.read((char *) &event->timestamp, sizeof(time_t));
+    log_stream.read((char *) &event->x, sizeof(int));
+    log_stream.read((char *) &event->y, sizeof(int));
+    log_stream.read((char *) &event->z, sizeof(int));
+    log_stream.read((char *) &event->otype, sizeof(uint8));
+    log_stream.read((char *) &event->ntype, sizeof(uint8));
+    log_stream.read((char *) &event->ometa, sizeof(uint8));
+    log_stream.read((char *) &event->nmeta, sizeof(uint8));
+    log_stream.read((char *) &event->nsize, sizeof(int));
+    log_stream.read((char *) &event->nick, event->nsize+1);
+#ifdef _DEBUG
+    printf("Time: %d\nx: %d\ny: %d\nz: %d\notype: %d\nntype: %d\nometa: %d\nnmeta %d\nnsize: %d\nnick: %s\n",
+           event->timestamp, 
+           event->x, 
+           event->y, 
+           event->z, 
+           event->otype, 
+           event->ntype, 
+           event->ometa, 
+           event->nmeta, 
+           event->nsize, 
+           event->nick
+          ); 
+#endif
+    return true;
+  } 
+  return false;
 }
 
 TrxLogger::~TrxLogger() {

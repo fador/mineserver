@@ -50,7 +50,7 @@ void BlockDefault::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 
       return;
 
    Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-   Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+   Map::get()->setBlock(x, y, z, BLOCK_AIR, 0, user->nick);
    this->spawnBlockItem(x,y,z,block);
 }
 
@@ -82,7 +82,7 @@ void BlockDefault::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
 
    direction = user->relativeToBlock(x, y, z);
 
-   Map::get()->setBlock(x, y, z, (char)newblock, direction);
+   Map::get()->setBlock(x, y, z, (char)newblock, direction, user->nick);
    Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
 }
 
@@ -99,7 +99,7 @@ void BlockDefault::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint
       return;
 
    Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-   Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+   Map::get()->setBlock(x, y, z, BLOCK_AIR, 0, user->nick);
    Map::get()->createPickupSpawn(x, y, z, oldblock, 1);
 }
 

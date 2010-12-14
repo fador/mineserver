@@ -57,6 +57,7 @@ public:
   bool getLogs(time_t t, std::string &nick, std::vector<event_t> *logs);
   bool getLogs(time_t t, std::vector<event_t> *logs);
   bool getLogs(std::vector<event_t> *logs);
+  bool getEvent(event_t *event);
 
 private:
   std::fstream log_stream;

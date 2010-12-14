@@ -85,11 +85,11 @@ void BlockPlant::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
    {
       case BLOCK_SOIL:
          /* change to dirt block */
-         Map::get()->setBlock(x, y-1, z, (char)BLOCK_DIRT, 0);
+         Map::get()->setBlock(x, y-1, z, (char)BLOCK_DIRT, 0, user->nick);
          Map::get()->sendBlockChange(x, y-1, z, (char)BLOCK_DIRT, 0);
       case BLOCK_GRASS:
       case BLOCK_DIRT:
-         Map::get()->setBlock(x, y, z, (char)newblock, 0);
+         Map::get()->setBlock(x, y, z, (char)newblock, 0, user->nick);
          Map::get()->sendBlockChange(x, y, z, (char)newblock, 0);
       break;
       default:

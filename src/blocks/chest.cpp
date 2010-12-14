@@ -194,7 +194,7 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
   if(destroy) 
   {
     Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-    Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+    Map::get()->setBlock(x, y, z, BLOCK_AIR, 0, user->nick);
     this->spawnBlockItem(x,y,z,block);
     // TODO: spawn items in chest
   } else {
@@ -240,7 +240,7 @@ void BlockChest::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
   NBT_Value *nbtItems = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
   val->Insert("Items", nbtItems);
   
-  Map::get()->setBlock(x, y, z, (char)newblock, direction);
+  Map::get()->setBlock(x, y, z, (char)newblock, direction, user->nick);
   Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
   
   Map::get()->setComplexEntity(user, x, y, z, val);

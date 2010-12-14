@@ -73,7 +73,7 @@ void BlockTracks::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 
   {
     // Break torch and spawn torch item
     Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-    Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+    Map::get()->setBlock(x, y, z, BLOCK_AIR, 0, user->nick);
     this->spawnBlockItem(x, y, z, block);
   }
 }
@@ -123,12 +123,12 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
     // Modify previous trackpiece to form corner
     if(isTrack(x-1, y, z-1, meta) && meta != FLAT_NS && meta != CORNER_NW && meta != CORNER_SW)
     {
-      Map::get()->setBlock(x, y, z-1, (char)newblock, CORNER_SW);
+      Map::get()->setBlock(x, y, z-1, (char)newblock, CORNER_SW, user->nick);
       Map::get()->sendBlockChange(x, y, z-1, (char)newblock, CORNER_SW);
     }
     else if(isTrack(x+1, y, z-1, meta) && meta != FLAT_NS && meta != CORNER_NE && meta != CORNER_SE)
     {
-      Map::get()->setBlock(x, y, z-1, (char)newblock, CORNER_SE);
+      Map::get()->setBlock(x, y, z-1, (char)newblock, CORNER_SE, user->nick);
       Map::get()->sendBlockChange(x, y, z-1, (char)newblock, CORNER_SE);
     }
   }
@@ -157,12 +157,12 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
     // Modify previous trackpiece to form corner
     if(isTrack(x+1, y, z+1, meta) && meta != FLAT_NS && meta != CORNER_NE && meta != CORNER_SE)
     {
-      Map::get()->setBlock(x, y, z+1, (char)newblock, CORNER_NE);
+      Map::get()->setBlock(x, y, z+1, (char)newblock, CORNER_NE, user->nick);
       Map::get()->sendBlockChange(x, y, z+1, (char)newblock, CORNER_NE);
     }
     else if(isTrack(x-1, y, z+1, meta) && meta != FLAT_NS && meta != CORNER_NW && meta != CORNER_SW)
     { 
-      Map::get()->setBlock(x, y, z+1, (char)newblock, CORNER_NW);
+      Map::get()->setBlock(x, y, z+1, (char)newblock, CORNER_NW, user->nick);
       Map::get()->sendBlockChange(x, y, z+1, (char)newblock, CORNER_NW);
     }
   }
@@ -181,7 +181,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
     else
     {
       // Change previous block meta
-      Map::get()->setBlock(x-1, y, z, (char)newblock, FLAT_EW);
+      Map::get()->setBlock(x-1, y, z, (char)newblock, FLAT_EW, user->nick);
       Map::get()->sendBlockChange(x-1, y, z, (char)newblock, FLAT_EW);
     }
   
@@ -197,12 +197,12 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
     // Modify previous trackpiece to form corner
     if(isTrack(x-1, y, z-1, meta) && meta != FLAT_EW && meta != CORNER_NE && meta != CORNER_NW)
     {
-      Map::get()->setBlock(x-1, y, z, (char)newblock, CORNER_NE);
+      Map::get()->setBlock(x-1, y, z, (char)newblock, CORNER_NE, user->nick);
       Map::get()->sendBlockChange(x-1, y, z, (char)newblock, CORNER_NE);
     }
     else if(isTrack(x-1, y, z+1, meta) && meta != FLAT_EW && meta != CORNER_SW && meta != CORNER_SE)
     {
-      Map::get()->setBlock(x-1, y, z, (char)newblock, CORNER_SE);
+      Map::get()->setBlock(x-1, y, z, (char)newblock, CORNER_SE, user->nick);
       Map::get()->sendBlockChange(x-1, y, z, (char)newblock, CORNER_SE);
     }
   }
@@ -221,7 +221,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
     } 
     else
     {
-      Map::get()->setBlock(x+1, y, z, (char)newblock, FLAT_EW);
+      Map::get()->setBlock(x+1, y, z, (char)newblock, FLAT_EW, user->nick);
       Map::get()->sendBlockChange(x+1, y, z, (char)newblock, FLAT_EW);
     }
 
@@ -237,19 +237,19 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
     // Modify previous trackpiece to form corner
     if(isTrack(x+1, y, z-1, meta) && meta != FLAT_EW && meta != CORNER_NW && meta != CORNER_NE)
     {
-      Map::get()->setBlock(x+1, y, z, (char)newblock, CORNER_NW);
+      Map::get()->setBlock(x+1, y, z, (char)newblock, CORNER_NW, user->nick);
       Map::get()->sendBlockChange(x+1, y, z, (char)newblock, CORNER_NW);
     }
     else if(isTrack(x+1, y, z+1, meta) && meta != FLAT_EW && meta != CORNER_SW && meta != CORNER_SE)
     {
-      Map::get()->setBlock(x+1, y, z, (char)newblock, CORNER_SW);
+      Map::get()->setBlock(x+1, y, z, (char)newblock, CORNER_SW, user->nick);
       Map::get()->sendBlockChange(x+1, y, z, (char)newblock, CORNER_SW);
     }
   }
   
   
   std::cout << std::endl;
-  Map::get()->setBlock(x, y, z, (char)newblock, metadata);
+  Map::get()->setBlock(x, y, z, (char)newblock, metadata, user->nick);
   Map::get()->sendBlockChange(x, y, z, (char)newblock, metadata);
 }
 
