@@ -1,9 +1,5 @@
 # admins
 [Server]
-Psoden
-fador
-ReDucTor
-Pacino
 
 # ops
 

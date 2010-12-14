@@ -162,7 +162,7 @@ bool User::changeNick(std::string _nick)
 
 	// Update the player list with the new name!
 	Mineserver::get().updatePlayerList();
-	
+
   return true;
 }
 
@@ -175,7 +175,7 @@ User::~User()
     if((*it) == this)
     {
       Mineserver::get().users().erase(it);
-			
+
 			// Update the player list
 			Mineserver::get().updatePlayerList();
 
@@ -189,9 +189,15 @@ User::~User()
       {
         for(int mapz = -viewDistance+curChunk.z(); mapz <= viewDistance+curChunk.z(); mapz++)
         {
-			sChunk *chunk = Map::get()->chunks.GetChunk(mapx, mapz);
+			sChunk* chunk = Map::get()->chunks.GetChunk(mapx, mapz);
 			if(chunk != NULL)
+			{
 				chunk->users.erase(this);
+				if(chunk->users.size() == 0)
+				{
+					Map::get()->releaseMap(mapx, mapz);
+				}
+			}
         }
       }
 
@@ -211,7 +217,7 @@ User::~User()
 bool User::sendLoginInfo()
 {
   std::string player = temp_nick;
-  User *user = this;
+  User* user = this;
 
   user->changeNick(player);
 
@@ -228,7 +234,7 @@ bool User::sendLoginInfo()
   //Inventory
   for(sint32 invType=-1; invType != -4; invType--)
   {
-    Item *inventory = NULL;
+    Item* inventory = NULL;
     sint16 inventoryCount = 0;
 
     if(invType == -1)
@@ -370,26 +376,26 @@ bool User::loadData()
   if(stat(infile.c_str(), &stFileInfo) != 0)
     return false;
 
-  NBT_Value * playerRoot = NBT_Value::LoadFromFile(infile.c_str());
-  NBT_Value &nbtPlayer = *playerRoot;
+  NBT_Value*  playerRoot = NBT_Value::LoadFromFile(infile.c_str());
+  NBT_Value& nbtPlayer = *playerRoot;
   if(playerRoot == NULL)
   {
     LOG("Failed to open player file");
     return false;
   }
 
-  std::vector<NBT_Value*> *_pos = nbtPlayer["Pos"]->GetList();
+  std::vector<NBT_Value*>* _pos = nbtPlayer["Pos"]->GetList();
   pos.x = (double)(*(*_pos)[0]);
   pos.y = (double)(*(*_pos)[1]);
   pos.z = (double)(*(*_pos)[2]);
 
   health = *nbtPlayer["Health"];
 
-  std::vector<NBT_Value*> *rot = nbtPlayer["Rotation"]->GetList();
+  std::vector<NBT_Value*>* rot = nbtPlayer["Rotation"]->GetList();
   pos.yaw = (float)(*(*rot)[0]);
   pos.yaw = (float)(*(*rot)[1]);
 
-  std::vector<NBT_Value*> *_inv = nbtPlayer["Inventory"]->GetList();
+  std::vector<NBT_Value*>* _inv = nbtPlayer["Inventory"]->GetList();
   std::vector<NBT_Value*>::iterator iter = _inv->begin(), end = _inv->end();
 
   for( ; iter != end ; iter++ )
@@ -408,7 +414,7 @@ bool User::loadData()
         inv.main[(uint8)slot].count  = count;
         inv.main[(uint8)slot].health = damage;
         inv.main[(uint8)slot].type   = item_id;
-        
+
         // Add item at slot 0 to currentItem
         if(slot == 0)
         {
@@ -420,7 +426,7 @@ bool User::loadData()
       {
         inv.crafting[(uint8)slot-80].count  = count;
         inv.crafting[(uint8)slot-80].health = damage;
-        inv.crafting[(uint8)slot-80].type   = item_id;   
+        inv.crafting[(uint8)slot-80].type   = item_id;
       }
       //Equipped
       else if(slot >= 100 && slot <= 103)
@@ -467,10 +473,10 @@ bool User::saveData()
   val.Insert("HurtTime", new NBT_Value((sint16)0));
   val.Insert("FallDistance", new NBT_Value(54.f));
 
-  NBT_Value *nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
+  NBT_Value* nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
 
   //Start with main items
-  Item *slots   = (Item *)&inv.main;
+  Item* slots   = (Item*)&inv.main;
   char slotid   = 0;
   char itemslot = 0;
   for(int i = 0; i < 36+4+4; i++)
@@ -478,20 +484,20 @@ bool User::saveData()
     //Crafting items after main
     if(i == 36)
     {
-      slots    = (Item *)&inv.crafting;
+      slots    = (Item*)&inv.crafting;
       itemslot = 80;
       slotid   = 0;
     }
     //Equipped items last
     else if(i == 36+4)
     {
-      slots    = (Item *)&inv.equipped;
+      slots    = (Item*)&inv.equipped;
       itemslot = 100;
       slotid   = 0;
     }
     if(slots[(uint8)slotid].count)
     {
-    NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+    NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
     val->Insert("Count", new NBT_Value((sint8)slots[(uint8)slotid].count));
     val->Insert("Slot", new NBT_Value((sint8)itemslot));
     val->Insert("Damage", new NBT_Value((sint16)slots[(uint8)slotid].health));
@@ -505,20 +511,20 @@ bool User::saveData()
 
   val.Insert("Inventory", nbtInv);
 
-  NBT_Value *nbtPos = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_DOUBLE);
+  NBT_Value* nbtPos = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_DOUBLE);
   nbtPos->GetList()->push_back(new NBT_Value((double)pos.x));
   nbtPos->GetList()->push_back(new NBT_Value((double)pos.y));
   nbtPos->GetList()->push_back(new NBT_Value((double)pos.z));
   val.Insert("Pos", nbtPos);
 
 
-  NBT_Value *nbtRot = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_FLOAT);
+  NBT_Value* nbtRot = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_FLOAT);
   nbtRot->GetList()->push_back(new NBT_Value((float)pos.yaw));
   nbtRot->GetList()->push_back(new NBT_Value((float)pos.pitch));
   val.Insert("Rotation", nbtRot);
 
 
-  NBT_Value *nbtMotion = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_DOUBLE);
+  NBT_Value* nbtMotion = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_DOUBLE);
   nbtMotion->GetList()->push_back(new NBT_Value((double)0.0));
   nbtMotion->GetList()->push_back(new NBT_Value((double)0.0));
   nbtMotion->GetList()->push_back(new NBT_Value((double)0.0));
@@ -550,8 +556,8 @@ bool User::checkInventory(sint16 itemID, char count)
 }
 
 bool User::updatePos(double x, double y, double z, double stance)
-{	
-  
+{
+
   //Riding on a minecart?
   if(y==-999)
   {
@@ -562,12 +568,12 @@ bool User::updatePos(double x, double y, double z, double stance)
 
   if(nick.size() && logged)
   {
-	sChunk *newChunk = Map::get()->loadMap(blockToChunk((sint32)x), blockToChunk((sint32)z));
-    sChunk *oldChunk = Map::get()->loadMap(blockToChunk((sint32)pos.x), blockToChunk((sint32)pos.z));
+	sChunk* newChunk = Map::get()->loadMap(blockToChunk((sint32)x), blockToChunk((sint32)z));
+    sChunk* oldChunk = Map::get()->loadMap(blockToChunk((sint32)pos.x), blockToChunk((sint32)pos.z));
 	if(newChunk == oldChunk)
 	{
 		Packet telePacket;
-		telePacket << (sint8)PACKET_ENTITY_TELEPORT 
+		telePacket << (sint8)PACKET_ENTITY_TELEPORT
 		   << (sint32)UID << (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
 		newChunk->sendPacket(telePacket, this);
 	}
@@ -593,7 +599,7 @@ bool User::updatePos(double x, double y, double z, double stance)
 		{
 			Packet pkt;
 			pkt << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)UID << nick
-				<< (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) 
+				<< (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32)
 				<< angleToByte(pos.yaw) << angleToByte(pos.pitch) << (sint16)curItem;
 
 			std::list<User*>::iterator iter = toadd.begin(), end = toadd.end();
@@ -606,7 +612,7 @@ bool User::updatePos(double x, double y, double z, double stance)
 
 		// TODO: Determine those who where present for both.
 		Packet telePacket;
-		telePacket << (sint8)PACKET_ENTITY_TELEPORT 
+		telePacket << (sint8)PACKET_ENTITY_TELEPORT
 		   << (sint32)UID << (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
 		newChunk->sendPacket(telePacket, this);
 
@@ -640,7 +646,7 @@ bool User::updatePos(double x, double y, double z, double stance)
 		    if(!withinViewDistance(chunkDiffX, oldChunk->x) || !withinViewDistance(chunkDiffZ, oldChunk->z))
 			{
 				addQueue(mapx, mapz);
-				sChunk *chunk = Map::get()->chunks.GetChunk(mapx, mapz);
+				sChunk* chunk = Map::get()->chunks.GetChunk(mapx, mapz);
 
 				if(chunk != NULL)
 				{
@@ -652,7 +658,7 @@ bool User::updatePos(double x, double y, double z, double stance)
 			{
 				addRemoveQueue(mapx-chunkDiffX, mapz-chunkDiffZ);
 
-				sChunk *chunk = Map::get()->chunks.GetChunk((mapx - chunkDiffX), (mapz - chunkDiffZ));
+				sChunk* chunk = Map::get()->chunks.GetChunk((mapx - chunkDiffX), (mapz - chunkDiffZ));
 
 				if(chunk != NULL)
 				{
@@ -693,7 +699,7 @@ bool User::updatePos(double x, double y, double z, double stance)
 			<< (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch) << (sint16)curItem;
 
 		Packet telePacket;
-		telePacket << (sint8)PACKET_ENTITY_TELEPORT 
+		telePacket << (sint8)PACKET_ENTITY_TELEPORT
 		   << (sint32)UID << (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
 
 		toTeleport.erase(this);
@@ -763,8 +769,8 @@ bool User::updatePos(double x, double y, double z, double stance)
       for( ; iter != end ; iter++)
       {
         //No more than 2 blocks away
-		if( abs((sint32)x-((*iter)->pos.x()/32)) < 2 && 
-            abs((sint32)y-((*iter)->pos.y()/32)) < 2 && 
+		if( abs((sint32)x-((*iter)->pos.x()/32)) < 2 &&
+            abs((sint32)y-((*iter)->pos.y()/32)) < 2 &&
             abs((sint32)z-((*iter)->pos.z()/32)) < 2)
 		{
           //Dont pickup own spawns right away
@@ -891,7 +897,7 @@ bool User::updateLook(float yaw, float pitch)
   Packet pkt;
   pkt << (sint8)PACKET_ENTITY_LOOK << (sint32)UID << angleToByte(yaw) << angleToByte(pitch);
 
-  sChunk *chunk = Map::get()->chunks.GetChunk(blockToChunk((sint32)pos.x),blockToChunk((sint32)pos.z));
+  sChunk* chunk = Map::get()->chunks.GetChunk(blockToChunk((sint32)pos.x),blockToChunk((sint32)pos.z));
   if(chunk != NULL)
 	chunk->sendPacket(pkt, this);
 
@@ -900,7 +906,7 @@ bool User::updateLook(float yaw, float pitch)
   return true;
 }
 
-bool User::sendOthers(uint8 *data, uint32 len)
+bool User::sendOthers(uint8* data, uint32 len)
 {
   for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
@@ -942,7 +948,7 @@ sint8 User::relativeToBlock(const sint32 x, const sint8 y, const sint32 z)
    return direction;
 }
 
-bool User::sendAll(uint8 *data, uint32 len)
+bool User::sendAll(uint8* data, uint32 len)
 {
   for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
@@ -958,7 +964,7 @@ bool User::sendAll(uint8 *data, uint32 len)
   return true;
 }
 
-bool User::sendAdmins(uint8 *data, uint32 len)
+bool User::sendAdmins(uint8* data, uint32 len)
 {
   for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
@@ -968,7 +974,7 @@ bool User::sendAdmins(uint8 *data, uint32 len)
   return true;
 }
 
-bool User::sendOps(uint8 *data, uint32 len)
+bool User::sendOps(uint8* data, uint32 len)
 {
   for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
@@ -978,7 +984,7 @@ bool User::sendOps(uint8 *data, uint32 len)
   return true;
 }
 
-bool User::sendGuests(uint8 *data, uint32 len)
+bool User::sendGuests(uint8* data, uint32 len)
 {
   for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
   {
@@ -1023,7 +1029,7 @@ bool User::addRemoveQueue(int x, int z)
 bool User::addKnown(int x, int z)
 {
   vec newMap(x, 0, z);
-  sChunk * chunk = Map::get()->chunks.GetChunk(x,z);
+  sChunk* chunk = Map::get()->chunks.GetChunk(x,z);
   if(chunk == NULL)
 	  return false;
 
@@ -1035,9 +1041,15 @@ bool User::addKnown(int x, int z)
 
 bool User::delKnown(int x, int z)
 {
-  sChunk * chunk = Map::get()->chunks.GetChunk(x,z);
+  sChunk* chunk = Map::get()->chunks.GetChunk(x,z);
   if(chunk != NULL)
+  {
     chunk->users.erase(this);
+	if(chunk->users.size() == 0)
+	{
+		Map::get()->releaseMap(x,z);
+	}
+  }
 
   for(unsigned int i = 0; i < mapKnown.size(); i++)
   {
@@ -1127,7 +1139,7 @@ bool User::teleport(double x, double y, double z)
 	  y = 128.0;
 	  LOG("Player Attempted to teleport with y > 128.0");
   }
-  buffer << (sint8)PACKET_PLAYER_POSITION_AND_LOOK << x << y << (double)0.0 << z 
+  buffer << (sint8)PACKET_PLAYER_POSITION_AND_LOOK << x << y << (double)0.0 << z
     << (float)0.f << (float)0.f << (sint8)1;
 
   //Also update pos for other players
@@ -1143,7 +1155,7 @@ bool User::spawnUser(int x, int y, int z)
   pkt << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)UID << nick
     << (sint32)x << (sint32)y << (sint32)z << (sint8)0 << (sint8)0
     << (sint16)0;
-  sChunk *chunk = Map::get()->chunks.GetChunk(blockToChunk(x >> 5), blockToChunk(z >> 5));
+  sChunk*chunk = Map::get()->chunks.GetChunk(blockToChunk(x >> 5), blockToChunk(z >> 5));
   if(chunk != NULL)
 	  chunk->sendPacket(pkt, this);
   return true;
@@ -1226,12 +1238,12 @@ bool User::isUnderwater()
    return false;
 }
 
-struct event *User::GetEvent()
+struct event* User::GetEvent()
 {
   return &m_event;
 }
 
-std::vector<User *> & User::all()
+std::vector<User*>& User::all()
 {
   return Mineserver::get().users();
 }

@@ -29,66 +29,70 @@
 
 #include <cstdlib>
 #include <iostream>
+
 #ifdef WIN32
+  #pragma warning( disable: 4005)
   #include <winsock2.h>
   #include <curses.h>
 #else
-#include <ncurses.h>
+  #include <ncurses.h>
 #endif
+
 #include <vector>
 #include "user.h"
+
 enum
 {
-	LOG_TITLE,
+  LOG_TITLE,
   LOG_GENERAL,
   LOG_CHAT,
   LOG_PLAYERS,
-	LOG_ERROR,
-	LOG_COMMAND
+  LOG_ERROR,
+  LOG_COMMAND
 };
+
 enum
 {
-	TEXT_COLOR_RED = 1,
-	TEXT_COLOR_GREEN,
-	TEXT_COLOR_YELLOW,
-	TEXT_COLOR_BLUE,
-	TEXT_COLOR_MAGENTA,
-	TEXT_COLOR_CYAN,
-	TEXT_COLOR_WHITE,
-	TEXT_COLOR_INVERSE
+  TEXT_COLOR_RED = 1,
+  TEXT_COLOR_GREEN,
+  TEXT_COLOR_YELLOW,
+  TEXT_COLOR_BLUE,
+  TEXT_COLOR_MAGENTA,
+  TEXT_COLOR_CYAN,
+  TEXT_COLOR_WHITE,
+  TEXT_COLOR_INVERSE
 };
 
 class Screen
 {
 public:
-  Screen();
   static Screen* get() {
-    if(!_instance) {
-      _instance = new Screen();
-    }
-    return _instance;
+	static Screen instance;
+    return &instance;
   }
-	void init(std::string version);
-	WINDOW* createWindow(int width, int height, int startx, int starty);
-	void destroyWindow(WINDOW *local_win);
-	void log(std::string message);
-	void log(int logType, std::string message);
+
+  void init(std::string version);
+  WINDOW* createWindow(int width, int height, int startx, int starty);
+  void destroyWindow(WINDOW *local_win);
+  void log(std::string message);
+  void log(int logType, std::string message);
   void updatePlayerList(std::vector<User *> users);
-	void end();
-	WINDOW *commandLog;
+  void end();
+  WINDOW *commandLog;
   bool hasCommand();
   std::string getCommand();
-  
+
+protected:
+  Screen();
+
 private:
-  static Screen *_instance;
+  std::string currentTimestamp(bool seconds);
 
-	WINDOW *title;
-	WINDOW *generalLog;
-	WINDOW *chatLog;
-	WINDOW *playerList;
-	
-	std::string currentCommand;
-	char commandBuffer[80];
+  WINDOW *title;
+  WINDOW *generalLog;
+  WINDOW *chatLog;
+  WINDOW *playerList;
   
+  std::string currentCommand;
+  std::string commandHistory[25];
 };
-

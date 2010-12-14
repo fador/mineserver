@@ -26,6 +26,7 @@
  */
 
 #include <stdlib.h>
+#include <sys/types.h>
 #ifdef WIN32
   #include <conio.h>
   #include <winsock2.h>
@@ -38,7 +39,6 @@
   #include <netinet/tcp.h>
 #endif
 
-#include <sys/types.h>
 #include <fcntl.h>
 #include <cstdio>
 #include <deque>

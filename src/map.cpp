@@ -55,7 +55,7 @@
 #include "chat.h"
 
 
-Map* Map::mMap = NULL;
+Map* Map::_instance = NULL;
 
 void Map::addSapling(User* user, int x, int y, int z)
 {
@@ -154,8 +154,8 @@ void Map::init()
     }
   }
 
-  NBT_Value *root = NBT_Value::LoadFromFile(infile);
-  NBT_Value &data = *((*root)["Data"]);
+  NBT_Value* root = NBT_Value::LoadFromFile(infile);
+  NBT_Value& data = *((*root)["Data"]);
 
   spawnPos.x() = (sint32)*data["SpawnX"];
   spawnPos.y() = (sint32)*data["SpawnY"];
@@ -169,7 +169,7 @@ void Map::init()
   // Basic tree handling
 
   // Get list of saplings from map:
-  NBT_Value *trees = ((*root)["Trees"]);
+  NBT_Value* trees = ((*root)["Trees"]);
 
   if(!trees || trees->GetListType() != NBT_Value::TAG_COMPOUND)
   {
@@ -182,13 +182,13 @@ void Map::init()
 
   trees->Print();
 
-  std::vector<NBT_Value*> *tree_list = trees->GetList();
+  std::vector<NBT_Value*>* tree_list = trees->GetList();
 
   Screen::get()->log(dtos((*tree_list).size()) + " saplings");
 
   for(std::vector<NBT_Value*>::iterator iter = (*tree_list).begin(); iter != (*tree_list).end(); ++iter)
   {
-    NBT_Value &tree = *(*iter);
+    NBT_Value& tree = *(*iter);
     sint32 x = (sint32)*tree["X"];
     sint32 y = (sint32)*tree["Y"];
     sint32 z = (sint32)*tree["Z"];
@@ -211,20 +211,20 @@ void Map::init()
 
 void Map::free()
 {
-   if (mMap)
+   if (_instance)
    {
-      delete mMap;
-      mMap = 0;
+      delete _instance;
+      _instance = 0;
    }
 }
 
-sChunk *Map::getMapData(int x, int z, bool generate)
+sChunk* Map::getMapData(int x, int z, bool generate)
 {
 #ifdef _DEBUG2
   printf("getMapData(x=%d, z=%d, generate=%d)\n", x, z, generate);
 #endif
 
-  sChunk *chunk = chunks.GetChunk(x,z);
+  sChunk* chunk = chunks.GetChunk(x,z);
 
   if(chunk != NULL || generate == false)
 	  return chunk;
@@ -250,14 +250,14 @@ bool Map::saveWholeMap()
 
   std::string infile = mapDirectory+"/level.dat";
 
-  NBT_Value *root = NBT_Value::LoadFromFile(infile);
+  NBT_Value* root = NBT_Value::LoadFromFile(infile);
   if(root != NULL)
   {
-    NBT_Value &data = *((*root)["Data"]);
+    NBT_Value& data = *((*root)["Data"]);
 
     //Get time from the map
     *data["Time"] = mapTime;
-    NBT_Value *trees = ((*root)["Trees"]);
+    NBT_Value* trees = ((*root)["Trees"]);
 
     if(trees)
     {
@@ -291,7 +291,7 @@ bool Map::generateLight(int x, int z)
   printf("generateLight(x=%d, z=%d)\n", x, z);
 #endif
 
-  sChunk *chunk = chunks.GetChunk(x,z);
+  sChunk* chunk = chunks.GetChunk(x,z);
   if(chunk == NULL)
   {
     LOG("Loading chunk failed (generateLight)");
@@ -303,7 +303,7 @@ bool Map::generateLight(int x, int z)
 
 //#define PRINT_LIGHTGEN_TIME
 
-bool Map::generateLight(int x, int z, sChunk *chunk)
+bool Map::generateLight(int x, int z, sChunk* chunk)
 {
 #ifdef _DEBUG2
   printf("generateLight(x=%d, z=%d, chunk=%p)\n", x, z, chunk);
@@ -318,10 +318,10 @@ bool Map::generateLight(int x, int z, sChunk *chunk)
   #endif
   #endif
 
-  uint8 *blocks     = chunk->blocks;
-  uint8 *skylight   = chunk->skylight;
-  uint8 *blocklight = chunk->blocklight;
-  uint8 *heightmap  = chunk->heightmap;
+  uint8* blocks     = chunk->blocks;
+  uint8* skylight   = chunk->skylight;
+  uint8* blocklight = chunk->blocklight;
+  uint8* heightmap  = chunk->heightmap;
 
   int highest_y = 0;
 
@@ -446,7 +446,7 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight)
   int chunk_x = blockToChunk(x);
   int chunk_z = blockToChunk(z);
 
-  sChunk *chunk = getMapData(chunk_x, chunk_z, false);
+  sChunk* chunk = getMapData(chunk_x, chunk_z, false);
 
   if(!chunk)
   {
@@ -457,7 +457,7 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight)
   return spreadLight(x, y, z, skylight, blocklight, chunk);
 }
 
-bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk *chunk)
+bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk* chunk)
 {
 #ifdef _DEBUG2
   printf("spreadLight(x=%d, y=%d, z=%d, skylight=%d, blocklight=%d, chunk=%p)\n", x, y, z, skylight, blocklight, chunk);
@@ -535,7 +535,7 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk 
   return true;
 }
 
-bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate)
+bool Map::getBlock(int x, int y, int z, uint8* type, uint8* meta, bool generate)
 {
 #ifdef _DEBUG2
   printf("getBlock(x=%d, y=%d, z=%d, type=%p, meta=%p, generate=%d)\n", x, y, z, type, meta, generate);
@@ -551,7 +551,7 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate)
   int chunk_x = blockToChunk(x);
   int chunk_z = blockToChunk(z);
 
-  sChunk *chunk = getMapData(chunk_x, chunk_z, generate);
+  sChunk* chunk = getMapData(chunk_x, chunk_z, generate);
 
   if(!chunk)
   {
@@ -566,7 +566,7 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate)
   return getBlock(x, y, z, type, meta, generate, chunk);
 }
 
-bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate, sChunk *chunk)
+bool Map::getBlock(int x, int y, int z, uint8* type, uint8* meta, bool generate, sChunk* chunk)
 {
 #ifdef _DEBUG2
   printf("getBlock(x=%d, y=%d, z=%d, type=%p, meta=%p, generate=%d)\n", x, y, z, type, meta, generate);
@@ -575,8 +575,8 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate,
   int chunk_block_x  = blockToChunkBlock(x);
   int chunk_block_z  = blockToChunkBlock(z);
 
-  uint8 *blocks      = chunk->blocks;
-  uint8 *metapointer = chunk->data;
+  uint8* blocks      = chunk->blocks;
+  uint8* metapointer = chunk->data;
   int index          = y + (chunk_block_z << 7) + (chunk_block_x << 11);
   *type              = blocks[index];
   uint8 metadata     = metapointer[(index)>>1];
@@ -597,7 +597,7 @@ bool Map::getBlock(int x, int y, int z, uint8 *type, uint8 *meta, bool generate,
   return true;
 }
 
-bool Map::getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight)
+bool Map::getLight(int x, int y, int z, uint8* skylight, uint8* blocklight)
 {
 #ifdef _DEBUG2
   printf("getLight(x=%d, y=%d, z=%d, skylight=%p, blocklight=%p)\n", x, y, z, skylight, blocklight);
@@ -613,7 +613,7 @@ bool Map::getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight)
   int chunk_x = blockToChunk(x);
   int chunk_z = blockToChunk(z);
 
-  sChunk *chunk = getMapData(chunk_x, chunk_z, false);
+  sChunk* chunk = getMapData(chunk_x, chunk_z, false);
 
   if(!chunk)
   {
@@ -624,7 +624,7 @@ bool Map::getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight)
   return getLight(x, y, z, skylight, blocklight, chunk);
 }
 
-bool Map::getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight, sChunk *chunk)
+bool Map::getLight(int x, int y, int z, uint8* skylight, uint8* blocklight, sChunk* chunk)
 {
 #ifdef _DEBUG2
   printf("getLight(x=%d, y=%d, z=%d, skylight=%p, blocklight=%p, chunk=%p)\n", x, y, z, skylight, blocklight, chunk);
@@ -634,8 +634,8 @@ bool Map::getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight, sChu
   int chunk_block_x = blockToChunkBlock(x);
   int chunk_block_z = blockToChunkBlock(z);
 
-  uint8 *blocklightPtr = chunk->blocklight;
-  uint8 *skylightPtr   = chunk->skylight;
+  uint8* blocklightPtr = chunk->blocklight;
+  uint8* skylightPtr   = chunk->skylight;
   int index            = y + (chunk_block_z << 7) + (chunk_block_x << 11);
   *blocklight = blocklightPtr[(index)>>1];
   *skylight   = skylightPtr[(index)>>1];
@@ -672,7 +672,7 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type)
   int chunk_x = blockToChunk(x);
   int chunk_z = blockToChunk(z);
 
-  sChunk *chunk = getMapData(chunk_x, chunk_z, false);
+  sChunk* chunk = getMapData(chunk_x, chunk_z, false);
 
   if (!chunk)
   {
@@ -683,7 +683,7 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type)
   return setLight(x, y, z, skylight, blocklight, type, chunk);
 }
 
-bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type, sChunk *chunk)
+bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type, sChunk* chunk)
 {
 #ifdef _DEBUG2
   printf("setLight(x=%d, y=%d, z=%d, skylight=%d, blocklight=%d, type=%d, chunk=%p)\n", x, y, z, skylight, blocklight, type, chunk);
@@ -692,8 +692,8 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type, 
   int chunk_block_x        = blockToChunkBlock(x);
   int chunk_block_z        = blockToChunkBlock(z);
 
-  uint8 *blocklightPtr     = chunk->blocklight;
-  uint8 *skylightPtr       = chunk->skylight;
+  uint8* blocklightPtr     = chunk->blocklight;
+  uint8* skylightPtr       = chunk->skylight;
   int index                = y + (chunk_block_z << 7) + (chunk_block_x << 11);
   char skylight_local      = skylightPtr[index>>1];
   char blocklight_local    = blocklightPtr[index>>1];
@@ -759,7 +759,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   //uint32 mapId;
   //Map::posToId(chunk_x, chunk_z, &mapId);
 
-  sChunk *chunk = getMapData(chunk_x, chunk_z, true);
+  sChunk* chunk = getMapData(chunk_x, chunk_z, true);
 
   if(!chunk)
   {
@@ -771,8 +771,8 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   int chunk_block_x  = blockToChunkBlock(x);
   int chunk_block_z  = blockToChunkBlock(z);
 
-  uint8 *blocks      = chunk->blocks;
-  uint8 *metapointer = chunk->data;
+  uint8* blocks      = chunk->blocks;
+  uint8* metapointer = chunk->data;
   int index          = y + (chunk_block_z << 7) + (chunk_block_x << 11);
   blocks[index] = type;
   char metadata      = metapointer[index>>1];
@@ -805,7 +805,7 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
   Packet pkt;
   pkt << PACKET_BLOCK_CHANGE << (sint32)x << (sint8)y << (sint32)z << (sint8)type << (sint8)meta;
 
-  sChunk *chunk = chunks.GetChunk(blockToChunk(x), blockToChunk(z));
+  sChunk* chunk = chunks.GetChunk(blockToChunk(x), blockToChunk(z));
   if(chunk == NULL)
 	  return false;
 
@@ -817,7 +817,7 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
 bool Map::sendPickupSpawn(spawnedItem item)
 {
   //Push to global item storage
-  spawnedItem *storedItem = new spawnedItem;
+  spawnedItem* storedItem = new spawnedItem;
   *storedItem     = item;
   items[item.EID] = storedItem;
 
@@ -825,7 +825,7 @@ bool Map::sendPickupSpawn(spawnedItem item)
   int chunk_x = blockToChunk(item.pos.x()/32);
   int chunk_z = blockToChunk(item.pos.z()/32);
 
-  sChunk *chunk = chunks.GetChunk(chunk_x, chunk_z);
+  sChunk* chunk = chunks.GetChunk(chunk_x, chunk_z);
   if(chunk == NULL)
 	  return false;
 
@@ -859,13 +859,13 @@ void Map::createPickupSpawn(int x, int y, int z, int type, int count)
    sendPickupSpawn(item);
 }
 
-sChunk * Map::loadMap(int x, int z, bool generate)
+sChunk*  Map::loadMap(int x, int z, bool generate)
 {
 #ifdef _DEBUG2
   printf("loadMap(x=%d, z=%d, generate=%d)\n", x, z, generate);
 #endif
 
-  sChunk *chunk = chunks.GetChunk(x,z);
+  sChunk* chunk = chunks.GetChunk(x,z);
   if(chunk != NULL)
 	  return chunk;
 
@@ -914,10 +914,10 @@ sChunk * Map::loadMap(int x, int z, bool generate)
 
             std::string infile = mapDirectory+"/level.dat";
 
-            NBT_Value *root = NBT_Value::LoadFromFile(infile);
+            NBT_Value* root = NBT_Value::LoadFromFile(infile);
             if(root != NULL)
             {
-              NBT_Value &data = *((*root)["Data"]);
+              NBT_Value& data = *((*root)["Data"]);
               *data["SpawnX"] = (sint32)spawnPos.x();
               *data["SpawnY"] = (sint32)spawnPos.y();
               *data["SpawnZ"] = (sint32)spawnPos.z();
@@ -942,15 +942,15 @@ sChunk * Map::loadMap(int x, int z, bool generate)
   chunk = new sChunk();
 
   chunk->nbt = NBT_Value::LoadFromFile(infile.c_str());
-  
-  
+
+
   if(chunk->nbt == NULL)
   {
     LOG("Error in loading map (unable to load file)");
     return false;
   }
 
-  NBT_Value &level = *(*chunk->nbt)["Level"];
+  NBT_Value& level = *(*chunk->nbt)["Level"];
 
   chunk->x = (sint32)(*level["xPos"]);
   chunk->z = (sint32)(*level["zPos"]);
@@ -958,19 +958,21 @@ sChunk * Map::loadMap(int x, int z, bool generate)
   if(chunk->x != x || chunk->z != z)
   {
     LOG("Error in loading map (incorrect chunk)");
+	delete chunk->nbt;
 	delete chunk;
     return NULL;
   }
 
-  std::vector<uint8> *blocks = level["Blocks"]->GetByteArray();
-  std::vector<uint8> *data = level["Data"]->GetByteArray();
-  std::vector<uint8> *blocklight = level["BlockLight"]->GetByteArray();
-  std::vector<uint8> *skylight = level["SkyLight"]->GetByteArray();
-  std::vector<uint8> *heightmap = level["HeightMap"]->GetByteArray();
+  std::vector<uint8>* blocks = level["Blocks"]->GetByteArray();
+  std::vector<uint8>* data = level["Data"]->GetByteArray();
+  std::vector<uint8>* blocklight = level["BlockLight"]->GetByteArray();
+  std::vector<uint8>* skylight = level["SkyLight"]->GetByteArray();
+  std::vector<uint8>* heightmap = level["HeightMap"]->GetByteArray();
 
   if(blocks == 0 || data == 0 || blocklight == 0 || skylight == 0 || heightmap == 0)
   {
     LOG("Error in loading map (chunk missing data)");
+	delete chunk->nbt;
 	delete chunk;
     return NULL;
   }
@@ -984,6 +986,7 @@ sChunk * Map::loadMap(int x, int z, bool generate)
     skylight->size() != halfLen)
   {
     LOG("Error in loading map (corrupt?)");
+	delete chunk->nbt;
 	delete chunk;
     return NULL;
   }
@@ -1022,7 +1025,7 @@ bool Map::saveMap(int x, int z)
 //  if(!maps.count(mapId))
 //    return false;
 
-  sChunk * chunk = chunks.GetChunk(x, z);
+  sChunk*  chunk = chunks.GetChunk(x, z);
 
   // Recalculate light maps
 //  if(mapLightRegen[mapId])
@@ -1085,11 +1088,13 @@ bool Map::releaseMap(int x, int z)
   // save first
   saveMap(x, z);
 
-  sChunk *chunk = chunks.GetChunk(x,z);
+  sChunk* chunk = chunks.GetChunk(x,z);
   if(chunk == NULL)
 	  return false;
   chunks.UnlinkChunk(x, z);
+  delete chunk->nbt;
   delete chunk;
+  
   return true;
 
   //uint32 mapId;
@@ -1106,7 +1111,7 @@ bool Map::releaseMap(int x, int z)
 }
 
 // Send chunk to user
-void Map::sendToUser(User *user, int x, int z)
+void Map::sendToUser(User* user, int x, int z)
 {
 #ifdef _DEBUG
   printf("sendToUser(x=%d, z=%d)\n", x, z);
@@ -1114,12 +1119,12 @@ void Map::sendToUser(User *user, int x, int z)
 
 //  uint32 mapId;
 //  Map::posToId(x, z, &mapId);
-  sChunk *chunk = loadMap(x, z);
+  sChunk* chunk = loadMap(x, z);
   if(chunk == NULL)
 	  return;
 
-  uint8 *data4   = new uint8[18+81920];
-  uint8 *mapdata = new uint8[81920];
+  uint8* data4   = new uint8[18+81920];
+  uint8* mapdata = new uint8[81920];
   sint32 mapposx    = x;
   sint32 mapposz    = z;
 
@@ -1142,7 +1147,7 @@ void Map::sendToUser(User *user, int x, int z)
   memcpy(&mapdata[32768+16384+16384], chunk->skylight, 16384);
 
   uLongf written = 81920;
-  Bytef *buffer = new Bytef[written];
+  Bytef* buffer = new Bytef[written];
 
   // Compress data with zlib deflate
   compress(buffer, &written, &mapdata[0], 81920);
@@ -1151,23 +1156,23 @@ void Map::sendToUser(User *user, int x, int z)
   user->buffer.addToWrite(buffer, written);
 
   //Get list of chests,furnaces etc on the chunk
-  NBT_Value *entityList = (*(*chunk->nbt)["Level"])["TileEntities"];
+  NBT_Value* entityList = (*(*chunk->nbt)["Level"])["TileEntities"];
 
   //Verify the type
   if(entityList && entityList->GetType() == NBT_Value::TAG_LIST && entityList->GetListType() == NBT_Value::TAG_COMPOUND)
   {
-    std::vector<NBT_Value*> *entities = entityList->GetList();
+    std::vector<NBT_Value*>* entities = entityList->GetList();
     std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
 
-    uint8 *compressedData = new uint8[ALLOCATE_NBTFILE];
+    uint8* compressedData = new uint8[ALLOCATE_NBTFILE];
 
     for( ; iter != end ; iter++)
     {
       std::vector<uint8> buffer;
-      NBT_Value *idVal = (**iter)["id"];
+      NBT_Value* idVal = (**iter)["id"];
       if(idVal == NULL)
         continue;
-      std::string *id = idVal->GetString();
+      std::string* id = idVal->GetString();
       if(id && (*id=="Chest" || *id=="Furnace" || *id=="Sign"))
       {
         if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
@@ -1180,7 +1185,7 @@ void Map::sendToUser(User *user, int x, int z)
 
           if(*id == "Chest")
           {
-            NBT_Value *lockData = (**iter)["Lockdata"];
+            NBT_Value* lockData = (**iter)["Lockdata"];
             if(lockData != NULL)
             {
               if((*lockData)["locked"] != NULL)
@@ -1248,14 +1253,14 @@ void Map::sendToUser(User *user, int x, int z)
   delete[] mapdata;
 }
 
-void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *entity)
+void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value* entity)
 {
 //  uint32 mapId;
-  
+
   int chunk_x = blockToChunk(x);
   int chunk_z = blockToChunk(z);
 
-  sChunk *chunk = loadMap(chunk_x, chunk_z);
+  sChunk* chunk = loadMap(chunk_x, chunk_z);
   if(chunk == NULL)
 	  return;
 
@@ -1280,7 +1285,7 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *
     return;
   }
 
-  NBT_Value *entityList = (*(*chunk->nbt)["Level"])["TileEntities"];
+  NBT_Value* entityList = (*(*chunk->nbt)["Level"])["TileEntities"];
 
   if(!entityList)
   {
@@ -1295,7 +1300,7 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *
       entityList->SetType(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
     }
 
-    std::vector<NBT_Value*> *entities = entityList->GetList();
+    std::vector<NBT_Value*>* entities = entityList->GetList();
     std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
 
     bool done = false;
@@ -1312,13 +1317,13 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *
 
       if((sint32)(*(**iter)["x"]) == x && (sint32)(*(**iter)["y"]) == y && (sint32)(*(**iter)["z"]) == z)
       {
-        NBT_Value *nbtLockdata = (**iter)["Lockdata"];
+        NBT_Value* nbtLockdata = (**iter)["Lockdata"];
 
         if(nbtLockdata != NULL)
         {
           player = *(*nbtLockdata)["player"]->GetString();
           locked = *(*nbtLockdata)["locked"];
-          
+
           if(locked == 1)
           {
             if(!(user != NULL && player != user->nick))
@@ -1341,7 +1346,7 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *
     {
       if(user != NULL)
       {
-        NBT_Value *nbtLockdata = new NBT_Value(NBT_Value::TAG_COMPOUND);
+        NBT_Value* nbtLockdata = new NBT_Value(NBT_Value::TAG_COMPOUND);
         nbtLockdata->Insert("player", new NBT_Value(player));
         nbtLockdata->Insert("locked", new NBT_Value(locked));
         entity->Insert("Lockdata", nbtLockdata);
@@ -1365,7 +1370,7 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value *
   buffer.push_back(0);
   entity->Write(buffer);
 
-  uint8 *compressedData = new uint8[ALLOCATE_NBTFILE];
+  uint8* compressedData = new uint8[ALLOCATE_NBTFILE];
 
   z_stream zstream2;
   zstream2.zalloc = Z_NULL;
