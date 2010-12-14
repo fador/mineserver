@@ -801,14 +801,8 @@ bool Map::setBlock(int x, int y, int z, char type, char meta, std::string nick)
 {
 #ifdef _DEBUG
   printf("setBlock(x=%d, y=%d, z=%d, type=%d, char=%d)\n", x, y, z, type, meta);
-#endif
-  event_t entry;
-  entry.x = x;
-  entry.y = y;
-  entry.z = z;
-  strcpy(entry.nick, nick.c_str());
+#endif       
 
-  Map::getBlock(x,y,z, &entry.otype, &entry.ometa);
 
   if((y < 0) || (y > 127))
   {
@@ -829,6 +823,19 @@ bool Map::setBlock(int x, int y, int z, char type, char meta, std::string nick)
   {
     LOG("Loading chunk failed (setBlock)");
     return false;
+  }
+
+  // Log the block update to the binary log
+  if(Conf::get()->bValue("enable_binary_log") == true) 
+  {
+    event_t entry;
+    entry.x = x;
+    entry.y = y;
+    entry.z = z;
+    strcpy(entry.nick, nick.c_str());
+
+    Map::getBlock(x,y,z, &entry.otype, &entry.ometa);
+    TRXLOG(entry);
   }
 
   // Which block inside the chunk
@@ -855,9 +862,6 @@ bool Map::setBlock(int x, int y, int z, char type, char meta, std::string nick)
 
   mapChanged[mapId]       = 1;
   mapLastused[mapId]      = (int)time(0);
-
-  // Log the block update
-  TRXLOG(entry);
 
   return true;
 }
