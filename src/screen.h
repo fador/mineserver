@@ -67,8 +67,10 @@ class Screen
 {
 public:
   static Screen* get() {
-	static Screen instance;
-    return &instance;
+    if (!_instance) {
+      _instance = new Screen();
+    }
+    return _instance;
   }
 
   void init(std::string version);
@@ -92,7 +94,9 @@ private:
   WINDOW *generalLog;
   WINDOW *chatLog;
   WINDOW *playerList;
-  
+
+  static Screen *_instance;
+
   std::string currentCommand;
   std::string commandHistory[25];
 };

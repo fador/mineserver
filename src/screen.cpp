@@ -28,6 +28,8 @@
 #include <ctime>
 #include "screen.h"
 
+Screen* Screen::_instance;
+
 Screen::Screen() {
 }
 
