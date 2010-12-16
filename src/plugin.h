@@ -35,84 +35,101 @@
 #include "delegate/delegate.hpp"
 #include "constants.h"
 #include "tools.h"
-
-class User;
+#include "user.h"
+#include "hook.h"
 
 typedef srutil::delegate6<void, User*, sint8, sint32, sint8, sint32, sint8> Function;
 
 class Callback
 {
 public:
-   void add(const std::string name, Function func)
-   {
-      remove(name);
-      callbacks.insert(std::pair<std::string, Function>(name, func));
-   }
+  void add(const std::string name, Function func)
+  {
+    remove(name);
+    callbacks.insert(std::pair<std::string, Function>(name, func));
+  }
    
-   bool remove(const std::string name)
-   {
-      Events::iterator iter = callbacks.find(name);
+  bool remove(const std::string name)
+  {
+    Events::iterator iter = callbacks.find(name);
 
-      if (iter == callbacks.end())
-         return false;
+    if (iter == callbacks.end())
+    {
+      return false;
+    }
       
-      callbacks.erase(iter);
-      return true;
-   }
+    callbacks.erase(iter);
+    return true;
+  }
 
-   Function* get(const std::string name)
-   {
-      Events::iterator iter = callbacks.find(name);
+  Function* get(const std::string name)
+  {
+    Events::iterator iter = callbacks.find(name);
 
-      if (iter == callbacks.end())
-         return NULL;
+    if (iter == callbacks.end())
+    {
+      return NULL;
+    }
 
-      return &iter->second;
-   }
+    return &iter->second;
+  }
    
-   bool run(const std::string name, const Function::invoker_type function)
-   {
-      Events::iterator iter = callbacks.find(name);
+  bool run(const std::string name, const Function::invoker_type function)
+  {
+    Events::iterator iter = callbacks.find(name);
 
-      if (iter == callbacks.end())
-         return false;
+    if (iter == callbacks.end())
+    {
+      return false;
+    }
 
-      function(iter->second);
-      return true;
-   }
+    function(iter->second);
+    return true;
+  }
 
-   void reset()
-   {
-      callbacks.clear();
-   }
+  void reset()
+  {
+    callbacks.clear();
+  }
 
 private:
-   typedef std::map<std::string, Function > Events;
-   Events callbacks;
+  typedef std::map<std::string, Function > Events;
+  Events callbacks;
 };
 
 class Plugin
 {
-private:
-   Plugin()
-   {
-   }
-   typedef std::map<sint16, Callback> Callbacks;
-   Callbacks blockevents;
-   static Plugin *mPlugin;
 public:
-   void init();
-   void free();
-   void setBlockCallback(const int type, Callback call);
-   Callback* getBlockCallback(const int type);
-   bool runBlockCallback(const int type, const std::string name, const Function::invoker_type function);
-   bool removeBlockCallback(const int type);
-   static Plugin* get()
-   {
-      if(!mPlugin) {
-         mPlugin = new Plugin();
-      }
-      return mPlugin;
-   }
+  static Plugin* get()
+  {
+    if (!m_plugin)
+    {
+      m_plugin = new Plugin;
+    }
+    return m_plugin;
+  }
+
+  void init();
+  void free();
+
+  void setBlockCallback(const int type, Callback call);
+  Callback* getBlockCallback(const int type);
+  bool runBlockCallback(const int type, const std::string name, const Function::invoker_type function);
+  bool removeBlockCallback(const int type);
+
+  typedef functor3<bool,std::string,User*,std::string> typeChatRecv;
+  Hook<typeChatRecv>* hookChatRecv;
+  typedef typeChatRecv::ftype funcChatRecv;
+  typedef typeChatRecv::atype argsChatRecv;
+
+private:
+  Plugin()
+  {
+    hookChatRecv = new Hook<typeChatRecv>;
+  }
+
+  typedef std::map<sint16, Callback> Callbacks;
+  Callbacks blockevents;
+  static Plugin* m_plugin;
 };
 

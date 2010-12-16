@@ -80,16 +80,18 @@ public:
 
   static Chat* get()
   {
-    if(!_instance) {
-      _instance = new Chat();
+    if(!m_chat)
+    {
+      m_chat = new Chat();
     }
-    return _instance;
+
+    return m_chat;
   }
 
   void free();
 
 private:
-  static Chat* _instance;
+  static Chat* m_chat;
 
   Chat();
   void registerStandardCommands();

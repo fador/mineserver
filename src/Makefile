@@ -54,7 +54,7 @@ dist:
 
 all: $(PROGS)
 
-chat.o: chat.cpp logger.h constants.h tools.h map.h user.h chat.h config.h physics.h
+chat.o: chat.cpp logger.h constants.h tools.h map.h user.h chat.h config.h physics.h plugin.h hook.h
 commands.o: commands.cpp logger.h constants.h tools.h map.h user.h chat.h config.h physics.h
 config.o: config.cpp logger.h constants.h config.h
 constants.o: constants.cpp constants.h
@@ -65,12 +65,12 @@ furnace.o: furnace.cpp furnace.h
 furnaceManager.o: furnaceManager.cpp furnaceManager.h
 packets.o: packets.cpp constants.h logger.h sockets.h tools.h map.h user.h chat.h config.h nbt.h packets.h physics.h
 physics.o: physics.cpp logger.h constants.h config.h user.h map.h vec.h physics.h
-screen.o:	screen.cpp mineserver.h screen.h
+screen.o: screen.cpp mineserver.h screen.h
 sockets.o: sockets.cpp logger.h constants.h tools.h user.h map.h chat.h nbt.h packets.h
 tools.o: tools.cpp tools.h
 user.o: user.cpp constants.h logger.h tools.h map.h user.h nbt.h chat.h packets.h
 mineserver.o: mineserver.cpp constants.h logger.h sockets.h tools.h map.h user.h chat.h worldgen/mapgen.h config.h nbt.h packets.h physics.h
-plugin.o: plugin.cpp plugin.h blocks/basic.h blocks/door.h blocks/falling.h blocks/fire.h blocks/liquid.h blocks/plant.h blocks/sign.h blocks/snow.h blocks/stair.h blocks/torch.h blocks/tracks.h blocks/chest.h
+plugin.o: plugin.cpp plugin.h hook.h blocks/basic.h blocks/door.h blocks/falling.h blocks/fire.h blocks/liquid.h blocks/plant.h blocks/sign.h blocks/snow.h blocks/stair.h blocks/torch.h blocks/tracks.h blocks/chest.h
 blocks/basic.o: blocks/basic.cpp blocks/basic.h
 blocks/default.o: blocks/default.cpp blocks/default.h
 blocks/door.o: blocks/door.cpp blocks/basic.h blocks/door.h

@@ -197,6 +197,7 @@ int Mineserver::run(int argc, char *argv[])
       {
         Map::get()->loadMap(x, z);
       }
+
       if(show_progress)
       {
 #ifdef WIN32
@@ -233,7 +234,7 @@ int Mineserver::run(int argc, char *argv[])
   if(iResult != 0)
   {
     printf("WSAStartup failed with error: %d\n", iResult);
-		Screen::get()->end();
+    Screen::get()->end();
     return EXIT_FAILURE;
   }
 #endif
@@ -251,7 +252,7 @@ int Mineserver::run(int argc, char *argv[])
   if(m_socketlisten < 0)
   {
     Screen::get()->log(LOG_ERROR, "Failed to create listen socket");
-		Screen::get()->end();
+    Screen::get()->end();
     return 1;
   }
 
@@ -273,10 +274,9 @@ int Mineserver::run(int argc, char *argv[])
   if(listen(m_socketlisten, 5) < 0)
   {
     Screen::get()->log(LOG_ERROR, "Failed to listen to socket");
-		Screen::get()->end();
+    Screen::get()->end();
     return 1;
   }
-
 
   setnonblock(m_socketlisten);
   event_set(&m_listenEvent, m_socketlisten, EV_WRITE|EV_READ|EV_PERSIST, accept_callback, NULL);
@@ -306,14 +306,15 @@ int Mineserver::run(int argc, char *argv[])
     struct hostent* hostinfo = gethostbyname(name);
     Screen::get()->log("Listening on: ");
     int ipIndex = 0;
-    while(hostinfo && hostinfo->h_addr_list[ipIndex]) {
-        std::string ip(inet_ntoa(*(struct in_addr*)hostinfo->h_addr_list[ipIndex++]));
-        Screen::get()->log(" " + ip + ":" + dtos(port));
+    while(hostinfo && hostinfo->h_addr_list[ipIndex])
+    {
+      std::string ip(inet_ntoa(*(struct in_addr*)hostinfo->h_addr_list[ipIndex++]));
+      Screen::get()->log(" " + ip + ":" + dtos(port));
     }
   }
   else
   {
-		std::string myip(ip);
+    std::string myip(ip);
     Screen::get()->log("Listening on " + myip + ":" + dtos(port));
   }
   //std::cout << std::endl;

@@ -52,21 +52,38 @@
 #include "config.h"
 #include "physics.h"
 #include "constants.h"
+#include "plugin.h"
+#include "hook.h"
 
-Chat* Chat::_instance;
+Chat* Chat::m_chat;
 
 void Chat::free()
 {
-   if(_instance)
-   {
-      delete _instance;
-      _instance = 0;
-   }
+  if(m_chat)
+  {
+    delete m_chat;
+    m_chat = 0;
+  }
+}
+
+// ------------------------------------------- //
+// CALLBACK EXAMPLE - WILL NOT BE HERE FOREVER //
+// ------------------------------------------- //
+bool callbacktest(std::string timestamp, User* user, std::string text)
+{
+  Screen::get()->log("Derp! @"+timestamp+": "+text);
+  return false;
 }
 
 Chat::Chat()
 {
   registerStandardCommands();
+
+  // ------------------------------------------------------------ //
+  // AGAIN, PART OF THE CALLBACK EXAMPLE.                         //
+  // THIS WOULD USUALLY BE CALLED IN THE INITIALISER OF A PLUGIN. //
+  // ------------------------------------------------------------ //
+  Plugin::get()->hookChatRecv->addCallback(&callbacktest);
 }
 
 void Chat::registerCommand(Command *command)
@@ -197,6 +214,12 @@ bool Chat::handleMsg(User *user, std::string msg)
   std::string timeStamp (asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
+  Plugin::argsChatRecv* args = new Plugin::argsChatRecv(timeStamp, user, msg);
+  if (Plugin::get()->hookChatRecv->doOne(args))
+  {
+    return false;
+  }
+
   char prefix = msg[0];
 
   switch(prefix)
@@ -209,6 +232,7 @@ bool Chat::handleMsg(User *user, std::string msg)
       }
       break;
 
+    // Admin message
     case ADMINCHATPREFIX:
       if(IS_ADMIN(user->permissions))
       {

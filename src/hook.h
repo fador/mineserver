@@ -1,3 +1,6 @@
+#ifndef _HOOK_H
+#define _HOOK_H
+
 #include <vector>
 
 #include "hook_typedefs.h"
@@ -73,3 +76,5 @@ public:
 private:
   std::vector<typename T::ftype> functions;
 };
+
+#endif

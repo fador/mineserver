@@ -1,3 +1,6 @@
+#ifndef _HOOK_TYPEDEFS_H
+#define _HOOK_TYPEDEFS_H
+
 struct arglist {};
 struct functor {};
 
@@ -840,3 +843,4 @@ struct functor20 : functor
   }
 };
 
+#endif

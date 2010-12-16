@@ -40,14 +40,14 @@
 #include "blocks/tracks.h"
 #include "blocks/chest.h"
 
-Plugin* Plugin::mPlugin;
+Plugin* Plugin::m_plugin;
 
 void Plugin::free()
 {
-   if (mPlugin)
+   if (m_plugin)
    {
-      delete mPlugin;
-      mPlugin = 0;
+      delete m_plugin;
+      m_plugin = NULL;
    }
 }
 
