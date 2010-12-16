@@ -32,6 +32,9 @@
 #include <map>
 #include <vector>
 
+//Fix Winsock2 error that occurs when Windows.h is included before it.
+#define _WINSOCKAPI_
+
 #ifdef WIN32
 #include <windows.h>
 #else
