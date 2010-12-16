@@ -74,16 +74,16 @@ static bool quit = false;
 
 int setnonblock(int fd)
 {
-  #ifdef WIN32
+#ifdef WIN32
   u_long iMode = 1;
   ioctlsocket(fd, FIONBIO, &iMode);
-  #else
+#else
   int flags;
 
   flags  = fcntl(fd, F_GETFL);
   flags |= O_NONBLOCK;
   fcntl(fd, F_SETFL, flags);
-  #endif
+#endif
 
   return 1;
 }

@@ -122,10 +122,40 @@ public:
   typedef typeChatRecv::ftype funcChatRecv;
   typedef typeChatRecv::atype argsChatRecv;
 
+  typedef functor4<void,User*,sint32,sint8,sint32> typeDiggingStarted;
+  Hook<typeDiggingStarted>* hookDiggingStarted;
+  typedef typeDiggingStarted::ftype funcDiggingStarted;
+  typedef typeDiggingStarted::atype argsDiggingStarted;
+
+  typedef functor4<void,User*,sint32,sint8,sint32> typeDigging;
+  Hook<typeDigging>* hookDigging;
+  typedef typeDigging::ftype funcDigging;
+  typedef typeDigging::atype argsDigging;
+
+  typedef functor4<void,User*,sint32,sint8,sint32> typeDiggingStopped;
+  Hook<typeDiggingStopped>* hookDiggingStopped;
+  typedef typeDiggingStopped::ftype funcDiggingStopped;
+  typedef typeDiggingStopped::atype argsDiggingStopped;
+
+  typedef functor4<void,User*,sint32,sint8,sint32> typeBlockBroken;
+  Hook<typeBlockBroken>* hookBlockBroken;
+  typedef typeBlockBroken::ftype funcBlockBroken;
+  typedef typeBlockBroken::atype argsBlockBroken;
+
+  typedef functor4<void,User*,sint32,sint8,sint32> typeBlockNeighbourBroken;
+  Hook<typeBlockNeighbourBroken>* hookBlockNeighbourBroken;
+  typedef typeBlockNeighbourBroken::ftype funcBlockNeighbourBroken;
+  typedef typeBlockNeighbourBroken::atype argsBlockNeighbourBroken;
+
 private:
   Plugin()
   {
     hookChatRecv = new Hook<typeChatRecv>;
+    hookDiggingStarted = new Hook<typeDiggingStarted>;
+    hookDigging = new Hook<typeDigging>;
+    hookDiggingStopped = new Hook<typeDiggingStopped>;
+    hookBlockBroken = new Hook<typeBlockBroken>;
+    hookBlockNeighbourBroken = new Hook<typeBlockNeighbourBroken>;
   }
 
   typedef std::map<sint16, Callback> Callbacks;
