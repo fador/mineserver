@@ -83,7 +83,7 @@ Chat::Chat()
   // AGAIN, PART OF THE CALLBACK EXAMPLE.                         //
   // THIS WOULD USUALLY BE CALLED IN THE INITIALISER OF A PLUGIN. //
   // ------------------------------------------------------------ //
-  Plugin::get()->hookChatRecv->addCallback(&callbacktest);
+  Plugin::get()->hookChatRecv.addCallback(&callbacktest);
 }
 
 void Chat::registerCommand(Command *command)
@@ -214,8 +214,7 @@ bool Chat::handleMsg(User *user, std::string msg)
   std::string timeStamp (asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
-  Plugin::argsChatRecv* args = new Plugin::argsChatRecv(timeStamp, user, msg);
-  if (Plugin::get()->hookChatRecv->doOne(args))
+  if (Plugin::get()->hookChatRecv.doOne(timeStamp, user, msg))
   {
     return false;
   }

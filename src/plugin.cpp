@@ -263,6 +263,11 @@ void Plugin::init()
   /* BLOCK_SNOW_BLOCK */
 }
 
+bool Plugin::load(std::string name, std::string file)
+{
+  return true;
+}
+
 void Plugin::setBlockCallback(const int type, Callback call)
 {
    if (getBlockCallback(type))

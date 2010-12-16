@@ -524,72 +524,67 @@ int PacketHandler::player_digging(User *user)
   {
     case BLOCK_STATUS_STARTED_DIGGING:
     {
-      Plugin::argsDiggingStarted args(user, x, y, z);
-      Plugin::get()->hookDiggingStarted->doAll(&args);
-
+      Plugin::get()->hookDiggingStarted.doAll(user, x, y, z);
       Plugin::get()->runBlockCallback(block, "onStartedDigging", inv);
-
       break;
     }
     case BLOCK_STATUS_DIGGING:
     {
-      Plugin::argsDigging args(user, x, y, z);
-      Plugin::get()->hookDigging->doAll(&args);
-
+      Plugin::get()->hookDigging.doAll(user, x, y, z);
       Plugin::get()->runBlockCallback(block, "onDigging", inv);
-
       break;
     }
     case BLOCK_STATUS_STOPPED_DIGGING:
     {
-      Plugin::argsDiggingStopped args(user, x, y, z);
-      Plugin::get()->hookDiggingStopped->doAll(&args);
-
+      Plugin::get()->hookDiggingStopped.doAll(user, x, y, z);
       Plugin::get()->runBlockCallback(block, "onStoppedDigging", inv);
-
       break;
     }
     case BLOCK_STATUS_BLOCK_BROKEN:
     {
-      Plugin::argsBlockBroken args(user, x, y, z);
-      Plugin::get()->hookBlockBroken->doAll(&args);
-
+      Plugin::get()->hookBlockBroken.doAll(user, x, y, z);
       Plugin::get()->runBlockCallback(block, "onBroken", inv);
 
       /* notify neighbour blocks of the broken block */
       status = block;
       if (Map::get()->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
       {
+        Plugin::get()->hookBlockNeighbourBroken.doAll(user, x+1, y, z, BLOCK_SOUTH);
         inv = Function::invoker_type(user, status, x+1, y, z, BLOCK_SOUTH);
         Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
       }
 
       if (Map::get()->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
       {
+        Plugin::get()->hookBlockNeighbourBroken.doAll(user, x-1, y, z, BLOCK_NORTH);
         inv = Function::invoker_type(user, status, x-1, y, z, BLOCK_NORTH);
         Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
       }
 
       if (Map::get()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
       {
+        Plugin::get()->hookBlockNeighbourBroken.doAll(user, x, y+1, z, BLOCK_TOP);
         inv = Function::invoker_type(user, status, x, y+1, z, BLOCK_TOP);
         Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
       }
 
       if (Map::get()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
       {
+        Plugin::get()->hookBlockNeighbourBroken.doAll(user, x, y-1, z, BLOCK_BOTTOM);
         inv = Function::invoker_type(user, status, x, y-1, z, BLOCK_BOTTOM);
         Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
       }
 
       if (Map::get()->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
       {
+        Plugin::get()->hookBlockNeighbourBroken.doAll(user, x, y, z+1, BLOCK_WEST);
         inv = Function::invoker_type(user, status, x, y, z+1, BLOCK_WEST);
         Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
       }
 
       if (Map::get()->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
       {
+        Plugin::get()->hookBlockNeighbourBroken.doAll(user, x, y, z-1, BLOCK_EAST);
         inv = Function::invoker_type(user, status, x, y, z-1, BLOCK_EAST);
         Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
       }
