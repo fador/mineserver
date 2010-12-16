@@ -45,7 +45,7 @@ void Tree::Generate() {
 
 void Tree::GenerateTrunk() {
 	//Generate the trunk section.
-	for(int i = 0; i <= (rand() % MAX_TRUNK) + MIN_TRUNK; i++)  {
+	for(int i = 0; i < (rand() % MAX_TRUNK) + MIN_TRUNK; i++)  {
 		Trunk trunk(_x,_y+i,_z);
 		m_Trunk.push_back(trunk);
 	}
@@ -53,7 +53,7 @@ void Tree::GenerateTrunk() {
 
 void Tree::GenerateCanopy() {
 	//Generate the canopy section.
-	for(int i = 0; i <= (rand() % MAX_CANOPY) + MIN_CANOPY; i++) {
+	for(int i = 0; i < (rand() % MAX_CANOPY) + MIN_CANOPY; i++) {
 		Canopy canopy(m_Trunk.back());
 		canopy.SetY(canopy.GetY() + i);
 		m_Canopy.push_back(canopy);

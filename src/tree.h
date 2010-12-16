@@ -6,7 +6,7 @@
 #include "screen.h"
 #include "vec.h"
 
-enum { MAX_TRUNK = 12, MIN_TRUNK = 3, MAX_CANOPY = 2, MIN_CANOPY = 0 };
+enum { MAX_TRUNK = 13, MIN_TRUNK = 4, MAX_CANOPY = 3, MIN_CANOPY = 1 };
 
 class ITree {
 	public:
