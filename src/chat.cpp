@@ -71,7 +71,16 @@ void Chat::free()
 // ------------------------------------------- //
 bool callbacktest(std::string timestamp, User* user, std::string text)
 {
-  Screen::get()->log("Derp! @"+timestamp+": "+text);
+  if (text == "herp")
+  {
+    Plugin::get()->loadExternal("foo", "./foo.so");
+  }
+
+  if (text == "derp")
+  {
+    Plugin::get()->unloadExternal("foo");
+  }
+
   return false;
 }
 
@@ -86,7 +95,7 @@ Chat::Chat()
   Plugin::get()->hookChatRecv.addCallback(&callbacktest);
 }
 
-void Chat::registerCommand(Command *command)
+void Chat::registerCommand(Command* command)
 {
   // Loop thru all the words for this command
   std::string currentWord;
@@ -150,7 +159,7 @@ bool Chat::checkMotd(std::string motdFile)
   return true;
 }
 
-bool Chat::sendUserlist(User *user)
+bool Chat::sendUserlist(User* user)
 {
   this->sendMsg(user, MC_COLOR_BLUE + "[ " + dtos(User::all().size()) + " players online ]", USER);
 
@@ -206,11 +215,11 @@ std::deque<std::string> Chat::parseCmd(std::string cmd)
   return temp;
 }
 
-bool Chat::handleMsg(User *user, std::string msg)
+bool Chat::handleMsg(User* user, std::string msg)
 {
   // Timestamp
   time_t rawTime = time(NULL);
-  struct tm *Tm  = localtime(&rawTime);
+  struct tm* Tm  = localtime(&rawTime);
   std::string timeStamp (asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
@@ -314,10 +323,10 @@ void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeSta
   this->sendMsg(user, msg, ALL);
 }
 
-bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
+bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
 {
   size_t tmpArrayLen = msg.size()+3;
-  uint8 *tmpArray    = new uint8[tmpArrayLen];
+  uint8* tmpArray    = new uint8[tmpArrayLen];
 
   tmpArray[0] = 0x03;
   tmpArray[1] = 0;
@@ -360,12 +369,12 @@ bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
   return true;
 }
 
-void Chat::sendHelp(User *user, std::deque<std::string> args)
+void Chat::sendHelp(User* user, std::deque<std::string> args)
 {
   // TODO: Add paging support, since not all commands will fit into
   // the screen at once.
 
-  CommandList *commandList = &m_guestCommands; // defaults
+  CommandList* commandList = &m_guestCommands; // defaults
   std::string commandColor = MC_COLOR_BLUE;
 
   if(IS_ADMIN(user->permissions))

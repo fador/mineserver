@@ -31,13 +31,43 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <stdio.h>
+
+#ifdef WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
 
 #include "delegate/delegate.hpp"
 #include "constants.h"
 #include "tools.h"
 #include "user.h"
 #include "hook.h"
+
+// A wild INCONSISTENCY appears!
+//
+//  --------------
+// | >FIGHT  PkMn |
+// |  ITEM   RUN  |
+//  --------------
+//
+// deoxxa uses MACRO ATTACK!
+//
+#ifdef WIN32
+#define LIBRARY_HANDLE HINSTANCE
+#define LIBRARY_LOAD(x) LoadLibrary(x)
+#define LIBRARY_SYMBOL(x, y) GetProcAddress(x, y)
+#define LIBRARY_CLOSE(x) FreeLibrary(x)
+#else
+#define LIBRARY_HANDLE void*
+#define LIBRARY_LOAD(x) dlopen(x, RTLD_LAZY)
+#define LIBRARY_SYMBOL(x, y) dlsym(x, y)
+#define LIBRARY_CLOSE(x) dlclose(x)
+#endif
+//
+// It's SUPER EFFECTIVE!
+// Foe INCONSISTENCY fainted!
+// You got 374¥ for winning!
 
 typedef srutil::delegate6<void, User*, sint8, sint32, sint8, sint32, sint8> Function;
 
@@ -98,6 +128,13 @@ private:
   Events callbacks;
 };
 
+#define CALLBACK_CHAT_RECV 1
+#define CALLBACK_DIGGING_STARTED 11
+#define CALLBACK_DIGGING 12
+#define CALLBACK_DIGGING_STOPPED 13
+#define CALLBACK_BLOCK_BROKEN 21
+#define CALLBACK_BLOCK_NEIGHBOUR_BROKEN 22
+
 class Plugin
 {
 public:
@@ -110,7 +147,8 @@ public:
     return m_plugin;
   }
 
-  bool load(const std::string name, const std::string file);
+  bool loadExternal(const std::string name, const std::string file);
+  void unloadExternal(const std::string name);
 
   Hook3<bool,std::string,User*,std::string> hookChatRecv;
   Hook4<void,User*,sint32,sint8,sint32> hookDiggingStarted;
@@ -133,6 +171,8 @@ public:
 private:
   Plugin() {}
   static Plugin* m_plugin;
+  std::map<const std::string, LIBRARY_HANDLE> m_libraryHandles;
+  std::map<const std::string, int> m_libraryHandleRefs;
 
   typedef std::map<sint16, Callback> Callbacks;
   Callbacks blockevents;
