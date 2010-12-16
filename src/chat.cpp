@@ -1,29 +1,29 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
-   All rights reserved.
+  Copyright (c) 2010, The Mineserver Project
+  All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
- * Neither the name of the The Mineserver Project nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 #include <cstdlib>
 #include <cstdio>
@@ -52,24 +52,50 @@
 #include "config.h"
 #include "physics.h"
 #include "constants.h"
+#include "plugin.h"
+#include "hook.h"
 
-Chat* Chat::_instance;
+Chat* Chat::m_chat;
 
 void Chat::free()
 {
-   if(_instance)
-   {
-      delete _instance;
-      _instance = 0;
-   }
+  if(m_chat)
+  {
+    delete m_chat;
+    m_chat = 0;
+  }
+}
+
+// ------------------------------------------- //
+// CALLBACK EXAMPLE - WILL NOT BE HERE FOREVER //
+// ------------------------------------------- //
+bool callbacktest(std::string timestamp, User* user, std::string text)
+{
+  if (text == "herp")
+  {
+    Plugin::get()->loadExternal("foo", "./foo.so");
+  }
+
+  if (text == "derp")
+  {
+    Plugin::get()->unloadExternal("foo");
+  }
+
+  return false;
 }
 
 Chat::Chat()
 {
   registerStandardCommands();
+
+  // ------------------------------------------------------------ //
+  // AGAIN, PART OF THE CALLBACK EXAMPLE.                         //
+  // THIS WOULD USUALLY BE CALLED IN THE INITIALISER OF A PLUGIN. //
+  // ------------------------------------------------------------ //
+  Plugin::get()->hookChatRecv.addCallback(&callbacktest);
 }
 
-void Chat::registerCommand(Command *command)
+void Chat::registerCommand(Command* command)
 {
   // Loop thru all the words for this command
   std::string currentWord;
@@ -133,7 +159,7 @@ bool Chat::checkMotd(std::string motdFile)
   return true;
 }
 
-bool Chat::sendUserlist(User *user)
+bool Chat::sendUserlist(User* user)
 {
   this->sendMsg(user, MC_COLOR_BLUE + "[ " + dtos(User::all().size()) + " players online ]", USER);
 
@@ -189,13 +215,18 @@ std::deque<std::string> Chat::parseCmd(std::string cmd)
   return temp;
 }
 
-bool Chat::handleMsg(User *user, std::string msg)
+bool Chat::handleMsg(User* user, std::string msg)
 {
   // Timestamp
   time_t rawTime = time(NULL);
-  struct tm *Tm  = localtime(&rawTime);
+  struct tm* Tm  = localtime(&rawTime);
   std::string timeStamp (asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
+
+  if (Plugin::get()->hookChatRecv.doOne(timeStamp, user, msg))
+  {
+    return false;
+  }
 
   char prefix = msg[0];
 
@@ -209,6 +240,7 @@ bool Chat::handleMsg(User *user, std::string msg)
       }
       break;
 
+    // Admin message
     case ADMINCHATPREFIX:
       if(IS_ADMIN(user->permissions))
       {
@@ -291,10 +323,10 @@ void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeSta
   this->sendMsg(user, msg, ALL);
 }
 
-bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
+bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
 {
   size_t tmpArrayLen = msg.size()+3;
-  uint8 *tmpArray    = new uint8[tmpArrayLen];
+  uint8* tmpArray    = new uint8[tmpArrayLen];
 
   tmpArray[0] = 0x03;
   tmpArray[1] = 0;
@@ -337,12 +369,12 @@ bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
   return true;
 }
 
-void Chat::sendHelp(User *user, std::deque<std::string> args)
+void Chat::sendHelp(User* user, std::deque<std::string> args)
 {
   // TODO: Add paging support, since not all commands will fit into
   // the screen at once.
 
-  CommandList *commandList = &m_guestCommands; // defaults
+  CommandList* commandList = &m_guestCommands; // defaults
   std::string commandColor = MC_COLOR_BLUE;
 
   if(IS_ADMIN(user->permissions))

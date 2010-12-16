@@ -90,17 +90,11 @@ void PacketHandler::free()
 
 void PacketHandler::init()
 {
-
-  //Len 0
   packets[PACKET_KEEP_ALIVE]               = Packets(0, &PacketHandler::keep_alive);
-  //Variable len
   packets[PACKET_LOGIN_REQUEST]            = Packets(PACKET_VARIABLE_LEN, &PacketHandler::login_request);
-  //Variable len
   packets[PACKET_HANDSHAKE]                = Packets(PACKET_VARIABLE_LEN, &PacketHandler::handshake);
-  packets[PACKET_CHAT_MESSAGE]             = Packets(PACKET_VARIABLE_LEN,
-                                                     &PacketHandler::chat_message);
-  packets[PACKET_PLAYER_INVENTORY]         = Packets(PACKET_VARIABLE_LEN,
-                                                     &PacketHandler::player_inventory);
+  packets[PACKET_CHAT_MESSAGE]             = Packets(PACKET_VARIABLE_LEN, &PacketHandler::chat_message);
+  packets[PACKET_PLAYER_INVENTORY]         = Packets(PACKET_VARIABLE_LEN, &PacketHandler::player_inventory);
   packets[PACKET_USE_ENTITY]               = Packets( 9, &PacketHandler::use_entity);
   packets[PACKET_PLAYER]                   = Packets( 1, &PacketHandler::player);
   packets[PACKET_PLAYER_POSITION]          = Packets(33, &PacketHandler::player_position);
@@ -111,12 +105,9 @@ void PacketHandler::init()
   packets[PACKET_HOLDING_CHANGE]           = Packets( 6, &PacketHandler::holding_change);
   packets[PACKET_ARM_ANIMATION]            = Packets( 5, &PacketHandler::arm_animation);
   packets[PACKET_PICKUP_SPAWN]             = Packets(22, &PacketHandler::pickup_spawn);
-  packets[PACKET_DISCONNECT]               = Packets(PACKET_VARIABLE_LEN,
-                                                     &PacketHandler::disconnect);
-  packets[PACKET_COMPLEX_ENTITIES]         = Packets(PACKET_VARIABLE_LEN,
-                                                     &PacketHandler::complex_entities);
+  packets[PACKET_DISCONNECT]               = Packets(PACKET_VARIABLE_LEN, &PacketHandler::disconnect);
+  packets[PACKET_COMPLEX_ENTITIES]         = Packets(PACKET_VARIABLE_LEN, &PacketHandler::complex_entities);
   packets[PACKET_RESPAWN]                  = Packets( 0, &PacketHandler::respawn);
-
 }
 
 // Keep Alive (http://mc.kev009.com/wiki/Protocol#Keep_Alive_.280x00.29)
@@ -139,7 +130,7 @@ int socket_connect(char *host, int port)
       return 0;
   }
 
-  memmove(&addr.sin_addr,hp->h_addr,  hp->h_length);
+  memmove(&addr.sin_addr, hp->h_addr, hp->h_length);
   addr.sin_port = htons(port);
   addr.sin_family = AF_INET;
   sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -150,24 +141,28 @@ int socket_connect(char *host, int port)
   setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO,(const char *)&tv,sizeof(struct timeval));
 
   setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const char *)&on, sizeof(int));
-  if(sock == -1)
+
+  if (sock == -1)
   {
     return 0;
   }
-  if(connect(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1)
+
+  if (connect(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1)
   {
     return 0;
   }
+
   return sock;
 }
-
 
 // Login request (http://mc.kev009.com/wiki/Protocol#Login_Request_.280x01.29)
 int PacketHandler::login_request(User *user)
 {
   //Check that we have enought data in the buffer
   if(!user->buffer.haveData(12))
+  {
     return PACKET_NEED_MORE_DATA;
+  }
 
   sint32 version;
   std::string player, passwd;
@@ -177,7 +172,9 @@ int PacketHandler::login_request(User *user)
   user->buffer >> version >> player >> passwd >> mapseed >> dimension;
 
   if(!user->buffer)
+  {
     return PACKET_NEED_MORE_DATA;
+  }
 
   user->buffer.removePacket();
 
@@ -201,7 +198,8 @@ int PacketHandler::login_request(User *user)
 
   // Check if user is on the whitelist
   // But first, is it enabled?
-  if(Conf::get()->bValue("use_whitelist") == true) {
+  if(Conf::get()->bValue("use_whitelist") == true)
+  {
     if(user->checkWhitelist(player))
     {
       user->kick(Conf::get()->sValue("default_whitelist_message"));
@@ -326,14 +324,18 @@ int PacketHandler::chat_message(User *user)
 {
   // Wait for length-short. HEHE
   if(!user->buffer.haveData(2))
+  {
     return PACKET_NEED_MORE_DATA;
+  }
 
   std::string msg;
 
   user->buffer >> msg;
 
   if(!user->buffer)
+  {
     return PACKET_NEED_MORE_DATA;
+  }
 
   user->buffer.removePacket();
 
@@ -394,14 +396,18 @@ int PacketHandler::player_inventory(User *user)
     user->buffer >> item_id;
 
     if(!user->buffer)
+    {
       return PACKET_NEED_MORE_DATA;
+    }
 
     if(item_id != -1)
     {
       user->buffer >> numberOfItems >> health;
 
       if(!user->buffer)
+      {
         return PACKET_NEED_MORE_DATA;
+      }
 
 
       slots[i].type   = item_id;
@@ -421,7 +427,9 @@ int PacketHandler::player(User *user)
   sint8 onground;
   user->buffer >> onground;
   if(!user->buffer)
+  {
     return PACKET_NEED_MORE_DATA;
+  }
   user->buffer.removePacket();
   return PACKET_OK;
 }
@@ -434,7 +442,9 @@ int PacketHandler::player_position(User *user)
   user->buffer >> x >> y >> stance >> z >> onground;
 
   if(!user->buffer)
+  {
     return PACKET_NEED_MORE_DATA;
+  }
 
   user->updatePos(x, y, z, stance);
   user->buffer.removePacket();
@@ -450,7 +460,9 @@ int PacketHandler::player_look(User *user)
   user->buffer >> yaw >> pitch >> onground;
 
   if(!user->buffer)
+  {
     return PACKET_NEED_MORE_DATA;
+  }
 
   user->updateLook(yaw, pitch);
 
@@ -466,10 +478,12 @@ int PacketHandler::player_position_and_look(User *user)
   sint8 onground;
 
   user->buffer >> x >> y >> stance >> z
-        >> yaw >> pitch >> onground;
+               >> yaw >> pitch >> onground;
 
   if(!user->buffer)
+  {
     return PACKET_NEED_MORE_DATA;
+  }
 
   //Update user data
   user->updatePos(x, y, z, stance);
@@ -482,76 +496,102 @@ int PacketHandler::player_position_and_look(User *user)
 
 int PacketHandler::player_digging(User *user)
 {
-  sint8 status,y;
-  sint32 x,z;
+  sint8 status;
+  sint32 x;
+  sint8  y;
+  sint32 z;
   sint8 direction;
   uint8 block;
   uint8 meta;
+
   user->buffer >> status >> x >> y >> z >> direction;
 
   if(!user->buffer)
+  {
     return PACKET_NEED_MORE_DATA;
+  }
 
   user->buffer.removePacket();
 
   if(!Map::get()->getBlock(x, y, z, &block, &meta))
+  {
     return PACKET_OK;
+  }
 
   Function::invoker_type inv(user, status, x, y, z, direction);
 
   switch(status)
   {
-     case BLOCK_STATUS_STARTED_DIGGING:
-       Plugin::get()->runBlockCallback(block, "onStartedDigging", inv);
-     break;
-     case BLOCK_STATUS_DIGGING:
-       Plugin::get()->runBlockCallback(block, "onDigging", inv);
-     break;
-     case BLOCK_STATUS_STOPPED_DIGGING:
-       Plugin::get()->runBlockCallback(block, "onStoppedDigging", inv);
-     break;
-     case BLOCK_STATUS_BLOCK_BROKEN:
-       Plugin::get()->runBlockCallback(block, "onBroken", inv);
+    case BLOCK_STATUS_STARTED_DIGGING:
+    {
+      Plugin::get()->hookDiggingStarted.doAll(user, x, y, z);
+      Plugin::get()->runBlockCallback(block, "onStartedDigging", inv);
+      break;
+    }
+    case BLOCK_STATUS_DIGGING:
+    {
+      Plugin::get()->hookDigging.doAll(user, x, y, z);
+      Plugin::get()->runBlockCallback(block, "onDigging", inv);
+      break;
+    }
+    case BLOCK_STATUS_STOPPED_DIGGING:
+    {
+      Plugin::get()->hookDiggingStopped.doAll(user, x, y, z);
+      Plugin::get()->runBlockCallback(block, "onStoppedDigging", inv);
+      break;
+    }
+    case BLOCK_STATUS_BLOCK_BROKEN:
+    {
+      Plugin::get()->hookBlockBroken.doAll(user, x, y, z);
+      Plugin::get()->runBlockCallback(block, "onBroken", inv);
 
-       /* notify neighbour blocks of the broken block */
-       status = block;
-       if (Map::get()->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
-       {
-          inv = Function::invoker_type(user, status, x+1, y, z, BLOCK_SOUTH);
-          Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
-       }
+      /* notify neighbour blocks of the broken block */
+      status = block;
+      if (Map::get()->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
+      {
+        Plugin::get()->hookBlockNeighbourBroken.doAll(user, x+1, y, z, BLOCK_SOUTH);
+        inv = Function::invoker_type(user, status, x+1, y, z, BLOCK_SOUTH);
+        Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
+      }
 
-       if (Map::get()->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
-       {
-          inv = Function::invoker_type(user, status, x-1, y, z, BLOCK_NORTH);
-          Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
-       }
+      if (Map::get()->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
+      {
+        Plugin::get()->hookBlockNeighbourBroken.doAll(user, x-1, y, z, BLOCK_NORTH);
+        inv = Function::invoker_type(user, status, x-1, y, z, BLOCK_NORTH);
+        Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
+      }
 
-       if (Map::get()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
-       {
-          inv = Function::invoker_type(user, status, x, y+1, z, BLOCK_TOP);
-          Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
-       }
+      if (Map::get()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
+      {
+        Plugin::get()->hookBlockNeighbourBroken.doAll(user, x, y+1, z, BLOCK_TOP);
+        inv = Function::invoker_type(user, status, x, y+1, z, BLOCK_TOP);
+        Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
+      }
 
-       if (Map::get()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
-       {
-          inv = Function::invoker_type(user, status, x, y-1, z, BLOCK_BOTTOM);
-          Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
-       }
+      if (Map::get()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
+      {
+        Plugin::get()->hookBlockNeighbourBroken.doAll(user, x, y-1, z, BLOCK_BOTTOM);
+        inv = Function::invoker_type(user, status, x, y-1, z, BLOCK_BOTTOM);
+        Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
+      }
 
-       if (Map::get()->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
-       {
-          inv = Function::invoker_type(user, status, x, y, z+1, BLOCK_WEST);
-          Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
-       }
+      if (Map::get()->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
+      {
+        Plugin::get()->hookBlockNeighbourBroken.doAll(user, x, y, z+1, BLOCK_WEST);
+        inv = Function::invoker_type(user, status, x, y, z+1, BLOCK_WEST);
+        Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
+      }
 
-       if (Map::get()->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
-       {
-          inv = Function::invoker_type(user, status, x, y, z-1, BLOCK_EAST);
-          Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
-       }
-     break;
+      if (Map::get()->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
+      {
+        Plugin::get()->hookBlockNeighbourBroken.doAll(user, x, y, z-1, BLOCK_EAST);
+        inv = Function::invoker_type(user, status, x, y, z-1, BLOCK_EAST);
+        Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
+      }
+      break;
+    }
   }
+
   return PACKET_OK;
 }
 
@@ -570,13 +610,17 @@ int PacketHandler::player_block_placement(User *user)
   user->buffer >> newblock >> x >> y >> z >> direction;
 
   if(!user->buffer)
+  {
     return PACKET_NEED_MORE_DATA;
+  }
 
   user->buffer.removePacket();
 
   // TODO: Handle processing of
   if(direction == -1)
+  {
     return PACKET_OK;
+  }
 
   //Minecart testing!!
   if(newblock == ITEM_MINECART && Map::get()->getBlock(x, y, z, &oldblock, &metadata))
@@ -597,14 +641,18 @@ int PacketHandler::player_block_placement(User *user)
   }
 
   if(y < 0)
+  {
     return PACKET_OK;
+  }
 
   #ifdef _DEBUG
     Screen::get()->log("Block_placement: " + newblock + " (" + dtos(x) + "," + dtos((int)y) + "," + dtos(z) + ") dir: " + dtos((int)direction);
   #endif
 
   if (direction)
+  {
     direction = 6-direction;
+  }
 
   Callback callback;
   Function event;
@@ -642,7 +690,7 @@ int PacketHandler::player_block_placement(User *user)
      }
 
      if (Map::get()->getBlock(check_x, check_y, check_z, &oldblocktop, &metadatatop)
-     && (oldblocktop == BLOCK_LAVA || oldblocktop == BLOCK_STATIONARY_LAVA
+         && (oldblocktop == BLOCK_LAVA || oldblocktop == BLOCK_STATIONARY_LAVA
          || oldblocktop == BLOCK_WATER || oldblocktop == BLOCK_STATIONARY_WATER))
      {
        /* block above needs replacing rather then the block send by the client */
@@ -711,7 +759,9 @@ int PacketHandler::holding_change(User *user)
   user->buffer >> entityID >> itemID;
 
   if(!user->buffer)
+  {
     return PACKET_NEED_MORE_DATA;
+  }
 
   user->buffer.removePacket();
 
@@ -736,7 +786,9 @@ int PacketHandler::arm_animation(User *user)
   user->buffer >> userID >> animType;
 
   if(!user->buffer)
+  {
     return PACKET_NEED_MORE_DATA;
+  }
 
   user->buffer.removePacket();
 
@@ -763,11 +815,13 @@ int PacketHandler::pickup_spawn(User *user)
   user->buffer >> yaw >> pitch >> roll;
 
   if(!user->buffer)
+  {
     return PACKET_NEED_MORE_DATA;
+  }
 
   user->buffer.removePacket();
 
-  item.EID    = generateEID();
+  item.EID       = generateEID();
 
   item.spawnedBy = user->UID;
 
@@ -792,7 +846,9 @@ int PacketHandler::disconnect(User *user)
   user->buffer >> msg;
 
   if(!user->buffer)
+  {
     return PACKET_NEED_MORE_DATA;
+  }
 
   user->buffer.removePacket();
 
@@ -814,7 +870,9 @@ int PacketHandler::disconnect(User *user)
 int PacketHandler::complex_entities(User *user)
 {
   if(!user->buffer.haveData(12))
+  {
     return PACKET_NEED_MORE_DATA;
+  }
 
   sint32 x,z;
   sint16 len,y;
@@ -823,10 +881,14 @@ int PacketHandler::complex_entities(User *user)
   user->buffer >> x >> y >> z >> len;
 
   if(!user->buffer)
+  {
     return PACKET_NEED_MORE_DATA;
+  }
 
   if(!user->buffer.haveData(len))
+  {
     return PACKET_NEED_MORE_DATA;
+  }
 
   uint8 *buffer = new uint8[len];
 
@@ -838,7 +900,8 @@ int PacketHandler::complex_entities(User *user)
   Map::get()->getBlock(x, y, z, &block, &meta);
 
   //We only handle chest for now
-  if(block != BLOCK_CHEST && block != BLOCK_FURNACE && block != BLOCK_BURNING_FURNACE && block != BLOCK_SIGN_POST && block != BLOCK_WALL_SIGN)
+  if(block != BLOCK_CHEST && block != BLOCK_FURNACE && block != BLOCK_BURNING_FURNACE &&
+     block != BLOCK_SIGN_POST && block != BLOCK_WALL_SIGN)
   {
     delete[] buffer;
     return PACKET_OK;
@@ -866,7 +929,7 @@ int PacketHandler::complex_entities(User *user)
   zstream.next_out = uncompressedBuffer;
 
   //Uncompress
-  if(inflate(&zstream, Z_FULL_FLUSH)!=Z_STREAM_END)
+  if(inflate(&zstream, Z_FULL_FLUSH) != Z_STREAM_END)
   {
     Screen::get()->log(LOG_ERROR, "Error in inflate!");
     delete[] buffer;
@@ -888,13 +951,15 @@ int PacketHandler::complex_entities(User *user)
   entity->Print();
 #endif
 
-    // Check if this is a Furnace and handle if so
-    if(block == BLOCK_FURNACE || block == BLOCK_BURNING_FURNACE) {
-      FurnaceManager::get()->handleActivity(entity, block);
-    }
-    else {
-      Map::get()->setComplexEntity(user, x, y, z, entity);
-    }
+  // Check if this is a Furnace and handle if so
+  if(block == BLOCK_FURNACE || block == BLOCK_BURNING_FURNACE)
+  {
+    FurnaceManager::get()->handleActivity(entity, block);
+  }
+  else
+  {
+    Map::get()->setComplexEntity(user, x, y, z, entity);
+  }
 
   delete [] buffer;
 
@@ -910,7 +975,9 @@ int PacketHandler::use_entity(User *user)
   user->buffer >> userID >> target >> targetType;
 
   if (!user->buffer)
+  {
     return PACKET_NEED_MORE_DATA;
+  }
 
   user->buffer.removePacket();
 

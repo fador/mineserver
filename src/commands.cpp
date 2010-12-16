@@ -53,7 +53,6 @@
 
 namespace
 {
-
   void reportError(User* user, std::string message)
   {
     Chat::get()->sendMsg(user, MC_COLOR_DARK_MAGENTA + "Error! " + MC_COLOR_RED + message, Chat::USER);
@@ -355,6 +354,7 @@ void unmute(User* user, std::string command, std::deque<std::string> args)
     reportError(user, "Usage: /unmute player");
   }
 }
+
 void showMOTD(User* user, std::string command, std::deque<std::string> args)
 {
   // Open MOTD file
@@ -375,11 +375,12 @@ void showMOTD(User* user, std::string command, std::deque<std::string> args)
   motdfs.close();
 
 }
+
 void emote(User* user, std::string command, std::deque<std::string> args)
 {
-	if(user->isAbleToCommunicate(command) == false)
+  if(user->isAbleToCommunicate(command) == false)
   {
-		return;
+    return;
   }
 
   std::string emoteMsg;
@@ -399,11 +400,12 @@ void emote(User* user, std::string command, std::deque<std::string> args)
     Chat::get()->sendMsg(user, MC_COLOR_DARK_ORANGE + "* " + user->nick + " " + emoteMsg, Chat::ALL);
   }
 }
+
 void whisper(User* user, std::string command, std::deque<std::string> args)
 {
-	if(user->isAbleToCommunicate(command) == false)
+  if(user->isAbleToCommunicate(command) == false)
   {
-		return;
+    return;
   }
 
   if(!args.empty())
@@ -443,9 +445,10 @@ void whisper(User* user, std::string command, std::deque<std::string> args)
     reportError(user, "Usage: /" + command + " player [message]");
   }
 }
+
 void doNotDisturb(User* user, std::string command, std::deque<std::string> args)
 {
-	user->toggleDND();
+  user->toggleDND();
 }
 
 void help(User* user, std::string command, std::deque<std::string> args)
@@ -589,12 +592,12 @@ void showPosition(User* user, std::string command, std::deque<std::string> args)
     if(tUser != NULL)
     {
       Chat::get()->sendMsg(user, MC_COLOR_BLUE + args[0] + " is at: " + dtos(tUser->pos.x)
-                                                                     + " "
-                                                                     + dtos(tUser->pos.y)
-                                                                     + " "
-                                                                     + dtos(tUser->pos.z)
-                                                                     + " Heading: " + getHeadingString(tUser)
-                                                                     , Chat::USER);
+                                                                      + " "
+                                                                      + dtos(tUser->pos.y)
+                                                                      + " "
+                                                                      + dtos(tUser->pos.z)
+                                                                      + " Heading: " + getHeadingString(tUser)
+                                                                      , Chat::USER);
     }
     else
     {
@@ -604,12 +607,12 @@ void showPosition(User* user, std::string command, std::deque<std::string> args)
   else if(args.size() == 0)
   {
     Chat::get()->sendMsg(user, MC_COLOR_BLUE + "You are at: " + dtos(user->pos.x)
-                                                             + " "
-                                                             + dtos(user->pos.y)
-                                                             + " "
-                                                             + dtos(user->pos.z)
-                                                             + " Heading: " + getHeadingString(user)
-                                                             , Chat::USER);
+                                                              + " "
+                                                              + dtos(user->pos.y)
+                                                              + " "
+                                                              + dtos(user->pos.z)
+                                                              + " Heading: " + getHeadingString(user)
+                                                              , Chat::USER);
   }
   else
   {
@@ -750,7 +753,6 @@ void giveItems(User* user, std::string command, std::deque<std::string> args)
   }
 }
 
-
 void giveItemsSelf(User* user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 1 || args.size() == 2)
@@ -839,7 +841,7 @@ void setHealth(User* user, std::string command, std::deque<std::string> args)
 
 void Chat::registerStandardCommands()
 {
-  // // Players
+  // Players
   registerCommand(new Command(parseCmd("about"), "", "Display server name & version", about, Conf::get()->commandPermission("about")));
   registerCommand(new Command(parseCmd("home"), "", "Teleport to map spawn location", home, Conf::get()->commandPermission("home")));
   registerCommand(new Command(parseCmd("kit"), "<name> [<player>]", "Gives kit to self or to <player>, if defined", kit, Conf::get()->commandPermission("kit")));

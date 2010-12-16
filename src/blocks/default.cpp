@@ -33,25 +33,25 @@ void BlockDefault::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y,
 
 void BlockDefault::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-
 }
 
 void BlockDefault::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-
 }
 
 void BlockDefault::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-   uint8 block;
-   uint8 meta;
+  uint8 block;
+  uint8 meta;
 
-   if (!Map::get()->getBlock(x, y, z, &block, &meta))
-      return;
+  if (!Map::get()->getBlock(x, y, z, &block, &meta))
+  {
+    return;
+  }
 
-   Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-   Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
-   this->spawnBlockItem(x,y,z,block);
+  Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+  this->spawnBlockItem(x,y,z,block);
 }
 
 void BlockDefault::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
@@ -60,30 +60,40 @@ void BlockDefault::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8
 
 void BlockDefault::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-   uint8 oldblock;
-   uint8 oldmeta;
+  uint8 oldblock;
+  uint8 oldmeta;
 
-   if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
-      return;
+  if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
+  {
+    return;
+  }
 
-   /* Check block below allows blocks placed on top */
-   if (!this->isBlockStackable(oldblock))
-      return;
+  /* Check block below allows blocks placed on top */
+  if (!this->isBlockStackable(oldblock))
+  {
+    return;
+  }
 
-   /* move the x,y,z coords dependent upon placement direction */
-   if (!this->translateDirection(&x,&y,&z,direction))
-      return;
+  /* move the x,y,z coords dependent upon placement direction */
+  if (!this->translateDirection(&x,&y,&z,direction))
+  {
+    return;
+  }
 
-   if (this->isUserOnBlock(x,y,z))
-      return;
+  if (this->isUserOnBlock(x,y,z))
+  {
+    return;
+  }
 
-   if (!this->isBlockEmpty(x,y,z))
-      return;
+  if (!this->isBlockEmpty(x,y,z))
+  {
+    return;
+  }
 
-   direction = user->relativeToBlock(x, y, z);
+  direction = user->relativeToBlock(x, y, z);
 
-   Map::get()->setBlock(x, y, z, (char)newblock, direction);
-   Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
+  Map::get()->setBlock(x, y, z, (char)newblock, direction);
+  Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
 }
 
 void BlockDefault::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
@@ -92,15 +102,17 @@ void BlockDefault::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 
 
 void BlockDefault::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-   uint8 oldblock;
-   uint8 oldmeta;
+  uint8 oldblock;
+  uint8 oldmeta;
 
-   if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
-      return;
+  if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
+  {
+    return;
+  }
 
-   Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-   Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
-   Map::get()->createPickupSpawn(x, y, z, oldblock, 1);
+  Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+  Map::get()->createPickupSpawn(x, y, z, oldblock, 1);
 }
 
 void BlockDefault::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)

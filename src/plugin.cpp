@@ -40,14 +40,20 @@
 #include "blocks/tracks.h"
 #include "blocks/chest.h"
 
-Plugin* Plugin::mPlugin;
+#ifdef WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
+
+Plugin* Plugin::m_plugin;
 
 void Plugin::free()
 {
-   if (mPlugin)
+   if (m_plugin)
    {
-      delete mPlugin;
-      mPlugin = 0;
+      delete m_plugin;
+      m_plugin = NULL;
    }
 }
 
@@ -261,6 +267,54 @@ void Plugin::init()
   /* BLOCK_WOODEN_PRESSURE_PLATE, BLOCK_STONE_PRESSURE_PLATE */
   /* BLOCK_ICE */
   /* BLOCK_SNOW_BLOCK */
+}
+
+void registerExternal(int hookId, void* function)
+{
+  return;
+}
+
+bool Plugin::loadExternal(const std::string name, const std::string file)
+{
+  LIBRARY_HANDLE lhandle = NULL;
+  void (*fhandle)(void (*)(int, void*)) = NULL;
+
+  Screen::get()->log("Loading plugin "+name+" ("+file+")...");
+
+  lhandle = LIBRARY_LOAD(file.c_str());
+  if (lhandle == NULL)
+  {
+    Screen::get()->log("Could not load "+name+"!");
+    return false;
+  }
+
+  m_libraryHandles[name] = lhandle;
+
+  fhandle = (void (*)(void (*)(int, void*))) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
+  if (fhandle == NULL)
+  {
+    Screen::get()->log("Could not get function handle!");
+    unloadExternal(name);
+    return false;
+  }
+
+  fhandle(&registerExternal);
+
+  return true;
+}
+
+void Plugin::unloadExternal(const std::string name)
+{
+  if (m_libraryHandles.count(name) > 0)
+  {
+    Screen::get()->log("Unloading plugin "+name+"...");
+    LIBRARY_CLOSE(m_libraryHandles[name]);
+    m_libraryHandles.erase(name);
+  }
+  else
+  {
+    Screen::get()->log("Plugin "+name+" not loaded!");
+  }
 }
 
 void Plugin::setBlockCallback(const int type, Callback call)

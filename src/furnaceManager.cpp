@@ -33,10 +33,12 @@
 
 FurnaceManager* FurnaceManager::_instance;
 
-FurnaceManager::FurnaceManager() {
+FurnaceManager::FurnaceManager()
+{
 }
 
-void FurnaceManager::update() {
+void FurnaceManager::update()
+{
 
   // Bail if we don't have any furnaces
   if(m_activeFurnaces.size() == 0)
@@ -99,7 +101,6 @@ void FurnaceManager::handleActivity(NBT_Value *entity, uint8 blockType)
   // Loop thru all active furnaces, to see if this one is here
   for(unsigned int index = 0; index < m_activeFurnaces.size(); index++)
   {
-
     Furnace* currentFurnace = (Furnace*)m_activeFurnaces[index];
     if(currentFurnace->x() == furnace->x() && currentFurnace->y() == furnace->y() && currentFurnace->z() == furnace->z())
     {
