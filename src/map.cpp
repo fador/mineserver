@@ -53,6 +53,7 @@
 #include "config.h"
 #include "permissions.h"
 #include "chat.h"
+#include "tree.h"
 
 
 Map* Map::_instance = NULL;
@@ -78,16 +79,35 @@ void Map::checkGenTrees()
       sint32 y = (*iter).y;
       sint32 z = (*iter).z;
 
-      // grow tree!
-      setBlock( x, y, z, BLOCK_LOG, 0);
-      setBlock( x, y+1, z, BLOCK_LOG, 0);
-      setBlock( x, y+2, z, BLOCK_LOG, 0);
-      setBlock( x, y+3, z, BLOCK_LEAVES, 0);
+	  Tree tree(x,y,z);
+	  tree.Generate();
 
-      sendBlockChange( x, y, z, BLOCK_LOG, 0);
-      sendBlockChange( x, y+1, z, BLOCK_LOG, 0);
-      sendBlockChange( x, y+2, z, BLOCK_LOG, 0);
-      sendBlockChange( x, y+3, z, BLOCK_LEAVES, 0);
+	  //std::vector<BlockData> tree;
+	  //for(int count = 0; count < (rand() % 10) + 3 ; count++) {
+		 // BlockData treeBlock;
+		 // if(count < 3) {
+			//treeBlock.Set(x,y+count,z,BLOCK_LOG,0);
+		 // }
+		 // else {
+			//  treeBlock.Set(x,y+count,z,BLOCK_LEAVES,0);
+		 // }
+		 // tree.push_back(treeBlock);
+	  //}
+
+	  //for(std::vector<BlockData>::iterator block = tree.begin(); block != tree.end(); ++block) {
+		 // block->Update();
+	  //}
+
+      // grow tree!
+      //setBlock( x, y, z, BLOCK_LOG, 0);
+      //setBlock( x, y+1, z, BLOCK_LOG, 0);
+      //setBlock( x, y+2, z, BLOCK_LOG, 0);
+      //setBlock( x, y+3, z, BLOCK_LEAVES, 0);
+
+      //sendBlockChange( x, y, z, BLOCK_LOG, 0);
+      //sendBlockChange( x, y+1, z, BLOCK_LOG, 0);
+      //sendBlockChange( x, y+2, z, BLOCK_LOG, 0);
+      //sendBlockChange( x, y+3, z, BLOCK_LEAVES, 0);
 
         saplings.erase(iter++);  // alternatively, i = items.erase(i);
     }
@@ -105,7 +125,6 @@ void Map::init()
 #ifdef _DEBUG
   printf("Map::init()\n");
 #endif
-
   mapDirectory = Conf::get()->sValue("map_directory");
   if(mapDirectory == "Not found!")
   {
@@ -205,7 +224,7 @@ void Map::init()
 
   delete root;
 #ifdef _DEBUG
-  Screen::get()->log("Spawn: (" + spawnPos.x() + "," + spawnPos.y() + "," + spawnPos.z() + ")");
+//  Screen::get()->log("Spawn: (" + spawnPos.x() + "," + spawnPos.y() + "," + spawnPos.z() + ")");
 #endif
 }
 
