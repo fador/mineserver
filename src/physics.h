@@ -67,17 +67,17 @@ private:
     enabled = true;
   }
   std::vector<Sim> simList;
-  static Physics *mPhysics;
+  static Physics *m_Physics;
 public:
   bool enabled;
 
   void free();
   static Physics* get()
   {
-    if(!mPhysics) {
-      mPhysics = new Physics();
+    if(!m_Physics) {
+      m_Physics = new Physics();
     }
-    return mPhysics;
+    return m_Physics;
   }
 
   bool update();

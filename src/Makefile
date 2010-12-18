@@ -54,7 +54,7 @@ dist:
 
 all: $(PROGS)
 
-chat.o: chat.cpp logger.h constants.h tools.h map.h user.h chat.h config.h physics.h plugin.h hook.h
+chat.o: chat.cpp logger.h constants.h tools.h map.h user.h chat.h config.h physics.h plugin.h
 commands.o: commands.cpp logger.h constants.h tools.h map.h user.h chat.h config.h physics.h
 config.o: config.cpp logger.h constants.h config.h
 constants.o: constants.cpp constants.h

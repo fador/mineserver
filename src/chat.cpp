@@ -53,7 +53,6 @@
 #include "physics.h"
 #include "constants.h"
 #include "plugin.h"
-#include "hook.h"
 
 Chat* Chat::m_chat;
 
@@ -66,33 +65,9 @@ void Chat::free()
   }
 }
 
-// ------------------------------------------- //
-// CALLBACK EXAMPLE - WILL NOT BE HERE FOREVER //
-// ------------------------------------------- //
-bool callbacktest(std::string timestamp, User* user, std::string text)
-{
-  if (text == "herp")
-  {
-    Plugin::get()->loadExternal("foo", "./foo.so");
-  }
-
-  if (text == "derp")
-  {
-    Plugin::get()->unloadExternal("foo");
-  }
-
-  return false;
-}
-
 Chat::Chat()
 {
   registerStandardCommands();
-
-  // ------------------------------------------------------------ //
-  // AGAIN, PART OF THE CALLBACK EXAMPLE.                         //
-  // THIS WOULD USUALLY BE CALLED IN THE INITIALISER OF A PLUGIN. //
-  // ------------------------------------------------------------ //
-  Plugin::get()->hookChatRecv.addCallback(&callbacktest);
 }
 
 void Chat::registerCommand(Command* command)

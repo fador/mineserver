@@ -65,39 +65,34 @@ namespace
 
 bool isWaterBlock(int id)
 {
-  return id == BLOCK_WATER ||
-         id == BLOCK_STATIONARY_WATER;
+  return ((id == BLOCK_WATER) || (id == BLOCK_STATIONARY_WATER));
 }
 
 bool isLavaBlock(int id)
 {
-  return id == BLOCK_LAVA ||
-         id == BLOCK_STATIONARY_LAVA;
+  return ((id == BLOCK_LAVA) || (id == BLOCK_STATIONARY_LAVA));
 }
 
 bool isLiquidBlock(int id)
 {
-  return isWaterBlock(id) || isLavaBlock(id);
+  return ((id == BLOCK_LAVA) || (id == BLOCK_STATIONARY_LAVA) || (id == BLOCK_WATER) || (id == BLOCK_STATIONARY_WATER));
 }
 
 bool mayFallThrough(int id)
 {
-  return id == BLOCK_AIR ||
-         id == BLOCK_WATER ||
-         id == BLOCK_STATIONARY_WATER ||
-         id == BLOCK_SNOW;
+  return ((id == BLOCK_AIR) || (id == BLOCK_WATER) || (id == BLOCK_STATIONARY_WATER) || (id == BLOCK_SNOW));
 }
 
 }
 
-Physics* Physics::mPhysics;
+Physics* Physics::m_Physics;
 
 void Physics::free()
 {
-   if (mPhysics)
+   if (m_Physics)
    {
-      delete mPhysics;
-      mPhysics = 0;
+      delete m_Physics;
+      m_Physics = 0;
    }
 }
 
@@ -105,11 +100,15 @@ void Physics::free()
 bool Physics::update()
 {
   if(!enabled)
+  {
     return true;
+  }
 
   // Check if needs to be updated
   if(simList.empty())
+  {
     return true;
+  }
 
   clock_t starttime = clock();
 
@@ -129,24 +128,24 @@ bool Physics::update()
     simList[simIt].blocks[0].id   = block;
     simList[simIt].blocks[0].meta = meta;
 
-    //Water simulation
+    // Water simulation
     if(simList[simIt].type == TYPE_WATER)
     {
       if(isWaterBlock(block))
       {
-
         sint32 it = 0;
+
         //for(sint32 it=simList[simIt].blocks.size()-1; it>=0; it--)
         {
-
           bool havesource = false;
 
-          //Search for water source if this is not the source
+          // Search for water source if this is not the source
           if(simList[simIt].blocks[it].id != BLOCK_STATIONARY_WATER)
           {
             for(int i = 0; i < 6; i++)
             {
               vec local(pos);
+
               switch(i)
               {
                 case 0: local += vec( 0,  1,  0); break; //y++
@@ -157,24 +156,27 @@ bool Physics::update()
                 case 5: local += vec( 0, -1,  0); break; //y--
               }
 
-              //Search neighboring water blocks for source current
-              if(Map::get()->getBlock(local, &block, &meta) &&
-                 isWaterBlock(block))
+              // Search neighboring water blocks for source current
+              if (Map::get()->getBlock(local, &block, &meta) && isWaterBlock(block))
               {
-                //is this the source block
-                if(i != 5 &&
-                   (block == BLOCK_STATIONARY_WATER || (meta&0x07) <
-                    (simList[simIt].blocks[it].meta&0x07) || i == 0))
+                // is this the source block
+                if(i != 5 && (block == BLOCK_STATIONARY_WATER || (meta&0x07) < (simList[simIt].blocks[it].meta&0x07) || i == 0))
+                {
                   havesource = true;
+                }
                 //Else we have to search for source to this block also
                 else if(i == 5 || (meta&0x07) > (simList[simIt].blocks[it].meta&0x07))
+                {
                   toAdd.push_back(local);
+                }
               }
             }
           }
           //Stationary water block is the source
           else
+          {
             havesource = true;
+          }
 
           //If no source, dry block away
           if(!havesource)
@@ -196,7 +198,7 @@ bool Physics::update()
               toRemove.push_back(simIt);
               addSimulation(pos);
               // Update simulation meta information
-              //simList[simIt].blocks[it].meta = meta;
+              // simList[simIt].blocks[it].meta = meta;
             }
             //Else this block has dried out
             else

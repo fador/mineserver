@@ -50,6 +50,7 @@
 #include "config.h"
 #include "physics.h"
 #include "kit.h"
+#include "plugin.h"
 
 namespace
 {
@@ -62,6 +63,36 @@ namespace
     {
       Screen::get()->log(LOG_CHAT, message);
     }
+  }
+
+  void pluginLoad(User* user, std::string command, std::deque<std::string> args)
+  {
+    if (!IS_ADMIN(user->permissions))
+    {
+      return;
+    }
+
+    if (args.size() < 2)
+    {
+      return;
+    }
+
+    Plugin::get()->loadExternal(args[0], args[1]);
+  }
+
+  void pluginUnload(User* user, std::string command, std::deque<std::string> args)
+  {
+    if (!IS_ADMIN(user->permissions))
+    {
+      return;
+    }
+
+    if (args.size() < 1)
+    {
+      return;
+    }
+
+    Plugin::get()->unloadExternal(args[0]);
   }
 
   void playerList(User* user, std::string command, std::deque<std::string> args)
@@ -867,4 +898,6 @@ void Chat::registerStandardCommands()
   registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport, Conf::get()->commandPermission("tp")));
   registerCommand(new Command(parseCmd("unban"), "<player>", "Lift a ban of a player", unban, Conf::get()->commandPermission("unban")));
   registerCommand(new Command(parseCmd("unmute"), "<player>", "Unmutes a given player", unmute, Conf::get()->commandPermission("unmute")));
+  registerCommand(new Command(parseCmd("load"), "<name> <file>", "Loads a plugin from a file", pluginLoad, Conf::get()->commandPermission("load")));
+  registerCommand(new Command(parseCmd("unload"), "<name>", "Unloads a plugin", pluginUnload, Conf::get()->commandPermission("unload")));
 }

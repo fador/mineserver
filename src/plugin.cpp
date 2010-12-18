@@ -50,11 +50,11 @@ Plugin* Plugin::m_plugin;
 
 void Plugin::free()
 {
-   if (m_plugin)
-   {
-      delete m_plugin;
-      m_plugin = NULL;
-   }
+  if (m_plugin)
+  {
+    delete m_plugin;
+    m_plugin = NULL;
+  }
 }
 
 void Plugin::init()
@@ -62,7 +62,7 @@ void Plugin::init()
    // Set default behaviours 
    Callback call;
    /* FIXME: must remember to delete any memory we create here upon server stop */
-   
+
    BlockDefault* defaultblock = new BlockDefault();
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    call.add("onPlace", Function::from_method<BlockDefault, &BlockDefault::onPlace>(defaultblock));
@@ -127,7 +127,7 @@ void Plugin::init()
    setBlockCallback(BLOCK_SAND, call);
    setBlockCallback(BLOCK_SLOW_SAND, call);
    setBlockCallback(BLOCK_GRAVEL, call);
-   
+
    /* Torches */
    call.reset();
    BlockTorch* torchblock = new BlockTorch();
@@ -139,7 +139,7 @@ void Plugin::init()
    setBlockCallback(BLOCK_TORCH, call);
    setBlockCallback(BLOCK_REDSTONE_TORCH_OFF, call);
    setBlockCallback(BLOCK_REDSTONE_TORCH_ON, call);
-   
+
    /* ladders */
    call.reset();
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
@@ -277,7 +277,7 @@ void registerExternal(int hookId, void* function)
 bool Plugin::loadExternal(const std::string name, const std::string file)
 {
   LIBRARY_HANDLE lhandle = NULL;
-  void (*fhandle)(void (*)(int, void*)) = NULL;
+  void (*fhandle)() = NULL;
 
   Screen::get()->log("Loading plugin "+name+" ("+file+")...");
 
@@ -290,7 +290,7 @@ bool Plugin::loadExternal(const std::string name, const std::string file)
 
   m_libraryHandles[name] = lhandle;
 
-  fhandle = (void (*)(void (*)(int, void*))) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
+  fhandle = (void (*)()) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
   if (fhandle == NULL)
   {
     Screen::get()->log("Could not get function handle!");
@@ -298,7 +298,7 @@ bool Plugin::loadExternal(const std::string name, const std::string file)
     return false;
   }
 
-  fhandle(&registerExternal);
+  fhandle();
 
   return true;
 }
@@ -324,36 +324,44 @@ void Plugin::setBlockCallback(const int type, Callback call)
       LOG("Block type set more then once.");
       removeBlockCallback(type);
    }
+
    blockevents.insert(std::pair<int, Callback>(type, call));
 }
 
 Callback* Plugin::getBlockCallback(const int type)
 {
-   Callbacks::iterator iter = blockevents.find(type);
+  Callbacks::iterator iter = blockevents.find(type);
 
-   if (iter == blockevents.end())
-      return NULL;
+  if (iter == blockevents.end())
+  {
+    return NULL;
+  }
 
-   return &(*iter).second;
+  return &(*iter).second;
 }
 
 bool Plugin::runBlockCallback(const int type, const std::string name, const Function::invoker_type function)
 {
-   Callbacks::iterator iter = blockevents.find(type);
+  Callbacks::iterator iter = blockevents.find(type);
 
-   if (iter == blockevents.end())
-      return false;
+  if (iter == blockevents.end())
+  {
+    return false;
+  }
 
-   return (*iter).second.run(name, function);
+  return (*iter).second.run(name, function);
 }
 
 bool Plugin::removeBlockCallback(const int type)
 {
-   Callbacks::iterator iter = blockevents.find(type);
+  Callbacks::iterator iter = blockevents.find(type);
 
-   if (iter == blockevents.end())
-      return false;
+  if (iter == blockevents.end())
+  {
+    return false;
+  }
 
-   blockevents.erase(iter);
-   return true;
+  blockevents.erase(iter);
+
+  return true;
 }
