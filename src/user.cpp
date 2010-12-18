@@ -212,23 +212,21 @@ User::~User()
   }
 }
 
-
 bool User::sendLoginInfo()
 {
-  std::string player = temp_nick;
-  User* user = this;
+  std::string player = nick;
 
-  user->changeNick(player);
+  changeNick(player);
 
   //Load user data
-  user->loadData();
+  loadData();
 
   //Login OK package
-  user->buffer << (sint8)PACKET_LOGIN_RESPONSE
-               << (sint32)user->UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
+  buffer << (sint8)PACKET_LOGIN_RESPONSE
+         << (sint32)UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
 
   //Send server time (after dawn)
-  user->buffer << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
+  buffer << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
 
   //Inventory
   for(sint32 invType=-1; invType != -4; invType--)
@@ -238,30 +236,30 @@ bool User::sendLoginInfo()
 
     if(invType == -1)
     {
-      inventory = user->inv.main;
+      inventory = inv.main;
       inventoryCount = 36;
     }
     else if(invType == -2)
     {
-      inventory = user->inv.equipped;
+      inventory = inv.equipped;
       inventoryCount = 4;
     }
     else if(invType == -3)
     {
-      inventory = user->inv.crafting;
+      inventory = inv.crafting;
       inventoryCount = 4;
     }
-    user->buffer << (sint8)PACKET_PLAYER_INVENTORY << invType << inventoryCount;
+    buffer << (sint8)PACKET_PLAYER_INVENTORY << invType << inventoryCount;
 
     for(int i=0; i<inventoryCount; i++)
     {
       if(inventory[i].count)
       {
-        user->buffer << (sint16)inventory[i].type << (sint8)inventory[i].count << (sint16)inventory[i].health;
+        buffer << (sint16)inventory[i].type << (sint8)inventory[i].count << (sint16)inventory[i].health;
       }
       else
       {
-        user->buffer << (sint16)-1;
+        buffer << (sint16)-1;
       }
     }
   }
@@ -276,34 +274,34 @@ bool User::sendLoginInfo()
     // If not commentline
     if(temp[0] != COMMENTPREFIX)
     {
-      user->buffer << (sint8)PACKET_CHAT_MESSAGE << temp;
+      buffer << (sint8)PACKET_CHAT_MESSAGE << temp;
     }
   }
   motdfs.close();
 
   //Teleport player
-  user->teleport(user->pos.x, user->pos.y+2, user->pos.z);
+  teleport(pos.x, pos.y+2, pos.z);
 
   //Put nearby chunks to queue
-  for(int x = -user->viewDistance; x <= user->viewDistance; x++)
+  for(int x = -viewDistance; x <= viewDistance; x++)
   {
-    for(int z = -user->viewDistance; z <= user->viewDistance; z++)
+    for(int z = -viewDistance; z <= viewDistance; z++)
     {
-      user->addQueue((sint32)user->pos.x/16+x, (sint32)user->pos.z/16+z);
+      addQueue((sint32)pos.x/16+x, (sint32)pos.z/16+z);
     }
   }
   // Push chunks to user
-  user->pushMap();
+  pushMap();
 
-  //Spawn this user to others
-  user->spawnUser((sint32)user->pos.x*32, ((sint32)user->pos.y+2)*32, (sint32)user->pos.z*32);
-  //Spawn other users for connected user
-  user->spawnOthers();
+  // Spawn this user to others
+  spawnUser((sint32)pos.x*32, ((sint32)pos.y+2)*32, (sint32)pos.z*32);
+  // Spawn other users for connected user
+  spawnOthers();
 
-  user->sethealth(user->health);
-  user->logged = true;
+  sethealth(health);
+  logged = true;
 
-  Chat::get()->sendMsg(user, player+" connected!", Chat::ALL);
+  Chat::get()->sendMsg(this, player+" connected!", Chat::ALL);
 
   return true;
 }
@@ -315,6 +313,7 @@ bool User::kick(std::string kickMsg)
   Screen::get()->log(nick + " kicked. Reason: " + kickMsg);
   return true;
 }
+
 bool User::mute(std::string muteMsg)
 {
   if(!muteMsg.empty())
@@ -331,6 +330,7 @@ bool User::mute(std::string muteMsg)
   Screen::get()->log(nick + " muted. Reason: " + muteMsg);
   return true;
 }
+
 bool User::unmute()
 {
     Chat::get()->sendMsg(this, MC_COLOR_YELLOW + "You have been unmuted.", Chat::USER);
@@ -338,6 +338,7 @@ bool User::unmute()
     Screen::get()->log(nick + " unmuted. ");
     return true;
 }
+
 bool User::toggleDND()
 {
   if(!this->dnd)
@@ -356,6 +357,7 @@ bool User::toggleDND()
   }
   return this->dnd;
 }
+
 bool User::isAbleToCommunicate(std::string communicateCommand)
 {
   // Check if this is chat or a regular command and prefix with a slash accordingly
@@ -373,6 +375,7 @@ bool User::isAbleToCommunicate(std::string communicateCommand)
   }
   return true;
 }
+
 bool User::loadData()
 {
   std::string infile = Map::get()->mapDirectory+"/players/"+this->nick+".dat";

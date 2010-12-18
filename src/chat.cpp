@@ -198,7 +198,9 @@ bool Chat::handleMsg(User* user, std::string msg)
   std::string timeStamp (asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
-  if (Plugin::get()->hookChatRecv.doOne(timeStamp, user, msg))
+  bool blockMessage = false;
+  Plugin::get()->hookChat.doUntilFalse(user, timeStamp, msg, &blockMessage);
+  if (blockMessage)
   {
     return false;
   }

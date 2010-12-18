@@ -128,13 +128,6 @@ private:
   Events callbacks;
 };
 
-#define CALLBACK_CHAT_RECV 1
-#define CALLBACK_DIGGING_STARTED 11
-#define CALLBACK_DIGGING 12
-#define CALLBACK_DIGGING_STOPPED 13
-#define CALLBACK_BLOCK_BROKEN 21
-#define CALLBACK_BLOCK_NEIGHBOUR_BROKEN 22
-
 class Plugin
 {
 public:
@@ -150,12 +143,16 @@ public:
   bool loadExternal(const std::string name, const std::string file);
   void unloadExternal(const std::string name);
 
-  Hook3<bool,std::string,User*,std::string> hookChatRecv;
+  Hook3<bool,User*,bool*,std::string*> hookLogin;
+  Hook4<bool,User*,std::string,std::string,bool*> hookChat;
   Hook4<void,User*,sint32,sint8,sint32> hookDiggingStarted;
   Hook4<void,User*,sint32,sint8,sint32> hookDigging;
   Hook4<void,User*,sint32,sint8,sint32> hookDiggingStopped;
   Hook4<void,User*,sint32,sint8,sint32> hookBlockBroken;
   Hook5<void,User*,sint32,sint8,sint32,int> hookBlockNeighbourBroken;
+  Hook5<void,User*,sint32,sint8,sint32,sint16> hookBlockPlace;
+  Hook6<void,User*,sint32,sint8,sint32,sint16,sint16> hookBlockReplace;
+  Hook4<void,User*,sint32,sint8,sint32> hookBlockNeighbourPlace;
 
   // Old code
   // This needs to be phased over to the new plugin architecture

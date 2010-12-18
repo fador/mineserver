@@ -180,11 +180,12 @@ void Map::init()
     root->SaveToFile(infile);
   }
 
+#ifdef _DEBUG
   trees->Print();
+  Screen::get()->log(dtos((*tree_list).size()) + " saplings");
+#endif
 
   std::vector<NBT_Value*>* tree_list = trees->GetList();
-
-  Screen::get()->log(dtos((*tree_list).size()) + " saplings");
 
   for(std::vector<NBT_Value*>::iterator iter = (*tree_list).begin(); iter != (*tree_list).end(); ++iter)
   {
