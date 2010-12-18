@@ -269,11 +269,6 @@ void Plugin::init()
   /* BLOCK_SNOW_BLOCK */
 }
 
-void registerExternal(int hookId, void* function)
-{
-  return;
-}
-
 bool Plugin::loadExternal(const std::string name, const std::string file)
 {
   LIBRARY_HANDLE lhandle = NULL;
@@ -314,6 +309,38 @@ void Plugin::unloadExternal(const std::string name)
   else
   {
     Screen::get()->log("Plugin "+name+" not loaded!");
+  }
+}
+
+bool Plugin::hasPointer(const std::string name)
+{
+  std::map<const std::string, void*>::iterator it_a;
+  std::map<const std::string, void*>::iterator it_b;
+  for (it_a=m_registry.begin();it_a!=it_b;++it_a)
+  {
+    if (it_a->first == name)
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void Plugin::setPointer(const std::string name, void* pointer)
+{
+  m_registry[name] = pointer;
+}
+
+void* Plugin::getPointer(const std::string name)
+{
+  if (hasPointer(name))
+  {
+    return m_registry[name];
+  }
+  else
+  {
+    return NULL;
   }
 }
 

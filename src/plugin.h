@@ -140,8 +140,13 @@ public:
     return m_plugin;
   }
 
+  // Un/Load external plugins
   bool loadExternal(const std::string name, const std::string file);
   void unloadExternal(const std::string name);
+  // Pointer registry stuff, so plugins can be stateful
+  bool hasPointer(const std::string name);
+  void setPointer(const std::string name, void* pointer);
+  void* getPointer(const std::string name);
 
   Hook3<bool,User*,bool*,std::string*> hookLogin;
   Hook4<bool,User*,std::string,std::string,bool*> hookChat;
@@ -169,7 +174,7 @@ private:
   Plugin() {}
   static Plugin* m_plugin;
   std::map<const std::string, LIBRARY_HANDLE> m_libraryHandles;
-  std::map<const std::string, int> m_libraryHandleRefs;
+  std::map<const std::string, void*> m_registry;
 
   typedef std::map<sint16, Callback> Callbacks;
   Callbacks blockevents;
