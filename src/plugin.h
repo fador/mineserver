@@ -57,11 +57,13 @@
 #define LIBRARY_HANDLE HINSTANCE
 #define LIBRARY_LOAD(x) LoadLibrary(x)
 #define LIBRARY_SYMBOL(x, y) GetProcAddress(x, y)
+#define LIBRARY_ERROR() GetLastError()
 #define LIBRARY_CLOSE(x) FreeLibrary(x)
 #else
 #define LIBRARY_HANDLE void*
 #define LIBRARY_LOAD(x) dlopen(x, RTLD_LAZY)
 #define LIBRARY_SYMBOL(x, y) dlsym(x, y)
+#define LIBRARY_ERROR() dlerror()
 #define LIBRARY_CLOSE(x) dlclose(x)
 #endif
 //
@@ -147,6 +149,7 @@ public:
   bool hasPointer(const std::string name);
   void setPointer(const std::string name, void* pointer);
   void* getPointer(const std::string name);
+  void remPointer(const std::string name);
 
   Hook3<bool,User*,bool*,std::string*> hookLogin;
   Hook4<bool,User*,std::string,std::string,bool*> hookChat;
@@ -176,6 +179,7 @@ private:
   std::map<const std::string, LIBRARY_HANDLE> m_libraryHandles;
   std::map<const std::string, void*> m_registry;
 
+  // Old stuff
   typedef std::map<sint16, Callback> Callbacks;
   Callbacks blockevents;
 };

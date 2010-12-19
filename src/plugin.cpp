@@ -25,6 +25,14 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "sys/stat.h"
+
+#ifdef WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
+
 #include "plugin.h"
 #include "logger.h"
 #include "blocks/default.h"
@@ -39,12 +47,6 @@
 #include "blocks/sign.h"
 #include "blocks/tracks.h"
 #include "blocks/chest.h"
-
-#ifdef WIN32
-#include <windows.h>
-#else
-#include <dlfcn.h>
-#endif
 
 Plugin* Plugin::m_plugin;
 
@@ -276,10 +278,18 @@ bool Plugin::loadExternal(const std::string name, const std::string file)
 
   Screen::get()->log("Loading plugin "+name+" ("+file+")...");
 
+  struct stat st;
+  if(stat(file.c_str(), &st) != 0)
+  {
+    Screen::get()->log("Could not find "+file+"!");
+    return false;
+  }
+
   lhandle = LIBRARY_LOAD(file.c_str());
   if (lhandle == NULL)
   {
-    Screen::get()->log("Could not load "+name+"!");
+    Screen::get()->log("Could not load "+file+"!");
+    Screen::get()->log(LIBRARY_ERROR());
     return false;
   }
 
@@ -288,7 +298,7 @@ bool Plugin::loadExternal(const std::string name, const std::string file)
   fhandle = (void (*)()) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
   if (fhandle == NULL)
   {
-    Screen::get()->log("Could not get function handle!");
+    Screen::get()->log("Could not get init function handle!");
     unloadExternal(name);
     return false;
   }
@@ -300,9 +310,25 @@ bool Plugin::loadExternal(const std::string name, const std::string file)
 
 void Plugin::unloadExternal(const std::string name)
 {
-  if (m_libraryHandles.count(name) > 0)
+  LIBRARY_HANDLE lhandle = NULL;
+  void (*fhandle)() = NULL;
+
+  if (m_libraryHandles[name] != NULL)
   {
     Screen::get()->log("Unloading plugin "+name+"...");
+
+    lhandle = m_libraryHandles[name];
+    fhandle = (void (*)()) LIBRARY_SYMBOL(lhandle, (name+"_shutdown").c_str());
+    if (fhandle == NULL)
+    {
+      Screen::get()->log("Could not get shutdown function handle!");
+    }
+    else
+    {
+      Screen::get()->log("Calling shutdown function for "+name+".");
+      fhandle();
+    }
+
     LIBRARY_CLOSE(m_libraryHandles[name]);
     m_libraryHandles.erase(name);
   }
@@ -341,6 +367,14 @@ void* Plugin::getPointer(const std::string name)
   else
   {
     return NULL;
+  }
+}
+
+void Plugin::remPointer(const std::string name)
+{
+  if (hasPointer(name))
+  {
+    m_registry.erase(name);
   }
 }
 
