@@ -1,6 +1,7 @@
 # admins
 [Server]
-
+Sepheus
+NoxmasterV
 # ops
 
 # members
