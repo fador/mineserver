@@ -28,7 +28,10 @@
 #ifndef _USER_H
 #define _USER_H
 
+#include <vector>
+
 #include <event.h>
+
 #include "vec.h"
 #include "tools.h"
 #include "constants.h"

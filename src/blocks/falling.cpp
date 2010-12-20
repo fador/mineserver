@@ -25,8 +25,10 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "falling.h"
 #include "../plugin.h"
+#include "../mineserver.h"
+
+#include "falling.h"
 
 void BlockFalling::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
@@ -54,7 +56,7 @@ void BlockFalling::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
    uint8 oldblock;
    uint8 oldmeta;
 
-   if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
+   if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
       return;
 
    /* Check block below allows blocks placed on top */
@@ -73,8 +75,8 @@ void BlockFalling::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
 
    direction = user->relativeToBlock(x, y, z);
 
-   Map::get()->setBlock(x, y, z, (char)newblock, direction);
-   Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
+   Mineserver::get()->map()->setBlock(x, y, z, (char)newblock, direction);
+   Mineserver::get()->map()->sendBlockChange(x, y, z, (char)newblock, direction);
 
    applyPhysics(user,x,y,z);
 }
@@ -92,7 +94,7 @@ void BlockFalling::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y
   uint8 block;
   uint8 meta;
 
-  if (!Map::get()->getBlock(x, y, z, &block, &meta))
+  if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
   {
     return;
   }
@@ -105,12 +107,12 @@ void BlockFalling::applyPhysics(User* user, sint32 x, sint8 y, sint32 z)
   uint8 fallblock, block;
   uint8 fallmeta, meta;
    
-  if (!Map::get()->getBlock(x, y, z, &fallblock, &fallmeta))
+  if (!Mineserver::get()->map()->getBlock(x, y, z, &fallblock, &fallmeta))
   {
     return;
   }
    
-  while(Map::get()->getBlock(x, y-1, z, &block, &meta))
+  while(Mineserver::get()->map()->getBlock(x, y-1, z, &block, &meta))
   {
     switch(block)
     {
@@ -127,13 +129,13 @@ void BlockFalling::applyPhysics(User* user, sint32 x, sint8 y, sint32 z)
      }
 
      // Destroy original block
-     Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-     Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+     Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+     Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
 
      y--;
 
-     Map::get()->setBlock(x, y, z, fallblock, fallmeta);
-     Map::get()->sendBlockChange(x, y, z, fallblock, fallmeta);
+     Mineserver::get()->map()->setBlock(x, y, z, fallblock, fallmeta);
+     Mineserver::get()->map()->sendBlockChange(x, y, z, fallblock, fallmeta);
 
      this->notifyNeighbours(x, y+1, z, "onNeighbourMove", user, block, BLOCK_BOTTOM);
    }

@@ -79,8 +79,7 @@ struct spawnedItem
 
 class Map
 {
-private:
-
+public:
   Map()
   {
     for(int i = 0; i < 256; i++)
@@ -184,12 +183,7 @@ private:
 
       delete root;
     }
-
-
   }
-  static Map* _instance;
-
-public:
 
   std::string mapDirectory;
 
@@ -232,7 +226,6 @@ public:
 //  void idToPos(uint32 id, int *x, int *z);
 
   void init();
-  void free();
   void sendToUser(User *user, int x, int z);
 
   //Time in the map
@@ -291,14 +284,6 @@ public:
   void createPickupSpawn(int x, int y, int z, int type, int count);
 
   void setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value* entity);
-
-  static Map* get()
-  {
-    if(!_instance) {
-      _instance = new Map();
-    }
-    return _instance;
-  }
 };
 
 #endif

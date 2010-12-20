@@ -25,14 +25,15 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "chest.h"
-
+#include "../mineserver.h"
 #include "../chat.h"
 #include "../nbt.h"
 #include "../map.h"
 #include "../logger.h"
 #include "../tools.h"
 #include "../user.h"
+
+#include "chest.h"
 
 void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
@@ -42,7 +43,7 @@ void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, s
     int chunk_x = blockToChunk(x);
     int chunk_z = blockToChunk(z);
 
-    sChunk *chunk = Map::get()->loadMap(chunk_x, chunk_z);
+    sChunk *chunk = Mineserver::get()->map()->loadMap(chunk_x, chunk_z);
 
     if(chunk == NULL)
     {
@@ -134,7 +135,7 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
   uint8 block;
   uint8 meta;
 
-  if (!Map::get()->getBlock(x, y, z, &block, &meta))
+  if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
     return;
 
   bool destroy = false;
@@ -142,7 +143,7 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
   int chunk_x = blockToChunk(x);
   int chunk_z = blockToChunk(z);
 
-  sChunk *chunk = Map::get()->loadMap(chunk_x, chunk_z);
+  sChunk *chunk = Mineserver::get()->map()->loadMap(chunk_x, chunk_z);
    
   if(chunk == NULL)
 	  return;
@@ -196,8 +197,8 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
 
   if(destroy) 
   {
-    Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-    Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+    Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+    Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
     this->spawnBlockItem(x,y,z,block);
     // TODO: spawn items in chest
   } else {
@@ -214,7 +215,7 @@ void BlockChest::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
   uint8 oldblock;
   uint8 oldmeta;
 
-  if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
     return;
 
   /* Check block below allows blocks placed on top */
@@ -242,10 +243,10 @@ void BlockChest::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
   NBT_Value *nbtItems = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
   val->Insert("Items", nbtItems);
   
-  Map::get()->setBlock(x, y, z, (char)newblock, direction);
-  Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
+  Mineserver::get()->map()->setBlock(x, y, z, (char)newblock, direction);
+  Mineserver::get()->map()->sendBlockChange(x, y, z, (char)newblock, direction);
   
-  Map::get()->setComplexEntity(user, x, y, z, val);
+  Mineserver::get()->map()->setComplexEntity(user, x, y, z, val);
 }
 
 void BlockChest::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)

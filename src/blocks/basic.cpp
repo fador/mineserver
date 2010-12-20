@@ -25,11 +25,13 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "basic.h"
-
-#include "../plugin.h"
 #include <cmath>
 #include <cstdlib>
+
+#include "../mineserver.h"
+#include "../plugin.h"
+
+#include "basic.h"
 
 bool BlockBasic::isBlockStackable(const uint8 block)
 {
@@ -108,7 +110,7 @@ bool BlockBasic::isBlockEmpty(const sint32 x, const sint8 y, const sint32 z)
 {
   uint8 block;
   uint8 meta;
-  return Map::get()->getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR;
+  return Mineserver::get()->map()->getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR;
 }
 
 bool BlockBasic::spawnBlockItem(const sint32 x, const sint8 y, const sint32 z, const uint8 block)
@@ -120,7 +122,7 @@ bool BlockBasic::spawnBlockItem(const sint32 x, const sint8 y, const sint32 z, c
 
     if (count)
     {
-      Map::get()->createPickupSpawn(x, y, z, item_id, count);
+      Mineserver::get()->map()->createPickupSpawn(x, y, z, item_id, count);
       return true;
     }
   }
@@ -134,37 +136,37 @@ void BlockBasic::notifyNeighbours(const sint32 x, const sint8 y, const sint32 z,
   uint8 meta;
   Function::invoker_type inv(user, oldblock, x, y, z, 0);
 
-  if (ignore_direction != BLOCK_SOUTH && Map::get()->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
+  if (ignore_direction != BLOCK_SOUTH && Mineserver::get()->map()->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
   {
     inv = Function::invoker_type(user, oldblock, x+1, y, z, BLOCK_SOUTH);
     Plugin::get()->runBlockCallback(block, callback, inv);
   }
 
-  if (ignore_direction != BLOCK_NORTH && Map::get()->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
+  if (ignore_direction != BLOCK_NORTH && Mineserver::get()->map()->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
   {
     inv = Function::invoker_type(user, oldblock, x-1, y, z, BLOCK_NORTH);
     Plugin::get()->runBlockCallback(block, callback, inv);
   }
 
-  if (ignore_direction != BLOCK_TOP && Map::get()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
+  if (ignore_direction != BLOCK_TOP && Mineserver::get()->map()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
   {
     inv = Function::invoker_type(user, oldblock, x, y+1, z, BLOCK_TOP);
     Plugin::get()->runBlockCallback(block, callback, inv);
   }
 
-  if (ignore_direction != BLOCK_BOTTOM && Map::get()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
+  if (ignore_direction != BLOCK_BOTTOM && Mineserver::get()->map()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
   {
     inv = Function::invoker_type(user, oldblock, x, y-1, z, BLOCK_BOTTOM);
     Plugin::get()->runBlockCallback(block, callback, inv);
   }
 
-  if (ignore_direction != BLOCK_WEST && Map::get()->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
+  if (ignore_direction != BLOCK_WEST && Mineserver::get()->map()->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
   {
     inv = Function::invoker_type(user, oldblock, x, y, z+1, BLOCK_WEST);
     Plugin::get()->runBlockCallback(block, callback, inv);
   }
 
-  if (ignore_direction != BLOCK_EAST && Map::get()->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
+  if (ignore_direction != BLOCK_EAST && Mineserver::get()->map()->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
   {
     inv = Function::invoker_type(user, oldblock, x, y, z-1, BLOCK_EAST);
     Plugin::get()->runBlockCallback(block, callback, inv);

@@ -162,10 +162,10 @@ void MapGen::generateChunk(int x, int z)
   main->Insert("Level", val);
   
 /*  uint32 chunkid;
-  Map::get()->posToId(x, z, &chunkid);
+  Mineserver::get()->map()->posToId(x, z, &chunkid);
   
-  Map::get()->maps[chunkid].x = x;
-  Map::get()->maps[chunkid].z = z; */
+  Mineserver::get()->map()->maps[chunkid].x = x;
+  Mineserver::get()->map()->maps[chunkid].z = z; */
 
   std::vector<uint8> *t_blocks = (*val)["Blocks"]->GetByteArray();
   std::vector<uint8> *t_data = (*val)["Data"]->GetByteArray();
@@ -183,15 +183,15 @@ void MapGen::generateChunk(int x, int z)
   chunk->x = x;
   chunk->z = z;
 
-  Map::get()->chunks.LinkChunk(chunk, x, z);
+  Mineserver::get()->map()->chunks.LinkChunk(chunk, x, z);
 
   // Update last used time
-  //Map::get()->mapLastused[chunkid] = (int)time(0);
+  //Mineserver::get()->map()->mapLastused[chunkid] = (int)time(0);
 
   // Not changed
-  //Map::get()->mapChanged[chunkid] = Conf::get()->bValue("save_unchanged_chunks");
+  //Mineserver::get()->map()->mapChanged[chunkid] = Conf::get()->bValue("save_unchanged_chunks");
   
-  //Map::get()->maps[chunkid].nbt = main;
+  //Mineserver::get()->map()->maps[chunkid].nbt = main;
 }
 
 //#define PRINT_MAPGEN_TIME
@@ -324,15 +324,15 @@ void MapGen::AddBeaches()
         uint8 block;
         uint8 meta;
 
-        Map::get()->sendBlockChange(x, h, z, BLOCK_WATER, 0);
-        Map::get()->setBlock(x, h, z, BLOCK_WATER, 0);
+        Mineserver::get()->map()->sendBlockChange(x, h, z, BLOCK_WATER, 0);
+        Mineserver::get()->map()->setBlock(x, h, z, BLOCK_WATER, 0);
         
-        Map::get()->getBlock(x, h-1, z, &block, &meta);
+        Mineserver::get()->map()->getBlock(x, h-1, z, &block, &meta);
         
         if( h > 0 && block == BLOCK_DIRT )
         {
-          Map::get()->sendBlockChange(x, h-1, z, BLOCK_WATER, 0);
-          Map::get()->setBlock(x, h-1, z, BLOCK_WATER, 0);
+          Mineserver::get()->map()->sendBlockChange(x, h-1, z, BLOCK_WATER, 0);
+          Mineserver::get()->map()->setBlock(x, h-1, z, BLOCK_WATER, 0);
         }
       }
     }

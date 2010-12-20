@@ -437,7 +437,7 @@ int PacketHandler::player_digging(User *user)
 
   user->buffer.removePacket();
 
-  if(!Map::get()->getBlock(x, y, z, &block, &meta))
+  if(!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
   {
     return PACKET_OK;
   }
@@ -471,42 +471,42 @@ int PacketHandler::player_digging(User *user)
 
       /* notify neighbour blocks of the broken block */
       status = block;
-      if (Map::get()->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
+      if (Mineserver::get()->map()->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
       {
         Plugin::get()->hookBlockNeighbourBroken.doAll(user, x+1, y, z, BLOCK_SOUTH);
         inv = Function::invoker_type(user, status, x+1, y, z, BLOCK_SOUTH);
         Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
       }
 
-      if (Map::get()->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
+      if (Mineserver::get()->map()->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
       {
         Plugin::get()->hookBlockNeighbourBroken.doAll(user, x-1, y, z, BLOCK_NORTH);
         inv = Function::invoker_type(user, status, x-1, y, z, BLOCK_NORTH);
         Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
       }
 
-      if (Map::get()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
+      if (Mineserver::get()->map()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
       {
         Plugin::get()->hookBlockNeighbourBroken.doAll(user, x, y+1, z, BLOCK_TOP);
         inv = Function::invoker_type(user, status, x, y+1, z, BLOCK_TOP);
         Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
       }
 
-      if (Map::get()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
+      if (Mineserver::get()->map()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
       {
         Plugin::get()->hookBlockNeighbourBroken.doAll(user, x, y-1, z, BLOCK_BOTTOM);
         inv = Function::invoker_type(user, status, x, y-1, z, BLOCK_BOTTOM);
         Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
       }
 
-      if (Map::get()->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
+      if (Mineserver::get()->map()->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
       {
         Plugin::get()->hookBlockNeighbourBroken.doAll(user, x, y, z+1, BLOCK_WEST);
         inv = Function::invoker_type(user, status, x, y, z+1, BLOCK_WEST);
         Plugin::get()->runBlockCallback(block, "onNeighbourBroken", inv);
       }
 
-      if (Map::get()->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
+      if (Mineserver::get()->map()->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
       {
         Plugin::get()->hookBlockNeighbourBroken.doAll(user, x, y, z-1, BLOCK_EAST);
         inv = Function::invoker_type(user, status, x, y, z-1, BLOCK_EAST);
@@ -548,7 +548,7 @@ int PacketHandler::player_block_placement(User *user)
   }
 
   // Minecart testing!!
-  if(newblock == ITEM_MINECART && Map::get()->getBlock(x, y, z, &oldblock, &metadata))
+  if(newblock == ITEM_MINECART && Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &metadata))
   {
     if (oldblock != BLOCK_MINECART_TRACKS)
     {
@@ -587,7 +587,7 @@ int PacketHandler::player_block_placement(User *user)
   Function event;
   Function::invoker_type inv(user, newblock, x, y, z, direction);
 
-  if (Map::get()->getBlock(x, y, z, &oldblock, &metadata))
+  if (Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &metadata))
   {
     uint8 oldblocktop;
     uint8 metadatatop;
@@ -617,7 +617,7 @@ int PacketHandler::player_block_placement(User *user)
       break;
     }
 
-    if (Map::get()->getBlock(check_x, check_y, check_z, &oldblocktop, &metadatatop) && (oldblocktop == BLOCK_LAVA || oldblocktop == BLOCK_STATIONARY_LAVA || oldblocktop == BLOCK_WATER || oldblocktop == BLOCK_STATIONARY_WATER))
+    if (Mineserver::get()->map()->getBlock(check_x, check_y, check_z, &oldblocktop, &metadatatop) && (oldblocktop == BLOCK_LAVA || oldblocktop == BLOCK_STATIONARY_LAVA || oldblocktop == BLOCK_WATER || oldblocktop == BLOCK_STATIONARY_WATER))
     {
       /* block above needs replacing rather then the block sent by the client */
       inv = Function::invoker_type(user, newblock, check_x, check_y, check_z, direction);
@@ -640,42 +640,42 @@ int PacketHandler::player_block_placement(User *user)
     Plugin::get()->hookBlockPlace.doAll(user, x, y, z, newblock);
 
     /* notify neighbour blocks of the placed block */
-    if (Map::get()->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
+    if (Mineserver::get()->map()->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
     {
       inv = Function::invoker_type(user, newblock, x+1, y, z, BLOCK_SOUTH);
       Plugin::get()->runBlockCallback(block, "onNeighbourPlace", inv);
       Plugin::get()->hookBlockNeighbourPlace.doAll(user, x, y, z);
     }
 
-    if (Map::get()->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
+    if (Mineserver::get()->map()->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
     {
       inv = Function::invoker_type(user, newblock, x-1, y, z, BLOCK_NORTH);
       Plugin::get()->runBlockCallback(block, "onNeighbourPlace", inv);
       Plugin::get()->hookBlockNeighbourPlace.doAll(user, x, y, z);
     }
 
-    if (Map::get()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
+    if (Mineserver::get()->map()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
     {
       inv = Function::invoker_type(user, newblock, x, y+1, z, BLOCK_TOP);
       Plugin::get()->runBlockCallback(block, "onNeighbourPlace", inv);
       Plugin::get()->hookBlockNeighbourPlace.doAll(user, x, y, z);
     }
 
-    if (Map::get()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
+    if (Mineserver::get()->map()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
     {
       inv = Function::invoker_type(user, newblock, x, y-1, z, BLOCK_BOTTOM);
       Plugin::get()->runBlockCallback(block, "onNeighbourPlace", inv);
       Plugin::get()->hookBlockNeighbourPlace.doAll(user, x, y, z);
     }
 
-    if (Map::get()->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
+    if (Mineserver::get()->map()->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
     {
       inv = Function::invoker_type(user, newblock, x, y, z+1, BLOCK_WEST);
       Plugin::get()->runBlockCallback(block, "onNeighbourPlace", inv);
       Plugin::get()->hookBlockNeighbourPlace.doAll(user, x, y, z);
     }
 
-    if (Map::get()->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
+    if (Mineserver::get()->map()->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
     {
       inv = Function::invoker_type(user, newblock, x, y, z-1, BLOCK_EAST);
       Plugin::get()->runBlockCallback(block, "onNeighbourPlace", inv);
@@ -768,7 +768,7 @@ int PacketHandler::pickup_spawn(User *user)
   int z = int(sin(angle) * distanceToThrow + cos(angle) * distanceToThrow);
   item.pos += vec(x, 0, z);
 
-  Map::get()->sendPickupSpawn(item);
+  Mineserver::get()->map()->sendPickupSpawn(item);
 
   return PACKET_OK;
 }
@@ -833,7 +833,7 @@ int PacketHandler::complex_entities(User *user)
   user->buffer.removePacket();
 
   uint8 block, meta;
-  Map::get()->getBlock(x, y, z, &block, &meta);
+  Mineserver::get()->map()->getBlock(x, y, z, &block, &meta);
 
   //We only handle chest for now
   if(block != BLOCK_CHEST && block != BLOCK_FURNACE && block != BLOCK_BURNING_FURNACE &&
@@ -894,7 +894,7 @@ int PacketHandler::complex_entities(User *user)
   }
   else
   {
-    Map::get()->setComplexEntity(user, x, y, z, entity);
+    Mineserver::get()->map()->setComplexEntity(user, x, y, z, entity);
   }
 
   delete [] buffer;
@@ -962,7 +962,7 @@ int PacketHandler::respawn(User *user)
 {
   user->dropInventory();
   user->respawn();
-  user->teleport(Map::get()->spawnPos.x(), Map::get()->spawnPos.y() + 2, Map::get()->spawnPos.z());
+  user->teleport(Mineserver::get()->map()->spawnPos.x(), Mineserver::get()->map()->spawnPos.y() + 2, Mineserver::get()->map()->spawnPos.z());
   user->buffer.removePacket();
   return PACKET_OK;
 }

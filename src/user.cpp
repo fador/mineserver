@@ -76,9 +76,9 @@ User::User(int sock, uint32 EID)
   this->logged          = false;
   // ENABLED FOR DEBUG
 
-  this->pos.x           = Map::get()->spawnPos.x();
-  this->pos.y           = Map::get()->spawnPos.y();
-  this->pos.z           = Map::get()->spawnPos.z();
+  this->pos.x           = Mineserver::get()->map()->spawnPos.x();
+  this->pos.y           = Mineserver::get()->map()->spawnPos.y();
+  this->pos.z           = Mineserver::get()->map()->spawnPos.z();
   this->write_err_count = 0;
   this->health          = 20;
   this->attachedTo      = 0;
@@ -87,7 +87,7 @@ User::User(int sock, uint32 EID)
   // Ignore this user if it's the server console
   if(this->UID != SERVER_CONSOLE_UID)
   {
-    Mineserver::get().users().push_back(this);
+    Mineserver::get()->users().push_back(this);
   }
 }
 
@@ -96,23 +96,23 @@ bool User::changeNick(std::string _nick)
   nick = _nick;
 
   // Update the player list with the new name!
-  Mineserver::get().updatePlayerList();
+  Mineserver::get()->updatePlayerList();
 
   return true;
 }
 
 User::~User()
 {
-  for(std::vector<User*>::iterator it = Mineserver::get().users().begin();
-      it != Mineserver::get().users().end();
+  for(std::vector<User*>::iterator it = Mineserver::get()->users().begin();
+      it != Mineserver::get()->users().end();
       it++)
   {
     if((*it) == this)
     {
-      Mineserver::get().users().erase(it);
+      Mineserver::get()->users().erase(it);
 
       // Update the player list
-      Mineserver::get().updatePlayerList();
+      Mineserver::get()->updatePlayerList();
 
       break;
     }
@@ -124,13 +124,13 @@ User::~User()
     {
       for(int mapz = -viewDistance+curChunk.z(); mapz <= viewDistance+curChunk.z(); mapz++)
       {
-        sChunk* chunk = Map::get()->chunks.GetChunk(mapx, mapz);
+        sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(mapx, mapz);
         if(chunk != NULL)
         {
           chunk->users.erase(this);
           if(chunk->users.size() == 0)
           {
-            Map::get()->releaseMap(mapx, mapz);
+            Mineserver::get()->map()->releaseMap(mapx, mapz);
           }
         }
       }
@@ -161,7 +161,7 @@ bool User::sendLoginInfo()
          << (sint32)UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
 
   //Send server time (after dawn)
-  buffer << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
+  buffer << (sint8)PACKET_TIME_UPDATE << (sint64)Mineserver::get()->map()->mapTime;
 
   //Inventory
   for(sint32 invType=-1; invType != -4; invType--)
@@ -313,7 +313,7 @@ bool User::isAbleToCommunicate(std::string communicateCommand)
 
 bool User::loadData()
 {
-  std::string infile = Map::get()->mapDirectory+"/players/"+this->nick+".dat";
+  std::string infile = Mineserver::get()->map()->mapDirectory+"/players/"+this->nick+".dat";
 
   struct stat stFileInfo;
   if(stat(infile.c_str(), &stFileInfo) != 0)
@@ -387,12 +387,12 @@ bool User::loadData()
 
 bool User::saveData()
 {
-  std::string outfile = Map::get()->mapDirectory+"/players/"+this->nick+".dat";
+  std::string outfile = Mineserver::get()->map()->mapDirectory+"/players/"+this->nick+".dat";
   // Try to create parent directories if necessary
   struct stat stFileInfo;
   if(stat(outfile.c_str(), &stFileInfo) != 0)
   {
-    std::string outdir = Map::get()->mapDirectory+"/players";
+    std::string outdir = Mineserver::get()->map()->mapDirectory+"/players";
 
     if(stat(outdir.c_str(), &stFileInfo) != 0)
     {
@@ -517,8 +517,8 @@ bool User::updatePos(double x, double y, double z, double stance)
 
   if(nick.size() && logged)
   {
-    sChunk* newChunk = Map::get()->loadMap(blockToChunk((sint32)x), blockToChunk((sint32)z));
-    sChunk* oldChunk = Map::get()->loadMap(blockToChunk((sint32)pos.x), blockToChunk((sint32)pos.z));
+    sChunk* newChunk = Mineserver::get()->map()->loadMap(blockToChunk((sint32)x), blockToChunk((sint32)z));
+    sChunk* oldChunk = Mineserver::get()->map()->loadMap(blockToChunk((sint32)pos.x), blockToChunk((sint32)pos.z));
     if(newChunk == oldChunk)
     {
       Packet telePacket;
@@ -602,7 +602,7 @@ bool User::updatePos(double x, double y, double z, double stance)
           if(!withinViewDistance(chunkDiffX, oldChunk->x) || !withinViewDistance(chunkDiffZ, oldChunk->z))
           {
             addQueue(mapx, mapz);
-            sChunk* chunk = Map::get()->chunks.GetChunk(mapx, mapz);
+            sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(mapx, mapz);
 
             if(chunk != NULL)
             {
@@ -614,7 +614,7 @@ bool User::updatePos(double x, double y, double z, double stance)
           {
             addRemoveQueue(mapx-chunkDiffX, mapz-chunkDiffZ);
 
-            sChunk* chunk = Map::get()->chunks.GetChunk((mapx - chunkDiffX), (mapz - chunkDiffZ));
+            sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk((mapx - chunkDiffX), (mapz - chunkDiffZ));
 
             if(chunk != NULL)
             {
@@ -711,7 +711,7 @@ bool User::updatePos(double x, double y, double z, double stance)
               buffer << (sint8)PACKET_ADD_TO_INVENTORY << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint16)(*iter)->health;
 
 
-              Map::get()->items.erase((*iter)->EID);
+              Mineserver::get()->map()->items.erase((*iter)->EID);
               delete *iter;
               iter = newChunk->items.erase(iter);
               end = newChunk->items.end();
@@ -753,7 +753,7 @@ bool User::updateLook(float yaw, float pitch)
   Packet pkt;
   pkt << (sint8)PACKET_ENTITY_LOOK << (sint32)UID << angleToByte(yaw) << angleToByte(pitch);
 
-  sChunk* chunk = Map::get()->chunks.GetChunk(blockToChunk((sint32)pos.x),blockToChunk((sint32)pos.z));
+  sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(blockToChunk((sint32)pos.x),blockToChunk((sint32)pos.z));
   if(chunk != NULL)
   {
     chunk->sendPacket(pkt, this);
@@ -766,14 +766,14 @@ bool User::updateLook(float yaw, float pitch)
 
 bool User::sendOthers(uint8* data, uint32 len)
 {
-  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
   {
-    if(Mineserver::get().users()[i]->fd != this->fd && Mineserver::get().users()[i]->logged)
+    if(Mineserver::get()->users()[i]->fd != this->fd && Mineserver::get()->users()[i]->logged)
     {
       // Don't send to his user if he is DND and the message is a chat message
-      if(!(Mineserver::get().users()[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
+      if(!(Mineserver::get()->users()[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
       {
-        Mineserver::get().users()[i]->buffer.addToWrite(data, len);
+        Mineserver::get()->users()[i]->buffer.addToWrite(data, len);
       }
     }
   }
@@ -816,14 +816,14 @@ sint8 User::relativeToBlock(const sint32 x, const sint8 y, const sint32 z)
 
 bool User::sendAll(uint8* data, uint32 len)
 {
-  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
   {
-    if(Mineserver::get().users()[i]->fd && Mineserver::get().users()[i]->logged)
+    if(Mineserver::get()->users()[i]->fd && Mineserver::get()->users()[i]->logged)
     {
       // Don't send to his user if he is DND and the message is a chat message
-      if(!(Mineserver::get().users()[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
+      if(!(Mineserver::get()->users()[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
       {
-        Mineserver::get().users()[i]->buffer.addToWrite(data, len);
+        Mineserver::get()->users()[i]->buffer.addToWrite(data, len);
       }
     }
   }
@@ -832,11 +832,11 @@ bool User::sendAll(uint8* data, uint32 len)
 
 bool User::sendAdmins(uint8* data, uint32 len)
 {
-  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
   {
-    if(Mineserver::get().users()[i]->fd && Mineserver::get().users()[i]->logged && IS_ADMIN(Mineserver::get().users()[i]->permissions))
+    if(Mineserver::get()->users()[i]->fd && Mineserver::get()->users()[i]->logged && IS_ADMIN(Mineserver::get()->users()[i]->permissions))
     {
-      Mineserver::get().users()[i]->buffer.addToWrite(data, len);
+      Mineserver::get()->users()[i]->buffer.addToWrite(data, len);
     }
   }
   return true;
@@ -844,11 +844,11 @@ bool User::sendAdmins(uint8* data, uint32 len)
 
 bool User::sendOps(uint8* data, uint32 len)
 {
-  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
   {
-    if(Mineserver::get().users()[i]->fd && Mineserver::get().users()[i]->logged && IS_ADMIN(Mineserver::get().users()[i]->permissions))
+    if(Mineserver::get()->users()[i]->fd && Mineserver::get()->users()[i]->logged && IS_ADMIN(Mineserver::get()->users()[i]->permissions))
     {
-      Mineserver::get().users()[i]->buffer.addToWrite(data, len);
+      Mineserver::get()->users()[i]->buffer.addToWrite(data, len);
     }
   }
   return true;
@@ -856,11 +856,11 @@ bool User::sendOps(uint8* data, uint32 len)
 
 bool User::sendGuests(uint8* data, uint32 len)
 {
-  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
   {
-    if(Mineserver::get().users()[i]->fd && Mineserver::get().users()[i]->logged && IS_ADMIN(Mineserver::get().users()[i]->permissions))
+    if(Mineserver::get()->users()[i]->fd && Mineserver::get()->users()[i]->logged && IS_ADMIN(Mineserver::get()->users()[i]->permissions))
     {
-      Mineserver::get().users()[i]->buffer.addToWrite(data, len);
+      Mineserver::get()->users()[i]->buffer.addToWrite(data, len);
     }
   }
   return true;
@@ -905,7 +905,7 @@ bool User::addRemoveQueue(int x, int z)
 bool User::addKnown(int x, int z)
 {
   vec newMap(x, 0, z);
-  sChunk* chunk = Map::get()->chunks.GetChunk(x,z);
+  sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(x,z);
   if(chunk == NULL)
   {
     return false;
@@ -919,13 +919,13 @@ bool User::addKnown(int x, int z)
 
 bool User::delKnown(int x, int z)
 {
-  sChunk* chunk = Map::get()->chunks.GetChunk(x,z);
+  sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(x,z);
   if(chunk != NULL)
   {
     chunk->users.erase(this);
     if(chunk->users.size() == 0)
     {
-      Map::get()->releaseMap(x,z);
+      Mineserver::get()->map()->releaseMap(x,z);
     }
   }
 
@@ -998,7 +998,7 @@ bool User::pushMap()
                static_cast<int>(pos.z / 16));
     sort(mapQueue.begin(), mapQueue.end(), DistanceComparator(target));
 
-    Map::get()->sendToUser(this, mapQueue[0].x(), mapQueue[0].z());
+    Mineserver::get()->map()->sendToUser(this, mapQueue[0].x(), mapQueue[0].z());
 
     // Add this to known list
     addKnown(mapQueue[0].x(), mapQueue[0].z());
@@ -1033,7 +1033,7 @@ bool User::spawnUser(int x, int y, int z)
   pkt << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)UID << nick
       << (sint32)x << (sint32)y << (sint32)z << (sint8)0 << (sint8)0
       << (sint16)0;
-  sChunk*chunk = Map::get()->chunks.GetChunk(blockToChunk(x >> 5), blockToChunk(z >> 5));
+  sChunk*chunk = Mineserver::get()->map()->chunks.GetChunk(blockToChunk(x >> 5), blockToChunk(z >> 5));
   if(chunk != NULL)
     chunk->sendPacket(pkt, this);
   return true;
@@ -1042,12 +1042,12 @@ bool User::spawnUser(int x, int y, int z)
 bool User::spawnOthers()
 {
 
-  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
   {
-    if(Mineserver::get().users()[i]->UID != this->UID && Mineserver::get().users()[i]->nick != this->nick)
+    if(Mineserver::get()->users()[i]->UID != this->UID && Mineserver::get()->users()[i]->nick != this->nick)
     {
-      buffer << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)Mineserver::get().users()[i]->UID << Mineserver::get().users()[i]->nick
-             << (sint32)(Mineserver::get().users()[i]->pos.x * 32) << (sint32)(Mineserver::get().users()[i]->pos.y * 32) << (sint32)(Mineserver::get().users()[i]->pos.z * 32)
+      buffer << (sint8)PACKET_NAMED_ENTITY_SPAWN << (sint32)Mineserver::get()->users()[i]->UID << Mineserver::get()->users()[i]->nick
+             << (sint32)(Mineserver::get()->users()[i]->pos.x * 32) << (sint32)(Mineserver::get()->users()[i]->pos.y * 32) << (sint32)(Mineserver::get()->users()[i]->pos.z * 32)
              << (sint8)0 << (sint8)0 << (sint16)0;
     }
   }
@@ -1076,7 +1076,7 @@ bool User::dropInventory()
   {
     if( inv.main[i].type != 0 )
     {
-      Map::get()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.main[i].type, inv.main[i].count);
+      Mineserver::get()->map()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.main[i].type, inv.main[i].count);
       inv.main[i] = Item();
     }
 
@@ -1084,12 +1084,12 @@ bool User::dropInventory()
     {
       if( inv.equipped[i].type != 0 )
       {
-        Map::get()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.equipped[i].type, inv.equipped[i].count);
+        Mineserver::get()->map()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.equipped[i].type, inv.equipped[i].count);
         inv.equipped[i] = Item();
       }
       if( inv.crafting[i].type != 0 )
       {
-        Map::get()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.crafting[i].type, inv.crafting[i].count);
+        Mineserver::get()->map()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.crafting[i].type, inv.crafting[i].count);
         inv.crafting[i] = Item();
       }
     }
@@ -1102,7 +1102,7 @@ bool User::isUnderwater()
    uint8 topblock, topmeta;
    int y = ( pos.y - int(pos.y) <= 0.25 ) ? (int)pos.y + 1: (int)pos.y + 2;
 
-   Map::get()->getBlock((int)pos.x, y, (int)pos.z, &topblock, &topmeta);
+   Mineserver::get()->map()->getBlock((int)pos.x, y, (int)pos.z, &topblock, &topmeta);
 
    if( topblock == BLOCK_WATER || topblock == BLOCK_STATIONARY_WATER )
    {
@@ -1125,15 +1125,15 @@ struct event* User::GetEvent()
 
 std::vector<User*>& User::all()
 {
-  return Mineserver::get().users();
+  return Mineserver::get()->users();
 }
 
 bool User::isUser(int sock)
 {
   uint8 i;
-  for(i = 0; i < Mineserver::get().users().size(); i++)
+  for(i = 0; i < Mineserver::get()->users().size(); i++)
   {
-    if(Mineserver::get().users()[i]->fd == sock)
+    if(Mineserver::get()->users()[i]->fd == sock)
     {
       return true;
     }
@@ -1145,11 +1145,11 @@ bool User::isUser(int sock)
 User* User::byNick(std::string nick)
 {
   // Get coordinates
-  for(unsigned int i = 0; i < Mineserver::get().users().size(); i++)
+  for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
   {
-    if(strToLower(Mineserver::get().users()[i]->nick) == strToLower(nick))
+    if(strToLower(Mineserver::get()->users()[i]->nick) == strToLower(nick))
     {
-      return Mineserver::get().users()[i];
+      return Mineserver::get()->users()[i];
     }
   }
   return NULL;

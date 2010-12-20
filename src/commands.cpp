@@ -150,12 +150,12 @@ namespace
 void home(User* user, std::string command, std::deque<std::string> args)
 {
   Chat::get()->sendMsg(user, MC_COLOR_BLUE + "Teleported you home!", Chat::USER);
-  user->teleport(Map::get()->spawnPos.x(), Map::get()->spawnPos.y() + 2, Map::get()->spawnPos.z());
+  user->teleport(Mineserver::get()->map()->spawnPos.x(), Mineserver::get()->map()->spawnPos.y() + 2, Mineserver::get()->map()->spawnPos.z());
 }
 
 void saveMap(User* user, std::string command, std::deque<std::string> args)
 {
-  Map::get()->saveWholeMap();
+  Mineserver::get()->map()->saveWholeMap();
   Chat::get()->handleMsg(user, "% Saved map.");
 }
 
@@ -385,9 +385,9 @@ void setTime(User* user, std::string command, std::deque<std::string> args)
       timeValue = "18000";
     }
 
-    Map::get()->mapTime = (sint64)atoi(timeValue.c_str());
+    Mineserver::get()->map()->mapTime = (sint64)atoi(timeValue.c_str());
     Packet pkt;
-    pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
+    pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Mineserver::get()->map()->mapTime;
 
     if(User::all().size())
     {
@@ -525,10 +525,10 @@ void regenerateLighting(User* user, std::string command, std::deque<std::string>
 {
   printf("Regenerating lighting for chunk %d,%d\n", blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
   //First load the map
-  if(Map::get()->loadMap(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z)))
+  if(Mineserver::get()->map()->loadMap(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z)))
   {
     //Then regenerate lighting
-    Map::get()->generateLight(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
+    Mineserver::get()->map()->generateLight(blockToChunk((sint32)user->pos.x), blockToChunk((sint32)user->pos.z));
   }
 }
 
@@ -628,7 +628,7 @@ void giveItems(User* user, std::string command, std::deque<std::string> args)
           item.pos.x() = static_cast<int>(tUser->pos.x * 32);
           item.pos.y() = static_cast<int>(tUser->pos.y * 32);
           item.pos.z() = static_cast<int>(tUser->pos.z * 32);
-          Map::get()->sendPickupSpawn(item);
+          Mineserver::get()->map()->sendPickupSpawn(item);
         }
 
         Chat::get()->sendMsg(user, MC_COLOR_RED + user->nick + " spawned " + args[1], Chat::ADMINS);
@@ -697,7 +697,7 @@ void giveItemsSelf(User* user, std::string command, std::deque<std::string> args
           item.pos.x() = static_cast<int>(tUser->pos.x * 32);
           item.pos.y() = static_cast<int>(tUser->pos.y * 32);
           item.pos.z() = static_cast<int>(tUser->pos.z * 32);
-          Map::get()->sendPickupSpawn(item);
+          Mineserver::get()->map()->sendPickupSpawn(item);
         }
 
         Chat::get()->sendMsg(user, MC_COLOR_RED + user->nick + " spawned " + args[0], Chat::ADMINS);

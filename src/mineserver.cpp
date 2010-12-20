@@ -91,7 +91,7 @@ int setnonblock(int fd)
 //Handle signals
 void sighandler(int sig_num)
 {
-  Mineserver::get().stop();
+  Mineserver::get()->stop();
 }
 
 int main(int argc, char* argv[])
@@ -101,11 +101,12 @@ int main(int argc, char* argv[])
 
   srand(time(NULL));
 
-  return Mineserver::get().run(argc, argv);
+  return Mineserver::get()->run(argc, argv);
 }
 
 Mineserver::Mineserver()
 {
+  m_map = new Map;
 }
 
 event_base* Mineserver::getEventBase()
@@ -115,18 +116,19 @@ event_base* Mineserver::getEventBase()
 
 void Mineserver::updatePlayerList()
 {
-	// Update the player window
-	Screen::get()->updatePlayerList(users());
+  // Update the player window
+  Screen::get()->updatePlayerList(users());
 }
+
 int Mineserver::run(int argc, char *argv[])
 {
   uint32 starttime = (uint32)time(0);
   uint32 tick      = (uint32)time(0);
 
-	// Init our Screen
-	Screen::get()->init(VERSION);
-	Screen::get()->log("Welcome to Mineserver v" + VERSION);
-	updatePlayerList();
+  // Init our Screen
+  Screen::get()->init(VERSION);
+  Screen::get()->log("Welcome to Mineserver v" + VERSION);
+  updatePlayerList();
 
   initConstants();
 
@@ -163,7 +165,7 @@ int Mineserver::run(int argc, char *argv[])
   Physics::get()->enabled = (Conf::get()->bValue("liquid_physics"));
 
   // Initialize map
-  Map::get()->init();
+  Mineserver::get()->map()->init();
 
   if (Conf::get()->bValue("map_generate_spawn"))
   {
@@ -191,7 +193,7 @@ int Mineserver::run(int argc, char *argv[])
 #endif
       for (int z = -size; z <= size; z++)
       {
-        Map::get()->loadMap(x, z);
+        Mineserver::get()->map()->loadMap(x, z);
       }
 
       if(show_progress)
@@ -349,7 +351,7 @@ int Mineserver::run(int argc, char *argv[])
 
         //Send server time
         Packet pkt;
-        pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Map::get()->mapTime;
+        pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Mineserver::get()->map()->mapTime;
         User::all()[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
       }
 
@@ -358,19 +360,19 @@ int Mineserver::run(int argc, char *argv[])
 
       //Release chunks not used in <map_release_time> seconds
    /*   std::vector<uint32> toRelease;
-      for(std::map<uint32, int>::const_iterator it = Map::get()->mapLastused.begin();
-          it != Map::get()->mapLastused.end();
+      for(std::map<uint32, int>::const_iterator it = Mineserver::get()->map()->mapLastused.begin();
+          it != Mineserver::get()->map()->mapLastused.end();
           ++it)
       {
-        if(Map::get()->mapLastused[it->first] <= time(0)-map_release_time)
+        if(Mineserver::get()->map()->mapLastused[it->first] <= time(0)-map_release_time)
           toRelease.push_back(it->first);
       }
 
       int x_temp, z_temp;
       for(unsigned i = 0; i < toRelease.size(); i++)
       {
-        Map::get()->idToPos(toRelease[i], &x_temp, &z_temp);
-        Map::get()->releaseMap(x_temp, z_temp);
+        Mineserver::get()->map()->idToPos(toRelease[i], &x_temp, &z_temp);
+        Mineserver::get()->map()->releaseMap(x_temp, z_temp);
       } */
     }
 
@@ -393,10 +395,10 @@ int Mineserver::run(int argc, char *argv[])
           User::all()[i]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
         }
       }
-      Map::get()->mapTime+=20;
-      if(Map::get()->mapTime>=24000) Map::get()->mapTime=0;
+      Mineserver::get()->map()->mapTime+=20;
+      if(Mineserver::get()->map()->mapTime>=24000) Mineserver::get()->map()->mapTime=0;
 
-      Map::get()->checkGenTrees();
+      Mineserver::get()->map()->checkGenTrees();
 
       // Check for Furnace activity
       FurnaceManager::get()->update();
@@ -430,8 +432,9 @@ int Mineserver::run(int argc, char *argv[])
 #endif
 
   /* Free memory */
+  delete m_map;
+
   PacketHandler::get()->free();
-  Map::get()->free();
   Physics::get()->free();
   FurnaceManager::get()->free();
   Chat::get()->free();
@@ -440,9 +443,8 @@ int Mineserver::run(int argc, char *argv[])
   Logger::get()->free();
   MapGen::get()->free();
 
-	// End our NCurses session
-	Screen::get()->end();
-
+  // End our NCurses session
+  Screen::get()->end();
 
   return EXIT_SUCCESS;
 }
@@ -454,3 +456,12 @@ bool Mineserver::stop()
   return true;
 }
 
+Map* Mineserver::map()
+{
+  return m_map;
+}
+
+void Mineserver::setMap(Map* map)
+{
+  m_map = map;
+}

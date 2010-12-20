@@ -55,8 +55,6 @@
 #include "chat.h"
 
 
-Map* Map::_instance = NULL;
-
 void Map::addSapling(User* user, int x, int y, int z)
 {
   Screen::get()->log("Place sapling " + dtos(x) + " " + dtos(y) + " " + dtos(z));
@@ -208,15 +206,6 @@ void Map::init()
 #ifdef _DEBUG
   Screen::get()->log("Spawn: (" + spawnPos.x() + "," + spawnPos.y() + "," + spawnPos.z() + ")");
 #endif
-}
-
-void Map::free()
-{
-   if (_instance)
-   {
-      delete _instance;
-      _instance = 0;
-   }
 }
 
 sChunk* Map::getMapData(int x, int z, bool generate)
