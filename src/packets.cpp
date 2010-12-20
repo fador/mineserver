@@ -646,7 +646,7 @@ int PacketHandler::player_block_placement(User *user)
   }
 
   #ifdef _DEBUG
-    Screen::get()->log("Block_placement: " + newblock + " (" + dtos(x) + "," + dtos((int)y) + "," + dtos(z) + ") dir: " + dtos((int)direction);
+    Screen::get()->log("Block_placement: " + dtos(newblock) + " (" + dtos(x) + "," + dtos((int)y) + "," + dtos(z) + ") dir: " + dtos((int)direction));
   #endif
 
   if (direction)

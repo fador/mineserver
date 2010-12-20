@@ -205,7 +205,7 @@ bool Conf::load(std::string configFile, std::string namePrefix)
   }
   ifs.close();
   #ifdef _DEBUG
-  Screen::get()->log("Loaded " + lineNum + " lines from " + configFile);
+  Screen::get()->log("Loaded " + dtos(lineNum) + " lines from " + configFile);
   #endif
 
   return true;
