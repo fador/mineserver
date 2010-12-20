@@ -33,6 +33,7 @@
 
 #include "user.h"
 #include "map.h"
+#include "chat.h"
 
 class Mineserver
 {
@@ -61,6 +62,8 @@ public:
 
   Map* map();
   void setMap(Map* map);
+  Chat* chat();
+  void setChat(Chat* chat);
 
 private:
   Mineserver();
@@ -70,6 +73,7 @@ private:
   std::vector<User*> m_users;
 
   Map* m_map;
+  Chat* m_chat;
 };
 
 #endif

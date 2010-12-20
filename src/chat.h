@@ -59,6 +59,9 @@ public:
     Command(std::deque<std::string> _names, std::string _arguments, std::string _description, CommandCallback _callback, int _permissions) : names(_names),arguments(_arguments),description(_description),callback(_callback),permissions(_permissions) {}
   };
 
+  Chat();
+  ~Chat();
+
   bool handleMsg(User* user, std::string msg);
   void handleServerMsg(User* user, std::string msg, const std::string& timeStamp);
   void handleAdminChatMsg(User* user, std::string msg, const std::string& timeStamp);
@@ -71,22 +74,7 @@ public:
   void registerCommand(Command* command);
   void sendHelp(User* user, std::deque<std::string> args);
 
-  static Chat* get()
-  {
-    if(!m_chat)
-    {
-      m_chat = new Chat();
-    }
-
-    return m_chat;
-  }
-
-  void free();
-
 private:
-  static Chat* m_chat;
-
-  Chat();
   void registerStandardCommands();
   std::deque<std::string> parseCmd(std::string cmd);
 

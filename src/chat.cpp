@@ -54,20 +54,13 @@
 #include "constants.h"
 #include "plugin.h"
 
-Chat* Chat::m_chat;
-
-void Chat::free()
-{
-  if(m_chat)
-  {
-    delete m_chat;
-    m_chat = 0;
-  }
-}
-
 Chat::Chat()
 {
   registerStandardCommands();
+}
+
+Chat::~Chat()
+{
 }
 
 void Chat::registerCommand(Command* command)

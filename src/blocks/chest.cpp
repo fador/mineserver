@@ -96,11 +96,11 @@ void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, s
               
               if(locked == 1)
               {
-                Chat::get()->sendMsg(user, COLOR_RED + "Chest locked", Chat::USER);
+                Mineserver::get()->chat()->sendMsg(user, COLOR_RED + "Chest locked", Chat::USER);
               }
               else
               {
-                Chat::get()->sendMsg(user, COLOR_RED + "Chest opened", Chat::USER);
+                Mineserver::get()->chat()->sendMsg(user, COLOR_RED + "Chest opened", Chat::USER);
               }
           
             }
@@ -202,7 +202,7 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
     this->spawnBlockItem(x,y,z,block);
     // TODO: spawn items in chest
   } else {
-    Chat::get()->sendMsg(user, COLOR_RED + "Can't destroy chests that are not your!", Chat::USER);
+    Mineserver::get()->chat()->sendMsg(user, COLOR_RED + "Can't destroy chests that are not your!", Chat::USER);
   }
 }
 

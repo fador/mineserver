@@ -159,7 +159,7 @@ int Mineserver::run(int argc, char *argv[])
   pid_out.close();
 
   // Load MOTD
-  Chat::get()->checkMotd(Conf::get()->sValue("motd_file"));
+  Mineserver::get()->chat()->checkMotd(Conf::get()->sValue("motd_file"));
 
   // Set physics enable state according to config
   Physics::get()->enabled = (Conf::get()->bValue("liquid_physics"));
@@ -334,7 +334,7 @@ int Mineserver::run(int argc, char *argv[])
     if(Screen::get()->hasCommand())
     {
       // Now handle this command as normal
-      Chat::get()->handleMsg(serverUser, Screen::get()->getCommand().c_str());
+      Mineserver::get()->chat()->handleMsg(serverUser, Screen::get()->getCommand().c_str());
     }
 
     if(time(0)-starttime > 10)
@@ -433,11 +433,11 @@ int Mineserver::run(int argc, char *argv[])
 
   /* Free memory */
   delete m_map;
+  delete m_chat;
 
   PacketHandler::get()->free();
   Physics::get()->free();
   FurnaceManager::get()->free();
-  Chat::get()->free();
   Conf::get()->free();
   Plugin::get()->free();
   Logger::get()->free();
@@ -464,4 +464,14 @@ Map* Mineserver::map()
 void Mineserver::setMap(Map* map)
 {
   m_map = map;
+}
+
+Chat* Mineserver::chat()
+{
+  return m_chat;
+}
+
+void Mineserver::setChat(Chat* chat)
+{
+  m_chat = chat;
 }

@@ -263,7 +263,7 @@ int PacketHandler::chat_message(User *user)
 
   user->buffer.removePacket();
 
-  Chat::get()->handleMsg(user, msg);
+  Mineserver::get()->chat()->handleMsg(user, msg);
 
   return PACKET_OK;
 }

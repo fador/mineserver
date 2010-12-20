@@ -1188,7 +1188,7 @@ void Map::sendToUser(User* user, int x, int z)
                   // Check permission to access
                   if(!(chestowner == user->nick || IS_ADMIN(user->permissions)))
                   {
-                    Chat::get()->sendMsg(user, MC_COLOR_BLUE + "Chest is locked.", Chat::USER);
+                    Mineserver::get()->chat()->sendMsg(user, MC_COLOR_BLUE + "Chest is locked.", Chat::USER);
                     continue;
                   }
                 }
