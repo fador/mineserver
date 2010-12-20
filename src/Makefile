@@ -34,7 +34,7 @@ CC = $(CXX)
 LDFLAGS += -L/usr/local/lib -L/usr/lib -levent -lz -lnoise -lncurses $(LFLAGS)
 CXXFLAGS += $(DFLAGS) -I. -I/usr/Local/include -I/usr/include
 
-OBJS  = mineserver.o map.o chat.o commands.o config.o constants.o logger.o nbt.o furnace.o furnaceManager.o packets.o physics.o sockets.o tools.o user.o screen.o plugin.o
+OBJS  = mineserver.o map.o chat.o commands.o config.o constants.o logger.o nbt.o furnace.o furnaceManager.o packets.o physics.o sockets.o tools.o user.o screen.o plugin.o tree.o
 OBJS += blocks/basic.o blocks/door.o blocks/falling.o blocks/fire.o blocks/liquid.o blocks/plant.o blocks/sign.o blocks/snow.o blocks/stair.o blocks/torch.o blocks/tracks.o blocks/default.o blocks/chest.o
 OBJS += worldgen/mapgen.o worldgen/cavegen.o worldgen/mersenne.o
 PROG = ./mineserver
@@ -68,6 +68,7 @@ physics.o: physics.cpp logger.h constants.h config.h user.h map.h vec.h physics.
 screen.o: screen.cpp screen.h
 sockets.o: sockets.cpp logger.h constants.h tools.h mineserver.h user.h map.h chat.h nbt.h packets.h
 tools.o: tools.cpp tools.h
+tree.o: tree.cpp tree.h
 user.o: user.cpp constants.h logger.h tools.h mineserver.h map.h user.h nbt.h chat.h packets.h
 mineserver.o: mineserver.cpp mineserver.h constants.h logger.h sockets.h tools.h map.h user.h chat.h worldgen/mapgen.h config.h nbt.h packets.h physics.h
 plugin.o: plugin.cpp plugin.h hook.h mineserver.h blocks/basic.h blocks/door.h blocks/falling.h blocks/fire.h blocks/liquid.h blocks/plant.h blocks/sign.h blocks/snow.h blocks/stair.h blocks/torch.h blocks/tracks.h blocks/chest.h

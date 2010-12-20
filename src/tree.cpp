@@ -36,7 +36,7 @@ void Tree::Generate() {
 	
 
 	//Push to client
-	for(std::vector<std::vector<ITree>>::iterator section = m_treeBlocks.begin(); section != m_treeBlocks.end(); ++section) {
+	for(std::vector<std::vector<ITree> >::iterator section = m_treeBlocks.begin(); section != m_treeBlocks.end(); ++section) {
 		for(std::vector<ITree>::iterator block = section->begin(); block != section->end(); ++block) {
 			block->Update();
 		}

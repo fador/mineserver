@@ -13,13 +13,13 @@ class ITree {
 	public:
 		ITree() { }
 		virtual ~ITree() { }
-		virtual void ITree::Update() {
+		virtual void Update() {
       Mineserver::get()->map()->setBlock(_x, _y, _z, _type, _meta);
 			Mineserver::get()->map()->sendBlockChange(_x, _y, _z, _type, _meta);
 		}
-		virtual void ITree::SetY(sint32 y) { _y = y; }
-		virtual const sint32 ITree::GetY(void) { return _y; }
-		virtual const vec ITree::Location() { return vec(_x,_y,_z); }
+		virtual void SetY(sint32 y) { _y = y; }
+		virtual const sint32 GetY(void) { return _y; }
+		virtual const vec Location() { return vec(_x,_y,_z); }
 	protected:
 		sint32 _x;
 		sint32 _y;
@@ -63,19 +63,19 @@ class Tree : public ITree
 {
 	public:
 		Tree(sint32 x, sint32 y, sint32 z);
-		void Tree::Generate(void);
+		void Generate(void);
 		~Tree(void);
 	protected:
-		void Tree::Set(sint32 xloc, sint32 yloc, sint32 zloc, int blocktype, char metadata);
-		void Tree::Update();
+		void Set(sint32 xloc, sint32 yloc, sint32 zloc, int blocktype, char metadata);
+		void Update();
 	private:
-		std::vector<std::vector<ITree>> m_treeBlocks;
+		std::vector<std::vector<ITree > > m_treeBlocks;
 		std::vector<ITree> m_Trunk;
 		std::vector<ITree> m_Branches;
 		std::vector<ITree> m_Canopy;
 
-		void Tree::GenerateTrunk();
-		void Tree::GenerateCanopy();
+		void GenerateTrunk();
+		void GenerateCanopy();
 };
 
 #endif
