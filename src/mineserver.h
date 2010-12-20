@@ -38,7 +38,9 @@
 #include "plugin.h"
 #include "physics.h"
 #include "config.h"
+#include "logger.h"
 #include "furnaceManager.h"
+#include "worldgen/mapgen.h"
 
 class Mineserver
 {
@@ -79,6 +81,10 @@ public:
   void setFurnaceManager(FurnaceManager* furnaceManager) { m_furnaceManager = furnaceManager; }
   PacketHandler* packetHandler() { if (!m_packetHandler) { m_packetHandler = new PacketHandler; } return m_packetHandler; }
   void setPacketHandler(PacketHandler* packetHandler) { m_packetHandler = packetHandler; }
+  MapGen* mapGen() { if (!m_mapGen) { m_mapGen = new MapGen; } return m_mapGen; }
+  void setMapGen(MapGen* mapGen) { m_mapGen = mapGen; }
+  Logger* logger() { if (!m_logger) { m_logger = new Logger; } return m_logger; }
+  void setLogger(Logger* logger) { m_logger = logger; }
 
 private:
   Mineserver() {}
@@ -97,6 +103,8 @@ private:
   Conf* m_conf;
   FurnaceManager* m_furnaceManager;
   PacketHandler* m_packetHandler;
+  MapGen* m_mapGen;
+  Logger* m_logger;
 };
 
 #endif

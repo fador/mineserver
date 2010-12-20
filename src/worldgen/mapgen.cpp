@@ -51,17 +51,6 @@
 #include "cavegen.h"
 #include "mapgen.h"
 
-MapGen* MapGen::mMapGen;
-
-void MapGen::free()
-{
-   if (mMapGen)
-   {
-      delete mMapGen;
-      mMapGen = 0;
-   }
-}
-
 void MapGen::init(int seed)
 {
   cave.init(seed+8);

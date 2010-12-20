@@ -38,25 +38,27 @@
 
 class MapGen
 {
-private:
-  MapGen() {}
+public:
+  void init(int seed);
+  void generateChunk(int x, int z);
 
+private:
   uint8 blocks[16*16*128];
   uint8 blockdata[16*16*128/2];
   uint8 skylight[16*16*128/2];
   uint8 blocklight[16*16*128/2];
   uint8 heightmap[16*16];
-  
+
   int m_seed;
   int seaLevel;
 
   float perlinScale;
-  
+
   void generateFlatgrass();
   void generateWithNoise(int x, int z);
-  
+
   void AddBeaches();
-  
+
   CaveGen cave;
 
   // Heightmap composition
@@ -75,21 +77,6 @@ private:
   
   noise::module::Select seaTerrain;
   noise::module::Select finalTerrain;
-
-  static MapGen *mMapGen;
-public:
-  static MapGen* get()
-  {
-     if(!mMapGen) {
-        mMapGen = new MapGen();
-     }
-     return mMapGen;
-  }
-
-  void init(int seed);
-  void free();
-  void generateChunk(int x, int z);
 };
-
 
 #endif

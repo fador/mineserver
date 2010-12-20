@@ -202,7 +202,7 @@ void Map::init()
   /////////////////
 
   // Init mapgenerator
-  MapGen::get()->init(mapSeed);
+  Mineserver::get()->mapGen()->init(mapSeed);
 
   delete root;
 #ifdef _DEBUG
@@ -878,7 +878,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
     // If generate (false only for lightmapgenerator)
     if(generate)
     {
-      MapGen::get()->generateChunk(x,z);
+      Mineserver::get()->mapGen()->generateChunk(x,z);
       generateLight(x, z);
 
 	  //mapLightRegen[mapId] = false;

@@ -410,9 +410,8 @@ int Mineserver::run(int argc, char *argv[])
   delete m_conf;
   delete m_furnaceManager;
   delete m_packetHandler;
-
-  Logger::get()->free();
-  MapGen::get()->free();
+  delete m_mapGen;
+  delete m_logger;
 
   return EXIT_SUCCESS;
 }
