@@ -66,13 +66,6 @@ enum
 class Screen
 {
 public:
-  static Screen* get() {
-    if (!_instance) {
-      _instance = new Screen();
-    }
-    return _instance;
-  }
-
   void init(std::string version);
   WINDOW* createWindow(int width, int height, int startx, int starty);
   void destroyWindow(WINDOW *local_win);
@@ -84,9 +77,6 @@ public:
   bool hasCommand();
   std::string getCommand();
 
-protected:
-  Screen();
-
 private:
   std::string currentTimestamp(bool seconds);
 
@@ -94,8 +84,6 @@ private:
   WINDOW *generalLog;
   WINDOW *chatLog;
   WINDOW *playerList;
-
-  static Screen *_instance;
 
   std::string currentCommand;
   std::string commandHistory[25];

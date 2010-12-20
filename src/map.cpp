@@ -53,14 +53,11 @@
 #include "config.h"
 #include "permissions.h"
 #include "chat.h"
+#include "mineserver.h"
 #include "tree.h"
-
-
-Map* Map::_instance = NULL;
-
 void Map::addSapling(User* user, int x, int y, int z)
 {
-  Screen::get()->log("Place sapling " + dtos(x) + " " + dtos(y) + " " + dtos(z));
+  Mineserver::get()->screen()->log("Place sapling " + dtos(x) + " " + dtos(y) + " " + dtos(z));
 
   saplings.push_back( sTree(x,y,z,mapTime,user->UID) );
 }
@@ -73,7 +70,7 @@ void Map::checkGenTrees()
   {
     if(rand() % 50 == 0)
     {
-      Screen::get()->log("Grow tree!");
+      Mineserver::get()->screen()->log("Grow tree!");
 
       sint32 x = (*iter).x;
       sint32 y = (*iter).y;
@@ -125,7 +122,7 @@ void Map::init()
 #ifdef _DEBUG
   printf("Map::init()\n");
 #endif
-  mapDirectory = Conf::get()->sValue("map_directory");
+  mapDirectory = Mineserver::get()->conf()->sValue("map_directory");
   if(mapDirectory == "Not found!")
   {
     std::cout << "Error, mapdir not defined!" << std::endl;
@@ -137,7 +134,7 @@ void Map::init()
   struct stat stFileInfo;
   if(stat(mapDirectory.c_str(), &stFileInfo) != 0)
   {
-    Screen::get()->log("Warning: Map directory not found, creating it now.");
+    Mineserver::get()->screen()->log("Warning: Map directory not found, creating it now.");
 
 #ifdef WIN32
     if(_mkdir(mapDirectory.c_str()) == -1)
@@ -145,14 +142,14 @@ void Map::init()
     if(mkdir(mapDirectory.c_str(), 0755) == -1)
 #endif
     {
-      Screen::get()->log("Error: Could not create map directory.");
+      Mineserver::get()->screen()->log("Error: Could not create map directory.");
       exit(EXIT_FAILURE);
     }
   }
 
   if(stat((infile).c_str(), &stFileInfo) != 0)
   {
-    Screen::get()->log("Warning: level.dat not found, creating it now.");
+    Mineserver::get()->screen()->log("Warning: level.dat not found, creating it now.");
 
     NBT_Value level(NBT_Value::TAG_COMPOUND);
     level.Insert("Data", new NBT_Value(NBT_Value::TAG_COMPOUND));
@@ -168,7 +165,7 @@ void Map::init()
 
     if (stat(infile.c_str(), &stFileInfo) != 0)
     {
-      Screen::get()->log("Error: Could not create level.dat");
+      Mineserver::get()->screen()->log("Error: Could not create level.dat");
       exit(EXIT_FAILURE);
     }
   }
@@ -193,17 +190,20 @@ void Map::init()
   if(!trees || trees->GetListType() != NBT_Value::TAG_COMPOUND)
   {
 
-    Screen::get()->log("No Trees in level.dat, creating..");
+    Mineserver::get()->screen()->log("No Trees in level.dat, creating..");
     root->Insert("Trees", new NBT_Value(NBT_Value::TAG_LIST,NBT_Value::TAG_COMPOUND));
     trees = ((*root)["Trees"]);
     root->SaveToFile(infile);
   }
 
-  trees->Print();
+#ifdef _DEBUG
+  std::string dump;
+  trees->Dump(dump);
+  Mineserver::get()->screen()->log(dump);
+  //Mineserver::get()->screen()->log(dtos((*tree_list).size()) + " saplings");
+#endif
 
   std::vector<NBT_Value*>* tree_list = trees->GetList();
-
-  Screen::get()->log(dtos((*tree_list).size()) + " saplings");
 
   for(std::vector<NBT_Value*>::iterator iter = (*tree_list).begin(); iter != (*tree_list).end(); ++iter)
   {
@@ -214,27 +214,18 @@ void Map::init()
     sint32 plantedTime = (sint32)*tree["plantedTime"];
     sint32 plantedBy = (sint32)*tree["plantedBy"];
     saplings.push_back( sTree(x,y,z,plantedTime,plantedBy) );
-    Screen::get()->log("sapling: " + dtos(x) + " " + dtos(y) + " " + dtos(z));
+    Mineserver::get()->screen()->log("sapling: " + dtos(x) + " " + dtos(y) + " " + dtos(z));
   }
 
   /////////////////
 
   // Init mapgenerator
-  MapGen::get()->init(mapSeed);
+  Mineserver::get()->mapGen()->init(mapSeed);
 
   delete root;
 #ifdef _DEBUG
-//  Screen::get()->log("Spawn: (" + spawnPos.x() + "," + spawnPos.y() + "," + spawnPos.z() + ")");
+  //Mineserver::get()->screen()->log("Spawn: (" + spawnPos.x() + "," + spawnPos.y() + "," + spawnPos.z() + ")");
 #endif
-}
-
-void Map::free()
-{
-   if (_instance)
-   {
-      delete _instance;
-      _instance = 0;
-   }
 }
 
 sChunk* Map::getMapData(int x, int z, bool generate)
@@ -439,10 +430,10 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
   #ifdef PRINT_LIGHTGEN_TIME
   #ifdef WIN32
     t_end = timeGetTime ();
-    Screen::get()->log("Lightgen: " + dtos(t_end-t_begin) + "ms");
+    Mineserver::get()->screen()->log("Lightgen: " + dtos(t_end-t_begin) + "ms");
   #else
     t_end = clock();
-    Screen::get()->log("Lightgen: " + dtos((t_end-t_begin)/(CLOCKS_PER_SEC/1000))) + "ms");
+    Mineserver::get()->screen()->log("Lightgen: " + dtos((t_end-t_begin)/(CLOCKS_PER_SEC/1000))) + "ms");
   #endif
   #endif
 
@@ -817,7 +808,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
 
 bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("sendBlockChange(x=%d, y=%d, z=%d, type=%d, meta=%d)\n", x, y, z, type, meta);
 #endif
 
@@ -905,7 +896,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
     // If generate (false only for lightmapgenerator)
     if(generate)
     {
-      MapGen::get()->generateChunk(x,z);
+      Mineserver::get()->mapGen()->generateChunk(x,z);
       generateLight(x, z);
 
 	  //mapLightRegen[mapId] = false;
@@ -1030,7 +1021,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
 
 bool Map::saveMap(int x, int z)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("saveMap(x=%d, z=%d)\n", x, z);
 #endif
 
@@ -1132,7 +1123,7 @@ bool Map::releaseMap(int x, int z)
 // Send chunk to user
 void Map::sendToUser(User* user, int x, int z)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("sendToUser(x=%d, z=%d)\n", x, z);
 #endif
 
@@ -1217,7 +1208,7 @@ void Map::sendToUser(User* user, int x, int z)
                   // Check permission to access
                   if(!(chestowner == user->nick || IS_ADMIN(user->permissions)))
                   {
-                    Chat::get()->sendMsg(user, MC_COLOR_BLUE + "Chest is locked.", Chat::USER);
+                    Mineserver::get()->chat()->sendMsg(user, MC_COLOR_BLUE + "Chest is locked.", Chat::USER);
                     continue;
                   }
                 }
@@ -1249,7 +1240,7 @@ void Map::sendToUser(User* user, int x, int z)
           //Gzip the data
           if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
           {
-            Screen::get()->log("Error in deflate: " + dtos(state));
+            Mineserver::get()->screen()->log("Error in deflate: " + dtos(state));
           }
 
           sint32 entityX = *(**iter)["x"];
@@ -1288,7 +1279,7 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value* 
   {
     player = user->nick;
   }
-  sint8 locked = Conf::get()->bValue("chests_locked_by_default")?1:0;
+  sint8 locked = Mineserver::get()->conf()->bValue("chests_locked_by_default")?1:0;
 
   if(entity->GetType() != NBT_Value::TAG_COMPOUND)
   {
@@ -1407,7 +1398,7 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value* 
   //Gzip the data
   if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
   {
-    Screen::get()->log("Error in deflate: " + dtos(state));
+    Mineserver::get()->screen()->log("Error in deflate: " + dtos(state));
   }
 
   deflateEnd(&zstream2);

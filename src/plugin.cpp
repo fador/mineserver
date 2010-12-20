@@ -1,32 +1,43 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
-   All rights reserved.
+  Copyright (c) 2010, The Mineserver Project
+  All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
- * Neither the name of the The Mineserver Project nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#include "sys/stat.h"
+
+#include "mineserver.h"
+#ifdef WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
+
+
+#include "logger.h"
 
 #include "plugin.h"
-#include "logger.h"
 #include "blocks/default.h"
 #include "blocks/falling.h"
 #include "blocks/torch.h"
@@ -40,29 +51,12 @@
 #include "blocks/tracks.h"
 #include "blocks/chest.h"
 
-#ifdef WIN32
-#include <windows.h>
-#else
-#include <dlfcn.h>
-#endif
-
-Plugin* Plugin::m_plugin;
-
-void Plugin::free()
-{
-   if (m_plugin)
-   {
-      delete m_plugin;
-      m_plugin = NULL;
-   }
-}
-
 void Plugin::init()
 {
    // Set default behaviours 
    Callback call;
    /* FIXME: must remember to delete any memory we create here upon server stop */
-   
+
    BlockDefault* defaultblock = new BlockDefault();
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    call.add("onPlace", Function::from_method<BlockDefault, &BlockDefault::onPlace>(defaultblock));
@@ -127,7 +121,7 @@ void Plugin::init()
    setBlockCallback(BLOCK_SAND, call);
    setBlockCallback(BLOCK_SLOW_SAND, call);
    setBlockCallback(BLOCK_GRAVEL, call);
-   
+
    /* Torches */
    call.reset();
    BlockTorch* torchblock = new BlockTorch();
@@ -139,7 +133,7 @@ void Plugin::init()
    setBlockCallback(BLOCK_TORCH, call);
    setBlockCallback(BLOCK_REDSTONE_TORCH_OFF, call);
    setBlockCallback(BLOCK_REDSTONE_TORCH_ON, call);
-   
+
    /* ladders */
    call.reset();
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
@@ -269,51 +263,110 @@ void Plugin::init()
   /* BLOCK_SNOW_BLOCK */
 }
 
-void registerExternal(int hookId, void* function)
-{
-  return;
-}
-
 bool Plugin::loadExternal(const std::string name, const std::string file)
 {
   LIBRARY_HANDLE lhandle = NULL;
-  void (*fhandle)(void (*)(int, void*)) = NULL;
+  void (*fhandle)(Mineserver*) = NULL;
 
-  Screen::get()->log("Loading plugin "+name+" ("+file+")...");
+  Mineserver::get()->screen()->log("Loading plugin "+name+" ("+file+")...");
+
+  struct stat st;
+  if(stat(file.c_str(), &st) != 0)
+  {
+    Mineserver::get()->screen()->log("Could not find "+file+"!");
+    return false;
+  }
 
   lhandle = LIBRARY_LOAD(file.c_str());
   if (lhandle == NULL)
   {
-    Screen::get()->log("Could not load "+name+"!");
+    Mineserver::get()->screen()->log("Could not load "+file+"!");
+    Mineserver::get()->screen()->log(LIBRARY_ERROR());
     return false;
   }
 
   m_libraryHandles[name] = lhandle;
 
-  fhandle = (void (*)(void (*)(int, void*))) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
+  fhandle = (void (*)(Mineserver*)) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
   if (fhandle == NULL)
   {
-    Screen::get()->log("Could not get function handle!");
+    Mineserver::get()->screen()->log("Could not get init function handle!");
     unloadExternal(name);
     return false;
   }
 
-  fhandle(&registerExternal);
+  fhandle(Mineserver::get());
 
   return true;
 }
 
 void Plugin::unloadExternal(const std::string name)
 {
-  if (m_libraryHandles.count(name) > 0)
+  LIBRARY_HANDLE lhandle = NULL;
+  void (*fhandle)(Mineserver*) = NULL;
+
+  if (m_libraryHandles[name] != NULL)
   {
-    Screen::get()->log("Unloading plugin "+name+"...");
+    Mineserver::get()->screen()->log("Unloading plugin "+name+"...");
+
+    lhandle = m_libraryHandles[name];
+    fhandle = (void (*)(Mineserver*)) LIBRARY_SYMBOL(lhandle, (name+"_shutdown").c_str());
+    if (fhandle == NULL)
+    {
+      Mineserver::get()->screen()->log("Could not get shutdown function handle!");
+    }
+    else
+    {
+      Mineserver::get()->screen()->log("Calling shutdown function for "+name+".");
+      fhandle(Mineserver::get());
+    }
+
     LIBRARY_CLOSE(m_libraryHandles[name]);
     m_libraryHandles.erase(name);
   }
   else
   {
-    Screen::get()->log("Plugin "+name+" not loaded!");
+    Mineserver::get()->screen()->log("Plugin "+name+" not loaded!");
+  }
+}
+
+bool Plugin::hasPointer(const std::string name)
+{
+  std::map<const std::string, void*>::iterator it_a;
+  std::map<const std::string, void*>::iterator it_b;
+  for (it_a=m_registry.begin();it_a!=it_b;++it_a)
+  {
+    if (it_a->first == name)
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void Plugin::setPointer(const std::string name, void* pointer)
+{
+  m_registry[name] = pointer;
+}
+
+void* Plugin::getPointer(const std::string name)
+{
+  if (hasPointer(name))
+  {
+    return m_registry[name];
+  }
+  else
+  {
+    return NULL;
+  }
+}
+
+void Plugin::remPointer(const std::string name)
+{
+  if (hasPointer(name))
+  {
+    m_registry.erase(name);
   }
 }
 
@@ -324,36 +377,44 @@ void Plugin::setBlockCallback(const int type, Callback call)
       LOG("Block type set more then once.");
       removeBlockCallback(type);
    }
+
    blockevents.insert(std::pair<int, Callback>(type, call));
 }
 
 Callback* Plugin::getBlockCallback(const int type)
 {
-   Callbacks::iterator iter = blockevents.find(type);
+  Callbacks::iterator iter = blockevents.find(type);
 
-   if (iter == blockevents.end())
-      return NULL;
+  if (iter == blockevents.end())
+  {
+    return NULL;
+  }
 
-   return &(*iter).second;
+  return &(*iter).second;
 }
 
 bool Plugin::runBlockCallback(const int type, const std::string name, const Function::invoker_type function)
 {
-   Callbacks::iterator iter = blockevents.find(type);
+  Callbacks::iterator iter = blockevents.find(type);
 
-   if (iter == blockevents.end())
-      return false;
+  if (iter == blockevents.end())
+  {
+    return false;
+  }
 
-   return (*iter).second.run(name, function);
+  return (*iter).second.run(name, function);
 }
 
 bool Plugin::removeBlockCallback(const int type)
 {
-   Callbacks::iterator iter = blockevents.find(type);
+  Callbacks::iterator iter = blockevents.find(type);
 
-   if (iter == blockevents.end())
-      return false;
+  if (iter == blockevents.end())
+  {
+    return false;
+  }
 
-   blockevents.erase(iter);
-   return true;
+  blockevents.erase(iter);
+
+  return true;
 }

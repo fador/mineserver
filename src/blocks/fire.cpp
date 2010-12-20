@@ -25,6 +25,8 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "../mineserver.h"
+
 #include "fire.h"
 
 void BlockFire::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
@@ -56,7 +58,7 @@ void BlockFire::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
    uint8 oldblock;
    uint8 oldmeta;
 
-   if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
+   if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
       return;
 
    /* Check block below allows blocks placed on top */
@@ -80,8 +82,8 @@ void BlockFire::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
    if (block == ITEM_FLINT_AND_STEEL)
       newblock = BLOCK_FIRE;
 
-   Map::get()->setBlock(x, y, z, (char)newblock, direction);
-   Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
+   Mineserver::get()->map()->setBlock(x, y, z, (char)newblock, direction);
+   Mineserver::get()->map()->sendBlockChange(x, y, z, (char)newblock, direction);
 }
 
 void BlockFire::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)

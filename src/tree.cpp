@@ -29,7 +29,6 @@ void Tree::Generate() {
 	
 	//m_treeBlocks.push_back(m_Branches);
 	
-
 	while(!m_treeBlocks.empty()) {
 		std::stack<ITree> section = m_treeBlocks.top();
 		while(!section.empty()) {

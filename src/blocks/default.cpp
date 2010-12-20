@@ -25,6 +25,8 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "../mineserver.h"
+
 #include "default.h"
 
 void BlockDefault::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
@@ -44,13 +46,13 @@ void BlockDefault::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 
   uint8 block;
   uint8 meta;
 
-  if (!Map::get()->getBlock(x, y, z, &block, &meta))
+  if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
   {
     return;
   }
 
-  Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-  Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
   this->spawnBlockItem(x,y,z,block);
 }
 
@@ -63,7 +65,7 @@ void BlockDefault::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
   uint8 oldblock;
   uint8 oldmeta;
 
-  if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     return;
   }
@@ -92,8 +94,8 @@ void BlockDefault::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
 
   direction = user->relativeToBlock(x, y, z);
 
-  Map::get()->setBlock(x, y, z, (char)newblock, direction);
-  Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
+  Mineserver::get()->map()->setBlock(x, y, z, (char)newblock, direction);
+  Mineserver::get()->map()->sendBlockChange(x, y, z, (char)newblock, direction);
 }
 
 void BlockDefault::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
@@ -105,14 +107,14 @@ void BlockDefault::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint
   uint8 oldblock;
   uint8 oldmeta;
 
-  if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     return;
   }
 
-  Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-  Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
-  Map::get()->createPickupSpawn(x, y, z, oldblock, 1);
+  Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map()->createPickupSpawn(x, y, z, oldblock, 1);
 }
 
 void BlockDefault::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)

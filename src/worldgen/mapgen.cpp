@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cmath>
 #include <ctime>
 
+
 #include "../logger.h"
 #include "../constants.h"
 
@@ -49,20 +50,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <noise/noise.h>
 #endif
 
+#include "../logger.h"
+#include "../constants.h"
+#include "../config.h"
+#include "../nbt.h"
+#include "../map.h"
+#include "../mineserver.h"
+
 //#include "mersenne.h"
 #include "cavegen.h"
 #include "mapgen.h"
-
-MapGen* MapGen::mMapGen;
-
-void MapGen::free()
-{
-	if (mMapGen)
-	{
-		delete mMapGen;
-		mMapGen = 0;
-	}
-}
 
 void MapGen::init(int seed)
 {
@@ -112,7 +109,7 @@ void MapGen::init(int seed)
 	seaTerrain.SetBounds(-0.3, 1000.0);
 	seaTerrain.SetEdgeFalloff(0.1);
 
-	seaLevel = Conf::get()->iValue("sea_level");
+	seaLevel = Mineserver::get()->conf()->iValue("sea_level");
 
 	m_seed = seed;
 	treesGenerated = false;
@@ -144,7 +141,7 @@ void MapGen::generateChunk(int x, int z)
 	NBT_Value *main = new NBT_Value(NBT_Value::TAG_COMPOUND);
 	NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
 
-	if(Conf::get()->bValue("map_flatgrass"))
+	if(Mineserver::get()->conf()->bValue("map_flatgrass"))
 		generateFlatgrass();
 	else
 		generateWithNoise(x, z);
@@ -164,10 +161,10 @@ void MapGen::generateChunk(int x, int z)
 	main->Insert("Level", val);
 
 	/*  uint32 chunkid;
-	Map::get()->posToId(x, z, &chunkid);
+	Mineserver::get()->map()->posToId(x, z, &chunkid);
 
-	Map::get()->maps[chunkid].x = x;
-	Map::get()->maps[chunkid].z = z; */
+	Mineserver::get()->map()->maps[chunkid].x = x;
+	Mineserver::get()->map()->maps[chunkid].z = z; */
 
 	std::vector<uint8> *t_blocks = (*val)["Blocks"]->GetByteArray();
 	std::vector<uint8> *t_data = (*val)["Data"]->GetByteArray();
@@ -185,19 +182,34 @@ void MapGen::generateChunk(int x, int z)
 	chunk->x = x;
 	chunk->z = z;
 
-	Map::get()->chunks.LinkChunk(chunk, x, z);
+	Mineserver::get()->map()->chunks.LinkChunk(chunk, x, z);
 
 	// Update last used time
-	//Map::get()->mapLastused[chunkid] = (int)time(0);
+	//Mineserver::get()->map()->mapLastused[chunkid] = (int)time(0);
 
 	// Not changed
-	//Map::get()->mapChanged[chunkid] = Conf::get()->bValue("save_unchanged_chunks");
+	//Mineserver::get()->map()->mapChanged[chunkid] = Mineserver::get()->conf()->bValue("save_unchanged_chunks");
 
-	//Map::get()->maps[chunkid].nbt = main;
-	AddTrees();
+	//Mineserver::get()->map()->maps[chunkid].nbt = main;
 }
 
 //#define PRINT_MAPGEN_TIME
+
+
+void MapGen::AddTrees() {
+	if(!treesGenerated) {
+		int x = 0;
+		int y = 65;
+		int z = 0;
+		for(int treeZ = 0; treeZ < 100; treeZ+=5) {
+			for(int treeLoc = 0; treeLoc < 100; treeLoc+=5) {
+				Tree tree(treeLoc,y,treeZ);
+				tree.Generate();
+			}
+		}
+	}
+	treesGenerated = true;
+}
 
 void MapGen::generateWithNoise(int x, int z) 
 {
@@ -274,40 +286,24 @@ void MapGen::generateWithNoise(int x, int z)
 			}
 		}
 	}
-	if(Conf::get()->bValue("add_beaches"))
+	if(Mineserver::get()->conf()->bValue("add_beaches"))
 		AddBeaches();
 
 #ifdef PRINT_MAPGEN_TIME
 #ifdef WIN32
 	t_end = timeGetTime ();
-	Screen::get()->log("Mapgen: " + dtos(t_end-t_begin) + "ms");
+	Mineserver::get()->screen()->log("Mapgen: " + dtos(t_end-t_begin) + "ms");
 #else
 	gettimeofday(&end, NULL);
-	Screen::get()->log("Mapgen: " + dtos(end.tv_usec - start.tv_usec));
+	Mineserver::get()->screen()->log("Mapgen: " + dtos(end.tv_usec - start.tv_usec));
 #endif
 #endif
-
-}
-
-void MapGen::AddTrees() {
-	if(!treesGenerated) {
-		int x = 0;
-		int y = 65;
-		int z = 0;
-		for(int treeZ = 0; treeZ < 100; treeZ+=5) {
-			for(int treeLoc = 0; treeLoc < 100; treeLoc+=5) {
-				Tree tree(treeLoc,y,treeZ);
-				tree.Generate();
-			}
-		}
-	}
-	treesGenerated = true;
 }
 
 void MapGen::AddBeaches() 
 {
-	int beachExtent = Conf::get()->iValue("beach_extent");
-	int beachHeight = Conf::get()->iValue("beach_height");
+	int beachExtent = Mineserver::get()->conf()->iValue("beach_extent");
+	int beachHeight = Mineserver::get()->conf()->iValue("beach_height");
 
 	int beachExtentSqr = (beachExtent + 1) * (beachExtent + 1);
 	for(int x = 0; x < 16; x++) 
@@ -342,15 +338,15 @@ void MapGen::AddBeaches()
 				uint8 block;
 				uint8 meta;
 
-				Map::get()->sendBlockChange(x, h, z, BLOCK_WATER, 0);
-				Map::get()->setBlock(x, h, z, BLOCK_WATER, 0);
+				Mineserver::get()->map()->sendBlockChange(x, h, z, BLOCK_WATER, 0);
+				Mineserver::get()->map()->setBlock(x, h, z, BLOCK_WATER, 0);
 
-				Map::get()->getBlock(x, h-1, z, &block, &meta);
+				Mineserver::get()->map()->getBlock(x, h-1, z, &block, &meta);
 
 				if( h > 0 && block == BLOCK_DIRT )
 				{
-					Map::get()->sendBlockChange(x, h-1, z, BLOCK_WATER, 0);
-					Map::get()->setBlock(x, h-1, z, BLOCK_WATER, 0);
+					Mineserver::get()->map()->sendBlockChange(x, h-1, z, BLOCK_WATER, 0);
+					Mineserver::get()->map()->setBlock(x, h-1, z, BLOCK_WATER, 0);
 				}
 			}
 		}

@@ -25,6 +25,8 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "../mineserver.h"
+
 #include "snow.h"
 
 void BlockSnow::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
@@ -51,13 +53,13 @@ void BlockSnow::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y,
    uint8 block;
    uint8 meta;
 
-   if (!Map::get()->getBlock(x, y, z, &block, &meta))
+   if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
       return;
       
    if (direction == BLOCK_TOP && this->isBlockEmpty(x,y-1,z))
    {
-      Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-      Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+      Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+      Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
       this->spawnBlockItem(x, y, z, block);
    }   
 }

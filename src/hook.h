@@ -53,13 +53,28 @@ public:
     }
   }
 
-  bool doOne()
+  bool doUntilTrue()
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)())
+      if (((ftype)*ia)() == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse()
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)() == false)
       {
         return true;
       }
@@ -126,13 +141,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1)
+  bool doUntilTrue(A1 a1)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1))
+      if (((ftype)*ia)(a1) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1) == false)
       {
         return true;
       }
@@ -199,13 +229,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2)
+  bool doUntilTrue(A1 a1, A2 a2)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2))
+      if (((ftype)*ia)(a1, a2) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2) == false)
       {
         return true;
       }
@@ -272,13 +317,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3))
+      if (((ftype)*ia)(a1, a2, a3) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3) == false)
       {
         return true;
       }
@@ -345,13 +405,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3, A4 a4)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3, A4 a4)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4))
+      if (((ftype)*ia)(a1, a2, a3, a4) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3, A4 a4)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3, a4) == false)
       {
         return true;
       }
@@ -418,13 +493,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5))
+      if (((ftype)*ia)(a1, a2, a3, a4, a5) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3, a4, a5) == false)
       {
         return true;
       }
@@ -491,13 +581,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6))
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6) == false)
       {
         return true;
       }
@@ -564,13 +669,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7))
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7) == false)
       {
         return true;
       }
@@ -637,13 +757,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8))
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8) == false)
       {
         return true;
       }
@@ -710,13 +845,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9))
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9) == false)
       {
         return true;
       }
@@ -783,13 +933,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10))
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) == false)
       {
         return true;
       }
@@ -856,13 +1021,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11))
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) == false)
       {
         return true;
       }
@@ -929,13 +1109,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12))
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12) == false)
       {
         return true;
       }
@@ -1002,13 +1197,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13))
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13) == false)
       {
         return true;
       }
@@ -1075,13 +1285,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14))
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14) == false)
       {
         return true;
       }
@@ -1148,13 +1373,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15))
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) == false)
       {
         return true;
       }
@@ -1221,13 +1461,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15, A16 a16)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15, A16 a16)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16))
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15, A16 a16)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16) == false)
       {
         return true;
       }
@@ -1294,13 +1549,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15, A16 a16, A17 a17)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15, A16 a16, A17 a17)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17))
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15, A16 a16, A17 a17)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17) == false)
       {
         return true;
       }
@@ -1367,13 +1637,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15, A16 a16, A17 a17, A18 a18)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15, A16 a16, A17 a17, A18 a18)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18))
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15, A16 a16, A17 a17, A18 a18)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18) == false)
       {
         return true;
       }
@@ -1440,13 +1725,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15, A16 a16, A17 a17, A18 a18, A19 a19)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15, A16 a16, A17 a17, A18 a18, A19 a19)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19))
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15, A16 a16, A17 a17, A18 a18, A19 a19)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19) == false)
       {
         return true;
       }
@@ -1513,13 +1813,28 @@ public:
     }
   }
 
-  bool doOne(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15, A16 a16, A17 a17, A18 a18, A19 a19, A20 a20)
+  bool doUntilTrue(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15, A16 a16, A17 a17, A18 a18, A19 a19, A20 a20)
   {
     typename std::vector<ftype>::iterator ia = callbacks.begin();
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20))
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20) == true)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool doUntilFalse(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15, A16 a16, A17 a17, A18 a18, A19 a19, A20 a20)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20) == false)
       {
         return true;
       }

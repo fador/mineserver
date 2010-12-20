@@ -60,11 +60,14 @@
 #define LIBRARY_HANDLE HINSTANCE
 #define LIBRARY_LOAD(x) LoadLibrary(x)
 #define LIBRARY_SYMBOL(x, y) GetProcAddress(x, y)
+#define LIBRARY_ERROR() "error"
+//GetLastError()
 #define LIBRARY_CLOSE(x) FreeLibrary(x)
 #else
 #define LIBRARY_HANDLE void*
 #define LIBRARY_LOAD(x) dlopen(x, RTLD_LAZY)
 #define LIBRARY_SYMBOL(x, y) dlsym(x, y)
+#define LIBRARY_ERROR() dlerror()
 #define LIBRARY_CLOSE(x) dlclose(x)
 #endif
 //
@@ -131,34 +134,28 @@ private:
   Events callbacks;
 };
 
-#define CALLBACK_CHAT_RECV 1
-#define CALLBACK_DIGGING_STARTED 11
-#define CALLBACK_DIGGING 12
-#define CALLBACK_DIGGING_STOPPED 13
-#define CALLBACK_BLOCK_BROKEN 21
-#define CALLBACK_BLOCK_NEIGHBOUR_BROKEN 22
-
 class Plugin
 {
 public:
-  static Plugin* get()
-  {
-    if (!m_plugin)
-    {
-      m_plugin = new Plugin;
-    }
-    return m_plugin;
-  }
-
+  // Un/Load external plugins
   bool loadExternal(const std::string name, const std::string file);
   void unloadExternal(const std::string name);
+  // Pointer registry stuff, so plugins can be stateful
+  bool hasPointer(const std::string name);
+  void setPointer(const std::string name, void* pointer);
+  void* getPointer(const std::string name);
+  void remPointer(const std::string name);
 
-  Hook3<bool,std::string,User*,std::string> hookChatRecv;
+  Hook3<bool,User*,bool*,std::string*> hookLogin;
+  Hook4<bool,User*,std::string,std::string,bool*> hookChat;
   Hook4<void,User*,sint32,sint8,sint32> hookDiggingStarted;
   Hook4<void,User*,sint32,sint8,sint32> hookDigging;
   Hook4<void,User*,sint32,sint8,sint32> hookDiggingStopped;
   Hook4<void,User*,sint32,sint8,sint32> hookBlockBroken;
   Hook5<void,User*,sint32,sint8,sint32,int> hookBlockNeighbourBroken;
+  Hook5<void,User*,sint32,sint8,sint32,sint16> hookBlockPlace;
+  Hook6<void,User*,sint32,sint8,sint32,sint16,sint16> hookBlockReplace;
+  Hook4<void,User*,sint32,sint8,sint32> hookBlockNeighbourPlace;
 
   // Old code
   // This needs to be phased over to the new plugin architecture
@@ -172,11 +169,10 @@ public:
   bool removeBlockCallback(const int type);
 
 private:
-  Plugin() {}
-  static Plugin* m_plugin;
   std::map<const std::string, LIBRARY_HANDLE> m_libraryHandles;
-  std::map<const std::string, int> m_libraryHandleRefs;
+  std::map<const std::string, void*> m_registry;
 
+  // Old stuff
   typedef std::map<sint16, Callback> Callbacks;
   Callbacks blockevents;
 };

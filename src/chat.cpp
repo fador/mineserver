@@ -53,46 +53,15 @@
 #include "physics.h"
 #include "constants.h"
 #include "plugin.h"
-#include "hook.h"
-
-Chat* Chat::m_chat;
-
-void Chat::free()
-{
-  if(m_chat)
-  {
-    delete m_chat;
-    m_chat = 0;
-  }
-}
-
-// ------------------------------------------- //
-// CALLBACK EXAMPLE - WILL NOT BE HERE FOREVER //
-// ------------------------------------------- //
-bool callbacktest(std::string timestamp, User* user, std::string text)
-{
-  if (text == "herp")
-  {
-    Plugin::get()->loadExternal("foo", "./foo.so");
-  }
-
-  if (text == "derp")
-  {
-    Plugin::get()->unloadExternal("foo");
-  }
-
-  return false;
-}
+#include "mineserver.h"
 
 Chat::Chat()
 {
   registerStandardCommands();
+}
 
-  // ------------------------------------------------------------ //
-  // AGAIN, PART OF THE CALLBACK EXAMPLE.                         //
-  // THIS WOULD USUALLY BE CALLED IN THE INITIALISER OF A PLUGIN. //
-  // ------------------------------------------------------------ //
-  Plugin::get()->hookChatRecv.addCallback(&callbacktest);
+Chat::~Chat()
+{
 }
 
 void Chat::registerCommand(Command* command)
@@ -147,7 +116,7 @@ bool Chat::checkMotd(std::string motdFile)
   // If file does not exist
   if(ifs.fail())
   {
-    Screen::get()->log("> Warning: " + motdFile + " not found. Creating...");
+    Mineserver::get()->screen()->log("> Warning: " + motdFile + " not found. Creating...");
 
     std::ofstream motdofs(motdFile.c_str());
     motdofs << MOTD_CONTENT << std::endl;
@@ -223,7 +192,9 @@ bool Chat::handleMsg(User* user, std::string msg)
   std::string timeStamp (asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
-  if (Plugin::get()->hookChatRecv.doOne(timeStamp, user, msg))
+  bool blockMessage = false;
+  Mineserver::get()->plugin()->hookChat.doUntilFalse(user, timeStamp, msg, &blockMessage);
+  if (blockMessage)
   {
     return false;
   }
@@ -265,14 +236,14 @@ bool Chat::handleMsg(User* user, std::string msg)
 void Chat::handleServerMsg(User* user, std::string msg, const std::string& timeStamp)
 {
   // Decorate server message
-  Screen::get()->log(LOG_CHAT, "[!] " + msg.substr(1));
+  Mineserver::get()->screen()->log(LOG_CHAT, "[!] " + msg.substr(1));
   msg = MC_COLOR_RED + "[!] " + MC_COLOR_GREEN + msg.substr(1);
   this->sendMsg(user, msg, ALL);
 }
 
 void Chat::handleAdminChatMsg(User* user, std::string msg, const std::string& timeStamp)
 {
-  Screen::get()->log(LOG_CHAT, "[@] <"+ user->nick + "> " + msg.substr(1));
+  Mineserver::get()->screen()->log(LOG_CHAT, "[@] <"+ user->nick + "> " + msg.substr(1));
   msg = timeStamp +  MC_COLOR_RED + " [@]" + MC_COLOR_WHITE + " <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg.substr(1);
   this->sendMsg(user, msg, ADMINS);
 }
@@ -306,17 +277,17 @@ void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeSta
   // Check for Admins or Server Console
   if (user->UID == SERVER_CONSOLE_UID)
   {
-    Screen::get()->log(LOG_CHAT, user->nick + " " + msg);
+    Mineserver::get()->screen()->log(LOG_CHAT, user->nick + " " + msg);
     msg = timeStamp + " " + MC_COLOR_RED + user->nick + MC_COLOR_WHITE + " " + msg;
   }
   else if(IS_ADMIN(user->permissions))
   {
-    Screen::get()->log(LOG_CHAT, "<"+ user->nick + "> " + msg);
+    Mineserver::get()->screen()->log(LOG_CHAT, "<"+ user->nick + "> " + msg);
     msg = timeStamp + " <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg;
   }
   else
   {
-    Screen::get()->log(LOG_CHAT, "<"+ user->nick + "> " + dtos(user->UID) + " " + msg);
+    Mineserver::get()->screen()->log(LOG_CHAT, "<"+ user->nick + "> " + dtos(user->UID) + " " + msg);
     msg = timeStamp + " <"+ user->nick + "> " + msg;
   }
 

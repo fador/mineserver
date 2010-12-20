@@ -23,32 +23,34 @@
    ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-#pragma once
+#ifndef _BLOCKS_FALLING_H
+#define _BLOCKS_FALLING_H
 
 #include "basic.h"
+#include "../user.h"
 
-class User;
-
-/** BlockFalling deals specifically with blocks that fall when there are empty blocks
-below them.
-@see BlockBasic
-*/
+/**
+ * BlockFalling deals specifically with blocks that fall when there are empty
+ * blocks below them.
+ * @see BlockBasic
+ */
 
 class BlockFalling: public BlockBasic
 {
 public:
-   void onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
-   void onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
-   void onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
-   void onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
-   void onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
-   void onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
-   void onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
-   void onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
-   void onNeighbourMove(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onNeighbourMove(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
 private:
-   void physics(User* user, sint32 x, sint8 y, sint32 z);
+  void applyPhysics(User* user, sint32 x, sint8 y, sint32 z);
 };
 
+#endif

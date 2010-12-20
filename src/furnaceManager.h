@@ -25,7 +25,8 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef _FURNACE_MANAGER_H
+#define _FURNACE_MANAGER_H
 
 #include <cstdlib>
 #include "furnace.h"
@@ -33,20 +34,12 @@
 class FurnaceManager
 {
 public:
-  FurnaceManager();
-  static FurnaceManager* get() {
-    if(!_instance) {
-      _instance = new FurnaceManager();
-    }
-    return _instance;
-  }
-  void free();
   void update();
   void handleActivity(NBT_Value* entity, uint8 blockType);
 
 private:
   typedef std::vector<Furnace*> FurnaceContainer;
   FurnaceContainer m_activeFurnaces;
-  static FurnaceManager* _instance;
 };
 
+#endif

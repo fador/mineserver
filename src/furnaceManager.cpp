@@ -25,17 +25,11 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "furnaceManager.h"
-#include "furnace.h"
 #include <iostream>
 
-//#define _DEBUG
-
-FurnaceManager* FurnaceManager::_instance;
-
-FurnaceManager::FurnaceManager()
-{
-}
+#include "furnaceManager.h"
+#include "furnace.h"
+#include "mineserver.h"
 
 void FurnaceManager::update()
 {
@@ -47,7 +41,7 @@ void FurnaceManager::update()
   }
 
 #ifdef _DEBUG
-  Screen::get()->log("Checking Furnaces: " + dtos(m_activeFurnaces.size()) + " active furnaces.");
+  Mineserver::get()->screen()->log("Checking Furnaces: " + dtos(m_activeFurnaces.size()) + " active furnaces.");
 #endif
 
   // Loop thru all the furnaces
@@ -130,16 +124,5 @@ void FurnaceManager::handleActivity(NBT_Value *entity, uint8 blockType)
     furnace->sendToAllUsers();
   }
 }
-
-void FurnaceManager::free()
-{
-   if(_instance)
-   {
-      delete _instance;
-      _instance = 0;
-   }
-}
-
-
 
 

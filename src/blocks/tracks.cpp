@@ -25,8 +25,11 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "tracks.h"
 #include <iostream>
+
+#include "../mineserver.h"
+
+#include "tracks.h"
 
 enum {
   FLAT_NS = 0,
@@ -66,14 +69,14 @@ void BlockTracks::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 
   uint8 block;
   uint8 meta;
   
-  if (!Map::get()->getBlock(x, y, z, &block, &meta))
+  if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
     return;
 
   if (this->isBlockEmpty(x, y-1, z))
   {
     // Break torch and spawn torch item
-    Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-    Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+    Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+    Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
     this->spawnBlockItem(x, y, z, block);
   }
 }
@@ -83,7 +86,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   uint8 block;
   uint8 meta;
 
-  if (!Map::get()->getBlock(x, y, z, &block, &meta))
+  if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
      return;
 
   /* Check block below allows blocks placed on top */
@@ -102,7 +105,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // SOUTH
   if(isTrack(x, y, z-1, meta) && isStartPiece(x, y, z-1))
   {
-    Screen::get()->log("SOUTH");
+    Mineserver::get()->screen()->log("SOUTH");
     metadata = FLAT_NS;
     
     // Rising & falling tracks
@@ -123,20 +126,20 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
     // Modify previous trackpiece to form corner
     if(isTrack(x-1, y, z-1, meta) && meta != FLAT_NS && meta != CORNER_NW && meta != CORNER_SW)
     {
-      Map::get()->setBlock(x, y, z-1, (char)newblock, CORNER_SW);
-      Map::get()->sendBlockChange(x, y, z-1, (char)newblock, CORNER_SW);
+      Mineserver::get()->map()->setBlock(x, y, z-1, (char)newblock, CORNER_SW);
+      Mineserver::get()->map()->sendBlockChange(x, y, z-1, (char)newblock, CORNER_SW);
     }
     else if(isTrack(x+1, y, z-1, meta) && meta != FLAT_NS && meta != CORNER_NE && meta != CORNER_SE)
     {
-      Map::get()->setBlock(x, y, z-1, (char)newblock, CORNER_SE);
-      Map::get()->sendBlockChange(x, y, z-1, (char)newblock, CORNER_SE);
+      Mineserver::get()->map()->setBlock(x, y, z-1, (char)newblock, CORNER_SE);
+      Mineserver::get()->map()->sendBlockChange(x, y, z-1, (char)newblock, CORNER_SE);
     }
   }
   
   // NORTH
   if(isTrack(x, y, z+1, meta) && isStartPiece(x, y, z+1))
   {
-    Screen::get()->log("NORTH");
+    Mineserver::get()->screen()->log("NORTH");
 
     metadata = FLAT_NS;
     // Rising & falling tracks
@@ -157,20 +160,20 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
     // Modify previous trackpiece to form corner
     if(isTrack(x+1, y, z+1, meta) && meta != FLAT_NS && meta != CORNER_NE && meta != CORNER_SE)
     {
-      Map::get()->setBlock(x, y, z+1, (char)newblock, CORNER_NE);
-      Map::get()->sendBlockChange(x, y, z+1, (char)newblock, CORNER_NE);
+      Mineserver::get()->map()->setBlock(x, y, z+1, (char)newblock, CORNER_NE);
+      Mineserver::get()->map()->sendBlockChange(x, y, z+1, (char)newblock, CORNER_NE);
     }
     else if(isTrack(x-1, y, z+1, meta) && meta != FLAT_NS && meta != CORNER_NW && meta != CORNER_SW)
     { 
-      Map::get()->setBlock(x, y, z+1, (char)newblock, CORNER_NW);
-      Map::get()->sendBlockChange(x, y, z+1, (char)newblock, CORNER_NW);
+      Mineserver::get()->map()->setBlock(x, y, z+1, (char)newblock, CORNER_NW);
+      Mineserver::get()->map()->sendBlockChange(x, y, z+1, (char)newblock, CORNER_NW);
     }
   }
     
   // EAST
   if(isTrack(x-1, y, z, meta) && isStartPiece(x-1, y, z))
   {
-    Screen::get()->log("EAST");
+    Mineserver::get()->screen()->log("EAST");
     metadata = FLAT_EW;
     
     // Rising & falling tracks
@@ -181,8 +184,8 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
     else
     {
       // Change previous block meta
-      Map::get()->setBlock(x-1, y, z, (char)newblock, FLAT_EW);
-      Map::get()->sendBlockChange(x-1, y, z, (char)newblock, FLAT_EW);
+      Mineserver::get()->map()->setBlock(x-1, y, z, (char)newblock, FLAT_EW);
+      Mineserver::get()->map()->sendBlockChange(x-1, y, z, (char)newblock, FLAT_EW);
     }
   
     if(isTrack(x, y, z+1, meta) && isStartPiece(x, y, z+1))
@@ -197,20 +200,20 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
     // Modify previous trackpiece to form corner
     if(isTrack(x-1, y, z-1, meta) && meta != FLAT_EW && meta != CORNER_NE && meta != CORNER_NW)
     {
-      Map::get()->setBlock(x-1, y, z, (char)newblock, CORNER_NE);
-      Map::get()->sendBlockChange(x-1, y, z, (char)newblock, CORNER_NE);
+      Mineserver::get()->map()->setBlock(x-1, y, z, (char)newblock, CORNER_NE);
+      Mineserver::get()->map()->sendBlockChange(x-1, y, z, (char)newblock, CORNER_NE);
     }
     else if(isTrack(x-1, y, z+1, meta) && meta != FLAT_EW && meta != CORNER_SW && meta != CORNER_SE)
     {
-      Map::get()->setBlock(x-1, y, z, (char)newblock, CORNER_SE);
-      Map::get()->sendBlockChange(x-1, y, z, (char)newblock, CORNER_SE);
+      Mineserver::get()->map()->setBlock(x-1, y, z, (char)newblock, CORNER_SE);
+      Mineserver::get()->map()->sendBlockChange(x-1, y, z, (char)newblock, CORNER_SE);
     }
   }
   
   // WEST
   if(isTrack(x+1, y, z, meta) && isStartPiece(x+1, y, z))
   {
-    Screen::get()->log("WEST");
+    Mineserver::get()->screen()->log("WEST");
     metadata = FLAT_EW;
     // Change previous block meta
     
@@ -221,8 +224,8 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
     } 
     else
     {
-      Map::get()->setBlock(x+1, y, z, (char)newblock, FLAT_EW);
-      Map::get()->sendBlockChange(x+1, y, z, (char)newblock, FLAT_EW);
+      Mineserver::get()->map()->setBlock(x+1, y, z, (char)newblock, FLAT_EW);
+      Mineserver::get()->map()->sendBlockChange(x+1, y, z, (char)newblock, FLAT_EW);
     }
 
     if(isTrack(x, y, z+1, meta) && isStartPiece(x, y, z+1))
@@ -237,18 +240,18 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
     // Modify previous trackpiece to form corner
     if(isTrack(x+1, y, z-1, meta) && meta != FLAT_EW && meta != CORNER_NW && meta != CORNER_NE)
     {
-      Map::get()->setBlock(x+1, y, z, (char)newblock, CORNER_NW);
-      Map::get()->sendBlockChange(x+1, y, z, (char)newblock, CORNER_NW);
+      Mineserver::get()->map()->setBlock(x+1, y, z, (char)newblock, CORNER_NW);
+      Mineserver::get()->map()->sendBlockChange(x+1, y, z, (char)newblock, CORNER_NW);
     }
     else if(isTrack(x+1, y, z+1, meta) && meta != FLAT_EW && meta != CORNER_SW && meta != CORNER_SE)
     {
-      Map::get()->setBlock(x+1, y, z, (char)newblock, CORNER_SW);
-      Map::get()->sendBlockChange(x+1, y, z, (char)newblock, CORNER_SW);
+      Mineserver::get()->map()->setBlock(x+1, y, z, (char)newblock, CORNER_SW);
+      Mineserver::get()->map()->sendBlockChange(x+1, y, z, (char)newblock, CORNER_SW);
     }
   }
   
-  Map::get()->setBlock(x, y, z, (char)newblock, metadata);
-  Map::get()->sendBlockChange(x, y, z, (char)newblock, metadata);
+  Mineserver::get()->map()->setBlock(x, y, z, (char)newblock, metadata);
+  Mineserver::get()->map()->sendBlockChange(x, y, z, (char)newblock, metadata);
 }
 
 void BlockTracks::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
@@ -269,7 +272,7 @@ void BlockTracks::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y,
 bool BlockTracks::isTrack(sint32 x, sint8 y, sint32 z, uint8& meta)
 {
   uint8 block;
-  Map::get()->getBlock(x, y, z, &block, &meta);
+  Mineserver::get()->map()->getBlock(x, y, z, &block, &meta);
   return (block == BLOCK_MINECART_TRACKS);
 }
 
@@ -284,7 +287,7 @@ bool BlockTracks::isStartPiece(sint32 x, sint8 y, sint32 z)
   sint8 y1, y2;
   y1 = y2 = y;
   
-  Map::get()->getBlock(x, y, z, &block, &meta);
+  Mineserver::get()->map()->getBlock(x, y, z, &block, &meta);
   switch(meta)
   {
     case FLAT_EW:
@@ -333,8 +336,8 @@ bool BlockTracks::isStartPiece(sint32 x, sint8 y, sint32 z)
       break;
   }
   
-  if((Map::get()->getBlock(x1, y1, z1, &block, &meta) && block != BLOCK_MINECART_TRACKS) ||
-     (Map::get()->getBlock(x2, y2, z2, &block, &meta) && block != BLOCK_MINECART_TRACKS))
+  if((Mineserver::get()->map()->getBlock(x1, y1, z1, &block, &meta) && block != BLOCK_MINECART_TRACKS) ||
+     (Mineserver::get()->map()->getBlock(x2, y2, z2, &block, &meta) && block != BLOCK_MINECART_TRACKS))
   {
     return true;
   }

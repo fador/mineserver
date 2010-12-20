@@ -1,37 +1,39 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
-   All rights reserved.
+  Copyright (c) 2010, The Mineserver Project
+  All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
- * Neither the name of the The Mineserver Project nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
-#include "chest.h"
-
+#include "../mineserver.h"
 #include "../chat.h"
 #include "../nbt.h"
 #include "../map.h"
 #include "../logger.h"
 #include "../tools.h"
+#include "../user.h"
+
+#include "chest.h"
 
 void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
@@ -41,11 +43,13 @@ void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, s
     int chunk_x = blockToChunk(x);
     int chunk_z = blockToChunk(z);
 
-	sChunk *chunk = Map::get()->loadMap(chunk_x, chunk_z);
+    sChunk *chunk = Mineserver::get()->map()->loadMap(chunk_x, chunk_z);
 
-	if(chunk == NULL)
-		return;
-    
+    if(chunk == NULL)
+    {
+      return;
+    }
+
     NBT_Value *entityList = (*(*(chunk->nbt))["Level"])["TileEntities"];
 
     if(!entityList)
@@ -92,11 +96,11 @@ void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, s
               
               if(locked == 1)
               {
-                Chat::get()->sendMsg(user, COLOR_RED + "Chest locked", Chat::USER);
+                Mineserver::get()->chat()->sendMsg(user, COLOR_RED + "Chest locked", Chat::USER);
               }
               else
               {
-                Chat::get()->sendMsg(user, COLOR_RED + "Chest opened", Chat::USER);
+                Mineserver::get()->chat()->sendMsg(user, COLOR_RED + "Chest opened", Chat::USER);
               }
           
             }
@@ -131,7 +135,7 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
   uint8 block;
   uint8 meta;
 
-  if (!Map::get()->getBlock(x, y, z, &block, &meta))
+  if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
     return;
 
   bool destroy = false;
@@ -139,7 +143,7 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
   int chunk_x = blockToChunk(x);
   int chunk_z = blockToChunk(z);
 
-  sChunk *chunk = Map::get()->loadMap(chunk_x, chunk_z);
+  sChunk *chunk = Mineserver::get()->map()->loadMap(chunk_x, chunk_z);
    
   if(chunk == NULL)
 	  return;
@@ -162,7 +166,6 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
     std::vector<NBT_Value*> *entities = entityList->GetList();
     std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
 
-    
     for( ; iter != end; iter++ )
     {
       if((**iter)["x"] == NULL || (**iter)["y"] == NULL || (**iter)["z"] == NULL ||
@@ -191,20 +194,20 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
       }
     }
   } 
+
   if(destroy) 
   {
-    Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-    Map::get()->setBlock(x, y, z, BLOCK_AIR, 0);
+    Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+    Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
     this->spawnBlockItem(x,y,z,block);
     // TODO: spawn items in chest
   } else {
-    Chat::get()->sendMsg(user, COLOR_RED + "Can't destroy chests that are not your!", Chat::USER);
+    Mineserver::get()->chat()->sendMsg(user, COLOR_RED + "Can't destroy chests that are not your!", Chat::USER);
   }
 }
 
 void BlockChest::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-
 }
 
 void BlockChest::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
@@ -212,7 +215,7 @@ void BlockChest::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
   uint8 oldblock;
   uint8 oldmeta;
 
-  if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
     return;
 
   /* Check block below allows blocks placed on top */
@@ -240,25 +243,20 @@ void BlockChest::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
   NBT_Value *nbtItems = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
   val->Insert("Items", nbtItems);
   
-  Map::get()->setBlock(x, y, z, (char)newblock, direction);
-  Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
+  Mineserver::get()->map()->setBlock(x, y, z, (char)newblock, direction);
+  Mineserver::get()->map()->sendBlockChange(x, y, z, (char)newblock, direction);
   
-  Map::get()->setComplexEntity(user, x, y, z, val);
+  Mineserver::get()->map()->setComplexEntity(user, x, y, z, val);
 }
 
 void BlockChest::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-
 }
 
 void BlockChest::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-  
 }
 
 void BlockChest::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-  
 }
-
-
