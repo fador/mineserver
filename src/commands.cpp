@@ -67,11 +67,6 @@ namespace
 
   void pluginLoad(User* user, std::string command, std::deque<std::string> args)
   {
-    if (!IS_ADMIN(user->permissions))
-    {
-      return;
-    }
-
     if (args.size() < 2)
     {
       return;
@@ -82,11 +77,6 @@ namespace
 
   void pluginUnload(User* user, std::string command, std::deque<std::string> args)
   {
-    if (!IS_ADMIN(user->permissions))
-    {
-      return;
-    }
-
     if (args.size() < 1)
     {
       return;
@@ -214,13 +204,16 @@ void mute(User* user, std::string command, std::deque<std::string> args)
         args.pop_front();
       }
 
-			// Tell the user they're muted
+      // Tell the user they're muted
       tUser->mute(muteMsg);
 
-			// Tell the admins what happened
-			std::string adminMsg = MC_COLOR_RED + tUser->nick + " was muted by " + user->nick + ". ";
-			if(!muteMsg.empty())
-				adminMsg += " Reason: " + muteMsg;
+      // Tell the admins what happened
+      std::string adminMsg = MC_COLOR_RED + tUser->nick + " was muted by " + user->nick + ". ";
+      if(!muteMsg.empty())
+      {
+        adminMsg += " Reason: " + muteMsg;
+      }
+
       Mineserver::get()->chat()->sendMsg(user, adminMsg, Chat::ADMINS);
     }
     else
@@ -233,6 +226,7 @@ void mute(User* user, std::string command, std::deque<std::string> args)
     reportError(user, "Usage: /mute player [reason]");
   }
 }
+
 void unmute(User* user, std::string command, std::deque<std::string> args)
 {
   if(!args.empty())
@@ -275,7 +269,6 @@ void showMOTD(User* user, std::string command, std::deque<std::string> args)
 
   // Close motd file
   motdfs.close();
-
 }
 
 void emote(User* user, std::string command, std::deque<std::string> args)
@@ -314,7 +307,7 @@ void whisper(User* user, std::string command, std::deque<std::string> args)
   {
     std::string targetNick = args[0];
 
-    User* tUser        = User::byNick(targetNick);
+    User* tUser = User::byNick(targetNick);
 
     // Don't whisper or tell if DND is set
     if(tUser != NULL && tUser->dnd)

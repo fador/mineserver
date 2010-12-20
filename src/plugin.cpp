@@ -266,7 +266,7 @@ void Plugin::init()
 bool Plugin::loadExternal(const std::string name, const std::string file)
 {
   LIBRARY_HANDLE lhandle = NULL;
-  void (*fhandle)() = NULL;
+  void (*fhandle)(Mineserver*) = NULL;
 
   Mineserver::get()->screen()->log("Loading plugin "+name+" ("+file+")...");
 
@@ -287,7 +287,7 @@ bool Plugin::loadExternal(const std::string name, const std::string file)
 
   m_libraryHandles[name] = lhandle;
 
-  fhandle = (void (*)()) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
+  fhandle = (void (*)(Mineserver*)) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
   if (fhandle == NULL)
   {
     Mineserver::get()->screen()->log("Could not get init function handle!");
@@ -295,7 +295,7 @@ bool Plugin::loadExternal(const std::string name, const std::string file)
     return false;
   }
 
-  fhandle();
+  fhandle(Mineserver::get());
 
   return true;
 }
@@ -303,14 +303,14 @@ bool Plugin::loadExternal(const std::string name, const std::string file)
 void Plugin::unloadExternal(const std::string name)
 {
   LIBRARY_HANDLE lhandle = NULL;
-  void (*fhandle)() = NULL;
+  void (*fhandle)(Mineserver*) = NULL;
 
   if (m_libraryHandles[name] != NULL)
   {
     Mineserver::get()->screen()->log("Unloading plugin "+name+"...");
 
     lhandle = m_libraryHandles[name];
-    fhandle = (void (*)()) LIBRARY_SYMBOL(lhandle, (name+"_shutdown").c_str());
+    fhandle = (void (*)(Mineserver*)) LIBRARY_SYMBOL(lhandle, (name+"_shutdown").c_str());
     if (fhandle == NULL)
     {
       Mineserver::get()->screen()->log("Could not get shutdown function handle!");
@@ -318,7 +318,7 @@ void Plugin::unloadExternal(const std::string name)
     else
     {
       Mineserver::get()->screen()->log("Calling shutdown function for "+name+".");
-      fhandle();
+      fhandle(Mineserver::get());
     }
 
     LIBRARY_CLOSE(m_libraryHandles[name]);
