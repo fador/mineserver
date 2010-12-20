@@ -60,7 +60,8 @@
 #define LIBRARY_HANDLE HINSTANCE
 #define LIBRARY_LOAD(x) LoadLibrary(x)
 #define LIBRARY_SYMBOL(x, y) GetProcAddress(x, y)
-#define LIBRARY_ERROR() GetLastError()
+#define LIBRARY_ERROR() "error"
+//GetLastError()
 #define LIBRARY_CLOSE(x) FreeLibrary(x)
 #else
 #define LIBRARY_HANDLE void*

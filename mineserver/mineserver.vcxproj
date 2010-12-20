@@ -67,6 +67,7 @@
     <ClInclude Include="..\src\furnaceManager.h" />
     <ClInclude Include="..\src\logger.h" />
     <ClInclude Include="..\src\map.h" />
+    <ClInclude Include="..\src\mineserver.h" />
     <ClInclude Include="..\src\nbt.h" />
     <ClInclude Include="..\src\packets.h" />
     <ClInclude Include="..\src\permissions.h" />
@@ -155,15 +156,18 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>pdcurses.lib;Winmm.lib;libnoise.lib;zlibstat.lib;libevent.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>pdcurses.lib;Winmm.lib;libnoise.lib;zlibwapi.lib;libevent.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

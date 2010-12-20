@@ -27,13 +27,14 @@
 
 #include "sys/stat.h"
 
+#include "mineserver.h"
 #ifdef WIN32
 #include <windows.h>
 #else
 #include <dlfcn.h>
 #endif
 
-#include "mineserver.h"
+
 #include "logger.h"
 
 #include "plugin.h"

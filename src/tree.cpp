@@ -16,8 +16,8 @@ void Tree::Set(sint32 xloc, sint32 yloc, sint32 zloc, int blocktype, char metada
 	_x = xloc, _y = yloc, _z = zloc, _type = blocktype, _meta = metadata;
 }
 void Tree::Update() {
-	Map::get()->setBlock(_x, _y, _z, _type, _meta);
-	Map::get()->sendBlockChange(_x, _y, _z, _type, _meta);
+	Mineserver::get()->map()->setBlock(_x, _y, _z, _type, _meta);
+	Mineserver::get()->map()->sendBlockChange(_x, _y, _z, _type, _meta);
 }
 
 void Tree::Generate() {

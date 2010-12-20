@@ -29,6 +29,9 @@
 #define _MINESERVER_H
 
 #include <vector>
+#ifdef WIN32
+  #include <winsock2.h>
+#endif
 #include <event.h>
 #include <iostream>
 

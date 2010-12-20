@@ -233,5 +233,8 @@
     <ClInclude Include="..\src\tree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\mineserver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

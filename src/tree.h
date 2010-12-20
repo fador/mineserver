@@ -1,6 +1,7 @@
 #ifndef _TREE_H
 #define _TREE_H
 
+#include "mineserver.h"
 #include "tools.h"
 #include "map.h"
 #include "screen.h"
@@ -13,8 +14,8 @@ class ITree {
 		ITree() { }
 		virtual ~ITree() { }
 		virtual void ITree::Update() {
-			Map::get()->setBlock(_x, _y, _z, _type, _meta);
-			Map::get()->sendBlockChange(_x, _y, _z, _type, _meta);
+      Mineserver::get()->map()->setBlock(_x, _y, _z, _type, _meta);
+			Mineserver::get()->map()->sendBlockChange(_x, _y, _z, _type, _meta);
 		}
 		virtual void ITree::SetY(sint32 y) { _y = y; }
 		virtual const sint32 ITree::GetY(void) { return _y; }
