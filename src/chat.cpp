@@ -192,7 +192,7 @@ bool Chat::handleMsg(User* user, std::string msg)
   timeStamp = timeStamp.substr(11, 5);
 
   bool blockMessage = false;
-  Plugin::get()->hookChat.doUntilFalse(user, timeStamp, msg, &blockMessage);
+  Mineserver::get()->plugin()->hookChat.doUntilFalse(user, timeStamp, msg, &blockMessage);
   if (blockMessage)
   {
     return false;

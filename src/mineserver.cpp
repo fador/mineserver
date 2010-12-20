@@ -107,6 +107,8 @@ int main(int argc, char* argv[])
 Mineserver::Mineserver()
 {
   m_map = new Map;
+  m_chat = new Chat;
+  m_plugin = new Plugin;
 }
 
 event_base* Mineserver::getEventBase()
@@ -222,7 +224,7 @@ int Mineserver::run(int argc, char *argv[])
   int port = Conf::get()->iValue("port");
 
   // Initialize plugins
-  Plugin::get()->init();
+  Mineserver::get()->plugin()->init();
 
 #ifdef WIN32
   WSADATA wsaData;
@@ -434,12 +436,12 @@ int Mineserver::run(int argc, char *argv[])
   /* Free memory */
   delete m_map;
   delete m_chat;
+  delete m_plugin;
 
   PacketHandler::get()->free();
   Physics::get()->free();
   FurnaceManager::get()->free();
   Conf::get()->free();
-  Plugin::get()->free();
   Logger::get()->free();
   MapGen::get()->free();
 

@@ -34,6 +34,7 @@
 #include "user.h"
 #include "map.h"
 #include "chat.h"
+#include "plugin.h"
 
 class Mineserver
 {
@@ -64,6 +65,8 @@ public:
   void setMap(Map* map) { m_map = map; }
   Chat* chat() { return m_chat; }
   void setChat(Chat* chat) { m_chat = chat; }
+  Plugin* plugin() { return m_plugin; }
+  void setPlugin(Plugin* plugin) { m_plugin = plugin; }
 
 private:
   Mineserver();
@@ -74,6 +77,7 @@ private:
 
   Map* m_map;
   Chat* m_chat;
+  Plugin* m_plugin;
 };
 
 #endif

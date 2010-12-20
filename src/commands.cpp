@@ -76,7 +76,7 @@ namespace
       return;
     }
 
-    Plugin::get()->loadExternal(args[0], args[1]);
+    Mineserver::get()->plugin()->loadExternal(args[0], args[1]);
   }
 
   void pluginUnload(User* user, std::string command, std::deque<std::string> args)
@@ -91,7 +91,7 @@ namespace
       return;
     }
 
-    Plugin::get()->unloadExternal(args[0]);
+    Mineserver::get()->plugin()->unloadExternal(args[0]);
   }
 
   void playerList(User* user, std::string command, std::deque<std::string> args)

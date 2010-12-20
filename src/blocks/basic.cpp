@@ -139,36 +139,36 @@ void BlockBasic::notifyNeighbours(const sint32 x, const sint8 y, const sint32 z,
   if (ignore_direction != BLOCK_SOUTH && Mineserver::get()->map()->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
   {
     inv = Function::invoker_type(user, oldblock, x+1, y, z, BLOCK_SOUTH);
-    Plugin::get()->runBlockCallback(block, callback, inv);
+    Mineserver::get()->plugin()->runBlockCallback(block, callback, inv);
   }
 
   if (ignore_direction != BLOCK_NORTH && Mineserver::get()->map()->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
   {
     inv = Function::invoker_type(user, oldblock, x-1, y, z, BLOCK_NORTH);
-    Plugin::get()->runBlockCallback(block, callback, inv);
+    Mineserver::get()->plugin()->runBlockCallback(block, callback, inv);
   }
 
   if (ignore_direction != BLOCK_TOP && Mineserver::get()->map()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
   {
     inv = Function::invoker_type(user, oldblock, x, y+1, z, BLOCK_TOP);
-    Plugin::get()->runBlockCallback(block, callback, inv);
+    Mineserver::get()->plugin()->runBlockCallback(block, callback, inv);
   }
 
   if (ignore_direction != BLOCK_BOTTOM && Mineserver::get()->map()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
   {
     inv = Function::invoker_type(user, oldblock, x, y-1, z, BLOCK_BOTTOM);
-    Plugin::get()->runBlockCallback(block, callback, inv);
+    Mineserver::get()->plugin()->runBlockCallback(block, callback, inv);
   }
 
   if (ignore_direction != BLOCK_WEST && Mineserver::get()->map()->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
   {
     inv = Function::invoker_type(user, oldblock, x, y, z+1, BLOCK_WEST);
-    Plugin::get()->runBlockCallback(block, callback, inv);
+    Mineserver::get()->plugin()->runBlockCallback(block, callback, inv);
   }
 
   if (ignore_direction != BLOCK_EAST && Mineserver::get()->map()->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
   {
     inv = Function::invoker_type(user, oldblock, x, y, z-1, BLOCK_EAST);
-    Plugin::get()->runBlockCallback(block, callback, inv);
+    Mineserver::get()->plugin()->runBlockCallback(block, callback, inv);
   }
 }

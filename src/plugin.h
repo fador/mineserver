@@ -133,15 +133,6 @@ private:
 class Plugin
 {
 public:
-  static Plugin* get()
-  {
-    if (!m_plugin)
-    {
-      m_plugin = new Plugin;
-    }
-    return m_plugin;
-  }
-
   // Un/Load external plugins
   bool loadExternal(const std::string name, const std::string file);
   void unloadExternal(const std::string name);
@@ -174,8 +165,6 @@ public:
   bool removeBlockCallback(const int type);
 
 private:
-  Plugin() {}
-  static Plugin* m_plugin;
   std::map<const std::string, LIBRARY_HANDLE> m_libraryHandles;
   std::map<const std::string, void*> m_registry;
 
