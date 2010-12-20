@@ -398,34 +398,14 @@ struct packet_player_position_and_look
 
 class PacketHandler
 {
-
-private:
-  PacketHandler()
-  {
-  }
-  ~PacketHandler()
-  {
-  }
-
-   static PacketHandler *mPacketHandler;
 public:
-
   void init();
-  void free();
 
-  static PacketHandler* get()
-  {
-    if(!mPacketHandler) {
-      mPacketHandler = new PacketHandler();
-    }
-    return mPacketHandler;
-  }
-
-  //Information of all the packets
-  //around 2kB of memory
+  // Information of all the packets
+  // around 2kB of memory
   Packets packets[256];
 
-  //The packet functions
+  // The packet functions
   int keep_alive(User *user);
   int login_request(User *user);
   int handshake(User *user);
@@ -444,8 +424,6 @@ public:
   int complex_entities(User *user);
   int use_entity(User *user);
   int respawn(User *user);
-
 };
-
 
 #endif

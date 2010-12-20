@@ -208,7 +208,7 @@ int Mineserver::run(int argc, char *argv[])
   }
 
   // Initialize packethandler
-  PacketHandler::get()->init();
+  Mineserver::get()->packetHandler()->init();
 
   // Load ip from config
   std::string ip = Mineserver::get()->conf()->sValue("ip");
@@ -409,8 +409,8 @@ int Mineserver::run(int argc, char *argv[])
   delete m_physics;
   delete m_conf;
   delete m_furnaceManager;
+  delete m_packetHandler;
 
-  PacketHandler::get()->free();
   Logger::get()->free();
   MapGen::get()->free();
 

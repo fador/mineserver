@@ -78,17 +78,6 @@
 
 //#define _DEBUG
 
-PacketHandler* PacketHandler::mPacketHandler;
-
-void PacketHandler::free()
-{
-   if (mPacketHandler)
-   {
-      delete mPacketHandler;
-      mPacketHandler = 0;
-   }
-}
-
 void PacketHandler::init()
 {
   packets[PACKET_KEEP_ALIVE]               = Packets(0, &PacketHandler::keep_alive);

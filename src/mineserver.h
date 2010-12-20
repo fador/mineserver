@@ -77,6 +77,8 @@ public:
   void setConf(Conf* conf) { m_conf = conf; }
   FurnaceManager* furnaceManager() { if (!m_furnaceManager) { m_furnaceManager = new FurnaceManager; } return m_furnaceManager; }
   void setFurnaceManager(FurnaceManager* furnaceManager) { m_furnaceManager = furnaceManager; }
+  PacketHandler* packetHandler() { if (!m_packetHandler) { m_packetHandler = new PacketHandler; } return m_packetHandler; }
+  void setPacketHandler(PacketHandler* packetHandler) { m_packetHandler = packetHandler; }
 
 private:
   Mineserver() {}
@@ -94,6 +96,7 @@ private:
   Physics* m_physics;
   Conf* m_conf;
   FurnaceManager* m_furnaceManager;
+  PacketHandler* m_packetHandler;
 };
 
 #endif
