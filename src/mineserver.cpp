@@ -365,7 +365,7 @@ int Mineserver::run(int argc, char *argv[])
       map()->checkGenTrees();
 
       // Check for Furnace activity
-      FurnaceManager::get()->update();
+      Mineserver::get()->furnaceManager()->update();
     }
 
     // Physics simulation every 200ms
@@ -408,9 +408,9 @@ int Mineserver::run(int argc, char *argv[])
   delete m_screen;
   delete m_physics;
   delete m_conf;
+  delete m_furnaceManager;
 
   PacketHandler::get()->free();
-  FurnaceManager::get()->free();
   Logger::get()->free();
   MapGen::get()->free();
 

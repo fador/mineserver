@@ -893,7 +893,7 @@ int PacketHandler::complex_entities(User *user)
   // Check if this is a Furnace and handle if so
   if(block == BLOCK_FURNACE || block == BLOCK_BURNING_FURNACE)
   {
-    FurnaceManager::get()->handleActivity(entity, block);
+    Mineserver::get()->furnaceManager()->handleActivity(entity, block);
   }
   else
   {
@@ -904,7 +904,6 @@ int PacketHandler::complex_entities(User *user)
 
   return PACKET_OK;
 }
-
 
 int PacketHandler::use_entity(User *user)
 {

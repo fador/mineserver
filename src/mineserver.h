@@ -38,6 +38,7 @@
 #include "plugin.h"
 #include "physics.h"
 #include "config.h"
+#include "furnaceManager.h"
 
 class Mineserver
 {
@@ -74,6 +75,8 @@ public:
   void setPhysics(Physics* physics) { m_physics = physics; }
   Conf* conf() { if (!m_conf) { m_conf = new Conf; } return m_conf; }
   void setConf(Conf* conf) { m_conf = conf; }
+  FurnaceManager* furnaceManager() { if (!m_furnaceManager) { m_furnaceManager = new FurnaceManager; } return m_furnaceManager; }
+  void setFurnaceManager(FurnaceManager* furnaceManager) { m_furnaceManager = furnaceManager; }
 
 private:
   Mineserver() {}
@@ -90,6 +93,7 @@ private:
   Screen* m_screen;
   Physics* m_physics;
   Conf* m_conf;
+  FurnaceManager* m_furnaceManager;
 };
 
 #endif

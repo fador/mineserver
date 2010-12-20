@@ -31,12 +31,6 @@
 #include "furnace.h"
 #include "mineserver.h"
 
-FurnaceManager* FurnaceManager::_instance;
-
-FurnaceManager::FurnaceManager()
-{
-}
-
 void FurnaceManager::update()
 {
 
@@ -130,16 +124,5 @@ void FurnaceManager::handleActivity(NBT_Value *entity, uint8 blockType)
     furnace->sendToAllUsers();
   }
 }
-
-void FurnaceManager::free()
-{
-   if(_instance)
-   {
-      delete _instance;
-      _instance = 0;
-   }
-}
-
-
 
 
