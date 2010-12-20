@@ -169,35 +169,47 @@ bool User::sendLoginInfo()
   {
     Item* inventory = NULL;
     sint16 inventoryCount = 0;
+    sint16 itemSlot=0;
 
     if(invType == -1)
     {
       inventory = inv.main;
       inventoryCount = 36;
+      itemSlot = 9;
     }
     else if(invType == -2)
     {
       inventory = inv.equipped;
       inventoryCount = 4;
+      itemSlot = 5;
     }
     else if(invType == -3)
     {
       inventory = inv.crafting;
       inventoryCount = 4;
+      itemSlot = 1;
     }
 
-    buffer << (sint8)PACKET_INVENTORY << (sint8)invType << inventoryCount;
+    //buffer << (sint8)PACKET_INVENTORY << (sint8)0 << inventoryCount;
     for(int i=0; i<inventoryCount; i++)
-    {      
-      if(1)//inventory[i].count)
+    {   
+      if(inventory[i].count)
       {
-        buffer << (sint16)/*inventory[i].type*/50 << (sint8)/*inventory[i].count*/5 << (sint16)/*inventory[i].health*/0;
+        buffer << (sint8)0x67 << (sint8)0 << (sint16)(itemSlot) << (sint16)inventory[i].type << (sint8)(inventory[i].count) << (sint8)inventory[i].health;
+      }
+      /*
+      if(inventory[i].count)
+      {
+        buffer << (sint16)inventory[i].type << (sint8)inventory[i].count << (sint16)inventory[i].health;
       }
       else
       {
         buffer << (sint16)-1;
       }
+      */
+      itemSlot++;
     }
+    break;
   }
   
   // Send motd
@@ -712,7 +724,36 @@ bool User::updatePos(double x, double y, double z, double stance)
 
 
               //buffer << (sint8)PACKET_ADD_TO_INVENTORY << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint16)(*iter)->health;
-              buffer << (sint8)0x67 << (sint8)-1 << (sint16)10 << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint8)(*iter)->health;
+              //ToDo: change packet name
+              for(uint8 i = 0; i < 36; i++)
+              {
+                if(inv.main[i].type == 0)
+                {
+                  buffer << (sint8)0x67 << (sint8)0 << (sint16)(i+9) << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint8)(*iter)->health;
+                  inv.main[i].type = (*iter)->item;
+                  inv.main[i].count = (*iter)->count;
+                  break;
+                }
+
+                if(inv.main[i].type == (*iter)->item)
+                {
+                  if(64-inv.main[i].count >= (*iter)->count)
+                  {                    
+                    buffer << (sint8)0x67 << (sint8)0 << (sint16)(i+9) << (sint16)(*iter)->item << (sint8)(inv.main[i].count+(*iter)->count) << (sint8)(*iter)->health;
+                    inv.main[i].type = (*iter)->item;
+                    inv.main[i].count += (*iter)->count;
+                    break;
+                  }
+                  else if(64-inv.main[i].count > 0)
+                  {
+                    buffer << (sint8)0x67 << (sint8)0 << (sint16)(i+9) << (sint16)(*iter)->item << (sint8)64 << (sint8)(*iter)->health;
+                    inv.main[i].type = (*iter)->item;
+                    inv.main[i].count = 64;
+                    (*iter)->count -= 64-inv.main[i].count;
+                  }
+                }
+              }
+              
 
               Mineserver::get()->map()->items.erase((*iter)->EID);
               delete *iter;

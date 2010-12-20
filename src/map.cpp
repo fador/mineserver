@@ -1247,11 +1247,12 @@ void Map::sendToUser(User* user, int x, int z)
           sint32 entityY = *(**iter)["y"];
           sint32 entityZ = *(**iter)["z"];
 
+          /*
           // !!!! Complex Entity packet! !!!!
           user->buffer << (sint8)PACKET_COMPLEX_ENTITIES
             << (sint32)entityX << (sint16)entityY << (sint32)entityZ << (sint16)zstream2.total_out;
           user->buffer.addToWrite(compressedData, zstream2.total_out);
-
+          */
           deflateEnd(&zstream2);
         }
     }
@@ -1403,13 +1404,14 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value* 
 
   deflateEnd(&zstream2);
 
+  /*
   Packet pkt;
   pkt << (sint8)PACKET_COMPLEX_ENTITIES
     << x << (sint16)y << z << (sint16)zstream2.total_out;
   pkt.addToWrite(compressedData, zstream2.total_out);
 
   chunk->sendPacket(pkt);
-
+  */
   delete [] compressedData;
 
   //User::sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());

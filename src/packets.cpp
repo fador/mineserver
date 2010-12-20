@@ -96,7 +96,7 @@ void PacketHandler::init()
   packets[PACKET_ARM_ANIMATION]            = Packets( 5, &PacketHandler::arm_animation);
   packets[PACKET_PICKUP_SPAWN]             = Packets(22, &PacketHandler::pickup_spawn);
   packets[PACKET_DISCONNECT]               = Packets(PACKET_VARIABLE_LEN, &PacketHandler::disconnect);
-  packets[PACKET_COMPLEX_ENTITIES]         = Packets(PACKET_VARIABLE_LEN, &PacketHandler::complex_entities);
+  //packets[PACKET_COMPLEX_ENTITIES]         = Packets(PACKET_VARIABLE_LEN, &PacketHandler::complex_entities);
   packets[PACKET_RESPAWN]                  = Packets( 0, &PacketHandler::respawn);
   packets[PACKET_INVENTORY_CHANGE]         = Packets(PACKET_VARIABLE_LEN, &PacketHandler::inventory_change);
   packets[PACKET_INVENTORY_CLOSE]          = Packets(1, &PacketHandler::inventory_close);
@@ -133,6 +133,8 @@ int PacketHandler::inventory_close(User *user)
 
   user->buffer >> a;
 
+  //ToDo: check user->inventoryHolding for any items and spawn if it exist
+
   Mineserver::get()->screen()->log(LOG_GENERAL,"Packet 0x65: " + dtos(a));
   
   //No need to do anything
@@ -164,7 +166,58 @@ int PacketHandler::inventory_change(User *user)
     }
     user->buffer >> item_count >> item_health;
   }
-  //Mineserver::get()->screen()->log(LOG_GENERAL,"Packet 0x66: " + dtos(a) + "," + dtos(slot) + "," + dtos(c) +  "," + dtos(d) + "," + dtos(e) + "," + dtos(ea) + "," + dtos(ed));
+  if(from_type == 0)
+  {
+    if(itemID == -1 && user->inventoryHolding.type != 0)
+    {
+      if(from_slot<5)
+      {
+        user->inv.crafting[from_slot-1].count  = user->inventoryHolding.count;
+        user->inv.crafting[from_slot-1].health = user->inventoryHolding.health;
+        user->inv.crafting[from_slot-1].type   = user->inventoryHolding.type;
+      }
+      else if(from_slot<9)
+      {
+        user->inv.equipped[from_slot-5].count  = user->inventoryHolding.count;
+        user->inv.equipped[from_slot-5].health = user->inventoryHolding.health;
+        user->inv.equipped[from_slot-5].type   = user->inventoryHolding.type;
+      }
+      else
+      {
+        user->inv.main[from_slot-9].count  = user->inventoryHolding.count;
+        user->inv.main[from_slot-9].health = user->inventoryHolding.health;
+        user->inv.main[from_slot-9].type   = user->inventoryHolding.type;
+      }
+      user->inventoryHolding.count = 0;
+      user->inventoryHolding.type  = 0;
+      user->inventoryHolding.health= 0;
+    }
+    else
+    {
+      user->inventoryHolding.type   = itemID;
+      user->inventoryHolding.health = item_health;
+      user->inventoryHolding.count  = item_count;
+      if(from_slot<5)
+      {
+        user->inv.crafting[from_slot-1].count = 0;
+        user->inv.crafting[from_slot-1].health = 0;
+        user->inv.crafting[from_slot-1].count = 0;
+      }
+      else if(from_slot<9)
+      {
+        user->inv.equipped[from_slot-5].count = 0;
+        user->inv.equipped[from_slot-5].health = 0;
+        user->inv.equipped[from_slot-5].count = 0;
+      }
+      else
+      {
+        user->inv.main[from_slot-9].count = 0;
+        user->inv.main[from_slot-9].health = 0;
+        user->inv.main[from_slot-9].count = 0;
+      }
+    }
+  }
+  Mineserver::get()->screen()->log(LOG_GENERAL,"Packet 0x66: " + dtos(from_type) + "," + dtos(from_slot) + "," + dtos(to_type) +  "," + dtos(to_slot) + "," + dtos(itemID) + "," + dtos(item_count) + "," + dtos(item_health));
 
   //No need to do anything
   user->buffer.removePacket();
@@ -576,6 +629,12 @@ int PacketHandler::player_digging(User *user)
 
       break;
     }
+    case BLOCK_STATUS_PICKUP_SPAWN:
+    {
+      //ToDo: handle
+      break;
+    }
+    
   }
 
   return PACKET_OK;
@@ -609,7 +668,6 @@ int PacketHandler::player_block_placement(User *user)
     }
     user->buffer >> count >> health;
   }
-
   user->buffer.removePacket();
 
   // TODO: Handle processing of
@@ -872,7 +930,7 @@ int PacketHandler::disconnect(User *user)
 
   return PACKET_OK;
 }
-
+/*
 int PacketHandler::complex_entities(User *user)
 {
   if(!user->buffer.haveData(12))
@@ -973,6 +1031,7 @@ int PacketHandler::complex_entities(User *user)
 
   return PACKET_OK;
 }
+*/
 
 int PacketHandler::use_entity(User *user)
 {
