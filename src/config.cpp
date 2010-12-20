@@ -42,28 +42,12 @@
 
 #include "config.h"
 
-
-Conf* Conf::_conf;
-
-Conf::~Conf()
-{
-}
-
-void Conf::free()
-{
-   if (_conf)
-   {
-      delete _conf;
-      _conf = 0;
-   }
-}
-
 // Load/reload configuration
 bool Conf::load(std::string configFile, std::string namePrefix)
 {
-  #ifdef _DEBUG
+#ifdef _DEBUG
   Mineserver::get()->screen()->log("Loading data from " + configFile);
-  #endif
+#endif
   std::ifstream ifs(configFile.c_str());
 
   // If configfile does not exist

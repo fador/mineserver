@@ -86,17 +86,6 @@ bool mayFallThrough(int id)
 
 }
 
-Physics* Physics::m_Physics;
-
-void Physics::free()
-{
-   if (m_Physics)
-   {
-      delete m_Physics;
-      m_Physics = 0;
-   }
-}
-
 // Physics loop
 bool Physics::update()
 {

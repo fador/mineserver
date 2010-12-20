@@ -29,20 +29,20 @@
 #include <cstdio>
 #include <iostream>
 
-#include "../logger.h"
-#include "../constants.h"
-
-#include "../tools.h"
-#include "../map.h"
-#include "../config.h"
-#include "mersenne.h"
-
-// libnoise
 #ifdef DEBIAN
 #include <libnoise/noise.h>
 #else
 #include <noise/noise.h>
 #endif
+
+#include "../logger.h"
+#include "../constants.h"
+#include "../tools.h"
+#include "../map.h"
+#include "../config.h"
+#include "../mineserver.h"
+
+#include "mersenne.h"
 
 #include "cavegen.h"
 
@@ -64,14 +64,14 @@ void CaveGen::init(int seed)
 
   caveNoise2.SetNoiseQuality (noise::QUALITY_STD);
 
-  addCaves = Conf::get()->bValue("add_caves");
-  caveDensity = Conf::get()->iValue("cave_density");
-  caveSize = Conf::get()->iValue("cave_size");
-  addCaveLava = Conf::get()->bValue("cave_lava");
-  addCaveWater = Conf::get()->bValue("cave_water");
-  addOre = Conf::get()->bValue("cave_ore");
+  addCaves = Mineserver::get()->conf()->bValue("add_caves");
+  caveDensity = Mineserver::get()->conf()->iValue("cave_density");
+  caveSize = Mineserver::get()->conf()->iValue("cave_size");
+  addCaveLava = Mineserver::get()->conf()->bValue("cave_lava");
+  addCaveWater = Mineserver::get()->conf()->bValue("cave_water");
+  addOre = Mineserver::get()->conf()->bValue("cave_ore");
 
-  seaLevel = Conf::get()->iValue("sea_level");
+  seaLevel = Mineserver::get()->conf()->iValue("sea_level");
 }
 
 void CaveGen::AddCaves(uint8 &block, double x, double y, double z)

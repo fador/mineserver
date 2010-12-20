@@ -200,7 +200,7 @@ bool User::sendLoginInfo()
   }
 
   // Send motd
-  std::ifstream motdfs(Conf::get()->sValue("motd_file").c_str());
+  std::ifstream motdfs(Mineserver::get()->conf()->sValue("motd_file").c_str());
 
   std::string temp;
 

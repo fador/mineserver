@@ -138,11 +138,11 @@ int Mineserver::run(int argc, char *argv[])
   }
 
   // Initialize conf
-  Conf::get()->load(file_config);
-  Conf::get()->load(file_commands, COMMANDS_NAME_PREFIX);
+  Mineserver::get()->conf()->load(file_config);
+  Mineserver::get()->conf()->load(file_commands, COMMANDS_NAME_PREFIX);
 
   // Write PID to file
-  std::ofstream pid_out((Conf::get()->sValue("pid_file")).c_str());
+  std::ofstream pid_out((Mineserver::get()->conf()->sValue("pid_file")).c_str());
   if (!pid_out.fail())
   {
 #ifdef WIN32
@@ -154,19 +154,19 @@ int Mineserver::run(int argc, char *argv[])
   pid_out.close();
 
   // Load MOTD
-  Mineserver::get()->chat()->checkMotd(Conf::get()->sValue("motd_file"));
+  Mineserver::get()->chat()->checkMotd(Mineserver::get()->conf()->sValue("motd_file"));
 
   // Set physics enable state according to config
-  Physics::get()->enabled = (Conf::get()->bValue("liquid_physics"));
+  Mineserver::get()->physics()->enabled = (Mineserver::get()->conf()->bValue("liquid_physics"));
 
   // Initialize map
   Mineserver::get()->map()->init();
 
-  if (Conf::get()->bValue("map_generate_spawn"))
+  if (Mineserver::get()->conf()->bValue("map_generate_spawn"))
   {
     Mineserver::get()->screen()->log("Generating spawn area...");
-    int size = Conf::get()->iValue("map_generate_spawn_size");
-    bool show_progress = Conf::get()->bValue("map_generate_spawn_show_progress");
+    int size = Mineserver::get()->conf()->iValue("map_generate_spawn_size");
+    bool show_progress = Mineserver::get()->conf()->bValue("map_generate_spawn_show_progress");
 #ifdef WIN32
     DWORD t_begin,t_end;
 #else
@@ -211,10 +211,10 @@ int Mineserver::run(int argc, char *argv[])
   PacketHandler::get()->init();
 
   // Load ip from config
-  std::string ip = Conf::get()->sValue("ip");
+  std::string ip = Mineserver::get()->conf()->sValue("ip");
 
   // Load port from config
-  int port = Conf::get()->iValue("port");
+  int port = Mineserver::get()->conf()->iValue("port");
 
   // Initialize plugins
   Mineserver::get()->plugin()->init();
@@ -369,7 +369,7 @@ int Mineserver::run(int argc, char *argv[])
     }
 
     // Physics simulation every 200ms
-    Physics::get()->update();
+    Mineserver::get()->physics()->update();
 
     // Underwater check / drowning
     int i = 0;
@@ -393,9 +393,9 @@ int Mineserver::run(int argc, char *argv[])
 
   // Remove the PID file
 #ifdef WIN32
-  _unlink((Conf::get()->sValue("pid_file")).c_str());
+  _unlink((Mineserver::get()->conf()->sValue("pid_file")).c_str());
 #else
-  unlink((Conf::get()->sValue("pid_file")).c_str());
+  unlink((Mineserver::get()->conf()->sValue("pid_file")).c_str());
 #endif
 
   // End our NCurses session
@@ -406,11 +406,11 @@ int Mineserver::run(int argc, char *argv[])
   delete m_chat;
   delete m_plugin;
   delete m_screen;
+  delete m_physics;
+  delete m_conf;
 
   PacketHandler::get()->free();
-  Physics::get()->free();
   FurnaceManager::get()->free();
-  Conf::get()->free();
   Logger::get()->free();
   MapGen::get()->free();
 

@@ -36,6 +36,8 @@
 #include "map.h"
 #include "chat.h"
 #include "plugin.h"
+#include "physics.h"
+#include "config.h"
 
 class Mineserver
 {
@@ -68,6 +70,10 @@ public:
   void setPlugin(Plugin* plugin) { m_plugin = plugin; }
   Screen* screen() { if (!m_screen) { m_screen = new Screen; } return m_screen; }
   void setScreen(Screen* screen) { m_screen = screen; }
+  Physics* physics() { if (!m_physics) { m_physics = new Physics; } return m_physics; }
+  void setPhysics(Physics* physics) { m_physics = physics; }
+  Conf* conf() { if (!m_conf) { m_conf = new Conf; } return m_conf; }
+  void setConf(Conf* conf) { m_conf = conf; }
 
 private:
   Mineserver() {}
@@ -82,6 +88,8 @@ private:
   Chat* m_chat;
   Plugin* m_plugin;
   Screen* m_screen;
+  Physics* m_physics;
+  Conf* m_conf;
 };
 
 #endif

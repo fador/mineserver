@@ -30,6 +30,14 @@
 
 class Physics
 {
+public:
+  bool enabled;
+
+  bool update();
+  bool addSimulation(vec pos);
+  bool removeSimulation(vec pos);
+  bool checkSurrounding(vec pos);
+
 private:
   enum { TYPE_WATER, TYPE_LAVA } SimType;
   enum { M0, M1, M2, M3, M4, M5, M6, M7, M_FALLING } SimState;
@@ -39,9 +47,7 @@ private:
     uint8 id;
     vec pos;
     uint8 meta;
-    SimBlock()
-    {
-    }
+    SimBlock() {}
     SimBlock(uint8 id, vec pos, uint8 meta)
     {
       this->id   = id;
@@ -54,36 +60,11 @@ private:
   {
     char type;
     std::vector<SimBlock> blocks;
-
-    Sim(char stype, SimBlock initblock)
-      : type(stype),
-      blocks(1, initblock)
-    {
-    }
+    Sim(char stype, SimBlock initblock) : type(stype),blocks(1, initblock) {}
   };
 
-  Physics()
-  {
-    enabled = true;
-  }
   std::vector<Sim> simList;
   static Physics *m_Physics;
-public:
-  bool enabled;
-
-  void free();
-  static Physics* get()
-  {
-    if(!m_Physics) {
-      m_Physics = new Physics();
-    }
-    return m_Physics;
-  }
-
-  bool update();
-  bool addSimulation(vec pos);
-  bool removeSimulation(vec pos);
-  bool checkSurrounding(vec pos);
 };
 
 #endif

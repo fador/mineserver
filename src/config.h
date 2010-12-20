@@ -36,20 +36,6 @@
 class Conf
 {
  public:
-  static Conf* get()
-  {
-    if(!_conf)
-    {
-      _conf = new Conf();
-    }
-
-    return _conf;
-  }
-
-  ~Conf();
-
-  void free();
-
   bool load(std::string configFile, std::string namePrefix = "");
   int iValue(std::string name);
   std::string sValue(std::string name);
@@ -59,8 +45,6 @@ class Conf
   int permissionByName(std::string permissionName);
 
  private:
-  static Conf *_conf;
-  Conf() {}
   std::vector<int> stringToVec(std::string& val);
   std::map<std::string, std::string> m_confSet;
 };

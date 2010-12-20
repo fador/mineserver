@@ -186,14 +186,14 @@ int PacketHandler::login_request(User *user)
   // If version is not 2 or 3
   if(version != PROTOCOL_VERSION)
   {
-    user->kick(Conf::get()->sValue("wrong_protocol_message"));
+    user->kick(Mineserver::get()->conf()->sValue("wrong_protocol_message"));
     return PACKET_OK;
   }
 
   // If userlimit is reached
-  if((int)User::all().size() >= Conf::get()->iValue("user_limit"))
+  if((int)User::all().size() >= Mineserver::get()->conf()->iValue("user_limit"))
   {
-    user->kick(Conf::get()->sValue("server_full_message"));
+    user->kick(Mineserver::get()->conf()->sValue("server_full_message"));
     return PACKET_OK;
   }
 
@@ -228,7 +228,7 @@ int PacketHandler::handshake(User *user)
   user->buffer.removePacket();
 
   // Check whether we're to validate against minecraft.net
-  if(Conf::get()->bValue("user_validation") == true)
+  if(Mineserver::get()->conf()->bValue("user_validation") == true)
   {
     // Send the unique hash for this player to prompt the client to go to minecraft.net to validate
     Mineserver::get()->screen()->log("Handshake: Giving player "+player+" their minecraft.net hash of: " + hash(player));
@@ -685,7 +685,7 @@ int PacketHandler::player_block_placement(User *user)
   }
 
   /* TODO: Should be removed from here. Only needed for liquid related blocks? */
-  Physics::get()->checkSurrounding(vec(x, y, z));
+  Mineserver::get()->physics()->checkSurrounding(vec(x, y, z));
   return PACKET_OK;
 }
 

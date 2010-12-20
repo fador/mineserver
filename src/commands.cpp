@@ -102,9 +102,9 @@ namespace
 
   void about(User* user, std::string command, std::deque<std::string> args)
   {
-    if (Conf::get()->bValue("show_version"))
+    if (Mineserver::get()->conf()->bValue("show_version"))
     {
-      Mineserver::get()->chat()->sendMsg(user, MC_COLOR_BLUE + Conf::get()->sValue("server_name") + "Running Mineserver v." + VERSION, Chat::USER);
+      Mineserver::get()->chat()->sendMsg(user, MC_COLOR_BLUE + Mineserver::get()->conf()->sValue("server_name") + "Running Mineserver v." + VERSION, Chat::USER);
     }
   }
 
@@ -120,12 +120,12 @@ namespace
     if(tUser != NULL)
     {
       // Send rules
-      std::ifstream ifs(Conf::get()->sValue("rules_file").c_str());
+      std::ifstream ifs(Mineserver::get()->conf()->sValue("rules_file").c_str());
       std::string temp;
 
       if(ifs.fail())
       {
-        Mineserver::get()->screen()->log("> Warning: " + Conf::get()->sValue("rules_file") + " not found.");
+        Mineserver::get()->screen()->log("> Warning: " + Mineserver::get()->conf()->sValue("rules_file") + " not found.");
         return;
       }
       else
@@ -172,7 +172,7 @@ void kick(User* user, std::string command, std::deque<std::string> args)
       std::string kickMsg;
       if(args.empty())
       {
-        kickMsg = Conf::get()->sValue("default_kick_message");
+        kickMsg = Mineserver::get()->conf()->sValue("default_kick_message");
       }
       else
       {
@@ -260,7 +260,7 @@ void unmute(User* user, std::string command, std::deque<std::string> args)
 void showMOTD(User* user, std::string command, std::deque<std::string> args)
 {
   // Open MOTD file
-  std::ifstream motdfs(Conf::get()->sValue("motd_file").c_str());
+  std::ifstream motdfs(Mineserver::get()->conf()->sValue("motd_file").c_str());
 
   // Load MOTD into string and send to user if not a comment
   std::string msgLine;
@@ -535,11 +535,11 @@ void regenerateLighting(User* user, std::string command, std::deque<std::string>
 
 void reloadConfiguration(User* user, std::string command, std::deque<std::string> args)
 {
-  Conf::get()->load(CONFIG_FILE);
-  Conf::get()->load(COMMANDS_FILE, COMMANDS_NAME_PREFIX);
+  Mineserver::get()->conf()->load(CONFIG_FILE);
+  Mineserver::get()->conf()->load(COMMANDS_FILE, COMMANDS_NAME_PREFIX);
 
   // Set physics enable state based on config
-  Physics::get()->enabled = (Conf::get()->bValue("liquid_physics"));
+  Mineserver::get()->physics()->enabled = (Mineserver::get()->conf()->bValue("liquid_physics"));
 
   Mineserver::get()->chat()->sendMsg(user, MC_COLOR_DARK_MAGENTA + "Reloaded admins and config", Chat::USER);
 
@@ -594,7 +594,7 @@ void giveItems(User* user, std::string command, std::deque<std::string> args)
     //If item was not a number, search the name from config
     if(itemId == 0)
     {
-      itemId = Conf::get()->iValue(args[1]);
+      itemId = Mineserver::get()->conf()->iValue(args[1]);
     }
 
     // Check item validity
@@ -663,7 +663,7 @@ void giveItemsSelf(User* user, std::string command, std::deque<std::string> args
     //If item was not a number, search the name from config
     if(itemId == 0)
     {
-      itemId = Conf::get()->iValue(args[0]);
+      itemId = Mineserver::get()->conf()->iValue(args[0]);
     }
 
     // Check item validity
@@ -739,30 +739,30 @@ void setHealth(User* user, std::string command, std::deque<std::string> args)
 void Chat::registerStandardCommands()
 {
   // Players
-  registerCommand(new Command(parseCmd("about"), "", "Display server name & version", about, Conf::get()->commandPermission("about")));
-  registerCommand(new Command(parseCmd("home"), "", "Teleport to map spawn location", home, Conf::get()->commandPermission("home")));
-  registerCommand(new Command(parseCmd("motd"), "", "Display Message Of The Day", showMOTD, Conf::get()->commandPermission("motd")));
-  registerCommand(new Command(parseCmd("players who"), "", "Lists online players", playerList, Conf::get()->commandPermission("who")));
-  registerCommand(new Command(parseCmd("rules"), "", "Display server rules", rules, Conf::get()->commandPermission("rules")));
-  registerCommand(new Command(parseCmd("e em emote me"), "", "Emote", emote, Conf::get()->commandPermission("emote")));
-  registerCommand(new Command(parseCmd("whisper w tell t"), "<player> <message>", "Send a private message", whisper, Conf::get()->commandPermission("whisper")));
-  registerCommand(new Command(parseCmd("dnd"), "", "Do Not Disturb - toggles receiving chat messages", doNotDisturb, Conf::get()->commandPermission("dnd")));
-  registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", help, Conf::get()->commandPermission("help")));
+  registerCommand(new Command(parseCmd("about"), "", "Display server name & version", about, Mineserver::get()->conf()->commandPermission("about")));
+  registerCommand(new Command(parseCmd("home"), "", "Teleport to map spawn location", home, Mineserver::get()->conf()->commandPermission("home")));
+  registerCommand(new Command(parseCmd("motd"), "", "Display Message Of The Day", showMOTD, Mineserver::get()->conf()->commandPermission("motd")));
+  registerCommand(new Command(parseCmd("players who"), "", "Lists online players", playerList, Mineserver::get()->conf()->commandPermission("who")));
+  registerCommand(new Command(parseCmd("rules"), "", "Display server rules", rules, Mineserver::get()->conf()->commandPermission("rules")));
+  registerCommand(new Command(parseCmd("e em emote me"), "", "Emote", emote, Mineserver::get()->conf()->commandPermission("emote")));
+  registerCommand(new Command(parseCmd("whisper w tell t"), "<player> <message>", "Send a private message", whisper, Mineserver::get()->conf()->commandPermission("whisper")));
+  registerCommand(new Command(parseCmd("dnd"), "", "Do Not Disturb - toggles receiving chat messages", doNotDisturb, Mineserver::get()->conf()->commandPermission("dnd")));
+  registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", help, Mineserver::get()->conf()->commandPermission("help")));
 
   // Admins Only
-  registerCommand(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport, Conf::get()->commandPermission("ctp")));
-  registerCommand(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems, Conf::get()->commandPermission("give")));
-  registerCommand(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf, Conf::get()->commandPermission("igive")));
-  registerCommand(new Command(parseCmd("gps"), "[<player>]", "Show own coordinates or show <player>'s coordinates", showPosition, Conf::get()->commandPermission("gps")));
-  registerCommand(new Command(parseCmd("kick"), "<player>", "Kicks a player with optional kick message", kick, Conf::get()->commandPermission("kick")));
-  registerCommand(new Command(parseCmd("mute"), "<player>", "Mutes a player with optional message", mute, Conf::get()->commandPermission("mute")));
-  registerCommand(new Command(parseCmd("regen"), "", "Regenerates lightning", regenerateLighting, Conf::get()->commandPermission("regen")));
-  registerCommand(new Command(parseCmd("reload"), "", "Reload admins and configuration", reloadConfiguration, Conf::get()->commandPermission("reload")));
-  registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap, Conf::get()->commandPermission("save")));
-  registerCommand(new Command(parseCmd("sethealth"), "<player> <health>", "Set a player's health. <health> = 0-20", setHealth, Conf::get()->commandPermission("sethealth")));
-  registerCommand(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime, Conf::get()->commandPermission("settime")));
-  registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport, Conf::get()->commandPermission("tp")));
-  registerCommand(new Command(parseCmd("unmute"), "<player>", "Unmutes a given player", unmute, Conf::get()->commandPermission("unmute")));
-  registerCommand(new Command(parseCmd("load"), "<name> <file>", "Loads a plugin from a file", pluginLoad, Conf::get()->commandPermission("load")));
-  registerCommand(new Command(parseCmd("unload"), "<name>", "Unloads a plugin", pluginUnload, Conf::get()->commandPermission("unload")));
+  registerCommand(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport, Mineserver::get()->conf()->commandPermission("ctp")));
+  registerCommand(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems, Mineserver::get()->conf()->commandPermission("give")));
+  registerCommand(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf, Mineserver::get()->conf()->commandPermission("igive")));
+  registerCommand(new Command(parseCmd("gps"), "[<player>]", "Show own coordinates or show <player>'s coordinates", showPosition, Mineserver::get()->conf()->commandPermission("gps")));
+  registerCommand(new Command(parseCmd("kick"), "<player>", "Kicks a player with optional kick message", kick, Mineserver::get()->conf()->commandPermission("kick")));
+  registerCommand(new Command(parseCmd("mute"), "<player>", "Mutes a player with optional message", mute, Mineserver::get()->conf()->commandPermission("mute")));
+  registerCommand(new Command(parseCmd("regen"), "", "Regenerates lightning", regenerateLighting, Mineserver::get()->conf()->commandPermission("regen")));
+  registerCommand(new Command(parseCmd("reload"), "", "Reload admins and configuration", reloadConfiguration, Mineserver::get()->conf()->commandPermission("reload")));
+  registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap, Mineserver::get()->conf()->commandPermission("save")));
+  registerCommand(new Command(parseCmd("sethealth"), "<player> <health>", "Set a player's health. <health> = 0-20", setHealth, Mineserver::get()->conf()->commandPermission("sethealth")));
+  registerCommand(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime, Mineserver::get()->conf()->commandPermission("settime")));
+  registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport, Mineserver::get()->conf()->commandPermission("tp")));
+  registerCommand(new Command(parseCmd("unmute"), "<player>", "Unmutes a given player", unmute, Mineserver::get()->conf()->commandPermission("unmute")));
+  registerCommand(new Command(parseCmd("load"), "<name> <file>", "Loads a plugin from a file", pluginLoad, Mineserver::get()->conf()->commandPermission("load")));
+  registerCommand(new Command(parseCmd("unload"), "<name>", "Unloads a plugin", pluginUnload, Mineserver::get()->conf()->commandPermission("unload")));
 }
