@@ -34,19 +34,18 @@
 #include <cmath>
 #include <ctime>
 
-#include "../logger.h"
-#include "../constants.h"
-
-#include "../config.h"
-#include "../nbt.h"
-#include "../map.h"
-
-// libnoise
 #ifdef DEBIAN
 #include <libnoise/noise.h>
 #else
 #include <noise/noise.h>
 #endif
+
+#include "../logger.h"
+#include "../constants.h"
+#include "../config.h"
+#include "../nbt.h"
+#include "../map.h"
+#include "../mineserver.h"
 
 //#include "mersenne.h"
 #include "cavegen.h"
@@ -277,10 +276,10 @@ void MapGen::generateWithNoise(int x, int z)
   #ifdef PRINT_MAPGEN_TIME
   #ifdef WIN32
     t_end = timeGetTime ();
-    Screen::get()->log("Mapgen: " + dtos(t_end-t_begin) + "ms");
+    Mineserver::get()->screen()->log("Mapgen: " + dtos(t_end-t_begin) + "ms");
   #else
     gettimeofday(&end, NULL);
-    Screen::get()->log("Mapgen: " + dtos(end.tv_usec - start.tv_usec));
+    Mineserver::get()->screen()->log("Mapgen: " + dtos(end.tv_usec - start.tv_usec));
   #endif
   #endif
   

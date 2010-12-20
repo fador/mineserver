@@ -58,19 +58,19 @@ chat.o: chat.cpp logger.h constants.h tools.h map.h user.h chat.h config.h physi
 commands.o: commands.cpp logger.h constants.h tools.h map.h user.h chat.h config.h physics.h
 config.o: config.cpp logger.h constants.h config.h
 constants.o: constants.cpp constants.h
-logger.o: logger.cpp logger.h
+logger.o: logger.cpp logger.h mineserver.h
 map.o: map.cpp logger.h tools.h map.h user.h nbt.h config.h worldgen/mapgen.h
 nbt.o: nbt.cpp tools.h nbt.h map.h
-furnace.o: furnace.cpp furnace.h
+furnace.o: furnace.cpp furnace.h mineserver.h
 furnaceManager.o: furnaceManager.cpp furnaceManager.h
-packets.o: packets.cpp constants.h logger.h sockets.h tools.h map.h user.h chat.h config.h nbt.h packets.h physics.h
+packets.o: packets.cpp constants.h mineserver.h logger.h sockets.h tools.h map.h user.h chat.h config.h nbt.h packets.h physics.h
 physics.o: physics.cpp logger.h constants.h config.h user.h map.h vec.h physics.h
-screen.o: screen.cpp mineserver.h screen.h
-sockets.o: sockets.cpp logger.h constants.h tools.h user.h map.h chat.h nbt.h packets.h
+screen.o: screen.cpp screen.h
+sockets.o: sockets.cpp logger.h constants.h tools.h mineserver.h user.h map.h chat.h nbt.h packets.h
 tools.o: tools.cpp tools.h
-user.o: user.cpp constants.h logger.h tools.h map.h user.h nbt.h chat.h packets.h
-mineserver.o: mineserver.cpp constants.h logger.h sockets.h tools.h map.h user.h chat.h worldgen/mapgen.h config.h nbt.h packets.h physics.h
-plugin.o: plugin.cpp plugin.h hook.h blocks/basic.h blocks/door.h blocks/falling.h blocks/fire.h blocks/liquid.h blocks/plant.h blocks/sign.h blocks/snow.h blocks/stair.h blocks/torch.h blocks/tracks.h blocks/chest.h
+user.o: user.cpp constants.h logger.h tools.h mineserver.h map.h user.h nbt.h chat.h packets.h
+mineserver.o: mineserver.cpp mineserver.h constants.h logger.h sockets.h tools.h map.h user.h chat.h worldgen/mapgen.h config.h nbt.h packets.h physics.h
+plugin.o: plugin.cpp plugin.h hook.h mineserver.h blocks/basic.h blocks/door.h blocks/falling.h blocks/fire.h blocks/liquid.h blocks/plant.h blocks/sign.h blocks/snow.h blocks/stair.h blocks/torch.h blocks/tracks.h blocks/chest.h
 blocks/basic.o: blocks/basic.cpp blocks/basic.h
 blocks/default.o: blocks/default.cpp blocks/default.h
 blocks/door.o: blocks/door.cpp blocks/basic.h blocks/door.h

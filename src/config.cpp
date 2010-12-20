@@ -38,6 +38,7 @@
 #include "logger.h"
 #include "constants.h"
 #include "permissions.h"
+#include "mineserver.h"
 
 #include "config.h"
 
@@ -61,7 +62,7 @@ void Conf::free()
 bool Conf::load(std::string configFile, std::string namePrefix)
 {
   #ifdef _DEBUG
-  Screen::get()->log("Loading data from " + configFile);
+  Mineserver::get()->screen()->log("Loading data from " + configFile);
   #endif
   std::ifstream ifs(configFile.c_str());
 
@@ -69,7 +70,7 @@ bool Conf::load(std::string configFile, std::string namePrefix)
   if(ifs.fail() && configFile == CONFIG_FILE)
   {
     // TODO: Load default configuration from the internets!
-    Screen::get()->log(LOG_ERROR, "Warning: " + configFile + " not found! Generating it now.");
+    Mineserver::get()->screen()->log(LOG_ERROR, "Warning: " + configFile + " not found! Generating it now.");
 
     // Open config file
     std::ofstream confofs(configFile.c_str());
@@ -92,7 +93,7 @@ bool Conf::load(std::string configFile, std::string namePrefix)
 
   if (ifs.fail())
   {
-    Screen::get()->log(LOG_ERROR, "Warning: " + configFile + " not found!");
+    Mineserver::get()->screen()->log(LOG_ERROR, "Warning: " + configFile + " not found!");
     ifs.close();
     return true;
   }
@@ -154,7 +155,7 @@ bool Conf::load(std::string configFile, std::string namePrefix)
     // If under two words skip the line and log skipping.
     if(line.size() < 2)
     {
-      Screen::get()->log(LOG_ERROR, "Invalid configuration at line " + dtos(lineNum) + " of " + configFile);
+      Mineserver::get()->screen()->log(LOG_ERROR, "Invalid configuration at line " + dtos(lineNum) + " of " + configFile);
       continue;
     }
 
@@ -178,7 +179,7 @@ bool Conf::load(std::string configFile, std::string namePrefix)
     if (line[0] == "include")
     {
       #ifdef _DEBUG
-      Screen::get()->log("Including config file " + text);
+      Mineserver::get()->screen()->log("Including config file " + text);
       #endif
       load(text);
       continue;
@@ -200,7 +201,7 @@ bool Conf::load(std::string configFile, std::string namePrefix)
   }
   ifs.close();
   #ifdef _DEBUG
-  Screen::get()->log("Loaded " + lineNum + " lines from " + configFile);
+  Mineserver::get()->screen()->log("Loaded " + lineNum + " lines from " + configFile);
   #endif
 
   return true;
@@ -215,7 +216,7 @@ std::string Conf::sValue(std::string name)
   }
   else
   {
-		Screen::get()->log("Warning! " + name + " not defined in configuration. Using default value: " + defaultConf[name]);
+		Mineserver::get()->screen()->log("Warning! " + name + " not defined in configuration. Using default value: " + defaultConf[name]);
     return defaultConf[name];
   }
 }
@@ -228,7 +229,7 @@ int Conf::iValue(std::string name)
   }
   else
   {
-    Screen::get()->log("Warning! " + name + " not defined in configuration. Using default value: " + defaultConf[name]);
+    Mineserver::get()->screen()->log("Warning! " + name + " not defined in configuration. Using default value: " + defaultConf[name]);
     return atoi(defaultConf[name].c_str());
   }
 }
@@ -241,7 +242,7 @@ bool Conf::bValue(std::string name)
   }
   else
   {
-    Screen::get()->log("Warning! " + name + " not defined in configuration. Using default value: " + defaultConf[name]);
+    Mineserver::get()->screen()->log("Warning! " + name + " not defined in configuration. Using default value: " + defaultConf[name]);
     return (defaultConf[name] == "true")?true:false;
   }
 }
@@ -254,7 +255,7 @@ std::vector<int> Conf::vValue(std::string name)
   }
   else
   {
-    Screen::get()->log("Warning! " + name + " not defined in configuration.");
+    Mineserver::get()->screen()->log("Warning! " + name + " not defined in configuration.");
     return std::vector<int>();
   }
 }
@@ -286,7 +287,7 @@ int Conf::permissionByName(std::string permissionName)
     return PERM_GUEST;
   }
 
-  Screen::get()->log("Warning! Unknown permission name: " + permissionName + " - Using GUEST permission by default!");
+  Mineserver::get()->screen()->log("Warning! Unknown permission name: " + permissionName + " - Using GUEST permission by default!");
 
   return PERM_GUEST; // default
 }

@@ -25,11 +25,11 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "furnaceManager.h"
-#include "furnace.h"
 #include <iostream>
 
-//#define _DEBUG
+#include "furnaceManager.h"
+#include "furnace.h"
+#include "mineserver.h"
 
 FurnaceManager* FurnaceManager::_instance;
 
@@ -47,7 +47,7 @@ void FurnaceManager::update()
   }
 
 #ifdef _DEBUG
-  Screen::get()->log("Checking Furnaces: " + dtos(m_activeFurnaces.size()) + " active furnaces.");
+  Mineserver::get()->screen()->log("Checking Furnaces: " + dtos(m_activeFurnaces.size()) + " active furnaces.");
 #endif
 
   // Loop thru all the furnaces

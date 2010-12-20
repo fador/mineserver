@@ -26,12 +26,8 @@
  */
 
 #include <ctime>
+#include <iostream>
 #include "screen.h"
-
-Screen* Screen::_instance;
-
-Screen::Screen() {
-}
 
 void Screen::init(std::string version)
 {
@@ -42,7 +38,9 @@ void Screen::init(std::string version)
   refresh();
 
   for (int i = 0; i < 25; i++)
+  {
     commandHistory[i].clear();
+  }
 
   // Work out our dimensions - 7 for top row - 7 for bottom command row
   int titleHeight = 5;
@@ -229,11 +227,13 @@ void Screen::end()
   destroyWindow(generalLog);
   destroyWindow(chatLog);
   destroyWindow(playerList);
-  
+
   // Stop NCurses
   endwin();
 }
-void Screen::log(std::string message) {
+
+void Screen::log(std::string message)
+{
   // Default to general log
   this->log(LOG_GENERAL, message);
 }
@@ -258,11 +258,13 @@ void Screen::log(int logType, std::string message)
       window = commandLog;
       break;
   }
-    
+
   // Set the color
   if (logType == LOG_ERROR)
+  {
     wattron(window, COLOR_PAIR(TEXT_COLOR_RED));
-  
+  }
+
   // Get the cursor so we can indent a bit
   int x, y;
   getyx(window, y, x);
@@ -290,7 +292,9 @@ void Screen::log(int logType, std::string message)
       wattroff(window, COLOR_PAIR(TEXT_COLOR_YELLOW));  
     }
     else // Regular chat
+    {
        waddstr(window, (message + "\n").c_str());
+    }
   }
   else if (logType == LOG_GENERAL)
   {
@@ -298,13 +302,18 @@ void Screen::log(int logType, std::string message)
     waddstr(window, ("[" + currentTimestamp(true) + "] ").c_str());
     wattroff(window, WA_BOLD);
     waddstr(window, (message + "\n").c_str());
-  } else
+  }
+  else
+  {
     waddstr(window, (message + "\n").c_str());
+  }
     
   // Turn off color again
   if (logType == LOG_ERROR)
+  {
     wattroff(window, COLOR_PAIR(TEXT_COLOR_RED));
-  
+  }
+
   wrefresh(window);  
   
 //  wprintw(commandLog, "> ", 5, 0);

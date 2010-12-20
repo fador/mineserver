@@ -30,10 +30,11 @@
 //
 
 #include <cstdio>
-//#include <cstdlib>
 #include <iostream>
 #include <string>
+
 #include "logger.h"
+#include "mineserver.h"
 
 Logger* Logger::_instance;
 
@@ -49,5 +50,5 @@ void Logger::free()
 // Log to terminal
 void Logger::log(std::string msg, std::string file, int line)
 {
-  Screen::get()->log("[" + file + "@" + dtos(line) + "]: " + msg);
+  Mineserver::get()->screen()->log("[" + file + "@" + dtos(line) + "]: " + msg);
 }

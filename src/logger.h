@@ -25,6 +25,9 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef _LOGGER_H
+#define _LOGGER_H
+
 //
 // Mineserver logger.h
 //
@@ -53,3 +56,5 @@ public:
   }
   void free();
 };
+
+#endif

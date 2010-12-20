@@ -50,17 +50,18 @@
 #include <event.h>
 #include <sys/stat.h>
 #include <zlib.h>
-#include "logger.h"
-#include "constants.h"
 
 #include "tools.h"
 
+#include "logger.h"
+#include "constants.h"
 #include "user.h"
 #include "map.h"
 #include "chat.h"
 #include "nbt.h"
-#include "packets.h"
+#include "mineserver.h"
 
+#include "packets.h"
 
 extern int setnonblock(int fd);
 
@@ -81,7 +82,7 @@ void client_callback(int fd,
     read = recv(fd, (char*)buf, 2048, 0);
     if(read == 0)
     {
-    Screen::get()->log("Socket closed properly");
+    Mineserver::get()->screen()->log("Socket closed properly");
     //event_del(user->GetEvent());
 
 #ifdef WIN32
@@ -95,7 +96,7 @@ void client_callback(int fd,
 
     if(read == -1)
     {
-      Screen::get()->log("Socket had no data to read");
+      Mineserver::get()->screen()->log("Socket had no data to read");
       #ifdef WIN32
           closesocket(user->fd);
       #else
@@ -172,7 +173,7 @@ void client_callback(int fd,
     {
       if((errno != EAGAIN && errno != EINTR) || user->write_err_count>200)
       {
-        Screen::get()->log(LOG_ERROR, "Error writing to client");
+        Mineserver::get()->screen()->log(LOG_ERROR, "Error writing to client");
         //event_del(user->GetEvent());
 
     #ifdef WIN32

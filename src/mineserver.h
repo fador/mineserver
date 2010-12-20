@@ -30,6 +30,7 @@
 
 #include <vector>
 #include <event.h>
+#include <iostream>
 
 #include "user.h"
 #include "map.h"
@@ -42,12 +43,10 @@ public:
   static Mineserver* get()
   {
     static Mineserver* m_instance;
-
     if (!m_instance)
     {
       m_instance = new Mineserver;
     }
-
     return m_instance;
   }
 
@@ -61,23 +60,28 @@ public:
   int m_socketlisten;
   void updatePlayerList();
 
-  Map* map() { return m_map; }
+  Map* map() { if (!m_map) { m_map = new Map; } return m_map; }
   void setMap(Map* map) { m_map = map; }
-  Chat* chat() { return m_chat; }
+  Chat* chat() { if (!m_chat) { m_chat = new Chat; } return m_chat; }
   void setChat(Chat* chat) { m_chat = chat; }
-  Plugin* plugin() { return m_plugin; }
+  Plugin* plugin() { if (!m_plugin) { m_plugin = new Plugin; } return m_plugin; }
   void setPlugin(Plugin* plugin) { m_plugin = plugin; }
+  Screen* screen() { if (!m_screen) { m_screen = new Screen; } return m_screen; }
+  void setScreen(Screen* screen) { m_screen = screen; }
 
 private:
-  Mineserver();
+  Mineserver() {}
   event_base* m_eventBase;
   bool m_running;
   // holds all connected users
   std::vector<User*> m_users;
 
+  static Mineserver* m_instance;
+
   Map* m_map;
   Chat* m_chat;
   Plugin* m_plugin;
+  Screen* m_screen;
 };
 
 #endif

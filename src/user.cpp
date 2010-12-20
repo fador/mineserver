@@ -245,7 +245,7 @@ bool User::sendLoginInfo()
 bool User::kick(std::string kickMsg)
 {
   buffer << (sint8)PACKET_KICK << kickMsg;
-  Screen::get()->log(nick + " kicked. Reason: " + kickMsg);
+  Mineserver::get()->screen()->log(nick + " kicked. Reason: " + kickMsg);
   return true;
 }
 
@@ -262,7 +262,7 @@ bool User::mute(std::string muteMsg)
 
   Mineserver::get()->chat()->sendMsg(this, muteMsg, Chat::USER);
   this->muted = true;
-  Screen::get()->log(nick + " muted. Reason: " + muteMsg);
+  Mineserver::get()->screen()->log(nick + " muted. Reason: " + muteMsg);
   return true;
 }
 
@@ -270,7 +270,7 @@ bool User::unmute()
 {
     Mineserver::get()->chat()->sendMsg(this, MC_COLOR_YELLOW + "You have been unmuted.", Chat::USER);
     this->muted = false;
-    Screen::get()->log(nick + " unmuted. ");
+    Mineserver::get()->screen()->log(nick + " unmuted. ");
     return true;
 }
 

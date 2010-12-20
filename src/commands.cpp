@@ -50,6 +50,7 @@
 #include "config.h"
 #include "physics.h"
 #include "plugin.h"
+#include "mineserver.h"
 
 namespace
 {
@@ -60,7 +61,7 @@ namespace
     // Let the console know
     if(user->UID == SERVER_CONSOLE_UID)
     {
-      Screen::get()->log(LOG_CHAT, message);
+      Mineserver::get()->screen()->log(LOG_CHAT, message);
     }
   }
 
@@ -124,7 +125,7 @@ namespace
 
       if(ifs.fail())
       {
-        Screen::get()->log("> Warning: " + Conf::get()->sValue("rules_file") + " not found.");
+        Mineserver::get()->screen()->log("> Warning: " + Conf::get()->sValue("rules_file") + " not found.");
         return;
       }
       else
@@ -297,7 +298,7 @@ void emote(User* user, std::string command, std::deque<std::string> args)
   }
   else
   {
-    Screen::get()->log(LOG_CHAT, "* "+ user->nick + " " + emoteMsg);
+    Mineserver::get()->screen()->log(LOG_CHAT, "* "+ user->nick + " " + emoteMsg);
     Mineserver::get()->chat()->sendMsg(user, MC_COLOR_DARK_ORANGE + "* " + user->nick + " " + emoteMsg, Chat::ALL);
   }
 }

@@ -32,7 +32,6 @@
 #include <map>
 #include <vector>
 #include <deque>
-#include "mineserver.h"
 
 class Conf
 {

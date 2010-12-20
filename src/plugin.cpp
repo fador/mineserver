@@ -33,8 +33,10 @@
 #include <dlfcn.h>
 #endif
 
-#include "plugin.h"
+#include "mineserver.h"
 #include "logger.h"
+
+#include "plugin.h"
 #include "blocks/default.h"
 #include "blocks/falling.h"
 #include "blocks/torch.h"
@@ -265,20 +267,20 @@ bool Plugin::loadExternal(const std::string name, const std::string file)
   LIBRARY_HANDLE lhandle = NULL;
   void (*fhandle)() = NULL;
 
-  Screen::get()->log("Loading plugin "+name+" ("+file+")...");
+  Mineserver::get()->screen()->log("Loading plugin "+name+" ("+file+")...");
 
   struct stat st;
   if(stat(file.c_str(), &st) != 0)
   {
-    Screen::get()->log("Could not find "+file+"!");
+    Mineserver::get()->screen()->log("Could not find "+file+"!");
     return false;
   }
 
   lhandle = LIBRARY_LOAD(file.c_str());
   if (lhandle == NULL)
   {
-    Screen::get()->log("Could not load "+file+"!");
-    Screen::get()->log(LIBRARY_ERROR());
+    Mineserver::get()->screen()->log("Could not load "+file+"!");
+    Mineserver::get()->screen()->log(LIBRARY_ERROR());
     return false;
   }
 
@@ -287,7 +289,7 @@ bool Plugin::loadExternal(const std::string name, const std::string file)
   fhandle = (void (*)()) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
   if (fhandle == NULL)
   {
-    Screen::get()->log("Could not get init function handle!");
+    Mineserver::get()->screen()->log("Could not get init function handle!");
     unloadExternal(name);
     return false;
   }
@@ -304,17 +306,17 @@ void Plugin::unloadExternal(const std::string name)
 
   if (m_libraryHandles[name] != NULL)
   {
-    Screen::get()->log("Unloading plugin "+name+"...");
+    Mineserver::get()->screen()->log("Unloading plugin "+name+"...");
 
     lhandle = m_libraryHandles[name];
     fhandle = (void (*)()) LIBRARY_SYMBOL(lhandle, (name+"_shutdown").c_str());
     if (fhandle == NULL)
     {
-      Screen::get()->log("Could not get shutdown function handle!");
+      Mineserver::get()->screen()->log("Could not get shutdown function handle!");
     }
     else
     {
-      Screen::get()->log("Calling shutdown function for "+name+".");
+      Mineserver::get()->screen()->log("Calling shutdown function for "+name+".");
       fhandle();
     }
 
@@ -323,7 +325,7 @@ void Plugin::unloadExternal(const std::string name)
   }
   else
   {
-    Screen::get()->log("Plugin "+name+" not loaded!");
+    Mineserver::get()->screen()->log("Plugin "+name+" not loaded!");
   }
 }
 

@@ -68,6 +68,7 @@
 #include "physics.h"
 #include "plugin.h"
 #include "furnaceManager.h"
+#include "mineserver.h"
 
 #ifdef WIN32
     #define M_PI 3.141592653589793238462643
@@ -178,7 +179,7 @@ int PacketHandler::login_request(User *user)
 
   user->buffer.removePacket();
 
-  Screen::get()->log("Player " + dtos(user->UID) + " login v." + dtos(version) + " : " + player + ":" + passwd);
+  Mineserver::get()->screen()->log("Player " + dtos(user->UID) + " login v." + dtos(version) + " : " + player + ":" + passwd);
 
   user->nick = player;
 
@@ -230,13 +231,13 @@ int PacketHandler::handshake(User *user)
   if(Conf::get()->bValue("user_validation") == true)
   {
     // Send the unique hash for this player to prompt the client to go to minecraft.net to validate
-    Screen::get()->log("Handshake: Giving player "+player+" their minecraft.net hash of: " + hash(player));
+    Mineserver::get()->screen()->log("Handshake: Giving player "+player+" their minecraft.net hash of: " + hash(player));
     user->buffer << (sint8)PACKET_HANDSHAKE << hash(player);
   }
   else
   {
     // Send "no validation or password needed" validation
-    Screen::get()->log("Handshake: No validation required for player "+player+".");
+    Mineserver::get()->screen()->log("Handshake: No validation required for player "+player+".");
     user->buffer << (sint8)PACKET_HANDSHAKE << std::string("-");
   }
   // TODO: Add support for prompting user for Server password (once client supports it)
@@ -555,7 +556,7 @@ int PacketHandler::player_block_placement(User *user)
       return PACKET_OK;
     }
 
-    Screen::get()->log("Spawn minecart");
+    Mineserver::get()->screen()->log("Spawn minecart");
     sint32 EID=generateEID();
     Packet pkt;
     // MINECART
@@ -565,7 +566,7 @@ int PacketHandler::player_block_placement(User *user)
 
   if (newblock == -1 && newblock != ITEM_SIGN)
   {
-     Screen::get()->log("ignoring: "+newblock);
+     Mineserver::get()->screen()->log("ignoring: "+newblock);
      return PACKET_OK;
   }
 
@@ -575,7 +576,7 @@ int PacketHandler::player_block_placement(User *user)
   }
 
 #ifdef _DEBUG
-  Screen::get()->log("Block_placement: "+newblock+" ("+dtos(x)+","+dtos((int)y)+","+dtos(z)+") dir: "+dtos((int)direction);
+  Mineserver::get()->screen()->log("Block_placement: "+newblock+" ("+dtos(x)+","+dtos((int)y)+","+dtos(z)+") dir: "+dtos((int)direction);
 #endif
 
   if (direction)
@@ -788,7 +789,7 @@ int PacketHandler::disconnect(User *user)
 
   user->buffer.removePacket();
 
-  Screen::get()->log("Disconnect: " + msg);
+  Mineserver::get()->screen()->log("Disconnect: " + msg);
 
   event_del(user->GetEvent());
 
@@ -867,7 +868,7 @@ int PacketHandler::complex_entities(User *user)
   //Uncompress
   if(inflate(&zstream, Z_FULL_FLUSH) != Z_STREAM_END)
   {
-    Screen::get()->log(LOG_ERROR, "Error in inflate!");
+    Mineserver::get()->screen()->log(LOG_ERROR, "Error in inflate!");
     delete[] buffer;
     return PACKET_OK;
   }
@@ -883,8 +884,10 @@ int PacketHandler::complex_entities(User *user)
   NBT_Value *entity = new NBT_Value(NBT_Value::TAG_COMPOUND, &ptr, remaining);
 
 #ifdef _DEBUG
-  Screen::get()->log("Complex entity at (" + dtos(x) + "," + dtos(y) + "," + dtos(z) + ")");
-  entity->Print();
+  Mineserver::get()->screen()->log("Complex entity at (" + dtos(x) + "," + dtos(y) + "," + dtos(z) + ")");
+  std::string dump;
+  entity->Dump(dump);
+  Mineserver::get()->screen()->log(dump);
 #endif
 
   // Check if this is a Furnace and handle if so
