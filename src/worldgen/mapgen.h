@@ -46,6 +46,8 @@ private:
   uint8 skylight[16*16*128/2];
   uint8 blocklight[16*16*128/2];
   uint8 heightmap[16*16];
+
+  bool treesGenerated;
   
   int m_seed;
   int seaLevel;
@@ -56,6 +58,7 @@ private:
   void generateWithNoise(int x, int z);
   
   void AddBeaches();
+  void AddTrees();
   
   CaveGen cave;
 
