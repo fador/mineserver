@@ -163,6 +163,7 @@ bool User::sendLoginInfo()
   //Send server time (after dawn)
   buffer << (sint8)PACKET_TIME_UPDATE << (sint64)Mineserver::get()->map()->mapTime;
 
+  
   //Inventory
   for(sint32 invType=-1; invType != -4; invType--)
   {
@@ -184,13 +185,13 @@ bool User::sendLoginInfo()
       inventory = inv.crafting;
       inventoryCount = 4;
     }
-    buffer << (sint8)PACKET_PLAYER_INVENTORY << invType << inventoryCount;
 
+    buffer << (sint8)PACKET_INVENTORY << (sint8)invType << inventoryCount;
     for(int i=0; i<inventoryCount; i++)
-    {
-      if(inventory[i].count)
+    {      
+      if(1)//inventory[i].count)
       {
-        buffer << (sint16)inventory[i].type << (sint8)inventory[i].count << (sint16)inventory[i].health;
+        buffer << (sint16)/*inventory[i].type*/50 << (sint8)/*inventory[i].count*/5 << (sint16)/*inventory[i].health*/0;
       }
       else
       {
@@ -198,7 +199,7 @@ bool User::sendLoginInfo()
       }
     }
   }
-
+  
   // Send motd
   std::ifstream motdfs(Mineserver::get()->conf()->sValue("motd_file").c_str());
 
@@ -237,6 +238,7 @@ bool User::sendLoginInfo()
   logged = true;
 
   Mineserver::get()->chat()->sendMsg(this, player+" connected!", Chat::ALL);
+
 
   return true;
 }
@@ -708,8 +710,9 @@ bool User::updatePos(double x, double y, double z, double stance)
               pkt << (sint8)PACKET_DESTROY_ENTITY << (sint32)(*iter)->EID;
               newChunk->sendPacket(pkt);
 
-              buffer << (sint8)PACKET_ADD_TO_INVENTORY << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint16)(*iter)->health;
 
+              //buffer << (sint8)PACKET_ADD_TO_INVENTORY << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint16)(*iter)->health;
+              buffer << (sint8)0x67 << (sint8)-1 << (sint16)10 << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint8)(*iter)->health;
 
               Mineserver::get()->map()->items.erase((*iter)->EID);
               delete *iter;
@@ -1057,7 +1060,7 @@ bool User::spawnOthers()
 bool User::sethealth(int userHealth)
 {
   health = userHealth;
-  buffer << (sint8)PACKET_UPDATE_HEALTH << (sint8)userHealth;
+  buffer << (sint8)PACKET_UPDATE_HEALTH << (sint16)userHealth;
   //ToDo: Send destroy entity and spawn entity again
   return true;
 }

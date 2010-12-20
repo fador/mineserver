@@ -60,6 +60,10 @@ enum
   PACKET_PLAYER_BLOCK_PLACEMENT    = 0x0f,
   PACKET_HOLDING_CHANGE            = 0x10,
   PACKET_ARM_ANIMATION             = 0x12,
+  PACKET_INVENTORY_CLOSE           = 0x65,
+  PACKET_INVENTORY_CHANGE          = 0x66,
+  PACKET_INVENTORY                 = 0x68,
+  PACKET_SIGN                      = 0x82,
   PACKET_DISCONNECT                = 0xff,
   //Server to client
   PACKET_LOGIN_RESPONSE            = 0x01,
@@ -424,6 +428,10 @@ public:
   int complex_entities(User *user);
   int use_entity(User *user);
   int respawn(User *user);
+  int change_sign(User *user);
+
+  int inventory_change(User *user);
+  int inventory_close(User *user);
 };
 
 #endif

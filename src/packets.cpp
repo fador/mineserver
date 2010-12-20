@@ -91,13 +91,84 @@ void PacketHandler::init()
   packets[PACKET_PLAYER_LOOK]              = Packets( 9, &PacketHandler::player_look);
   packets[PACKET_PLAYER_POSITION_AND_LOOK] = Packets(41, &PacketHandler::player_position_and_look);
   packets[PACKET_PLAYER_DIGGING]           = Packets(11, &PacketHandler::player_digging);
-  packets[PACKET_PLAYER_BLOCK_PLACEMENT]   = Packets(12, &PacketHandler::player_block_placement);
-  packets[PACKET_HOLDING_CHANGE]           = Packets( 6, &PacketHandler::holding_change);
+  packets[PACKET_PLAYER_BLOCK_PLACEMENT]   = Packets(PACKET_VARIABLE_LEN, &PacketHandler::player_block_placement);
+  packets[PACKET_HOLDING_CHANGE]           = Packets( 2, &PacketHandler::holding_change);
   packets[PACKET_ARM_ANIMATION]            = Packets( 5, &PacketHandler::arm_animation);
   packets[PACKET_PICKUP_SPAWN]             = Packets(22, &PacketHandler::pickup_spawn);
   packets[PACKET_DISCONNECT]               = Packets(PACKET_VARIABLE_LEN, &PacketHandler::disconnect);
   packets[PACKET_COMPLEX_ENTITIES]         = Packets(PACKET_VARIABLE_LEN, &PacketHandler::complex_entities);
   packets[PACKET_RESPAWN]                  = Packets( 0, &PacketHandler::respawn);
+  packets[PACKET_INVENTORY_CHANGE]         = Packets(PACKET_VARIABLE_LEN, &PacketHandler::inventory_change);
+  packets[PACKET_INVENTORY_CLOSE]          = Packets(1, &PacketHandler::inventory_close);
+  packets[PACKET_SIGN]                     = Packets(PACKET_VARIABLE_LEN, &PacketHandler::change_sign); 
+
+  
+  
+}
+
+int PacketHandler::change_sign(User *user)
+{
+  sint32 x,z;
+  sint16 y;
+  std::string strings[4];
+
+  user->buffer >> x >> y >> z;
+
+  for(int i=0;i<4;i++)
+  {
+    user->buffer >> strings[i];
+  }
+  //ToDo: Save signs!
+
+  Mineserver::get()->screen()->log(LOG_GENERAL,"Sign: " + strings[0] + strings[1]+ strings[2]+ strings[3]);
+  
+  //No need to do anything
+  user->buffer.removePacket();
+  return PACKET_OK;
+}
+
+int PacketHandler::inventory_close(User *user)
+{
+  sint8 a;
+
+  user->buffer >> a;
+
+  Mineserver::get()->screen()->log(LOG_GENERAL,"Packet 0x65: " + dtos(a));
+  
+  //No need to do anything
+  user->buffer.removePacket();
+  return PACKET_OK;
+}
+
+//
+int PacketHandler::inventory_change(User *user)
+{
+  if(!user->buffer.haveData(10))
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+  sint8 from_type;
+  sint16 from_slot;
+  sint8 to_type;
+  sint16 to_slot;
+  sint16 itemID;
+  sint8 item_count;
+  sint8 item_health;
+
+  user->buffer >> from_type >> from_slot >> to_type >> to_slot >> itemID;
+  if(itemID != -1)
+  {
+    if(!user->buffer.haveData(2))
+    {
+      return PACKET_NEED_MORE_DATA;
+    }
+    user->buffer >> item_count >> item_health;
+  }
+  //Mineserver::get()->screen()->log(LOG_GENERAL,"Packet 0x66: " + dtos(a) + "," + dtos(slot) + "," + dtos(c) +  "," + dtos(d) + "," + dtos(e) + "," + dtos(ea) + "," + dtos(ed));
+
+  //No need to do anything
+  user->buffer.removePacket();
+  return PACKET_OK;
 }
 
 // Keep Alive (http://mc.kev009.com/wiki/Protocol#Keep_Alive_.280x00.29)
@@ -512,6 +583,11 @@ int PacketHandler::player_digging(User *user)
 
 int PacketHandler::player_block_placement(User *user)
 {
+
+  if(!user->buffer.haveData(12))
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
   sint8 y, direction;
   sint16 newblock;
   sint32 x, z;
@@ -521,12 +597,17 @@ int PacketHandler::player_block_placement(User *user)
   /* neighbour blocks */
   uint8 block;
   uint8 meta;
+  sint8 count,health;
 
-  user->buffer >> newblock >> x >> y >> z >> direction;
+  user->buffer >> x >> y >> z >> direction >> newblock;
 
-  if(!user->buffer)
+  if(newblock >= 0)
   {
-    return PACKET_NEED_MORE_DATA;
+    if(!user->buffer.haveData(2))
+    {
+      return PACKET_NEED_MORE_DATA;
+    }
+    user->buffer >> count >> health;
   }
 
   user->buffer.removePacket();
@@ -680,9 +761,8 @@ int PacketHandler::player_block_placement(User *user)
 
 int PacketHandler::holding_change(User *user)
 {
-  sint32 entityID;
   sint16 itemID;
-  user->buffer >> entityID >> itemID;
+  user->buffer >> itemID;
 
   if(!user->buffer)
   {
