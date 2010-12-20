@@ -185,7 +185,7 @@ bool Conf::load(std::string configFile, std::string namePrefix)
   }
   ifs.close();
   #ifdef _DEBUG
-  Mineserver::get()->screen()->log("Loaded " + lineNum + " lines from " + configFile);
+  //Mineserver::get()->screen()->log("Loaded " + lineNum + " lines from " + configFile);
   #endif
 
   return true;

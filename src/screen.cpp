@@ -32,7 +32,7 @@
 void Screen::init(std::string version)
 {
   initscr(); // Start NCurses
-  timeout(0); // Non blocking?
+  timeout(0); // Non blocking
   //noecho();
   echo();
   refresh();

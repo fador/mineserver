@@ -200,7 +200,7 @@ void Map::init()
   std::string dump;
   trees->Dump(dump);
   Mineserver::get()->screen()->log(dump);
-  Mineserver::get()->screen()->log(dtos((*tree_list).size()) + " saplings");
+  //Mineserver::get()->screen()->log(dtos((*tree_list).size()) + " saplings");
 #endif
 
   std::vector<NBT_Value*>* tree_list = trees->GetList();
@@ -224,7 +224,7 @@ void Map::init()
 
   delete root;
 #ifdef _DEBUG
-  Mineserver::get()->screen()->log("Spawn: (" + spawnPos.x() + "," + spawnPos.y() + "," + spawnPos.z() + ")");
+  //Mineserver::get()->screen()->log("Spawn: (" + spawnPos.x() + "," + spawnPos.y() + "," + spawnPos.z() + ")");
 #endif
 }
 
@@ -808,7 +808,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
 
 bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("sendBlockChange(x=%d, y=%d, z=%d, type=%d, meta=%d)\n", x, y, z, type, meta);
 #endif
 
@@ -1021,7 +1021,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
 
 bool Map::saveMap(int x, int z)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("saveMap(x=%d, z=%d)\n", x, z);
 #endif
 
@@ -1123,7 +1123,7 @@ bool Map::releaseMap(int x, int z)
 // Send chunk to user
 void Map::sendToUser(User* user, int x, int z)
 {
-#ifdef _DEBUG
+#ifdef _DEBUG2
   printf("sendToUser(x=%d, z=%d)\n", x, z);
 #endif
 

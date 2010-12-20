@@ -565,7 +565,7 @@ int PacketHandler::player_block_placement(User *user)
   }
 
 #ifdef _DEBUG
-  Mineserver::get()->screen()->log("Block_placement: "+newblock+" ("+dtos(x)+","+dtos((int)y)+","+dtos(z)+") dir: "+dtos((int)direction);
+  Mineserver::get()->screen()->log("Block_placement: "+dtos(newblock)+" ("+dtos(x)+","+dtos((int)y)+","+dtos(z)+") dir: "+dtos((int)direction));
 #endif
 
   if (direction)

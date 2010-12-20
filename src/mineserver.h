@@ -92,7 +92,19 @@ public:
   void setLogger(Logger* logger) { m_logger = logger; }
 
 private:
-  Mineserver() {}
+  Mineserver()
+  {
+    m_map            = NULL;
+    m_chat           = NULL;
+    m_plugin         = NULL;
+    m_screen         = NULL;
+    m_physics        = NULL;
+    m_conf           = NULL;
+    m_furnaceManager = NULL;
+    m_packetHandler  = NULL;
+    m_mapGen         = NULL;
+    m_logger         = NULL;
+  }
   event_base* m_eventBase;
   bool m_running;
   // holds all connected users
