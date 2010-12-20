@@ -34,8 +34,6 @@
 #include <deque>
 #include "mineserver.h"
 
-struct Kit;
-
 class Conf
 {
  public:
@@ -58,7 +56,6 @@ class Conf
   std::vector<int> vValue(std::string name);
   int commandPermission(std::string commandName);
   int permissionByName(std::string permissionName);
-  Kit* kit(const std::string& kitname);
 
   bool loadRoles();
 
@@ -73,7 +70,6 @@ class Conf
   std::vector<int> stringToVec(std::string& val);
 
   std::map<std::string, std::string> m_confSet;
-  std::map<std::string, Kit*> m_kits;
 
   // predefined usernames in roles.txt
   std::deque<std::string> m_admins;

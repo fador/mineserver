@@ -40,17 +40,12 @@
 #include "permissions.h"
 
 #include "config.h"
-#include "kit.h"
 
 
 Conf* Conf::_conf;
 
 Conf::~Conf()
 {
-  for(std::map<std::string, Kit*>::iterator it = m_kits.begin(); it != m_kits.end(); it++)
-  {
-    delete it->second;
-  }
 }
 
 void Conf::free()
@@ -294,32 +289,6 @@ int Conf::permissionByName(std::string permissionName)
   Screen::get()->log("Warning! Unknown permission name: " + permissionName + " - Using GUEST permission by default!");
 
   return PERM_GUEST; // default
-}
-
-Kit* Conf::kit(const std::string& kitname)
-{
-  if(m_kits.find(kitname) != m_kits.end()) {
-    return m_kits[kitname];
-  } else {
-    std::string keyname = "kit_" + kitname;
-    if(m_confSet.find(keyname) != m_confSet.end())
-    {
-      std::string valueString, permissionName, itemsString;
-      valueString = m_confSet[keyname];
-      size_t pos = valueString.find_first_of(",");
-
-      permissionName = valueString.substr(0, pos);
-      itemsString = valueString.substr(pos + 1);
-      std::vector<int> items = stringToVec(itemsString);
-
-      Kit* kit = new Kit(kitname, items, permissionByName(permissionName));
-      m_kits[kitname] = kit; // save kit for later, if used again
-      return kit;
-    } else {
-      Screen::get()->log("Warning! " + keyname + " not defined in configuration.");
-      return NULL;
-    }
-  }
 }
 
 std::vector<int> Conf::stringToVec(std::string& str)

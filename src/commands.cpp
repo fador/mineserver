@@ -49,7 +49,6 @@
 #include "chat.h"
 #include "config.h"
 #include "physics.h"
-#include "kit.h"
 #include "plugin.h"
 
 namespace
@@ -152,59 +151,6 @@ void home(User* user, std::string command, std::deque<std::string> args)
 {
   Chat::get()->sendMsg(user, MC_COLOR_BLUE + "Teleported you home!", Chat::USER);
   user->teleport(Map::get()->spawnPos.x(), Map::get()->spawnPos.y() + 2, Map::get()->spawnPos.z());
-}
-
-void kit(User* user, std::string command, std::deque<std::string> args)
-{
-  if(args.size() > 0)
-  {
-    // std::vector<int> kitItems = Conf::get()->vValue("kit_" + args[0]);
-    Kit* kit = Conf::get()->kit(args[0]);
-    // If kit is found
-    if(kit && !kit->items.empty() && (user->permissions & kit->permissions))
-    {
-      User* origUser = user;
-      if(args.size() > 1)
-      {
-        origUser = user;
-        user = User::byNick(args[1]);
-        if(!user)
-        {
-          user = origUser;
-          Chat::get()->sendMsg(user, MC_COLOR_RED + "User not found: " + args[1], Chat::USER);
-          return;
-        }
-      }
-
-      for(unsigned int i = 0; i < kit->items.size(); i++)
-      {
-        spawnedItem item;
-        item.EID     = generateEID();
-        item.item    = kit->items[i];
-        item.count   = 1;
-        item.health=0;
-        item.pos.x() = static_cast<int>(user->pos.x*32 + (rand() % 30));
-        item.pos.y() = static_cast<int>(user->pos.y*32);
-        item.pos.z() = static_cast<int>(user->pos.z*32 + (rand() % 30));
-        Map::get()->sendPickupSpawn(item);
-      }
-      Chat::get()->sendMsg(user, MC_COLOR_BLUE + "Spawned Kit " + args[0], Chat::USER);
-
-      // send notification to spawning user, if kit was spawned for someone else
-      if(origUser != user)
-      {
-        Chat::get()->sendMsg(origUser, MC_COLOR_BLUE + "Spawned Kit " + args[0] + " for user " + args[1], Chat::USER);
-      }
-    }
-    else
-    {
-      reportError(user, "Kit " + args[0] + " not found");
-    }
-  }
-  else
-  {
-    reportError(user, "Usage: /kit name");
-  }
 }
 
 void saveMap(User* user, std::string command, std::deque<std::string> args)
@@ -795,7 +741,6 @@ void Chat::registerStandardCommands()
   // Players
   registerCommand(new Command(parseCmd("about"), "", "Display server name & version", about, Conf::get()->commandPermission("about")));
   registerCommand(new Command(parseCmd("home"), "", "Teleport to map spawn location", home, Conf::get()->commandPermission("home")));
-  registerCommand(new Command(parseCmd("kit"), "<name> [<player>]", "Gives kit to self or to <player>, if defined", kit, Conf::get()->commandPermission("kit")));
   registerCommand(new Command(parseCmd("motd"), "", "Display Message Of The Day", showMOTD, Conf::get()->commandPermission("motd")));
   registerCommand(new Command(parseCmd("players who"), "", "Lists online players", playerList, Conf::get()->commandPermission("who")));
   registerCommand(new Command(parseCmd("rules"), "", "Display server rules", rules, Conf::get()->commandPermission("rules")));
