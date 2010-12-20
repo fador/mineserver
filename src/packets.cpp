@@ -170,50 +170,81 @@ int PacketHandler::inventory_change(User *user)
   {
     if(itemID == -1 && user->inventoryHolding.type != 0)
     {
+      sint16 addCount=user->inventoryHolding.count;
+      if(to_type == 1)
+      {
+        addCount = 1;
+      }
       if(from_slot<5)
       {
-        user->inv.crafting[from_slot-1].count  = user->inventoryHolding.count;
+        user->inv.crafting[from_slot-1].count  += addCount;
         user->inv.crafting[from_slot-1].health = user->inventoryHolding.health;
         user->inv.crafting[from_slot-1].type   = user->inventoryHolding.type;
       }
       else if(from_slot<9)
       {
-        user->inv.equipped[from_slot-5].count  = user->inventoryHolding.count;
+        user->inv.equipped[from_slot-5].count  += addCount;
         user->inv.equipped[from_slot-5].health = user->inventoryHolding.health;
         user->inv.equipped[from_slot-5].type   = user->inventoryHolding.type;
       }
       else
       {
-        user->inv.main[from_slot-9].count  = user->inventoryHolding.count;
+        user->inv.main[from_slot-9].count  += addCount;
         user->inv.main[from_slot-9].health = user->inventoryHolding.health;
         user->inv.main[from_slot-9].type   = user->inventoryHolding.type;
       }
-      user->inventoryHolding.count = 0;
-      user->inventoryHolding.type  = 0;
-      user->inventoryHolding.health= 0;
+      if(to_type == 1)
+      {
+        user->inventoryHolding.count--;
+        if(user->inventoryHolding.count == 0)
+        {
+          user->inventoryHolding.type  = 0;
+          user->inventoryHolding.health= 0;
+        }
+      }
+      else
+      {
+        user->inventoryHolding.count = 0;
+        user->inventoryHolding.type  = 0;
+        user->inventoryHolding.health= 0;
+      }
     }
     else
     {
       user->inventoryHolding.type   = itemID;
       user->inventoryHolding.health = item_health;
       user->inventoryHolding.count  = item_count;
+      if(to_type == 1)
+      {
+        user->inventoryHolding.count  -= item_count>>1;
+      }
+
       if(from_slot<5)
       {
-        user->inv.crafting[from_slot-1].count = 0;
-        user->inv.crafting[from_slot-1].health = 0;
-        user->inv.crafting[from_slot-1].count = 0;
+        user->inv.crafting[from_slot-1].count  -= user->inventoryHolding.count;
+        if(user->inv.crafting[from_slot-1].count == 0)
+        {
+          user->inv.crafting[from_slot-1].health = 0;
+          user->inv.crafting[from_slot-1].count  = 0;
+        }
       }
       else if(from_slot<9)
       {
-        user->inv.equipped[from_slot-5].count = 0;
-        user->inv.equipped[from_slot-5].health = 0;
-        user->inv.equipped[from_slot-5].count = 0;
+        user->inv.equipped[from_slot-5].count  -= user->inventoryHolding.count;
+        if(user->inv.equipped[from_slot-5].count == 0)
+        {
+          user->inv.equipped[from_slot-5].health = 0;
+          user->inv.equipped[from_slot-5].count  = 0;
+        }
       }
       else
       {
-        user->inv.main[from_slot-9].count = 0;
-        user->inv.main[from_slot-9].health = 0;
-        user->inv.main[from_slot-9].count = 0;
+        user->inv.main[from_slot-9].count  -= user->inventoryHolding.count;
+        if(user->inv.main[from_slot-9].count == 0)
+        {
+          user->inv.main[from_slot-9].health = 0;
+          user->inv.main[from_slot-9].count  = 0;
+        }
       }
     }
   }

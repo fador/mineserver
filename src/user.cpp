@@ -209,7 +209,6 @@ bool User::sendLoginInfo()
       */
       itemSlot++;
     }
-    break;
   }
   
   // Send motd
