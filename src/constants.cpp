@@ -41,7 +41,6 @@ void initConstants()
   defaultConf.insert(std::pair<std::string, std::string>("port", "25565"));
   defaultConf.insert(std::pair<std::string, std::string>("server_name", "Minecraft server"));
   defaultConf.insert(std::pair<std::string, std::string>("user_limit", "20"));
-  defaultConf.insert(std::pair<std::string, std::string>("use_whitelist", "false"));
   defaultConf.insert(std::pair<std::string, std::string>("show_version", "true"));
   defaultConf.insert(std::pair<std::string, std::string>("user_validation", "true"));
   defaultConf.insert(std::pair<std::string, std::string>("allow_connect_on_auth_timeout", "false"));
@@ -53,8 +52,6 @@ void initConstants()
   // File settings
   defaultConf.insert(std::pair<std::string, std::string>("commands_file", COMMANDS_FILE));
   defaultConf.insert(std::pair<std::string, std::string>("roles_file", ROLES_FILE));
-  defaultConf.insert(std::pair<std::string, std::string>("banned_file", BANNED_FILE));
-  defaultConf.insert(std::pair<std::string, std::string>("whitelist_file", WHITELIST_FILE));
   defaultConf.insert(std::pair<std::string, std::string>("motd_file", MOTD_FILE));
   defaultConf.insert(std::pair<std::string, std::string>("rules_file", RULES_FILE));
   defaultConf.insert(std::pair<std::string, std::string>("pid_file", PID_FILE));

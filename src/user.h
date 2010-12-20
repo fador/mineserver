@@ -86,8 +86,6 @@ public:
   bool waitForData;
   uint32 write_err_count;
   bool logged;
-  bool banned;
-  bool whitelist;
   bool muted;
 	bool dnd;
   sint16 health;
@@ -111,8 +109,6 @@ public:
   static bool isUser(int sock);
   static User* byNick(std::string nick);
 
-  bool checkBanned(std::string _nick);
-  bool checkWhitelist(std::string _nick);
   bool changeNick(std::string _nick);
   bool updatePos(double x, double y, double z, double stance);
   /** Check if the user is standing on this block */

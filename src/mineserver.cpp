@@ -156,10 +156,8 @@ int Mineserver::run(int argc, char *argv[])
   }
   pid_out.close();
 
-  // Load admin, banned and whitelisted users
+  // Load admin
   Conf::get()->loadRoles();
-  Conf::get()->loadBanned();
-  Conf::get()->loadWhitelist();
   // Load MOTD
   Chat::get()->checkMotd(Conf::get()->sValue("motd_file"));
 

@@ -213,82 +213,6 @@ void saveMap(User* user, std::string command, std::deque<std::string> args)
   Chat::get()->handleMsg(user, "% Saved map.");
 }
 
-void ban(User* user, std::string command, std::deque<std::string> args)
-{
-  if(args.size() > 0)
-  {
-    User* tUser = User::byNick(args[0]);
-
-    std::fstream bannedf;
-    bannedf.open("banned.txt",std::fstream::app);
-    bannedf << args[0] << std::endl;
-    bannedf.close();
-
-    if(tUser != NULL)
-    {
-      args.pop_front();
-      std::string kickMsg;
-      if(args.empty())
-      {
-        kickMsg = Conf::get()->sValue("default_banned_message");
-      }
-      else
-      {
-        while(!args.empty())
-        {
-          kickMsg += args[0] + " ";
-          args.pop_front();
-        }
-      }
-      tUser->kick(kickMsg);
-      Chat::get()->sendMsg(user, MC_COLOR_DARK_MAGENTA + tUser->nick + " was banned by " + user->nick + ": " + kickMsg, Chat::ALL);
-    }
-    else
-    {
-      Chat::get()->sendMsg(user, MC_COLOR_DARK_MAGENTA + args[0] +" was banned in his absence!", Chat::ALL);
-    }
-
-    // Reload list with banned users
-    Conf::get()->loadBanned();
-  }
-  else
-  {
-    reportError(user, "Usage: /ban player [reason]");
-  }
-}
-
-void unban(User* user, std::string command, std::deque<std::string> args)
-{
-  if(args.size() == 1)
-  {
-    std::string line;
-    std::ifstream in((Conf::get()->sValue("banned_file")).c_str());
-    std::ofstream out((Conf::get()->sValue("banned_file")+".tmp").c_str());
-
-    while( getline(in,line) )
-    {
-      if(line != args[0])
-      {
-        out << line << "\n";
-      }
-    }
-    in.close();
-    out.close();
-
-    remove((Conf::get()->sValue("banned_file")).c_str());
-    rename((Conf::get()->sValue("banned_file")+".tmp").c_str(), (Conf::get()->sValue("banned_file")).c_str());
-
-    Chat::get()->sendMsg(user, MC_COLOR_DARK_MAGENTA + args[0] + " was unbanned.", Chat::ALL);
-
-    // Reload list with banned users
-    Conf::get()->loadBanned();
-  }
-  else
-  {
-    reportError(user, "Usage: /unban player");
-  }
-}
-
 void kick(User* user, std::string command, std::deque<std::string> args)
 {
   if(!args.empty())
@@ -665,8 +589,6 @@ void regenerateLighting(User* user, std::string command, std::deque<std::string>
 void reloadConfiguration(User* user, std::string command, std::deque<std::string> args)
 {
   Conf::get()->loadRoles();
-  Conf::get()->loadBanned();
-  Conf::get()->loadWhitelist();
   Conf::get()->load(CONFIG_FILE);
   Conf::get()->load(COMMANDS_FILE, COMMANDS_NAME_PREFIX);
 
@@ -883,7 +805,6 @@ void Chat::registerStandardCommands()
   registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", help, Conf::get()->commandPermission("help")));
 
   // Admins Only
-  registerCommand(new Command(parseCmd("ban"), "<player>", "Bans (and kicks if online) <player> from server", ban, Conf::get()->commandPermission("ban")));
   registerCommand(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport, Conf::get()->commandPermission("ctp")));
   registerCommand(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems, Conf::get()->commandPermission("give")));
   registerCommand(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf, Conf::get()->commandPermission("igive")));
@@ -896,7 +817,6 @@ void Chat::registerStandardCommands()
   registerCommand(new Command(parseCmd("sethealth"), "<player> <health>", "Set a player's health. <health> = 0-20", setHealth, Conf::get()->commandPermission("sethealth")));
   registerCommand(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime, Conf::get()->commandPermission("settime")));
   registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport, Conf::get()->commandPermission("tp")));
-  registerCommand(new Command(parseCmd("unban"), "<player>", "Lift a ban of a player", unban, Conf::get()->commandPermission("unban")));
   registerCommand(new Command(parseCmd("unmute"), "<player>", "Unmutes a given player", unmute, Conf::get()->commandPermission("unmute")));
   registerCommand(new Command(parseCmd("load"), "<name> <file>", "Loads a plugin from a file", pluginLoad, Conf::get()->commandPermission("load")));
   registerCommand(new Command(parseCmd("unload"), "<name>", "Unloads a plugin", pluginUnload, Conf::get()->commandPermission("unload")));

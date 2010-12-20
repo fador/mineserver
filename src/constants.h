@@ -143,14 +143,6 @@ const std::string COMMANDS_CONTENT = "# This is default command permissions file
 const std::string ROLES_FILE    = "roles.txt";
 const std::string ROLES_CONTENT = "# This is default player roles file. Add nicknames here for admins, operators or members, one per line";
 
-// Banned users file
-const std::string BANNED_FILE    = "banned.txt";
-const std::string BANNED_CONTENT = "# This is default banned users file. Add nicknames here, one per line.";
-
-// Whitelist users file
-const std::string WHITELIST_FILE    = "whitelist.txt";
-const std::string WHITELIST_CONTENT = "# This is default whitelist file. Add nicknames here, one per line.";
-
 // Motdfile
 const std::string MOTD_FILE    = "motd.txt";
 const std::string MOTD_CONTENT = "This is the default motd! Please edit motd.txt to change this message.";

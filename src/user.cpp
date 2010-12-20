@@ -91,39 +91,6 @@ User::User(int sock, uint32 EID)
   }
 }
 
-
-bool User::checkBanned(std::string _nick)
-{
-  nick = _nick;
-
-  // Check banstatus
-  for(unsigned int i = 0; i < Conf::get()->banned().size(); i++)
-  {
-    if(Conf::get()->banned()[i] == nick)
-    {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-bool User::checkWhitelist(std::string _nick)
-{
-  nick = _nick;
-
-    // Check if nick is whitelisted, providing it is enabled
-  for(unsigned int i = 0; i < Conf::get()->whitelist().size(); i++)
-  {
-    if(Conf::get()->whitelist()[i] == nick)
-    {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 bool User::changeNick(std::string _nick)
 {
   nick = _nick;

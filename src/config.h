@@ -61,14 +61,10 @@ class Conf
   Kit* kit(const std::string& kitname);
 
   bool loadRoles();
-  bool loadBanned();
-  bool loadWhitelist();
 
   std::deque<std::string>& admins() { return m_admins; }
   std::deque<std::string>& ops() { return m_ops; }
   std::deque<std::string>& members() { return m_members; }
-  std::deque<std::string>& banned() { return m_banned; }
-  std::deque<std::string>& whitelist() { return m_whitelist; }
 
  private:
   static Conf *_conf;
@@ -79,13 +75,10 @@ class Conf
   std::map<std::string, std::string> m_confSet;
   std::map<std::string, Kit*> m_kits;
 
-  // predefined usernames in roles.txt, banned.txt & whitelist.txt
+  // predefined usernames in roles.txt
   std::deque<std::string> m_admins;
   std::deque<std::string> m_ops;
   std::deque<std::string> m_members;
-  std::deque<std::string> m_banned;
-  std::deque<std::string> m_whitelist;
-
 };
 
 #endif
