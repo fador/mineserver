@@ -5,6 +5,7 @@
 #include "map.h"
 #include "screen.h"
 #include "vec.h"
+#include <stack>
 
 enum { MAX_TRUNK = 13, MIN_TRUNK = 4, MAX_CANOPY = 3, MIN_CANOPY = 1 };
 
@@ -19,6 +20,7 @@ class ITree {
 		virtual void ITree::SetY(sint32 y) { _y = y; }
 		virtual const sint32 ITree::GetY(void) { return _y; }
 		virtual const vec ITree::Location() { return vec(_x,_y,_z); }
+		virtual const int ITree::Type() { return _type; }
 	protected:
 		sint32 _x;
 		sint32 _y;
@@ -66,13 +68,11 @@ class Tree : public ITree
 		~Tree(void);
 	protected:
 		void Tree::Set(sint32 xloc, sint32 yloc, sint32 zloc, int blocktype, char metadata);
-		void Tree::Update();
 	private:
-		std::vector<std::vector<ITree>> m_treeBlocks;
-		std::vector<ITree> m_Trunk;
-		std::vector<ITree> m_Branches;
-		std::vector<ITree> m_Canopy;
-
+		std::stack<std::stack<ITree>> m_treeBlocks;
+		std::stack<ITree> m_Trunk;
+		std::stack<ITree> m_Branches;
+		std::stack<ITree> m_Canopy;
 		void Tree::GenerateTrunk();
 		void Tree::GenerateCanopy();
 };
