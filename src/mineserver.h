@@ -60,10 +60,10 @@ public:
   int m_socketlisten;
   void updatePlayerList();
 
-  Map* map();
-  void setMap(Map* map);
-  Chat* chat();
-  void setChat(Chat* chat);
+  Map* map() { return m_map; }
+  void setMap(Map* map) { m_map = map; }
+  Chat* chat() { return m_chat; }
+  void setChat(Chat* chat) { m_chat = chat; }
 
 private:
   Mineserver();

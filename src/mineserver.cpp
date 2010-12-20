@@ -455,23 +455,3 @@ bool Mineserver::stop()
 
   return true;
 }
-
-Map* Mineserver::map()
-{
-  return m_map;
-}
-
-void Mineserver::setMap(Map* map)
-{
-  m_map = map;
-}
-
-Chat* Mineserver::chat()
-{
-  return m_chat;
-}
-
-void Mineserver::setChat(Chat* chat)
-{
-  m_chat = chat;
-}
