@@ -534,7 +534,6 @@ void regenerateLighting(User* user, std::string command, std::deque<std::string>
 
 void reloadConfiguration(User* user, std::string command, std::deque<std::string> args)
 {
-  Conf::get()->loadRoles();
   Conf::get()->load(CONFIG_FILE);
   Conf::get()->load(COMMANDS_FILE, COMMANDS_NAME_PREFIX);
 

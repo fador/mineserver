@@ -95,38 +95,6 @@ bool User::changeNick(std::string _nick)
 {
   nick = _nick;
 
-  SET_GUEST(permissions); // default
-
-  // Check adminstatus
-  for(unsigned int i = 0; i < Conf::get()->admins().size(); i++)
-  {
-    if(Conf::get()->admins()[i] == nick)
-    {
-      SET_ADMIN(permissions);
-      break;
-    }
-  }
-
-  // Check op status
-  for(unsigned int i = 0; i < Conf::get()->ops().size(); i++)
-  {
-    if(Conf::get()->ops()[i] == nick)
-    {
-      SET_OP(permissions);
-      break;
-    }
-  }
-
-  // Check member status
-  for(unsigned int i = 0; i < Conf::get()->members().size(); i++)
-  {
-    if(Conf::get()->members()[i] == nick)
-    {
-      SET_MEMBER(permissions);
-      break;
-    }
-  }
-
   // Update the player list with the new name!
   Mineserver::get().updatePlayerList();
 

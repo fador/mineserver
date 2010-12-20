@@ -156,8 +156,6 @@ int Mineserver::run(int argc, char *argv[])
   }
   pid_out.close();
 
-  // Load admin
-  Conf::get()->loadRoles();
   // Load MOTD
   Chat::get()->checkMotd(Conf::get()->sValue("motd_file"));
 
