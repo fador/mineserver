@@ -77,7 +77,7 @@ void Map::checkGenTrees()
       sint32 z = (*iter).z;
 
 	  Tree tree(x,y,z);
-	  tree.Generate();
+	  tree.generate();
 
         saplings.erase(iter++);  // alternatively, i = items.erase(i);
     }

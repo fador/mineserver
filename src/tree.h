@@ -14,21 +14,20 @@ class ITree {
 public:
 	ITree() { }
 	virtual ~ITree() { }
-	virtual void Update() {
+	virtual void update() {
 		Mineserver::get()->map()->setBlock(_x, _y, _z, _type, _meta);
 		Mineserver::get()->map()->sendBlockChange(_x, _y, _z, _type, _meta);
 	}
-	virtual void ITree::SetY(sint32 y) { _y = y; }
-	virtual const sint32 ITree::GetY(void) { return _y; }
-	virtual const vec ITree::Location() { return vec(_x,_y,_z); }
-	virtual const int ITree::Type() { return _type; }
+	virtual void setY(sint32 y) { _y = y; }
+	virtual const sint32 getY(void) { return _y; }
+	virtual const vec location(void) { return vec(_x,_y,_z); }
+	virtual const int type(void) { return _type; }
 protected:
 	sint32 _x;
 	sint32 _y;
 	sint32 _z;
 	int _type;
 	char _meta;
-
 };
 
 class Trunk : public ITree 
@@ -54,7 +53,7 @@ class Canopy : public ITree
 {
 public:
 	Canopy(sint32 x, sint32 y, sint32 z) { _x = x, _y = y, _z = z, _type = BLOCK_LEAVES, _meta = 0; }
-	Canopy(ITree trunk) { vec loc = trunk.Location(); _x = loc.x(), _y = loc.y(), _z = loc.z(), _type = BLOCK_LEAVES, _meta = 0; }
+	Canopy(ITree trunk) { vec loc = trunk.location(); _x = loc.x(), _y = loc.y(), _z = loc.z(), _type = BLOCK_LEAVES, _meta = 0; }
 	~Canopy() { }
 protected:
 };
@@ -65,17 +64,17 @@ class Tree : public ITree
 {
 public:
 	Tree(sint32 x, sint32 y, sint32 z);
-	void Generate(void);
+	void generate(void);
 	~Tree(void);
 protected:
-	void Tree::Set(sint32 xloc, sint32 yloc, sint32 zloc, int blocktype, char metadata);
+	void set(sint32 xloc, sint32 yloc, sint32 zloc, int blocktType, char metaData);
 private:
-	std::stack<std::stack<ITree>> m_treeBlocks;
+	std::stack<std::stack<ITree > > m_treeBlocks;
 	std::stack<ITree> m_Trunk;
 	std::stack<ITree> m_Branches;
 	std::stack<ITree> m_Canopy;
-	void Tree::GenerateTrunk();
-	void Tree::GenerateCanopy();
+	void generateTrunk();
+	void generateCanopy();
 };
 
 #endif

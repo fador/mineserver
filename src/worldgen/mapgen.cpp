@@ -204,7 +204,7 @@ void MapGen::AddTrees() {
 		for(int treeZ = 0; treeZ < 100; treeZ+=5) {
 			for(int treeLoc = 0; treeLoc < 100; treeLoc+=5) {
 				Tree tree(treeLoc,y,treeZ);
-				tree.Generate();
+				tree.generate();
 			}
 		}
 	}

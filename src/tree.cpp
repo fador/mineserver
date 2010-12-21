@@ -12,16 +12,16 @@ Tree::~Tree(void)
 }
 
 
-void Tree::Set(sint32 xloc, sint32 yloc, sint32 zloc, int blocktype, char metadata) {
-	_x = xloc, _y = yloc, _z = zloc, _type = blocktype, _meta = metadata;
+void Tree::set(sint32 xloc, sint32 yloc, sint32 zloc, int blockType, char metaData) {
+	_x = xloc, _y = yloc, _z = zloc, _type = blockType, _meta = metaData;
 }
 
-void Tree::Generate() {
-	GenerateTrunk();
+void Tree::generate() {
+	generateTrunk();
 	//Generate the branch section.
 	//Branch branch(_x,_y,_z);
 	//m_Branches.push_back(branch);
-	GenerateCanopy();
+	generateCanopy();
 	//Place these in the treeBlocks list.
 	
 	m_treeBlocks.push(m_Canopy);
@@ -39,7 +39,7 @@ void Tree::Generate() {
 	}
 }
 
-void Tree::GenerateTrunk() {
+void Tree::generateTrunk() {
 	//Generate the trunk section.
 	for(int i = 0; i < MIN_TRUNK; i++)  {
 		Trunk trunk(_x,_y+i,_z);
@@ -51,7 +51,7 @@ void Tree::GenerateTrunk() {
 	}
 }
 
-void Tree::GenerateCanopy() {
+void Tree::generateCanopy() {
 	//Generate the canopy section.
 	for(int i = 0; i < MIN_CANOPY; i++) {
 		Canopy canopy(m_Trunk.top());
