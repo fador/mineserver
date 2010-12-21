@@ -32,7 +32,7 @@ void Tree::generate() {
 	while(!m_treeBlocks.empty()) {
 		std::stack<ITree> section = m_treeBlocks.top();
 		while(!section.empty()) {
-			section.top().Update();
+			section.top().update();
 			section.pop();
 		}
 		m_treeBlocks.pop();
@@ -55,12 +55,12 @@ void Tree::generateCanopy() {
 	//Generate the canopy section.
 	for(int i = 0; i < MIN_CANOPY; i++) {
 		Canopy canopy(m_Trunk.top());
-		canopy.SetY(canopy.GetY() + i);
+		canopy.setY(canopy.getY() + i);
 		m_Canopy.push(canopy);
 	}
 	for(int i = MIN_CANOPY; i < (rand() % MAX_CANOPY); i++) {
 		Canopy canopy(m_Trunk.top());
-		canopy.SetY(canopy.GetY() + i);
+		canopy.setY(canopy.getY() + i);
 		m_Canopy.push(canopy);
 	}
 }
