@@ -41,11 +41,7 @@ void Tree::generate() {
 
 void Tree::generateTrunk() {
 	//Generate the trunk section.
-	for(int i = 0; i < MIN_TRUNK; i++)  {
-		Trunk trunk(_x,_y+i,_z);
-		m_Trunk.push(trunk);
-	}
-	for(int i = MIN_TRUNK; i < (rand() % MAX_TRUNK); i++)  {
+	for(int i = 0; i <= getRandInt(MIN_TRUNK,MAX_TRUNK); i++)  {
 		Trunk trunk(_x,_y+i,_z);
 		m_Trunk.push(trunk);
 	}
@@ -53,12 +49,7 @@ void Tree::generateTrunk() {
 
 void Tree::generateCanopy() {
 	//Generate the canopy section.
-	for(int i = 0; i < MIN_CANOPY; i++) {
-		Canopy canopy(m_Trunk.top());
-		canopy.setY(canopy.getY() + i);
-		m_Canopy.push(canopy);
-	}
-	for(int i = MIN_CANOPY; i < (rand() % MAX_CANOPY); i++) {
+	for(int i = MIN_CANOPY; i <= getRandInt(MIN_CANOPY,MAX_CANOPY); i++) {
 		Canopy canopy(m_Trunk.top());
 		canopy.setY(canopy.getY() + i);
 		m_Canopy.push(canopy);
