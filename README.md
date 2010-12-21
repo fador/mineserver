@@ -6,7 +6,7 @@ Also mail to developers@mineserver.be will reach us.
 
     Copyright (c) 2010, The Mineserver Project
 
-Custom Minecraft Alpha server software written in C++.
+Custom Minecraft Beta server software written in C++.
 
 ### == NOTICE ==
 Currently in (early) development. (Alpha stage)
@@ -43,10 +43,11 @@ Depends on (and tested with):
  [zlib 1.2.5](http://www.zlib.org)
  [libevent 1.4.14b](http://monkey.org/~provos/libevent/)
  [libnoise 1.0](http://libnoise.sourceforge.net/)
+ ncurses/pdcurses
 
  * Installing on Debian and Ubuntu: (For Ubuntu libevent1 -> libevent-1.4-2)
 
-    `sudo apt-get install libevent1 libevent-dev zlib1g zlib1g-dev libnoise-dev`
+    `sudo apt-get install ncurses5 ncurses5-dev libevent1 libevent-dev zlib1g zlib1g-dev libnoise-dev`
 
  * Installing on CentOS and RHEL
 

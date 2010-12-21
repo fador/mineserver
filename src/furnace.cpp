@@ -334,13 +334,15 @@ void Furnace::sendToAllUsers()
   deflateEnd(&zstream);
 
   // Create a new packet to send back to client
+  /*
   Packet pkt;
   pkt << (sint8)PACKET_COMPLEX_ENTITIES  << m_x << (sint16)m_y << m_z << (sint16)zstream.total_out;
   pkt.addToWrite(compressedData, zstream.total_out);
+  */
   delete[] compressedData;
 
   // Tell all users about this guy
-  User::sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
+  //User::sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
 
 #ifdef _DEBUG
   Mineserver::get()->screen()->log("Furnace entity data: ");
