@@ -43,7 +43,7 @@ PROGS = $(PROG)
 $(PROGS): $(OBJS)
 
 $(PROG):
-	$(CXX) $(LDFLAGS) $(OBJS) -o ../bin/mineserver
+	$(CXX) $(LDFLAGS) $(OBJS) -rdynamic -o ../bin/mineserver
 
 clean: 
 	$(RM) $(OBJS) $(PROGS)
