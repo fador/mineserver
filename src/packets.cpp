@@ -168,9 +168,23 @@ int PacketHandler::inventory_change(User *user)
   }
   if(from_type == 0)
   {
-    if(itemID == -1 && user->inventoryHolding.type != 0)
+    Item slotItem;
+    if(from_slot<5)
     {
-      sint16 addCount=user->inventoryHolding.count;
+      slotItem=user->inv.crafting[from_slot-1];
+    }
+    else if(from_slot<9)
+    {
+      slotItem=user->inv.equipped[from_slot-5];
+    }
+    else
+    {
+      slotItem=user->inv.main[from_slot-9];
+    }
+    //Empty slot and holding something
+    if((itemID == -1 || (slotItem.type == itemID && slotItem.count < 64) ) && user->inventoryHolding.type != 0)
+    {
+      sint16 addCount=(64-slotItem.count>=user->inventoryHolding.count)?user->inventoryHolding.count:64-slotItem.count;
       if(to_type == 1)
       {
         addCount = 1;
@@ -204,12 +218,15 @@ int PacketHandler::inventory_change(User *user)
       }
       else
       {
-        user->inventoryHolding.count = 0;
-        user->inventoryHolding.type  = 0;
-        user->inventoryHolding.health= 0;
+        user->inventoryHolding.count -=addCount;
+        if(user->inventoryHolding.count == 0)
+        {
+          user->inventoryHolding.type  = 0;
+          user->inventoryHolding.health= 0;
+        }
       }
     }
-    else
+    else if(user->inventoryHolding.type == 0)
     {
       user->inventoryHolding.type   = itemID;
       user->inventoryHolding.health = item_health;
