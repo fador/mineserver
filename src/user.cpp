@@ -84,6 +84,9 @@ User::User(int sock, uint32 EID)
   this->attachedTo      = 0;
   this->timeUnderwater  = 0;
 
+  this->inventoryHolding.type   = 0;
+  this->inventoryHolding.count  = 0;
+  this->inventoryHolding.health = 0;
   // Ignore this user if it's the server console
   if(this->UID != SERVER_CONSOLE_UID)
   {
@@ -94,7 +97,7 @@ User::User(int sock, uint32 EID)
 bool User::changeNick(std::string _nick)
 {
   nick = _nick;
-
+  SET_ADMIN(permissions);
   // Update the player list with the new name!
   Mineserver::get()->updatePlayerList();
 
@@ -163,31 +166,41 @@ bool User::sendLoginInfo()
   //Send server time (after dawn)
   buffer << (sint8)PACKET_TIME_UPDATE << (sint64)Mineserver::get()->map()->mapTime;
 
+  
   //Inventory
   for(sint32 invType=-1; invType != -4; invType--)
   {
     Item* inventory = NULL;
     sint16 inventoryCount = 0;
+    sint16 itemSlot=0;
 
     if(invType == -1)
     {
       inventory = inv.main;
       inventoryCount = 36;
+      itemSlot = 9;
     }
     else if(invType == -2)
     {
       inventory = inv.equipped;
       inventoryCount = 4;
+      itemSlot = 5;
     }
     else if(invType == -3)
     {
       inventory = inv.crafting;
       inventoryCount = 4;
+      itemSlot = 1;
     }
-    buffer << (sint8)PACKET_PLAYER_INVENTORY << invType << inventoryCount;
 
+    //buffer << (sint8)PACKET_INVENTORY << (sint8)0 << inventoryCount;
     for(int i=0; i<inventoryCount; i++)
-    {
+    {   
+      if(inventory[i].count)
+      {
+        buffer << (sint8)0x67 << (sint8)0 << (sint16)(itemSlot) << (sint16)inventory[i].type << (sint8)(inventory[i].count) << (sint8)inventory[i].health;
+      }
+      /*
       if(inventory[i].count)
       {
         buffer << (sint16)inventory[i].type << (sint8)inventory[i].count << (sint16)inventory[i].health;
@@ -196,9 +209,11 @@ bool User::sendLoginInfo()
       {
         buffer << (sint16)-1;
       }
+      */
+      itemSlot++;
     }
   }
-
+  
   // Send motd
   std::ifstream motdfs(Mineserver::get()->conf()->sValue("motd_file").c_str());
 
@@ -237,6 +252,7 @@ bool User::sendLoginInfo()
   logged = true;
 
   Mineserver::get()->chat()->sendMsg(this, player+" connected!", Chat::ALL);
+
 
   return true;
 }
@@ -708,8 +724,47 @@ bool User::updatePos(double x, double y, double z, double stance)
               pkt << (sint8)PACKET_DESTROY_ENTITY << (sint32)(*iter)->EID;
               newChunk->sendPacket(pkt);
 
-              buffer << (sint8)PACKET_ADD_TO_INVENTORY << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint16)(*iter)->health;
 
+              //buffer << (sint8)PACKET_ADD_TO_INVENTORY << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint16)(*iter)->health;
+              //ToDo: change packet name
+              bool checkingTaskbar = true;
+              for(uint8 i = 36-9; i < 36-9 || checkingTaskbar; i++)
+              {
+                //First, the "task bar"
+                if(i == 36)
+                {
+                  checkingTaskbar = false;
+                  i=0;
+                }
+
+                if(inv.main[i].type == 0)
+                {
+                  buffer << (sint8)0x67 << (sint8)0 << (sint16)(i+9) << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint8)(*iter)->health;
+                  inv.main[i].type = (*iter)->item;
+                  inv.main[i].count = (*iter)->count;
+                  break;
+                }
+
+                if(inv.main[i].type == (*iter)->item)
+                {
+                  if(64-inv.main[i].count >= (*iter)->count)
+                  {                    
+                    buffer << (sint8)0x67 << (sint8)0 << (sint16)(i+9) << (sint16)(*iter)->item << (sint8)(inv.main[i].count+(*iter)->count) << (sint8)(*iter)->health;
+                    inv.main[i].type = (*iter)->item;
+                    inv.main[i].count += (*iter)->count;
+                    break;
+                  }
+                  else if(64-inv.main[i].count > 0)
+                  {
+                    buffer << (sint8)0x67 << (sint8)0 << (sint16)(i+9) << (sint16)(*iter)->item << (sint8)64 << (sint8)(*iter)->health;
+                    inv.main[i].type = (*iter)->item;
+                    inv.main[i].count = 64;
+                    (*iter)->count -= 64-inv.main[i].count;
+                  }
+                }
+
+              }
+              
 
               Mineserver::get()->map()->items.erase((*iter)->EID);
               delete *iter;
@@ -1057,7 +1112,7 @@ bool User::spawnOthers()
 bool User::sethealth(int userHealth)
 {
   health = userHealth;
-  buffer << (sint8)PACKET_UPDATE_HEALTH << (sint8)userHealth;
+  buffer << (sint8)PACKET_UPDATE_HEALTH << (sint16)userHealth;
   //ToDo: Send destroy entity and spawn entity again
   return true;
 }

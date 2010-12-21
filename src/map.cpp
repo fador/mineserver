@@ -1174,6 +1174,32 @@ void Map::sendToUser(User* user, int x, int z)
     std::vector<NBT_Value*>* entities = entityList->GetList();
     std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
 
+    for( ; iter != end ; iter++)
+    {
+      std::vector<uint8> buffer;
+      NBT_Value* idVal = (**iter)["id"];
+      if(idVal == NULL)
+        continue;
+      std::string* id = idVal->GetString();
+      if(id && (*id=="Sign"))
+      {
+        if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
+          (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
+          (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
+        {
+          continue;
+        }
+
+        sint32 entityX = *(**iter)["x"];
+        sint32 entityY = *(**iter)["y"];
+        sint32 entityZ = *(**iter)["z"];
+        user->buffer << (sint8)PACKET_SIGN << entityX << (sint16)entityY << entityZ;
+        user->buffer << *(**iter)["Text1"]->GetString() << *(**iter)["Text2"]->GetString() << *(**iter)["Text3"]->GetString() << *(**iter)["Text4"]->GetString();
+      }
+    }
+  }
+
+    /*
     uint8* compressedData = new uint8[ALLOCATE_NBTFILE];
 
     for( ; iter != end ; iter++)
@@ -1247,16 +1273,19 @@ void Map::sendToUser(User* user, int x, int z)
           sint32 entityY = *(**iter)["y"];
           sint32 entityZ = *(**iter)["z"];
 
+          
           // !!!! Complex Entity packet! !!!!
           user->buffer << (sint8)PACKET_COMPLEX_ENTITIES
             << (sint32)entityX << (sint16)entityY << (sint32)entityZ << (sint16)zstream2.total_out;
           user->buffer.addToWrite(compressedData, zstream2.total_out);
-
+          
           deflateEnd(&zstream2);
         }
     }
     delete [] compressedData;
+    
   }
+  */
   delete [] buffer;
 
   delete[] data4;
@@ -1403,13 +1432,14 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value* 
 
   deflateEnd(&zstream2);
 
+  /*
   Packet pkt;
   pkt << (sint8)PACKET_COMPLEX_ENTITIES
     << x << (sint16)y << z << (sint16)zstream2.total_out;
   pkt.addToWrite(compressedData, zstream2.total_out);
 
   chunk->sendPacket(pkt);
-
+  */
   delete [] compressedData;
 
   //User::sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());

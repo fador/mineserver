@@ -100,6 +100,7 @@ public:
   vec curChunk;
   Inventory inv;
   sint16 curItem;
+  Item inventoryHolding;
 
   int permissions; // bitmask for permissions. See permissions.h
 
