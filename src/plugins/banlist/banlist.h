@@ -12,6 +12,7 @@ class Banlist
 {
 public:
   Banlist(Mineserver* mineserver) : m_mineserver(mineserver) {}
+  ~Banlist() {}
   bool getBan(const std::string user);
   void setBan(const std::string user, bool banned);
 private:

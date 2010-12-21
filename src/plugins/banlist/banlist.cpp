@@ -11,6 +11,12 @@ extern "C" void banlist_init(Mineserver* mineserver)
 {
   mineserver->screen()->log("banlist_init called");
 
+  if (mineserver->plugin()->hasPointer("banlist"))
+  {
+    mineserver->screen()->log("banlist is already loaded!");
+    return;
+  }
+
   mineserver->plugin()->setPointer("banlist", new Banlist(mineserver));
 }
 
@@ -18,12 +24,15 @@ extern "C" void banlist_shutdown(Mineserver* mineserver)
 {
   mineserver->screen()->log("banlist_shutdown called");
 
-  if (mineserver->plugin()->hasPointer("banlist"))
+  if (!mineserver->plugin()->hasPointer("banlist"))
   {
-    Banlist* banlist = (Banlist*)mineserver->plugin()->getPointer("banlist");
-    mineserver->plugin()->remPointer("banlist");
-    delete banlist;
+    mineserver->screen()->log("banlist is not loaded!");
+    return;
   }
+
+  Banlist* banlist = (Banlist*)mineserver->plugin()->getPointer("banlist");
+  mineserver->plugin()->remPointer("banlist");
+  delete banlist;
 }
 
 bool Banlist::getBan(const std::string user)
