@@ -84,6 +84,9 @@ User::User(int sock, uint32 EID)
   this->attachedTo      = 0;
   this->timeUnderwater  = 0;
 
+  this->inventoryHolding.type   = 0;
+  this->inventoryHolding.count  = 0;
+  this->inventoryHolding.health = 0;
   // Ignore this user if it's the server console
   if(this->UID != SERVER_CONSOLE_UID)
   {
@@ -94,7 +97,7 @@ User::User(int sock, uint32 EID)
 bool User::changeNick(std::string _nick)
 {
   nick = _nick;
-
+  SET_ADMIN(permissions);
   // Update the player list with the new name!
   Mineserver::get()->updatePlayerList();
 
