@@ -73,6 +73,8 @@ private:
 	std::stack<ITree> m_Trunk;
 	std::stack<ITree> m_Branches;
 	std::stack<ITree> m_Canopy;
+	int m_trunkHeight;
+	int m_canopyHeight;
 	void generateTrunk();
 	void generateCanopy();
 };

@@ -17,6 +17,7 @@ void Tree::set(sint32 xloc, sint32 yloc, sint32 zloc, int blockType, char metaDa
 }
 
 void Tree::generate() {
+	srand(time(NULL));
 	generateTrunk();
 	//Generate the branch section.
 	//Branch branch(_x,_y,_z);
@@ -28,7 +29,6 @@ void Tree::generate() {
 	m_treeBlocks.push(m_Trunk);
 	
 	//m_treeBlocks.push_back(m_Branches);
-	
 	while(!m_treeBlocks.empty()) {
 		std::stack<ITree> section = m_treeBlocks.top();
 		while(!section.empty()) {
@@ -41,17 +41,21 @@ void Tree::generate() {
 
 void Tree::generateTrunk() {
 	//Generate the trunk section.
-	for(int i = 0; i <= getRandInt(MIN_TRUNK,MAX_TRUNK); i++)  {
+	m_trunkHeight = getRandInt(MIN_TRUNK,MAX_TRUNK);
+	for(int i = 0; i < m_trunkHeight; i++)  {
 		Trunk trunk(_x,_y+i,_z);
 		m_Trunk.push(trunk);
 	}
+	assert(m_Trunk.size() >= MIN_TRUNK && m_Trunk.size() <= MAX_TRUNK);
 }
 
 void Tree::generateCanopy() {
 	//Generate the canopy section.
-	for(int i = MIN_CANOPY; i <= getRandInt(MIN_CANOPY,MAX_CANOPY); i++) {
+	m_canopyHeight = getRandInt(MIN_CANOPY,MAX_CANOPY);
+	for(int i = 0; i < m_canopyHeight; i++) {
 		Canopy canopy(m_Trunk.top());
-		canopy.setY(canopy.getY() + i);
+		canopy.setY(canopy.getY()+1 + i);
 		m_Canopy.push(canopy);
 	}
+	assert(m_Canopy.size() >= MIN_CANOPY && m_Canopy.size() <= MAX_CANOPY);
 }
