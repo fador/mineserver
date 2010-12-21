@@ -413,6 +413,7 @@ int PacketHandler::chat_message(User *user)
   return PACKET_OK;
 }
 
+//ToDo: Remove, deprecated
 int PacketHandler::player_inventory(User *user)
 {
   if(!user->buffer.haveData(14))
@@ -701,8 +702,26 @@ int PacketHandler::player_block_placement(User *user)
   }
   user->buffer.removePacket();
 
+  //Mineserver::get()->screen()->log("Block_placement: "+dtos(newblock)+" dir: "+dtos((int)direction) + " health: "+dtos((int)health) + " count: "+dtos((int)count));
+
+  bool foundFromInventory = false;
+  for(sint8 i=27;i<36;i++)
+  {
+    if(user->inv.main[i].type == newblock)
+    {
+      user->inv.main[i].count--;
+      if(user->inv.main[i].count == 0)
+      {
+        user->inv.main[i].type   = 0;
+        user->inv.main[i].health = 0;
+      }
+      foundFromInventory = true;
+      break;
+    }
+  }
+
   // TODO: Handle processing of
-  if(direction == -1)
+  if(direction == -1 || !foundFromInventory)
   {
     return PACKET_OK;
   }

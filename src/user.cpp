@@ -724,8 +724,16 @@ bool User::updatePos(double x, double y, double z, double stance)
 
               //buffer << (sint8)PACKET_ADD_TO_INVENTORY << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint16)(*iter)->health;
               //ToDo: change packet name
-              for(uint8 i = 0; i < 36; i++)
+              bool checkingTaskbar = true;
+              for(uint8 i = 36-9; i < 36-9 || checkingTaskbar; i++)
               {
+                //First, the "task bar"
+                if(i == 36)
+                {
+                  checkingTaskbar = false;
+                  i=0;
+                }
+
                 if(inv.main[i].type == 0)
                 {
                   buffer << (sint8)0x67 << (sint8)0 << (sint16)(i+9) << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint8)(*iter)->health;
@@ -751,6 +759,7 @@ bool User::updatePos(double x, double y, double z, double stance)
                     (*iter)->count -= 64-inv.main[i].count;
                   }
                 }
+
               }
               
 
