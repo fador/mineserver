@@ -29,6 +29,7 @@
 #define _TOOLS_H
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <string>
 
 #ifdef WIN32
