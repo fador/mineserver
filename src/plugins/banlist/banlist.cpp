@@ -1,9 +1,22 @@
+/**
+ * Compile this with the following command:
+ *
+ * $ g++ -DDEBIAN -shared -o banlist.so banlist.cpp
+ *
+ * Then put it in the same directory as your mineserver binary and issue the
+ * command `/load banlist ./banlist.so`. Of course replace .so with .dll if
+ * you're running windows.
+ *
+ * Right now it doesn't do much, but it does demonstrate all the basics needed
+ * to write your own plugins.
+ */
+
 #include <string>
 #include <vector>
 
-#include "../mineserver.h"
-#include "../plugin.h"
-#include "../screen.h"
+#include "../../mineserver.h"
+#include "../../plugin.h"
+#include "../../screen.h"
 
 #include "banlist.h"
 
@@ -33,6 +46,23 @@ extern "C" void banlist_shutdown(Mineserver* mineserver)
   Banlist* banlist = (Banlist*)mineserver->plugin()->getPointer("banlist");
   mineserver->plugin()->remPointer("banlist");
   delete banlist;
+}
+
+Banlist::Banlist(Mineserver* mineserver) : m_mineserver(mineserver)
+{
+  mineserver->plugin()->hookLogin.addCallback(&Banlist::callbackLogin);
+}
+
+bool Banlist::callbackLogin(User* user, bool* kick, std::string* reason)
+{
+  if (getBan(user->nick))
+  {
+    *kick = true;
+    reason->assign("You're banned!");
+    return false;
+  }
+
+  return true;
 }
 
 bool Banlist::getBan(const std::string user)
