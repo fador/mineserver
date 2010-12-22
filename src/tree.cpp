@@ -12,50 +12,50 @@ Tree::~Tree(void)
 }
 
 
-void Tree::Set(sint32 xloc, sint32 yloc, sint32 zloc, int blocktype, char metadata) {
-	_x = xloc, _y = yloc, _z = zloc, _type = blocktype, _meta = metadata;
-}
-void Tree::Update() {
-	Mineserver::get()->map()->setBlock(_x, _y, _z, _type, _meta);
-	Mineserver::get()->map()->sendBlockChange(_x, _y, _z, _type, _meta);
+void Tree::set(sint32 xloc, sint32 yloc, sint32 zloc, int blockType, char metaData) {
+	_x = xloc, _y = yloc, _z = zloc, _type = blockType, _meta = metaData;
 }
 
-void Tree::Generate() {
-	GenerateTrunk();
+void Tree::generate() {
+	srand(time(NULL));
+	generateTrunk();
 	//Generate the branch section.
 	//Branch branch(_x,_y,_z);
 	//m_Branches.push_back(branch);
-	GenerateCanopy();
+	generateCanopy();
 	//Place these in the treeBlocks list.
-	m_treeBlocks.push_back(m_Trunk);
-	m_treeBlocks.push_back(m_Canopy);
+	
+	m_treeBlocks.push(m_Canopy);
+	m_treeBlocks.push(m_Trunk);
 	
 	//m_treeBlocks.push_back(m_Branches);
-	
-	
-	
-
-	//Push to client
-	for(std::vector<std::vector<ITree> >::iterator section = m_treeBlocks.begin(); section != m_treeBlocks.end(); ++section) {
-		for(std::vector<ITree>::iterator block = section->begin(); block != section->end(); ++block) {
-			block->Update();
+	while(!m_treeBlocks.empty()) {
+		std::stack<ITree> section = m_treeBlocks.top();
+		while(!section.empty()) {
+			section.top().update();
+			section.pop();
 		}
+		m_treeBlocks.pop();
 	}
 }
 
-void Tree::GenerateTrunk() {
+void Tree::generateTrunk() {
 	//Generate the trunk section.
-	for(int i = 0; i < (rand() % MAX_TRUNK) + MIN_TRUNK; i++)  {
+	m_trunkHeight = getRandInt(MIN_TRUNK,MAX_TRUNK);
+	for(int i = 0; i < m_trunkHeight; i++)  {
 		Trunk trunk(_x,_y+i,_z);
-		m_Trunk.push_back(trunk);
+		m_Trunk.push(trunk);
 	}
+	assert(m_Trunk.size() >= MIN_TRUNK && m_Trunk.size() <= MAX_TRUNK);
 }
 
-void Tree::GenerateCanopy() {
+void Tree::generateCanopy() {
 	//Generate the canopy section.
-	for(int i = 0; i < (rand() % MAX_CANOPY) + MIN_CANOPY; i++) {
-		Canopy canopy(m_Trunk.back());
-		canopy.SetY(canopy.GetY() + i);
-		m_Canopy.push_back(canopy);
+	m_canopyHeight = getRandInt(MIN_CANOPY,MAX_CANOPY);
+	for(int i = 0; i < m_canopyHeight; i++) {
+		Canopy canopy(m_Trunk.top());
+		canopy.setY(canopy.getY()+1 + i);
+		m_Canopy.push(canopy);
 	}
+	assert(m_Canopy.size() >= MIN_CANOPY && m_Canopy.size() <= MAX_CANOPY);
 }

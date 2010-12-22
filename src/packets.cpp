@@ -770,6 +770,7 @@ int PacketHandler::player_block_placement(User *user)
     return PACKET_OK;
   }
 
+
 #ifdef _DEBUG
   Mineserver::get()->screen()->log("Block_placement: "+dtos(newblock)+" ("+dtos(x)+","+dtos((int)y)+","+dtos(z)+") dir: "+dtos((int)direction));
 #endif
