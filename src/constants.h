@@ -126,7 +126,7 @@ enum
   ITEM_GOLD_RECORD = 2256, ITEM_GREEN_RECORD
 };
 
-const std::string VERSION = "0.1.14 (Alpha)";
+const std::string VERSION = "0.1.15 (Alpha)";
 
 const int PROTOCOL_VERSION = 8;
 
