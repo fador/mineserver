@@ -122,7 +122,7 @@ bool BlockBasic::spawnBlockItem(const sint32 x, const sint8 y, const sint32 z, c
 
     if (count)
     {
-      Mineserver::get()->map()->createPickupSpawn(x, y, z, item_id, count);
+      Mineserver::get()->map()->createPickupSpawn(x, y, z, item_id, count, 0,NULL);
       return true;
     }
   }

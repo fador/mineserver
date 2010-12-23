@@ -55,7 +55,7 @@ struct Item
   sint16 health;
   Item()
   {
-    type   = 0;
+    type   = -1;
     count  = 0;
     health = 0;
   }
@@ -183,8 +183,8 @@ public:
   bool isUnderwater();
 
   // Getter/Setter for item currently in hold
-  sint16 currentItem();
-  void setCurrentItem(sint16 item_id);
+  sint16 currentItemSlot();
+  void setCurrentItemSlot(sint16 item_slot);
 
 
   bool withinViewDistance(int a, int b)
@@ -198,7 +198,7 @@ private:
   event m_event;
 
   // Item currently in hold
-  sint16 m_currentItem;
+  sint16 m_currentItemSlot;
 };
 
 #endif

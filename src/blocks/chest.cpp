@@ -38,7 +38,7 @@
 void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
   // Locksystem
-  if(user->currentItem() == ITEM_WOODEN_AXE)
+  if(user->inv.main[35+user->currentItemSlot()].type == ITEM_WOODEN_AXE)
   {    
     int chunk_x = blockToChunk(x);
     int chunk_z = blockToChunk(z);

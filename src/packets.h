@@ -62,6 +62,7 @@ enum
   PACKET_ARM_ANIMATION             = 0x12,
   PACKET_INVENTORY_CLOSE           = 0x65,
   PACKET_INVENTORY_CHANGE          = 0x66,
+  PACKET_SET_SLOT                  = 0x67,
   PACKET_INVENTORY                 = 0x68,
   PACKET_SIGN                      = 0x82,
   PACKET_DISCONNECT                = 0xff,
@@ -414,7 +415,6 @@ public:
   int login_request(User *user);
   int handshake(User *user);
   int chat_message(User *user);
-  int player_inventory(User *user);
   int player(User *user);
   int player_position(User *user);
   int player_look(User *user);
@@ -425,7 +425,6 @@ public:
   int arm_animation(User *user);
   int pickup_spawn(User *user);
   int disconnect(User *user);
-  int complex_entities(User *user);
   int use_entity(User *user);
   int respawn(User *user);
   int change_sign(User *user);

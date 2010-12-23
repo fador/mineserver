@@ -55,6 +55,8 @@
 #include "chat.h"
 #include "mineserver.h"
 #include "tree.h"
+
+
 void Map::addSapling(User* user, int x, int y, int z)
 {
   Mineserver::get()->screen()->log("Place sapling " + dtos(x) + " " + dtos(y) + " " + dtos(z));
@@ -824,13 +826,18 @@ bool Map::sendPickupSpawn(spawnedItem item)
   return true;
 }
 
-void Map::createPickupSpawn(int x, int y, int z, int type, int count)
+void Map::createPickupSpawn(int x, int y, int z, int type, int count, int health, User *user)
 {
    spawnedItem item;
    item.EID      = generateEID();
-   item.health   = 0;
+   item.health   = health;
    item.item     = type;
    item.count    = count;
+   if(user != NULL)
+   {
+    item.spawnedBy= user->UID;
+   }
+   item.spawnedAt= time(NULL);
 
    item.pos.x()  = x*32;
    item.pos.y()  = y*32;

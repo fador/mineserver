@@ -84,6 +84,7 @@ User::User(int sock, uint32 EID)
   this->attachedTo      = 0;
   this->timeUnderwater  = 0;
 
+  this->m_currentItemSlot = 0;
   this->inventoryHolding.type   = 0;
   this->inventoryHolding.count  = 0;
   this->inventoryHolding.health = 0;
@@ -366,34 +367,30 @@ bool User::loadData()
     count = *(**iter)["Count"];
     damage = *(**iter)["Damage"];
     item_id = *(**iter)["id"];
+    if(item_id == 0) item_id = -1;
 
-      //Main inventory slot
-      if(slot >= 0 && slot <= 35)
-      {
-        inv.main[(uint8)slot].count  = count;
-        inv.main[(uint8)slot].health = damage;
-        inv.main[(uint8)slot].type   = item_id;
+    //Main inventory slot
+    if(slot >= 0 && slot <= 35)
+    {
+      inv.main[(uint8)slot].count  = count;
+      inv.main[(uint8)slot].health = damage;
+      inv.main[(uint8)slot].type   = item_id;
 
-        // Add item at slot 0 to currentItem
-        if(slot == 0)
-        {
-          m_currentItem = item_id;
-        }
-      }
-      //Crafting
-      else if(slot >= 80 && slot <= 83)
-      {
-        inv.crafting[(uint8)slot-80].count  = count;
-        inv.crafting[(uint8)slot-80].health = damage;
-        inv.crafting[(uint8)slot-80].type   = item_id;
-      }
-      //Equipped
-      else if(slot >= 100 && slot <= 103)
-      {
-        inv.equipped[(uint8)slot-100].count  = count;
-        inv.equipped[(uint8)slot-100].health = damage;
-        inv.equipped[(uint8)slot-100].type   = item_id;
-      }
+    }
+    //Crafting
+    else if(slot >= 80 && slot <= 83)
+    {
+      inv.crafting[(uint8)slot-80].count  = count;
+      inv.crafting[(uint8)slot-80].health = damage;
+      inv.crafting[(uint8)slot-80].type   = item_id;
+    }
+    //Equipped
+    else if(slot >= 100 && slot <= 103)
+    {
+      inv.equipped[(uint8)slot-100].count  = count;
+      inv.equipped[(uint8)slot-100].health = damage;
+      inv.equipped[(uint8)slot-100].type   = item_id;
+    }
   }
 
   delete playerRoot;
@@ -500,7 +497,7 @@ bool User::checkInventory(sint16 itemID, char count)
   int leftToFit = count;
   for(uint8 i = 0; i < 36; i++)
   {
-    if(inv.main[i].type == 0)
+    if(inv.main[i].type == -1)
     {
       return true;
     }
@@ -581,7 +578,8 @@ bool User::updatePos(double x, double y, double z, double stance)
       // TODO: Determine those who where present for both.
       Packet telePacket;
       telePacket << (sint8)PACKET_ENTITY_TELEPORT
-                 << (sint32)UID << (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
+                 << (sint32)UID << (sint32)(x * 32) << (sint32)(y * 32) << (sint32)(z * 32) 
+                 << angleToByte(pos.yaw) << angleToByte(pos.pitch);
       newChunk->sendPacket(telePacket, this);
 
       int chunkDiffX = newChunk->x - oldChunk->x;
@@ -710,7 +708,7 @@ bool User::updatePos(double x, double y, double z, double stance)
         {
           //Dont pickup own spawns right away
           if((*iter)->spawnedBy != this->UID ||
-             (*iter)->spawnedAt+2 < time(0))
+             (*iter)->spawnedAt+2 < time(NULL))
           {
             //Check player inventory for space!
             if(checkInventory((*iter)->item,
@@ -719,14 +717,12 @@ bool User::updatePos(double x, double y, double z, double stance)
               //Send player collect item packet
               buffer << (sint8)PACKET_COLLECT_ITEM << (sint32)(*iter)->EID << (sint32)UID;
 
-                    //Send everyone destroy_entity-packet
+              //Send everyone destroy_entity-packet
               Packet pkt;
               pkt << (sint8)PACKET_DESTROY_ENTITY << (sint32)(*iter)->EID;
               newChunk->sendPacket(pkt);
 
 
-              //buffer << (sint8)PACKET_ADD_TO_INVENTORY << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint16)(*iter)->health;
-              //ToDo: change packet name
               bool checkingTaskbar = true;
               for(uint8 i = 36-9; i < 36-9 || checkingTaskbar; i++)
               {
@@ -737,32 +733,36 @@ bool User::updatePos(double x, double y, double z, double stance)
                   i=0;
                 }
 
-                if(inv.main[i].type == 0)
+                //If slot empty, put item there
+                if(inv.main[i].type == -1)
                 {
-                  buffer << (sint8)0x67 << (sint8)0 << (sint16)(i+9) << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint8)(*iter)->health;
+                  buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)(i+9) << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint8)(*iter)->health;
                   inv.main[i].type = (*iter)->item;
                   inv.main[i].count = (*iter)->count;
+                  inv.main[i].health = (*iter)->health;
                   break;
                 }
 
+                //If same item type
                 if(inv.main[i].type == (*iter)->item)
                 {
+                  //Put to the stack
                   if(64-inv.main[i].count >= (*iter)->count)
-                  {                    
-                    buffer << (sint8)0x67 << (sint8)0 << (sint16)(i+9) << (sint16)(*iter)->item << (sint8)(inv.main[i].count+(*iter)->count) << (sint8)(*iter)->health;
+                  {
+                    buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)(i+9) << (sint16)(*iter)->item << (sint8)(inv.main[i].count+(*iter)->count) << (sint8)(*iter)->health;
                     inv.main[i].type = (*iter)->item;
                     inv.main[i].count += (*iter)->count;
                     break;
                   }
+                  //Put some of the items to this stack and continue searching for space
                   else if(64-inv.main[i].count > 0)
                   {
-                    buffer << (sint8)0x67 << (sint8)0 << (sint16)(i+9) << (sint16)(*iter)->item << (sint8)64 << (sint8)(*iter)->health;
+                    buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)(i+9) << (sint16)(*iter)->item << (sint8)64 << (sint8)(*iter)->health;
                     inv.main[i].type = (*iter)->item;
                     inv.main[i].count = 64;
                     (*iter)->count -= 64-inv.main[i].count;
                   }
                 }
-
               }
               
 
@@ -788,6 +788,7 @@ bool User::updatePos(double x, double y, double z, double stance)
   this->pos.stance = stance;
   curChunk.x() = (int)(x/16);
   curChunk.z() = (int)(z/16);
+
   return true;
 }
 
@@ -1131,7 +1132,7 @@ bool User::dropInventory()
   {
     if( inv.main[i].type != 0 )
     {
-      Mineserver::get()->map()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.main[i].type, inv.main[i].count);
+      Mineserver::get()->map()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.main[i].type, inv.main[i].count,inv.main[i].health,this);
       inv.main[i] = Item();
     }
 
@@ -1139,12 +1140,12 @@ bool User::dropInventory()
     {
       if( inv.equipped[i].type != 0 )
       {
-        Mineserver::get()->map()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.equipped[i].type, inv.equipped[i].count);
+        Mineserver::get()->map()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.equipped[i].type, inv.equipped[i].count,inv.equipped[i].health,this);
         inv.equipped[i] = Item();
       }
       if( inv.crafting[i].type != 0 )
       {
-        Mineserver::get()->map()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.crafting[i].type, inv.crafting[i].count);
+        Mineserver::get()->map()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.crafting[i].type, inv.crafting[i].count,inv.crafting[i].health,this);
         inv.crafting[i] = Item();
       }
     }
@@ -1211,12 +1212,12 @@ User* User::byNick(std::string nick)
 }
 
 // Getter/Setter for item currently in hold
-sint16 User::currentItem()
+sint16 User::currentItemSlot()
 {
-  return m_currentItem;
+  return m_currentItemSlot;
 }
 
-void User::setCurrentItem(sint16 item_id)
+void User::setCurrentItemSlot(sint16 item_slot)
 {
-  m_currentItem = item_id;
+  m_currentItemSlot = item_slot;
 }

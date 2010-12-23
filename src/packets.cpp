@@ -84,7 +84,6 @@ void PacketHandler::init()
   packets[PACKET_LOGIN_REQUEST]            = Packets(PACKET_VARIABLE_LEN, &PacketHandler::login_request);
   packets[PACKET_HANDSHAKE]                = Packets(PACKET_VARIABLE_LEN, &PacketHandler::handshake);
   packets[PACKET_CHAT_MESSAGE]             = Packets(PACKET_VARIABLE_LEN, &PacketHandler::chat_message);
-  packets[PACKET_PLAYER_INVENTORY]         = Packets(PACKET_VARIABLE_LEN, &PacketHandler::player_inventory);
   packets[PACKET_USE_ENTITY]               = Packets( 9, &PacketHandler::use_entity);
   packets[PACKET_PLAYER]                   = Packets( 1, &PacketHandler::player);
   packets[PACKET_PLAYER_POSITION]          = Packets(33, &PacketHandler::player_position);
@@ -96,13 +95,10 @@ void PacketHandler::init()
   packets[PACKET_ARM_ANIMATION]            = Packets( 5, &PacketHandler::arm_animation);
   packets[PACKET_PICKUP_SPAWN]             = Packets(22, &PacketHandler::pickup_spawn);
   packets[PACKET_DISCONNECT]               = Packets(PACKET_VARIABLE_LEN, &PacketHandler::disconnect);
-  //packets[PACKET_COMPLEX_ENTITIES]         = Packets(PACKET_VARIABLE_LEN, &PacketHandler::complex_entities);
   packets[PACKET_RESPAWN]                  = Packets( 0, &PacketHandler::respawn);
   packets[PACKET_INVENTORY_CHANGE]         = Packets(PACKET_VARIABLE_LEN, &PacketHandler::inventory_change);
   packets[PACKET_INVENTORY_CLOSE]          = Packets(1, &PacketHandler::inventory_close);
   packets[PACKET_SIGN]                     = Packets(PACKET_VARIABLE_LEN, &PacketHandler::change_sign); 
-
-  
   
 }
 
@@ -135,7 +131,7 @@ int PacketHandler::inventory_close(User *user)
 
   //ToDo: check user->inventoryHolding for any items and spawn if it exist
 
-  Mineserver::get()->screen()->log(LOG_GENERAL,"Packet 0x65: " + dtos(a));
+  //Mineserver::get()->screen()->log(LOG_GENERAL,"Packet 0x65: " + dtos(a));
   
   //No need to do anything
   user->buffer.removePacket();
@@ -166,7 +162,7 @@ int PacketHandler::inventory_change(User *user)
     }
     user->buffer >> item_count >> item_health;
   }
-  if(from_type == 0)
+  if(from_type == 0) //Player inventory
   {
     Item slotItem;
     if(from_slot<5)
@@ -212,7 +208,7 @@ int PacketHandler::inventory_change(User *user)
         user->inventoryHolding.count--;
         if(user->inventoryHolding.count == 0)
         {
-          user->inventoryHolding.type  = 0;
+          user->inventoryHolding.type  = -1;
           user->inventoryHolding.health= 0;
         }
       }
@@ -221,12 +217,12 @@ int PacketHandler::inventory_change(User *user)
         user->inventoryHolding.count -=addCount;
         if(user->inventoryHolding.count == 0)
         {
-          user->inventoryHolding.type  = 0;
+          user->inventoryHolding.type  = -1;
           user->inventoryHolding.health= 0;
         }
       }
     }
-    else if(user->inventoryHolding.type == 0)
+    else if(user->inventoryHolding.type == -1)
     {
       user->inventoryHolding.type   = itemID;
       user->inventoryHolding.health = item_health;
@@ -265,7 +261,7 @@ int PacketHandler::inventory_change(User *user)
       }
     }
   }
-  Mineserver::get()->screen()->log(LOG_GENERAL,"Packet 0x66: " + dtos(from_type) + "," + dtos(from_slot) + "," + dtos(to_type) +  "," + dtos(to_slot) + "," + dtos(itemID) + "," + dtos(item_count) + "," + dtos(item_health));
+  //Mineserver::get()->screen()->log(LOG_GENERAL,"Packet 0x66: " + dtos(from_type) + "," + dtos(from_slot) + "," + dtos(to_type) +  "," + dtos(to_slot) + "," + dtos(itemID) + "," + dtos(item_count) + "," + dtos(item_health));
 
   //No need to do anything
   user->buffer.removePacket();
@@ -430,84 +426,6 @@ int PacketHandler::chat_message(User *user)
   return PACKET_OK;
 }
 
-//ToDo: Remove, deprecated
-int PacketHandler::player_inventory(User *user)
-{
-  if(!user->buffer.haveData(14))
-    return PACKET_NEED_MORE_DATA;
-
-  int i=0;
-  sint32 type;
-  sint16 count;
-
-  user->buffer >> type >> count;
-
-  if(!user->buffer)
-    return PACKET_NEED_MORE_DATA;
-
-  int items   = 0;
-  Item *slots = NULL;
-
-  items = count;
-
-  switch(type)
-  {
-  //Main inventory
-  case -1:
-    //items = 36;
-    memset(user->inv.main, 0, sizeof(Item)*36);
-    slots = (Item *)&user->inv.main;
-    break;
-
-  //Equipped armour
-  case -2:
-    //items = 4;
-    memset(user->inv.equipped, 0, sizeof(Item)*4);
-    slots = (Item *)&user->inv.equipped;
-    break;
-
-  //Crafting slots
-  case -3:
-    //items = 4;
-    memset(user->inv.crafting, 0, sizeof(Item)*4);
-    slots = (Item *)&user->inv.crafting;
-    break;
-  }
-
-  for(i = 0; i < items; i++)
-  {
-    sint16 item_id = 0;
-    sint8 numberOfItems = 0;
-    sint16 health = 0;
-
-    user->buffer >> item_id;
-
-    if(!user->buffer)
-    {
-      return PACKET_NEED_MORE_DATA;
-    }
-
-    if(item_id != -1)
-    {
-      user->buffer >> numberOfItems >> health;
-
-      if(!user->buffer)
-      {
-        return PACKET_NEED_MORE_DATA;
-      }
-
-
-      slots[i].type   = item_id;
-      slots[i].count  = numberOfItems;
-      slots[i].health = health;
-    }
-  }
-
-  user->buffer.removePacket();
-
-  return PACKET_OK;
-}
-
 int PacketHandler::player(User *user)
 {
   //OnGround packet
@@ -629,6 +547,10 @@ int PacketHandler::player_digging(User *user)
     }
     case BLOCK_STATUS_BLOCK_BROKEN:
     {
+      //ToDo: Fix, made for testing purposes!
+      if(user->inv.main[27+user->currentItemSlot()].type == ITEM_WOODEN_SPADE)
+         user->inv.main[27+user->currentItemSlot()].health++;
+
       Mineserver::get()->plugin()->hookBlockBroken.doAll(user, x, y, z);
       Mineserver::get()->plugin()->runBlockCallback(block, "onBroken", inv);
 
@@ -681,6 +603,22 @@ int PacketHandler::player_digging(User *user)
     case BLOCK_STATUS_PICKUP_SPAWN:
     {
       //ToDo: handle
+      if(user->inv.main[27+user->currentItemSlot()].type > 0)
+      {
+        Mineserver::get()->map()->createPickupSpawn(user->pos.x, user->pos.y,user->pos.z,user->inv.main[27+user->currentItemSlot()].type,1,user->inv.main[27+user->currentItemSlot()].health,user);
+
+        user->inv.main[27+user->currentItemSlot()].count--;
+        if(user->inv.main[27+user->currentItemSlot()].count == 0)
+        {
+          user->inv.main[27+user->currentItemSlot()].type   = -1;
+          user->inv.main[27+user->currentItemSlot()].health = 0;
+        }
+
+        user->buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)(36+user->currentItemSlot()) 
+                     << (sint16)user->inv.main[27+user->currentItemSlot()].type 
+                     << (sint8)user->inv.main[27+user->currentItemSlot()].count 
+                     << (sint8)user->inv.main[27+user->currentItemSlot()].health;
+      }
       break;
     }
     
@@ -887,8 +825,8 @@ int PacketHandler::player_block_placement(User *user)
 
 int PacketHandler::holding_change(User *user)
 {
-  sint16 itemID;
-  user->buffer >> itemID;
+  sint16 itemSlot;
+  user->buffer >> itemSlot;
 
   if(!user->buffer)
   {
@@ -897,15 +835,15 @@ int PacketHandler::holding_change(User *user)
 
   user->buffer.removePacket();
 
-  user->curItem = itemID;
+  user->curItem = itemSlot;
 
   //Send holding change to others
   Packet pkt;
-  pkt << (sint8)PACKET_HOLDING_CHANGE << (sint32)user->UID << itemID;
+  pkt << (sint8)PACKET_HOLDING_CHANGE << (sint32)user->UID << (sint16)user->inv.main[itemSlot+27].type;
   user->sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
 
   // Set current itemID to user
-  user->setCurrentItem(itemID);
+  user->setCurrentItemSlot(itemSlot);
 
   return PACKET_OK;
 }
@@ -956,6 +894,7 @@ int PacketHandler::pickup_spawn(User *user)
   item.EID       = generateEID();
 
   item.spawnedBy = user->UID;
+  item.spawnedAt = time(NULL);
 
   // Modify the position of the dropped item so that it appears in front of user instead of under user
   int distanceToThrow = 64;
@@ -998,108 +937,7 @@ int PacketHandler::disconnect(User *user)
 
   return PACKET_OK;
 }
-/*
-int PacketHandler::complex_entities(User *user)
-{
-  if(!user->buffer.haveData(12))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
 
-  sint32 x,z;
-  sint16 len,y;
-
-
-  user->buffer >> x >> y >> z >> len;
-
-  if(!user->buffer)
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
-
-  if(!user->buffer.haveData(len))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
-
-  uint8 *buffer = new uint8[len];
-
-  user->buffer.getData(buffer, len);
-
-  user->buffer.removePacket();
-
-  uint8 block, meta;
-  Mineserver::get()->map()->getBlock(x, y, z, &block, &meta);
-
-  //We only handle chest for now
-  if(block != BLOCK_CHEST && block != BLOCK_FURNACE && block != BLOCK_BURNING_FURNACE &&
-     block != BLOCK_SIGN_POST && block != BLOCK_WALL_SIGN)
-  {
-    delete[] buffer;
-    return PACKET_OK;
-  }
-
-
-  //Initialize zstream to handle gzip format
-  z_stream zstream;
-  zstream.zalloc    = (alloc_func)0;
-  zstream.zfree     = (free_func)0;
-  zstream.opaque    = (voidpf)0;
-  zstream.next_in   = buffer;
-  zstream.next_out  = 0;
-  zstream.avail_in  = len;
-  zstream.avail_out = 0;
-  zstream.total_in  = 0;
-  zstream.total_out = 0;
-  zstream.data_type = Z_BINARY;
-  inflateInit2(&zstream, 16+MAX_WBITS);
-
-  uLongf uncompressedSize   = ALLOCATE_NBTFILE;
-  uint8 *uncompressedBuffer = new uint8[uncompressedSize];
-
-  zstream.avail_out = uncompressedSize;
-  zstream.next_out = uncompressedBuffer;
-
-  //Uncompress
-  if(inflate(&zstream, Z_FULL_FLUSH) != Z_STREAM_END)
-  {
-    Mineserver::get()->screen()->log(LOG_ERROR, "Error in inflate!");
-    delete[] buffer;
-    return PACKET_OK;
-  }
-
-  inflateEnd(&zstream);
-
-  //Get size
-  uncompressedSize  = zstream.total_out;
-
-  uint8 *ptr = uncompressedBuffer + 3; // skip blank compound
-  int remaining = uncompressedSize;
-
-  NBT_Value *entity = new NBT_Value(NBT_Value::TAG_COMPOUND, &ptr, remaining);
-
-#ifdef _DEBUG
-  Mineserver::get()->screen()->log("Complex entity at (" + dtos(x) + "," + dtos(y) + "," + dtos(z) + ")");
-  std::string dump;
-  entity->Dump(dump);
-  Mineserver::get()->screen()->log(dump);
-#endif
-
-  // Check if this is a Furnace and handle if so
-  if(block == BLOCK_FURNACE || block == BLOCK_BURNING_FURNACE)
-  {
-    Mineserver::get()->furnaceManager()->handleActivity(entity, block);
-  }
-  else
-  {
-    Mineserver::get()->map()->setComplexEntity(user, x, y, z, entity);
-  }
-
-  delete [] buffer;
-
-  return PACKET_OK;
-}
-*/
 
 int PacketHandler::use_entity(User *user)
 {
