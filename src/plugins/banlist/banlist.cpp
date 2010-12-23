@@ -2,6 +2,7 @@
  * Compile this with the following command:
  *
  * $ g++ -DDEBIAN -shared -o banlist.so banlist.cpp
+ * (remove -DDEBIAN if you're not on Debian)
  *
  * Then put it in the same directory as your mineserver binary and issue the
  * command `/load banlist ./banlist.so`. Of course replace .so with .dll if
@@ -50,19 +51,6 @@ extern "C" void banlist_shutdown(Mineserver* mineserver)
 
 Banlist::Banlist(Mineserver* mineserver) : m_mineserver(mineserver)
 {
-  mineserver->plugin()->hookLogin.addCallback(&Banlist::callbackLogin);
-}
-
-bool Banlist::callbackLogin(User* user, bool* kick, std::string* reason)
-{
-  if (getBan(user->nick))
-  {
-    *kick = true;
-    reason->assign("You're banned!");
-    return false;
-  }
-
-  return true;
 }
 
 bool Banlist::getBan(const std::string user)

@@ -14,9 +14,9 @@ class Banlist
 public:
   Banlist(Mineserver* mineserver);
   ~Banlist() {}
-  bool callbackLogin(User* user, bool* kick, std::string* reason);
   bool getBan(const std::string user);
   void setBan(const std::string user, bool banned);
+  bool callbackLogin(User* user, bool* kick, std::string* reason);
 private:
   Mineserver* m_mineserver;
   std::vector<std::string> m_banlist;
