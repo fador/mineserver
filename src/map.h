@@ -60,6 +60,15 @@ struct sTree
   NBT_Value *nbt;
 };*/
 
+struct chestData
+{
+  sint32 x;
+  sint32 y;
+  sint32 z;
+  std::string id;
+  Item item[36];
+};
+
 struct spawnedItem
 {
   int EID;

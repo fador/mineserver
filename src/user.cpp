@@ -926,6 +926,17 @@ bool User::addQueue(int x, int z)
 {
   vec newMap(x, 0, z);
 
+
+  //Make sure this chunk is not being removed, if it is, delete it from remove queue
+  for(unsigned int i = 0; i < mapRemoveQueue.size(); i++)
+  {
+    if(mapRemoveQueue[i].x() == newMap.x() && mapRemoveQueue[i].z() == newMap.z())
+    {
+      mapRemoveQueue.erase(mapRemoveQueue.begin()+i);
+      break;
+    }
+  }
+
   for(unsigned int i = 0; i < mapQueue.size(); i++)
   {
     // Check for duplicates
@@ -979,6 +990,7 @@ bool User::delKnown(int x, int z)
   if(chunk != NULL)
   {
     chunk->users.erase(this);
+    //If no user needs this chunk
     if(chunk->users.size() == 0)
     {
       Mineserver::get()->map()->releaseMap(x,z);
