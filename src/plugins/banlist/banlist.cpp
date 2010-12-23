@@ -1,15 +1,17 @@
 /**
- * Compile this with the following command:
+ * Compile this with the following command if you're using linux (and gcc):
+ * $ g++ -shared -o banlist.so banlist.cpp
+ * (add -DDEBIAN if you're not on Debian)
  *
- * $ g++ -DDEBIAN -shared -o banlist.so banlist.cpp
- * (remove -DDEBIAN if you're not on Debian)
+ * On Windows under MSVS you'll have to link the DLL with the .lib from the
+ * mineserver binary. With MingW I'm not sure how to make it work...
  *
  * Then put it in the same directory as your mineserver binary and issue the
  * command `/load banlist ./banlist.so`. Of course replace .so with .dll if
- * you're running windows.
+ * you're running Windows.
  *
  * Right now it doesn't do much, but it does demonstrate all the basics needed
- * to write your own plugins.
+ * to write your own plugins. Make sure you check out banlist.h as well.
  */
 
 #include <string>
@@ -51,6 +53,12 @@ extern "C" void banlist_shutdown(Mineserver* mineserver)
 
 Banlist::Banlist(Mineserver* mineserver) : m_mineserver(mineserver)
 {
+  (static_cast<Hook3<bool,User*,bool*,std::string*>*>(m_mineserver->plugin()->getHook("Login")))->addCallback(&Banlist::callbackLogin);
+}
+
+Banlist::~Banlist()
+{
+  (static_cast<Hook3<bool,User*,bool*,std::string*>*>(m_mineserver->plugin()->getHook("Login")))->remCallback(&Banlist::callbackLogin);
 }
 
 bool Banlist::getBan(const std::string user)
@@ -91,5 +99,20 @@ void Banlist::setBan(const std::string user, bool banned)
   if (banned)
   {
     m_banlist.push_back(user);
+  }
+}
+
+bool Banlist::callbackLogin(User* user, bool* kick, std::string* reason)
+{
+  Banlist* banlist = static_cast<Banlist*>(Mineserver::get()->plugin()->getPointer("banlist"));
+  if (banlist->getBan(user->nick))
+  {
+    *kick = true;
+    reason->assign("You've been banned!");
+    return false;
+  }
+  else
+  {
+    return true;
   }
 }
