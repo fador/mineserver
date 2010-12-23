@@ -1,5 +1,6 @@
 SHELL = /bin/sh
 SYSTEM = $(shell uname)
+PDCURSES = ${pdcurses}
 
 DFLAGS = 
 
@@ -15,12 +16,20 @@ ifeq ($(SYSTEM),SunOS)
 DFLAGS += -D__SOLARIS__
 endif
 
-ifeq ($(SYSTEM),mingw)
-LFLAGS = -lws2_32
-endif
-
 ifeq ($(DEBIAN), 1)
 CXXFLAGS += -DDEBIAN
+endif
+
+ifeq ($(SYSTEM),MINGW32_NT-6.1)
+LFLAGS = -lws2_32 -lwinmm -export-all-symbols
+else
+LFLAGS = -rdynamic
+endif
+
+ifeq ($(PDCURSES),true)
+LFLAGS += -lpdcurses
+else
+LFLAGS += -lncurses
 endif
 
 ifeq ($(PEDANTIC), 1)
@@ -31,7 +40,7 @@ endif
 RM = rm -f
 CXX = g++
 CC = $(CXX)
-LDFLAGS += -L/usr/local/lib -L/usr/lib -levent -lz -lnoise -lncurses $(LFLAGS)
+LDFLAGS += -L/usr/local/lib -L/usr/lib -levent -lz -lnoise $(LFLAGS)
 CXXFLAGS += $(DFLAGS) -I. -I/usr/Local/include -I/usr/include
 
 OBJS  = mineserver.o map.o chat.o commands.o config.o constants.o logger.o nbt.o furnace.o furnaceManager.o packets.o physics.o sockets.o tools.o user.o screen.o plugin.o tree.o
@@ -43,7 +52,7 @@ PROGS = $(PROG)
 $(PROGS): $(OBJS)
 
 $(PROG):
-	$(CXX) $(LDFLAGS) $(OBJS) -rdynamic -o ../bin/mineserver
+	$(CXX) $(OBJS) -o ../bin/mineserver $(LDFLAGS)
 
 clean: 
 	$(RM) $(OBJS) $(PROGS)
