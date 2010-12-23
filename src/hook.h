@@ -3,8 +3,10 @@
 
 #include <vector>
 
+class Hook {};
+
 template <class R>
-class Hook0
+class Hook0 : public Hook
 {
 public:
   typedef R (*ftype)();
@@ -59,7 +61,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)() == true)
+      if (((ftype)*ia)())
       {
         return true;
       }
@@ -74,7 +76,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)() == false)
+      if (!((ftype)*ia)())
       {
         return true;
       }
@@ -92,7 +94,7 @@ private:
 };
 
 template <class R, class A1>
-class Hook1
+class Hook1 : public Hook
 {
 public:
   typedef R (*ftype)(A1);
@@ -147,7 +149,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1) == true)
+      if (((ftype)*ia)(a1))
       {
         return true;
       }
@@ -162,7 +164,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1) == false)
+      if (!((ftype)*ia)(a1))
       {
         return true;
       }
@@ -180,7 +182,7 @@ private:
 };
 
 template <class R, class A1, class A2>
-class Hook2
+class Hook2 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2);
@@ -235,7 +237,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2) == true)
+      if (((ftype)*ia)(a1, a2))
       {
         return true;
       }
@@ -250,7 +252,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2) == false)
+      if (!((ftype)*ia)(a1, a2))
       {
         return true;
       }
@@ -268,7 +270,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3>
-class Hook3
+class Hook3 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3);
@@ -323,7 +325,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3) == true)
+      if (((ftype)*ia)(a1, a2, a3))
       {
         return true;
       }
@@ -338,7 +340,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3) == false)
+      if (!((ftype)*ia)(a1, a2, a3))
       {
         return true;
       }
@@ -356,7 +358,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3, class A4>
-class Hook4
+class Hook4 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3, A4);
@@ -411,7 +413,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4) == true)
+      if (((ftype)*ia)(a1, a2, a3, a4))
       {
         return true;
       }
@@ -426,7 +428,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4) == false)
+      if (!((ftype)*ia)(a1, a2, a3, a4))
       {
         return true;
       }
@@ -444,7 +446,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3, class A4, class A5>
-class Hook5
+class Hook5 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3, A4, A5);
@@ -499,7 +501,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5) == true)
+      if (((ftype)*ia)(a1, a2, a3, a4, a5))
       {
         return true;
       }
@@ -514,7 +516,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5) == false)
+      if (!((ftype)*ia)(a1, a2, a3, a4, a5))
       {
         return true;
       }
@@ -532,7 +534,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6>
-class Hook6
+class Hook6 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3, A4, A5, A6);
@@ -587,7 +589,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6) == true)
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6))
       {
         return true;
       }
@@ -602,7 +604,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6) == false)
+      if (!((ftype)*ia)(a1, a2, a3, a4, a5, a6))
       {
         return true;
       }
@@ -620,7 +622,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7>
-class Hook7
+class Hook7 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3, A4, A5, A6, A7);
@@ -675,7 +677,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7) == true)
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7))
       {
         return true;
       }
@@ -690,7 +692,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7) == false)
+      if (!((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7))
       {
         return true;
       }
@@ -708,7 +710,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
-class Hook8
+class Hook8 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3, A4, A5, A6, A7, A8);
@@ -763,7 +765,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8) == true)
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8))
       {
         return true;
       }
@@ -778,7 +780,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8) == false)
+      if (!((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8))
       {
         return true;
       }
@@ -796,7 +798,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
-class Hook9
+class Hook9 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3, A4, A5, A6, A7, A8, A9);
@@ -851,7 +853,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9) == true)
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9))
       {
         return true;
       }
@@ -866,7 +868,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9) == false)
+      if (!((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9))
       {
         return true;
       }
@@ -884,7 +886,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
-class Hook10
+class Hook10 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10);
@@ -939,7 +941,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) == true)
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10))
       {
         return true;
       }
@@ -954,7 +956,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) == false)
+      if (!((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10))
       {
         return true;
       }
@@ -972,7 +974,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
-class Hook11
+class Hook11 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11);
@@ -1027,7 +1029,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) == true)
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11))
       {
         return true;
       }
@@ -1042,7 +1044,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) == false)
+      if (!((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11))
       {
         return true;
       }
@@ -1060,7 +1062,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
-class Hook12
+class Hook12 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12);
@@ -1115,7 +1117,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12) == true)
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12))
       {
         return true;
       }
@@ -1130,7 +1132,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12) == false)
+      if (!((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12))
       {
         return true;
       }
@@ -1148,7 +1150,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
-class Hook13
+class Hook13 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13);
@@ -1203,7 +1205,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13) == true)
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13))
       {
         return true;
       }
@@ -1218,7 +1220,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13) == false)
+      if (!((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13))
       {
         return true;
       }
@@ -1236,7 +1238,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
-class Hook14
+class Hook14 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14);
@@ -1291,7 +1293,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14) == true)
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14))
       {
         return true;
       }
@@ -1306,7 +1308,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14) == false)
+      if (!((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14))
       {
         return true;
       }
@@ -1324,7 +1326,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
-class Hook15
+class Hook15 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15);
@@ -1379,7 +1381,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) == true)
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15))
       {
         return true;
       }
@@ -1394,7 +1396,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) == false)
+      if (!((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15))
       {
         return true;
       }
@@ -1412,7 +1414,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16>
-class Hook16
+class Hook16 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16);
@@ -1467,7 +1469,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16) == true)
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16))
       {
         return true;
       }
@@ -1482,7 +1484,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16) == false)
+      if (!((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16))
       {
         return true;
       }
@@ -1500,7 +1502,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17>
-class Hook17
+class Hook17 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17);
@@ -1555,7 +1557,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17) == true)
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17))
       {
         return true;
       }
@@ -1570,7 +1572,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17) == false)
+      if (!((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17))
       {
         return true;
       }
@@ -1588,7 +1590,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18>
-class Hook18
+class Hook18 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18);
@@ -1643,7 +1645,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18) == true)
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18))
       {
         return true;
       }
@@ -1658,7 +1660,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18) == false)
+      if (!((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18))
       {
         return true;
       }
@@ -1676,7 +1678,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19>
-class Hook19
+class Hook19 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19);
@@ -1731,7 +1733,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19) == true)
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19))
       {
         return true;
       }
@@ -1746,7 +1748,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19) == false)
+      if (!((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19))
       {
         return true;
       }
@@ -1764,7 +1766,7 @@ private:
 };
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20>
-class Hook20
+class Hook20 : public Hook
 {
 public:
   typedef R (*ftype)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20);
@@ -1819,7 +1821,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20) == true)
+      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20))
       {
         return true;
       }
@@ -1834,7 +1836,7 @@ public:
     typename std::vector<ftype>::iterator ib = callbacks.end();
     for (;ia!=ib;++ia)
     {
-      if (((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20) == false)
+      if (!((ftype)*ia)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20))
       {
         return true;
       }

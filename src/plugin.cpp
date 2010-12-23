@@ -330,11 +330,51 @@ void Plugin::unloadExternal(const std::string name)
   }
 }
 
+bool Plugin::hasHook(const std::string name)
+{
+  std::map<const std::string, Hook*>::iterator it_a = m_hooks.begin();
+  std::map<const std::string, Hook*>::iterator it_b = m_hooks.end();
+  for (;it_a!=it_b;++it_a)
+  {
+    if (it_a->first == name)
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void Plugin::setHook(const std::string name, Hook* hook)
+{
+  m_hooks[name] = hook;
+}
+
+Hook* Plugin::getHook(const std::string name)
+{
+  if (hasHook(name))
+  {
+    return m_hooks[name];
+  }
+  else
+  {
+    return NULL;
+  }
+}
+
+void Plugin::remHook(const std::string name)
+{
+  if (hasHook(name))
+  {
+    m_hooks.erase(name);
+  }
+}
+
 bool Plugin::hasPointer(const std::string name)
 {
-  std::map<const std::string, void*>::iterator it_a;
-  std::map<const std::string, void*>::iterator it_b;
-  for (it_a=m_registry.begin();it_a!=it_b;++it_a)
+  std::map<const std::string, void*>::iterator it_a = m_pointers.begin();
+  std::map<const std::string, void*>::iterator it_b = m_pointers.end();
+  for (;it_a!=it_b;++it_a)
   {
     if (it_a->first == name)
     {
@@ -347,14 +387,14 @@ bool Plugin::hasPointer(const std::string name)
 
 void Plugin::setPointer(const std::string name, void* pointer)
 {
-  m_registry[name] = pointer;
+  m_pointers[name] = pointer;
 }
 
 void* Plugin::getPointer(const std::string name)
 {
   if (hasPointer(name))
   {
-    return m_registry[name];
+    return m_pointers[name];
   }
   else
   {
@@ -366,7 +406,7 @@ void Plugin::remPointer(const std::string name)
 {
   if (hasPointer(name))
   {
-    m_registry.erase(name);
+    m_pointers.erase(name);
   }
 }
 

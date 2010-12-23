@@ -85,7 +85,7 @@ public:
     remove(name);
     callbacks.insert(std::pair<std::string, Function>(name, func));
   }
-   
+
   bool remove(const std::string name)
   {
     Events::iterator iter = callbacks.find(name);
@@ -110,7 +110,7 @@ public:
 
     return &iter->second;
   }
-   
+
   bool run(const std::string name, const Function::invoker_type function)
   {
     Events::iterator iter = callbacks.find(name);
@@ -130,32 +130,50 @@ public:
   }
 
 private:
-  typedef std::map<std::string, Function > Events;
+  typedef std::map<std::string, Function> Events;
   Events callbacks;
 };
 
 class Plugin
 {
 public:
+  // Hook registry stuff
+  bool hasHook(const std::string name);
+  void setHook(const std::string name, Hook* hook);
+  Hook* getHook(const std::string name);
+  void remHook(const std::string name);
   // Un/Load external plugins
   bool loadExternal(const std::string name, const std::string file);
   void unloadExternal(const std::string name);
-  // Pointer registry stuff, so plugins can be stateful
+  // Pointer registry stuff
   bool hasPointer(const std::string name);
   void setPointer(const std::string name, void* pointer);
   void* getPointer(const std::string name);
   void remPointer(const std::string name);
-
-  Hook3<bool,User*,bool*,std::string*> hookLogin;
-  Hook4<bool,User*,std::string,std::string,bool*> hookChat;
-  Hook4<void,User*,sint32,sint8,sint32> hookDiggingStarted;
-  Hook4<void,User*,sint32,sint8,sint32> hookDigging;
-  Hook4<void,User*,sint32,sint8,sint32> hookDiggingStopped;
-  Hook4<void,User*,sint32,sint8,sint32> hookBlockBroken;
-  Hook5<void,User*,sint32,sint8,sint32,int> hookBlockNeighbourBroken;
-  Hook5<void,User*,sint32,sint8,sint32,sint16> hookBlockPlace;
-  Hook6<void,User*,sint32,sint8,sint32,sint16,sint16> hookBlockReplace;
-  Hook4<void,User*,sint32,sint8,sint32> hookBlockNeighbourPlace;
+  // Create default hooks
+  Plugin()
+  {
+    setHook("Login", new Hook3<bool,User*,bool*,std::string*>);
+    setHook("Chat", new Hook4<bool,User*,std::string,std::string,bool*>);
+    setHook("DiggingStarted", new Hook4<void,User*,sint32,sint8,sint32>);
+    setHook("Digging", new Hook4<void,User*,sint32,sint8,sint32>);
+    setHook("DiggingStopped", new Hook4<void,User*,sint32,sint8,sint32>);
+    setHook("BlockBroken", new Hook4<void,User*,sint32,sint8,sint32>);
+    setHook("BlockNeighbourBroken", new Hook5<void,User*,sint32,sint8,sint32,int>);
+    setHook("BlockPlace", new Hook5<void,User*,sint32,sint8,sint32,sint16>);
+    setHook("BlockReplace", new Hook6<void,User*,sint32,sint8,sint32,sint16,sint16>);
+    setHook("BlockNeighbourPlace", new Hook4<void,User*,sint32,sint8,sint32>);
+  }
+  // Remove existing hooks
+  ~Plugin()
+  {
+    std::map<std::string,Hook*>::iterator it = m_hooks.begin();
+    for (;it!=m_hooks.end();++it)
+    {
+      delete it->second;
+      m_hooks.erase(it->first);
+    }
+  }
 
   // Old code
   // This needs to be phased over to the new plugin architecture
@@ -169,8 +187,9 @@ public:
   bool removeBlockCallback(const int type);
 
 private:
+  std::map<const std::string, Hook*> m_hooks;
   std::map<const std::string, LIBRARY_HANDLE> m_libraryHandles;
-  std::map<const std::string, void*> m_registry;
+  std::map<const std::string, void*> m_pointers;
 
   // Old stuff
   typedef std::map<sint16, Callback> Callbacks;
