@@ -839,7 +839,7 @@ int PacketHandler::holding_change(User *user)
 
   //Send holding change to others
   Packet pkt;
-  pkt << (sint8)PACKET_HOLDING_CHANGE << (sint32)user->UID << (sint16)user->inv.main[itemSlot+27].type;
+  pkt << (sint8)PACKET_ENTITY_EQUIPMENT << (sint32)user->UID << (sint16)0 << (sint16)user->inv.main[itemSlot+27].type;
   user->sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
 
   // Set current itemID to user

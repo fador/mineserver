@@ -50,7 +50,7 @@ enum
   PACKET_LOGIN_REQUEST             = 0x01,
   PACKET_HANDSHAKE                 = 0x02,
   PACKET_CHAT_MESSAGE              = 0x03,
-  PACKET_PLAYER_INVENTORY          = 0x05,
+  PACKET_ENTITY_EQUIPMENT          = 0x05,
   PACKET_RESPAWN                   = 0x09,
   PACKET_PLAYER                    = 0x0a,
   PACKET_PLAYER_POSITION           = 0x0b,
