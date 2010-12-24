@@ -657,12 +657,93 @@ int PacketHandler::player_block_placement(User *user)
   }
   user->buffer.removePacket();
 
-  //Mineserver::get()->screen()->log("Block_placement: "+dtos(newblock)+" dir: "+dtos((int)direction) + " health: "+dtos((int)health) + " count: "+dtos((int)count));
+
+  if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &metadata))
+  {
+    return PACKET_OK;
+  }
+  
+  if(oldblock == BLOCK_CHEST)
+  {
+    user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)1  << (sint8)0 << std::string("Chest") << (sint8)28;
+
+    sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(x,z);
+
+    if(chunk == NULL)
+    {
+      return PACKET_OK;
+    }
+
+    for(uint32 i = 0;i < chunk->chests.size(); i++)
+    {
+      if(chunk->chests[i]->x == x && chunk->chests[i]->z == z)
+      {
+        for(int i = 0;i < 28; i++)
+        {
+          if(chunk->chests[i]->items[i].type != -1)
+          {
+            user->buffer << (sint8)PACKET_SET_SLOT << (sint8)1 << (sint16)(i) << (sint16)chunk->chests[i]->items[i].type 
+                         << (sint8)(chunk->chests[i]->items[i].count) << (sint8)chunk->chests[i]->items[i].health;
+          }
+        }
+      }
+    }
+
+    return PACKET_OK;
+  }
+
+  if(oldblock == BLOCK_FURNACE || oldblock == BLOCK_BURNING_FURNACE)
+  {
+    sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(x,z);
+
+    user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)3  << (sint8)2 << std::string("Furnace") << (sint8)0;
+
+
+    if(chunk == NULL)
+    {
+      return PACKET_OK;
+    }
+
+    for(uint32 i = 0;i < chunk->furnaces.size(); i++)
+    {
+      if(chunk->furnaces[i]->x == x && chunk->furnaces[i]->z == z)
+      {
+        for(int i = 0; i < 3; i++)
+        {
+          if(chunk->furnaces[i]->items[i].type != -1)
+          {
+            user->buffer << (sint8)PACKET_SET_SLOT << (sint8)3 << (sint16)(i) << (sint16)chunk->furnaces[i]->items[i].type 
+                         << (sint8)(chunk->furnaces[i]->items[i].count) << (sint8)chunk->furnaces[i]->items[i].health;
+          }
+        }
+      }
+    }
+
+    return PACKET_OK;
+  }
+
+  if(oldblock == BLOCK_WORKBENCH)
+  {
+    sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(x,z);
+    user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)2  << (sint8)1 << std::string("Workbench") << (sint8)0;
+
+
+    if(chunk == NULL)
+    {
+      return PACKET_OK;
+    }
+
+    //ToDo: send inventory
+    return PACKET_OK;
+  }
+
+
 
   bool foundFromInventory = false;
 
   if(user->inv.main[27+user->currentItemSlot()].type == newblock)
   {
+    //Are we really placing this?
     user->inv.main[27+user->currentItemSlot()].count--;
     if(user->inv.main[27+user->currentItemSlot()].count == 0)
     {
@@ -721,7 +802,7 @@ int PacketHandler::player_block_placement(User *user)
   Function event;
   Function::invoker_type inv(user, newblock, x, y, z, direction);
 
-  if (Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &metadata))
+  //if (Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &metadata))
   {
     uint8 oldblocktop;
     uint8 metadatatop;

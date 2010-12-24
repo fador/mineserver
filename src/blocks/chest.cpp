@@ -259,29 +259,6 @@ void BlockChest::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y,
 
 void BlockChest::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
-  user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)1  << (sint8)0 << std::string("Chest") << (sint8)28;
-
-  sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(x,z);
-
-  if(chunk == NULL)
-  {
-    return;
-  }
-
-  for(uint32 i = 0;i < chunk->chests.size(); i++)
-  {
-    if(chunk->chests[i]->x == x && chunk->chests[i]->z == z)
-    {
-      for(int i = 0;i < 28; i++)
-      {
-        if(chunk->chests[i]->items[i].type != -1)
-        {
-          user->buffer << (sint8)PACKET_SET_SLOT << (sint8)1 << (sint16)(i) << (sint16)chunk->chests[i]->items[i].type 
-                       << (sint8)(chunk->chests[i]->items[i].count) << (sint8)chunk->chests[i]->items[i].health;
-        }
-      }
-    }
-  }
 
 }
 
