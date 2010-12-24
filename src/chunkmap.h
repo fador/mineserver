@@ -35,10 +35,13 @@
 class User;
 class NBT_Value;
 struct spawnedItem;
+struct chestData;
+struct furnaceData;
+struct signData;
 
 struct sChunk
 {
-  sChunk() : refCount(0)
+  sChunk() : refCount(0),lightRegen(false),changed(false),lastused(0)
   {
   }
   uint8* blocks;
@@ -48,9 +51,18 @@ struct sChunk
   uint8* heightmap;
   sint32 x;
   sint32 z;
+  bool lightRegen;
+  bool changed;
+  time_t lastused;
+
   NBT_Value *nbt;
   std::set<User*> users;
   std::vector<spawnedItem *> items;
+  
+
+  std::vector<chestData *>   chests;
+  std::vector<signData *>    signs;
+  std::vector<furnaceData *> furnaces;
 
   bool HasUser(User* user)
   {

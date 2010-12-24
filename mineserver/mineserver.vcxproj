@@ -61,6 +61,7 @@
     <ClInclude Include="..\src\blocks\torch.h" />
     <ClInclude Include="..\src\blocks\tracks.h" />
     <ClInclude Include="..\src\chat.h" />
+    <ClInclude Include="..\src\chunkmap.h" />
     <ClInclude Include="..\src\config.h" />
     <ClInclude Include="..\src\constants.h" />
     <ClInclude Include="..\src\furnace.h" />
