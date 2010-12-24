@@ -31,6 +31,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <ctime>
 
 //Fix Winsock2 error that occurs when Windows.h is included before it.
 #define _WINSOCKAPI_
@@ -153,16 +154,25 @@ public:
   // Create default hooks
   Plugin()
   {
-    setHook("Login", new Hook3<bool,User*,bool*,std::string*>);
-    setHook("Chat", new Hook4<bool,User*,std::string,std::string,bool*>);
+    setHook("Timer200", new Hook0<void>);
+    setHook("Timer1000", new Hook0<void>);
+    setHook("Timer10000", new Hook0<void>);
+    setHook("LoginPre", new Hook2<bool,User*,std::string*>);
+    setHook("LoginPost", new Hook1<void,User*>);
+    setHook("ChatPre", new Hook3<bool,User*,time_t,std::string>);
+    setHook("ChatPost", new Hook3<void,User*,time_t,std::string>);
     setHook("DiggingStarted", new Hook4<void,User*,sint32,sint8,sint32>);
     setHook("Digging", new Hook4<void,User*,sint32,sint8,sint32>);
     setHook("DiggingStopped", new Hook4<void,User*,sint32,sint8,sint32>);
-    setHook("BlockBroken", new Hook4<void,User*,sint32,sint8,sint32>);
-    setHook("BlockNeighbourBroken", new Hook5<void,User*,sint32,sint8,sint32,int>);
-    setHook("BlockPlace", new Hook5<void,User*,sint32,sint8,sint32,sint16>);
-    setHook("BlockReplace", new Hook6<void,User*,sint32,sint8,sint32,sint16,sint16>);
-    setHook("BlockNeighbourPlace", new Hook4<void,User*,sint32,sint8,sint32>);
+    setHook("BlockBreakPre", new Hook4<bool,User*,sint32,sint8,sint32>);
+    setHook("BlockBreakPost", new Hook4<void,User*,sint32,sint8,sint32>);
+    setHook("BlockNeighbourBreak", new Hook7<void,User*,sint32,sint8,sint32,sint32,sint8,sint32>);
+    setHook("BlockPlacePre", new Hook5<bool,User*,sint32,sint8,sint32,sint16>);
+    setHook("BlockPlacePost", new Hook5<void,User*,sint32,sint8,sint32,sint16>);
+    setHook("BlockNeighbourPlace", new Hook7<void,User*,sint32,sint8,sint32,sint32,sint8,sint32>);
+    setHook("BlockReplacePre", new Hook6<void,User*,sint32,sint8,sint32,sint16,sint16>);
+    setHook("BlockReplacePost", new Hook6<void,User*,sint32,sint8,sint32,sint16,sint16>);
+    setHook("BlockNeighbourReplace", new Hook9<void,User*,sint32,sint8,sint32,sint32,sint8,sint32,sint16,sint16>);
   }
   // Remove existing hooks
   ~Plugin()
@@ -171,8 +181,8 @@ public:
     for (;it!=m_hooks.end();++it)
     {
       delete it->second;
-      m_hooks.erase(it->first);
     }
+    m_hooks.clear();
   }
 
   // Old code
