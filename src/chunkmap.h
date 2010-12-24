@@ -59,7 +59,7 @@ struct sChunk
   std::set<User*> users;
   std::vector<spawnedItem *> items;
   
-
+  //ToDo: clear these
   std::vector<chestData *>   chests;
   std::vector<signData *>    signs;
   std::vector<furnaceData *> furnaces;

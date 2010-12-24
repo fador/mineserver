@@ -590,15 +590,18 @@ bool User::updatePos(double x, double y, double z, double stance)
       {
         for(int mapz = newChunk->z-viewDistance; mapz <= newChunk->z+viewDistance; mapz++)
         {
-          if(!withinViewDistance(chunkDiffX, oldChunk->x) || !withinViewDistance(chunkDiffZ, oldChunk->z))
-          {
-            addQueue(mapx, mapz);
-          }
+
 
           if(!withinViewDistance((mapx - chunkDiffX), newChunk->x) || !withinViewDistance((mapz - chunkDiffZ), newChunk->z))
           {
             addRemoveQueue(mapx-chunkDiffX, mapz-chunkDiffZ);
           }
+
+          //If this chunk wasn't in the view distance before
+          //if(!withinViewDistance(chunkDiffX, oldChunk->x) || !withinViewDistance(chunkDiffZ, oldChunk->z))
+          //{
+          addQueue(mapx, mapz);
+          //}
         }
       }
     }
