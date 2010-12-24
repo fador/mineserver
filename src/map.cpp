@@ -1140,20 +1140,115 @@ void Map::sendToUser(User* user, int x, int z)
       if(idVal == NULL)
         continue;
       std::string* id = idVal->GetString();
-      if(id && (*id=="Sign"))
-      {
-        if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
-          (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
-          (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
-        {
-          continue;
-        }
+      if(id == NULL)
+        continue;
 
-        sint32 entityX = *(**iter)["x"];
-        sint32 entityY = *(**iter)["y"];
-        sint32 entityZ = *(**iter)["z"];
+      if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
+         (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
+         (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
+      {
+        continue;
+      }
+
+      sint32 entityX = *(**iter)["x"];
+      sint32 entityY = *(**iter)["y"];
+      sint32 entityZ = *(**iter)["z"];
+
+      if((*id=="Sign"))
+      {
         user->buffer << (sint8)PACKET_SIGN << entityX << (sint16)entityY << entityZ;
         user->buffer << *(**iter)["Text1"]->GetString() << *(**iter)["Text2"]->GetString() << *(**iter)["Text3"]->GetString() << *(**iter)["Text4"]->GetString();
+
+        signData *newSign = new signData;
+        newSign->x = entityX;
+        newSign->y = entityY;
+        newSign->z = entityZ;
+        newSign->text[0]=*(**iter)["Text1"]->GetString();
+        newSign->text[1]=*(**iter)["Text2"]->GetString();
+        newSign->text[2]=*(**iter)["Text3"]->GetString();
+        newSign->text[3]=*(**iter)["Text4"]->GetString();
+
+        chunk->signs.push_back(newSign);
+      }
+      else if((*id=="Chest"))
+      {
+        NBT_Value* chestItems = (**iter)["Items"];
+
+        if(chestItems->GetType() == NBT_Value::TAG_LIST)
+        {
+          if(chestItems->GetListType() != NBT_Value::TAG_COMPOUND)
+          {
+            continue;
+          }
+
+          std::vector<NBT_Value*>* entities = entityList->GetList();
+          std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
+
+          bool done = false;
+
+          chestData *newChest = new chestData;
+          newChest->x = entityX;
+          newChest->y = entityY;
+          newChest->z = entityZ;
+
+          for( ; iter != end; iter++ )
+          {
+            if((**iter)["Count"] == NULL || (**iter)["Slot"] == NULL || (**iter)["Damage"] == NULL || (**iter)["id"] == NULL ||
+               (**iter)["Count"]->GetType() != NBT_Value::TAG_INT ||
+               (**iter)["Slot"]->GetType() != NBT_Value::TAG_INT ||
+               (**iter)["Damage"]->GetType() != NBT_Value::TAG_INT ||
+               (**iter)["id"]->GetType() != NBT_Value::TAG_INT)
+            {
+              continue;
+            }
+            newChest->items[(sint8)*(**iter)["Slot"]].count  = (sint8)*(**iter)["Count"];
+            newChest->items[(sint8)*(**iter)["Slot"]].health = (sint16)*(**iter)["Damage"];
+            newChest->items[(sint8)*(**iter)["Slot"]].type   = (sint16)*(**iter)["id"];
+          }
+
+          chunk->chests.push_back(newChest);
+        }
+      }
+      else if((*id=="Furnace"))
+      {
+        NBT_Value* chestItems = (**iter)["Items"];
+
+        if(chestItems->GetType() == NBT_Value::TAG_LIST)
+        {
+          if(chestItems->GetListType() != NBT_Value::TAG_COMPOUND)
+          {
+            continue;
+          }
+
+          std::vector<NBT_Value*>* entities = entityList->GetList();
+          std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
+
+          bool done = false;
+
+          furnaceData *newFurnace = new furnaceData;
+          newFurnace->x = entityX;
+          newFurnace->y = entityY;
+          newFurnace->z = entityZ;
+          newFurnace->burnTime = (sint16)*(**iter)["BurnTime"];
+          newFurnace->cookTime = (sint16)*(**iter)["CookTime"];
+
+          for( ; iter != end; iter++ )
+          {
+            if((**iter)["Count"] == NULL || (**iter)["Slot"] == NULL || (**iter)["Damage"] == NULL || (**iter)["id"] == NULL ||
+               (**iter)["Count"]->GetType() != NBT_Value::TAG_INT ||
+               (**iter)["Slot"]->GetType() != NBT_Value::TAG_INT ||
+               (**iter)["Damage"]->GetType() != NBT_Value::TAG_INT ||
+               (**iter)["id"]->GetType() != NBT_Value::TAG_INT)
+            {
+              continue;
+            }
+            newFurnace->items[(sint8)*(**iter)["Slot"]].count  = (sint8)*(**iter)["Count"];
+            newFurnace->items[(sint8)*(**iter)["Slot"]].health = (sint16)*(**iter)["Damage"];
+            newFurnace->items[(sint8)*(**iter)["Slot"]].type   = (sint16)*(**iter)["id"];
+          }
+
+          chunk->furnaces.push_back(newFurnace);
+        }
       }
     }
   }
@@ -1330,7 +1425,6 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value* 
             }
           }
         }
-
 
         // Replace entity
         delete *iter;
