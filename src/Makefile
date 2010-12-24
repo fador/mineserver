@@ -51,15 +51,18 @@ CC = $(CXX)
 LDFLAGS += -L/usr/local/lib -L/usr/lib -levent -lz -lnoise $(LFLAGS)
 CXXFLAGS += $(DFLAGS) -I. -I/usr/Local/include -I/usr/include
 
+CXXFLAGS += $(shell python-config --cflags)
+LDFLAGS += $(shell python-config --ldflags)
+
 OBJS  = mineserver.o map.o chat.o commands.o config.o constants.o logger.o nbt.o furnace.o furnaceManager.o packets.o physics.o sockets.o tools.o user.o screen.o plugin.o tree.o
 OBJS += blocks/basic.o blocks/door.o blocks/falling.o blocks/fire.o blocks/liquid.o blocks/plant.o blocks/sign.o blocks/snow.o blocks/stair.o blocks/torch.o blocks/tracks.o blocks/default.o blocks/chest.o
-OBJS += worldgen/mapgen.o worldgen/cavegen.o worldgen/mersenne.o
+OBJS += worldgen/mapgen.o worldgen/cavegen.o worldgen/mersenne.o MineServer_wrap.o
 PROG = ./mineserver
 PROGS = $(PROG)
 
 $(PROGS): $(OBJS)
 
-$(PROG):
+$(PROG): _MineServer.so
 	$(CXX) $(OBJS) -o ../bin/mineserver $(LDFLAGS)
 
 clean: 
@@ -68,6 +71,18 @@ clean:
 dist:
 	tar cvzf ../mineserver-latest-`uname`-bin.tar.gz -C ../bin/ . ../LICENSE
 	zip -j ../mineserver-latest-`uname`-bin.zip ../bin/* ../LICENSE
+
+MineServer_wrap.cxx: MineServer.i
+	swig -c++ -python MineServer.i
+
+MineServer_wrap.o: MineServer_wrap.cxx MineServer.py
+	$(CXX) $(CXXFLAGS) -fPIC -c MineServer_wrap.cxx
+
+_MineServer.so: MineServer_wrap.o $(OBJS)
+	$(CXX) $(LDFLAGS) -shared -Wl,-soname,_MineServer.so -o _MineServer.so $(OBJS)
+	cp _MineServer.so ../bin
+	cp MineServer.py ../bin
+
 
 all: $(PROGS)
 

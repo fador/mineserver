@@ -1,2 +1,6 @@
 *.o
+MineServer_*
+_MineServer.so
+MineServer.py
+MineServer.pyc
 mineserver
