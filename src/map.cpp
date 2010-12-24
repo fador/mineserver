@@ -1190,6 +1190,11 @@ void Map::sendToUser(User* user, int x, int z)
           newChest->y = entityY;
           newChest->z = entityZ;
 
+          for(uint32 i = 0; i < 28; i ++)
+          {
+            newChest->items[i].type = -1;
+          }
+
           for( ; iter != end; iter++ )
           {
             if((**iter)["Count"] == NULL || (**iter)["Slot"] == NULL || (**iter)["Damage"] == NULL || (**iter)["id"] == NULL ||
@@ -1235,6 +1240,11 @@ void Map::sendToUser(User* user, int x, int z)
           newFurnace->z = entityZ;
           newFurnace->burnTime = (sint16)*(**iter)["BurnTime"];
           newFurnace->cookTime = (sint16)*(**iter)["CookTime"];
+
+          for(uint32 i = 0; i < 3; i ++)
+          {
+            newFurnace->items[i].type = -1;
+          }
 
           for( ; iter != end; iter++ )
           {

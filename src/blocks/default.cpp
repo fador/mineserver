@@ -112,6 +112,51 @@ void BlockDefault::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint
     return;
   }
 
+  if(oldblock == BLOCK_FURNACE || oldblock == BLOCK_BURNING_FURNACE)
+  {
+    sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(x,z);
+
+    user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)3  << (sint8)2 << std::string("Furnace") << (sint8)0;
+
+
+    if(chunk == NULL)
+    {
+      return;
+    }
+
+    for(uint32 i = 0;i < chunk->furnaces.size(); i++)
+    {
+      if(chunk->furnaces[i]->x == x && chunk->furnaces[i]->z == z)
+      {
+        for(int i = 0; i < 3; i++)
+        {
+          if(chunk->furnaces[i]->items[i].type != -1)
+          {
+            user->buffer << (sint8)PACKET_SET_SLOT << (sint8)3 << (sint16)(i) << (sint16)chunk->furnaces[i]->items[i].type 
+                         << (sint8)(chunk->furnaces[i]->items[i].count) << (sint8)chunk->furnaces[i]->items[i].health;
+          }
+        }
+      }
+    }
+
+    return;
+  }
+
+  if(oldblock == BLOCK_WORKBENCH)
+  {
+    sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(x,z);
+    user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)2  << (sint8)1 << std::string("Workbench") << (sint8)0;
+
+
+    if(chunk == NULL)
+    {
+      return;
+    }
+
+    //ToDo: send inventory
+    return;
+  }
+
   Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
   Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
   Mineserver::get()->map()->createPickupSpawn(x, y, z, oldblock, 1, 0,NULL);

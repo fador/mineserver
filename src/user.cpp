@@ -199,7 +199,7 @@ bool User::sendLoginInfo()
     {   
       if(inventory[i].count)
       {
-        buffer << (sint8)0x67 << (sint8)0 << (sint16)(itemSlot) << (sint16)inventory[i].type << (sint8)(inventory[i].count) << (sint8)inventory[i].health;
+        buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)(itemSlot) << (sint16)inventory[i].type << (sint8)(inventory[i].count) << (sint8)inventory[i].health;
       }
       /*
       if(inventory[i].count)
