@@ -660,20 +660,19 @@ int PacketHandler::player_block_placement(User *user)
   //Mineserver::get()->screen()->log("Block_placement: "+dtos(newblock)+" dir: "+dtos((int)direction) + " health: "+dtos((int)health) + " count: "+dtos((int)count));
 
   bool foundFromInventory = false;
-  for(sint8 i=27;i<36;i++)
+
+  if(user->inv.main[27+user->currentItemSlot()].type == newblock)
   {
-    if(user->inv.main[i].type == newblock)
+    user->inv.main[27+user->currentItemSlot()].count--;
+    if(user->inv.main[27+user->currentItemSlot()].count == 0)
     {
-      user->inv.main[i].count--;
-      if(user->inv.main[i].count == 0)
-      {
-        user->inv.main[i].type   = 0;
-        user->inv.main[i].health = 0;
-      }
-      foundFromInventory = true;
-      break;
+      user->inv.main[27+user->currentItemSlot()].type   = 0;
+      user->inv.main[27+user->currentItemSlot()].health = 0;
+      //ToDo: add holding change packet.
     }
+    foundFromInventory = true;
   }
+
 
   // TODO: Handle processing of
   if(direction == -1 || !foundFromInventory)
