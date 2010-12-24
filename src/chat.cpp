@@ -192,12 +192,11 @@ bool Chat::handleMsg(User* user, std::string msg)
   std::string timeStamp (asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
-  bool blockMessage = false;
-  (static_cast<Hook4<bool,User*,std::string,std::string,bool*>*>(Mineserver::get()->plugin()->getHook("Chat")))->doUntilFalse(user, timeStamp, msg, &blockMessage);
-  if (blockMessage)
+  if ((static_cast<Hook3<bool,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("ChatPre")))->doUntilFalse(user, rawTime, msg))
   {
     return false;
   }
+  (static_cast<Hook3<void,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("ChatPre")))->doAll(user, rawTime, msg);
 
   char prefix = msg[0];
 
