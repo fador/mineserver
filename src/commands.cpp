@@ -600,6 +600,7 @@ void giveItems(User* user, std::string command, std::deque<std::string> args)
         if(args.size() == 3)
         {
           itemCount = atoi(args[2].c_str());
+          if(itemCount>1024) itemCount=1024;
           // If multiple stacks
           itemStacks = roundUpTo(itemCount, 64) / 64;
           itemCount  -= (itemStacks-1) * 64;
@@ -669,6 +670,7 @@ void giveItemsSelf(User* user, std::string command, std::deque<std::string> args
         if(args.size() == 2)
         {
           itemCount = atoi(args[1].c_str());
+          if(itemCount>1024) itemCount=1024;
           // If multiple stacks
           itemStacks = roundUpTo(itemCount, 64) / 64;
           itemCount  -= (itemStacks-1) * 64;

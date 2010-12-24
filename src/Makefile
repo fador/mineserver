@@ -16,6 +16,14 @@ ifeq ($(SYSTEM),SunOS)
 DFLAGS += -D__SOLARIS__
 endif
 
+ifeq ($(findstring Ubuntu,$(shell cat /etc/issue)),Ubuntu)
+DEBIAN = 1
+endif
+
+ifeq ($(findstring Debian,$(shell cat /etc/issue)),Debian)
+DEBIAN = 1
+endif
+
 ifeq ($(DEBIAN), 1)
 CXXFLAGS += -DDEBIAN
 endif
