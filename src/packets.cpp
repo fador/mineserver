@@ -529,19 +529,19 @@ int PacketHandler::player_digging(User *user)
   {
     case BLOCK_STATUS_STARTED_DIGGING:
     {
-      (static_cast<Hook4<bool,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("DiggingStarted")))->doAll(user, x, y, z);
+      (static_cast<Hook4<void,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("DiggingStarted")))->doAll(user, x, y, z);
       Mineserver::get()->plugin()->runBlockCallback(block, "onStartedDigging", inv);
       break;
     }
     case BLOCK_STATUS_DIGGING:
     {
-      (static_cast<Hook4<bool,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("Digging")))->doAll(user, x, y, z);
+      (static_cast<Hook4<void,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("Digging")))->doAll(user, x, y, z);
       Mineserver::get()->plugin()->runBlockCallback(block, "onDigging", inv);
       break;
     }
     case BLOCK_STATUS_STOPPED_DIGGING:
     {
-      (static_cast<Hook4<bool,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("DiggingStopped")))->doAll(user, x, y, z);
+      (static_cast<Hook4<void,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("DiggingStopped")))->doAll(user, x, y, z);
       Mineserver::get()->plugin()->runBlockCallback(block, "onStoppedDigging", inv);
       break;
     }
@@ -563,42 +563,42 @@ int PacketHandler::player_digging(User *user)
       status = block;
       if (Mineserver::get()->map()->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
       {
-        (static_cast<Hook4<bool,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBroken")))->doAll(user, x+1, y, z);
+        (static_cast<Hook7<bool,User*,sint32,sint8,sint32, sint32, sint8, sint32>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBreak")))->doAll(user, x+1, y, z, x, y, z);
         inv = Function::invoker_type(user, status, x+1, y, z, BLOCK_SOUTH);
         Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourBroken", inv);
       }
 
       if (Mineserver::get()->map()->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
       {
-        (static_cast<Hook4<bool,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBroken")))->doAll(user, x-1, y, z);
+        (static_cast<Hook7<bool,User*,sint32,sint8,sint32, sint32, sint8, sint32>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBreak")))->doAll(user, x-1, y, z, x, y, z);
         inv = Function::invoker_type(user, status, x-1, y, z, BLOCK_NORTH);
         Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourBroken", inv);
       }
 
       if (Mineserver::get()->map()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
       {
-        (static_cast<Hook4<bool,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBroken")))->doAll(user, x, y+1, z);
+        (static_cast<Hook7<bool,User*,sint32,sint8,sint32, sint32, sint8, sint32>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBreak")))->doAll(user, x, y+1, z, x, y, z);
         inv = Function::invoker_type(user, status, x, y+1, z, BLOCK_TOP);
         Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourBroken", inv);
       }
 
       if (Mineserver::get()->map()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
       {
-        (static_cast<Hook4<bool,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBroken")))->doAll(user, x, y-1, z);
+        (static_cast<Hook7<bool,User*,sint32,sint8,sint32, sint32, sint8, sint32>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBreak")))->doAll(user, x, y-1, z, x, y, z);
         inv = Function::invoker_type(user, status, x, y-1, z, BLOCK_BOTTOM);
         Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourBroken", inv);
       }
 
       if (Mineserver::get()->map()->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
       {
-        (static_cast<Hook4<bool,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBroken")))->doAll(user, x, y, z+1);
+        (static_cast<Hook7<bool,User*,sint32,sint8,sint32, sint32, sint8, sint32>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBreak")))->doAll(user, x, y, z+1, x, y, z);
         inv = Function::invoker_type(user, status, x, y, z+1, BLOCK_WEST);
         Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourBroken", inv);
       }
 
       if (Mineserver::get()->map()->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
       {
-        (static_cast<Hook4<bool,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBroken")))->doAll(user, x, y, z-1);
+        (static_cast<Hook7<bool,User*,sint32,sint8,sint32, sint32, sint8, sint32>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBreak")))->doAll(user, x, y, z-1, x, y, z);
         inv = Function::invoker_type(user, status, x, y, z-1, BLOCK_EAST);
         Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourBroken", inv);
       }
