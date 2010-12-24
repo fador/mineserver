@@ -53,12 +53,22 @@ extern "C" void banlist_shutdown(Mineserver* mineserver)
 
 Banlist::Banlist(Mineserver* mineserver) : m_mineserver(mineserver)
 {
-  (static_cast<Hook3<bool,User*,bool*,std::string*>*>(m_mineserver->plugin()->getHook("Login")))->addCallback(&Banlist::callbackLogin);
+  if (m_mineserver->plugin()->hasHook("LoginPre"))
+  {
+    (static_cast<Hook2<bool,User*,std::string*>*>(m_mineserver->plugin()->getHook("LoginPre")))->addCallback(&Banlist::callbackLoginPre);
+  }
+  else
+  {
+    Mineserver::get()->screen()->log("Banlist: Can't find the LoginPre hook, banlist will not be operational.");
+  }
 }
 
 Banlist::~Banlist()
 {
-  (static_cast<Hook3<bool,User*,bool*,std::string*>*>(m_mineserver->plugin()->getHook("Login")))->remCallback(&Banlist::callbackLogin);
+  if (m_mineserver->plugin()->hasHook("LoginPre"))
+  {
+    (static_cast<Hook2<bool,User*,std::string*>*>(m_mineserver->plugin()->getHook("LoginPre")))->remCallback(&Banlist::callbackLoginPre);
+  }
 }
 
 bool Banlist::getBan(const std::string user)
@@ -102,17 +112,19 @@ void Banlist::setBan(const std::string user, bool banned)
   }
 }
 
-bool Banlist::callbackLogin(User* user, bool* kick, std::string* reason)
+bool Banlist::callbackLoginPre(User* user, std::string* reason)
 {
   Banlist* banlist = static_cast<Banlist*>(Mineserver::get()->plugin()->getPointer("banlist"));
+  Mineserver::get()->screen()->log("Banlist: Checking if user "+user->nick+" is banned");
   if (banlist->getBan(user->nick))
   {
-    *kick = true;
+    Mineserver::get()->screen()->log("Banlist: They are!");
     reason->assign("You've been banned!");
     return false;
   }
   else
   {
+    Mineserver::get()->screen()->log("Banlist: They're not!");
     return true;
   }
 }
