@@ -95,7 +95,7 @@ void Map::checkGenTrees()
 void Map::init()
 {
 #ifdef _DEBUG
-  printf("Map::init()\n");
+  Mineserver::get()->screen()->log("Map::init()");
 #endif
   mapDirectory = Mineserver::get()->conf()->sValue("map_directory");
   if(mapDirectory == "Not found!")
@@ -853,7 +853,11 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
 
   sChunk* chunk = chunks.GetChunk(x,z);
   if(chunk != NULL)
+  {
     return chunk;
+  }
+
+  chunk = new sChunk;
 
   // Generate map file name
 
@@ -863,8 +867,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   int mapposz = z;
   int moduloz = mapposz & 0x3F;
 
-  std::string infile = mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+
-                       base36_encode(mapposx)+"."+base36_encode(mapposz)+".dat";
+  std::string infile = mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+base36_encode(mapposx)+"."+base36_encode(mapposz)+".dat";
 
   struct stat stFileInfo;
   if (stat(infile.c_str(), &stFileInfo) != 0)
@@ -878,8 +881,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
       chunk->lightRegen = false;
 
       //If we generated spawn pos, make sure the position is not underground!
-      if(x == blockToChunk(spawnPos.x()) &&
-         z == blockToChunk(spawnPos.z()))
+      if(x == blockToChunk(spawnPos.x()) && z == blockToChunk(spawnPos.z()))
       {
         uint8 block,meta;
         bool foundAir=false;
@@ -917,12 +919,13 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
 
       }
 
-    return chunks.GetChunk(x,z);
+      return chunks.GetChunk(x,z);
     }
     else
     {
       return NULL;
     }
+
   }
 
   chunk = new sChunk();
@@ -944,8 +947,8 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   if(chunk->x != x || chunk->z != z)
   {
     LOG("Error in loading map (incorrect chunk)");
-  delete chunk->nbt;
-  delete chunk;
+    delete chunk->nbt;
+    delete chunk;
     return NULL;
   }
 
@@ -958,8 +961,8 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   if(blocks == 0 || data == 0 || blocklight == 0 || skylight == 0 || heightmap == 0)
   {
     LOG("Error in loading map (chunk missing data)");
-  delete chunk->nbt;
-  delete chunk;
+    delete chunk->nbt;
+    delete chunk;
     return NULL;
   }
 
