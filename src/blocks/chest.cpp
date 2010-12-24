@@ -187,7 +187,9 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
           {
             destroy = true;
           }
-        } else {
+        }
+        else
+        {
           destroy = true;
         }
         break;
@@ -201,7 +203,9 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
     Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
     this->spawnBlockItem(x,y,z,block);
     // TODO: spawn items in chest
-  } else {
+  }
+  else
+  {
     Mineserver::get()->chat()->sendMsg(user, COLOR_RED + "Can't destroy chests that are not your!", Chat::USER);
   }
 }
@@ -255,6 +259,8 @@ void BlockChest::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y,
 
 void BlockChest::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
+  user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)1  << (sint8)0 << std::string("Chest") << (sint8)36;
+
 }
 
 void BlockChest::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)

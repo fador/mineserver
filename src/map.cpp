@@ -214,7 +214,6 @@ sChunk* Map::getMapData(int x, int z, bool generate)
   if(chunk != NULL || generate == false)
     return chunk;
 
-  chunk->lastused = (int)time(NULL);
   return loadMap(x,z, generate);
 
 }
