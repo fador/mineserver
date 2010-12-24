@@ -204,9 +204,10 @@ void Plugin::init()
    call.reset();
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    call.add("onPlace", Function::from_method<BlockDefault, &BlockDefault::onPlace>(defaultblock));
+   call.add("onReplace", Function::from_method<BlockDefault, &BlockDefault::onReplace>(defaultblock));
    setBlockCallback(BLOCK_WORKBENCH, call);
    setBlockCallback(BLOCK_FURNACE, call);
-   /* TODO: Needs this? BLOCK_BURNING_FURNACE */
+   setBlockCallback(BLOCK_BURNING_FURNACE, call);
   
    /* Chests */
    call.reset();
@@ -214,6 +215,7 @@ void Plugin::init()
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    call.add("onPlace", Function::from_method<BlockChest, &BlockChest::onPlace>(chestblock));
    call.add("onStartedDigging", Function::from_method<BlockChest, &BlockChest::onStartedDigging>(chestblock));
+   call.add("onReplace", Function::from_method<BlockChest, &BlockChest::onReplace>(chestblock));
    setBlockCallback(BLOCK_CHEST, call);
 
    /* Doors */

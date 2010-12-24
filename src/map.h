@@ -48,17 +48,34 @@ struct sTree
 
 };
 
-/*struct sChunk
+//Basic chest data struct
+struct chestData
 {
-  uint8 *blocks;
-  uint8 *data;
-  uint8 *blocklight;
-  uint8 *skylight;
-  uint8 *heightmap;
   sint32 x;
+  sint32 y;
   sint32 z;
-  NBT_Value *nbt;
-};*/
+  Item items[28];
+};
+
+struct signData
+{
+  sint32 x;
+  sint32 y;
+  sint32 z;
+  std::string text[4];
+};
+
+struct furnaceData
+{
+  sint32 x;
+  sint32 y;
+  sint32 z;
+  Item items[3];
+  sint16 burnTime;
+  sint16 cookTime;
+};
+
+
 
 struct spawnedItem
 {

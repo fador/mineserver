@@ -88,6 +88,7 @@ enum
   PACKET_MAP_CHUNK                 = 0x33,
   PACKET_MULTI_BLOCK_CHANGE        = 0x34,
   PACKET_BLOCK_CHANGE              = 0x35,
+  PACKET_OPEN_WINDOW               = 0x64,
   //PACKET_COMPLEX_ENTITIES          = 0x3b,
   PACKET_KICK                      = 0xff,
 
