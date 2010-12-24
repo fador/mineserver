@@ -30,6 +30,7 @@
     <ClCompile Include="..\src\constants.cpp" />
     <ClCompile Include="..\src\furnace.cpp" />
     <ClCompile Include="..\src\furnaceManager.cpp" />
+    <ClCompile Include="..\src\inventory.cpp" />
     <ClCompile Include="..\src\logger.cpp" />
     <ClCompile Include="..\src\map.cpp" />
     <ClCompile Include="..\src\mineserver.cpp" />
@@ -66,6 +67,7 @@
     <ClInclude Include="..\src\constants.h" />
     <ClInclude Include="..\src\furnace.h" />
     <ClInclude Include="..\src\furnaceManager.h" />
+    <ClInclude Include="..\src\inventory.h" />
     <ClInclude Include="..\src\logger.h" />
     <ClInclude Include="..\src\map.h" />
     <ClInclude Include="..\src\mineserver.h" />

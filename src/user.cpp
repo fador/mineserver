@@ -524,7 +524,7 @@ bool User::updatePos(double x, double y, double z, double stance)
   if(y==-999)
   {
     //attachedTo
-    //ToDo: Get pos from minecart
+    //ToDo: Get pos from minecart/player/boat
     return false;
   }
 
