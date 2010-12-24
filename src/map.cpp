@@ -1225,6 +1225,11 @@ void Map::sendToUser(User* user, int x, int z)
 
           bool done = false;
 
+          if((**iter)["BurnTime"] == NULL || (**iter)["CookTime"] == NULL)
+          {
+            continue;
+          }
+
           furnaceData *newFurnace = new furnaceData;
           newFurnace->x = entityX;
           newFurnace->y = entityY;

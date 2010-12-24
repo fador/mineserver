@@ -347,6 +347,7 @@ int Mineserver::run(int argc, char *argv[])
         User::all()[i]->popMap();
 
         //Minecart hacks!!
+        /*
         if(User::all()[i]->attachedTo)
         {
           Packet pkt;
@@ -354,6 +355,7 @@ int Mineserver::run(int argc, char *argv[])
           //pkt << PACKET_ENTITY_RELATIVE_MOVE << (sint32)User::all()[i]->attachedTo <<  (sint8)100       << (sint8)0 << (sint8)0;
           User::all()[i]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
         }
+        */
       }
 
       map()->mapTime+=20;
