@@ -61,13 +61,13 @@ struct Item
   }
 };
 
-struct Inventory
+struct PlayerInventory
 {
   Item main[36];
   Item equipped[4];
   Item crafting[4];
 
-  Inventory()
+  PlayerInventory()
   {
   }
 };
@@ -98,7 +98,7 @@ public:
   std::string temp_nick;
   position pos;
   vec curChunk;
-  Inventory inv;
+  PlayerInventory inv;
   sint16 curItem;
   Item inventoryHolding;
 

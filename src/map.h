@@ -62,7 +62,10 @@ struct signData
   sint32 x;
   sint32 y;
   sint32 z;
-  std::string text[4];
+  std::string text1;
+  std::string text2;
+  std::string text3;
+  std::string text4;
 };
 
 struct furnaceData

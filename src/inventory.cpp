@@ -47,3 +47,13 @@
 #include "map.h"
 #include "user.h"
 #include "mineserver.h"
+
+
+#include "inventory.h"
+
+
+bool Inventory::moveItem(User *)
+{
+
+  return true;
+}

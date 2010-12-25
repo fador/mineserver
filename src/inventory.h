@@ -29,6 +29,14 @@
 #define _INVENTORY_H_
 
 
+struct openInventory
+{
+  sint32 x;
+  sint32 y;
+  sint32 z;
+  sint32 UID;
+};
+
 class Inventory
 {
 public:
@@ -39,9 +47,15 @@ public:
 
   ~Inventory()
   {
-
   }
 
+  //Open chest/workbench/furnace inventories
+  std::vector<openInventory *> openWorkbenches;
+  std::vector<openInventory *> openChests;
+  std::vector<openInventory *> openFurnaces;
+
+
+  bool moveItem(User *);
 
 };
 

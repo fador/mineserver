@@ -451,14 +451,14 @@ bool User::saveData()
       itemslot = 100;
       slotid   = 0;
     }
-    if(slots[(uint8)slotid].count)
+    if(slots[(uint8)slotid].count && slots[(uint8)slotid].type != 0 && slots[(uint8)slotid].type != -1)
     {
-    NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
-    val->Insert("Count", new NBT_Value((sint8)slots[(uint8)slotid].count));
-    val->Insert("Slot", new NBT_Value((sint8)itemslot));
-    val->Insert("Damage", new NBT_Value((sint16)slots[(uint8)slotid].health));
-    val->Insert("id", new NBT_Value((sint16)slots[(uint8)slotid].type));
-    nbtInv->GetList()->push_back(val);
+      NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+      val->Insert("Count", new NBT_Value((sint8)slots[(uint8)slotid].count));
+      val->Insert("Slot", new NBT_Value((sint8)itemslot));
+      val->Insert("Damage", new NBT_Value((sint16)slots[(uint8)slotid].health));
+      val->Insert("id", new NBT_Value((sint16)slots[(uint8)slotid].type));
+      nbtInv->GetList()->push_back(val);
     }
 
     slotid++;

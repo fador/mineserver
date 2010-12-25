@@ -104,27 +104,54 @@ void PacketHandler::init()
 
 int PacketHandler::change_sign(User *user)
 {
+  if(!user->buffer.haveData(16))
+    return PACKET_NEED_MORE_DATA;
   sint32 x,z;
   sint16 y;
-  std::string strings[4];
+  std::string strings1,strings2,strings3,strings4;
 
   user->buffer >> x >> y >> z;
 
-  for(int i=0;i<4;i++)
-  {
-    user->buffer >> strings[i];
-  }
+  if(!user->buffer.haveData(8))
+    return PACKET_NEED_MORE_DATA;
+  user->buffer >> strings1;
+  if(!user->buffer.haveData(6))
+    return PACKET_NEED_MORE_DATA;
+  user->buffer >> strings2;
+  if(!user->buffer.haveData(4))
+    return PACKET_NEED_MORE_DATA;
+  user->buffer >> strings3;
+  if(!user->buffer.haveData(2))
+    return PACKET_NEED_MORE_DATA;
+  user->buffer >> strings4;
+
   //ToDo: Save signs!
   signData *newSign = new signData;
   newSign->x = x;
   newSign->y = y;
   newSign->z = z;
-  newSign->text[0] = strings[0];
-  newSign->text[1] = strings[1];
-  newSign->text[2] = strings[2];
-  newSign->text[3] = strings[3];
+  newSign->text1 = strings1;
+  if(!user->buffer)
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+  newSign->text2 = strings2;
+  if(!user->buffer)
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+  newSign->text3 = strings3;
+  if(!user->buffer)
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+  newSign->text4 = strings4;
+  if(!user->buffer)
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
 
-  sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(x,z);
+  sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(blockToChunk(x),blockToChunk(z));
 
   if(chunk != NULL)
   {
@@ -146,22 +173,23 @@ int PacketHandler::change_sign(User *user)
     //Send sign packet to everyone
     Packet pkt;
     pkt << (sint8)PACKET_SIGN << x << y << z;
-    pkt << strings[0] << strings[1] << strings[2] << strings[3];
+    pkt << strings1 << strings2 << strings3 << strings4;
     user->sendAll((uint8 *)pkt.getWrite(), pkt.getWriteLen());
   }
 
-  Mineserver::get()->screen()->log(LOG_GENERAL,"Sign: " + strings[0] + strings[1]+ strings[2]+ strings[3]);
+  Mineserver::get()->screen()->log(LOG_GENERAL,"Sign: " + strings1 + strings2+ strings3+ strings4);
   
   //No need to do anything
   user->buffer.removePacket();
   return PACKET_OK;
 }
 
+
 int PacketHandler::inventory_close(User *user)
 {
-  sint8 a;
+  sint8 windowID;
 
-  user->buffer >> a;
+  user->buffer >> windowID;
 
   //ToDo: check user->inventoryHolding for any items and spawn if it exist
 

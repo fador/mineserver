@@ -1031,10 +1031,10 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
         newSign->x = entityX;
         newSign->y = entityY;
         newSign->z = entityZ;
-        newSign->text[0]=*(**iter)["Text1"]->GetString();
-        newSign->text[1]=*(**iter)["Text2"]->GetString();
-        newSign->text[2]=*(**iter)["Text3"]->GetString();
-        newSign->text[3]=*(**iter)["Text4"]->GetString();
+        newSign->text1=*(**iter)["Text1"]->GetString();
+        newSign->text2=*(**iter)["Text2"]->GetString();
+        newSign->text3=*(**iter)["Text3"]->GetString();
+        newSign->text4=*(**iter)["Text4"]->GetString();
 
         chunk->signs.push_back(newSign);
       }
@@ -1220,10 +1220,10 @@ bool Map::saveMap(int x, int z)
       val->Insert("x", new NBT_Value((sint32)chunk->signs[i]->x));
       val->Insert("y", new NBT_Value((sint32)chunk->signs[i]->y));
       val->Insert("z", new NBT_Value((sint32)chunk->signs[i]->z));
-      val->Insert("Text1", new NBT_Value(chunk->signs[i]->text[0]));
-      val->Insert("Text2", new NBT_Value(chunk->signs[i]->text[1]));
-      val->Insert("Text3", new NBT_Value(chunk->signs[i]->text[2]));
-      val->Insert("Text4", new NBT_Value(chunk->signs[i]->text[3]));
+      val->Insert("Text1", new NBT_Value(chunk->signs[i]->text1));
+      val->Insert("Text2", new NBT_Value(chunk->signs[i]->text2));
+      val->Insert("Text3", new NBT_Value(chunk->signs[i]->text3));
+      val->Insert("Text4", new NBT_Value(chunk->signs[i]->text4));
 
       entityList->GetList()->push_back(val);
   }
@@ -1323,7 +1323,7 @@ void Map::sendToUser(User* user, int x, int z)
   for(uint32 i = 0; i < chunk->signs.size(); i++)
   {
     user->buffer << (sint8)PACKET_SIGN << chunk->signs[i]->x << (sint16)chunk->signs[i]->y << chunk->signs[i]->z;
-    user->buffer << chunk->signs[i]->text[0] << chunk->signs[i]->text[1] << chunk->signs[i]->text[2] << chunk->signs[i]->text[3];
+    user->buffer << chunk->signs[i]->text1 << chunk->signs[i]->text2 << chunk->signs[i]->text3 << chunk->signs[i]->text4;
   } 
 
 

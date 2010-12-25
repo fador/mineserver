@@ -432,6 +432,7 @@ public:
 
   int inventory_change(User *user);
   int inventory_close(User *user);
+  int destroy_entity(User *user);
 };
 
 #endif
