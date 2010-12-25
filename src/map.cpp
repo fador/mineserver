@@ -994,157 +994,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   // Not changed
   chunk->changed    = false;
   chunk->lightRegen = false;
-
-  return chunk;
-}
-
-bool Map::saveMap(int x, int z)
-{
-#ifdef _DEBUG2
-  printf("saveMap(x=%d, z=%d)\n", x, z);
-#endif
-
-  sChunk*  chunk = chunks.GetChunk(x, z);
-
-  if(!chunk->changed)
-    return true;
-
-  // Recalculate light maps
-  if(chunk->lightRegen)
-  {
-    generateLight(x, z, chunk);
-  }
-
-  // Generate map file name
-
-  int mapposx = x;
-  int modulox = mapposx & 0x3F;
-
-  int mapposz = z;
-  int moduloz = mapposz & 0x3F;
-
-  std::string outfile = mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+
-                        base36_encode(mapposx)+"."+base36_encode(mapposz)+".dat";
-
-  // Try to create parent directories if necessary
-  struct stat stFileInfo;
-  if(stat(outfile.c_str(), &stFileInfo) != 0)
-  {
-    std::string outdir_a = mapDirectory+"/"+base36_encode(modulox);
-    std::string outdir_b = mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz);
-
-    if(stat(outdir_b.c_str(), &stFileInfo) != 0)
-    {
-      if(stat(outdir_a.c_str(), &stFileInfo) != 0)
-      {
-#ifdef WIN32
-        if(_mkdir(outdir_a.c_str()) == -1)
-#else
-        if(mkdir(outdir_a.c_str(), 0755) == -1)
-#endif
-
-          return false;
-      }
-
-#ifdef WIN32
-      if(_mkdir(outdir_b.c_str()) == -1)
-#else
-      if(mkdir(outdir_b.c_str(), 0755) == -1)
-#endif
-
-        return false;
-    }
-  }
-
-  chunk->nbt->SaveToFile(outfile);
-
-  // Set "not changed"
-  chunk->changed    = false;
-  chunk->lightRegen = false;
-
-  return true;
-}
-
-bool Map::releaseMap(int x, int z)
-{
-  // save first
-  saveMap(x, z);
-
-  sChunk* chunk = chunks.GetChunk(x,z);
-  if(chunk == NULL)
-    return false;
-
-  //Erase sign data
-  for(uint32 i = 0; i < chunk->signs.size(); i++)
-  {
-    delete chunk->signs[i];
-  }
-
-  //Erase chest data
-  for(uint32 i = 0; i < chunk->chests.size(); i++)
-  {
-    delete chunk->chests[i];
-  }
-
-  //Erase furnace data
-  for(uint32 i = 0; i < chunk->furnaces.size(); i++)
-  {
-    delete chunk->furnaces[i];
-  }
-
-  chunks.UnlinkChunk(x, z);
-  delete chunk->nbt;
-  delete chunk;
-  
-  return true;
-
-}
-
-// Send chunk to user
-void Map::sendToUser(User* user, int x, int z)
-{
-#ifdef _DEBUG2
-  printf("sendToUser(x=%d, z=%d)\n", x, z);
-#endif
-
-//  uint32 mapId;
-//  Map::posToId(x, z, &mapId);
-  sChunk* chunk = loadMap(x, z);
-  if(chunk == NULL)
-    return;
-
-  uint8* data4   = new uint8[18+81920];
-  uint8* mapdata = new uint8[81920];
-  sint32 mapposx    = x;
-  sint32 mapposz    = z;
-
-  //Regenerate lighting if needed
-  if(chunk->lightRegen)
-  {
-    generateLight(x, z, chunk);
-    chunk->lightRegen = false;
-  }
-  // Pre chunk
-  user->buffer << (sint8)PACKET_PRE_CHUNK << mapposx << mapposz << (sint8)1;
-
-  // Chunk
-  user->buffer << (sint8)PACKET_MAP_CHUNK << (sint32)(mapposx * 16) << (sint16)0 << (sint32)(mapposz * 16)
-    << (sint8)15 << (sint8)127 << (sint8)15;
-
-  memcpy(&mapdata[0], chunk->blocks, 32768);
-  memcpy(&mapdata[32768], chunk->data, 16384);
-  memcpy(&mapdata[32768+16384], chunk->blocklight, 16384);
-  memcpy(&mapdata[32768+16384+16384], chunk->skylight, 16384);
-
-  uLongf written = 81920;
-  Bytef* buffer = new Bytef[written];
-
-  // Compress data with zlib deflate
-  compress(buffer, &written, &mapdata[0], 81920);
-
-  user->buffer << (sint32)written;
-  user->buffer.addToWrite(buffer, written);
-
+    
   //Get list of chests,furnaces etc on the chunk
   NBT_Value* entityList = (*(*chunk->nbt)["Level"])["TileEntities"];
 
@@ -1177,9 +1027,6 @@ void Map::sendToUser(User* user, int x, int z)
 
       if((*id=="Sign"))
       {
-        user->buffer << (sint8)PACKET_SIGN << entityX << (sint16)entityY << entityZ;
-        user->buffer << *(**iter)["Text1"]->GetString() << *(**iter)["Text2"]->GetString() << *(**iter)["Text3"]->GetString() << *(**iter)["Text4"]->GetString();
-
         signData *newSign = new signData;
         newSign->x = entityX;
         newSign->y = entityY;
@@ -1289,93 +1136,189 @@ void Map::sendToUser(User* user, int x, int z)
     }
   }
 
-    /*
-    uint8* compressedData = new uint8[ALLOCATE_NBTFILE];
+  return chunk;
+}
 
-    for( ; iter != end ; iter++)
-    {
-      std::vector<uint8> buffer;
-      NBT_Value* idVal = (**iter)["id"];
-      if(idVal == NULL)
-        continue;
-      std::string* id = idVal->GetString();
-      if(id && (*id=="Chest" || *id=="Furnace" || *id=="Sign"))
-      {
-        if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
-          (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
-          (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
-        {
-          continue;
-        }
+bool Map::saveMap(int x, int z)
+{
+#ifdef _DEBUG2
+  printf("saveMap(x=%d, z=%d)\n", x, z);
+#endif
 
+  sChunk*  chunk = chunks.GetChunk(x, z);
 
-          if(*id == "Chest")
-          {
-            NBT_Value* lockData = (**iter)["Lockdata"];
-            if(lockData != NULL)
-            {
-              if((*lockData)["locked"] != NULL)
-              {
-                sint8 locked = *(*lockData)["locked"];
-                std::string chestowner = *(*lockData)["player"]->GetString();
-                // If locked
-                if (locked == 1)
-                {
-                  // Check permission to access
-                  if(!(chestowner == user->nick || IS_ADMIN(user->permissions)))
-                  {
-                    Mineserver::get()->chat()->sendMsg(user, MC_COLOR_BLUE + "Chest is locked.", Chat::USER);
-                    continue;
-                  }
-                }
-              }
-            }
-          }
+  if(!chunk->changed)
+    return true;
 
-          buffer.push_back(NBT_Value::TAG_COMPOUND);
-          buffer.push_back(0);
-          buffer.push_back(0);
-          (*iter)->Write(buffer);
-          buffer.push_back(0);
-          buffer.push_back(0);
-
-
-          z_stream zstream2;
-          zstream2.zalloc = Z_NULL;
-          zstream2.zfree = Z_NULL;
-          zstream2.opaque = Z_NULL;
-          zstream2.next_out=compressedData;
-          zstream2.next_in=&buffer[0];
-          zstream2.avail_in=buffer.size();
-          zstream2.avail_out=ALLOCATE_NBTFILE;
-          zstream2.total_out=0;
-          zstream2.total_in=0;
-          deflateInit2(&zstream2, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15+MAX_WBITS, 8,
-                     Z_DEFAULT_STRATEGY);
-
-          //Gzip the data
-          if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
-          {
-            Mineserver::get()->screen()->log("Error in deflate: " + dtos(state));
-          }
-
-          sint32 entityX = *(**iter)["x"];
-          sint32 entityY = *(**iter)["y"];
-          sint32 entityZ = *(**iter)["z"];
-
-          
-          // !!!! Complex Entity packet! !!!!
-          user->buffer << (sint8)PACKET_COMPLEX_ENTITIES
-            << (sint32)entityX << (sint16)entityY << (sint32)entityZ << (sint16)zstream2.total_out;
-          user->buffer.addToWrite(compressedData, zstream2.total_out);
-          
-          deflateEnd(&zstream2);
-        }
-    }
-    delete [] compressedData;
-    
+  // Recalculate light maps
+  if(chunk->lightRegen)
+  {
+    generateLight(x, z, chunk);
   }
-  */
+
+  // Generate map file name
+
+  int mapposx = x;
+  int modulox = mapposx & 0x3F;
+
+  int mapposz = z;
+  int moduloz = mapposz & 0x3F;
+
+  std::string outfile = mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz)+"/c."+
+                        base36_encode(mapposx)+"."+base36_encode(mapposz)+".dat";
+
+  // Try to create parent directories if necessary
+  struct stat stFileInfo;
+  if(stat(outfile.c_str(), &stFileInfo) != 0)
+  {
+    std::string outdir_a = mapDirectory+"/"+base36_encode(modulox);
+    std::string outdir_b = mapDirectory+"/"+base36_encode(modulox)+"/"+base36_encode(moduloz);
+
+    if(stat(outdir_b.c_str(), &stFileInfo) != 0)
+    {
+      if(stat(outdir_a.c_str(), &stFileInfo) != 0)
+      {
+#ifdef WIN32
+        if(_mkdir(outdir_a.c_str()) == -1)
+#else
+        if(mkdir(outdir_a.c_str(), 0755) == -1)
+#endif
+
+          return false;
+      }
+
+#ifdef WIN32
+      if(_mkdir(outdir_b.c_str()) == -1)
+#else
+      if(mkdir(outdir_b.c_str(), 0755) == -1)
+#endif
+
+        return false;
+    }
+  }
+
+
+  NBT_Value* entityList = (*(*chunk->nbt)["Level"])["TileEntities"];
+
+  if(!entityList)
+  {
+    entityList = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
+    chunk->nbt->Insert("TileEntities", entityList);
+  }
+
+  for(uint32 i = 0; i < chunk->signs.size(); i++)
+  {
+      NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+      val->Insert("id", new NBT_Value(std::string("Sign")));
+      val->Insert("x", new NBT_Value((sint32)chunk->signs[i]->x));
+      val->Insert("y", new NBT_Value((sint32)chunk->signs[i]->y));
+      val->Insert("z", new NBT_Value((sint32)chunk->signs[i]->z));
+      val->Insert("Text1", new NBT_Value(chunk->signs[i]->text[0]));
+      val->Insert("Text2", new NBT_Value(chunk->signs[i]->text[1]));
+      val->Insert("Text3", new NBT_Value(chunk->signs[i]->text[2]));
+      val->Insert("Text4", new NBT_Value(chunk->signs[i]->text[3]));
+
+      entityList->GetList()->push_back(val);
+  }
+
+
+
+  chunk->nbt->SaveToFile(outfile);
+
+  // Set "not changed"
+  chunk->changed    = false;
+  chunk->lightRegen = false;
+
+  return true;
+}
+
+bool Map::releaseMap(int x, int z)
+{
+  // save first
+  saveMap(x, z);
+
+  sChunk* chunk = chunks.GetChunk(x,z);
+  if(chunk == NULL)
+    return false;
+
+  //Erase sign data
+  for(uint32 i = 0; i < chunk->signs.size(); i++)
+  {
+    delete chunk->signs[i];
+  }
+
+  //Erase chest data
+  for(uint32 i = 0; i < chunk->chests.size(); i++)
+  {
+    delete chunk->chests[i];
+  }
+
+  //Erase furnace data
+  for(uint32 i = 0; i < chunk->furnaces.size(); i++)
+  {
+    delete chunk->furnaces[i];
+  }
+
+  chunks.UnlinkChunk(x, z);
+  delete chunk->nbt;
+  delete chunk;
+  
+  return true;
+
+}
+
+// Send chunk to user
+void Map::sendToUser(User* user, int x, int z)
+{
+#ifdef _DEBUG2
+  printf("sendToUser(x=%d, z=%d)\n", x, z);
+#endif
+
+//  uint32 mapId;
+//  Map::posToId(x, z, &mapId);
+  sChunk* chunk = loadMap(x, z);
+  if(chunk == NULL)
+    return;
+
+  uint8* data4   = new uint8[18+81920];
+  uint8* mapdata = new uint8[81920];
+  sint32 mapposx    = x;
+  sint32 mapposz    = z;
+
+  //Regenerate lighting if needed
+  if(chunk->lightRegen)
+  {
+    generateLight(x, z, chunk);
+    chunk->lightRegen = false;
+  }
+  // Pre chunk
+  user->buffer << (sint8)PACKET_PRE_CHUNK << mapposx << mapposz << (sint8)1;
+
+  // Chunk
+  user->buffer << (sint8)PACKET_MAP_CHUNK << (sint32)(mapposx * 16) << (sint16)0 << (sint32)(mapposz * 16)
+    << (sint8)15 << (sint8)127 << (sint8)15;
+
+  memcpy(&mapdata[0], chunk->blocks, 32768);
+  memcpy(&mapdata[32768], chunk->data, 16384);
+  memcpy(&mapdata[32768+16384], chunk->blocklight, 16384);
+  memcpy(&mapdata[32768+16384+16384], chunk->skylight, 16384);
+
+  uLongf written = 81920;
+  Bytef* buffer = new Bytef[written];
+
+  // Compress data with zlib deflate
+  compress(buffer, &written, &mapdata[0], 81920);
+
+  user->buffer << (sint32)written;
+  user->buffer.addToWrite(buffer, written);
+
+  for(uint32 i = 0; i < chunk->signs.size(); i++)
+  {
+    user->buffer << (sint8)PACKET_SIGN << chunk->signs[i]->x << (sint16)chunk->signs[i]->y << chunk->signs[i]->z;
+    user->buffer << chunk->signs[i]->text[0] << chunk->signs[i]->text[1] << chunk->signs[i]->text[2] << chunk->signs[i]->text[3];
+  } 
+
+
   delete [] buffer;
 
   delete[] data4;

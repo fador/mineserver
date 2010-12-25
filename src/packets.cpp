@@ -135,6 +135,7 @@ int PacketHandler::change_sign(User *user)
          chunk->signs[i]->y == y && 
          chunk->signs[i]->z == z)
       {
+        //Erase existing data
         delete chunk->signs[i];
         chunk->signs.erase(chunk->signs.begin()+i);
         break;
