@@ -1133,7 +1133,14 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
           chunk->furnaces.push_back(newFurnace);
         }
       }
+
+      //Delete list item
+      delete (*iter);
+      (*iter) = NULL;
     }
+
+    //Clear the list
+    entityList->GetList()->clear();
   }
 
   return chunk;
@@ -1312,6 +1319,7 @@ void Map::sendToUser(User* user, int x, int z)
   user->buffer << (sint32)written;
   user->buffer.addToWrite(buffer, written);
 
+  //Push sign data to player
   for(uint32 i = 0; i < chunk->signs.size(); i++)
   {
     user->buffer << (sint8)PACKET_SIGN << chunk->signs[i]->x << (sint16)chunk->signs[i]->y << chunk->signs[i]->z;
