@@ -1213,21 +1213,77 @@ bool Map::saveMap(int x, int z)
     chunk->nbt->Insert("TileEntities", entityList);
   }
 
+  //Save signs
   for(uint32 i = 0; i < chunk->signs.size(); i++)
   {
-      NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
-      val->Insert("id", new NBT_Value(std::string("Sign")));
-      val->Insert("x", new NBT_Value((sint32)chunk->signs[i]->x));
-      val->Insert("y", new NBT_Value((sint32)chunk->signs[i]->y));
-      val->Insert("z", new NBT_Value((sint32)chunk->signs[i]->z));
-      val->Insert("Text1", new NBT_Value(chunk->signs[i]->text1));
-      val->Insert("Text2", new NBT_Value(chunk->signs[i]->text2));
-      val->Insert("Text3", new NBT_Value(chunk->signs[i]->text3));
-      val->Insert("Text4", new NBT_Value(chunk->signs[i]->text4));
+    NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+    val->Insert("id", new NBT_Value(std::string("Sign")));
+    val->Insert("x", new NBT_Value((sint32)chunk->signs[i]->x));
+    val->Insert("y", new NBT_Value((sint32)chunk->signs[i]->y));
+    val->Insert("z", new NBT_Value((sint32)chunk->signs[i]->z));
+    val->Insert("Text1", new NBT_Value(chunk->signs[i]->text1));
+    val->Insert("Text2", new NBT_Value(chunk->signs[i]->text2));
+    val->Insert("Text3", new NBT_Value(chunk->signs[i]->text3));
+    val->Insert("Text4", new NBT_Value(chunk->signs[i]->text4));
 
-      entityList->GetList()->push_back(val);
+    entityList->GetList()->push_back(val);
   }
 
+  //Save chests
+  for(uint32 i = 0; i < chunk->chests.size(); i++)
+  {
+    NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+    val->Insert("id", new NBT_Value(std::string("Chest")));
+    val->Insert("x", new NBT_Value((sint32)chunk->chests[i]->x));
+    val->Insert("y", new NBT_Value((sint32)chunk->chests[i]->y));
+    val->Insert("z", new NBT_Value((sint32)chunk->chests[i]->z));
+    NBT_Value* nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
+
+    for(uint32 slot = 0; slot < 28; slot++)
+    {
+      if(chunk->chests[i]->items[slot].count && chunk->chests[i]->items[slot].type != 0 && chunk->chests[i]->items[slot].type != -1)
+      {
+        NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+        val->Insert("Count", new NBT_Value((sint8)chunk->chests[i]->items[slot].count));
+        val->Insert("Slot", new NBT_Value((sint8)slot));
+        val->Insert("Damage", new NBT_Value((sint16)chunk->chests[i]->items[slot].health));
+        val->Insert("id", new NBT_Value((sint16)chunk->chests[i]->items[slot].type));
+        nbtInv->GetList()->push_back(val);
+      }
+    }
+    val->Insert("Items", nbtInv);
+
+    entityList->GetList()->push_back(val);
+  }
+
+  //Save furnaces
+  for(uint32 i = 0; i < chunk->furnaces.size(); i++)
+  {
+    NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+    val->Insert("id", new NBT_Value(std::string("Furnace")));
+    val->Insert("x", new NBT_Value((sint32)chunk->furnaces[i]->x));
+    val->Insert("y", new NBT_Value((sint32)chunk->furnaces[i]->y));
+    val->Insert("z", new NBT_Value((sint32)chunk->furnaces[i]->z));
+    val->Insert("BurnTime", new NBT_Value((sint16)chunk->furnaces[i]->burnTime));
+    val->Insert("CookTime", new NBT_Value((sint16)chunk->furnaces[i]->cookTime));
+    NBT_Value* nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
+
+    for(uint32 slot = 0; slot < 3; slot++)
+    {
+      if(chunk->furnaces[i]->items[slot].count && chunk->furnaces[i]->items[slot].type != 0 && chunk->furnaces[i]->items[slot].type != -1)
+      {
+        NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+        val->Insert("Count", new NBT_Value((sint8)chunk->furnaces[i]->items[slot].count));
+        val->Insert("Slot", new NBT_Value((sint8)slot));
+        val->Insert("Damage", new NBT_Value((sint16)chunk->furnaces[i]->items[slot].health));
+        val->Insert("id", new NBT_Value((sint16)chunk->furnaces[i]->items[slot].type));
+        nbtInv->GetList()->push_back(val);
+      }
+    }
+    val->Insert("Items", nbtInv);
+
+    entityList->GetList()->push_back(val);
+  }
 
 
   chunk->nbt->SaveToFile(outfile);
