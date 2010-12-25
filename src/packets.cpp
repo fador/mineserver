@@ -131,25 +131,9 @@ int PacketHandler::change_sign(User *user)
   newSign->y = y;
   newSign->z = z;
   newSign->text1 = strings1;
-  if(!user->buffer)
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
   newSign->text2 = strings2;
-  if(!user->buffer)
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
   newSign->text3 = strings3;
-  if(!user->buffer)
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
   newSign->text4 = strings4;
-  if(!user->buffer)
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
 
   sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(blockToChunk(x),blockToChunk(z));
 

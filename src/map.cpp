@@ -996,7 +996,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   chunk->lightRegen = false;
     
   //Get list of chests,furnaces etc on the chunk
-  NBT_Value* entityList = (*(*chunk->nbt)["Level"])["TileEntities"];
+  NBT_Value* entityList = level["TileEntities"];
 
   //Verify the type
   if(entityList && entityList->GetType() == NBT_Value::TAG_LIST && entityList->GetListType() == NBT_Value::TAG_COMPOUND)
@@ -1049,8 +1049,8 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
             continue;
           }
 
-          std::vector<NBT_Value*>* entities = entityList->GetList();
-          std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
+          std::vector<NBT_Value*>* entities2 = chestItems->GetList();
+          std::vector<NBT_Value*>::iterator iter2 = entities2->begin(), end2 = entities2->end();
 
           bool done = false;
 
@@ -1064,19 +1064,19 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
             newChest->items[i].type = -1;
           }
 
-          for( ; iter != end; iter++ )
+          for( ; iter2 != end2; iter2++ )
           {
-            if((**iter)["Count"] == NULL || (**iter)["Slot"] == NULL || (**iter)["Damage"] == NULL || (**iter)["id"] == NULL ||
-               (**iter)["Count"]->GetType() != NBT_Value::TAG_INT ||
-               (**iter)["Slot"]->GetType() != NBT_Value::TAG_INT ||
-               (**iter)["Damage"]->GetType() != NBT_Value::TAG_INT ||
-               (**iter)["id"]->GetType() != NBT_Value::TAG_INT)
+            if((**iter2)["Count"] == NULL || (**iter2)["Slot"] == NULL || (**iter2)["Damage"] == NULL || (**iter2)["id"] == NULL ||
+               (**iter2)["Count"]->GetType() != NBT_Value::TAG_INT ||
+               (**iter2)["Slot"]->GetType() != NBT_Value::TAG_INT ||
+               (**iter2)["Damage"]->GetType() != NBT_Value::TAG_INT ||
+               (**iter2)["id"]->GetType() != NBT_Value::TAG_INT)
             {
               continue;
             }
-            newChest->items[(sint8)*(**iter)["Slot"]].count  = (sint8)*(**iter)["Count"];
-            newChest->items[(sint8)*(**iter)["Slot"]].health = (sint16)*(**iter)["Damage"];
-            newChest->items[(sint8)*(**iter)["Slot"]].type   = (sint16)*(**iter)["id"];
+            newChest->items[(sint8)*(**iter2)["Slot"]].count  = (sint8)*(**iter2)["Count"];
+            newChest->items[(sint8)*(**iter2)["Slot"]].health = (sint16)*(**iter2)["Damage"];
+            newChest->items[(sint8)*(**iter2)["Slot"]].type   = (sint16)*(**iter2)["id"];
           }
 
           chunk->chests.push_back(newChest);
@@ -1093,12 +1093,12 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
             continue;
           }
 
-          std::vector<NBT_Value*>* entities = entityList->GetList();
-          std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
+          std::vector<NBT_Value*>* entities2 = chestItems->GetList();
+          std::vector<NBT_Value*>::iterator iter2 = entities2->begin(), end2 = entities2->end();
 
           bool done = false;
 
-          if((**iter)["BurnTime"] == NULL || (**iter)["CookTime"] == NULL)
+          if((**iter2)["BurnTime"] == NULL || (**iter2)["CookTime"] == NULL)
           {
             continue;
           }
@@ -1107,8 +1107,8 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
           newFurnace->x = entityX;
           newFurnace->y = entityY;
           newFurnace->z = entityZ;
-          newFurnace->burnTime = (sint16)*(**iter)["BurnTime"];
-          newFurnace->cookTime = (sint16)*(**iter)["CookTime"];
+          newFurnace->burnTime = (sint16)*(**iter2)["BurnTime"];
+          newFurnace->cookTime = (sint16)*(**iter2)["CookTime"];
 
           for(uint32 i = 0; i < 3; i ++)
           {
@@ -1117,20 +1117,20 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
 
           for( ; iter != end; iter++ )
           {
-            if((**iter)["Count"] == NULL || (**iter)["Slot"] == NULL || (**iter)["Damage"] == NULL || (**iter)["id"] == NULL ||
-               (**iter)["Count"]->GetType() != NBT_Value::TAG_INT ||
-               (**iter)["Slot"]->GetType() != NBT_Value::TAG_INT ||
-               (**iter)["Damage"]->GetType() != NBT_Value::TAG_INT ||
-               (**iter)["id"]->GetType() != NBT_Value::TAG_INT)
+            if((**iter2)["Count"] == NULL || (**iter)["Slot"] == NULL || (**iter)["Damage"] == NULL || (**iter)["id"] == NULL ||
+               (**iter2)["Count"]->GetType() != NBT_Value::TAG_INT ||
+               (**iter2)["Slot"]->GetType() != NBT_Value::TAG_INT ||
+               (**iter2)["Damage"]->GetType() != NBT_Value::TAG_INT ||
+               (**iter2)["id"]->GetType() != NBT_Value::TAG_INT)
             {
               continue;
             }
-            newFurnace->items[(sint8)*(**iter)["Slot"]].count  = (sint8)*(**iter)["Count"];
-            newFurnace->items[(sint8)*(**iter)["Slot"]].health = (sint16)*(**iter)["Damage"];
-            newFurnace->items[(sint8)*(**iter)["Slot"]].type   = (sint16)*(**iter)["id"];
+            newFurnace->items[(sint8)*(**iter2)["Slot"]].count  = (sint8)*(**iter2)["Count"];
+            newFurnace->items[(sint8)*(**iter2)["Slot"]].health = (sint16)*(**iter2)["Damage"];
+            newFurnace->items[(sint8)*(**iter2)["Slot"]].type   = (sint16)*(**iter2)["id"];
           }
 
-          chunk->furnaces.push_back(newFurnace);
+          chunk->furnaces.push_back(newFurnace);          
         }
       }
 
