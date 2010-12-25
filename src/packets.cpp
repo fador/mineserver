@@ -128,15 +128,25 @@ int PacketHandler::change_sign(User *user)
 
   if(chunk != NULL)
   {
+    //Check if this sign data already exists and remove
+    for(uint32 i = 0; i < chunk->signs.size(); i++)
+    {
+      if(chunk->signs[i]->x == x && 
+         chunk->signs[i]->y == y && 
+         chunk->signs[i]->z == z)
+      {
+        delete chunk->signs[i];
+        chunk->signs.erase(chunk->signs.begin()+i);
+        break;
+      }
+    }
     chunk->signs.push_back(newSign);
 
     //Send sign packet to everyone
     Packet pkt;
     pkt << (sint8)PACKET_SIGN << x << y << z;
     pkt << strings[0] << strings[1] << strings[2] << strings[3];
-
     user->sendAll((uint8 *)pkt.getWrite(), pkt.getWriteLen());
-
   }
 
   Mineserver::get()->screen()->log(LOG_GENERAL,"Sign: " + strings[0] + strings[1]+ strings[2]+ strings[3]);

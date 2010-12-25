@@ -1073,6 +1073,25 @@ bool Map::releaseMap(int x, int z)
   sChunk* chunk = chunks.GetChunk(x,z);
   if(chunk == NULL)
     return false;
+
+  //Erase sign data
+  for(uint32 i = 0; i < chunk->signs.size(); i++)
+  {
+    delete chunk->signs[i];
+  }
+
+  //Erase chest data
+  for(uint32 i = 0; i < chunk->chests.size(); i++)
+  {
+    delete chunk->chests[i];
+  }
+
+  //Erase furnace data
+  for(uint32 i = 0; i < chunk->furnaces.size(); i++)
+  {
+    delete chunk->furnaces[i];
+  }
+
   chunks.UnlinkChunk(x, z);
   delete chunk->nbt;
   delete chunk;
