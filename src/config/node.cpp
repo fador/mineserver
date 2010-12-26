@@ -107,42 +107,42 @@ bool ConfigNode::data(std::string* ptr)
 
 bool ConfigNode::bData()
 {
-  bool tmp;
+  bool tmp = false;
   data(&tmp);
   return tmp;
 }
 
 int ConfigNode::iData()
 {
-  int tmp;
+  int tmp = 0;
   data(&tmp);
   return tmp;
 }
 
 long ConfigNode::lData()
 {
-  long tmp;
+  long tmp = 0;
   data(&tmp);
   return tmp;
 }
 
 float ConfigNode::fData()
 {
-  float tmp;
+  float tmp = 0;
   data(&tmp);
   return tmp;
 }
 
 double ConfigNode::dData()
 {
-  double tmp;
+  double tmp = 0;
   data(&tmp);
   return tmp;
 }
 
 std::string ConfigNode::sData()
 {
-  std::string tmp;
+  std::string tmp("");
   data(&tmp);
   return tmp;
 }

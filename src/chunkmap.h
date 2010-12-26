@@ -41,9 +41,7 @@ struct signData;
 
 struct sChunk
 {
-  sChunk() : refCount(0),lightRegen(false),changed(false),lastused(0)
-  {
-  }
+  sChunk() : refCount(0),lightRegen(false),changed(false),lastused(0) {}
   uint8* blocks;
   uint8* data;
   uint8* blocklight;
@@ -51,6 +49,8 @@ struct sChunk
   uint8* heightmap;
   sint32 x;
   sint32 z;
+
+  int refCount;
   bool lightRegen;
   bool changed;
   time_t lastused;
@@ -104,15 +104,11 @@ struct sChunk
 	 }
 	 return diff;
   }
-
-  int refCount;
 };
 
 struct sChunkNode
 {
-  sChunkNode(sChunk* _chunk, sChunkNode* _next)
-    : chunk(_chunk), next(_next)
-  {}
+  sChunkNode(sChunk* _chunk, sChunkNode* _next) : chunk(_chunk), next(_next) {}
   sChunk* chunk;
   sChunkNode* next;
 };
