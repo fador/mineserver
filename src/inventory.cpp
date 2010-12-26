@@ -322,12 +322,12 @@ bool Inventory::windowOpen(User *user, sint8 type, sint32 x, sint32 y, sint32 z)
       {
         if(chunk->chests[i]->x == x && chunk->chests[i]->z == z)
         {
-          for(int i = 0;i < 28; i++)
+          for(int j = 0;j < 28; j++)
           {
-            if(chunk->chests[i]->items[i].type != -1)
+            if(chunk->chests[i]->items[j].type != -1)
             {
-              user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_CHEST << (sint16)i << (sint16)chunk->chests[i]->items[i].type 
-                           << (sint8)(chunk->chests[i]->items[i].count) << (sint8)chunk->chests[i]->items[i].health;
+              user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_CHEST << (sint16)j << (sint16)chunk->chests[i]->items[j].type 
+                           << (sint8)(chunk->chests[i]->items[j].count) << (sint8)chunk->chests[i]->items[j].health;
             }
           }
         }
@@ -342,12 +342,12 @@ bool Inventory::windowOpen(User *user, sint8 type, sint32 x, sint32 y, sint32 z)
            openWorkbenches[i]->y == user->openInv.y &&
            openWorkbenches[i]->z == user->openInv.z)
         {
-          for(int i = 0; i < 10; i++)
+          for(int j = 0; j < 10; j++)
           {
-            if(openWorkbenches[i]->workbench[i].type != -1)
+            if(openWorkbenches[i]->workbench[j].type != -1)
             {
-              user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_WORKBENCH << (sint16)(i) << (sint16)openWorkbenches[i]->workbench[i].type 
-                           << (sint8)(openWorkbenches[i]->workbench[i].count) << (sint8)openWorkbenches[i]->workbench[i].health;
+              user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_WORKBENCH << (sint16)j << (sint16)openWorkbenches[i]->workbench[j].type 
+                           << (sint8)(openWorkbenches[i]->workbench[j].count) << (sint8)openWorkbenches[i]->workbench[j].health;
             }
           }
         }
@@ -361,12 +361,12 @@ bool Inventory::windowOpen(User *user, sint8 type, sint32 x, sint32 y, sint32 z)
       {
         if(chunk->furnaces[i]->x == x && chunk->furnaces[i]->z == z)
         {
-          for(int i = 0; i < 3; i++)
+          for(int j = 0; j < 3; j++)
           {
-            if(chunk->furnaces[i]->items[i].type != -1)
+            if(chunk->furnaces[i]->items[j].type != -1)
             {
-              user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_FURNACE << (sint16)(i) << (sint16)chunk->furnaces[i]->items[i].type 
-                           << (sint8)(chunk->furnaces[i]->items[i].count) << (sint8)chunk->furnaces[i]->items[i].health;
+              user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_FURNACE << (sint16)j << (sint16)chunk->furnaces[i]->items[j].type 
+                           << (sint8)(chunk->furnaces[i]->items[j].count) << (sint8)chunk->furnaces[i]->items[j].health;
             }
           }
         }
