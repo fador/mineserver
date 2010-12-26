@@ -54,6 +54,9 @@
 
 bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightClick, sint16 actionNumber, sint16 itemID, sint8 itemCount,sint8 itemUses)
 {  
+
+
+  Mineserver::get()->screen()->log(1,"window: " + dtos(windowID) + " sllot: " + dtos(slot) + " (" + dtos(actionNumber) + ") itemID: " + dtos(itemID));
   //Click outside the window
   if(slot == -999)
   {
@@ -210,11 +213,11 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
   {
     sint16 addCount = (64-slotItem->count>=user->inventoryHolding.count)?user->inventoryHolding.count:64-slotItem->count;
 
-    slotItem->count  += rightClick?1:addCount;
+    slotItem->count  += (rightClick?1:addCount);
     slotItem->health  = user->inventoryHolding.health;
     slotItem->type    = user->inventoryHolding.type;
 
-    user->inventoryHolding.count -= rightClick?1:addCount;
+    user->inventoryHolding.count -= (rightClick?1:addCount);
     if(user->inventoryHolding.count == 0)
     {
       user->inventoryHolding.type  = -1;
@@ -231,7 +234,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       user->inventoryHolding.count  -= slotItem->count>>1;
     }
 
-    slotItem->count  -= rightClick?slotItem->count>>1:user->inventoryHolding.count;
+    slotItem->count  -= (rightClick?slotItem->count>>1:user->inventoryHolding.count);
     if(slotItem->count == 0)
     {
       slotItem->health = 0;
@@ -239,6 +242,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
     }
   }
 
+  Mineserver::get()->screen()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(slotItem->type) + " (" + dtos(slotItem->count) + ") health: " + dtos(slotItem->health));
   //Update slot
   user->buffer << (sint8)PACKET_SET_SLOT << (sint8)windowID << (sint16)slot << (sint16)slotItem->type;
   if(slotItem->type != -1)
@@ -247,6 +251,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
   }
 
   //Signal others using the same space
+  /*
   switch(windowID)
   {
     case WINDOW_WORKBENCH:
@@ -293,6 +298,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       }
       break;
   }
+  */
 
   //Update item on the cursor
   user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_CURSOR << (sint16)0   << (sint16)user->inventoryHolding.type;
