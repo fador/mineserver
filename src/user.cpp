@@ -85,9 +85,7 @@ User::User(int sock, uint32 EID)
   this->timeUnderwater  = 0;
 
   this->m_currentItemSlot = 0;
-  this->inventoryHolding.type   = 0;
-  this->inventoryHolding.count  = 0;
-  this->inventoryHolding.health = 0;
+  this->inventoryHolding  = Item();
   // Ignore this user if it's the server console
   if(this->UID != SERVER_CONSOLE_UID)
   {
@@ -330,9 +328,10 @@ bool User::loadData()
     count   = *(**iter)["Count"];
     damage  = *(**iter)["Damage"];
     item_id = *(**iter)["id"];
-    if(item_id == 0)
+    if(item_id == 0 || count < 1)
     {
       item_id = -1;
+      count   =  0;
     }
 
     //Main inventory slot, converting 0-35 slots to 9-44

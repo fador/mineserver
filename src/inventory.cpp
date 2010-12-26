@@ -92,15 +92,15 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
     }
     else if(user->inventoryHolding.type == -1)
     {
-      user->inventoryHolding.type   = itemID;
-      user->inventoryHolding.health = itemUses;
-      user->inventoryHolding.count  = itemCount;
+      user->inventoryHolding.type   = user->inv[slot].type;
+      user->inventoryHolding.health = user->inv[slot].health;
+      user->inventoryHolding.count  = user->inv[slot].count;
       if(rightClick == 1)
       {
-        user->inventoryHolding.count  -= itemCount>>1;
+        user->inventoryHolding.count  -= user->inv[slot].count>>1;
       }
 
-      user->inv[slot].count  -= rightClick?itemCount>>1:user->inventoryHolding.count;
+      user->inv[slot].count  -= rightClick?user->inv[slot].count>>1:user->inventoryHolding.count;
       if(user->inv[slot].count == 0)
       {
         user->inv[slot].health = 0;
@@ -112,10 +112,18 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
     user->buffer << (sint8)PACKET_TRANSACTION << (sint8)0 << (sint16)actionNumber << (sint8)1;
 
     //Update slot
-    user->buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)slot << (sint16)itemID << (sint8)user->inv[slot].count << (sint8)user->inv[slot].health;
-    Mineserver::get()->screen()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(itemID) + " (" + dtos(user->inv[slot].count) + ") health: " + dtos(user->inv[slot].health));
+    user->buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)slot << (sint16)user->inv[slot].type;
+    if(user->inv[slot].type != -1)
+    {
+      user->buffer << (sint8)user->inv[slot].count << (sint8)user->inv[slot].health;
+    }
+    Mineserver::get()->screen()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(user->inv[slot].type) + " (" + dtos(user->inv[slot].count) + ") health: " + dtos(user->inv[slot].health));
     //Update item on the cursor
-    //user->buffer << (sint8)PACKET_SET_SLOT << (sint8)-1 << (sint16)0   << (sint16)user->inventoryHolding.type << (sint8)0 << (sint8)0;
+    user->buffer << (sint8)PACKET_SET_SLOT << (sint8)-1 << (sint16)0   << (sint16)user->inventoryHolding.type;
+    if(user->inventoryHolding.type != -1)
+    {
+      user->buffer << (sint8)user->inventoryHolding.count << (sint8)user->inventoryHolding.health;
+    }
   }
   return true;
 }
