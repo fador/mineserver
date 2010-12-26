@@ -550,6 +550,19 @@ bool Inventory::onwindowClose(User *user,sint8 type,sint32 x, sint32 y, sint32 z
 
           if((*inv)[i]->users.size() == 0)
           {
+            //Dump stuff to ground if workbench and no other users
+            if(type == WINDOW_WORKBENCH)
+            {
+              for(uint32 slotNumber = 1; slotNumber < 10; slotNumber ++)
+              {
+                if((*inv)[i]->workbench[slotNumber].type != -1)
+                {
+                  Mineserver::get()->map()->createPickupSpawn((int)(*inv)[i]->x, (int)(*inv)[i]->y, (int)(*inv)[i]->z, 
+                                                  (*inv)[i]->workbench[slotNumber].type, (*inv)[i]->workbench[slotNumber].count,
+                                                  (*inv)[i]->workbench[slotNumber].health,user);
+                }
+              }
+            }
             delete (*inv)[i];
             (*inv).erase((*inv).begin()+i);
           }
