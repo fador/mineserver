@@ -72,7 +72,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
     return true;
   }
 
-  if(!user->isOpenInv)
+  if(!user->isOpenInv && windowID != 0)
   {
     return false;
   }
@@ -469,21 +469,20 @@ bool Inventory::addItems(User *user,sint16 itemID, char count, sint16 health)
 
 bool Inventory::windowClose(User *user,sint8 windowID)
 {
+  //If still holding something, dump the items to ground
+  if(user->inventoryHolding.type != -1)
+  {
+    Mineserver::get()->map()->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z, 
+                                                user->inventoryHolding.type, user->inventoryHolding.count,
+                                                user->inventoryHolding.health,user);
+    user->inventoryHolding.count = 0;
+    user->inventoryHolding.type  =-1;
+    user->inventoryHolding.health= 0;
+  }
+
   if(user->isOpenInv)
   {
-    //If still holding something, dump the items to ground
-    if(user->inventoryHolding.type != -1)
-    {
-      Mineserver::get()->map()->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z, 
-                                                  user->inventoryHolding.type, user->inventoryHolding.count,
-                                                  user->inventoryHolding.health,user);
-      user->inventoryHolding.count = 0;
-      user->inventoryHolding.type  =-1;
-      user->inventoryHolding.health= 0;
-    }
-
     onwindowClose(user,user->openInv.type, user->openInv.x, user->openInv.y, user->openInv.z);
-
   }
 
   return true;

@@ -27,6 +27,10 @@
     <ClCompile Include="..\src\chat.cpp" />
     <ClCompile Include="..\src\commands.cpp" />
     <ClCompile Include="..\src\config.cpp" />
+    <ClCompile Include="..\src\config\lexer.cpp" />
+    <ClCompile Include="..\src\config\node.cpp" />
+    <ClCompile Include="..\src\config\parser.cpp" />
+    <ClCompile Include="..\src\config\scanner.cpp" />
     <ClCompile Include="..\src\constants.cpp" />
     <ClCompile Include="..\src\furnace.cpp" />
     <ClCompile Include="..\src\furnaceManager.cpp" />
@@ -64,6 +68,10 @@
     <ClInclude Include="..\src\chat.h" />
     <ClInclude Include="..\src\chunkmap.h" />
     <ClInclude Include="..\src\config.h" />
+    <ClInclude Include="..\src\config\lexer.h" />
+    <ClInclude Include="..\src\config\node.h" />
+    <ClInclude Include="..\src\config\parser.h" />
+    <ClInclude Include="..\src\config\scanner.h" />
     <ClInclude Include="..\src\constants.h" />
     <ClInclude Include="..\src\furnace.h" />
     <ClInclude Include="..\src\furnaceManager.h" />

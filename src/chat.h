@@ -43,6 +43,8 @@ public:
     GUESTS
   };
 
+
+
   Chat();
   ~Chat();
 

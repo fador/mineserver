@@ -579,7 +579,7 @@ int PacketHandler::player_digging(User *user)
         if(user->inv[36+user->currentItemSlot()].count == 0)
         {
           user->inv[36+user->currentItemSlot()].type   = -1;
-          user->inv[36+user->currentItemSlot()].health = 0;
+          user->inv[36+user->currentItemSlot()].health =  0;
         }
 
         user->buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)(36+user->currentItemSlot()) 
@@ -693,8 +693,8 @@ int PacketHandler::player_block_placement(User *user)
     user->inv[36+user->currentItemSlot()].count--;
     if(user->inv[36+user->currentItemSlot()].count == 0)
     {
-      user->inv[36+user->currentItemSlot()].type   = 0;
-      user->inv[36+user->currentItemSlot()].health = 0;
+      user->inv[36+user->currentItemSlot()].type   = -1;
+      user->inv[36+user->currentItemSlot()].health =  0;
       //ToDo: add holding change packet.
     }
     foundFromInventory = true;
