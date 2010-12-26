@@ -1059,22 +1059,18 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
           newChest->y = entityY;
           newChest->z = entityZ;
 
-          for(uint32 i = 0; i < 28; i ++)
-          {
-            newChest->items[i].type = -1;
-          }
-
           for( ; iter2 != end2; iter2++ )
           {
-            if((**iter2)["Count"] == NULL || (**iter2)["Slot"] == NULL || (**iter2)["Damage"] == NULL || (**iter2)["id"] == NULL ||
-               (**iter2)["Count"]->GetType() != NBT_Value::TAG_BYTE ||
-               (**iter2)["Slot"]->GetType() != NBT_Value::TAG_BYTE ||
-               (**iter2)["Damage"]->GetType() != NBT_Value::TAG_INT ||
-               (**iter2)["id"]->GetType() != NBT_Value::TAG_INT)
+            if((**iter2)["Count"] == NULL || (**iter2)["Slot"] == NULL || (**iter2)["Damage"] == NULL || (**iter2)["id"] == NULL// ||
+               //(**iter2)["Count"]->GetType() != NBT_Value::TAG_BYTE ||
+               //(**iter2)["Slot"]->GetType() != NBT_Value::TAG_BYTE ||
+               //(**iter2)["Damage"]->GetType() != NBT_Value::TAG_INT ||
+               //(**iter2)["id"]->GetType() != NBT_Value::TAG_INT)
+               )
             {
               continue;
             }
-            newChest->items[(sint8)*(**iter2)["Slot"]].count  = (sint8)*(**iter2)["Count"];
+            newChest->items[(sint8)*(**iter2)["Slot"]].count  =  (sint8)*(**iter2)["Count"];
             newChest->items[(sint8)*(**iter2)["Slot"]].health = (sint16)*(**iter2)["Damage"];
             newChest->items[(sint8)*(**iter2)["Slot"]].type   = (sint16)*(**iter2)["id"];
           }
@@ -1238,10 +1234,10 @@ bool Map::saveMap(int x, int z)
     val->Insert("y", new NBT_Value((sint32)chunk->chests[i]->y));
     val->Insert("z", new NBT_Value((sint32)chunk->chests[i]->z));
     NBT_Value* nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
-
-    for(uint32 slot = 0; slot < 28; slot++)
+    std::cout << "Saving chest..";
+    for(uint32 slot = 0; slot < 27; slot++)
     {
-      if(chunk->chests[i]->items[slot].count && chunk->chests[i]->items[slot].type != 0 && chunk->chests[i]->items[slot].type != -1)
+      if(chunk->chests[i]->items[slot].count && chunk->chests[i]->items[slot].type != -1)
       {
         NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
         val->Insert("Count", new NBT_Value((sint8)chunk->chests[i]->items[slot].count));

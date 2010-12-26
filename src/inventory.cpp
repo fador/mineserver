@@ -264,6 +264,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       break;
 
     case WINDOW_CHEST:
+      chunk->changed = true;
       if(slot < 27)        
       {
         for(uint32 i = 0; i < otherUsers->size(); i++)
@@ -278,6 +279,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       break;
 
     case WINDOW_FURNACE:
+      chunk->changed = true;
       if(slot < 3)        
       {
         for(uint32 i = 0; i < otherUsers->size(); i++)
