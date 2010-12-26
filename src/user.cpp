@@ -83,6 +83,7 @@ User::User(int sock, uint32 EID)
   this->health          = 20;
   this->attachedTo      = 0;
   this->timeUnderwater  = 0;
+  this->isOpenInv       = false;
 
   this->m_currentItemSlot = 0;
   this->inventoryHolding  = Item();

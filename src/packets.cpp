@@ -178,11 +178,8 @@ int PacketHandler::inventory_close(User *user)
 
   user->buffer >> windowID;
 
-  //ToDo: check user->inventoryHolding for any items and spawn if it exist
+  Mineserver::get()->inventory()->windowClose(user,windowID);
 
-  //Mineserver::get()->screen()->log(LOG_GENERAL,"Packet 0x65: " + dtos(a));
-  
-  //No need to do anything
   user->buffer.removePacket();
   return PACKET_OK;
 }
@@ -633,77 +630,23 @@ int PacketHandler::player_block_placement(User *user)
     return PACKET_OK;
   }
   
+  //Check if we need to open a window
   if(oldblock == BLOCK_CHEST)
   {
-    user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)WINDOW_CHEST  << (sint8)INVENTORYTYPE_CHEST << std::string("Chest") << (sint8)28;
-
-    sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(x,z);
-
-    if(chunk == NULL)
-    {
-      return PACKET_OK;
-    }
-
-    for(uint32 i = 0;i < chunk->chests.size(); i++)
-    {
-      if(chunk->chests[i]->x == x && chunk->chests[i]->z == z)
-      {
-        for(int i = 0;i < 28; i++)
-        {
-          if(chunk->chests[i]->items[i].type != -1)
-          {
-            user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_CHEST << (sint16)i << (sint16)chunk->chests[i]->items[i].type 
-                         << (sint8)(chunk->chests[i]->items[i].count) << (sint8)chunk->chests[i]->items[i].health;
-          }
-        }
-      }
-    }
-
+    //ToDo: check for large chest!
+    Mineserver::get()->inventory()->windowOpen(user,WINDOW_CHEST, x, y, z);
     return PACKET_OK;
   }
 
   if(oldblock == BLOCK_FURNACE || oldblock == BLOCK_BURNING_FURNACE)
   {
-    sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(x,z);
-
-    user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)WINDOW_FURNACE  << (sint8)INVENTORYTYPE_FURNACE << std::string("Furnace") << (sint8)0;
-
-
-    if(chunk == NULL)
-    {
-      return PACKET_OK;
-    }
-
-    for(uint32 i = 0;i < chunk->furnaces.size(); i++)
-    {
-      if(chunk->furnaces[i]->x == x && chunk->furnaces[i]->z == z)
-      {
-        for(int i = 0; i < 3; i++)
-        {
-          if(chunk->furnaces[i]->items[i].type != -1)
-          {
-            user->buffer << (sint8)PACKET_SET_SLOT << (sint8)3 << (sint16)(i) << (sint16)chunk->furnaces[i]->items[i].type 
-                         << (sint8)(chunk->furnaces[i]->items[i].count) << (sint8)chunk->furnaces[i]->items[i].health;
-          }
-        }
-      }
-    }
-
+    Mineserver::get()->inventory()->windowOpen(user,WINDOW_FURNACE, x, y, z);
     return PACKET_OK;
   }
 
   if(oldblock == BLOCK_WORKBENCH)
   {
-    sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(x,z);
-    user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)WINDOW_WORKBENCH  << (sint8)INVENTORYTYPE_WORKBENCH << std::string("Workbench") << (sint8)0;
-
-
-    if(chunk == NULL)
-    {
-      return PACKET_OK;
-    }
-
-    //ToDo: send inventory
+    Mineserver::get()->inventory()->windowOpen(user,WINDOW_WORKBENCH, x, y, z);
     return PACKET_OK;
   }
 

@@ -54,90 +54,328 @@
 
 bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightClick, sint16 actionNumber, sint16 itemID, sint8 itemCount,sint8 itemUses)
 {  
-  if(windowID == WINDOW_PLAYER) //Player inventory
+  //Click outside the window
+  if(slot == -999)
   {
-    //Click outside the window
-    if(slot == -999)
-    {
-      if(user->inventoryHolding.type != -1)
-      {
-        Mineserver::get()->map()->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z, 
-                                                    user->inventoryHolding.type, user->inventoryHolding.count,
-                                                    user->inventoryHolding.health,user);
-        user->inventoryHolding.count = 0;
-        user->inventoryHolding.type  =-1;
-        user->inventoryHolding.health= 0;
-      }
-      return true;
-    }
-
-    Item slotItem;
-    slotItem=user->inv[slot];
-
-    //Empty slot and holding something
-    if((itemID == -1 || (slotItem.type == itemID && slotItem.count < 64) ) && user->inventoryHolding.type != -1)
-    {
-      sint16 addCount = (64-slotItem.count>=user->inventoryHolding.count)?user->inventoryHolding.count:64-slotItem.count;
-
-      user->inv[slot].count  += rightClick?1:addCount;
-      user->inv[slot].health = user->inventoryHolding.health;
-      user->inv[slot].type   = user->inventoryHolding.type;
-
-      user->inventoryHolding.count -= rightClick?1:addCount;
-      if(user->inventoryHolding.count == 0)
-      {
-        user->inventoryHolding.type  = -1;
-        user->inventoryHolding.health= 0;
-      }
-    }
-    else if(user->inventoryHolding.type == -1)
-    {
-      user->inventoryHolding.type   = user->inv[slot].type;
-      user->inventoryHolding.health = user->inv[slot].health;
-      user->inventoryHolding.count  = user->inv[slot].count;
-      if(rightClick == 1)
-      {
-        user->inventoryHolding.count  -= user->inv[slot].count>>1;
-      }
-
-      user->inv[slot].count  -= rightClick?user->inv[slot].count>>1:user->inventoryHolding.count;
-      if(user->inv[slot].count == 0)
-      {
-        user->inv[slot].health = 0;
-        user->inv[slot].type   =-1;
-      }
-    }
-
-    //Update slot
-    user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_PLAYER << (sint16)slot << (sint16)user->inv[slot].type;
-    if(user->inv[slot].type != -1)
-    {
-      user->buffer << (sint8)user->inv[slot].count << (sint8)user->inv[slot].health;
-    }
-
-    //Update item on the cursor
-    user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_CURSOR << (sint16)0   << (sint16)user->inventoryHolding.type;
     if(user->inventoryHolding.type != -1)
     {
-      user->buffer << (sint8)user->inventoryHolding.count << (sint8)user->inventoryHolding.health;
+      Mineserver::get()->map()->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z, 
+                                                  user->inventoryHolding.type, user->inventoryHolding.count,
+                                                  user->inventoryHolding.health,user);
+      user->inventoryHolding.count = 0;
+      user->inventoryHolding.type  =-1;
+      user->inventoryHolding.health= 0;
     }
+    return true;
   }
-  else
+
+  if(!user->isOpenInv)
   {
-    Mineserver::get()->screen()->log(1,"slot: " + dtos(slot));
-    /*
-    user->buffer << (sint8)PACKET_SET_SLOT << (sint8)windowID << (sint16)slot << (sint16)-1;
-    user->buffer << (sint8)PACKET_SET_SLOT << (sint8)-1 << (sint16)0   << (sint16)user->inventoryHolding.type;
-    if(user->inventoryHolding.type != -1)
-    {
-      user->buffer << (sint8)user->inventoryHolding.count << (sint8)user->inventoryHolding.health;
-    }
-    */
+    return false;
   }
+
+  sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(blockToChunk(user->openInv.x),blockToChunk(user->openInv.z));
+
+  if(chunk == NULL)
+  {
+    return false;
+  }
+
+
+  std::vector<openInventory *> *inv;
+  switch(user->openInv.type)
+  {
+    case WINDOW_CHEST:
+      inv = &openChests;
+      break;
+    case WINDOW_FURNACE:
+      inv = &openFurnaces;
+      break;
+    case WINDOW_WORKBENCH:
+      inv = &openWorkbenches;
+      break;
+  }
+  std::vector<User *> *otherUsers = NULL;
+  openInventory *currentInventory = NULL;
+
+  for(uint32 i = 0; i < inv->size(); i++)
+  {
+    if((*inv)[i]->x == user->openInv.x &&
+       (*inv)[i]->y == user->openInv.y &&
+       (*inv)[i]->z == user->openInv.z)
+    {
+      otherUsers = &(*inv)[i]->users;
+      currentInventory = (*inv)[i];
+      break;
+    }
+  }
+
+  if(otherUsers == NULL || currentInventory == NULL)
+  {
+    return false;
+  }
+
+  Item *slotItem = NULL;
+  
+  switch(windowID)
+  {
+     //Player inventory
+    case WINDOW_PLAYER:
+      slotItem=&user->inv[slot];
+      break;
+    case WINDOW_CHEST:
+      if(slot>28)
+      {
+        slotItem=&user->inv[slot-19];
+      }
+      else
+      {
+        for(uint32 i = 0; i < chunk->chests.size(); i ++)
+        {
+          if(chunk->chests[i]->x == user->openInv.x &&
+             chunk->chests[i]->y == user->openInv.y &&
+             chunk->chests[i]->z == user->openInv.z)
+          {
+            slotItem = &chunk->chests[i]->items[0];
+          }
+        }
+        //Create chest data if it doesn't exist
+        if(slotItem == NULL)
+        {
+          chestData *newChest = new chestData;
+          newChest->x = user->openInv.x;
+          newChest->y = user->openInv.y;
+          newChest->z = user->openInv.z;
+          chunk->chests.push_back(newChest);
+          slotItem = &newChest->items[0];
+        }
+      }
+      break;
+    case WINDOW_LARGE_CHEST:
+      if(slot>56)
+      {
+        slotItem=&user->inv[slot-47];
+      }
+      else
+      {
+        //ToDo: Handle large chest
+      }
+      break;
+    case WINDOW_FURNACE:
+      if(slot>3)
+      {
+        slotItem=&user->inv[slot+6];
+      }
+      else
+      {
+        for(uint32 i = 0; i < chunk->furnaces.size(); i ++)
+        {
+          if(chunk->furnaces[i]->x == user->openInv.x &&
+             chunk->furnaces[i]->y == user->openInv.y &&
+             chunk->furnaces[i]->z == user->openInv.z)
+          {
+            slotItem = &chunk->furnaces[i]->items[0];
+          }
+        }
+        //Create furnace data if it doesn't exist
+        if(slotItem == NULL)
+        {
+          furnaceData *newFurnace = new furnaceData;
+          newFurnace->x = user->openInv.x;
+          newFurnace->y = user->openInv.y;
+          newFurnace->z = user->openInv.z;
+          newFurnace->burnTime = 0;
+          newFurnace->cookTime = 0;
+          chunk->furnaces.push_back(newFurnace);
+          slotItem = &newFurnace->items[0];
+        }
+      }
+      break;
+    case WINDOW_WORKBENCH:
+      if(slot > 9)
+      {
+        slotItem=&user->inv[slot+1];
+      }
+      else
+      {
+        slotItem=&currentInventory->workbench[slot];
+      }
+      break;
+  }
+  
+
+  //Empty slot and holding something
+  if((itemID == -1 || (slotItem->type == itemID && slotItem->count < 64) ) && user->inventoryHolding.type != -1)
+  {
+    sint16 addCount = (64-slotItem->count>=user->inventoryHolding.count)?user->inventoryHolding.count:64-slotItem->count;
+
+    slotItem->count  += rightClick?1:addCount;
+    slotItem->health  = user->inventoryHolding.health;
+    slotItem->type    = user->inventoryHolding.type;
+
+    user->inventoryHolding.count -= rightClick?1:addCount;
+    if(user->inventoryHolding.count == 0)
+    {
+      user->inventoryHolding.type  = -1;
+      user->inventoryHolding.health= 0;
+    }
+  }
+  else if(user->inventoryHolding.type == -1)
+  {
+    user->inventoryHolding.type   = slotItem->type;
+    user->inventoryHolding.health = slotItem->health;
+    user->inventoryHolding.count  = slotItem->count;
+    if(rightClick == 1)
+    {
+      user->inventoryHolding.count  -= slotItem->count>>1;
+    }
+
+    slotItem->count  -= rightClick?slotItem->count>>1:user->inventoryHolding.count;
+    if(slotItem->count == 0)
+    {
+      slotItem->health = 0;
+      slotItem->type   =-1;
+    }
+  }
+
+  //Update slot
+  user->buffer << (sint8)PACKET_SET_SLOT << (sint8)windowID << (sint16)slot << (sint16)slotItem->type;
+  if(slotItem->type != -1)
+  {
+    user->buffer << (sint8)slotItem->count << (sint8)slotItem->health;
+  }
+
+  //Signal others using the same space
+  switch(windowID)
+  {
+    case WINDOW_WORKBENCH:
+      if(slot < 10)        
+      {
+        for(uint32 i = 0; i < otherUsers->size(); i++)
+        {
+          (*otherUsers)[i]->buffer << (sint8)PACKET_SET_SLOT << (sint8)windowID << (sint16)slot << (sint16)slotItem->type;
+          if(slotItem->type != -1)
+          {
+            (*otherUsers)[i]->buffer << (sint8)slotItem->count << (sint8)slotItem->health;
+          }
+        }
+      }
+      break;
+
+    case WINDOW_CHEST:
+      if(slot < 28)        
+      {
+        for(uint32 i = 0; i < otherUsers->size(); i++)
+        {
+          (*otherUsers)[i]->buffer << (sint8)PACKET_SET_SLOT << (sint8)windowID << (sint16)slot << (sint16)slotItem->type;
+          if(slotItem->type != -1)
+          {
+            (*otherUsers)[i]->buffer << (sint8)slotItem->count << (sint8)slotItem->health;
+          }
+        }
+      }
+      break;
+
+    case WINDOW_FURNACE:
+      if(slot < 3)        
+      {
+        for(uint32 i = 0; i < otherUsers->size(); i++)
+        {
+          (*otherUsers)[i]->buffer << (sint8)PACKET_SET_SLOT << (sint8)windowID << (sint16)slot << (sint16)slotItem->type;
+          if(slotItem->type != -1)
+          {
+            (*otherUsers)[i]->buffer << (sint8)slotItem->count << (sint8)slotItem->health;
+          }
+        }
+      }
+      break;
+  }
+
+  //Update item on the cursor
+  user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_CURSOR << (sint16)0   << (sint16)user->inventoryHolding.type;
+  if(user->inventoryHolding.type != -1)
+  {
+    user->buffer << (sint8)user->inventoryHolding.count << (sint8)user->inventoryHolding.health;
+  }
+
   return true;
 }
 
 
+bool Inventory::windowOpen(User *user, sint8 type, sint32 x, sint32 y, sint32 z)
+{
+  sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(blockToChunk(x),blockToChunk(z));
+
+  if(chunk == NULL)
+  {
+    return false;
+  }
+
+  onwindowOpen(user,type,x,y,z);
+
+  switch(type)
+  {
+    case WINDOW_CHEST:    
+      user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)WINDOW_CHEST  << (sint8)INVENTORYTYPE_CHEST << std::string("Chest") << (sint8)28;
+
+      for(uint32 i = 0;i < chunk->chests.size(); i++)
+      {
+        if(chunk->chests[i]->x == x && chunk->chests[i]->z == z)
+        {
+          for(int i = 0;i < 28; i++)
+          {
+            if(chunk->chests[i]->items[i].type != -1)
+            {
+              user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_CHEST << (sint16)i << (sint16)chunk->chests[i]->items[i].type 
+                           << (sint8)(chunk->chests[i]->items[i].count) << (sint8)chunk->chests[i]->items[i].health;
+            }
+          }
+        }
+      }
+      break;
+    case WINDOW_WORKBENCH:
+      user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)WINDOW_WORKBENCH  << (sint8)INVENTORYTYPE_WORKBENCH << std::string("Workbench") << (sint8)0;
+
+      for(uint32 i = 0; i < openWorkbenches.size(); i++)
+      {
+        if(openWorkbenches[i]->x == user->openInv.x &&
+           openWorkbenches[i]->y == user->openInv.y &&
+           openWorkbenches[i]->z == user->openInv.z)
+        {
+          for(int i = 0; i < 10; i++)
+          {
+            if(openWorkbenches[i]->workbench[i].type != -1)
+            {
+              user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_WORKBENCH << (sint16)(i) << (sint16)openWorkbenches[i]->workbench[i].type 
+                           << (sint8)(openWorkbenches[i]->workbench[i].count) << (sint8)openWorkbenches[i]->workbench[i].health;
+            }
+          }
+        }
+      }
+      break;
+    case WINDOW_FURNACE:
+      
+      user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)WINDOW_FURNACE  << (sint8)INVENTORYTYPE_FURNACE << std::string("Furnace") << (sint8)0;
+
+      for(uint32 i = 0;i < chunk->furnaces.size(); i++)
+      {
+        if(chunk->furnaces[i]->x == x && chunk->furnaces[i]->z == z)
+        {
+          for(int i = 0; i < 3; i++)
+          {
+            if(chunk->furnaces[i]->items[i].type != -1)
+            {
+              user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_FURNACE << (sint16)(i) << (sint16)chunk->furnaces[i]->items[i].type 
+                           << (sint8)(chunk->furnaces[i]->items[i].count) << (sint8)chunk->furnaces[i]->items[i].health;
+            }
+          }
+        }
+      }
+      break;
+  }
+
+  return true;
+}
 
 bool Inventory::isSpace(User *user,sint16 itemID, char count)
 {
@@ -214,5 +452,115 @@ bool Inventory::addItems(User *user,sint16 itemID, char count, sint16 health)
     }
   }
 
+  return true;
+}
+
+bool Inventory::windowClose(User *user,sint8 windowID)
+{
+  if(user->isOpenInv)
+  {
+    //If still holding something, dump the items to ground
+    if(user->inventoryHolding.type != -1)
+    {
+      Mineserver::get()->map()->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z, 
+                                                  user->inventoryHolding.type, user->inventoryHolding.count,
+                                                  user->inventoryHolding.health,user);
+      user->inventoryHolding.count = 0;
+      user->inventoryHolding.type  =-1;
+      user->inventoryHolding.health= 0;
+    }
+
+    onwindowClose(user,user->openInv.type, user->openInv.x, user->openInv.y, user->openInv.z);
+
+  }
+
+  return true;
+}
+
+bool Inventory::onwindowOpen(User *user,sint8 type, sint32 x, sint32 y, sint32 z)
+{
+  std::vector<openInventory *> *inv;
+  switch(type)
+  {
+    case WINDOW_CHEST:
+      inv = &openChests;
+      break;
+    case WINDOW_FURNACE:
+      inv = &openFurnaces;
+      break;
+    case WINDOW_WORKBENCH:
+      inv = &openWorkbenches;
+      break;
+  }
+  for(uint32 i = 0; i < inv->size(); i++)
+  {
+    if((*inv)[i]->x == user->openInv.x &&
+       (*inv)[i]->y == user->openInv.y &&
+       (*inv)[i]->z == user->openInv.z)
+    {
+      (*inv)[i]->users.push_back(user);
+      user->isOpenInv = true;
+      return true;
+    }
+  }
+
+  //If the inventory not yet opened, create it
+  openInventory *newInv = new openInventory();
+  newInv->type = type;
+  newInv->x    = x;
+  newInv->y    = y;
+  newInv->z    = z;
+  user->openInv = *newInv;
+
+  newInv->users.push_back(user);
+
+  inv->push_back(newInv);
+
+  user->isOpenInv = true;
+
+  return true;
+}
+bool Inventory::onwindowClose(User *user,sint8 type,sint32 x, sint32 y, sint32 z)
+{
+  std::vector<openInventory *> *inv;
+  switch(type)
+  {
+    case WINDOW_CHEST:
+      inv = &openChests;
+      break;
+    case WINDOW_FURNACE:
+      inv = &openFurnaces;
+      break;
+    case WINDOW_WORKBENCH:
+      inv = &openWorkbenches;
+      break;
+  }
+
+  for(uint32 i = 0; i < inv->size(); i++)
+  {
+    if((*inv)[i]->x == user->openInv.x &&
+       (*inv)[i]->y == user->openInv.y &&
+       (*inv)[i]->z == user->openInv.z)
+    {
+      for(uint32 j = 0; j < (*inv)[i]->users.size(); j++)
+      {
+        if((*inv)[i]->users[j] == user)
+        {
+          (*inv)[i]->users.erase((*inv)[i]->users.begin()+j);
+
+          if((*inv)[i]->users.size() == 0)
+          {
+            delete (*inv)[i];
+            (*inv).erase((*inv).begin()+i);
+          }
+
+          user->isOpenInv = false;
+          return true;
+        }
+      }
+    }
+  }
+
+  user->isOpenInv = false;
   return true;
 }

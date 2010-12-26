@@ -38,6 +38,7 @@
 #include "packets.h"
 #include "permissions.h"
 
+
 struct position
 {
   double x;
@@ -60,6 +61,8 @@ struct Item
     health = 0;
   }
 };
+
+#include "inventory.h"
 
 uint32 generateEID();
 
@@ -90,6 +93,10 @@ public:
   Item inv[45];
   sint16 curItem;
   Item inventoryHolding;
+  //Do we have an open _shared_ inventory?
+  bool isOpenInv;
+  //More info on the inventory
+  openInventory openInv;
 
   int permissions; // bitmask for permissions. See permissions.h
 

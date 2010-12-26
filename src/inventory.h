@@ -28,12 +28,16 @@
 #ifndef _INVENTORY_H_
 #define _INVENTORY_H_
 
+#include "user.h"
+
 struct openInventory
 {
+  sint8 type;
   sint32 x;
   sint32 y;
   sint32 z;
-  sint32 UID;
+  Item workbench[10];
+  std::vector<User *> users;  
 };
 
 enum { WINDOW_CURSOR = -1, WINDOW_PLAYER = 0, WINDOW_WORKBENCH, WINDOW_CHEST, WINDOW_LARGE_CHEST, WINDOW_FURNACE };
@@ -57,7 +61,15 @@ public:
   std::vector<openInventory *> openChests;
   std::vector<openInventory *> openFurnaces;
 
+  bool onwindowOpen(User *user,sint8 type, sint32 x, sint32 y, sint32 z);
+  bool onwindowClose(User *user,sint8 type,sint32 x, sint32 y, sint32 z);
+
+
+  bool windowOpen(User *user, sint8 type, sint32 x, sint32 y, sint32 z);
+
   bool windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightClick, sint16 actionNumber, sint16 itemID, sint8 itemCount,sint8 itemUses);
+
+  bool windowClose(User *user,sint8 windowID);
     
   //Check inventory for space
   bool isSpace(User *user, sint16 itemID, char count);
