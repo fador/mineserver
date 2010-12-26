@@ -97,7 +97,7 @@ void Map::init()
 #ifdef _DEBUG
   Mineserver::get()->screen()->log("Map::init()");
 #endif
-  mapDirectory = Mineserver::get()->config()->sData("map_directory");
+  mapDirectory = Mineserver::get()->config()->sData("map.storage.nbt.directory");
   if(mapDirectory == "Not found!")
   {
     std::cout << "Error, mapdir not defined!" << std::endl;
@@ -1396,7 +1396,7 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value* 
     player = user->nick;
   }
 
-  sint8 locked = Mineserver::get()->config()->bData("chests_locked_by_default") ? 1 : 0;
+  sint8 locked = Mineserver::get()->config()->bData("temp.chests_locked_by_default") ? 1 : 0;
 
   if(entity->GetType() != NBT_Value::TAG_COMPOUND)
   {

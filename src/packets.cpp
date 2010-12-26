@@ -306,14 +306,14 @@ int PacketHandler::login_request(User *user)
   // If version is not 2 or 3
   if(version != PROTOCOL_VERSION)
   {
-    user->kick(Mineserver::get()->config()->sData("wrong_protocol_message"));
+    user->kick(Mineserver::get()->config()->sData("strings.wrong_protocol"));
     return PACKET_OK;
   }
 
   // If userlimit is reached
-  if((int)User::all().size() >= Mineserver::get()->config()->iData("user_limit"))
+  if((int)User::all().size() >= Mineserver::get()->config()->iData("system.user_limit"))
   {
-    user->kick(Mineserver::get()->config()->sData("server_full_message"));
+    user->kick(Mineserver::get()->config()->sData("strings.server_full"));
     return PACKET_OK;
   }
 
@@ -348,7 +348,7 @@ int PacketHandler::handshake(User *user)
   user->buffer.removePacket();
 
   // Check whether we're to validate against minecraft.net
-  if(Mineserver::get()->config()->bData("user_validation") == true)
+  if(Mineserver::get()->config()->bData("system.user_validation") == true)
   {
     // Send the unique hash for this player to prompt the client to go to minecraft.net to validate
     Mineserver::get()->screen()->log("Handshake: Giving player "+player+" their minecraft.net hash of: " + hash(player));

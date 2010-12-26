@@ -160,12 +160,10 @@ bool User::sendLoginInfo()
   loadData();
 
   //Login OK package
-  buffer << (sint8)PACKET_LOGIN_RESPONSE
-         << (sint32)UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
+  buffer << (sint8)PACKET_LOGIN_RESPONSE << (sint32)UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
 
   //Send server time (after dawn)
   buffer << (sint8)PACKET_TIME_UPDATE << (sint64)Mineserver::get()->map()->mapTime;
-
   
   //Inventory
   for(int i=1; i<45; i++)
@@ -175,21 +173,6 @@ bool User::sendLoginInfo()
       buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)(i) << (sint16)inv[i].type << (sint8)(inv[i].count) << (sint8)inv[i].health;
     }
   }
-
-  // Send motd
-  std::ifstream motdfs(Mineserver::get()->config()->sData("motd_file").c_str());
-
-  std::string temp;
-
-  while(getline( motdfs, temp ))
-  {
-    // If not commentline
-    if(temp[0] != COMMENTPREFIX)
-    {
-      buffer << (sint8)PACKET_CHAT_MESSAGE << temp;
-    }
-  }
-  motdfs.close();
 
   //Teleport player
   teleport(pos.x, pos.y+2, pos.z);
