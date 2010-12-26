@@ -54,7 +54,7 @@ struct chestData
   sint32 x;
   sint32 y;
   sint32 z;
-  Item items[28];
+  Item items[27];
 };
 
 struct signData

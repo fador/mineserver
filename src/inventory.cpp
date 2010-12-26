@@ -124,9 +124,9 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       slotItem=&user->inv[slot];
       break;
     case WINDOW_CHEST:
-      if(slot>28)
+      if(slot>27)
       {
-        slotItem=&user->inv[slot-19];
+        slotItem=&user->inv[slot-18];
       }
       else
       {
@@ -136,7 +136,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
              chunk->chests[i]->y == user->openInv.y &&
              chunk->chests[i]->z == user->openInv.z)
           {
-            slotItem = &chunk->chests[i]->items[0];
+            slotItem = &chunk->chests[i]->items[slot];
           }
         }
         //Create chest data if it doesn't exist
@@ -147,7 +147,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
           newChest->y = user->openInv.y;
           newChest->z = user->openInv.z;
           chunk->chests.push_back(newChest);
-          slotItem = &newChest->items[0];
+          slotItem = &newChest->items[slot];
         }
       }
       break;
@@ -174,7 +174,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
              chunk->furnaces[i]->y == user->openInv.y &&
              chunk->furnaces[i]->z == user->openInv.z)
           {
-            slotItem = &chunk->furnaces[i]->items[0];
+            slotItem = &chunk->furnaces[i]->items[slot];
           }
         }
         //Create furnace data if it doesn't exist
@@ -187,14 +187,14 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
           newFurnace->burnTime = 0;
           newFurnace->cookTime = 0;
           chunk->furnaces.push_back(newFurnace);
-          slotItem = &newFurnace->items[0];
+          slotItem = &newFurnace->items[slot];
         }
       }
       break;
     case WINDOW_WORKBENCH:
       if(slot > 9)
       {
-        slotItem=&user->inv[slot+1];
+        slotItem=&user->inv[slot-1];
       }
       else
       {
@@ -263,7 +263,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       break;
 
     case WINDOW_CHEST:
-      if(slot < 28)        
+      if(slot < 27)        
       {
         for(uint32 i = 0; i < otherUsers->size(); i++)
         {
@@ -316,13 +316,13 @@ bool Inventory::windowOpen(User *user, sint8 type, sint32 x, sint32 y, sint32 z)
   switch(type)
   {
     case WINDOW_CHEST:    
-      user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)WINDOW_CHEST  << (sint8)INVENTORYTYPE_CHEST << std::string("Chest") << (sint8)28;
+      user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)WINDOW_CHEST  << (sint8)INVENTORYTYPE_CHEST << std::string("Chest") << (sint8)27;
 
       for(uint32 i = 0;i < chunk->chests.size(); i++)
       {
-        if(chunk->chests[i]->x == x && chunk->chests[i]->z == z)
+        if(chunk->chests[i]->x == x && chunk->chests[i]->y == y && chunk->chests[i]->z == z)
         {
-          for(int j = 0;j < 28; j++)
+          for(int j = 0;j < 27; j++)
           {
             if(chunk->chests[i]->items[j].type != -1)
             {
@@ -330,6 +330,7 @@ bool Inventory::windowOpen(User *user, sint8 type, sint32 x, sint32 y, sint32 z)
                            << (sint8)(chunk->chests[i]->items[j].count) << (sint8)chunk->chests[i]->items[j].health;
             }
           }
+          break;
         }
       }
       break;
@@ -350,6 +351,7 @@ bool Inventory::windowOpen(User *user, sint8 type, sint32 x, sint32 y, sint32 z)
                            << (sint8)(openWorkbenches[i]->workbench[j].count) << (sint8)openWorkbenches[i]->workbench[j].health;
             }
           }
+          break;
         }
       }
       break;
@@ -359,7 +361,7 @@ bool Inventory::windowOpen(User *user, sint8 type, sint32 x, sint32 y, sint32 z)
 
       for(uint32 i = 0;i < chunk->furnaces.size(); i++)
       {
-        if(chunk->furnaces[i]->x == x && chunk->furnaces[i]->z == z)
+        if(chunk->furnaces[i]->x == x && chunk->furnaces[i]->y == y && chunk->furnaces[i]->z == z)
         {
           for(int j = 0; j < 3; j++)
           {
@@ -369,6 +371,7 @@ bool Inventory::windowOpen(User *user, sint8 type, sint32 x, sint32 y, sint32 z)
                            << (sint8)(chunk->furnaces[i]->items[j].count) << (sint8)chunk->furnaces[i]->items[j].health;
             }
           }
+          break;
         }
       }
       break;
@@ -515,7 +518,6 @@ bool Inventory::onwindowOpen(User *user,sint8 type, sint32 x, sint32 y, sint32 z
   newInv->users.push_back(user);
 
   inv->push_back(newInv);
-
   user->isOpenInv = true;
 
   return true;
@@ -557,7 +559,7 @@ bool Inventory::onwindowClose(User *user,sint8 type,sint32 x, sint32 y, sint32 z
               {
                 if((*inv)[i]->workbench[slotNumber].type != -1)
                 {
-                  Mineserver::get()->map()->createPickupSpawn((int)(*inv)[i]->x, (int)(*inv)[i]->y, (int)(*inv)[i]->z, 
+                  Mineserver::get()->map()->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z, 
                                                   (*inv)[i]->workbench[slotNumber].type, (*inv)[i]->workbench[slotNumber].count,
                                                   (*inv)[i]->workbench[slotNumber].health,user);
                 }

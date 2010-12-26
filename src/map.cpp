@@ -1067,8 +1067,8 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
           for( ; iter2 != end2; iter2++ )
           {
             if((**iter2)["Count"] == NULL || (**iter2)["Slot"] == NULL || (**iter2)["Damage"] == NULL || (**iter2)["id"] == NULL ||
-               (**iter2)["Count"]->GetType() != NBT_Value::TAG_INT ||
-               (**iter2)["Slot"]->GetType() != NBT_Value::TAG_INT ||
+               (**iter2)["Count"]->GetType() != NBT_Value::TAG_BYTE ||
+               (**iter2)["Slot"]->GetType() != NBT_Value::TAG_BYTE ||
                (**iter2)["Damage"]->GetType() != NBT_Value::TAG_INT ||
                (**iter2)["id"]->GetType() != NBT_Value::TAG_INT)
             {
@@ -1118,8 +1118,8 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
           for( ; iter != end; iter++ )
           {
             if((**iter2)["Count"] == NULL || (**iter)["Slot"] == NULL || (**iter)["Damage"] == NULL || (**iter)["id"] == NULL ||
-               (**iter2)["Count"]->GetType() != NBT_Value::TAG_INT ||
-               (**iter2)["Slot"]->GetType() != NBT_Value::TAG_INT ||
+               (**iter2)["Count"]->GetType() != NBT_Value::TAG_BYTE ||
+               (**iter2)["Slot"]->GetType() != NBT_Value::TAG_BYTE ||
                (**iter2)["Damage"]->GetType() != NBT_Value::TAG_INT ||
                (**iter2)["id"]->GetType() != NBT_Value::TAG_INT)
             {
