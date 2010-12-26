@@ -1061,12 +1061,11 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
 
           for( ; iter2 != end2; iter2++ )
           {
-            if((**iter2)["Count"] == NULL || (**iter2)["Slot"] == NULL || (**iter2)["Damage"] == NULL || (**iter2)["id"] == NULL// ||
-               //(**iter2)["Count"]->GetType() != NBT_Value::TAG_BYTE ||
-               //(**iter2)["Slot"]->GetType() != NBT_Value::TAG_BYTE ||
-               //(**iter2)["Damage"]->GetType() != NBT_Value::TAG_INT ||
-               //(**iter2)["id"]->GetType() != NBT_Value::TAG_INT)
-               )
+            if((**iter2)["Count"] == NULL || (**iter2)["Slot"] == NULL || (**iter2)["Damage"] == NULL || (**iter2)["id"] == NULL ||
+               (**iter2)["Count"]->GetType() != NBT_Value::TAG_BYTE ||
+               (**iter2)["Slot"]->GetType() != NBT_Value::TAG_BYTE ||
+               (**iter2)["Damage"]->GetType() != NBT_Value::TAG_SHORT ||
+               (**iter2)["id"]->GetType() != NBT_Value::TAG_SHORT)               
             {
               continue;
             }
@@ -1116,8 +1115,8 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
             if((**iter2)["Count"] == NULL || (**iter)["Slot"] == NULL || (**iter)["Damage"] == NULL || (**iter)["id"] == NULL ||
                (**iter2)["Count"]->GetType() != NBT_Value::TAG_BYTE ||
                (**iter2)["Slot"]->GetType() != NBT_Value::TAG_BYTE ||
-               (**iter2)["Damage"]->GetType() != NBT_Value::TAG_INT ||
-               (**iter2)["id"]->GetType() != NBT_Value::TAG_INT)
+               (**iter2)["Damage"]->GetType() != NBT_Value::TAG_SHORT ||
+               (**iter2)["id"]->GetType() != NBT_Value::TAG_SHORT)
             {
               continue;
             }
@@ -1234,7 +1233,6 @@ bool Map::saveMap(int x, int z)
     val->Insert("y", new NBT_Value((sint32)chunk->chests[i]->y));
     val->Insert("z", new NBT_Value((sint32)chunk->chests[i]->z));
     NBT_Value* nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
-    std::cout << "Saving chest..";
     for(uint32 slot = 0; slot < 27; slot++)
     {
       if(chunk->chests[i]->items[slot].count && chunk->chests[i]->items[slot].type != -1)
