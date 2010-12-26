@@ -137,6 +137,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
              chunk->chests[i]->z == user->openInv.z)
           {
             slotItem = &chunk->chests[i]->items[slot];
+            break;
           }
         }
         //Create chest data if it doesn't exist

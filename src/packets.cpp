@@ -633,20 +633,53 @@ int PacketHandler::player_block_placement(User *user)
   //Check if we need to open a window
   if(oldblock == BLOCK_CHEST)
   {
+    sint8  check_y = y;
+    sint32 check_x = x;
+    sint32 check_z = z;
+    switch(direction)
+    {
+      case BLOCK_TOP:   check_y++; break;
+      case BLOCK_NORTH: check_x++; break;
+      case BLOCK_SOUTH: check_x--; break;
+      case BLOCK_EAST:  check_z++; break;
+      case BLOCK_WEST:  check_z--; break;
+    }
     //ToDo: check for large chest!
-    Mineserver::get()->inventory()->windowOpen(user,WINDOW_CHEST, x, y, z);
+    Mineserver::get()->inventory()->windowOpen(user,WINDOW_CHEST,check_x, check_y, check_z);
     return PACKET_OK;
   }
 
   if(oldblock == BLOCK_FURNACE || oldblock == BLOCK_BURNING_FURNACE)
   {
-    Mineserver::get()->inventory()->windowOpen(user,WINDOW_FURNACE, x, y, z);
+    sint8  check_y = y;
+    sint32 check_x = x;
+    sint32 check_z = z;
+    switch(direction)
+    {
+      case BLOCK_TOP:   check_y++; break;
+      case BLOCK_NORTH: check_x++; break;
+      case BLOCK_SOUTH: check_x--; break;
+      case BLOCK_EAST:  check_z++; break;
+      case BLOCK_WEST:  check_z--; break;
+    }
+    Mineserver::get()->inventory()->windowOpen(user,WINDOW_FURNACE,check_x, check_y, check_z);
     return PACKET_OK;
   }
 
   if(oldblock == BLOCK_WORKBENCH)
   {
-    Mineserver::get()->inventory()->windowOpen(user,WINDOW_WORKBENCH, x, y, z);
+    sint8  check_y = y;
+    sint32 check_x = x;
+    sint32 check_z = z;
+    switch(direction)
+    {
+      case BLOCK_TOP:   check_y++; break;
+      case BLOCK_NORTH: check_x++; break;
+      case BLOCK_SOUTH: check_x--; break;
+      case BLOCK_EAST:  check_z++; break;
+      case BLOCK_WEST:  check_z--; break;
+    }
+    Mineserver::get()->inventory()->windowOpen(user,WINDOW_WORKBENCH,check_x, check_y, check_z);
     return PACKET_OK;
   }
 
