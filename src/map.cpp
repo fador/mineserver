@@ -1093,7 +1093,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
 
           bool done = false;
 
-          if((**iter2)["BurnTime"] == NULL || (**iter2)["CookTime"] == NULL)
+          if((**iter)["BurnTime"] == NULL || (**iter)["CookTime"] == NULL)
           {
             continue;
           }
@@ -1102,21 +1102,17 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
           newFurnace->x = entityX;
           newFurnace->y = entityY;
           newFurnace->z = entityZ;
-          newFurnace->burnTime = (sint16)*(**iter2)["BurnTime"];
-          newFurnace->cookTime = (sint16)*(**iter2)["CookTime"];
+          newFurnace->burnTime = (sint16)*(**iter)["BurnTime"];
+          newFurnace->cookTime = (sint16)*(**iter)["CookTime"];
 
-          for(uint32 i = 0; i < 3; i ++)
-          {
-            newFurnace->items[i].type = -1;
-          }
-
-          for( ; iter != end; iter++ )
+          for( ; iter2 != end2; iter2++ )
           {
             if((**iter2)["Count"] == NULL || (**iter)["Slot"] == NULL || (**iter)["Damage"] == NULL || (**iter)["id"] == NULL ||
                (**iter2)["Count"]->GetType() != NBT_Value::TAG_BYTE ||
                (**iter2)["Slot"]->GetType() != NBT_Value::TAG_BYTE ||
                (**iter2)["Damage"]->GetType() != NBT_Value::TAG_SHORT ||
-               (**iter2)["id"]->GetType() != NBT_Value::TAG_SHORT)
+               (**iter2)["id"]->GetType() != NBT_Value::TAG_SHORT ||
+               (sint8)*(**iter2)["Slot"] > 3 || (sint8)*(**iter2)["Slot"] < 0)
             {
               continue;
             }
