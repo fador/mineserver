@@ -430,6 +430,7 @@ public:
   int use_entity(User *user);
   int respawn(User *user);
   int change_sign(User *user);
+  int inventory_transaction(User *user);
 
   int inventory_change(User *user);
   int inventory_close(User *user);

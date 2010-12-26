@@ -70,6 +70,8 @@
 #include "furnaceManager.h"
 #include "mineserver.h"
 
+#include "inventory.h"
+
 #ifdef WIN32
     #define M_PI 3.141592653589793238462643
 #endif
@@ -99,6 +101,7 @@ void PacketHandler::init()
   packets[PACKET_INVENTORY_CHANGE]         = Packets(PACKET_VARIABLE_LEN, &PacketHandler::inventory_change);
   packets[PACKET_INVENTORY_CLOSE]          = Packets(1, &PacketHandler::inventory_close);
   packets[PACKET_SIGN]                     = Packets(PACKET_VARIABLE_LEN, &PacketHandler::change_sign); 
+  packets[PACKET_TRANSACTION]              = Packets(4, &PacketHandler::inventory_transaction); 
   
 }
 
@@ -179,6 +182,21 @@ int PacketHandler::inventory_close(User *user)
 
   //Mineserver::get()->screen()->log(LOG_GENERAL,"Packet 0x65: " + dtos(a));
   
+  //No need to do anything
+  user->buffer.removePacket();
+  return PACKET_OK;
+}
+
+
+int PacketHandler::inventory_transaction(User *user)
+{
+  sint8 windowID;
+  sint16 action;
+  sint8 accepted;
+
+  user->buffer >> windowID >> action >> accepted;
+
+
   //No need to do anything
   user->buffer.removePacket();
   return PACKET_OK;
@@ -617,7 +635,7 @@ int PacketHandler::player_block_placement(User *user)
   
   if(oldblock == BLOCK_CHEST)
   {
-    user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)1  << (sint8)0 << std::string("Chest") << (sint8)28;
+    user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)WINDOW_CHEST  << (sint8)INVENTORYTYPE_CHEST << std::string("Chest") << (sint8)28;
 
     sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(x,z);
 
@@ -634,7 +652,7 @@ int PacketHandler::player_block_placement(User *user)
         {
           if(chunk->chests[i]->items[i].type != -1)
           {
-            user->buffer << (sint8)PACKET_SET_SLOT << (sint8)1 << (sint16)(i) << (sint16)chunk->chests[i]->items[i].type 
+            user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_CHEST << (sint16)i << (sint16)chunk->chests[i]->items[i].type 
                          << (sint8)(chunk->chests[i]->items[i].count) << (sint8)chunk->chests[i]->items[i].health;
           }
         }
@@ -648,7 +666,7 @@ int PacketHandler::player_block_placement(User *user)
   {
     sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(x,z);
 
-    user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)3  << (sint8)2 << std::string("Furnace") << (sint8)0;
+    user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)WINDOW_FURNACE  << (sint8)INVENTORYTYPE_FURNACE << std::string("Furnace") << (sint8)0;
 
 
     if(chunk == NULL)
@@ -677,7 +695,7 @@ int PacketHandler::player_block_placement(User *user)
   if(oldblock == BLOCK_WORKBENCH)
   {
     sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(x,z);
-    user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)2  << (sint8)1 << std::string("Workbench") << (sint8)0;
+    user->buffer << (sint8)PACKET_OPEN_WINDOW << (sint8)WINDOW_WORKBENCH  << (sint8)INVENTORYTYPE_WORKBENCH << std::string("Workbench") << (sint8)0;
 
 
     if(chunk == NULL)
