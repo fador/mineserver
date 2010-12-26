@@ -51,7 +51,7 @@ CC = $(CXX)
 LDFLAGS += -L/usr/local/lib -L/usr/lib -levent -lz -lnoise $(LFLAGS)
 CXXFLAGS += $(DFLAGS) -I. -I/usr/Local/include -I/usr/include
 
-OBJS  = mineserver.o map.o chat.o commands.o config.o constants.o logger.o nbt.o furnace.o furnaceManager.o packets.o physics.o sockets.o tools.o user.o screen.o plugin.o tree.o
+OBJS  = mineserver.o map.o chat.o commands.o config.o constants.o logger.o nbt.o furnace.o furnaceManager.o packets.o physics.o sockets.o tools.o user.o screen.o plugin.o tree.o inventory.o
 OBJS += blocks/basic.o blocks/door.o blocks/falling.o blocks/fire.o blocks/liquid.o blocks/plant.o blocks/sign.o blocks/snow.o blocks/stair.o blocks/torch.o blocks/tracks.o blocks/default.o blocks/chest.o
 OBJS += worldgen/mapgen.o worldgen/cavegen.o worldgen/mersenne.o
 PROG = ./mineserver
@@ -77,6 +77,7 @@ config.o: config.cpp logger.h constants.h config.h
 constants.o: constants.cpp constants.h
 logger.o: logger.cpp logger.h mineserver.h
 map.o: map.cpp logger.h tools.h map.h user.h nbt.h config.h worldgen/mapgen.h
+inventory.o: inventory.cpp inventory.h tools.h map.h user.h mineserver.h
 nbt.o: nbt.cpp tools.h nbt.h map.h
 furnace.o: furnace.cpp furnace.h mineserver.h
 furnaceManager.o: furnaceManager.cpp furnaceManager.h

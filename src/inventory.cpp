@@ -117,7 +117,8 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
     {
       user->buffer << (sint8)user->inv[slot].count << (sint8)user->inv[slot].health;
     }
-    Mineserver::get()->screen()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(user->inv[slot].type) + " (" + dtos(user->inv[slot].count) + ") health: " + dtos(user->inv[slot].health));
+    //Mineserver::get()->screen()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(user->inv[slot].type) + " (" + dtos(user->inv[slot].count) + ") health: " + dtos(user->inv[slot].health));
+
     //Update item on the cursor
     user->buffer << (sint8)PACKET_SET_SLOT << (sint8)-1 << (sint16)0   << (sint16)user->inventoryHolding.type;
     if(user->inventoryHolding.type != -1)
