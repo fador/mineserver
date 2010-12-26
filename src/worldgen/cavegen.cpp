@@ -64,14 +64,14 @@ void CaveGen::init(int seed)
 
   caveNoise2.SetNoiseQuality (noise::QUALITY_STD);
 
-  addCaves = Mineserver::get()->conf()->bValue("add_caves");
-  caveDensity = Mineserver::get()->conf()->iValue("cave_density");
-  caveSize = Mineserver::get()->conf()->iValue("cave_size");
-  addCaveLava = Mineserver::get()->conf()->bValue("cave_lava");
-  addCaveWater = Mineserver::get()->conf()->bValue("cave_water");
-  addOre = Mineserver::get()->conf()->bValue("cave_ore");
+  addCaves = Mineserver::get()->config()->bData("add_caves");
+  caveDensity = Mineserver::get()->config()->iData("cave_density");
+  caveSize = Mineserver::get()->config()->iData("cave_size");
+  addCaveLava = Mineserver::get()->config()->bData("cave_lava");
+  addCaveWater = Mineserver::get()->config()->bData("cave_water");
+  addOre = Mineserver::get()->config()->bData("cave_ore");
 
-  seaLevel = Mineserver::get()->conf()->iValue("sea_level");
+  seaLevel = Mineserver::get()->config()->iData("sea_level");
 }
 
 void CaveGen::AddCaves(uint8 &block, double x, double y, double z)

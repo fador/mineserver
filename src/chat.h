@@ -42,22 +42,6 @@ public:
     OPS,
     GUESTS
   };
-  typedef void (*CommandCallback)(User*, std::string, std::deque<std::string>);
-
-  /**
-   * Chat command a user can enter.
-   * Requires the right permissions by the user (e.g. for admin-only commands).
-   */
-  struct Command
-  {
-    std::deque<std::string> names;
-    std::string arguments;
-    std::string description;
-    CommandCallback callback;
-    int permissions;
-
-    Command(std::deque<std::string> _names, std::string _arguments, std::string _description, CommandCallback _callback, int _permissions) : names(_names),arguments(_arguments),description(_description),callback(_callback),permissions(_permissions) {}
-  };
 
   Chat();
   ~Chat();
@@ -65,24 +49,15 @@ public:
   bool handleMsg(User* user, std::string msg);
   void handleServerMsg(User* user, std::string msg, const std::string& timeStamp);
   void handleAdminChatMsg(User* user, std::string msg, const std::string& timeStamp);
-  void handleCommandMsg(User* user, std::string msg, const std::string& timeStamp);
   void handleChatMsg(User* user, std::string msg, const std::string& timeStamp);
 
   bool sendMsg(User* user, std::string msg, MessageTarget action = ALL);
   bool sendUserlist(User* user);
   bool checkMotd(std::string motdFile);
-  void registerCommand(Command* command);
   void sendHelp(User* user, std::deque<std::string> args);
 
 private:
-  void registerStandardCommands();
   std::deque<std::string> parseCmd(std::string cmd);
-
-  typedef std::map<std::string, Command*> CommandList;
-  CommandList m_adminCommands;
-  CommandList m_opCommands;
-  CommandList m_memberCommands;
-  CommandList m_guestCommands;
 };
 
 #endif

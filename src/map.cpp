@@ -97,7 +97,7 @@ void Map::init()
 #ifdef _DEBUG
   Mineserver::get()->screen()->log("Map::init()");
 #endif
-  mapDirectory = Mineserver::get()->conf()->sValue("map_directory");
+  mapDirectory = Mineserver::get()->config()->sData("map_directory");
   if(mapDirectory == "Not found!")
   {
     std::cout << "Error, mapdir not defined!" << std::endl;
@@ -1395,7 +1395,8 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value* 
   {
     player = user->nick;
   }
-  sint8 locked = Mineserver::get()->conf()->bValue("chests_locked_by_default")?1:0;
+
+  sint8 locked = Mineserver::get()->config()->bData("chests_locked_by_default") ? 1 : 0;
 
   if(entity->GetType() != NBT_Value::TAG_COMPOUND)
   {
@@ -1403,9 +1404,7 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value* 
     return;
   }
 
-  if((*entity)["x"] == NULL || (sint32)*(*entity)["x"] != x  ||
-     (*entity)["y"] == NULL || (sint32)*(*entity)["y"] != y  ||
-     (*entity)["z"] == NULL || (sint32)*(*entity)["z"] != z)
+  if((*entity)["x"] == NULL || (sint32)*(*entity)["x"] != x  || (*entity)["y"] == NULL || (sint32)*(*entity)["y"] != y  || (*entity)["z"] == NULL || (sint32)*(*entity)["z"] != z)
   {
     LOG("Invalid Complex Entity");
     return;

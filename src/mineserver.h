@@ -81,8 +81,8 @@ public:
   void setScreen(Screen* screen) { m_screen = screen; }
   Physics* physics() { if (!m_physics) { m_physics = new Physics; } return m_physics; }
   void setPhysics(Physics* physics) { m_physics = physics; }
-  Conf* conf() { if (!m_conf) { m_conf = new Conf; } return m_conf; }
-  void setConf(Conf* conf) { m_conf = conf; }
+  Config* config() { if (!m_config) { m_config = new Config; } return m_config; }
+  void setConfig(Config* config) { m_config = config; }
   FurnaceManager* furnaceManager() { if (!m_furnaceManager) { m_furnaceManager = new FurnaceManager; } return m_furnaceManager; }
   void setFurnaceManager(FurnaceManager* furnaceManager) { m_furnaceManager = furnaceManager; }
   PacketHandler* packetHandler() { if (!m_packetHandler) { m_packetHandler = new PacketHandler; } return m_packetHandler; }
@@ -103,7 +103,7 @@ private:
     m_plugin         = NULL;
     m_screen         = NULL;
     m_physics        = NULL;
-    m_conf           = NULL;
+    m_config         = NULL;
     m_furnaceManager = NULL;
     m_packetHandler  = NULL;
     m_mapGen         = NULL;
@@ -122,7 +122,7 @@ private:
   Plugin* m_plugin;
   Screen* m_screen;
   Physics* m_physics;
-  Conf* m_conf;
+  Config* m_config;
   FurnaceManager* m_furnaceManager;
   PacketHandler* m_packetHandler;
   MapGen* m_mapGen;

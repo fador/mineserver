@@ -306,14 +306,14 @@ int PacketHandler::login_request(User *user)
   // If version is not 2 or 3
   if(version != PROTOCOL_VERSION)
   {
-    user->kick(Mineserver::get()->conf()->sValue("wrong_protocol_message"));
+    user->kick(Mineserver::get()->config()->sData("wrong_protocol_message"));
     return PACKET_OK;
   }
 
   // If userlimit is reached
-  if((int)User::all().size() >= Mineserver::get()->conf()->iValue("user_limit"))
+  if((int)User::all().size() >= Mineserver::get()->config()->iData("user_limit"))
   {
-    user->kick(Mineserver::get()->conf()->sValue("server_full_message"));
+    user->kick(Mineserver::get()->config()->sData("server_full_message"));
     return PACKET_OK;
   }
 
@@ -348,7 +348,7 @@ int PacketHandler::handshake(User *user)
   user->buffer.removePacket();
 
   // Check whether we're to validate against minecraft.net
-  if(Mineserver::get()->conf()->bValue("user_validation") == true)
+  if(Mineserver::get()->config()->bData("user_validation") == true)
   {
     // Send the unique hash for this player to prompt the client to go to minecraft.net to validate
     Mineserver::get()->screen()->log("Handshake: Giving player "+player+" their minecraft.net hash of: " + hash(player));
@@ -492,19 +492,19 @@ int PacketHandler::player_digging(User *user)
   {
     case BLOCK_STATUS_STARTED_DIGGING:
     {
-      (static_cast<Hook4<void,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("DiggingStarted")))->doAll(user, x, y, z);
+      (static_cast<Hook4<void,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("PlayerDiggingStarted")))->doAll(user, x, y, z);
       Mineserver::get()->plugin()->runBlockCallback(block, "onStartedDigging", inv);
       break;
     }
     case BLOCK_STATUS_DIGGING:
     {
-      (static_cast<Hook4<void,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("Digging")))->doAll(user, x, y, z);
+      (static_cast<Hook4<void,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("PlayerDigging")))->doAll(user, x, y, z);
       Mineserver::get()->plugin()->runBlockCallback(block, "onDigging", inv);
       break;
     }
     case BLOCK_STATUS_STOPPED_DIGGING:
     {
-      (static_cast<Hook4<void,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("DiggingStopped")))->doAll(user, x, y, z);
+      (static_cast<Hook4<void,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("PlayerDiggingStopped")))->doAll(user, x, y, z);
       Mineserver::get()->plugin()->runBlockCallback(block, "onStoppedDigging", inv);
       break;
     }
@@ -905,6 +905,8 @@ int PacketHandler::arm_animation(User *user)
   Packet pkt;
   pkt << (sint8)PACKET_ARM_ANIMATION << (sint32)user->UID << animType;
   user->sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
+
+  (static_cast<Hook0<void>*>(Mineserver::get()->plugin()->getHook("PlayerArmSwing")))->doAll();
 
   return PACKET_OK;
 }

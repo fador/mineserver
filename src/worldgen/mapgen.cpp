@@ -109,7 +109,7 @@ void MapGen::init(int seed)
   seaTerrain.SetBounds(-0.3, 1000.0);
   seaTerrain.SetEdgeFalloff(0.1);
 
-  seaLevel = Mineserver::get()->conf()->iValue("sea_level");
+  seaLevel = Mineserver::get()->config()->iData("sea_level");
 
   m_seed = seed;
   treesGenerated = false;
@@ -141,7 +141,7 @@ void MapGen::generateChunk(int x, int z)
   NBT_Value *main = new NBT_Value(NBT_Value::TAG_COMPOUND);
   NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
 
-  if(Mineserver::get()->conf()->bValue("map_flatgrass"))
+  if(Mineserver::get()->config()->bData("map_flatgrass"))
     generateFlatgrass();
   else
     generateWithNoise(x, z);
@@ -188,7 +188,7 @@ void MapGen::generateChunk(int x, int z)
   //Mineserver::get()->map()->mapLastused[chunkid] = (int)time(0);
 
   // Not changed
-  //Mineserver::get()->map()->mapChanged[chunkid] = Mineserver::get()->conf()->bValue("save_unchanged_chunks");
+  //Mineserver::get()->map()->mapChanged[chunkid] = Mineserver::get()->config()->bData("save_unchanged_chunks");
 
   //Mineserver::get()->map()->maps[chunkid].nbt = main;
 }
@@ -286,7 +286,7 @@ void MapGen::generateWithNoise(int x, int z)
       }
     }
   }
-  if(Mineserver::get()->conf()->bValue("add_beaches"))
+  if(Mineserver::get()->config()->bData("add_beaches"))
     AddBeaches();
 
 #ifdef PRINT_MAPGEN_TIME
@@ -302,8 +302,8 @@ void MapGen::generateWithNoise(int x, int z)
 
 void MapGen::AddBeaches() 
 {
-  int beachExtent = Mineserver::get()->conf()->iValue("beach_extent");
-  int beachHeight = Mineserver::get()->conf()->iValue("beach_height");
+  int beachExtent = Mineserver::get()->config()->iData("beach_extent");
+  int beachHeight = Mineserver::get()->config()->iData("beach_height");
 
   int beachExtentSqr = (beachExtent + 1) * (beachExtent + 1);
   for(int x = 0; x < 16; x++) 

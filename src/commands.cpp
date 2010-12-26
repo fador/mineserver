@@ -67,12 +67,17 @@ namespace
 
   void pluginLoad(User* user, std::string command, std::deque<std::string> args)
   {
-    if (args.size() < 2)
+    if (args.size() == 2)
     {
-      return;
+      Mineserver::get()->plugin()->loadPlugin(args[0], args[1]);
     }
 
-    Mineserver::get()->plugin()->loadExternal(args[0], args[1]);
+    if (args.size() == 1)
+    {
+      Mineserver::get()->plugin()->loadPlugin(args[0]);
+    }
+
+    return;
   }
 
   void pluginUnload(User* user, std::string command, std::deque<std::string> args)
@@ -82,7 +87,7 @@ namespace
       return;
     }
 
-    Mineserver::get()->plugin()->unloadExternal(args[0]);
+    Mineserver::get()->plugin()->unloadPlugin(args[0]);
   }
 
   void playerList(User* user, std::string command, std::deque<std::string> args)
