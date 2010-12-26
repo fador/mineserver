@@ -28,7 +28,6 @@
 #ifndef _INVENTORY_H_
 #define _INVENTORY_H_
 
-
 struct openInventory
 {
   sint32 x;
@@ -54,9 +53,13 @@ public:
   std::vector<openInventory *> openChests;
   std::vector<openInventory *> openFurnaces;
 
+  bool windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightClick, sint16 actionNumber, sint16 itemID, sint8 itemCount,sint8 itemUses);
+    
+  //Check inventory for space
+  bool isSpace(User *user, sint16 itemID, char count);
 
-  bool moveItem(User *);
-
+  //Add items to inventory (pickups)
+  bool addItems(User *user, sint16 itemID, char count, sint16 health);
 };
 
 

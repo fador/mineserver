@@ -61,17 +61,6 @@ struct Item
   }
 };
 
-struct PlayerInventory
-{
-  Item main[36];
-  Item equipped[4];
-  Item crafting[4];
-
-  PlayerInventory()
-  {
-  }
-};
-
 uint32 generateEID();
 
 class User
@@ -98,7 +87,7 @@ public:
   std::string temp_nick;
   position pos;
   vec curChunk;
-  PlayerInventory inv;
+  Item inv[45];
   sint16 curItem;
   Item inventoryHolding;
 
@@ -125,9 +114,6 @@ public:
   static bool sendAdmins(uint8* data, uint32 len);
   static bool sendOps(uint8* data, uint32 len);
   static bool sendGuests(uint8* data, uint32 len);
-
-  //Check inventory for space
-  bool checkInventory(sint16 itemID, char count);
 
   //Login
   bool sendLoginInfo();

@@ -191,124 +191,26 @@ int PacketHandler::inventory_change(User *user)
   {
     return PACKET_NEED_MORE_DATA;
   }
-  sint8 from_type;
-  sint16 from_slot;
-  sint8 to_type;
-  sint16 to_slot;
+  sint8 windowID;
+  sint16 slot;
+  sint8 rightClick;
+  sint16 actionNumber;
   sint16 itemID;
-  sint8 item_count;
-  sint8 item_health;
+  sint8 itemCount = 0;
+  sint8 itemUses  = 0;
 
-  user->buffer >> from_type >> from_slot >> to_type >> to_slot >> itemID;
+  user->buffer >> windowID >> slot >> rightClick >> actionNumber >> itemID;
   if(itemID != -1)
   {
     if(!user->buffer.haveData(2))
     {
       return PACKET_NEED_MORE_DATA;
     }
-    user->buffer >> item_count >> item_health;
+    user->buffer >> itemCount >> itemUses;
   }
-  if(from_type == 0) //Player inventory
-  {
-    Item slotItem;
-    if(from_slot<5)
-    {
-      slotItem=user->inv.crafting[from_slot-1];
-    }
-    else if(from_slot<9)
-    {
-      slotItem=user->inv.equipped[from_slot-5];
-    }
-    else
-    {
-      slotItem=user->inv.main[from_slot-9];
-    }
-    //Empty slot and holding something
-    if((itemID == -1 || (slotItem.type == itemID && slotItem.count < 64) ) && user->inventoryHolding.type != 0)
-    {
-      sint16 addCount=(64-slotItem.count>=user->inventoryHolding.count)?user->inventoryHolding.count:64-slotItem.count;
-      if(to_type == 1)
-      {
-        addCount = 1;
-      }
-      if(from_slot<5)
-      {
-        user->inv.crafting[from_slot-1].count  += addCount;
-        user->inv.crafting[from_slot-1].health = user->inventoryHolding.health;
-        user->inv.crafting[from_slot-1].type   = user->inventoryHolding.type;
-      }
-      else if(from_slot<9)
-      {
-        user->inv.equipped[from_slot-5].count  += addCount;
-        user->inv.equipped[from_slot-5].health = user->inventoryHolding.health;
-        user->inv.equipped[from_slot-5].type   = user->inventoryHolding.type;
-      }
-      else
-      {
-        user->inv.main[from_slot-9].count  += addCount;
-        user->inv.main[from_slot-9].health = user->inventoryHolding.health;
-        user->inv.main[from_slot-9].type   = user->inventoryHolding.type;
-      }
-      if(to_type == 1)
-      {
-        user->inventoryHolding.count--;
-        if(user->inventoryHolding.count == 0)
-        {
-          user->inventoryHolding.type  = -1;
-          user->inventoryHolding.health= 0;
-        }
-      }
-      else
-      {
-        user->inventoryHolding.count -=addCount;
-        if(user->inventoryHolding.count == 0)
-        {
-          user->inventoryHolding.type  = -1;
-          user->inventoryHolding.health= 0;
-        }
-      }
-    }
-    else if(user->inventoryHolding.type == -1)
-    {
-      user->inventoryHolding.type   = itemID;
-      user->inventoryHolding.health = item_health;
-      user->inventoryHolding.count  = item_count;
-      if(to_type == 1)
-      {
-        user->inventoryHolding.count  -= item_count>>1;
-      }
 
-      if(from_slot<5)
-      {
-        user->inv.crafting[from_slot-1].count  -= user->inventoryHolding.count;
-        if(user->inv.crafting[from_slot-1].count == 0)
-        {
-          user->inv.crafting[from_slot-1].health = 0;
-          user->inv.crafting[from_slot-1].count  = 0;
-        }
-      }
-      else if(from_slot<9)
-      {
-        user->inv.equipped[from_slot-5].count  -= user->inventoryHolding.count;
-        if(user->inv.equipped[from_slot-5].count == 0)
-        {
-          user->inv.equipped[from_slot-5].health = 0;
-          user->inv.equipped[from_slot-5].count  = 0;
-        }
-      }
-      else
-      {
-        user->inv.main[from_slot-9].count  -= user->inventoryHolding.count;
-        if(user->inv.main[from_slot-9].count == 0)
-        {
-          user->inv.main[from_slot-9].health = 0;
-          user->inv.main[from_slot-9].count  = 0;
-        }
-      }
-    }
-  }
-  //Mineserver::get()->screen()->log(LOG_GENERAL,"Packet 0x66: " + dtos(from_type) + "," + dtos(from_slot) + "," + dtos(to_type) +  "," + dtos(to_slot) + "," + dtos(itemID) + "," + dtos(item_count) + "," + dtos(item_health));
-
+  Mineserver::get()->inventory()->windowClick(user,windowID,slot,rightClick,actionNumber,itemID,itemCount,itemUses);
+  
   //No need to do anything
   user->buffer.removePacket();
   return PACKET_OK;
@@ -594,8 +496,8 @@ int PacketHandler::player_digging(User *user)
     case BLOCK_STATUS_BLOCK_BROKEN:
     {
       //ToDo: Fix, made for testing purposes!
-      if(user->inv.main[27+user->currentItemSlot()].type == ITEM_WOODEN_SPADE)
-         user->inv.main[27+user->currentItemSlot()].health++;
+      if(user->inv[36+user->currentItemSlot()].type == ITEM_WOODEN_SPADE)
+         user->inv[36+user->currentItemSlot()].health++;
 
       if ((static_cast<Hook4<bool,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("BlockBreakPre")))->doUntilFalse(user, x, y, z))
       {
@@ -654,21 +556,21 @@ int PacketHandler::player_digging(User *user)
     case BLOCK_STATUS_PICKUP_SPAWN:
     {
       //ToDo: handle
-      if(user->inv.main[27+user->currentItemSlot()].type > 0)
+      if(user->inv[36+user->currentItemSlot()].type > 0)
       {
-        Mineserver::get()->map()->createPickupSpawn(user->pos.x, user->pos.y,user->pos.z,user->inv.main[27+user->currentItemSlot()].type,1,user->inv.main[27+user->currentItemSlot()].health,user);
+        Mineserver::get()->map()->createPickupSpawn(user->pos.x, user->pos.y,user->pos.z,user->inv[36+user->currentItemSlot()].type,1,user->inv[36+user->currentItemSlot()].health,user);
 
-        user->inv.main[27+user->currentItemSlot()].count--;
-        if(user->inv.main[27+user->currentItemSlot()].count == 0)
+        user->inv[36+user->currentItemSlot()].count--;
+        if(user->inv[36+user->currentItemSlot()].count == 0)
         {
-          user->inv.main[27+user->currentItemSlot()].type   = -1;
-          user->inv.main[27+user->currentItemSlot()].health = 0;
+          user->inv[36+user->currentItemSlot()].type   = -1;
+          user->inv[36+user->currentItemSlot()].health = 0;
         }
 
         user->buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)(36+user->currentItemSlot()) 
-                     << (sint16)user->inv.main[27+user->currentItemSlot()].type 
-                     << (sint8)user->inv.main[27+user->currentItemSlot()].count 
-                     << (sint8)user->inv.main[27+user->currentItemSlot()].health;
+                     << (sint16)user->inv[36+user->currentItemSlot()].type 
+                     << (sint8)user->inv[36+user->currentItemSlot()].count 
+                     << (sint8)user->inv[36+user->currentItemSlot()].health;
       }
       break;
     }
@@ -791,14 +693,14 @@ int PacketHandler::player_block_placement(User *user)
 
   bool foundFromInventory = false;
 
-  if(user->inv.main[27+user->currentItemSlot()].type == newblock)
+  if(user->inv[36+user->currentItemSlot()].type == newblock)
   {
     //Are we really placing this?
-    user->inv.main[27+user->currentItemSlot()].count--;
-    if(user->inv.main[27+user->currentItemSlot()].count == 0)
+    user->inv[36+user->currentItemSlot()].count--;
+    if(user->inv[36+user->currentItemSlot()].count == 0)
     {
-      user->inv.main[27+user->currentItemSlot()].type   = 0;
-      user->inv.main[27+user->currentItemSlot()].health = 0;
+      user->inv[36+user->currentItemSlot()].type   = 0;
+      user->inv[36+user->currentItemSlot()].health = 0;
       //ToDo: add holding change packet.
     }
     foundFromInventory = true;
@@ -983,7 +885,7 @@ int PacketHandler::holding_change(User *user)
 
   //Send holding change to others
   Packet pkt;
-  pkt << (sint8)PACKET_ENTITY_EQUIPMENT << (sint32)user->UID << (sint16)0 << (sint16)user->inv.main[itemSlot+27].type;
+  pkt << (sint8)PACKET_ENTITY_EQUIPMENT << (sint32)user->UID << (sint16)0 << (sint16)user->inv[itemSlot+36].type;
   user->sendOthers((uint8*)pkt.getWrite(), pkt.getWriteLen());
 
   // Set current itemID to user

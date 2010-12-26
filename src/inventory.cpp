@@ -52,8 +52,150 @@
 #include "inventory.h"
 
 
-bool Inventory::moveItem(User *)
+bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightClick, sint16 actionNumber, sint16 itemID, sint8 itemCount,sint8 itemUses)
+{  
+  if(windowID == 0) //Player inventory
+  {
+    //Click outside the window
+    if(slot == -999)
+    {
+      if(user->inventoryHolding.type != -1)
+      {
+        Mineserver::get()->map()->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z, 
+                                                    user->inventoryHolding.type, user->inventoryHolding.count,
+                                                    user->inventoryHolding.health,user);
+        user->inventoryHolding.count = 0;
+        user->inventoryHolding.type  =-1;
+        user->inventoryHolding.health= 0;
+      }
+      return true;
+    }
+
+    Item slotItem;
+    slotItem=user->inv[slot];
+
+    //Empty slot and holding something
+    if((itemID == -1 || (slotItem.type == itemID && slotItem.count < 64) ) && user->inventoryHolding.type != -1)
+    {
+      sint16 addCount = (64-slotItem.count>=user->inventoryHolding.count)?user->inventoryHolding.count:64-slotItem.count;
+
+      user->inv[slot].count  += rightClick?1:addCount;
+      user->inv[slot].health = user->inventoryHolding.health;
+      user->inv[slot].type   = user->inventoryHolding.type;
+
+      user->inventoryHolding.count -= rightClick?1:addCount;
+      if(user->inventoryHolding.count == 0)
+      {
+        user->inventoryHolding.type  = -1;
+        user->inventoryHolding.health= 0;
+      }
+    }
+    else if(user->inventoryHolding.type == -1)
+    {
+      user->inventoryHolding.type   = itemID;
+      user->inventoryHolding.health = itemUses;
+      user->inventoryHolding.count  = itemCount;
+      if(rightClick == 1)
+      {
+        user->inventoryHolding.count  -= itemCount>>1;
+      }
+
+      user->inv[slot].count  -= rightClick?itemCount>>1:user->inventoryHolding.count;
+      if(user->inv[slot].count == 0)
+      {
+        user->inv[slot].health = 0;
+        user->inv[slot].type   =-1;
+      }
+    }
+
+    //Accept transaction
+    user->buffer << (sint8)PACKET_TRANSACTION << (sint8)0 << (sint16)actionNumber << (sint8)1;
+
+    //Update slot
+    user->buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)slot << (sint16)itemID << (sint8)user->inv[slot].count << (sint8)user->inv[slot].health;
+    Mineserver::get()->screen()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(itemID) + " (" + dtos(user->inv[slot].count) + ") health: " + dtos(user->inv[slot].health));
+    //Update item on the cursor
+    //user->buffer << (sint8)PACKET_SET_SLOT << (sint8)-1 << (sint16)0   << (sint16)user->inventoryHolding.type << (sint8)0 << (sint8)0;
+  }
+  return true;
+}
+
+
+
+bool Inventory::isSpace(User *user,sint16 itemID, char count)
 {
+  int leftToFit = count;
+  for(uint8 i = 0; i < 36; i++)
+  {
+    Item *slot=&user->inv[i+9];
+    if(slot->type == -1)
+    {
+      return true;
+    }
+
+    if(slot->type == itemID)
+    {
+      if(64-slot->count >= leftToFit)
+      {
+        return true;
+      }
+      else if(64-slot->count > 0)
+      {
+        leftToFit -= 64-slot->count;
+      }
+    }
+  }
+  return false;
+}
+
+
+bool Inventory::addItems(User *user,sint16 itemID, char count, sint16 health)
+{
+  bool checkingTaskbar = true;
+
+  for(uint8 i = 36-9; i < 36-9 || checkingTaskbar; i++)
+  {
+    //First, the "task bar"
+    if(i == 36)
+    {
+      checkingTaskbar = false;
+      i=0;
+    }
+
+    //The main slots are in range 9-44
+    Item *slot = &user->inv[i+9];
+
+    //If slot empty, put item there
+    if(slot->type == -1)
+    {
+      user->buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)(i+9) << (sint16)itemID << (sint8)count << (sint8)health;
+      slot->type   = itemID;
+      slot->count  = count;
+      slot->health = health;
+      break;
+    }
+
+    //If same item type
+    if(slot->type == itemID)
+    {
+      //Put to the stack
+      if(64-slot->count >= count)
+      {
+        user->buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)(i+9) << (sint16)itemID << (sint8)(slot->count+count) << (sint8)health;
+        slot->type   = itemID;
+        slot->count += count;
+        break;
+      }
+      //Put some of the items to this stack and continue searching for space
+      else if(64-slot->count > 0)
+      {
+        user->buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)(i+9) << (sint16)itemID << (sint8)64 << (sint8)health;
+        slot->type = itemID;
+        slot->count = 64;
+        count -= 64-slot->count;
+      }
+    }
+  }
 
   return true;
 }

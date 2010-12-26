@@ -46,6 +46,7 @@
 #include "logger.h"
 #include "furnaceManager.h"
 #include "worldgen/mapgen.h"
+#include "inventory.h"
 
 class Mineserver
 {
@@ -91,6 +92,9 @@ public:
   Logger* logger() { if (!m_logger) { m_logger = new Logger; } return m_logger; }
   void setLogger(Logger* logger) { m_logger = logger; }
 
+  Inventory* inventory() { if (!m_inventory) { m_inventory = new Inventory; } return m_inventory; }
+  void setInventory(Inventory* inventory) { m_inventory = m_inventory; }
+
 private:
   Mineserver()
   {
@@ -104,6 +108,7 @@ private:
     m_packetHandler  = NULL;
     m_mapGen         = NULL;
     m_logger         = NULL;
+    m_inventory      = NULL;
   }
   event_base* m_eventBase;
   bool m_running;
@@ -122,6 +127,7 @@ private:
   PacketHandler* m_packetHandler;
   MapGen* m_mapGen;
   Logger* m_logger;
+  Inventory* m_inventory;
 };
 
 #endif
