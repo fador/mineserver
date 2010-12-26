@@ -51,10 +51,11 @@ CC = $(CXX)
 LDFLAGS += -L/usr/local/lib -L/usr/lib -levent -lz -lnoise $(LFLAGS)
 CXXFLAGS += $(DFLAGS) -I. -I/usr/Local/include -I/usr/include
 
-OBJS  = mineserver.o map.o chat.o commands.o config.o constants.o logger.o nbt.o furnace.o furnaceManager.o packets.o physics.o sockets.o tools.o user.o screen.o plugin.o tree.o inventory.o
+OBJS  = mineserver.o map.o chat.o constants.o logger.o nbt.o furnace.o furnaceManager.o packets.o physics.o sockets.o tools.o user.o screen.o plugin.o tree.o inventory.o
+OBJS += config.o config/node.o config/scanner.o config/lexer.o config/parser.o
 OBJS += blocks/basic.o blocks/door.o blocks/falling.o blocks/fire.o blocks/liquid.o blocks/plant.o blocks/sign.o blocks/snow.o blocks/stair.o blocks/torch.o blocks/tracks.o blocks/default.o blocks/chest.o
 OBJS += worldgen/mapgen.o worldgen/cavegen.o worldgen/mersenne.o
-PROG = ./mineserver
+PROG  = ./mineserver
 PROGS = $(PROG)
 
 $(PROGS): $(OBJS)
@@ -72,8 +73,11 @@ dist:
 all: $(PROGS)
 
 chat.o: chat.cpp logger.h constants.h tools.h map.h user.h chat.h config.h physics.h plugin.h
-commands.o: commands.cpp logger.h constants.h tools.h map.h user.h chat.h config.h physics.h
-config.o: config.cpp logger.h constants.h config.h
+config/node.o: config/node.cpp config/node.h
+config/scanner.o: config/scanner.cpp config/scanner.h
+config/lexer.o: config/lexer.cpp config/lexer.h
+config/parser.o: config/parser.cpp config/parser.h
+config.o: config.cpp config.h config/node.h config/scanner.h config/lexer.h config/parser.h
 constants.o: constants.cpp constants.h
 logger.o: logger.cpp logger.h mineserver.h
 map.o: map.cpp logger.h tools.h map.h user.h nbt.h config.h worldgen/mapgen.h
