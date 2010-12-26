@@ -48,7 +48,7 @@ bool ConfigScanner::read(std::string file)
   }
 
   std::ifstream handle;
-  handle.open(file.c_str());
+  handle.open(file.c_str(), std::ios_base::binary);
 
   if (handle.bad())
   {
