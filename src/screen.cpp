@@ -154,7 +154,10 @@ bool Screen::hasCommand()
     if (readchar != ERR)
     {
       if (readchar == '\b') // Backspace
-        currentCommand.erase(currentCommand.end() - 1);
+      {
+        if (currentCommand.size() != 0)
+          currentCommand.erase(currentCommand.end() - 1);
+      }
       else if (readchar == '\n')
         running = false;
       else if (readchar == KEY_UP) // FIXME
