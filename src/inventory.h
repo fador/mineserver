@@ -48,12 +48,41 @@ class Inventory
 {
 public:
 
+  struct Recipe
+  {
+    sint8 width;
+    sint8 height;
+    sint16 *slots;
+    Item output;
+  };
+  
+  std::vector<Recipe*> recipes;
+
   Inventory()
   {
+    Recipe *workbench = new Recipe;
+    workbench->width = 3;
+    workbench->height = 3;
+    workbench->slots = new sint16[9];
+    sint16 input[9] = { 5, 5, 5,
+                        5,-1, 5,
+                        5, 5, 5 };
+    workbench->output.count = 1;
+    workbench->output.type  = BLOCK_WORKBENCH;
+    workbench->output.health= 0;
+    workbench->slots = input;
+
+    recipes.push_back(workbench);
   }
 
   ~Inventory()
   {
+    for(uint32 i = 0; i < recipes.size(); i++)
+    {
+      delete [] recipes[i]->slots;
+      delete [] recipes[i];
+    }
+
   }
 
   //Open chest/workbench/furnace inventories
@@ -76,6 +105,11 @@ public:
 
   //Add items to inventory (pickups)
   bool addItems(User *user, sint16 itemID, char count, sint16 health);
+
+  bool doCraft(Item *slots, sint8 width, sint8 height);
+
+  bool setSlot(User *user, sint8 windowID, sint16 slot, sint16 itemID, sint8 count, sint16 health);
+
 };
 
 

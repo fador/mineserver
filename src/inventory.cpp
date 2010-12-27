@@ -241,7 +241,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
     //If accessing crafting output slot, remove from input!
     if((windowID == WINDOW_WORKBENCH || windowID == WINDOW_PLAYER) && slot == 0)
     {
-      //Do something?
+      //ToDo: use recipe and remove blocks from the crafting slots
     }
     else
     {
@@ -262,16 +262,27 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
     }
   }
 
-  Mineserver::get()->screen()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(slotItem->type) + " (" + dtos(slotItem->count) + ") health: " + dtos(slotItem->health));
-  //Update slot
-  user->buffer << (sint8)PACKET_SET_SLOT << (sint8)windowID << (sint16)slot << (sint16)slotItem->type;
-  if(slotItem->type != -1)
+  //Check if crafting
+  if(windowID == WINDOW_WORKBENCH && slot <10 && slot > 0 )
   {
-    user->buffer << (sint8)slotItem->count << (sint8)slotItem->health;
+    if(doCraft(&currentInventory->workbench[0], 3, 3))
+    {
+      setSlot(user, windowID, 0, currentInventory->workbench[0].type, currentInventory->workbench[0].count, currentInventory->workbench[0].health);
+    }
+  }
+  else if(windowID == WINDOW_PLAYER && slot <4 && slot > 0)
+  {
+    if(doCraft(&user->inv[0], 2, 2))
+    {
+      setSlot(user, windowID, 0, user->inv[0].type, user->inv[0].count, user->inv[0].health);
+    }
   }
 
+  Mineserver::get()->screen()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(slotItem->type) + " (" + dtos(slotItem->count) + ") health: " + dtos(slotItem->health));
+  //Update slot
+  setSlot(user, windowID, slot, slotItem->type, slotItem->count, slotItem->health);
+
   //Signal others using the same space
-  /*
   switch(windowID)
   {
     case WINDOW_WORKBENCH:
@@ -318,7 +329,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       }
       break;
   }
-  */
+  
 
   //Update item on the cursor
   user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_CURSOR << (sint16)0   << (sint16)user->inventoryHolding.type;
@@ -605,5 +616,68 @@ bool Inventory::onwindowClose(User *user,sint8 type,sint32 x, sint32 y, sint32 z
   }
 
   user->isOpenInv = false;
+  return true;
+}
+
+
+
+
+bool Inventory::doCraft(Item *slots, sint8 width, sint8 height)
+{
+
+  for(uint32 i = 0; i < recipes.size(); i++)
+  {
+    //Skip if recipe doesn't fit
+    if(width < recipes[i]->width || height < recipes[i]->height)
+    {
+      continue;
+    }
+    
+    sint8 offsetX = 0, offsetY = 0;
+
+    //Check for any possible position the recipe would fit
+    do
+    {
+      do
+      {
+        bool mismatch = false;
+        //Check for the recipe match on this position
+        for(uint32 recipePosX = 0; recipePosX < recipes[i]->width; recipePosX++)
+        {
+          for(uint32 recipePosY = 0; recipePosY < recipes[i]->height; recipePosY++)
+          {
+            if(slots[recipePosY*width+recipePosX+1].type != recipes[i]->slots[recipePosY*recipes[i]->height+recipePosX])
+            {
+              mismatch = true;
+              break;
+            }
+          }
+        }
+
+        //Found match!
+        if(!mismatch)
+        {
+          slots[0] = recipes[i]->output;
+          return true;
+        }
+
+        offsetX++;
+      } while(offsetX<=width-recipes[i]->width);
+
+      offsetY++;
+    } while(offsetY<=height-recipes[i]->height);
+  }
+
+  return false;
+}
+
+bool Inventory::setSlot(User *user, sint8 windowID, sint16 slot, sint16 itemID, sint8 count, sint16 health)
+{
+  user->buffer << (sint8)PACKET_SET_SLOT << (sint8)windowID << (sint16)slot   << (sint16)itemID;
+  if(itemID != -1)
+  {
+    user->buffer << (sint8)count << (sint8)health;
+  }
+
   return true;
 }
