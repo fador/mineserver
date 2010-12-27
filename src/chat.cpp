@@ -143,6 +143,9 @@ std::deque<std::string> Chat::parseCmd(std::string cmd)
 
 bool Chat::handleMsg(User* user, std::string msg)
 {
+  if (msg.empty()) // If the message is empty handle it as if there is no message.
+      return true;
+
   // Timestamp
   time_t rawTime = time(NULL);
   struct tm* Tm  = localtime(&rawTime);
