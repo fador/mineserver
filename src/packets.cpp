@@ -659,18 +659,28 @@ int PacketHandler::player_block_placement(User *user)
 
   bool foundFromInventory = false;
 
-  if(user->inv[36+user->currentItemSlot()].type == newblock)
+  #define INV_TASKBAR_START 36
+  if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].type == newblock && newblock != -1)
   {
     //Are we really placing this?
-    user->inv[36+user->currentItemSlot()].count--;
-    if(user->inv[36+user->currentItemSlot()].count == 0)
+    user->inv[INV_TASKBAR_START+user->currentItemSlot()].count--;
+    if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].count == 0)
     {
-      user->inv[36+user->currentItemSlot()].type   = -1;
-      user->inv[36+user->currentItemSlot()].health =  0;
+      user->inv[INV_TASKBAR_START+user->currentItemSlot()].type   = -1;
+      user->inv[INV_TASKBAR_START+user->currentItemSlot()].health =  0;
       //ToDo: add holding change packet.
+    }
+    user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_PLAYER 
+                 << (sint16)INV_TASKBAR_START+user->currentItemSlot() 
+                 << (sint16)user->inv[INV_TASKBAR_START+user->currentItemSlot()].type;
+    if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].type != -1)
+    {
+      user->buffer << (sint8)user->inv[INV_TASKBAR_START+user->currentItemSlot()].count
+                   << (sint8)user->inv[INV_TASKBAR_START+user->currentItemSlot()].health;
     }
     foundFromInventory = true;
   }
+  #undef INV_TASKBAR_START
 
 
   // TODO: Handle processing of
@@ -697,7 +707,7 @@ int PacketHandler::player_block_placement(User *user)
 
   if (newblock == -1 && newblock != ITEM_SIGN)
   {
-     Mineserver::get()->screen()->log("ignoring: "+newblock);
+     Mineserver::get()->screen()->log("ignoring: "+dtos(newblock));
      return PACKET_OK;
   }
 

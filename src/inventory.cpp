@@ -56,7 +56,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
 {  
 
 
-  Mineserver::get()->screen()->log(1,"window: " + dtos(windowID) + " sllot: " + dtos(slot) + " (" + dtos(actionNumber) + ") itemID: " + dtos(itemID));
+  Mineserver::get()->screen()->log(1,"window: " + dtos(windowID) + " slot: " + dtos(slot) + " (" + dtos(actionNumber) + ") itemID: " + dtos(itemID));
   //Click outside the window
   if(slot == -999)
   {
@@ -85,31 +85,35 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
   }
 
 
-  std::vector<openInventory *> *inv;
-  switch(user->openInv.type)
-  {
-    case WINDOW_CHEST:
-      inv = &openChests;
-      break;
-    case WINDOW_FURNACE:
-      inv = &openFurnaces;
-      break;
-    case WINDOW_WORKBENCH:
-      inv = &openWorkbenches;
-      break;
-  }
   std::vector<User *> *otherUsers = NULL;
   openInventory *currentInventory = NULL;
 
-  for(uint32 i = 0; i < inv->size(); i++)
+  if(windowID != WINDOW_PLAYER)
   {
-    if((*inv)[i]->x == user->openInv.x &&
-       (*inv)[i]->y == user->openInv.y &&
-       (*inv)[i]->z == user->openInv.z)
+    std::vector<openInventory *> *inv;
+    switch(user->openInv.type)
     {
-      otherUsers = &(*inv)[i]->users;
-      currentInventory = (*inv)[i];
-      break;
+      case WINDOW_CHEST:
+        inv = &openChests;
+        break;
+      case WINDOW_FURNACE:
+        inv = &openFurnaces;
+        break;
+      case WINDOW_WORKBENCH:
+        inv = &openWorkbenches;
+        break;
+    }
+
+    for(uint32 i = 0; i < inv->size(); i++)
+    {
+      if((*inv)[i]->x == user->openInv.x &&
+         (*inv)[i]->y == user->openInv.y &&
+         (*inv)[i]->z == user->openInv.z)
+      {
+        otherUsers = &(*inv)[i]->users;
+        currentInventory = (*inv)[i];
+        break;
+      }
     }
   }
 
@@ -211,34 +215,50 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
   //Empty slot and holding something
   if((itemID == -1 || (slotItem->type == itemID && slotItem->count < 64) ) && user->inventoryHolding.type != -1)
   {
-    sint16 addCount = (64-slotItem->count>=user->inventoryHolding.count)?user->inventoryHolding.count:64-slotItem->count;
-
-    slotItem->count  += (rightClick?1:addCount);
-    slotItem->health  = user->inventoryHolding.health;
-    slotItem->type    = user->inventoryHolding.type;
-
-    user->inventoryHolding.count -= (rightClick?1:addCount);
-    if(user->inventoryHolding.count == 0)
+    //If accessing crafting output slot, deny
+    if((windowID == WINDOW_WORKBENCH || windowID == WINDOW_PLAYER) && slot == 0)
     {
-      user->inventoryHolding.type  = -1;
-      user->inventoryHolding.health= 0;
+      //Do something?
+    }
+    else
+    {
+      sint16 addCount = (64-slotItem->count>=user->inventoryHolding.count)?user->inventoryHolding.count:64-slotItem->count;
+
+      slotItem->count  += (rightClick?1:addCount);
+      slotItem->health  = user->inventoryHolding.health;
+      slotItem->type    = user->inventoryHolding.type;
+
+      user->inventoryHolding.count -= (rightClick?1:addCount);
+      if(user->inventoryHolding.count == 0)
+      {
+        user->inventoryHolding.type  = -1;
+        user->inventoryHolding.health= 0;
+      }
     }
   }
   else if(user->inventoryHolding.type == -1)
   {
-    user->inventoryHolding.type   = slotItem->type;
-    user->inventoryHolding.health = slotItem->health;
-    user->inventoryHolding.count  = slotItem->count;
-    if(rightClick == 1)
+    //If accessing crafting output slot, remove from input!
+    if((windowID == WINDOW_WORKBENCH || windowID == WINDOW_PLAYER) && slot == 0)
     {
-      user->inventoryHolding.count  -= slotItem->count>>1;
+      //Do something?
     }
-
-    slotItem->count  -= (rightClick?slotItem->count>>1:user->inventoryHolding.count);
-    if(slotItem->count == 0)
+    else
     {
-      slotItem->health = 0;
-      slotItem->type   =-1;
+      user->inventoryHolding.type   = slotItem->type;
+      user->inventoryHolding.health = slotItem->health;
+      user->inventoryHolding.count  = slotItem->count;
+      if(rightClick == 1)
+      {
+        user->inventoryHolding.count  -= slotItem->count>>1;
+      }
+
+      slotItem->count  -= (rightClick?slotItem->count>>1:user->inventoryHolding.count);
+      if(slotItem->count == 0)
+      {
+        slotItem->health = 0;
+        slotItem->type   =-1;
+      }
     }
   }
 
