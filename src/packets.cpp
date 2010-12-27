@@ -651,7 +651,11 @@ int PacketHandler::player_block_placement(User *user)
     return PACKET_OK;
   }
 
-
+  // TODO: Handle sint16 itemID's
+  if(newblock > 255)
+  {
+    return PACKET_OK;
+  }
 
   bool foundFromInventory = false;
 

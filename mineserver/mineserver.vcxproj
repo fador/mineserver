@@ -25,7 +25,6 @@
     <ClCompile Include="..\src\blocks\torch.cpp" />
     <ClCompile Include="..\src\blocks\tracks.cpp" />
     <ClCompile Include="..\src\chat.cpp" />
-    <ClCompile Include="..\src\commands.cpp" />
     <ClCompile Include="..\src\config.cpp" />
     <ClCompile Include="..\src\config\lexer.cpp" />
     <ClCompile Include="..\src\config\node.cpp" />
