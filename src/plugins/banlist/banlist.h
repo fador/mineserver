@@ -7,6 +7,8 @@
 #ifndef _PLUGIN_BANLIST_H
 #define _PLUGIN_BANLIST_H
 
+#define PLUGIN_BANLIST_VERSION 0.1
+
 class P_Banlist
 {
 public:

@@ -64,6 +64,7 @@
 #define LIBRARY_SYMBOL(x, y) GetProcAddress(x, y)
 #define LIBRARY_ERROR() "Windows error handling needs work!" // <- NOTE
 #define LIBRARY_CLOSE(x) FreeLibrary(x)
+#define LIBRARY_EXTENSION ".dll"
 #else
 #define LIBRARY_HANDLE void*
 #define LIBRARY_LOAD(x) dlopen(x, RTLD_LAZY)
@@ -71,6 +72,7 @@
 #define LIBRARY_SYMBOL(x, y) dlsym(x, y)
 #define LIBRARY_ERROR() dlerror()
 #define LIBRARY_CLOSE(x) dlclose(x)
+#define LIBRARY_EXTENSION ".so"
 #endif
 //
 // It's SUPER EFFECTIVE!

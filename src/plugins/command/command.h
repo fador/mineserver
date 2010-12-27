@@ -6,6 +6,8 @@
 #ifndef _PLUGIN_COMMAND_H
 #define _PLUGIN_COMMAND_H
 
+#define PLUGIN_COMMAND_VERSION 0.1
+
 class P_Command
 {
 public:
