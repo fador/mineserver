@@ -671,7 +671,7 @@ int PacketHandler::player_block_placement(User *user)
       //ToDo: add holding change packet.
     }
     user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_PLAYER 
-                 << (sint16)INV_TASKBAR_START+user->currentItemSlot() 
+                 << (sint16)(INV_TASKBAR_START+user->currentItemSlot())
                  << (sint16)user->inv[INV_TASKBAR_START+user->currentItemSlot()].type;
     if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].type != -1)
     {
