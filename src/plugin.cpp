@@ -275,13 +275,26 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
     Mineserver::get()->screen()->log("Loading plugin `"+name+"' (`"+file+"')...");
 
     struct stat st;
-    if(stat(file.c_str(), &st) != 0)
+    if(stat(file.c_str(), &st) == 0)
     {
-      Mineserver::get()->screen()->log("Could not find `"+file+"'!");
-      return false;
+      lhandle = LIBRARY_LOAD(file.c_str());
+    }
+    else
+    {
+      Mineserver::get()->screen()->log("Could not find `"+file+"', trying `"+file+LIBRARY_EXTENSION+"'.");
+
+      if (stat((file+LIBRARY_EXTENSION).c_str(), &st) == 0)
+      {
+        lhandle = LIBRARY_LOAD((file+LIBRARY_EXTENSION).c_str());
+      }
+      else
+      {
+        Mineserver::get()->screen()->log("Could not find `"+file+LIBRARY_EXTENSION+"'!");
+
+        return false;
+      }
     }
 
-    lhandle = LIBRARY_LOAD(file.c_str());
   }
   else
   {
