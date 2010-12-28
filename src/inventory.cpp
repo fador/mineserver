@@ -507,7 +507,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
   bool playerCrafting    = false;
 
   //Empty slot and holding something
-  if((itemID == -1 || (slotItem->type == itemID && slotItem->count < 64) ) && user->inventoryHolding.type != -1)
+  if((itemID == -1 || (slotItem->type == user->inventoryHolding.type && slotItem->count < 64) ) && user->inventoryHolding.type != -1)
   {
     //If accessing crafting output slot
     if(slotItem->type != -1 && (windowID == WINDOW_WORKBENCH || windowID == WINDOW_PLAYER) && slot == 0)
@@ -637,8 +637,18 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       {
         slotItem->health = 0;
         slotItem->type   =-1;
-      }
+      }      
     }
+  }
+  else
+  {
+    //Swap items if holding something and clicking another, not with craft slot
+    if((windowID != WINDOW_WORKBENCH && windowID != WINDOW_PLAYER) || slot != 0)
+    {
+      Item tempItem            = user->inventoryHolding;
+      user->inventoryHolding   = (*slotItem);
+      *slotItem                = tempItem;
+    }      
   }
     
   
@@ -699,10 +709,13 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       {
         for(uint32 i = 0; i < otherUsers->size(); i++)
         {
-          (*otherUsers)[i]->buffer << (sint8)PACKET_SET_SLOT << (sint8)windowID << (sint16)slot << (sint16)slotItem->type;
-          if(slotItem->type != -1)
+          if((*otherUsers)[i] != user)
           {
-            (*otherUsers)[i]->buffer << (sint8)slotItem->count << (sint8)slotItem->health;
+            (*otherUsers)[i]->buffer << (sint8)PACKET_SET_SLOT << (sint8)windowID << (sint16)slot << (sint16)slotItem->type;
+            if(slotItem->type != -1)
+            {
+              (*otherUsers)[i]->buffer << (sint8)slotItem->count << (sint8)slotItem->health;
+            }
           }
         }
       }
@@ -714,10 +727,13 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       {
         for(uint32 i = 0; i < otherUsers->size(); i++)
         {
-          (*otherUsers)[i]->buffer << (sint8)PACKET_SET_SLOT << (sint8)windowID << (sint16)slot << (sint16)slotItem->type;
-          if(slotItem->type != -1)
+          if((*otherUsers)[i] != user)
           {
-            (*otherUsers)[i]->buffer << (sint8)slotItem->count << (sint8)slotItem->health;
+            (*otherUsers)[i]->buffer << (sint8)PACKET_SET_SLOT << (sint8)windowID << (sint16)slot << (sint16)slotItem->type;
+            if(slotItem->type != -1)
+            {
+              (*otherUsers)[i]->buffer << (sint8)slotItem->count << (sint8)slotItem->health;
+            }
           }
         }
       }
@@ -1030,9 +1046,9 @@ bool Inventory::doCraft(Item *slots, sint8 width, sint8 height)
       {
         bool mismatch = false;
         //Check for the recipe match on this position
-        for(uint32 recipePosX = 0; recipePosX < recipes[i]->width; recipePosX++)
+        for(sint32 recipePosX = 0; recipePosX < recipes[i]->width; recipePosX++)
         {
-          for(uint32 recipePosY = 0; recipePosY < recipes[i]->height; recipePosY++)
+          for(sint32 recipePosY = 0; recipePosY < recipes[i]->height; recipePosY++)
           {
             if(slots[(recipePosY+offsetY)*width+recipePosX+1+offsetX].type != recipes[i]->slots[recipePosY*recipes[i]->width+recipePosX])
             {
@@ -1047,9 +1063,9 @@ bool Inventory::doCraft(Item *slots, sint8 width, sint8 height)
         {
           //Check that other areas are empty!
           bool foundItem = false;
-          for(uint32 craftingPosX = 0; craftingPosX < width; craftingPosX++)
+          for(sint32 craftingPosX = 0; craftingPosX < width; craftingPosX++)
           {
-            for(uint32 craftingPosY = 0; craftingPosY < height; craftingPosY++)
+            for(sint32 craftingPosY = 0; craftingPosY < height; craftingPosY++)
             {
               //If not inside the recipe boundaries
               if(craftingPosX < offsetX || craftingPosX>=offsetX+recipes[i]->width ||
