@@ -51,21 +51,14 @@ CC = $(CXX)
 LDFLAGS += -L/usr/local/lib -L/usr/lib -levent -lz -lnoise $(LFLAGS)
 CXXFLAGS += $(DFLAGS) -I. -I/usr/Local/include -I/usr/include
 
-<<<<<<< HEAD
 CXXFLAGS += $(shell python-config --cflags)
 LDFLAGS += $(shell python-config --ldflags)
 
-OBJS  = mineserver.o map.o chat.o commands.o config.o constants.o logger.o nbt.o furnace.o furnaceManager.o packets.o physics.o sockets.o tools.o user.o screen.o plugin.o tree.o
-OBJS += blocks/basic.o blocks/door.o blocks/falling.o blocks/fire.o blocks/liquid.o blocks/plant.o blocks/sign.o blocks/snow.o blocks/stair.o blocks/torch.o blocks/tracks.o blocks/default.o blocks/chest.o
-OBJS += worldgen/mapgen.o worldgen/cavegen.o worldgen/mersenne.o MineServer_wrap.o
-PROG = ./mineserver
-=======
 OBJS  = mineserver.o map.o chat.o constants.o logger.o nbt.o furnace.o furnaceManager.o packets.o physics.o sockets.o tools.o user.o screen.o plugin.o tree.o inventory.o
 OBJS += config.o config/node.o config/scanner.o config/lexer.o config/parser.o
 OBJS += blocks/basic.o blocks/door.o blocks/falling.o blocks/fire.o blocks/liquid.o blocks/plant.o blocks/sign.o blocks/snow.o blocks/stair.o blocks/torch.o blocks/tracks.o blocks/default.o blocks/chest.o
-OBJS += worldgen/mapgen.o worldgen/cavegen.o worldgen/mersenne.o
+OBJS += worldgen/mapgen.o worldgen/cavegen.o worldgen/mersenne.o MineServer_wrap.o
 PROG  = ./mineserver
->>>>>>> upstream/master
 PROGS = $(PROG)
 
 $(PROGS): $(OBJS)
