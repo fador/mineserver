@@ -552,23 +552,26 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
           playerCrafting = true;
         }
       }
-      setSlot(user, WINDOW_CURSOR, 0, user->inventoryHolding.type, user->inventoryHolding.count, user->inventoryHolding.health);
     }
     else
     {
       //ToDo: Make sure we have room for the items!
 
-      sint16 addCount = (64-slotItem->count>=user->inventoryHolding.count)?user->inventoryHolding.count:64-slotItem->count;
-
-      slotItem->count  += ((rightClick)?1:addCount);
-      slotItem->health  = user->inventoryHolding.health;
-      slotItem->type    = user->inventoryHolding.type;
-
-      user->inventoryHolding.count -= ((rightClick)?1:addCount);
-      if(user->inventoryHolding.count == 0)
+      //Make sure not putting anything to the crafting space
+      if((windowID != WINDOW_WORKBENCH && windowID != WINDOW_PLAYER) || slot != 0)
       {
-        user->inventoryHolding.type  = -1;
-        user->inventoryHolding.health= 0;
+        sint16 addCount = (64-slotItem->count>=user->inventoryHolding.count)?user->inventoryHolding.count:64-slotItem->count;
+
+        slotItem->count  += ((rightClick)?1:addCount);
+        slotItem->health  = user->inventoryHolding.health;
+        slotItem->type    = user->inventoryHolding.type;
+
+        user->inventoryHolding.count -= ((rightClick)?1:addCount);
+        if(user->inventoryHolding.count == 0)
+        {
+          user->inventoryHolding.type  = -1;
+          user->inventoryHolding.health= 0;
+        }
       }
     }
     
@@ -619,8 +622,6 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
         }
         playerCrafting = true;
       }
-
-      setSlot(user, WINDOW_CURSOR, 0, user->inventoryHolding.type, user->inventoryHolding.count, user->inventoryHolding.health);
     }
     else
     {
