@@ -371,6 +371,8 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
     {
       return false;
     }
+
+    chunk->changed = true;
   }
 
   std::vector<User *> *otherUsers = NULL;
