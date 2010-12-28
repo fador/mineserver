@@ -61,9 +61,9 @@ public:
   Inventory()
   {
     Recipe *furnace = new Recipe;
-    furnace->width = 3;
+    furnace->width  = 3;
     furnace->height = 3;
-    furnace->slots = new sint16[9];
+    furnace->slots  = new sint16[9];
     sint16 input[9] = { 4, 4, 4,
                         4,-1, 4,
                         4, 4, 4 };
@@ -75,9 +75,9 @@ public:
     recipes.push_back(furnace);
 
     Recipe *workbench = new Recipe;
-    workbench->width = 2;
+    workbench->width  = 2;
     workbench->height = 2;
-    workbench->slots = new sint16[4];
+    workbench->slots  = new sint16[4];
     sint16 inputWorkbench[4] = { 4, 4,
                                  4, 4 };
                         
@@ -89,9 +89,9 @@ public:
     recipes.push_back(workbench);
 
     Recipe *grass = new Recipe;
-    grass->width = 2;
+    grass->width  = 2;
     grass->height = 2;
-    grass->slots = new sint16[4];
+    grass->slots  = new sint16[4];
     sint16 input2[4] = { 3, 3,
                          3, 3};
     grass->output.count = 1;

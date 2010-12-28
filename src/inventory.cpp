@@ -54,9 +54,10 @@
 
 bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightClick, sint16 actionNumber, sint16 itemID, sint8 itemCount,sint8 itemUses)
 {  
+  //Ack
+  user->buffer << (sint8)PACKET_TRANSACTION << (sint8)windowID << (sint16)actionNumber << (sint8)1;
 
-
-  Mineserver::get()->screen()->log(1,"window: " + dtos(windowID) + " slot: " + dtos(slot) + " (" + dtos(actionNumber) + ") itemID: " + dtos(itemID));
+  //Mineserver::get()->screen()->log(1,"window: " + dtos(windowID) + " slot: " + dtos(slot) + " (" + dtos(actionNumber) + ") itemID: " + dtos(itemID));
   //Click outside the window
   if(slot == -999)
   {
@@ -77,13 +78,16 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
     return false;
   }
 
-  sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(blockToChunk(user->openInv.x),blockToChunk(user->openInv.z));
-
-  if(chunk == NULL)
+  sChunk* chunk = NULL;
+  if(windowID != 0)
   {
-    return false;
-  }
+    chunk = Mineserver::get()->map()->chunks.GetChunk(blockToChunk(user->openInv.x),blockToChunk(user->openInv.z));
 
+    if(chunk == NULL)
+    {
+      return false;
+    }
+  }
 
   std::vector<User *> *otherUsers = NULL;
   openInventory *currentInventory = NULL;
@@ -115,12 +119,14 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
         break;
       }
     }
+
+    if(otherUsers == NULL || currentInventory == NULL)
+    {
+      return false;
+    }
   }
 
-  if(otherUsers == NULL || currentInventory == NULL)
-  {
-    return false;
-  }
+
 
   Item *slotItem = NULL;
   
@@ -211,37 +217,124 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       break;
   }
   
+  bool workbenchCrafting = false;
+  bool playerCrafting    = false;
 
   //Empty slot and holding something
   if((itemID == -1 || (slotItem->type == itemID && slotItem->count < 64) ) && user->inventoryHolding.type != -1)
   {
-    //If accessing crafting output slot, deny
-    if((windowID == WINDOW_WORKBENCH || windowID == WINDOW_PLAYER) && slot == 0)
+    //If accessing crafting output slot
+    if(slotItem->type != -1 && (windowID == WINDOW_WORKBENCH || windowID == WINDOW_PLAYER) && slot == 0)
     {
-      //Do something?
+      if(user->inventoryHolding.type == slotItem->type && 64-user->inventoryHolding.count >= slotItem->count)
+      {
+        user->inventoryHolding.count += slotItem->count;
+        if(windowID == WINDOW_WORKBENCH)
+        {
+          for(uint8 workbenchSlot = 1; workbenchSlot < 10; workbenchSlot++)
+          {
+            if(currentInventory->workbench[workbenchSlot].type != -1)
+            {
+              currentInventory->workbench[workbenchSlot].count --;
+              if(currentInventory->workbench[workbenchSlot].count == 0)
+              {
+                currentInventory->workbench[workbenchSlot] = Item();
+              }
+              setSlot(user, windowID, workbenchSlot, currentInventory->workbench[workbenchSlot].type, 
+                                                     currentInventory->workbench[workbenchSlot].count, 
+                                                     currentInventory->workbench[workbenchSlot].health);
+            }
+          }
+          workbenchCrafting = true;
+        }
+        else
+        {
+          for(uint8 playerSlot = 1; playerSlot < 5; playerSlot++)
+          {
+            if(user->inv[playerSlot].type != -1)
+            {
+              user->inv[playerSlot].count --;
+              if(user->inv[playerSlot].count == 0)
+              {
+                user->inv[playerSlot] = Item();
+              }
+              setSlot(user, windowID, playerSlot, user->inv[playerSlot].type, 
+                                                  user->inv[playerSlot].count, 
+                                                  user->inv[playerSlot].health);
+            }
+          }
+          playerCrafting = true;
+        }
+      }
+      setSlot(user, WINDOW_CURSOR, 0, user->inventoryHolding.type, user->inventoryHolding.count, user->inventoryHolding.health);
     }
     else
     {
+      //ToDo: Make sure we have room for the items!
+
       sint16 addCount = (64-slotItem->count>=user->inventoryHolding.count)?user->inventoryHolding.count:64-slotItem->count;
 
-      slotItem->count  += (rightClick?1:addCount);
+      slotItem->count  += ((rightClick)?1:addCount);
       slotItem->health  = user->inventoryHolding.health;
       slotItem->type    = user->inventoryHolding.type;
 
-      user->inventoryHolding.count -= (rightClick?1:addCount);
+      user->inventoryHolding.count -= ((rightClick)?1:addCount);
       if(user->inventoryHolding.count == 0)
       {
         user->inventoryHolding.type  = -1;
         user->inventoryHolding.health= 0;
       }
     }
+    
   }
   else if(user->inventoryHolding.type == -1)
   {
     //If accessing crafting output slot, remove from input!
-    if((windowID == WINDOW_WORKBENCH || windowID == WINDOW_PLAYER) && slot == 0)
+    if(slotItem->type != -1 && (windowID == WINDOW_WORKBENCH || windowID == WINDOW_PLAYER) && slot == 0)
     {
-      //ToDo: use recipe and remove blocks from the crafting slots
+      user->inventoryHolding.type = slotItem->type;
+      user->inventoryHolding.count = slotItem->count;
+      user->inventoryHolding.health = slotItem->health;
+
+      if(windowID == WINDOW_WORKBENCH)
+      {
+        for(uint8 workbenchSlot = 1; workbenchSlot < 10; workbenchSlot++)
+        {
+          if(currentInventory->workbench[workbenchSlot].type != -1)
+          {
+            currentInventory->workbench[workbenchSlot].count --;
+            if(currentInventory->workbench[workbenchSlot].count == 0)
+            {
+              currentInventory->workbench[workbenchSlot] = Item();
+            }
+
+            setSlot(user, windowID, workbenchSlot,currentInventory->workbench[workbenchSlot].type, 
+                                                  currentInventory->workbench[workbenchSlot].count, 
+                                                  currentInventory->workbench[workbenchSlot].health);
+          }
+        }
+        workbenchCrafting = true;
+      }
+      else
+      {
+        for(uint8 playerSlot = 1; playerSlot < 5; playerSlot++)
+        {
+          if(user->inv[playerSlot].type != -1)
+          {
+            user->inv[playerSlot].count --;
+            if(user->inv[playerSlot].count == 0)
+            {
+              user->inv[playerSlot] = Item();
+            }
+            setSlot(user, windowID, playerSlot, user->inv[playerSlot].type, 
+                                                user->inv[playerSlot].count, 
+                                                user->inv[playerSlot].health);
+          }
+        }
+        playerCrafting = true;
+      }
+
+      setSlot(user, WINDOW_CURSOR, 0, user->inventoryHolding.type, user->inventoryHolding.count, user->inventoryHolding.health);
     }
     else
     {
@@ -253,7 +346,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
         user->inventoryHolding.count  -= slotItem->count>>1;
       }
 
-      slotItem->count  -= (rightClick?slotItem->count>>1:user->inventoryHolding.count);
+      slotItem->count  -= user->inventoryHolding.count;
       if(slotItem->count == 0)
       {
         slotItem->health = 0;
@@ -271,7 +364,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
 
 
   //Check if crafting
-  if(windowID == WINDOW_WORKBENCH && slot < 10 && slot > 0 )
+  if(windowID == WINDOW_WORKBENCH && slot < 10 && slot > 0 || workbenchCrafting)
   {
     if(doCraft(currentInventory->workbench, 3, 3))
     {
@@ -283,7 +376,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       setSlot(user, windowID, 0, -1, 0, 0);
     }
   }
-  else if(windowID == WINDOW_PLAYER && slot < 4 && slot > 0)
+  else if(windowID == WINDOW_PLAYER && slot < 5 && slot > 0 || playerCrafting)
   {
     if(doCraft(user->inv, 2, 2))
     {
@@ -291,7 +384,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
     }
     else
     {
-      currentInventory->workbench[0] = Item();
+      user->inv[0] = Item();
       setSlot(user, windowID, 0, -1, 0, 0);
     }
   }
@@ -703,7 +796,7 @@ bool Inventory::doCraft(Item *slots, sint8 width, sint8 height)
 
 bool Inventory::setSlot(User *user, sint8 windowID, sint16 slot, sint16 itemID, sint8 count, sint16 health)
 {
-  Mineserver::get()->screen()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(itemID) + " (" + dtos(count) + ") health: " + dtos(health));
+  //Mineserver::get()->screen()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(itemID) + " (" + dtos(count) + ") health: " + dtos(health));
   user->buffer << (sint8)PACKET_SET_SLOT << (sint8)windowID << (sint16)slot   << (sint16)itemID;
   if(itemID != -1)
   {
