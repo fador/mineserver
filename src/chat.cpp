@@ -250,7 +250,7 @@ bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
     break;
 
   case USER:
-   	user->buffer.addToWrite(tmpArray, tmpArrayLen);
+     user->buffer.addToWrite(tmpArray, tmpArrayLen);
     break;
 
   case ADMINS:

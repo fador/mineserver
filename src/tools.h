@@ -90,9 +90,9 @@ inline sint32 blockToChunkBlock(sint32 value)
 
 inline sint8 angleToByte(float angle)
 {
-	return (sint8)((angle / 360.f) * 256);
+  return (sint8)((angle / 360.f) * 256);
 }
 
-inline int getRandInt(int min, int max) { return (rand() % ((max-min)+1) + min); };
+inline int getRandInt(int min, int max) { return (rand() % ((max-min)+1) + min); }
 
 #endif

@@ -39,10 +39,10 @@
 struct sTree
 {
   sint32 x,y,z;
-  sint32 plantedTime;
+  sint64 plantedTime;
   uint32 plantedBy;
 
-  sTree(sint32 _x,sint32 _y, sint32 _z, sint32 _plantedTime, uint32 _plantedBy) :
+  sTree(sint32 _x,sint32 _y, sint32 _z, sint64 _plantedTime, uint32 _plantedBy) :
     x(_x),y(_y),z(_z),
     plantedTime(_plantedTime),plantedBy(_plantedBy) {}
 

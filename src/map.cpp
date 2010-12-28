@@ -1052,8 +1052,6 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
           std::vector<NBT_Value*>* entities2 = chestItems->GetList();
           std::vector<NBT_Value*>::iterator iter2 = entities2->begin(), end2 = entities2->end();
 
-          bool done = false;
-
           chestData *newChest = new chestData;
           newChest->x = entityX;
           newChest->y = entityY;
@@ -1090,8 +1088,6 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
 
           std::vector<NBT_Value*>* entities2 = chestItems->GetList();
           std::vector<NBT_Value*>::iterator iter2 = entities2->begin(), end2 = entities2->end();
-
-          bool done = false;
 
           if((**iter)["BurnTime"] == NULL || (**iter)["CookTime"] == NULL)
           {

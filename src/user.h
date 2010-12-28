@@ -82,7 +82,7 @@ public:
   uint32 write_err_count;
   bool logged;
   bool muted;
-	bool dnd;
+  bool dnd;
   sint16 health;
   uint16 timeUnderwater;
   unsigned int UID;
@@ -135,8 +135,8 @@ public:
   // Chat blocking
   bool mute(std::string muteMsg);
   bool unmute();
-	bool toggleDND();
-	bool isAbleToCommunicate(std::string communicateCommand);
+  bool toggleDND();
+  bool isAbleToCommunicate(std::string communicateCommand);
 
   //Map related
 
@@ -182,7 +182,7 @@ public:
 
   bool withinViewDistance(int a, int b)
   {
-	  return a > b ? (a-b)<viewDistance : (b-a)<viewDistance;
+    return a > b ? (a-b)<viewDistance : (b-a)<viewDistance;
   }
 
   struct event* GetEvent();

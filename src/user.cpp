@@ -378,7 +378,6 @@ bool User::saveData()
 
   NBT_Value* nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
 
-  char slotid   = 9;
   char itemslot = 0;
   //Start with main items
   for(int slotid = 9; slotid < 45; slotid++,itemslot++)
