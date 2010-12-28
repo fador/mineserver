@@ -97,7 +97,7 @@ void Map::init()
 #ifdef _DEBUG
   Mineserver::get()->screen()->log("Map::init()");
 #endif
-  mapDirectory = Mineserver::get()->conf()->sValue("map_directory");
+  mapDirectory = Mineserver::get()->config()->sData("map.storage.nbt.directory");
   if(mapDirectory == "Not found!")
   {
     std::cout << "Error, mapdir not defined!" << std::endl;
@@ -994,6 +994,141 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   // Not changed
   chunk->changed    = false;
   chunk->lightRegen = false;
+    
+  //Get list of chests,furnaces etc on the chunk
+  NBT_Value* entityList = level["TileEntities"];
+
+  //Verify the type
+  if(entityList && entityList->GetType() == NBT_Value::TAG_LIST && entityList->GetListType() == NBT_Value::TAG_COMPOUND)
+  {
+    std::vector<NBT_Value*>* entities = entityList->GetList();
+    std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
+
+    for( ; iter != end ; iter++)
+    {
+      std::vector<uint8> buffer;
+      NBT_Value* idVal = (**iter)["id"];
+      if(idVal == NULL)
+        continue;
+      std::string* id = idVal->GetString();
+      if(id == NULL)
+        continue;
+
+      if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
+         (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
+         (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
+      {
+        continue;
+      }
+
+      sint32 entityX = *(**iter)["x"];
+      sint32 entityY = *(**iter)["y"];
+      sint32 entityZ = *(**iter)["z"];
+
+      if((*id=="Sign"))
+      {
+        signData *newSign = new signData;
+        newSign->x = entityX;
+        newSign->y = entityY;
+        newSign->z = entityZ;
+        newSign->text1=*(**iter)["Text1"]->GetString();
+        newSign->text2=*(**iter)["Text2"]->GetString();
+        newSign->text3=*(**iter)["Text3"]->GetString();
+        newSign->text4=*(**iter)["Text4"]->GetString();
+
+        chunk->signs.push_back(newSign);
+      }
+      else if((*id=="Chest"))
+      {
+        NBT_Value* chestItems = (**iter)["Items"];
+
+        if(chestItems->GetType() == NBT_Value::TAG_LIST)
+        {
+          if(chestItems->GetListType() != NBT_Value::TAG_COMPOUND)
+          {
+            continue;
+          }
+
+          std::vector<NBT_Value*>* entities2 = chestItems->GetList();
+          std::vector<NBT_Value*>::iterator iter2 = entities2->begin(), end2 = entities2->end();
+
+          chestData *newChest = new chestData;
+          newChest->x = entityX;
+          newChest->y = entityY;
+          newChest->z = entityZ;
+
+          for( ; iter2 != end2; iter2++ )
+          {
+            if((**iter2)["Count"] == NULL || (**iter2)["Slot"] == NULL || (**iter2)["Damage"] == NULL || (**iter2)["id"] == NULL ||
+               (**iter2)["Count"]->GetType() != NBT_Value::TAG_BYTE ||
+               (**iter2)["Slot"]->GetType() != NBT_Value::TAG_BYTE ||
+               (**iter2)["Damage"]->GetType() != NBT_Value::TAG_SHORT ||
+               (**iter2)["id"]->GetType() != NBT_Value::TAG_SHORT)               
+            {
+              continue;
+            }
+            newChest->items[(sint8)*(**iter2)["Slot"]].count  =  (sint8)*(**iter2)["Count"];
+            newChest->items[(sint8)*(**iter2)["Slot"]].health = (sint16)*(**iter2)["Damage"];
+            newChest->items[(sint8)*(**iter2)["Slot"]].type   = (sint16)*(**iter2)["id"];
+          }
+
+          chunk->chests.push_back(newChest);
+        }
+      }
+      else if((*id=="Furnace"))
+      {
+        NBT_Value* chestItems = (**iter)["Items"];
+
+        if(chestItems->GetType() == NBT_Value::TAG_LIST)
+        {
+          if(chestItems->GetListType() != NBT_Value::TAG_COMPOUND)
+          {
+            continue;
+          }
+
+          std::vector<NBT_Value*>* entities2 = chestItems->GetList();
+          std::vector<NBT_Value*>::iterator iter2 = entities2->begin(), end2 = entities2->end();
+
+          if((**iter)["BurnTime"] == NULL || (**iter)["CookTime"] == NULL)
+          {
+            continue;
+          }
+
+          furnaceData *newFurnace = new furnaceData;
+          newFurnace->x = entityX;
+          newFurnace->y = entityY;
+          newFurnace->z = entityZ;
+          newFurnace->burnTime = (sint16)*(**iter)["BurnTime"];
+          newFurnace->cookTime = (sint16)*(**iter)["CookTime"];
+
+          for( ; iter2 != end2; iter2++ )
+          {
+            if((**iter2)["Count"] == NULL || (**iter)["Slot"] == NULL || (**iter)["Damage"] == NULL || (**iter)["id"] == NULL ||
+               (**iter2)["Count"]->GetType() != NBT_Value::TAG_BYTE ||
+               (**iter2)["Slot"]->GetType() != NBT_Value::TAG_BYTE ||
+               (**iter2)["Damage"]->GetType() != NBT_Value::TAG_SHORT ||
+               (**iter2)["id"]->GetType() != NBT_Value::TAG_SHORT ||
+               (sint8)*(**iter2)["Slot"] > 3 || (sint8)*(**iter2)["Slot"] < 0)
+            {
+              continue;
+            }
+            newFurnace->items[(sint8)*(**iter2)["Slot"]].count  = (sint8)*(**iter2)["Count"];
+            newFurnace->items[(sint8)*(**iter2)["Slot"]].health = (sint16)*(**iter2)["Damage"];
+            newFurnace->items[(sint8)*(**iter2)["Slot"]].type   = (sint16)*(**iter2)["id"];
+          }
+
+          chunk->furnaces.push_back(newFurnace);          
+        }
+      }
+
+      //Delete list item
+      delete (*iter);
+      (*iter) = NULL;
+    }
+
+    //Clear the list
+    entityList->GetList()->clear();
+  }
 
   return chunk;
 }
@@ -1056,6 +1191,87 @@ bool Map::saveMap(int x, int z)
     }
   }
 
+
+  NBT_Value* entityList = (*(*chunk->nbt)["Level"])["TileEntities"];
+
+  if(!entityList)
+  {
+    entityList = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
+    chunk->nbt->Insert("TileEntities", entityList);
+  }
+
+  //Save signs
+  for(uint32 i = 0; i < chunk->signs.size(); i++)
+  {
+    NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+    val->Insert("id", new NBT_Value(std::string("Sign")));
+    val->Insert("x", new NBT_Value((sint32)chunk->signs[i]->x));
+    val->Insert("y", new NBT_Value((sint32)chunk->signs[i]->y));
+    val->Insert("z", new NBT_Value((sint32)chunk->signs[i]->z));
+    val->Insert("Text1", new NBT_Value(chunk->signs[i]->text1));
+    val->Insert("Text2", new NBT_Value(chunk->signs[i]->text2));
+    val->Insert("Text3", new NBT_Value(chunk->signs[i]->text3));
+    val->Insert("Text4", new NBT_Value(chunk->signs[i]->text4));
+
+    entityList->GetList()->push_back(val);
+  }
+
+  //Save chests
+  for(uint32 i = 0; i < chunk->chests.size(); i++)
+  {
+    NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+    val->Insert("id", new NBT_Value(std::string("Chest")));
+    val->Insert("x", new NBT_Value((sint32)chunk->chests[i]->x));
+    val->Insert("y", new NBT_Value((sint32)chunk->chests[i]->y));
+    val->Insert("z", new NBT_Value((sint32)chunk->chests[i]->z));
+    NBT_Value* nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
+    for(uint32 slot = 0; slot < 27; slot++)
+    {
+      if(chunk->chests[i]->items[slot].count && chunk->chests[i]->items[slot].type != -1)
+      {
+        NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+        val->Insert("Count", new NBT_Value((sint8)chunk->chests[i]->items[slot].count));
+        val->Insert("Slot", new NBT_Value((sint8)slot));
+        val->Insert("Damage", new NBT_Value((sint16)chunk->chests[i]->items[slot].health));
+        val->Insert("id", new NBT_Value((sint16)chunk->chests[i]->items[slot].type));
+        nbtInv->GetList()->push_back(val);
+      }
+    }
+    val->Insert("Items", nbtInv);
+
+    entityList->GetList()->push_back(val);
+  }
+
+  //Save furnaces
+  for(uint32 i = 0; i < chunk->furnaces.size(); i++)
+  {
+    NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+    val->Insert("id", new NBT_Value(std::string("Furnace")));
+    val->Insert("x", new NBT_Value((sint32)chunk->furnaces[i]->x));
+    val->Insert("y", new NBT_Value((sint32)chunk->furnaces[i]->y));
+    val->Insert("z", new NBT_Value((sint32)chunk->furnaces[i]->z));
+    val->Insert("BurnTime", new NBT_Value((sint16)chunk->furnaces[i]->burnTime));
+    val->Insert("CookTime", new NBT_Value((sint16)chunk->furnaces[i]->cookTime));
+    NBT_Value* nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
+
+    for(uint32 slot = 0; slot < 3; slot++)
+    {
+      if(chunk->furnaces[i]->items[slot].count && chunk->furnaces[i]->items[slot].type != 0 && chunk->furnaces[i]->items[slot].type != -1)
+      {
+        NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+        val->Insert("Count", new NBT_Value((sint8)chunk->furnaces[i]->items[slot].count));
+        val->Insert("Slot", new NBT_Value((sint8)slot));
+        val->Insert("Damage", new NBT_Value((sint16)chunk->furnaces[i]->items[slot].health));
+        val->Insert("id", new NBT_Value((sint16)chunk->furnaces[i]->items[slot].type));
+        nbtInv->GetList()->push_back(val);
+      }
+    }
+    val->Insert("Items", nbtInv);
+
+    entityList->GetList()->push_back(val);
+  }
+
+
   chunk->nbt->SaveToFile(outfile);
 
   // Set "not changed"
@@ -1073,6 +1289,25 @@ bool Map::releaseMap(int x, int z)
   sChunk* chunk = chunks.GetChunk(x,z);
   if(chunk == NULL)
     return false;
+
+  //Erase sign data
+  for(uint32 i = 0; i < chunk->signs.size(); i++)
+  {
+    delete chunk->signs[i];
+  }
+
+  //Erase chest data
+  for(uint32 i = 0; i < chunk->chests.size(); i++)
+  {
+    delete chunk->chests[i];
+  }
+
+  //Erase furnace data
+  for(uint32 i = 0; i < chunk->furnaces.size(); i++)
+  {
+    delete chunk->furnaces[i];
+  }
+
   chunks.UnlinkChunk(x, z);
   delete chunk->nbt;
   delete chunk;
@@ -1126,237 +1361,14 @@ void Map::sendToUser(User* user, int x, int z)
   user->buffer << (sint32)written;
   user->buffer.addToWrite(buffer, written);
 
-  //Get list of chests,furnaces etc on the chunk
-  NBT_Value* entityList = (*(*chunk->nbt)["Level"])["TileEntities"];
-
-  //Verify the type
-  if(entityList && entityList->GetType() == NBT_Value::TAG_LIST && entityList->GetListType() == NBT_Value::TAG_COMPOUND)
+  //Push sign data to player
+  for(uint32 i = 0; i < chunk->signs.size(); i++)
   {
-    std::vector<NBT_Value*>* entities = entityList->GetList();
-    std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
-
-    for( ; iter != end ; iter++)
-    {
-      std::vector<uint8> buffer;
-      NBT_Value* idVal = (**iter)["id"];
-      if(idVal == NULL)
-        continue;
-      std::string* id = idVal->GetString();
-      if(id == NULL)
-        continue;
-
-      if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
-         (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
-         (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
-      {
-        continue;
-      }
-
-      sint32 entityX = *(**iter)["x"];
-      sint32 entityY = *(**iter)["y"];
-      sint32 entityZ = *(**iter)["z"];
-
-      if((*id=="Sign"))
-      {
-        user->buffer << (sint8)PACKET_SIGN << entityX << (sint16)entityY << entityZ;
-        user->buffer << *(**iter)["Text1"]->GetString() << *(**iter)["Text2"]->GetString() << *(**iter)["Text3"]->GetString() << *(**iter)["Text4"]->GetString();
-
-        signData *newSign = new signData;
-        newSign->x = entityX;
-        newSign->y = entityY;
-        newSign->z = entityZ;
-        newSign->text[0]=*(**iter)["Text1"]->GetString();
-        newSign->text[1]=*(**iter)["Text2"]->GetString();
-        newSign->text[2]=*(**iter)["Text3"]->GetString();
-        newSign->text[3]=*(**iter)["Text4"]->GetString();
-
-        chunk->signs.push_back(newSign);
-      }
-      else if((*id=="Chest"))
-      {
-        NBT_Value* chestItems = (**iter)["Items"];
-
-        if(chestItems->GetType() == NBT_Value::TAG_LIST)
-        {
-          if(chestItems->GetListType() != NBT_Value::TAG_COMPOUND)
-          {
-            continue;
-          }
-
-          std::vector<NBT_Value*>* entities = entityList->GetList();
-          std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
-
-          bool done = false;
-
-          chestData *newChest = new chestData;
-          newChest->x = entityX;
-          newChest->y = entityY;
-          newChest->z = entityZ;
-
-          for(uint32 i = 0; i < 28; i ++)
-          {
-            newChest->items[i].type = -1;
-          }
-
-          for( ; iter != end; iter++ )
-          {
-            if((**iter)["Count"] == NULL || (**iter)["Slot"] == NULL || (**iter)["Damage"] == NULL || (**iter)["id"] == NULL ||
-               (**iter)["Count"]->GetType() != NBT_Value::TAG_INT ||
-               (**iter)["Slot"]->GetType() != NBT_Value::TAG_INT ||
-               (**iter)["Damage"]->GetType() != NBT_Value::TAG_INT ||
-               (**iter)["id"]->GetType() != NBT_Value::TAG_INT)
-            {
-              continue;
-            }
-            newChest->items[(sint8)*(**iter)["Slot"]].count  = (sint8)*(**iter)["Count"];
-            newChest->items[(sint8)*(**iter)["Slot"]].health = (sint16)*(**iter)["Damage"];
-            newChest->items[(sint8)*(**iter)["Slot"]].type   = (sint16)*(**iter)["id"];
-          }
-
-          chunk->chests.push_back(newChest);
-        }
-      }
-      else if((*id=="Furnace"))
-      {
-        NBT_Value* chestItems = (**iter)["Items"];
-
-        if(chestItems->GetType() == NBT_Value::TAG_LIST)
-        {
-          if(chestItems->GetListType() != NBT_Value::TAG_COMPOUND)
-          {
-            continue;
-          }
-
-          std::vector<NBT_Value*>* entities = entityList->GetList();
-          std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
-
-          bool done = false;
-
-          if((**iter)["BurnTime"] == NULL || (**iter)["CookTime"] == NULL)
-          {
-            continue;
-          }
-
-          furnaceData *newFurnace = new furnaceData;
-          newFurnace->x = entityX;
-          newFurnace->y = entityY;
-          newFurnace->z = entityZ;
-          newFurnace->burnTime = (sint16)*(**iter)["BurnTime"];
-          newFurnace->cookTime = (sint16)*(**iter)["CookTime"];
-
-          for(uint32 i = 0; i < 3; i ++)
-          {
-            newFurnace->items[i].type = -1;
-          }
-
-          for( ; iter != end; iter++ )
-          {
-            if((**iter)["Count"] == NULL || (**iter)["Slot"] == NULL || (**iter)["Damage"] == NULL || (**iter)["id"] == NULL ||
-               (**iter)["Count"]->GetType() != NBT_Value::TAG_INT ||
-               (**iter)["Slot"]->GetType() != NBT_Value::TAG_INT ||
-               (**iter)["Damage"]->GetType() != NBT_Value::TAG_INT ||
-               (**iter)["id"]->GetType() != NBT_Value::TAG_INT)
-            {
-              continue;
-            }
-            newFurnace->items[(sint8)*(**iter)["Slot"]].count  = (sint8)*(**iter)["Count"];
-            newFurnace->items[(sint8)*(**iter)["Slot"]].health = (sint16)*(**iter)["Damage"];
-            newFurnace->items[(sint8)*(**iter)["Slot"]].type   = (sint16)*(**iter)["id"];
-          }
-
-          chunk->furnaces.push_back(newFurnace);
-        }
-      }
-    }
-  }
-
-    /*
-    uint8* compressedData = new uint8[ALLOCATE_NBTFILE];
-
-    for( ; iter != end ; iter++)
-    {
-      std::vector<uint8> buffer;
-      NBT_Value* idVal = (**iter)["id"];
-      if(idVal == NULL)
-        continue;
-      std::string* id = idVal->GetString();
-      if(id && (*id=="Chest" || *id=="Furnace" || *id=="Sign"))
-      {
-        if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
-          (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
-          (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
-        {
-          continue;
-        }
+    user->buffer << (sint8)PACKET_SIGN << chunk->signs[i]->x << (sint16)chunk->signs[i]->y << chunk->signs[i]->z;
+    user->buffer << chunk->signs[i]->text1 << chunk->signs[i]->text2 << chunk->signs[i]->text3 << chunk->signs[i]->text4;
+  } 
 
 
-          if(*id == "Chest")
-          {
-            NBT_Value* lockData = (**iter)["Lockdata"];
-            if(lockData != NULL)
-            {
-              if((*lockData)["locked"] != NULL)
-              {
-                sint8 locked = *(*lockData)["locked"];
-                std::string chestowner = *(*lockData)["player"]->GetString();
-                // If locked
-                if (locked == 1)
-                {
-                  // Check permission to access
-                  if(!(chestowner == user->nick || IS_ADMIN(user->permissions)))
-                  {
-                    Mineserver::get()->chat()->sendMsg(user, MC_COLOR_BLUE + "Chest is locked.", Chat::USER);
-                    continue;
-                  }
-                }
-              }
-            }
-          }
-
-          buffer.push_back(NBT_Value::TAG_COMPOUND);
-          buffer.push_back(0);
-          buffer.push_back(0);
-          (*iter)->Write(buffer);
-          buffer.push_back(0);
-          buffer.push_back(0);
-
-
-          z_stream zstream2;
-          zstream2.zalloc = Z_NULL;
-          zstream2.zfree = Z_NULL;
-          zstream2.opaque = Z_NULL;
-          zstream2.next_out=compressedData;
-          zstream2.next_in=&buffer[0];
-          zstream2.avail_in=buffer.size();
-          zstream2.avail_out=ALLOCATE_NBTFILE;
-          zstream2.total_out=0;
-          zstream2.total_in=0;
-          deflateInit2(&zstream2, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15+MAX_WBITS, 8,
-                     Z_DEFAULT_STRATEGY);
-
-          //Gzip the data
-          if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
-          {
-            Mineserver::get()->screen()->log("Error in deflate: " + dtos(state));
-          }
-
-          sint32 entityX = *(**iter)["x"];
-          sint32 entityY = *(**iter)["y"];
-          sint32 entityZ = *(**iter)["z"];
-
-          
-          // !!!! Complex Entity packet! !!!!
-          user->buffer << (sint8)PACKET_COMPLEX_ENTITIES
-            << (sint32)entityX << (sint16)entityY << (sint32)entityZ << (sint16)zstream2.total_out;
-          user->buffer.addToWrite(compressedData, zstream2.total_out);
-          
-          deflateEnd(&zstream2);
-        }
-    }
-    delete [] compressedData;
-    
-  }
-  */
   delete [] buffer;
 
   delete[] data4;
@@ -1379,7 +1391,8 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value* 
   {
     player = user->nick;
   }
-  sint8 locked = Mineserver::get()->conf()->bValue("chests_locked_by_default")?1:0;
+
+  sint8 locked = Mineserver::get()->config()->bData("temp.chests_locked_by_default") ? 1 : 0;
 
   if(entity->GetType() != NBT_Value::TAG_COMPOUND)
   {
@@ -1387,9 +1400,7 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value* 
     return;
   }
 
-  if((*entity)["x"] == NULL || (sint32)*(*entity)["x"] != x  ||
-     (*entity)["y"] == NULL || (sint32)*(*entity)["y"] != y  ||
-     (*entity)["z"] == NULL || (sint32)*(*entity)["z"] != z)
+  if((*entity)["x"] == NULL || (sint32)*(*entity)["x"] != x  || (*entity)["y"] == NULL || (sint32)*(*entity)["y"] != y  || (*entity)["z"] == NULL || (sint32)*(*entity)["z"] != z)
   {
     LOG("Invalid Complex Entity");
     return;

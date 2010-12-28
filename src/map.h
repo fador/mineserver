@@ -39,10 +39,10 @@
 struct sTree
 {
   sint32 x,y,z;
-  sint32 plantedTime;
+  sint64 plantedTime;
   uint32 plantedBy;
 
-  sTree(sint32 _x,sint32 _y, sint32 _z, sint32 _plantedTime, uint32 _plantedBy) :
+  sTree(sint32 _x,sint32 _y, sint32 _z, sint64 _plantedTime, uint32 _plantedBy) :
     x(_x),y(_y),z(_z),
     plantedTime(_plantedTime),plantedBy(_plantedBy) {}
 
@@ -54,7 +54,7 @@ struct chestData
   sint32 x;
   sint32 y;
   sint32 z;
-  Item items[28];
+  Item items[27];
 };
 
 struct signData
@@ -62,7 +62,10 @@ struct signData
   sint32 x;
   sint32 y;
   sint32 z;
-  std::string text[4];
+  std::string text1;
+  std::string text2;
+  std::string text3;
+  std::string text4;
 };
 
 struct furnaceData

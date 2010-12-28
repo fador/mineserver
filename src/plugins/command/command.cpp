@@ -9,30 +9,32 @@
 
 extern "C" void command_init(Mineserver* mineserver)
 {
-  mineserver->screen()->log("command_init called");
-
-  if (mineserver->plugin()->hasPointer("command"))
+  if (mineserver->plugin()->getPluginVersion("command") >= 0)
   {
     mineserver->screen()->log("command is already loaded!");
     return;
   }
 
+  mineserver->plugin()->setPluginVersion("command", PLUGIN_COMMAND_VERSION);
   mineserver->plugin()->setPointer("command", new P_Command(mineserver));
 }
 
 extern "C" void command_shutdown(Mineserver* mineserver)
 {
-  mineserver->screen()->log("command_shutdown called");
-
-  if (!mineserver->plugin()->hasPointer("command"))
+  if (mineserver->plugin()->getPluginVersion("command") < 0)
   {
     mineserver->screen()->log("command is not loaded!");
     return;
   }
- 
-  P_Command* command = (P_Command*)mineserver->plugin()->getPointer("command");
-  mineserver->plugin()->remPointer("command");
-  delete command;
+
+  if (mineserver->plugin()->hasPointer("command"))
+  {
+    P_Command* command = (P_Command*)mineserver->plugin()->getPointer("command");
+    mineserver->plugin()->remPointer("command");
+    delete command;
+  }
+
+  mineserver->plugin()->remPluginVersion("command");
 }
 
 P_Command::P_Command(Mineserver* mineserver) : m_mineserver(mineserver)

@@ -60,16 +60,19 @@
 #ifdef WIN32
 #define LIBRARY_HANDLE HINSTANCE
 #define LIBRARY_LOAD(x) LoadLibrary(x)
+#define LIBRARY_SELF() GetModuleHandle(NULL)
 #define LIBRARY_SYMBOL(x, y) GetProcAddress(x, y)
-#define LIBRARY_ERROR() "error"
-//GetLastError()
+#define LIBRARY_ERROR() "Windows error handling needs work!" // <- NOTE
 #define LIBRARY_CLOSE(x) FreeLibrary(x)
+#define LIBRARY_EXTENSION ".dll"
 #else
 #define LIBRARY_HANDLE void*
 #define LIBRARY_LOAD(x) dlopen(x, RTLD_LAZY)
+#define LIBRARY_SELF() dlopen(NULL, RTLD_LAZY)
 #define LIBRARY_SYMBOL(x, y) dlsym(x, y)
 #define LIBRARY_ERROR() dlerror()
 #define LIBRARY_CLOSE(x) dlclose(x)
+#define LIBRARY_EXTENSION ".so"
 #endif
 //
 // It's SUPER EFFECTIVE!
@@ -143,9 +146,13 @@ public:
   void setHook(const std::string name, Hook* hook);
   Hook* getHook(const std::string name);
   void remHook(const std::string name);
-  // Un/Load external plugins
-  bool loadExternal(const std::string name, const std::string file);
-  void unloadExternal(const std::string name);
+  // Load/Unload plugins
+  bool loadPlugin(const std::string name, const std::string file="");
+  void unloadPlugin(const std::string name);
+  // Plugin version registry
+  void setPluginVersion(const std::string name, float version);
+  float getPluginVersion(const std::string name);
+  void remPluginVersion(const std::string name);
   // Pointer registry stuff
   bool hasPointer(const std::string name);
   void setPointer(const std::string name, void* pointer);
@@ -161,9 +168,13 @@ public:
     setHook("LoginPost", new Hook1<void,User*>);
     setHook("ChatPre", new Hook3<bool,User*,time_t,std::string>);
     setHook("ChatPost", new Hook3<void,User*,time_t,std::string>);
-    setHook("DiggingStarted", new Hook4<void,User*,sint32,sint8,sint32>);
-    setHook("Digging", new Hook4<void,User*,sint32,sint8,sint32>);
-    setHook("DiggingStopped", new Hook4<void,User*,sint32,sint8,sint32>);
+    setHook("PlayerArmSwing", new Hook1<void,User*>);
+    setHook("PlayerDamagePre", new Hook3<bool,User*,User*,int>);
+    setHook("PlayerDamagePost", new Hook3<void,User*,User*,int>);
+    setHook("PlayerDisconnect", new Hook3<void,User*,uint32,uint16>);
+    setHook("PlayerDiggingStarted", new Hook4<void,User*,sint32,sint8,sint32>);
+    setHook("PlayerDigging", new Hook4<void,User*,sint32,sint8,sint32>);
+    setHook("PlayerDiggingStopped", new Hook4<void,User*,sint32,sint8,sint32>);
     setHook("BlockBreakPre", new Hook4<bool,User*,sint32,sint8,sint32>);
     setHook("BlockBreakPost", new Hook4<void,User*,sint32,sint8,sint32>);
     setHook("BlockNeighbourBreak", new Hook7<void,User*,sint32,sint8,sint32,sint32,sint8,sint32>);
@@ -200,6 +211,7 @@ private:
   std::map<const std::string, Hook*> m_hooks;
   std::map<const std::string, LIBRARY_HANDLE> m_libraryHandles;
   std::map<const std::string, void*> m_pointers;
+  std::map<const std::string, float> m_pluginVersions;
 
   // Old stuff
   typedef std::map<sint16, Callback> Callbacks;

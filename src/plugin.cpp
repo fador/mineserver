@@ -265,24 +265,46 @@ void Plugin::init()
   /* BLOCK_SNOW_BLOCK */
 }
 
-bool Plugin::loadExternal(const std::string name, const std::string file)
+bool Plugin::loadPlugin(const std::string name, const std::string file)
 {
   LIBRARY_HANDLE lhandle = NULL;
   void (*fhandle)(Mineserver*) = NULL;
 
-  Mineserver::get()->screen()->log("Loading plugin "+name+" ("+file+")...");
-
-  struct stat st;
-  if(stat(file.c_str(), &st) != 0)
+  if (file.size())
   {
-    Mineserver::get()->screen()->log("Could not find "+file+"!");
-    return false;
+    Mineserver::get()->screen()->log("Loading plugin `"+name+"' (`"+file+"')...");
+
+    struct stat st;
+    if(stat(file.c_str(), &st) == 0)
+    {
+      lhandle = LIBRARY_LOAD(file.c_str());
+    }
+    else
+    {
+      Mineserver::get()->screen()->log("Could not find `"+file+"', trying `"+file+LIBRARY_EXTENSION+"'.");
+
+      if (stat((file+LIBRARY_EXTENSION).c_str(), &st) == 0)
+      {
+        lhandle = LIBRARY_LOAD((file+LIBRARY_EXTENSION).c_str());
+      }
+      else
+      {
+        Mineserver::get()->screen()->log("Could not find `"+file+LIBRARY_EXTENSION+"'!");
+
+        return false;
+      }
+    }
+
+  }
+  else
+  {
+    Mineserver::get()->screen()->log("Loading plugin `"+name+"' (built in)...");
+    lhandle = LIBRARY_SELF();
   }
 
-  lhandle = LIBRARY_LOAD(file.c_str());
   if (lhandle == NULL)
   {
-    Mineserver::get()->screen()->log("Could not load "+file+"!");
+    Mineserver::get()->screen()->log("Could not load plugin `"+name+"'!");
     Mineserver::get()->screen()->log(LIBRARY_ERROR());
     return false;
   }
@@ -293,7 +315,7 @@ bool Plugin::loadExternal(const std::string name, const std::string file)
   if (fhandle == NULL)
   {
     Mineserver::get()->screen()->log("Could not get init function handle!");
-    unloadExternal(name);
+    unloadPlugin(name);
     return false;
   }
 
@@ -302,16 +324,25 @@ bool Plugin::loadExternal(const std::string name, const std::string file)
   return true;
 }
 
-void Plugin::unloadExternal(const std::string name)
+void Plugin::unloadPlugin(const std::string name)
 {
   LIBRARY_HANDLE lhandle = NULL;
   void (*fhandle)(Mineserver*) = NULL;
 
-  if (m_libraryHandles[name] != NULL)
+  if (m_pluginVersions.find(name) != m_pluginVersions.end())
   {
-    Mineserver::get()->screen()->log("Unloading plugin "+name+"...");
+    Mineserver::get()->screen()->log("Unloading plugin `"+name+"'...");
 
-    lhandle = m_libraryHandles[name];
+    if (m_libraryHandles[name] != NULL)
+    {
+      lhandle = m_libraryHandles[name];
+      m_libraryHandles.erase(name);
+    }
+    else
+    {
+      lhandle = LIBRARY_SELF();
+    }
+
     fhandle = (void (*)(Mineserver*)) LIBRARY_SYMBOL(lhandle, (name+"_shutdown").c_str());
     if (fhandle == NULL)
     {
@@ -319,16 +350,15 @@ void Plugin::unloadExternal(const std::string name)
     }
     else
     {
-      Mineserver::get()->screen()->log("Calling shutdown function for "+name+".");
+      Mineserver::get()->screen()->log("Calling shutdown function for `"+name+"'.");
       fhandle(Mineserver::get());
     }
 
     LIBRARY_CLOSE(m_libraryHandles[name]);
-    m_libraryHandles.erase(name);
   }
   else
   {
-    Mineserver::get()->screen()->log("Plugin "+name+" not loaded!");
+    Mineserver::get()->screen()->log("Plugin `"+name+"' not loaded!");
   }
 }
 
@@ -369,6 +399,31 @@ void Plugin::remHook(const std::string name)
   if (hasHook(name))
   {
     m_hooks.erase(name);
+  }
+}
+
+void Plugin::setPluginVersion(const std::string name, float version)
+{
+  m_pluginVersions[name] = version;
+}
+
+float Plugin::getPluginVersion(const std::string name)
+{
+  if (m_pluginVersions.count(name) >= 0)
+  {
+    return m_pluginVersions[name];
+  }
+  else
+  {
+    return -1.0f;
+  }
+}
+
+void Plugin::remPluginVersion(const std::string name)
+{
+  if (m_pluginVersions.count(name) >= 0)
+  {
+    m_pluginVersions.erase(name);
   }
 }
 

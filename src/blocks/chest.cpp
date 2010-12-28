@@ -38,7 +38,7 @@
 void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
   // Locksystem
-  if(user->inv.main[27+user->currentItemSlot()].type == ITEM_WOODEN_AXE)
+  if(user->inv[36+user->currentItemSlot()].type == ITEM_WOODEN_AXE)
   {    
     int chunk_x = blockToChunk(x);
     int chunk_z = blockToChunk(z);
@@ -146,7 +146,7 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
   sChunk *chunk = Mineserver::get()->map()->loadMap(chunk_x, chunk_z);
    
   if(chunk == NULL)
-	  return;
+    return;
     
   NBT_Value *entityList = (*(*(chunk->nbt))["Level"])["TileEntities"];
 

@@ -57,53 +57,10 @@
 
 Chat::Chat()
 {
-  registerStandardCommands();
 }
 
 Chat::~Chat()
 {
-}
-
-void Chat::registerCommand(Command* command)
-{
-  // Loop thru all the words for this command
-  std::string currentWord;
-  std::deque<std::string> words = command->names;
-  while(!words.empty())
-  {
-    currentWord = words[0];
-    words.pop_front();
-
-    if(IS_ADMIN(command->permissions))
-    {
-      m_adminCommands[currentWord] = command;
-      continue;
-    }
-
-    if(IS_OP(command->permissions))
-    {
-      m_opCommands[currentWord] = command;
-      m_adminCommands[currentWord] = command;
-      continue;
-    }
-
-    if(IS_MEMBER(command->permissions))
-    {
-      m_memberCommands[currentWord] = command;
-      m_opCommands[currentWord] = command;
-      m_adminCommands[currentWord] = command;
-      continue;
-    }
-
-    if(IS_GUEST(command->permissions))
-    {
-      // insert into all
-      m_guestCommands[currentWord] = command;
-      m_memberCommands[currentWord] = command;
-      m_opCommands[currentWord] = command;
-      m_adminCommands[currentWord] = command;
-    }
-  }
 }
 
 bool Chat::checkMotd(std::string motdFile)
@@ -186,6 +143,9 @@ std::deque<std::string> Chat::parseCmd(std::string cmd)
 
 bool Chat::handleMsg(User* user, std::string msg)
 {
+  if (msg.empty()) // If the message is empty handle it as if there is no message.
+      return true;
+
   // Timestamp
   time_t rawTime = time(NULL);
   struct tm* Tm  = localtime(&rawTime);
@@ -218,11 +178,6 @@ bool Chat::handleMsg(User* user, std::string msg)
       }
       break;
 
-    // Command
-    case CHATCMDPREFIX:
-      handleCommandMsg(user, msg, timeStamp);
-      break;
-
     // Normal chat message
     default:
       handleChatMsg(user, msg, timeStamp);
@@ -245,25 +200,6 @@ void Chat::handleAdminChatMsg(User* user, std::string msg, const std::string& ti
   Mineserver::get()->screen()->log(LOG_CHAT, "[@] <"+ user->nick + "> " + msg.substr(1));
   msg = timeStamp +  MC_COLOR_RED + " [@]" + MC_COLOR_WHITE + " <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg.substr(1);
   this->sendMsg(user, msg, ADMINS);
-}
-
-void Chat::handleCommandMsg(User* user, std::string msg, const std::string& timeStamp)
-{
-  std::deque<std::string> cmd = this->parseCmd(msg.substr(1));
-
-  std::string command = cmd[0];
-  cmd.pop_front();
-
-  // User commands
-  CommandList::iterator iter;
-  if((iter = m_memberCommands.find(command)) != m_memberCommands.end())
-  {
-    iter->second->callback(user, command, cmd);
-  }
-  else if(IS_ADMIN(user->permissions) && (iter = m_adminCommands.find(command)) != m_adminCommands.end())
-  {
-    iter->second->callback(user, command, cmd);
-  }
 }
 
 void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeStamp)
@@ -314,7 +250,7 @@ bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
     break;
 
   case USER:
-   	user->buffer.addToWrite(tmpArray, tmpArrayLen);
+     user->buffer.addToWrite(tmpArray, tmpArrayLen);
     break;
 
   case ADMINS:
@@ -337,55 +273,4 @@ bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
   delete[] tmpArray;
 
   return true;
-}
-
-void Chat::sendHelp(User* user, std::deque<std::string> args)
-{
-  // TODO: Add paging support, since not all commands will fit into
-  // the screen at once.
-
-  CommandList* commandList = &m_guestCommands; // defaults
-  std::string commandColor = MC_COLOR_BLUE;
-
-  if(IS_ADMIN(user->permissions))
-  {
-    commandList = &m_adminCommands;
-    commandColor = MC_COLOR_RED; // different color for admin commands
-  }
-  else if(IS_OP(user->permissions))
-  {
-    commandList = &m_opCommands;
-    commandColor = MC_COLOR_GREEN;
-  }
-  else if(IS_MEMBER(user->permissions))
-  {
-    commandList = &m_memberCommands;
-  }
-
-  if(args.size() == 0)
-  {
-    for(CommandList::iterator it = commandList->begin();
-        it != commandList->end();
-        it++)
-    {
-      std::string args = it->second->arguments;
-      std::string description = it->second->description;
-      sendMsg(user, commandColor + CHATCMDPREFIX + it->first + " " + args + " : " + MC_COLOR_YELLOW + description, Chat::USER);
-    }
-  }
-  else
-  {
-    CommandList::iterator iter;
-    if((iter = commandList->find(args.front())) != commandList->end())
-    {
-      std::string args = iter->second->arguments;
-      std::string description = iter->second->description;
-      sendMsg(user, commandColor + CHATCMDPREFIX + iter->first + " " + args, Chat::USER);
-      sendMsg(user, MC_COLOR_YELLOW + CHATCMDPREFIX + description, Chat::USER);
-    }
-    else
-    {
-      sendMsg(user, MC_COLOR_RED + "Unknown Command: " + args.front(), Chat::USER);
-    }
-  }
 }

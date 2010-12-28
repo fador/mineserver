@@ -428,12 +428,12 @@ void NBT_Value::cleanup()
   if(m_type == TAG_LIST)
   {
     if(m_value.listVal.data != NULL)
-	{
+  {
       std::vector<NBT_Value*>::iterator iter = m_value.listVal.data->begin(), end = m_value.listVal.data->end();
       for( ; iter != end ; iter++)
         delete *iter;
       delete m_value.listVal.data;
-	}
+  }
   }
   if(m_type == TAG_COMPOUND)
   {
@@ -442,7 +442,7 @@ void NBT_Value::cleanup()
       std::map<std::string, NBT_Value*>::iterator iter = m_value.compoundVal->begin(), end = m_value.compoundVal->end();
       for( ; iter != end ; iter++ )
         delete iter->second;
-	  
+    
       delete m_value.compoundVal;
     }
   }
@@ -463,8 +463,8 @@ NBT_Value * NBT_Value::LoadFromFile(const std::string &filename)
 
   if(uncompressedSize == 0)
   {
-	  std::cout << "Unable to determine uncompressed size of " << filename << std::endl;
-	  uncompressedSize = ALLOCATE_NBTFILE;
+    std::cout << "Unable to determine uncompressed size of " << filename << std::endl;
+    uncompressedSize = ALLOCATE_NBTFILE;
   }
 
   uint8 *uncompressedData = new uint8[uncompressedSize];
