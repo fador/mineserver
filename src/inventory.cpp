@@ -661,7 +661,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
 
 
   //Check if crafting
-  if(windowID == WINDOW_WORKBENCH && slot < 10 && slot > 0 || workbenchCrafting)
+  if((windowID == WINDOW_WORKBENCH && slot < 10 && slot > 0) || workbenchCrafting)
   {
     if(doCraft(currentInventory->workbench, 3, 3))
     {
@@ -673,7 +673,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       setSlot(user, windowID, 0, -1, 0, 0);
     }
   }
-  else if(windowID == WINDOW_PLAYER && slot < 5 && slot > 0 || playerCrafting)
+  else if((windowID == WINDOW_PLAYER && slot < 5 && slot > 0) || playerCrafting)
   {
     if(doCraft(user->inv, 2, 2))
     {

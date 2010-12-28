@@ -74,24 +74,24 @@ inline uint64 ntohll(uint64 v)
   if(htons(1) == 1) // check if already big-endian
         return v;
   return (uint64)ntohl(v & 0x00000000ffffffff) << 32 | (uint64)ntohl( (v >> 32) & 0x00000000ffffffff);
-};
+}
 
 //Converts block-coordinates to chunk coordinate
 inline sint32 blockToChunk(sint32 value)
 {
   return value>>4;//(value < 0) ? (((value+1)/16)-1) : (value/16);
-};
+}
 
 //Converts absolute block-coordinates to chunk-block-coordinates
 inline sint32 blockToChunkBlock(sint32 value)
 {
   return value&15;//(value < 0) ? (15+((value+1)%16)) : (value%16);
-};
+}
 
 inline sint8 angleToByte(float angle)
 {
 	return (sint8)((angle / 360.f) * 256);
-};
+}
 
 inline int getRandInt(int min, int max) { return (rand() % ((max-min)+1) + min); };
 
