@@ -261,27 +261,42 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       }
     }
   }
-
-  //Check if crafting
-  if(windowID == WINDOW_WORKBENCH && slot <10 && slot > 0 )
-  {
-    if(doCraft(&currentInventory->workbench[0], 3, 3))
-    {
-      setSlot(user, windowID, 0, currentInventory->workbench[0].type, currentInventory->workbench[0].count, currentInventory->workbench[0].health);
-    }
-  }
-  else if(windowID == WINDOW_PLAYER && slot <4 && slot > 0)
-  {
-    if(doCraft(&user->inv[0], 2, 2))
-    {
-      setSlot(user, windowID, 0, user->inv[0].type, user->inv[0].count, user->inv[0].health);
-    }
-  }
-
-  Mineserver::get()->screen()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(slotItem->type) + " (" + dtos(slotItem->count) + ") health: " + dtos(slotItem->health));
+    
+  
   //Update slot
   setSlot(user, windowID, slot, slotItem->type, slotItem->count, slotItem->health);
 
+  //Update item on the cursor
+  setSlot(user, WINDOW_CURSOR, 0, user->inventoryHolding.type, user->inventoryHolding.count, user->inventoryHolding.health);
+
+
+  //Check if crafting
+  if(windowID == WINDOW_WORKBENCH && slot < 10 && slot > 0 )
+  {
+    if(doCraft(currentInventory->workbench, 3, 3))
+    {
+      setSlot(user, windowID, 0, currentInventory->workbench[0].type, currentInventory->workbench[0].count, currentInventory->workbench[0].health);
+    }
+    else
+    {
+      currentInventory->workbench[0] = Item();
+      setSlot(user, windowID, 0, -1, 0, 0);
+    }
+  }
+  else if(windowID == WINDOW_PLAYER && slot < 4 && slot > 0)
+  {
+    if(doCraft(user->inv, 2, 2))
+    {
+      setSlot(user, windowID, 0, user->inv[0].type, user->inv[0].count, user->inv[0].health);
+    }
+    else
+    {
+      currentInventory->workbench[0] = Item();
+      setSlot(user, windowID, 0, -1, 0, 0);
+    }
+  }
+
+  /*
   //Signal others using the same space
   switch(windowID)
   {
@@ -289,7 +304,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       if(slot < 10)        
       {
         for(uint32 i = 0; i < otherUsers->size(); i++)
-        {
+        {          
           (*otherUsers)[i]->buffer << (sint8)PACKET_SET_SLOT << (sint8)windowID << (sint16)slot << (sint16)slotItem->type;
           if(slotItem->type != -1)
           {
@@ -329,14 +344,8 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       }
       break;
   }
-  
+  */
 
-  //Update item on the cursor
-  user->buffer << (sint8)PACKET_SET_SLOT << (sint8)WINDOW_CURSOR << (sint16)0   << (sint16)user->inventoryHolding.type;
-  if(user->inventoryHolding.type != -1)
-  {
-    user->buffer << (sint8)user->inventoryHolding.count << (sint8)user->inventoryHolding.health;
-  }
 
   return true;
 }
@@ -624,7 +633,6 @@ bool Inventory::onwindowClose(User *user,sint8 type,sint32 x, sint32 y, sint32 z
 
 bool Inventory::doCraft(Item *slots, sint8 width, sint8 height)
 {
-
   for(uint32 i = 0; i < recipes.size(); i++)
   {
     //Skip if recipe doesn't fit
@@ -638,6 +646,7 @@ bool Inventory::doCraft(Item *slots, sint8 width, sint8 height)
     //Check for any possible position the recipe would fit
     do
     {
+      offsetX = 0;
       do
       {
         bool mismatch = false;
@@ -646,7 +655,7 @@ bool Inventory::doCraft(Item *slots, sint8 width, sint8 height)
         {
           for(uint32 recipePosY = 0; recipePosY < recipes[i]->height; recipePosY++)
           {
-            if(slots[recipePosY*width+recipePosX+1].type != recipes[i]->slots[recipePosY*recipes[i]->height+recipePosX])
+            if(slots[(recipePosY+offsetY)*width+recipePosX+1+offsetX].type != recipes[i]->slots[recipePosY*recipes[i]->height+recipePosX])
             {
               mismatch = true;
               break;
@@ -673,6 +682,7 @@ bool Inventory::doCraft(Item *slots, sint8 width, sint8 height)
 
 bool Inventory::setSlot(User *user, sint8 windowID, sint16 slot, sint16 itemID, sint8 count, sint16 health)
 {
+  Mineserver::get()->screen()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(itemID) + " (" + dtos(count) + ") health: " + dtos(health));
   user->buffer << (sint8)PACKET_SET_SLOT << (sint8)windowID << (sint16)slot   << (sint16)itemID;
   if(itemID != -1)
   {

@@ -60,19 +60,47 @@ public:
 
   Inventory()
   {
+    Recipe *furnace = new Recipe;
+    furnace->width = 3;
+    furnace->height = 3;
+    furnace->slots = new sint16[9];
+    sint16 input[9] = { 4, 4, 4,
+                        4,-1, 4,
+                        4, 4, 4 };
+    furnace->output.count = 1;
+    furnace->output.type  = BLOCK_FURNACE;
+    furnace->output.health= 0;
+    memcpy(furnace->slots,input,9*sizeof(sint16));
+    
+    recipes.push_back(furnace);
+
     Recipe *workbench = new Recipe;
-    workbench->width = 3;
-    workbench->height = 3;
-    workbench->slots = new sint16[9];
-    sint16 input[9] = { 5, 5, 5,
-                        5,-1, 5,
-                        5, 5, 5 };
+    workbench->width = 2;
+    workbench->height = 2;
+    workbench->slots = new sint16[4];
+    sint16 inputWorkbench[4] = { 4, 4,
+                                 4, 4 };
+                        
     workbench->output.count = 1;
     workbench->output.type  = BLOCK_WORKBENCH;
     workbench->output.health= 0;
-    workbench->slots = input;
-
+    memcpy(workbench->slots,inputWorkbench,4*sizeof(sint16));
+    
     recipes.push_back(workbench);
+
+    Recipe *grass = new Recipe;
+    grass->width = 2;
+    grass->height = 2;
+    grass->slots = new sint16[4];
+    sint16 input2[4] = { 3, 3,
+                         3, 3};
+    grass->output.count = 1;
+    grass->output.type  = BLOCK_GRASS;
+    grass->output.health= 0;
+    memcpy(grass->slots,input2,4*sizeof(sint16));
+
+    recipes.push_back(grass);
+
   }
 
   ~Inventory()
