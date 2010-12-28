@@ -1032,7 +1032,7 @@ bool Inventory::doCraft(Item *slots, sint8 width, sint8 height)
         {
           for(uint32 recipePosY = 0; recipePosY < recipes[i]->height; recipePosY++)
           {
-            if(slots[(recipePosY+offsetY)*width+recipePosX+1+offsetX].type != recipes[i]->slots[recipePosY*recipes[i]->height+recipePosX])
+            if(slots[(recipePosY+offsetY)*width+recipePosX+1+offsetX].type != recipes[i]->slots[recipePosY*recipes[i]->width+recipePosX])
             {
               mismatch = true;
               break;
