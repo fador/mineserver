@@ -666,8 +666,29 @@ bool Inventory::doCraft(Item *slots, sint8 width, sint8 height)
         //Found match!
         if(!mismatch)
         {
-          slots[0] = recipes[i]->output;
-          return true;
+          //Check that other areas are empty!
+          bool foundItem = false;
+          for(uint32 craftingPosX = 0; craftingPosX < width; craftingPosX++)
+          {
+            for(uint32 craftingPosY = 0; craftingPosY < height; craftingPosY++)
+            {
+              //If not inside the recipe boundaries
+              if(craftingPosX < offsetX || craftingPosX>=offsetX+recipes[i]->width ||
+                 craftingPosY < offsetY || craftingPosY>=offsetY+recipes[i]->height)
+              {
+                if(slots[(craftingPosY)*width+craftingPosX+1].type != -1)
+                {
+                  foundItem = true;
+                  break;
+                }
+              }
+            }
+          }
+          if(!foundItem)
+          {
+            slots[0] = recipes[i]->output;
+            return true;
+          }
         }
 
         offsetX++;
