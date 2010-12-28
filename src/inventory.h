@@ -65,7 +65,7 @@ public:
     for(uint32 i = 0; i < recipes.size(); i++)
     {
       delete [] recipes[i]->slots;
-      delete [] recipes[i];
+      delete recipes[i];
     }
   }
 
