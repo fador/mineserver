@@ -55,7 +55,7 @@
 #include "plugin_api.h"
 
 mineserver_pointer_struct plugin_api_pointers;
-std::vector<bool (*)(std::string user, std::string msg)> chatPreHook;
+std::vector<bool (*)(const std::string& user, std::string msg)> chatPreHook;
 
 
 
@@ -80,7 +80,7 @@ bool plugin_api_add_hook(std::string name, void *function)
 {
   if(name == "ChatPre")
   {
-    chatPreHook.push_back((bool (*)(std::string user, std::string msg))function);
+    chatPreHook.push_back((bool (*)(const std::string& user, std::string msg))function);
     return true;
   }
   return false;

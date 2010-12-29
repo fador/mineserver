@@ -94,6 +94,8 @@ public:
 
   bool setSlot(User *user, sint8 windowID, sint16 slot, sint16 itemID, sint8 count, sint16 health);
 
+  sint16 itemHealth(sint16 itemID, sint8 block, bool &rightUse);
+
 };
 
 
