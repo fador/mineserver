@@ -423,7 +423,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       slotItem=&user->inv[slot];
       break;
     case WINDOW_CHEST:
-      if(slot>27)
+      if(slot>26)
       {
         slotItem=&user->inv[slot-18];
       }
@@ -452,7 +452,7 @@ bool Inventory::windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightC
       }
       break;
     case WINDOW_LARGE_CHEST:
-      if(slot>56)
+      if(slot>54)
       {
         slotItem=&user->inv[slot-47];
       }
