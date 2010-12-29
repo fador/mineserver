@@ -1,7 +1,17 @@
+/*
+g++ -c command.cpp
+g++ -shared command.o -o command.so
+
+copy command.so to Mineserver bin directory.
+
+
+*/
+
 #include <string>
 #include <deque>
 #include <ctime>
 #include <sstream>
+#include <cstdlib>
 
 #include "../../src/plugin_api.h"
 
