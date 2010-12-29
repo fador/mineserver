@@ -652,7 +652,7 @@ int PacketHandler::player_block_placement(User *user)
   }
 
   // TODO: Handle sint16 itemID's
-  if(newblock > 255)
+  if(newblock > 255 && newblock != ITEM_SIGN)
   {
     return PACKET_OK;
   }
