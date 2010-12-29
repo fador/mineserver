@@ -268,7 +268,11 @@ void Plugin::init()
 bool Plugin::loadPlugin(const std::string name, const std::string file)
 {
   LIBRARY_HANDLE lhandle = NULL;
+  #ifdef FADOR_PLUGIN
+  void (*fhandle)(mineserver_pointer_struct*) = NULL;
+  #else
   void (*fhandle)(Mineserver*) = NULL;
+  #endif
 
   if (file.size())
   {
@@ -311,15 +315,22 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
 
   m_libraryHandles[name] = lhandle;
 
+  #ifdef FADOR_PLUGIN
+  fhandle = (void (*)(mineserver_pointer_struct*)) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
+  #else
   fhandle = (void (*)(Mineserver*)) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
+  #endif
   if (fhandle == NULL)
   {
     Mineserver::get()->screen()->log("Could not get init function handle!");
     unloadPlugin(name);
     return false;
   }
-
+  #ifdef FADOR_PLUGIN  
+  fhandle(&plugin_api_pointers);
+  #else
   fhandle(Mineserver::get());
+  #endif
 
   return true;
 }
@@ -327,7 +338,11 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
 void Plugin::unloadPlugin(const std::string name)
 {
   LIBRARY_HANDLE lhandle = NULL;
+  #ifdef FADOR_PLUGIN
+  void (*fhandle)(void) = NULL;
+  #else
   void (*fhandle)(Mineserver*) = NULL;
+  #endif
 
   if (m_pluginVersions.find(name) != m_pluginVersions.end())
   {
@@ -343,7 +358,12 @@ void Plugin::unloadPlugin(const std::string name)
       lhandle = LIBRARY_SELF();
     }
 
+    #ifdef FADOR_PLUGIN
+    fhandle = (void (*)(void)) LIBRARY_SYMBOL(lhandle, (name+"_shutdown").c_str());
+    #else
     fhandle = (void (*)(Mineserver*)) LIBRARY_SYMBOL(lhandle, (name+"_shutdown").c_str());
+    #endif
+
     if (fhandle == NULL)
     {
       Mineserver::get()->screen()->log("Could not get shutdown function handle!");
@@ -351,7 +371,12 @@ void Plugin::unloadPlugin(const std::string name)
     else
     {
       Mineserver::get()->screen()->log("Calling shutdown function for `"+name+"'.");
+      
+      #ifdef FADOR_PLUGIN  
+      fhandle();
+      #else
       fhandle(Mineserver::get());
+      #endif
     }
 
     LIBRARY_CLOSE(m_libraryHandles[name]);
