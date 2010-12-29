@@ -152,12 +152,18 @@ bool Chat::handleMsg(User* user, std::string msg)
   std::string timeStamp (asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
+  #ifdef FADOR_PLUGIN
+  if(plugin_api_chatpre_callback(user->nick,msg))
+  {
+    return false;
+  }
+  #else
   if ((static_cast<Hook3<bool,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("ChatPre")))->doUntilFalse(user, rawTime, msg))
   {
     return false;
   }
   (static_cast<Hook3<void,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("ChatPre")))->doAll(user, rawTime, msg);
-
+  #endif
   char prefix = msg[0];
 
   switch(prefix)

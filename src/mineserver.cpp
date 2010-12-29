@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
   signal(SIGTERM, sighandler);
   signal(SIGINT, sighandler);
 
-  srand(time(NULL));
+  srand((uint32)time(NULL));
 
   return Mineserver::get()->run(argc, argv);
 }
@@ -120,6 +120,10 @@ int Mineserver::run(int argc, char *argv[])
 {
   uint32 starttime = (uint32)time(0);
   uint32 tick      = (uint32)time(0);
+
+  #ifdef FADOR_PLUGIN
+    init_plugin_api();
+  #endif
 
   // Init our Screen
   screen()->init(VERSION);

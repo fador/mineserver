@@ -48,6 +48,12 @@
 #include "worldgen/mapgen.h"
 #include "inventory.h"
 
+#ifdef FADOR_PLUGIN
+#define MINESERVER
+#include "plugin_api.h"
+#undef MINESERVER
+#endif
+
 class Mineserver
 {
 public:

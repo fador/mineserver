@@ -195,7 +195,7 @@ void Map::init()
   /////////////////
 
   // Init mapgenerator
-  Mineserver::get()->mapGen()->init(mapSeed);
+  Mineserver::get()->mapGen()->init((sint32)mapSeed);
 
   delete root;
 #ifdef _DEBUG

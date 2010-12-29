@@ -5,6 +5,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mineserver", "mineserver.vc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mineserver_banplugin", "mineserver_banplugin.vcxproj", "{9DDBBE91-9FAF-48BE-96DD-5FE0D8FFD66B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mineserver_plugintest", "..\plugintest\mineserver_plugintest.vcxproj", "{8BF3BBA7-4740-4138-BAB6-674D1E54EFC3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -19,13 +21,17 @@ Global
 		{9DDBBE91-9FAF-48BE-96DD-5FE0D8FFD66B}.Debug|Win32.Build.0 = Debug|Win32
 		{9DDBBE91-9FAF-48BE-96DD-5FE0D8FFD66B}.Release|Win32.ActiveCfg = Release|Win32
 		{9DDBBE91-9FAF-48BE-96DD-5FE0D8FFD66B}.Release|Win32.Build.0 = Release|Win32
+		{8BF3BBA7-4740-4138-BAB6-674D1E54EFC3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8BF3BBA7-4740-4138-BAB6-674D1E54EFC3}.Debug|Win32.Build.0 = Debug|Win32
+		{8BF3BBA7-4740-4138-BAB6-674D1E54EFC3}.Release|Win32.ActiveCfg = Release|Win32
+		{8BF3BBA7-4740-4138-BAB6-674D1E54EFC3}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		AMDCaProjectFile = C:\projektit\minecraft\mineserver\mineserver\CodeAnalyst\mineserver.caw
-		AMDCaPersistentStartup = mineserver
 		AMDCaPersistentConfig = Release|Win32
+		AMDCaPersistentStartup = mineserver
+		AMDCaProjectFile = C:\projektit\minecraft\mineserver\mineserver\CodeAnalyst\mineserver.caw
 	EndGlobalSection
 EndGlobal

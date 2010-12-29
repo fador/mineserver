@@ -511,8 +511,26 @@ int PacketHandler::player_digging(User *user)
     case BLOCK_STATUS_BLOCK_BROKEN:
     {
       //ToDo: Fix, made for testing purposes!
-      if(user->inv[36+user->currentItemSlot()].type == ITEM_WOODEN_SPADE)
-         user->inv[36+user->currentItemSlot()].health++;
+      #define itemSlot (36+user->currentItemSlot())
+      bool rightUse;
+      sint16 itemHealth=Mineserver::get()->inventory()->itemHealth(user->inv[itemSlot].type,block,rightUse);
+      if(itemHealth > 0)
+      {
+         user->inv[itemSlot].health++;
+         if(!rightUse)
+           user->inv[itemSlot].health++;
+         if(itemHealth <= user->inv[itemSlot].health)
+         {
+            user->inv[itemSlot].count--;
+            if(user->inv[itemSlot].count == 0)
+            {
+              user->inv[itemSlot] = Item();
+            }            
+         }
+         Mineserver::get()->inventory()->setSlot(user,WINDOW_PLAYER,itemSlot,user->inv[itemSlot].type,
+                                                 user->inv[itemSlot].count,user->inv[itemSlot].health);
+      }
+      #undef itemSlot
 
       if ((static_cast<Hook4<bool,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("BlockBreakPre")))->doUntilFalse(user, x, y, z))
       {
@@ -571,23 +589,21 @@ int PacketHandler::player_digging(User *user)
     case BLOCK_STATUS_PICKUP_SPAWN:
     {
       //ToDo: handle
-      if(user->inv[36+user->currentItemSlot()].type > 0)
+      #define itemSlot (36+user->currentItemSlot())
+      if(user->inv[itemSlot].type > 0)
       {
-        Mineserver::get()->map()->createPickupSpawn(user->pos.x, user->pos.y,user->pos.z,user->inv[36+user->currentItemSlot()].type,1,user->inv[36+user->currentItemSlot()].health,user);
+        Mineserver::get()->map()->createPickupSpawn(user->pos.x, user->pos.y,user->pos.z,user->inv[itemSlot].type,1,user->inv[itemSlot].health,user);
 
-        user->inv[36+user->currentItemSlot()].count--;
-        if(user->inv[36+user->currentItemSlot()].count == 0)
+        user->inv[itemSlot].count--;
+        if(user->inv[itemSlot].count == 0)
         {
-          user->inv[36+user->currentItemSlot()].type   = -1;
-          user->inv[36+user->currentItemSlot()].health =  0;
+          user->inv[itemSlot] = Item();
         }
-
-        user->buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)(36+user->currentItemSlot()) 
-                     << (sint16)user->inv[36+user->currentItemSlot()].type 
-                     << (sint8)user->inv[36+user->currentItemSlot()].count 
-                     << (sint8)user->inv[36+user->currentItemSlot()].health;
+        Mineserver::get()->inventory()->setSlot(user,WINDOW_PLAYER,itemSlot,user->inv[itemSlot].type,
+                                                user->inv[itemSlot].count,user->inv[itemSlot].health);
       }
       break;
+      #undef itemSlot
     }
     
   }
@@ -652,7 +668,7 @@ int PacketHandler::player_block_placement(User *user)
   }
 
   // TODO: Handle sint16 itemID's
-  if(newblock > 255)
+  if(newblock > 255 && newblock != ITEM_SIGN)
   {
     return PACKET_OK;
   }

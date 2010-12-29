@@ -147,6 +147,9 @@
     <ClCompile Include="..\src\config\parser.cpp">
       <Filter>Source Files\config</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\plugin_api.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\user.h">
@@ -271,6 +274,9 @@
     </ClInclude>
     <ClInclude Include="..\src\config\parser.h">
       <Filter>Header Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\plugin_api.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
