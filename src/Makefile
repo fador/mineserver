@@ -1,112 +1,95 @@
-SHELL = /bin/sh
-SYSTEM = $(shell uname)
-PDCURSES = ${pdcurses}
+# Standard things
+.SUFFIXES:
+.SUFFIXES:	.c .o .so
 
-DFLAGS = 
+# Defaults
+PLUGIN       = NO
 
-ifeq ($(SYSTEM),Darwin)
-DFLAGS += -D__APPLE__
+# Variables
+ARCHFLAGS    = 
+LIBRARIES    = 
+INC          = -I. -I/usr/include -I/usr/local/include
+CFLAGS       = 
+LDFLAGS      = -L/usr/local/lib -L/usr/lib -levent -lz -lnoise
+COMMIT       = $(shell git log | head -n1 | cut -b8-14)
+BUILD        = "$(COMMIT)"
+DF           = $(*F)
+DEPDIR       = .deps
+BUILDDIR     = .build
+OBJS         = $(patsubst %.cpp,%.o,$(SRC))
+
+ifeq ($(PLUGIN), YES)
+	OBJS    += $(patsubst %.cpp,%.o,$(PLUGINS))
 endif
 
-ifeq ($(SYSTEM),FreeBSD)
-DFLAGS += -D__FREEBSD__
+ifeq ($(PDCURSES), YES)
+	LDFLAGS += -lpdcurses
+else
+	LDFLAGS += -lncurses
 endif
 
-ifeq ($(SYSTEM),SunOS)
-DFLAGS += -D__SOLARIS__
+ifeq ($(DEBUG), YES)
+	CFLAGS  += -DDEBUG
+endif
+
+ifeq ($(PEDANTIC), YES)
+	CFLAGS  += -Wall -Werror -pedantic
 endif
 
 ifeq ($(findstring Ubuntu,$(shell cat /etc/issue)),Ubuntu)
-DEBIAN = 1
+	DEBIAN   = 1
 endif
 
 ifeq ($(findstring Debian,$(shell cat /etc/issue)),Debian)
-DEBIAN = 1
+	DEBIAN   = 1
 endif
 
 ifeq ($(DEBIAN), 1)
-CXXFLAGS += -DDEBIAN
+	CFLAGS  += -DDEBIAN
 endif
 
-ifeq ($(findstring MINGW32,$(SYSTEM)),MINGW32)
-LFLAGS = -lws2_32 -lwinmm -export-all-symbols
-else
-LFLAGS = -rdynamic
+# Sources
+SRC          = mineserver.cpp map.cpp chat.cpp constants.cpp logger.cpp nbt.cpp
+SRC         += furnace.cpp furnaceManager.cpp packets.cpp physics.cpp sockets.cpp
+SRC         += tools.cpp user.cpp screen.cpp tree.cpp inventory.cpp
+
+SRC         += config.cpp config/node.cpp config/scanner.cpp config/lexer.cpp config/parser.cpp
+
+SRC         += blocks/basic.cpp blocks/door.cpp blocks/falling.cpp blocks/fire.cpp
+SRC         += blocks/liquid.cpp blocks/plant.cpp blocks/sign.cpp blocks/snow.cpp 
+SRC         += blocks/stair.cpp blocks/torch.cpp blocks/tracks.cpp blocks/default.cpp
+SRC         += blocks/chest.cpp
+
+SRC         += worldgen/mapgen.cpp worldgen/cavegen.cpp worldgen/mersenne.cpp
+
+ifeq ($(PLUGIN),YES)
+	SRC     +=  plugin.cpp
 endif
 
-ifeq ($(PDCURSES),true)
-LFLAGS += -lpdcurses
-else
-LFLAGS += -lncurses
-endif
+# Tools
+CC           = clang
+OBJCOPY      = objcopy
+COMPILE      = $(CC) $(INC) $(CFLAGS) $(ARCHFLAGS) -DSHA1=$(BUILD) -c $< -o $@
+MAKEDEPEND   = $(CC) -M $(INC) $(CFLAGS) $(ARCHFLAGS) -o "$(DEPDIR)/$*.d" $<
 
-ifeq ($(PEDANTIC), 1)
-LDFLAGS += -Wall -pedantic
-CXXFLAGS += -Wall -pedantic
-endif
+# Rules
+.PHONY: clean all
 
-RM = rm -f
-CXX = g++
-CC = $(CXX)
-LDFLAGS += -L/usr/local/lib -L/usr/lib -levent -lz -lnoise $(LFLAGS)
-CXXFLAGS += $(DFLAGS) -I. -I/usr/Local/include -I/usr/include
+all:	mineserver
 
-OBJS  = mineserver.o map.o chat.o constants.o logger.o nbt.o furnace.o furnaceManager.o packets.o physics.o sockets.o tools.o user.o screen.o plugin.o tree.o inventory.o
-OBJS += config.o config/node.o config/scanner.o config/lexer.o config/parser.o
-OBJS += blocks/basic.o blocks/door.o blocks/falling.o blocks/fire.o blocks/liquid.o blocks/plant.o blocks/sign.o blocks/snow.o blocks/stair.o blocks/torch.o blocks/tracks.o blocks/default.o blocks/chest.o
-OBJS += worldgen/mapgen.o worldgen/cavegen.o worldgen/mersenne.o
-PROG  = ./mineserver
-PROGS = $(PROG)
+%.o: %.cpp
+	@echo "Compiling $<"
+	@mkdir -p $(DEPDIR)/$(dir $@)
+	@$(MAKEDEPEND)
+	@sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e '/^$$/ d' -e 's/$$/ :/' < $(DEPDIR)/$(dir $@)/$(*F).d >> $(DEPDIR)/$(dir $@)/$(*F).d
+	@$(COMPILE)
 
-$(PROGS): $(OBJS)
+-include $(addprefix $(DEPDIR)/,$(OBJS:.o=.d))
 
-$(PROG):
-	$(CXX) $(OBJS) -o ../bin/mineserver $(LDFLAGS)
+mineserver: $(OBJS)
+	@echo "Building $@"
+	@$(CC) $(ARCHFLAGS) $(LDFLAGS) $(OBJS) $(LIBRARIES) -o ../bin/$@
 
-clean: 
-	$(RM) $(OBJS) $(PROGS)
-
-dist:
-	tar cvzf ../mineserver-latest-`uname`-bin.tar.gz -C ../bin/ . ../LICENSE
-	zip -j ../mineserver-latest-`uname`-bin.zip ../bin/* ../LICENSE
-
-all: $(PROGS)
-
-chat.o: chat.cpp logger.h constants.h tools.h map.h user.h chat.h config.h physics.h plugin.h
-config/node.o: config/node.cpp config/node.h
-config/scanner.o: config/scanner.cpp config/scanner.h
-config/lexer.o: config/lexer.cpp config/lexer.h
-config/parser.o: config/parser.cpp config/parser.h
-config.o: config.cpp config.h config/node.h config/scanner.h config/lexer.h config/parser.h
-constants.o: constants.cpp constants.h
-logger.o: logger.cpp logger.h mineserver.h
-map.o: map.cpp logger.h tools.h map.h user.h nbt.h config.h worldgen/mapgen.h
-inventory.o: inventory.cpp inventory.h tools.h map.h user.h mineserver.h
-nbt.o: nbt.cpp tools.h nbt.h map.h
-furnace.o: furnace.cpp furnace.h mineserver.h
-furnaceManager.o: furnaceManager.cpp furnaceManager.h
-packets.o: packets.cpp constants.h mineserver.h logger.h sockets.h tools.h map.h user.h chat.h config.h nbt.h packets.h physics.h
-physics.o: physics.cpp logger.h constants.h config.h user.h map.h vec.h physics.h
-screen.o: screen.cpp screen.h
-sockets.o: sockets.cpp logger.h constants.h tools.h mineserver.h user.h map.h chat.h nbt.h packets.h
-tools.o: tools.cpp tools.h
-tree.o: tree.cpp tree.h
-user.o: user.cpp constants.h logger.h tools.h mineserver.h map.h user.h nbt.h chat.h packets.h
-mineserver.o: mineserver.cpp mineserver.h constants.h logger.h sockets.h tools.h map.h user.h chat.h worldgen/mapgen.h config.h nbt.h packets.h physics.h
-plugin.o: plugin.cpp plugin.h hook.h mineserver.h blocks/basic.h blocks/door.h blocks/falling.h blocks/fire.h blocks/liquid.h blocks/plant.h blocks/sign.h blocks/snow.h blocks/stair.h blocks/torch.h blocks/tracks.h blocks/chest.h
-blocks/basic.o: blocks/basic.cpp blocks/basic.h
-blocks/default.o: blocks/default.cpp blocks/default.h
-blocks/door.o: blocks/door.cpp blocks/basic.h blocks/door.h
-blocks/falling.o: blocks/falling.cpp blocks/basic.h blocks/falling.h
-blocks/fire.o: blocks/fire.cpp blocks/basic.h blocks/fire.h
-blocks/liquid.o: blocks/liquid.cpp physics.h blocks/basic.h blocks/liquid.h
-blocks/plant.o: blocks/plant.cpp blocks/basic.h blocks/plant.h
-blocks/sign.o: blocks/sign.cpp blocks/basic.h blocks/sign.h
-blocks/snow.o: blocks/snow.cpp blocks/basic.h blocks/snow.h
-blocks/stair.o: blocks/stair.cpp blocks/basic.h blocks/stair.h
-blocks/torch.o: blocks/torch.cpp blocks/basic.h blocks/torch.h
-blocks/tracks.o: blocks/tracks.cpp blocks/tracks.h
-blocks/chest.o: blocks/chest.cpp blocks/chest.h
-worldgen/cavegen.o: worldgen/cavegen.cpp worldgen/cavegen.h worldgen/mersenne.h map.h constants.h logger.h tools.h config.h
-worldgen/mapgen.o: worldgen/mapgen.cpp worldgen/mapgen.h logger.h constants.h config.h worldgen/mersenne.h worldgen/cavegen.h
-worldgen/mersenne.o: worldgen/mersenne.cpp worldgen/mersenne.h
+#.PHONY: clean
+clean:
+	@rm -rf *.o $(DEPDIR) ../bin/mineserver
