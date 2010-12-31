@@ -28,7 +28,10 @@
 #ifndef _USER_H
 #define _USER_H
 
+#include <vector>
+
 #include <event.h>
+
 #include "vec.h"
 #include "tools.h"
 #include "constants.h"
@@ -52,7 +55,7 @@ struct Item
   sint16 health;
   Item()
   {
-    type   = 0;
+    type   = -1;
     count  = 0;
     health = 0;
   }
@@ -86,8 +89,6 @@ public:
   bool waitForData;
   uint32 write_err_count;
   bool logged;
-  bool banned;
-  bool whitelist;
   bool muted;
 	bool dnd;
   sint16 health;
@@ -99,6 +100,7 @@ public:
   vec curChunk;
   Inventory inv;
   sint16 curItem;
+  Item inventoryHolding;
 
   int permissions; // bitmask for permissions. See permissions.h
 
@@ -111,8 +113,6 @@ public:
   static bool isUser(int sock);
   static User* byNick(std::string nick);
 
-  bool checkBanned(std::string _nick);
-  bool checkWhitelist(std::string _nick);
   bool changeNick(std::string _nick);
   bool updatePos(double x, double y, double z, double stance);
   /** Check if the user is standing on this block */
@@ -183,8 +183,8 @@ public:
   bool isUnderwater();
 
   // Getter/Setter for item currently in hold
-  sint16 currentItem();
-  void setCurrentItem(sint16 item_id);
+  sint16 currentItemSlot();
+  void setCurrentItemSlot(sint16 item_slot);
 
 
   bool withinViewDistance(int a, int b)
@@ -198,7 +198,7 @@ private:
   event m_event;
 
   // Item currently in hold
-  sint16 m_currentItem;
+  sint16 m_currentItemSlot;
 };
 
 #endif

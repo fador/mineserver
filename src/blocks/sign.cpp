@@ -25,8 +25,11 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sign.h"
 #include <math.h>
+
+#include "../mineserver.h"
+
+#include "sign.h"
 
 void BlockSign::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
@@ -53,7 +56,7 @@ void BlockSign::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
    uint8 oldblock;
    uint8 oldmeta;
 
-   if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
+   if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
       return;
 
    /* Check block below allows blocks placed on top */
@@ -155,8 +158,8 @@ void BlockSign::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
    if (!this->isBlockEmpty(x,y,z))
       return;
 
-   Map::get()->setBlock(x, y, z, (char)newblock, metadata, user->nick);
-   Map::get()->sendBlockChange(x, y, z, (char)newblock, metadata);
+   Mineserver::get()->map()->setBlock(x, y, z, (char)newblock, metadata);
+   Mineserver::get()->map()->sendBlockChange(x, y, z, (char)newblock, metadata);
 }
 
 void BlockSign::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)

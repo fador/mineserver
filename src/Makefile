@@ -1,5 +1,6 @@
 SHELL = /bin/sh
 SYSTEM = $(shell uname)
+PDCURSES = ${pdcurses}
 
 DFLAGS = 
 
@@ -15,12 +16,20 @@ ifeq ($(SYSTEM),SunOS)
 DFLAGS += -D__SOLARIS__
 endif
 
-ifeq ($(SYSTEM),mingw)
-LFLAGS = -lws2_32
-endif
-
 ifeq ($(DEBIAN), 1)
 CXXFLAGS += -DDEBIAN
+endif
+
+ifeq ($(SYSTEM),MINGW32_NT-6.1)
+LFLAGS = -lws2_32 -lwinmm -export-all-symbols
+else
+LFLAGS = -rdynamic
+endif
+
+ifeq ($(PDCURSES),true)
+LFLAGS += -lpdcurses
+else
+LFLAGS += -lncurses
 endif
 
 ifeq ($(PEDANTIC), 1)
@@ -31,10 +40,10 @@ endif
 RM = rm -f
 CXX = g++
 CC = $(CXX)
-LDFLAGS += -L/usr/local/lib -L/usr/lib -levent -lz -lnoise -lncurses $(LFLAGS)
+LDFLAGS += -L/usr/local/lib -L/usr/lib -levent -lz -lnoise $(LFLAGS)
 CXXFLAGS += $(DFLAGS) -I. -I/usr/Local/include -I/usr/include
 
-OBJS  = map.o chat.o commands.o config.o constants.o logger.o trxlogger.o nbt.o furnace.o furnaceManager.o packets.o physics.o sockets.o tools.o user.o mineserver.o screen.o plugin.o
+OBJS  = mineserver.o map.o chat.o commands.o config.o constants.o logger.o nbt.o furnace.o furnaceManager.o packets.o physics.o sockets.o tools.o user.o screen.o plugin.o tree.o
 OBJS += blocks/basic.o blocks/door.o blocks/falling.o blocks/fire.o blocks/liquid.o blocks/plant.o blocks/sign.o blocks/snow.o blocks/stair.o blocks/torch.o blocks/tracks.o blocks/default.o blocks/chest.o
 OBJS += worldgen/mapgen.o worldgen/cavegen.o worldgen/mersenne.o
 PROG = ./mineserver
@@ -43,7 +52,7 @@ PROGS = $(PROG)
 $(PROGS): $(OBJS)
 
 $(PROG):
-	$(CXX) $(LDFLAGS) $(OBJS) -o ../bin/mineserver
+	$(CXX) $(OBJS) -o ../bin/mineserver $(LDFLAGS)
 
 clean: 
 	$(RM) $(OBJS) $(PROGS)
@@ -54,23 +63,24 @@ dist:
 
 all: $(PROGS)
 
-chat.o: chat.cpp logger.h constants.h tools.h map.h user.h chat.h config.h physics.h
-commands.o: commands.cpp logger.h trxlogger.h constants.h tools.h map.h user.h chat.h config.h physics.h
+chat.o: chat.cpp logger.h constants.h tools.h map.h user.h chat.h config.h physics.h plugin.h
+commands.o: commands.cpp logger.h constants.h tools.h map.h user.h chat.h config.h physics.h
 config.o: config.cpp logger.h constants.h config.h
 constants.o: constants.cpp constants.h
-logger.o: logger.cpp logger.h
-map.o: map.cpp logger.h trxlogger.h tools.h map.h user.h nbt.h config.h worldgen/mapgen.h
+logger.o: logger.cpp logger.h mineserver.h
+map.o: map.cpp logger.h tools.h map.h user.h nbt.h config.h worldgen/mapgen.h
 nbt.o: nbt.cpp tools.h nbt.h map.h
-furnace.o: furnace.cpp furnace.h
+furnace.o: furnace.cpp furnace.h mineserver.h
 furnaceManager.o: furnaceManager.cpp furnaceManager.h
-packets.o: packets.cpp constants.h logger.h sockets.h tools.h map.h user.h chat.h config.h nbt.h packets.h physics.h
+packets.o: packets.cpp constants.h mineserver.h logger.h sockets.h tools.h map.h user.h chat.h config.h nbt.h packets.h physics.h
 physics.o: physics.cpp logger.h constants.h config.h user.h map.h vec.h physics.h
-screen.o:	screen.cpp mineserver.h screen.h
-sockets.o: sockets.cpp logger.h constants.h tools.h user.h map.h chat.h nbt.h packets.h
+screen.o: screen.cpp screen.h
+sockets.o: sockets.cpp logger.h constants.h tools.h mineserver.h user.h map.h chat.h nbt.h packets.h
 tools.o: tools.cpp tools.h
-user.o: user.cpp constants.h logger.h tools.h map.h user.h nbt.h chat.h packets.h
-mineserver.o: mineserver.cpp constants.h logger.h sockets.h tools.h map.h user.h chat.h worldgen/mapgen.h config.h nbt.h packets.h physics.h
-plugin.o: plugin.cpp plugin.h blocks/basic.h blocks/door.h blocks/falling.h blocks/fire.h blocks/liquid.h blocks/plant.h blocks/sign.h blocks/snow.h blocks/stair.h blocks/torch.h blocks/tracks.h blocks/chest.h
+tree.o: tree.cpp tree.h
+user.o: user.cpp constants.h logger.h tools.h mineserver.h map.h user.h nbt.h chat.h packets.h
+mineserver.o: mineserver.cpp mineserver.h constants.h logger.h sockets.h tools.h map.h user.h chat.h worldgen/mapgen.h config.h nbt.h packets.h physics.h
+plugin.o: plugin.cpp plugin.h hook.h mineserver.h blocks/basic.h blocks/door.h blocks/falling.h blocks/fire.h blocks/liquid.h blocks/plant.h blocks/sign.h blocks/snow.h blocks/stair.h blocks/torch.h blocks/tracks.h blocks/chest.h
 blocks/basic.o: blocks/basic.cpp blocks/basic.h
 blocks/default.o: blocks/default.cpp blocks/default.h
 blocks/door.o: blocks/door.cpp blocks/basic.h blocks/door.h

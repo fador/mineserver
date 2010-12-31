@@ -1,29 +1,29 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
-   All rights reserved.
+  Copyright (c) 2010, The Mineserver Project
+  All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
- * Neither the name of the The Mineserver Project nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 #include <cstdlib>
 #include <cstdio>
@@ -52,24 +52,19 @@
 #include "config.h"
 #include "physics.h"
 #include "constants.h"
-
-Chat* Chat::_instance;
-
-void Chat::free()
-{
-   if(_instance)
-   {
-      delete _instance;
-      _instance = 0;
-   }
-}
+#include "plugin.h"
+#include "mineserver.h"
 
 Chat::Chat()
 {
   registerStandardCommands();
 }
 
-void Chat::registerCommand(Command *command)
+Chat::~Chat()
+{
+}
+
+void Chat::registerCommand(Command* command)
 {
   // Loop thru all the words for this command
   std::string currentWord;
@@ -121,7 +116,7 @@ bool Chat::checkMotd(std::string motdFile)
   // If file does not exist
   if(ifs.fail())
   {
-    Screen::get()->log("> Warning: " + motdFile + " not found. Creating...");
+    Mineserver::get()->screen()->log("> Warning: " + motdFile + " not found. Creating...");
 
     std::ofstream motdofs(motdFile.c_str());
     motdofs << MOTD_CONTENT << std::endl;
@@ -133,7 +128,7 @@ bool Chat::checkMotd(std::string motdFile)
   return true;
 }
 
-bool Chat::sendUserlist(User *user)
+bool Chat::sendUserlist(User* user)
 {
   this->sendMsg(user, MC_COLOR_BLUE + "[ " + dtos(User::all().size()) + " players online ]", USER);
 
@@ -189,91 +184,120 @@ std::deque<std::string> Chat::parseCmd(std::string cmd)
   return temp;
 }
 
-bool Chat::handleMsg(User *user, std::string msg)
+bool Chat::handleMsg(User* user, std::string msg)
 {
   // Timestamp
   time_t rawTime = time(NULL);
-  struct tm *Tm  = localtime(&rawTime);
+  struct tm* Tm  = localtime(&rawTime);
   std::string timeStamp (asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
-  //
-  // Chat commands
-  //
-
-  // Servermsg (Admin-only)
-  if(msg[0] == SERVERMSGPREFIX && IS_ADMIN(user->permissions))
+  bool blockMessage = false;
+  (static_cast<Hook4<bool,User*,std::string,std::string,bool*>*>(Mineserver::get()->plugin()->getHook("Chat")))->doUntilFalse(user, timeStamp, msg, &blockMessage);
+  if (blockMessage)
   {
-    // Decorate server message
-    Screen::get()->log(LOG_CHAT, "[!] " + msg.substr(1));
-    msg = MC_COLOR_RED + "[!] " + MC_COLOR_GREEN + msg.substr(1);
-    this->sendMsg(user, msg, ALL);
+    return false;
   }
 
-  // Adminchat
-  else if(msg[0] == ADMINCHATPREFIX && IS_ADMIN(user->permissions))
+  char prefix = msg[0];
+
+  switch(prefix)
   {
-    Screen::get()->log(LOG_CHAT, "[@] <"+ user->nick + "> " + msg.substr(1));
-    msg = timeStamp +  MC_COLOR_RED + " [@]" + MC_COLOR_WHITE + " <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg.substr(1);
-    this->sendMsg(user, msg, ADMINS);
-  }
-
-  // Command
-  else if(msg[0] == CHATCMDPREFIX)
-  {
-    std::deque<std::string> cmd = this->parseCmd(msg.substr(1));
-
-    std::string command         = cmd[0];
-    cmd.pop_front();
-
-    // User commands
-    CommandList::iterator iter;
-    if((iter = m_memberCommands.find(command)) != m_memberCommands.end())
-    {
-      iter->second->callback(user, command, cmd);
-    }
-    else if(IS_ADMIN(user->permissions) && (iter = m_adminCommands.find(command)) != m_adminCommands.end())
-    {
-      iter->second->callback(user, command, cmd);
-    }
-  }
-  // Normal message
-  else
-  {
-		if(user->isAbleToCommunicate("chat") == false)
-    {
-			return true;
-		}
-    else
-    {
-      // Check for Admins or Server Console
-      if (user->UID == SERVER_CONSOLE_UID)
+    // Servermsg (Admin-only)
+    case SERVERMSGPREFIX:
+      if(IS_ADMIN(user->permissions))
       {
-        Screen::get()->log(LOG_CHAT, user->nick + " " + msg);
-        msg = timeStamp + " " + MC_COLOR_RED + user->nick + MC_COLOR_WHITE + " " + msg;
+        handleServerMsg(user, msg, timeStamp);
       }
-      else if(IS_ADMIN(user->permissions))
-      {
-        Screen::get()->log(LOG_CHAT, "<"+ user->nick + "> " + msg);
-        msg = timeStamp + " <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg;
-      }
-      else
-      {
-        Screen::get()->log(LOG_CHAT, "<"+ user->nick + "> " + dtos(user->UID) + " " + msg);
-        msg = timeStamp + " <"+ user->nick + "> " + msg;
-      }
-    }
+      break;
 
-    this->sendMsg(user, msg, ALL);
+    // Admin message
+    case ADMINCHATPREFIX:
+      if(IS_ADMIN(user->permissions))
+      {
+        handleAdminChatMsg(user, msg, timeStamp);
+      }
+      break;
+
+    // Command
+    case CHATCMDPREFIX:
+      handleCommandMsg(user, msg, timeStamp);
+      break;
+
+    // Normal chat message
+    default:
+      handleChatMsg(user, msg, timeStamp);
+      break;
   }
 
   return true;
 }
 
-bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
+void Chat::handleServerMsg(User* user, std::string msg, const std::string& timeStamp)
+{
+  // Decorate server message
+  Mineserver::get()->screen()->log(LOG_CHAT, "[!] " + msg.substr(1));
+  msg = MC_COLOR_RED + "[!] " + MC_COLOR_GREEN + msg.substr(1);
+  this->sendMsg(user, msg, ALL);
+}
+
+void Chat::handleAdminChatMsg(User* user, std::string msg, const std::string& timeStamp)
+{
+  Mineserver::get()->screen()->log(LOG_CHAT, "[@] <"+ user->nick + "> " + msg.substr(1));
+  msg = timeStamp +  MC_COLOR_RED + " [@]" + MC_COLOR_WHITE + " <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg.substr(1);
+  this->sendMsg(user, msg, ADMINS);
+}
+
+void Chat::handleCommandMsg(User* user, std::string msg, const std::string& timeStamp)
+{
+  std::deque<std::string> cmd = this->parseCmd(msg.substr(1));
+
+  std::string command = cmd[0];
+  cmd.pop_front();
+
+  // User commands
+  CommandList::iterator iter;
+  if((iter = m_memberCommands.find(command)) != m_memberCommands.end())
+  {
+    iter->second->callback(user, command, cmd);
+  }
+  else if(IS_ADMIN(user->permissions) && (iter = m_adminCommands.find(command)) != m_adminCommands.end())
+  {
+    iter->second->callback(user, command, cmd);
+  }
+}
+
+void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeStamp)
+{
+  if(user->isAbleToCommunicate("chat") == false)
+  {
+    return;
+  }
+
+  // Check for Admins or Server Console
+  if (user->UID == SERVER_CONSOLE_UID)
+  {
+    Mineserver::get()->screen()->log(LOG_CHAT, user->nick + " " + msg);
+    msg = timeStamp + " " + MC_COLOR_RED + user->nick + MC_COLOR_WHITE + " " + msg;
+  }
+  else if(IS_ADMIN(user->permissions))
+  {
+    Mineserver::get()->screen()->log(LOG_CHAT, "<"+ user->nick + "> " + msg);
+    msg = timeStamp + " <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg;
+  }
+  else
+  {
+    Mineserver::get()->screen()->log(LOG_CHAT, "<"+ user->nick + "> " + dtos(user->UID) + " " + msg);
+    msg = timeStamp + " <"+ user->nick + "> " + msg;
+  }
+
+  this->sendMsg(user, msg, ALL);
+}
+
+bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
 {
   size_t tmpArrayLen = msg.size()+3;
-  uint8 *tmpArray    = new uint8[tmpArrayLen];
+  uint8* tmpArray    = new uint8[tmpArrayLen];
 
   tmpArray[0] = 0x03;
   tmpArray[1] = 0;
@@ -316,12 +340,12 @@ bool Chat::sendMsg(User *user, std::string msg, MessageTarget action)
   return true;
 }
 
-void Chat::sendHelp(User *user, std::deque<std::string> args)
+void Chat::sendHelp(User* user, std::deque<std::string> args)
 {
   // TODO: Add paging support, since not all commands will fit into
   // the screen at once.
 
-  CommandList *commandList = &m_guestCommands; // defaults
+  CommandList* commandList = &m_guestCommands; // defaults
   std::string commandColor = MC_COLOR_BLUE;
 
   if(IS_ADMIN(user->permissions))

@@ -38,43 +38,23 @@
 #include "logger.h"
 #include "constants.h"
 #include "permissions.h"
+#include "mineserver.h"
 
 #include "config.h"
-#include "kit.h"
-
-
-Conf* Conf::_conf;
-
-Conf::~Conf()
-{
-  for(std::map<std::string, Kit*>::iterator it = m_kits.begin(); it != m_kits.end(); it++)
-  {
-    delete it->second;
-  }
-}
-
-void Conf::free()
-{
-   if (_conf)
-   {
-      delete _conf;
-      _conf = 0;
-   }
-}
 
 // Load/reload configuration
 bool Conf::load(std::string configFile, std::string namePrefix)
 {
-  #ifdef _DEBUG
-  Screen::get()->log("Loading data from " + configFile);
-  #endif
+#ifdef _DEBUG
+  Mineserver::get()->screen()->log("Loading data from " + configFile);
+#endif
   std::ifstream ifs(configFile.c_str());
 
   // If configfile does not exist
   if(ifs.fail() && configFile == CONFIG_FILE)
   {
     // TODO: Load default configuration from the internets!
-    Screen::get()->log(LOG_ERROR, "Warning: " + configFile + " not found! Generating it now.");
+    Mineserver::get()->screen()->log(LOG_ERROR, "Warning: " + configFile + " not found! Generating it now.");
 
     // Open config file
     std::ofstream confofs(configFile.c_str());
@@ -97,7 +77,7 @@ bool Conf::load(std::string configFile, std::string namePrefix)
 
   if (ifs.fail())
   {
-    Screen::get()->log(LOG_ERROR, "Warning: " + configFile + " not found!");
+    Mineserver::get()->screen()->log(LOG_ERROR, "Warning: " + configFile + " not found!");
     ifs.close();
     return true;
   }
@@ -159,7 +139,7 @@ bool Conf::load(std::string configFile, std::string namePrefix)
     // If under two words skip the line and log skipping.
     if(line.size() < 2)
     {
-      Screen::get()->log(LOG_ERROR, "Invalid configuration at line " + dtos(lineNum) + " of " + configFile);
+      Mineserver::get()->screen()->log(LOG_ERROR, "Invalid configuration at line " + dtos(lineNum) + " of " + configFile);
       continue;
     }
 
@@ -183,7 +163,7 @@ bool Conf::load(std::string configFile, std::string namePrefix)
     if (line[0] == "include")
     {
       #ifdef _DEBUG
-      Screen::get()->log("Including config file " + text);
+      Mineserver::get()->screen()->log("Including config file " + text);
       #endif
       load(text);
       continue;
@@ -205,7 +185,7 @@ bool Conf::load(std::string configFile, std::string namePrefix)
   }
   ifs.close();
   #ifdef _DEBUG
-  Screen::get()->log("Loaded " + lineNum + " lines from " + configFile);
+  Mineserver::get()->screen()->log("Loaded " + dtos(lineNum) + " lines from " + configFile);
   #endif
 
   return true;
@@ -220,7 +200,7 @@ std::string Conf::sValue(std::string name)
   }
   else
   {
-		Screen::get()->log("Warning! " + name + " not defined in configuration. Using default value: " + defaultConf[name]);
+		Mineserver::get()->screen()->log("Warning! " + name + " not defined in configuration. Using default value: " + defaultConf[name]);
     return defaultConf[name];
   }
 }
@@ -233,7 +213,7 @@ int Conf::iValue(std::string name)
   }
   else
   {
-    Screen::get()->log("Warning! " + name + " not defined in configuration. Using default value: " + defaultConf[name]);
+    Mineserver::get()->screen()->log("Warning! " + name + " not defined in configuration. Using default value: " + defaultConf[name]);
     return atoi(defaultConf[name].c_str());
   }
 }
@@ -246,7 +226,7 @@ bool Conf::bValue(std::string name)
   }
   else
   {
-    Screen::get()->log("Warning! " + name + " not defined in configuration. Using default value: " + defaultConf[name]);
+    Mineserver::get()->screen()->log("Warning! " + name + " not defined in configuration. Using default value: " + defaultConf[name]);
     return (defaultConf[name] == "true")?true:false;
   }
 }
@@ -259,7 +239,7 @@ std::vector<int> Conf::vValue(std::string name)
   }
   else
   {
-    Screen::get()->log("Warning! " + name + " not defined in configuration.");
+    Mineserver::get()->screen()->log("Warning! " + name + " not defined in configuration.");
     return std::vector<int>();
   }
 }
@@ -291,35 +271,9 @@ int Conf::permissionByName(std::string permissionName)
     return PERM_GUEST;
   }
 
-  Screen::get()->log("Warning! Unknown permission name: " + permissionName + " - Using GUEST permission by default!");
+  Mineserver::get()->screen()->log("Warning! Unknown permission name: " + permissionName + " - Using GUEST permission by default!");
 
   return PERM_GUEST; // default
-}
-
-Kit* Conf::kit(const std::string& kitname)
-{
-  if(m_kits.find(kitname) != m_kits.end()) {
-    return m_kits[kitname];
-  } else {
-    std::string keyname = "kit_" + kitname;
-    if(m_confSet.find(keyname) != m_confSet.end())
-    {
-      std::string valueString, permissionName, itemsString;
-      valueString = m_confSet[keyname];
-      size_t pos = valueString.find_first_of(",");
-
-      permissionName = valueString.substr(0, pos);
-      itemsString = valueString.substr(pos + 1);
-      std::vector<int> items = stringToVec(itemsString);
-
-      Kit* kit = new Kit(kitname, items, permissionByName(permissionName));
-      m_kits[kitname] = kit; // save kit for later, if used again
-      return kit;
-    } else {
-      Screen::get()->log("Warning! " + keyname + " not defined in configuration.");
-      return NULL;
-    }
-  }
 }
 
 std::vector<int> Conf::stringToVec(std::string& str)
@@ -350,148 +304,4 @@ std::vector<int> Conf::stringToVec(std::string& str)
   }
 
   return temp;
-}
-
-
-
-bool Conf::loadRoles()
-{
-  std::string rolesFile = sValue("roles_file");
-
-  // Clear current admin-vector
-  m_admins.clear();
-  m_ops.clear();
-  m_members.clear();
-
-  // Read admins to deque
-  std::ifstream ifs(rolesFile.c_str());
-
-  // If file does not exist
-  if(ifs.fail())
-  {
-    Screen::get()->log("> Warning: " + rolesFile + " not found. Creating...");
-
-    std::ofstream adminofs(rolesFile.c_str());
-    adminofs << ROLES_CONTENT << std::endl;
-    adminofs.close();
-
-    return true;
-  }
-
-  std::deque<std::string> *role_list = &m_members; // default is member role
-  std::string temp;
-  while(getline(ifs, temp))
-  {
-    if(temp[0] == COMMENTPREFIX)
-    {
-      temp = temp.substr(1); // ignore COMMENTPREFIX
-      temp.erase(std::remove(temp.begin(), temp.end(), ' '), temp.end());
-
-      // get the name of the role from the comment
-      if(temp == "admins")
-      {
-        role_list = &m_admins;
-      }
-      if(temp == "ops")
-      {
-        role_list = &m_ops;
-      }
-      if(temp == "members")
-      {
-        role_list = &m_members;
-      }
-    }
-    else
-    {
-      temp.erase(std::remove(temp.begin(), temp.end(), ' '), temp.end());
-      if(temp != "")
-      {
-        role_list->push_back(temp);
-      }
-    }
-  }
-  ifs.close();
-#ifdef _DEBUG
-  Screen::get()->log("Loaded roles from " + rolesFile);
-#endif
-
-  return true;
-}
-
-bool Conf::loadBanned()
-{
-  std::string bannedFile = sValue("banned_file");
-
-  // Clear current banned-vector
-  m_banned.clear();
-
-  // Read banned to deque
-  std::ifstream ifs(bannedFile.c_str());
-
-  // If file does not exist
-  if(ifs.fail())
-  {
-    Screen::get()->log("> Warning: " + bannedFile + " not found. Creating...");
-
-    std::ofstream bannedofs(bannedFile.c_str());
-    bannedofs << BANNED_CONTENT << std::endl;
-    bannedofs.close();
-
-    return true;
-  }
-
-  std::string temp;
-  while(getline(ifs, temp))
-  {
-    // If not commentline
-    if(temp[0] != COMMENTPREFIX)
-    {
-      m_banned.push_back(temp);
-    }
-  }
-  ifs.close();
-#ifdef _DEBUG
-  Screen::get()->log("Loaded banned users from " + bannedFile);
-#endif
-
-  return true;
-}
-
-bool Conf::loadWhitelist()
-{
-  std::string whitelistFile = sValue("whitelist_file");
-
-  // Clear current whitelist-vector
-  m_whitelist.clear();
-
-  // Read whitelist to deque
-  std::ifstream ifs(whitelistFile.c_str());
-
-  // If file does not exist
-  if(ifs.fail())
-  {
-    Screen::get()->log("> Warning: " + whitelistFile + " not found. Creating...");
-
-    std::ofstream whitelistofs(whitelistFile.c_str());
-    whitelistofs << WHITELIST_CONTENT << std::endl;
-    whitelistofs.close();
-
-    return true;
-  }
-
-  std::string temp;
-  while(getline(ifs, temp))
-  {
-    // If not commentline
-    if(temp[0] != COMMENTPREFIX)
-    {
-      m_whitelist.push_back(temp);
-    }
-  }
-  ifs.close();
-#ifdef _DEBUG
-  Screen::get()->log("Loaded whitelisted users from " + whitelistFile);
-#endif
-
-  return true;
 }

@@ -42,7 +42,8 @@ enum
   BLOCK_STATUS_STARTED_DIGGING,
   BLOCK_STATUS_DIGGING,
   BLOCK_STATUS_STOPPED_DIGGING,
-  BLOCK_STATUS_BLOCK_BROKEN
+  BLOCK_STATUS_BLOCK_BROKEN,
+  BLOCK_STATUS_PICKUP_SPAWN
 };
 
 // Chat colors
@@ -125,9 +126,9 @@ enum
   ITEM_GOLD_RECORD = 2256, ITEM_GREEN_RECORD
 };
 
-const std::string VERSION = "0.1.14 (Alpha)";
+const std::string VERSION = "0.1.15 (Alpha)";
 
-const int PROTOCOL_VERSION = 6;
+const int PROTOCOL_VERSION = 8;
 
 const char COMMENTPREFIX  = '#';
 
@@ -142,14 +143,6 @@ const std::string COMMANDS_CONTENT = "# This is default command permissions file
 // Roles file
 const std::string ROLES_FILE    = "roles.txt";
 const std::string ROLES_CONTENT = "# This is default player roles file. Add nicknames here for admins, operators or members, one per line";
-
-// Banned users file
-const std::string BANNED_FILE    = "banned.txt";
-const std::string BANNED_CONTENT = "# This is default banned users file. Add nicknames here, one per line.";
-
-// Whitelist users file
-const std::string WHITELIST_FILE    = "whitelist.txt";
-const std::string WHITELIST_CONTENT = "# This is default whitelist file. Add nicknames here, one per line.";
 
 // Motdfile
 const std::string MOTD_FILE    = "motd.txt";
@@ -193,7 +186,7 @@ const char SERVERMSGPREFIX = '%';
 const char CHATCMDPREFIX   = '/';
 const char ADMINCHATPREFIX = '&';
 
-const int SERVER_CONSOLE_UID = -1;
+const unsigned int SERVER_CONSOLE_UID = -1;
 
 void initConstants();
 

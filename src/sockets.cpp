@@ -50,17 +50,18 @@
 #include <event.h>
 #include <sys/stat.h>
 #include <zlib.h>
-#include "logger.h"
-#include "constants.h"
 
 #include "tools.h"
 
+#include "logger.h"
+#include "constants.h"
 #include "user.h"
 #include "map.h"
 #include "chat.h"
 #include "nbt.h"
-#include "packets.h"
+#include "mineserver.h"
 
+#include "packets.h"
 
 extern int setnonblock(int fd);
 
@@ -81,7 +82,7 @@ void client_callback(int fd,
     read = recv(fd, (char*)buf, 2048, 0);
     if(read == 0)
     {
-    Screen::get()->log("Socket closed properly");
+    Mineserver::get()->screen()->log("Socket closed properly");
     //event_del(user->GetEvent());
 
 #ifdef WIN32
@@ -95,7 +96,7 @@ void client_callback(int fd,
 
     if(read == -1)
     {
-      Screen::get()->log("Socket had no data to read");
+      Mineserver::get()->screen()->log("Socket had no data to read");
       #ifdef WIN32
           closesocket(user->fd);
       #else
@@ -114,13 +115,13 @@ void client_callback(int fd,
     while(user->buffer >> (sint8&)user->action)
     {
       //Variable len package
-      if(PacketHandler::get()->packets[user->action].len == PACKET_VARIABLE_LEN)
+      if(Mineserver::get()->packetHandler()->packets[user->action].len == PACKET_VARIABLE_LEN)
       {
         //Call specific function
         int (PacketHandler::*function)(User *) =
-        PacketHandler::get()->packets[user->action].function;
+        Mineserver::get()->packetHandler()->packets[user->action].function;
         bool disconnecting = user->action == 0xFF;
-        int curpos = (PacketHandler::get()->*function)(user);
+        int curpos = (Mineserver::get()->packetHandler()->*function)(user);
         if(curpos == PACKET_NEED_MORE_DATA)
         {
           user->waitForData = true;
@@ -134,7 +135,7 @@ void client_callback(int fd,
           return;
         }
       }
-      else if(PacketHandler::get()->packets[user->action].len == PACKET_DOES_NOT_EXIST)
+      else if(Mineserver::get()->packetHandler()->packets[user->action].len == PACKET_DOES_NOT_EXIST)
       {
         printf("Unknown action: 0x%x\n", user->action);
 
@@ -149,7 +150,7 @@ void client_callback(int fd,
       }
       else
       {
-        if(!user->buffer.haveData(PacketHandler::get()->packets[user->action].len))
+        if(!user->buffer.haveData(Mineserver::get()->packetHandler()->packets[user->action].len))
         {
           user->waitForData = true;
           event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
@@ -158,8 +159,8 @@ void client_callback(int fd,
         }
 
         //Call specific function
-        int (PacketHandler::*function)(User *) = PacketHandler::get()->packets[user->action].function;
-        (PacketHandler::get()->*function)(user);
+        int (PacketHandler::*function)(User *) = Mineserver::get()->packetHandler()->packets[user->action].function;
+        (Mineserver::get()->packetHandler()->*function)(user);
       }
     } //End while
   }
@@ -172,7 +173,7 @@ void client_callback(int fd,
     {
       if((errno != EAGAIN && errno != EINTR) || user->write_err_count>200)
       {
-        Screen::get()->log(LOG_ERROR, "Error writing to client");
+        Mineserver::get()->screen()->log(LOG_ERROR, "Error writing to client");
         //event_del(user->GetEvent());
 
     #ifdef WIN32

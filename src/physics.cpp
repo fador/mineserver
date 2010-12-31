@@ -57,6 +57,7 @@
 #include "user.h"
 #include "map.h"
 #include "vec.h"
+#include "mineserver.h"
 
 #include "physics.h"
 
@@ -65,58 +66,46 @@ namespace
 
 bool isWaterBlock(int id)
 {
-  return id == BLOCK_WATER ||
-         id == BLOCK_STATIONARY_WATER;
+  return ((id == BLOCK_WATER) || (id == BLOCK_STATIONARY_WATER));
 }
 
 bool isLavaBlock(int id)
 {
-  return id == BLOCK_LAVA ||
-         id == BLOCK_STATIONARY_LAVA;
+  return ((id == BLOCK_LAVA) || (id == BLOCK_STATIONARY_LAVA));
 }
 
 bool isLiquidBlock(int id)
 {
-  return isWaterBlock(id) || isLavaBlock(id);
+  return ((id == BLOCK_LAVA) || (id == BLOCK_STATIONARY_LAVA) || (id == BLOCK_WATER) || (id == BLOCK_STATIONARY_WATER));
 }
 
 bool mayFallThrough(int id)
 {
-  return id == BLOCK_AIR ||
-         id == BLOCK_WATER ||
-         id == BLOCK_STATIONARY_WATER ||
-         id == BLOCK_SNOW;
+  return ((id == BLOCK_AIR) || (id == BLOCK_WATER) || (id == BLOCK_STATIONARY_WATER) || (id == BLOCK_SNOW));
 }
 
-}
-
-Physics* Physics::mPhysics;
-
-void Physics::free()
-{
-   if (mPhysics)
-   {
-      delete mPhysics;
-      mPhysics = 0;
-   }
 }
 
 // Physics loop
 bool Physics::update()
 {
   if(!enabled)
+  {
     return true;
+  }
 
   // Check if needs to be updated
   if(simList.empty())
+  {
     return true;
+  }
 
   clock_t starttime = clock();
 
   std::vector<sint32> toRemove;
   std::vector<vec> toAdd;
 
-  Screen::get()->log("Simulating " + dtos(simList.size()) + " items!");
+  Mineserver::get()->screen()->log("Simulating " + dtos(simList.size()) + " items!");
   uint32 listSize = simList.size();
   // Iterate each simulation
   for(uint32 simIt = 0; simIt < listSize; simIt++)
@@ -124,29 +113,29 @@ bool Physics::update()
     vec pos = simList[simIt].blocks[0].pos;
     // Blocks
     uint8 block, meta;
-    Map::get()->getBlock(pos, &block, &meta);
+    Mineserver::get()->map()->getBlock(pos, &block, &meta);
 
     simList[simIt].blocks[0].id   = block;
     simList[simIt].blocks[0].meta = meta;
 
-    //Water simulation
+    // Water simulation
     if(simList[simIt].type == TYPE_WATER)
     {
       if(isWaterBlock(block))
       {
-
         sint32 it = 0;
+
         //for(sint32 it=simList[simIt].blocks.size()-1; it>=0; it--)
         {
-
           bool havesource = false;
 
-          //Search for water source if this is not the source
+          // Search for water source if this is not the source
           if(simList[simIt].blocks[it].id != BLOCK_STATIONARY_WATER)
           {
             for(int i = 0; i < 6; i++)
             {
               vec local(pos);
+
               switch(i)
               {
                 case 0: local += vec( 0,  1,  0); break; //y++
@@ -157,24 +146,27 @@ bool Physics::update()
                 case 5: local += vec( 0, -1,  0); break; //y--
               }
 
-              //Search neighboring water blocks for source current
-              if(Map::get()->getBlock(local, &block, &meta) &&
-                 isWaterBlock(block))
+              // Search neighboring water blocks for source current
+              if (Mineserver::get()->map()->getBlock(local, &block, &meta) && isWaterBlock(block))
               {
-                //is this the source block
-                if(i != 5 &&
-                   (block == BLOCK_STATIONARY_WATER || (meta&0x07) <
-                    (simList[simIt].blocks[it].meta&0x07) || i == 0))
+                // is this the source block
+                if(i != 5 && (block == BLOCK_STATIONARY_WATER || (meta&0x07) < (simList[simIt].blocks[it].meta&0x07) || i == 0))
+                {
                   havesource = true;
+                }
                 //Else we have to search for source to this block also
                 else if(i == 5 || (meta&0x07) > (simList[simIt].blocks[it].meta&0x07))
+                {
                   toAdd.push_back(local);
+                }
               }
             }
           }
           //Stationary water block is the source
           else
+          {
             havesource = true;
+          }
 
           //If no source, dry block away
           if(!havesource)
@@ -190,24 +182,24 @@ bool Physics::update()
               // Set new water level
               block = BLOCK_WATER;
               meta  = simList[simIt].blocks[it].meta+1;
-              Map::get()->setBlock(pos, block, meta);
-              Map::get()->sendBlockChange(pos, block, meta);
+              Mineserver::get()->map()->setBlock(pos, block, meta);
+              Mineserver::get()->map()->sendBlockChange(pos, block, meta);
 
               toRemove.push_back(simIt);
               addSimulation(pos);
               // Update simulation meta information
-              //simList[simIt].blocks[it].meta = meta;
+              // simList[simIt].blocks[it].meta = meta;
             }
             //Else this block has dried out
             else
             {
               //Clear and remove simulation
-              Map::get()->setBlock(pos, BLOCK_AIR, 0);
-              Map::get()->sendBlockChange(pos, BLOCK_AIR, 0);
+              Mineserver::get()->map()->setBlock(pos, BLOCK_AIR, 0);
+              Mineserver::get()->map()->sendBlockChange(pos, BLOCK_AIR, 0);
               toRemove.push_back(simIt);
 
               //If below this block has another waterblock, simulate it also
-              if(Map::get()->getBlock(pos - vec(0, 1, 0), &block, &meta) &&
+              if(Mineserver::get()->map()->getBlock(pos - vec(0, 1, 0), &block, &meta) &&
                  isWaterBlock(block))
                 addSimulation(pos - vec(0, 1, 0));
 
@@ -219,14 +211,14 @@ bool Physics::update()
             toAdd.clear();
             vec belowPos(pos - vec(0, 1, 0));
             // If below is free to fall
-            if(Map::get()->getBlock(belowPos, &block, &meta) &&
+            if(Mineserver::get()->map()->getBlock(belowPos, &block, &meta) &&
                mayFallThrough(block))
             {
               // Set new fallblock there
               block = BLOCK_WATER;
               meta  = M_FALLING;
-              Map::get()->setBlock(belowPos, block, meta);
-              Map::get()->sendBlockChange(belowPos, block, meta);
+              Mineserver::get()->map()->setBlock(belowPos, block, meta);
+              Mineserver::get()->map()->sendBlockChange(belowPos, block, meta);
               // Change simulation-block to current block
               toRemove.push_back(simIt);
               addSimulation(belowPos);
@@ -249,15 +241,15 @@ bool Physics::update()
                 case 3: local += vec( 0,  0, -1); break;
                 }
 
-                if(Map::get()->getBlock(local, &block, &meta) &&
+                if(Mineserver::get()->map()->getBlock(local, &block, &meta) &&
                    mayFallThrough(block))
                 {
                   //Decrease water level each turn
                   if(!isWaterBlock(block) || meta > (simList[simIt].blocks[it].meta&0x07)+1)
                   {
                     meta = (simList[simIt].blocks[it].meta&0x07)+1;
-                    Map::get()->setBlock(local, BLOCK_WATER, meta);
-                    Map::get()->sendBlockChange(local, BLOCK_WATER, meta);
+                    Mineserver::get()->map()->setBlock(local, BLOCK_WATER, meta);
+                    Mineserver::get()->map()->sendBlockChange(local, BLOCK_WATER, meta);
                     addSimulation(local);
                   }
                 }
@@ -297,7 +289,7 @@ bool Physics::update()
 
   
   clock_t endtime = clock()-starttime;
-  Screen::get()->log("Exit simulation, took " + dtos(endtime*1000/CLOCKS_PER_SEC) + " ms, " + dtos(simList.size()) + " items left");
+  Mineserver::get()->screen()->log("Exit simulation, took " + dtos(endtime*1000/CLOCKS_PER_SEC) + " ms, " + dtos(simList.size()) + " items left");
   return true;
 }
 
@@ -308,7 +300,7 @@ bool Physics::addSimulation(vec pos)
     return true;
 
   uint8 block; uint8 meta;
-  Map::get()->getBlock(pos, &block, &meta);
+  Mineserver::get()->map()->getBlock(pos, &block, &meta);
   SimBlock simulationBlock(block, pos, meta);
 
   // Simulating water
@@ -372,7 +364,7 @@ bool Physics::checkSurrounding(vec pos)
     }
 
     //Add liquid blocks to simulation if they are affected by breaking a block
-    if(Map::get()->getBlock(local, &block, &meta) &&
+    if(Mineserver::get()->map()->getBlock(local, &block, &meta) &&
        isLiquidBlock(block))
       addSimulation(local);
   }

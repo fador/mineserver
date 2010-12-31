@@ -25,8 +25,10 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "liquid.h"
+#include "../mineserver.h"
 #include "../physics.h"
+
+#include "liquid.h"
 
 void BlockLiquid::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
@@ -57,7 +59,7 @@ void BlockLiquid::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
    uint8 oldblock;
    uint8 oldmeta;
 
-   if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
+   if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
       return;
 
    /* move the x,y,z coords dependent upon placement direction */
@@ -77,8 +79,8 @@ void BlockLiquid::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
    if (block == ITEM_LAVA_BUCKET)
       newblock = BLOCK_STATIONARY_LAVA;
 
-   Map::get()->setBlock(x, y, z, (char)newblock, direction, user->nick);
-   Map::get()->sendBlockChange(x, y, z, (char)newblock, direction);
+   Mineserver::get()->map()->setBlock(x, y, z, (char)newblock, direction);
+   Mineserver::get()->map()->sendBlockChange(x, y, z, (char)newblock, direction);
 
    physics(x,y,z);
 }
@@ -92,18 +94,18 @@ void BlockLiquid::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint3
 {
    uint8 oldblock;
    uint8 oldmeta;
-   if (!Map::get()->getBlock(x, y, z, &oldblock, &oldmeta))
+   if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
       return;
 
-   Physics::get()->removeSimulation(vec(x,y,z));
+   Mineserver::get()->physics()->removeSimulation(vec(x,y,z));
 
-   Map::get()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-   Map::get()->setBlock(x, y, z, BLOCK_AIR, 0, user->nick);
+   Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+   Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
 }
 
 void BlockLiquid::physics(sint32 x, sint8 y, sint32 z)
 {
-   Physics::get()->addSimulation(vec(x, y, z));
-   //Physics::get()->checkSurrounding(vec(x, y, z));
+   Mineserver::get()->physics()->addSimulation(vec(x, y, z));
+   //Mineserver::get()->physics()->checkSurrounding(vec(x, y, z));
 }
 
