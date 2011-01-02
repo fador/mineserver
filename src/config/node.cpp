@@ -52,12 +52,11 @@ bool ConfigNode::data(bool* ptr)
 {
   if (m_type == CONFIG_NODE_BOOLEAN)
   {
-    *ptr = (bool)m_nData;
+    *ptr = m_nData == 0.0;
     return true;
   }
   else
   {
-    ptr = false;
     return false;
   }
 }
@@ -71,7 +70,6 @@ bool ConfigNode::data(int* ptr)
   }
   else
   {
-    ptr = NULL;
     return false;
   }
 }
@@ -85,7 +83,6 @@ bool ConfigNode::data(long* ptr)
   }
   else
   {
-    ptr = NULL;
     return false;
   }
 }
@@ -99,7 +96,6 @@ bool ConfigNode::data(float* ptr)
   }
   else
   {
-    ptr = NULL;
     return false;
   }
 }
@@ -113,7 +109,6 @@ bool ConfigNode::data(double* ptr)
   }
   else
   {
-    ptr = NULL;
     return false;
   }
 }
@@ -155,14 +150,14 @@ long ConfigNode::lData()
 
 float ConfigNode::fData()
 {
-  float tmp = 0;
+  float tmp = 0.0f;
   data(&tmp);
   return tmp;
 }
 
 double ConfigNode::dData()
 {
-  double tmp = 0;
+  double tmp = 0.0;
   data(&tmp);
   return tmp;
 }
@@ -428,7 +423,7 @@ void ConfigNode::dump(int indent=0)
 
     case CONFIG_NODE_BOOLEAN:
     {
-      std::cout << "boolean: " << ((bool)m_nData ? "true" : "false") << "\n";
+      std::cout << "boolean: " << ((m_nData == 0) ? "true" : "false") << "\n";
       break;
     }
 
