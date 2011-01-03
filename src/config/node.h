@@ -43,34 +43,28 @@ class ConfigNode
 public:
   ConfigNode();
   ~ConfigNode();
-  bool data(bool* ptr);
-  bool data(int* ptr);
-  bool data(long* ptr);
-  bool data(float* ptr);
-  bool data(double* ptr);
-  bool data(std::string* ptr);
-  bool bData();
-  int iData();
-  long lData();
-  float fData();
-  double dData();
-  std::string sData();
+  bool bData() const;
+  int iData() const;
+  long lData() const;
+  float fData() const;
+  double dData() const;
+  std::string sData() const;
   void setData(bool data);
   void setData(int data);
   void setData(long data);
   void setData(float data);
   void setData(double data);
-  void setData(std::string& data);
+  void setData(const std::string& data);
   std::list<std::string>* keys(int type=CONFIG_NODE_UNDEFINED);
-  int type();
+  int type() const;
   void setType(int type);
-  bool has(std::string& key);
-  ConfigNode* get(std::string& key, bool createMissing=true);
-  bool set(std::string& key, ConfigNode* ptr, bool createMissing=true);
+  bool has(const std::string& key);
+  ConfigNode* get(const std::string& key, bool createMissing=true);
+  bool set(const std::string& key, ConfigNode* ptr, bool createMissing=true);
   bool add(ConfigNode* ptr);
   void clear();
-  void dump(int indent);
-  void dump() { dump(0); }
+  void dump(int indent) const;
+  void dump() const { dump(0); }
 private:
   int m_type;
   int m_index;

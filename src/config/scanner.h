@@ -35,7 +35,7 @@ class ConfigScanner
 public:
   ConfigScanner();
   ~ConfigScanner();
-  bool read(std::string file);
+  bool read(const std::string& file);
   int size();
   int left();
   int move(int len);
