@@ -52,7 +52,7 @@ bool ConfigNode::data(bool* ptr)
 {
   if (m_type == CONFIG_NODE_BOOLEAN)
   {
-    *ptr = m_nData == 0.0;
+    *ptr = m_nData != 0.0;
     return true;
   }
   else
