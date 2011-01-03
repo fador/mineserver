@@ -510,7 +510,7 @@ int PacketHandler::player_digging(User *user)
     }
     case BLOCK_STATUS_BLOCK_BROKEN:
     {
-      //ToDo: Fix, made for testing purposes!
+      //Player tool usage calculation etc
       #define itemSlot (36+user->currentItemSlot())
       bool rightUse;
       sint16 itemHealth=Mineserver::get()->inventory()->itemHealth(user->inv[itemSlot].type,block,rightUse);

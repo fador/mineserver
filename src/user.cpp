@@ -467,6 +467,7 @@ bool User::updatePos(double x, double y, double z, double stance)
   {
     sChunk* newChunk = Mineserver::get()->map()->loadMap(blockToChunk((sint32)x), blockToChunk((sint32)z));
     sChunk* oldChunk = Mineserver::get()->map()->loadMap(blockToChunk((sint32)pos.x), blockToChunk((sint32)pos.z));
+
     if(newChunk == oldChunk)
     {
       Packet telePacket;
