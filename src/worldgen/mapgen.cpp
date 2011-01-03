@@ -404,8 +404,6 @@ void MapGen::AddOres(int x, int z)
   uint8 block;
   uint8 meta;
   
-  //Mineserver::get()->screen()->log("addOres");
-  
   for(int bX = 4; bX < 12; bX++) 
   {
     for(int bZ = 4; bZ < 12; bZ++) 
@@ -414,7 +412,7 @@ void MapGen::AddOres(int x, int z)
       blockZ = zBlockpos+bZ;
       
       height = heightmap[(bZ<<4)+bX];
-      height -= 3;
+      height -= 5;
       
       for(int h = 10; h < height; h++)
       {
@@ -426,7 +424,7 @@ void MapGen::AddOres(int x, int z)
         int chance = mersenne.uniform(10000);
 
         // Coal ore
-        if(h < 90 && chance < 100)
+        if(h < 90 && chance < 70)
         {
           AddDeposit(blockX, h, blockZ, BLOCK_COAL_ORE, 4);
         }  
@@ -444,7 +442,7 @@ void MapGen::AddOres(int x, int z)
         }
         
         // Diamond ore
-        if(h < 17 && chance < 7)
+        if(h < 17 && chance < 8)
         {
           AddDeposit(blockX, h, blockZ, BLOCK_DIAMOND_ORE, 2);
         }
@@ -461,7 +459,7 @@ void MapGen::AddDeposit(int x, int y, int z, uint8 block, int depotSize)
     {
       for(int bZ = z; bZ < z+depotSize; bZ++)
       {
-        if(mersenne.uniform(1000) < 600)
+        if(mersenne.uniform(1000) < 500)
         {
           Mineserver::get()->map()->sendBlockChange(bX, bY, bZ, block, 0);
           Mineserver::get()->map()->setBlock(bX, bY, bZ, block, 0);
