@@ -71,7 +71,7 @@ void MapGen::init(int seed)
   ridgedMultiNoise.SetLacunarity(2.0);
   //  perlinNoise.SetPersistence(0.1); // 0-1
 
-  // Heighmap scale..
+  /* Heighmap scale..
   perlinScale = 0.7f;
 
   baseFlatTerrain.SetSeed(seed+1);
@@ -107,7 +107,7 @@ void MapGen::init(int seed)
   seaTerrain.SetSourceModule(1, finalTerrain);
   seaTerrain.SetControlModule(seaControl);
   seaTerrain.SetBounds(-0.3, 1000.0);
-  seaTerrain.SetEdgeFalloff(0.1);
+  seaTerrain.SetEdgeFalloff(0.1);*/
 
   seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
 
