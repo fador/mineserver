@@ -43,24 +43,18 @@
 #include "../mineserver.h"
 
 #include "mersenne.h"
-
 #include "cavegen.h"
 
 void CaveGen::init(int seed)
 {
   // Set up us the Perlin-noise module.
-  caveNoise1.SetSeed (seed+1);
-  caveNoise1.SetFrequency (1.0/20);
-  //caveNoise.SetLacunarity (0.5);
-  caveNoise1.SetOctaveCount (2);
-
-  caveNoise1.SetNoiseQuality (noise::QUALITY_STD);
+  caveNoise.SetSeed(seed+1);
+  caveNoise.SetFrequency(1.0/20);
+  caveNoise.SetOctaveCount(2);
+  caveNoise.SetNoiseQuality(noise::QUALITY_STD);
 
   addCaves = Mineserver::get()->config()->bData("mapgen.caves.enabled");
-  caveDensity = Mineserver::get()->config()->iData("mapgen.caves.density");
-  caveSize = Mineserver::get()->config()->iData("mapgen.caves.size");
   addCaveLava = Mineserver::get()->config()->bData("mapgen.caves.lava");
-  addCaveWater = Mineserver::get()->config()->bData("mapgen.caves.water");
   addOre = Mineserver::get()->config()->bData("mapgen.caves.ore");
 
   seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
@@ -70,9 +64,9 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
 { 
   if(addCaves)
   {
-    caveN1 = caveNoise1.GetValue(x,y,z);
+    value = caveNoise.GetValue(x,y,z);
     
-    if(caveN1 < 0.1)// && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER)
+    if(value < 0.1)
     {
       // Add bottomlava
       if(y < 10.0 && addCaveLava)
@@ -90,18 +84,25 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
       {
         int chance = mersenne.uniform(10000);
         
+        // Coal ore
         if(y < 90.0 && chance < 100)
         {
           block = BLOCK_COAL_ORE;
         }  
+        
+        // Iron ore
         if(y < 60.0 && chance < 30)
         {
           block = BLOCK_IRON_ORE;
         }
+        
+        // Gold ore
         if(y < 32.0 && chance < 10)
         {
           block = BLOCK_GOLD_ORE;
         }
+        
+        // Diamond ore
         if(y < 17.0 && chance < 7)
         {
           block = BLOCK_DIAMOND_ORE;
