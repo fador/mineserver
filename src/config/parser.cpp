@@ -105,6 +105,21 @@ bool ConfigParser::parse(std::string file, ConfigNode* ptr)
       }
     }
 
+    if (token_type == CONFIG_TOKEN_BOOLEAN)
+    {
+      ConfigNode* newNode = new ConfigNode;
+      newNode->setData(token_data == "true");
+      if (token_label.size())
+      {
+        currentNode->set(token_label, newNode, true);
+        token_label.clear();
+      }
+      else
+      {
+        currentNode->add(newNode);
+      }
+    }
+
     if (token_type == CONFIG_TOKEN_STRING)
     {
       ConfigNode* newNode = new ConfigNode;

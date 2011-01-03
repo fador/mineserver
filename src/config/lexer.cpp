@@ -93,7 +93,17 @@ bool ConfigLexer::get_token(int* type, std::string* data)
       buf = m_scanner->get();
     }
 
-    *type = CONFIG_TOKEN_ENTITY;
+    // Check for boolean literal is true and false
+    // This prevents us using true and false as identifiers.
+    if (*data == "true" || *data == "false")
+    {
+      *type = CONFIG_TOKEN_BOOLEAN;
+    }
+    else
+    {
+      *type = CONFIG_TOKEN_ENTITY;
+    }
+
     return true;
   }
   // Number

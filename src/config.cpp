@@ -115,7 +115,7 @@ std::string Config::sData(std::string key)
     return m_root->get(key, false)->sData();
   }
 
-  return NULL;
+  return "";
 }
 
 ConfigNode* Config::mData(std::string key)
