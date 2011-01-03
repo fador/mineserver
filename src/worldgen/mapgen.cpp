@@ -107,6 +107,8 @@ void MapGen::init(int seed)
   expandBeaches = Mineserver::get()->config()->bData("mapgen.beaches.expand");
   beachExtent = Mineserver::get()->config()->iData("mapgen.beaches.extent");
   beachHeight = Mineserver::get()->config()->iData("mapgen.beaches.height");
+  
+  addOre = Mineserver::get()->config()->bData("mapgen.caves.ore");
 
 }
 
@@ -194,6 +196,9 @@ void MapGen::generateChunk(int x, int z)
   //Mineserver::get()->map()->mapChanged[chunkid] = Mineserver::get()->config()->bData("save_unchanged_chunks");
 
   //Mineserver::get()->map()->maps[chunkid].nbt = main;
+  
+  if(addOre)
+    AddOres(x, z);
   
   // Add trees
   if(addTrees)
@@ -384,6 +389,82 @@ void MapGen::ExpandBeaches(int x, int z)
         {
           Mineserver::get()->map()->sendBlockChange(blockX, h-1, blockZ, BLOCK_SAND, 0);
           Mineserver::get()->map()->setBlock(blockX, h-1, blockZ, BLOCK_SAND, 0);
+        }
+      }
+    }
+  }
+}
+
+void MapGen::AddOres(int x, int z) 
+{
+  double xBlockpos = x<<4;
+  double zBlockpos = z<<4;
+  
+  int blockX, blockZ, height;
+  uint8 block;
+  uint8 meta;
+  
+  //Mineserver::get()->screen()->log("addOres");
+  
+  for(int bX = 4; bX < 12; bX++) 
+  {
+    for(int bZ = 4; bZ < 12; bZ++) 
+    {
+      blockX = xBlockpos+bX;
+      blockZ = zBlockpos+bZ;
+      
+      height = heightmap[(bZ<<4)+bX];
+      height -= 3;
+      
+      for(int h = 10; h < height; h++)
+      {
+        Mineserver::get()->map()->getBlock(blockX, h, blockZ, &block, &meta);
+        // No ore on air
+        if(block == BLOCK_AIR)
+          continue;
+        
+        int chance = mersenne.uniform(10000);
+
+        // Coal ore
+        if(h < 90 && chance < 100)
+        {
+          AddDeposit(blockX, h, blockZ, BLOCK_COAL_ORE, 4);
+        }  
+        
+        // Iron ore
+        if(h < 60 && chance < 30)
+        {
+          AddDeposit(blockX, h, blockZ, BLOCK_IRON_ORE, 3);
+        }
+        
+        // Gold ore
+        if(h < 32 && chance < 10)
+        {
+          AddDeposit(blockX, h, blockZ, BLOCK_GOLD_ORE, 2);
+        }
+        
+        // Diamond ore
+        if(h < 17 && chance < 7)
+        {
+          AddDeposit(blockX, h, blockZ, BLOCK_DIAMOND_ORE, 2);
+        }
+      }
+    }
+  }
+}
+
+void MapGen::AddDeposit(int x, int y, int z, uint8 block, int depotSize)
+{
+  for(int bX = x; bX < x+depotSize; bX++)
+  {
+    for(int bY = y; bY < y+depotSize; bY++)
+    {
+      for(int bZ = z; bZ < z+depotSize; bZ++)
+      {
+        if(mersenne.uniform(1000) < 600)
+        {
+          Mineserver::get()->map()->sendBlockChange(bX, bY, bZ, block, 0);
+          Mineserver::get()->map()->setBlock(bX, bY, bZ, block, 0);
         }
       }
     }
