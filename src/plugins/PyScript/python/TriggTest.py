@@ -1,12 +1,8 @@
 # Plugin 1 for PyScript
-import MineServer;
+from MineServer import m;
 
 def init():
-    print "Test"
-    print MineServer.Mineserver
-    print MineServer.Mineserver.get()
-    print MineServer.Mineserver.get()
-    print MineServer.Mineserver.get()
+    m.screen.log("Hai Der!")
 #    print MineServer.MineServer.get().screen()
 #    a = MineServer.MineServer.get().screen()
 #    a.log("Test")

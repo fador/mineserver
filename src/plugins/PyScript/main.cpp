@@ -9,10 +9,7 @@
 #include <dirent.h>
 #include <sys/types.h>
 
-#include "../../mineserver.h"
-#include "../../plugin.h"
-#include "../../screen.h"
-#include "../../user.h"
+#include "../../plugin_api.h"
 
 #include "../../MineServer_wrap.cxx"
 
