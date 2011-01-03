@@ -39,7 +39,7 @@ ConfigScanner::~ConfigScanner()
 {
 }
 
-bool ConfigScanner::read(std::string file)
+bool ConfigScanner::read(const std::string& file)
 {
   struct stat tmp;
   if(stat(file.c_str(), &tmp) != 0)

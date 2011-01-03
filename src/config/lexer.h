@@ -31,12 +31,12 @@
 #include <string>
 #include <stack>
 #include <utility>
-#include "scanner.h"
 
 #define CONFIG_TOKEN_ENTITY 1
 #define CONFIG_TOKEN_LABEL 2
 #define CONFIG_TOKEN_NUMBER 3
 #define CONFIG_TOKEN_STRING 4
+#define CONFIG_TOKEN_BOOLEAN 5
 
 #define CONFIG_TOKEN_LIST_OPEN 10
 #define CONFIG_TOKEN_LIST_CLOSE 11
@@ -48,11 +48,13 @@
 
 #define CONFIG_TOKEN_TERMINATOR 30
 
+class ConfigScanner;
+
 class ConfigLexer
 {
 public:
   bool get_token(int* type, std::string* data);
-  void put_token(int type, std::string& data);
+  void put_token(int type, const std::string& data);
   void setScanner(ConfigScanner* scanner);
   ConfigScanner* scanner();
 private:

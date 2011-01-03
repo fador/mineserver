@@ -43,7 +43,7 @@ Config::~Config()
   delete m_root;
 }
 
-bool Config::load(std::string file)
+bool Config::load(const std::string& file)
 {
   return m_parser->parse(file, m_root);
 }
@@ -58,67 +58,67 @@ ConfigNode* Config::root()
   return m_root;
 }
 
-bool Config::bData(std::string key)
+bool Config::bData(const std::string& key)
 {
   if (m_root->has(key))  
   {
     return m_root->get(key, false)->bData();
   }
 
-  return NULL;
+  return false;
 }
 
-int Config::iData(std::string key)
+int Config::iData(const std::string& key)
 {
   if (m_root->has(key))  
   {
     return m_root->get(key, false)->iData();
   }
 
-  return NULL;
+  return 0;
 }
 
-long Config::lData(std::string key)
+long Config::lData(const std::string& key)
 {
   if (m_root->has(key))  
   {
     return m_root->get(key, false)->lData();
   }
 
-  return NULL;
+  return 0L;
 }
 
-float Config::fData(std::string key)
+float Config::fData(const std::string& key)
 {
   if (m_root->has(key))  
   {
     return m_root->get(key, false)->fData();
   }
 
-  return NULL;
+  return 0.0f;
 }
 
-double Config::dData(std::string key)
+double Config::dData(const std::string& key)
 {
   if (m_root->has(key))  
   {
     return m_root->get(key, false)->dData();
   }
 
-  return NULL;
+  return 0.0;
 }
 
-std::string Config::sData(std::string key)
+std::string Config::sData(const std::string& key)
 {
   if (m_root->has(key))  
   {
     return m_root->get(key, false)->sData();
   }
 
-  return NULL;
+  return "";
 }
 
-ConfigNode* Config::mData(std::string key)
+ConfigNode* Config::mData(const std::string& key)
 {
   if (m_root->has(key))
   {
@@ -128,12 +128,12 @@ ConfigNode* Config::mData(std::string key)
   return NULL;
 }
 
-bool Config::has(std::string key)
+bool Config::has(const std::string& key)
 {
   return m_root->has(key);
 }
 
-int Config::type(std::string key)
+int Config::type(const std::string& key) const
 {
   if (m_root->has(key))
   {

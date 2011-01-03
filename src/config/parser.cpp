@@ -36,19 +36,19 @@
 #include "parser.h"
 #include "node.h"
 
-bool ConfigParser::parse(std::string file, ConfigNode* ptr)
+bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
 {
-  ConfigScanner* scanner = new ConfigScanner();
-  ConfigLexer* lexer = new ConfigLexer();
+  ConfigScanner scanner;
+  ConfigLexer lexer;
   ConfigNode* root = ptr;
 
-  if (!scanner->read(file))
+  if (!scanner.read(file))
   {
     std::cerr << "Couldn't find config file: " << file << "\n";
     return false;
   }
 
-  lexer->setScanner(scanner);
+  lexer.setScanner(&scanner);
 
   int token_type;
   std::string token_data;
@@ -56,7 +56,7 @@ bool ConfigParser::parse(std::string file, ConfigNode* ptr)
   std::deque<ConfigNode*> nodeStack;
   ConfigNode* currentNode = root;
   nodeStack.push_back(currentNode);
-  while (lexer->get_token(&token_type, &token_data))
+  while (lexer.get_token(&token_type, &token_data))
   {
     if (!token_type)
     {
@@ -70,7 +70,7 @@ bool ConfigParser::parse(std::string file, ConfigNode* ptr)
       int tmp_type;
       std::string tmp_data;
 
-      lexer->get_token(&tmp_type, &tmp_data);
+      lexer.get_token(&tmp_type, &tmp_data);
       if (tmp_type == CONFIG_TOKEN_STRING)
       {
         if (tmp_data == file)
@@ -88,7 +88,7 @@ bool ConfigParser::parse(std::string file, ConfigNode* ptr)
       }
       else
       {
-        lexer->put_token(tmp_type, tmp_data);
+        lexer.put_token(tmp_type, tmp_data);
       }
     }
 
@@ -102,6 +102,21 @@ bool ConfigParser::parse(std::string file, ConfigNode* ptr)
       if (currentNode != root)
       {
         currentNode->clear();
+      }
+    }
+
+    if (token_type == CONFIG_TOKEN_BOOLEAN)
+    {
+      ConfigNode* newNode = new ConfigNode;
+      newNode->setData(token_data == "true");
+      if (token_label.size())
+      {
+        currentNode->set(token_label, newNode, true);
+        token_label.clear();
+      }
+      else
+      {
+        currentNode->add(newNode);
       }
     }
 

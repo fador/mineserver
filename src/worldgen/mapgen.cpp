@@ -57,7 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../map.h"
 #include "../mineserver.h"
 
-//#include "mersenne.h"
+#include "mersenne.h"
 #include "cavegen.h"
 #include "mapgen.h"
 
@@ -71,7 +71,7 @@ void MapGen::init(int seed)
   ridgedMultiNoise.SetLacunarity(2.0);
   //  perlinNoise.SetPersistence(0.1); // 0-1
 
-  // Heighmap scale..
+  /* Heighmap scale..
   perlinScale = 0.7f;
 
   baseFlatTerrain.SetSeed(seed+1);
@@ -107,9 +107,10 @@ void MapGen::init(int seed)
   seaTerrain.SetSourceModule(1, finalTerrain);
   seaTerrain.SetControlModule(seaControl);
   seaTerrain.SetBounds(-0.3, 1000.0);
-  seaTerrain.SetEdgeFalloff(0.1);
+  seaTerrain.SetEdgeFalloff(0.1);*/
 
   seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
+  addTrees = Mineserver::get()->config()->bData("mapgen.trees.enabled");
 
   m_seed = seed;
   treesGenerated = false;
@@ -191,13 +192,19 @@ void MapGen::generateChunk(int x, int z)
   //Mineserver::get()->map()->mapChanged[chunkid] = Mineserver::get()->config()->bData("save_unchanged_chunks");
 
   //Mineserver::get()->map()->maps[chunkid].nbt = main;
+  
+  // Add trees
+  if(addTrees)
+  {
+    AddTrees(x, z);
+  }
 }
 
 //#define PRINT_MAPGEN_TIME
 
 
-void MapGen::AddTrees() {
-  if(!treesGenerated) {
+void MapGen::AddTrees(int x, int z) {
+  /*if(!treesGenerated) {
     int x = 0;
     int y = 65;
     int z = 0;
@@ -208,7 +215,42 @@ void MapGen::AddTrees() {
       }
     }
   }
-  treesGenerated = true;
+  treesGenerated = true;*/
+  double xBlockpos=x<<4;
+  double zBlockpos=z<<4;
+  int height = 110;
+  uint8 block;
+  uint8 meta;
+  
+  for (int bX = 0; bX < 16; bX++) 
+  {
+    for (int bZ = 0; bZ < 16; bZ++) 
+    {
+      height = 110;
+      while(true)
+      {
+        Mineserver::get()->map()->getBlock(xBlockpos+bX, height, zBlockpos+bZ, &block, &meta);
+        if(block == BLOCK_AIR)
+        {
+          height--;
+        } else
+        {
+          if(block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
+          {
+            // No trees on water
+            break;
+          }
+          height++;
+          if(mersenne.uniform(10000) < 195)
+          {
+            Tree tree(xBlockpos+bX, height, zBlockpos+bZ);
+            tree.generate();
+          }
+          break;
+        }
+      }
+    }
+  }
 }
 
 void MapGen::generateWithNoise(int x, int z) 
@@ -286,8 +328,8 @@ void MapGen::generateWithNoise(int x, int z)
       }
     }
   }
-  if(Mineserver::get()->config()->bData("mapgen.beaches.enabled"))
-    AddBeaches();
+  //if(Mineserver::get()->config()->bData("mapgen.beaches.enabled"))
+  //  AddBeaches();
 
 #ifdef PRINT_MAPGEN_TIME
 #ifdef WIN32

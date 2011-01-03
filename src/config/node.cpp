@@ -48,129 +48,64 @@ ConfigNode::~ConfigNode()
   }
 }
 
-bool ConfigNode::data(bool* ptr)
-{
-  if (m_type == CONFIG_NODE_BOOLEAN)
-  {
-    *ptr = (bool)m_nData;
-    return true;
-  }
-  else
-  {
-    ptr = false;
-    return false;
-  }
-}
 
-bool ConfigNode::data(int* ptr)
-{
-  if (m_type == CONFIG_NODE_NUMBER)
-  {
-    *ptr = (int)m_nData;
-    return true;
-  }
-  else
-  {
-    ptr = NULL;
-    return false;
-  }
-}
 
-bool ConfigNode::data(long* ptr)
-{
-  if (m_type == CONFIG_NODE_NUMBER)
-  {
-    *ptr = (long)m_nData;
-    return true;
-  }
-  else
-  {
-    ptr = NULL;
-    return false;
-  }
-}
-
-bool ConfigNode::data(float* ptr)
-{
-  if (m_type == CONFIG_NODE_NUMBER)
-  {
-    *ptr = (float)m_nData;
-    return true;
-  }
-  else
-  {
-    ptr = NULL;
-    return false;
-  }
-}
-
-bool ConfigNode::data(double* ptr)
-{
-  if (m_type == CONFIG_NODE_NUMBER)
-  {
-    *ptr = (double)m_nData;
-    return true;
-  }
-  else
-  {
-    ptr = NULL;
-    return false;
-  }
-}
-
-bool ConfigNode::data(std::string* ptr)
-{
-  if (m_type == CONFIG_NODE_STRING)
-  {
-    ptr->assign(m_sData);
-    return true;
-  }
-  else
-  {
-    ptr->clear();
-    return false;
-  }
-}
-
-bool ConfigNode::bData()
+bool ConfigNode::bData() const
 {
   bool tmp = false;
-  data(&tmp);
+  if (m_type == CONFIG_NODE_BOOLEAN) {
+    tmp = m_nData != 0.0;
+  }
   return tmp;
 }
 
-int ConfigNode::iData()
+int ConfigNode::iData() const
 {
-  int tmp = 0;
-  data(&tmp);
-  return tmp;
+  if (m_type == CONFIG_NODE_NUMBER)
+  {
+    return (int)m_nData;
+  }
+  return 0;
 }
 
-long ConfigNode::lData()
+long ConfigNode::lData() const
 {
-  long tmp = 0;
-  data(&tmp);
-  return tmp;
+  if (m_type == CONFIG_NODE_NUMBER)
+  {
+    return (long)m_nData;
+  }
+  return 0;
 }
 
-float ConfigNode::fData()
+float ConfigNode::fData() const
 {
-  float tmp = 0;
-  data(&tmp);
-  return tmp;
+  if (m_type == CONFIG_NODE_NUMBER)
+  {
+    return (float)m_nData;
+  }
+  return 0.0f;
 }
 
-double ConfigNode::dData()
+double ConfigNode::dData() const
 {
-  double tmp = 0;
-  data(&tmp);
-  return tmp;
+  if (m_type == CONFIG_NODE_NUMBER)
+  {
+    return m_nData;
+  }
+  return 0.0;
 }
 
-std::string ConfigNode::sData()
+std::string ConfigNode::sData() const
 {
   std::string tmp("");
-  data(&tmp);
+  if (m_type == CONFIG_NODE_STRING)
+  {
+    tmp.assign(m_sData);
+  }
+  else 
+  {
+    tmp.clear();
+  }
   return tmp;
 }
 
@@ -235,13 +170,13 @@ void ConfigNode::setData(double data)
   m_nData = (double)data;
 }
 
-void ConfigNode::setData(std::string& data)
+void ConfigNode::setData(const std::string& data)
 {
   m_type = CONFIG_NODE_STRING;
   m_sData.assign(data);
 }
 
-int ConfigNode::type()
+int ConfigNode::type() const
 {
   return m_type;
 }
@@ -251,7 +186,7 @@ void ConfigNode::setType(int type)
   m_type = type;
 }
 
-bool ConfigNode::has(std::string& key)
+bool ConfigNode::has(const std::string& key)
 {
   if (m_type != CONFIG_NODE_LIST)
   {
@@ -262,8 +197,8 @@ bool ConfigNode::has(std::string& key)
 
   if (pos != std::string::npos)
   {
-    std::string keyA(key.substr(0, pos));
-    std::string keyB(key.substr(pos+1));
+    const std::string keyA(key.substr(0, pos));
+    const std::string keyB(key.substr(pos+1));
     ConfigNode* tmp;
 
     if (m_list.count(keyA) == 0)
@@ -286,7 +221,7 @@ bool ConfigNode::has(std::string& key)
   }
 }
 
-ConfigNode* ConfigNode::get(std::string& key, bool createMissing)
+ConfigNode* ConfigNode::get(const std::string& key, bool createMissing)
 {
   if (m_type != CONFIG_NODE_LIST)
   {
@@ -338,7 +273,7 @@ ConfigNode* ConfigNode::get(std::string& key, bool createMissing)
   }
 }
 
-bool ConfigNode::set(std::string& key, ConfigNode* ptr, bool createMissing)
+bool ConfigNode::set(const std::string& key, ConfigNode* ptr, bool createMissing)
 {
   m_type = CONFIG_NODE_LIST;
 
@@ -391,7 +326,7 @@ void ConfigNode::clear()
   m_list.clear();
 }
 
-void ConfigNode::dump(int indent=0)
+void ConfigNode::dump(int indent=0) const
 {
   for (int i=0;i<indent;i++)
   {
@@ -410,8 +345,8 @@ void ConfigNode::dump(int indent=0)
     {
       std::cout << "list:\n";
 
-      std::map<std::string, ConfigNode*>::iterator iter_a = m_list.begin();
-      std::map<std::string, ConfigNode*>::iterator iter_b = m_list.end();
+      std::map<std::string, ConfigNode*>::const_iterator iter_a = m_list.begin();
+      std::map<std::string, ConfigNode*>::const_iterator iter_b = m_list.end();
 
       for (;iter_a!=iter_b;++iter_a)
       {
@@ -428,7 +363,7 @@ void ConfigNode::dump(int indent=0)
 
     case CONFIG_NODE_BOOLEAN:
     {
-      std::cout << "boolean: " << ((bool)m_nData ? "true" : "false") << "\n";
+      std::cout << "boolean: " << ((m_nData == 0) ? "true" : "false") << "\n";
       break;
     }
 

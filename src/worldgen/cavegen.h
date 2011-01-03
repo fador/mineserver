@@ -39,13 +39,12 @@ public:
   float caveScale;
 
 private:
-  Random rand;
+  Random mersenne;
   uint8 *blocks;
   
   noise::module::RidgedMulti caveNoise1;
-  noise::module::RidgedMulti caveNoise2;
   
-  double caveN1, caveN2;
+  double caveN1;
   
   bool addCaves;
   int caveDensity;
