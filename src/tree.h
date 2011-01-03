@@ -8,7 +8,7 @@
 #include "vec.h"
 #include <stack>
 
-enum { MAX_TRUNK = 13, MIN_TRUNK = 4, MAX_CANOPY = 3, MIN_CANOPY = 1 };
+enum { MAX_TRUNK = 8, MIN_TRUNK = 4, MAX_CANOPY = 3, MIN_CANOPY = 1 };
 
 class ITree {
 public:
