@@ -61,9 +61,11 @@ private:
   void generateWithNoise(int x, int z);
 
   void AddBeaches();
-  void AddTrees();
+  void AddTrees(int x, int z);
   
   CaveGen cave;
+  
+  Random mersenne;
 
   // Heightmap composition
   noise::module::RidgedMulti ridgedMultiNoise;
