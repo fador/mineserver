@@ -1108,3 +1108,120 @@ bool Inventory::setSlot(User *user, sint8 windowID, sint16 slot, sint16 itemID, 
 
   return true;
 }
+
+
+sint16 Inventory::itemHealth(sint16 itemID, sint8 block, bool &rightUse)
+{
+  sint16 health=0;
+  rightUse = false;
+  switch(itemID)
+  {
+    case ITEM_GOLD_AXE:
+    case ITEM_GOLD_PICKAXE:
+    case ITEM_GOLD_HOE:
+    case ITEM_GOLD_SPADE:
+    case ITEM_WOODEN_AXE:
+    case ITEM_WOODEN_PICKAXE:
+    case ITEM_WOODEN_HOE:
+    case ITEM_WOODEN_SPADE:
+    health = 32;
+    break;
+    case ITEM_STONE_AXE:
+    case ITEM_STONE_PICKAXE:
+    case ITEM_STONE_HOE:
+    case ITEM_STONE_SPADE:
+    health = 64;
+    break;
+    case ITEM_IRON_AXE:
+    case ITEM_IRON_PICKAXE:
+    case ITEM_IRON_HOE:
+    case ITEM_IRON_SPADE:
+    health = 128;
+    break;
+    case ITEM_DIAMOND_AXE:
+    case ITEM_DIAMOND_PICKAXE:
+    case ITEM_DIAMOND_HOE:
+    case ITEM_DIAMOND_SPADE:
+    health = 1024;
+    break;
+
+    default:
+      health = 0;
+  }
+
+
+  switch(itemID)
+  {
+    case ITEM_WOODEN_AXE:
+    case ITEM_GOLD_AXE:
+    case ITEM_STONE_AXE:
+    case ITEM_IRON_AXE:
+    case ITEM_DIAMOND_AXE:
+     if(block == BLOCK_LOG || block == BLOCK_WOOD)
+     {
+       rightUse = true;
+     }
+    break;
+    
+    case ITEM_WOODEN_PICKAXE:
+    case ITEM_STONE_PICKAXE:
+    case ITEM_GOLD_PICKAXE:
+    case ITEM_IRON_PICKAXE:
+    case ITEM_DIAMOND_PICKAXE:
+     switch(block)
+     {
+       case BLOCK_STONE:
+       case BLOCK_COBBLESTONE:
+       case BLOCK_MOSSY_COBBLESTONE:
+       case BLOCK_COAL_ORE:
+       case BLOCK_IRON_ORE:
+       case BLOCK_GOLD_ORE:
+       case BLOCK_DIAMOND_ORE:
+       case BLOCK_OBSIDIAN:
+       case BLOCK_LIGHTSTONE:
+       case BLOCK_NETHERSTONE:
+       case BLOCK_WOODEN_STAIRS:
+       case BLOCK_COBBLESTONE_STAIRS:
+       case BLOCK_IRON_DOOR:
+       case BLOCK_ICE:
+        rightUse = true;
+       break;
+       default:
+         rightUse = false;
+     }
+    break;
+    
+    case ITEM_WOODEN_HOE:
+    case ITEM_GOLD_HOE:
+    case ITEM_STONE_HOE:
+    case ITEM_IRON_HOE:
+    case ITEM_DIAMOND_HOE:
+      //ToDo: add this
+      rightUse = false;
+    break;
+          
+    case ITEM_WOODEN_SPADE:
+    case ITEM_GOLD_SPADE:          
+    case ITEM_STONE_SPADE:
+    case ITEM_IRON_SPADE:
+    case ITEM_DIAMOND_SPADE:
+     switch(block)
+     {
+       case BLOCK_DIRT:
+       case BLOCK_GRASS:
+       case BLOCK_SAND:
+       case BLOCK_GRAVEL:
+       case BLOCK_CLAY:
+       case BLOCK_SNOW:
+        rightUse = true;
+       break;
+       default:
+         rightUse = false;
+     }
+    break;
+
+    default:
+      health = 0;
+  }
+  return health;
+}

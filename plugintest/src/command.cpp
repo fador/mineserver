@@ -94,7 +94,7 @@ void registerCommand(Command* command)
 
 
 
-bool chatPreFunction(std::string user, std::string msg)
+bool chatPreFunction(const std::string& user, std::string msg)
 {
   if(msg.size() == 0)
   {
@@ -197,7 +197,7 @@ void giveItemsSelf(std::string user, std::string command, std::deque<std::string
             amount = itemCount;
           }
 
-          mineserver->map.createPickupSpawn(player_pos->x,player_pos->y,player_pos->z,itemId,amount,0,user);
+          mineserver->map.createPickupSpawn((int)player_pos->x,(int)player_pos->y,(int)player_pos->z,itemId,amount,0,user);
         }
       }
     }
