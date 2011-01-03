@@ -54,6 +54,8 @@ private:
   
   int m_seed;
   int seaLevel;
+  
+  bool addTrees;
 
   float perlinScale;
 

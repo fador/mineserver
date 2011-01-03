@@ -110,6 +110,7 @@ void MapGen::init(int seed)
   seaTerrain.SetEdgeFalloff(0.1);*/
 
   seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
+  addTrees = Mineserver::get()->config()->bData("mapgen.trees.enabled");
 
   m_seed = seed;
   treesGenerated = false;
@@ -193,7 +194,10 @@ void MapGen::generateChunk(int x, int z)
   //Mineserver::get()->map()->maps[chunkid].nbt = main;
   
   // Add trees
-  AddTrees(x, z);
+  if(addTrees)
+  {
+    AddTrees(x, z);
+  }
 }
 
 //#define PRINT_MAPGEN_TIME
