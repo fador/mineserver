@@ -45,7 +45,6 @@ private:
   
   bool addCaves;
   bool addCaveLava;
-  bool addOre;
 
   int seaLevel;
 };

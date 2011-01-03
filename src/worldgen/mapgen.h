@@ -56,12 +56,18 @@ private:
   bool expandBeaches;
   int beachExtent;
   int beachHeight;
+  
+  bool addOre;
 
   void generateFlatgrass();
   void generateWithNoise(int x, int z);
 
   void ExpandBeaches(int x, int z);
   void AddTrees(int x, int z);
+  
+  void AddOres(int x, int z);
+  void AddDeposit(int x, int y, int z, uint8 block, int depotSize);
+
   
   CaveGen cave;
   Random mersenne;

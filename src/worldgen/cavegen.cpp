@@ -55,7 +55,6 @@ void CaveGen::init(int seed)
 
   addCaves = Mineserver::get()->config()->bData("mapgen.caves.enabled");
   addCaveLava = Mineserver::get()->config()->bData("mapgen.caves.lava");
-  addOre = Mineserver::get()->config()->bData("mapgen.caves.ore");
 
   seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
 }
@@ -78,36 +77,5 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
       block = BLOCK_AIR;
       return;
     } 
-    else
-    {
-      if(addOre) // Add ore
-      {
-        int chance = mersenne.uniform(10000);
-        
-        // Coal ore
-        if(y < 90.0 && chance < 100)
-        {
-          block = BLOCK_COAL_ORE;
-        }  
-        
-        // Iron ore
-        if(y < 60.0 && chance < 30)
-        {
-          block = BLOCK_IRON_ORE;
-        }
-        
-        // Gold ore
-        if(y < 32.0 && chance < 10)
-        {
-          block = BLOCK_GOLD_ORE;
-        }
-        
-        // Diamond ore
-        if(y < 17.0 && chance < 7)
-        {
-          block = BLOCK_DIAMOND_ORE;
-        }
-      } 
-    }
   }
 }
