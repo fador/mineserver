@@ -43,7 +43,7 @@ ConfigScanner* ConfigLexer::scanner()
   return m_scanner;
 }
 
-void ConfigLexer::put_token(int type, std::string& data)
+void ConfigLexer::put_token(int type, const std::string& data)
 {
   std::pair<int, std::string>* tmp = new std::pair<int, std::string>;
   tmp->first = type;
