@@ -21,6 +21,19 @@ copy command.so to Mineserver bin directory.
 const char CHATCMDPREFIX   = '/';
 mineserver_pointer_struct* mineserver;
 
+struct cuboidStruct
+{
+  int x;
+  char y;
+  int z;
+  char block;
+  bool active;
+  int state;
+};
+
+std::map<std::string,cuboidStruct> cuboidMap;
+
+
 std::string dtos( double n )
 {
   std::ostringstream result;
@@ -123,11 +136,11 @@ bool chatPreFunction(const std::string& user, std::string msg)
     if((iter = m_Commands.find(command)) != m_Commands.end())
     {
       iter->second->callback(user, command, cmd);
-      return true;
+      return false;
     }
   }
 
-  return false;
+  return true;
 }
 
 
@@ -220,6 +233,17 @@ void home(std::string user, std::string command, std::deque<std::string> args)
   mineserver->user.teleport(user,x, y + 2, z);
 }
 
+void cuboid(std::string user, std::string command, std::deque<std::string> args)
+{
+  if(cuboidMap.find(user) != cuboidMap.end())
+  {
+    cuboidMap.erase(cuboidMap.find(user));
+  }
+  cuboidMap[user].active = 1;
+  cuboidMap[user].state = 0;
+  mineserver->chat.sendmsgTo(user, "Cuboid start, place first block");
+}
+
 void setTime(std::string user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 1)
@@ -259,6 +283,51 @@ void setTime(std::string user, std::string command, std::deque<std::string> args
   }
 }
 
+bool blockPlacePreFunction(const std::string& user, int x,char y,int z,unsigned char block)
+{  
+  if(cuboidMap.find(user) != cuboidMap.end())
+  {
+    if(cuboidMap[user].active)
+    {
+      if(cuboidMap[user].state == 0)
+      {
+        cuboidMap[user].state = 1;
+        cuboidMap[user].x     = x;
+        cuboidMap[user].y     = y;
+        cuboidMap[user].z     = z;
+        cuboidMap[user].block = block;
+        mineserver->chat.sendmsgTo(user, "First block done, place second");
+      }
+      else if(cuboidMap[user].state == 1)
+      {
+        if(cuboidMap[user].block == block)
+        {
+          if(cuboidMap[user].y == y)
+          {
+            int xstart,xend;
+            int zstart,zend;
+            xstart=(x<cuboidMap[user].x)?x:cuboidMap[user].x;
+            xend=(x<cuboidMap[user].x)?cuboidMap[user].x:x;
+
+            zstart=(z<cuboidMap[user].z)?z:cuboidMap[user].z;
+            zend=(z<cuboidMap[user].z)?cuboidMap[user].z:z;
+            for(int xpos = xstart; xpos <= xend; xpos ++)
+            {
+              for(int zpos = zstart;  zpos <= zend; zpos ++)
+              {                
+                mineserver->map.setBlock(xpos,y,zpos,block,0);
+              }
+            }
+            mineserver->chat.sendmsgTo(user, "Cuboid done");
+          }
+        }
+        cuboidMap.erase(cuboidMap.find(user));
+      }
+    }
+  }
+
+  return true;
+}
 
 PLUGIN_API_EXPORT void command_init(mineserver_pointer_struct* mineserver_temp)
 {
@@ -273,10 +342,12 @@ PLUGIN_API_EXPORT void command_init(mineserver_pointer_struct* mineserver_temp)
   mineserver->plugin.setPluginVersion("command", PLUGIN_COMMAND_VERSION);
 
   mineserver->callback.add_hook("ChatPre", (void *)chatPreFunction);
+  mineserver->callback.add_hook("BlockPlacePre", (void *)blockPlacePreFunction);
 
   registerCommand(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf));
   registerCommand(new Command(parseCmd("home"), "", "Teleport to map spawn location", home));
-  registerCommand(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime));  
+  registerCommand(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime));
+  registerCommand(new Command(parseCmd("cuboid"), "", "Cuboid testing", cuboid));  
 }
 
 PLUGIN_API_EXPORT void command_shutdown(void)

@@ -1230,25 +1230,25 @@ sint16 Inventory::itemHealth(sint16 itemID, sint8 block, bool &rightUse)
     case ITEM_WOODEN_PICKAXE:
     case ITEM_WOODEN_HOE:
     case ITEM_WOODEN_SPADE:
-    health = 32;
+      health = 32;
     break;
     case ITEM_STONE_AXE:
     case ITEM_STONE_PICKAXE:
     case ITEM_STONE_HOE:
     case ITEM_STONE_SPADE:
-    health = 64;
+      health = 64;
     break;
     case ITEM_IRON_AXE:
     case ITEM_IRON_PICKAXE:
     case ITEM_IRON_HOE:
     case ITEM_IRON_SPADE:
-    health = 128;
+      health = 128;
     break;
     case ITEM_DIAMOND_AXE:
     case ITEM_DIAMOND_PICKAXE:
     case ITEM_DIAMOND_HOE:
     case ITEM_DIAMOND_SPADE:
-    health = 1024;
+      health = 1024;
     break;
 
     default:
