@@ -304,14 +304,16 @@ bool blockPlacePreFunction(const std::string& user, int x,char y,int z,unsigned 
         {
           if(cuboidMap[user].y == y)
           {
-            int xmod = 1;
-            if(x < cuboidMap[user].x) xmod = -1;
-            int zmod = 1;
-            if(z < cuboidMap[user].z) zmod = -1;
+            int xstart,xend;
+            int zstart,zend;
+            xstart=(x<cuboidMap[user].x)?x:cuboidMap[user].x;
+            xend=(x<cuboidMap[user].x)?cuboidMap[user].x:x;
 
-            for(int xpos = (x<cuboidMap[user].x)?x:cuboidMap[user].x; xpos <= x; xpos ++)
+            zstart=(z<cuboidMap[user].z)?z:cuboidMap[user].z;
+            zend=(z<cuboidMap[user].z)?cuboidMap[user].z:z;
+            for(int xpos = xstart; xpos <= xend; xpos ++)
             {
-              for(int zpos = (z<cuboidMap[user].z)?z:cuboidMap[user].z;  zpos <= z;zpos ++)
+              for(int zpos = zstart;  zpos <= zend; zpos ++)
               {                
                 mineserver->map.setBlock(xpos,y,zpos,block,0);
               }
