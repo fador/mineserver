@@ -110,5 +110,8 @@ void init_plugin_api(void);
 extern mineserver_pointer_struct plugin_api_pointers;
 #endif
 
+mineserver_pointer_struct getMineServer();
+
 
 #endif
+

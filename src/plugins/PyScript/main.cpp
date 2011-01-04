@@ -1,3 +1,5 @@
+#define PVERSION 1.1
+
 #include <Python.h>
 #include <iostream>
 #include <stdlib.h>
@@ -18,35 +20,34 @@ using namespace std;
 class Script
 {
     public:
-        Script(Mineserver* mineserver, string name);
+        Script(mineserver_pointer_struct* mineserver, string name);
         Script(const Script &last);
         ~Script();
-        PyObject* callPyFunc(const char* name);
+        PyObject* callPyFunc(const char* name, PyObject* Args);
         void load(string ModName);
     private:
-        Mineserver * m_mineserver;
+        mineserver_pointer_struct * m_mineserver;
         PyObject* mod;
 };
 
 class PyScript
 {
     public:
-        PyScript(Mineserver* mineserver);
+        PyScript(mineserver_pointer_struct* mineserver);
         ~PyScript();
-        void callbackLogin(bool temp, User* user, bool* kick, std::string* reason);
         int getdir(string dir, vector<string> &files); 
-        PyObject* callAllFunc(const char* func);
+        PyObject* callAllFunc(const char* func, PyObject *args);
         static PyObject* MineServer_get_version(PyObject *self, PyObject *args);
     private:
-        Mineserver* m_mineserver;
+        mineserver_pointer_struct* m_mineserver;
         vector<Script*> scripts;
 };
 
-void PyScript::callbackLogin(bool temp, User* user, bool* kick, std::string* reason){
-    callAllFunc("player_login");
-}
+//void PyScript::callbackLogin(bool temp, User* user, bool* kick, std::string* reason){
+//    callAllFunc("player_login");
+//}
 
-Script::Script(Mineserver* mine, string name): m_mineserver(mine)
+Script::Script(mineserver_pointer_struct* mine, string name): m_mineserver(mine)
 {
     load(name);
 }
@@ -56,12 +57,13 @@ Script::Script(const Script &last){
 }
 
 void Script::load(string ModName){
-    PyObject* pName;
+    PyObject *pName,*Args;
     pName = PyString_FromString(ModName.c_str());
     mod = PyImport_Import(pName);
     Py_DECREF(pName);
-    callPyFunc("init");
-    m_mineserver->screen()->log(ModName);
+    Args = PyTuple_New(0);
+    callPyFunc("init",Args);
+    m_mineserver->screen.log(ModName);
 }
 
 Script::~Script(){
@@ -83,14 +85,12 @@ int PyScript::getdir (string dir, vector<string> &files)
     return 0;
 }
 
-PyObject* Script::callPyFunc(const char* name){
-    PyObject  *pValue, *pFunc, *pArgs;
+PyObject* Script::callPyFunc(const char* name, PyObject* Args){
+    PyObject  *pValue, *pFunc;
     if(mod != NULL) {
         pFunc = PyObject_GetAttrString(mod, name);
         if(pFunc && PyCallable_Check(pFunc)){
-            pArgs = PyTuple_New(0);
-            pValue = PyObject_CallObject(pFunc, pArgs);
-            Py_DECREF(pArgs);
+            pValue = PyObject_CallObject(pFunc, Args);
             if(pValue!=NULL){
                 Py_XDECREF(pFunc);
                 return pValue;
@@ -105,7 +105,7 @@ PyObject* Script::callPyFunc(const char* name){
     return NULL;
 }
 
-PyScript::PyScript(Mineserver* mineserver) : m_mineserver(mineserver)
+PyScript::PyScript(mineserver_pointer_struct* mineserver) : m_mineserver(mineserver)
 {
 //    mineserver->plugin()->hookLogin.addCallback(&PyScript::callbackLogin);
     string dir = string("python");
@@ -124,7 +124,7 @@ PyScript::PyScript(Mineserver* mineserver) : m_mineserver(mineserver)
         found2 = files[i].rfind(string(".pyc"));
         found3 = files[i].find(string("."));
         if(found!=string::npos && found2==string::npos && found3!=0){
-            m_mineserver->screen()->log(files[i]);
+            m_mineserver->screen.log(files[i]);
             filename = files[i].substr(0,found);
             Script thescript = Script(mineserver,filename);
             scripts.push_back(&thescript);
@@ -132,36 +132,32 @@ PyScript::PyScript(Mineserver* mineserver) : m_mineserver(mineserver)
     }
 }
 
-PyObject* PyScript::callAllFunc(const char* func){
+PyObject* PyScript::callAllFunc(const char* func, PyObject* Args){
     unsigned int i;
     for(i = 0; i<scripts.size(); i++){
         Script *sc = scripts.at(i);
-        sc->callPyFunc(func);
+        sc->callPyFunc(func,Args);
     }
     return NULL;
 }
 
 PyScript::~PyScript(){
-    callAllFunc("deinit");
+    PyObject* Args;
+    Args=PyTuple_New(0);
+    callAllFunc("deinit",Args);
     Py_Finalize();
 }
 
-extern "C" void PyScript_init(Mineserver* mineserver){
-    if(mineserver->plugin()->hasPointer("PyScript")){
-        mineserver->screen()->log("PyScript already loaded!");
+PLUGIN_API_EXPORT void PyScript_init(mineserver_pointer_struct* mineserver){
+    if(mineserver->plugin.getPluginVersion("PyScript")>0){
+        mineserver->screen.log("PyScript already loaded!");
         return;
     }
-    mineserver->plugin()->setPointer("PyScript", new PyScript(mineserver));
-    mineserver->screen()->log("PyScript loaded!");
+    mineserver->plugin.setPluginVersion("PyScript", PVERSION);
+    mineserver->screen.log("PyScript loaded!");
 }
 
-extern "C" void PyScript_shutdown(Mineserver* mineserver){
-    if(mineserver->plugin()->hasPointer("PyScript")){
-        PyScript* plugin = (PyScript*)mineserver->plugin()->getPointer("PyScript");
-        mineserver->plugin()->remPointer("PyScript");
-        delete plugin;
-    }
-    mineserver->screen()->log("PyScript unloaded!");
+PLUGIN_API_EXPORT void PyScript_shutdown(void){
 }
 
 

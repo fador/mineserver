@@ -222,3 +222,7 @@ void init_plugin_api(void)
 
   plugin_api_pointers.callback.add_hook       = &plugin_api_add_hook;
 }
+
+mineserver_pointer_struct getMineServer(){
+    return plugin_api_pointers;
+}
