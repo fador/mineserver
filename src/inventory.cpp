@@ -67,6 +67,14 @@ Inventory::Inventory()
   std::string text;
   while(getline(ifs, temp))
   {
+    //If empty line
+    if(temp.size() == 0)
+      continue;
+
+    // If commentline -> skip to next
+    if(temp[0] == COMMENTPREFIX)
+      continue;
+    
     receiptFiles.push_back(temp + ".recipe");
   }
   ifs.close();
@@ -75,231 +83,6 @@ Inventory::Inventory()
   {
     readRecipe("recipes/" + receiptFiles[i]);
   }
-
-  
-  /*
-  
-  //Chest
-  recipe = new Recipe;
-  recipe->width  = 3;
-  recipe->height = 3;
-  recipe->slots  = new sint16[recipe->width*recipe->height];
-  sint16 inputchest[9] = { BLOCK_WOOD, BLOCK_WOOD, BLOCK_WOOD,
-                           BLOCK_WOOD,   -1      , BLOCK_WOOD,
-                           BLOCK_WOOD, BLOCK_WOOD, BLOCK_WOOD};
-  recipe->output.count = 1;
-  recipe->output.type  = BLOCK_CHEST;
-  recipe->output.health= 0;
-  memcpy(recipe->slots,inputchest,recipe->width*recipe->height*sizeof(sint16));    
-  recipes.push_back(recipe);
-
-  //
-  // Block recipes
-  //
-
-
-
-
-
-  //sign
-  recipe = new Recipe;
-  recipe->width  = 3;
-  recipe->height = 3;
-  recipe->slots  = new sint16[recipe->width*recipe->height];
-  sint16 inputsign[9] = { BLOCK_WOOD,BLOCK_WOOD,BLOCK_WOOD,
-                          BLOCK_WOOD,BLOCK_WOOD,BLOCK_WOOD,
-                            -1 ,     ITEM_STICK,     -1};
-  recipe->output.count = 1;
-  recipe->output.type  = ITEM_SIGN;
-  recipe->output.health= 0;
-  memcpy(recipe->slots,inputsign,recipe->width*recipe->height*sizeof(sint16));    
-
-
-  recipes.push_back(recipe);
-
-
-
-  //fence
-  recipe = new Recipe;
-  recipe->width  = 3;
-  recipe->height = 2;
-  recipe->slots  = new sint16[recipe->width*recipe->height];
-  sint16 inputfence[6] = { ITEM_STICK,ITEM_STICK,ITEM_STICK,
-                              ITEM_STICK,ITEM_STICK,ITEM_STICK};
-  recipe->output.count = 2;
-  recipe->output.type  = BLOCK_FENCE;
-  recipe->output.health= 0;
-  memcpy(recipe->slots,inputfence,recipe->width*recipe->height*sizeof(sint16));
-
-  recipes.push_back(recipe);
-
-
-  //ladders
-  recipe = new Recipe;
-  recipe->width  = 3;
-  recipe->height = 3;
-  recipe->slots  = new sint16[recipe->width*recipe->height];
-  sint16 inputladders[9] = { ITEM_STICK,     -1   ,ITEM_STICK,
-                            -1         ,ITEM_STICK,        -1,
-                            ITEM_STICK ,-1,       ITEM_STICK};
-  recipe->output.count = 1;
-  recipe->output.type  = BLOCK_LADDER;
-  recipe->output.health= 0;
-  memcpy(recipe->slots,inputladders,recipe->width*recipe->height*sizeof(sint16));    
-
-
-  recipes.push_back(recipe);
-
-  //stone shovel
-  recipe = new Recipe;
-  recipe->width  = 1;
-  recipe->height = 3;
-  recipe->slots  = new sint16[recipe->width*recipe->height];
-  sint16 inputshovel1[3] = { BLOCK_COBBLESTONE,
-                              ITEM_STICK,
-                              ITEM_STICK};
-  recipe->output.count = 1;
-  recipe->output.type  = ITEM_STONE_SPADE;
-  recipe->output.health= 0;
-  memcpy(recipe->slots,inputshovel1,recipe->width*recipe->height*sizeof(sint16));    
-
-
-  recipes.push_back(recipe);
-
-  //wooden shovel
-  recipe = new Recipe;
-  recipe->width  = 1;
-  recipe->height = 3;
-  recipe->slots  = new sint16[recipe->width*recipe->height];
-  sint16 inputshovel2[3] = { BLOCK_WOOD,
-                              ITEM_STICK,
-                              ITEM_STICK};
-  recipe->output.count = 1;
-  recipe->output.type  = ITEM_WOODEN_SPADE;
-  recipe->output.health= 0;
-  memcpy(recipe->slots,inputshovel2,recipe->width*recipe->height*sizeof(sint16));    
-  recipes.push_back(recipe);
-
-
-  //stone pickaxe
-  recipe = new Recipe;
-  recipe->width  = 3;
-  recipe->height = 3;
-  recipe->slots  = new sint16[recipe->width*recipe->height];
-  sint16 inputpickaxe1[9] = { BLOCK_COBBLESTONE,BLOCK_COBBLESTONE,BLOCK_COBBLESTONE,
-                            -1             ,ITEM_STICK,              -1,
-                            -1             ,ITEM_STICK,              -1};
-  recipe->output.count = 1;
-  recipe->output.type  = ITEM_STONE_PICKAXE;
-  recipe->output.health= 0;
-  memcpy(recipe->slots,inputpickaxe1,recipe->width*recipe->height*sizeof(sint16));    
-  recipes.push_back(recipe);
-
-
-  //wood pickaxe
-  recipe = new Recipe;
-  recipe->width  = 3;
-  recipe->height = 3;
-  recipe->slots  = new sint16[recipe->width*recipe->height];
-  sint16 inputpickaxe2[9] = {    BLOCK_WOOD,BLOCK_WOOD,BLOCK_WOOD,
-                                    -1     ,ITEM_STICK,     -1,
-                                    -1     ,ITEM_STICK,     -1};
-  recipe->output.count = 1;
-  recipe->output.type  = ITEM_WOODEN_PICKAXE;
-  recipe->output.health= 0;
-  memcpy(recipe->slots,inputpickaxe2,recipe->width*recipe->height*sizeof(sint16));    
-  recipes.push_back(recipe);
-
-
-
-  //stone axe
-  recipe = new Recipe;
-  recipe->width  = 2;
-  recipe->height = 3;
-  recipe->slots  = new sint16[recipe->width*recipe->height];
-  sint16 inputaxe2[6] = { BLOCK_COBBLESTONE,BLOCK_COBBLESTONE,
-                          BLOCK_COBBLESTONE,ITEM_STICK,
-                            -1             ,ITEM_STICK};
-  recipe->output.count = 1;
-  recipe->output.type  = ITEM_STONE_AXE;
-  recipe->output.health= 0;
-  memcpy(recipe->slots,inputaxe2,recipe->width*recipe->height*sizeof(sint16));    
-  recipes.push_back(recipe);
-
-
-  //wooden axe
-  recipe = new Recipe;
-  recipe->width  = 2;
-  recipe->height = 3;
-  recipe->slots  = new sint16[recipe->width*recipe->height];
-  sint16 inputaxe1[6] = { BLOCK_WOOD,BLOCK_WOOD,
-                          BLOCK_WOOD,ITEM_STICK,
-                            -1     ,ITEM_STICK};
-  recipe->output.count = 1;
-  recipe->output.type  = ITEM_WOODEN_AXE;
-  recipe->output.health= 0;
-  memcpy(recipe->slots,inputaxe1,recipe->width*recipe->height*sizeof(sint16));    
-  recipes.push_back(recipe);
-
-
-  //wooden Stairs
-  recipe = new Recipe;
-  recipe->width  = 3;
-  recipe->height = 3;
-  recipe->slots  = new sint16[recipe->width*recipe->height];
-  sint16 inputwoodstair[9] = { BLOCK_WOOD,-1,-1,
-                                BLOCK_WOOD,BLOCK_WOOD,-1,
-                                BLOCK_WOOD,BLOCK_WOOD,BLOCK_WOOD};
-  recipe->output.count = 4;
-  recipe->output.type  = BLOCK_WOODEN_STAIRS;
-  recipe->output.health= 0;
-  memcpy(recipe->slots,inputwoodstair,recipe->width*recipe->height*sizeof(sint16));    
-  recipes.push_back(recipe);
-
-
-  //Stone Stairs
-  recipe = new Recipe;
-  recipe->width  = 3;
-  recipe->height = 3;
-  recipe->slots  = new sint16[recipe->width*recipe->height];
-  sint16 inputstonestair[9] = { BLOCK_STONE,-1,-1,
-                                BLOCK_STONE,BLOCK_STONE,-1,
-                                BLOCK_STONE,BLOCK_STONE,BLOCK_STONE};
-  recipe->output.count = 4;
-  recipe->output.type  = BLOCK_COBBLESTONE_STAIRS;
-  recipe->output.health= 0;
-  memcpy(recipe->slots,inputstonestair,recipe->width*recipe->height*sizeof(sint16));    
-  recipes.push_back(recipe);
-
-
-  //stone_Slab
-  recipe = new Recipe;
-  recipe->width  = 3;
-  recipe->height = 1;
-  recipe->slots  = new sint16[recipe->width*recipe->height];
-  sint16 inputstoneslab[3] = { BLOCK_STONE,BLOCK_STONE,BLOCK_STONE};
-  recipe->output.count = 4;
-  recipe->output.type  = 44;
-  recipe->output.health= 0;
-  memcpy(recipe->slots,inputstoneslab,recipe->width*recipe->height*sizeof(sint16));    
-  recipes.push_back(recipe);
-
-
-
-
-  Recipe *grass = new Recipe;
-  grass->width  = 2;
-  grass->height = 2;
-  grass->slots  = new sint16[4];
-  sint16 input2[4] = { 3, 3,
-                        3, 3};
-  grass->output.count = 1;
-  grass->output.type  = BLOCK_GRASS;
-  grass->output.health= 0;
-  memcpy(grass->slots,input2,4*sizeof(sint16));
-
-  recipes.push_back(grass);*/
-
 }
 
 bool Inventory::addRecipe(int width, int height, sint16* inputrecipe, int outputCount, 
@@ -324,13 +107,13 @@ bool Inventory::readRecipe(std::string recipeFile)
 
   if (ifs.fail())
   {
-    Mineserver::get()->screen()->log("IFS FAIL: " + recipeFile);
+    Mineserver::get()->screen()->log("Could not find: " + recipeFile);
 
     ifs.close();
     return false;
   }
   
-  Mineserver::get()->screen()->log("Reading: " + recipeFile);
+  //Mineserver::get()->screen()->log("Reading: " + recipeFile);
 
   std::string temp;
   
@@ -341,7 +124,7 @@ bool Inventory::readRecipe(std::string recipeFile)
   int del;
   bool readingRecipe = false;
   std::vector<std::string> line;
-  std::vector<uint8> recipetable;
+  std::vector<sint16> recipetable;
   std::string text;
   while(getline(ifs, temp))
   {
@@ -398,7 +181,7 @@ bool Inventory::readRecipe(std::string recipeFile)
     {
       for(int i = 0; i < line.size(); i++)
       {
-        //Mineserver::get()->screen()->log(line[i]);
+        //Mineserver::get()->screen()->log(dtos(atoi(line[i].c_str())));
         recipetable.push_back(atoi(line[i].c_str()));
       }
       continue;
