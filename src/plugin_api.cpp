@@ -96,8 +96,8 @@ bool plugin_api_callbackChatPre(User* user,time_t time,std::string msg)
   return true;
 }
 
-typedef bool (*blockPlacePreFunction)(const std::string&, int,char,int,char);
-bool plugin_api_callbackBlockPlacePre(User* user,int x,char y,int z,char block)
+typedef bool (*blockPlacePreFunction)(const std::string&, int,char,int,unsigned char);
+bool plugin_api_callbackBlockPlacePre(User* user,sint32 x,sint8 y,sint32 z,uint8 block)
 {
   for(uint32 i = 0; i < Hooks["BlockPlacePre"].size(); i++)
   {
@@ -110,7 +110,7 @@ bool plugin_api_callbackBlockPlacePre(User* user,int x,char y,int z,char block)
 }
 
 typedef bool (*blockBreakPreFunction)(const std::string&, int,char,int);
-bool plugin_api_callbackBlockPlacePre(User* user,int x,char y,int z)
+bool plugin_api_callbackBlockBreakPre(User* user,sint32 x,sint8 y,sint32 z)
 {
   for(uint32 i = 0; i < Hooks["BlockBreakPre"].size(); i++)
   {
@@ -273,4 +273,9 @@ void init_plugin_api(void)
   plugin_api_pointers.callback.add_hook       = &plugin_api_add_hook;
 
   (static_cast<Hook3<bool,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("ChatPre")))->addCallback(&plugin_api_callbackChatPre);
+  (static_cast<Hook4<bool,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("BlockBreakPre")))->addCallback(&plugin_api_callbackBlockBreakPre);
+  (static_cast<Hook5<bool,User*,sint32,sint8,sint32,uint8>*>(Mineserver::get()->plugin()->getHook("BlockPlacePre")))->addCallback(&plugin_api_callbackBlockPlacePre);
+
+
+
 }

@@ -797,7 +797,7 @@ int PacketHandler::player_block_placement(User *user)
       (static_cast<Hook6<void,User*,sint32,sint8,sint32,uint8,uint8>*>(Mineserver::get()->plugin()->getHook("BlockReplacePost")))->doAll(user, x, y, z, oldblock, newblock);
     }
 
-    if ((static_cast<Hook5<bool,User*,sint32,sint8,sint32,uint8>*>(Mineserver::get()->plugin()->getHook("BlockPlacePre")))->doUntilFalse(user, x, y, z, newblock))
+    if ((static_cast<Hook5<bool,User*,sint32,sint8,sint32,uint8>*>(Mineserver::get()->plugin()->getHook("BlockPlacePre")))->doUntilFalse(user, check_x, check_y, check_z, newblock))
     {
       return PACKET_OK;
     }
