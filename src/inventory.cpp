@@ -35,6 +35,7 @@
 #include <string.h>
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <cstdio>
 #include <ctime>
@@ -53,7 +54,51 @@
 
 Inventory::Inventory()
 {
-  Recipe *recipe;
+  std::ifstream ifs("recipes/ENABLED_RECIPES.cfg");
+
+  if(ifs.fail())
+  {
+    ifs.close();
+    return;
+  }
+
+  std::string temp;
+  std::vector<std::string> receiptFiles;
+  std::string text;
+  while(getline(ifs, temp))
+  {
+    receiptFiles.push_back(temp + ".recipe");
+  }
+  ifs.close();
+  
+  for(int i = 0; i < receiptFiles.size(); i++)
+  {
+    readRecipe("recipes/" + receiptFiles[i]);
+  }
+
+  
+  /*
+  
+  //Chest
+  recipe = new Recipe;
+  recipe->width  = 3;
+  recipe->height = 3;
+  recipe->slots  = new sint16[recipe->width*recipe->height];
+  sint16 inputchest[9] = { BLOCK_WOOD, BLOCK_WOOD, BLOCK_WOOD,
+                           BLOCK_WOOD,   -1      , BLOCK_WOOD,
+                           BLOCK_WOOD, BLOCK_WOOD, BLOCK_WOOD};
+  recipe->output.count = 1;
+  recipe->output.type  = BLOCK_CHEST;
+  recipe->output.health= 0;
+  memcpy(recipe->slots,inputchest,recipe->width*recipe->height*sizeof(sint16));    
+  recipes.push_back(recipe);
+
+  //
+  // Block recipes
+  //
+
+
+
 
 
   //sign
@@ -239,86 +284,8 @@ Inventory::Inventory()
   memcpy(recipe->slots,inputstoneslab,recipe->width*recipe->height*sizeof(sint16));    
   recipes.push_back(recipe);
 
-  //Chest
-  recipe = new Recipe;
-  recipe->width  = 3;
-  recipe->height = 3;
-  recipe->slots  = new sint16[recipe->width*recipe->height];
-  sint16 inputchest[9] = { BLOCK_WOOD,BLOCK_WOOD,BLOCK_WOOD,
-                              BLOCK_WOOD,   -1     ,BLOCK_WOOD,
-                              BLOCK_WOOD,BLOCK_WOOD,BLOCK_WOOD};
-  recipe->output.count = 1;
-  recipe->output.type  = BLOCK_CHEST;
-  recipe->output.health= 0;
-  memcpy(recipe->slots,inputchest,recipe->width*recipe->height*sizeof(sint16));    
-  recipes.push_back(recipe);
 
 
-  //Torches
-  recipe = new Recipe;
-  recipe->width  = 1;
-  recipe->height = 2;
-  recipe->slots  = new sint16[recipe->width*recipe->height];
-  sint16 inputtorches[2] = { ITEM_COAL,ITEM_STICK };
-  recipe->output.count = 4;
-  recipe->output.type  = BLOCK_TORCH;
-  recipe->output.health= 0;
-  memcpy(recipe->slots,inputtorches,recipe->width*recipe->height*sizeof(sint16));    
-  recipes.push_back(recipe);
-
-
-  //Sticks
-  recipe = new Recipe;
-  recipe->width  = 1;
-  recipe->height = 2;
-  recipe->slots  = new sint16[recipe->width*recipe->height];
-  sint16 inputstick[2] = { BLOCK_WOOD,BLOCK_WOOD };
-  recipe->output.count = 4;
-  recipe->output.type  = ITEM_STICK;
-  recipe->output.health= 0;
-  memcpy(recipe->slots,inputstick,recipe->width*recipe->height*sizeof(sint16));    
-  recipes.push_back(recipe);
-
-
-
-  Recipe *wood = new Recipe;
-  wood->width  = 1;
-  wood->height = 1;
-  wood->slots  = new sint16[1];
-  sint16 inputwood[1] = { BLOCK_LOG };
-  wood->output.count = 4;
-  wood->output.type  = BLOCK_WOOD;
-  wood->output.health= 0;
-  memcpy(wood->slots,inputwood,sizeof(sint16));    
-  recipes.push_back(wood);
-
-
-  Recipe *furnace = new Recipe;
-  furnace->width  = 3;
-  furnace->height = 3;
-  furnace->slots  = new sint16[9];
-  sint16 input[9] = { 4, 4, 4,
-                      4,-1, 4,
-                      4, 4, 4 };
-  furnace->output.count = 1;
-  furnace->output.type  = BLOCK_FURNACE;
-  furnace->output.health= 0;
-  memcpy(furnace->slots,input,9*sizeof(sint16));    
-  recipes.push_back(furnace);
-
-  Recipe *workbench = new Recipe;
-  workbench->width  = 2;
-  workbench->height = 2;
-  workbench->slots  = new sint16[4];
-  sint16 inputWorkbench[4] = { 5, 5,
-                                5, 5 };
-                        
-  workbench->output.count = 1;
-  workbench->output.type  = BLOCK_WORKBENCH;
-  workbench->output.health= 0;
-  memcpy(workbench->slots,inputWorkbench,4*sizeof(sint16));
-    
-  recipes.push_back(workbench);
 
   Recipe *grass = new Recipe;
   grass->width  = 2;
@@ -331,8 +298,147 @@ Inventory::Inventory()
   grass->output.health= 0;
   memcpy(grass->slots,input2,4*sizeof(sint16));
 
-  recipes.push_back(grass);
+  recipes.push_back(grass);*/
 
+}
+
+bool Inventory::addRecipe(int width, int height, sint16* inputrecipe, int outputCount, 
+                          sint16 outputType, sint16 outputHealth)
+{
+  Recipe *recipe = new Recipe;
+  recipe->width  = width;
+  recipe->height = height;
+  recipe->slots  = new sint16[width*height];
+  recipe->output.count = outputCount;
+  recipe->output.type  = outputType;
+  recipe->output.health= outputHealth;
+  memcpy(recipe->slots, inputrecipe, width*height*sizeof(sint16));    
+  recipes.push_back(recipe);
+  
+  return true;
+}
+
+bool Inventory::readRecipe(std::string recipeFile)
+{
+  std::ifstream ifs(recipeFile.c_str());
+
+  if (ifs.fail())
+  {
+    Mineserver::get()->screen()->log("IFS FAIL: " + recipeFile);
+
+    ifs.close();
+    return false;
+  }
+  
+  Mineserver::get()->screen()->log("Reading: " + recipeFile);
+
+  std::string temp;
+  
+  int height, width, outCount;
+  sint16 outType, outHealth;
+
+  // Reading row at a time
+  int del;
+  bool readingRecipe = false;
+  std::vector<std::string> line;
+  std::vector<uint8> recipetable;
+  std::string text;
+  while(getline(ifs, temp))
+  {
+    //If empty line
+    if(temp.size() == 0)
+      continue;
+
+    // If commentline -> skip to next
+    if(temp[0] == COMMENTPREFIX)
+      continue;
+
+    // Init vars
+    del = 0;
+    line.clear();
+
+    // Process line
+    while(temp.length() > 0)
+    {
+      // Remove white spaces
+      while(temp[0] == ' ')
+        temp = temp.substr(1);
+
+      // Split words
+      del = temp.find(' ');
+      if(del > -1)
+      {
+        line.push_back(temp.substr(0, del));
+        temp = temp.substr(del+1);
+      }
+      else
+      {
+        line.push_back(temp);
+        break;
+      }
+    }
+
+    // Begin recipe
+    if(line.size() == 1 && line[0] == "<-")
+    {
+      //Mineserver::get()->screen()->log("<-");
+
+      readingRecipe = true;
+      continue;
+    }
+    // Begin recipe
+    if(line.size() == 1 && line[0] == "->")
+    {
+      readingRecipe = false;
+      //Mineserver::get()->screen()->log("->");
+      continue;
+    }
+
+    if(readingRecipe)
+    {
+      for(int i = 0; i < line.size(); i++)
+      {
+        //Mineserver::get()->screen()->log(line[i]);
+        recipetable.push_back(atoi(line[i].c_str()));
+      }
+      continue;
+    }
+    else
+    {
+      // Keywords
+      if (line[0] == "width")
+      {
+        width = atoi(line[1].c_str());
+      }
+      if (line[0] == "height")
+      {
+        height = atoi(line[1].c_str());
+      }
+      if (line[0] == "outputcount")
+      {
+        outCount = atoi(line[1].c_str());
+      }
+      if (line[0] == "outputtype")
+      {
+        outType = atoi(line[1].c_str());
+      }
+      if (line[0] == "outputhealth")
+      {
+        outHealth = atoi(line[1].c_str());
+      }
+    }
+  }
+  ifs.close();
+  
+  sint16* inrecipe = new sint16[height*width];
+  for(int i = 0; i < recipetable.size(); i++)
+  {
+    inrecipe[i] = recipetable[i];
+  }
+  addRecipe(width, height, inrecipe, outCount, outType, outHealth);
+  delete [] inrecipe;
+  
+  return true;
 }
 
 
