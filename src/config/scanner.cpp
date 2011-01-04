@@ -26,126 +26,96 @@
 */
 
 #include <string>
+#include <fstream>
+#include <sys/stat.h>
 
-#include "config/parser.h"
-#include "config/node.h"
-#include "config.h"
+#include "scanner.h"
 
-Config::Config()
+ConfigScanner::ConfigScanner() : m_pos(0)
 {
-  m_parser = new ConfigParser;
-  m_root = new ConfigNode;
 }
 
-Config::~Config()
+ConfigScanner::~ConfigScanner()
 {
-  delete m_parser;
-  delete m_root;
 }
 
-bool Config::load(const std::string& file)
+bool ConfigScanner::read(const std::string& file)
 {
-  return m_parser->parse(file, m_root);
-}
-
-void Config::dump()
-{
-  m_root->dump();
-}
-
-ConfigNode* Config::root()
-{
-  return m_root;
-}
-
-bool Config::bData(const std::string& key)
-{
-  if (m_root->has(key))  
+  struct stat tmp;
+  if(stat(file.c_str(), &tmp) != 0)
   {
-    return m_root->get(key, false)->bData();
+    return false;
   }
 
-  return false;
-}
+  std::ifstream handle;
+  handle.open(file.c_str(), std::ios_base::binary);
 
-int Config::iData(const std::string& key)
-{
-  if (m_root->has(key))  
+  if (handle.bad())
   {
-    return m_root->get(key, false)->iData();
+    return false;
   }
 
-  return 0;
+  m_data.clear();
+
+  handle.seekg(0, std::ios::end);
+  int size = handle.tellg();
+  handle.seekg(0, std::ios::beg);
+
+  char* buf = new char [size];
+  handle.read(buf, size);
+
+  handle.close();
+
+  m_data.assign(buf, size);
+
+  delete [] buf;
+
+  return true;
 }
 
-long Config::lData(const std::string& key)
+int ConfigScanner::size()
 {
-  if (m_root->has(key))  
+  return m_data.length();
+}
+
+int ConfigScanner::left()
+{
+  return m_data.length() - m_pos;
+}
+
+int ConfigScanner::move(int len)
+{
+  if ((unsigned int)(m_pos + len) > m_data.length())
   {
-    return m_root->get(key, false)->lData();
+    len = m_data.length() - m_pos;
   }
 
-  return 0L;
-}
-
-float Config::fData(const std::string& key)
-{
-  if (m_root->has(key))  
+  if ((m_pos + len) < 0)
   {
-    return m_root->get(key, false)->fData();
+    len = (0 - m_pos);
   }
 
-  return 0.0f;
+  m_pos += len;
+
+  return len;
 }
 
-double Config::dData(const std::string& key)
+char ConfigScanner::get()
 {
-  if (m_root->has(key))  
+  return *(m_data.substr(m_pos, 1).c_str());
+}
+
+char ConfigScanner::at(int offset)
+{
+  if ((unsigned int)offset >= m_data.length())
   {
-    return m_root->get(key, false)->dData();
+    return -1;
   }
 
-  return 0.0;
+  return *(m_data.substr(offset, 1).c_str());
 }
 
-std::string Config::sData(const std::string& key)
+int ConfigScanner::pos()
 {
-  if (m_root->has(key))  
-  {
-    return m_root->get(key, false)->sData();
-  }
-
-  return "";
-}
-
-ConfigNode* Config::mData(const std::string& key)
-{
-  if (m_root->has(key))
-  {
-    return m_root->get(key, false);
-  }
-
-  return NULL;
-}
-
-bool Config::has(const std::string& key)
-{
-  return m_root->has(key);
-}
-
-int Config::type(const std::string& key) const
-{
-  if (m_root->has(key))
-  {
-    return m_root->get(key)->type();
-  }
-  else
-  {
-    return CONFIG_NODE_UNDEFINED;
-  }
-}
-
-std::list<std::string>* Config::keys(int type)
-{
-  return m_root->keys();
+  return m_pos;
 }

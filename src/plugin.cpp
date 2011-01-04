@@ -204,9 +204,10 @@ void Plugin::init()
    call.reset();
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    call.add("onPlace", Function::from_method<BlockDefault, &BlockDefault::onPlace>(defaultblock));
+   call.add("onReplace", Function::from_method<BlockDefault, &BlockDefault::onReplace>(defaultblock));
    setBlockCallback(BLOCK_WORKBENCH, call);
    setBlockCallback(BLOCK_FURNACE, call);
-   /* TODO: Needs this? BLOCK_BURNING_FURNACE */
+   setBlockCallback(BLOCK_BURNING_FURNACE, call);
   
    /* Chests */
    call.reset();
@@ -214,6 +215,7 @@ void Plugin::init()
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    call.add("onPlace", Function::from_method<BlockChest, &BlockChest::onPlace>(chestblock));
    call.add("onStartedDigging", Function::from_method<BlockChest, &BlockChest::onStartedDigging>(chestblock));
+   call.add("onReplace", Function::from_method<BlockChest, &BlockChest::onReplace>(chestblock));
    setBlockCallback(BLOCK_CHEST, call);
 
    /* Doors */
@@ -263,70 +265,125 @@ void Plugin::init()
   /* BLOCK_SNOW_BLOCK */
 }
 
-bool Plugin::loadExternal(const std::string name, const std::string file)
+bool Plugin::loadPlugin(const std::string name, const std::string file)
 {
   LIBRARY_HANDLE lhandle = NULL;
+  #ifdef FADOR_PLUGIN
+  void (*fhandle)(mineserver_pointer_struct*) = NULL;
+  #else
   void (*fhandle)(Mineserver*) = NULL;
+  #endif
 
-  Mineserver::get()->screen()->log("Loading plugin "+name+" ("+file+")...");
-
-  struct stat st;
-  if(stat(file.c_str(), &st) != 0)
+  if (file.size())
   {
-    Mineserver::get()->screen()->log("Could not find "+file+"!");
-    return false;
+    Mineserver::get()->screen()->log("Loading plugin `"+name+"' (`"+file+"')...");
+
+    struct stat st;
+    if(stat(file.c_str(), &st) == 0)
+    {
+      lhandle = LIBRARY_LOAD(file.c_str());
+    }
+    else
+    {
+      Mineserver::get()->screen()->log("Could not find `"+file+"', trying `"+file+LIBRARY_EXTENSION+"'.");
+
+      if (stat((file+LIBRARY_EXTENSION).c_str(), &st) == 0)
+      {
+        lhandle = LIBRARY_LOAD((file+LIBRARY_EXTENSION).c_str());
+      }
+      else
+      {
+        Mineserver::get()->screen()->log("Could not find `"+file+LIBRARY_EXTENSION+"'!");
+
+        return false;
+      }
+    }
+
+  }
+  else
+  {
+    Mineserver::get()->screen()->log("Loading plugin `"+name+"' (built in)...");
+    lhandle = LIBRARY_SELF();
   }
 
-  lhandle = LIBRARY_LOAD(file.c_str());
   if (lhandle == NULL)
   {
-    Mineserver::get()->screen()->log("Could not load "+file+"!");
+    Mineserver::get()->screen()->log("Could not load plugin `"+name+"'!");
     Mineserver::get()->screen()->log(LIBRARY_ERROR());
     return false;
   }
 
   m_libraryHandles[name] = lhandle;
 
+  #ifdef FADOR_PLUGIN
+  fhandle = (void (*)(mineserver_pointer_struct*)) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
+  #else
   fhandle = (void (*)(Mineserver*)) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
+  #endif
   if (fhandle == NULL)
   {
     Mineserver::get()->screen()->log("Could not get init function handle!");
-    unloadExternal(name);
+    unloadPlugin(name);
     return false;
   }
-
+  #ifdef FADOR_PLUGIN  
+  fhandle(&plugin_api_pointers);
+  #else
   fhandle(Mineserver::get());
+  #endif
 
   return true;
 }
 
-void Plugin::unloadExternal(const std::string name)
+void Plugin::unloadPlugin(const std::string name)
 {
   LIBRARY_HANDLE lhandle = NULL;
+  #ifdef FADOR_PLUGIN
+  void (*fhandle)(void) = NULL;
+  #else
   void (*fhandle)(Mineserver*) = NULL;
+  #endif
 
-  if (m_libraryHandles[name] != NULL)
+  if (m_pluginVersions.find(name) != m_pluginVersions.end())
   {
-    Mineserver::get()->screen()->log("Unloading plugin "+name+"...");
+    Mineserver::get()->screen()->log("Unloading plugin `"+name+"'...");
 
-    lhandle = m_libraryHandles[name];
+    if (m_libraryHandles[name] != NULL)
+    {
+      lhandle = m_libraryHandles[name];
+      m_libraryHandles.erase(name);
+    }
+    else
+    {
+      lhandle = LIBRARY_SELF();
+    }
+
+    #ifdef FADOR_PLUGIN
+    fhandle = (void (*)(void)) LIBRARY_SYMBOL(lhandle, (name+"_shutdown").c_str());
+    #else
     fhandle = (void (*)(Mineserver*)) LIBRARY_SYMBOL(lhandle, (name+"_shutdown").c_str());
+    #endif
+
     if (fhandle == NULL)
     {
       Mineserver::get()->screen()->log("Could not get shutdown function handle!");
     }
     else
     {
-      Mineserver::get()->screen()->log("Calling shutdown function for "+name+".");
+      Mineserver::get()->screen()->log("Calling shutdown function for `"+name+"'.");
+      
+      #ifdef FADOR_PLUGIN  
+      fhandle();
+      #else
       fhandle(Mineserver::get());
+      #endif
     }
 
     LIBRARY_CLOSE(m_libraryHandles[name]);
-    m_libraryHandles.erase(name);
   }
   else
   {
-    Mineserver::get()->screen()->log("Plugin "+name+" not loaded!");
+    Mineserver::get()->screen()->log("Plugin `"+name+"' not loaded!");
   }
 }
 
@@ -367,6 +424,31 @@ void Plugin::remHook(const std::string name)
   if (hasHook(name))
   {
     m_hooks.erase(name);
+  }
+}
+
+void Plugin::setPluginVersion(const std::string name, float version)
+{
+  m_pluginVersions[name] = version;
+}
+
+float Plugin::getPluginVersion(const std::string name)
+{
+  if (m_pluginVersions.count(name) >= 0)
+  {
+    return m_pluginVersions[name];
+  }
+  else
+  {
+    return -1.0f;
+  }
+}
+
+void Plugin::remPluginVersion(const std::string name)
+{
+  if (m_pluginVersions.count(name) >= 0)
+  {
+    m_pluginVersions.erase(name);
   }
 }
 

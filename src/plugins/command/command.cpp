@@ -1,0 +1,157 @@
+#include <string>
+#include <deque>
+#include <ctime>
+
+#include "../../mineserver.h"
+#include "../../user.h"
+
+#include "command.h"
+
+extern "C" void command_init(Mineserver* mineserver)
+{
+  if (mineserver->plugin()->getPluginVersion("command") >= 0)
+  {
+    mineserver->screen()->log("command is already loaded!");
+    return;
+  }
+
+  mineserver->plugin()->setPluginVersion("command", PLUGIN_COMMAND_VERSION);
+  mineserver->plugin()->setPointer("command", new P_Command(mineserver));
+}
+
+extern "C" void command_shutdown(Mineserver* mineserver)
+{
+  if (mineserver->plugin()->getPluginVersion("command") < 0)
+  {
+    mineserver->screen()->log("command is not loaded!");
+    return;
+  }
+
+  if (mineserver->plugin()->hasPointer("command"))
+  {
+    P_Command* command = (P_Command*)mineserver->plugin()->getPointer("command");
+    mineserver->plugin()->remPointer("command");
+    delete command;
+  }
+
+  mineserver->plugin()->remPluginVersion("command");
+}
+
+P_Command::P_Command(Mineserver* mineserver) : m_mineserver(mineserver)
+{
+  if (m_mineserver->plugin()->hasHook("ChatPre"))
+  {
+    (static_cast<Hook3<bool,User*,time_t,std::string>*>(m_mineserver->plugin()->getHook("ChatPre")))->addCallback(&P_Command::callbackChatPre);
+    m_mineserver->plugin()->setHook("CommandPre", new Hook4<bool,User*,time_t,std::string*,std::deque<std::string*>*>);
+    m_mineserver->plugin()->setHook("CommandPost", new Hook4<void,User*,time_t,std::string*,std::deque<std::string*>*>);
+  }
+  else
+  {
+    m_mineserver->screen()->log("Command: Can't find the ChatPre hook, commands will not be operational.");
+  }
+}
+
+P_Command::~P_Command()
+{
+  if (m_mineserver->plugin()->hasHook("ChatPre"))
+  {
+    (static_cast<Hook3<bool,User*,time_t,std::string>*>(m_mineserver->plugin()->getHook("ChatPre")))->remCallback(&P_Command::callbackChatPre);
+  }
+
+  if (m_mineserver->plugin()->hasHook("CommandPre") && (static_cast<Hook4<bool,User*,time_t,std::string*,std::deque<std::string*>*>*>(m_mineserver->plugin()->getHook("CommandPre"))->numCallbacks() < 1))
+  {
+    m_mineserver->plugin()->remHook("CommandPre");
+  }
+
+  if (m_mineserver->plugin()->hasHook("CommandPost") && (static_cast<Hook4<void,User*,time_t,std::string*,std::deque<std::string*>*>*>(m_mineserver->plugin()->getHook("CommandPost"))->numCallbacks() < 1))
+  {
+    m_mineserver->plugin()->remHook("CommandPost");
+  }
+}
+
+bool P_Command::callbackChatPre(User* user, time_t time, std::string data)
+{
+  if ((data.substr(0, 1) == "/") && (data.length() > 1))
+  {
+    std::string* command_name = NULL;
+    std::deque<std::string*>* command_args = new std::deque<std::string*>;
+
+    int pos = 1;
+    while (pos < data.length())
+    {
+      // Skip whitespace
+      while (data.substr(pos, 1) == " ")
+      {
+        pos++;
+      }
+
+      std::string* token = new std::string();
+      // We've got a quoted string
+      if (data.substr(pos, 1) == "\"")
+      {
+        // Skip first quote
+        pos++;
+
+        while ((data.substr(pos, 1) != "\"") && (pos < data.length()))
+        {
+          // Escape character is '\'. We only want to act on it if we have space for both it and whatever it's escaping.
+          if ((data.substr(pos, 1) == "\\") && (pos < data.length()-1))
+          {
+            pos++;
+          }
+
+          token->append(data.substr(pos, 1));
+          pos++;
+        }
+
+        // Skip closing quote if necessary
+        // This will only be false if we hit the end of the string before finding the closing quote
+        if (data.substr(pos, 1) == "\"")
+        {
+          pos++;
+        }
+      }
+      // We've got some bare data
+      else
+      {
+        while ((data.substr(pos, 1) != " ") && (pos < data.length()))
+        {
+          token->append(data.substr(pos, 1));
+          pos++;
+        }
+      }
+
+      // If we don't have a command name yet, this is the first token
+      if (command_name == NULL)
+      {
+        command_name = token;
+      }
+      // Otherwise this is an argument
+      else
+      {
+        command_args->push_back(token);
+      }
+    }
+
+    Mineserver::get()->screen()->log("Command ("+user->nick+"): "+*command_name);
+
+    if (!static_cast<Hook4<bool,User*,time_t,std::string*,std::deque<std::string*>*>*>(Mineserver::get()->plugin()->getHook("CommandPre"))->doUntilFalse(user, time, command_name, command_args))
+    {
+      static_cast<Hook4<void,User*,time_t,std::string*,std::deque<std::string*>*>*>(Mineserver::get()->plugin()->getHook("CommandPost"))->doAll(user, time, command_name, command_args);
+    }
+
+    delete command_name;
+    while (command_args->size())
+    {
+      delete command_args->back();
+      command_args->pop_back();
+    }
+    delete command_args;
+
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+}

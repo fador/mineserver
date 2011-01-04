@@ -23,59 +23,19 @@
    ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-#include <cstdlib>
-#include <cstdio>
-#include <iostream>
+#ifndef _CONFIG_PARSER_H
+#define _CONFIG_PARSER_H
 
-#ifdef DEBIAN
-#include <libnoise/noise.h>
-#else
-#include <noise/noise.h>
-#endif
+#include <string>
 
-#include "../logger.h"
-#include "../constants.h"
-#include "../tools.h"
-#include "../map.h"
-#include "../config.h"
-#include "../mineserver.h"
+class ConfigNode;
 
-#include "mersenne.h"
-#include "cavegen.h"
-
-void CaveGen::init(int seed)
+class ConfigParser
 {
-  // Set up us the Perlin-noise module.
-  caveNoise.SetSeed(seed+1);
-  caveNoise.SetFrequency(1.0/20);
-  caveNoise.SetOctaveCount(2);
-  caveNoise.SetNoiseQuality(noise::QUALITY_STD);
+public:
+  bool parse(const std::string& file, ConfigNode* ptr);
+};
 
-  addCaves = Mineserver::get()->config()->bData("mapgen.caves.enabled");
-  addCaveLava = Mineserver::get()->config()->bData("mapgen.caves.lava");
-
-  seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
-}
-
-void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
-{ 
-  if(addCaves)
-  {
-    value = caveNoise.GetValue(x,y,z);
-    
-    if(value < 0.1)
-    {
-      // Add bottomlava
-      if(y < 10.0 && addCaveLava)
-      {
-        block = BLOCK_STATIONARY_LAVA;
-        return;
-      }
-      
-      block = BLOCK_AIR;
-      return;
-    } 
-  }
-}
+#endif

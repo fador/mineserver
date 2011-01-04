@@ -23,59 +23,54 @@
    ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-#include <cstdlib>
-#include <cstdio>
-#include <iostream>
+#ifndef _CONFIG_NODE_H
+#define _CONFIG_NODE_H
 
-#ifdef DEBIAN
-#include <libnoise/noise.h>
-#else
-#include <noise/noise.h>
-#endif
+#include <string>
+#include <map>
+#include <list>
 
-#include "../logger.h"
-#include "../constants.h"
-#include "../tools.h"
-#include "../map.h"
-#include "../config.h"
-#include "../mineserver.h"
+#define CONFIG_NODE_UNDEFINED 0
+#define CONFIG_NODE_LIST 1
+#define CONFIG_NODE_BOOLEAN 2
+#define CONFIG_NODE_NUMBER 3
+#define CONFIG_NODE_STRING 4
 
-#include "mersenne.h"
-#include "cavegen.h"
-
-void CaveGen::init(int seed)
+class ConfigNode
 {
-  // Set up us the Perlin-noise module.
-  caveNoise.SetSeed(seed+1);
-  caveNoise.SetFrequency(1.0/20);
-  caveNoise.SetOctaveCount(2);
-  caveNoise.SetNoiseQuality(noise::QUALITY_STD);
+public:
+  ConfigNode();
+  ~ConfigNode();
+  bool bData() const;
+  int iData() const;
+  long lData() const;
+  float fData() const;
+  double dData() const;
+  std::string sData() const;
+  void setData(bool data);
+  void setData(int data);
+  void setData(long data);
+  void setData(float data);
+  void setData(double data);
+  void setData(const std::string& data);
+  std::list<std::string>* keys(int type=CONFIG_NODE_UNDEFINED);
+  int type() const;
+  void setType(int type);
+  bool has(const std::string& key);
+  ConfigNode* get(const std::string& key, bool createMissing=true);
+  bool set(const std::string& key, ConfigNode* ptr, bool createMissing=true);
+  bool add(ConfigNode* ptr);
+  void clear();
+  void dump(int indent) const;
+  void dump() const { dump(0); }
+private:
+  int m_type;
+  int m_index;
+  double m_nData;
+  std::string m_sData;
+  std::map<std::string, ConfigNode*> m_list;
+};
 
-  addCaves = Mineserver::get()->config()->bData("mapgen.caves.enabled");
-  addCaveLava = Mineserver::get()->config()->bData("mapgen.caves.lava");
-
-  seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
-}
-
-void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
-{ 
-  if(addCaves)
-  {
-    value = caveNoise.GetValue(x,y,z);
-    
-    if(value < 0.1)
-    {
-      // Add bottomlava
-      if(y < 10.0 && addCaveLava)
-      {
-        block = BLOCK_STATIONARY_LAVA;
-        return;
-      }
-      
-      block = BLOCK_AIR;
-      return;
-    } 
-  }
-}
+#endif

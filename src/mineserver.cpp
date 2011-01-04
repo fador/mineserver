@@ -61,6 +61,7 @@
 #include "chat.h"
 #include "worldgen/mapgen.h"
 #include "config.h"
+#include "config/node.h"
 #include "nbt.h"
 #include "packets.h"
 #include "physics.h"
@@ -99,7 +100,7 @@ int main(int argc, char* argv[])
   signal(SIGTERM, sighandler);
   signal(SIGINT, sighandler);
 
-  srand(time(NULL));
+  srand((uint32)time(NULL));
 
   return Mineserver::get()->run(argc, argv);
 }
@@ -120,6 +121,10 @@ int Mineserver::run(int argc, char *argv[])
   uint32 starttime = (uint32)time(0);
   uint32 tick      = (uint32)time(0);
 
+  #ifdef FADOR_PLUGIN
+    init_plugin_api();
+  #endif
+
   // Init our Screen
   screen()->init(VERSION);
   screen()->log("Welcome to Mineserver v" + VERSION);
@@ -129,8 +134,6 @@ int Mineserver::run(int argc, char *argv[])
 
   std::string file_config;
   file_config.assign(CONFIG_FILE);
-  std::string file_commands;
-  file_commands.assign(COMMANDS_FILE);
 
   if (argc > 1)
   {
@@ -138,11 +141,20 @@ int Mineserver::run(int argc, char *argv[])
   }
 
   // Initialize conf
-  Mineserver::get()->conf()->load(file_config);
-  Mineserver::get()->conf()->load(file_commands, COMMANDS_NAME_PREFIX);
+  Mineserver::get()->config()->load(file_config);
+
+  if (Mineserver::get()->config()->has("system.plugins") && (Mineserver::get()->config()->type("system.plugins") == CONFIG_NODE_LIST))
+  {
+    std::list<std::string>* tmp = Mineserver::get()->config()->mData("system.plugins")->keys();
+    std::list<std::string>::iterator it = tmp->begin();
+    for (;it!=tmp->end();++it)
+    {
+      Mineserver::get()->plugin()->loadPlugin(*it, Mineserver::get()->config()->sData("system.plugins."+(*it)));
+    }
+  }
 
   // Write PID to file
-  std::ofstream pid_out((Mineserver::get()->conf()->sValue("pid_file")).c_str());
+  std::ofstream pid_out((Mineserver::get()->config()->sData("system.pid_file")).c_str());
   if (!pid_out.fail())
   {
 #ifdef WIN32
@@ -153,20 +165,17 @@ int Mineserver::run(int argc, char *argv[])
   }
   pid_out.close();
 
-  // Load MOTD
-  Mineserver::get()->chat()->checkMotd(Mineserver::get()->conf()->sValue("motd_file"));
-
   // Set physics enable state according to config
-  Mineserver::get()->physics()->enabled = (Mineserver::get()->conf()->bValue("liquid_physics"));
+  Mineserver::get()->physics()->enabled = (Mineserver::get()->config()->bData("physics.enabled"));
 
   // Initialize map
   Mineserver::get()->map()->init();
 
-  if (Mineserver::get()->conf()->bValue("map_generate_spawn"))
+  if (Mineserver::get()->config()->bData("map.generate_spawn.enabled"))
   {
     Mineserver::get()->screen()->log("Generating spawn area...");
-    int size = Mineserver::get()->conf()->iValue("map_generate_spawn_size");
-    bool show_progress = Mineserver::get()->conf()->bValue("map_generate_spawn_show_progress");
+    int size = Mineserver::get()->config()->iData("map.generate_spawn.size");
+    bool show_progress = Mineserver::get()->config()->bData("map.generate_spawn.show_progress");
 #ifdef WIN32
     DWORD t_begin,t_end;
 #else
@@ -211,10 +220,10 @@ int Mineserver::run(int argc, char *argv[])
   Mineserver::get()->packetHandler()->init();
 
   // Load ip from config
-  std::string ip = Mineserver::get()->conf()->sValue("ip");
+  std::string ip = Mineserver::get()->config()->sData("net.ip");
 
   // Load port from config
-  int port = Mineserver::get()->conf()->iValue("port");
+  int port = Mineserver::get()->config()->iData("net.port");
 
   // Initialize plugins
   Mineserver::get()->plugin()->init();
@@ -347,6 +356,7 @@ int Mineserver::run(int argc, char *argv[])
         User::all()[i]->popMap();
 
         //Minecart hacks!!
+        /*
         if(User::all()[i]->attachedTo)
         {
           Packet pkt;
@@ -354,6 +364,7 @@ int Mineserver::run(int argc, char *argv[])
           //pkt << PACKET_ENTITY_RELATIVE_MOVE << (sint32)User::all()[i]->attachedTo <<  (sint8)100       << (sint8)0 << (sint8)0;
           User::all()[i]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
         }
+        */
       }
 
       map()->mapTime+=20;
@@ -393,9 +404,9 @@ int Mineserver::run(int argc, char *argv[])
 
   // Remove the PID file
 #ifdef WIN32
-  _unlink((Mineserver::get()->conf()->sValue("pid_file")).c_str());
+  _unlink((Mineserver::get()->config()->sData("system.pid_file")).c_str());
 #else
-  unlink((Mineserver::get()->conf()->sValue("pid_file")).c_str());
+  unlink((Mineserver::get()->config()->sData("system.pid_file")).c_str());
 #endif
 
   // End our NCurses session
@@ -407,7 +418,7 @@ int Mineserver::run(int argc, char *argv[])
   delete m_plugin;
   delete m_screen;
   delete m_physics;
-  delete m_conf;
+  delete m_config;
   delete m_furnaceManager;
   delete m_packetHandler;
   delete m_mapGen;

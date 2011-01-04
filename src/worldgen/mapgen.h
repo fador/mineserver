@@ -48,26 +48,34 @@ private:
   uint8 skylight[16*16*128/2];
   uint8 blocklight[16*16*128/2];
   uint8 heightmap[16*16];
-
-  //Temporary testing sillyness.
-  bool treesGenerated;
   
-  int m_seed;
   int seaLevel;
-
-  float perlinScale;
+  
+  bool addTrees;
+  
+  bool expandBeaches;
+  int beachExtent;
+  int beachHeight;
+  
+  bool addOre;
 
   void generateFlatgrass();
   void generateWithNoise(int x, int z);
 
-  void AddBeaches();
-  void AddTrees();
+  void ExpandBeaches(int x, int z);
+  void AddTrees(int x, int z);
+  
+  void AddOres(int x, int z);
+  void AddDeposit(int x, int y, int z, uint8 block, int depotSize);
+
   
   CaveGen cave;
+  Random mersenne;
 
   // Heightmap composition
   noise::module::RidgedMulti ridgedMultiNoise;
-  noise::module::ScaleBias perlinBiased;
+  
+  /*noise::module::ScaleBias perlinBiased;
 
   noise::module::Perlin baseFlatTerrain;  
   noise::module::ScaleBias flatTerrain;
@@ -80,7 +88,7 @@ private:
   noise::module::Perlin seaControl;
   
   noise::module::Select seaTerrain;
-  noise::module::Select finalTerrain;
+  noise::module::Select finalTerrain;*/
 };
 
 #endif

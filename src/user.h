@@ -38,6 +38,7 @@
 #include "packets.h"
 #include "permissions.h"
 
+
 struct position
 {
   double x;
@@ -61,16 +62,7 @@ struct Item
   }
 };
 
-struct Inventory
-{
-  Item main[36];
-  Item equipped[4];
-  Item crafting[4];
-
-  Inventory()
-  {
-  }
-};
+#include "inventory.h"
 
 uint32 generateEID();
 
@@ -90,7 +82,7 @@ public:
   uint32 write_err_count;
   bool logged;
   bool muted;
-	bool dnd;
+  bool dnd;
   sint16 health;
   uint16 timeUnderwater;
   unsigned int UID;
@@ -98,9 +90,13 @@ public:
   std::string temp_nick;
   position pos;
   vec curChunk;
-  Inventory inv;
+  Item inv[45];
   sint16 curItem;
   Item inventoryHolding;
+  //Do we have an open _shared_ inventory?
+  bool isOpenInv;
+  //More info on the inventory
+  openInventory openInv;
 
   int permissions; // bitmask for permissions. See permissions.h
 
@@ -126,9 +122,6 @@ public:
   static bool sendOps(uint8* data, uint32 len);
   static bool sendGuests(uint8* data, uint32 len);
 
-  //Check inventory for space
-  bool checkInventory(sint16 itemID, char count);
-
   //Login
   bool sendLoginInfo();
 
@@ -142,8 +135,8 @@ public:
   // Chat blocking
   bool mute(std::string muteMsg);
   bool unmute();
-	bool toggleDND();
-	bool isAbleToCommunicate(std::string communicateCommand);
+  bool toggleDND();
+  bool isAbleToCommunicate(std::string communicateCommand);
 
   //Map related
 
@@ -189,7 +182,7 @@ public:
 
   bool withinViewDistance(int a, int b)
   {
-	  return a > b ? (a-b)<viewDistance : (b-a)<viewDistance;
+    return a > b ? (a-b)<viewDistance : (b-a)<viewDistance;
   }
 
   struct event* GetEvent();

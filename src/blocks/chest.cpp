@@ -38,7 +38,7 @@
 void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
   // Locksystem
-  if(user->inv.main[35+user->currentItemSlot()].type == ITEM_WOODEN_AXE)
+  if(user->inv[36+user->currentItemSlot()].type == ITEM_WOODEN_AXE)
   {    
     int chunk_x = blockToChunk(x);
     int chunk_z = blockToChunk(z);
@@ -146,7 +146,7 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
   sChunk *chunk = Mineserver::get()->map()->loadMap(chunk_x, chunk_z);
    
   if(chunk == NULL)
-	  return;
+    return;
     
   NBT_Value *entityList = (*(*(chunk->nbt))["Level"])["TileEntities"];
 
@@ -187,7 +187,9 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
           {
             destroy = true;
           }
-        } else {
+        }
+        else
+        {
           destroy = true;
         }
         break;
@@ -201,7 +203,9 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
     Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
     this->spawnBlockItem(x,y,z,block);
     // TODO: spawn items in chest
-  } else {
+  }
+  else
+  {
     Mineserver::get()->chat()->sendMsg(user, COLOR_RED + "Can't destroy chests that are not your!", Chat::USER);
   }
 }
@@ -255,6 +259,7 @@ void BlockChest::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y,
 
 void BlockChest::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
 {
+
 }
 
 void BlockChest::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)

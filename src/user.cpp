@@ -83,11 +83,10 @@ User::User(int sock, uint32 EID)
   this->health          = 20;
   this->attachedTo      = 0;
   this->timeUnderwater  = 0;
+  this->isOpenInv       = false;
 
   this->m_currentItemSlot = 0;
-  this->inventoryHolding.type   = 0;
-  this->inventoryHolding.count  = 0;
-  this->inventoryHolding.health = 0;
+  this->inventoryHolding  = Item();
   // Ignore this user if it's the server console
   if(this->UID != SERVER_CONSOLE_UID)
   {
@@ -161,74 +160,19 @@ bool User::sendLoginInfo()
   loadData();
 
   //Login OK package
-  buffer << (sint8)PACKET_LOGIN_RESPONSE
-         << (sint32)UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
+  buffer << (sint8)PACKET_LOGIN_RESPONSE << (sint32)UID << std::string("") << std::string("") << (sint64)0 << (sint8)0;
 
   //Send server time (after dawn)
   buffer << (sint8)PACKET_TIME_UPDATE << (sint64)Mineserver::get()->map()->mapTime;
-
   
   //Inventory
-  for(sint32 invType=-1; invType != -4; invType--)
-  {
-    Item* inventory = NULL;
-    sint16 inventoryCount = 0;
-    sint16 itemSlot=0;
-
-    if(invType == -1)
+  for(int i=1; i<45; i++)
+  {   
+    if(inv[i].type != -1 && inv[i].count)
     {
-      inventory = inv.main;
-      inventoryCount = 36;
-      itemSlot = 9;
-    }
-    else if(invType == -2)
-    {
-      inventory = inv.equipped;
-      inventoryCount = 4;
-      itemSlot = 5;
-    }
-    else if(invType == -3)
-    {
-      inventory = inv.crafting;
-      inventoryCount = 4;
-      itemSlot = 1;
-    }
-
-    //buffer << (sint8)PACKET_INVENTORY << (sint8)0 << inventoryCount;
-    for(int i=0; i<inventoryCount; i++)
-    {   
-      if(inventory[i].count)
-      {
-        buffer << (sint8)0x67 << (sint8)0 << (sint16)(itemSlot) << (sint16)inventory[i].type << (sint8)(inventory[i].count) << (sint8)inventory[i].health;
-      }
-      /*
-      if(inventory[i].count)
-      {
-        buffer << (sint16)inventory[i].type << (sint8)inventory[i].count << (sint16)inventory[i].health;
-      }
-      else
-      {
-        buffer << (sint16)-1;
-      }
-      */
-      itemSlot++;
+      buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)(i) << (sint16)inv[i].type << (sint8)(inv[i].count) << (sint8)inv[i].health;
     }
   }
-  
-  // Send motd
-  std::ifstream motdfs(Mineserver::get()->conf()->sValue("motd_file").c_str());
-
-  std::string temp;
-
-  while(getline( motdfs, temp ))
-  {
-    // If not commentline
-    if(temp[0] != COMMENTPREFIX)
-    {
-      buffer << (sint8)PACKET_CHAT_MESSAGE << temp;
-    }
-  }
-  motdfs.close();
 
   //Teleport player
   teleport(pos.x, pos.y+2, pos.z);
@@ -363,33 +307,36 @@ bool User::loadData()
     sint8 slot, count;
     sint16 damage, item_id;
 
-    slot = *(**iter)["Slot"];
-    count = *(**iter)["Count"];
-    damage = *(**iter)["Damage"];
+    slot    = *(**iter)["Slot"];
+    count   = *(**iter)["Count"];
+    damage  = *(**iter)["Damage"];
     item_id = *(**iter)["id"];
-    if(item_id == 0) item_id = -1;
+    if(item_id == 0 || count < 1)
+    {
+      item_id = -1;
+      count   =  0;
+    }
 
-    //Main inventory slot
+    //Main inventory slot, converting 0-35 slots to 9-44
     if(slot >= 0 && slot <= 35)
     {
-      inv.main[(uint8)slot].count  = count;
-      inv.main[(uint8)slot].health = damage;
-      inv.main[(uint8)slot].type   = item_id;
-
+      inv[(uint8)slot+9].count  = count;
+      inv[(uint8)slot+9].health = damage;
+      inv[(uint8)slot+9].type   = item_id;
     }
-    //Crafting
+    //Crafting, converting 80-83 slots to 1-4
     else if(slot >= 80 && slot <= 83)
     {
-      inv.crafting[(uint8)slot-80].count  = count;
-      inv.crafting[(uint8)slot-80].health = damage;
-      inv.crafting[(uint8)slot-80].type   = item_id;
+      inv[(uint8)slot-79].count  = count;
+      inv[(uint8)slot-79].health = damage;
+      inv[(uint8)slot-79].type   = item_id;
     }
-    //Equipped
+    //Equipped, converting 100-103 slots to 8-5 (reverse order!)
     else if(slot >= 100 && slot <= 103)
     {
-      inv.equipped[(uint8)slot-100].count  = count;
-      inv.equipped[(uint8)slot-100].health = damage;
-      inv.equipped[(uint8)slot-100].type   = item_id;
+      inv[(uint8)8+(100-slot)].count  = count;
+      inv[(uint8)8+(100-slot)].health = damage;
+      inv[(uint8)8+(100-slot)].type   = item_id;
     }
   }
 
@@ -431,39 +378,50 @@ bool User::saveData()
 
   NBT_Value* nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
 
-  //Start with main items
-  Item* slots   = (Item*)&inv.main;
-  char slotid   = 0;
   char itemslot = 0;
-  for(int i = 0; i < 36+4+4; i++)
+  //Start with main items
+  for(int slotid = 9; slotid < 45; slotid++,itemslot++)
   {
-    //Crafting items after main
-    if(i == 36)
+    if(inv[(uint8)slotid].count && inv[(uint8)slotid].type != 0 && inv[(uint8)slotid].type != -1)
     {
-      slots    = (Item*)&inv.crafting;
-      itemslot = 80;
-      slotid   = 0;
-    }
-    //Equipped items last
-    else if(i == 36+4)
-    {
-      slots    = (Item*)&inv.equipped;
-      itemslot = 100;
-      slotid   = 0;
-    }
-    if(slots[(uint8)slotid].count)
-    {
-    NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
-    val->Insert("Count", new NBT_Value((sint8)slots[(uint8)slotid].count));
-    val->Insert("Slot", new NBT_Value((sint8)itemslot));
-    val->Insert("Damage", new NBT_Value((sint16)slots[(uint8)slotid].health));
-    val->Insert("id", new NBT_Value((sint16)slots[(uint8)slotid].type));
-    nbtInv->GetList()->push_back(val);
-    }
-
-    slotid++;
-    itemslot++;
+      NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+      val->Insert("Count", new NBT_Value((sint8)inv[(uint8)slotid].count));
+      val->Insert("Slot", new NBT_Value((sint8)itemslot));
+      val->Insert("Damage", new NBT_Value((sint16)inv[(uint8)slotid].health));
+      val->Insert("id", new NBT_Value((sint16)inv[(uint8)slotid].type));
+      nbtInv->GetList()->push_back(val);
+    }    
   }
+  //Crafting slots
+  itemslot = 80;
+  for(int slotid = 1; slotid < 6; slotid++,itemslot++)
+  {
+    if(inv[(uint8)slotid].count && inv[(uint8)slotid].type != 0 && inv[(uint8)slotid].type != -1)
+    {
+      NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+      val->Insert("Count", new NBT_Value((sint8)inv[(uint8)slotid].count));
+      val->Insert("Slot", new NBT_Value((sint8)itemslot));
+      val->Insert("Damage", new NBT_Value((sint16)inv[(uint8)slotid].health));
+      val->Insert("id", new NBT_Value((sint16)inv[(uint8)slotid].type));
+      nbtInv->GetList()->push_back(val);
+    }    
+  }
+
+  //Equipped items last
+  itemslot = 103;
+  for(int slotid = 5; slotid < 9; slotid++,itemslot--)
+  {
+    if(inv[(uint8)slotid].count && inv[(uint8)slotid].type != 0 && inv[(uint8)slotid].type != -1)
+    {
+      NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+      val->Insert("Count", new NBT_Value((sint8)inv[(uint8)slotid].count));
+      val->Insert("Slot", new NBT_Value((sint8)itemslot));
+      val->Insert("Damage", new NBT_Value((sint16)inv[(uint8)slotid].health));
+      val->Insert("id", new NBT_Value((sint16)inv[(uint8)slotid].type));
+      nbtInv->GetList()->push_back(val);
+    }    
+  }
+
 
   val.Insert("Inventory", nbtInv);
 
@@ -492,30 +450,7 @@ bool User::saveData()
 
 }
 
-bool User::checkInventory(sint16 itemID, char count)
-{
-  int leftToFit = count;
-  for(uint8 i = 0; i < 36; i++)
-  {
-    if(inv.main[i].type == -1)
-    {
-      return true;
-    }
 
-    if(inv.main[i].type == itemID)
-    {
-      if(64-inv.main[i].count >= leftToFit)
-      {
-        return true;
-      }
-      else if(64-inv.main[i].count > 0)
-      {
-        leftToFit -= 64-inv.main[i].count;
-      }
-    }
-  }
-  return false;
-}
 
 bool User::updatePos(double x, double y, double z, double stance)
 {
@@ -524,7 +459,7 @@ bool User::updatePos(double x, double y, double z, double stance)
   if(y==-999)
   {
     //attachedTo
-    //ToDo: Get pos from minecart
+    //ToDo: Get pos from minecart/player/boat
     return false;
   }
 
@@ -532,6 +467,7 @@ bool User::updatePos(double x, double y, double z, double stance)
   {
     sChunk* newChunk = Mineserver::get()->map()->loadMap(blockToChunk((sint32)x), blockToChunk((sint32)z));
     sChunk* oldChunk = Mineserver::get()->map()->loadMap(blockToChunk((sint32)pos.x), blockToChunk((sint32)pos.z));
+
     if(newChunk == oldChunk)
     {
       Packet telePacket;
@@ -590,15 +526,18 @@ bool User::updatePos(double x, double y, double z, double stance)
       {
         for(int mapz = newChunk->z-viewDistance; mapz <= newChunk->z+viewDistance; mapz++)
         {
-          if(!withinViewDistance(chunkDiffX, oldChunk->x) || !withinViewDistance(chunkDiffZ, oldChunk->z))
-          {
-            addQueue(mapx, mapz);
-          }
+
 
           if(!withinViewDistance((mapx - chunkDiffX), newChunk->x) || !withinViewDistance((mapz - chunkDiffZ), newChunk->z))
           {
             addRemoveQueue(mapx-chunkDiffX, mapz-chunkDiffZ);
           }
+
+          //If this chunk wasn't in the view distance before
+          //if(!withinViewDistance(chunkDiffX, oldChunk->x) || !withinViewDistance(chunkDiffZ, oldChunk->z))
+          //{
+          addQueue(mapx, mapz);
+          //}
         }
       }
     }
@@ -707,12 +646,10 @@ bool User::updatePos(double x, double y, double z, double stance)
             abs((sint32)z-((*iter)->pos.z()/32)) < 2)
         {
           //Dont pickup own spawns right away
-          if((*iter)->spawnedBy != this->UID ||
-             (*iter)->spawnedAt+2 < time(NULL))
+          if((*iter)->spawnedBy != this->UID || (*iter)->spawnedAt+2 < time(NULL))
           {
             //Check player inventory for space!
-            if(checkInventory((*iter)->item,
-                              (*iter)->count))
+            if(Mineserver::get()->inventory()->isSpace(this,(*iter)->item,(*iter)->count))
             {
               //Send player collect item packet
               buffer << (sint8)PACKET_COLLECT_ITEM << (sint32)(*iter)->EID << (sint32)UID;
@@ -722,50 +659,9 @@ bool User::updatePos(double x, double y, double z, double stance)
               pkt << (sint8)PACKET_DESTROY_ENTITY << (sint32)(*iter)->EID;
               newChunk->sendPacket(pkt);
 
-
-              bool checkingTaskbar = true;
-              for(uint8 i = 36-9; i < 36-9 || checkingTaskbar; i++)
-              {
-                //First, the "task bar"
-                if(i == 36)
-                {
-                  checkingTaskbar = false;
-                  i=0;
-                }
-
-                //If slot empty, put item there
-                if(inv.main[i].type == -1)
-                {
-                  buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)(i+9) << (sint16)(*iter)->item << (sint8)(*iter)->count << (sint8)(*iter)->health;
-                  inv.main[i].type = (*iter)->item;
-                  inv.main[i].count = (*iter)->count;
-                  inv.main[i].health = (*iter)->health;
-                  break;
-                }
-
-                //If same item type
-                if(inv.main[i].type == (*iter)->item)
-                {
-                  //Put to the stack
-                  if(64-inv.main[i].count >= (*iter)->count)
-                  {
-                    buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)(i+9) << (sint16)(*iter)->item << (sint8)(inv.main[i].count+(*iter)->count) << (sint8)(*iter)->health;
-                    inv.main[i].type = (*iter)->item;
-                    inv.main[i].count += (*iter)->count;
-                    break;
-                  }
-                  //Put some of the items to this stack and continue searching for space
-                  else if(64-inv.main[i].count > 0)
-                  {
-                    buffer << (sint8)PACKET_SET_SLOT << (sint8)0 << (sint16)(i+9) << (sint16)(*iter)->item << (sint8)64 << (sint8)(*iter)->health;
-                    inv.main[i].type = (*iter)->item;
-                    inv.main[i].count = 64;
-                    (*iter)->count -= 64-inv.main[i].count;
-                  }
-                }
-              }
+              //Add items to inventory
+              Mineserver::get()->inventory()->addItems(this,(*iter)->item,(*iter)->count, (*iter)->health);
               
-
               Mineserver::get()->map()->items.erase((*iter)->EID);
               delete *iter;
               iter = newChunk->items.erase(iter);
@@ -926,6 +822,17 @@ bool User::addQueue(int x, int z)
 {
   vec newMap(x, 0, z);
 
+
+  //Make sure this chunk is not being removed, if it is, delete it from remove queue
+  for(unsigned int i = 0; i < mapRemoveQueue.size(); i++)
+  {
+    if(mapRemoveQueue[i].x() == newMap.x() && mapRemoveQueue[i].z() == newMap.z())
+    {
+      mapRemoveQueue.erase(mapRemoveQueue.begin()+i);
+      break;
+    }
+  }
+
   for(unsigned int i = 0; i < mapQueue.size(); i++)
   {
     // Check for duplicates
@@ -979,6 +886,7 @@ bool User::delKnown(int x, int z)
   if(chunk != NULL)
   {
     chunk->users.erase(this);
+    //If no user needs this chunk
     if(chunk->users.size() == 0)
     {
       Mineserver::get()->map()->releaseMap(x,z);
@@ -1128,26 +1036,12 @@ bool User::respawn()
 
 bool User::dropInventory()
 {
-  for( int i = 0; i < 36; i++ )
+  for( int i = 1; i < 45; i++ )
   {
-    if( inv.main[i].type != 0 )
+    if( inv[i].type != -1 )
     {
-      Mineserver::get()->map()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.main[i].type, inv.main[i].count,inv.main[i].health,this);
-      inv.main[i] = Item();
-    }
-
-    if( i >= 0 && i < 4 )
-    {
-      if( inv.equipped[i].type != 0 )
-      {
-        Mineserver::get()->map()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.equipped[i].type, inv.equipped[i].count,inv.equipped[i].health,this);
-        inv.equipped[i] = Item();
-      }
-      if( inv.crafting[i].type != 0 )
-      {
-        Mineserver::get()->map()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv.crafting[i].type, inv.crafting[i].count,inv.crafting[i].health,this);
-        inv.crafting[i] = Item();
-      }
+      Mineserver::get()->map()->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, inv[i].type, inv[i].count,inv[i].health,this);
+      inv[i] = Item();
     }
   }
   return true;

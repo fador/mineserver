@@ -23,59 +23,43 @@
    ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-#include <cstdlib>
-#include <cstdio>
-#include <iostream>
+#ifndef _CONFIG_LEXER_H
+#define _CONFIG_LEXER_H
 
-#ifdef DEBIAN
-#include <libnoise/noise.h>
-#else
-#include <noise/noise.h>
-#endif
+#include <string>
+#include <stack>
+#include <utility>
 
-#include "../logger.h"
-#include "../constants.h"
-#include "../tools.h"
-#include "../map.h"
-#include "../config.h"
-#include "../mineserver.h"
+#define CONFIG_TOKEN_ENTITY 1
+#define CONFIG_TOKEN_LABEL 2
+#define CONFIG_TOKEN_NUMBER 3
+#define CONFIG_TOKEN_STRING 4
+#define CONFIG_TOKEN_BOOLEAN 5
 
-#include "mersenne.h"
-#include "cavegen.h"
+#define CONFIG_TOKEN_LIST_OPEN 10
+#define CONFIG_TOKEN_LIST_CLOSE 11
+#define CONFIG_TOKEN_LIST_DELIMITER 12
+#define CONFIG_TOKEN_LIST_LABEL 13
 
-void CaveGen::init(int seed)
+#define CONFIG_TOKEN_OPERATOR_ASSIGN 20
+#define CONFIG_TOKEN_OPERATOR_APPEND 21
+
+#define CONFIG_TOKEN_TERMINATOR 30
+
+class ConfigScanner;
+
+class ConfigLexer
 {
-  // Set up us the Perlin-noise module.
-  caveNoise.SetSeed(seed+1);
-  caveNoise.SetFrequency(1.0/20);
-  caveNoise.SetOctaveCount(2);
-  caveNoise.SetNoiseQuality(noise::QUALITY_STD);
+public:
+  bool get_token(int* type, std::string* data);
+  void put_token(int type, const std::string& data);
+  void setScanner(ConfigScanner* scanner);
+  ConfigScanner* scanner();
+private:
+  ConfigScanner* m_scanner;
+  std::stack<std::pair<int, std::string>*> m_tokenStack;
+};
 
-  addCaves = Mineserver::get()->config()->bData("mapgen.caves.enabled");
-  addCaveLava = Mineserver::get()->config()->bData("mapgen.caves.lava");
-
-  seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
-}
-
-void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
-{ 
-  if(addCaves)
-  {
-    value = caveNoise.GetValue(x,y,z);
-    
-    if(value < 0.1)
-    {
-      // Add bottomlava
-      if(y < 10.0 && addCaveLava)
-      {
-        block = BLOCK_STATIONARY_LAVA;
-        return;
-      }
-      
-      block = BLOCK_AIR;
-      return;
-    } 
-  }
-}
+#endif
