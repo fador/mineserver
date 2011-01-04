@@ -60,20 +60,20 @@ struct user_pointer_struct
 {
   bool (*teleport)(std::string user,double x, double y, double z);
   position_struct* (*getPosition)(std::string user);
-  void *temp[10];
+  void *temp[100];
 };
 
 struct chat_pointer_struct
 {
   bool (*sendmsgTo)(std::string user,std::string msg);
   bool   (*sendmsg)(std::string msg);
-  void *temp[10];
+  void *temp[100];
 };
 
 struct screen_pointer_struct
 {
   void (*log)(std::string message);
-  void *temp[10];
+  void *temp[100];
 };
 
 
@@ -82,13 +82,15 @@ struct map_pointer_struct
   void (*createPickupSpawn)(int x, int y, int z, int type, int count, int health, std::string user);
   bool (*setTime)(std::string timeValue);
   void (*getSpawn)(int* x, int* y, int* z);
-  void *temp[10];
+  bool (*getBlock)(int x, int y, int z, unsigned char* type,unsigned char* meta);
+  bool (*setBlock)(int x, int y, int z, unsigned char type,unsigned char meta);
+  void *temp[100];
 };
 
 struct callback_pointer_struct
 {
   bool (*add_hook)(std::string name, void *function);
-  void *temp[20];
+  void *temp[100];
 };
 
 struct mineserver_pointer_struct
@@ -100,10 +102,10 @@ struct mineserver_pointer_struct
   user_pointer_struct user;
   callback_pointer_struct callback;
 
-  void *temp[10];
+  void *temp[100];
 };
 
-
+//Ignore these, only used when compiling with Mineserver
 #ifdef MINESERVER
 bool plugin_api_chatpre_callback(std::string user, std::string msg);
 void init_plugin_api(void);

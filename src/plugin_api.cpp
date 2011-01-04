@@ -55,10 +55,10 @@
 #include "plugin_api.h"
 
 mineserver_pointer_struct plugin_api_pointers;
-std::vector<bool (*)(const std::string& user, std::string msg)> chatPreHook;
+std::map<std::string,std::vector<void *> > Hooks;
 
 
-
+//HELPER FUNCTIONS
 User* userFromName(std::string user)
 {
   for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
@@ -76,26 +76,50 @@ User* userFromName(std::string user)
 }
 
 
+//PLUGIN_API FUNCTIONS
 bool plugin_api_add_hook(std::string name, void *function)
 {
-  if(name == "ChatPre")
-  {
-    chatPreHook.push_back((bool (*)(const std::string& user, std::string msg))function);
-    return true;
-  }
-  return false;
+  Hooks[name].push_back(function);
+  return true;
 }
 
-bool plugin_api_chatpre_callback(std::string user, std::string msg)
+typedef bool (*chatPreFunction)(const std::string&, std::string);
+bool plugin_api_callbackChatPre(User* user,time_t time,std::string msg)
 {
-  for(uint32 i = 0; i < chatPreHook.size(); i++)
+  for(uint32 i = 0; i < Hooks["ChatPre"].size(); i++)
   {
-    if(chatPreHook[i](user,msg))
+    if(!((chatPreFunction)Hooks["ChatPre"][i])(user->nick,msg))
     {
-      return true;
+      return false;
     }
   }
-  return false;
+  return true;
+}
+
+typedef bool (*blockPlacePreFunction)(const std::string&, int,char,int,unsigned char);
+bool plugin_api_callbackBlockPlacePre(User* user,sint32 x,sint8 y,sint32 z,uint8 block)
+{
+  for(uint32 i = 0; i < Hooks["BlockPlacePre"].size(); i++)
+  {
+    if(!((blockPlacePreFunction)Hooks["BlockPlacePre"][i])(user->nick,x,y,z,block))
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+typedef bool (*blockBreakPreFunction)(const std::string&, int,char,int);
+bool plugin_api_callbackBlockBreakPre(User* user,sint32 x,sint8 y,sint32 z)
+{
+  for(uint32 i = 0; i < Hooks["BlockBreakPre"].size(); i++)
+  {
+    if(!((blockBreakPreFunction)Hooks["BlockBreakPre"][i])(user->nick,x,y,z))
+    {
+      return false;
+    }
+  }
+  return true;
 }
 
 
@@ -110,11 +134,15 @@ void plugin_setPluginVersion(const std::string name, float version)
   Mineserver::get()->plugin()->setPluginVersion(name,version);
 }
 
+
+
+//SCREEN WRAPPER FUNCTIONS
 void screen_log(std::string message)
 {
   Mineserver::get()->screen()->log(message);
 }
 
+//CHAT WRAPPER FUNCTIONS
 bool chat_sendmsgTo(std::string user,std::string msg)
 {
   for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
@@ -132,7 +160,6 @@ bool chat_sendmsgTo(std::string user,std::string msg)
   return false;
 }
 
-
 bool chat_sendmsg(std::string msg)
 {
   for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
@@ -149,6 +176,10 @@ bool chat_sendmsg(std::string msg)
   return true;
 }
 
+
+
+
+//MAP WRAPPER FUNCTIONS
 bool map_setTime(std::string timeValue)
 {
   Mineserver::get()->map()->mapTime = (sint64)atoi(timeValue.c_str());
@@ -162,7 +193,32 @@ bool map_setTime(std::string timeValue)
   return true;
 }
 
+void map_createPickupSpawn(int x, int y, int z, int type, int count, int health, std::string user)
+{
+  User* tempUser = userFromName(user);
+  Mineserver::get()->map()->createPickupSpawn(x,y,z,type,count,health,tempUser);
+}
 
+void map_getSpawn(int* x, int* y, int* z)
+{  
+  *x=Mineserver::get()->map()->spawnPos.x();
+  *y=Mineserver::get()->map()->spawnPos.y();
+  *z=Mineserver::get()->map()->spawnPos.z();
+}
+
+bool map_getBlock(int x, int y, int z, unsigned char* type,unsigned char* meta)
+{
+  return Mineserver::get()->map()->getBlock(x,y,z, type, meta);
+}
+
+bool map_setBlock(int x, int y, int z, unsigned char type,unsigned char meta)
+{
+  Mineserver::get()->map()->sendBlockChange(x, y, z, type, meta);
+  return Mineserver::get()->map()->setBlock(x,y,z, type, meta);
+}
+
+
+//USER WRAPPER FUNCTIONS
 position_struct* user_getPosition(std::string user)
 {
   for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
@@ -190,19 +246,11 @@ bool user_teleport(std::string user,double x, double y, double z)
   return false;
 }
 
-void map_createPickupSpawn(int x, int y, int z, int type, int count, int health, std::string user)
-{
-  User* tempUser = userFromName(user);
-  Mineserver::get()->map()->createPickupSpawn(x,y,z,type,count,health,tempUser);
-}
 
-void map_getSpawn(int* x, int* y, int* z)
-{  
-  *x=Mineserver::get()->map()->spawnPos.x();
-  *y=Mineserver::get()->map()->spawnPos.y();
-  *z=Mineserver::get()->map()->spawnPos.z();
-}
 
+
+
+//Initialization of the plugin_api function pointer array
 void init_plugin_api(void)
 {
   plugin_api_pointers.screen.log              = &screen_log;
@@ -216,11 +264,20 @@ void init_plugin_api(void)
   plugin_api_pointers.map.setTime             = &map_setTime;
   plugin_api_pointers.map.createPickupSpawn   = &map_createPickupSpawn;
   plugin_api_pointers.map.getSpawn            = &map_getSpawn;
+  plugin_api_pointers.map.setBlock            = &map_setBlock;
+  plugin_api_pointers.map.getBlock            = &map_getBlock;
 
   plugin_api_pointers.user.getPosition        = &user_getPosition;
   plugin_api_pointers.user.teleport           = &user_teleport;
 
   plugin_api_pointers.callback.add_hook       = &plugin_api_add_hook;
+
+  (static_cast<Hook3<bool,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("ChatPre")))->addCallback(&plugin_api_callbackChatPre);
+  (static_cast<Hook4<bool,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("BlockBreakPre")))->addCallback(&plugin_api_callbackBlockBreakPre);
+  (static_cast<Hook5<bool,User*,sint32,sint8,sint32,uint8>*>(Mineserver::get()->plugin()->getHook("BlockPlacePre")))->addCallback(&plugin_api_callbackBlockPlacePre);
+
+
+
 }
 
 mineserver_pointer_struct getMineServer(){
