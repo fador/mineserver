@@ -1,0 +1,13 @@
+# Input
+width 3
+height 3
+<-
+266 266 266
+266 266 266
+266 266 266
+->
+
+# Output
+outputcount 1
+outputtype 41
+outputhealth 0
