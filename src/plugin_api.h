@@ -34,7 +34,7 @@
 #include <ctime>
 
 #ifdef WIN32
-#define PLUGIN_API_EXPORT extern "C" __declspec(dllexport)
+#define PLUGIN_API_EXPORT __declspec(dllexport)
 #else
 #define PLUGIN_API_EXPORT extern "C"
 #endif
