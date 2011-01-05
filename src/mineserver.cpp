@@ -166,7 +166,7 @@ int Mineserver::run(int argc, char *argv[])
   pid_out.close();
 
   // Set physics enable state according to config
-  Mineserver::get()->physics()->enabled = (Mineserver::get()->config()->bData("physics.enabled"));
+  Mineserver::get()->physics()->enabled = (Mineserver::get()->config()->bData("system.physics.enabled"));
 
   // Initialize map
   Mineserver::get()->map()->init();
