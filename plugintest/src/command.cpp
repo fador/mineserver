@@ -37,6 +37,7 @@ copy command.so to Mineserver bin directory.
 #include <ctime>
 #include <sstream>
 #include <cstdlib>
+#include <map>
 
 #include "../../src/plugin_api.h"
 
