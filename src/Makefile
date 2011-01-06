@@ -19,15 +19,14 @@ SRC         += blocks/chest.cpp
 
 SRC         += worldgen/mapgen.cpp worldgen/cavegen.cpp worldgen/mersenne.cpp
 
-ifeq ($(PLUGIN),YES)
-  SRC       +=  plugin.cpp plugin_api.cpp
-endif
+SRC         += plugin.cpp plugin_api.cpp
+
 
 # Variables
 ARCHFLAGS    = 
 LIBRARIES    = 
 INC          = -I. -I/usr/include -I/usr/local/include
-CXXFLAGS     =
+CXXFLAGS     = -DFADOR_PLUGIN
 LDFLAGS      = -L/usr/local/lib -L/usr/lib -levent -lz -lnoise
 COMMIT       = `git log | head -n1 | cut -b8-14`
 DF           = $(*F)
@@ -68,7 +67,7 @@ endif
 # Tools
 CXX          = g++
 OBJCOPY      = objcopy
-COMPILE      = $(CXX) $(INC) $(CXXFLAGS) $(ARCHFLAGS) -DSHA1=$(COMMIT) -c $< -o $@
+COMPILE      = $(CXX) $(INC) $(CXXFLAGS) $(ARCHFLAGS) -c $< -o $@
 MAKEDEPEND   = $(CXX) -M $(INC) $(CXXFLAGS) $(ARCHFLAGS) -o "$(DEPDIR)/$*.d" $<
 
 # Rules
