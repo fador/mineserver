@@ -25,6 +25,10 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <map>
+#include <vector>
+#include <string>
+
 #include "sys/stat.h"
 
 #include "mineserver.h"
@@ -81,17 +85,17 @@ bool plugin_api_add_hook(const char* name, void *function)
   return true;
 }
 
-bool plugin_hasHook(const std::string& hookID)
+bool plugin_hasHook(const char* hookID)
 {
   return Mineserver::get()->plugin()->hasHook(hookID);
 }
 
-void plugin_setHook(const std::string& hookID, Hook* hook)
+void plugin_setHook(const char* hookID, Hook* hook)
 {
   Mineserver::get()->plugin()->setHook(hookID, hook);
 }
 
-void plugin_addCallback(const std::string& hookID, void* function)
+void plugin_addCallback(const char* hookID, void* function)
 {
   Mineserver::get()->plugin()->getHook(hookID)->addCallback(function);
 }

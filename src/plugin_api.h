@@ -28,11 +28,6 @@
 #ifndef _PLUGIN_API_H
 #define _PLUGIN_API_H
 
-#include <string>
-#include <map>
-#include <vector>
-#include <ctime>
-
 #include "hook.h"
 
 #ifdef WIN32
@@ -47,9 +42,9 @@ struct plugin_pointer_struct
 {
   float (*getPluginVersion)(const char* name);
   void (*setPluginVersion)(const char* name, float version);
-  bool (*hasHook)(const std::string& hookID);
-  void (*setHook)(const std::string& hookID, Hook* hook);
-  void (*addCallback)(const std::string& hookID, void* function);
+  bool (*hasHook)(const char* hookID);
+  void (*setHook)(const char* hookID, Hook* hook);
+  void (*addCallback)(const char* hookID, void* function);
   void *temp[10];
 };
 
