@@ -28,11 +28,6 @@
 #ifndef _PLUGIN_API_H
 #define _PLUGIN_API_H
 
-#include <string>
-#include <map>
-#include <vector>
-#include <ctime>
-
 #ifdef WIN32
 #define PLUGIN_API_EXPORT extern "C" __declspec(dllexport) 
 #define CALLCONVERSION __cdecl
