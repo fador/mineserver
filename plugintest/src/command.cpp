@@ -107,8 +107,10 @@ void registerCommand(Command* command)
 
 
 
-bool chatPreFunction(const std::string& user, std::string msg)
+bool chatPreFunction(const char* userIn,size_t userLen, const char* msgIn, size_t msgLen)
 {
+  std::string user(userIn,userLen);
+  std::string msg(msgIn,msgLen);
   if(msg.size() == 0)
   {
     return false;
@@ -116,7 +118,8 @@ bool chatPreFunction(const std::string& user, std::string msg)
 
   char prefix = msg[0];
 
-  mineserver->screen.log("Command Plugin got from "+user+": " + msg);
+  std::string logMsg = "Command Plugin got from "+user+": " + msg;
+  mineserver->screen.log(logMsg.c_str(),logMsg.size());
 
   if(prefix == CHATCMDPREFIX)
   {
@@ -186,9 +189,8 @@ void giveItemsSelf(std::string user, std::string command, std::deque<std::string
     // Check item validity
     if(isValidItem(itemId))
     {
-      position_struct *player_pos = mineserver->user.getPosition(user);
-
-      if(player_pos != NULL)
+      double x,y,z;
+      if(mineserver->user.getPosition(user.c_str(),user.size(),&x,&y,&z,NULL,NULL,NULL))
       {
         int itemCount = 1, itemStacks = 1;
 
@@ -210,27 +212,31 @@ void giveItemsSelf(std::string user, std::string command, std::deque<std::string
             amount = itemCount;
           }
 
-          mineserver->map.createPickupSpawn((int)player_pos->x,(int)player_pos->y,(int)player_pos->z,itemId,amount,0,user);
+          mineserver->map.createPickupSpawn((int)x,(int)y,(int)z,itemId,amount,0,user.c_str(),user.size());
         }
       }
+
     }
     else
     {
-      mineserver->chat.sendmsgTo(user, "Not a valid item");      
+      std::string msg = "Not a valid item";
+      mineserver->chat.sendmsgTo(user.c_str(),user.size(), msg.c_str(),msg.size());      
     }
   }
   else
   {
-    mineserver->chat.sendmsgTo(user, "Usage: /igive item [count]");
+    std::string msg = "Usage: /igive item [count]";
+    mineserver->chat.sendmsgTo(user.c_str(),user.size(), msg.c_str(),msg.size());
   }
 }
 
 void home(std::string user, std::string command, std::deque<std::string> args)
 {
-  mineserver->chat.sendmsgTo(user, "Teleported you home!");
+  std::string msg = "Teleported you home!";
+  mineserver->chat.sendmsgTo(user.c_str(),user.size(), msg.c_str(),msg.size() );
   int x,y,z;
   mineserver->map.getSpawn(&x,&y,&z);
-  mineserver->user.teleport(user,x, y + 2, z);
+  mineserver->user.teleport(user.c_str(),user.size(),x, y + 2, z);
 }
 
 void cuboid(std::string user, std::string command, std::deque<std::string> args)
@@ -241,7 +247,8 @@ void cuboid(std::string user, std::string command, std::deque<std::string> args)
   }
   cuboidMap[user].active = 1;
   cuboidMap[user].state = 0;
-  mineserver->chat.sendmsgTo(user, "Cuboid start, place first block");
+  std::string msg = "Cuboid start, place first block";
+  mineserver->chat.sendmsgTo(user.c_str(),user.size(),msg.c_str(),msg.size());
 }
 
 void setTime(std::string user, std::string command, std::deque<std::string> args)
@@ -272,19 +279,21 @@ void setTime(std::string user, std::string command, std::deque<std::string> args
       timeValue = "18000";
     }
 
-    mineserver->map.setTime(timeValue);
+    mineserver->map.setTime(atoi(timeValue.c_str()));
 
-
-    mineserver->chat.sendmsgTo(user, "World time changed.");
+    std::string msg = "World time changed.";
+    mineserver->chat.sendmsgTo(user.c_str(),user.size(), msg.c_str(),msg.size());
   }
   else
   {
-    mineserver->chat.sendmsgTo(user, "Usage: /settime time (time = 0-24000)");
+    std::string msg =  "Usage: /settime time (time = 0-24000)";
+    mineserver->chat.sendmsgTo(user.c_str(),user.size(), msg.c_str(),msg.size());
   }
 }
 
-bool blockPlacePreFunction(const std::string& user, int x,char y,int z,unsigned char block)
+bool blockPlacePreFunction(const char* userIn, size_t userLen, int x,char y,int z,unsigned char block)
 {  
+  std::string user(userIn,userLen);
   if(cuboidMap.find(user) != cuboidMap.end())
   {
     if(cuboidMap[user].active)
@@ -296,7 +305,8 @@ bool blockPlacePreFunction(const std::string& user, int x,char y,int z,unsigned 
         cuboidMap[user].y     = y;
         cuboidMap[user].z     = z;
         cuboidMap[user].block = block;
-        mineserver->chat.sendmsgTo(user, "First block done, place second");
+        std::string msg = "First block done, place second";
+        mineserver->chat.sendmsgTo(user.c_str(),user.size(), msg.c_str(),msg.size());
       }
       else if(cuboidMap[user].state == 1)
       {
@@ -318,7 +328,8 @@ bool blockPlacePreFunction(const std::string& user, int x,char y,int z,unsigned 
                 mineserver->map.setBlock(xpos,y,zpos,block,0);
               }
             }
-            mineserver->chat.sendmsgTo(user, "Cuboid done");
+            std::string msg = "Cuboid done";
+            mineserver->chat.sendmsgTo(user.c_str(),user.size(), msg.c_str(),msg.size());
           }
         }
         cuboidMap.erase(cuboidMap.find(user));
@@ -329,20 +340,27 @@ bool blockPlacePreFunction(const std::string& user, int x,char y,int z,unsigned 
   return true;
 }
 
-PLUGIN_API_EXPORT void command_init(mineserver_pointer_struct* mineserver_temp)
+std::string pluginName = "command";
+
+PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mineserver_temp)
 {
   mineserver = mineserver_temp;
-  if (mineserver->plugin.getPluginVersion("command") > 0)
+
+  if (mineserver->plugin.getPluginVersion(pluginName.c_str(),pluginName.size()) > 0)
   {
-    mineserver->screen.log("command is already loaded v." +dtos(mineserver->plugin.getPluginVersion("command")));
+    std::string msg="command is already loaded v." +dtos(mineserver->plugin.getPluginVersion(pluginName.c_str(),pluginName.size()));
+    mineserver->screen.log(msg.c_str(),msg.size());
     return;
   }
-  mineserver->screen.log("Loaded \"command\"!");
+  std::string msg="Loaded "+pluginName+"!";
+  mineserver->screen.log(msg.c_str(),msg.size());
 
-  mineserver->plugin.setPluginVersion("command", PLUGIN_COMMAND_VERSION);
+  mineserver->plugin.setPluginVersion(pluginName.c_str(),pluginName.size(), PLUGIN_COMMAND_VERSION);
 
-  mineserver->callback.add_hook("ChatPre", (void *)chatPreFunction);
-  mineserver->callback.add_hook("BlockPlacePre", (void *)blockPlacePreFunction);
+  std::string hookName="ChatPre";
+  mineserver->callback.add_hook(hookName.c_str(),hookName.size(), (void *)chatPreFunction);
+  hookName = "BlockPlacePre";
+  mineserver->callback.add_hook(hookName.c_str(),hookName.size(), (void *)blockPlacePreFunction);
 
   registerCommand(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf));
   registerCommand(new Command(parseCmd("home"), "", "Teleport to map spawn location", home));
@@ -350,11 +368,12 @@ PLUGIN_API_EXPORT void command_init(mineserver_pointer_struct* mineserver_temp)
   registerCommand(new Command(parseCmd("cuboid"), "", "Cuboid testing", cuboid));  
 }
 
-PLUGIN_API_EXPORT void command_shutdown(void)
+PLUGIN_API_EXPORT void CALLCONVERSION command_shutdown(void)
 {
-  if (mineserver->plugin.getPluginVersion("command") <= 0)
+  if (mineserver->plugin.getPluginVersion(pluginName.c_str(),pluginName.size()) <= 0)
   {
-    mineserver->screen.log("command is not loaded!");
+    std::string msg="command is not loaded!";
+    mineserver->screen.log(msg.c_str(),msg.size());
     return;
   }
 

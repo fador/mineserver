@@ -156,7 +156,8 @@ bool Chat::handleMsg(User* user, std::string msg)
   {
     return false;
   }
-  (static_cast<Hook3<void,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("ChatPre")))->doAll(user, rawTime, msg);
+  //ToDo: Fix: why is there doAll after it has done them all?
+  //(static_cast<Hook3<void,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("ChatPre")))->doAll(user, rawTime, msg);
   char prefix = msg[0];
 
   switch(prefix)
