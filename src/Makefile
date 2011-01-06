@@ -88,5 +88,9 @@ mineserver: $(OBJS)
 	@echo "Building $@"
 	@$(CXX) $(ARCHFLAGS) $(LDFLAGS) $(OBJS) $(LIBRARIES) -o ../bin/$@
 
+dist:
+	tar cvzf ../mineserver-latest-`uname`-bin.tar.gz -C ../bin/ . ../LICENSE
+	zip -j ../mineserver-latest-`uname`-bin.zip ../bin/* ../LICENSE
+  
 clean:
 	@rm -rf *.o $(DEPDIR) ../bin/mineserver
