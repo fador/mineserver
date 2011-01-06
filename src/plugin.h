@@ -164,10 +164,13 @@ public:
     setHook("Timer200", new Hook0<void>);
     setHook("Timer1000", new Hook0<void>);
     setHook("Timer10000", new Hook0<void>);
-    setHook("LoginPre", new Hook2<bool,User*,std::string*>);
-    setHook("LoginPost", new Hook1<void,User*>);
-    setHook("ChatPre", new Hook3<bool,User*,time_t,std::string>);
-    setHook("ChatPost", new Hook3<void,User*,time_t,std::string>);
+    setHook("PlayerLoginPre", new Hook2<bool,User*,std::string*>);
+    setHook("PlayerLoginPost", new Hook1<void,User*>);
+    setHook("PlayerNickPost", new Hook2<void,User*,std::string>);
+    setHook("PlayerKickPost", new Hook2<void,User*,std::string>);
+    setHook("PlayerQuitPost", new Hook1<void,User*>);
+    setHook("PlayerChatPre", new Hook3<bool,User*,time_t,std::string>);
+    setHook("PlayerChatPost", new Hook3<void,User*,time_t,std::string>);
     setHook("PlayerArmSwing", new Hook1<void,User*>);
     setHook("PlayerDamagePre", new Hook3<bool,User*,User*,int>);
     setHook("PlayerDamagePost", new Hook3<void,User*,User*,int>);

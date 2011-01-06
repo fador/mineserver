@@ -28,6 +28,13 @@
 #ifndef _PLUGIN_API_H
 #define _PLUGIN_API_H
 
+#include <string>
+#include <map>
+#include <vector>
+#include <ctime>
+
+#include "hook.h"
+
 #ifdef WIN32
 #define PLUGIN_API_EXPORT extern "C" __declspec(dllexport) 
 #define CALLCONVERSION __cdecl
@@ -40,6 +47,9 @@ struct plugin_pointer_struct
 {
   float (*getPluginVersion)(const char* name);
   void (*setPluginVersion)(const char* name, float version);
+  bool (*hasHook)(const std::string& hookID);
+  void (*setHook)(const std::string& hookID, Hook* hook);
+  void (*addCallback)(const std::string& hookID, void* function);
   void *temp[10];
 };
 
@@ -63,7 +73,6 @@ struct screen_pointer_struct
   void (*log)(const char* msg);
   void *temp[100];
 };
-
 
 struct map_pointer_struct
 {
@@ -102,11 +111,10 @@ struct mineserver_pointer_struct
   void *temp[100];
 };
 
-//Ignore these, only used when compiling with Mineserver
+// Ignore these, only used when compiling with Mineserver
 #ifdef MINESERVER
 void init_plugin_api(void);
 extern mineserver_pointer_struct plugin_api_pointers;
 #endif
-
 
 #endif

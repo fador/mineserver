@@ -3,7 +3,6 @@ g++ -c command.cpp
 g++ -shared command.o -o command.so
 
 copy command.so to Mineserver bin directory.
-
 */
 /*
   Copyright (c) 2010, The Mineserver Project
@@ -38,6 +37,7 @@ copy command.so to Mineserver bin directory.
 #include <sstream>
 #include <cstdlib>
 #include <map>
+#include <iostream>
 
 #include "../../src/plugin_api.h"
 
@@ -58,7 +58,6 @@ struct cuboidStruct
 };
 
 std::map<std::string,cuboidStruct> cuboidMap;
-
 
 std::string dtos( double n )
 {
@@ -115,9 +114,6 @@ struct Command
 typedef std::map<std::string, Command*> CommandList;
 CommandList m_Commands;
 
-
-
-
 void registerCommand(Command* command)
 {
   // Loop thru all the words for this command
@@ -130,8 +126,6 @@ void registerCommand(Command* command)
     m_Commands[currentWord] = command;
   }
 }
-
-
 
 bool chatPreFunction(const char* userIn, const char* msgIn)
 {
@@ -171,7 +165,6 @@ bool chatPreFunction(const char* userIn, const char* msgIn)
 
   return true;
 }
-
 
 bool isValidItem(int id)
 {
@@ -519,6 +512,9 @@ std::string pluginName = "command";
 
 PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mineserver_temp)
 {
+  mineserver->screen.log("This is a test!");
+  return;
+
   mineserver = mineserver_temp;
 
   if (mineserver->plugin.getPluginVersion(pluginName.c_str()) > 0)
@@ -560,5 +556,3 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_shutdown(void)
   }
 
 }
-
-

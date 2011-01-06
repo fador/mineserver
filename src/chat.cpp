@@ -152,12 +152,11 @@ bool Chat::handleMsg(User* user, std::string msg)
   std::string timeStamp (asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
-  if ((static_cast<Hook3<bool,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("ChatPre")))->doUntilFalse(user, rawTime, msg))
+  if ((static_cast<Hook3<bool,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("PlayerChatPre")))->doUntilFalse(user, rawTime, msg))
   {
     return false;
   }
-  //ToDo: Fix: why is there doAll after it has done them all?
-  //(static_cast<Hook3<void,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("ChatPre")))->doAll(user, rawTime, msg);
+  (static_cast<Hook3<void,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("PlayerChatPost")))->doAll(user, rawTime, msg);
   char prefix = msg[0];
 
   switch(prefix)

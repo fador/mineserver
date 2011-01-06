@@ -34,9 +34,9 @@
 #include <dlfcn.h>
 #endif
 
-
 #include "logger.h"
 
+#include "hook.h"
 #include "plugin.h"
 #include "blocks/default.h"
 #include "blocks/falling.h"
@@ -57,8 +57,7 @@
 mineserver_pointer_struct plugin_api_pointers;
 std::map<std::string,std::vector<void *> > Hooks;
 
-
-//HELPER FUNCTIONS
+// HELPER FUNCTIONS
 User* userFromName(std::string user)
 {
   for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
@@ -75,20 +74,34 @@ User* userFromName(std::string user)
   return NULL;
 }
 
-
-//PLUGIN_API FUNCTIONS
+// PLUGIN_API FUNCTIONS
 bool plugin_api_add_hook(const char* name, void *function)
 {
   Hooks[std::string(name)].push_back(function);
   return true;
 }
 
-typedef bool (*chatPreFunction)(const char*, const char*);
-bool plugin_api_callbackChatPre(User* user,time_t time,std::string msg)
+bool plugin_hasHook(const std::string& hookID)
 {
-  for(uint32 i = 0; i < Hooks["ChatPre"].size(); i++)
+  return Mineserver::get()->plugin()->hasHook(hookID);
+}
+
+void plugin_setHook(const std::string& hookID, Hook* hook)
+{
+  Mineserver::get()->plugin()->setHook(hookID, hook);
+}
+
+void plugin_addCallback(const std::string& hookID, void* function)
+{
+  Mineserver::get()->plugin()->getHook(hookID)->addCallback(function);
+}
+
+typedef bool (*playerChatPreFunction)(const char*, const char*);
+bool plugin_api_callbackPlayerChatPre(User* user,time_t time,std::string msg)
+{
+  for(uint32 i = 0; i < Hooks["PlayerChatPre"].size(); i++)
   {
-    if(!((chatPreFunction)Hooks["ChatPre"][i])(user->nick.c_str(),msg.c_str()))
+    if(!((playerChatPreFunction)Hooks["PlayerChatPre"][i])(user->nick.c_str(),msg.c_str()))
     {
       return false;
     }
@@ -122,27 +135,23 @@ bool plugin_api_callbackBlockBreakPre(User* user,sint32 x,sint8 y,sint32 z)
   return true;
 }
 
-
 float plugin_getPluginVersion(const char* name)
 {
  return Mineserver::get()->plugin()->getPluginVersion(std::string(name));
 }
-
 
 void plugin_setPluginVersion(const char* name, float version)
 {
   Mineserver::get()->plugin()->setPluginVersion(std::string(name),version);
 }
 
-
-
-//SCREEN WRAPPER FUNCTIONS
+// SCREEN WRAPPER FUNCTIONS
 void screen_log(const char* msg)
 {
   Mineserver::get()->screen()->log(std::string(msg));
 }
 
-//CHAT WRAPPER FUNCTIONS
+// CHAT WRAPPER FUNCTIONS
 bool chat_sendmsgTo(const char* user,const char* msg)
 {
   std::string userStr(user);
@@ -191,9 +200,7 @@ bool chat_sendUserlist(const char* user)
   return false;
 }
 
-
-
-//MAP WRAPPER FUNCTIONS
+// MAP WRAPPER FUNCTIONS
 bool map_setTime(int timeValue)
 {
   Mineserver::get()->map()->mapTime = timeValue;
@@ -219,9 +226,9 @@ void map_createPickupSpawn(int x, int y, int z, int type, int count, int health,
 
 void map_getSpawn(int* x, int* y, int* z)
 {  
-  *x=Mineserver::get()->map()->spawnPos.x();
-  *y=Mineserver::get()->map()->spawnPos.y();
-  *z=Mineserver::get()->map()->spawnPos.z();
+  *x = Mineserver::get()->map()->spawnPos.x();
+  *y = Mineserver::get()->map()->spawnPos.y();
+  *z = Mineserver::get()->map()->spawnPos.z();
 }
 
 bool map_getBlock(int x, int y, int z, unsigned char* type,unsigned char* meta)
@@ -240,8 +247,7 @@ void map_saveWholeMap(void)
   Mineserver::get()->map()->saveWholeMap();
 }
 
-
-//USER WRAPPER FUNCTIONS
+// USER WRAPPER FUNCTIONS
 bool user_getPosition(const char* user, double* x, double* y, double* z, float* yaw, float* pitch, double *stance)
 {
   std::string userStr(user);
@@ -284,15 +290,14 @@ bool user_teleport(const char* user,double x, double y, double z)
   return false;
 }
 
-
-//CONFIG WRAPPER FUNCTIONS
+// CONFIG WRAPPER FUNCTIONS
 int config_iData(const char* name)
 {
   return Mineserver::get()->config()->iData(std::string(name));
 }
 
 
-//Initialization of the plugin_api function pointer array
+// Initialization of the plugin_api function pointer array
 void init_plugin_api(void)
 {
   plugin_api_pointers.screen.log              = &screen_log;
@@ -303,6 +308,9 @@ void init_plugin_api(void)
 
   plugin_api_pointers.plugin.getPluginVersion = &plugin_getPluginVersion;
   plugin_api_pointers.plugin.setPluginVersion = &plugin_setPluginVersion;
+  plugin_api_pointers.plugin.hasHook          = &plugin_hasHook;
+  plugin_api_pointers.plugin.setHook          = &plugin_setHook;
+  plugin_api_pointers.plugin.addCallback      = &plugin_addCallback;
 
   plugin_api_pointers.map.setTime             = &map_setTime;
   plugin_api_pointers.map.createPickupSpawn   = &map_createPickupSpawn;
@@ -318,10 +326,7 @@ void init_plugin_api(void)
 
   plugin_api_pointers.config.iData            = &config_iData;
 
-  (static_cast<Hook3<bool,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("ChatPre")))->addCallback(&plugin_api_callbackChatPre);
+  (static_cast<Hook3<bool,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("PlayerChatPre")))->addCallback(&plugin_api_callbackPlayerChatPre);
   (static_cast<Hook4<bool,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("BlockBreakPre")))->addCallback(&plugin_api_callbackBlockBreakPre);
   (static_cast<Hook5<bool,User*,sint32,sint8,sint32,uint8>*>(Mineserver::get()->plugin()->getHook("BlockPlacePre")))->addCallback(&plugin_api_callbackBlockPlacePre);
-
-
-
 }

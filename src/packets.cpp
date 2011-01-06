@@ -318,14 +318,14 @@ int PacketHandler::login_request(User *user)
   }
 
   std::string kickMessage;
-  if ((static_cast<Hook2<bool,User*,std::string*>*>(Mineserver::get()->plugin()->getHook("LoginPre")))->doUntilFalse(user, &kickMessage))
+  if ((static_cast<Hook2<bool,User*,std::string*>*>(Mineserver::get()->plugin()->getHook("PlayerLoginPre")))->doUntilFalse(user, &kickMessage))
   {
     user->kick(kickMessage);
   }
   else
   {
-    (static_cast<Hook1<void,User*>*>(Mineserver::get()->plugin()->getHook("LoginPost")))->doAll(user);
     user->sendLoginInfo();
+    (static_cast<Hook1<void,User*>*>(Mineserver::get()->plugin()->getHook("PlayerLoginPost")))->doAll(user);
   }
 
   return PACKET_OK;
