@@ -127,7 +127,7 @@ int Mineserver::run(int argc, char *argv[])
 
   // Init our Screen
   screen()->init(VERSION);
-  screen()->log("Welcome to Mineserver v" + VERSION);
+  screen()->log(LogType::LOG_INFO, "Mineserver", "Welcome to Mineserver v" + VERSION);
   updatePlayerList();
 
   initConstants();
@@ -173,7 +173,7 @@ int Mineserver::run(int argc, char *argv[])
 
   if (Mineserver::get()->config()->bData("map.generate_spawn.enabled"))
   {
-    Mineserver::get()->screen()->log("Generating spawn area...");
+    LOG(INFO, "Mapgen", "Generating spawn area...");
     int size = Mineserver::get()->config()->iData("map.generate_spawn.size");
     bool show_progress = Mineserver::get()->config()->bData("map.generate_spawn.show_progress");
 #ifdef WIN32
@@ -204,15 +204,15 @@ int Mineserver::run(int argc, char *argv[])
       {
 #ifdef WIN32
         t_end = timeGetTime ();
-        Mineserver::get()->screen()->log(dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos((t_end-t_begin)/(size*2+1)) + "ms per chunk");
+        LOG(INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos((t_end-t_begin)/(size*2+1)) + "ms per chunk");
 #else
         t_end = clock();
-        Mineserver::get()->screen()->log(dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos(((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1)) + "ms per chunk");
+        LOG(INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos(((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1)) + "ms per chunk");
 #endif
       }
     }
 #ifdef _DEBUG
-    Mineserver::get()->screen()->log("Spawn area ready!");
+    LOG(DEBUG, "Map", "Spawn area ready!");
 #endif
   }
 
@@ -253,7 +253,7 @@ int Mineserver::run(int argc, char *argv[])
 
   if(m_socketlisten < 0)
   {
-    Mineserver::get()->screen()->log(LOG_ERROR, "Failed to create listen socket");
+    Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Failed to create listen socket");
     Mineserver::get()->screen()->end();
     return 1;
   }
@@ -269,13 +269,14 @@ int Mineserver::run(int argc, char *argv[])
   //Bind to port
   if(bind(m_socketlisten, (struct sockaddr*)&addresslisten, sizeof(addresslisten)) < 0)
   {
-    Mineserver::get()->screen()->log(LOG_ERROR, "Failed to bind");
+    Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Failed to bind to " + ip + ":" + dtos(port));
+    Mineserver::get()->screen()->end();
     return 1;
   }
-
+  
   if(listen(m_socketlisten, 5) < 0)
   {
-    Mineserver::get()->screen()->log(LOG_ERROR, "Failed to listen to socket");
+    Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Failed to listen to socket" );
     Mineserver::get()->screen()->end();
     return 1;
   }
@@ -290,18 +291,18 @@ int Mineserver::run(int argc, char *argv[])
     char name[255];
     gethostname ( name, sizeof(name));
     struct hostent* hostinfo = gethostbyname(name);
-    Mineserver::get()->screen()->log("Listening on: ");
+    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", "Listening on: ");
     int ipIndex = 0;
     while(hostinfo && hostinfo->h_addr_list[ipIndex])
     {
       std::string ip(inet_ntoa(*(struct in_addr*)hostinfo->h_addr_list[ipIndex++]));
-      Mineserver::get()->screen()->log(" " + ip + ":" + dtos(port));
+      Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", "Listening on " + ip + ":" + dtos(port));
     }
   }
   else
   {
     std::string myip(ip);
-    Mineserver::get()->screen()->log("Listening on " + myip + ":" + dtos(port));
+    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", "Listening on " + myip + ":" + dtos(port));
   }
   //std::cout << std::endl;
 

@@ -36,8 +36,15 @@
 #include "logger.h"
 #include "mineserver.h"
 
+#include "logtype.h"
+
 // Log to terminal
-void Logger::log(std::string msg, std::string file, int line)
+void Logger::log(const std::string& msg, const std::string& file, int line)
 {
-  Mineserver::get()->screen()->log("[" + file + "@" + dtos(line) + "]: " + msg);
+  Mineserver::get()->screen()->log(LogType::LOG_INFO, file, "[" + file + "@" + dtos(line) + "]: " + msg);
+}
+
+void Logger::log(LogType::LogType type, const std::string& source, const std::string& message)
+{
+  Mineserver::get()->screen()->log(type, source, message);
 }

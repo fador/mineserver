@@ -164,8 +164,8 @@ int PacketHandler::change_sign(User *user)
     user->sendAll((uint8 *)pkt.getWrite(), pkt.getWriteLen());
   }
 
-  Mineserver::get()->screen()->log(LOG_GENERAL,"Sign: " + strings1 + strings2+ strings3+ strings4);
-  
+  Mineserver::get()->logger()->log(LogType::LOG_INFO, "Packets", "Sign: " + strings1 + strings2 + strings3 + strings4);
+
   //No need to do anything
   user->buffer.removePacket();
   return PACKET_OK;
@@ -299,7 +299,7 @@ int PacketHandler::login_request(User *user)
 
   user->buffer.removePacket();
 
-  Mineserver::get()->screen()->log("Player " + dtos(user->UID) + " login v." + dtos(version) + " : " + player + ":" + passwd);
+  LOG(INFO, "Packets", "Player " + dtos(user->UID) + " login v." + dtos(version) + " : " + player + ":" + passwd);
 
   user->nick = player;
 
@@ -351,13 +351,13 @@ int PacketHandler::handshake(User *user)
   if(Mineserver::get()->config()->bData("system.user_validation") == true)
   {
     // Send the unique hash for this player to prompt the client to go to minecraft.net to validate
-    Mineserver::get()->screen()->log("Handshake: Giving player "+player+" their minecraft.net hash of: " + hash(player));
+    LOG(INFO, "Packets", "Handshake: Giving player "+player+" their minecraft.net hash of: " + hash(player));
     user->buffer << (sint8)PACKET_HANDSHAKE << hash(player);
   }
   else
   {
     // Send "no validation or password needed" validation
-    Mineserver::get()->screen()->log("Handshake: No validation required for player "+player+".");
+    LOG(INFO, "Packets", "Handshake: No validation required for player "+player+".");
     user->buffer << (sint8)PACKET_HANDSHAKE << std::string("-");
   }
   // TODO: Add support for prompting user for Server password (once client supports it)
@@ -712,7 +712,7 @@ int PacketHandler::player_block_placement(User *user)
       return PACKET_OK;
     }
 
-    Mineserver::get()->screen()->log("Spawn minecart");
+    LOG(INFO, "Packets", "Spawn minecart");
     sint32 EID=generateEID();
     Packet pkt;
     // MINECART
@@ -722,7 +722,7 @@ int PacketHandler::player_block_placement(User *user)
 
   if (newblock == -1 && newblock != ITEM_SIGN)
   {
-     Mineserver::get()->screen()->log("ignoring: "+dtos(newblock));
+     LOG(DEBUG, "Packets", "ignoring: "+dtos(newblock));
      return PACKET_OK;
   }
 
@@ -731,9 +731,8 @@ int PacketHandler::player_block_placement(User *user)
     return PACKET_OK;
   }
 
-
 #ifdef _DEBUG
-  Mineserver::get()->screen()->log("Block_placement: "+dtos(newblock)+" ("+dtos(x)+","+dtos((int)y)+","+dtos(z)+") dir: "+dtos((int)direction));
+  LOG(DEBUG,"Packets", "Block_placement: "+dtos(newblock)+" ("+dtos(x)+","+dtos((int)y)+","+dtos(z)+") dir: "+dtos((int)direction));
 #endif
 
   if (direction)
@@ -962,7 +961,7 @@ int PacketHandler::disconnect(User *user)
 
   user->buffer.removePacket();
 
-  Mineserver::get()->screen()->log("Disconnect: " + msg);
+  LOG(INFO, "Packets", "Disconnect: " + msg);
 
   event_del(user->GetEvent());
 

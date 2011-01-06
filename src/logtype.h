@@ -23,34 +23,30 @@
    ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifndef _LOG_TYPE_H
+#define _LOG_TYPE_H
+
+/** 
+ * An enumeration of types of log messages..
+ *
+ * Inspired by syslog.
  */
-
-#ifndef _LOGGER_H
-#define _LOGGER_H
-
-//
-// Mineserver logger.h
-//
-#include <string>
-#include "screen.h"
-#include "tools.h"
-
-#include "logtype.h"
-
-#ifdef _WIN32
-#define LOGLF(msg) Mineserver::get()->logger()->log(msg, std::string(((strrchr(__FILE__, '\\') ?"": __FILE__ - 1) + 1)), __LINE__)
-#else
-#define LOGLF(msg) Mineserver::get()->logger()->log(msg, std::string(((strrchr(__FILE__, '/') ?"": __FILE__ - 1) + 1)), __LINE__)
-#endif
-
-#define LOG(type, source, msg) Mineserver::get()->logger()->log(LogType::LOG_##type, source, msg)
-
-class Logger
+namespace LogType 
 {
-public:
-  void log(const std::string& message, const std::string& file, int line);
-  void log(LogType::LogType type, const std::string& source, const std::string& message);
+  enum LogType {
+    LOG_EMERG,    /** system is unusable */
+    LOG_ALERT,    /** action must be taken immediately*/ 
+    LOG_CRITICAL, /** critical conditions */
+    LOG_ERROR,    /** error conditions */
+    LOG_WARNING,  /** warning conditions */
+    LOG_NOTICE,   /** normal, but significant, condition */
+    LOG_INFO,     /** informational message */
+  #ifdef _DEBUG
+    LOG_DEBUG,    /** debug-level message */
+  #endif
+  };
 
-};
-
+}
 #endif

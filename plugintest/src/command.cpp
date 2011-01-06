@@ -14,6 +14,7 @@ copy command.so to Mineserver bin directory.
 #include <cstdlib>
 
 #include "../../src/plugin_api.h"
+#include "../../src/logtype.h"
 
 #include "command.h"
 
@@ -32,7 +33,6 @@ struct cuboidStruct
 };
 
 std::map<std::string,cuboidStruct> cuboidMap;
-
 
 std::string dtos( double n )
 {
@@ -89,9 +89,6 @@ struct Command
 typedef std::map<std::string, Command*> CommandList;
 CommandList m_Commands;
 
-
-
-
 void registerCommand(Command* command)
 {
   // Loop thru all the words for this command
@@ -105,8 +102,6 @@ void registerCommand(Command* command)
   }
 }
 
-
-
 bool chatPreFunction(const std::string& user, std::string msg)
 {
   if(msg.size() == 0)
@@ -116,7 +111,7 @@ bool chatPreFunction(const std::string& user, std::string msg)
 
   char prefix = msg[0];
 
-  mineserver->screen.log("Command Plugin got from "+user+": " + msg);
+  mineserver->logger.log(LogType::LOG_INFO, "plugin.command", "Command Plugin got from "+user+": " + msg);
 
   if(prefix == CHATCMDPREFIX)
   {
@@ -334,10 +329,10 @@ PLUGIN_API_EXPORT void command_init(mineserver_pointer_struct* mineserver_temp)
   mineserver = mineserver_temp;
   if (mineserver->plugin.getPluginVersion("command") > 0)
   {
-    mineserver->screen.log("command is already loaded v." +dtos(mineserver->plugin.getPluginVersion("command")));
+    mineserver->logger.log(LogType::LOG_INFO, "plugin.command", "command is already loaded v." +dtos(mineserver->plugin.getPluginVersion("command")));
     return;
   }
-  mineserver->screen.log("Loaded \"command\"!");
+  mineserver->logger.log(LogType::LOG_INFO, "plugin.command", "Loaded \"command\"!");
 
   mineserver->plugin.setPluginVersion("command", PLUGIN_COMMAND_VERSION);
 
@@ -354,7 +349,7 @@ PLUGIN_API_EXPORT void command_shutdown(void)
 {
   if (mineserver->plugin.getPluginVersion("command") <= 0)
   {
-    mineserver->screen.log("command is not loaded!");
+    mineserver->logger.log(LogType::LOG_INFO, "plugin.command", "command is not loaded!");
     return;
   }
 

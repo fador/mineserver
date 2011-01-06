@@ -346,6 +346,9 @@
 			<File
 				RelativePath="..\..\src\logger.h"
 				>
+			<File
+				RelativePath="..\..\src\logtype.h"
+				>
 			</File>
 			<File
 				RelativePath="..\..\src\map.h"

@@ -34,7 +34,7 @@
 #include <ctime>
 
 #ifdef WIN32
-#define PLUGIN_API_EXPORT __declspec(dllexport)
+#define PLUGIN_API_EXPORT extern "C" __declspec(dllexport)
 #else
 #define PLUGIN_API_EXPORT extern "C"
 #endif
@@ -70,12 +70,11 @@ struct chat_pointer_struct
   void *temp[100];
 };
 
-struct screen_pointer_struct
+struct logger_pointer_struct
 {
-  void (*log)(std::string message);
+  void (*log)(int type, const std::string& source, const std::string& message);
   void *temp[100];
 };
-
 
 struct map_pointer_struct
 {
@@ -96,7 +95,7 @@ struct callback_pointer_struct
 struct mineserver_pointer_struct
 {
   map_pointer_struct map;
-  screen_pointer_struct screen;
+  logger_pointer_struct logger;
   chat_pointer_struct chat;
   plugin_pointer_struct plugin;
   user_pointer_struct user;

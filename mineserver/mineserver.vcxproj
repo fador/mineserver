@@ -77,6 +77,7 @@
     <ClInclude Include="..\src\furnaceManager.h" />
     <ClInclude Include="..\src\inventory.h" />
     <ClInclude Include="..\src\logger.h" />
+    <ClInclude Include="..\src\logtype.h" />
     <ClInclude Include="..\src\map.h" />
     <ClInclude Include="..\src\mineserver.h" />
     <ClInclude Include="..\src\nbt.h" />
