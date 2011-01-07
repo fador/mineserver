@@ -163,8 +163,11 @@ bool Screen::hasCommand()
     {
       if (readchar == '\b') // Backspace
       {
-        if (currentCommand.size() != 0)
+        if (!currentCommand.empty())
+        {
           currentCommand.erase(currentCommand.end() - 1);
+          wdelch(commandLog);
+        }
       }
       else if (readchar == '\n')
         running = false;
