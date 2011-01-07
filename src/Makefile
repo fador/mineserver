@@ -55,7 +55,7 @@ endif
 ifeq ($(findstring MINGW32,$(SYSTEM)),MINGW32)
 LFLAGS = -lws2_32 -lwinmm -export-all-symbols
 else
-#LFLAGS = -rdynamic
+LFLAGS = -rdynamic
 endif
 
 ifeq ($(findstring Debian,$(shell cat /etc/issue)),Debian)
@@ -93,6 +93,9 @@ mineserver: $(OBJS)
 dist:
 	tar cvzf ../mineserver-latest-`uname`-bin.tar.gz -C ../bin/ . ../LICENSE
 	zip -j ../mineserver-latest-`uname`-bin.zip ../bin/* ../LICENSE
-  
+
 clean:
-	@rm -rf *.o $(DEPDIR) ../bin/mineserver
+	@rm -f *.o
+	@rm -f */*.o
+	@rm -f */*/*.o
+	@rm -rf $(DEPDIR)
