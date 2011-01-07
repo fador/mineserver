@@ -326,6 +326,46 @@ void home(std::string user, std::string command, std::deque<std::string> args)
   mineserver->user.teleport(user.c_str(),x, y + 2, z);
 }
 
+void userTeleport(std::string user, std::string command, std::deque<std::string> args)
+{
+  if(args.size() == 1)
+  {
+    std::string tUser = args[0];
+    double x,y,z;
+    if(mineserver->user.getPosition(tUser.c_str(), &x,&y,&z,NULL,NULL,NULL))
+    {
+      mineserver->user.teleport(user.c_str(),x,y+2,z);
+      mineserver->chat.sendmsgTo(user.c_str(), "Teleported!");
+    }
+    else
+    {
+      std::string msg = "User " + args[0] + " not found (see /players)";
+      mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
+    }
+  }
+  else if(args.size() == 2)
+  {
+    std::string whoUser = args[0];
+    std::string toUser  = args[1];
+
+    double x,y,z;
+    if(mineserver->user.getPosition(toUser.c_str(), &x,&y,&z,NULL,NULL,NULL))
+    {
+      mineserver->user.teleport(whoUser.c_str(),x,y+2,z);
+      mineserver->chat.sendmsgTo(user.c_str(), "Teleported!");
+    }
+    else
+    {
+      std::string msg = "User " + args[0] + " not found (see /players)";
+      mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
+    }
+  }
+  else
+  {
+    mineserver->chat.sendmsgTo(user.c_str(), "Usage: /tp [player] targetplayer");
+  }
+}
+
 void cuboid(std::string user, std::string command, std::deque<std::string> args)
 {
   if(cuboidMap.find(user) != cuboidMap.end())
@@ -433,7 +473,47 @@ bool blockPlacePreFunction(const char* userIn, int x,char y,int z,unsigned char 
   return true;
 }
 
+void sendHelp(std::string user, std::string command, std::deque<std::string> args)
+{
+  // TODO: Add paging support, since not all commands will fit into
+  // the screen at once.
 
+  CommandList* commandList = &m_Commands; // defaults
+  //std::string commandColor = MC_COLOR_BLUE;
+
+
+
+  if(args.size() == 0)
+  {
+    for(CommandList::iterator it = commandList->begin();
+        it != commandList->end();
+        it++)
+    {
+      std::string args = it->second->arguments;
+      std::string description = it->second->description;
+      std::string msg = /*commandColor +*/ CHATCMDPREFIX + it->first + " " + args + " : " /*+ MC_COLOR_YELLOW*/ + description;
+      mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
+    }
+  }
+  else
+  {
+    CommandList::iterator iter;
+    if((iter = commandList->find(args.front())) != commandList->end())
+    {
+      std::string args = iter->second->arguments;
+      std::string description = iter->second->description;
+      std::string msg = /*commandColor +*/ CHATCMDPREFIX + iter->first + " " + args;
+      mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
+      msg = /*MC_COLOR_YELLOW + */CHATCMDPREFIX + description;
+      mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
+    }
+    else
+    {
+      std::string msg = /*MC_COLOR_RED +*/ "Unknown Command: " + args.front();
+      mineserver->chat.sendmsgTo(user.c_str(),msg.c_str());
+    }
+  }
+}
 
 std::string pluginName = "command";
 
@@ -458,13 +538,17 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mi
   registerCommand(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf));
   registerCommand(new Command(parseCmd("home"), "", "Teleport to map spawn location", home));
   registerCommand(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime));
-  registerCommand(new Command(parseCmd("cuboid"), "", "Cuboid testing", cuboid));  
+  registerCommand(new Command(parseCmd("cuboid"), "", "type in the command and place two blocks, it will fill the space between them", cuboid));  
   registerCommand(new Command(parseCmd("players who list"), "", "Lists online players", playerList));
 
   registerCommand(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems));
 
   registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap));
   
+  registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", sendHelp));
+
+  registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport));
+
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION command_shutdown(void)
