@@ -35,12 +35,22 @@
 #include "screen.h"
 #include "tools.h"
 
-#define LOG(msg) Mineserver::get()->logger()->log(msg, std::string(((strrchr(__FILE__, '/') ?"": __FILE__ - 1) + 1)), __LINE__)
+#include "logtype.h"
+
+#ifdef _WIN32
+#define LOGLF(msg) Mineserver::get()->logger()->log(msg, std::string(((strrchr(__FILE__, '\\') ?"": __FILE__ - 1) + 1)), __LINE__)
+#else
+#define LOGLF(msg) Mineserver::get()->logger()->log(msg, std::string(((strrchr(__FILE__, '/') ?"": __FILE__ - 1) + 1)), __LINE__)
+#endif
+
+#define LOG(type, source, msg) Mineserver::get()->logger()->log(LogType::LOG_##type, source, msg)
 
 class Logger
 {
 public:
-  void log(std::string msg, std::string file, int line);
+  void log(const std::string& message, const std::string& file, int line);
+  void log(LogType::LogType type, const std::string& source, const std::string& message);
+
 };
 
 #endif

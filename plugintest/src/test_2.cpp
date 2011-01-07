@@ -2,7 +2,7 @@
 
 PLUGIN_API_EXPORT void test_2_init(mineserver_pointer_struct* mineserver)
 {
-  mineserver->screen.log("test_2_init");
+  mineserver->logger.log("test_2_init");
 }
 
 PLUGIN_API_EXPORT void test_2_shutdown(void)

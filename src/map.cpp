@@ -59,7 +59,7 @@
 
 void Map::addSapling(User* user, int x, int y, int z)
 {
-  Mineserver::get()->screen()->log("Place sapling " + dtos(x) + " " + dtos(y) + " " + dtos(z));
+  LOG(INFO, "Map", "Place sapling " + dtos(x) + " " + dtos(y) + " " + dtos(z));
 
   saplings.push_back( sTree(x,y,z,mapTime,user->UID) );
 }
@@ -72,7 +72,7 @@ void Map::checkGenTrees()
   {
     if(rand() % 50 == 0)
     {
-      Mineserver::get()->screen()->log("Grow tree!");
+      LOG(INFO, "Map", "Grow tree!");
 
       sint32 x = (*iter).x;
       sint32 y = (*iter).y;
@@ -95,7 +95,7 @@ void Map::checkGenTrees()
 void Map::init()
 {
 #ifdef _DEBUG
-  Mineserver::get()->screen()->log("Map::init()");
+  LOGLF("Map::init()");
 #endif
   mapDirectory = Mineserver::get()->config()->sData("map.storage.nbt.directory");
   if(mapDirectory == "Not found!")
@@ -109,7 +109,7 @@ void Map::init()
   struct stat stFileInfo;
   if(stat(mapDirectory.c_str(), &stFileInfo) != 0)
   {
-    Mineserver::get()->screen()->log("Warning: Map directory not found, creating it now.");
+    LOG(WARNING, "Map","Warning: Map directory not found, creating it now.");
 
 #ifdef WIN32
     if(_mkdir(mapDirectory.c_str()) == -1)
@@ -117,14 +117,15 @@ void Map::init()
     if(mkdir(mapDirectory.c_str(), 0755) == -1)
 #endif
     {
-      Mineserver::get()->screen()->log("Error: Could not create map directory.");
+      LOG(EMERG, "Map","Error: Could not create map directory.");
+
       exit(EXIT_FAILURE);
     }
   }
 
   if(stat((infile).c_str(), &stFileInfo) != 0)
   {
-    Mineserver::get()->screen()->log("Warning: level.dat not found, creating it now.");
+    LOG(WARNING, "Map","Warning: level.dat not found, creating it now.");
 
     NBT_Value level(NBT_Value::TAG_COMPOUND);
     level.Insert("Data", new NBT_Value(NBT_Value::TAG_COMPOUND));
@@ -140,7 +141,7 @@ void Map::init()
 
     if (stat(infile.c_str(), &stFileInfo) != 0)
     {
-      Mineserver::get()->screen()->log("Error: Could not create level.dat");
+      LOG(EMERG, "Map", "Error: Could not create level.dat");
       exit(EXIT_FAILURE);
     }
   }
@@ -164,8 +165,7 @@ void Map::init()
 
   if(!trees || trees->GetListType() != NBT_Value::TAG_COMPOUND)
   {
-
-    Mineserver::get()->screen()->log("No Trees in level.dat, creating..");
+    LOG(INFO, "Map", "No Trees in level.dat, creating..");
     root->Insert("Trees", new NBT_Value(NBT_Value::TAG_LIST,NBT_Value::TAG_COMPOUND));
     trees = ((*root)["Trees"]);
     root->SaveToFile(infile);
@@ -174,7 +174,7 @@ void Map::init()
 #ifdef _DEBUG
   std::string dump;
   trees->Dump(dump);
-  Mineserver::get()->screen()->log(dump);
+  LOG(DEBUG, "Map", dump);
   //Mineserver::get()->screen()->log(dtos((*tree_list).size()) + " saplings");
 #endif
 
@@ -189,7 +189,7 @@ void Map::init()
     sint32 plantedTime = (sint32)*tree["plantedTime"];
     sint32 plantedBy = (sint32)*tree["plantedBy"];
     saplings.push_back( sTree(x,y,z,plantedTime,plantedBy) );
-    Mineserver::get()->screen()->log("sapling: " + dtos(x) + " " + dtos(y) + " " + dtos(z));
+    LOG(INFO, "Map", "sapling: " + dtos(x) + " " + dtos(y) + " " + dtos(z));
   }
 
   /////////////////
@@ -278,7 +278,7 @@ bool Map::generateLight(int x, int z)
   sChunk* chunk = chunks.GetChunk(x,z);
   if(chunk == NULL)
   {
-    LOG("Loading chunk failed (generateLight)");
+    LOGLF("Loading chunk failed (generateLight)");
     return false;
   }
 
@@ -290,7 +290,7 @@ bool Map::generateLight(int x, int z)
 bool Map::generateLight(int x, int z, sChunk* chunk)
 {
 #ifdef _DEBUG2
-  printf("generateLight(x=%d, z=%d, chunk=%p)\n", x, z, chunk);
+  LOGLF("generateLight(x=%d, z=%d, chunk=%p)\n", x, z, chunk);
 #endif
   #ifdef PRINT_LIGHTGEN_TIME
   #ifdef WIN32
@@ -423,7 +423,7 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight)
 
   if((y < 0) || (y > 127))
   {
-    LOG("Invalid y value (spreadLight)");
+    LOGLF("Invalid y value (spreadLight)");
     return false;
   }
 
@@ -434,7 +434,7 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight)
 
   if(!chunk)
   {
-    LOG("Loading chunk failed (spreadLight)");
+    LOGLF("Loading chunk failed (spreadLight)");
     return false;
   }
 
@@ -528,7 +528,7 @@ bool Map::getBlock(int x, int y, int z, uint8* type, uint8* meta, bool generate)
   if((y < 0) || (y > 127))
   {
     printf("(%i, %i, %i) ", x, y, z);
-    LOG("Invalid y value (getBlock)");
+    LOGLF("Invalid y value (getBlock)");
     return false;
   }
 
@@ -541,7 +541,7 @@ bool Map::getBlock(int x, int y, int z, uint8* type, uint8* meta, bool generate)
   {
     if(generate)
     {
-     LOG("Loading chunk failed (getBlock)");
+     LOGLF("Loading chunk failed (getBlock)");
     }
 
     return false;
@@ -589,7 +589,7 @@ bool Map::getLight(int x, int y, int z, uint8* skylight, uint8* blocklight)
 
   if((y < 0) || (y > 127))
   {
-    LOG("Invalid y value (getLight)");
+    LOGLF("Invalid y value (getLight)");
     return false;
   }
 
@@ -601,7 +601,7 @@ bool Map::getLight(int x, int y, int z, uint8* skylight, uint8* blocklight)
 
   if(!chunk)
   {
-    LOG("Loading chunk failed (getLight)");
+    LOGLF("Loading chunk failed (getLight)");
     return false;
   }
 
@@ -649,7 +649,7 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type)
 
   if ((y < 0) || (y > 127))
   {
-    LOG("Invalid y value (setLight)");
+    LOGLF("Invalid y value (setLight)");
     return false;
   }
 
@@ -660,7 +660,7 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type)
 
   if (!chunk)
   {
-    LOG("Loading chunk failed (setLight)");
+    LOGLF("Loading chunk failed (setLight)");
     return false;
   }
 
@@ -732,7 +732,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
 
   if((y < 0) || (y > 127))
   {
-    LOG("Invalid y value (setBlock)");
+    LOGLF("Invalid y value (setBlock)");
     return false;
   }
 
@@ -744,7 +744,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
 
   if(!chunk)
   {
-    LOG("Loading chunk failed (setBlock)");
+    LOGLF("Loading chunk failed (setBlock)");
     return false;
   }
 
@@ -935,7 +935,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
 
   if(chunk->nbt == NULL)
   {
-    LOG("Error in loading map (unable to load file)");
+    LOGLF("Error in loading map (unable to load file)");
     return false;
   }
 
@@ -946,7 +946,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
 
   if(chunk->x != x || chunk->z != z)
   {
-    LOG("Error in loading map (incorrect chunk)");
+    LOGLF("Error in loading map (incorrect chunk)");
     delete chunk->nbt;
     delete chunk;
     return NULL;
@@ -960,7 +960,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
 
   if(blocks == 0 || data == 0 || blocklight == 0 || skylight == 0 || heightmap == 0)
   {
-    LOG("Error in loading map (chunk missing data)");
+    LOGLF("Error in loading map (chunk missing data)");
     delete chunk->nbt;
     delete chunk;
     return NULL;
@@ -974,7 +974,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
     blocklight->size() != halfLen ||
     skylight->size() != halfLen)
   {
-    LOG("Error in loading map (corrupt?)");
+    LOGLF("Error in loading map (corrupt?)");
   delete chunk->nbt;
   delete chunk;
     return NULL;
@@ -1396,13 +1396,13 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value* 
 
   if(entity->GetType() != NBT_Value::TAG_COMPOUND)
   {
-    LOG("Complex Entity wasn't TAG_COMPOUND");
+    LOGLF("Complex Entity wasn't TAG_COMPOUND");
     return;
   }
 
   if((*entity)["x"] == NULL || (sint32)*(*entity)["x"] != x  || (*entity)["y"] == NULL || (sint32)*(*entity)["y"] != y  || (*entity)["z"] == NULL || (sint32)*(*entity)["z"] != z)
   {
-    LOG("Invalid Complex Entity");
+    LOGLF("Invalid Complex Entity");
     return;
   }
 
@@ -1478,7 +1478,7 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value* 
   }
   else
   {
-    LOG("TileEntities list type not valid");
+    LOGLF("TileEntities list type not valid");
     return;
   }
 
@@ -1508,7 +1508,7 @@ void Map::setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value* 
   //Gzip the data
   if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
   {
-    Mineserver::get()->screen()->log("Error in deflate: " + dtos(state));
+    LOG(INFO, "Map","Error in deflate: " + dtos(state));
   }
 
   deflateEnd(&zstream2);

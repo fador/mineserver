@@ -199,7 +199,11 @@ bool User::sendLoginInfo()
 bool User::kick(std::string kickMsg)
 {
   buffer << (sint8)PACKET_KICK << kickMsg;
+
   (static_cast<Hook2<void,User*,std::string>*>(Mineserver::get()->plugin()->getHook("PlayerKickPost")))->doAll(this, kickMsg);
+
+  Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", nick + " kicked. Reason: " + kickMsg);
+
   return true;
 }
 
@@ -216,7 +220,7 @@ bool User::mute(std::string muteMsg)
 
   Mineserver::get()->chat()->sendMsg(this, muteMsg, Chat::USER);
   this->muted = true;
-  Mineserver::get()->screen()->log(nick + " muted. Reason: " + muteMsg);
+  Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", nick + " muted. Reason: " + muteMsg);
   return true;
 }
 
@@ -224,7 +228,7 @@ bool User::unmute()
 {
     Mineserver::get()->chat()->sendMsg(this, MC_COLOR_YELLOW + "You have been unmuted.", Chat::USER);
     this->muted = false;
-    Mineserver::get()->screen()->log(nick + " unmuted. ");
+    Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", nick + " unmuted.");
     return true;
 }
 
@@ -277,7 +281,7 @@ bool User::loadData()
   NBT_Value& nbtPlayer = *playerRoot;
   if(playerRoot == NULL)
   {
-    LOG("Failed to open player file");
+    LOGLF("Failed to open player file");
     return false;
   }
 
@@ -972,7 +976,7 @@ bool User::teleport(double x, double y, double z)
   if(y > 128.0)
   {
     y = 128.0;
-    LOG("Player Attempted to teleport with y > 128.0");
+    LOGLF("Player Attempted to teleport with y > 128.0");
   }
   buffer << (sint8)PACKET_PLAYER_POSITION_AND_LOOK << x << y << (double)0.0 << z
          << (float)0.f << (float)0.f << (sint8)1;

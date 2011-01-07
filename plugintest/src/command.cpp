@@ -40,6 +40,7 @@ copy command.so to Mineserver bin directory.
 #include <iostream>
 
 #include "../../src/plugin_api.h"
+#include "../../src/logtype.h"
 
 #include "command.h"
 
@@ -59,7 +60,7 @@ struct cuboidStruct
 
 std::map<std::string,cuboidStruct> cuboidMap;
 
-std::string dtos( double n )
+std::string dtos(double n)
 {
   std::ostringstream result;
   result << n;
@@ -96,6 +97,7 @@ std::deque<std::string> parseCmd(std::string cmd)
   {
     temp.push_back("empty");
   }
+
   return temp;
 }
 
@@ -103,12 +105,11 @@ typedef void (*CommandCallback)(std::string nick, std::string, std::deque<std::s
 
 struct Command
 {
+  CommandCallback callback;  
+  Command(std::deque<std::string> _names, std::string _arguments, std::string _description, CommandCallback _callback) : names(_names),arguments(_arguments),description(_description),callback(_callback) {}
   std::deque<std::string> names;
   std::string arguments;
   std::string description;
-  CommandCallback callback;  
-  Command(std::deque<std::string> _names, std::string _arguments, std::string _description, CommandCallback _callback) 
-    : names(_names),arguments(_arguments),description(_description),callback(_callback) {}
 };
 
 typedef std::map<std::string, Command*> CommandList;
@@ -131,6 +132,7 @@ bool chatPreFunction(const char* userIn, const char* msgIn)
 {
   std::string user(userIn);
   std::string msg(msgIn);
+
   if(msg.size() == 0)
   {
     return false;
@@ -139,9 +141,9 @@ bool chatPreFunction(const char* userIn, const char* msgIn)
   char prefix = msg[0];
 
   std::string logMsg = "Command Plugin got from "+user+": " + msg;
-  mineserver->screen.log(logMsg.c_str());
+  mineserver->logger.log(LogType::LOG_INFO, "plugin.command", logMsg.c_str());
 
-  if(prefix == CHATCMDPREFIX)
+  if (prefix == CHATCMDPREFIX)
   {
     // Timestamp
     time_t rawTime = time(NULL);
@@ -168,22 +170,22 @@ bool chatPreFunction(const char* userIn, const char* msgIn)
 
 bool isValidItem(int id)
 {
-  if(id < 1)  // zero or negative items are all invalid
+  if (id < 1)  // zero or negative items are all invalid
   {
     return false;
   }
 
-  if(id > 91 && id < 256)  // these are undefined blocks and items
+  if (id > 91 && id < 256)  // these are undefined blocks and items
   {
     return false;
   }
 
-  if(id == 2256 || id == 2257)  // records are special cased
+  if (id == 2256 || id == 2257)  // records are special cased
   {
     return true;
   }
 
-  if(id > 350)  // high items are invalid
+  if (id > 350)  // high items are invalid
   {
     return false;
   }
@@ -198,7 +200,7 @@ int roundUpTo(int x, int nearest)
 
 void giveItems(std::string userIn, std::string command, std::deque<std::string> args)
 {
-  if(args.size() == 2 || args.size() == 3)
+  if (args.size() == 2 || args.size() == 3)
   {
     std::string user = args[0];
     int itemId = 0;
@@ -207,33 +209,33 @@ void giveItems(std::string userIn, std::string command, std::deque<std::string> 
     itemId = atoi(args[1].c_str());
 
     //If item was not a number, search the name from config
-    if(itemId == 0)
+    if (itemId == 0)
     {
       itemId = mineserver->config.iData(args[1].c_str());
     }
 
     // Check item validity
-    if(isValidItem(itemId))
+    if (isValidItem(itemId))
     {
       double x,y,z;
-      if(mineserver->user.getPosition(user.c_str(),&x,&y,&z,NULL,NULL,NULL))
+      if (mineserver->user.getPosition(user.c_str(),&x,&y,&z,NULL,NULL,NULL))
       {
         int itemCount = 1, itemStacks = 1;
 
-        if(args.size() == 3)
+        if (args.size() == 3)
         {
           itemCount = atoi(args[2].c_str());
-          if(itemCount>1024) itemCount=1024;
+          if (itemCount>1024) itemCount=1024;
           // If multiple stacks
           itemStacks = roundUpTo(itemCount, 64) / 64;
           itemCount  -= (itemStacks-1) * 64;
         }
 
         int amount = 64;
-        for(int i = 0; i < itemStacks; i++)
+        for (int i = 0; i < itemStacks; i++)
         {
           // if last stack
-          if(i == itemStacks - 1)
+          if (i == itemStacks - 1)
           {
             amount = itemCount;
           }
@@ -256,7 +258,7 @@ void giveItems(std::string userIn, std::string command, std::deque<std::string> 
 
 void giveItemsSelf(std::string user, std::string command, std::deque<std::string> args)
 {
-  if(args.size() == 1 || args.size() == 2)
+  if (args.size() == 1 || args.size() == 2)
   {
     int itemId = 0;
 
@@ -264,20 +266,20 @@ void giveItemsSelf(std::string user, std::string command, std::deque<std::string
     itemId = atoi(args[0].c_str());
 
     //If item was not a number, search the name from config
-    if(itemId == 0)
+    if (itemId == 0)
     {
       itemId = mineserver->config.iData(args[0].c_str());
     }
 
     // Check item validity
-    if(isValidItem(itemId))
+    if (isValidItem(itemId))
     {
       double x,y,z;
-      if(mineserver->user.getPosition(user.c_str(),&x,&y,&z,NULL,NULL,NULL))
+      if (mineserver->user.getPosition(user.c_str(),&x,&y,&z,NULL,NULL,NULL))
       {
         int itemCount = 1, itemStacks = 1;
 
-        if(args.size() == 2)
+        if (args.size() == 2)
         {
           itemCount = atoi(args[1].c_str());
           if(itemCount>1024) itemCount=1024;
@@ -287,10 +289,10 @@ void giveItemsSelf(std::string user, std::string command, std::deque<std::string
         }
 
         int amount = 64;
-        for(int i = 0; i < itemStacks; i++)
+        for (int i = 0; i < itemStacks; i++)
         {
           // if last stack
-          if(i == itemStacks - 1)
+          if (i == itemStacks - 1)
           {
             amount = itemCount;
           }
@@ -474,13 +476,9 @@ void sendHelp(std::string user, std::string command, std::deque<std::string> arg
   CommandList* commandList = &m_Commands; // defaults
   //std::string commandColor = MC_COLOR_BLUE;
 
-
-
-  if(args.size() == 0)
+  if (args.size() == 0)
   {
-    for(CommandList::iterator it = commandList->begin();
-        it != commandList->end();
-        it++)
+    for(CommandList::iterator it = commandList->begin();it != commandList->end();++it)
     {
       std::string args = it->second->arguments;
       std::string description = it->second->description;
@@ -491,7 +489,7 @@ void sendHelp(std::string user, std::string command, std::deque<std::string> arg
   else
   {
     CommandList::iterator iter;
-    if((iter = commandList->find(args.front())) != commandList->end())
+    if ((iter = commandList->find(args.front())) != commandList->end())
     {
       std::string args = iter->second->arguments;
       std::string description = iter->second->description;
@@ -512,19 +510,16 @@ std::string pluginName = "command";
 
 PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mineserver_temp)
 {
-  mineserver->screen.log("This is a test!");
-  return;
-
   mineserver = mineserver_temp;
 
   if (mineserver->plugin.getPluginVersion(pluginName.c_str()) > 0)
   {
-    std::string msg="command is already loaded v." +dtos(mineserver->plugin.getPluginVersion(pluginName.c_str()));
-    mineserver->screen.log(msg.c_str());
+    std::string msg = "command is already loaded v."+dtos(mineserver->plugin.getPluginVersion(pluginName.c_str()));
+    mineserver->logger.log(LogType::LOG_INFO, "plugin.command", msg.c_str());
     return;
   }
-  std::string msg="Loaded "+pluginName+"!";
-  mineserver->screen.log(msg.c_str());
+  std::string msg = "Loaded "+pluginName+"!";
+  mineserver->logger.log(LogType::LOG_INFO, "plugin.command", msg.c_str());
 
   mineserver->plugin.setPluginVersion(pluginName.c_str(), PLUGIN_COMMAND_VERSION);
 
@@ -544,15 +539,13 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mi
   registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", sendHelp));
 
   registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport));
-
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION command_shutdown(void)
 {
   if (mineserver->plugin.getPluginVersion(pluginName.c_str()) <= 0)
   {
-    mineserver->screen.log("command is not loaded!");
+    mineserver->logger.log(LogType::LOG_INFO, "plugin.command", "command is not loaded!");
     return;
   }
-
 }

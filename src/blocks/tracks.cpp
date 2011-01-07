@@ -105,7 +105,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // SOUTH
   if(isTrack(x, y, z-1, meta) && isStartPiece(x, y, z-1))
   {
-    Mineserver::get()->screen()->log("SOUTH");
+    LOG(INFO, "Tracks", "SOUTH");
     metadata = FLAT_NS;
     
     // Rising & falling tracks
@@ -139,7 +139,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // NORTH
   if(isTrack(x, y, z+1, meta) && isStartPiece(x, y, z+1))
   {
-    Mineserver::get()->screen()->log("NORTH");
+    LOG(INFO, "Tracks", "NORTH");
 
     metadata = FLAT_NS;
     // Rising & falling tracks
@@ -173,7 +173,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // EAST
   if(isTrack(x-1, y, z, meta) && isStartPiece(x-1, y, z))
   {
-    Mineserver::get()->screen()->log("EAST");
+    LOG(INFO, "Tracks", "EAST");
     metadata = FLAT_EW;
     
     // Rising & falling tracks
@@ -213,7 +213,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   // WEST
   if(isTrack(x+1, y, z, meta) && isStartPiece(x+1, y, z))
   {
-    Mineserver::get()->screen()->log("WEST");
+    LOG(INFO, "Tracks", "WEST");
     metadata = FLAT_EW;
     // Change previous block meta
     

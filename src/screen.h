@@ -41,15 +41,7 @@
 #include <vector>
 #include "user.h"
 
-enum
-{
-  LOG_TITLE,
-  LOG_GENERAL,
-  LOG_CHAT,
-  LOG_PLAYERS,
-  LOG_ERROR,
-  LOG_COMMAND
-};
+#include "logtype.h"
 
 enum
 {
@@ -69,8 +61,7 @@ public:
   void init(std::string version);
   WINDOW* createWindow(int width, int height, int startx, int starty);
   void destroyWindow(WINDOW *local_win);
-  void log(std::string message);
-  void log(int logType, std::string message);
+  void log(LogType::LogType type, const std::string& source, const std::string& message);
   void updatePlayerList(std::vector<User *> users);
   void end();
   WINDOW *commandLog;

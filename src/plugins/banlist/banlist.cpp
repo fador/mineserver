@@ -28,7 +28,7 @@ extern "C" void banlist_init(Mineserver* mineserver)
 {
   if (mineserver->plugin()->getPluginVersion("banlist") >= 0)
   {
-    mineserver->screen()->log("banlist is already loaded!");
+    LOG(WARNING,"plugin.banlist", "banlist is already loaded!");
     return;
   }
 
@@ -40,7 +40,7 @@ extern "C" void banlist_shutdown(Mineserver* mineserver)
 {
   if (mineserver->plugin()->getPluginVersion("banlist") < 0)
   {
-    mineserver->screen()->log("banlist is not loaded!");
+    LOG(WARNING, "plugin.banlist", "banlist is not loaded!");
     return;
   }
 
@@ -62,7 +62,7 @@ P_Banlist::P_Banlist(Mineserver* mineserver) : m_mineserver(mineserver)
   }
   else
   {
-    Mineserver::get()->screen()->log("Banlist: Can't find the LoginPre hook, banlist will not be operational.");
+    LOG(WARNING, "plugin.banlist", "Banlist: Can't find the LoginPre hook, banlist will not be operational.");
   }
 }
 
@@ -118,16 +118,16 @@ void P_Banlist::setBan(const std::string user, bool banned)
 bool P_Banlist::callbackLoginPre(User* user, std::string* reason)
 {
   P_Banlist* banlist = static_cast<P_Banlist*>(Mineserver::get()->plugin()->getPointer("banlist"));
-  Mineserver::get()->screen()->log("Banlist: Checking if user "+user->nick+" is banned");
+  LOG(INFO, "plugin.banlist", "Banlist: Checking if user "+user->nick+" is banned");
   if (banlist->getBan(user->nick))
   {
-    Mineserver::get()->screen()->log("Banlist: They are!");
+    LOG(INFO, "plugin.banlist", "Banlist: They are!");
     reason->assign("You've been banned!");
     return false;
   }
   else
   {
-    Mineserver::get()->screen()->log("Banlist: They're not!");
+    LOG(INFO, "plugin.banlist", "Banlist: They are not!");
     return true;
   }
 }

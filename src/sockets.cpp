@@ -82,7 +82,7 @@ void client_callback(int fd,
     read = recv(fd, (char*)buf, 2048, 0);
     if(read == 0)
     {
-    Mineserver::get()->screen()->log("Socket closed properly");
+      Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket closed properly");
     //event_del(user->GetEvent());
 
 #ifdef WIN32
@@ -96,7 +96,8 @@ void client_callback(int fd,
 
     if(read == -1)
     {
-      Mineserver::get()->screen()->log("Socket had no data to read");
+      Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket had no data to read");
+
       #ifdef WIN32
           closesocket(user->fd);
       #else
@@ -175,7 +176,7 @@ void client_callback(int fd,
     {
       if((errno != EAGAIN && errno != EINTR) || user->write_err_count>200)
       {
-        Mineserver::get()->screen()->log(LOG_ERROR, "Error writing to client");
+        Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Error writing to client");
         //event_del(user->GetEvent());
 
     #ifdef WIN32
@@ -224,7 +225,7 @@ void accept_callback(int fd,
                      &client_len);
   if(client_fd < 0)
   {
-    LOG("Client: accept() failed");
+    LOGLF("Client: accept() failed");
     return;
   }
   User *client = new User(client_fd, generateEID());

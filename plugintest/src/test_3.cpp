@@ -3,7 +3,7 @@
 
 PLUGIN_API_EXPORT void test_3_init(mineserver_pointer_struct* mineserver)
 {
-  mineserver->screen.log("test_3_init");
+  mineserver->logger.log("test_3_init");
   mineserver->plugin.setHook("test", new Hook0<void>);
 }
 

@@ -149,10 +149,10 @@ void plugin_setPluginVersion(const char* name, float version)
   Mineserver::get()->plugin()->setPluginVersion(std::string(name),version);
 }
 
-// SCREEN WRAPPER FUNCTIONS
-void screen_log(const char* msg)
+// LOGGER WRAPPER FUNCTIONS
+void logger_log(int type, const char* source, const char* message)
 {
-  Mineserver::get()->screen()->log(std::string(msg));
+  Mineserver::get()->logger()->log((LogType::LogType)type, std::string(source), std::string(message));
 }
 
 // CHAT WRAPPER FUNCTIONS
@@ -304,7 +304,7 @@ int config_iData(const char* name)
 // Initialization of the plugin_api function pointer array
 void init_plugin_api(void)
 {
-  plugin_api_pointers.screen.log              = &screen_log;
+  plugin_api_pointers.logger.log              = &logger_log;
 
   plugin_api_pointers.chat.sendmsg            = &chat_sendmsg;
   plugin_api_pointers.chat.sendmsgTo          = &chat_sendmsgTo;

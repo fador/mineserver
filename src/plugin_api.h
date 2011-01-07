@@ -63,9 +63,9 @@ struct chat_pointer_struct
   void *temp[100];
 };
 
-struct screen_pointer_struct
+struct logger_pointer_struct
 {
-  void (*log)(const char* msg);
+  void (*log)(int type, const char* source, const char* message);
   void *temp[100];
 };
 
@@ -95,7 +95,7 @@ struct config_pointer_struct
 struct mineserver_pointer_struct
 {
   map_pointer_struct map;
-  screen_pointer_struct screen;
+  logger_pointer_struct logger;
   chat_pointer_struct chat;
   plugin_pointer_struct plugin;
   user_pointer_struct user;
