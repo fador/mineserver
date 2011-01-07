@@ -29,6 +29,14 @@
 #include <iostream>
 #include "screen.h"
 
+enum 
+{
+  LOG_TITLE,
+  LOG_COMMAND,
+  LOG_GENERAL,
+  LOG_PLAYERS
+};
+
 void Screen::init(std::string version)
 {
   initscr(); // Start NCurses
@@ -118,10 +126,10 @@ void Screen::init(std::string version)
   refresh();
   
   // Now shove our logo in at the top
-  log(LOG_TITLE, "  /\\/\\ (_)_ __   ___ ___  ___ _ ____   _____ _ __ ");
-  log(LOG_TITLE, " /    \\| | '_ \\ / _ | __|/ _ \\ '__\\ \\ / / _ \\ '__|");
-  log(LOG_TITLE, "/ /\\/\\ \\ | | | |  __|__ \\  __/ |   \\ V /  __/ |   ");
-  log(LOG_TITLE, "\\/    \\/_|_| |_|\\___|___/\\___|_|    \\_/ \\___|_|  ");
+  log(LogType::LOG_INFO, "Title", "  /\\/\\ (_)_ __   ___ ___  ___ _ ____   _____ _ __ ");
+  log(LogType::LOG_INFO, "Title", " /    \\| | '_ \\ / _ | __|/ _ \\ '__\\ \\ / / _ \\ '__|");
+  log(LogType::LOG_INFO, "Title", "/ /\\/\\ \\ | | | |  __|__ \\  __/ |   \\ V /  __/ |   ");
+  log(LogType::LOG_INFO, "Title", "\\/    \\/_|_| |_|\\___|___/\\___|_|    \\_/ \\___|_|  ");
 
   wmove(title, 3, 50);
   wattron(title, COLOR_PAIR(TEXT_COLOR_WHITE));
@@ -161,7 +169,7 @@ bool Screen::hasCommand()
       else if (readchar == '\n')
         running = false;
       else if (readchar == KEY_UP) // FIXME
-        log("Up arrow key was pressed");
+        log(LogType::LOG_INFO, "Console", "Up arrow key was pressed");
       else
         currentCommand += readchar;
     }
@@ -185,7 +193,10 @@ std::string Screen::getCommand()
   // Get a copy of the current command, clear it and return the copy
   std::string tempCmd = currentCommand;
   currentCommand.clear();
-  log(LOG_COMMAND, "");
+  if (!tempCmd.empty())
+  {
+    log(LogType::LOG_INFO, "Command", "");
+  }
   return tempCmd;
 }
 
@@ -235,17 +246,34 @@ void Screen::end()
   endwin();
 }
 
-void Screen::log(std::string message)
+/*void Screen::log(std::string message)
 {
   // Default to general log
   this->log(LOG_GENERAL, message);
-}
+}*/
 
-void Screen::log(int logType, std::string message)
+void Screen::log(LogType::LogType type, const std::string& source, const std::string& message)
 {
-  WINDOW *window = title;
+  WINDOW *window = generalLog;
 
-  switch (logType)
+  if (source == "Chat")
+  {
+    window = chatLog;
+  }
+  else if (source == "Command")
+  {
+    window = commandLog;
+  }
+  else if (source == "Players")
+  {
+    window = playerList;
+  }
+  else if (source == "Title")
+  {
+    window = title;
+  }
+
+  /*switch (type)
   {
     case LOG_GENERAL:
     case LOG_ERROR:
@@ -260,10 +288,10 @@ void Screen::log(int logType, std::string message)
     case LOG_COMMAND:
       window = commandLog;
       break;
-  }
+  }*/
 
   // Set the color
-  if (logType == LOG_ERROR)
+  if (type == LogType::LOG_ERROR)
   {
     wattron(window, COLOR_PAIR(TEXT_COLOR_RED));
   }
@@ -272,12 +300,13 @@ void Screen::log(int logType, std::string message)
   int x, y;
   getyx(window, y, x);
 
+/*
   // Print the message to the correct window
   if (window == chatLog)
   {
     // Display the timestamp
     waddstr(window, (currentTimestamp(false) + " ").c_str());
-    
+
     // Check for special messages
     if (message.substr(0,3) == "[!]" || message.substr(0,3) == "[@]")    // Server or AdminChat message
     {
@@ -299,7 +328,9 @@ void Screen::log(int logType, std::string message)
        waddstr(window, (message + "\n").c_str());
     }
   }
-  else if (logType == LOG_GENERAL)
+*/
+
+  if (type != LogType::LOG_ERROR && (window == chatLog || window == generalLog))
   {
     wattron(window, WA_BOLD);
     waddstr(window, ("[" + currentTimestamp(true) + "] ").c_str());
@@ -312,7 +343,7 @@ void Screen::log(int logType, std::string message)
   }
     
   // Turn off color again
-  if (logType == LOG_ERROR)
+  if (type == LogType::LOG_ERROR)
   {
     wattroff(window, COLOR_PAIR(TEXT_COLOR_RED));
   }
@@ -329,13 +360,19 @@ void Screen::updatePlayerList(std::vector<User *> users)
 {
   // Clear the playerlist
   wclear(playerList);
-  
+
   // Now fill it up!
-  if(users.size() == 0)
-    log(LOG_PLAYERS, "No active players");
+  if(users.size() == 0) 
+  {
+    log(LogType::LOG_INFO, "Players", "No active players");
+  }
   else
+  {
     for (unsigned int i = 0; i < users.size(); i++)
-      log(LOG_PLAYERS, users[i]->nick);
+    {
+      log(LogType::LOG_INFO, "Players", users[i]->nick);
+    }
+  }
 }
 
 std::string Screen::currentTimestamp(bool seconds) {

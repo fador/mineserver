@@ -25,26 +25,29 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-//
-// Mineserver logger.cpp
-//
+#ifndef _LOG_TYPE_H
+#define _LOG_TYPE_H
 
-#include <cstdio>
-#include <iostream>
-#include <string>
-
-#include "logger.h"
-#include "mineserver.h"
-
-#include "logtype.h"
-
-// Log to terminal
-void Logger::log(const std::string& msg, const std::string& file, int line)
+/** 
+ * An enumeration of types of log messages..
+ *
+ * Inspired by syslog.
+ */
+namespace LogType
 {
-  Mineserver::get()->screen()->log(LogType::LOG_INFO, file, "[" + file + "@" + dtos(line) + "]: " + msg);
-}
+  enum LogType
+  {
+    LOG_EMERG,    /** system is unusable */
+    LOG_ALERT,    /** action must be taken immediately*/ 
+    LOG_CRITICAL, /** critical conditions */
+    LOG_ERROR,    /** error conditions */
+    LOG_WARNING,  /** warning conditions */
+    LOG_NOTICE,   /** normal, but significant, condition */
+    LOG_INFO,     /** informational message */
+#ifdef _DEBUG
+    LOG_DEBUG,    /** debug-level message */
+#endif
+  };
+};
 
-void Logger::log(LogType::LogType type, const std::string& source, const std::string& message)
-{
-  Mineserver::get()->screen()->log(type, source, message);
-}
+#endif

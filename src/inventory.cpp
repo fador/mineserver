@@ -107,13 +107,12 @@ bool Inventory::readRecipe(std::string recipeFile)
 
   if (ifs.fail())
   {
-    Mineserver::get()->screen()->log("Could not find: " + recipeFile);
-
+    LOG(WARNING, "Inventory", "Could not find: " + recipeFile);
     ifs.close();
     return false;
   }
-  
-  //Mineserver::get()->screen()->log("Reading: " + recipeFile);
+
+  //LOG(INFO, "Inventory", "Reading: " + recipeFile);
 
   std::string temp;
   

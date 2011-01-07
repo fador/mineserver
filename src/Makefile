@@ -52,8 +52,10 @@ ifeq ($(PEDANTIC), YES)
   CXXFLAGS  += -Wall -Werror -pedantic
 endif
 
-ifeq ($(findstring Ubuntu,$(shell cat /etc/issue)),Ubuntu)
-  DEBIAN     = 1
+ifeq ($(findstring MINGW32,$(SYSTEM)),MINGW32)
+LFLAGS = -lws2_32 -lwinmm -export-all-symbols
+else
+#LFLAGS = -rdynamic
 endif
 
 ifeq ($(findstring Debian,$(shell cat /etc/issue)),Debian)

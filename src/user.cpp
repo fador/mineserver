@@ -96,32 +96,28 @@ User::User(int sock, uint32 EID)
 
 bool User::changeNick(std::string _nick)
 {
+  (static_cast<Hook2<void,User*,std::string>*>(Mineserver::get()->plugin()->getHook("PlayerNickPost")))->doAll(this, _nick);
+
   nick = _nick;
   SET_ADMIN(permissions);
-  // Update the player list with the new name!
-  Mineserver::get()->updatePlayerList();
 
   return true;
 }
 
 User::~User()
 {
-  for(std::vector<User*>::iterator it = Mineserver::get()->users().begin();
-      it != Mineserver::get()->users().end();
-      it++)
+  std::vector<User*>::iterator it_a = Mineserver::get()->users().begin();
+  std::vector<User*>::iterator it_b = Mineserver::get()->users().end();
+  for(;it_a!=it_b;++it_a)
   {
-    if((*it) == this)
+    if((*it_a) == this)
     {
-      Mineserver::get()->users().erase(it);
-
-      // Update the player list
-      Mineserver::get()->updatePlayerList();
-
+      Mineserver::get()->users().erase(it_a);
       break;
     }
   }
 
-  if(this->nick.size())
+  if(logged)
   {
     for(int mapx = -viewDistance+curChunk.x(); mapx <= viewDistance+curChunk.x(); mapx++)
     {
@@ -148,14 +144,12 @@ User::~User()
     putSint32(&entityData[1], this->UID);
     this->sendOthers(&entityData[0], 5);
   }
+
+  (static_cast<Hook1<void,User*>*>(Mineserver::get()->plugin()->getHook("PlayerQuitPost")))->doAll(this);
 }
 
 bool User::sendLoginInfo()
 {
-  std::string player = nick;
-
-  changeNick(player);
-
   //Load user data
   loadData();
 
@@ -196,8 +190,7 @@ bool User::sendLoginInfo()
   sethealth(health);
   logged = true;
 
-  Mineserver::get()->chat()->sendMsg(this, player+" connected!", Chat::ALL);
-
+  Mineserver::get()->chat()->sendMsg(this, nick+" connected!", Chat::ALL);
 
   return true;
 }
@@ -206,7 +199,11 @@ bool User::sendLoginInfo()
 bool User::kick(std::string kickMsg)
 {
   buffer << (sint8)PACKET_KICK << kickMsg;
-  Mineserver::get()->screen()->log(nick + " kicked. Reason: " + kickMsg);
+
+  (static_cast<Hook2<void,User*,std::string>*>(Mineserver::get()->plugin()->getHook("PlayerKickPost")))->doAll(this, kickMsg);
+
+  Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", nick + " kicked. Reason: " + kickMsg);
+
   return true;
 }
 
@@ -223,7 +220,7 @@ bool User::mute(std::string muteMsg)
 
   Mineserver::get()->chat()->sendMsg(this, muteMsg, Chat::USER);
   this->muted = true;
-  Mineserver::get()->screen()->log(nick + " muted. Reason: " + muteMsg);
+  Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", nick + " muted. Reason: " + muteMsg);
   return true;
 }
 
@@ -231,7 +228,7 @@ bool User::unmute()
 {
     Mineserver::get()->chat()->sendMsg(this, MC_COLOR_YELLOW + "You have been unmuted.", Chat::USER);
     this->muted = false;
-    Mineserver::get()->screen()->log(nick + " unmuted. ");
+    Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", nick + " unmuted.");
     return true;
 }
 
@@ -284,7 +281,7 @@ bool User::loadData()
   NBT_Value& nbtPlayer = *playerRoot;
   if(playerRoot == NULL)
   {
-    LOG("Failed to open player file");
+    LOGLF("Failed to open player file");
     return false;
   }
 
@@ -463,7 +460,7 @@ bool User::updatePos(double x, double y, double z, double stance)
     return false;
   }
 
-  if(nick.size() && logged)
+  if(logged)
   {
     sChunk* newChunk = Mineserver::get()->map()->loadMap(blockToChunk((sint32)x), blockToChunk((sint32)z));
     sChunk* oldChunk = Mineserver::get()->map()->loadMap(blockToChunk((sint32)pos.x), blockToChunk((sint32)pos.z));
@@ -979,7 +976,7 @@ bool User::teleport(double x, double y, double z)
   if(y > 128.0)
   {
     y = 128.0;
-    LOG("Player Attempted to teleport with y > 128.0");
+    LOGLF("Player Attempted to teleport with y > 128.0");
   }
   buffer << (sint8)PACKET_PLAYER_POSITION_AND_LOOK << x << y << (double)0.0 << z
          << (float)0.f << (float)0.f << (sint8)1;

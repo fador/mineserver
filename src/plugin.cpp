@@ -276,7 +276,7 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
 
   if (file.size())
   {
-    Mineserver::get()->screen()->log("Loading plugin `"+name+"' (`"+file+"')...");
+    LOG(INFO, "Plugin", "Loading plugin `"+name+"' (`"+file+"')...");
 
     struct stat st;
     if(stat(file.c_str(), &st) == 0)
@@ -285,7 +285,7 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
     }
     else
     {
-      Mineserver::get()->screen()->log("Could not find `"+file+"', trying `"+file+LIBRARY_EXTENSION+"'.");
+      LOG(INFO, "Plugin", "Could not find `"+file+"', trying `"+file+LIBRARY_EXTENSION+"'.");
 
       if (stat((file+LIBRARY_EXTENSION).c_str(), &st) == 0)
       {
@@ -293,8 +293,7 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
       }
       else
       {
-        Mineserver::get()->screen()->log("Could not find `"+file+LIBRARY_EXTENSION+"'!");
-
+        LOG(INFO, "Plugin", "Could not find `"+file+LIBRARY_EXTENSION+"'!");
         return false;
       }
     }
@@ -302,14 +301,14 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
   }
   else
   {
-    Mineserver::get()->screen()->log("Loading plugin `"+name+"' (built in)...");
+    LOG(INFO, "Plugin", "Loading plugin `"+name+"' (built in)...");
     lhandle = LIBRARY_SELF();
   }
 
   if (lhandle == NULL)
   {
-    Mineserver::get()->screen()->log("Could not load plugin `"+name+"'!");
-    Mineserver::get()->screen()->log(LIBRARY_ERROR());
+    LOG(INFO, "Plugin", "Could not load plugin `"+name+"'!");
+    LOG(INFO, "Plugin", LIBRARY_ERROR());
     return false;
   }
 
@@ -322,7 +321,7 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
   #endif
   if (fhandle == NULL)
   {
-    Mineserver::get()->screen()->log("Could not get init function handle!");
+    LOG(INFO, "Plugin", "Could not get init function handle!");
     unloadPlugin(name);
     return false;
   }
@@ -346,7 +345,7 @@ void Plugin::unloadPlugin(const std::string name)
 
   if (m_pluginVersions.find(name) != m_pluginVersions.end())
   {
-    Mineserver::get()->screen()->log("Unloading plugin `"+name+"'...");
+    LOG(INFO, "Plugin", "Unloading plugin `"+name+"'...");
 
     if (m_libraryHandles[name] != NULL)
     {
@@ -366,11 +365,11 @@ void Plugin::unloadPlugin(const std::string name)
 
     if (fhandle == NULL)
     {
-      Mineserver::get()->screen()->log("Could not get shutdown function handle!");
+      LOG(INFO, "Plugin","Could not get shutdown function handle!");
     }
     else
     {
-      Mineserver::get()->screen()->log("Calling shutdown function for `"+name+"'.");
+      LOG(INFO, "Plugin","Calling shutdown function for `"+name+"'.");
       
       #ifdef FADOR_PLUGIN  
       fhandle();
@@ -383,7 +382,7 @@ void Plugin::unloadPlugin(const std::string name)
   }
   else
   {
-    Mineserver::get()->screen()->log("Plugin `"+name+"' not loaded!");
+    LOG(INFO, "Plugin", "Plugin `"+name+"' not loaded!");
   }
 }
 
@@ -496,7 +495,7 @@ void Plugin::setBlockCallback(const int type, Callback call)
 {
    if (getBlockCallback(type))
    {
-      LOG("Block type set more then once.");
+      LOG(INFO, "Phyics", "Block type set more then once.");
       removeBlockCallback(type);
    }
 

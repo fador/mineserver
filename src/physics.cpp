@@ -105,7 +105,8 @@ bool Physics::update()
   std::vector<sint32> toRemove;
   std::vector<vec> toAdd;
 
-  Mineserver::get()->screen()->log("Simulating " + dtos(simList.size()) + " items!");
+  LOG(INFO, "Physics", "Simulating " + dtos(simList.size()) + " items!");
+
   uint32 listSize = simList.size();
   // Iterate each simulation
   for(uint32 simIt = 0; simIt < listSize; simIt++)
@@ -286,10 +287,9 @@ bool Physics::update()
   {
     simList.erase(simList.begin()+*rit);
   }
-
   
   clock_t endtime = clock()-starttime;
-  Mineserver::get()->screen()->log("Exit simulation, took " + dtos(endtime*1000/CLOCKS_PER_SEC) + " ms, " + dtos(simList.size()) + " items left");
+  LOG(INFO, "Physics", "Exit simulation, took " + dtos(endtime*1000/CLOCKS_PER_SEC) + " ms, " + dtos(simList.size()) + " items left");
   return true;
 }
 

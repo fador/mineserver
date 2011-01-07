@@ -329,7 +329,7 @@ void Furnace::sendToAllUsers()
   // Gzip the data
   if(int state = deflate(&zstream, Z_FULL_FLUSH) != Z_OK)
   {
-    Mineserver::get()->screen()->log(LOG_ERROR, "Error in deflate: " + state);
+    Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Furnace", "Error in deflate: " + state);
   }
   deflateEnd(&zstream);
 
@@ -345,14 +345,12 @@ void Furnace::sendToAllUsers()
   //User::sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
 
 #ifdef _DEBUG
-  Mineserver::get()->screen()->log("Furnace entity data: ");
+  LOG(DEBUG, "Furnace", "Furnace entity data: ");
   std::string dump;
   newEntity->Dump(dump);
-  Mineserver::get()->screen()->log(dump);
+  LOG(DEBUG, "Furnace", dump);
 #endif
 
   // Update our map with this guy
   Mineserver::get()->map()->setComplexEntity(NULL, m_x, m_y, m_z, newEntity);
-
 }
-

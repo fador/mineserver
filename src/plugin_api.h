@@ -28,6 +28,8 @@
 #ifndef _PLUGIN_API_H
 #define _PLUGIN_API_H
 
+#include "hook.h"
+
 #ifdef WIN32
 #define PLUGIN_API_EXPORT extern "C" __declspec(dllexport) 
 #define CALLCONVERSION __cdecl
@@ -40,6 +42,9 @@ struct plugin_pointer_struct
 {
   float (*getPluginVersion)(const char* name);
   void (*setPluginVersion)(const char* name, float version);
+  bool (*hasHook)(const char* hookID);
+  void (*setHook)(const char* hookID, Hook* hook);
+  void (*addCallback)(const char* hookID, void* function);
   void *temp[10];
 };
 
@@ -58,12 +63,11 @@ struct chat_pointer_struct
   void *temp[100];
 };
 
-struct screen_pointer_struct
+struct logger_pointer_struct
 {
-  void (*log)(const char* msg);
+  void (*log)(int type, const char* source, const char* message);
   void *temp[100];
 };
-
 
 struct map_pointer_struct
 {
@@ -91,7 +95,7 @@ struct config_pointer_struct
 struct mineserver_pointer_struct
 {
   map_pointer_struct map;
-  screen_pointer_struct screen;
+  logger_pointer_struct logger;
   chat_pointer_struct chat;
   plugin_pointer_struct plugin;
   user_pointer_struct user;
@@ -102,11 +106,10 @@ struct mineserver_pointer_struct
   void *temp[100];
 };
 
-//Ignore these, only used when compiling with Mineserver
+// Ignore these, only used when compiling with Mineserver
 #ifdef MINESERVER
 void init_plugin_api(void);
 extern mineserver_pointer_struct plugin_api_pointers;
 #endif
-
 
 #endif

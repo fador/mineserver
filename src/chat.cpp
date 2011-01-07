@@ -54,6 +54,7 @@
 #include "constants.h"
 #include "plugin.h"
 #include "mineserver.h"
+#include "logger.h"
 
 Chat::Chat()
 {
@@ -73,7 +74,7 @@ bool Chat::checkMotd(std::string motdFile)
   // If file does not exist
   if(ifs.fail())
   {
-    Mineserver::get()->screen()->log("> Warning: " + motdFile + " not found. Creating...");
+    Mineserver::get()->logger()->log(LogType::LOG_WARNING, "System", "> Warning: " + motdFile + " not found. Creating...");
 
     std::ofstream motdofs(motdFile.c_str());
     motdofs << MOTD_CONTENT << std::endl;
@@ -152,12 +153,11 @@ bool Chat::handleMsg(User* user, std::string msg)
   std::string timeStamp (asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
-  if ((static_cast<Hook3<bool,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("ChatPre")))->doUntilFalse(user, rawTime, msg))
+  if ((static_cast<Hook3<bool,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("PlayerChatPre")))->doUntilFalse(user, rawTime, msg))
   {
     return false;
   }
-  //ToDo: Fix: why is there doAll after it has done them all?
-  //(static_cast<Hook3<void,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("ChatPre")))->doAll(user, rawTime, msg);
+  (static_cast<Hook3<void,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("PlayerChatPost")))->doAll(user, rawTime, msg);
   char prefix = msg[0];
 
   switch(prefix)
@@ -190,14 +190,14 @@ bool Chat::handleMsg(User* user, std::string msg)
 void Chat::handleServerMsg(User* user, std::string msg, const std::string& timeStamp)
 {
   // Decorate server message
-  Mineserver::get()->screen()->log(LOG_CHAT, "[!] " + msg.substr(1));
+  Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "[!] " + msg.substr(1));
   msg = MC_COLOR_RED + "[!] " + MC_COLOR_GREEN + msg.substr(1);
   this->sendMsg(user, msg, ALL);
 }
 
 void Chat::handleAdminChatMsg(User* user, std::string msg, const std::string& timeStamp)
 {
-  Mineserver::get()->screen()->log(LOG_CHAT, "[@] <"+ user->nick + "> " + msg.substr(1));
+  Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "[@] <"+ user->nick + "> " + msg.substr(1));
   msg = timeStamp +  MC_COLOR_RED + " [@]" + MC_COLOR_WHITE + " <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg.substr(1);
   this->sendMsg(user, msg, ADMINS);
 }
@@ -212,17 +212,17 @@ void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeSta
   // Check for Admins or Server Console
   if (user->UID == SERVER_CONSOLE_UID)
   {
-    Mineserver::get()->screen()->log(LOG_CHAT, user->nick + " " + msg);
+    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat",  user->nick + " " + msg);
     msg = timeStamp + " " + MC_COLOR_RED + user->nick + MC_COLOR_WHITE + " " + msg;
   }
   else if(IS_ADMIN(user->permissions))
   {
-    Mineserver::get()->screen()->log(LOG_CHAT, "<"+ user->nick + "> " + msg);
+    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "<"+ user->nick + "> " + msg);
     msg = timeStamp + " <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg;
   }
   else
   {
-    Mineserver::get()->screen()->log(LOG_CHAT, "<"+ user->nick + "> " + dtos(user->UID) + " " + msg);
+    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "<"+ user->nick + "> " + dtos(user->UID) + " " + msg);
     msg = timeStamp + " <"+ user->nick + "> " + msg;
   }
 
