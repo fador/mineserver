@@ -57,6 +57,9 @@ public:
   };
   
   std::vector<Recipe*> recipes;
+  bool addRecipe(int width, int height, sint16* inputrecipe, int outputCount, 
+                 sint16 outputType, sint16 outputHealth);
+  bool readRecipe(std::string recipeFile);
 
   Inventory();
 

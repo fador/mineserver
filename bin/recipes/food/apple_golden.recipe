@@ -1,0 +1,14 @@
+# Input
+width 3
+height 3
+
+<-
+41 41 41
+41 260 41
+41 41 41
+->
+
+# Output
+outputcount 1
+outputtype 322
+outputhealth 0

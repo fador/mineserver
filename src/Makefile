@@ -1,31 +1,55 @@
-SHELL = /bin/sh
-SYSTEM = $(shell uname)
-PDCURSES = ${pdcurses}
+# Standard things
+.SUFFIXES:
+.SUFFIXES:  .c .o .so
 
-DFLAGS = 
+# Defaults
+PLUGIN       = YES
 
-ifeq ($(SYSTEM),Darwin)
-DFLAGS += -D__APPLE__
+# Sources
+SRC          = mineserver.cpp map.cpp chat.cpp constants.cpp logger.cpp nbt.cpp
+SRC         += furnace.cpp furnaceManager.cpp packets.cpp physics.cpp sockets.cpp
+SRC         += tools.cpp user.cpp screen.cpp tree.cpp inventory.cpp
+
+SRC         += config.cpp config/node.cpp config/scanner.cpp config/lexer.cpp config/parser.cpp
+
+SRC         += blocks/basic.cpp blocks/door.cpp blocks/falling.cpp blocks/fire.cpp
+SRC         += blocks/liquid.cpp blocks/plant.cpp blocks/sign.cpp blocks/snow.cpp 
+SRC         += blocks/stair.cpp blocks/torch.cpp blocks/tracks.cpp blocks/default.cpp
+SRC         += blocks/chest.cpp
+
+SRC         += worldgen/mapgen.cpp worldgen/cavegen.cpp worldgen/mersenne.cpp
+
+SRC         += plugin.cpp plugin_api.cpp
+
+
+# Variables
+ARCHFLAGS    = 
+LIBRARIES    = 
+INC          = -I. -I/usr/include -I/usr/local/include
+CXXFLAGS     = -DFADOR_PLUGIN
+LDFLAGS      = -L/usr/local/lib -L/usr/lib -levent -lz -lnoise
+COMMIT       = `git log | head -n1 | cut -b8-14`
+DF           = $(*F)
+DEPDIR       = .deps
+BUILDDIR     = .build
+OBJS         = $(patsubst %.cpp,%.o,$(SRC))
+
+ifeq ($(PLUGIN), YES)
+  OBJS      += $(patsubst %.cpp,%.o,$(PLUGINS))
 endif
 
-ifeq ($(SYSTEM),FreeBSD)
-DFLAGS += -D__FREEBSD__
+ifeq ($(PDCURSES), YES)
+  LDFLAGS   += -lpdcurses
+else
+  LDFLAGS   += -lncurses
 endif
 
-ifeq ($(SYSTEM),SunOS)
-DFLAGS += -D__SOLARIS__
+ifeq ($(DEBUG), YES)
+  CXXFLAGS  += -DDEBUG
 endif
 
-ifeq ($(findstring Ubuntu,$(shell cat /etc/issue)),Ubuntu)
-DEBIAN = 1
-endif
-
-ifeq ($(findstring Debian,$(shell cat /etc/issue)),Debian)
-DEBIAN = 1
-endif
-
-ifeq ($(DEBIAN), 1)
-CXXFLAGS += -DDEBIAN
+ifeq ($(PEDANTIC), YES)
+  CXXFLAGS  += -Wall -Werror -pedantic
 endif
 
 ifeq ($(findstring MINGW32,$(SYSTEM)),MINGW32)
@@ -34,23 +58,24 @@ else
 LFLAGS = -rdynamic
 endif
 
-ifeq ($(PDCURSES),true)
-LFLAGS += -lpdcurses
-else
-LFLAGS += -lncurses
+ifeq ($(findstring Debian,$(shell cat /etc/issue)),Debian)
+  DEBIAN     = 1
 endif
 
-ifeq ($(PEDANTIC), 1)
-LDFLAGS += -Wall -pedantic
-CXXFLAGS += -Wall -pedantic
+ifeq ($(DEBIAN), 1)
+  CXXFLAGS  += -DDEBIAN
 endif
 
-RM = rm -f
-CXX = g++
-CC = $(CXX)
-LDFLAGS += -L/usr/local/lib -L/usr/lib -levent -lz -lnoise $(LFLAGS)
-CXXFLAGS += $(DFLAGS) -I. -I/usr/Local/include -I/usr/include
+# Tools
+CXX          = g++
+OBJCOPY      = objcopy
+COMPILE      = $(CXX) $(INC) $(CXXFLAGS) $(ARCHFLAGS) -c $< -o $@
+MAKEDEPEND   = $(CXX) -M $(INC) $(CXXFLAGS) $(ARCHFLAGS) -o "$(DEPDIR)/$*.d" $<
 
+# Rules
+.PHONY: clean all
+
+<<<<<<< HEAD
 CXXFLAGS += $(shell python-config --cflags)
 LDFLAGS += $(shell python-config --ldflags)
 
@@ -60,19 +85,33 @@ OBJS += blocks/basic.o blocks/door.o blocks/falling.o blocks/fire.o blocks/liqui
 OBJS += worldgen/mapgen.o worldgen/cavegen.o worldgen/mersenne.o MineServer_wrap.o
 PROG  = ./mineserver
 PROGS = $(PROG)
+=======
+all: mineserver
+>>>>>>> upstream/master
 
-$(PROGS): $(OBJS)
+%.o: %.cpp
+	@echo "Compiling $<"
+	@mkdir -p $(DEPDIR)/$(dir $@)
+	@$(MAKEDEPEND)
+	@sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e '/^$$/ d' -e 's/$$/ :/' < $(DEPDIR)/$(dir $@)/$(*F).d >> $(DEPDIR)/$(dir $@)/$(*F).d
+	@$(COMPILE)
 
+<<<<<<< HEAD
 $(PROG): _MineServer.so
 	$(CXX) $(OBJS) -o ../bin/mineserver $(LDFLAGS)
+=======
+-include $(addprefix $(DEPDIR)/,$(OBJS:.o=.d))
+>>>>>>> upstream/master
 
-clean: 
-	$(RM) $(OBJS) $(PROGS)
+mineserver: $(OBJS)
+	@echo "Building $@"
+	@$(CXX) $(ARCHFLAGS) $(LDFLAGS) $(OBJS) $(LIBRARIES) -o ../bin/$@
 
 dist:
 	tar cvzf ../mineserver-latest-`uname`-bin.tar.gz -C ../bin/ . ../LICENSE
 	zip -j ../mineserver-latest-`uname`-bin.zip ../bin/* ../LICENSE
 
+<<<<<<< HEAD
 MineServer_wrap.cxx: MineServer.i
 	swig -c++ -python MineServer.i
 
@@ -125,3 +164,10 @@ blocks/chest.o: blocks/chest.cpp blocks/chest.h
 worldgen/cavegen.o: worldgen/cavegen.cpp worldgen/cavegen.h worldgen/mersenne.h map.h constants.h logger.h tools.h config.h
 worldgen/mapgen.o: worldgen/mapgen.cpp worldgen/mapgen.h logger.h constants.h config.h worldgen/mersenne.h worldgen/cavegen.h
 worldgen/mersenne.o: worldgen/mersenne.cpp worldgen/mersenne.h
+=======
+clean:
+	@rm -f *.o
+	@rm -f */*.o
+	@rm -f */*/*.o
+	@rm -rf $(DEPDIR)
+>>>>>>> upstream/master

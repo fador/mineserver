@@ -278,5 +278,8 @@
     <ClInclude Include="..\src\plugin_api.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\logtype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

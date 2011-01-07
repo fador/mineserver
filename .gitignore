@@ -16,6 +16,9 @@ CPackSourceConfig.cmake
 Makefile
 cmake_install.cmake
 
+# Makefile generated files
+src/.deps
+
 #Test world
 mineserver/world
 
