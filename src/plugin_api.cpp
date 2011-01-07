@@ -77,18 +77,18 @@ User* userFromName(std::string user)
 
 
 //PLUGIN_API FUNCTIONS
-bool plugin_api_add_hook(const char* name, size_t nameLen, void *function)
+bool plugin_api_add_hook(const char* name, void *function)
 {
-  Hooks[std::string(name,nameLen)].push_back(function);
+  Hooks[std::string(name)].push_back(function);
   return true;
 }
 
-typedef bool (*chatPreFunction)(const char*,size_t, const char*,size_t);
+typedef bool (*chatPreFunction)(const char*, const char*);
 bool plugin_api_callbackChatPre(User* user,time_t time,std::string msg)
 {
   for(uint32 i = 0; i < Hooks["ChatPre"].size(); i++)
   {
-    if(!((chatPreFunction)Hooks["ChatPre"][i])(user->nick.c_str(),user->nick.size(),msg.c_str(),msg.size()))
+    if(!((chatPreFunction)Hooks["ChatPre"][i])(user->nick.c_str(),msg.c_str()))
     {
       return false;
     }
@@ -96,12 +96,12 @@ bool plugin_api_callbackChatPre(User* user,time_t time,std::string msg)
   return true;
 }
 
-typedef bool (*blockPlacePreFunction)(const char*,size_t, int,char,int,unsigned char);
+typedef bool (*blockPlacePreFunction)(const char*, int,char,int,unsigned char);
 bool plugin_api_callbackBlockPlacePre(User* user,sint32 x,sint8 y,sint32 z,uint8 block)
 {
   for(uint32 i = 0; i < Hooks["BlockPlacePre"].size(); i++)
   {
-    if(!((blockPlacePreFunction)Hooks["BlockPlacePre"][i])(user->nick.c_str(),user->nick.size(),x,y,z,block))
+    if(!((blockPlacePreFunction)Hooks["BlockPlacePre"][i])(user->nick.c_str(),x,y,z,block))
     {
       return false;
     }
@@ -109,12 +109,12 @@ bool plugin_api_callbackBlockPlacePre(User* user,sint32 x,sint8 y,sint32 z,uint8
   return true;
 }
 
-typedef bool (*blockBreakPreFunction)(const char*,size_t, int,char,int);
+typedef bool (*blockBreakPreFunction)(const char*, int,char,int);
 bool plugin_api_callbackBlockBreakPre(User* user,sint32 x,sint8 y,sint32 z)
 {
   for(uint32 i = 0; i < Hooks["BlockBreakPre"].size(); i++)
   {
-    if(!((blockBreakPreFunction)Hooks["BlockBreakPre"][i])(user->nick.c_str(),user->nick.size(),x,y,z))
+    if(!((blockBreakPreFunction)Hooks["BlockBreakPre"][i])(user->nick.c_str(),x,y,z))
     {
       return false;
     }
@@ -123,29 +123,29 @@ bool plugin_api_callbackBlockBreakPre(User* user,sint32 x,sint8 y,sint32 z)
 }
 
 
-float plugin_getPluginVersion(const char* name,size_t nameLen)
+float plugin_getPluginVersion(const char* name)
 {
- return Mineserver::get()->plugin()->getPluginVersion(std::string(name,nameLen));
+ return Mineserver::get()->plugin()->getPluginVersion(std::string(name));
 }
 
 
-void plugin_setPluginVersion(const char* name,size_t nameLen, float version)
+void plugin_setPluginVersion(const char* name, float version)
 {
-  Mineserver::get()->plugin()->setPluginVersion(std::string(name,nameLen),version);
+  Mineserver::get()->plugin()->setPluginVersion(std::string(name),version);
 }
 
 
 
 //SCREEN WRAPPER FUNCTIONS
-void screen_log(const char* msg,size_t msgLen)
+void screen_log(const char* msg)
 {
-  Mineserver::get()->screen()->log(std::string(msg,msgLen));
+  Mineserver::get()->screen()->log(std::string(msg));
 }
 
 //CHAT WRAPPER FUNCTIONS
-bool chat_sendmsgTo(const char* user,size_t userLen,const char* msg, size_t msgLen)
+bool chat_sendmsgTo(const char* user,const char* msg)
 {
-  std::string userStr(user,userLen);
+  std::string userStr(user);
   for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
   {
     if(Mineserver::get()->users()[i]->fd && Mineserver::get()->users()[i]->logged)
@@ -153,7 +153,7 @@ bool chat_sendmsgTo(const char* user,size_t userLen,const char* msg, size_t msgL
       // Don't send to his user if he is DND and the message is a chat message
       if(userStr == Mineserver::get()->users()[i]->nick)
       {
-        Mineserver::get()->users()[i]->buffer << (sint8)PACKET_CHAT_MESSAGE << std::string(msg,msgLen);
+        Mineserver::get()->users()[i]->buffer << (sint8)PACKET_CHAT_MESSAGE << std::string(msg);
         return true;
       }
     }
@@ -161,9 +161,9 @@ bool chat_sendmsgTo(const char* user,size_t userLen,const char* msg, size_t msgL
   return false;
 }
 
-bool chat_sendmsg(const char* msg, size_t msgLen)
+bool chat_sendmsg(const char* msg)
 {
-  std::string msgStr(msg,msgLen);
+  std::string msgStr(msg);
   for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
   {
     if(Mineserver::get()->users()[i]->fd && Mineserver::get()->users()[i]->logged)
@@ -178,6 +178,18 @@ bool chat_sendmsg(const char* msg, size_t msgLen)
   return true;
 }
 
+bool chat_sendUserlist(const char* user)
+{
+  std::string userStr(user);
+
+  User *userPtr = userFromName(userStr);
+  if(userPtr != NULL)
+  {
+    Mineserver::get()->chat()->sendUserlist(userPtr);
+    return true;
+  }
+  return false;
+}
 
 
 
@@ -195,12 +207,12 @@ bool map_setTime(int timeValue)
   return true;
 }
 
-void map_createPickupSpawn(int x, int y, int z, int type, int count, int health, const char* user,size_t userLen)
+void map_createPickupSpawn(int x, int y, int z, int type, int count, int health, const char* user)
 {
   User* tempUser = NULL;
-  if(userLen > 0)
+  if(user != NULL)
   {
-    tempUser = userFromName(std::string(user,userLen));
+    tempUser = userFromName(std::string(user));
   }
   Mineserver::get()->map()->createPickupSpawn(x,y,z,type,count,health,tempUser);
 }
@@ -223,11 +235,16 @@ bool map_setBlock(int x, int y, int z, unsigned char type,unsigned char meta)
   return Mineserver::get()->map()->setBlock(x,y,z, type, meta);
 }
 
+void map_saveWholeMap(void)
+{
+  Mineserver::get()->map()->saveWholeMap();
+}
+
 
 //USER WRAPPER FUNCTIONS
-bool user_getPosition(const char* user,size_t userLen, double* x, double* y, double* z, float* yaw, float* pitch, double *stance)
+bool user_getPosition(const char* user, double* x, double* y, double* z, float* yaw, float* pitch, double *stance)
 {
-  std::string userStr(user,userLen);
+  std::string userStr(user);
   for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
   {
     if(Mineserver::get()->users()[i]->fd && Mineserver::get()->users()[i]->logged)
@@ -256,15 +273,22 @@ bool user_getPosition(const char* user,size_t userLen, double* x, double* y, dou
   return false;
 }
 
-bool user_teleport(const char* user,size_t userLen,double x, double y, double z)
+bool user_teleport(const char* user,double x, double y, double z)
 {
-  User* tempUser = userFromName(std::string(user,userLen));
+  User* tempUser = userFromName(std::string(user));
   if(tempUser != NULL)
   {
     tempUser->teleport(x, y, z);
     return true;
   }
   return false;
+}
+
+
+//CONFIG WRAPPER FUNCTIONS
+int config_iData(const char* name)
+{
+  return Mineserver::get()->config()->iData(std::string(name));
 }
 
 
@@ -275,6 +299,7 @@ void init_plugin_api(void)
 
   plugin_api_pointers.chat.sendmsg            = &chat_sendmsg;
   plugin_api_pointers.chat.sendmsgTo          = &chat_sendmsgTo;
+  plugin_api_pointers.chat.sendUserlist       = &chat_sendUserlist;
 
   plugin_api_pointers.plugin.getPluginVersion = &plugin_getPluginVersion;
   plugin_api_pointers.plugin.setPluginVersion = &plugin_setPluginVersion;
@@ -284,11 +309,14 @@ void init_plugin_api(void)
   plugin_api_pointers.map.getSpawn            = &map_getSpawn;
   plugin_api_pointers.map.setBlock            = &map_setBlock;
   plugin_api_pointers.map.getBlock            = &map_getBlock;
+  plugin_api_pointers.map.saveWholeMap        = &map_saveWholeMap;
 
   plugin_api_pointers.user.getPosition        = &user_getPosition;
   plugin_api_pointers.user.teleport           = &user_teleport;
 
   plugin_api_pointers.callback.add_hook       = &plugin_api_add_hook;
+
+  plugin_api_pointers.config.iData            = &config_iData;
 
   (static_cast<Hook3<bool,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("ChatPre")))->addCallback(&plugin_api_callbackChatPre);
   (static_cast<Hook4<bool,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("BlockBreakPre")))->addCallback(&plugin_api_callbackBlockBreakPre);
