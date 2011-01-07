@@ -539,7 +539,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mi
   registerCommand(new Command(parseCmd("home"), "", "Teleport to map spawn location", home));
   registerCommand(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime));
   registerCommand(new Command(parseCmd("cuboid"), "", "type in the command and place two blocks, it will fill the space between them", cuboid));  
-  registerCommand(new Command(parseCmd("players who list"), "", "Lists online players", playerList));
+  registerCommand(new Command(parseCmd("players who names list"), "", "Lists online players", playerList));
 
   registerCommand(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems));
 
