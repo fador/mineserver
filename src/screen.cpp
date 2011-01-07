@@ -136,7 +136,9 @@ void Screen::init(std::string version)
   wprintw(title, ("v" + version).c_str());
   wattroff(title, COLOR_PAIR(TEXT_COLOR_WHITE));
   wrefresh(title);
-  
+
+  keypad(commandLog, true);
+
   // Fill up the command window
 //  log(LOG_COMMAND, "");
 //  log(LOG_COMMAND, "");
@@ -144,6 +146,7 @@ void Screen::init(std::string version)
 //  log(LOG_COMMAND, "");
 //  log(LOG_COMMAND, "");     
 
+  commandX = 0;
 }
 
 bool Screen::hasCommand()
@@ -152,7 +155,7 @@ bool Screen::hasCommand()
   bool running = true;
 
   // Get the chars in the buffer
-  wmove(commandLog, 4, currentCommand.size() + 1);
+  wmove(commandLog, 4, commandX + 1);
 
   do
   {
@@ -165,42 +168,71 @@ bool Screen::hasCommand()
       {
         if (!currentCommand.empty())
         {
-          currentCommand.erase(currentCommand.end() - 1);
+          currentCommand.erase(commandX - 1, 1);
           wdelch(commandLog);
+          --commandX;
         }
       }
       else if (readchar == '\n')
+      {
         running = false;
-      else if (readchar == KEY_UP) // FIXME
+      }
+      else if (readchar == KEY_LEFT)
+      {
+        if (commandX > 0)
+        {
+          --commandX;
+        }
+      }
+      else if (readchar == KEY_RIGHT)
+      {
+        if ( commandX < currentCommand.size() )
+        {
+          ++commandX;
+        }
+      }
+      else if (readchar == KEY_UP)
+      {
+        // FIXME
         log(LogType::LOG_INFO, "Console", "Up arrow key was pressed");
+      }
       else
+      {
         currentCommand += readchar;
+        ++commandX;
+      }
     }
     else
       running = false;
   } while(running);
 
   //int crlfEntered = wgetnstr(commandLog, commandBuffer, 80);
-  wmove(commandLog, 4, currentCommand.size() + 1);
-  wrefresh(commandLog);
-  
+
   // Check if we've got a full command waiting
   if (readchar == '\n')//crlfEntered == OK)
+  {
+    wmove(commandLog, 3, commandX + 1);
+    waddstr(commandLog, currentCommand.substr(commandX).c_str());
     return true;
-  else
-    return false;
+  }
+
+  wmove(commandLog, 4, commandX + 1);
+  wrefresh(commandLog);
+  return false;
 }
 
 std::string Screen::getCommand()
 {
   // Get a copy of the current command, clear it and return the copy
-  std::string tempCmd = currentCommand;
+  std::string command = currentCommand;
   currentCommand.clear();
-  if (!tempCmd.empty())
+  commandX = 0;
+  if (!command.empty())
   {
+    wmove(commandLog, 4, command.size() + 1);
     log(LogType::LOG_INFO, "Command", "");
   }
-  return tempCmd;
+  return command;
 }
 
 WINDOW* Screen::createWindow(int width, int height, int startx, int starty)
@@ -275,23 +307,6 @@ void Screen::log(LogType::LogType type, const std::string& source, const std::st
   {
     window = title;
   }
-
-  /*switch (type)
-  {
-    case LOG_GENERAL:
-    case LOG_ERROR:
-      window = generalLog;
-      break;
-    case LOG_CHAT:
-      window = chatLog;
-      break;
-    case LOG_PLAYERS:
-      window = playerList;
-      break;
-    case LOG_COMMAND:
-      window = commandLog;
-      break;
-  }*/
 
   // Set the color
   if (type == LogType::LOG_ERROR)

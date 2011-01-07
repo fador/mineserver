@@ -76,6 +76,7 @@ private:
   WINDOW *chatLog;
   WINDOW *playerList;
 
+  int commandX;
   std::string currentCommand;
   std::string commandHistory[25];
 };
