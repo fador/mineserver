@@ -1,29 +1,29 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
-   All rights reserved.
+  Copyright (c) 2010, The Mineserver Project
+  All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
- * Neither the name of the The Mineserver Project nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 #include <iostream>
 #include <fstream>
@@ -428,12 +428,12 @@ void NBT_Value::cleanup()
   if(m_type == TAG_LIST)
   {
     if(m_value.listVal.data != NULL)
-	{
+  {
       std::vector<NBT_Value*>::iterator iter = m_value.listVal.data->begin(), end = m_value.listVal.data->end();
       for( ; iter != end ; iter++)
         delete *iter;
       delete m_value.listVal.data;
-	}
+  }
   }
   if(m_type == TAG_COMPOUND)
   {
@@ -442,7 +442,7 @@ void NBT_Value::cleanup()
       std::map<std::string, NBT_Value*>::iterator iter = m_value.compoundVal->begin(), end = m_value.compoundVal->end();
       for( ; iter != end ; iter++ )
         delete iter->second;
-	  
+    
       delete m_value.compoundVal;
     }
   }
@@ -463,8 +463,8 @@ NBT_Value * NBT_Value::LoadFromFile(const std::string &filename)
 
   if(uncompressedSize == 0)
   {
-	  std::cout << "Unable to determine uncompressed size of " << filename << std::endl;
-	  uncompressedSize = ALLOCATE_NBTFILE;
+    std::cout << "Unable to determine uncompressed size of " << filename << std::endl;
+    uncompressedSize = ALLOCATE_NBTFILE;
   }
 
   uint8 *uncompressedData = new uint8[uncompressedSize];
@@ -596,68 +596,82 @@ void NBT_Value::Write(std::vector<uint8> &buffer)
   }
 }
 
-void NBT_Value::Print(const std::string &name, int tabs)
+void NBT_Value::Dump(std::string& data, const std::string& name, int tabs)
 {
-	std::string tabPrefix = "";
+  std::string tabPrefix = "";
   for(int i=0;i<tabs;i++)
+  {
     tabPrefix += "  ";
+  }
+
   switch(m_type)
   {
   case TAG_END:
-    Screen::get()->log(tabPrefix + "TAG_End(\"" + name + "\")");
+    data += tabPrefix + "TAG_End(\"" + name + "\")\n";
     break;
   case TAG_BYTE:
-    Screen::get()->log(tabPrefix + "TAG_Byte(\"" + name + "\"): " + dtos((int)m_value.byteVal));
+    data += tabPrefix + "TAG_Byte(\"" + name + "\"): " + dtos((int)m_value.byteVal) + "\n";
     break;
   case TAG_SHORT:
-    Screen::get()->log(tabPrefix + "TAG_Short(\"" + name + "\"): " + dtos(m_value.shortVal));
+    data += tabPrefix + "TAG_Short(\"" + name + "\"): " + dtos(m_value.shortVal) + "\n";
     break;
   case TAG_INT:
-    Screen::get()->log(tabPrefix + "TAG_Int(\"" + name + "\"): " + dtos(m_value.intVal));
+    data += tabPrefix + "TAG_Int(\"" + name + "\"): " + dtos(m_value.intVal) + "\n";
     break;
   case TAG_LONG:
-    Screen::get()->log(tabPrefix + "TAG_Long(\"" + name + "\"): " + dtos(m_value.longVal));
+    data += tabPrefix + "TAG_Long(\"" + name + "\"): " + dtos(m_value.longVal) + "\n";
     break;
   case TAG_FLOAT:
-    Screen::get()->log(tabPrefix + "TAG_Float(\"" + name + "\"): " + dtos(m_value.floatVal));
+    data += tabPrefix + "TAG_Float(\"" + name + "\"): " + dtos(m_value.floatVal) + "\n";
     break;
   case TAG_DOUBLE:
-    Screen::get()->log(tabPrefix + "TAG_Double(\"" + name + "\"): " + dtos(m_value.doubleVal));
+    data += tabPrefix + "TAG_Double(\"" + name + "\"): " + dtos(m_value.doubleVal) + "\n";
     break;
   case TAG_BYTE_ARRAY:
-    Screen::get()->log(tabPrefix + "TAG_Byte_Array(\"" + name + "\"): ");
+    data += tabPrefix + "TAG_Byte_Array(\"" + name + "\"): \n";
     if(m_value.byteArrayVal != NULL)
-      Screen::get()->log(tabPrefix + dtos(m_value.byteArrayVal->size()) + " bytes");
+    {
+      data += tabPrefix + dtos(m_value.byteArrayVal->size()) + " bytes\n";
+    }
     else
-      Screen::get()->log(tabPrefix + "0 bytes");
+    {
+      data += tabPrefix + "0 bytes\n";
+    }
     break;
   case TAG_STRING:
-    Screen::get()->log(tabPrefix + "TAG_String(\"" + name + "\"): ");
+    data += tabPrefix + "TAG_String(\"" + name + "\"): \n";
     if(m_value.stringVal != NULL)
-      Screen::get()->log(tabPrefix + *m_value.stringVal);
+    {
+      data += tabPrefix + *m_value.stringVal + "\n";
+    }
     else
-      Screen::get()->log(tabPrefix + "");
+    {
+      data += tabPrefix + "\n";
+    }
     break;
   case TAG_LIST:
-    Screen::get()->log(tabPrefix + "TAG_List(\"" + name + "\"): Type " + dtos(m_value.listVal.type));
+    data += tabPrefix + "TAG_List(\"" + name + "\"): Type " + dtos(m_value.listVal.type) + "\n";
     if(m_value.listVal.data != NULL)
     {
       std::vector<NBT_Value*>::iterator iter = m_value.listVal.data->begin(), end = m_value.listVal.data->end();
       for( ; iter != end ; iter++ )
-        (*iter)->Print(std::string(""), tabs+1);
+      {
+        (*iter)->Dump(data, std::string(""), tabs+1);
+      }
     }
     break;
   case TAG_COMPOUND:
-    Screen::get()->log(tabPrefix + "TAG_Compound(\"" + name + "\"):");
+    data += tabPrefix + "TAG_Compound(\"" + name + "\"):\n";
     if(m_value.compoundVal != NULL)
     {
       std::map<std::string, NBT_Value*>::iterator iter = m_value.compoundVal->begin(), end = m_value.compoundVal->end();
       for( ; iter != end; iter++)
-        iter->second->Print(iter->first, tabs+1);
+      {
+        iter->second->Dump(data, iter->first, tabs+1);
+      }
     }
     break;
   default:
-    Screen::get()->log(tabPrefix + "Invalid TAG:" + dtos(m_type));
+    data += tabPrefix + "Invalid TAG:" + dtos(m_type) + "\n";
   }
 }
-

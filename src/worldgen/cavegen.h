@@ -35,27 +35,18 @@ class CaveGen
 public:
   void init(int seed);
   void AddCaves(uint8 &block, double x, double y, double z);
-  
-  float caveScale;
 
 private:
-  Random rand;
+  Random mersenne;
   uint8 *blocks;
   
-  noise::module::RidgedMulti caveNoise1;
-  noise::module::RidgedMulti caveNoise2;
-  
-  double caveN1, caveN2;
+  noise::module::RidgedMulti caveNoise;
+  double value;
   
   bool addCaves;
-  int caveDensity;
-  int caveSize;
   bool addCaveLava;
-  bool addCaveWater;
-  bool addOre;
 
   int seaLevel;
-
 };
 
 #endif

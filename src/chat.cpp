@@ -53,88 +53,15 @@
 #include "physics.h"
 #include "constants.h"
 #include "plugin.h"
-#include "hook.h"
-
-Chat* Chat::m_chat;
-
-void Chat::free()
-{
-  if(m_chat)
-  {
-    delete m_chat;
-    m_chat = 0;
-  }
-}
-
-// ------------------------------------------- //
-// CALLBACK EXAMPLE - WILL NOT BE HERE FOREVER //
-// ------------------------------------------- //
-bool callbacktest(std::string timestamp, User* user, std::string text)
-{
-  if (text == "herp")
-  {
-    Plugin::get()->loadExternal("foo", "./foo.so");
-  }
-
-  if (text == "derp")
-  {
-    Plugin::get()->unloadExternal("foo");
-  }
-
-  return false;
-}
+#include "mineserver.h"
+#include "logger.h"
 
 Chat::Chat()
 {
-  registerStandardCommands();
-
-  // ------------------------------------------------------------ //
-  // AGAIN, PART OF THE CALLBACK EXAMPLE.                         //
-  // THIS WOULD USUALLY BE CALLED IN THE INITIALISER OF A PLUGIN. //
-  // ------------------------------------------------------------ //
-  Plugin::get()->hookChatRecv.addCallback(&callbacktest);
 }
 
-void Chat::registerCommand(Command* command)
+Chat::~Chat()
 {
-  // Loop thru all the words for this command
-  std::string currentWord;
-  std::deque<std::string> words = command->names;
-  while(!words.empty())
-  {
-    currentWord = words[0];
-    words.pop_front();
-
-    if(IS_ADMIN(command->permissions))
-    {
-      m_adminCommands[currentWord] = command;
-      continue;
-    }
-
-    if(IS_OP(command->permissions))
-    {
-      m_opCommands[currentWord] = command;
-      m_adminCommands[currentWord] = command;
-      continue;
-    }
-
-    if(IS_MEMBER(command->permissions))
-    {
-      m_memberCommands[currentWord] = command;
-      m_opCommands[currentWord] = command;
-      m_adminCommands[currentWord] = command;
-      continue;
-    }
-
-    if(IS_GUEST(command->permissions))
-    {
-      // insert into all
-      m_guestCommands[currentWord] = command;
-      m_memberCommands[currentWord] = command;
-      m_opCommands[currentWord] = command;
-      m_adminCommands[currentWord] = command;
-    }
-  }
 }
 
 bool Chat::checkMotd(std::string motdFile)
@@ -147,7 +74,7 @@ bool Chat::checkMotd(std::string motdFile)
   // If file does not exist
   if(ifs.fail())
   {
-    Screen::get()->log("> Warning: " + motdFile + " not found. Creating...");
+    Mineserver::get()->logger()->log(LogType::LOG_WARNING, "System", "> Warning: " + motdFile + " not found. Creating...");
 
     std::ofstream motdofs(motdFile.c_str());
     motdofs << MOTD_CONTENT << std::endl;
@@ -217,17 +144,20 @@ std::deque<std::string> Chat::parseCmd(std::string cmd)
 
 bool Chat::handleMsg(User* user, std::string msg)
 {
+  if (msg.empty()) // If the message is empty handle it as if there is no message.
+      return true;
+
   // Timestamp
   time_t rawTime = time(NULL);
   struct tm* Tm  = localtime(&rawTime);
   std::string timeStamp (asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
-  if (Plugin::get()->hookChatRecv.doOne(timeStamp, user, msg))
+  if ((static_cast<Hook3<bool,const char*,time_t,const char*>*>(Mineserver::get()->plugin()->getHook("PlayerChatPre")))->doUntilFalse(user->nick.c_str(), rawTime, msg.c_str()))
   {
     return false;
   }
-
+  (static_cast<Hook3<bool,const char*,time_t,const char*>*>(Mineserver::get()->plugin()->getHook("PlayerChatPost")))->doAll(user->nick.c_str(), rawTime, msg.c_str());
   char prefix = msg[0];
 
   switch(prefix)
@@ -248,11 +178,6 @@ bool Chat::handleMsg(User* user, std::string msg)
       }
       break;
 
-    // Command
-    case CHATCMDPREFIX:
-      handleCommandMsg(user, msg, timeStamp);
-      break;
-
     // Normal chat message
     default:
       handleChatMsg(user, msg, timeStamp);
@@ -265,35 +190,16 @@ bool Chat::handleMsg(User* user, std::string msg)
 void Chat::handleServerMsg(User* user, std::string msg, const std::string& timeStamp)
 {
   // Decorate server message
-  Screen::get()->log(LOG_CHAT, "[!] " + msg.substr(1));
+  Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "[!] " + msg.substr(1));
   msg = MC_COLOR_RED + "[!] " + MC_COLOR_GREEN + msg.substr(1);
   this->sendMsg(user, msg, ALL);
 }
 
 void Chat::handleAdminChatMsg(User* user, std::string msg, const std::string& timeStamp)
 {
-  Screen::get()->log(LOG_CHAT, "[@] <"+ user->nick + "> " + msg.substr(1));
+  Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "[@] <"+ user->nick + "> " + msg.substr(1));
   msg = timeStamp +  MC_COLOR_RED + " [@]" + MC_COLOR_WHITE + " <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg.substr(1);
   this->sendMsg(user, msg, ADMINS);
-}
-
-void Chat::handleCommandMsg(User* user, std::string msg, const std::string& timeStamp)
-{
-  std::deque<std::string> cmd = this->parseCmd(msg.substr(1));
-
-  std::string command = cmd[0];
-  cmd.pop_front();
-
-  // User commands
-  CommandList::iterator iter;
-  if((iter = m_memberCommands.find(command)) != m_memberCommands.end())
-  {
-    iter->second->callback(user, command, cmd);
-  }
-  else if(IS_ADMIN(user->permissions) && (iter = m_adminCommands.find(command)) != m_adminCommands.end())
-  {
-    iter->second->callback(user, command, cmd);
-  }
 }
 
 void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeStamp)
@@ -306,17 +212,17 @@ void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeSta
   // Check for Admins or Server Console
   if (user->UID == SERVER_CONSOLE_UID)
   {
-    Screen::get()->log(LOG_CHAT, user->nick + " " + msg);
+    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat",  user->nick + " " + msg);
     msg = timeStamp + " " + MC_COLOR_RED + user->nick + MC_COLOR_WHITE + " " + msg;
   }
   else if(IS_ADMIN(user->permissions))
   {
-    Screen::get()->log(LOG_CHAT, "<"+ user->nick + "> " + msg);
+    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "<"+ user->nick + "> " + msg);
     msg = timeStamp + " <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg;
   }
   else
   {
-    Screen::get()->log(LOG_CHAT, "<"+ user->nick + "> " + dtos(user->UID) + " " + msg);
+    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "<"+ user->nick + "> " + dtos(user->UID) + " " + msg);
     msg = timeStamp + " <"+ user->nick + "> " + msg;
   }
 
@@ -344,7 +250,7 @@ bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
     break;
 
   case USER:
-   	user->buffer.addToWrite(tmpArray, tmpArrayLen);
+     user->buffer.addToWrite(tmpArray, tmpArrayLen);
     break;
 
   case ADMINS:
@@ -367,55 +273,4 @@ bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
   delete[] tmpArray;
 
   return true;
-}
-
-void Chat::sendHelp(User* user, std::deque<std::string> args)
-{
-  // TODO: Add paging support, since not all commands will fit into
-  // the screen at once.
-
-  CommandList* commandList = &m_guestCommands; // defaults
-  std::string commandColor = MC_COLOR_BLUE;
-
-  if(IS_ADMIN(user->permissions))
-  {
-    commandList = &m_adminCommands;
-    commandColor = MC_COLOR_RED; // different color for admin commands
-  }
-  else if(IS_OP(user->permissions))
-  {
-    commandList = &m_opCommands;
-    commandColor = MC_COLOR_GREEN;
-  }
-  else if(IS_MEMBER(user->permissions))
-  {
-    commandList = &m_memberCommands;
-  }
-
-  if(args.size() == 0)
-  {
-    for(CommandList::iterator it = commandList->begin();
-        it != commandList->end();
-        it++)
-    {
-      std::string args = it->second->arguments;
-      std::string description = it->second->description;
-      sendMsg(user, commandColor + CHATCMDPREFIX + it->first + " " + args + " : " + MC_COLOR_YELLOW + description, Chat::USER);
-    }
-  }
-  else
-  {
-    CommandList::iterator iter;
-    if((iter = commandList->find(args.front())) != commandList->end())
-    {
-      std::string args = iter->second->arguments;
-      std::string description = iter->second->description;
-      sendMsg(user, commandColor + CHATCMDPREFIX + iter->first + " " + args, Chat::USER);
-      sendMsg(user, MC_COLOR_YELLOW + CHATCMDPREFIX + description, Chat::USER);
-    }
-    else
-    {
-      sendMsg(user, MC_COLOR_RED + "Unknown Command: " + args.front(), Chat::USER);
-    }
-  }
 }

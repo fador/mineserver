@@ -1,0 +1,13 @@
+# Input
+width 3
+height 3
+<-
+-1 266 -1
+266 331 266
+-1 266 -1
+->
+
+# Output
+outputcount 1
+outputtype 347
+outputhealth 0

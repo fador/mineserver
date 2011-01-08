@@ -25,6 +25,9 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef _LOGGER_H
+#define _LOGGER_H
+
 //
 // Mineserver logger.h
 //
@@ -32,24 +35,22 @@
 #include "screen.h"
 #include "tools.h"
 
-#define LOG(msg) Logger::get()->log(msg, std::string(((strrchr(__FILE__, '/') ?"": __FILE__ - 1) + 1)), __LINE__)
+#include "logtype.h"
+
+#ifdef _WIN32
+#define LOGLF(msg) Mineserver::get()->logger()->log(msg, std::string(((strrchr(__FILE__, '\\') ?"": __FILE__ - 1) + 1)), __LINE__)
+#else
+#define LOGLF(msg) Mineserver::get()->logger()->log(msg, std::string(((strrchr(__FILE__, '/') ?"": __FILE__ - 1) + 1)), __LINE__)
+#endif
+
+#define LOG(type, source, msg) Mineserver::get()->logger()->log(LogType::LOG_##type, source, msg)
 
 class Logger
 {
-private:
-  Logger()
-  {
-  }
-  static Logger* _instance;
 public:
-  void log(std::string msg, std::string file, int line);
-  static Logger* get()
-  {
-    if(!_instance)
-    {
-      _instance = new Logger();
-    }
-     return _instance;
-  }
-  void free();
+  void log(const std::string& message, const std::string& file, int line);
+  void log(LogType::LogType type, const std::string& source, const std::string& message);
+
 };
+
+#endif

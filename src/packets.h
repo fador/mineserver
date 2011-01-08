@@ -50,7 +50,7 @@ enum
   PACKET_LOGIN_REQUEST             = 0x01,
   PACKET_HANDSHAKE                 = 0x02,
   PACKET_CHAT_MESSAGE              = 0x03,
-  PACKET_PLAYER_INVENTORY          = 0x05,
+  PACKET_ENTITY_EQUIPMENT          = 0x05,
   PACKET_RESPAWN                   = 0x09,
   PACKET_PLAYER                    = 0x0a,
   PACKET_PLAYER_POSITION           = 0x0b,
@@ -60,6 +60,11 @@ enum
   PACKET_PLAYER_BLOCK_PLACEMENT    = 0x0f,
   PACKET_HOLDING_CHANGE            = 0x10,
   PACKET_ARM_ANIMATION             = 0x12,
+  PACKET_INVENTORY_CLOSE           = 0x65,
+  PACKET_INVENTORY_CHANGE          = 0x66,
+  PACKET_SET_SLOT                  = 0x67,
+  PACKET_INVENTORY                 = 0x68,
+  PACKET_SIGN                      = 0x82,
   PACKET_DISCONNECT                = 0xff,
   //Server to client
   PACKET_LOGIN_RESPONSE            = 0x01,
@@ -83,7 +88,9 @@ enum
   PACKET_MAP_CHUNK                 = 0x33,
   PACKET_MULTI_BLOCK_CHANGE        = 0x34,
   PACKET_BLOCK_CHANGE              = 0x35,
-  PACKET_COMPLEX_ENTITIES          = 0x3b,
+  PACKET_OPEN_WINDOW               = 0x64,
+  PACKET_TRANSACTION               = 0x6a,
+  //PACKET_COMPLEX_ENTITIES          = 0x3b,
   PACKET_KICK                      = 0xff,
 
 
@@ -398,39 +405,18 @@ struct packet_player_position_and_look
 
 class PacketHandler
 {
-
-private:
-  PacketHandler()
-  {
-  }
-  ~PacketHandler()
-  {
-  }
-
-   static PacketHandler *mPacketHandler;
 public:
-
   void init();
-  void free();
 
-  static PacketHandler* get()
-  {
-    if(!mPacketHandler) {
-      mPacketHandler = new PacketHandler();
-    }
-    return mPacketHandler;
-  }
-
-  //Information of all the packets
-  //around 2kB of memory
+  // Information of all the packets
+  // around 2kB of memory
   Packets packets[256];
 
-  //The packet functions
+  // The packet functions
   int keep_alive(User *user);
   int login_request(User *user);
   int handshake(User *user);
   int chat_message(User *user);
-  int player_inventory(User *user);
   int player(User *user);
   int player_position(User *user);
   int player_look(User *user);
@@ -441,11 +427,14 @@ public:
   int arm_animation(User *user);
   int pickup_spawn(User *user);
   int disconnect(User *user);
-  int complex_entities(User *user);
   int use_entity(User *user);
   int respawn(User *user);
+  int change_sign(User *user);
+  int inventory_transaction(User *user);
 
+  int inventory_change(User *user);
+  int inventory_close(User *user);
+  int destroy_entity(User *user);
 };
-
 
 #endif

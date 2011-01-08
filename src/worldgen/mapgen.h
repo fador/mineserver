@@ -38,30 +38,44 @@
 
 class MapGen
 {
-private:
-  MapGen() {}
+public:
+  void init(int seed);
+  void generateChunk(int x, int z);
 
+private:
   uint8 blocks[16*16*128];
   uint8 blockdata[16*16*128/2];
   uint8 skylight[16*16*128/2];
   uint8 blocklight[16*16*128/2];
   uint8 heightmap[16*16];
   
-  int m_seed;
   int seaLevel;
-
-  float perlinScale;
   
+  bool addTrees;
+  
+  bool expandBeaches;
+  int beachExtent;
+  int beachHeight;
+  
+  bool addOre;
+
   void generateFlatgrass();
   void generateWithNoise(int x, int z);
+
+  void ExpandBeaches(int x, int z);
+  void AddTrees(int x, int z);
   
-  void AddBeaches();
+  void AddOres(int x, int z);
+  void AddDeposit(int x, int y, int z, uint8 block, int depotSize);
+
   
   CaveGen cave;
+  Random mersenne;
 
   // Heightmap composition
   noise::module::RidgedMulti ridgedMultiNoise;
-  noise::module::ScaleBias perlinBiased;
+  
+  /*noise::module::ScaleBias perlinBiased;
 
   noise::module::Perlin baseFlatTerrain;  
   noise::module::ScaleBias flatTerrain;
@@ -74,22 +88,7 @@ private:
   noise::module::Perlin seaControl;
   
   noise::module::Select seaTerrain;
-  noise::module::Select finalTerrain;
-
-  static MapGen *mMapGen;
-public:
-  static MapGen* get()
-  {
-     if(!mMapGen) {
-        mMapGen = new MapGen();
-     }
-     return mMapGen;
-  }
-
-  void init(int seed);
-  void free();
-  void generateChunk(int x, int z);
+  noise::module::Select finalTerrain;*/
 };
-
 
 #endif

@@ -23,69 +23,43 @@
    ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
 #include <string>
-#include <map>
-#include <vector>
-#include <deque>
-#include "mineserver.h"
+#include <list>
 
-struct Kit;
+#include "config/parser.h"
+#include "config/node.h"
 
-class Conf
+class Config
 {
- public:
-  static Conf* get()
-  {
-    if(!_conf) {
-      _conf = new Conf();
-    }
-    return _conf;
-  }
+public:
+  Config();
+  ~Config();
 
-  ~Conf();
+  bool load(const std::string& file);
+  void dump();
 
-  void free();
+  ConfigNode* root();
 
-  bool load(std::string configFile, std::string namePrefix = "");
-  int iValue(std::string name);
-  std::string sValue(std::string name);
-  bool bValue(std::string name);
-  std::vector<int> vValue(std::string name);
-  int commandPermission(std::string commandName);
-  int permissionByName(std::string permissionName);
-  Kit* kit(const std::string& kitname);
+  int iData(const std::string& name);
+  long lData(const std::string& name);
+  float fData(const std::string& name);
+  double dData(const std::string& name);
+  std::string sData(const std::string& name);
+  bool bData(const std::string& name);
+  ConfigNode* mData(const std::string& name);
 
-  bool loadRoles();
-  bool loadBanned();
-  bool loadWhitelist();
+  bool has(const std::string& name);
+  int type(const std::string& name) const;
+  std::list<std::string>* keys(int type=CONFIG_NODE_UNDEFINED);
 
-  std::deque<std::string>& admins() { return m_admins; }
-  std::deque<std::string>& ops() { return m_ops; }
-  std::deque<std::string>& members() { return m_members; }
-  std::deque<std::string>& banned() { return m_banned; }
-  std::deque<std::string>& whitelist() { return m_whitelist; }
-
- private:
-  static Conf *_conf;
-
-  Conf() {}
-  std::vector<int> stringToVec(std::string& val);
-
-  std::map<std::string, std::string> m_confSet;
-  std::map<std::string, Kit*> m_kits;
-
-  // predefined usernames in roles.txt, banned.txt & whitelist.txt
-  std::deque<std::string> m_admins;
-  std::deque<std::string> m_ops;
-  std::deque<std::string> m_members;
-  std::deque<std::string> m_banned;
-  std::deque<std::string> m_whitelist;
-
+private:
+  ConfigParser* m_parser;
+  ConfigNode* m_root;
 };
 
 #endif

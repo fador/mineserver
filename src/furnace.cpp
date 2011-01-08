@@ -25,10 +25,9 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "furnace.h"
 #include <iostream>
-
-//#define _DEBUG
+#include "furnace.h"
+#include "mineserver.h"
 
 Furnace::Furnace(NBT_Value* entity, uint8 blockType)
 {
@@ -99,19 +98,19 @@ void Furnace::updateBlock()
   // Now make sure that it's got the correct block type based on it's current status
   if(isBurningFuel() && !m_burning)
   {
-    Map::get()->getBlock(m_x, m_y, m_z, &block, &meta);
+    Mineserver::get()->map()->getBlock(m_x, m_y, m_z, &block, &meta);
     // Switch to burning furnace
-    Map::get()->setBlock(m_x, m_y, m_z, BLOCK_BURNING_FURNACE, meta);
-    Map::get()->sendBlockChange(m_x, m_y, m_z, BLOCK_BURNING_FURNACE, meta);
+    Mineserver::get()->map()->setBlock(m_x, m_y, m_z, BLOCK_BURNING_FURNACE, meta);
+    Mineserver::get()->map()->sendBlockChange(m_x, m_y, m_z, BLOCK_BURNING_FURNACE, meta);
     sendToAllUsers();
     m_burning = true;
   }
   else if(!isBurningFuel() && m_burning)
   {
-    Map::get()->getBlock(m_x, m_y, m_z, &block, &meta);
+    Mineserver::get()->map()->getBlock(m_x, m_y, m_z, &block, &meta);
     // Switch to regular furnace
-    Map::get()->setBlock(m_x, m_y, m_z, BLOCK_FURNACE, meta);
-    Map::get()->sendBlockChange(m_x, m_y, m_z, BLOCK_FURNACE, meta);
+    Mineserver::get()->map()->setBlock(m_x, m_y, m_z, BLOCK_FURNACE, meta);
+    Mineserver::get()->map()->sendBlockChange(m_x, m_y, m_z, BLOCK_FURNACE, meta);
     sendToAllUsers();
     m_burning = false;
   }
@@ -330,26 +329,28 @@ void Furnace::sendToAllUsers()
   // Gzip the data
   if(int state = deflate(&zstream, Z_FULL_FLUSH) != Z_OK)
   {
-    Screen::get()->log(LOG_ERROR, "Error in deflate: " + state);
+    Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Furnace", "Error in deflate: " + state);
   }
   deflateEnd(&zstream);
 
   // Create a new packet to send back to client
+  /*
   Packet pkt;
   pkt << (sint8)PACKET_COMPLEX_ENTITIES  << m_x << (sint16)m_y << m_z << (sint16)zstream.total_out;
   pkt.addToWrite(compressedData, zstream.total_out);
+  */
   delete[] compressedData;
 
   // Tell all users about this guy
-  User::sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
+  //User::sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
 
-  #ifdef _DEBUG
-    Screen::get()->log("Furnace entity data: ");
-    newEntity->Print();
-  #endif
+#ifdef _DEBUG
+  LOG(DEBUG, "Furnace", "Furnace entity data: ");
+  std::string dump;
+  newEntity->Dump(dump);
+  LOG(DEBUG, "Furnace", dump);
+#endif
 
   // Update our map with this guy
-  Map::get()->setComplexEntity(NULL, m_x, m_y, m_z, newEntity);
-
+  Mineserver::get()->map()->setComplexEntity(NULL, m_x, m_y, m_z, newEntity);
 }
-

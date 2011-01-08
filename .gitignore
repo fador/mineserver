@@ -1,3 +1,4 @@
+
 # OS junk
 .DS_Store
 Thumbs.db
@@ -14,3 +15,43 @@ CPackConfig.cmake
 CPackSourceConfig.cmake
 Makefile
 cmake_install.cmake
+
+# Makefile generated files
+src/.deps
+
+#Test world
+mineserver/world
+
+#VS stuff
+#ignore thumbnails created by windows
+Thumbs.db
+#Ignore files build by Visual Studio
+*.obj
+*.exe
+*.pdb
+*.user
+*.aps
+*.pch
+*.vspscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.log
+*.pid
+*.sdf
+*.opensdf
+*.pcap
+[Bb]in
+[Dd]ebug*/
+*.lib
+*.sbr
+obj/
+[Rr]elease*/
+_ReSharper*/
+[Tt]est[Rr]esult*

@@ -41,15 +41,7 @@
 #include <vector>
 #include "user.h"
 
-enum
-{
-  LOG_TITLE,
-  LOG_GENERAL,
-  LOG_CHAT,
-  LOG_PLAYERS,
-  LOG_ERROR,
-  LOG_COMMAND
-};
+#include "logtype.h"
 
 enum
 {
@@ -66,26 +58,15 @@ enum
 class Screen
 {
 public:
-  static Screen* get() {
-    if (!_instance) {
-      _instance = new Screen();
-    }
-    return _instance;
-  }
-
   void init(std::string version);
   WINDOW* createWindow(int width, int height, int startx, int starty);
   void destroyWindow(WINDOW *local_win);
-  void log(std::string message);
-  void log(int logType, std::string message);
+  void log(LogType::LogType type, const std::string& source, const std::string& message);
   void updatePlayerList(std::vector<User *> users);
   void end();
   WINDOW *commandLog;
   bool hasCommand();
   std::string getCommand();
-
-protected:
-  Screen();
 
 private:
   std::string currentTimestamp(bool seconds);
@@ -94,8 +75,6 @@ private:
   WINDOW *generalLog;
   WINDOW *chatLog;
   WINDOW *playerList;
-
-  static Screen *_instance;
 
   std::string currentCommand;
   std::string commandHistory[25];

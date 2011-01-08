@@ -28,12 +28,16 @@
 #ifndef _USER_H
 #define _USER_H
 
+#include <vector>
+
 #include <event.h>
+
 #include "vec.h"
 #include "tools.h"
 #include "constants.h"
 #include "packets.h"
 #include "permissions.h"
+
 
 struct position
 {
@@ -52,22 +56,13 @@ struct Item
   sint16 health;
   Item()
   {
-    type   = 0;
+    type   = -1;
     count  = 0;
     health = 0;
   }
 };
 
-struct Inventory
-{
-  Item main[36];
-  Item equipped[4];
-  Item crafting[4];
-
-  Inventory()
-  {
-  }
-};
+#include "inventory.h"
 
 uint32 generateEID();
 
@@ -86,10 +81,8 @@ public:
   bool waitForData;
   uint32 write_err_count;
   bool logged;
-  bool banned;
-  bool whitelist;
   bool muted;
-	bool dnd;
+  bool dnd;
   sint16 health;
   uint16 timeUnderwater;
   unsigned int UID;
@@ -97,8 +90,13 @@ public:
   std::string temp_nick;
   position pos;
   vec curChunk;
-  Inventory inv;
+  Item inv[45];
   sint16 curItem;
+  Item inventoryHolding;
+  //Do we have an open _shared_ inventory?
+  bool isOpenInv;
+  //More info on the inventory
+  openInventory openInv;
 
   int permissions; // bitmask for permissions. See permissions.h
 
@@ -111,8 +109,6 @@ public:
   static bool isUser(int sock);
   static User* byNick(std::string nick);
 
-  bool checkBanned(std::string _nick);
-  bool checkWhitelist(std::string _nick);
   bool changeNick(std::string _nick);
   bool updatePos(double x, double y, double z, double stance);
   /** Check if the user is standing on this block */
@@ -125,9 +121,6 @@ public:
   static bool sendAdmins(uint8* data, uint32 len);
   static bool sendOps(uint8* data, uint32 len);
   static bool sendGuests(uint8* data, uint32 len);
-
-  //Check inventory for space
-  bool checkInventory(sint16 itemID, char count);
 
   //Login
   bool sendLoginInfo();
@@ -142,8 +135,8 @@ public:
   // Chat blocking
   bool mute(std::string muteMsg);
   bool unmute();
-	bool toggleDND();
-	bool isAbleToCommunicate(std::string communicateCommand);
+  bool toggleDND();
+  bool isAbleToCommunicate(std::string communicateCommand);
 
   //Map related
 
@@ -183,13 +176,13 @@ public:
   bool isUnderwater();
 
   // Getter/Setter for item currently in hold
-  sint16 currentItem();
-  void setCurrentItem(sint16 item_id);
+  sint16 currentItemSlot();
+  void setCurrentItemSlot(sint16 item_slot);
 
 
   bool withinViewDistance(int a, int b)
   {
-	  return a > b ? (a-b)<viewDistance : (b-a)<viewDistance;
+    return a > b ? (a-b)<viewDistance : (b-a)<viewDistance;
   }
 
   struct event* GetEvent();
@@ -198,7 +191,7 @@ private:
   event m_event;
 
   // Item currently in hold
-  sint16 m_currentItem;
+  sint16 m_currentItemSlot;
 };
 
 #endif

@@ -164,18 +164,18 @@ std::string dtos( double n )
 
 std::string hash(std::string value)
 {
-	// Hash the player's name along with a secret to generate a unique hash for this player
-	// Uses the DJB2 algorithm
-	unsigned long hash = 5381;
-	int c;
-	
-	char *cvalue = const_cast<char *>(value.c_str());
-	
-	while ((c = *cvalue++))
-		hash = ((hash <<5) + hash) + c;	/* hash * 33 + c */
-		
-	std::ostringstream hashString;
-	hashString << hash;
-		
-	return hashString.str();
+  // Hash the player's name along with a secret to generate a unique hash for this player
+  // Uses the DJB2 algorithm
+  unsigned long hash = 5381;
+  int c;
+  
+  char *cvalue = const_cast<char *>(value.c_str());
+  
+  while ((c = *cvalue++))
+    hash = ((hash <<5) + hash) + c;  /* hash * 33 + c */
+    
+  std::ostringstream hashString;
+  hashString << hash;
+    
+  return hashString.str();
 }

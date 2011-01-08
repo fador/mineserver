@@ -25,12 +25,15 @@
     <ClCompile Include="..\src\blocks\torch.cpp" />
     <ClCompile Include="..\src\blocks\tracks.cpp" />
     <ClCompile Include="..\src\chat.cpp" />
-    <ClCompile Include="..\src\commands.cpp" />
     <ClCompile Include="..\src\config.cpp" />
+    <ClCompile Include="..\src\config\lexer.cpp" />
+    <ClCompile Include="..\src\config\node.cpp" />
+    <ClCompile Include="..\src\config\parser.cpp" />
+    <ClCompile Include="..\src\config\scanner.cpp" />
     <ClCompile Include="..\src\constants.cpp" />
     <ClCompile Include="..\src\furnace.cpp" />
     <ClCompile Include="..\src\furnaceManager.cpp" />
-    <ClCompile Include="..\src\lighting.cpp" />
+    <ClCompile Include="..\src\inventory.cpp" />
     <ClCompile Include="..\src\logger.cpp" />
     <ClCompile Include="..\src\map.cpp" />
     <ClCompile Include="..\src\mineserver.cpp" />
@@ -38,9 +41,11 @@
     <ClCompile Include="..\src\packets.cpp" />
     <ClCompile Include="..\src\physics.cpp" />
     <ClCompile Include="..\src\plugin.cpp" />
+    <ClCompile Include="..\src\plugin_api.cpp" />
     <ClCompile Include="..\src\screen.cpp" />
     <ClCompile Include="..\src\sockets.cpp" />
     <ClCompile Include="..\src\tools.cpp" />
+    <ClCompile Include="..\src\tree.cpp" />
     <ClCompile Include="..\src\user.cpp" />
     <ClCompile Include="..\src\worldgen\cavegen.cpp" />
     <ClCompile Include="..\src\worldgen\mapgen.cpp" />
@@ -61,21 +66,31 @@
     <ClInclude Include="..\src\blocks\torch.h" />
     <ClInclude Include="..\src\blocks\tracks.h" />
     <ClInclude Include="..\src\chat.h" />
+    <ClInclude Include="..\src\chunkmap.h" />
     <ClInclude Include="..\src\config.h" />
+    <ClInclude Include="..\src\config\lexer.h" />
+    <ClInclude Include="..\src\config\node.h" />
+    <ClInclude Include="..\src\config\parser.h" />
+    <ClInclude Include="..\src\config\scanner.h" />
     <ClInclude Include="..\src\constants.h" />
     <ClInclude Include="..\src\furnace.h" />
     <ClInclude Include="..\src\furnaceManager.h" />
-    <ClInclude Include="..\src\lighting.h" />
+    <ClInclude Include="..\src\hook.h" />
+    <ClInclude Include="..\src\inventory.h" />
     <ClInclude Include="..\src\logger.h" />
+    <ClInclude Include="..\src\logtype.h" />
     <ClInclude Include="..\src\map.h" />
+    <ClInclude Include="..\src\mineserver.h" />
     <ClInclude Include="..\src\nbt.h" />
     <ClInclude Include="..\src\packets.h" />
     <ClInclude Include="..\src\permissions.h" />
     <ClInclude Include="..\src\physics.h" />
     <ClInclude Include="..\src\plugin.h" />
+    <ClInclude Include="..\src\plugin_api.h" />
     <ClInclude Include="..\src\screen.h" />
     <ClInclude Include="..\src\sockets.h" />
     <ClInclude Include="..\src\tools.h" />
+    <ClInclude Include="..\src\tree.h" />
     <ClInclude Include="..\src\user.h" />
     <ClInclude Include="..\src\vec.h" />
     <ClInclude Include="..\src\worldgen\cavegen.h" />
@@ -97,7 +112,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -112,10 +127,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\bin\</OutDir>
+    <IncludePath>C:\Libraries\Include;C:\Libraries\Include\event2;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Libraries\Lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\bin\</OutDir>
+    <IncludePath>C:\Libraries\Include;C:\Libraries\Include\noise;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Libraries\Lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -123,13 +142,15 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>ZLIB_WINAPI;WIN32;DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FADOR_PLUGIN;ZLIB_WINAPI;WIN32;DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Winmm.lib;libnoise.lib;zlibwapi.lib;ws2_32.lib;libevent.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Winmm.lib;libnoise.lib;zlibwapi.lib;ws2_32.lib;libevent.lib;pdcurses.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
@@ -141,7 +162,7 @@
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;ZLIB_WINAPI;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CONSOLE;FTLOG=main;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FADOR_PLUGIN;WIN32;ZLIB_WINAPI;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CONSOLE;FTLOG=main;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -151,7 +172,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>pdcurses.lib;Winmm.lib;libnoise.lib;zlibwapi.lib;libevent.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -160,6 +181,9 @@
       </AdditionalLibraryDirectories>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

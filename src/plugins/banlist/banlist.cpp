@@ -1,0 +1,133 @@
+/**
+ * Compile this with the following command if you're using linux (and gcc):
+ * $ g++ -shared -o banlist.so banlist.cpp
+ * (add -DDEBIAN if you're not on Debian)
+ *
+ * On Windows under MSVS you'll have to link the DLL with the .lib from the
+ * mineserver binary. With MingW I'm not sure how to make it work...
+ *
+ * Then put it in the same directory as your mineserver binary and issue the
+ * command `/load banlist ./banlist.so`. Of course replace .so with .dll if
+ * you're running Windows.
+ *
+ * Right now it doesn't do much, but it does demonstrate all the basics needed
+ * to write your own plugins. Make sure you check out banlist.h as well.
+ */
+
+#include <string>
+#include <vector>
+
+#include "../../mineserver.h"
+#include "../../plugin.h"
+#include "../../screen.h"
+#include "../../user.h"
+
+#include "banlist.h"
+
+extern "C" void banlist_init(Mineserver* mineserver)
+{
+  if (mineserver->plugin()->getPluginVersion("banlist") >= 0)
+  {
+    LOG(WARNING,"plugin.banlist", "banlist is already loaded!");
+    return;
+  }
+
+  mineserver->plugin()->setPluginVersion("banlist", PLUGIN_BANLIST_VERSION);
+  mineserver->plugin()->setPointer("banlist", new P_Banlist(mineserver));
+}
+
+extern "C" void banlist_shutdown(Mineserver* mineserver)
+{
+  if (mineserver->plugin()->getPluginVersion("banlist") < 0)
+  {
+    LOG(WARNING, "plugin.banlist", "banlist is not loaded!");
+    return;
+  }
+
+  if (mineserver->plugin()->hasPointer("banlist"))
+  {
+    P_Banlist* banlist = static_cast<P_Banlist*>(mineserver->plugin()->getPointer("banlist"));
+    mineserver->plugin()->remPointer("banlist");
+    delete banlist;
+  }
+
+  mineserver->plugin()->remPluginVersion("banlist");
+}
+
+P_Banlist::P_Banlist(Mineserver* mineserver) : m_mineserver(mineserver)
+{
+  if (m_mineserver->plugin()->hasHook("LoginPre"))
+  {
+    (static_cast<Hook2<bool,User*,std::string*>*>(m_mineserver->plugin()->getHook("LoginPre")))->addCallback(&P_Banlist::callbackLoginPre);
+  }
+  else
+  {
+    LOG(WARNING, "plugin.banlist", "Banlist: Can't find the LoginPre hook, banlist will not be operational.");
+  }
+}
+
+P_Banlist::~P_Banlist()
+{
+  if (m_mineserver->plugin()->hasHook("LoginPre"))
+  {
+    (static_cast<Hook2<bool,User*,std::string*>*>(m_mineserver->plugin()->getHook("LoginPre")))->remCallback(&P_Banlist::callbackLoginPre);
+  }
+}
+
+bool P_Banlist::getBan(const std::string user)
+{
+  std::vector<std::string>::iterator it_a = m_banlist.begin();
+  std::vector<std::string>::iterator it_b = m_banlist.end();
+  for (;it_a!=it_b;++it_a)
+  {
+    if (*it_a == user)
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void P_Banlist::setBan(const std::string user, bool banned)
+{
+  std::vector<std::string>::iterator it_a = m_banlist.begin();
+  std::vector<std::string>::iterator it_b = m_banlist.end();
+  for (;it_a!=it_b;++it_a)
+  {
+    if (*it_a == user)
+    {
+      if (banned)
+      {
+        return;
+      }
+      else
+      {
+        m_banlist.erase(it_a);
+        return;
+      }
+    }
+  }
+
+  if (banned)
+  {
+    m_banlist.push_back(user);
+  }
+}
+
+bool P_Banlist::callbackLoginPre(User* user, std::string* reason)
+{
+  P_Banlist* banlist = static_cast<P_Banlist*>(Mineserver::get()->plugin()->getPointer("banlist"));
+  LOG(INFO, "plugin.banlist", "Banlist: Checking if user "+user->nick+" is banned");
+  if (banlist->getBan(user->nick))
+  {
+    LOG(INFO, "plugin.banlist", "Banlist: They are!");
+    reason->assign("You've been banned!");
+    return false;
+  }
+  else
+  {
+    LOG(INFO, "plugin.banlist", "Banlist: They are not!");
+    return true;
+  }
+}

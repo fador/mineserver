@@ -102,7 +102,7 @@ public:
   
   void Write(std::vector<uint8> &buffer);
 
-  void Print(const std::string &name = std::string(""), int tabs=0);
+  void Dump(std::string& data, const std::string &name = std::string(""), int tabs=0);
 private:
   eTAG_Type m_type;
   union

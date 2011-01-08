@@ -29,61 +29,44 @@
 #include <cstdio>
 #include <iostream>
 
-#include "../logger.h"
-#include "../constants.h"
-
-#include "../tools.h"
-#include "../map.h"
-#include "../config.h"
-#include "mersenne.h"
-
-// libnoise
 #ifdef DEBIAN
 #include <libnoise/noise.h>
 #else
 #include <noise/noise.h>
 #endif
 
+#include "../logger.h"
+#include "../constants.h"
+#include "../tools.h"
+#include "../map.h"
+#include "../config.h"
+#include "../mineserver.h"
+
+#include "mersenne.h"
 #include "cavegen.h"
 
 void CaveGen::init(int seed)
 {
   // Set up us the Perlin-noise module.
-  caveNoise1.SetSeed (seed+1);
-  caveNoise1.SetFrequency (1.0/20);
-  //caveNoise.SetLacunarity (0.5);
-  caveNoise1.SetOctaveCount (2);
+  caveNoise.SetSeed(seed+1);
+  caveNoise.SetFrequency(1.0/20);
+  caveNoise.SetOctaveCount(2);
+  caveNoise.SetNoiseQuality(noise::QUALITY_STD);
 
-  caveNoise1.SetNoiseQuality (noise::QUALITY_STD);
-  
-  // Set up us the Perlin-noise module.
-  caveNoise2.SetSeed (seed+2);
-  caveNoise2.SetFrequency (1.0/20);
-  //caveNoise.SetLacunarity (0.5);
-  caveNoise2.SetOctaveCount (2);
+  addCaves = Mineserver::get()->config()->bData("mapgen.caves.enabled");
+  addCaveLava = Mineserver::get()->config()->bData("mapgen.caves.lava");
 
-  caveNoise2.SetNoiseQuality (noise::QUALITY_STD);
-
-  addCaves = Conf::get()->bValue("add_caves");
-  caveDensity = Conf::get()->iValue("cave_density");
-  caveSize = Conf::get()->iValue("cave_size");
-  addCaveLava = Conf::get()->bValue("cave_lava");
-  addCaveWater = Conf::get()->bValue("cave_water");
-  addOre = Conf::get()->bValue("cave_ore");
-
-  seaLevel = Conf::get()->iValue("sea_level");
+  seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
 }
 
 void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
 { 
   if(addCaves)
   {
-   
-    caveN1 = caveNoise1.GetValue(x,y,z);
+    value = caveNoise.GetValue(x,y,z);
     
-    if(caveN1 < 0.1)// && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER)
+    if(value < 0.1)
     {
-      
       // Add bottomlava
       if(y < 10.0 && addCaveLava)
       {
@@ -93,28 +76,6 @@ void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
       
       block = BLOCK_AIR;
       return;
-    }
-
-    
-    /*if(y < 60.0 && addOre)
-    {      
-      caveN1 = caveNoise1.GetValue(x,y,z);
-      if(caveN1 > 0.56)
-      {
-        if(y < 32.0 && caveN1 > 0.67)
-        {
-          if(y < 16.0 && caveN1 > 0.79)
-          {
-            block = BLOCK_DIAMOND_ORE;
-            return;
-          }
-          block = BLOCK_GOLD_ORE;
-          return;
-        }        
-        block = BLOCK_IRON_ORE;
-      }
-      return;
-    }*/
-
+    } 
   }
 }

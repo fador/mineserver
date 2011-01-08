@@ -1,0 +1,13 @@
+# Input
+width 2
+height 2
+
+<-
+336 336
+336 336
+->
+
+# Output
+outputcount 1
+outputtype 45
+outputhealth 0
