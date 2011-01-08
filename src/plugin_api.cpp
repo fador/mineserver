@@ -106,7 +106,7 @@ bool hook_doUntilTrue(const char* hookID, ...)
   bool result = false;
   va_list argList;
   va_start(argList, hookID);
-  result = Mineserver::get()->plugin()->getHook(hookID)->doUntilTrue(argList);
+  result = Mineserver::get()->plugin()->getHook(hookID)->doUntilTrueVA(argList);
   va_end(argList);
   return result;
 }
@@ -116,7 +116,7 @@ bool hook_doUntilFalse(const char* hookID, ...)
   bool result = false;
   va_list argList;
   va_start(argList, hookID);
-  result = Mineserver::get()->plugin()->getHook(hookID)->doUntilFalse(argList);
+  result = Mineserver::get()->plugin()->getHook(hookID)->doUntilFalseVA(argList);
   va_end(argList);
   return result;
 }
@@ -125,7 +125,7 @@ void hook_doAll(const char* hookID, ...)
 {
   va_list argList;
   va_start(argList, hookID);
-  Mineserver::get()->plugin()->getHook(hookID)->doAll(argList);
+  Mineserver::get()->plugin()->getHook(hookID)->doAllVA(argList);
   va_end(argList);
 }
 

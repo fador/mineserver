@@ -8,9 +8,9 @@ class Hook
 {
 public:
   virtual void addCallback(void* function) {}
-  virtual bool doUntilTrue(va_list vl) { return false; }
-  virtual bool doUntilFalse(va_list vl) { return false; }
-  virtual void doAll(va_list vl) {}
+  virtual bool doUntilTrueVA(va_list vl) { return false; }
+  virtual bool doUntilFalseVA(va_list vl) { return false; }
+  virtual void doAllVA(va_list vl) {}
 };
 
 template <class R>
@@ -68,7 +68,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
 
 
@@ -90,7 +90,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
 
 
@@ -112,7 +112,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
 
 
@@ -124,7 +124,7 @@ public:
     return callbacks[n]();
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
 
 
@@ -190,7 +190,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
 
@@ -212,7 +212,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
 
@@ -234,7 +234,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
 
@@ -246,7 +246,7 @@ public:
     return callbacks[n](a1);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
 
@@ -312,7 +312,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -335,7 +335,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -358,7 +358,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -371,7 +371,7 @@ public:
     return callbacks[n](a1, a2);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -438,7 +438,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -462,7 +462,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -486,7 +486,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -500,7 +500,7 @@ public:
     return callbacks[n](a1, a2, a3);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -568,7 +568,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -593,7 +593,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -618,7 +618,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -633,7 +633,7 @@ public:
     return callbacks[n](a1, a2, a3, a4);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -702,7 +702,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -728,7 +728,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -754,7 +754,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -770,7 +770,7 @@ public:
     return callbacks[n](a1, a2, a3, a4, a5);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -840,7 +840,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -867,7 +867,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -894,7 +894,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -911,7 +911,7 @@ public:
     return callbacks[n](a1, a2, a3, a4, a5, a6);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -982,7 +982,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1010,7 +1010,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1038,7 +1038,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1056,7 +1056,7 @@ public:
     return callbacks[n](a1, a2, a3, a4, a5, a6, a7);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1128,7 +1128,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1157,7 +1157,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1186,7 +1186,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1205,7 +1205,7 @@ public:
     return callbacks[n](a1, a2, a3, a4, a5, a6, a7, a8);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1278,7 +1278,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1308,7 +1308,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1338,7 +1338,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1358,7 +1358,7 @@ public:
     return callbacks[n](a1, a2, a3, a4, a5, a6, a7, a8, a9);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1432,7 +1432,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1463,7 +1463,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1494,7 +1494,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1515,7 +1515,7 @@ public:
     return callbacks[n](a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1590,7 +1590,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1622,7 +1622,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1654,7 +1654,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1676,7 +1676,7 @@ public:
     return callbacks[n](a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1752,7 +1752,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1785,7 +1785,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1818,7 +1818,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1841,7 +1841,7 @@ public:
     return callbacks[n](a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1918,7 +1918,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1952,7 +1952,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -1986,7 +1986,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2010,7 +2010,7 @@ public:
     return callbacks[n](a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2088,7 +2088,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2123,7 +2123,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2158,7 +2158,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2183,7 +2183,7 @@ public:
     return callbacks[n](a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2262,7 +2262,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2298,7 +2298,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2334,7 +2334,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2360,7 +2360,7 @@ public:
     return callbacks[n](a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2440,7 +2440,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2477,7 +2477,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2514,7 +2514,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2541,7 +2541,7 @@ public:
     return callbacks[n](a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2622,7 +2622,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2660,7 +2660,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2698,7 +2698,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2726,7 +2726,7 @@ public:
     return callbacks[n](a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2808,7 +2808,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2847,7 +2847,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2886,7 +2886,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2915,7 +2915,7 @@ public:
     return callbacks[n](a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -2998,7 +2998,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -3038,7 +3038,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -3078,7 +3078,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -3108,7 +3108,7 @@ public:
     return callbacks[n](a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -3192,7 +3192,7 @@ public:
     }
   }
 
-  void doAll(va_list vl)
+  void doAllVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -3233,7 +3233,7 @@ public:
     return false;
   }
 
-  bool doUntilTrue(va_list vl)
+  bool doUntilTrueVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -3274,7 +3274,7 @@ public:
     return false;
   }
 
-  bool doUntilFalse(va_list vl)
+  bool doUntilFalseVA(va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
@@ -3305,7 +3305,7 @@ public:
     return callbacks[n](a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20);
   }
 
-  R doThis(int n, va_list vl)
+  R doThisVA(int n, va_list vl)
   {
     A1 a1 = va_arg(vl, A1);
     A2 a2 = va_arg(vl, A2);
