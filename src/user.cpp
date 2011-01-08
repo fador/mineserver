@@ -96,7 +96,7 @@ User::User(int sock, uint32 EID)
 
 bool User::changeNick(std::string _nick)
 {
-  (static_cast<Hook2<bool,User*,std::string>*>(Mineserver::get()->plugin()->getHook("PlayerNickPost")))->doAll(this, _nick);
+  (static_cast<Hook2<bool,const char*,const char*>*>(Mineserver::get()->plugin()->getHook("PlayerNickPost")))->doAll(nick.c_str(), _nick.c_str());
 
   nick = _nick;
   SET_ADMIN(permissions);
@@ -145,7 +145,7 @@ User::~User()
     this->sendOthers(&entityData[0], 5);
   }
 
-  (static_cast<Hook1<bool,User*>*>(Mineserver::get()->plugin()->getHook("PlayerQuitPost")))->doAll(this);
+  (static_cast<Hook1<bool,const char*>*>(Mineserver::get()->plugin()->getHook("PlayerQuitPost")))->doAll(nick.c_str());
 }
 
 bool User::sendLoginInfo()
@@ -200,7 +200,7 @@ bool User::kick(std::string kickMsg)
 {
   buffer << (sint8)PACKET_KICK << kickMsg;
 
-  (static_cast<Hook2<bool,User*,std::string>*>(Mineserver::get()->plugin()->getHook("PlayerKickPost")))->doAll(this, kickMsg);
+  (static_cast<Hook2<bool,const char*,const char*>*>(Mineserver::get()->plugin()->getHook("PlayerKickPost")))->doAll(nick.c_str(), kickMsg.c_str());
 
   Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", nick + " kicked. Reason: " + kickMsg);
 

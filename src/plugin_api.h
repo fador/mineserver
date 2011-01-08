@@ -28,7 +28,9 @@
 #ifndef _PLUGIN_API_H
 #define _PLUGIN_API_H
 
+#ifdef __cplusplus
 #include "hook.h"
+#endif
 
 #ifdef WIN32
 #define PLUGIN_API_EXPORT extern "C" __declspec(dllexport) 
@@ -43,7 +45,11 @@ struct plugin_pointer_struct
   float (*getPluginVersion)(const char* name);
   void (*setPluginVersion)(const char* name, float version);
   bool (*hasHook)(const char* hookID);
+#ifdef __cplusplus
   void (*setHook)(const char* hookID, Hook* hook);
+#else
+  void (*setHook)(const char* hookID, void* hook);
+#endif
   void (*addCallback)(const char* hookID, void* function);
   bool (*doUntilTrue)(const char* hookID, ...);
   bool (*doUntilFalse)(const char* hookID, ...);

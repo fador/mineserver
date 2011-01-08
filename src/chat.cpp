@@ -153,11 +153,11 @@ bool Chat::handleMsg(User* user, std::string msg)
   std::string timeStamp (asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
-  if ((static_cast<Hook3<bool,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("PlayerChatPre")))->doUntilFalse(user, rawTime, msg))
+  if ((static_cast<Hook3<bool,const char*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("PlayerChatPre")))->doUntilFalse(user->nick.c_str(), rawTime, msg))
   {
     return false;
   }
-  (static_cast<Hook3<bool,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("PlayerChatPost")))->doAll(user, rawTime, msg);
+  (static_cast<Hook3<bool,const char*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("PlayerChatPost")))->doAll(user->nick.c_str(), rawTime, msg);
   char prefix = msg[0];
 
   switch(prefix)
