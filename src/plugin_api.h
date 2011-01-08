@@ -45,6 +45,9 @@ struct plugin_pointer_struct
   bool (*hasHook)(const char* hookID);
   void (*setHook)(const char* hookID, Hook* hook);
   void (*addCallback)(const char* hookID, void* function);
+  bool (*doUntilTrue)(const char* hookID, ...);
+  bool (*doUntilFalse)(const char* hookID, ...);
+  void (*doAll)(const char* hookID, ...);
   void *temp[10];
 };
 
@@ -101,7 +104,6 @@ struct mineserver_pointer_struct
   user_pointer_struct user;
   callback_pointer_struct callback;
   config_pointer_struct config;
-
 
   void *temp[100];
 };
