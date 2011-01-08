@@ -235,6 +235,43 @@ void map_saveWholeMap(void)
   Mineserver::get()->map()->saveWholeMap();
 }
 
+unsigned char* map_getMapData_block(int x, int z)
+{
+  sChunk* chunk=Mineserver::get()->map()->getMapData(x,z);
+  if(chunk != NULL)
+  {
+    return chunk->blocks;
+  }
+  return NULL;
+}
+unsigned char* map_getMapData_meta(int x, int z)
+{
+  sChunk* chunk=Mineserver::get()->map()->getMapData(x,z);
+  if(chunk != NULL)
+  {
+    return chunk->data;
+  }
+  return NULL;
+}
+unsigned char* map_getMapData_skylight(int x, int z)
+{
+  sChunk* chunk=Mineserver::get()->map()->getMapData(x,z);
+  if(chunk != NULL)
+  {
+    return chunk->skylight;
+  }
+  return NULL;
+}
+unsigned char* map_getMapData_blocklight(int x, int z)
+{
+  sChunk* chunk=Mineserver::get()->map()->getMapData(x,z);
+  if(chunk != NULL)
+  {
+    return chunk->blocklight;
+  }
+  return NULL;
+}
+
 // USER WRAPPER FUNCTIONS
 bool user_getPosition(const char* user, double* x, double* y, double* z, float* yaw, float* pitch, double *stance)
 {
@@ -284,35 +321,70 @@ int config_iData(const char* name)
   return Mineserver::get()->config()->iData(std::string(name));
 }
 
+long config_lData(const char* name)
+{
+  return Mineserver::get()->config()->lData(std::string(name));
+}
+
+float config_fData(const char* name)
+{
+  return Mineserver::get()->config()->fData(std::string(name));
+}
+
+double config_dData(const char* name)
+{
+  return Mineserver::get()->config()->dData(std::string(name));
+}
+
+const char* config_sData(const char* name)
+{
+  return Mineserver::get()->config()->sData(std::string(name)).c_str();
+}
+
+bool config_bData(const char* name)
+{
+  return Mineserver::get()->config()->bData(std::string(name));
+}
 
 // Initialization of the plugin_api function pointer array
 void init_plugin_api(void)
 {
-  plugin_api_pointers.logger.log              = &logger_log;
+  plugin_api_pointers.logger.log                = &logger_log;
 
-  plugin_api_pointers.chat.sendmsg            = &chat_sendmsg;
-  plugin_api_pointers.chat.sendmsgTo          = &chat_sendmsgTo;
-  plugin_api_pointers.chat.sendUserlist       = &chat_sendUserlist;
+  plugin_api_pointers.chat.sendmsg              = &chat_sendmsg;
+  plugin_api_pointers.chat.sendmsgTo            = &chat_sendmsgTo;
+  plugin_api_pointers.chat.sendUserlist         = &chat_sendUserlist;
 
-  plugin_api_pointers.plugin.getPluginVersion = &plugin_getPluginVersion;
-  plugin_api_pointers.plugin.setPluginVersion = &plugin_setPluginVersion;
-  plugin_api_pointers.plugin.hasHook          = &plugin_hasHook;
-  plugin_api_pointers.plugin.setHook          = &plugin_setHook;
-  plugin_api_pointers.plugin.addCallback      = &hook_addCallback;
-  plugin_api_pointers.plugin.doUntilTrue      = &hook_doUntilTrue;
-  plugin_api_pointers.plugin.doUntilFalse     = &hook_doUntilFalse;
-  plugin_api_pointers.plugin.doAll            = &hook_doAll;
+  plugin_api_pointers.plugin.getPluginVersion   = &plugin_getPluginVersion;
+  plugin_api_pointers.plugin.setPluginVersion   = &plugin_setPluginVersion;
+  plugin_api_pointers.plugin.hasHook            = &plugin_hasHook;
+  plugin_api_pointers.plugin.setHook            = &plugin_setHook;
+  plugin_api_pointers.plugin.addCallback        = &hook_addCallback;
+  plugin_api_pointers.plugin.doUntilTrue        = &hook_doUntilTrue;
+  plugin_api_pointers.plugin.doUntilFalse       = &hook_doUntilFalse;
+  plugin_api_pointers.plugin.doAll              = &hook_doAll;
 
-  plugin_api_pointers.map.setTime             = &map_setTime;
-  plugin_api_pointers.map.createPickupSpawn   = &map_createPickupSpawn;
-  plugin_api_pointers.map.getSpawn            = &map_getSpawn;
-  plugin_api_pointers.map.setBlock            = &map_setBlock;
-  plugin_api_pointers.map.getBlock            = &map_getBlock;
-  plugin_api_pointers.map.saveWholeMap        = &map_saveWholeMap;
+  plugin_api_pointers.map.setTime               = &map_setTime;
+  plugin_api_pointers.map.createPickupSpawn     = &map_createPickupSpawn;
+  plugin_api_pointers.map.getSpawn              = &map_getSpawn;
+  plugin_api_pointers.map.setBlock              = &map_setBlock;
+  plugin_api_pointers.map.getBlock              = &map_getBlock;
+  plugin_api_pointers.map.saveWholeMap          = &map_saveWholeMap;
+  plugin_api_pointers.map.getMapData_block      = &map_getMapData_block;
+  plugin_api_pointers.map.getMapData_meta       = &map_getMapData_meta;
+  plugin_api_pointers.map.getMapData_skylight   = &map_getMapData_skylight;
+  plugin_api_pointers.map.getMapData_blocklight = &map_getMapData_blocklight;
 
-  plugin_api_pointers.user.getPosition        = &user_getPosition;
-  plugin_api_pointers.user.teleport           = &user_teleport;
+  plugin_api_pointers.user.getPosition          = &user_getPosition;
+  plugin_api_pointers.user.teleport             = &user_teleport;
 
-  plugin_api_pointers.config.iData            = &config_iData;
+  plugin_api_pointers.config.iData              = &config_iData;
+  plugin_api_pointers.config.lData              = &config_lData;
+  plugin_api_pointers.config.fData              = &config_fData;
+  plugin_api_pointers.config.dData              = &config_dData;
+  plugin_api_pointers.config.sData              = &config_sData;
+  plugin_api_pointers.config.bData              = &config_bData;
+
+
 
 }

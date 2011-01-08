@@ -65,15 +65,15 @@ struct plugin_pointer_struct
 
 struct user_pointer_struct
 {
-  bool (*teleport)(const char* user,double x, double y, double z);
+  bool (*teleport)   (const char* user,double x, double y, double z);
   bool (*getPosition)(const char* user, double* x, double* y, double* z, float* yaw, float* pitch, double *stance);
   void *temp[100];
 };
 
 struct chat_pointer_struct
 {
-  bool    (*sendmsgTo)(const char* user,const char* msg);
-  bool      (*sendmsg)(const char* msg);
+  bool (*sendmsgTo)   (const char* user,const char* msg);
+  bool (*sendmsg)     (const char* msg);
   bool (*sendUserlist)(const char* user);
   void *temp[100];
 };
@@ -92,12 +92,21 @@ struct map_pointer_struct
   bool (*getBlock)(int x, int y, int z, unsigned char* type,unsigned char* meta);
   bool (*setBlock)(int x, int y, int z, unsigned char type,unsigned char meta);
   void (*saveWholeMap)(void);
+  unsigned char* (*getMapData_block)(int x, int z);
+  unsigned char* (*getMapData_meta)(int x, int z);
+  unsigned char* (*getMapData_skylight)(int x, int z);
+  unsigned char* (*getMapData_blocklight)(int x, int z);
   void *temp[100];
 };
 
 struct config_pointer_struct
 {
   int (*iData)(const char* name);
+  long (*lData)(const char* name);
+  float (*fData)(const char* name);
+  double (*dData)(const char* name);
+  const char* (*sData)(const char* name);
+  bool (*bData)(const char* name);
   void *temp[100];
 };
 
