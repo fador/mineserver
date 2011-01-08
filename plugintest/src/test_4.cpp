@@ -8,7 +8,7 @@
 
 mineserver_pointer_struct* mineserver = NULL;
 
-void test_4a_callback()
+bool test_4a_callback()
 {
   mineserver->logger.log(LogType::LOG_INFO, "plugin.test_4a", "test_4a_callback called");
 
@@ -31,6 +31,8 @@ void test_4a_callback()
   mineserver->logger.log(LogType::LOG_INFO, "plugin.test_4a", c_a);
   mineserver->logger.log(LogType::LOG_INFO, "plugin.test_4a", c_b);
   mineserver->logger.log(LogType::LOG_INFO, "plugin.test_4a", c_c);
+
+  return true;
 }
 
 PLUGIN_API_EXPORT void test_4a_init(mineserver_pointer_struct* _mineserver)
@@ -50,7 +52,7 @@ bool test_4b_callback(int* ptr)
 {
   mineserver->logger.log(LogType::LOG_INFO, "plugin.test_4b", "test_4b_callback called");
 
-  *ptr++;
+  ++(*ptr);
   return true;
 }
 
@@ -70,7 +72,7 @@ bool test_4c_callback(int* ptr)
 {
   mineserver->logger.log(LogType::LOG_INFO, "plugin.test_4c", "test_4c_callback called");
 
-  *ptr++;
+  ++(*ptr);
   return true;
 }
 

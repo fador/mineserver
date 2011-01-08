@@ -7,10 +7,10 @@
 class Hook
 {
 public:
-  void addCallback(void* function) {}
-  bool doUntilTrue(va_list vl) {}
-  bool doUntilFalse(va_list vl) {}
-  void doAll(va_list vl) {}
+  virtual void addCallback(void* function) {}
+  virtual bool doUntilTrue(va_list vl) { return false; }
+  virtual bool doUntilFalse(va_list vl) { return false; }
+  virtual void doAll(va_list vl) {}
 };
 
 template <class R>

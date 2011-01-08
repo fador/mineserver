@@ -321,7 +321,7 @@ int Mineserver::run(int argc, char *argv[])
   while(m_running && event_base_loop(m_eventBase, 0) == 0)
   {
     // Run 200ms timer hook
-    static_cast<Hook0<void>*>(plugin()->getHook("Timer200"))->doAll();
+    static_cast<Hook0<bool>*>(plugin()->getHook("Timer200"))->doAll();
 
     // Append current command and check if user entered return
     if(Mineserver::get()->screen()->hasCommand())
@@ -350,7 +350,7 @@ int Mineserver::run(int argc, char *argv[])
       // TODO: Run garbage collection for chunk storage dealie?
 
       // Run 10s timer hook
-      static_cast<Hook0<void>*>(plugin()->getHook("Timer10000"))->doAll();
+      static_cast<Hook0<bool>*>(plugin()->getHook("Timer10000"))->doAll();
     }
 
     //Every second
@@ -387,7 +387,7 @@ int Mineserver::run(int argc, char *argv[])
       Mineserver::get()->furnaceManager()->update();
 
       // Run 1s timer hook
-      static_cast<Hook0<void>*>(plugin()->getHook("Timer1000"))->doAll();
+      static_cast<Hook0<bool>*>(plugin()->getHook("Timer1000"))->doAll();
     }
 
     // Physics simulation every 200ms
