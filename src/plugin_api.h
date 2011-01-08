@@ -67,6 +67,7 @@ struct user_pointer_struct
 {
   bool (*teleport)   (const char* user,double x, double y, double z);
   bool (*getPosition)(const char* user, double* x, double* y, double* z, float* yaw, float* pitch, double *stance);
+  bool (*sethealth)  (const char* user,int userHealth);
   void *temp[100];
 };
 

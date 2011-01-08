@@ -315,6 +315,17 @@ bool user_teleport(const char* user,double x, double y, double z)
   return false;
 }
 
+bool user_sethealth(const char* user,int userHealth)
+{
+  User* tempUser = userFromName(std::string(user));
+  if(tempUser != NULL)
+  {
+    tempUser->sethealth(userHealth);
+    return true;
+  }
+  return false;
+}
+
 // CONFIG WRAPPER FUNCTIONS
 int config_iData(const char* name)
 {
@@ -377,6 +388,7 @@ void init_plugin_api(void)
 
   plugin_api_pointers.user.getPosition          = &user_getPosition;
   plugin_api_pointers.user.teleport             = &user_teleport;
+  plugin_api_pointers.user.sethealth            = &user_sethealth;
 
   plugin_api_pointers.config.iData              = &config_iData;
   plugin_api_pointers.config.lData              = &config_lData;
