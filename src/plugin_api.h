@@ -29,6 +29,12 @@
 #define _PLUGIN_API_H
 
 #ifdef __cplusplus
+#ifndef MINESERVER_C_API
+  #define USE_HOOKS
+#endif
+#endif
+
+#ifdef USE_HOOKS
 #include "hook.h"
 #endif
 
@@ -45,7 +51,7 @@ struct plugin_pointer_struct
   float (*getPluginVersion)(const char* name);
   void (*setPluginVersion)(const char* name, float version);
   bool (*hasHook)(const char* hookID);
-#ifdef __cplusplus
+#ifdef USE_HOOKS
   void (*setHook)(const char* hookID, Hook* hook);
 #else
   void (*setHook)(const char* hookID, void* hook);
@@ -89,12 +95,6 @@ struct map_pointer_struct
   void *temp[100];
 };
 
-struct callback_pointer_struct
-{
-  bool (*add_hook)(const char* name, void *function);
-  void *temp[100];
-};
-
 struct config_pointer_struct
 {
   int (*iData)(const char* name);
@@ -108,7 +108,6 @@ struct mineserver_pointer_struct
   chat_pointer_struct chat;
   plugin_pointer_struct plugin;
   user_pointer_struct user;
-  callback_pointer_struct callback;
   config_pointer_struct config;
 
   void *temp[100];

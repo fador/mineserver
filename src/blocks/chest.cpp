@@ -206,7 +206,7 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
   }
   else
   {
-    Mineserver::get()->chat()->sendMsg(user, COLOR_RED + "Can't destroy chests that are not your!", Chat::USER);
+    Mineserver::get()->chat()->sendMsg(user, MC_COLOR_RED + "Can't destroy chests that are not your!", Chat::USER);
   }
 }
 

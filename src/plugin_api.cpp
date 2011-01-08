@@ -60,7 +60,6 @@
 #include "plugin_api.h"
 
 mineserver_pointer_struct plugin_api_pointers;
-std::map<std::string,std::vector<void *> > Hooks;
 
 // HELPER FUNCTIONS
 User* userFromName(std::string user)
@@ -80,11 +79,6 @@ User* userFromName(std::string user)
 }
 
 // PLUGIN_API FUNCTIONS
-bool plugin_api_add_hook(const char* name, void *function)
-{
-  Hooks[std::string(name)].push_back(function);
-  return true;
-}
 
 bool plugin_hasHook(const char* hookID)
 {
@@ -127,45 +121,6 @@ void hook_doAll(const char* hookID, ...)
   va_start(argList, hookID);
   Mineserver::get()->plugin()->getHook(hookID)->doAllVA(argList);
   va_end(argList);
-}
-
-typedef bool (*playerChatPreFunction)(const char*, const char*);
-bool plugin_api_callbackPlayerChatPre(User* user,time_t time,std::string msg)
-{
-  for(uint32 i = 0; i < Hooks["PlayerChatPre"].size(); i++)
-  {
-    if(!((playerChatPreFunction)Hooks["PlayerChatPre"][i])(user->nick.c_str(),msg.c_str()))
-    {
-      return false;
-    }
-  }
-  return true;
-}
-
-typedef bool (*blockPlacePreFunction)(const char*, int,char,int,unsigned char);
-bool plugin_api_callbackBlockPlacePre(User* user,sint32 x,sint8 y,sint32 z,uint8 block)
-{
-  for(uint32 i = 0; i < Hooks["BlockPlacePre"].size(); i++)
-  {
-    if(!((blockPlacePreFunction)Hooks["BlockPlacePre"][i])(user->nick.c_str(),x,y,z,block))
-    {
-      return false;
-    }
-  }
-  return true;
-}
-
-typedef bool (*blockBreakPreFunction)(const char*, int,char,int);
-bool plugin_api_callbackBlockBreakPre(User* user,sint32 x,sint8 y,sint32 z)
-{
-  for(uint32 i = 0; i < Hooks["BlockBreakPre"].size(); i++)
-  {
-    if(!((blockBreakPreFunction)Hooks["BlockBreakPre"][i])(user->nick.c_str(),x,y,z))
-    {
-      return false;
-    }
-  }
-  return true;
 }
 
 float plugin_getPluginVersion(const char* name)
@@ -358,11 +313,6 @@ void init_plugin_api(void)
   plugin_api_pointers.user.getPosition        = &user_getPosition;
   plugin_api_pointers.user.teleport           = &user_teleport;
 
-  plugin_api_pointers.callback.add_hook       = &plugin_api_add_hook;
-
   plugin_api_pointers.config.iData            = &config_iData;
 
-  (static_cast<Hook3<bool,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("PlayerChatPre")))->addCallback(&plugin_api_callbackPlayerChatPre);
-  (static_cast<Hook4<bool,User*,sint32,sint8,sint32>*>(Mineserver::get()->plugin()->getHook("BlockBreakPre")))->addCallback(&plugin_api_callbackBlockBreakPre);
-  (static_cast<Hook5<bool,User*,sint32,sint8,sint32,uint8>*>(Mineserver::get()->plugin()->getHook("BlockPlacePre")))->addCallback(&plugin_api_callbackBlockPlacePre);
 }
