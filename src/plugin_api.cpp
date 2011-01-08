@@ -28,6 +28,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <stdarg.h>
 
 #include "sys/stat.h"
 
@@ -95,9 +96,37 @@ void plugin_setHook(const char* hookID, Hook* hook)
   Mineserver::get()->plugin()->setHook(hookID, hook);
 }
 
-void plugin_addCallback(const char* hookID, void* function)
+void hook_addCallback(const char* hookID, void* function)
 {
   Mineserver::get()->plugin()->getHook(hookID)->addCallback(function);
+}
+
+bool hook_doUntilTrue(const char* hookID, ...)
+{
+  bool result = false;
+  va_list argList;
+  va_start(argList, hookID);
+  result = Mineserver::get()->plugin()->getHook(hookID)->doUntilTrue(argList);
+  va_end(argList);
+  return result;
+}
+
+bool hook_doUntilFalse(const char* hookID, ...)
+{
+  bool result = false;
+  va_list argList;
+  va_start(argList, hookID);
+  result = Mineserver::get()->plugin()->getHook(hookID)->doUntilFalse(argList);
+  va_end(argList);
+  return result;
+}
+
+void hook_doAll(const char* hookID, ...)
+{
+  va_list argList;
+  va_start(argList, hookID);
+  Mineserver::get()->plugin()->getHook(hookID)->doAll(argList);
+  va_end(argList);
 }
 
 typedef bool (*playerChatPreFunction)(const char*, const char*);
@@ -314,7 +343,10 @@ void init_plugin_api(void)
   plugin_api_pointers.plugin.setPluginVersion = &plugin_setPluginVersion;
   plugin_api_pointers.plugin.hasHook          = &plugin_hasHook;
   plugin_api_pointers.plugin.setHook          = &plugin_setHook;
-  plugin_api_pointers.plugin.addCallback      = &plugin_addCallback;
+  plugin_api_pointers.plugin.addCallback      = &hook_addCallback;
+  plugin_api_pointers.plugin.doUntilTrue      = &hook_doUntilTrue;
+  plugin_api_pointers.plugin.doUntilFalse     = &hook_doUntilFalse;
+  plugin_api_pointers.plugin.doAll            = &hook_doAll;
 
   plugin_api_pointers.map.setTime             = &map_setTime;
   plugin_api_pointers.map.createPickupSpawn   = &map_createPickupSpawn;

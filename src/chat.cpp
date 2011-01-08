@@ -157,7 +157,7 @@ bool Chat::handleMsg(User* user, std::string msg)
   {
     return false;
   }
-  (static_cast<Hook3<void,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("PlayerChatPost")))->doAll(user, rawTime, msg);
+  (static_cast<Hook3<bool,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("PlayerChatPost")))->doAll(user, rawTime, msg);
   char prefix = msg[0];
 
   switch(prefix)

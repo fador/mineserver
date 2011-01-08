@@ -936,7 +936,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   if(chunk->nbt == NULL)
   {
     LOGLF("Error in loading map (unable to load file)");
-    return false;
+    return NULL;
   }
 
   NBT_Value& level = *(*chunk->nbt)["Level"];
