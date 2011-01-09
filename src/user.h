@@ -30,7 +30,7 @@
 
 #include <vector>
 
-#include <event.h>
+#include "event.h"
 
 #include "vec.h"
 #include "tools.h"
@@ -51,9 +51,9 @@ struct position
 
 struct Item
 {
-  sint16 type;
-  sint8 count;
-  sint16 health;
+  int16_t type;
+  int8_t count;
+  int16_t health;
   Item()
   {
     type   = -1;
@@ -64,34 +64,34 @@ struct Item
 
 #include "inventory.h"
 
-uint32 generateEID();
+uint32_t generateEID();
 
 class User
 {
 public:
 
-  User(int sock, uint32 EID);
+  User(int sock, uint32_t EID);
   ~User();
 
   int fd;
 
   //View distance in chunks -viewDistance <-> viewDistance
   static const int viewDistance = 10;
-  uint8 action;
+  uint8_t action;
   bool waitForData;
-  uint32 write_err_count;
+  uint32_t write_err_count;
   bool logged;
   bool muted;
   bool dnd;
-  sint16 health;
-  uint16 timeUnderwater;
+  int16_t health;
+  uint16_t timeUnderwater;
   unsigned int UID;
   std::string nick;
   std::string temp_nick;
   position pos;
   vec curChunk;
   Item inv[45];
-  sint16 curItem;
+  int16_t curItem;
   Item inventoryHolding;
   //Do we have an open _shared_ inventory?
   bool isOpenInv;
@@ -100,7 +100,7 @@ public:
 
   int permissions; // bitmask for permissions. See permissions.h
 
-  sint32 attachedTo;
+  int32_t attachedTo;
 
   //Input buffer
   Packet buffer;
@@ -112,15 +112,15 @@ public:
   bool changeNick(std::string _nick);
   bool updatePos(double x, double y, double z, double stance);
   /** Check if the user is standing on this block */
-  bool checkOnBlock(sint32 x, sint8 y, sint32 z);
+  bool checkOnBlock(int32_t x, int8_t y, int32_t z);
   bool updateLook(float yaw, float pitch);
-  sint8 relativeToBlock(const sint32 x, const sint8 y, const sint32 z);
+  int8_t relativeToBlock(const int32_t x, const int8_t y, const int32_t z);
 
-  bool sendOthers(uint8* data, uint32 len);
-  static bool sendAll(uint8* data, uint32 len);
-  static bool sendAdmins(uint8* data, uint32 len);
-  static bool sendOps(uint8* data, uint32 len);
-  static bool sendGuests(uint8* data, uint32 len);
+  bool sendOthers(uint8_t* data, uint32_t len);
+  static bool sendAll(uint8_t* data, uint32_t len);
+  static bool sendAdmins(uint8_t* data, uint32_t len);
+  static bool sendOps(uint8_t* data, uint32_t len);
+  static bool sendGuests(uint8_t* data, uint32_t len);
 
   //Login
   bool sendLoginInfo();
@@ -176,8 +176,8 @@ public:
   bool isUnderwater();
 
   // Getter/Setter for item currently in hold
-  sint16 currentItemSlot();
-  void setCurrentItemSlot(sint16 item_slot);
+  int16_t currentItemSlot();
+  void setCurrentItemSlot(int16_t item_slot);
 
 
   bool withinViewDistance(int a, int b)
@@ -191,7 +191,7 @@ private:
   event m_event;
 
   // Item currently in hold
-  sint16 m_currentItemSlot;
+  int16_t m_currentItemSlot;
 };
 
 #endif

@@ -59,7 +59,7 @@ void CaveGen::init(int seed)
   seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
 }
 
-void CaveGen::AddCaves(uint8 &block, double x, double y, double z)
+void CaveGen::AddCaves(uint8_t &block, double x, double y, double z)
 { 
   if(addCaves)
   {

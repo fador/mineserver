@@ -30,7 +30,7 @@
 
 #include <map>
 #include <string>
-#include "tools.h"
+#include <stdint.h>
 
 //
 // Mineserver constants
@@ -163,14 +163,14 @@ extern std::map<std::string, std::string> defaultConf;
 //
 struct Drop
 {
-  uint16 item_id;
-  sint32 probability;
-  uint8 count;
+  uint16_t item_id;
+  uint32_t probability;
+  uint8_t count;
   bool exclusive;
 
   Drop() {}
 
-  Drop(uint16 item_id, uint32 probability, uint8 count, bool exclusive)
+  Drop(uint16_t item_id, uint32_t probability, uint8_t count, bool exclusive)
   {
     this->item_id     = item_id;
     this->probability = probability;
@@ -179,7 +179,7 @@ struct Drop
   }
 };
 
-extern std::map<uint8, Drop> BLOCKDROPS;
+extern std::map<uint8_t, Drop> BLOCKDROPS;
 
 // Chat prefixes
 const char SERVERMSGPREFIX = '%';

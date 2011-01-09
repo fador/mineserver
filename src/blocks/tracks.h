@@ -33,9 +33,9 @@ class User;
 
 struct TrackData
 {
-  uint32 x;
-  uint8 y;
-  uint32 z;
+  uint32_t x;
+  uint8_t y;
+  uint32_t z;
 };
 
 /** BlockTracks deals specifically with minecart tracks
@@ -44,19 +44,18 @@ struct TrackData
 class BlockTracks: public BlockBasic
 {
 public:
-  void onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
-  void onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
-  void onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
-  void onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
-  void onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
-  void onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
-  void onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
-  void onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
-  void onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+  void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction);
+  void onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction);
+  void onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction);
+  void onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction);
+  void onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction);
+  void onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction);
+  void onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction);
+  void onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction);
+  void onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction);
 private:
   TrackData trackLog[2];
-  bool isTrack(sint32 x, sint8 y, sint32 z, uint8& meta);
-  bool isStartPiece(sint32 x, sint8 y, sint32 z);
+  bool isTrack(int32_t x, int8_t y, int32_t z, uint8_t& meta);
+  bool isStartPiece(int32_t x, int8_t y, int32_t z);
 
 };
-

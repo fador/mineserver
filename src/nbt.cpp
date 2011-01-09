@@ -50,6 +50,8 @@
 #include "nbt.h"
 #include "constants.h"
 
+
+
 //NBT level file reading
 //More info: http://www.minecraft.net/docs/NBT.txt
 
@@ -60,22 +62,22 @@ NBT_Value::NBT_Value(eTAG_Type type, eTAG_Type listType) : m_type(type)
     m_value.listVal.type = listType;
 }
 
-NBT_Value::NBT_Value(sint8 value) : m_type(TAG_BYTE)
+NBT_Value::NBT_Value(int8_t value) : m_type(TAG_BYTE)
 {
   m_value.byteVal = value;
 }
 
-NBT_Value::NBT_Value(sint16 value) : m_type(TAG_SHORT)
+NBT_Value::NBT_Value(int16_t value) : m_type(TAG_SHORT)
 {
   m_value.shortVal = value;
 }
 
-NBT_Value::NBT_Value(sint32 value) : m_type(TAG_INT)
+NBT_Value::NBT_Value(int32_t value) : m_type(TAG_INT)
 {
   m_value.intVal = value;
 }
 
-NBT_Value::NBT_Value(sint64 value) : m_type(TAG_LONG)
+NBT_Value::NBT_Value(int64_t value) : m_type(TAG_LONG)
 {
   m_value.longVal = value;
 }
@@ -90,9 +92,9 @@ NBT_Value::NBT_Value(double value) : m_type(TAG_DOUBLE)
   m_value.doubleVal = value;
 }
 
-NBT_Value::NBT_Value(uint8 *buf, sint32 len) : m_type(TAG_BYTE_ARRAY)
+NBT_Value::NBT_Value(uint8_t *buf, int32_t len) : m_type(TAG_BYTE_ARRAY)
 {
-  m_value.byteArrayVal = new std::vector<uint8>(buf, buf + len);
+  m_value.byteArrayVal = new std::vector<uint8_t>(buf, buf + len);
 }
 
 NBT_Value::NBT_Value(const std::string &str) : m_type(TAG_STRING)
@@ -100,7 +102,7 @@ NBT_Value::NBT_Value(const std::string &str) : m_type(TAG_STRING)
   m_value.stringVal = new std::string(str);
 }
 
-NBT_Value::NBT_Value(eTAG_Type type, uint8 **buf, int &remaining) : m_type(type)
+NBT_Value::NBT_Value(eTAG_Type type, uint8_t **buf, int &remaining) : m_type(type)
 {
   switch(m_type)
   {
@@ -156,12 +158,12 @@ NBT_Value::NBT_Value(eTAG_Type type, uint8 **buf, int &remaining) : m_type(type)
     remaining -= 4;
     if(remaining >= 0)
     {
-      sint32 bufLen = getSint32(*buf);
+      int32_t bufLen = getSint32(*buf);
       remaining -= bufLen;
       *buf += 4;
       if(remaining >= 0)
       {
-        m_value.byteArrayVal = new std::vector<uint8>();
+        m_value.byteArrayVal = new std::vector<uint8_t>();
         m_value.byteArrayVal->assign(*buf, (*buf)+bufLen);
         *buf += bufLen;
       }
@@ -171,7 +173,7 @@ NBT_Value::NBT_Value(eTAG_Type type, uint8 **buf, int &remaining) : m_type(type)
     remaining -= 2;
     if(remaining >= 0)
     {
-      sint16 stringLen = getSint16(*buf);
+      int16_t stringLen = getSint16(*buf);
       remaining -= stringLen;
       *buf += 2;
       if(remaining >= 0)
@@ -185,10 +187,10 @@ NBT_Value::NBT_Value(eTAG_Type type, uint8 **buf, int &remaining) : m_type(type)
     remaining -= 5;
     if(remaining >= 0)
     {
-      sint8 type = **buf;
+      int8_t type = **buf;
       (*buf)++;
       m_value.listVal.type = (eTAG_Type)type;
-      sint32 count = getSint32(*buf);
+      int32_t count = getSint32(*buf);
       *buf += 4;
       m_value.listVal.data = new std::vector<NBT_Value*>();
       if(count)
@@ -205,7 +207,7 @@ NBT_Value::NBT_Value(eTAG_Type type, uint8 **buf, int &remaining) : m_type(type)
     while(remaining > 0)
     {
       remaining--;
-      sint8 type = **buf;
+      int8_t type = **buf;
       (*buf)++;
       if(type == TAG_END)
         break;
@@ -214,7 +216,7 @@ NBT_Value::NBT_Value(eTAG_Type type, uint8 **buf, int &remaining) : m_type(type)
       if(remaining <= 0)
         break;
 
-      sint16 stringLen = getSint16(*buf);
+      int16_t stringLen = getSint16(*buf);
       *buf += 2;
 
       remaining -= stringLen;
@@ -273,7 +275,7 @@ void NBT_Value::Insert(const std::string &str, NBT_Value *val)
   (*m_value.compoundVal)[str] = val;
 }
 
-NBT_Value::operator sint8()
+NBT_Value::operator int8_t()
 {
   if(m_type != TAG_BYTE)
     return 0;
@@ -281,7 +283,7 @@ NBT_Value::operator sint8()
   return m_value.byteVal;
 }
 
-NBT_Value::operator sint16()
+NBT_Value::operator int16_t()
 {
   if(m_type != TAG_SHORT)
     return 0;
@@ -289,7 +291,7 @@ NBT_Value::operator sint16()
   return m_value.shortVal;
 }
 
-NBT_Value::operator sint32()
+NBT_Value::operator int32_t()
 {
   if(m_type != TAG_INT)
     return 0;
@@ -297,7 +299,7 @@ NBT_Value::operator sint32()
   return m_value.intVal;
 }
 
-NBT_Value::operator sint64()
+NBT_Value::operator int64_t()
 {
   if(m_type != TAG_LONG)
     return 0;
@@ -321,7 +323,7 @@ NBT_Value::operator double()
   return m_value.doubleVal;
 }
 
-NBT_Value & NBT_Value::operator =(sint8 val)
+NBT_Value & NBT_Value::operator =(int8_t val)
 {
   cleanup();
   m_type = TAG_BYTE;
@@ -329,7 +331,7 @@ NBT_Value & NBT_Value::operator =(sint8 val)
   return *this;
 }
 
-NBT_Value & NBT_Value::operator =(sint16 val)
+NBT_Value & NBT_Value::operator =(int16_t val)
 {
   cleanup();
   m_type = TAG_SHORT;
@@ -337,7 +339,7 @@ NBT_Value & NBT_Value::operator =(sint16 val)
   return *this;
 }
 
-NBT_Value & NBT_Value::operator =(sint32 val)
+NBT_Value & NBT_Value::operator =(int32_t val)
 {
   cleanup();
   m_type = TAG_INT;
@@ -345,7 +347,7 @@ NBT_Value & NBT_Value::operator =(sint32 val)
   return *this;
 }
 
-NBT_Value & NBT_Value::operator =(sint64 val)
+NBT_Value & NBT_Value::operator =(int64_t val)
 {
   cleanup();
   m_type = TAG_LONG;
@@ -369,12 +371,12 @@ NBT_Value & NBT_Value::operator =(double val)
   return *this;
 }
 
-std::vector<uint8> *NBT_Value::GetByteArray()
+std::vector<uint8_t> *NBT_Value::GetByteArray()
 {
   if(m_type != TAG_BYTE_ARRAY)
     return NULL;
   if(m_value.byteArrayVal == NULL)
-    m_value.byteArrayVal = new std::vector<uint8>();
+    m_value.byteArrayVal = new std::vector<uint8_t>();
   return m_value.byteArrayVal;
 }
 
@@ -457,7 +459,7 @@ NBT_Value * NBT_Value::LoadFromFile(const std::string &filename)
   if(fp == NULL)
     return NULL;
   fseek(fp, -4, SEEK_END);
-  uint32 uncompressedSize = 0;
+  uint32_t uncompressedSize = 0;
   fread(&uncompressedSize, 4, 1, fp);
   fclose(fp);
 
@@ -467,7 +469,7 @@ NBT_Value * NBT_Value::LoadFromFile(const std::string &filename)
     uncompressedSize = ALLOCATE_NBTFILE;
   }
 
-  uint8 *uncompressedData = new uint8[uncompressedSize];
+  uint8_t *uncompressedData = new uint8_t[uncompressedSize];
   gzFile nbtFile = gzopen(filename.c_str(), "rb");
   if(nbtFile == NULL)
   {
@@ -477,7 +479,7 @@ NBT_Value * NBT_Value::LoadFromFile(const std::string &filename)
   gzread(nbtFile, uncompressedData, uncompressedSize);
   gzclose(nbtFile);
 
-  uint8 *ptr = uncompressedData+3; // Jump blank compound
+  uint8_t *ptr = uncompressedData+3; // Jump blank compound
   int remaining = uncompressedSize;
 
   NBT_Value *root = new NBT_Value(TAG_COMPOUND, &ptr, remaining);
@@ -489,7 +491,7 @@ NBT_Value * NBT_Value::LoadFromFile(const std::string &filename)
 
 void NBT_Value::SaveToFile(const std::string &filename)
 {
-  std::vector<uint8> buffer;
+  std::vector<uint8_t> buffer;
   
   // Blank compound tag
   buffer.push_back(TAG_COMPOUND);
@@ -507,7 +509,7 @@ void NBT_Value::SaveToFile(const std::string &filename)
   gzclose(nbtFile);
 }
 
-void NBT_Value::Write(std::vector<uint8> &buffer)
+void NBT_Value::Write(std::vector<uint8_t> &buffer)
 {
   int storeAt = buffer.size();;
   switch(m_type)
@@ -549,7 +551,7 @@ void NBT_Value::Write(std::vector<uint8> &buffer)
     {
       int stringLen = m_value.stringVal ? m_value.stringVal->size() : 0;
       buffer.resize(storeAt + 2 + stringLen);
-      putSint16(&buffer[storeAt], (sint16)stringLen);
+      putSint16(&buffer[storeAt], (int16_t)stringLen);
       storeAt += 2;
       if(stringLen>0)
         memcpy(&buffer[storeAt], m_value.stringVal->c_str(), stringLen);
@@ -579,7 +581,7 @@ void NBT_Value::Write(std::vector<uint8> &buffer)
           NBT_Value *val = iter->second;
           int curPos = buffer.size();
           buffer.resize(curPos + 3 + keySize);
-          buffer[curPos] = (uint8)val->GetType();
+          buffer[curPos] = (uint8_t)val->GetType();
           curPos++;
           putSint16(&buffer[curPos], keySize);
           curPos += 2;

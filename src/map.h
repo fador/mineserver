@@ -36,13 +36,13 @@
 #include "vec.h"
 #include "chunkmap.h"
 
-struct sTree
+struct sTree  
 {
-  sint32 x,y,z;
-  sint64 plantedTime;
-  uint32 plantedBy;
+  int32_t x,y,z;
+  int64_t plantedTime;
+  uint32_t plantedBy;
 
-  sTree(sint32 _x,sint32 _y, sint32 _z, sint64 _plantedTime, uint32 _plantedBy) :
+  sTree(int32_t _x,int32_t _y, int32_t _z, int64_t _plantedTime, uint32_t _plantedBy) :
     x(_x),y(_y),z(_z),
     plantedTime(_plantedTime),plantedBy(_plantedBy) {}
 
@@ -51,17 +51,17 @@ struct sTree
 //Basic chest data struct
 struct chestData
 {
-  sint32 x;
-  sint32 y;
-  sint32 z;
+  int32_t x;
+  int32_t y;
+  int32_t z;
   Item items[27];
 };
 
 struct signData
 {
-  sint32 x;
-  sint32 y;
-  sint32 z;
+  int32_t x;
+  int32_t y;
+  int32_t z;
   std::string text1;
   std::string text2;
   std::string text3;
@@ -70,12 +70,12 @@ struct signData
 
 struct furnaceData
 {
-  sint32 x;
-  sint32 y;
-  sint32 z;
+  int32_t x;
+  int32_t y;
+  int32_t z;
   Item items[3];
-  sint16 burnTime;
-  sint16 cookTime;
+  int16_t burnTime;
+  int16_t cookTime;
 };
 
 
@@ -83,12 +83,12 @@ struct furnaceData
 struct spawnedItem
 {
   int EID;
-  sint16 item;
+  int16_t item;
   char count;
-  sint16 health;
+  int16_t health;
   vec pos;
   time_t spawnedAt;
-  uint32 spawnedBy;
+  uint32_t spawnedBy;
 
   spawnedItem()
   {
@@ -156,13 +156,13 @@ public:
   ~Map()
   {
     // Free all memory
-    for(std::map<uint32, sChunk>::const_iterator it = maps.begin(); it != maps.end(); it = maps.begin())
+    for(std::map<uint32_t, sChunk>::const_iterator it = maps.begin(); it != maps.end(); it = maps.begin())
     {
       releaseMap(maps[it->first].x, maps[it->first].z);
     }
 
     //Free item memory
-    for(std::map<uint32, spawnedItem *>::const_iterator it = items.begin(); it != items.end(); ++it)
+    for(std::map<uint32_t, spawnedItem *>::const_iterator it = items.begin(); it != items.end(); ++it)
     {
       delete items[it->first];
     }
@@ -190,11 +190,11 @@ public:
         {
           //(*trees)[i] = (*iter)
           NBT_Value* tree = new NBT_Value(NBT_Value::TAG_COMPOUND);
-          tree->Insert("X", new NBT_Value( (sint32)(*iter).x));
-          tree->Insert("Y", new NBT_Value( (sint32)(*iter).y));
-          tree->Insert("Z", new NBT_Value( (sint32)(*iter).z));
-          tree->Insert("plantedTime", new NBT_Value( (sint32)(*iter).plantedTime));
-          tree->Insert("plantedBy", new NBT_Value( (sint32)(*iter).plantedBy));
+          tree->Insert("X", new NBT_Value( (int32_t)(*iter).x));
+          tree->Insert("Y", new NBT_Value( (int32_t)(*iter).y));
+          tree->Insert("Z", new NBT_Value( (int32_t)(*iter).z));
+          tree->Insert("plantedTime", new NBT_Value( (int32_t)(*iter).plantedTime));
+          tree->Insert("plantedBy", new NBT_Value( (int32_t)(*iter).plantedBy));
           tree_vec->push_back(tree);
         }
       }
@@ -222,37 +222,37 @@ public:
   int emitLight[256];
 
   // Store all maps here
-  std::map<uint32, sChunk> maps;
+  std::map<uint32_t, sChunk> maps;
 
   // Store chunks here (remove maps)
   ChunkMap chunks;
 
   // Store the time map chunk has been last used
-  std::map<uint32, int> mapLastused;
+  std::map<uint32_t, int> mapLastused;
 
   // Store if map has been modified
-  std::map<uint32, bool> mapChanged;
+  std::map<uint32_t, bool> mapChanged;
 
   // Do we need light regeneration
-  std::map<uint32, bool> mapLightRegen;
+  std::map<uint32_t, bool> mapLightRegen;
 
   // Store item pointers for each chunk
   //std::map<uint32, std::vector<spawnedItem *> > mapItems;
 
   //All spawned items on map
-  std::map<uint32, spawnedItem*> items;
+  std::map<uint32_t, spawnedItem*> items;
 
-//  void posToId(int x, int z, uint32 *id);
-//  void idToPos(uint32 id, int *x, int *z);
+//  void posToId(int x, int z, uint32_t *id);
+//  void idToPos(uint32_t id, int *x, int *z);
 
   void init();
   void sendToUser(User *user, int x, int z);
 
   //Time in the map
-  sint64 mapTime;
+  int64_t mapTime;
 
   // Map seed
-  sint64 mapSeed;
+  int64_t mapSeed;
 
   // Get pointer to struct
   sChunk* getMapData(int x, int z, bool generate = true);
@@ -274,17 +274,17 @@ public:
   bool releaseMap(int x, int z);
 
   // Light get/set
-  bool getLight(int x, int y, int z, uint8* blocklight, uint8* skylight);
-  bool getLight(int x, int y, int z, uint8* blocklight, uint8* skylight, sChunk* chunk);
+  bool getLight(int x, int y, int z, uint8_t* blocklight, uint8_t* skylight);
+  bool getLight(int x, int y, int z, uint8_t* blocklight, uint8_t* skylight, sChunk* chunk);
   bool setLight(int x, int y, int z, int blocklight, int skylight, int setLight);
   bool setLight(int x, int y, int z, int blocklight, int skylight, int setLight, sChunk* chunk);
   bool spreadLight(int x, int y, int z, int skylight, int blocklight);
   bool spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk* chunk);
 
   // Block value/meta get/set
-  bool getBlock(int x, int y, int z, uint8* type, uint8* meta, bool generate = true);
-  bool getBlock(int x, int y, int z, uint8* type, uint8* meta, bool generate, sChunk* chunk);
-  bool getBlock(vec pos, uint8* type, uint8* meta)
+  bool getBlock(int x, int y, int z, uint8_t* type, uint8_t* meta, bool generate = true);
+  bool getBlock(int x, int y, int z, uint8_t* type, uint8_t* meta, bool generate, sChunk* chunk);
+  bool getBlock(vec pos, uint8_t* type, uint8_t* meta)
   {
     return getBlock(pos.x(), pos.y(), pos.z(), type, meta);
   }
@@ -303,7 +303,7 @@ public:
   bool sendPickupSpawn(spawnedItem item);
   void createPickupSpawn(int x, int y, int z, int type, int count,int health, User *user);
 
-  void setComplexEntity(User* user, sint32 x, sint32 y, sint32 z, NBT_Value* entity);
+  void setComplexEntity(User* user, int32_t x, int32_t y, int32_t z, NBT_Value* entity);
 };
 
 #endif

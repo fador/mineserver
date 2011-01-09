@@ -232,7 +232,7 @@ void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeSta
 bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
 {
   size_t tmpArrayLen = msg.size()+3;
-  uint8* tmpArray    = new uint8[tmpArrayLen];
+  uint8_t* tmpArray    = new uint8_t[tmpArrayLen];
 
   tmpArray[0] = 0x03;
   tmpArray[1] = 0;

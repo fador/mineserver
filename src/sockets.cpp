@@ -77,7 +77,7 @@ void client_callback(int fd,
 
     int read   = 1;
 
-    uint8 *buf = new uint8[2048];
+    uint8_t *buf = new uint8_t[2048];
 
     read = recv(fd, (char*)buf, 2048, 0);
     if(read == 0)
@@ -113,7 +113,7 @@ void client_callback(int fd,
 
     user->buffer.reset();
 
-    while(user->buffer >> (sint8&)user->action)
+    while(user->buffer >> (int8_t&)user->action)
     {
       //Variable len package
       if(Mineserver::get()->packetHandler()->packets[user->action].len == PACKET_VARIABLE_LEN)

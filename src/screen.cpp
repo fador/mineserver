@@ -25,9 +25,14 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "screen.h"
+
+#include "logtype.h"
+#include "user.h"
+
+#include <cstdlib>
 #include <ctime>
 #include <iostream>
-#include "screen.h"
 
 enum 
 {

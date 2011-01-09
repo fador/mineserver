@@ -1,7 +1,7 @@
 #include "tree.h"
 
 
-Tree::Tree(sint32 x, sint32 y, sint32 z)
+Tree::Tree(int32_t x, int32_t y, int32_t z)
 {
   _x = x, _y = y, _z = z;
 }
@@ -12,14 +12,14 @@ Tree::~Tree(void)
 }
 
 
-void Tree::set(sint32 xloc, sint32 yloc, sint32 zloc, int blockType, char metaData)
+void Tree::set(int32_t xloc, int32_t yloc, int32_t zloc, int blockType, char metaData)
 {
   _x = xloc, _y = yloc, _z = zloc, _type = blockType, _meta = metaData;
 }
 
 void Tree::generate()
 {
-  srand((uint32)time(NULL));
+  srand((uint32_t)time(NULL));
   generateTrunk();
   //Generate the branch section.
   //Branch branch(_x,_y,_z);

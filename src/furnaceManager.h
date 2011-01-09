@@ -28,14 +28,17 @@
 #ifndef _FURNACE_MANAGER_H
 #define _FURNACE_MANAGER_H
 
-#include <cstdlib>
-#include "furnace.h"
+#include <stdint.h>
+#include <vector>
+
+class Furnace;
+class NBT_Value;
 
 class FurnaceManager
 {
 public:
   void update();
-  void handleActivity(NBT_Value* entity, uint8 blockType);
+  void handleActivity(NBT_Value* entity, uint8_t blockType);
 
 private:
   typedef std::vector<Furnace*> FurnaceContainer;

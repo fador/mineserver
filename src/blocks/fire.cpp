@@ -29,34 +29,34 @@
 
 #include "fire.h"
 
-void BlockFire::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFire::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockFire::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFire::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockFire::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFire::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockFire::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFire::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockFire::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFire::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockFire::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFire::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-   uint8 oldblock;
-   uint8 oldmeta;
+   uint8_t oldblock;
+   uint8_t oldmeta;
 
    if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
       return;
@@ -86,11 +86,11 @@ void BlockFire::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
    Mineserver::get()->map()->sendBlockChange(x, y, z, (char)newblock, direction);
 }
 
-void BlockFire::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFire::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockFire::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFire::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }

@@ -43,11 +43,11 @@ public:
   void generateChunk(int x, int z);
 
 private:
-  uint8 blocks[16*16*128];
-  uint8 blockdata[16*16*128/2];
-  uint8 skylight[16*16*128/2];
-  uint8 blocklight[16*16*128/2];
-  uint8 heightmap[16*16];
+  uint8_t blocks[16*16*128];
+  uint8_t blockdata[16*16*128/2];
+  uint8_t skylight[16*16*128/2];
+  uint8_t blocklight[16*16*128/2];
+  uint8_t heightmap[16*16];
   
   int seaLevel;
   
@@ -66,7 +66,7 @@ private:
   void AddTrees(int x, int z);
   
   void AddOres(int x, int z);
-  void AddDeposit(int x, int y, int z, uint8 block, int depotSize);
+  void AddDeposit(int x, int y, int z, uint8_t block, int depotSize);
 
   
   CaveGen cave;

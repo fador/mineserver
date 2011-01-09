@@ -87,7 +87,7 @@ void FurnaceManager::update()
   }
 }
 
-void FurnaceManager::handleActivity(NBT_Value *entity, uint8 blockType)
+void FurnaceManager::handleActivity(NBT_Value *entity, uint8_t blockType)
 {
   // Create a furnace
   Furnace* furnace = new Furnace(entity, blockType);

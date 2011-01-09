@@ -28,7 +28,6 @@
 #ifndef _CHUNKMAP_H_
 #define _CHUNKMAP_H_
 
-#include "tools.h"
 #include <set>
 #include <list>
 
@@ -42,13 +41,13 @@ struct signData;
 struct sChunk
 {
   sChunk() : refCount(0),lightRegen(false),changed(false),lastused(0) {}
-  uint8* blocks;
-  uint8* data;
-  uint8* blocklight;
-  uint8* skylight;
-  uint8* heightmap;
-  sint32 x;
-  sint32 z;
+  uint8_t* blocks;
+  uint8_t* data;
+  uint8_t* blocklight;
+  uint8_t* skylight;
+  uint8_t* heightmap;
+  int32_t x;
+  int32_t z;
 
   int refCount;
   bool lightRegen;

@@ -44,11 +44,11 @@ private:
 
   struct SimBlock
   {
-    uint8 id;
+    uint8_t id;
     vec pos;
-    uint8 meta;
+    uint8_t meta;
     SimBlock() {}
-    SimBlock(uint8 id, vec pos, uint8 meta)
+    SimBlock(uint8_t id, vec pos, uint8_t meta)
     {
       this->id   = id;
       this->pos  = pos;

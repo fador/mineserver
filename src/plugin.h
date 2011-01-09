@@ -79,7 +79,7 @@
 // Foe INCONSISTENCY fainted!
 // You got 374¥ for winning!
 
-typedef srutil::delegate6<void, User*, sint8, sint32, sint8, sint32, sint8> Function;
+typedef srutil::delegate6<void, User*, int8_t, int32_t, int8_t, int32_t, int8_t> Function;
 
 class Callback
 {
@@ -174,19 +174,19 @@ public:
     setHook("PlayerArmSwing", new Hook1<bool,const char*>);
     setHook("PlayerDamagePre", new Hook3<bool,const char*,const char*,int>);
     setHook("PlayerDamagePost", new Hook3<bool,const char*,const char*,int>);
-    setHook("PlayerDisconnect", new Hook3<bool,const char*,uint32,uint16>);
-    setHook("PlayerDiggingStarted", new Hook4<bool,const char*,sint32,sint8,sint32>);
-    setHook("PlayerDigging", new Hook4<bool,const char*,sint32,sint8,sint32>);
-    setHook("PlayerDiggingStopped", new Hook4<bool,const char*,sint32,sint8,sint32>);
-    setHook("BlockBreakPre", new Hook4<bool,const char*,sint32,sint8,sint32>);
-    setHook("BlockBreakPost", new Hook4<bool,const char*,sint32,sint8,sint32>);
-    setHook("BlockNeighbourBreak", new Hook7<bool,const char*,sint32,sint8,sint32,sint32,sint8,sint32>);
-    setHook("BlockPlacePre", new Hook5<bool,const char*,sint32,sint8,sint32,sint16>);
-    setHook("BlockPlacePost", new Hook5<bool,const char*,sint32,sint8,sint32,sint16>);
-    setHook("BlockNeighbourPlace", new Hook7<bool,const char*,sint32,sint8,sint32,sint32,sint8,sint32>);
-    setHook("BlockReplacePre", new Hook6<bool,const char*,sint32,sint8,sint32,sint16,sint16>);
-    setHook("BlockReplacePost", new Hook6<bool,const char*,sint32,sint8,sint32,sint16,sint16>);
-    setHook("BlockNeighbourReplace", new Hook9<bool,const char*,sint32,sint8,sint32,sint32,sint8,sint32,sint16,sint16>);
+    setHook("PlayerDisconnect", new Hook3<bool,const char*,uint32_t,uint16_t>);
+    setHook("PlayerDiggingStarted", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
+    setHook("PlayerDigging", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
+    setHook("PlayerDiggingStopped", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
+    setHook("BlockBreakPre", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
+    setHook("BlockBreakPost", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
+    setHook("BlockNeighbourBreak", new Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>);
+    setHook("BlockPlacePre", new Hook5<bool,const char*,int32_t,int8_t,int32_t,int16_t>);
+    setHook("BlockPlacePost", new Hook5<bool,const char*,int32_t,int8_t,int32_t,int16_t>);
+    setHook("BlockNeighbourPlace", new Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>);
+    setHook("BlockReplacePre", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>);
+    setHook("BlockReplacePost", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>);
+    setHook("BlockNeighbourReplace", new Hook9<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t,int16_t,int16_t>);
   }
   // Remove existing hooks
   ~Plugin()
@@ -217,7 +217,7 @@ private:
   std::map<const std::string, float> m_pluginVersions;
 
   // Old stuff
-  typedef std::map<sint16, Callback> Callbacks;
+  typedef std::map<int16_t, Callback> Callbacks;
   Callbacks blockevents;
 };
 

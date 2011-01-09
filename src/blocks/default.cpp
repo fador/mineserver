@@ -29,22 +29,22 @@
 
 #include "default.h"
 
-void BlockDefault::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockDefault::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockDefault::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockDefault::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockDefault::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockDefault::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockDefault::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockDefault::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-  uint8 block;
-  uint8 meta;
+  uint8_t block;
+  uint8_t meta;
 
   if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
   {
@@ -56,14 +56,14 @@ void BlockDefault::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 
   this->spawnBlockItem(x,y,z,block);
 }
 
-void BlockDefault::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockDefault::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockDefault::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockDefault::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-  uint8 oldblock;
-  uint8 oldmeta;
+  uint8_t oldblock;
+  uint8_t oldmeta;
 
   if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
   {
@@ -98,14 +98,14 @@ void BlockDefault::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
   Mineserver::get()->map()->sendBlockChange(x, y, z, (char)newblock, direction);
 }
 
-void BlockDefault::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockDefault::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockDefault::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockDefault::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-  uint8 oldblock;
-  uint8 oldmeta;
+  uint8_t oldblock;
+  uint8_t oldmeta;
 
   if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
   {
@@ -117,7 +117,7 @@ void BlockDefault::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint
   Mineserver::get()->map()->createPickupSpawn(x, y, z, oldblock, 1, 0,NULL);
 }
 
-void BlockDefault::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockDefault::onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 

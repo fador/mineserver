@@ -27,39 +27,39 @@
 
 #include "stair.h"
 
-void BlockStair::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockStair::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockStair::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockStair::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockStair::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockStair::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockStair::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockStair::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockStair::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockStair::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
    /* TODO: add code to align stairs? */
 }
 
-void BlockStair::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockStair::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockStair::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockStair::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
    /* Align neighbour to this stair */
 }
 
-void BlockStair::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockStair::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }

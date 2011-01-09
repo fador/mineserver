@@ -34,11 +34,11 @@ class CaveGen
 {
 public:
   void init(int seed);
-  void AddCaves(uint8 &block, double x, double y, double z);
+  void AddCaves(uint8_t &block, double x, double y, double z);
 
 private:
   Random mersenne;
-  uint8 *blocks;
+  uint8_t *blocks;
   
   noise::module::RidgedMulti caveNoise;
   double value;

@@ -28,14 +28,16 @@
 #ifndef _INVENTORY_H_
 #define _INVENTORY_H_
 
-#include "user.h"
+#include <stdint.h>
+
+class User;
 
 struct openInventory
 {
-  sint8 type;
-  sint32 x;
-  sint32 y;
-  sint32 z;
+  int8_t type;
+  int32_t x;
+  int32_t y;
+  int32_t z;
   Item workbench[10];
   std::vector<User *> users;  
 };
@@ -50,22 +52,22 @@ public:
 
   struct Recipe
   {
-    sint8 width;
-    sint8 height;
-    sint16 *slots;
+    int8_t width;
+    int8_t height;
+    int16_t *slots;
     Item output;
   };
   
   std::vector<Recipe*> recipes;
-  bool addRecipe(int width, int height, sint16* inputrecipe, int outputCount, 
-                 sint16 outputType, sint16 outputHealth);
+  bool addRecipe(int width, int height, int16_t* inputrecipe, int outputCount, 
+                 int16_t outputType, int16_t outputHealth);
   bool readRecipe(std::string recipeFile);
 
   Inventory();
 
   ~Inventory()
   {
-    for(uint32 i = 0; i < recipes.size(); i++)
+    for(unsigned int i = 0; i < recipes.size(); i++)
     {
       delete [] recipes[i]->slots;
       delete recipes[i];
@@ -77,27 +79,27 @@ public:
   std::vector<openInventory *> openChests;
   std::vector<openInventory *> openFurnaces;
 
-  bool onwindowOpen(User *user,sint8 type, sint32 x, sint32 y, sint32 z);
-  bool onwindowClose(User *user,sint8 type,sint32 x, sint32 y, sint32 z);
+  bool onwindowOpen(User *user,int8_t type, int32_t x, int32_t y, int32_t z);
+  bool onwindowClose(User *user,int8_t type,int32_t x, int32_t y, int32_t z);
 
 
-  bool windowOpen(User *user, sint8 type, sint32 x, sint32 y, sint32 z);
+  bool windowOpen(User *user, int8_t type, int32_t x, int32_t y, int32_t z);
 
-  bool windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightClick, sint16 actionNumber, sint16 itemID, sint8 itemCount,sint8 itemUses);
+  bool windowClick(User *user,int8_t windowID, int16_t slot, int8_t rightClick, int16_t actionNumber, int16_t itemID, int8_t itemCount,int8_t itemUses);
 
-  bool windowClose(User *user,sint8 windowID);
+  bool windowClose(User *user,int8_t windowID);
     
   //Check inventory for space
-  bool isSpace(User *user, sint16 itemID, char count);
+  bool isSpace(User *user, int16_t itemID, char count);
 
   //Add items to inventory (pickups)
-  bool addItems(User *user, sint16 itemID, char count, sint16 health);
+  bool addItems(User *user, int16_t itemID, char count, int16_t health);
 
-  bool doCraft(Item *slots, sint8 width, sint8 height);
+  bool doCraft(Item *slots, int8_t width, int8_t height);
 
-  bool setSlot(User *user, sint8 windowID, sint16 slot, sint16 itemID, sint8 count, sint16 health);
+  bool setSlot(User *user, int8_t windowID, int16_t slot, int16_t itemID, int8_t count, int16_t health);
 
-  sint16 itemHealth(sint16 itemID, sint8 block, bool &rightUse);
+  int16_t itemHealth(int16_t itemID, int8_t block, bool &rightUse);
 
 };
 

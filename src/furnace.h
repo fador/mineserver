@@ -25,16 +25,19 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef _FURNACE_H
+#define _FURNACE_H
 
 #include <cstdlib>
 
+#include "types.h"
+
+/*
 #include "constants.h"
-#include "map.h"
-#include "tools.h"
-#include "screen.h"
+*/
 
 class User;
+class NBT_Value;
 
 enum
 {
@@ -48,16 +51,16 @@ class Furnace
 
   struct Slot
   {
-    sint8 count;
-    sint16 damage;
-    sint16 id;
+    int8_t count;
+    int16_t damage;
+    int16_t id;
   };
 
 public:
-  Furnace(NBT_Value* entity, uint8 blockType);
+  Furnace(NBT_Value* entity, uint8_t blockType);
 
   void sendToAllUsers();
-  NBT_Value* getSlotEntity(sint8 slotNumber);
+  NBT_Value* getSlotEntity(int8_t slotNumber);
   void smelt();
   bool isBurningFuel();
   bool isCooking();
@@ -69,35 +72,35 @@ public:
    * Getter & setter methods
    */
 
-  sint16 burnTime();
-  sint16 cookTime();
+  int16_t burnTime();
+  int16_t cookTime();
 
-  sint16 fuelBurningTime() { return m_fuelBurningTime; }
-  void setFuelBurningTime(sint16 fuelBurningTime) { m_fuelBurningTime = fuelBurningTime; }
+  int16_t fuelBurningTime() { return m_fuelBurningTime; }
+  void setFuelBurningTime(int16_t fuelBurningTime) { m_fuelBurningTime = fuelBurningTime; }
 
-  sint16 activeCookDuration() { return m_activeCookDuration; }
-  void setActiveCookDuration(sint16 activeCookDuration) { m_activeCookDuration = activeCookDuration; }
+  int16_t activeCookDuration() { return m_activeCookDuration; }
+  void setActiveCookDuration(int16_t activeCookDuration) { m_activeCookDuration = activeCookDuration; }
 
-  sint16 cookingTime() { return m_cookingTime; }
+  int16_t cookingTime() { return m_cookingTime; }
 
-  sint32 x() { return m_x; }
-  sint32 y() { return m_y; }
-  sint32 z() { return m_z; }
+  int32_t x() { return m_x; }
+  int32_t y() { return m_y; }
+  int32_t z() { return m_z; }
 
   Slot* slots() { return m_slots; };
 
 private:
-  sint16 m_fuelBurningTime;
-  sint16 m_initialBurningTime;
-  sint16 m_cookingTime;
-  sint16 m_activeCookDuration;
- // sint16 activeBurnDuration;
-  sint32 m_x;
-  sint32 m_y;
-  sint32 m_z;
+  int16_t m_fuelBurningTime;
+  int16_t m_initialBurningTime;
+  int16_t m_cookingTime;
+  int16_t m_activeCookDuration;
+ // int16_t activeBurnDuration;
+  int32_t m_x;
+  int32_t m_y;
+  int32_t m_z;
   Slot m_slots[3];
 
   bool m_burning;
 };
 
-
+#endif // _FURNACE.H

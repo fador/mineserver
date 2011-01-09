@@ -30,34 +30,34 @@
 
 #include "liquid.h"
 
-void BlockLiquid::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockLiquid::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockLiquid::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockLiquid::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockLiquid::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockLiquid::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockLiquid::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockLiquid::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockLiquid::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockLiquid::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
    physics(x,y,z);
 }
 
-void BlockLiquid::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockLiquid::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-   uint8 oldblock;
-   uint8 oldmeta;
+   uint8_t oldblock;
+   uint8_t oldmeta;
 
    if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
       return;
@@ -85,15 +85,15 @@ void BlockLiquid::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
    physics(x,y,z);
 }
 
-void BlockLiquid::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockLiquid::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
    physics(x,y,z);
 }
 
-void BlockLiquid::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockLiquid::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-   uint8 oldblock;
-   uint8 oldmeta;
+   uint8_t oldblock;
+   uint8_t oldmeta;
    if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
       return;
 
@@ -103,7 +103,7 @@ void BlockLiquid::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint3
    Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
 }
 
-void BlockLiquid::physics(sint32 x, sint8 y, sint32 z)
+void BlockLiquid::physics(int32_t x, int8_t y, int32_t z)
 {
    Mineserver::get()->physics()->addSimulation(vec(x, y, z));
    //Mineserver::get()->physics()->checkSurrounding(vec(x, y, z));

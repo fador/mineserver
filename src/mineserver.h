@@ -34,8 +34,10 @@
 #else
   #include <netinet/in.h>
 #endif
-#include <event.h>
+
 #include <iostream>
+
+#include <event.h>
 
 #include "user.h"
 #include "map.h"
@@ -54,6 +56,8 @@
 #include "plugin_api.h"
 #undef MINESERVER
 #endif
+
+struct event_base;
 
 class Mineserver
 {

@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
   signal(SIGTERM, sighandler);
   signal(SIGINT, sighandler);
 
-  srand((uint32)time(NULL));
+  srand((uint32_t)time(NULL));
 
   return Mineserver::get()->run(argc, argv);
 }
@@ -119,8 +119,8 @@ void Mineserver::updatePlayerList()
 
 int Mineserver::run(int argc, char *argv[])
 {
-  uint32 starttime = (uint32)time(0);
-  uint32 tick      = (uint32)time(0);
+  uint32_t starttime = (uint32_t)time(0);
+  uint32_t tick      = (uint32_t)time(0);
 
 #ifdef FADOR_PLUGIN
     init_plugin_api();
@@ -332,19 +332,19 @@ int Mineserver::run(int argc, char *argv[])
 
     if(time(0)-starttime > 10)
     {
-      starttime = (uint32)time(0);
+      starttime = (uint32_t)time(0);
 
       //If users, ping them
       if(User::all().size() > 0)
       {
         //0x00 package
-        uint8 data = 0;
+        uint8_t data = 0;
         User::all()[0]->sendAll(&data, 1);
 
         //Send server time
         Packet pkt;
-        pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Mineserver::get()->map()->mapTime;
-        User::all()[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
+        pkt << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map()->mapTime;
+        User::all()[0]->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
       }
 
       // TODO: Run garbage collection for chunk storage dealie?
@@ -356,7 +356,7 @@ int Mineserver::run(int argc, char *argv[])
     //Every second
     if(time(0)-tick > 0)
     {
-      tick = (uint32)time(0);
+      tick = (uint32_t)time(0);
       //Loop users
       for(unsigned int i = 0; i < User::all().size(); i++)
       {
@@ -368,9 +368,9 @@ int Mineserver::run(int argc, char *argv[])
         if(User::all()[i]->attachedTo)
         {
           Packet pkt;
-          pkt << PACKET_ENTITY_VELOCITY << (sint32)User::all()[i]->attachedTo <<  (sint16)10000       << (sint16)0 << (sint16)0;
-          //pkt << PACKET_ENTITY_RELATIVE_MOVE << (sint32)User::all()[i]->attachedTo <<  (sint8)100       << (sint8)0 << (sint8)0;
-          User::all()[i]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
+          pkt << PACKET_ENTITY_VELOCITY << (int32_t)User::all()[i]->attachedTo <<  (int16_t)10000       << (int16_t)0 << (int16_t)0;
+          //pkt << PACKET_ENTITY_RELATIVE_MOVE << (int32_t)User::all()[i]->attachedTo <<  (int8_t)100       << (int8_t)0 << (int8_t)0;
+          User::all()[i]->sendAll((int8_t*)pkt.getWrite(), pkt.getWriteLen());
         }
         */
       }

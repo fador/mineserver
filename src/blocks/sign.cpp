@@ -31,30 +31,30 @@
 
 #include "sign.h"
 
-void BlockSign::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockSign::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockSign::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockSign::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockSign::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockSign::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockSign::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockSign::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockSign::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockSign::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockSign::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockSign::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-   uint8 oldblock;
-   uint8 oldmeta;
+   uint8_t oldblock;
+   uint8_t oldmeta;
 
    if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
       return;
@@ -123,7 +123,7 @@ void BlockSign::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
 
    double angleDegree = ((atan2(diffZ, diffX) * 180 / M_PI + 90) / 22.5);
 
-   uint8 metadata;
+   uint8_t metadata;
    if (angleDegree < 0)
    {
       angleDegree += 16;
@@ -147,7 +147,7 @@ void BlockSign::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
       case BLOCK_TOP:
          y++;
          newblock = BLOCK_SIGN_POST;
-         metadata = (uint8)(angleDegree + 0.5);
+         metadata = (uint8_t)(angleDegree + 0.5);
       break;
       case BLOCK_BOTTOM:
       default:
@@ -162,10 +162,10 @@ void BlockSign::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z,
    Mineserver::get()->map()->sendBlockChange(x, y, z, (char)newblock, metadata);
 }
 
-void BlockSign::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockSign::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockSign::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockSign::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }

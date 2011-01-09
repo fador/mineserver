@@ -46,74 +46,74 @@
 
 #include "tools.h"
 
-void putSint64(uint8 *buf, sint64 value)
+void putSint64(uint8_t *buf, int64_t value)
 {
-  uint64 nval = ntohll(value);
+  uint64_t nval = ntohll(value);
   memcpy(buf, &nval, 8);
 }
 
-void putSint32(uint8 *buf, sint32 value)
+void putSint32(uint8_t *buf, int32_t value)
 {
-  uint32 nval = htonl(value);
+  uint32_t nval = htonl(value);
   memcpy(buf, &nval, 4);
 }
 
-void putSint16(uint8 *buf, short value)
+void putSint16(uint8_t *buf, int16_t value)
 {
   short value2=htons(value);
   memcpy(buf, &value2, 2);
 }
 
-void putFloat(uint8 *buf, float value)
+void putFloat(uint8_t *buf, float value)
 {
-  uint32 nval;
+  uint32_t nval;
   memcpy(&nval, &value, 4);
   nval = htonl(nval);
   memcpy(buf, &nval, 4);
 }
 
-void putDouble(uint8 *buf, double value)
+void putDouble(uint8_t *buf, double value)
 {
-  uint64 nval;
+  uint64_t nval;
   memcpy(&nval, &value, 8);
   nval = ntohll(nval);
   memcpy(buf, &nval, 8);
 }
 
-double getDouble(uint8 *buf)
+double getDouble(uint8_t *buf)
 {
   double val;
-  uint64 ival = *reinterpret_cast<const sint64*>(buf);
+  uint64_t ival = *reinterpret_cast<const int64_t*>(buf);
   ival = ntohll(ival);
   memcpy(&val, &ival, 8);
   return val;
 }
 
-float getFloat(uint8 *buf)
+float getFloat(uint8_t *buf)
 {
   float val;
-  int ival = ntohl(*reinterpret_cast<const sint32*>(buf));
+  int ival = ntohl(*reinterpret_cast<const int32_t*>(buf));
   memcpy(&val, &ival, 4);
   return val;
 }
 
-sint64 getSint64(uint8 *buf)
+int64_t getSint64(uint8_t *buf)
 {
-  sint64 val;
-  val = *reinterpret_cast<const sint64*>(buf);
+  int64_t val;
+  val = *reinterpret_cast<const int64_t*>(buf);
   val = ntohll(val);
   return val;
 }
 
-sint32 getSint32(uint8 *buf)
+int32_t getSint32(uint8_t *buf)
 {
-  int val = ntohl(*reinterpret_cast<const sint32*>(buf));
+  int val = ntohl(*reinterpret_cast<const int32_t*>(buf));
   return val;
 }
 
-sint32 getSint16(uint8 *buf)
+int32_t getSint16(uint8_t *buf)
 {
-  short val = ntohs(*reinterpret_cast<const sint16*>(buf));
+  short val = ntohs(*reinterpret_cast<const int16_t*>(buf));
 
   return val;
 }

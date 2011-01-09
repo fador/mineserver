@@ -28,9 +28,6 @@
 #ifndef _SCREEN_H
 #define _SCREEN_H
 
-#include <cstdlib>
-#include <iostream>
-
 #ifdef WIN32
   #pragma warning( disable: 4005)
   #include <winsock2.h>
@@ -40,9 +37,12 @@
 #endif
 
 #include <vector>
-#include "user.h"
 
-#include "logtype.h"
+class User;
+
+namespace LogType {
+  enum LogType;
+}
 
 enum
 {
@@ -79,7 +79,7 @@ private:
   WINDOW *chatLog;
   WINDOW *playerList;
 
-  int commandX;
+  unsigned int commandX;
   int currentCommandHistoryIndex;
   int nextCommandHistoryIndex;
 

@@ -30,31 +30,31 @@
 
 #include "falling.h"
 
-void BlockFalling::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFalling::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockFalling::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFalling::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockFalling::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFalling::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockFalling::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFalling::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockFalling::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFalling::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
    this->onNeighbourMove(user, oldblock, x, y, z, direction);
 }
 
-void BlockFalling::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFalling::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-   uint8 oldblock;
-   uint8 oldmeta;
+   uint8_t oldblock;
+   uint8_t oldmeta;
 
    if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
       return;
@@ -81,18 +81,18 @@ void BlockFalling::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32
    applyPhysics(user,x,y,z);
 }
 
-void BlockFalling::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFalling::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockFalling::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFalling::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockFalling::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockFalling::onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-  uint8 block;
-  uint8 meta;
+  uint8_t block;
+  uint8_t meta;
 
   if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
   {
@@ -102,10 +102,10 @@ void BlockFalling::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y
   applyPhysics(user,x,y,z);
 }
 
-void BlockFalling::applyPhysics(User* user, sint32 x, sint8 y, sint32 z)
+void BlockFalling::applyPhysics(User* user, int32_t x, int8_t y, int32_t z)
 {
-  uint8 fallblock, block;
-  uint8 fallmeta, meta;
+  uint8_t fallblock, block;
+  uint8_t fallmeta, meta;
    
   if (!Mineserver::get()->map()->getBlock(x, y, z, &fallblock, &fallmeta))
   {

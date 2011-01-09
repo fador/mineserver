@@ -102,18 +102,18 @@ bool Physics::update()
 
   clock_t starttime = clock();
 
-  std::vector<sint32> toRemove;
+  std::vector<int32_t> toRemove;
   std::vector<vec> toAdd;
 
   LOG(INFO, "Physics", "Simulating " + dtos(simList.size()) + " items!");
 
-  uint32 listSize = simList.size();
+  uint32_t listSize = simList.size();
   // Iterate each simulation
-  for(uint32 simIt = 0; simIt < listSize; simIt++)
+  for(uint32_t simIt = 0; simIt < listSize; simIt++)
   {
     vec pos = simList[simIt].blocks[0].pos;
     // Blocks
-    uint8 block, meta;
+    uint8_t block, meta;
     Mineserver::get()->map()->getBlock(pos, &block, &meta);
 
     simList[simIt].blocks[0].id   = block;
@@ -124,9 +124,9 @@ bool Physics::update()
     {
       if(isWaterBlock(block))
       {
-        sint32 it = 0;
+        int32_t it = 0;
 
-        //for(sint32 it=simList[simIt].blocks.size()-1; it>=0; it--)
+        //for(int32_t it=simList[simIt].blocks.size()-1; it>=0; it--)
         {
           bool havesource = false;
 
@@ -173,7 +173,7 @@ bool Physics::update()
           if(!havesource)
           {
             //This block will change so add surrounding blocks to simulation
-            for(uint32 i = 0; i < toAdd.size(); i++)
+            for(uint32_t i = 0; i < toAdd.size(); i++)
             {
               addSimulation(toAdd[i]);
             }
@@ -299,7 +299,7 @@ bool Physics::addSimulation(vec pos)
   if(!enabled)
     return true;
 
-  uint8 block; uint8 meta;
+  uint8_t block; uint8_t meta;
   Mineserver::get()->map()->getBlock(pos, &block, &meta);
   SimBlock simulationBlock(block, pos, meta);
 
@@ -343,7 +343,7 @@ bool Physics::checkSurrounding(vec pos)
   if(!enabled)
     return true;
 
-  uint8 block; uint8 meta;
+  uint8_t block; uint8_t meta;
 
   for(int i = 0; i < 6; i++)
   {

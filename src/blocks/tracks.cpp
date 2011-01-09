@@ -44,30 +44,30 @@ enum {
   CORNER_NE
 };
 
-void BlockTracks::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockTracks::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockTracks::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockTracks::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockTracks::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockTracks::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockTracks::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockTracks::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
   
 }
 
-void BlockTracks::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockTracks::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-  uint8 block;
-  uint8 meta;
+  uint8_t block;
+  uint8_t meta;
   
   if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
     return;
@@ -81,10 +81,10 @@ void BlockTracks::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 
   }
 }
 
-void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockTracks::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-  uint8 block;
-  uint8 meta;
+  uint8_t block;
+  uint8_t meta;
 
   if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
      return;
@@ -100,7 +100,7 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   if (!this->isBlockEmpty(x,y,z))
      return;
    
-  uint8 metadata = FLAT_NS;
+  uint8_t metadata = FLAT_NS;
   
   // SOUTH
   if(isTrack(x, y, z-1, meta) && isStartPiece(x, y, z-1))
@@ -254,37 +254,37 @@ void BlockTracks::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 
   Mineserver::get()->map()->sendBlockChange(x, y, z, (char)newblock, metadata);
 }
 
-void BlockTracks::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockTracks::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockTracks::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockTracks::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
   
 }
 
-void BlockTracks::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockTracks::onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
   
 }
 
-bool BlockTracks::isTrack(sint32 x, sint8 y, sint32 z, uint8& meta)
+bool BlockTracks::isTrack(int32_t x, int8_t y, int32_t z, uint8_t& meta)
 {
-  uint8 block;
+  uint8_t block;
   Mineserver::get()->map()->getBlock(x, y, z, &block, &meta);
   return (block == BLOCK_MINECART_TRACKS);
 }
 
-bool BlockTracks::isStartPiece(sint32 x, sint8 y, sint32 z)
+bool BlockTracks::isStartPiece(int32_t x, int8_t y, int32_t z)
 {
-  uint8 block;
-  uint8 meta;
-  sint32 x1, x2, z1, z2;
+  uint8_t block;
+  uint8_t meta;
+  int32_t x1, x2, z1, z2;
   x1 = x2 = x;
   z1 = z2 = z;
   
-  sint8 y1, y2;
+  int8_t y1, y2;
   y1 = y2 = y;
   
   Mineserver::get()->map()->getBlock(x, y, z, &block, &meta);

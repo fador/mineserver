@@ -29,29 +29,29 @@
 
 #include "plant.h"
 
-void BlockPlant::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockPlant::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockPlant::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockPlant::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockPlant::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockPlant::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockPlant::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockPlant::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockPlant::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockPlant::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-   uint8 block;
-   uint8 meta;
+   uint8_t block;
+   uint8_t meta;
    if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
       return;
    
@@ -64,10 +64,10 @@ void BlockPlant::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y
    }   
 }
 
-void BlockPlant::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockPlant::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-   uint8 oldblock;
-   uint8 oldmeta;
+   uint8_t oldblock;
+   uint8_t oldmeta;
 
    /* move the x,y,z coords dependent upon placement direction */
    if (!this->translateDirection(&x,&y,&z,direction))
@@ -103,11 +103,11 @@ void BlockPlant::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
       Mineserver::get()->map()->addSapling(user,x,y,z);
 }
 
-void BlockPlant::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockPlant::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockPlant::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockPlant::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
