@@ -176,7 +176,7 @@ void client_callback(int fd,
     {
       if((errno != EAGAIN && errno != EINTR))// || user->write_err_count>200)
       {
-        Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Error writing to client");
+        Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Error writing to client, tried to write " + dtos(writeLen) + " bytes, code: " + dtos(errno));
         //event_del(user->GetEvent());
 
     #ifdef WIN32
