@@ -148,13 +148,13 @@ void BlockBasic::notifyNeighbours(const int32_t x, const int8_t y, const int32_t
     Mineserver::get()->plugin()->runBlockCallback(block, callback, inv);
   }
 
-  if (ignore_direction != BLOCK_TOP && Mineserver::get()->map()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
+  if (y < 127 && ignore_direction != BLOCK_TOP && Mineserver::get()->map()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
   {
     inv = Function::invoker_type(user, oldblock, x, y+1, z, BLOCK_TOP);
     Mineserver::get()->plugin()->runBlockCallback(block, callback, inv);
   }
 
-  if (ignore_direction != BLOCK_BOTTOM && Mineserver::get()->map()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
+  if (y > 0 && ignore_direction != BLOCK_BOTTOM && Mineserver::get()->map()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
   {
     inv = Function::invoker_type(user, oldblock, x, y-1, z, BLOCK_BOTTOM);
     Mineserver::get()->plugin()->runBlockCallback(block, callback, inv);
