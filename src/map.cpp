@@ -57,6 +57,110 @@
 #include "mineserver.h"
 #include "tree.h"
 
+Map::Map()
+{
+  for(int i = 0; i < 256; i++)
+  {
+    emitLight[i] = 0;
+  }
+  emitLight[0x0A] = 15; // Lava
+  emitLight[0x0B] = 15; // Stationary Lava
+  emitLight[0x27] = 1;  // Brown mushroom
+  emitLight[0x32] = 14; // Torch
+  emitLight[0x33] = 15; // Fire
+  emitLight[0x3E] = 14; // Lit furnace
+  emitLight[0x4A] = 9;  // Redstone ore (Glowing)
+  emitLight[0x4C] = 7;  // Redstone Torch (On)
+  emitLight[0x59] = 15; // Lightstone
+  emitLight[0x5A] = 11; // Portal
+  emitLight[0x5B] = 15; // Jack-O-Lantern
+
+  for(int i = 0; i < 256; i++)
+  {
+    stopLight[i] = 16;
+  }
+  stopLight[0x00] = 0; // Empty
+  stopLight[0x06] = 0; // Sapling
+  stopLight[0x08] = 3; // Water
+  stopLight[0x09] = 3; // Stationary water
+  stopLight[0x12] = 3; // Leaves
+  stopLight[0x14] = 0; // Glass
+  stopLight[0x25] = 0; // Yellow flower
+  stopLight[0x26] = 0; // Red rose
+  stopLight[0x27] = 0; // Brown mushroom
+  stopLight[0x28] = 0; // Red mushroom
+  stopLight[0x32] = 0; // Torch
+  stopLight[0x33] = 0; // Fire
+  stopLight[0x34] = 0; // Mob spawner
+  stopLight[0x35] = 0; // Wooden stairs
+  stopLight[0x37] = 0; // Redstone wire
+  stopLight[0x40] = 0; // Wooden door
+  stopLight[0x41] = 0; // Ladder
+  stopLight[0x42] = 0; // Minecart track
+  stopLight[0x43] = 0; // Cobblestone stairs
+  stopLight[0x47] = 0; // Iron door
+  stopLight[0x4b] = 0; // Redstone Torch (Off)
+  stopLight[0x4C] = 0; // Redstone Torch (On)
+  stopLight[0x4e] = 0; // Snow
+  stopLight[0x4f] = 3; // Ice
+  stopLight[0x55] = 0; // Fence
+  stopLight[0x5A] = 0; // Portal
+  stopLight[0x5B] = 0; // Jack-O-Lantern
+  stopLight[BLOCK_SIGN_POST] = 0; // Sign post
+  stopLight[BLOCK_WALL_SIGN] = 0; // Wall sign
+}
+
+Map::~Map()
+{
+  // Free all memory
+  for(std::map<uint32_t, sChunk>::const_iterator it = maps.begin(); it != maps.end(); it = maps.begin())
+  {
+    releaseMap(maps[it->first].x, maps[it->first].z);
+  }
+
+  //Free item memory
+  for(std::map<uint32_t, spawnedItem *>::const_iterator it = items.begin(); it != items.end(); ++it)
+  {
+    delete items[it->first];
+  }
+
+  items.clear();
+  std::string infile = mapDirectory+"/level.dat";
+
+  NBT_Value* root = NBT_Value::LoadFromFile(infile);
+  if(root != NULL)
+  {
+    NBT_Value &data = *((*root)["Data"]);
+
+    //Get time from the map
+    *data["Time"] = mapTime;
+
+    NBT_Value* trees = ((*root)["Trees"]);
+
+    if(trees)
+    {
+      std::vector<NBT_Value*>* tree_vec = trees->GetList();
+
+      tree_vec->clear();
+
+      for(std::list<sTree>::iterator iter = saplings.begin(); iter != saplings.end(); ++iter)
+      {
+        //(*trees)[i] = (*iter)
+        NBT_Value* tree = new NBT_Value(NBT_Value::TAG_COMPOUND);
+        tree->Insert("X", new NBT_Value( (int32_t)(*iter).x));
+        tree->Insert("Y", new NBT_Value( (int32_t)(*iter).y));
+        tree->Insert("Z", new NBT_Value( (int32_t)(*iter).z));
+        tree->Insert("plantedTime", new NBT_Value( (int32_t)(*iter).plantedTime));
+        tree->Insert("plantedBy", new NBT_Value( (int32_t)(*iter).plantedBy));
+        tree_vec->push_back(tree);
+      }
+    }
+
+    root->SaveToFile(infile);
+
+    delete root;
+  }
+}
 
 void Map::addSapling(User* user, int x, int y, int z)
 {

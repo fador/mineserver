@@ -25,15 +25,14 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "../mineserver.h"
-#include "../chat.h"
-#include "../nbt.h"
-#include "../map.h"
-#include "../logger.h"
-#include "../tools.h"
-#include "../user.h"
-
 #include "chest.h"
+
+#include "../user.h"
+#include "../permissions.h"
+#include "../nbt.h"
+#include "../mineserver.h"
+#include "../map.h"
+#include "../chat.h"
 
 void BlockChest::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {

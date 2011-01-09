@@ -1,5 +1,6 @@
 #include "tree.h"
 
+#include "tools.h"
 
 Tree::Tree(int32_t x, int32_t y, int32_t z)
 {

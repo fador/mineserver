@@ -25,6 +25,8 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "inventory.h"
+
 #ifdef WIN32
   #include <conio.h>
   #include <direct.h>
@@ -45,12 +47,11 @@
 #include <zlib.h>
 #include <sys/stat.h>
 
+#include "constants.h"
 #include "map.h"
 #include "user.h"
 #include "mineserver.h"
-
-
-#include "inventory.h"
+#include "logger.h"
 
 Inventory::Inventory()
 {
@@ -263,11 +264,11 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
   }
 
   std::vector<User *> *otherUsers = NULL;
-  openInventory *currentInventory = NULL;
+  OpenInventory *currentInventory = NULL;
 
   if(windowID != WINDOW_PLAYER)
   {
-    std::vector<openInventory *> *inv;
+    std::vector<OpenInventory *> *inv;
     switch(user->openInv.type)
     {
       case WINDOW_CHEST:
@@ -298,8 +299,6 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
       return false;
     }
   }
-
-
 
   Item *slotItem = NULL;
   
@@ -813,7 +812,7 @@ bool Inventory::windowClose(User *user,int8_t windowID)
 
 bool Inventory::onwindowOpen(User *user,int8_t type, int32_t x, int32_t y, int32_t z)
 {
-  std::vector<openInventory *> *inv;
+  std::vector<OpenInventory *> *inv;
   switch(type)
   {
     case WINDOW_CHEST:
@@ -839,7 +838,7 @@ bool Inventory::onwindowOpen(User *user,int8_t type, int32_t x, int32_t y, int32
   }
 
   //If the inventory not yet opened, create it
-  openInventory *newInv = new openInventory();
+  OpenInventory *newInv = new OpenInventory();
   newInv->type = type;
   newInv->x    = x;
   newInv->y    = y;
@@ -855,7 +854,7 @@ bool Inventory::onwindowOpen(User *user,int8_t type, int32_t x, int32_t y, int32
 }
 bool Inventory::onwindowClose(User *user,int8_t type,int32_t x, int32_t y, int32_t z)
 {
-  std::vector<openInventory *> *inv;
+  std::vector<OpenInventory *> *inv;
   switch(type)
   {
     case WINDOW_CHEST:

@@ -29,10 +29,24 @@
 #define _INVENTORY_H_
 
 #include <stdint.h>
+#include <vector>
 
 class User;
 
-struct openInventory
+struct Item
+{
+  int16_t type;
+  int8_t count;
+  int16_t health;
+  Item()
+  {
+    type   = -1;
+    count  = 0;
+    health = 0;
+  }
+};
+
+struct OpenInventory
 {
   int8_t type;
   int32_t x;
@@ -45,6 +59,8 @@ struct openInventory
 enum { WINDOW_CURSOR = -1, WINDOW_PLAYER = 0, WINDOW_WORKBENCH, WINDOW_CHEST, WINDOW_LARGE_CHEST, WINDOW_FURNACE };
 
 enum { INVENTORYTYPE_CHEST = 0,INVENTORYTYPE_WORKBENCH, INVENTORYTYPE_FURNACE };
+
+class User;
 
 class Inventory
 {
@@ -75,9 +91,9 @@ public:
   }
 
   //Open chest/workbench/furnace inventories
-  std::vector<openInventory *> openWorkbenches;
-  std::vector<openInventory *> openChests;
-  std::vector<openInventory *> openFurnaces;
+  std::vector<OpenInventory *> openWorkbenches;
+  std::vector<OpenInventory *> openChests;
+  std::vector<OpenInventory *> openFurnaces;
 
   bool onwindowOpen(User *user,int8_t type, int32_t x, int32_t y, int32_t z);
   bool onwindowClose(User *user,int8_t type,int32_t x, int32_t y, int32_t z);
@@ -102,6 +118,5 @@ public:
   int16_t itemHealth(int16_t itemID, int8_t block, bool &rightUse);
 
 };
-
 
 #endif

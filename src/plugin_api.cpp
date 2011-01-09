@@ -40,6 +40,7 @@
 #endif
 
 #include "logger.h"
+#include "chat.h"
 
 #include "hook.h"
 #include "plugin.h"

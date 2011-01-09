@@ -28,27 +28,25 @@
 #ifndef _MINESERVER_H
 #define _MINESERVER_H
 
+#include <iostream>
 #include <vector>
+
 #ifdef WIN32
-  #include <winsock2.h>
-#else
-  #include <netinet/in.h>
+  // This is needed for event to work on Windows.
+  #include <Winsock2.h>
 #endif
 
-#include <iostream>
-
-#include <event.h>
-
-#include "user.h"
-#include "map.h"
 #include "chat.h"
-#include "plugin.h"
-#include "physics.h"
 #include "config.h"
-#include "logger.h"
 #include "furnaceManager.h"
-#include "worldgen/mapgen.h"
 #include "inventory.h"
+#include "logger.h"
+#include "map.h"
+#include "physics.h"
+#include "plugin.h"
+#include "screen.h"
+#include "user.h"
+#include "worldgen/mapgen.h"
 
 #ifdef FADOR_PLUGIN
 #define MINESERVER

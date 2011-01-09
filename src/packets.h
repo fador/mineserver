@@ -31,14 +31,6 @@
 #include <string.h>
 #include <stdint.h>
 
-#ifdef WIN32
-  #include <winsock2.h>
-#else
-  #include <netinet/in.h>
-#endif
-
-#include "tools.h"
-
 #define PACKET_NEED_MORE_DATA -3
 #define PACKET_DOES_NOT_EXIST -2
 #define PACKET_VARIABLE_LEN   -1
@@ -164,151 +156,21 @@ public:
     m_readPos = 0;
   }
 
-  Packet & operator<<(int8_t val)
-  {
-    m_writeBuffer.push_back(val);
-    return *this;
-  }
-
-  Packet & operator>>(int8_t &val)
-  {
-    if(haveData(1))
-    {
-      val = *reinterpret_cast<const int8_t*>(&m_readBuffer[m_readPos]);
-      m_readPos += 1;
-    }
-    return *this;
-  }
-
-  Packet & operator<<(int16_t val)
-  {
-    uint16_t nval = htons(val);
-    addToWrite(&nval, 2);
-    return *this;
-  }
-
-  Packet & operator>>(int16_t &val)
-  {
-    if(haveData(2))
-    {
-      val = ntohs(*reinterpret_cast<const int16_t*>(&m_readBuffer[m_readPos]));
-      m_readPos += 2;
-    }
-    return *this;
-  }
-
-  Packet & operator<<(int32_t val)
-  {
-    uint32_t nval = htonl(val);
-    addToWrite(&nval, 4);
-    return *this;
-  }
-
-  Packet & operator>>(int32_t &val)
-  {
-    if(haveData(4))
-    {
-      val = ntohl(*reinterpret_cast<const int32_t*>(&m_readBuffer[m_readPos]));
-      m_readPos += 4;
-    }
-    return *this;
-  }
-
-  Packet & operator<<(int64_t val)
-  {
-    uint64_t nval = ntohll(val);
-    addToWrite(&nval, 8);
-    return *this;
-  }
-
-  Packet & operator>>(int64_t &val)
-  {
-    if(haveData(8))
-    {
-      val = *reinterpret_cast<const int64_t*>(&m_readBuffer[m_readPos]);
-      val = ntohll(val);
-      m_readPos += 8;
-    }
-    return *this;
-  }
-
-  Packet & operator<<(float val)
-  {
-    uint32_t nval;
-    memcpy(&nval, &val , 4);
-    nval = htonl(nval);
-    addToWrite(&nval, 4);
-    return *this;
-  }
-
-  Packet & operator>>(float &val)
-  {
-    if(haveData(4))
-    {
-      int32_t ival = ntohl(*reinterpret_cast<const int32_t*>(&m_readBuffer[m_readPos]));
-      memcpy(&val, &ival, 4);
-      m_readPos += 4;
-    }
-    return *this;
-  }
-
-  Packet & operator<<(double val)
-  {
-    uint64_t nval;
-    memcpy(&nval, &val, 8);
-    nval = ntohll(nval);
-    addToWrite(&nval, 8);
-    return *this;
-  }
-
-
-  Packet & operator>>(double &val)
-  {
-    if(haveData(8))
-    {
-      uint64_t ival = *reinterpret_cast<const uint64_t*>(&m_readBuffer[m_readPos]);
-      ival = ntohll(ival);
-      memcpy((void*)&val, (void*)&ival, 8);
-      m_readPos += 8;
-    }
-    return *this;
-  }
-
-  Packet & operator<<(const std::string &str)
-  {
-    uint16_t lenval = htons(str.size());
-    addToWrite(&lenval, 2);
-
-    addToWrite(&str[0], str.size());
-    return *this;
-  }
-
-  Packet & operator>>(std::string &str)
-  {
-    uint16_t lenval;
-    if(haveData(2))
-    {
-      lenval = ntohs(*reinterpret_cast<const int16_t*>(&m_readBuffer[m_readPos]));
-      m_readPos += 2;
-
-      if(haveData(lenval))
-      {
-        str.assign((char*)&m_readBuffer[m_readPos], lenval);
-        m_readPos += lenval;
-      }
-    }    
-    return *this;
-  }
-
-  void operator<<(Packet &other)
-  {
-    int dataSize = other.getWriteLen();
-    if(dataSize == 0)
-      return;
-    BufferVector::size_type start = m_writeBuffer.size();
-    m_writeBuffer.resize(start + dataSize);
-    memcpy(&m_writeBuffer[start], other.getWrite(), dataSize);
-  }
+  Packet & operator<<(int8_t val);
+  Packet & operator>>(int8_t &val);
+  Packet & operator<<(int16_t val);
+  Packet & operator>>(int16_t &val);
+  Packet & operator<<(int32_t val);
+  Packet & operator>>(int32_t &val);
+  Packet & operator<<(int64_t val);
+  Packet & operator>>(int64_t &val);
+  Packet & operator<<(float val);
+  Packet & operator>>(float &val);
+  Packet & operator<<(double val);
+  Packet & operator>>(double &val);
+  Packet & operator<<(const std::string &str);
+  Packet & operator>>(std::string &str);
+  void operator<<(Packet &other);
 
   void getData(void *buf, int count)
   {

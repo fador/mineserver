@@ -32,8 +32,6 @@
 // Mineserver logger.h
 //
 #include <string>
-#include "screen.h"
-#include "tools.h"
 
 #include "logtype.h"
 

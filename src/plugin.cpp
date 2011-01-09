@@ -34,7 +34,7 @@
 #include <dlfcn.h>
 #endif
 
-
+#include "constants.h"
 #include "logger.h"
 
 #include "plugin.h"

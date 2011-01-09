@@ -34,6 +34,7 @@
 #include <noise/noise.h>
 #endif
 
+#include "mersenne.h"
 #include "cavegen.h"
 
 class MapGen

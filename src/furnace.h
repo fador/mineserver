@@ -29,12 +29,7 @@
 #define _FURNACE_H
 
 #include <cstdlib>
-
-//#include "types.h"
-
-/*
-#include "constants.h"
-*/
+#include <stdint.h>
 
 class User;
 class NBT_Value;

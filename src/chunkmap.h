@@ -31,6 +31,9 @@
 #include <set>
 #include <list>
 
+#include "packets.h"
+#include "user.h"
+
 class User;
 class NBT_Value;
 struct spawnedItem;

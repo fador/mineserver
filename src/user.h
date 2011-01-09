@@ -30,14 +30,15 @@
 
 #include <vector>
 
-#include "event.h"
+#ifdef WIN32
+  // This is needed for event to work on Windows.
+  #include <winsock2.h>
+#endif
+#include <event.h>
 
 #include "vec.h"
-#include "tools.h"
-#include "constants.h"
+#include "inventory.h"
 #include "packets.h"
-#include "permissions.h"
-
 
 struct position
 {
@@ -48,21 +49,6 @@ struct position
   float yaw;
   float pitch;
 };
-
-struct Item
-{
-  int16_t type;
-  int8_t count;
-  int16_t health;
-  Item()
-  {
-    type   = -1;
-    count  = 0;
-    health = 0;
-  }
-};
-
-#include "inventory.h"
 
 uint32_t generateEID();
 
@@ -96,7 +82,7 @@ public:
   //Do we have an open _shared_ inventory?
   bool isOpenInv;
   //More info on the inventory
-  openInventory openInv;
+  OpenInventory openInv;
 
   int permissions; // bitmask for permissions. See permissions.h
 

@@ -25,36 +25,16 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <cstdlib>
-#include <cstdio>
-#include <iostream>
-#include <deque>
-#include <fstream>
-#include <vector>
-#include <ctime>
-#include <math.h>
-#include <algorithm>
-#include <string>
-
-#ifdef WIN32
-  #include <winsock2.h>
-#else
-  #include <netinet/in.h>
-  #include <string.h>
-#endif
-
-#include "constants.h"
-
-#include "tools.h"
-#include "map.h"
-#include "user.h"
 #include "chat.h"
-#include "config.h"
-#include "physics.h"
+
+#include <ctime>
+#include <iostream>
+#include <fstream>
+
 #include "constants.h"
-#include "plugin.h"
-#include "mineserver.h"
 #include "logger.h"
+#include "mineserver.h"
+#include "permissions.h"
 
 Chat::Chat()
 {
@@ -64,7 +44,7 @@ Chat::~Chat()
 {
 }
 
-bool Chat::checkMotd(std::string motdFile)
+bool Chat::checkMotd(const std::string& motdFile)
 {
   //
   // Create motdfile is it doesn't exist

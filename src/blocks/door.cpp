@@ -25,8 +25,9 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "../mineserver.h"
 #include "door.h"
+
+#include "../mineserver.h"
 
 void BlockDoor::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {

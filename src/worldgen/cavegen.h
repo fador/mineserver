@@ -28,6 +28,8 @@
 #ifndef _CAVEGEN_H
 #define _CAVEGEN_H
 
+#include <stdint.h>
+
 #include "mersenne.h"
 
 class CaveGen

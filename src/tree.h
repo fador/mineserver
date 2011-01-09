@@ -1,10 +1,9 @@
 #ifndef _TREE_H_
 #define _TREE_H_
 
+#include "constants.h"
 #include "mineserver.h"
-#include "tools.h"
 #include "map.h"
-#include "screen.h"
 #include "vec.h"
 #include <stack>
 

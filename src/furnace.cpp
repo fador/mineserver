@@ -26,6 +26,8 @@
  */
 
 #include <iostream>
+
+#include "constants.h"
 #include "furnace.h"
 #include "mineserver.h"
 

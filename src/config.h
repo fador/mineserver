@@ -31,8 +31,9 @@
 #include <string>
 #include <list>
 
-#include "config/parser.h"
 #include "config/node.h"
+
+class ConfigParser;
 
 class Config
 {

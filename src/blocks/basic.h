@@ -31,6 +31,8 @@
 #include <stdint.h>
 #include <string>
 
+#include "../constants.h"
+
 class User;
 
 /**

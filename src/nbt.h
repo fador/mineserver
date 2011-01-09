@@ -28,12 +28,12 @@
 #ifndef _NBT_H
 #define _NBT_H
 
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
+
+#include <stdint.h>
 #include <zlib.h>
-#include "screen.h"
-#include "tools.h"
 
 class NBT_Value
 {

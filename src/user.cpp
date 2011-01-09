@@ -25,7 +25,6 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <vector>
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>
@@ -44,18 +43,18 @@
 #endif
 #include <zlib.h>
 #include <ctime>
+
 #include "constants.h"
 
 #include "logger.h"
-#include "tools.h"
 #include "map.h"
 #include "user.h"
-#include "nbt.h"
 #include "chat.h"
+#include "plugin.h"
 #include "packets.h"
 #include "mineserver.h"
 #include "config.h"
-#include "sockets.h"
+#include "permissions.h"
 
 //Generate "unique" entity ID
 uint32_t generateEID()

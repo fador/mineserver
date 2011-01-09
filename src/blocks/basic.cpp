@@ -115,7 +115,7 @@ bool BlockBasic::isBlockEmpty(const int32_t x, const int8_t y, const int32_t z)
 
 bool BlockBasic::spawnBlockItem(const int32_t x, const int8_t y, const int32_t z, const uint8_t block)
 {
-  if (BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand() % 10000)
+  if (BLOCKDROPS.count(block) && (int)BLOCKDROPS[block].probability >= rand() % 10000)
   {
     uint16_t item_id = BLOCKDROPS[block].item_id;
     int count = BLOCKDROPS[block].count;
