@@ -225,7 +225,7 @@ ConfigNode* ConfigNode::get(const std::string& key, bool createMissing)
 {
   if (m_type != CONFIG_NODE_LIST)
   {
-    return false;
+    return NULL;
   }
 
   size_t pos = key.find('.');
@@ -244,7 +244,7 @@ ConfigNode* ConfigNode::get(const std::string& key, bool createMissing)
     {
       if (createMissing == false)
       {
-        return false;
+        return NULL;
       }
       else
       {
@@ -265,7 +265,7 @@ ConfigNode* ConfigNode::get(const std::string& key, bool createMissing)
       }
       else
       {
-        return false;
+        return NULL;
       }
     }
 
