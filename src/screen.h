@@ -25,7 +25,8 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef _SCREEN_H
+#define _SCREEN_H
 
 #include <cstdlib>
 #include <iostream>
@@ -55,6 +56,8 @@ enum
   TEXT_COLOR_INVERSE
 };
 
+#define COMMAND_HISTORY_SIZE 40
+
 class Screen
 {
 public:
@@ -77,6 +80,15 @@ private:
   WINDOW *playerList;
 
   int commandX;
+  int currentCommandHistoryIndex;
+  int nextCommandHistoryIndex;
+
   std::string currentCommand;
-  std::string commandHistory[25];
+  std::string commandHistory[COMMAND_HISTORY_SIZE];
+
+  static const int commandHistorySize = COMMAND_HISTORY_SIZE;
 };
+
+#undef COMMAND_HISTORY_SIZE
+
+#endif /* _SCREEN_H_ */

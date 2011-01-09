@@ -45,7 +45,9 @@ void Screen::init(std::string version)
   echo();
   refresh();
 
-  for (int i = 0; i < 25; i++)
+  currentCommandHistoryIndex = 0;
+  nextCommandHistoryIndex = 0;
+  for (int i = 0; i < commandHistorySize; i++)
   {
     commandHistory[i].clear();
   }
@@ -191,10 +193,57 @@ bool Screen::hasCommand()
           ++commandX;
         }
       }
+      else if (readchar == KEY_DOWN)
+      {
+        // Get the next command in the history
+        currentCommandHistoryIndex = (currentCommandHistoryIndex + 1) % commandHistorySize;
+
+        if (currentCommandHistoryIndex == nextCommandHistoryIndex)
+        {
+          // At the start of the history
+          currentCommand = "";
+          if ((--currentCommandHistoryIndex) < 0)
+          {
+            currentCommandHistoryIndex += Screen::commandHistorySize;
+          }
+        }
+        else
+        {
+          currentCommand = commandHistory[currentCommandHistoryIndex];
+        }
+
+        // Render the command to the screen
+        wdeleteln(commandLog);
+        wmove(commandLog, 4, 1);
+        waddstr(commandLog, currentCommand.c_str());
+        commandX = currentCommand.size();
+      }
       else if (readchar == KEY_UP)
       {
-        // FIXME
-        log(LogType::LOG_INFO, "Console", "Up arrow key was pressed");
+        // Get the previous command from the command history.
+        if (!commandHistory[currentCommandHistoryIndex].empty())
+        {
+          currentCommand = commandHistory[currentCommandHistoryIndex];
+        }
+
+        if (currentCommandHistoryIndex != nextCommandHistoryIndex)
+        {
+          // Set it up to go to the previous command next time.
+          currentCommandHistoryIndex = currentCommandHistoryIndex - 1;
+          if (currentCommandHistoryIndex < 0)
+          {
+            currentCommandHistoryIndex += Screen::commandHistorySize;
+          }
+        }
+
+        if (!currentCommand.empty())
+        {
+          // Render the command to the screen.
+          wdeleteln(commandLog);
+          wmove(commandLog, 4, 1);
+          waddstr(commandLog, currentCommand.c_str());
+          commandX = currentCommand.size();
+        }
       }
       else
       {
@@ -231,6 +280,9 @@ std::string Screen::getCommand()
   {
     wmove(commandLog, 4, command.size() + 1);
     log(LogType::LOG_INFO, "Command", "");
+    currentCommandHistoryIndex =  nextCommandHistoryIndex;
+    commandHistory[nextCommandHistoryIndex++] = command;
+    nextCommandHistoryIndex = nextCommandHistoryIndex % Screen::commandHistorySize;    
   }
   return command;
 }
