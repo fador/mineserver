@@ -1,28 +1,28 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
-   All rights reserved.
+  Copyright (c) 2010, The Mineserver Project
+  All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
- * Neither the name of the The Mineserver Project nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <string>
@@ -120,20 +120,20 @@ std::list<std::string>* ConfigNode::keys(int type)
   {
     if ((type == CONFIG_NODE_UNDEFINED) || (iter_a->second->type() == type))
     {
-      keys->push_back(iter_a->first);
+    keys->push_back(iter_a->first);
     }
 
     if (iter_a->second->type() == CONFIG_NODE_LIST)
     {
-      std::list<std::string>* tmp_list = iter_a->second->keys(type);
-      std::list<std::string>::iterator tmp_iter = tmp_list->begin();
+    std::list<std::string>* tmp_list = iter_a->second->keys(type);
+    std::list<std::string>::iterator tmp_iter = tmp_list->begin();
 
-      for (;tmp_iter!=tmp_list->end();++tmp_iter)
+    for (;tmp_iter!=tmp_list->end();++tmp_iter)
       {
         keys->push_back((iter_a->first)+"."+(*tmp_iter));
       }
 
-      delete tmp_list;
+    delete tmp_list;
     }
   }
 
@@ -203,12 +203,12 @@ bool ConfigNode::has(const std::string& key)
 
     if (m_list.count(keyA) == 0)
     {
-      return false;
+    return false;
     }
     else
     {
-      tmp = m_list[keyA];
-      return tmp->has(keyB);
+    tmp = m_list[keyA];
+    return tmp->has(keyB);
     }
   }
   else if (m_list.count(key) == 1)
@@ -238,15 +238,15 @@ ConfigNode* ConfigNode::get(const std::string& key, bool createMissing)
 
     if (m_list.count(keyA))
     {
-      tmp = m_list[keyA];
+    tmp = m_list[keyA];
     }
     else
     {
-      if (createMissing == false)
+    if (createMissing == false)
       {
         return NULL;
       }
-      else
+    else
       {
         tmp = new ConfigNode();
         m_list[keyA] = tmp;
@@ -259,11 +259,11 @@ ConfigNode* ConfigNode::get(const std::string& key, bool createMissing)
   {
     if (m_list.count(key) == 0)
     {
-      if (createMissing == true)
+    if (createMissing == true)
       {
         m_list[key] = new ConfigNode;
       }
-      else
+    else
       {
         return NULL;
       }
@@ -287,11 +287,11 @@ bool ConfigNode::set(const std::string& key, ConfigNode* ptr, bool createMissing
 
     if (m_list.count(keyA) == 0)
     {
-      if (createMissing == false)
+    if (createMissing == false)
       {
         return false;
       }
-      else
+    else
       {
         m_list[keyA] = new ConfigNode;
       }
@@ -337,18 +337,18 @@ void ConfigNode::dump(int indent=0) const
   {
     case CONFIG_NODE_UNDEFINED:
     {
-      std::cout << "undefined\n";
-      break;
+    std::cout << "undefined\n";
+    break;
     }
 
     case CONFIG_NODE_LIST:
     {
-      std::cout << "list:\n";
+    std::cout << "list:\n";
 
-      std::map<std::string, ConfigNode*>::const_iterator iter_a = m_list.begin();
-      std::map<std::string, ConfigNode*>::const_iterator iter_b = m_list.end();
+    std::map<std::string, ConfigNode*>::const_iterator iter_a = m_list.begin();
+    std::map<std::string, ConfigNode*>::const_iterator iter_b = m_list.end();
 
-      for (;iter_a!=iter_b;++iter_a)
+    for (;iter_a!=iter_b;++iter_a)
       {
         for (int i=0;i<(indent+1);i++)
         {
@@ -358,31 +358,31 @@ void ConfigNode::dump(int indent=0) const
         iter_a->second->dump(indent+1);
       }
 
-      break;
+    break;
     }
 
     case CONFIG_NODE_BOOLEAN:
     {
-      std::cout << "boolean: " << ((m_nData == 0) ? "true" : "false") << "\n";
-      break;
+    std::cout << "boolean: " << ((m_nData == 0) ? "true" : "false") << "\n";
+    break;
     }
 
     case CONFIG_NODE_NUMBER:
     {
-      std::cout << "number: " << m_nData << "\n";
-      break;
+    std::cout << "number: " << m_nData << "\n";
+    break;
     }
 
     case CONFIG_NODE_STRING:
     {
-      std::cout << "string: " << m_sData << "\n";
-      break;
+    std::cout << "string: " << m_sData << "\n";
+    break;
     }
 
     default:
     {
-      std::cout << "unknown\n";
-      break;
+    std::cout << "unknown\n";
+    break;
     }
   }
 }
