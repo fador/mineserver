@@ -67,7 +67,7 @@ ifeq ($(DEBIAN), 1)
 endif
 
 # Tools
-CXX          = clang
+CXX          = g++
 OBJCOPY      = objcopy
 COMPILE      = $(CXX) $(INC) $(CXXFLAGS) $(ARCHFLAGS) -c $< -o $@
 MAKEDEPEND   = $(CXX) -M $(INC) $(CXXFLAGS) $(ARCHFLAGS) -o "$(DEPDIR)/$*.d" $<
