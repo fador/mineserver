@@ -161,32 +161,32 @@ public:
   // Create default hooks
   Plugin()
   {
-    setHook("Timer200", new Hook0<void>);
-    setHook("Timer1000", new Hook0<void>);
-    setHook("Timer10000", new Hook0<void>);
-    setHook("PlayerLoginPre", new Hook2<bool,User*,std::string*>);
-    setHook("PlayerLoginPost", new Hook1<void,User*>);
-    setHook("PlayerNickPost", new Hook2<void,User*,std::string>);
-    setHook("PlayerKickPost", new Hook2<void,User*,std::string>);
-    setHook("PlayerQuitPost", new Hook1<void,User*>);
-    setHook("PlayerChatPre", new Hook3<bool,User*,time_t,std::string>);
-    setHook("PlayerChatPost", new Hook3<void,User*,time_t,std::string>);
-    setHook("PlayerArmSwing", new Hook1<void,User*>);
-    setHook("PlayerDamagePre", new Hook3<bool,User*,User*,int>);
-    setHook("PlayerDamagePost", new Hook3<void,User*,User*,int>);
-    setHook("PlayerDisconnect", new Hook3<void,User*,uint32,uint16>);
-    setHook("PlayerDiggingStarted", new Hook4<void,User*,sint32,sint8,sint32>);
-    setHook("PlayerDigging", new Hook4<void,User*,sint32,sint8,sint32>);
-    setHook("PlayerDiggingStopped", new Hook4<void,User*,sint32,sint8,sint32>);
-    setHook("BlockBreakPre", new Hook4<bool,User*,sint32,sint8,sint32>);
-    setHook("BlockBreakPost", new Hook4<void,User*,sint32,sint8,sint32>);
-    setHook("BlockNeighbourBreak", new Hook7<void,User*,sint32,sint8,sint32,sint32,sint8,sint32>);
-    setHook("BlockPlacePre", new Hook5<bool,User*,sint32,sint8,sint32,sint16>);
-    setHook("BlockPlacePost", new Hook5<void,User*,sint32,sint8,sint32,sint16>);
-    setHook("BlockNeighbourPlace", new Hook7<void,User*,sint32,sint8,sint32,sint32,sint8,sint32>);
-    setHook("BlockReplacePre", new Hook6<void,User*,sint32,sint8,sint32,sint16,sint16>);
-    setHook("BlockReplacePost", new Hook6<void,User*,sint32,sint8,sint32,sint16,sint16>);
-    setHook("BlockNeighbourReplace", new Hook9<void,User*,sint32,sint8,sint32,sint32,sint8,sint32,sint16,sint16>);
+    setHook("Timer200", new Hook0<bool>);
+    setHook("Timer1000", new Hook0<bool>);
+    setHook("Timer10000", new Hook0<bool>);
+    setHook("PlayerLoginPre", new Hook2<bool,const char*,char***>);
+    setHook("PlayerLoginPost", new Hook1<bool,const char*>);
+    setHook("PlayerNickPost", new Hook2<bool,const char*,const char*>);
+    setHook("PlayerKickPost", new Hook2<bool,const char*,const char*>);
+    setHook("PlayerQuitPost", new Hook1<bool,const char*>);
+    setHook("PlayerChatPre", new Hook3<bool,const char*,time_t,const char*>);
+    setHook("PlayerChatPost", new Hook3<bool,const char*,time_t,const char*>);
+    setHook("PlayerArmSwing", new Hook1<bool,const char*>);
+    setHook("PlayerDamagePre", new Hook3<bool,const char*,const char*,int>);
+    setHook("PlayerDamagePost", new Hook3<bool,const char*,const char*,int>);
+    setHook("PlayerDisconnect", new Hook3<bool,const char*,uint32,uint16>);
+    setHook("PlayerDiggingStarted", new Hook4<bool,const char*,sint32,sint8,sint32>);
+    setHook("PlayerDigging", new Hook4<bool,const char*,sint32,sint8,sint32>);
+    setHook("PlayerDiggingStopped", new Hook4<bool,const char*,sint32,sint8,sint32>);
+    setHook("BlockBreakPre", new Hook4<bool,const char*,sint32,sint8,sint32>);
+    setHook("BlockBreakPost", new Hook4<bool,const char*,sint32,sint8,sint32>);
+    setHook("BlockNeighbourBreak", new Hook7<bool,const char*,sint32,sint8,sint32,sint32,sint8,sint32>);
+    setHook("BlockPlacePre", new Hook5<bool,const char*,sint32,sint8,sint32,sint16>);
+    setHook("BlockPlacePost", new Hook5<bool,const char*,sint32,sint8,sint32,sint16>);
+    setHook("BlockNeighbourPlace", new Hook7<bool,const char*,sint32,sint8,sint32,sint32,sint8,sint32>);
+    setHook("BlockReplacePre", new Hook6<bool,const char*,sint32,sint8,sint32,sint16,sint16>);
+    setHook("BlockReplacePost", new Hook6<bool,const char*,sint32,sint8,sint32,sint16,sint16>);
+    setHook("BlockNeighbourReplace", new Hook9<bool,const char*,sint32,sint8,sint32,sint32,sint8,sint32,sint16,sint16>);
   }
   // Remove existing hooks
   ~Plugin()

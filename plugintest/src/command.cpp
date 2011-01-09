@@ -39,8 +39,9 @@ copy command.so to Mineserver bin directory.
 #include <map>
 #include <iostream>
 
+#define MINESERVER_C_API
 #include "../../src/plugin_api.h"
-#include "../../src/logtype.h"
+//#include "../../src/logtype.h"
 
 #include "command.h"
 
@@ -128,7 +129,8 @@ void registerCommand(Command* command)
   }
 }
 
-bool chatPreFunction(const char* userIn, const char* msgIn)
+#define LOG_INFO 6
+bool chatPreFunction(const char* userIn,time_t timestamp, const char* msgIn)
 {
   std::string user(userIn);
   std::string msg(msgIn);
@@ -141,12 +143,12 @@ bool chatPreFunction(const char* userIn, const char* msgIn)
   char prefix = msg[0];
 
   std::string logMsg = "Command Plugin got from "+user+": " + msg;
-  mineserver->logger.log(LogType::LOG_INFO, "plugin.command", logMsg.c_str());
+  mineserver->logger.log(LOG_INFO, "plugin.command", logMsg.c_str());
 
   if (prefix == CHATCMDPREFIX)
   {
     // Timestamp
-    time_t rawTime = time(NULL);
+    time_t rawTime = timestamp;
     struct tm* Tm  = localtime(&rawTime);
     std::string timeStamp (asctime(Tm));
     timeStamp = timeStamp.substr(11, 5);
@@ -515,29 +517,25 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mi
   if (mineserver->plugin.getPluginVersion(pluginName.c_str()) > 0)
   {
     std::string msg = "command is already loaded v."+dtos(mineserver->plugin.getPluginVersion(pluginName.c_str()));
-    mineserver->logger.log(LogType::LOG_INFO, "plugin.command", msg.c_str());
+    mineserver->logger.log(LOG_INFO, "plugin.command", msg.c_str());
     return;
   }
   std::string msg = "Loaded "+pluginName+"!";
-  mineserver->logger.log(LogType::LOG_INFO, "plugin.command", msg.c_str());
+  mineserver->logger.log(LOG_INFO, "plugin.command", msg.c_str());
 
   mineserver->plugin.setPluginVersion(pluginName.c_str(), PLUGIN_COMMAND_VERSION);
 
-  mineserver->callback.add_hook("ChatPre", (void *)chatPreFunction);
-  mineserver->callback.add_hook("BlockPlacePre", (void *)blockPlacePreFunction);
+  mineserver->plugin.addCallback("PlayerChatPre", (void *)chatPreFunction);
+  mineserver->plugin.addCallback("BlockPlacePre", (void *)blockPlacePreFunction);
 
   registerCommand(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf));
   registerCommand(new Command(parseCmd("home"), "", "Teleport to map spawn location", home));
   registerCommand(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime));
   registerCommand(new Command(parseCmd("cuboid"), "", "type in the command and place two blocks, it will fill the space between them", cuboid));  
-  registerCommand(new Command(parseCmd("players who list"), "", "Lists online players", playerList));
-
+  registerCommand(new Command(parseCmd("players who names list"), "", "Lists online players", playerList));
   registerCommand(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems));
-
-  registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap));
-  
+  registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap));  
   registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", sendHelp));
-
   registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport));
 }
 
@@ -545,7 +543,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_shutdown(void)
 {
   if (mineserver->plugin.getPluginVersion(pluginName.c_str()) <= 0)
   {
-    mineserver->logger.log(LogType::LOG_INFO, "plugin.command", "command is not loaded!");
+    mineserver->logger.log(LOG_INFO, "plugin.command", "command is not loaded!");
     return;
   }
 }

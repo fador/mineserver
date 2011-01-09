@@ -28,7 +28,15 @@
 #ifndef _PLUGIN_API_H
 #define _PLUGIN_API_H
 
+#ifdef __cplusplus
+#ifndef MINESERVER_C_API
+  #define USE_HOOKS
+#endif
+#endif
+
+#ifdef USE_HOOKS
 #include "hook.h"
+#endif
 
 #ifdef WIN32
 #define PLUGIN_API_EXPORT extern "C" __declspec(dllexport) 
@@ -43,22 +51,30 @@ struct plugin_pointer_struct
   float (*getPluginVersion)(const char* name);
   void (*setPluginVersion)(const char* name, float version);
   bool (*hasHook)(const char* hookID);
+#ifdef USE_HOOKS
   void (*setHook)(const char* hookID, Hook* hook);
+#else
+  void (*setHook)(const char* hookID, void* hook);
+#endif
   void (*addCallback)(const char* hookID, void* function);
+  bool (*doUntilTrue)(const char* hookID, ...);
+  bool (*doUntilFalse)(const char* hookID, ...);
+  void (*doAll)(const char* hookID, ...);
   void *temp[10];
 };
 
 struct user_pointer_struct
 {
-  bool (*teleport)(const char* user,double x, double y, double z);
+  bool (*teleport)   (const char* user,double x, double y, double z);
   bool (*getPosition)(const char* user, double* x, double* y, double* z, float* yaw, float* pitch, double *stance);
+  bool (*sethealth)  (const char* user,int userHealth);
   void *temp[100];
 };
 
 struct chat_pointer_struct
 {
-  bool    (*sendmsgTo)(const char* user,const char* msg);
-  bool      (*sendmsg)(const char* msg);
+  bool (*sendmsgTo)   (const char* user,const char* msg);
+  bool (*sendmsg)     (const char* msg);
   bool (*sendUserlist)(const char* user);
   void *temp[100];
 };
@@ -77,18 +93,21 @@ struct map_pointer_struct
   bool (*getBlock)(int x, int y, int z, unsigned char* type,unsigned char* meta);
   bool (*setBlock)(int x, int y, int z, unsigned char type,unsigned char meta);
   void (*saveWholeMap)(void);
-  void *temp[100];
-};
-
-struct callback_pointer_struct
-{
-  bool (*add_hook)(const char* name, void *function);
+  unsigned char* (*getMapData_block)(int x, int z);
+  unsigned char* (*getMapData_meta)(int x, int z);
+  unsigned char* (*getMapData_skylight)(int x, int z);
+  unsigned char* (*getMapData_blocklight)(int x, int z);
   void *temp[100];
 };
 
 struct config_pointer_struct
 {
   int (*iData)(const char* name);
+  long (*lData)(const char* name);
+  float (*fData)(const char* name);
+  double (*dData)(const char* name);
+  const char* (*sData)(const char* name);
+  bool (*bData)(const char* name);
   void *temp[100];
 };
 
@@ -99,9 +118,7 @@ struct mineserver_pointer_struct
   chat_pointer_struct chat;
   plugin_pointer_struct plugin;
   user_pointer_struct user;
-  callback_pointer_struct callback;
   config_pointer_struct config;
-
 
   void *temp[100];
 };
