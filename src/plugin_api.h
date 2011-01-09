@@ -102,6 +102,7 @@ struct map_pointer_struct
 
 struct config_pointer_struct
 {
+  bool (*has)(const char* name);
   int (*iData)(const char* name);
   long (*lData)(const char* name);
   float (*fData)(const char* name);

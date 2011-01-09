@@ -328,6 +328,11 @@ bool user_sethealth(const char* user,int userHealth)
 }
 
 // CONFIG WRAPPER FUNCTIONS
+bool config_has(const char* name)
+{
+  return Mineserver::get()->config()->has(std::string(name));
+}
+
 int config_iData(const char* name)
 {
   return Mineserver::get()->config()->iData(std::string(name));
@@ -391,6 +396,7 @@ void init_plugin_api(void)
   plugin_api_pointers.user.teleport             = &user_teleport;
   plugin_api_pointers.user.sethealth            = &user_sethealth;
 
+  plugin_api_pointers.config.has                = &config_has;
   plugin_api_pointers.config.iData              = &config_iData;
   plugin_api_pointers.config.lData              = &config_lData;
   plugin_api_pointers.config.fData              = &config_fData;
