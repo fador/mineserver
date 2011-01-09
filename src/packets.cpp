@@ -202,11 +202,11 @@ int PacketHandler::inventory_change(User *user)
   {
     return PACKET_NEED_MORE_DATA;
   }
-  int8_t windowID;
-  int16_t slot;
-  int8_t rightClick;
-  int16_t actionNumber;
-  int16_t itemID;
+  int8_t windowID = 0;
+  int16_t slot = 0;
+  int8_t rightClick = 0;
+  int16_t actionNumber = 0;
+  int16_t itemID = 0;
   int8_t itemCount = 0;
   int8_t itemUses  = 0;
 
@@ -613,16 +613,16 @@ int PacketHandler::player_block_placement(User *user)
   {
     return PACKET_NEED_MORE_DATA;
   }
-  int8_t y, direction;
-  int16_t newblock;
-  int32_t x, z;
+  int8_t y = 0, direction = 0;
+  int16_t newblock = 0;
+  int32_t x, z = 0;
   /* replacement of block */
-  uint8_t oldblock;
-  uint8_t metadata;
+  uint8_t oldblock = 0;
+  uint8_t metadata = 0;
   /* neighbour blocks */
-  uint8_t block;
-  uint8_t meta;
-  int8_t count,health;
+  uint8_t block = 0;
+  uint8_t meta = 0;
+  int8_t count = 0, health = 0;
 
   user->buffer >> x >> y >> z >> direction >> newblock;
 

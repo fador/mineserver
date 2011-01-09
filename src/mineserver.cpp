@@ -159,9 +159,9 @@ int Mineserver::run(int argc, char *argv[])
   if (!pid_out.fail())
   {
 #ifdef WIN32
-     pid_out << _getpid();
+    pid_out << _getpid();
 #else
-     pid_out << getpid();
+    pid_out << getpid();
 #endif
   }
   pid_out.close();
@@ -178,9 +178,9 @@ int Mineserver::run(int argc, char *argv[])
     int size = Mineserver::get()->config()->iData("map.generate_spawn.size");
     bool show_progress = Mineserver::get()->config()->bData("map.generate_spawn.show_progress");
 #ifdef WIN32
-    DWORD t_begin,t_end;
+    DWORD t_begin = 0, t_end = 0;
 #else
-    clock_t t_begin,t_end;
+    clock_t t_begin = 0, t_end = 0;
 #endif
 
     for (int x=-size;x<=size;x++)

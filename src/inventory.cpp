@@ -117,8 +117,8 @@ bool Inventory::readRecipe(std::string recipeFile)
 
   std::string temp;
   
-  int height, width, outCount;
-  int16_t outType, outHealth;
+  int height = 0, width = 0, outCount = 0;
+  int16_t outType = 0, outHealth = 0;
 
   // Reading row at a time
   int del;
@@ -263,12 +263,12 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
     chunk->changed = true;
   }
 
-  std::vector<User *> *otherUsers = NULL;
-  OpenInventory *currentInventory = NULL;
+  std::vector<User*>* otherUsers = NULL;
+  OpenInventory* currentInventory = NULL;
 
   if(windowID != WINDOW_PLAYER)
   {
-    std::vector<OpenInventory *> *inv;
+    std::vector<OpenInventory*>* inv = NULL;
     switch(user->openInv.type)
     {
       case WINDOW_CHEST:
@@ -300,8 +300,8 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
     }
   }
 
-  Item *slotItem = NULL;
-  
+  Item* slotItem = NULL;
+
   switch(windowID)
   {
      //Player inventory
@@ -852,20 +852,24 @@ bool Inventory::onwindowOpen(User *user,int8_t type, int32_t x, int32_t y, int32
 
   return true;
 }
-bool Inventory::onwindowClose(User *user,int8_t type,int32_t x, int32_t y, int32_t z)
+
+bool Inventory::onwindowClose(User *user, int8_t type, int32_t x, int32_t y, int32_t z)
 {
-  std::vector<OpenInventory *> *inv;
+  std::vector<OpenInventory*>* inv = NULL;
+
   switch(type)
   {
-    case WINDOW_CHEST:
-      inv = &openChests;
-      break;
-    case WINDOW_FURNACE:
-      inv = &openFurnaces;
-      break;
-    case WINDOW_WORKBENCH:
-      inv = &openWorkbenches;
-      break;
+  case WINDOW_CHEST:
+    inv = &openChests;
+    break;
+  case WINDOW_FURNACE:
+    inv = &openFurnaces;
+    break;
+  case WINDOW_WORKBENCH:
+    inv = &openWorkbenches;
+    break;
+  default:
+    return false;
   }
 
   for(uint32_t i = 0; i < inv->size(); i++)

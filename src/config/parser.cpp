@@ -152,7 +152,7 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
 
     if (token_type == CONFIG_TOKEN_LIST_OPEN)
     {
-      ConfigNode* newNode;
+      ConfigNode* newNode = new ConfigNode;
       if (token_label.size())
       {
         if (!currentNode->has(token_label))
