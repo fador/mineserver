@@ -174,7 +174,7 @@ void client_callback(int fd,
     int written = send(fd, (char*)user->buffer.getWrite(), writeLen, 0);
     if(written == -1)
     {
-      if((errno != EAGAIN && errno != EINTR) || user->write_err_count>200)
+      if((errno != EAGAIN && errno != EINTR))// || user->write_err_count>200)
       {
         Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Error writing to client");
         //event_del(user->GetEvent());
@@ -189,14 +189,14 @@ void client_callback(int fd,
       }
       else
       {
-        user->write_err_count++;
+        //user->write_err_count++;
       }
 
     }
     else
     {
       user->buffer.clearWrite(written);
-      user->write_err_count=0;
+      //user->write_err_count=0;
     }
 
     if(user->buffer.getWriteLen())

@@ -318,6 +318,7 @@ int Mineserver::run(int argc, char *argv[])
   User* serverUser = new User(-1, SERVER_CONSOLE_UID);
   serverUser->changeNick("[Server]");
 
+  time_t timeNow = time(NULL);
   while(m_running && event_base_loop(m_eventBase, 0) == 0)
   {
     // Run 200ms timer hook
@@ -330,9 +331,10 @@ int Mineserver::run(int argc, char *argv[])
       Mineserver::get()->chat()->handleMsg(serverUser, Mineserver::get()->screen()->getCommand().c_str());
     }
 
-    if(time(0)-starttime > 10)
+    timeNow = time(0);
+    if(timeNow-starttime > 10)
     {
-      starttime = (uint32_t)time(0);
+      starttime = (uint32_t)timeNow;
 
       //If users, ping them
       if(User::all().size() > 0)
@@ -354,9 +356,9 @@ int Mineserver::run(int argc, char *argv[])
     }
 
     //Every second
-    if(time(0)-tick > 0)
+    if(timeNow-tick > 0)
     {
-      tick = (uint32_t)time(0);
+      tick = (uint32_t)timeNow;
       //Loop users
       for(unsigned int i = 0; i < User::all().size(); i++)
       {
@@ -394,15 +396,13 @@ int Mineserver::run(int argc, char *argv[])
     Mineserver::get()->physics()->update();
 
     // Underwater check / drowning
+    //ToDo: this could be done a bit differently? - Fador
     int i = 0;
     int s = User::all().size();
     for(i=0;i<s;i++)
     {
       User::all()[i]->isUnderwater();
     }
-
-//    event_set(&m_listenEvent, m_socketlisten, EV_WRITE|EV_READ|EV_PERSIST, accept_callback, NULL);
-//    event_add(&m_listenEvent, NULL);
 
     event_base_loopexit(m_eventBase, &loopTime);
   }

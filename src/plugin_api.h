@@ -49,15 +49,15 @@
 struct plugin_pointer_struct
 {
   float (*getPluginVersion)(const char* name);
-  void (*setPluginVersion)(const char* name, float version);
+  void (*setPluginVersion) (const char* name, float version);
   bool (*hasHook)(const char* hookID);
 #ifdef USE_HOOKS
   void (*setHook)(const char* hookID, Hook* hook);
 #else
   void (*setHook)(const char* hookID, void* hook);
 #endif
-  void (*addCallback)(const char* hookID, void* function);
-  bool (*doUntilTrue)(const char* hookID, ...);
+  void (*addCallback) (const char* hookID, void* function);
+  bool (*doUntilTrue) (const char* hookID, ...);
   bool (*doUntilFalse)(const char* hookID, ...);
   void (*doAll)(const char* hookID, ...);
   void *temp[10];
@@ -88,14 +88,14 @@ struct logger_pointer_struct
 struct map_pointer_struct
 {
   void (*createPickupSpawn)(int x, int y, int z, int type, int count, int health, const char* user);
-  bool (*setTime)(int timeValue);
+  bool (*setTime) (int timeValue);
   void (*getSpawn)(int* x, int* y, int* z);
   bool (*getBlock)(int x, int y, int z, unsigned char* type,unsigned char* meta);
   bool (*setBlock)(int x, int y, int z, unsigned char type,unsigned char meta);
   void (*saveWholeMap)(void);
   unsigned char* (*getMapData_block)(int x, int z);
-  unsigned char* (*getMapData_meta)(int x, int z);
-  unsigned char* (*getMapData_skylight)(int x, int z);
+  unsigned char* (*getMapData_meta) (int x, int z);
+  unsigned char* (*getMapData_skylight)  (int x, int z);
   unsigned char* (*getMapData_blocklight)(int x, int z);
   void *temp[100];
 };
