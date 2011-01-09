@@ -61,6 +61,9 @@ public:
 
   int fd;
 
+  //When we last received data from this user
+  time_t lastData;
+
   //View distance in chunks -viewDistance <-> viewDistance
   static const int viewDistance = 10;
   uint8_t action;

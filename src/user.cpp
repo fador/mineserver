@@ -83,6 +83,7 @@ User::User(int sock, uint32_t EID)
   this->attachedTo      = 0;
   this->timeUnderwater  = 0;
   this->isOpenInv       = false;
+  this->lastData        = time(NULL);
 
   this->m_currentItemSlot = 0;
   this->inventoryHolding  = Item();
@@ -105,6 +106,12 @@ bool User::changeNick(std::string _nick)
 
 User::~User()
 {
+  //Remove all known chunks
+  for(unsigned int i = 0; i < mapKnown.size(); i++)
+  {
+    delKnown(mapKnown[i].x(), mapKnown[i].z());
+  }
+
   std::vector<User*>::iterator it_a = Mineserver::get()->users().begin();
   std::vector<User*>::iterator it_b = Mineserver::get()->users().end();
   for(;it_a!=it_b;++it_a)

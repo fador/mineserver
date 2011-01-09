@@ -107,6 +107,8 @@ void client_callback(int fd,
       return;
     }
 
+    user->lastData = time(NULL);
+
     user->buffer.addToRead(buf, read);
 
     delete[] buf;
