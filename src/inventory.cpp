@@ -25,7 +25,6 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "inventory.h"
 
 #ifdef WIN32
   #include <conio.h>
@@ -47,6 +46,7 @@
 #include <zlib.h>
 #include <sys/stat.h>
 
+#include "inventory.h"
 #include "constants.h"
 #include "map.h"
 #include "user.h"
