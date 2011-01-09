@@ -313,7 +313,7 @@ void Furnace::sendToAllUsers()
   buffer.push_back(0);
 
   // Compress the data
-  uint8_t* compressedData = new uint8[ALLOCATE_NBTFILE];
+  uint8_t* compressedData = new uint8_t[ALLOCATE_NBTFILE];
   z_stream zstream;
   zstream.zalloc = Z_NULL;
   zstream.zfree = Z_NULL;

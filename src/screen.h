@@ -36,13 +36,11 @@
   #include <ncurses.h>
 #endif
 
+#include <string>
 #include <vector>
 
+#include "logtype.h"
 class User;
-
-namespace LogType {
-  enum LogType;
-}
 
 enum
 {

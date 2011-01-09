@@ -50,7 +50,6 @@
 #include "worldgen/mapgen.h"
 #include "inventory.h"
 
-#define FADOR_PLUGIN
 #ifdef FADOR_PLUGIN
 #define MINESERVER
 #include "plugin_api.h"
