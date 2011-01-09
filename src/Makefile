@@ -53,9 +53,9 @@ ifeq ($(PEDANTIC), YES)
 endif
 
 ifeq ($(findstring MINGW32,$(SYSTEM)),MINGW32)
-LFLAGS = -lws2_32 -lwinmm -export-all-symbols
+LDFLAGS += -lws2_32 -lwinmm
 else
-LFLAGS = -rdynamic -ldl
+LDFLAGS += -ldl
 endif
 
 ifeq ($(findstring Debian,$(shell cat /etc/issue)),Debian)
@@ -67,7 +67,7 @@ ifeq ($(DEBIAN), 1)
 endif
 
 # Tools
-CXX          = g++
+CXX          = clang
 OBJCOPY      = objcopy
 COMPILE      = $(CXX) $(INC) $(CXXFLAGS) $(ARCHFLAGS) -c $< -o $@
 MAKEDEPEND   = $(CXX) -M $(INC) $(CXXFLAGS) $(ARCHFLAGS) -o "$(DEPDIR)/$*.d" $<
