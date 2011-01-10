@@ -106,6 +106,15 @@ bool User::changeNick(std::string _nick)
 
 User::~User()
 {
+  event_del(GetEvent());
+  #ifdef WIN32
+    closesocket(fd);
+  #else
+    close(fd);
+  #endif
+
+  this->buffer.reset();
+
   //Remove all known chunks
   for(unsigned int i = 0; i < mapKnown.size(); i++)
   {

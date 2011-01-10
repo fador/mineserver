@@ -375,10 +375,20 @@ int Mineserver::run(int argc, char *argv[])
     {
       tick = (uint32_t)timeNow;
       //Loop users
-      for(int i = User::all().size()-1; i >= 0; i--)
+      for(int i = users().size()-1; i >= 0; i--)
       {
-        User::all()[i]->pushMap();
-        User::all()[i]->popMap();
+        //No data received in 3s, timeout
+        if(users()[i]->logged && (timeNow-users()[i]->lastData) > 3)
+        {
+          Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Player "+users()[i]->nick+" timed out");
+
+          delete users()[i];
+        }
+        else
+        {
+          users()[i]->pushMap();
+          users()[i]->popMap();
+        }
 
         //Minecart hacks!!
         /*
@@ -390,18 +400,7 @@ int Mineserver::run(int argc, char *argv[])
           User::all()[i]->sendAll((int8_t*)pkt.getWrite(), pkt.getWriteLen());
         }
         */
-        //No data received in 3s, timeout
-        if(User::all()[i]->logged && (timeNow-User::all()[i]->lastData) > 2)
-        {
-          Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Player "+User::all()[i]->nick+" timed out");
 
-          #ifdef WIN32
-              closesocket(User::all()[i]->fd);
-          #else
-              close(User::all()[i]->fd);
-          #endif
-              delete User::all()[i];
-        }
       }
 
       map()->mapTime+=20;

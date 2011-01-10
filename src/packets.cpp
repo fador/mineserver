@@ -964,14 +964,6 @@ int PacketHandler::disconnect(User *user)
 
   LOG(INFO, "Packets", "Disconnect: " + msg);
 
-  event_del(user->GetEvent());
-
-  #ifdef WIN32
-  closesocket(user->fd);
-  #else
-  close(user->fd);
-  #endif
-
   delete user;
 
   return PACKET_OK;
