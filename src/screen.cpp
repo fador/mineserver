@@ -103,21 +103,25 @@ void Screen::init(std::string version)
   // Write our border lines on the regular stdscr
   attron(COLOR_PAIR(TEXT_COLOR_WHITE));
 
+  // TODO: These mvaddch calls are cast to void to avoid an unused return value
+  // warning in clang. If there's a better way to do it, feel free to change
+  // things.
+
   // Top row
   for (int x = 0; x < COLS; x++)
-    mvaddch(titleHeight - 1, x, '=');
+    (void)mvaddch(titleHeight - 1, x, '=');
 
   // Middle row
   for(int x = 0; x < COLS - 21; x++)
-    mvaddch(logHeight + titleHeight, x, '=');
+    (void)mvaddch(logHeight + titleHeight, x, '=');
 
   // Bottom row
   for (int x = 0; x < COLS; x++)
-    mvaddch((logHeight + chatHeight + titleHeight + 1), x, '=');
+    (void)mvaddch((logHeight + chatHeight + titleHeight + 1), x, '=');
 
   // Far column divider
   for (int y = 5; y < (logHeight + chatHeight + titleHeight + 1); y++)
-    mvaddch(y, COLS - 21, '|');
+    (void)mvaddch(y, COLS - 21, '|');
 
   attroff(COLOR_PAIR(TEXT_COLOR_MAGENTA));
   
