@@ -38,7 +38,7 @@ copy command.so to Mineserver bin directory.
 #include <cstdlib>
 #include <map>
 #include <iostream>
-#include <cstdint>
+#include <stdint.h>
 
 #define MINESERVER_C_API
 #include "../../src/plugin_api.h"
