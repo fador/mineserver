@@ -53,9 +53,9 @@ ifeq ($(PEDANTIC), YES)
 endif
 
 ifeq ($(findstring MINGW32,$(SYSTEM)),MINGW32)
-LFLAGS = -lws2_32 -lwinmm -export-all-symbols
+LDFLAGS += -lws2_32 -lwinmm
 else
-LFLAGS = -rdynamic
+LDFLAGS += -ldl
 endif
 
 ifeq ($(findstring Debian,$(shell cat /etc/issue)),Debian)

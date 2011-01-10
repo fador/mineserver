@@ -33,7 +33,7 @@
 
 #include "basic.h"
 
-bool BlockBasic::isBlockStackable(const uint8 block)
+bool BlockBasic::isBlockStackable(const uint8_t block)
 {
   /* Check block below allows blocks placed on top */
   switch(block)
@@ -61,7 +61,7 @@ bool BlockBasic::isBlockStackable(const uint8 block)
   return true;
 }
 
-bool BlockBasic::isUserOnBlock(const sint32 x, const sint8 y, const sint32 z)
+bool BlockBasic::isUserOnBlock(const int32_t x, const int8_t y, const int32_t z)
 {
   /* TODO: Get Users by chunk rather then whole list */
   for(unsigned int i = 0; i < User::all().size(); i++)
@@ -76,7 +76,7 @@ bool BlockBasic::isUserOnBlock(const sint32 x, const sint8 y, const sint32 z)
   return false;
 }
 
-bool BlockBasic::translateDirection(sint32 *x, sint8 *y, sint32 *z, const sint8 direction)
+bool BlockBasic::translateDirection(int32_t *x, int8_t *y, int32_t *z, const int8_t direction)
 {
   switch(direction)
   {
@@ -106,18 +106,18 @@ bool BlockBasic::translateDirection(sint32 *x, sint8 *y, sint32 *z, const sint8 
   return true;
 }
 
-bool BlockBasic::isBlockEmpty(const sint32 x, const sint8 y, const sint32 z)
+bool BlockBasic::isBlockEmpty(const int32_t x, const int8_t y, const int32_t z)
 {
-  uint8 block;
-  uint8 meta;
+  uint8_t block;
+  uint8_t meta;
   return Mineserver::get()->map()->getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR;
 }
 
-bool BlockBasic::spawnBlockItem(const sint32 x, const sint8 y, const sint32 z, const uint8 block)
+bool BlockBasic::spawnBlockItem(const int32_t x, const int8_t y, const int32_t z, const uint8_t block)
 {
-  if (BLOCKDROPS.count(block) && BLOCKDROPS[block].probability >= rand() % 10000)
+  if (BLOCKDROPS.count(block) && (int)BLOCKDROPS[block].probability >= rand() % 10000)
   {
-    uint16 item_id = BLOCKDROPS[block].item_id;
+    uint16_t item_id = BLOCKDROPS[block].item_id;
     int count = BLOCKDROPS[block].count;
 
     if (count)
@@ -130,10 +130,10 @@ bool BlockBasic::spawnBlockItem(const sint32 x, const sint8 y, const sint32 z, c
   return false;
 }
 
-void BlockBasic::notifyNeighbours(const sint32 x, const sint8 y, const sint32 z, const std::string callback, User* user,const uint8 oldblock, const sint8 ignore_direction)
+void BlockBasic::notifyNeighbours(const int32_t x, const int8_t y, const int32_t z, const std::string callback, User* user,const uint8_t oldblock, const int8_t ignore_direction)
 {
-  uint8 block;
-  uint8 meta;
+  uint8_t block;
+  uint8_t meta;
   Function::invoker_type inv(user, oldblock, x, y, z, 0);
 
   if (ignore_direction != BLOCK_SOUTH && Mineserver::get()->map()->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
@@ -148,13 +148,13 @@ void BlockBasic::notifyNeighbours(const sint32 x, const sint8 y, const sint32 z,
     Mineserver::get()->plugin()->runBlockCallback(block, callback, inv);
   }
 
-  if (ignore_direction != BLOCK_TOP && Mineserver::get()->map()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
+  if (y < 127 && ignore_direction != BLOCK_TOP && Mineserver::get()->map()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
   {
     inv = Function::invoker_type(user, oldblock, x, y+1, z, BLOCK_TOP);
     Mineserver::get()->plugin()->runBlockCallback(block, callback, inv);
   }
 
-  if (ignore_direction != BLOCK_BOTTOM && Mineserver::get()->map()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
+  if (y > 0 && ignore_direction != BLOCK_BOTTOM && Mineserver::get()->map()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
   {
     inv = Function::invoker_type(user, oldblock, x, y-1, z, BLOCK_BOTTOM);
     Mineserver::get()->plugin()->runBlockCallback(block, callback, inv);

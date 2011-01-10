@@ -2,32 +2,37 @@
    Copyright (c) 2010, The Mineserver Project
    All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
- * Neither the name of the The Mineserver Project nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "screen.h"
+
+#include "logtype.h"
+#include "user.h"
+
+#include <cstdlib>
 #include <ctime>
 #include <iostream>
-#include "screen.h"
 
 enum 
 {
@@ -45,7 +50,9 @@ void Screen::init(std::string version)
   echo();
   refresh();
 
-  for (int i = 0; i < 25; i++)
+  currentCommandHistoryIndex = 0;
+  nextCommandHistoryIndex = 0;
+  for (int i = 0; i < commandHistorySize; i++)
   {
     commandHistory[i].clear();
   }
@@ -96,21 +103,25 @@ void Screen::init(std::string version)
   // Write our border lines on the regular stdscr
   attron(COLOR_PAIR(TEXT_COLOR_WHITE));
 
+  // TODO: These mvaddch calls are cast to void to avoid an unused return value
+  // warning in clang. If there's a better way to do it, feel free to change
+  // things.
+
   // Top row
   for (int x = 0; x < COLS; x++)
-    mvaddch(titleHeight - 1, x, '=');
+    (void)mvaddch(titleHeight - 1, x, '=');
 
   // Middle row
   for(int x = 0; x < COLS - 21; x++)
-    mvaddch(logHeight + titleHeight, x, '=');
+    (void)mvaddch(logHeight + titleHeight, x, '=');
 
   // Bottom row
   for (int x = 0; x < COLS; x++)
-    mvaddch((logHeight + chatHeight + titleHeight + 1), x, '=');
+    (void)mvaddch((logHeight + chatHeight + titleHeight + 1), x, '=');
 
   // Far column divider
   for (int y = 5; y < (logHeight + chatHeight + titleHeight + 1); y++)
-    mvaddch(y, COLS - 21, '|');
+    (void)mvaddch(y, COLS - 21, '|');
 
   attroff(COLOR_PAIR(TEXT_COLOR_MAGENTA));
   
@@ -136,7 +147,9 @@ void Screen::init(std::string version)
   wprintw(title, ("v" + version).c_str());
   wattroff(title, COLOR_PAIR(TEXT_COLOR_WHITE));
   wrefresh(title);
-  
+
+  keypad(commandLog, true);
+
   // Fill up the command window
 //  log(LOG_COMMAND, "");
 //  log(LOG_COMMAND, "");
@@ -144,6 +157,7 @@ void Screen::init(std::string version)
 //  log(LOG_COMMAND, "");
 //  log(LOG_COMMAND, "");     
 
+  commandX = 0;
 }
 
 bool Screen::hasCommand()
@@ -152,7 +166,7 @@ bool Screen::hasCommand()
   bool running = true;
 
   // Get the chars in the buffer
-  wmove(commandLog, 4, currentCommand.size() + 1);
+  wmove(commandLog, 4, commandX + 1);
 
   do
   {
@@ -163,41 +177,123 @@ bool Screen::hasCommand()
     {
       if (readchar == '\b') // Backspace
       {
-        if (currentCommand.size() != 0)
-          currentCommand.erase(currentCommand.end() - 1);
+        if (!currentCommand.empty())
+        {
+          currentCommand.erase(commandX - 1, 1);
+          wdelch(commandLog);
+          --commandX;
+        }
       }
       else if (readchar == '\n')
+      {
         running = false;
-      else if (readchar == KEY_UP) // FIXME
-        log(LogType::LOG_INFO, "Console", "Up arrow key was pressed");
+      }
+      else if (readchar == KEY_LEFT)
+      {
+        if (commandX > 0)
+        {
+          --commandX;
+        }
+      }
+      else if (readchar == KEY_RIGHT)
+      {
+        if ( commandX < currentCommand.size() )
+        {
+          ++commandX;
+        }
+      }
+      else if (readchar == KEY_DOWN)
+      {
+        // Get the next command in the history
+        currentCommandHistoryIndex = (currentCommandHistoryIndex + 1) % commandHistorySize;
+
+        if (currentCommandHistoryIndex == nextCommandHistoryIndex)
+        {
+          // At the start of the history
+          currentCommand = "";
+          if ((--currentCommandHistoryIndex) < 0)
+          {
+            currentCommandHistoryIndex += Screen::commandHistorySize;
+          }
+        }
+        else
+        {
+          currentCommand = commandHistory[currentCommandHistoryIndex];
+        }
+
+        // Render the command to the screen
+        wdeleteln(commandLog);
+        wmove(commandLog, 4, 1);
+        waddstr(commandLog, currentCommand.c_str());
+        commandX = currentCommand.size();
+      }
+      else if (readchar == KEY_UP)
+      {
+        // Get the previous command from the command history.
+        if (!commandHistory[currentCommandHistoryIndex].empty())
+        {
+          currentCommand = commandHistory[currentCommandHistoryIndex];
+        }
+
+        if (currentCommandHistoryIndex != nextCommandHistoryIndex)
+        {
+          // Set it up to go to the previous command next time.
+          currentCommandHistoryIndex = currentCommandHistoryIndex - 1;
+          if (currentCommandHistoryIndex < 0)
+          {
+            currentCommandHistoryIndex += Screen::commandHistorySize;
+          }
+        }
+
+        if (!currentCommand.empty())
+        {
+          // Render the command to the screen.
+          wdeleteln(commandLog);
+          wmove(commandLog, 4, 1);
+          waddstr(commandLog, currentCommand.c_str());
+          commandX = currentCommand.size();
+        }
+      }
       else
+      {
         currentCommand += readchar;
+        ++commandX;
+      }
     }
     else
       running = false;
   } while(running);
 
   //int crlfEntered = wgetnstr(commandLog, commandBuffer, 80);
-  wmove(commandLog, 4, currentCommand.size() + 1);
-  wrefresh(commandLog);
-  
+
   // Check if we've got a full command waiting
   if (readchar == '\n')//crlfEntered == OK)
+  {
+    wmove(commandLog, 3, commandX + 1);
+    waddstr(commandLog, currentCommand.substr(commandX).c_str());
     return true;
-  else
-    return false;
+  }
+
+  wmove(commandLog, 4, commandX + 1);
+  wrefresh(commandLog);
+  return false;
 }
 
 std::string Screen::getCommand()
 {
   // Get a copy of the current command, clear it and return the copy
-  std::string tempCmd = currentCommand;
+  std::string command = currentCommand;
   currentCommand.clear();
-  if (!tempCmd.empty())
+  commandX = 0;
+  if (!command.empty())
   {
+    wmove(commandLog, 4, command.size() + 1);
     log(LogType::LOG_INFO, "Command", "");
+    currentCommandHistoryIndex =  nextCommandHistoryIndex;
+    commandHistory[nextCommandHistoryIndex++] = command;
+    nextCommandHistoryIndex = nextCommandHistoryIndex % Screen::commandHistorySize;    
   }
-  return tempCmd;
+  return command;
 }
 
 WINDOW* Screen::createWindow(int width, int height, int startx, int starty)
@@ -272,23 +368,6 @@ void Screen::log(LogType::LogType type, const std::string& source, const std::st
   {
     window = title;
   }
-
-  /*switch (type)
-  {
-    case LOG_GENERAL:
-    case LOG_ERROR:
-      window = generalLog;
-      break;
-    case LOG_CHAT:
-      window = chatLog;
-      break;
-    case LOG_PLAYERS:
-      window = playerList;
-      break;
-    case LOG_COMMAND:
-      window = commandLog;
-      break;
-  }*/
 
   // Set the color
   if (type == LogType::LOG_ERROR)

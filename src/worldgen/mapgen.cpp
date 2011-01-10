@@ -41,17 +41,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <noise/noise.h>
 #endif
 
-#include "../logger.h"
-#include "../constants.h"
-#include "../config.h"
-#include "../nbt.h"
-#include "../map.h"
-#include "../tree.h"
-#include "../mineserver.h"
-
 #include "mersenne.h"
 #include "cavegen.h"
 #include "mapgen.h"
+
+#include "../mineserver.h"
+#include "../config.h"
+#include "../constants.h"
+#include "../logger.h"
+#include "../map.h"
+#include "../nbt.h"
+#include "../tree.h"
 
 void MapGen::init(int seed)
 {
@@ -158,24 +158,24 @@ void MapGen::generateChunk(int x, int z)
   val->Insert("HeightMap", new NBT_Value(heightmap, 16*16));
   val->Insert("Entities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
   val->Insert("TileEntities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
-  val->Insert("LastUpdate", new NBT_Value((sint64)time(NULL)));
+  val->Insert("LastUpdate", new NBT_Value((int64_t)time(NULL)));
   val->Insert("xPos", new NBT_Value(x));
   val->Insert("zPos", new NBT_Value(z));
   val->Insert("TerrainPopulated", new NBT_Value((char)1));
 
   main->Insert("Level", val);
 
-  /*  uint32 chunkid;
+  /*  uint32_t chunkid;
   Mineserver::get()->map()->posToId(x, z, &chunkid);
 
   Mineserver::get()->map()->maps[chunkid].x = x;
   Mineserver::get()->map()->maps[chunkid].z = z; */
 
-  std::vector<uint8> *t_blocks = (*val)["Blocks"]->GetByteArray();
-  std::vector<uint8> *t_data = (*val)["Data"]->GetByteArray();
-  std::vector<uint8> *t_blocklight = (*val)["BlockLight"]->GetByteArray();
-  std::vector<uint8> *t_skylight = (*val)["SkyLight"]->GetByteArray();
-  std::vector<uint8> *heightmap = (*val)["HeightMap"]->GetByteArray();
+  std::vector<uint8_t> *t_blocks = (*val)["Blocks"]->GetByteArray();
+  std::vector<uint8_t> *t_data = (*val)["Data"]->GetByteArray();
+  std::vector<uint8_t> *t_blocklight = (*val)["BlockLight"]->GetByteArray();
+  std::vector<uint8_t> *t_skylight = (*val)["SkyLight"]->GetByteArray();
+  std::vector<uint8_t> *heightmap = (*val)["HeightMap"]->GetByteArray();
 
   sChunk *chunk = new sChunk();
   chunk->blocks = &((*t_blocks)[0]);
@@ -214,12 +214,12 @@ void MapGen::generateChunk(int x, int z)
 
 void MapGen::AddTrees(int x, int z) 
 {
-  double xBlockpos = x<<4;
-  double zBlockpos = z<<4;
+  int xBlockpos = x<<4;
+  int zBlockpos = z<<4;
   
   int blockX, blockZ, height;
-  uint8 block;
-  uint8 meta;
+  uint8_t block;
+  uint8_t meta;
   
   for(int bX = 0; bX < 16; bX++) 
   {
@@ -259,9 +259,9 @@ void MapGen::generateWithNoise(int x, int z)
 #endif
 
   // Populate blocks in chunk
-  sint32 currentHeight;
-  sint32 ymax;
-  uint8 *curBlock;
+  int32_t currentHeight;
+  int32_t ymax;
+  uint8_t *curBlock;
   memset(blocks, 0, 16*16*128);
 
   double xBlockpos = x<<4;
@@ -270,10 +270,10 @@ void MapGen::generateWithNoise(int x, int z)
   {
     for(int bZ = 0; bZ < 16; bZ++) 
     {
-      heightmap[(bZ<<4)+bX] = ymax = currentHeight = (uint8)((ridgedMultiNoise.GetValue(xBlockpos+bX,0, zBlockpos+bZ) * 15) + 64);
+      heightmap[(bZ<<4)+bX] = ymax = currentHeight = (uint8_t)((ridgedMultiNoise.GetValue(xBlockpos+bX,0, zBlockpos+bZ) * 15) + 64);
 
-      sint32 stoneHeight = (sint32)(currentHeight * 0.94);
-      sint32 bYbX = ((bZ << 7) + (bX << 11));
+      int32_t stoneHeight = (int32_t)(currentHeight * 0.94);
+      int32_t bYbX = ((bZ << 7) + (bX << 11));
 
       if(ymax < seaLevel) 
         ymax = seaLevel;
@@ -334,12 +334,12 @@ void MapGen::generateWithNoise(int x, int z)
 void MapGen::ExpandBeaches(int x, int z) 
 {
   int beachExtentSqr = (beachExtent + 1) * (beachExtent + 1);
-  double xBlockpos = x<<4;
-  double zBlockpos = z<<4;
+  int xBlockpos = x<<4;
+  int zBlockpos = z<<4;
   
   int blockX, blockZ, h;
-  uint8 block;
-  uint8 meta;
+  uint8_t block;
+  uint8_t meta;
   
   for(int bX = 0; bX < 16; bX++) 
   {
@@ -397,12 +397,12 @@ void MapGen::ExpandBeaches(int x, int z)
 
 void MapGen::AddOres(int x, int z) 
 {
-  double xBlockpos = x<<4;
-  double zBlockpos = z<<4;
+  int xBlockpos = x<<4;
+  int zBlockpos = z<<4;
   
   int blockX, blockZ, height;
-  uint8 block;
-  uint8 meta;
+  uint8_t block;
+  uint8_t meta;
   
   for(int bX = 4; bX < 12; bX++) 
   {
@@ -451,7 +451,7 @@ void MapGen::AddOres(int x, int z)
   }
 }
 
-void MapGen::AddDeposit(int x, int y, int z, uint8 block, int depotSize)
+void MapGen::AddDeposit(int x, int y, int z, uint8_t block, int depotSize)
 {
   for(int bX = x; bX < x+depotSize; bX++)
   {

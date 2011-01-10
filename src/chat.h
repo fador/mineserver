@@ -29,6 +29,9 @@
 #define _CHAT_H
 
 #include <deque>
+#include <string>
+
+class User;
 
 class Chat
 {
@@ -43,8 +46,6 @@ public:
     GUESTS
   };
 
-
-
   Chat();
   ~Chat();
 
@@ -55,7 +56,7 @@ public:
 
   bool sendMsg(User* user, std::string msg, MessageTarget action = ALL);
   bool sendUserlist(User* user);
-  bool checkMotd(std::string motdFile);
+  bool checkMotd(const std::string& motdFile);
   void sendHelp(User* user, std::deque<std::string> args);
 
 private:

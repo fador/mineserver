@@ -75,6 +75,7 @@
     <ClInclude Include="..\src\constants.h" />
     <ClInclude Include="..\src\furnace.h" />
     <ClInclude Include="..\src\furnaceManager.h" />
+    <ClInclude Include="..\src\hook.h" />
     <ClInclude Include="..\src\inventory.h" />
     <ClInclude Include="..\src\logger.h" />
     <ClInclude Include="..\src\logtype.h" />
