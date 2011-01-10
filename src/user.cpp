@@ -68,7 +68,7 @@ User::User(int sock, uint32_t EID)
 {
   this->action          = 0;
   this->muted           = false;
-  this->dnd              = false;
+  this->dnd             = false;
   this->waitForData     = false;
   this->fd              = sock;
   this->UID             = EID;
