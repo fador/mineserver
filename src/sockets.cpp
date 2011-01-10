@@ -48,7 +48,6 @@
 #include <vector>
 #include <ctime>
 #include <event.h>
-#include <evutil.h>
 #include <sys/stat.h>
 #include <zlib.h>
 
