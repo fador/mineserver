@@ -38,6 +38,7 @@ copy command.so to Mineserver bin directory.
 #include <cstdlib>
 #include <map>
 #include <iostream>
+#include <cstdint>
 
 #define MINESERVER_C_API
 #include "../../src/plugin_api.h"
@@ -423,8 +424,30 @@ void setTime(std::string user, std::string command, std::deque<std::string> args
   }
 }
 
-bool blockPlacePreFunction(const char* userIn, int x,char y,int z,unsigned char block)
+// Direction
+enum Direction
+{
+   BLOCK_BOTTOM, BLOCK_NORTH, BLOCK_SOUTH, BLOCK_EAST, BLOCK_WEST, BLOCK_TOP
+};
+
+bool translateDirection(int32_t *x, int8_t *y, int32_t *z, int8_t direction)
+{
+    switch(direction)
+    {
+    case BLOCK_BOTTOM: (*y)--;  break;
+    case BLOCK_TOP:    (*y)++;  break;
+    case BLOCK_NORTH:  (*x)++;  break;
+    case BLOCK_SOUTH:  (*x)--;  break;
+    case BLOCK_EAST:   (*z)++;  break;
+    case BLOCK_WEST:   (*z)--;  break;
+    default:                  break;
+    }
+  return true;
+}
+
+bool blockPlacePreFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int16_t block,int8_t direction)
 {  
+  translateDirection(&x,&y,&z,direction);
   std::string user(userIn);
   if(cuboidMap.find(user) != cuboidMap.end())
   {

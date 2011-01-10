@@ -753,6 +753,9 @@ int PacketHandler::player_block_placement(User *user)
     /* client doesn't give us the correct block for lava and water, check block above */
     switch(direction)
     {
+    case BLOCK_BOTTOM:
+      check_y--;
+      break;
     case BLOCK_TOP:
       check_y++;
       break;
@@ -780,24 +783,24 @@ int PacketHandler::player_block_placement(User *user)
 
       inv = Function::invoker_type(user, newblock, check_x, check_y, check_z, direction);
       Mineserver::get()->plugin()->runBlockCallback(oldblocktop, "onReplace", inv);
-      if ((static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,uint8_t,uint8_t>*>(Mineserver::get()->plugin()->getHook("BlockReplacePre")))->doUntilFalse(user->nick.c_str(), check_x, check_y, check_z, oldblock, newblock))
+      if ((static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>*>(Mineserver::get()->plugin()->getHook("BlockReplacePre")))->doUntilFalse(user->nick.c_str(), check_x, check_y, check_z, oldblock, newblock))
       {
         return PACKET_OK;
       }
-      (static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,uint8_t,uint8_t>*>(Mineserver::get()->plugin()->getHook("BlockReplacePost")))->doAll(user->nick.c_str(), check_x, check_y, check_z, oldblock, newblock);
+      (static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>*>(Mineserver::get()->plugin()->getHook("BlockReplacePost")))->doAll(user->nick.c_str(), check_x, check_y, check_z, oldblock, newblock);
     }
     else
     {
       inv = Function::invoker_type(user, newblock, x, y, z, direction);
       Mineserver::get()->plugin()->runBlockCallback(oldblock, "onReplace", inv);
-      if ((static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,uint8_t,uint8_t>*>(Mineserver::get()->plugin()->getHook("BlockReplacePre")))->doUntilFalse(user->nick.c_str(), x, y, z, oldblock, newblock))
+      if ((static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>*>(Mineserver::get()->plugin()->getHook("BlockReplacePre")))->doUntilFalse(user->nick.c_str(), x, y, z, oldblock, newblock))
       {
         return PACKET_OK;
       }
-      (static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,uint8_t,uint8_t>*>(Mineserver::get()->plugin()->getHook("BlockReplacePost")))->doAll(user->nick.c_str(), x, y, z, oldblock, newblock);
+      (static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>*>(Mineserver::get()->plugin()->getHook("BlockReplacePost")))->doAll(user->nick.c_str(), x, y, z, oldblock, newblock);
     }
 
-    if ((static_cast<Hook5<bool,const char*,int32_t,int8_t,int32_t,uint8_t>*>(Mineserver::get()->plugin()->getHook("BlockPlacePre")))->doUntilFalse(user->nick.c_str(), check_x, check_y, check_z, newblock))
+    if ((static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int8_t>*>(Mineserver::get()->plugin()->getHook("BlockPlacePre")))->doUntilFalse(user->nick.c_str(), x, y, z, newblock,direction))
     {
       return PACKET_OK;
     }
@@ -809,7 +812,7 @@ int PacketHandler::player_block_placement(User *user)
     inv = Function::invoker_type(user, newblock, x, y, z, direction);
     Mineserver::get()->plugin()->runBlockCallback(newblock, "onPlace", inv);
 
-    (static_cast<Hook5<bool,const char*,int32_t,int8_t,int32_t,uint8_t>*>(Mineserver::get()->plugin()->getHook("BlockPlacePost")))->doAll(user->nick.c_str(), x, y, z, newblock);
+    (static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int8_t>*>(Mineserver::get()->plugin()->getHook("BlockPlacePost")))->doAll(user->nick.c_str(), x, y, z, newblock,direction);
 
     /* notify neighbour blocks of the placed block */
     if (Mineserver::get()->map()->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
