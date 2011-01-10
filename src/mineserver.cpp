@@ -106,6 +106,21 @@ int main(int argc, char* argv[])
   return Mineserver::get()->run(argc, argv);
 }
 
+Mineserver::Mineserver()
+{
+  m_map            = new Map;
+  m_chat           = new Chat;
+  m_plugin         = new Plugin;
+  m_screen         = new Screen;
+  m_physics        = new Physics;
+  m_config         = new Config;
+  m_furnaceManager = new FurnaceManager;
+  m_packetHandler  = new PacketHandler;
+  m_mapGen         = new MapGen;
+  m_logger         = new Logger;
+  m_inventory      = new Inventory;
+}
+
 event_base* Mineserver::getEventBase()
 {
   return m_eventBase;
