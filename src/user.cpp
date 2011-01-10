@@ -159,6 +159,8 @@ User::~User()
     putSint32(&entityData[1], this->UID);
     this->sendOthers(&entityData[0], 5);
   }
+  //Update player list
+  Mineserver::get()->screen()->updatePlayerList(Mineserver::get()->users());
 
   (static_cast<Hook1<bool,const char*>*>(Mineserver::get()->plugin()->getHook("PlayerQuitPost")))->doAll(nick.c_str());
 }
@@ -206,6 +208,9 @@ bool User::sendLoginInfo()
   logged = true;
 
   Mineserver::get()->chat()->sendMsg(this, nick+" connected!", Chat::ALL);
+
+  //Update player list
+  Mineserver::get()->screen()->updatePlayerList(Mineserver::get()->users());
 
   return true;
 }
