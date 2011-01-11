@@ -1,0 +1,49 @@
+#define PVERSION 1.1
+
+#include <Python.h>
+#include <iostream>
+#include <stdlib.h>
+#include <math.h>
+#include <vector>
+#include <string>
+#include <errno.h>
+#include <iostream>
+#include <dirent.h>
+#include <sys/types.h>
+
+//##ifndef PyScript
+//##define PyScript
+#include "../../plugin_api.h"
+
+using namespace std;
+
+void checkPyErr();
+
+class Script
+{
+    public:
+        Script(mineserver_pointer_struct* mineserver, string name);
+        Script(const Script &last);
+        ~Script();
+        PyObject* callPyFunc(const char* name, PyObject* Args);
+        void load(string ModName);
+    private:
+        mineserver_pointer_struct * m_mineserver;
+        PyObject* mod;
+        string modname;
+};
+
+//class PyScript
+//{
+//    public:
+//        PyScript(mineserver_pointer_struct* mineserver);
+//        ~PyScript();
+//        int getdir(string dir, vector<string> &files); 
+//        PyObject* callAllFunc(const char* func, PyObject *args);
+//        static PyObject* MineServer_get_version(PyObject *self, PyObject *args);
+//    private:
+//        mineserver_pointer_struct* m_mineserver;
+//        vector<Script*> scripts;
+//};
+
+//##endif

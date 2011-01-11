@@ -1,10 +1,14 @@
 # Plugin 1 for PyScript
-from MineServer import m;
+import MineServer;
 global M
 
 def init():
    global M
-   M = m.getMineServer()
+   print MineServer
+   print MineServer.getMS
+   M = MineServer.getMS()
+   print M
+   M.screen.log("IT WURKS!?")
 #   M.screen.log("Hai Der!")
 #    m.screen.log("Hai Der!")
 #    print MineServer.MineServer.get().screen()

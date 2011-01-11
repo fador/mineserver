@@ -408,6 +408,3 @@ void init_plugin_api(void)
 
 }
 
-mineserver_pointer_struct getMineServer(){
-    return plugin_api_pointers;
-}

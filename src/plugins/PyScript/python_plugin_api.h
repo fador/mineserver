@@ -25,29 +25,65 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef _LOG_TYPE_H
-#define _LOG_TYPE_H
 
-/** 
- * An enumeration of types of log messages..
- *
- * Inspired by syslog.
- */
-namespace LogType
+#include <iostream>
+#include <stdlib.h>
+#include <math.h>
+#include <vector>
+#include <string>
+#include <errno.h>
+#include <iostream>
+#include <dirent.h>
+#include <sys/types.h>
+
+#ifndef PyWrapper
+#define PyWrapper
+
+#include "../../plugin_api.h"
+
+class PyLoc
 {
-  enum LogType
-  {
-    LOG_EMERG,    /** 0 :system is unusable */
-    LOG_ALERT,    /** 1 :action must be taken immediately*/ 
-    LOG_CRITICAL, /** 2 :critical conditions */
-    LOG_ERROR,    /** 3 :error conditions */
-    LOG_WARNING,  /** 4 :warning conditions */
-    LOG_NOTICE,   /** 5 :normal, but significant, condition */
-    LOG_INFO,     /** 6 :informational message */
-#ifdef _DEBUG
-    LOG_DEBUG,    /** 7 :debug-level message */
-#endif
-  };
+public:
+  double x,y,z,rot,pit;
 };
+
+class PyPlugin
+{
+public:
+ float getPluginVersion(const std::string name);
+ void setPluginVersion(const std::string name, float version);
+};
+
+class PymyMap
+{
+public:
+  void createPickupSpawn(int x, int y, int z, int type, int count, int health, std::string user);
+  bool setTime(int timeValue);
+  PyLoc* getSpawn();
+  bool getBlock(int x, int y, int z, unsigned char* type,unsigned char* meta);
+  bool setBlock(int x, int y, int z, unsigned char type,unsigned char meta);
+};
+
+class PyScreen
+{
+public:
+  void log(char* message);
+};
+
+class PyMineserver
+{
+public:
+ PyPlugin plugin;
+ PymyMap map;
+ PyScreen screen;
+ mineserver_pointer_struct getMineServer();
+ void setMineServer(mineserver_pointer_struct* MS);
+ mineserver_pointer_struct* pyms;
+};
+
+PyMineserver* getMS();
+#ifndef SWIG
+mineserver_pointer_struct getMineServer();
+#endif
 
 #endif
