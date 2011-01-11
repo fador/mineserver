@@ -30,6 +30,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <stdio.h>
+
 #ifndef WIN32
   #include <poll.h>
   #include <unistd.h>
@@ -45,19 +47,21 @@ DWORD WINAPI CliScreen::stdinThreadProc()
 {
   while (true)
   {
-	std::string s;
-	std::getline(std::cin, s);
-	if (std::cin.rdstate() != std::ios::goodbit)
-	{
-		EnterCriticalSection(&ccAccess);
-		currentCommand.clear();
-		LeaveCriticalSection(&ccAccess);
-		return -1;
-	}
+    std::string s;
+    std::getline(std::cin, s);
+
+    if (std::cin.rdstate() != std::ios::goodbit)
+    {
+      EnterCriticalSection(&ccAccess);
+      currentCommand.clear();
+      LeaveCriticalSection(&ccAccess);
+      return -1;
+    }
+
     EnterCriticalSection(&ccAccess);
-	currentCommand += s;
-	_hasCommand = true;
-	LeaveCriticalSection(&ccAccess);
+    currentCommand += s;
+    _hasCommand = true;
+    LeaveCriticalSection(&ccAccess);
   }
 }
 #endif
@@ -65,24 +69,22 @@ DWORD WINAPI CliScreen::stdinThreadProc()
 void CliScreen::init(std::string version)
 {
 #ifdef WIN32
-	InitializeCriticalSection(&ccAccess);
-	stdinThread = CreateThread(NULL, 0, _stdinThreadProc, (void *)this, 0,
-		NULL);
+  InitializeCriticalSection(&ccAccess);
+  stdinThread = CreateThread(NULL, 0, _stdinThreadProc, (void *)this, 0, NULL);
 #endif
 }
 
 void CliScreen::end()
 {
 #ifdef WIN32
-	TerminateThread(stdinThread, 0);
-	DeleteCriticalSection(&ccAccess);
+  TerminateThread(stdinThread, 0);
+  DeleteCriticalSection(&ccAccess);
 #endif
 }
 
 void CliScreen::log(LogType::LogType type, const std::string& source, const std::string& message)
 {
-	std::cout << "[" << currentTimestamp(true) << "] " << source << ": "
-		<< message << std::endl;
+  std::cout << "[" << currentTimestamp(true) << "] " << source << ": " << message << std::endl;
 }
 
 void CliScreen::updatePlayerList(std::vector<User *> users)
@@ -99,16 +101,27 @@ bool CliScreen::hasCommand()
 
   while (true)
   {
-	stdinfd[0].fd = fileno(stdin);
+    stdinfd[0].fd = fileno(stdin);
     stdinfd[0].events = POLLIN;
+
     if (!poll(stdinfd, 1, 0))
+    {
       return false;
+    }
+
     if (read(STDIN_FILENO, &readchar, 1) == -1)
+    {
       return false;
-	if (readchar == '\n')
-	  return true;
-	else
-	  currentCommand += readchar;
+    }
+
+    if (readchar == '\n')
+    {
+       return true;
+    }
+    else
+    {
+      currentCommand += readchar;
+    }
   }
 #endif
 }
