@@ -114,7 +114,7 @@ void BlockDefault::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, i
 
   Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
   Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
-  Mineserver::get()->map()->createPickupSpawn(x, y, z, oldblock, 1, 0,NULL);
+  Mineserver::get()->map()->createPickupSpawn(x, y, z, oldblock, 1, 0, NULL);
 }
 
 void BlockDefault::onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)

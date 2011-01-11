@@ -202,7 +202,7 @@ void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeSta
   }
   else
   {
-    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "<"+ user->nick + "> " + dtos(user->UID) + " " + msg);
+    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "<"+ user->nick + "> " + msg);
     msg = timeStamp + " <"+ user->nick + "> " + msg;
   }
 
