@@ -101,7 +101,7 @@ bool CliScreen::hasCommand()
   {
 	stdinfd[0].fd = fileno(stdin);
     stdinfd[0].events = POLLIN;
-    if (!poll(stdinfd, 1, 1))
+    if (!poll(stdinfd, 1, 0))
       return false;
     if (read(STDIN_FILENO, &readchar, 1) == -1)
       return false;
