@@ -175,7 +175,7 @@ bool User::sendLoginInfo()
 
   //Send server time (after dawn)
   buffer << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map()->mapTime;
-  
+
   //Inventory
   for(int i=1; i<45; i++)
   {   
@@ -653,32 +653,32 @@ bool User::updatePos(double x, double y, double z, double stance)
 
     if(newChunk->items.size())
     {
-      //Loop through items and check if they are close enought to be picked up
+      // Loop through items and check if they are close enought to be picked up
       std::vector<spawnedItem*>::iterator iter = newChunk->items.begin(), end = newChunk->items.end();
-      for( ; iter != end ; iter++)
+      for(;iter!=end;++iter)
       {
-        //No more than 2 blocks away
+        // No more than 2 blocks away
         if( abs((int32_t)x-((*iter)->pos.x()/32)) < 2 &&
             abs((int32_t)y-((*iter)->pos.y()/32)) < 2 &&
             abs((int32_t)z-((*iter)->pos.z()/32)) < 2)
         {
-          //Dont pickup own spawns right away
+          // Dont pickup own spawns right away
           if((*iter)->spawnedBy != this->UID || (*iter)->spawnedAt+2 < time(NULL))
           {
-            //Check player inventory for space!
+            // Check player inventory for space!
             if(Mineserver::get()->inventory()->isSpace(this,(*iter)->item,(*iter)->count))
             {
-              //Send player collect item packet
+              // Send player collect item packet
               buffer << (int8_t)PACKET_COLLECT_ITEM << (int32_t)(*iter)->EID << (int32_t)UID;
 
-              //Send everyone destroy_entity-packet
+              // Send everyone destroy_entity-packet
               Packet pkt;
               pkt << (int8_t)PACKET_DESTROY_ENTITY << (int32_t)(*iter)->EID;
               newChunk->sendPacket(pkt);
 
-              //Add items to inventory
+              // Add items to inventory
               Mineserver::get()->inventory()->addItems(this,(*iter)->item,(*iter)->count, (*iter)->health);
-              
+
               Mineserver::get()->map()->items.erase((*iter)->EID);
               delete *iter;
               iter = newChunk->items.erase(iter);
@@ -839,8 +839,7 @@ bool User::addQueue(int x, int z)
 {
   vec newMap(x, 0, z);
 
-
-  //Make sure this chunk is not being removed, if it is, delete it from remove queue
+  // Make sure this chunk is not being removed, if it is, delete it from remove queue
   for(unsigned int i = 0; i < mapRemoveQueue.size(); i++)
   {
     if(mapRemoveQueue[i].x() == newMap.x() && mapRemoveQueue[i].z() == newMap.z())
@@ -861,7 +860,7 @@ bool User::addQueue(int x, int z)
 
   for(unsigned int i = 0; i < mapKnown.size(); i++)
   {
-    //Check for duplicates
+    // Check for duplicates
     if(mapKnown[i].x() == newMap.x() && mapKnown[i].z() == newMap.z())
     {
       return false;
