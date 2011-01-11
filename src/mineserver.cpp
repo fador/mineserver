@@ -68,6 +68,7 @@
 #include "plugin.h"
 #include "furnaceManager.h"
 #include "cursesScreen.h"
+#include "cliScreen.h"
 #include "hook.h"
 
 #ifdef WIN32
@@ -111,7 +112,7 @@ Mineserver::Mineserver()
   m_map            = new Map;
   m_chat           = new Chat;
   m_plugin         = new Plugin;
-  m_screen         = new CursesScreen;
+  m_screen         = new CliScreen;
   m_physics        = new Physics;
   m_config         = new Config;
   m_furnaceManager = new FurnaceManager;
@@ -158,6 +159,19 @@ int Mineserver::run(int argc, char *argv[])
 
   // Initialize conf
   Mineserver::get()->config()->load(file_config);
+
+  //If needed change interface and reinitialize the new Screen
+  std::string iface = Mineserver::get()->config()->sData("system.interface");
+  if (iface == "curses")
+  {
+	screen()->end();
+	//TODO: we lose everything written to the screen
+	//      up to this point when using curses
+	m_screen = new CursesScreen;
+	screen()->init(VERSION);
+	screen()->log(LogType::LOG_INFO, "Mineserver", "Interface changed to curses");
+    updatePlayerList();
+  }
 
   if (Mineserver::get()->config()->has("system.plugins") && (Mineserver::get()->config()->type("system.plugins") == CONFIG_NODE_LIST))
   {

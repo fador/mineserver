@@ -42,6 +42,9 @@ public:
   virtual void end() = 0;
   virtual bool hasCommand() = 0;
   virtual std::string getCommand() = 0;
+
+protected:
+  std::string currentTimestamp(bool seconds);
 };
 
 #endif //_SCREENBASE_H

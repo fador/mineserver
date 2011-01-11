@@ -25,6 +25,7 @@
     <ClCompile Include="..\src\blocks\torch.cpp" />
     <ClCompile Include="..\src\blocks\tracks.cpp" />
     <ClCompile Include="..\src\chat.cpp" />
+    <ClCompile Include="..\src\cliScreen.cpp" />
     <ClCompile Include="..\src\config.cpp" />
     <ClCompile Include="..\src\config\lexer.cpp" />
     <ClCompile Include="..\src\config\node.cpp" />
@@ -68,6 +69,7 @@
     <ClInclude Include="..\src\blocks\tracks.h" />
     <ClInclude Include="..\src\chat.h" />
     <ClInclude Include="..\src\chunkmap.h" />
+    <ClInclude Include="..\src\cliScreen.h" />
     <ClInclude Include="..\src\config.h" />
     <ClInclude Include="..\src\config\lexer.h" />
     <ClInclude Include="..\src\config\node.h" />

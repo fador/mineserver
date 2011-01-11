@@ -31,7 +31,6 @@
 #include "user.h"
 
 #include <cstdlib>
-#include <ctime>
 #include <iostream>
 
 enum 
@@ -452,13 +451,4 @@ void CursesScreen::updatePlayerList(std::vector<User *> users)
       log(LogType::LOG_INFO, "Players", users[i]->nick);
     }
   }
-}
-
-std::string CursesScreen::currentTimestamp(bool seconds) {
-  time_t currentTime = time(NULL);
-  struct tm *Tm  = localtime(&currentTime);
-  std::string timeStamp (asctime(Tm));
-  timeStamp = timeStamp.substr(11, seconds ? 8 : 5);
-
-  return timeStamp;
 }
