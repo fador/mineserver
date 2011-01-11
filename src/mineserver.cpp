@@ -67,7 +67,7 @@
 #include "physics.h"
 #include "plugin.h"
 #include "furnaceManager.h"
-#include "screen.h"
+#include "cursesScreen.h"
 #include "hook.h"
 
 #ifdef WIN32
@@ -111,7 +111,7 @@ Mineserver::Mineserver()
   m_map            = new Map;
   m_chat           = new Chat;
   m_plugin         = new Plugin;
-  m_screen         = new Screen;
+  m_screen         = new CursesScreen;
   m_physics        = new Physics;
   m_config         = new Config;
   m_furnaceManager = new FurnaceManager;

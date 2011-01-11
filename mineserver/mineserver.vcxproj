@@ -43,6 +43,7 @@
     <ClCompile Include="..\src\plugin.cpp" />
     <ClCompile Include="..\src\plugin_api.cpp" />
     <ClCompile Include="..\src\cursesScreen.cpp" />
+    <ClCompile Include="..\src\screenBase.cpp" />
     <ClCompile Include="..\src\sockets.cpp" />
     <ClCompile Include="..\src\tools.cpp" />
     <ClCompile Include="..\src\tree.cpp" />
@@ -88,6 +89,7 @@
     <ClInclude Include="..\src\plugin.h" />
     <ClInclude Include="..\src\plugin_api.h" />
     <ClInclude Include="..\src\cursesScreen.h" />
+    <ClInclude Include="..\src\screenBase.h" />
     <ClInclude Include="..\src\sockets.h" />
     <ClInclude Include="..\src\tools.h" />
     <ClInclude Include="..\src\tree.h" />

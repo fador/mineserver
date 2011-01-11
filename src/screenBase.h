@@ -25,69 +25,23 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _CURSESSCREEN_H
-#define _CURSESSCREEN_H
+#ifndef _SCREENBASE_H
+#define _SCREENBASE_H
 
-#ifdef WIN32
-  #pragma warning( disable: 4005)
-  #include <winsock2.h>
-  #include <curses.h>
-#else
-  #include <ncurses.h>
-#endif
-
-#include <string>
 #include <vector>
-
-#include "screenBase.h"
 #include "logtype.h"
-class User;
+#include "user.h"
 
-enum
-{
-  TEXT_COLOR_RED = 1,
-  TEXT_COLOR_GREEN,
-  TEXT_COLOR_YELLOW,
-  TEXT_COLOR_BLUE,
-  TEXT_COLOR_MAGENTA,
-  TEXT_COLOR_CYAN,
-  TEXT_COLOR_WHITE,
-  TEXT_COLOR_INVERSE
-};
-
-#define COMMAND_HISTORY_SIZE 40
-
-class CursesScreen : public Screen
+class Screen
 {
 public:
-  void init(std::string version);
-  WINDOW* createWindow(int width, int height, int startx, int starty);
-  void destroyWindow(WINDOW *local_win);
-  void log(LogType::LogType type, const std::string& source, const std::string& message);
-  void updatePlayerList(std::vector<User *> users);
-  void end();
-  WINDOW *commandLog;
-  bool hasCommand();
-  std::string getCommand();
-
-private:
-  std::string currentTimestamp(bool seconds);
-
-  WINDOW *title;
-  WINDOW *generalLog;
-  WINDOW *chatLog;
-  WINDOW *playerList;
-
-  unsigned int commandX;
-  int currentCommandHistoryIndex;
-  int nextCommandHistoryIndex;
-
-  std::string currentCommand;
-  std::string commandHistory[COMMAND_HISTORY_SIZE];
-
-  static const int commandHistorySize = COMMAND_HISTORY_SIZE;
+  virtual ~Screen(void) = 0;
+  virtual void init(std::string version) = 0;
+  virtual void log(LogType::LogType type, const std::string& source, const std::string& message) = 0;
+  virtual void updatePlayerList(std::vector<User *> users) = 0;
+  virtual void end() = 0;
+  virtual bool hasCommand() = 0;
+  virtual std::string getCommand() = 0;
 };
 
-#undef COMMAND_HISTORY_SIZE
-
-#endif /* _CURSESSCREEN_H */
+#endif //_SCREENBASE_H
