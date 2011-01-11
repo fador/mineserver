@@ -25,13 +25,12 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "screen.h"
+#include "cursesScreen.h"
 
 #include "logtype.h"
 #include "user.h"
 
 #include <cstdlib>
-#include <ctime>
 #include <iostream>
 
 enum 
@@ -42,7 +41,7 @@ enum
   LOG_PLAYERS
 };
 
-void Screen::init(std::string version)
+void CursesScreen::init(std::string version)
 {
   initscr(); // Start NCurses
   timeout(0); // Non blocking
@@ -160,7 +159,7 @@ void Screen::init(std::string version)
   commandX = 0;
 }
 
-bool Screen::hasCommand()
+bool CursesScreen::hasCommand()
 {
   int readchar;
   bool running = true;
@@ -213,7 +212,7 @@ bool Screen::hasCommand()
           currentCommand = "";
           if ((--currentCommandHistoryIndex) < 0)
           {
-            currentCommandHistoryIndex += Screen::commandHistorySize;
+            currentCommandHistoryIndex += CursesScreen::commandHistorySize;
           }
         }
         else
@@ -241,7 +240,7 @@ bool Screen::hasCommand()
           currentCommandHistoryIndex = currentCommandHistoryIndex - 1;
           if (currentCommandHistoryIndex < 0)
           {
-            currentCommandHistoryIndex += Screen::commandHistorySize;
+            currentCommandHistoryIndex += CursesScreen::commandHistorySize;
           }
         }
 
@@ -279,7 +278,7 @@ bool Screen::hasCommand()
   return false;
 }
 
-std::string Screen::getCommand()
+std::string CursesScreen::getCommand()
 {
   // Get a copy of the current command, clear it and return the copy
   std::string command = currentCommand;
@@ -291,12 +290,12 @@ std::string Screen::getCommand()
     log(LogType::LOG_INFO, "Command", "");
     currentCommandHistoryIndex =  nextCommandHistoryIndex;
     commandHistory[nextCommandHistoryIndex++] = command;
-    nextCommandHistoryIndex = nextCommandHistoryIndex % Screen::commandHistorySize;    
+    nextCommandHistoryIndex = nextCommandHistoryIndex % CursesScreen::commandHistorySize;    
   }
   return command;
 }
 
-WINDOW* Screen::createWindow(int width, int height, int startx, int starty)
+WINDOW* CursesScreen::createWindow(int width, int height, int startx, int starty)
 {  
   WINDOW *local_win;
 
@@ -308,7 +307,7 @@ WINDOW* Screen::createWindow(int width, int height, int startx, int starty)
   return local_win;
 }
 
-void Screen::destroyWindow(WINDOW *local_win)
+void CursesScreen::destroyWindow(WINDOW *local_win)
 {  
   /* box(local_win, ' ', ' '); : This won't produce the desired
    * result of erasing the window. It will leave it's four corners 
@@ -330,7 +329,7 @@ void Screen::destroyWindow(WINDOW *local_win)
   delwin(local_win);
 }
 
-void Screen::end()
+void CursesScreen::end()
 {
   // Kill our windows
   destroyWindow(title);
@@ -348,7 +347,7 @@ void Screen::end()
   this->log(LOG_GENERAL, message);
 }*/
 
-void Screen::log(LogType::LogType type, const std::string& source, const std::string& message)
+void CursesScreen::log(LogType::LogType type, const std::string& source, const std::string& message)
 {
   WINDOW *window = generalLog;
 
@@ -435,7 +434,7 @@ void Screen::log(LogType::LogType type, const std::string& source, const std::st
   
 }
 
-void Screen::updatePlayerList(std::vector<User *> users)
+void CursesScreen::updatePlayerList(std::vector<User *> users)
 {
   // Clear the playerlist
   wclear(playerList);
@@ -452,13 +451,4 @@ void Screen::updatePlayerList(std::vector<User *> users)
       log(LogType::LOG_INFO, "Players", users[i]->nick);
     }
   }
-}
-
-std::string Screen::currentTimestamp(bool seconds) {
-  time_t currentTime = time(NULL);
-  struct tm *Tm  = localtime(&currentTime);
-  std::string timeStamp (asctime(Tm));
-  timeStamp = timeStamp.substr(11, seconds ? 8 : 5);
-
-  return timeStamp;
 }

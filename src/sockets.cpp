@@ -83,27 +83,16 @@ void client_callback(int fd,
     if(read == 0)
     {
       Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket closed properly");
-    //event_del(user->GetEvent());
 
-#ifdef WIN32
-    closesocket(user->fd);
-#else
-    close(user->fd);
-#endif
-    delete user;
-    return;
+      delete user;
+      return;
     }
 
     if(read == -1)
     {
       Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket had no data to read");
 
-      #ifdef WIN32
-          closesocket(user->fd);
-      #else
-          close(user->fd);
-      #endif
-          delete user;
+      delete user;
       return;
     }
 
@@ -142,13 +131,6 @@ void client_callback(int fd,
       {
         printf("Unknown action: 0x%x\n", user->action);
 
-        //event_del(user->GetEvent());
-
-        #ifdef WIN32
-        closesocket(user->fd);
-        #else
-        close(user->fd);
-        #endif
         delete user;
 
         break;
@@ -179,13 +161,7 @@ void client_callback(int fd,
       if((errno != EAGAIN && errno != EINTR))// || user->write_err_count>200)
       {
         Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Error writing to client, tried to write " + dtos(writeLen) + " bytes, code: " + dtos(errno));
-        //event_del(user->GetEvent());
 
-    #ifdef WIN32
-        closesocket(user->fd);
-    #else
-        close(user->fd);
-    #endif
         delete user;
         return;
       }

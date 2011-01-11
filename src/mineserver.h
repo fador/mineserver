@@ -44,7 +44,7 @@
 #include "map.h"
 #include "physics.h"
 #include "plugin.h"
-#include "screen.h"
+#include "screenBase.h"
 #include "user.h"
 #include "worldgen/mapgen.h"
 

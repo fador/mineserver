@@ -144,6 +144,11 @@ void logger_log(int type, const char* source, const char* message)
 bool chat_sendmsgTo(const char* user,const char* msg)
 {
   std::string userStr(user);
+  if (userStr == "[Server]")
+  {
+	  LOG(INFO, "Chat", msg);
+	  return true;
+  }
   for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
   {
     if(Mineserver::get()->users()[i]->fd && Mineserver::get()->users()[i]->logged)

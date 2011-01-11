@@ -236,7 +236,7 @@ void Map::init()
     level.Insert("Data", new NBT_Value(NBT_Value::TAG_COMPOUND));
     level["Data"]->Insert("Time", new NBT_Value((int64_t)0));
     level["Data"]->Insert("SpawnX", new NBT_Value((int32_t)0));
-    level["Data"]->Insert("SpawnY", new NBT_Value((int32_t)80));
+    level["Data"]->Insert("SpawnY", new NBT_Value((int32_t)120));
     level["Data"]->Insert("SpawnZ", new NBT_Value((int32_t)0));
     level["Data"]->Insert("RandomSeed", new NBT_Value((int64_t)(rand()*65535)));
 
@@ -989,21 +989,21 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
       if(x == blockToChunk(spawnPos.x()) && z == blockToChunk(spawnPos.z()))
       {
         uint8_t block,meta;
-        bool foundAir=false;
-        if(getBlock(spawnPos.x(),spawnPos.y(),spawnPos.z(), &block, &meta,false) && block != BLOCK_AIR)
+        bool foundLand = false;
+        if(getBlock(spawnPos.x(),spawnPos.y(),spawnPos.z(), &block, &meta, false) && block == BLOCK_AIR)
         {
           uint8_t new_y;
-          for(new_y = spawnPos.y(); new_y < 128 ; new_y++)
+          for(new_y = spawnPos.y(); new_y > 30; new_y--)
           {
-            if(getBlock(spawnPos.x(),new_y,spawnPos.z(), &block, &meta,false) && block == BLOCK_AIR)
+            if(getBlock(spawnPos.x(), new_y, spawnPos.z(), &block, &meta, false) && block != BLOCK_AIR)
             {
-              foundAir=true;
+              foundLand = true;
               break;
             }
           }
-          if(foundAir)
+          if(foundLand)
           {
-            spawnPos.y() = new_y;
+            spawnPos.y() = new_y+1;
 
             std::string infile = mapDirectory+"/level.dat";
 

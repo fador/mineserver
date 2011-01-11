@@ -67,7 +67,8 @@
 #include "physics.h"
 #include "plugin.h"
 #include "furnaceManager.h"
-#include "screen.h"
+#include "cursesScreen.h"
+#include "cliScreen.h"
 #include "hook.h"
 
 #ifdef WIN32
@@ -111,7 +112,7 @@ Mineserver::Mineserver()
   m_map            = new Map;
   m_chat           = new Chat;
   m_plugin         = new Plugin;
-  m_screen         = new Screen;
+  m_screen         = new CliScreen;
   m_physics        = new Physics;
   m_config         = new Config;
   m_furnaceManager = new FurnaceManager;
@@ -158,6 +159,19 @@ int Mineserver::run(int argc, char *argv[])
 
   // Initialize conf
   Mineserver::get()->config()->load(file_config);
+
+  //If needed change interface and reinitialize the new Screen
+  std::string iface = Mineserver::get()->config()->sData("system.interface");
+  if (iface == "curses")
+  {
+	screen()->end();
+	//TODO: we lose everything written to the screen
+	//      up to this point when using curses
+	m_screen = new CursesScreen;
+	screen()->init(VERSION);
+	screen()->log(LogType::LOG_INFO, "Mineserver", "Interface changed to curses");
+    updatePlayerList();
+  }
 
   if (Mineserver::get()->config()->has("system.plugins") && (Mineserver::get()->config()->type("system.plugins") == CONFIG_NODE_LIST))
   {
@@ -375,10 +389,20 @@ int Mineserver::run(int argc, char *argv[])
     {
       tick = (uint32_t)timeNow;
       //Loop users
-      for(int i = User::all().size()-1; i >= 0; i--)
+      for(int i = users().size()-1; i >= 0; i--)
       {
-        User::all()[i]->pushMap();
-        User::all()[i]->popMap();
+        //No data received in 3s, timeout
+        if(users()[i]->logged && (timeNow-users()[i]->lastData) > 3)
+        {
+          Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Player "+users()[i]->nick+" timed out");
+
+          delete users()[i];
+        }
+        else
+        {
+          users()[i]->pushMap();
+          users()[i]->popMap();
+        }
 
         //Minecart hacks!!
         /*
@@ -390,18 +414,7 @@ int Mineserver::run(int argc, char *argv[])
           User::all()[i]->sendAll((int8_t*)pkt.getWrite(), pkt.getWriteLen());
         }
         */
-        //No data received in 3s, timeout
-        if(User::all()[i]->logged && (timeNow-User::all()[i]->lastData) > 2)
-        {
-          Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Player "+User::all()[i]->nick+" timed out");
 
-          #ifdef WIN32
-              closesocket(User::all()[i]->fd);
-          #else
-              close(User::all()[i]->fd);
-          #endif
-              delete User::all()[i];
-        }
       }
 
       map()->mapTime+=20;
