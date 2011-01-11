@@ -75,6 +75,7 @@ void CliScreen::end()
 {
 #ifdef WIN32
 	TerminateThread(stdinThread, 0);
+	DeleteCriticalSection(&ccAccess);
 #endif
 }
 
