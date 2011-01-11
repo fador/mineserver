@@ -101,7 +101,7 @@ bool CliScreen::hasCommand()
   {
 	stdinfd[0].fd = fileno(stdin);
     stdinfd[0].events = POLLIN;
-    if (!poll(cinfd, 1, 0))
+    if (!poll(stdinfd, 1, 0))
       return false;
     readchar = std::cin.get();
 	if (std::cin.rdstate() != std::ios::goodbit)

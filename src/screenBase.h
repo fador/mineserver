@@ -28,6 +28,7 @@
 #ifndef _SCREENBASE_H
 #define _SCREENBASE_H
 
+#include <string>
 #include <vector>
 #include "logtype.h"
 #include "user.h"
