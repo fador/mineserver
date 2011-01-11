@@ -32,7 +32,7 @@
 
 #ifndef WIN32
   #include <poll.h>
-  #include <stdio.h>
+  #include <unistd.h>
 #endif
 
 #ifdef WIN32
@@ -94,18 +94,17 @@ bool CliScreen::hasCommand()
 #ifdef WIN32
   return _hasCommand;
 #else
-  int readchar;
+  char readchar;
   pollfd stdinfd[1];
 
   while (true)
   {
 	stdinfd[0].fd = fileno(stdin);
     stdinfd[0].events = POLLIN;
-    if (!poll(stdinfd, 1, 0))
+    if (!poll(stdinfd, 1, 1))
       return false;
-    readchar = std::cin.get();
-	if (std::cin.rdstate() != std::ios::goodbit)
-	  return false;
+    if (read(STDIN_FILENO, &readchar, 1) == -1)
+      return false;
 	if (readchar == '\n')
 	  return true;
 	else
