@@ -1,6 +1,6 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
-   All rights reserved.
+  Copyright (c) 2010, The Mineserver Project
+  All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -879,6 +879,42 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   chunk->lightRegen    = true;
   chunk->lastused      = (int)time(NULL);
 
+  if (type == BLOCK_AIR) 
+  {
+    LOG(INFO, "Map", "Block "+dtos(x)+","+dtos(y)+","+dtos(z)+" set to air, recalculating entity positions.");
+ 
+    uint8_t temp_type = 0, temp_meta = 0;
+    int8_t temp_y = y;
+    while (getBlock(x, temp_y, z, &temp_type, &temp_meta, false) && (temp_type == BLOCK_AIR))
+    {
+      temp_y--;
+      LOG(INFO, "Map", "Decrementing temp_y to "+dtos(temp_y));
+    }
+    // We've actually moved down past the last air block to the one beneath, so we need to go back up one
+    temp_y++;
+
+    LOG(INFO, "Map", "Final position is "+dtos(x)+","+dtos(temp_y)+","+dtos(z));
+
+    int ex = 0, ey = 0, ez = 0, bx = 0, by = 0, bz = 0;
+    std::map<uint32_t,spawnedItem*>::const_iterator it_a = items.begin(), it_b = items.end();
+    for (;it_a!=it_b;++it_a)
+    {
+      ex = it_a->second->pos.x();
+      ey = it_a->second->pos.y();
+      ez = it_a->second->pos.z();
+      bx = int(ex/32);
+      by = int(ey/32);
+      bz = int(ez/32);
+
+      LOG(INFO, "Map", "Entity "+dtos(it_a->first)+": "+dtos(bx)+","+dtos(by)+","+dtos(bz)+" vs "+dtos(x)+","+dtos(y)+","+dtos(z));
+
+      if ((bx == x) && (by == y+1) && (bz == z))
+      {
+        it_a->second->pos.y() = temp_y*32;
+      }
+    }
+  }
+
   return true;
 }
 
@@ -929,25 +965,42 @@ bool Map::sendPickupSpawn(spawnedItem item)
 
 void Map::createPickupSpawn(int x, int y, int z, int type, int count, int health, User *user)
 {
-   spawnedItem item;
-   item.EID      = generateEID();
-   item.health   = health;
-   item.item     = type;
-   item.count    = count;
-   if(user != NULL)
-   {
-    item.spawnedBy= user->UID;
-   }
-   item.spawnedAt= time(NULL);
+  spawnedItem item;
+  item.EID      = generateEID();
+  item.health   = health;
+  item.item     = type;
+  item.count    = count;
+  if(user != NULL)
+  {
+    item.spawnedBy = user->UID;
+  }
+  item.spawnedAt = time(NULL);
 
-   item.pos.x()  = x*32;
-   item.pos.y()  = y*32;
-   item.pos.z()  = z*32;
-   //Randomize spawn position a bit
-   item.pos.x() += 5+(rand()%22);
-   item.pos.z() += 5+(rand()%22);
+  // Check to see if the block we're being asked to put the pickup spawn in is air
+  // If so, find the lowest air block at x,*,z that we can place it in and move it there
+  // Effectively we get... Gravity!
+  uint8_t temp_type = 0, temp_meta = 0;
+  int8_t temp_y = y;
+  if (getBlock(x, temp_y, z, &temp_type, &temp_meta, false) && (temp_type == BLOCK_AIR))
+  {
+    while (getBlock(x, temp_y, z, &temp_type, &temp_meta, false) && (temp_type == BLOCK_AIR))
+    {
+      temp_y--;
+    }
+    // We've actually moved down past the last air block, so we need to go back up one
+    temp_y++;
 
-   sendPickupSpawn(item);
+    y = temp_y;
+  }
+
+  item.pos.x()  = x*32;
+  item.pos.y()  = y*32;
+  item.pos.z()  = z*32;
+  //Randomize spawn position a bit
+  item.pos.x() += 5+(rand()%22);
+  item.pos.z() += 5+(rand()%22);
+
+  sendPickupSpawn(item);
 }
 
 sChunk*  Map::loadMap(int x, int z, bool generate)
