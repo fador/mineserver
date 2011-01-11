@@ -67,7 +67,7 @@ public:
 class PyScreen
 {
 public:
-  void log(char* message);
+  void log(const char* message);
 };
 
 class PyMineserver
@@ -76,14 +76,13 @@ public:
  PyPlugin plugin;
  PymyMap map;
  PyScreen screen;
- mineserver_pointer_struct getMineServer();
+ mineserver_pointer_struct* getMineServer();
  void setMineServer(mineserver_pointer_struct* MS);
- mineserver_pointer_struct* pyms;
 };
+
 
 PyMineserver* getMS();
 #ifndef SWIG
-mineserver_pointer_struct getMineServer();
 #endif
 
 #endif

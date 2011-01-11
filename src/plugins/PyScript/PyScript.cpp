@@ -2,6 +2,7 @@
 
 #include <Python.h>
 #include <iostream>
+#include <sstream>
 #include <stdlib.h>
 #include <math.h>
 #include <vector>
@@ -17,7 +18,10 @@
 
 using namespace std;
 
+#ifndef SWIG
 mineserver_pointer_struct* ms;
+#endif
+
 Script* the_script;
 
 void checkPyErr(){
@@ -144,6 +148,7 @@ PyObject* Script::callPyFunc(const char* name, PyObject* Args){
 
 PLUGIN_API_EXPORT void CALLCONVERSION PyScript_init(mineserver_pointer_struct* mineserver){
     ms  = mineserver;
+    getMS()->setMineServer(mineserver);
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION set_name(const char* name){
@@ -153,13 +158,10 @@ PLUGIN_API_EXPORT void CALLCONVERSION set_name(const char* name){
         script_name.replace(pos,1,"/"); // Silently ignore backslashes
         pos = script_name.find("\\");
     }
-    ms->logger.log(6,"Plugin",script_name.c_str());
     Py_Initialize();
     //init_MineServer();
     PyRun_SimpleString("import sys;");
-    PyRun_SimpleString("sys.path.insert(0,\"python\");");
     PyRun_SimpleString("sys.path.insert(0,\".\");");
-    getMS()->setMineServer(ms);
     string f_slash ("/");
     string path_to = script_name.substr(
         0,
@@ -167,13 +169,11 @@ PLUGIN_API_EXPORT void CALLCONVERSION set_name(const char* name){
     string c1 ("sys.path.insert(0,\"");
     string c2 ("\");");
     string command (c1+path_to+c2);
-    ms->logger.log(6,"Plugin",path_to.c_str());
     PyRun_SimpleString(command.c_str());
     size_t start = script_name.rfind("/")+1;
     size_t len = script_name.rfind(".") - start;
     string filename = script_name.substr(start, len);
     PyRun_SimpleString("import MineServer");
-    ms->logger.log(6,"Plugin",filename.c_str());
     Script newScript = Script(ms,filename);
     the_script = &newScript;
 }
