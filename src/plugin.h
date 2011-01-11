@@ -181,8 +181,8 @@ public:
     setHook("BlockBreakPre", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
     setHook("BlockBreakPost", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
     setHook("BlockNeighbourBreak", new Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>);
-    setHook("BlockPlacePre", new Hook5<bool,const char*,int32_t,int8_t,int32_t,int16_t>);
-    setHook("BlockPlacePost", new Hook5<bool,const char*,int32_t,int8_t,int32_t,int16_t>);
+    setHook("BlockPlacePre", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int8_t>);
+    setHook("BlockPlacePost", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int8_t>);
     setHook("BlockNeighbourPlace", new Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>);
     setHook("BlockReplacePre", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>);
     setHook("BlockReplacePost", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>);
