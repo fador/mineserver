@@ -64,9 +64,9 @@ private:
   void generateWithNoise(int x, int z);
 
   void ExpandBeaches(int x, int z);
-  void AddTrees(int x, int z);
+  void AddTrees(int x, int z, int count);
   
-  void AddOres(int x, int z);
+  void AddOre(int x, int z, uint8_t type);
   void AddDeposit(int x, int y, int z, uint8_t block, int depotSize);
 
   
