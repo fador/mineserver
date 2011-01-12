@@ -119,8 +119,8 @@ void initConstants()
   BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_SNOW_BLOCK, Drop(ITEM_SNOWBALL, 10000, 4, true)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_FURNACE, Drop(BLOCK_COBBLESTONE, 10000, 3, true)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_BURNING_FURNACE, Drop(BLOCK_COBBLESTONE, 10000, 3, true)));
-  BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_CHEST, Drop(BLOCK_WOOD, 10000, 2, true)));
-  BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_WORKBENCH, Drop(BLOCK_WOOD, 10000, 2, true)));
+  BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_CHEST, Drop(BLOCK_CHEST, 10000, 1, true)));
+  BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_WORKBENCH, Drop(BLOCK_WORKBENCH, 10000, 1, true)));
 
 
   // Blocks that drop items by chance
