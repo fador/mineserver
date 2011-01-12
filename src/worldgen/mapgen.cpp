@@ -458,6 +458,8 @@ void MapGen::AddOre(int x, int z, uint8_t type)
     blockX += xBlockpos;
     blockZ += zBlockpos;
     
+    i++;
+    
     Mineserver::get()->map()->getBlock(blockX, blockY, blockZ, &block, &meta);
     // No ore in caves
     if(block == BLOCK_AIR)
@@ -465,7 +467,6 @@ void MapGen::AddOre(int x, int z, uint8_t type)
         
     AddDeposit(blockX, blockY, blockZ, type, 4);
     
-    i++;
   }
 }
 
