@@ -81,9 +81,54 @@ User* userFromName(std::string user)
 
 // PLUGIN_API FUNCTIONS
 
+bool plugin_hasPluginVersion(const char* name)
+{
+ return Mineserver::get()->plugin()->hasPluginVersion(std::string(name));
+}
+
+float plugin_getPluginVersion(const char* name)
+{
+ return Mineserver::get()->plugin()->getPluginVersion(std::string(name));
+}
+
+void plugin_setPluginVersion(const char* name, float version)
+{
+  Mineserver::get()->plugin()->setPluginVersion(std::string(name),version);
+}
+
+void plugin_remPluginVersion(const char* name)
+{
+  Mineserver::get()->plugin()->remPluginVersion(std::string(name));
+}
+
+bool plugin_hasPointer(const char* name)
+{
+  return Mineserver::get()->plugin()->hasPointer(std::string(name));
+}
+
+void* plugin_getPointer(const char* name)
+{
+  return Mineserver::get()->plugin()->getPointer(std::string(name));
+}
+
+void plugin_setPointer(const char* name, void* pointer)
+{
+  Mineserver::get()->plugin()->setPointer(std::string(name), pointer);
+}
+
+void plugin_remPointer(const char* name)
+{
+  Mineserver::get()->plugin()->remPointer(std::string(name));
+}
+
 bool plugin_hasHook(const char* hookID)
 {
   return Mineserver::get()->plugin()->hasHook(hookID);
+}
+
+Hook* plugin_getHook(const char* hookID)
+{
+  return Mineserver::get()->plugin()->getHook(hookID);
 }
 
 void plugin_setHook(const char* hookID, Hook* hook)
@@ -91,9 +136,24 @@ void plugin_setHook(const char* hookID, Hook* hook)
   Mineserver::get()->plugin()->setHook(hookID, hook);
 }
 
+void plugin_remHook(const char* hookID)
+{
+  Mineserver::get()->plugin()->remHook(hookID);
+}
+
+bool hook_hasCallback(const char* hookID, void* function)
+{
+  return Mineserver::get()->plugin()->getHook(hookID)->hasCallback(function);
+}
+
 void hook_addCallback(const char* hookID, void* function)
 {
   Mineserver::get()->plugin()->getHook(hookID)->addCallback(function);
+}
+
+void hook_remCallback(const char* hookID, void* function)
+{
+  Mineserver::get()->plugin()->getHook(hookID)->remCallback(function);
 }
 
 bool hook_doUntilTrue(const char* hookID, ...)
@@ -122,16 +182,6 @@ void hook_doAll(const char* hookID, ...)
   va_start(argList, hookID);
   Mineserver::get()->plugin()->getHook(hookID)->doAllVA(argList);
   va_end(argList);
-}
-
-float plugin_getPluginVersion(const char* name)
-{
- return Mineserver::get()->plugin()->getPluginVersion(std::string(name));
-}
-
-void plugin_setPluginVersion(const char* name, float version)
-{
-  Mineserver::get()->plugin()->setPluginVersion(std::string(name),version);
 }
 
 // LOGGER WRAPPER FUNCTIONS
@@ -377,11 +427,21 @@ void init_plugin_api(void)
   plugin_api_pointers.chat.sendmsgTo            = &chat_sendmsgTo;
   plugin_api_pointers.chat.sendUserlist         = &chat_sendUserlist;
 
+  plugin_api_pointers.plugin.hasPluginVersion   = &plugin_hasPluginVersion;
   plugin_api_pointers.plugin.getPluginVersion   = &plugin_getPluginVersion;
   plugin_api_pointers.plugin.setPluginVersion   = &plugin_setPluginVersion;
+  plugin_api_pointers.plugin.remPluginVersion   = &plugin_remPluginVersion;
+  plugin_api_pointers.plugin.hasPointer         = &plugin_hasPointer;
+  plugin_api_pointers.plugin.getPointer         = &plugin_getPointer;
+  plugin_api_pointers.plugin.setPointer         = &plugin_setPointer;
+  plugin_api_pointers.plugin.remPointer         = &plugin_remPointer;
   plugin_api_pointers.plugin.hasHook            = &plugin_hasHook;
+  plugin_api_pointers.plugin.getHook            = &plugin_getHook;
   plugin_api_pointers.plugin.setHook            = &plugin_setHook;
+  plugin_api_pointers.plugin.remHook            = &plugin_remHook;
+  plugin_api_pointers.plugin.hasCallback        = &hook_hasCallback;
   plugin_api_pointers.plugin.addCallback        = &hook_addCallback;
+  plugin_api_pointers.plugin.remCallback        = &hook_remCallback;
   plugin_api_pointers.plugin.doUntilTrue        = &hook_doUntilTrue;
   plugin_api_pointers.plugin.doUntilFalse       = &hook_doUntilFalse;
   plugin_api_pointers.plugin.doAll              = &hook_doAll;

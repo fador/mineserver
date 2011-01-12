@@ -895,12 +895,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
     {
       if ((floor(static_cast<double>(it_a->second->pos.x())/32) == x) && (floor(static_cast<double>(it_a->second->pos.y())/32) == y+1) && (floor(static_cast<double>(it_a->second->pos.z())/32) == z))
       {
-        LOG(INFO, "Map", "Moving entity");
         it_a->second->pos.y() = temp_y*32;
-      }
-      else
-      {
-        LOG(INFO, "Map", "Not moving entity");
       }
     }
   }
