@@ -279,7 +279,8 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
     LOG(INFO, "Plugin", "Loading plugin `"+name+"' (`"+file+"')...");
 
     struct stat st;
-    if(stat(file.c_str(), &st) == 0)
+    int statr = stat(file.c_str(), &st);
+    if ((statr == 0) && !(st.st_mode & S_IFDIR))
     {
       lhandle = LIBRARY_LOAD(file.c_str());
     }
@@ -287,7 +288,8 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
     {
       LOG(INFO, "Plugin", "Could not find `"+file+"', trying `"+file+LIBRARY_EXTENSION+"'.");
 
-      if (stat((file+LIBRARY_EXTENSION).c_str(), &st) == 0)
+      statr = stat((file+LIBRARY_EXTENSION).c_str(), &st);
+      if ((statr == 0) && !(st.st_mode & S_IFDIR))
       {
         lhandle = LIBRARY_LOAD((file+LIBRARY_EXTENSION).c_str());
       }
@@ -426,26 +428,42 @@ void Plugin::remHook(const std::string name)
   }
 }
 
-void Plugin::setPluginVersion(const std::string name, float version)
+bool Plugin::hasPluginVersion(const std::string name)
 {
-  m_pluginVersions[name] = version;
+  std::map<const std::string, float>::iterator it_a = m_pluginVersions.begin();
+  std::map<const std::string, float>::iterator it_b = m_pluginVersions.end();
+
+  for (;it_a!=it_b;++it_a)
+  {
+    if (it_a->first == name)
+    {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 float Plugin::getPluginVersion(const std::string name)
 {
-  if (m_pluginVersions.count(name) >= 0)
+  if (hasPluginVersion(name))
   {
     return m_pluginVersions[name];
   }
   else
   {
-    return -1.0f;
+    return 0.0f;
   }
+}
+
+void Plugin::setPluginVersion(const std::string name, float version)
+{
+  m_pluginVersions[name] = version;
 }
 
 void Plugin::remPluginVersion(const std::string name)
 {
-  if (m_pluginVersions.count(name) >= 0)
+  if (hasPluginVersion(name))
   {
     m_pluginVersions.erase(name);
   }

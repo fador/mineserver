@@ -18,6 +18,8 @@ class Hook
 {
 public:
   virtual void addCallback(void* function) {}
+  virtual bool hasCallback(void* function) { return false; }
+  virtual void remCallback(void* function) {}
   virtual bool doUntilTrueVA(va_list vl) { return false; }
   virtual bool doUntilFalseVA(va_list vl) { return false; }
   virtual void doAllVA(va_list vl) {}
@@ -44,6 +46,26 @@ public:
     return callbacks.size();
   }
 
+  bool hasCallback(ftype function)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (*ia == function)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool hasCallback(void* function)
+  {
+    return hasCallback(reinterpret_cast<ftype>(function));
+  }
+
   void addCallback(ftype function)
   {
     callbacks.push_back(function);
@@ -51,7 +73,7 @@ public:
 
   void addCallback(void* function)
   {
-    callbacks.push_back(reinterpret_cast<ftype>(function));
+    addCallback(reinterpret_cast<ftype>(function));
   }
 
   void remCallback(ftype function)
@@ -66,6 +88,11 @@ public:
         break;
       }
     }
+  }
+
+  void remCallback(void* function)
+  {
+    remCallback(reinterpret_cast<ftype>(function));
   }
 
   void doAll()
@@ -166,6 +193,26 @@ public:
     return callbacks.size();
   }
 
+  bool hasCallback(ftype function)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (*ia == function)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool hasCallback(void* function)
+  {
+    return hasCallback(reinterpret_cast<ftype>(function));
+  }
+
   void addCallback(ftype function)
   {
     callbacks.push_back(function);
@@ -173,7 +220,7 @@ public:
 
   void addCallback(void* function)
   {
-    callbacks.push_back(reinterpret_cast<ftype>(function));
+    addCallback(reinterpret_cast<ftype>(function));
   }
 
   void remCallback(ftype function)
@@ -188,6 +235,11 @@ public:
         break;
       }
     }
+  }
+
+  void remCallback(void* function)
+  {
+    remCallback(reinterpret_cast<ftype>(function));
   }
 
   void doAll(A1 a1)
@@ -288,6 +340,26 @@ public:
     return callbacks.size();
   }
 
+  bool hasCallback(ftype function)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (*ia == function)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool hasCallback(void* function)
+  {
+    return hasCallback(reinterpret_cast<ftype>(function));
+  }
+
   void addCallback(ftype function)
   {
     callbacks.push_back(function);
@@ -295,7 +367,7 @@ public:
 
   void addCallback(void* function)
   {
-    callbacks.push_back(reinterpret_cast<ftype>(function));
+    addCallback(reinterpret_cast<ftype>(function));
   }
 
   void remCallback(ftype function)
@@ -310,6 +382,11 @@ public:
         break;
       }
     }
+  }
+
+  void remCallback(void* function)
+  {
+    remCallback(reinterpret_cast<ftype>(function));
   }
 
   void doAll(A1 a1, A2 a2)
@@ -414,6 +491,26 @@ public:
     return callbacks.size();
   }
 
+  bool hasCallback(ftype function)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (*ia == function)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool hasCallback(void* function)
+  {
+    return hasCallback(reinterpret_cast<ftype>(function));
+  }
+
   void addCallback(ftype function)
   {
     callbacks.push_back(function);
@@ -421,7 +518,7 @@ public:
 
   void addCallback(void* function)
   {
-    callbacks.push_back(reinterpret_cast<ftype>(function));
+    addCallback(reinterpret_cast<ftype>(function));
   }
 
   void remCallback(ftype function)
@@ -436,6 +533,11 @@ public:
         break;
       }
     }
+  }
+
+  void remCallback(void* function)
+  {
+    remCallback(reinterpret_cast<ftype>(function));
   }
 
   void doAll(A1 a1, A2 a2, A3 a3)
@@ -544,6 +646,26 @@ public:
     return callbacks.size();
   }
 
+  bool hasCallback(ftype function)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (*ia == function)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool hasCallback(void* function)
+  {
+    return hasCallback(reinterpret_cast<ftype>(function));
+  }
+
   void addCallback(ftype function)
   {
     callbacks.push_back(function);
@@ -551,7 +673,7 @@ public:
 
   void addCallback(void* function)
   {
-    callbacks.push_back(reinterpret_cast<ftype>(function));
+    addCallback(reinterpret_cast<ftype>(function));
   }
 
   void remCallback(ftype function)
@@ -566,6 +688,11 @@ public:
         break;
       }
     }
+  }
+
+  void remCallback(void* function)
+  {
+    remCallback(reinterpret_cast<ftype>(function));
   }
 
   void doAll(A1 a1, A2 a2, A3 a3, A4 a4)
@@ -678,6 +805,26 @@ public:
     return callbacks.size();
   }
 
+  bool hasCallback(ftype function)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (*ia == function)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool hasCallback(void* function)
+  {
+    return hasCallback(reinterpret_cast<ftype>(function));
+  }
+
   void addCallback(ftype function)
   {
     callbacks.push_back(function);
@@ -685,7 +832,7 @@ public:
 
   void addCallback(void* function)
   {
-    callbacks.push_back(reinterpret_cast<ftype>(function));
+    addCallback(reinterpret_cast<ftype>(function));
   }
 
   void remCallback(ftype function)
@@ -700,6 +847,11 @@ public:
         break;
       }
     }
+  }
+
+  void remCallback(void* function)
+  {
+    remCallback(reinterpret_cast<ftype>(function));
   }
 
   void doAll(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5)
@@ -816,6 +968,26 @@ public:
     return callbacks.size();
   }
 
+  bool hasCallback(ftype function)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (*ia == function)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool hasCallback(void* function)
+  {
+    return hasCallback(reinterpret_cast<ftype>(function));
+  }
+
   void addCallback(ftype function)
   {
     callbacks.push_back(function);
@@ -823,7 +995,7 @@ public:
 
   void addCallback(void* function)
   {
-    callbacks.push_back(reinterpret_cast<ftype>(function));
+    addCallback(reinterpret_cast<ftype>(function));
   }
 
   void remCallback(ftype function)
@@ -838,6 +1010,11 @@ public:
         break;
       }
     }
+  }
+
+  void remCallback(void* function)
+  {
+    remCallback(reinterpret_cast<ftype>(function));
   }
 
   void doAll(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6)
@@ -958,6 +1135,26 @@ public:
     return callbacks.size();
   }
 
+  bool hasCallback(ftype function)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (*ia == function)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool hasCallback(void* function)
+  {
+    return hasCallback(reinterpret_cast<ftype>(function));
+  }
+
   void addCallback(ftype function)
   {
     callbacks.push_back(function);
@@ -965,7 +1162,7 @@ public:
 
   void addCallback(void* function)
   {
-    callbacks.push_back(reinterpret_cast<ftype>(function));
+    addCallback(reinterpret_cast<ftype>(function));
   }
 
   void remCallback(ftype function)
@@ -980,6 +1177,11 @@ public:
         break;
       }
     }
+  }
+
+  void remCallback(void* function)
+  {
+    remCallback(reinterpret_cast<ftype>(function));
   }
 
   void doAll(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7)
@@ -1104,6 +1306,26 @@ public:
     return callbacks.size();
   }
 
+  bool hasCallback(ftype function)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (*ia == function)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool hasCallback(void* function)
+  {
+    return hasCallback(reinterpret_cast<ftype>(function));
+  }
+
   void addCallback(ftype function)
   {
     callbacks.push_back(function);
@@ -1111,7 +1333,7 @@ public:
 
   void addCallback(void* function)
   {
-    callbacks.push_back(reinterpret_cast<ftype>(function));
+    addCallback(reinterpret_cast<ftype>(function));
   }
 
   void remCallback(ftype function)
@@ -1126,6 +1348,11 @@ public:
         break;
       }
     }
+  }
+
+  void remCallback(void* function)
+  {
+    remCallback(reinterpret_cast<ftype>(function));
   }
 
   void doAll(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8)
@@ -1254,6 +1481,26 @@ public:
     return callbacks.size();
   }
 
+  bool hasCallback(ftype function)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (*ia == function)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool hasCallback(void* function)
+  {
+    return hasCallback(reinterpret_cast<ftype>(function));
+  }
+
   void addCallback(ftype function)
   {
     callbacks.push_back(function);
@@ -1261,7 +1508,7 @@ public:
 
   void addCallback(void* function)
   {
-    callbacks.push_back(reinterpret_cast<ftype>(function));
+    addCallback(reinterpret_cast<ftype>(function));
   }
 
   void remCallback(ftype function)
@@ -1276,6 +1523,11 @@ public:
         break;
       }
     }
+  }
+
+  void remCallback(void* function)
+  {
+    remCallback(reinterpret_cast<ftype>(function));
   }
 
   void doAll(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9)
@@ -1408,6 +1660,26 @@ public:
     return callbacks.size();
   }
 
+  bool hasCallback(ftype function)
+  {
+    typename std::vector<ftype>::iterator ia = callbacks.begin();
+    typename std::vector<ftype>::iterator ib = callbacks.end();
+    for (;ia!=ib;++ia)
+    {
+      if (*ia == function)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool hasCallback(void* function)
+  {
+    return hasCallback(reinterpret_cast<ftype>(function));
+  }
+
   void addCallback(ftype function)
   {
     callbacks.push_back(function);
@@ -1415,7 +1687,7 @@ public:
 
   void addCallback(void* function)
   {
-    callbacks.push_back(reinterpret_cast<ftype>(function));
+    addCallback(reinterpret_cast<ftype>(function));
   }
 
   void remCallback(ftype function)
@@ -1430,6 +1702,11 @@ public:
         break;
       }
     }
+  }
+
+  void remCallback(void* function)
+  {
+    remCallback(reinterpret_cast<ftype>(function));
   }
 
   void doAll(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10)

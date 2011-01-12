@@ -203,7 +203,7 @@ int Mineserver::run(int argc, char *argv[])
 
   if (Mineserver::get()->config()->bData("map.generate_spawn.enabled"))
   {
-    LOG(INFO, "Mapgen", "Generating spawn area...");
+    screen()->log(LogType::LOG_INFO, "Mapgen", "Generating spawn area...");
     int size = Mineserver::get()->config()->iData("map.generate_spawn.size");
     bool show_progress = Mineserver::get()->config()->bData("map.generate_spawn.show_progress");
 #ifdef WIN32
@@ -234,10 +234,10 @@ int Mineserver::run(int argc, char *argv[])
       {
 #ifdef WIN32
         t_end = timeGetTime ();
-        LOG(INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos((t_end-t_begin)/(size*2+1)) + "ms per chunk");
+        screen()->log(LogType::LOG_INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos((t_end-t_begin)/(size*2+1)) + "ms per chunk");
 #else
         t_end = clock();
-        LOG(INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos(((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1)) + "ms per chunk");
+        screen()->log(LogType::LOG_INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos(((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1)) + "ms per chunk");
 #endif
       }
     }
@@ -326,13 +326,13 @@ int Mineserver::run(int argc, char *argv[])
     while(hostinfo && hostinfo->h_addr_list[ipIndex])
     {
       std::string ip(inet_ntoa(*(struct in_addr*)hostinfo->h_addr_list[ipIndex++]));
-      Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", "Listening on " + ip + ":" + dtos(port));
+      Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", ip + ":" + dtos(port));
     }
   }
   else
   {
     std::string myip(ip);
-    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", "Listening on " + myip + ":" + dtos(port));
+    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", myip + ":" + dtos(port));
   }
   //std::cout << std::endl;
 
