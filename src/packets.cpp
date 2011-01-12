@@ -621,8 +621,8 @@ int PacketHandler::player_block_placement(User *user)
   uint8_t metadata = 0;
   /* neighbour blocks */
   uint8_t block = 0;
-  uint8_t meta = 0;
-  int8_t count = 0, health = 0;
+  uint8_t meta  = 0;
+  int8_t count  = 0, health = 0;
 
   user->buffer >> x >> y >> z >> direction >> newblock;
 
@@ -775,7 +775,9 @@ int PacketHandler::player_block_placement(User *user)
       break;
     }
 
-    if (Mineserver::get()->map()->getBlock(check_x, check_y, check_z, &oldblocktop, &metadatatop) && (oldblocktop == BLOCK_LAVA || oldblocktop == BLOCK_STATIONARY_LAVA || oldblocktop == BLOCK_WATER || oldblocktop == BLOCK_STATIONARY_WATER))
+    if (Mineserver::get()->map()->getBlock(check_x, check_y, check_z, &oldblocktop, &metadatatop) && 
+        (oldblocktop == BLOCK_LAVA || oldblocktop == BLOCK_STATIONARY_LAVA ||
+         oldblocktop == BLOCK_WATER || oldblocktop == BLOCK_STATIONARY_WATER))
     {
       /* block above needs replacing rather then the block sent by the client */
 
