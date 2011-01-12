@@ -279,7 +279,8 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
     LOG(INFO, "Plugin", "Loading plugin `"+name+"' (`"+file+"')...");
 
     struct stat st;
-    if(stat(file.c_str(), &st) == 0)
+    int statr = stat(file.c_str(), &st);
+    if ((statr == 0) && !(st.st_mode & S_IFDIR))
     {
       lhandle = LIBRARY_LOAD(file.c_str());
     }
@@ -287,7 +288,8 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
     {
       LOG(INFO, "Plugin", "Could not find `"+file+"', trying `"+file+LIBRARY_EXTENSION+"'.");
 
-      if (stat((file+LIBRARY_EXTENSION).c_str(), &st) == 0)
+      statr = stat((file+LIBRARY_EXTENSION).c_str(), &st);
+      if ((statr == 0) && !(st.st_mode & S_IFDIR))
       {
         lhandle = LIBRARY_LOAD((file+LIBRARY_EXTENSION).c_str());
       }
