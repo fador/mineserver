@@ -426,26 +426,42 @@ void Plugin::remHook(const std::string name)
   }
 }
 
-void Plugin::setPluginVersion(const std::string name, float version)
+bool Plugin::hasPluginVersion(const std::string name)
 {
-  m_pluginVersions[name] = version;
+  std::map<const std::string, float>::iterator it_a = m_pluginVersions.begin();
+  std::map<const std::string, float>::iterator it_b = m_pluginVersions.end();
+
+  for (;it_a!=it_b;++it_a)
+  {
+    if (it_a->first == name)
+    {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 float Plugin::getPluginVersion(const std::string name)
 {
-  if (m_pluginVersions.count(name) >= 0)
+  if (hasPluginVersion(name))
   {
     return m_pluginVersions[name];
   }
   else
   {
-    return -1.0f;
+    return 0.0f;
   }
+}
+
+void Plugin::setPluginVersion(const std::string name, float version)
+{
+  m_pluginVersions[name] = version;
 }
 
 void Plugin::remPluginVersion(const std::string name)
 {
-  if (m_pluginVersions.count(name) >= 0)
+  if (hasPluginVersion(name))
   {
     m_pluginVersions.erase(name);
   }
