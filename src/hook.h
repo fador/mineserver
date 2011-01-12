@@ -18,7 +18,7 @@ class Hook
 {
 public:
   virtual void addCallback(void* function) {}
-  virtual bool hasCallback(void* function) {}
+  virtual bool hasCallback(void* function) { return false; }
   virtual void remCallback(void* function) {}
   virtual bool doUntilTrueVA(va_list vl) { return false; }
   virtual bool doUntilFalseVA(va_list vl) { return false; }
