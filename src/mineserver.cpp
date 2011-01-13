@@ -473,8 +473,6 @@ int Mineserver::run(int argc, char *argv[])
   delete m_mapGen;
   delete m_logger;
 
-  delete serverUser;
-
   return EXIT_SUCCESS;
 }
 

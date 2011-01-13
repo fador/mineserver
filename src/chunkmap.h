@@ -31,6 +31,7 @@
 #include <set>
 #include <list>
 #include <vector>
+#include <iostream>
 
 #include "packets.h"
 #include "user.h"
@@ -220,13 +221,20 @@ public:
   void linkChunk(sChunk* chunk, int x, int z)
   {
     int _hash = hash(x, z);
+
     chunk->refCount++;
+
     m_buckets[_hash] = new sChunkNode(chunk, NULL, m_buckets[_hash]);
+
+    if (m_buckets[_hash]->next != NULL)
+    {
+      m_buckets[_hash]->next->prev = m_buckets[_hash];
+    }
   }
 
-  void clear()
+  void free()
   {
-    for(int i = 0; i < 21 * 21; i++)
+    for (int i=0;i<441;++i)
     {
       sChunkNode* node = m_buckets[i];
       sChunkNode* next = NULL;
