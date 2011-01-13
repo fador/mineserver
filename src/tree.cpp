@@ -20,7 +20,6 @@ void Tree::set(int32_t xloc, int32_t yloc, int32_t zloc, int blockType, char met
 
 void Tree::generate()
 {
-  srand((uint32_t)time(NULL));
   generateTrunk();
   generateCanopy();
   //Place these in the treeBlocks list.
@@ -77,7 +76,7 @@ void Tree::generateCanopy()
         int yLoc = topY + y - m_canopyHeight + 2;
 
         // Probability of skipping a piece of canopy - based on trial and error.
-        int prob = 100 - (4 * (abs(x) + abs(z) + 1) * (3 * y + 1));
+        int prob = 100 - (3 * (abs(x) + abs(z) + 1) * (3 * y + 1));
 
         // Don't overwrite the trunk, and skip some spots at random based on probability above
         if ((x == 0 && z == 0 && yLoc <= topY) || useLoc > prob)
