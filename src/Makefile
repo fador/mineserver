@@ -64,6 +64,10 @@ ifeq ($(findstring Debian,$(shell cat /etc/issue)),Debian)
   DEBIAN     = 1
 endif
 
+ifeq ($(findstring Ubuntu,$(shell cat /etc/issue)),Ubuntu)
+  DEBIAN     = 1
+endif
+
 ifeq ($(DEBIAN), 1)
   CXXFLAGS  += -DDEBIAN
 endif
