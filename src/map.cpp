@@ -982,10 +982,8 @@ void Map::createPickupSpawn(int x, int y, int z, int type, int count, int health
   item.pos.y()  = y*32;
   item.pos.z()  = z*32;
   //Randomize spawn position a bit
-  //item.pos.x() += 5+(rand()%22);
-  //item.pos.z() += 5+(rand()%22);
-  item.pos.x() += 15;
-  item.pos.z() += 15;
+  item.pos.x() += 5+(rand()%22);
+  item.pos.z() += 5+(rand()%22);
 
   sendPickupSpawn(item);
 }
