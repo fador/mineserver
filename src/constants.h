@@ -164,18 +164,18 @@ extern std::map<std::string, std::string> defaultConf;
 struct Drop
 {
   uint16_t item_id;
-  uint16_t alt_item_id;
   uint32_t probability;
   uint8_t count;
+  Drop* alt_drop;
 
   Drop() {}
 
-  Drop(uint16_t item_id, uint32_t probability, uint8_t count, uint16_t alt_item_id = NULL)
+  Drop(uint16_t item_id, uint32_t probability, uint8_t count, Drop* alt_drop = NULL)
   {
     this->item_id     = item_id;
     this->probability = probability;
     this->count       = count;
-    this->alt_item_id = alt_item_id;
+    this->alt_drop = alt_drop;
   }
 };
 

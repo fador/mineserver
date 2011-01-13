@@ -126,7 +126,7 @@ void initConstants()
 
 
   // Blocks that drop items by chance
-  BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_GRAVEL, Drop(ITEM_FLINT, 850, 1, BLOCK_GRAVEL)));
+  BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_GRAVEL, Drop(ITEM_FLINT, 850, 1, new Drop(BLOCK_GRAVEL, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_LEAVES, Drop(BLOCK_SAPLING, 1200, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_SIGN_POST, Drop(ITEM_SIGN, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_WALL_SIGN, Drop(ITEM_SIGN, 10000, 1)));
