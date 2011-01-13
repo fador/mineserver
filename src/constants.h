@@ -166,16 +166,16 @@ struct Drop
   uint16_t item_id;
   uint32_t probability;
   uint8_t count;
-  bool exclusive;
+  Drop* alt_drop;
 
   Drop() {}
 
-  Drop(uint16_t item_id, uint32_t probability, uint8_t count, bool exclusive)
+  Drop(uint16_t item_id, uint32_t probability, uint8_t count, Drop* alt_drop = NULL)
   {
     this->item_id     = item_id;
     this->probability = probability;
     this->count       = count;
-    this->exclusive   = exclusive;
+    this->alt_drop = alt_drop;
   }
 };
 
