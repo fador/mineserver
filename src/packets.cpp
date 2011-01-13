@@ -208,7 +208,7 @@ int PacketHandler::inventory_change(User *user)
   int16_t actionNumber = 0;
   int16_t itemID = 0;
   int8_t itemCount = 0;
-  int8_t itemUses  = 0;
+  int16_t itemUses  = 0;
 
   user->buffer >> windowID >> slot >> rightClick >> actionNumber >> itemID;
   if(itemID != -1)
@@ -622,7 +622,8 @@ int PacketHandler::player_block_placement(User *user)
   /* neighbour blocks */
   uint8_t block = 0;
   uint8_t meta  = 0;
-  int8_t count  = 0, health = 0;
+  int8_t count  = 0;
+  int16_t health = 0;
 
   user->buffer >> x >> y >> z >> direction >> newblock;
 
@@ -727,7 +728,7 @@ int PacketHandler::player_block_placement(User *user)
     if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].type != -1)
     {
       user->buffer << (int8_t)user->inv[INV_TASKBAR_START+user->currentItemSlot()].count
-                   << (int8_t)user->inv[INV_TASKBAR_START+user->currentItemSlot()].health;
+                   << (int16_t)user->inv[INV_TASKBAR_START+user->currentItemSlot()].health;
     }
     foundFromInventory = true;
   }
@@ -908,7 +909,7 @@ int PacketHandler::holding_change(User *user)
 
   //Send holding change to others
   Packet pkt;
-  pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)user->UID << (int16_t)0 << (int16_t)user->inv[itemSlot+36].type;
+  pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)user->UID << (int16_t)0 << (int16_t)user->inv[itemSlot+36].type << (int16_t)user->inv[itemSlot+36].health;
   user->sendOthers((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
 
   // Set current itemID to user
@@ -951,7 +952,7 @@ int PacketHandler::pickup_spawn(User *user)
 
   user->buffer >> (int32_t&)item.EID;
 
-  user->buffer >> (int16_t&)item.item >> (int8_t&)item.count ;
+  user->buffer >> (int16_t&)item.item >> (int8_t&)item.count >> (int16_t&)item.health;
   user->buffer >> (int32_t&)item.pos.x() >> (int32_t&)item.pos.y() >> (int32_t&)item.pos.z();
   user->buffer >> yaw >> pitch >> roll;
 
