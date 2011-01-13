@@ -60,18 +60,18 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
   {
     if (!token_type)
     {
-    std::cerr << "Unrecognised data!\n";
-    return false;
+      std::cerr << "Unrecognised data!\n";
+      return false;
     }
 
     // Include other files only if we're in the root node
     if ((token_type == CONFIG_TOKEN_ENTITY) && (token_data == "include") && (currentNode == root))
     {
-    int tmp_type;
-    std::string tmp_data;
+      int tmp_type;
+      std::string tmp_data;
 
-    lexer.get_token(&tmp_type, &tmp_data);
-    if (tmp_type == CONFIG_TOKEN_STRING)
+      lexer.get_token(&tmp_type, &tmp_data);
+      if (tmp_type == CONFIG_TOKEN_STRING)
       {
         if (tmp_data == file)
         {
@@ -86,7 +86,7 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
 
         continue;
       }
-    else
+      else
       {
         lexer.put_token(tmp_type, tmp_data);
       }
@@ -94,12 +94,12 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
 
     if ((token_type == CONFIG_TOKEN_ENTITY) || (token_type == CONFIG_TOKEN_LABEL))
     {
-    token_label.assign(token_data);
+      token_label.assign(token_data);
     }
 
     if (token_type == CONFIG_TOKEN_OPERATOR_ASSIGN)
     {
-    if (currentNode != root)
+      if (currentNode != root)
       {
         currentNode->clear();
       }
@@ -107,14 +107,14 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
 
     if (token_type == CONFIG_TOKEN_BOOLEAN)
     {
-    ConfigNode* newNode = new ConfigNode;
-    newNode->setData(token_data == "true");
-    if (token_label.size())
+      ConfigNode* newNode = new ConfigNode;
+      newNode->setData(token_data == "true");
+      if (token_label.size())
       {
         currentNode->set(token_label, newNode, true);
         token_label.clear();
       }
-    else
+      else
       {
         currentNode->add(newNode);
       }
@@ -122,14 +122,14 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
 
     if (token_type == CONFIG_TOKEN_STRING)
     {
-    ConfigNode* newNode = new ConfigNode;
-    newNode->setData(token_data);
-    if (token_label.size())
+      ConfigNode* newNode = new ConfigNode;
+      newNode->setData(token_data);
+      if (token_label.size())
       {
         currentNode->set(token_label, newNode, true);
         token_label.clear();
       }
-    else
+      else
       {
         currentNode->add(newNode);
       }
@@ -137,14 +137,14 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
 
     if (token_type == CONFIG_TOKEN_NUMBER)
     {
-    ConfigNode* newNode = new ConfigNode;
-    newNode->setData((double)::atof(token_data.c_str()));
-    if (token_label.size())
+      ConfigNode* newNode = new ConfigNode;
+      newNode->setData((double)::atof(token_data.c_str()));
+      if (token_label.size())
       {
         currentNode->set(token_label, newNode, true);
         token_label.clear();
       }
-    else
+      else
       {
         currentNode->add(newNode);
       }
@@ -152,8 +152,8 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
 
     if (token_type == CONFIG_TOKEN_LIST_OPEN)
     {
-    ConfigNode* newNode = new ConfigNode;
-    if (token_label.size())
+      ConfigNode* newNode = new ConfigNode;
+      if (token_label.size())
       {
         if (!currentNode->has(token_label))
         {
@@ -166,18 +166,18 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
 
         token_label.clear();
       }
-    else
+      else
       {
         currentNode->add(newNode);
       }
-    nodeStack.push_back(currentNode);
-    currentNode = newNode;
+      nodeStack.push_back(currentNode);
+      currentNode = newNode;
     }
 
     if (token_type == CONFIG_TOKEN_LIST_CLOSE)
     {
-    currentNode = nodeStack.back();
-    nodeStack.pop_back();
+      currentNode = nodeStack.back();
+      nodeStack.pop_back();
     }
   }
 

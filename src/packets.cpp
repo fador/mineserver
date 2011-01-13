@@ -134,7 +134,7 @@ int PacketHandler::change_sign(User *user)
   newSign->text3 = strings3;
   newSign->text4 = strings4;
 
-  sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(blockToChunk(x),blockToChunk(z));
+  sChunk* chunk = Mineserver::get()->map()->chunks.getChunk(blockToChunk(x),blockToChunk(z));
 
   if(chunk != NULL)
   {
@@ -208,7 +208,7 @@ int PacketHandler::inventory_change(User *user)
   int16_t actionNumber = 0;
   int16_t itemID = 0;
   int8_t itemCount = 0;
-  int8_t itemUses  = 0;
+  int16_t itemUses  = 0;
 
   user->buffer >> windowID >> slot >> rightClick >> actionNumber >> itemID;
   if(itemID != -1)
@@ -621,8 +621,9 @@ int PacketHandler::player_block_placement(User *user)
   uint8_t metadata = 0;
   /* neighbour blocks */
   uint8_t block = 0;
-  uint8_t meta = 0;
-  int8_t count = 0, health = 0;
+  uint8_t meta  = 0;
+  int8_t count  = 0;
+  int16_t health = 0;
 
   user->buffer >> x >> y >> z >> direction >> newblock;
 
@@ -640,6 +641,44 @@ int PacketHandler::player_block_placement(User *user)
   if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &metadata))
   {
     return PACKET_OK;
+  }
+
+  //Check if opening a door
+  if(oldblock == BLOCK_WOODEN_DOOR || oldblock == BLOCK_IRON_DOOR)
+  {
+     // Toggle door state
+     if (metadata & 0x4)
+     {
+       metadata &= (0x8 | 0x3);
+     }
+     else
+     {
+       metadata |= 0x4;
+     }
+
+     uint8_t metadata2, block2;
+
+     int modifier = (metadata & 0x8) ? -1 : 1;
+
+     Mineserver::get()->map()->setBlock(x, y, z, oldblock, metadata);
+     Mineserver::get()->map()->sendBlockChange(x, y, z, (char)oldblock, metadata);  
+
+     Mineserver::get()->map()->getBlock(x, y + modifier, z, &block2, &metadata2);
+
+     if (block2 == oldblock)
+     {
+       metadata2 = metadata;
+   
+       if(metadata & 0x8)
+         metadata2 &= 0x7;
+       else
+         metadata2 |= 0x8;
+
+       Mineserver::get()->map()->setBlock(x, y + modifier, z, block2, metadata2);
+       Mineserver::get()->map()->sendBlockChange(x, y + modifier, z, (char)oldblock, metadata2);
+     }
+
+     return PACKET_OK;
   }
   
   //Check if we need to open a window
@@ -664,10 +703,12 @@ int PacketHandler::player_block_placement(User *user)
   }
 
   // TODO: Handle int16_t itemID's
+  /*
   if(newblock > 255 && newblock != ITEM_SIGN)
   {
     return PACKET_OK;
   }
+  */
 
   bool foundFromInventory = false;
 
@@ -687,7 +728,7 @@ int PacketHandler::player_block_placement(User *user)
     if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].type != -1)
     {
       user->buffer << (int8_t)user->inv[INV_TASKBAR_START+user->currentItemSlot()].count
-                   << (int8_t)user->inv[INV_TASKBAR_START+user->currentItemSlot()].health;
+                   << (int16_t)user->inv[INV_TASKBAR_START+user->currentItemSlot()].health;
     }
     foundFromInventory = true;
   }
@@ -753,29 +794,18 @@ int PacketHandler::player_block_placement(User *user)
     /* client doesn't give us the correct block for lava and water, check block above */
     switch(direction)
     {
-    case BLOCK_BOTTOM:
-      check_y--;
-      break;
-    case BLOCK_TOP:
-      check_y++;
-      break;
-    case BLOCK_NORTH:
-      check_x++;
-      break;
-    case BLOCK_SOUTH:
-      check_x--;
-      break;
-    case BLOCK_EAST:
-      check_z++;
-      break;
-    case BLOCK_WEST:
-      check_z--;
-      break;
-    default:
-      break;
+      case BLOCK_BOTTOM: check_y--;  break;
+      case BLOCK_TOP:    check_y++;  break;
+      case BLOCK_NORTH:  check_x++;  break;
+      case BLOCK_SOUTH:  check_x--;  break;
+      case BLOCK_EAST:   check_z++;  break;
+      case BLOCK_WEST:   check_z--;  break;
+      default:                       break;
     }
 
-    if (Mineserver::get()->map()->getBlock(check_x, check_y, check_z, &oldblocktop, &metadatatop) && (oldblocktop == BLOCK_LAVA || oldblocktop == BLOCK_STATIONARY_LAVA || oldblocktop == BLOCK_WATER || oldblocktop == BLOCK_STATIONARY_WATER))
+    if (Mineserver::get()->map()->getBlock(check_x, check_y, check_z, &oldblocktop, &metadatatop) && 
+        (oldblocktop == BLOCK_LAVA || oldblocktop == BLOCK_STATIONARY_LAVA ||
+         oldblocktop == BLOCK_WATER || oldblocktop == BLOCK_STATIONARY_WATER))
     {
       /* block above needs replacing rather then the block sent by the client */
 
@@ -879,7 +909,7 @@ int PacketHandler::holding_change(User *user)
 
   //Send holding change to others
   Packet pkt;
-  pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)user->UID << (int16_t)0 << (int16_t)user->inv[itemSlot+36].type;
+  pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)user->UID << (int16_t)0 << (int16_t)user->inv[itemSlot+36].type << (int16_t)user->inv[itemSlot+36].health;
   user->sendOthers((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
 
   // Set current itemID to user
@@ -922,7 +952,7 @@ int PacketHandler::pickup_spawn(User *user)
 
   user->buffer >> (int32_t&)item.EID;
 
-  user->buffer >> (int16_t&)item.item >> (int8_t&)item.count ;
+  user->buffer >> (int16_t&)item.item >> (int8_t&)item.count >> (int16_t&)item.health;
   user->buffer >> (int32_t&)item.pos.x() >> (int32_t&)item.pos.y() >> (int32_t&)item.pos.z();
   user->buffer >> yaw >> pitch >> roll;
 

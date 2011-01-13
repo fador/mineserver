@@ -48,18 +48,34 @@
 
 struct plugin_pointer_struct
 {
+  bool  (*hasPluginVersion)(const char* name);
   float (*getPluginVersion)(const char* name);
-  void (*setPluginVersion) (const char* name, float version);
-  bool (*hasHook)(const char* hookID);
+  void  (*setPluginVersion)(const char* name, float version);
+  void  (*remPluginVersion)(const char* name);
+
+  bool  (*hasPointer)(const char* name);
+  void* (*getPointer)(const char* name);
+  void  (*setPointer)(const char* name, void* pointer);
+  void  (*remPointer)(const char* name);
+
+  bool  (*hasHook)(const char* hookID);
 #ifdef USE_HOOKS
-  void (*setHook)(const char* hookID, Hook* hook);
+  Hook* (*getHook)(const char* hookID);
+  void  (*setHook)(const char* hookID, Hook* hook);
 #else
-  void (*setHook)(const char* hookID, void* hook);
+  void* (*getHook)(const char* hookID);
+  void  (*setHook)(const char* hookID, void* hook);
 #endif
-  void (*addCallback) (const char* hookID, void* function);
-  bool (*doUntilTrue) (const char* hookID, ...);
-  bool (*doUntilFalse)(const char* hookID, ...);
-  void (*doAll)(const char* hookID, ...);
+  void  (*remHook)(const char* hookID);
+
+  bool (*hasCallback)          (const char* hookID, void* function);
+  void (*addCallback)          (const char* hookID, void* function);
+  void (*addIdentifiedCallback)(const char* hookID, void* identifier, void* function);
+  void (*remCallback)          (const char* hookID, void* function);
+  bool (*doUntilTrue)          (const char* hookID, ...);
+  bool (*doUntilFalse)         (const char* hookID, ...);
+  void (*doAll)                (const char* hookID, ...);
+
   void *temp[10];
 };
 

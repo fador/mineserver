@@ -59,7 +59,7 @@ DWORD WINAPI CliScreen::stdinThreadProc()
     }
 
     EnterCriticalSection(&ccAccess);
-    currentCommand += s;
+	currentCommand += s + "\n";
     _hasCommand = true;
     LeaveCriticalSection(&ccAccess);
   }
@@ -69,6 +69,7 @@ DWORD WINAPI CliScreen::stdinThreadProc()
 void CliScreen::init(std::string version)
 {
 #ifdef WIN32
+  _hasCommand = false;
   InitializeCriticalSection(&ccAccess);
   stdinThread = CreateThread(NULL, 0, _stdinThreadProc, (void *)this, 0, NULL);
 #endif
@@ -135,14 +136,13 @@ std::string CliScreen::getCommand()
   std::istringstream is;
   is.str(currentCommand);
   std::getline(is, command);
-  currentCommand = is.str();
+  currentCommand = std::string((std::istreambuf_iterator<char>(is)),
+                               std::istreambuf_iterator<char>());
+  _hasCommand = !currentCommand.empty();
+  LeaveCriticalSection(&ccAccess);
 #else
   command = currentCommand;
-#endif
   currentCommand.clear();
-#ifdef WIN32
-  _hasCommand = currentCommand.empty();
-  LeaveCriticalSection(&ccAccess);
 #endif
   return command;
 }

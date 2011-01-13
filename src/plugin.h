@@ -42,6 +42,8 @@
 #include <dlfcn.h>
 #endif
 
+class BlockBasic;
+
 #include "delegate/delegate.hpp"
 //#include "constants.h"
 #include "tools.h"
@@ -142,22 +144,23 @@ class Plugin
 {
 public:
   // Hook registry stuff
-  bool hasHook(const std::string name);
-  void setHook(const std::string name, Hook* hook);
+  bool  hasHook(const std::string name);
   Hook* getHook(const std::string name);
-  void remHook(const std::string name);
+  void  setHook(const std::string name, Hook* hook);
+  void  remHook(const std::string name);
   // Load/Unload plugins
   bool loadPlugin(const std::string name, const std::string file="");
   void unloadPlugin(const std::string name);
   // Plugin version registry
-  void setPluginVersion(const std::string name, float version);
+  bool  hasPluginVersion(const std::string name);
   float getPluginVersion(const std::string name);
-  void remPluginVersion(const std::string name);
+  void  setPluginVersion(const std::string name, float version);
+  void  remPluginVersion(const std::string name);
   // Pointer registry stuff
-  bool hasPointer(const std::string name);
-  void setPointer(const std::string name, void* pointer);
+  bool  hasPointer(const std::string name);
+  void  setPointer(const std::string name, void* pointer);
   void* getPointer(const std::string name);
-  void remPointer(const std::string name);
+  void  remPointer(const std::string name);
   // Create default hooks
   Plugin()
   {
@@ -187,6 +190,8 @@ public:
     setHook("BlockReplacePre", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>);
     setHook("BlockReplacePost", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>);
     setHook("BlockNeighbourReplace", new Hook9<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t,int16_t,int16_t>);
+
+    init();
   }
   // Remove existing hooks
   ~Plugin()
@@ -197,6 +202,8 @@ public:
       delete it->second;
     }
     m_hooks.clear();
+
+    free();
   }
 
   // Old code
@@ -219,6 +226,7 @@ private:
   // Old stuff
   typedef std::map<int16_t, Callback> Callbacks;
   Callbacks blockevents;
+  std::vector<BlockBasic*> toClean;
 };
 
 #endif

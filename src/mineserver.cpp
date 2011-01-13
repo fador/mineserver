@@ -164,12 +164,12 @@ int Mineserver::run(int argc, char *argv[])
   std::string iface = Mineserver::get()->config()->sData("system.interface");
   if (iface == "curses")
   {
-	screen()->end();
-	//TODO: we lose everything written to the screen
-	//      up to this point when using curses
-	m_screen = new CursesScreen;
-	screen()->init(VERSION);
-	screen()->log(LogType::LOG_INFO, "Mineserver", "Interface changed to curses");
+    screen()->end();
+    //TODO: we lose everything written to the screen
+    //      up to this point when using curses
+    m_screen = new CursesScreen;
+    screen()->init(VERSION);
+    screen()->log(LogType::LOG_INFO, "Mineserver", "Interface changed to curses");
     updatePlayerList();
   }
 
@@ -181,6 +181,7 @@ int Mineserver::run(int argc, char *argv[])
     {
       Mineserver::get()->plugin()->loadPlugin(*it, Mineserver::get()->config()->sData("system.plugins."+(*it)));
     }
+    delete tmp;
   }
 
   // Write PID to file
@@ -254,9 +255,6 @@ int Mineserver::run(int argc, char *argv[])
 
   // Load port from config
   int port = Mineserver::get()->config()->iData("net.port");
-
-  // Initialize plugins
-  Mineserver::get()->plugin()->init();
 
 #ifdef WIN32
   WSADATA wsaData;
@@ -474,6 +472,8 @@ int Mineserver::run(int argc, char *argv[])
   delete m_packetHandler;
   delete m_mapGen;
   delete m_logger;
+
+  delete serverUser;
 
   return EXIT_SUCCESS;
 }

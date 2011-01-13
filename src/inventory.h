@@ -101,7 +101,7 @@ public:
 
   bool windowOpen(User *user, int8_t type, int32_t x, int32_t y, int32_t z);
 
-  bool windowClick(User *user,int8_t windowID, int16_t slot, int8_t rightClick, int16_t actionNumber, int16_t itemID, int8_t itemCount,int8_t itemUses);
+  bool windowClick(User *user,int8_t windowID, int16_t slot, int8_t rightClick, int16_t actionNumber, int16_t itemID, int8_t itemCount,int16_t itemUses);
 
   bool windowClose(User *user,int8_t windowID);
     
