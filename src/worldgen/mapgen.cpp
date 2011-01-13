@@ -53,9 +53,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../nbt.h"
 #include "../tree.h"
 
+int g_seed;
+
+inline int fastrand() { 
+  g_seed = (214013*g_seed+2531011); 
+  return (g_seed>>16)&0x7FFF; 
+} 
+
 void MapGen::init(int seed)
 {
   cave.init(seed+7);
+  
+  g_seed = seed;
 
   ridgedMultiNoise.SetSeed(seed);
   ridgedMultiNoise.SetOctaveCount(6);
@@ -198,11 +207,16 @@ void MapGen::generateChunk(int x, int z)
   //Mineserver::get()->map()->maps[chunkid].nbt = main;
   
   if(addOre)
-    AddOres(x, z);
+  {
+    AddOre(x, z, BLOCK_COAL_ORE);
+    AddOre(x, z, BLOCK_IRON_ORE);
+    AddOre(x, z, BLOCK_GOLD_ORE);
+    AddOre(x, z, BLOCK_DIAMOND_ORE);
+  }
   
   // Add trees
   if(addTrees)
-    AddTrees(x, z);
+    AddTrees(x, z, fastrand()%2+3);
     
   if(expandBeaches)
     ExpandBeaches(x, z);
@@ -212,36 +226,35 @@ void MapGen::generateChunk(int x, int z)
 //#define PRINT_MAPGEN_TIME
 
 
-void MapGen::AddTrees(int x, int z) 
+void MapGen::AddTrees(int x, int z, int count) 
 {
   int xBlockpos = x<<4;
   int zBlockpos = z<<4;
   
-  int blockX, blockZ, height;
+  int blockX, blockY, blockZ;
   uint8_t block;
   uint8_t meta;
-  
-  for(int bX = 0; bX < 16; bX++) 
+    
+  int i = 0;
+  while(i < count)
   {
-    for(int bZ = 0; bZ < 16; bZ++) 
-    {
-      blockX = xBlockpos+bX;
-      blockZ = zBlockpos+bZ;
+    blockX = fastrand()%16;
+    blockZ = fastrand()%16;
       
-      height = heightmap[(bZ<<4)+bX] + 1;
+    blockY = heightmap[(blockZ<<4)+blockX] + 1;
+    
+    blockX += xBlockpos;
+    blockZ += zBlockpos;
+    
+    i++;
       
-      Mineserver::get()->map()->getBlock(blockX, height, blockZ, &block, &meta);
-      // No trees on water
-      if(block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
-         break;
+    Mineserver::get()->map()->getBlock(blockX, blockY, blockZ, &block, &meta);
+    // No trees on water
+    if(block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
+      continue;
         
-      if(mersenne.uniform(10000) < 400)
-      {
-        Tree tree(blockX, height, blockZ);
-        tree.generate();
-      }
-      break;
-    }
+    Tree tree(blockX, blockY, blockZ);
+    tree.generate();
   }
 }
 
@@ -395,59 +408,66 @@ void MapGen::ExpandBeaches(int x, int z)
   }
 }
 
-void MapGen::AddOres(int x, int z) 
+void MapGen::AddOre(int x, int z, uint8_t type) 
 {
   int xBlockpos = x<<4;
   int zBlockpos = z<<4;
   
-  int blockX, blockZ, height;
+  int blockX, blockY, blockZ;
   uint8_t block;
   uint8_t meta;
   
-  for(int bX = 4; bX < 12; bX++) 
-  {
-    for(int bZ = 4; bZ < 12; bZ++) 
-    {
-      blockX = xBlockpos+bX;
-      blockZ = zBlockpos+bZ;
-      
-      height = heightmap[(bZ<<4)+bX];
-      height -= 5;
-      
-      for(int h = 10; h < height; h++)
-      {
-        Mineserver::get()->map()->getBlock(blockX, h, blockZ, &block, &meta);
-        // No ore on air
-        if(block == BLOCK_AIR)
-          continue;
-        
-        int chance = mersenne.uniform(10000);
+  int count, startHeight;
 
-        // Coal ore
-        if(h < 90 && chance < 70)
-        {
-          AddDeposit(blockX, h, blockZ, BLOCK_COAL_ORE, 4);
-        }  
-        
-        // Iron ore
-        if(h < 60 && chance < 30)
-        {
-          AddDeposit(blockX, h, blockZ, BLOCK_IRON_ORE, 3);
-        }
-        
-        // Gold ore
-        if(h < 32 && chance < 10)
-        {
-          AddDeposit(blockX, h, blockZ, BLOCK_GOLD_ORE, 2);
-        }
-        
-        // Diamond ore
-        if(h < 17 && chance < 8)
-        {
-          AddDeposit(blockX, h, blockZ, BLOCK_DIAMOND_ORE, 2);
-        }
-      }
+  switch(type) {
+    case BLOCK_COAL_ORE:
+      count = fastrand()%10 + 20; // 20-30 coal deposits
+      startHeight = 90;
+      break;
+    case BLOCK_IRON_ORE:
+      count = fastrand()%8 + 10; // 10-18 iron deposits
+      startHeight = 60;
+      break;
+    case BLOCK_GOLD_ORE:
+      count = fastrand()%5 + 5; // 5-10 gold deposits
+      startHeight = 32;
+      break;
+    case BLOCK_DIAMOND_ORE:
+      count = fastrand()%2 + 2; // 2-4 diamond deposits
+      startHeight = 17;
+      break;
+  }
+  
+  int i = 0;
+  while(i < count)
+  {
+    blockX = fastrand()%8 + 4;
+    blockZ = fastrand()%8 + 4;
+    
+    blockY = heightmap[(blockZ<<4)+blockX];
+    blockY -= 5;
+    
+    // Check that startheight is not higher than height at that column
+    if(blockY > startHeight)
+    {
+      blockY = startHeight;
     }
+    
+    blockX += xBlockpos;
+    blockZ += zBlockpos;
+    
+    // Calculate Y
+    blockY = fastrand()%blockY;
+    
+    i++;
+    
+    Mineserver::get()->map()->getBlock(blockX, blockY, blockZ, &block, &meta);
+    // No ore in caves
+    if(block == BLOCK_AIR)
+      continue;
+        
+    AddDeposit(blockX, blockY, blockZ, type, 4);
+    
   }
 }
 
