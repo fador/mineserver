@@ -98,7 +98,23 @@ void PacketHandler::init()
   packets[PACKET_INVENTORY_CLOSE]          = Packets(1, &PacketHandler::inventory_close);
   packets[PACKET_SIGN]                     = Packets(PACKET_VARIABLE_LEN, &PacketHandler::change_sign); 
   packets[PACKET_TRANSACTION]              = Packets(4, &PacketHandler::inventory_transaction); 
+  packets[PACKET_ENTITY_CROUCH]            = Packets(5, &PacketHandler::entity_crouch); 
+
   
+}
+
+
+int PacketHandler::entity_crouch(User *user)
+{
+  int32_t EID;
+  int8_t action;
+
+  user->buffer >> EID >> action;
+
+  Mineserver::get()->logger()->log(LogType::LOG_INFO, "Packets", "Entity action: EID: " + dtos(EID) +" Action: " +dtos(action));
+
+  user->buffer.removePacket();
+  return PACKET_OK;
 }
 
 int PacketHandler::change_sign(User *user)
