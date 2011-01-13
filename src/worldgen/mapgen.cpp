@@ -196,7 +196,7 @@ void MapGen::generateChunk(int x, int z)
   chunk->x = x;
   chunk->z = z;
 
-  Mineserver::get()->map()->chunks.LinkChunk(chunk, x, z);
+  Mineserver::get()->map()->chunks.linkChunk(chunk, x, z);
 
   // Update last used time
   //Mineserver::get()->map()->mapLastused[chunkid] = (int)time(0);

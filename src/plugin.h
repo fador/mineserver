@@ -42,6 +42,8 @@
 #include <dlfcn.h>
 #endif
 
+class BlockBasic;
+
 #include "delegate/delegate.hpp"
 //#include "constants.h"
 #include "tools.h"
@@ -188,6 +190,8 @@ public:
     setHook("BlockReplacePre", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>);
     setHook("BlockReplacePost", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>);
     setHook("BlockNeighbourReplace", new Hook9<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t,int16_t,int16_t>);
+
+    init();
   }
   // Remove existing hooks
   ~Plugin()
@@ -198,6 +202,8 @@ public:
       delete it->second;
     }
     m_hooks.clear();
+
+    free();
   }
 
   // Old code
@@ -220,6 +226,7 @@ private:
   // Old stuff
   typedef std::map<int16_t, Callback> Callbacks;
   Callbacks blockevents;
+  std::vector<BlockBasic*> toClean;
 };
 
 #endif

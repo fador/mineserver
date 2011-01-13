@@ -68,12 +68,13 @@ struct plugin_pointer_struct
 #endif
   void  (*remHook)(const char* hookID);
 
-  bool (*hasCallback) (const char* hookID, void* function);
-  void (*addCallback) (const char* hookID, void* function);
-  void (*remCallback) (const char* hookID, void* function);
-  bool (*doUntilTrue) (const char* hookID, ...);
-  bool (*doUntilFalse)(const char* hookID, ...);
-  void (*doAll)(const char* hookID, ...);
+  bool (*hasCallback)          (const char* hookID, void* function);
+  void (*addCallback)          (const char* hookID, void* function);
+  void (*addIdentifiedCallback)(const char* hookID, void* identifier, void* function);
+  void (*remCallback)          (const char* hookID, void* function);
+  bool (*doUntilTrue)          (const char* hookID, ...);
+  bool (*doUntilFalse)         (const char* hookID, ...);
+  void (*doAll)                (const char* hookID, ...);
 
   void *temp[10];
 };

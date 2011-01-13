@@ -23,13 +23,14 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-#ifndef _CHUNKMAP_H_
-#define _CHUNKMAP_H_
+#ifndef _CHUNKMAP_H
+#define _CHUNKMAP_H
 
 #include <set>
 #include <list>
+#include <vector>
 
 #include "packets.h"
 #include "user.h"
@@ -57,161 +58,190 @@ struct sChunk
   bool changed;
   time_t lastused;
 
-  NBT_Value *nbt;
-  std::set<User*> users;
-  std::vector<spawnedItem *> items;
-  
-  //ToDo: clear these
-  std::vector<chestData *>   chests;
-  std::vector<signData *>    signs;
-  std::vector<furnaceData *> furnaces;
+  NBT_Value* nbt;
+  std::set<User*>           users;
+  std::vector<spawnedItem*> items;
 
-  bool HasUser(User* user)
+  // ToDo: clear these
+  std::vector<chestData*>   chests;
+  std::vector<signData*>    signs;
+  std::vector<furnaceData*> furnaces;
+
+  bool hasUser(User* user)
   {
     return users.count(user) != 0;
   }
 
-  void sendPacket(const Packet &packet, User *dontsend = NULL)
+  void sendPacket(const Packet &packet, User* nosend = NULL)
   {
-    std::set<User*>::iterator iter = users.begin(), end = users.end();
+    std::set<User*>::iterator iter_a = users.begin(), iter_b = users.end();
 
-    for( ; iter != end ; iter++ )
+    for (;iter_a!=iter_b;++iter_a)
     {
-      if((*iter) != dontsend)
-        (*iter)->buffer.addToWrite(packet.getWrite(), packet.getWriteLen());
+      if ((*iter_a) != nosend)
+      {
+        (*iter_a)->buffer.addToWrite(packet.getWrite(), packet.getWriteLen());
+      }
     }
   }
 
-  static bool UserBoundry(sChunk *left, std::list<User*> &lusers, sChunk *right, std::list<User*> &rusers)
+  static bool userBoundary(sChunk* left, std::list<User*> &lusers, sChunk* right, std::list<User*> &rusers)
   {
-   bool diff = false;
-   std::set<User*>::iterator iter = left->users.begin(), end = left->users.end();
-   for( ; iter != end ; iter++)
-   {
-     if(!right->users.count(*iter))
-     {
-       lusers.push_front(*iter);
-       diff = true;
-     }
-   }
+    bool diff = false;
 
-   iter = right->users.begin(), end = right->users.end();
-   for( ; iter != end ; iter++)
-   {
-     if(!left->users.count(*iter))
-     {
-       diff = true;
-       rusers.push_front(*iter);
-     }
-   }
-   return diff;
+    std::set<User*>::iterator iter_a;
+    std::set<User*>::iterator iter_b;
+
+    iter_a = left->users.begin(), iter_b = left->users.end();
+    for(;iter_a!=iter_b;++iter_a)
+    {
+      if (!right->users.count(*iter_a))
+      {
+        lusers.push_front(*iter_a);
+        diff = true;
+      }
+    }
+
+    iter_a = right->users.begin(), iter_b = right->users.end();
+    for(;iter_a!=iter_b;++iter_a)
+    {
+      if (!left->users.count(*iter_a))
+      {
+        rusers.push_front(*iter_a);
+        diff = true;
+      }
+    }
+
+    return diff;
   }
 };
 
 struct sChunkNode
 {
-  sChunkNode(sChunk* _chunk, sChunkNode* _next) : chunk(_chunk), next(_next) {}
+  sChunkNode(sChunk* _chunk, sChunkNode* _prev, sChunkNode* _next) : chunk(_chunk),prev(_prev),next(_next) {}
   sChunk* chunk;
+  sChunkNode* prev;
   sChunkNode* next;
 };
 
 class ChunkMap
 {
-private:
-  sChunkNode* m_buckets[441];
 public:
   ChunkMap()
   {
     memset(m_buckets, 0, sizeof(m_buckets));
   }
 
-  int Hash(int x, int z)
+  int hash(int x, int z)
   {
     x %= 21;
-    if(x < 0)
+    if (x < 0)
+    {
       x += 21;
+    }
 
     z %= 21;
-    if(z < 0)
+    if (z < 0)
+    {
       z += 21;
+    }
 
     return x + z * 21;
   }
 
-  sChunk* GetChunk(int x, int z)
+  sChunk* getChunk(int x, int z)
   {
-    sChunkNode* node = m_buckets[Hash(x,z)];
-    if(node == NULL)
-      return NULL;
+    sChunkNode* node = NULL;
 
-    do
+    for (node=m_buckets[hash(x,z)];node!=NULL;node=node->next)
     {
-      if(node->chunk->x == x && node->chunk->z == z)
+      if ((node->chunk->x == x) && (node->chunk->z == z))
+      {
         return node->chunk;
-
-      node = node->next;
-    } while(node != NULL);
+      }
+    }
 
     return NULL;
   }
 
-  void UnlinkChunk(int x, int z)
+  void unlinkChunk(int x, int z)
   {
-    int _hash = Hash(x, z);
+    int _hash = hash(x, z);
 
-    sChunkNode* node = m_buckets[_hash];
-    if(node == NULL)
-      return;
+    sChunkNode* root = m_buckets[_hash];
+    sChunkNode* node = root;
 
-    if(node->chunk->x == x && node->chunk->z == z)
+    // Loop until we reach the end of the chain
+    while (node != NULL)
     {
-      node->chunk->refCount--;
-      m_buckets[_hash] = node->next;
-      delete node;
-    }
-    else
-    {
-      sChunkNode* prev = node;
-      node = node->next;
-      while(node != NULL)
+      // We've got the right node, time to get to work!
+      if ((node->chunk->x == x) && (node->chunk->z == z))
       {
-        if(node->chunk->x == x && node->chunk->z == z)
-          break;
+        node->chunk->refCount--;
 
-        prev = node;
+        // If we have both next and previous nodes, we need to connect them up
+        // when we remove this node because we're in the middle of the chain.
+        if (node->next != NULL && node->prev != NULL)
+        {
+          node->next->prev = node->prev;
+          node->prev->next = node->next;
+        }
+        // Otherwise we're at one of the ends of the chain, so we just need to
+        // cut it off where it is.
+        else if (node->next != NULL)
+        {
+          node->next->prev = NULL;
+        }
+        else if (node->prev != NULL)
+        {
+          node->prev->next = NULL;
+        }
+
+        // If the node we're looking at is the root node, we need to update the
+        // bucket to point at the new start of the chain.
+        if (node == root)
+        {
+          m_buckets[_hash] = node->next;
+        }
+
+        // Free up the memory we were using for this node.
+        delete node;
+
+        return;
+      }
+      // This isn't the right node, look at the next one.
+      else
+      {
         node = node->next;
       }
-
-      if(node != NULL)
-      {
-        prev->next = node->next;
-        node->chunk->refCount--;
-        delete node;
-      }
     }
   }
 
-  void LinkChunk(sChunk* chunk, int x, int z)
+  void linkChunk(sChunk* chunk, int x, int z)
   {
-    int _hash = Hash(x, z);
+    int _hash = hash(x, z);
     chunk->refCount++;
-    m_buckets[_hash] = new sChunkNode(chunk, m_buckets[_hash]);
+    m_buckets[_hash] = new sChunkNode(chunk, NULL, m_buckets[_hash]);
   }
 
-  void Clear()
+  void clear()
   {
     for(int i = 0; i < 21 * 21; i++)
     {
       sChunkNode* node = m_buckets[i];
-      while(node != NULL)
+      sChunkNode* next = NULL;
+      while (node != NULL)
       {
-        sChunkNode* next = node->next;
+        next = node->next;
         delete node;
         node = next;
       }
       m_buckets[i] = NULL;
     }
   }
+
+private:
+  sChunkNode* m_buckets[441];
 };
 
 #endif
