@@ -151,6 +151,11 @@ void hook_addCallback(const char* hookID, void* function)
   Mineserver::get()->plugin()->getHook(hookID)->addCallback(function);
 }
 
+void hook_addIdentifiedCallback(const char* hookID, void* identifier, void* function)
+{
+  Mineserver::get()->plugin()->getHook(hookID)->addIdentifiedCallback(identifier, function);
+}
+
 void hook_remCallback(const char* hookID, void* function)
 {
   Mineserver::get()->plugin()->getHook(hookID)->remCallback(function);
@@ -421,53 +426,54 @@ bool config_bData(const char* name)
 // Initialization of the plugin_api function pointer array
 void init_plugin_api(void)
 {
-  plugin_api_pointers.logger.log                = &logger_log;
+  plugin_api_pointers.logger.log                   = &logger_log;
 
-  plugin_api_pointers.chat.sendmsg              = &chat_sendmsg;
-  plugin_api_pointers.chat.sendmsgTo            = &chat_sendmsgTo;
-  plugin_api_pointers.chat.sendUserlist         = &chat_sendUserlist;
+  plugin_api_pointers.chat.sendmsg                 = &chat_sendmsg;
+  plugin_api_pointers.chat.sendmsgTo               = &chat_sendmsgTo;
+  plugin_api_pointers.chat.sendUserlist            = &chat_sendUserlist;
 
-  plugin_api_pointers.plugin.hasPluginVersion   = &plugin_hasPluginVersion;
-  plugin_api_pointers.plugin.getPluginVersion   = &plugin_getPluginVersion;
-  plugin_api_pointers.plugin.setPluginVersion   = &plugin_setPluginVersion;
-  plugin_api_pointers.plugin.remPluginVersion   = &plugin_remPluginVersion;
-  plugin_api_pointers.plugin.hasPointer         = &plugin_hasPointer;
-  plugin_api_pointers.plugin.getPointer         = &plugin_getPointer;
-  plugin_api_pointers.plugin.setPointer         = &plugin_setPointer;
-  plugin_api_pointers.plugin.remPointer         = &plugin_remPointer;
-  plugin_api_pointers.plugin.hasHook            = &plugin_hasHook;
-  plugin_api_pointers.plugin.getHook            = &plugin_getHook;
-  plugin_api_pointers.plugin.setHook            = &plugin_setHook;
-  plugin_api_pointers.plugin.remHook            = &plugin_remHook;
-  plugin_api_pointers.plugin.hasCallback        = &hook_hasCallback;
-  plugin_api_pointers.plugin.addCallback        = &hook_addCallback;
-  plugin_api_pointers.plugin.remCallback        = &hook_remCallback;
-  plugin_api_pointers.plugin.doUntilTrue        = &hook_doUntilTrue;
-  plugin_api_pointers.plugin.doUntilFalse       = &hook_doUntilFalse;
-  plugin_api_pointers.plugin.doAll              = &hook_doAll;
+  plugin_api_pointers.plugin.hasPluginVersion      = &plugin_hasPluginVersion;
+  plugin_api_pointers.plugin.getPluginVersion      = &plugin_getPluginVersion;
+  plugin_api_pointers.plugin.setPluginVersion      = &plugin_setPluginVersion;
+  plugin_api_pointers.plugin.remPluginVersion      = &plugin_remPluginVersion;
+  plugin_api_pointers.plugin.hasPointer            = &plugin_hasPointer;
+  plugin_api_pointers.plugin.getPointer            = &plugin_getPointer;
+  plugin_api_pointers.plugin.setPointer            = &plugin_setPointer;
+  plugin_api_pointers.plugin.remPointer            = &plugin_remPointer;
+  plugin_api_pointers.plugin.hasHook               = &plugin_hasHook;
+  plugin_api_pointers.plugin.getHook               = &plugin_getHook;
+  plugin_api_pointers.plugin.setHook               = &plugin_setHook;
+  plugin_api_pointers.plugin.remHook               = &plugin_remHook;
+  plugin_api_pointers.plugin.hasCallback           = &hook_hasCallback;
+  plugin_api_pointers.plugin.addCallback           = &hook_addCallback;
+  plugin_api_pointers.plugin.addIdentifiedCallback = &hook_addIdentifiedCallback;
+  plugin_api_pointers.plugin.remCallback           = &hook_remCallback;
+  plugin_api_pointers.plugin.doUntilTrue           = &hook_doUntilTrue;
+  plugin_api_pointers.plugin.doUntilFalse          = &hook_doUntilFalse;
+  plugin_api_pointers.plugin.doAll                 = &hook_doAll;
 
-  plugin_api_pointers.map.setTime               = &map_setTime;
-  plugin_api_pointers.map.createPickupSpawn     = &map_createPickupSpawn;
-  plugin_api_pointers.map.getSpawn              = &map_getSpawn;
-  plugin_api_pointers.map.setBlock              = &map_setBlock;
-  plugin_api_pointers.map.getBlock              = &map_getBlock;
-  plugin_api_pointers.map.saveWholeMap          = &map_saveWholeMap;
-  plugin_api_pointers.map.getMapData_block      = &map_getMapData_block;
-  plugin_api_pointers.map.getMapData_meta       = &map_getMapData_meta;
-  plugin_api_pointers.map.getMapData_skylight   = &map_getMapData_skylight;
-  plugin_api_pointers.map.getMapData_blocklight = &map_getMapData_blocklight;
+  plugin_api_pointers.map.setTime                  = &map_setTime;
+  plugin_api_pointers.map.createPickupSpawn        = &map_createPickupSpawn;
+  plugin_api_pointers.map.getSpawn                 = &map_getSpawn;
+  plugin_api_pointers.map.setBlock                 = &map_setBlock;
+  plugin_api_pointers.map.getBlock                 = &map_getBlock;
+  plugin_api_pointers.map.saveWholeMap             = &map_saveWholeMap;
+  plugin_api_pointers.map.getMapData_block         = &map_getMapData_block;
+  plugin_api_pointers.map.getMapData_meta          = &map_getMapData_meta;
+  plugin_api_pointers.map.getMapData_skylight      = &map_getMapData_skylight;
+  plugin_api_pointers.map.getMapData_blocklight    = &map_getMapData_blocklight;
 
-  plugin_api_pointers.user.getPosition          = &user_getPosition;
-  plugin_api_pointers.user.teleport             = &user_teleport;
-  plugin_api_pointers.user.sethealth            = &user_sethealth;
+  plugin_api_pointers.user.getPosition             = &user_getPosition;
+  plugin_api_pointers.user.teleport                = &user_teleport;
+  plugin_api_pointers.user.sethealth               = &user_sethealth;
 
-  plugin_api_pointers.config.has                = &config_has;
-  plugin_api_pointers.config.iData              = &config_iData;
-  plugin_api_pointers.config.lData              = &config_lData;
-  plugin_api_pointers.config.fData              = &config_fData;
-  plugin_api_pointers.config.dData              = &config_dData;
-  plugin_api_pointers.config.sData              = &config_sData;
-  plugin_api_pointers.config.bData              = &config_bData;
+  plugin_api_pointers.config.has                   = &config_has;
+  plugin_api_pointers.config.iData                 = &config_iData;
+  plugin_api_pointers.config.lData                 = &config_lData;
+  plugin_api_pointers.config.fData                 = &config_fData;
+  plugin_api_pointers.config.dData                 = &config_dData;
+  plugin_api_pointers.config.sData                 = &config_sData;
+  plugin_api_pointers.config.bData                 = &config_bData;
 
 
 
