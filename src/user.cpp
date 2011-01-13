@@ -498,7 +498,7 @@ bool User::updatePos(double x, double y, double z, double stance)
       std::list<User*> toremove;
       std::list<User*> toadd;
 
-      sChunk::UserBoundry(oldChunk, toremove, newChunk, toadd);
+      sChunk::userBoundary(oldChunk, toremove, newChunk, toadd);
 
       if(toremove.size())
       {

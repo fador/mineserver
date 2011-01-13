@@ -112,7 +112,7 @@ Map::Map()
 
 Map::~Map()
 {
-  // Free all memory
+  // Free chunk memory
   for(std::map<uint32_t, sChunk>::const_iterator it = maps.begin(); it != maps.end(); it = maps.begin())
   {
     releaseMap(maps[it->first].x, maps[it->first].z);
@@ -1131,7 +1131,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   chunk->skylight = &((*skylight)[0]);
   chunk->heightmap = &((*heightmap)[0]);
 
-  chunks.LinkChunk(chunk, x, z);
+  chunks.linkChunk(chunk, x, z);
 
   // Update last used time
   chunk->lastused = (int)time(0);
@@ -1435,30 +1435,29 @@ bool Map::releaseMap(int x, int z)
   if(chunk == NULL)
     return false;
 
-  //Erase sign data
-  for(uint32_t i = 0; i < chunk->signs.size(); i++)
+  // Erase sign data
+  for(int i=0;i<chunk->signs.size();++i)
   {
     delete chunk->signs[i];
   }
 
-  //Erase chest data
-  for(uint32_t i = 0; i < chunk->chests.size(); i++)
+  // Erase chest data
+  for(int i=0;i<chunk->chests.size();++i)
   {
     delete chunk->chests[i];
   }
 
-  //Erase furnace data
-  for(uint32_t i = 0; i < chunk->furnaces.size(); i++)
+  // Erase furnace data
+  for(int i=0;i<chunk->furnaces.size();++i)
   {
     delete chunk->furnaces[i];
   }
 
-  chunks.UnlinkChunk(x, z);
+  chunks.unlinkChunk(x, z);
   delete chunk->nbt;
   delete chunk;
-  
-  return true;
 
+  return true;
 }
 
 // Send chunk to user
