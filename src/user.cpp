@@ -181,7 +181,7 @@ bool User::sendLoginInfo()
   {   
     if(inv[i].type != -1 && inv[i].count)
     {
-      buffer << (int8_t)PACKET_SET_SLOT << (int8_t)0 << (int16_t)(i) << (int16_t)inv[i].type << (int8_t)(inv[i].count) << (int8_t)inv[i].health;
+      buffer << (int8_t)PACKET_SET_SLOT << (int8_t)0 << (int16_t)(i) << (int16_t)inv[i].type << (int8_t)(inv[i].count) << (int16_t)inv[i].health;
     }
   }
 
