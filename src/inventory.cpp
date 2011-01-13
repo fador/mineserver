@@ -253,7 +253,7 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
   sChunk* chunk = NULL;
   if(windowID != 0)
   {
-    chunk = Mineserver::get()->map()->chunks.GetChunk(blockToChunk(user->openInv.x),blockToChunk(user->openInv.z));
+    chunk = Mineserver::get()->map()->chunks.getChunk(blockToChunk(user->openInv.x),blockToChunk(user->openInv.z));
 
     if(chunk == NULL)
     {
@@ -635,7 +635,7 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
 
 bool Inventory::windowOpen(User *user, int8_t type, int32_t x, int32_t y, int32_t z)
 {
-  sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(blockToChunk(x),blockToChunk(z));
+  sChunk* chunk = Mineserver::get()->map()->chunks.getChunk(blockToChunk(x),blockToChunk(z));
 
   if(chunk == NULL)
   {

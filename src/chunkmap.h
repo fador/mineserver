@@ -120,14 +120,12 @@ struct sChunkNode
 {
   sChunkNode(sChunk* _chunk, sChunkNode* _prev, sChunkNode* _next) : chunk(_chunk),prev(_prev),next(_next) {}
   sChunk* chunk;
-  sChunkNode* next;
   sChunkNode* prev;
+  sChunkNode* next;
 };
 
 class ChunkMap
 {
-private:
-  sChunkNode* m_buckets[441];
 public:
   ChunkMap()
   {
@@ -151,18 +149,16 @@ public:
     return x + z * 21;
   }
 
-  sChunk* GetChunk(int x, int z)
+  sChunk* getChunk(int x, int z)
   {
-    sChunkNode* node = m_buckets[hash(x,z)];
+    sChunkNode* node = NULL;
 
-    while (node != NULL);
+    for (node=m_buckets[hash(x,z)];node!=NULL;node=node->next)
     {
-      if (node->chunk->x == x && node->chunk->z == z)
+      if ((node->chunk->x == x) && (node->chunk->z == z))
       {
         return node->chunk;
       }
-
-      node = node->next;
     }
 
     return NULL;
@@ -228,20 +224,24 @@ public:
     m_buckets[_hash] = new sChunkNode(chunk, NULL, m_buckets[_hash]);
   }
 
-  void Clear()
+  void clear()
   {
     for(int i = 0; i < 21 * 21; i++)
     {
       sChunkNode* node = m_buckets[i];
+      sChunkNode* next = NULL;
       while (node != NULL)
       {
-        sChunkNode* next = node->next;
+        next = node->next;
         delete node;
         node = next;
       }
       m_buckets[i] = NULL;
     }
   }
+
+private:
+  sChunkNode* m_buckets[441];
 };
 
 #endif

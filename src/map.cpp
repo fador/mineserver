@@ -314,7 +314,7 @@ sChunk* Map::getMapData(int x, int z, bool generate)
   printf("getMapData(x=%d, z=%d, generate=%d)\n", x, z, generate);
 #endif
 
-  sChunk* chunk = chunks.GetChunk(x,z);
+  sChunk* chunk = chunks.getChunk(x,z);
 
   if(chunk != NULL || generate == false)
     return chunk;
@@ -380,7 +380,7 @@ bool Map::generateLight(int x, int z)
   printf("generateLight(x=%d, z=%d)\n", x, z);
 #endif
 
-  sChunk* chunk = chunks.GetChunk(x,z);
+  sChunk* chunk = chunks.getChunk(x,z);
   if(chunk == NULL)
   {
     LOGLF("Loading chunk failed (generateLight)");
@@ -912,7 +912,7 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
   Packet pkt;
   pkt << PACKET_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int8_t)type << (int8_t)meta;
 
-  sChunk* chunk = chunks.GetChunk(blockToChunk(x), blockToChunk(z));
+  sChunk* chunk = chunks.getChunk(blockToChunk(x), blockToChunk(z));
   if(chunk == NULL)
     return false;
 
@@ -932,7 +932,7 @@ bool Map::sendPickupSpawn(spawnedItem item)
   int chunk_x = blockToChunk(item.pos.x()/32);
   int chunk_z = blockToChunk(item.pos.z()/32);
 
-  sChunk* chunk = chunks.GetChunk(chunk_x, chunk_z);
+  sChunk* chunk = chunks.getChunk(chunk_x, chunk_z);
   if(chunk == NULL)
     return false;
 
@@ -996,7 +996,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   printf("loadMap(x=%d, z=%d, generate=%d)\n", x, z, generate);
 #endif
 
-  sChunk* chunk = chunks.GetChunk(x,z);
+  sChunk* chunk = chunks.getChunk(x,z);
   if(chunk != NULL)
   {
     return chunk;
@@ -1064,7 +1064,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
 
       }
 
-      return chunks.GetChunk(x,z);
+      return chunks.getChunk(x,z);
     }
     else
     {
@@ -1284,7 +1284,7 @@ bool Map::saveMap(int x, int z)
   printf("saveMap(x=%d, z=%d)\n", x, z);
 #endif
 
-  sChunk*  chunk = chunks.GetChunk(x, z);
+  sChunk*  chunk = chunks.getChunk(x, z);
 
   if(!chunk->changed)
     return true;
@@ -1431,7 +1431,7 @@ bool Map::releaseMap(int x, int z)
   // save first
   saveMap(x, z);
 
-  sChunk* chunk = chunks.GetChunk(x,z);
+  sChunk* chunk = chunks.getChunk(x,z);
   if(chunk == NULL)
     return false;
 
