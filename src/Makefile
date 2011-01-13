@@ -8,7 +8,9 @@ PLUGIN       = YES
 # Sources
 SRC          = mineserver.cpp map.cpp chat.cpp constants.cpp logger.cpp nbt.cpp
 SRC         += furnace.cpp furnaceManager.cpp packets.cpp physics.cpp sockets.cpp
-SRC         += tools.cpp user.cpp screen.cpp tree.cpp inventory.cpp
+SRC         += tools.cpp user.cpp tree.cpp inventory.cpp
+
+SRC         += screenBase.cpp cliScreen.cpp cursesScreen.cpp
 
 SRC         += config.cpp config/node.cpp config/scanner.cpp config/lexer.cpp config/parser.cpp
 
@@ -53,9 +55,9 @@ ifeq ($(PEDANTIC), YES)
 endif
 
 ifeq ($(findstring MINGW32,$(SYSTEM)),MINGW32)
-LFLAGS = -lws2_32 -lwinmm -export-all-symbols
+LDFLAGS += -lws2_32 -lwinmm
 else
-LFLAGS = -rdynamic
+LDFLAGS += -ldl
 endif
 
 ifeq ($(findstring Debian,$(shell cat /etc/issue)),Debian)

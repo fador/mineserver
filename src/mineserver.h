@@ -28,31 +28,33 @@
 #ifndef _MINESERVER_H
 #define _MINESERVER_H
 
-#include <vector>
-#ifdef WIN32
-  #include <winsock2.h>
-#else
-  #include <netinet/in.h>
-#endif
-#include <event.h>
 #include <iostream>
+#include <vector>
 
-#include "user.h"
-#include "map.h"
+#ifdef WIN32
+  // This is needed for event to work on Windows.
+  #include <Winsock2.h>
+#endif
+
 #include "chat.h"
-#include "plugin.h"
-#include "physics.h"
 #include "config.h"
-#include "logger.h"
 #include "furnaceManager.h"
-#include "worldgen/mapgen.h"
 #include "inventory.h"
+#include "logger.h"
+#include "map.h"
+#include "physics.h"
+#include "plugin.h"
+#include "screenBase.h"
+#include "user.h"
+#include "worldgen/mapgen.h"
 
 #ifdef FADOR_PLUGIN
 #define MINESERVER
 #include "plugin_api.h"
 #undef MINESERVER
 #endif
+
+struct event_base;
 
 class Mineserver
 {
@@ -77,45 +79,32 @@ public:
   int m_socketlisten;
   void updatePlayerList();
 
-  Map* map() { if (!m_map) { m_map = new Map; } return m_map; }
+  Map* map() const { return m_map; }
   void setMap(Map* map) { m_map = map; }
-  Chat* chat() { if (!m_chat) { m_chat = new Chat; } return m_chat; }
+  Chat* chat() const { return m_chat; }
   void setChat(Chat* chat) { m_chat = chat; }
-  Plugin* plugin() { if (!m_plugin) { m_plugin = new Plugin; } return m_plugin; }
+  Plugin* plugin() const { return m_plugin; }
   void setPlugin(Plugin* plugin) { m_plugin = plugin; }
-  Screen* screen() { if (!m_screen) { m_screen = new Screen; } return m_screen; }
+  Screen* screen() const { return m_screen; }
   void setScreen(Screen* screen) { m_screen = screen; }
-  Physics* physics() { if (!m_physics) { m_physics = new Physics; } return m_physics; }
+  Physics* physics() const { return m_physics; }
   void setPhysics(Physics* physics) { m_physics = physics; }
-  Config* config() { if (!m_config) { m_config = new Config; } return m_config; }
+  Config* config() const { return m_config; }
   void setConfig(Config* config) { m_config = config; }
-  FurnaceManager* furnaceManager() { if (!m_furnaceManager) { m_furnaceManager = new FurnaceManager; } return m_furnaceManager; }
+  FurnaceManager* furnaceManager() const { return m_furnaceManager; }
   void setFurnaceManager(FurnaceManager* furnaceManager) { m_furnaceManager = furnaceManager; }
-  PacketHandler* packetHandler() { if (!m_packetHandler) { m_packetHandler = new PacketHandler; } return m_packetHandler; }
+  PacketHandler* packetHandler() const { return m_packetHandler; }
   void setPacketHandler(PacketHandler* packetHandler) { m_packetHandler = packetHandler; }
-  MapGen* mapGen() { if (!m_mapGen) { m_mapGen = new MapGen; } return m_mapGen; }
+  MapGen* mapGen() const { return m_mapGen; }
   void setMapGen(MapGen* mapGen) { m_mapGen = mapGen; }
-  Logger* logger() { if (!m_logger) { m_logger = new Logger; } return m_logger; }
+  Logger* logger() const { return m_logger; }
   void setLogger(Logger* logger) { m_logger = logger; }
 
-  Inventory* inventory() { if (!m_inventory) { m_inventory = new Inventory; } return m_inventory; }
+  Inventory* inventory() const { return m_inventory; }
   void setInventory(Inventory* inventory) { m_inventory = m_inventory; }
 
 private:
-  Mineserver()
-  {
-    m_map            = NULL;
-    m_chat           = NULL;
-    m_plugin         = NULL;
-    m_screen         = NULL;
-    m_physics        = NULL;
-    m_config         = NULL;
-    m_furnaceManager = NULL;
-    m_packetHandler  = NULL;
-    m_mapGen         = NULL;
-    m_logger         = NULL;
-    m_inventory      = NULL;
-  }
+  Mineserver();
   event_base* m_eventBase;
   bool m_running;
   // holds all connected users

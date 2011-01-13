@@ -23,44 +23,29 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
-#ifndef _CONFIG_H
-#define _CONFIG_H
+#ifndef _SCREENBASE_H
+#define _SCREENBASE_H
 
 #include <string>
-#include <list>
+#include <vector>
+#include "logtype.h"
+#include "user.h"
 
-#include "config/node.h"
-
-class ConfigParser;
-
-class Config
+class Screen
 {
 public:
-  Config();
-  ~Config();
+  virtual ~Screen(void) = 0;
+  virtual void init(std::string version) = 0;
+  virtual void log(LogType::LogType type, const std::string& source, const std::string& message) = 0;
+  virtual void updatePlayerList(std::vector<User *> users) = 0;
+  virtual void end() = 0;
+  virtual bool hasCommand() = 0;
+  virtual std::string getCommand() = 0;
 
-  bool load(const std::string& file);
-  void dump();
-
-  ConfigNode* root();
-
-  int iData(const std::string& name);
-  long lData(const std::string& name);
-  float fData(const std::string& name);
-  double dData(const std::string& name);
-  std::string sData(const std::string& name);
-  bool bData(const std::string& name);
-  ConfigNode* mData(const std::string& name);
-
-  bool has(const std::string& name);
-  int type(const std::string& name) const;
-  std::list<std::string>* keys(int type=CONFIG_NODE_UNDEFINED);
-
-private:
-  ConfigParser* m_parser;
-  ConfigNode* m_root;
+protected:
+  std::string currentTimestamp(bool seconds);
 };
 
-#endif
+#endif //_SCREENBASE_H

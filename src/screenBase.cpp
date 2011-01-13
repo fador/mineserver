@@ -23,44 +23,18 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
-#ifndef _CONFIG_H
-#define _CONFIG_H
+#include "screenBase.h"
+#include <ctime>
 
-#include <string>
-#include <list>
+Screen::~Screen(void) {}
 
-#include "config/node.h"
+std::string Screen::currentTimestamp(bool seconds) {
+  time_t currentTime = time(NULL);
+  struct tm *Tm  = localtime(&currentTime);
+  std::string timeStamp (asctime(Tm));
+  timeStamp = timeStamp.substr(11, seconds ? 8 : 5);
 
-class ConfigParser;
-
-class Config
-{
-public:
-  Config();
-  ~Config();
-
-  bool load(const std::string& file);
-  void dump();
-
-  ConfigNode* root();
-
-  int iData(const std::string& name);
-  long lData(const std::string& name);
-  float fData(const std::string& name);
-  double dData(const std::string& name);
-  std::string sData(const std::string& name);
-  bool bData(const std::string& name);
-  ConfigNode* mData(const std::string& name);
-
-  bool has(const std::string& name);
-  int type(const std::string& name) const;
-  std::list<std::string>* keys(int type=CONFIG_NODE_UNDEFINED);
-
-private:
-  ConfigParser* m_parser;
-  ConfigNode* m_root;
-};
-
-#endif
+  return timeStamp;
+}

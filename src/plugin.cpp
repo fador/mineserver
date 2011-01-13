@@ -34,7 +34,7 @@
 #include <dlfcn.h>
 #endif
 
-
+#include "constants.h"
 #include "logger.h"
 
 #include "plugin.h"
@@ -53,11 +53,36 @@
 
 void Plugin::init()
 {
+   // Create Block* objects and put them away so we can delete them later
+   BlockDefault* defaultblock = new BlockDefault();
+   toClean.push_back(defaultblock);
+   BlockFalling* fallingblock = new BlockFalling();
+   toClean.push_back(fallingblock);
+   BlockTorch* torchblock = new BlockTorch();
+   toClean.push_back(torchblock);
+   BlockPlant* plantblock = new BlockPlant();
+   toClean.push_back(plantblock);
+   BlockSnow* snowblock = new BlockSnow();
+   toClean.push_back(snowblock);
+   BlockLiquid* liquidblock = new BlockLiquid();
+   toClean.push_back(liquidblock);
+   BlockFire* fireblock = new BlockFire();
+   toClean.push_back(fireblock);
+   BlockStair* stairblock = new BlockStair();
+   toClean.push_back(stairblock);
+   BlockChest* chestblock = new BlockChest();
+   toClean.push_back(chestblock);
+   BlockDoor* doorblock = new BlockDoor();
+   toClean.push_back(doorblock);
+   BlockSign* signblock = new BlockSign();
+   toClean.push_back(signblock);
+   BlockTracks* tracksblock = new BlockTracks();
+   toClean.push_back(tracksblock);
+
    // Set default behaviours 
    Callback call;
    /* FIXME: must remember to delete any memory we create here upon server stop */
 
-   BlockDefault* defaultblock = new BlockDefault();
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    call.add("onPlace", Function::from_method<BlockDefault, &BlockDefault::onPlace>(defaultblock));
    setBlockCallback(BLOCK_STONE, call);
@@ -113,7 +138,6 @@ void Plugin::init()
 
    /* Falling blocks (sand, etc) */
    call.reset();
-   BlockFalling* fallingblock = new BlockFalling();
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    call.add("onPlace", Function::from_method<BlockFalling, &BlockFalling::onPlace>(fallingblock));
    call.add("onNeighbourBroken", Function::from_method<BlockFalling, &BlockFalling::onNeighbourBroken>(fallingblock));
@@ -124,7 +148,6 @@ void Plugin::init()
 
    /* Torches */
    call.reset();
-   BlockTorch* torchblock = new BlockTorch();
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    call.add("onPlace", Function::from_method<BlockTorch, &BlockTorch::onPlace>(torchblock));
    call.add("onNeighbourBroken", Function::from_method<BlockTorch, &BlockTorch::onNeighbourBroken>(torchblock));
@@ -143,7 +166,6 @@ void Plugin::init()
 
    /* Plants */
    call.reset();
-   BlockPlant* plantblock = new BlockPlant();
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    call.add("onPlace", Function::from_method<BlockPlant, &BlockPlant::onPlace>(plantblock));
    call.add("onNeighbourBroken", Function::from_method<BlockPlant, &BlockPlant::onNeighbourBroken>(plantblock));
@@ -159,14 +181,12 @@ void Plugin::init()
    
    /* Snow */
    call.reset();
-   BlockSnow* snowblock = new BlockSnow();
    call.add("onNeighbourBroken", Function::from_method<BlockSnow, &BlockSnow::onNeighbourBroken>(snowblock));
    call.add("onPlace", Function::from_method<BlockDefault, &BlockDefault::onPlace>(defaultblock));
    setBlockCallback(BLOCK_SNOW, call);
 
    /* Lava and Water */
    call.reset();
-   BlockLiquid* liquidblock = new BlockLiquid();
    call.add("onPlace", Function::from_method<BlockLiquid, &BlockLiquid::onPlace>(liquidblock));
    call.add("onNeighbourBroken", Function::from_method<BlockLiquid, &BlockLiquid::onNeighbourBroken>(liquidblock));
    call.add("onReplace", Function::from_method<BlockLiquid, &BlockLiquid::onReplace>(liquidblock));
@@ -179,14 +199,12 @@ void Plugin::init()
 
    /* Fire */
    call.reset();
-   BlockFire* fireblock = new BlockFire();
    call.add("onPlace", Function::from_method<BlockFire, &BlockFire::onPlace>(fireblock));
    setBlockCallback(BLOCK_FIRE, call);
    setBlockCallback(ITEM_FLINT_AND_STEEL, call);
 
    /* Stairs */
    call.reset();
-   BlockStair* stairblock = new BlockStair();
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    call.add("onPlace", Function::from_method<BlockDefault, &BlockDefault::onPlace>(defaultblock));
    call.add("onNeighbourBroken", Function::from_method<BlockStair, &BlockStair::onNeighbourBroken>(stairblock));
@@ -211,7 +229,6 @@ void Plugin::init()
   
    /* Chests */
    call.reset();
-   BlockChest* chestblock = new BlockChest();
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    call.add("onPlace", Function::from_method<BlockChest, &BlockChest::onPlace>(chestblock));
    call.add("onStartedDigging", Function::from_method<BlockChest, &BlockChest::onStartedDigging>(chestblock));
@@ -220,7 +237,6 @@ void Plugin::init()
 
    /* Doors */
    call.reset();
-   BlockDoor* doorblock = new BlockDoor();
    call.add("onStartedDigging", Function::from_method<BlockDoor, &BlockDoor::onStartedDigging>(doorblock));
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    call.add("onPlace", Function::from_method<BlockDoor, &BlockDoor::onPlace>(doorblock));
@@ -236,7 +252,6 @@ void Plugin::init()
 
    /* signs */
    call.reset();
-   BlockSign* signblock = new BlockSign();
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    call.add("onNeighbourBroken", Function::from_method<BlockTorch, &BlockTorch::onNeighbourBroken>(torchblock));
    call.add("onPlace", Function::from_method<BlockSign, &BlockSign::onPlace>(signblock));
@@ -246,7 +261,6 @@ void Plugin::init()
    
    /* minecart tracks */
    call.reset();
-   BlockTracks* tracksblock = new BlockTracks();
    call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    call.add("onPlace", Function::from_method<BlockTracks, &BlockTracks::onPlace>(tracksblock));
    call.add("onNeighbourBroken", Function::from_method<BlockTracks, &BlockTracks::onNeighbourBroken>(tracksblock));
@@ -265,6 +279,15 @@ void Plugin::init()
   /* BLOCK_SNOW_BLOCK */
 }
 
+void Plugin::free()
+{
+  std::vector<BlockBasic*>::iterator it = toClean.begin();
+  for (;it!=toClean.end();++it)
+  {
+    delete *it;
+  }
+}
+
 bool Plugin::loadPlugin(const std::string name, const std::string file)
 {
   LIBRARY_HANDLE lhandle = NULL;
@@ -279,7 +302,8 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
     LOG(INFO, "Plugin", "Loading plugin `"+name+"' (`"+file+"')...");
 
     struct stat st;
-    if(stat(file.c_str(), &st) == 0)
+    int statr = stat(file.c_str(), &st);
+    if ((statr == 0) && !(st.st_mode & S_IFDIR))
     {
       lhandle = LIBRARY_LOAD(file.c_str());
     }
@@ -287,7 +311,8 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
     {
       LOG(INFO, "Plugin", "Could not find `"+file+"', trying `"+file+LIBRARY_EXTENSION+"'.");
 
-      if (stat((file+LIBRARY_EXTENSION).c_str(), &st) == 0)
+      statr = stat((file+LIBRARY_EXTENSION).c_str(), &st);
+      if ((statr == 0) && !(st.st_mode & S_IFDIR))
       {
         lhandle = LIBRARY_LOAD((file+LIBRARY_EXTENSION).c_str());
       }
@@ -426,26 +451,42 @@ void Plugin::remHook(const std::string name)
   }
 }
 
-void Plugin::setPluginVersion(const std::string name, float version)
+bool Plugin::hasPluginVersion(const std::string name)
 {
-  m_pluginVersions[name] = version;
+  std::map<const std::string, float>::iterator it_a = m_pluginVersions.begin();
+  std::map<const std::string, float>::iterator it_b = m_pluginVersions.end();
+
+  for (;it_a!=it_b;++it_a)
+  {
+    if (it_a->first == name)
+    {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 float Plugin::getPluginVersion(const std::string name)
 {
-  if (m_pluginVersions.count(name) >= 0)
+  if (hasPluginVersion(name))
   {
     return m_pluginVersions[name];
   }
   else
   {
-    return -1.0f;
+    return 0.0f;
   }
+}
+
+void Plugin::setPluginVersion(const std::string name, float version)
+{
+  m_pluginVersions[name] = version;
 }
 
 void Plugin::remPluginVersion(const std::string name)
 {
-  if (m_pluginVersions.count(name) >= 0)
+  if (hasPluginVersion(name))
   {
     m_pluginVersions.erase(name);
   }

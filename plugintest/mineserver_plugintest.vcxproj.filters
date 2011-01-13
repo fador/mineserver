@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\command.h">
+    <ClInclude Include="..\src\plugin_api.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\plugin_api.h">
+    <ClInclude Include="src\command.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

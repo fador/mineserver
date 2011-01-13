@@ -25,36 +25,16 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <cstdlib>
-#include <cstdio>
-#include <iostream>
-#include <deque>
-#include <fstream>
-#include <vector>
-#include <ctime>
-#include <math.h>
-#include <algorithm>
-#include <string>
-
-#ifdef WIN32
-  #include <winsock2.h>
-#else
-  #include <netinet/in.h>
-  #include <string.h>
-#endif
-
-#include "constants.h"
-
-#include "tools.h"
-#include "map.h"
-#include "user.h"
 #include "chat.h"
-#include "config.h"
-#include "physics.h"
+
+#include <ctime>
+#include <iostream>
+#include <fstream>
+
 #include "constants.h"
-#include "plugin.h"
-#include "mineserver.h"
 #include "logger.h"
+#include "mineserver.h"
+#include "permissions.h"
 
 Chat::Chat()
 {
@@ -64,7 +44,7 @@ Chat::~Chat()
 {
 }
 
-bool Chat::checkMotd(std::string motdFile)
+bool Chat::checkMotd(const std::string& motdFile)
 {
   //
   // Create motdfile is it doesn't exist
@@ -222,7 +202,7 @@ void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeSta
   }
   else
   {
-    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "<"+ user->nick + "> " + dtos(user->UID) + " " + msg);
+    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "<"+ user->nick + "> " + msg);
     msg = timeStamp + " <"+ user->nick + "> " + msg;
   }
 
@@ -232,7 +212,7 @@ void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeSta
 bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
 {
   size_t tmpArrayLen = msg.size()+3;
-  uint8* tmpArray    = new uint8[tmpArrayLen];
+  uint8_t* tmpArray    = new uint8_t[tmpArrayLen];
 
   tmpArray[0] = 0x03;
   tmpArray[1] = 0;

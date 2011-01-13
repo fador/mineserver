@@ -2,27 +2,27 @@
    Copyright (c) 2010, The Mineserver Project
    All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
- * Neither the name of the The Mineserver Project nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include <stdlib.h>
 #ifdef WIN32
@@ -67,7 +67,8 @@
 #include "physics.h"
 #include "plugin.h"
 #include "furnaceManager.h"
-#include "screen.h"
+#include "cursesScreen.h"
+#include "cliScreen.h"
 #include "hook.h"
 
 #ifdef WIN32
@@ -101,9 +102,24 @@ int main(int argc, char* argv[])
   signal(SIGTERM, sighandler);
   signal(SIGINT, sighandler);
 
-  srand((uint32)time(NULL));
+  srand((uint32_t)time(NULL));
 
   return Mineserver::get()->run(argc, argv);
+}
+
+Mineserver::Mineserver()
+{
+  m_map            = new Map;
+  m_chat           = new Chat;
+  m_plugin         = new Plugin;
+  m_screen         = new CliScreen;
+  m_physics        = new Physics;
+  m_config         = new Config;
+  m_furnaceManager = new FurnaceManager;
+  m_packetHandler  = new PacketHandler;
+  m_mapGen         = new MapGen;
+  m_logger         = new Logger;
+  m_inventory      = new Inventory;
 }
 
 event_base* Mineserver::getEventBase()
@@ -119,8 +135,8 @@ void Mineserver::updatePlayerList()
 
 int Mineserver::run(int argc, char *argv[])
 {
-  uint32 starttime = (uint32)time(0);
-  uint32 tick      = (uint32)time(0);
+  uint32_t starttime = (uint32_t)time(0);
+  uint32_t tick      = (uint32_t)time(0);
 
 #ifdef FADOR_PLUGIN
     init_plugin_api();
@@ -144,6 +160,19 @@ int Mineserver::run(int argc, char *argv[])
   // Initialize conf
   Mineserver::get()->config()->load(file_config);
 
+  //If needed change interface and reinitialize the new Screen
+  std::string iface = Mineserver::get()->config()->sData("system.interface");
+  if (iface == "curses")
+  {
+    screen()->end();
+    //TODO: we lose everything written to the screen
+    //      up to this point when using curses
+    m_screen = new CursesScreen;
+    screen()->init(VERSION);
+    screen()->log(LogType::LOG_INFO, "Mineserver", "Interface changed to curses");
+    updatePlayerList();
+  }
+
   if (Mineserver::get()->config()->has("system.plugins") && (Mineserver::get()->config()->type("system.plugins") == CONFIG_NODE_LIST))
   {
     std::list<std::string>* tmp = Mineserver::get()->config()->mData("system.plugins")->keys();
@@ -152,6 +181,7 @@ int Mineserver::run(int argc, char *argv[])
     {
       Mineserver::get()->plugin()->loadPlugin(*it, Mineserver::get()->config()->sData("system.plugins."+(*it)));
     }
+    delete tmp;
   }
 
   // Write PID to file
@@ -159,9 +189,9 @@ int Mineserver::run(int argc, char *argv[])
   if (!pid_out.fail())
   {
 #ifdef WIN32
-     pid_out << _getpid();
+    pid_out << _getpid();
 #else
-     pid_out << getpid();
+    pid_out << getpid();
 #endif
   }
   pid_out.close();
@@ -174,13 +204,13 @@ int Mineserver::run(int argc, char *argv[])
 
   if (Mineserver::get()->config()->bData("map.generate_spawn.enabled"))
   {
-    LOG(INFO, "Mapgen", "Generating spawn area...");
+    screen()->log(LogType::LOG_INFO, "Mapgen", "Generating spawn area...");
     int size = Mineserver::get()->config()->iData("map.generate_spawn.size");
     bool show_progress = Mineserver::get()->config()->bData("map.generate_spawn.show_progress");
 #ifdef WIN32
-    DWORD t_begin,t_end;
+    DWORD t_begin = 0, t_end = 0;
 #else
-    clock_t t_begin,t_end;
+    clock_t t_begin = 0, t_end = 0;
 #endif
 
     for (int x=-size;x<=size;x++)
@@ -205,10 +235,10 @@ int Mineserver::run(int argc, char *argv[])
       {
 #ifdef WIN32
         t_end = timeGetTime ();
-        LOG(INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos((t_end-t_begin)/(size*2+1)) + "ms per chunk");
+        screen()->log(LogType::LOG_INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos((t_end-t_begin)/(size*2+1)) + "ms per chunk");
 #else
         t_end = clock();
-        LOG(INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos(((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1)) + "ms per chunk");
+        screen()->log(LogType::LOG_INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos(((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1)) + "ms per chunk");
 #endif
       }
     }
@@ -225,9 +255,6 @@ int Mineserver::run(int argc, char *argv[])
 
   // Load port from config
   int port = Mineserver::get()->config()->iData("net.port");
-
-  // Initialize plugins
-  Mineserver::get()->plugin()->init();
 
 #ifdef WIN32
   WSADATA wsaData;
@@ -297,13 +324,13 @@ int Mineserver::run(int argc, char *argv[])
     while(hostinfo && hostinfo->h_addr_list[ipIndex])
     {
       std::string ip(inet_ntoa(*(struct in_addr*)hostinfo->h_addr_list[ipIndex++]));
-      Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", "Listening on " + ip + ":" + dtos(port));
+      Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", ip + ":" + dtos(port));
     }
   }
   else
   {
     std::string myip(ip);
-    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", "Listening on " + myip + ":" + dtos(port));
+    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", myip + ":" + dtos(port));
   }
   //std::cout << std::endl;
 
@@ -318,6 +345,7 @@ int Mineserver::run(int argc, char *argv[])
   User* serverUser = new User(-1, SERVER_CONSOLE_UID);
   serverUser->changeNick("[Server]");
 
+  time_t timeNow = time(NULL);
   while(m_running && event_base_loop(m_eventBase, 0) == 0)
   {
     // Run 200ms timer hook
@@ -330,21 +358,22 @@ int Mineserver::run(int argc, char *argv[])
       Mineserver::get()->chat()->handleMsg(serverUser, Mineserver::get()->screen()->getCommand().c_str());
     }
 
-    if(time(0)-starttime > 10)
+    timeNow = time(0);
+    if(timeNow-starttime > 10)
     {
-      starttime = (uint32)time(0);
+      starttime = (uint32_t)timeNow;
 
       //If users, ping them
       if(User::all().size() > 0)
       {
         //0x00 package
-        uint8 data = 0;
+        uint8_t data = 0;
         User::all()[0]->sendAll(&data, 1);
 
         //Send server time
         Packet pkt;
-        pkt << (sint8)PACKET_TIME_UPDATE << (sint64)Mineserver::get()->map()->mapTime;
-        User::all()[0]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
+        pkt << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map()->mapTime;
+        User::all()[0]->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
       }
 
       // TODO: Run garbage collection for chunk storage dealie?
@@ -354,25 +383,36 @@ int Mineserver::run(int argc, char *argv[])
     }
 
     //Every second
-    if(time(0)-tick > 0)
+    if(timeNow-tick > 0)
     {
-      tick = (uint32)time(0);
+      tick = (uint32_t)timeNow;
       //Loop users
-      for(unsigned int i = 0; i < User::all().size(); i++)
+      for(int i = users().size()-1; i >= 0; i--)
       {
-        User::all()[i]->pushMap();
-        User::all()[i]->popMap();
+        //No data received in 3s, timeout
+        if(users()[i]->logged && (timeNow-users()[i]->lastData) > 3)
+        {
+          Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Player "+users()[i]->nick+" timed out");
+
+          delete users()[i];
+        }
+        else
+        {
+          users()[i]->pushMap();
+          users()[i]->popMap();
+        }
 
         //Minecart hacks!!
         /*
         if(User::all()[i]->attachedTo)
         {
           Packet pkt;
-          pkt << PACKET_ENTITY_VELOCITY << (sint32)User::all()[i]->attachedTo <<  (sint16)10000       << (sint16)0 << (sint16)0;
-          //pkt << PACKET_ENTITY_RELATIVE_MOVE << (sint32)User::all()[i]->attachedTo <<  (sint8)100       << (sint8)0 << (sint8)0;
-          User::all()[i]->sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
+          pkt << PACKET_ENTITY_VELOCITY << (int32_t)User::all()[i]->attachedTo <<  (int16_t)10000       << (int16_t)0 << (int16_t)0;
+          //pkt << PACKET_ENTITY_RELATIVE_MOVE << (int32_t)User::all()[i]->attachedTo <<  (int8_t)100       << (int8_t)0 << (int8_t)0;
+          User::all()[i]->sendAll((int8_t*)pkt.getWrite(), pkt.getWriteLen());
         }
         */
+
       }
 
       map()->mapTime+=20;
@@ -394,15 +434,13 @@ int Mineserver::run(int argc, char *argv[])
     Mineserver::get()->physics()->update();
 
     // Underwater check / drowning
+    //ToDo: this could be done a bit differently? - Fador
     int i = 0;
     int s = User::all().size();
     for(i=0;i<s;i++)
     {
       User::all()[i]->isUnderwater();
     }
-
-//    event_set(&m_listenEvent, m_socketlisten, EV_WRITE|EV_READ|EV_PERSIST, accept_callback, NULL);
-//    event_add(&m_listenEvent, NULL);
 
     event_base_loopexit(m_eventBase, &loopTime);
   }
@@ -434,6 +472,8 @@ int Mineserver::run(int argc, char *argv[])
   delete m_packetHandler;
   delete m_mapGen;
   delete m_logger;
+
+  delete serverUser;
 
   return EXIT_SUCCESS;
 }

@@ -48,32 +48,49 @@
 
 struct plugin_pointer_struct
 {
+  bool  (*hasPluginVersion)(const char* name);
   float (*getPluginVersion)(const char* name);
-  void (*setPluginVersion)(const char* name, float version);
-  bool (*hasHook)(const char* hookID);
+  void  (*setPluginVersion)(const char* name, float version);
+  void  (*remPluginVersion)(const char* name);
+
+  bool  (*hasPointer)(const char* name);
+  void* (*getPointer)(const char* name);
+  void  (*setPointer)(const char* name, void* pointer);
+  void  (*remPointer)(const char* name);
+
+  bool  (*hasHook)(const char* hookID);
 #ifdef USE_HOOKS
-  void (*setHook)(const char* hookID, Hook* hook);
+  Hook* (*getHook)(const char* hookID);
+  void  (*setHook)(const char* hookID, Hook* hook);
 #else
-  void (*setHook)(const char* hookID, void* hook);
+  void* (*getHook)(const char* hookID);
+  void  (*setHook)(const char* hookID, void* hook);
 #endif
-  void (*addCallback)(const char* hookID, void* function);
-  bool (*doUntilTrue)(const char* hookID, ...);
-  bool (*doUntilFalse)(const char* hookID, ...);
-  void (*doAll)(const char* hookID, ...);
+  void  (*remHook)(const char* hookID);
+
+  bool (*hasCallback)          (const char* hookID, void* function);
+  void (*addCallback)          (const char* hookID, void* function);
+  void (*addIdentifiedCallback)(const char* hookID, void* identifier, void* function);
+  void (*remCallback)          (const char* hookID, void* function);
+  bool (*doUntilTrue)          (const char* hookID, ...);
+  bool (*doUntilFalse)         (const char* hookID, ...);
+  void (*doAll)                (const char* hookID, ...);
+
   void *temp[10];
 };
 
 struct user_pointer_struct
 {
-  bool (*teleport)(const char* user,double x, double y, double z);
+  bool (*teleport)   (const char* user,double x, double y, double z);
   bool (*getPosition)(const char* user, double* x, double* y, double* z, float* yaw, float* pitch, double *stance);
+  bool (*sethealth)  (const char* user,int userHealth);
   void *temp[100];
 };
 
 struct chat_pointer_struct
 {
-  bool    (*sendmsgTo)(const char* user,const char* msg);
-  bool      (*sendmsg)(const char* msg);
+  bool (*sendmsgTo)   (const char* user,const char* msg);
+  bool (*sendmsg)     (const char* msg);
   bool (*sendUserlist)(const char* user);
   void *temp[100];
 };
@@ -87,17 +104,27 @@ struct logger_pointer_struct
 struct map_pointer_struct
 {
   void (*createPickupSpawn)(int x, int y, int z, int type, int count, int health, const char* user);
-  bool (*setTime)(int timeValue);
+  bool (*setTime) (int timeValue);
   void (*getSpawn)(int* x, int* y, int* z);
   bool (*getBlock)(int x, int y, int z, unsigned char* type,unsigned char* meta);
   bool (*setBlock)(int x, int y, int z, unsigned char type,unsigned char meta);
   void (*saveWholeMap)(void);
+  unsigned char* (*getMapData_block)(int x, int z);
+  unsigned char* (*getMapData_meta) (int x, int z);
+  unsigned char* (*getMapData_skylight)  (int x, int z);
+  unsigned char* (*getMapData_blocklight)(int x, int z);
   void *temp[100];
 };
 
 struct config_pointer_struct
 {
+  bool (*has)(const char* name);
   int (*iData)(const char* name);
+  long (*lData)(const char* name);
+  float (*fData)(const char* name);
+  double (*dData)(const char* name);
+  const char* (*sData)(const char* name);
+  bool (*bData)(const char* name);
   void *temp[100];
 };
 

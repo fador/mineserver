@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2010, Kasper F. Brandt
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -23,44 +23,36 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
-#ifndef _CONFIG_H
-#define _CONFIG_H
+#ifndef _CLISCREEN_H
+#define _CLISCREEN_H
 
 #include <string>
-#include <list>
+#include <vector>
 
-#include "config/node.h"
+#include "screenBase.h"
+#include "logtype.h"
 
-class ConfigParser;
-
-class Config
+class CliScreen : public Screen
 {
 public:
-  Config();
-  ~Config();
-
-  bool load(const std::string& file);
-  void dump();
-
-  ConfigNode* root();
-
-  int iData(const std::string& name);
-  long lData(const std::string& name);
-  float fData(const std::string& name);
-  double dData(const std::string& name);
-  std::string sData(const std::string& name);
-  bool bData(const std::string& name);
-  ConfigNode* mData(const std::string& name);
-
-  bool has(const std::string& name);
-  int type(const std::string& name) const;
-  std::list<std::string>* keys(int type=CONFIG_NODE_UNDEFINED);
+  void init(std::string version);
+  void log(LogType::LogType type, const std::string& source, const std::string& message);
+  void updatePlayerList(std::vector<User *> users);
+  void end();
+  bool hasCommand();
+  std::string getCommand();
 
 private:
-  ConfigParser* m_parser;
-  ConfigNode* m_root;
+  std::string currentCommand;
+#ifdef WIN32
+  bool _hasCommand;
+  static DWORD WINAPI _stdinThreadProc(LPVOID lpParameter);
+  DWORD WINAPI stdinThreadProc();
+  CRITICAL_SECTION ccAccess;
+  HANDLE stdinThread;
+#endif
 };
 
-#endif
+#endif //_CLISCREEN_H
