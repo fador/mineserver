@@ -418,8 +418,6 @@ void MapGen::AddOre(int x, int z, uint8_t type)
   uint8_t meta;
   
   int count, startHeight;
-  
-  // Values for coal (Most common ore)
 
   switch(type) {
     case BLOCK_COAL_ORE:
@@ -457,6 +455,9 @@ void MapGen::AddOre(int x, int z, uint8_t type)
     
     blockX += xBlockpos;
     blockZ += zBlockpos;
+    
+    // Calculate Y
+    blockY = fastrand()%blockY;
     
     i++;
     
