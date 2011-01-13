@@ -9,13 +9,15 @@ for MineServer, lowering the bar for plugin devs.
 
 General rules:
 
-- all Python Plugins must be in bin/plugins
+- Have python, Python.h and SWIG
+ (sudo apt-get install python python-dev swig)
+
 - "make" MineServer first
 - Must run "make" in src/plugins/PyScript (any halp on other build systems?)
 
 Usage:
-run mineserver and type "/load PyScript ./PyScript.so"
-this will load all python plugins in bin/plugins
+In config.cfg add a new plugin, name it and point the file to a .py file you wish you use
 
 API:
-Right now, the API and callbacks are rather few and far between, work is in progress
+An example of callbacks are included in TriggTest.py which is bundled in src/plugins/PyScript/python
+for a full list of functions see pydoc MineServer

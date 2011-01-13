@@ -9,4 +9,7 @@ typedef std::string String;
 
 %}
 %include "python_plugin_api.h"
-
+%pythoncode %{
+def setUpMSPointer(ms):
+    get_MS().setMineServer(ms)
+%}

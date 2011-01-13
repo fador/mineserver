@@ -42,6 +42,14 @@ mineserver_pointer_struct* getMineServer();
 // Call Back defs
 bool chatPreFunction(const char* userIn,time_t timestamp, const char* msgIn);
 bool timer200Function();
+bool timer500Function();
+bool timer1000Function();
+bool timer10000Function();
+bool blockPlaceFunction(const char* name, int32_t x, int8_t y, int32_t z,
+                        int16_t id, int8_t dir);
+bool blockBreakFunction(const char* name, int x, int y, int z);
+
+
 
 
 #endif

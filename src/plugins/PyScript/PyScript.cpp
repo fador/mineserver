@@ -29,8 +29,6 @@ Script* the_script;
 void checkPyErr(){
     if(PyErr_Occurred()){
         PyErr_Print();
-        int h;
-        cin >> h;
     }
 }
 
@@ -61,9 +59,12 @@ void Script::load(string ModName){
     Arg = SWIG_NewPointerObj((void*)m_mineserver, SWIGTYPE_p_mineserver_pointer_struct, 1);
     Args = Py_BuildValue("(O)",Arg);
 
-    callPyFunc("init",Args);
-    checkPyErr();
+    callPyFunc("setUpMSPointer",Args);
     Py_XDECREF(Args);
+    checkPyErr();
+    PyObject *Args2;
+    Args2 = PyTuple_New(0);
+    callPyFunc("init",Args2);
 }
 
 Script::~Script(){
@@ -93,7 +94,6 @@ PyObject* Script::callPyFunc(const char* name, PyObject* Args){
             pValue = PyObject_CallObject(pFunc, Args);
             if(pValue!=NULL){
                 Py_XDECREF(pFunc);
-                Py_XDECREF(Args);
                 return pValue;
             }
             Py_XDECREF(pValue);
@@ -153,8 +153,6 @@ PyObject* Script::callPyFunc(const char* name, PyObject* Args){
 //}
 
 mineserver_pointer_struct* getMineServer(){
-    cout << (int)::safe << endl;
-    cout << (int)::ms << endl;
     if((int)::ms == 0){
         cout << "Passing zero pointer as MineServer struct! SEGFAULT COMMING" << endl;
     }
@@ -166,15 +164,21 @@ PLUGIN_API_EXPORT void CALLCONVERSION PyScript_init(mineserver_pointer_struct* m
 //    getMS()->setMineServer(mineserver);
     // Timers
     mineserver->plugin.addCallback("Timer200", (void *)timer200Function);
+    mineserver->plugin.addCallback("Timer1000", (void *)timer1000Function);
+    mineserver->plugin.addCallback("Timer10000", (void *)timer10000Function);
 
     // Chat
     mineserver->plugin.addCallback("PlayerChatPre", (void *)chatPreFunction);
+
+    // Map callbacks
+    mineserver->plugin.addCallback("BlockPlacePre", (void*)blockPlaceFunction);
+    mineserver->plugin.addCallback("BlockBreakPre", (void*)blockBreakFunction);
+
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION set_name(const char* name){
     std::string script_name = std::string(name);
     size_t pos = script_name.rfind("\\");
-    cout << (int)safe << endl;
     while(pos != string::npos){
         script_name.replace(pos,1,"/"); // Silently ignore backslashes
         pos = script_name.find("\\");
@@ -183,7 +187,6 @@ PLUGIN_API_EXPORT void CALLCONVERSION set_name(const char* name){
     Py_Initialize();
     SWIG_init();
     init_MineServer();
-    cout << (int)safe << endl;
     ::ms=::safe;
     PyRun_SimpleString("import sys;");
     PyRun_SimpleString("sys.path.insert(0,\".\");");
@@ -199,10 +202,8 @@ PLUGIN_API_EXPORT void CALLCONVERSION set_name(const char* name){
     size_t len = script_name.rfind(".") - start;
     string filename = script_name.substr(start, len);
     PyRun_SimpleString("import MineServer");
-    cout << (int)safe << endl;
 
     Script newScript = Script(::ms,filename);
-    cout << (int)safe << endl;
 
     the_script = &newScript;
     ::ms=::safe;
@@ -213,28 +214,86 @@ PLUGIN_API_EXPORT void CALLCONVERSION PyScript_shutdown(void){
 
 
 
-// Callbacks
 bool chatPreFunction(const char* userIn,time_t timestamp, const char* msgIn)
 {
-//    string userName(userIn);
-//    string userMsg(msgIn);
-    PyObject *param;
+    PyObject *ret, *param;
     param = Py_BuildValue("ss",userIn,msgIn);
-    the_script->callPyFunc("cb_chat",param);
+    ret = the_script->callPyFunc("cb_chat",param);
     checkPyErr();
     Py_XDECREF(param);
+    if(PyBool_Check(ret)){
+        Py_XDECREF(ret);
+        return ret == Py_True;
+    }
+    Py_XDECREF(ret);
+
+    return true;
 } 
 
 bool timer200Function()
 {
-//    string userName(userIn);
-//    string userMsg(msgIn);
-    cout << (int)magical() << endl;
-    cout << (int)::ms << endl;
     PyObject *param;
     param = PyTuple_New(0);
     the_script->callPyFunc("cb_timer200",param);
     checkPyErr();
     Py_XDECREF(param);
 }
+
+bool timer1000Function()
+{
+    PyObject *param;
+    param = PyTuple_New(0);
+    the_script->callPyFunc("cb_timer1000",param);
+    checkPyErr();
+    Py_XDECREF(param);
+}
+
+bool timer10000Function()
+{
+    PyObject *param;
+    param = PyTuple_New(0);
+    the_script->callPyFunc("cb_timer10000",param);
+    checkPyErr();
+    Py_XDECREF(param);
+}
+
+bool blockPlaceFunction(const char* name, int32_t x, int8_t y, int32_t z,
+                        int16_t id, int8_t dir)
+{
+    PyObject *param, *Arg, *ret;
+    PyBlock* block = get_MS()->map.get_block((int)x,(int)y,(int)z);
+    Arg = SWIG_NewPointerObj((void*)block, SWIGTYPE_p_PyBlock, 1);
+    param = Py_BuildValue("(sO)",name,Arg);
+    ret = the_script->callPyFunc("cb_block_place",param);
+    checkPyErr();
+    Py_XDECREF(Arg);
+    Py_XDECREF(param);
+    if(ret && PyBool_Check(ret)){
+        Py_XDECREF(ret);
+        return ret == Py_True;
+    }
+    Py_XDECREF(ret);
+    return true;
+}
+
+bool blockBreakFunction(const char* name, int x, int y, int z)
+{
+    PyObject *param, *Arg, *ret;
+    PyBlock* block = get_MS()->map.get_block((int)x,(int)y,(int)z);
+    Arg = SWIG_NewPointerObj((void*)block, SWIGTYPE_p_PyBlock, 1);
+    param = Py_BuildValue("(sO)",name,Arg);
+    ret = the_script->callPyFunc("cb_block_break",param);
+    checkPyErr();
+    Py_XDECREF(Arg);
+    Py_XDECREF(param);
+    if(ret && PyBool_Check(ret)){
+        Py_XDECREF(ret);
+        return ret == Py_True;
+    }
+    Py_XDECREF(ret);
+    return true;
+}
+
+
+
 

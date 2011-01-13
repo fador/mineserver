@@ -47,21 +47,40 @@ public:
   double x,y,z,rot,pit;
 };
 
-class PyPlugin
+class PyBlock
 {
 public:
- float getPluginVersion(const std::string name);
- void setPluginVersion(const std::string name, float version);
+  int x,y,z,type,meta;
+  int get_type();
+  void set_type(int new_type);
+  int get_meta();
+  void set_meta(int new_meta);
+};
+
+class PyUser
+{
+public:
+  const char* name;
+  PyLoc* location;
+  void teleport(PyLoc new_location);
+  void set_health(int health);
+};
+
+class PyChat
+{
+public:
+  void send_message_to(const char* user, const char* message);
+  void send_message(const char* message);
 };
 
 class PymyMap
 {
 public:
-  void createPickupSpawn(int x, int y, int z, int type, int count, int health, std::string user);
-  bool setTime(int timeValue);
-  PyLoc* getSpawn();
-  bool getBlock(int x, int y, int z, unsigned char* type,unsigned char* meta);
-  bool setBlock(int x, int y, int z, unsigned char type,unsigned char meta);
+  void save();
+  void create_item(int x, int y, int z, int type, int count, int health, std::string user);
+  bool set_time(int timeValue);
+  PyLoc* get_spawn();
+  PyBlock* get_block(int x, int y, int z);
 };
 
 class PyScreen
@@ -73,17 +92,18 @@ public:
 class PyMineserver
 {
 public:
- PyPlugin plugin;
  PymyMap map;
  PyScreen screen;
+ PyChat chat;
+ void setMineServer(mineserver_pointer_struct* MS);
+ PyUser* get_user(const char* player_name);
 };
 
 mineserver_pointer_struct* magical();
-bool set_time(mineserver_pointer_struct* m, int timeValue);
 
 
 
-PyMineserver* getMS();
+PyMineserver* get_MS();
 #ifndef SWIG
 #endif
 
