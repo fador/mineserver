@@ -221,6 +221,11 @@ bool User::sendLoginInfo()
   //Update player list
   Mineserver::get()->screen()->updatePlayerList(Mineserver::get()->users());
 
+  pushMap(); pushMap(); pushMap();
+  //Teleport player (again)
+  teleport(pos.x, pos.y+2, pos.z);
+
+
   return true;
 }
 
