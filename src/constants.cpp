@@ -112,6 +112,8 @@ void initConstants()
   BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_MINECART_TRACKS, Drop(BLOCK_MINECART_TRACKS, 10000, 1, true)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_MOSSY_COBBLESTONE, Drop(BLOCK_MOSSY_COBBLESTONE, 10000, 1, true)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_OBSIDIAN, Drop(BLOCK_OBSIDIAN, 10000, 1, true)));
+  BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_STEP, Drop(BLOCK_STEP, 10000, 1, true)));
+  BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_DOUBLE_STEP, Drop(BLOCK_STEP, 10000, 1, true)));
 
   // Always drop but give more then one item
   BLOCKDROPS.insert(std::pair<uint8_t, Drop>(BLOCK_REDSTONE_ORE, Drop(ITEM_REDSTONE, 10000, 4, true)));
