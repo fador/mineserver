@@ -76,9 +76,11 @@ public:
  PyPlugin plugin;
  PymyMap map;
  PyScreen screen;
- mineserver_pointer_struct* getMineServer();
- void setMineServer(mineserver_pointer_struct* MS);
 };
+
+mineserver_pointer_struct* magical();
+bool set_time(mineserver_pointer_struct* m, int timeValue);
+
 
 
 PyMineserver* getMS();

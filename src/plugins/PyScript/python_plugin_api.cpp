@@ -40,60 +40,66 @@
 
 PyMineserver* pymines= new PyMineserver();
 
-mineserver_pointer_struct* pyms;
-
-mineserver_pointer_struct* getMineServer();
-
 PyMineserver* getMS(){
     return pymines;
 }
 
 float PyPlugin::getPluginVersion(const std::string name)
 {
-  return getMS()->getMineServer()->plugin.getPluginVersion(name.c_str());
+  return getMineServer()->plugin.getPluginVersion(name.c_str());
 }
 void PyPlugin::setPluginVersion(const std::string name, float version)
 {
-  getMS()->getMineServer()->plugin.setPluginVersion(name.c_str(),version);
+  getMineServer()->plugin.setPluginVersion(name.c_str(),version);
 }
 
 void PymyMap::createPickupSpawn(int x, int y, int z, int type, int count, int health, std::string user)
 {
-  getMS()->getMineServer()->map.createPickupSpawn(x,y,z,type,count,health,user.c_str());
+  getMineServer()->map.createPickupSpawn(x,y,z,type,count,health,user.c_str());
 }
+mineserver_pointer_struct* magical(){
+  return getMineServer();
+}
+bool set_time(mineserver_pointer_struct* m, int timeValue)
+{
+ return m->map.setTime(timeValue);
+}
+
 bool PymyMap::setTime(int timeValue)
 {
- return getMS()->getMineServer()->map.setTime(timeValue);
+ cout << (int)getMineServer();
+ cout << (int)::ms << endl;
+ return ::ms->map.setTime(timeValue);
 }
 PyLoc* PymyMap::getSpawn()
 {
   PyLoc* L= new PyLoc();
   int *x,*y,*z;
   double dx,dy,dz;
-  getMS()->getMineServer()->map.getSpawn(x,y,z);
+  getMineServer()->map.getSpawn(x,y,z);
   dx = (double)*x; dy = (double)*y; dz = (double)*z;
   L->x=dx; L->y=dy; L->z=dz;
   return L;
 }
 bool PymyMap::getBlock(int x, int y, int z, unsigned char* type,unsigned char* meta)
 {
-  return getMS()->getMineServer()->map.getBlock(x,y,z,type,meta);
+  return getMineServer()->map.getBlock(x,y,z,type,meta);
 }
 bool PymyMap::setBlock(int x, int y, int z, unsigned char type,unsigned char meta)
 {
-  return getMS()->getMineServer()->map.setBlock(x,y,z,type,meta);
+  return getMineServer()->map.setBlock(x,y,z,type,meta);
 }
 
 void PyScreen::log(const char* message)
 {
   std::string m2(message);
-  getMS()->getMineServer()->logger.log(6,"Plugin",m2.c_str());
+  getMineServer()->logger.log(6,"Plugin",m2.c_str());
 }
 
-mineserver_pointer_struct* PyMineserver::getMineServer(){
-  return pyms;
-}
+//mineserver_pointer_struct* PyMineserver::getMineServer(){
+//  return pyms;
+//}
 
-void PyMineserver::setMineServer(mineserver_pointer_struct* MS){
-  pyms = MS;
-}
+//void PyMineserver::setMineServer(mineserver_pointer_struct* MS){
+//  pyms = MS;
+//}

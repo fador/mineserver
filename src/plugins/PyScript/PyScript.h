@@ -30,9 +30,21 @@ class Script
         void load(string ModName);
     private:
         mineserver_pointer_struct * m_mineserver;
-        PyObject* mod;
+//        PyObject* mod;
         string modname;
 };
+
+// Stuff only to be used in C++ plugin, not in python wrapper
+#ifndef SWIG
+extern mineserver_pointer_struct* ms;
+mineserver_pointer_struct* getMineServer();
+
+// Call Back defs
+bool chatPreFunction(const char* userIn,time_t timestamp, const char* msgIn);
+bool timer200Function();
+
+
+#endif
 
 //class PyScript
 //{

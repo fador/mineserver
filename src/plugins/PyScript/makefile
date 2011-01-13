@@ -1,13 +1,20 @@
 # Makefile for PyScript
 all: complete
+SHELL = /bin/sh
 
+CFLAGS = $(shell python-config --cflags) -fPIC -O0 -g
+LDFLAGS = $(shell python-config --ldflags) -shared -Xlinker -export-dynamic
+
+ifeq ($(DEBIAN), 1)
+  CFLAGS  += -DDEBIAN
+endif
 
 COMP = g++
 ifeq ($(CLANG), YES)
   COMP = clang
 endif
 
-OBJS = MineServer_wrap.o PyScript.o python_plugin_api.o
+OBJS = PyScript.o python_plugin_api.o
 
 complete: PyScript.so _MineServer.so MineServer.py
 	cp PyScript.so ../../../bin
@@ -16,22 +23,26 @@ complete: PyScript.so _MineServer.so MineServer.py
 	touch complete
 
 PyScript.so : python/TriggTest.py _MineServer.so $(OBJS)
-	$(COMP) `python-config --ldflags` -g -export-dynamic -rdynamic -shared -Wl,-soname,PyScript.so -o PyScript.so PyScript.o python_plugin_api.o -lc
+	$(COMP) $(LDFLAGS) -g -rdynamic -Wl,-soname,PyScript.so -o PyScript.so -lc $(OBJS)
 
-PyScript.o : PyScript.cpp MineServer_wrap.cxx
-	$(COMP) -O2 -fPIC -DDEBIAN `python-config --cflags` -o PyScript.o -c PyScript.cpp
+PyScript.o : PyScript.cpp MineServer_wrap.cxx PyScript.h
+	$(COMP) $(CFLAGS) -c PyScript.cpp
 
 python_plugin_api.o: python_plugin_api.cpp python_plugin_api.h ../../plugin_api.cpp ../../plugin_api.h
-	$(COMP) `python-config --cflags` -fPIC -O2 -c python_plugin_api.cpp
+	$(COMP) $(CFLAGS) -c python_plugin_api.cpp
 
 MineServer_wrap.cxx: MineServer.i ../../plugin_api.cpp ../../plugin_api.h python_plugin_api.cpp python_plugin_api.h
 	swig -c++ -python MineServer.i
 
 MineServer_wrap.o: MineServer_wrap.cxx MineServer.py
-	$(COMP) -DDEBIAN `python-config --cflags` -O2 -fPIC -c MineServer_wrap.cxx
+	$(COMP) $(CFLAGS) -c MineServer_wrap.cxx
 
 _MineServer.so: $(OBJS)
-	$(COMP) `python-config --ldflags` -shared python_plugin_api.o MineServer_wrap.o -Wl,-soname,_MineServer.so -o _MineServer.so 
+	$(COMP) $(LDFLAGS) $(OBJS) -Wl,-soname,_MineServer.so -o _MineServer.so 
 
 clean:
-	rm *.o *.so MineServer_wrap* *.py
+	rm *.o
+	rm *.so
+	rm *.py*
+	rm MineServer_w*
+	rm complete

@@ -1,4 +1,5 @@
 %module MineServer
+%ignore getMineServer();
 %feature("autodoc", "1");
 %include "std_string.i"
 using namespace std;

@@ -15,12 +15,14 @@
 #include "../../plugin_api.h"
 #include "python_plugin_api.h"
 #include "PyScript.h"
+#include "MineServer_wrap.cxx"
 
 using namespace std;
 
-#ifndef SWIG
+mineserver_pointer_struct* safe;
 mineserver_pointer_struct* ms;
-#endif
+PyObject* mod;
+
 
 Script* the_script;
 
@@ -50,15 +52,18 @@ Script::Script(mineserver_pointer_struct* mine, string name): m_mineserver(mine)
 
 void Script::load(string ModName){
     modname = ModName;
-    PyObject *pName,*Args;
+    PyObject *pName,*Args,*Arg;
     pName = PyString_FromString(ModName.c_str());
-    mod = PyImport_Import(pName);
+    ::mod = PyImport_Import(pName);
     checkPyErr();
     Py_DECREF(pName);
-    Args = PyTuple_New(0);
+
+    Arg = SWIG_NewPointerObj((void*)m_mineserver, SWIGTYPE_p_mineserver_pointer_struct, 1);
+    Args = Py_BuildValue("(O)",Arg);
+
     callPyFunc("init",Args);
     checkPyErr();
-    Py_DECREF(Args);
+    Py_XDECREF(Args);
 }
 
 Script::~Script(){
@@ -82,12 +87,13 @@ Script::~Script(){
 
 PyObject* Script::callPyFunc(const char* name, PyObject* Args){
     PyObject  *pValue, *pFunc;
-    if(mod != NULL) {
-        pFunc = PyObject_GetAttrString(mod, name);
+    if(::mod != NULL) {
+        pFunc = PyObject_GetAttrString(::mod, name);
         if(pFunc && PyCallable_Check(pFunc)){
             pValue = PyObject_CallObject(pFunc, Args);
             if(pValue!=NULL){
                 Py_XDECREF(pFunc);
+                Py_XDECREF(Args);
                 return pValue;
             }
             Py_XDECREF(pValue);
@@ -146,20 +152,39 @@ PyObject* Script::callPyFunc(const char* name, PyObject* Args){
 //    Py_Finalize();
 //}
 
+mineserver_pointer_struct* getMineServer(){
+    cout << (int)::safe << endl;
+    cout << (int)::ms << endl;
+    if((int)::ms == 0){
+        cout << "Passing zero pointer as MineServer struct! SEGFAULT COMMING" << endl;
+    }
+    return ::ms;
+}
+
 PLUGIN_API_EXPORT void CALLCONVERSION PyScript_init(mineserver_pointer_struct* mineserver){
-    ms  = mineserver;
-    getMS()->setMineServer(mineserver);
+    ::safe  = mineserver;
+//    getMS()->setMineServer(mineserver);
+    // Timers
+    mineserver->plugin.addCallback("Timer200", (void *)timer200Function);
+
+    // Chat
+    mineserver->plugin.addCallback("PlayerChatPre", (void *)chatPreFunction);
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION set_name(const char* name){
     std::string script_name = std::string(name);
     size_t pos = script_name.rfind("\\");
+    cout << (int)safe << endl;
     while(pos != string::npos){
         script_name.replace(pos,1,"/"); // Silently ignore backslashes
         pos = script_name.find("\\");
     }
+//    PyImport_AppendInittab("MineServer",init_MineServer);
     Py_Initialize();
-    //init_MineServer();
+    SWIG_init();
+    init_MineServer();
+    cout << (int)safe << endl;
+    ::ms=::safe;
     PyRun_SimpleString("import sys;");
     PyRun_SimpleString("sys.path.insert(0,\".\");");
     string f_slash ("/");
@@ -174,9 +199,42 @@ PLUGIN_API_EXPORT void CALLCONVERSION set_name(const char* name){
     size_t len = script_name.rfind(".") - start;
     string filename = script_name.substr(start, len);
     PyRun_SimpleString("import MineServer");
-    Script newScript = Script(ms,filename);
+    cout << (int)safe << endl;
+
+    Script newScript = Script(::ms,filename);
+    cout << (int)safe << endl;
+
     the_script = &newScript;
+    ::ms=::safe;
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION PyScript_shutdown(void){
 }
+
+
+
+// Callbacks
+bool chatPreFunction(const char* userIn,time_t timestamp, const char* msgIn)
+{
+//    string userName(userIn);
+//    string userMsg(msgIn);
+    PyObject *param;
+    param = Py_BuildValue("ss",userIn,msgIn);
+    the_script->callPyFunc("cb_chat",param);
+    checkPyErr();
+    Py_XDECREF(param);
+} 
+
+bool timer200Function()
+{
+//    string userName(userIn);
+//    string userMsg(msgIn);
+    cout << (int)magical() << endl;
+    cout << (int)::ms << endl;
+    PyObject *param;
+    param = PyTuple_New(0);
+    the_script->callPyFunc("cb_timer200",param);
+    checkPyErr();
+    Py_XDECREF(param);
+}
+
