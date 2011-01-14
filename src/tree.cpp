@@ -125,7 +125,7 @@ void Tree::generateCanopy(){
                         uint8_t temp_posy = posy+yi;
                         uint8_t temp_posz = posz+zi;
                         Mineserver::get()->map()->getBlock(temp_posx,temp_posy,temp_posz,&blocktype,&meta);
-                        if(blocktype==0){
+                        if(blocktype== BLOCK_AIR){
                             Canopy u = Canopy(temp_posx,temp_posy,temp_posz,canopy_darkness);
                         }
                     }
