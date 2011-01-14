@@ -95,7 +95,7 @@ void Tree::generateCanopy(){
     vec loc;
 
 
-    char canopy_darkness;
+    uint8_t canopy_darkness = 0;
     //Not much point making less code with a while/for loop
     //since compiled this is alot faster
     if(rand() % 50 ==0){
@@ -113,17 +113,17 @@ void Tree::generateCanopy(){
         loc = m_Branch[i]->location();
         delete m_Branch[i];
 
-        uint8_t posx = loc.x();
+        int32_t posx = loc.x();
         uint8_t posy = loc.y();
-        uint8_t posz = loc.z();
+        int32_t posz = loc.z();
 
         for(int8_t xi=(-canopySize);xi<=canopySize;xi++){
             for(int8_t yi=(-canopySize);yi<=canopySize;yi++){
                 for(int8_t zi=(-canopySize);zi<=canopySize;zi++){
                     if(abs(xi)+abs(yi)+abs(zi) <= canopySize){
-                        uint8_t temp_posx = posx+xi;
+                        int32_t temp_posx = posx+xi;
                         uint8_t temp_posy = posy+yi;
-                        uint8_t temp_posz = posz+zi;
+                        int32_t temp_posz = posz+zi;
                         Mineserver::get()->map()->getBlock(temp_posx,temp_posy,temp_posz,&blocktype,&meta);
                         if(blocktype== BLOCK_AIR){
                             Canopy u(temp_posx,temp_posy,temp_posz,canopy_darkness);
