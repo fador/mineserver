@@ -121,7 +121,7 @@ bool BlockBasic::spawnBlockItem(const int32_t x, const int8_t y, const int32_t z
 
   if (BLOCKDROPS.count(block))
   {
-    drop = &BLOCKDROPS[block];
+    drop = BLOCKDROPS[block];
 
     while (drop)
     {
