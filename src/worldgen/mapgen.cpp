@@ -226,7 +226,7 @@ void MapGen::generateChunk(int x, int z)
 //#define PRINT_MAPGEN_TIME
 
 
-void MapGen::AddTrees(int x, int z, int count) 
+void MapGen::AddTrees(int x, int z, uint16_t count)
 {
   int xBlockpos = x<<4;
   int zBlockpos = z<<4;
@@ -234,9 +234,8 @@ void MapGen::AddTrees(int x, int z, int count)
   int blockX, blockY, blockZ;
   uint8_t block;
   uint8_t meta;
-    
-  int i = 0;
-  while(i < count)
+
+  for(uint16_t i;i<count;i++)
   {
     blockX = fastrand()%16;
     blockZ = fastrand()%16;
@@ -245,8 +244,6 @@ void MapGen::AddTrees(int x, int z, int count)
     
     blockX += xBlockpos;
     blockZ += zBlockpos;
-    
-    i++;
       
     Mineserver::get()->map()->getBlock(blockX, blockY, blockZ, &block, &meta);
     // No trees on water
@@ -254,7 +251,6 @@ void MapGen::AddTrees(int x, int z, int count)
       continue;
         
     Tree tree(blockX, blockY, blockZ);
-    tree.generate();
   }
 }
 
