@@ -138,7 +138,7 @@ User::~User()
     {
       for(int mapz = -viewDistance+curChunk.z(); mapz <= viewDistance+curChunk.z(); mapz++)
       {
-        sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(mapx, mapz);
+        sChunk* chunk = Mineserver::get()->map()->chunks.getChunk(mapx, mapz);
         if(chunk != NULL)
         {
           chunk->users.erase(this);
@@ -173,20 +173,11 @@ bool User::sendLoginInfo()
   //Login OK package
   buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << std::string("") << (int64_t)0 << (int8_t)0;
 
-  //Send server time (after dawn)
-  buffer << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map()->mapTime;
 
-  //Inventory
-  for(int i=1; i<45; i++)
-  {   
-    if(inv[i].type != -1 && inv[i].count)
-    {
-      buffer << (int8_t)PACKET_SET_SLOT << (int8_t)0 << (int16_t)(i) << (int16_t)inv[i].type << (int8_t)(inv[i].count) << (int8_t)inv[i].health;
-    }
-  }
+  //Send spawn position
+  buffer << (int8_t)PACKET_SPAWN_POSITION << (int32_t)pos.x << ((int32_t)pos.y+2) << (int32_t)pos.z;
 
-  //Teleport player
-  teleport(pos.x, pos.y+2, pos.z);
+
 
   //Put nearby chunks to queue
   for(int x = -viewDistance; x <= viewDistance; x++)
@@ -197,7 +188,25 @@ bool User::sendLoginInfo()
     }
   }
   // Push chunks to user
-  pushMap();
+  pushMap(); pushMap();
+
+
+
+  //Teleport player
+  teleport(pos.x, pos.y+2, pos.z);
+
+  //Send server time (after dawn)
+  buffer << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map()->mapTime;
+
+
+  //Inventory
+  for(int i=1; i<45; i++)
+  {   
+    if(inv[i].type != -1 && inv[i].count)
+    {
+      buffer << (int8_t)PACKET_SET_SLOT << (int8_t)0 << (int16_t)(i) << (int16_t)inv[i].type << (int8_t)(inv[i].count) << (int16_t)inv[i].health;
+    }
+  }
 
   // Spawn this user to others
   spawnUser((int32_t)pos.x*32, ((int32_t)pos.y+2)*32, (int32_t)pos.z*32);
@@ -211,6 +220,11 @@ bool User::sendLoginInfo()
 
   //Update player list
   Mineserver::get()->screen()->updatePlayerList(Mineserver::get()->users());
+
+  pushMap(); pushMap(); pushMap();
+  //Teleport player (again)
+  teleport(pos.x, pos.y+2, pos.z);
+
 
   return true;
 }
@@ -498,7 +512,7 @@ bool User::updatePos(double x, double y, double z, double stance)
       std::list<User*> toremove;
       std::list<User*> toadd;
 
-      sChunk::UserBoundry(oldChunk, toremove, newChunk, toadd);
+      sChunk::userBoundary(oldChunk, toremove, newChunk, toadd);
 
       if(toremove.size())
       {
@@ -572,7 +586,7 @@ bool User::updatePos(double x, double y, double z, double stance)
           if(!withinViewDistance(chunkDiffX, oldChunk->x) || !withinViewDistance(chunkDiffZ, oldChunk->z))
           {
             addQueue(mapx, mapz);
-            sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(mapx, mapz);
+            sChunk* chunk = Mineserver::get()->map()->chunks.getChunk(mapx, mapz);
 
             if(chunk != NULL)
             {
@@ -584,7 +598,7 @@ bool User::updatePos(double x, double y, double z, double stance)
           {
             addRemoveQueue(mapx-chunkDiffX, mapz-chunkDiffZ);
 
-            sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk((mapx - chunkDiffX), (mapz - chunkDiffZ));
+            sChunk* chunk = Mineserver::get()->map()->chunks.getChunk((mapx - chunkDiffX), (mapz - chunkDiffZ));
 
             if(chunk != NULL)
             {
@@ -722,7 +736,7 @@ bool User::updateLook(float yaw, float pitch)
   Packet pkt;
   pkt << (int8_t)PACKET_ENTITY_LOOK << (int32_t)UID << angleToByte(yaw) << angleToByte(pitch);
 
-  sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(blockToChunk((int32_t)pos.x),blockToChunk((int32_t)pos.z));
+  sChunk* chunk = Mineserver::get()->map()->chunks.getChunk(blockToChunk((int32_t)pos.x),blockToChunk((int32_t)pos.z));
   if(chunk != NULL)
   {
     chunk->sendPacket(pkt, this);
@@ -884,7 +898,7 @@ bool User::addRemoveQueue(int x, int z)
 bool User::addKnown(int x, int z)
 {
   vec newMap(x, 0, z);
-  sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(x,z);
+  sChunk* chunk = Mineserver::get()->map()->chunks.getChunk(x,z);
   if(chunk == NULL)
   {
     return false;
@@ -898,7 +912,7 @@ bool User::addKnown(int x, int z)
 
 bool User::delKnown(int x, int z)
 {
-  sChunk* chunk = Mineserver::get()->map()->chunks.GetChunk(x,z);
+  sChunk* chunk = Mineserver::get()->map()->chunks.getChunk(x,z);
   if(chunk != NULL)
   {
     chunk->users.erase(this);
@@ -1013,7 +1027,7 @@ bool User::spawnUser(int x, int y, int z)
   pkt << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)UID << nick
       << (int32_t)x << (int32_t)y << (int32_t)z << (int8_t)0 << (int8_t)0
       << (int16_t)0;
-  sChunk*chunk = Mineserver::get()->map()->chunks.GetChunk(blockToChunk(x >> 5), blockToChunk(z >> 5));
+  sChunk*chunk = Mineserver::get()->map()->chunks.getChunk(blockToChunk(x >> 5), blockToChunk(z >> 5));
   if(chunk != NULL)
     chunk->sendPacket(pkt, this);
   return true;

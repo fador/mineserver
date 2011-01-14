@@ -61,6 +61,7 @@ enum
   PACKET_PLAYER_BLOCK_PLACEMENT    = 0x0f,
   PACKET_HOLDING_CHANGE            = 0x10,
   PACKET_ARM_ANIMATION             = 0x12,
+  PACKET_ENTITY_CROUCH             = 0x13,
   PACKET_INVENTORY_CLOSE           = 0x65,
   PACKET_INVENTORY_CHANGE          = 0x66,
   PACKET_SET_SLOT                  = 0x67,
@@ -306,6 +307,8 @@ public:
   int inventory_change(User *user);
   int inventory_close(User *user);
   int destroy_entity(User *user);
+
+  int entity_crouch(User *user);
 };
 
 #endif
