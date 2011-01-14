@@ -171,47 +171,52 @@ void Map::addSapling(User* user, int x, int y, int z)
     saplings.push_back( sTree(x,y,z,mapTime,user->UID) );
 }
 #define TREE_MIN_SPACE 5 //this should be relocated to some constants header perhaps?
+#define TREE_MAX_SPACE 20
+
 void Map::checkGenTrees()
 {
-    std::list<sTree>::iterator iter = saplings.begin();
+  std::list<sTree>::iterator iter = saplings.begin();
 
-    static uint8_t light;
-    static uint8_t skylight;
+  static uint8_t light;
+  static uint8_t skylight;
 
-    static uint8_t blocktype;
-    static uint8_t meta;
+  static uint8_t blocktype;
+  static uint8_t meta;
 
-    while (iter != saplings.end())
+  while (iter != saplings.end())
+  {
+    getLight(iter->x,iter->y+1,iter->z,&light,&skylight);
+    if(light>9 || skylight >3)
     {
-        getLight(iter->x,iter->y+1,iter->z,&light,&skylight);
-        if(light>9 || skylight >3){
-            //Check above blocks
-            uint8_t i=1;
-            nextblock:
-            getBlock(iter->x,iter->y+i,iter->z,&blocktype,&meta);
-            if(blocktype == BLOCK_AIR){
-                i++;
-                goto nextblock;
-            }
-            if(i>=TREE_MIN_SPACE){//If there is enough space
-                if(rand() % 50 == 0)
-                {
-                    LOG(INFO, "Map", "Grow tree!");
+      //Check above blocks
+      uint8_t i=1;
+      for(i = 1;i < TREE_MAX_SPACE; i++)
+      {
+        if(!getBlock(iter->x,iter->y+i,iter->z,&blocktype,&meta) || blocktype != BLOCK_AIR)
+        {
+          break;
+        }
+      }
+      if(i >= TREE_MIN_SPACE)
+      {//If there is enough space
+        if(rand() % 50 == 0)
+        {
+          LOG(INFO, "Map", "Grow tree!");
 
-                    Tree tree((*iter).x,(*iter).y,(*iter).z,i);
-                    saplings.erase(iter++);  // alternatively, i = items.erase(i);
-                }
-            }
-            else{
-                goto increment;
-            }
+          Tree tree((*iter).x,(*iter).y,(*iter).z,i);
+          saplings.erase(iter++);  // alternatively, i = items.erase(i);
         }
-        else{
-            increment:
-            iter++;
-        }
+      }
+      else
+      {
+        iter++;
+      }
     }
-
+    else
+    {
+      iter++;
+    }
+  }
 }
 
 void Map::init()
