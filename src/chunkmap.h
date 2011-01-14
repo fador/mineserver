@@ -36,16 +36,56 @@
 #include "packets.h"
 #include "user.h"
 
-class User;
 class NBT_Value;
-struct spawnedItem;
-struct chestData;
-struct furnaceData;
-struct signData;
+
+struct spawnedItem
+{
+  int EID;
+  int16_t item;
+  char count;
+  int16_t health;
+  vec pos;
+  time_t spawnedAt;
+  uint32_t spawnedBy;
+  
+  spawnedItem()
+  {
+    spawnedAt = time(0);
+    spawnedBy = 0;
+  }
+};
+
+struct chestData
+{
+  int32_t x;
+  int32_t y;
+  int32_t z;
+  Item items[27];
+};
+   
+struct signData
+{
+  int32_t x;
+  int32_t y;
+  int32_t z;
+  std::string text1;
+  std::string text2;
+  std::string text3;
+  std::string text4;
+};
+    
+struct furnaceData
+{
+  int32_t x;
+  int32_t y;
+  int32_t z;
+  Item items[3];
+  int16_t burnTime;
+  int16_t cookTime;
+};
 
 struct sChunk
 {
-  sChunk() : refCount(0),lightRegen(false),changed(false),lastused(0) {}
   uint8_t* blocks;
   uint8_t* data;
   uint8_t* blocklight;
@@ -67,6 +107,36 @@ struct sChunk
   std::vector<chestData*>   chests;
   std::vector<signData*>    signs;
   std::vector<furnaceData*> furnaces;
+
+  sChunk() : refCount(0),lightRegen(false),changed(false),lastused(0)
+  {
+  }
+
+  ~sChunk()
+  {
+    std::vector<chestData*>::iterator chest_it = chests.begin();
+    for (;chest_it!=chests.end();++chest_it)
+    {
+      delete *chest_it;
+    }
+    chests.clear();
+
+    std::vector<signData*>::iterator sign_it = signs.begin();
+    for (;sign_it!=signs.end();++sign_it)
+    {
+      delete *sign_it;
+    }
+    signs.clear();
+
+    std::vector<furnaceData*>::iterator furnace_it = furnaces.begin();
+    for (;furnace_it!=furnaces.end();++furnace_it)
+    {
+      delete *furnace_it;
+    }
+    furnaces.clear();
+
+    delete nbt;
+  }
 
   bool hasUser(User* user)
   {
@@ -120,6 +190,15 @@ struct sChunk
 struct sChunkNode
 {
   sChunkNode(sChunk* _chunk, sChunkNode* _prev, sChunkNode* _next) : chunk(_chunk),prev(_prev),next(_next) {}
+
+  ~sChunkNode()
+  {
+    if (chunk != NULL)
+    {
+      delete chunk;
+    }
+  }
+
   sChunk* chunk;
   sChunkNode* prev;
   sChunkNode* next;
@@ -131,6 +210,22 @@ public:
   ChunkMap()
   {
     memset(m_buckets, 0, sizeof(m_buckets));
+  }
+
+  ~ChunkMap()
+  {
+    for (int i=0;i<441;++i)
+    {
+      sChunkNode* node = m_buckets[i];
+      sChunkNode* next = NULL;
+      if (node != NULL)
+      {
+        next = node->next;
+        delete node;
+        node = next;
+      }
+      m_buckets[i] = NULL;
+    }
   }
 
   int hash(int x, int z)
@@ -148,6 +243,17 @@ public:
     }
 
     return x + z * 21;
+  }
+
+  int numChunks()
+  {
+    int num = 0;
+
+    for (int i=0;i<441;++i)
+      for (sChunkNode* node = m_buckets[i];node!=NULL;node=node->next)
+        num++;
+
+    return num;
   }
 
   sChunk* getChunk(int x, int z)
@@ -179,6 +285,11 @@ public:
       if ((node->chunk->x == x) && (node->chunk->z == z))
       {
         node->chunk->refCount--;
+
+        if (node->chunk->refCount == 0)
+        {
+          delete node->chunk;
+        }
 
         // If we have both next and previous nodes, we need to connect them up
         // when we remove this node because we're in the middle of the chain.
@@ -229,22 +340,6 @@ public:
     if (m_buckets[_hash]->next != NULL)
     {
       m_buckets[_hash]->next->prev = m_buckets[_hash];
-    }
-  }
-
-  void free()
-  {
-    for (int i=0;i<441;++i)
-    {
-      sChunkNode* node = m_buckets[i];
-      sChunkNode* next = NULL;
-      while (node != NULL)
-      {
-        next = node->next;
-        delete node;
-        node = next;
-      }
-      m_buckets[i] = NULL;
     }
   }
 
