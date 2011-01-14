@@ -50,6 +50,7 @@
 #include "blocks/sign.h"
 #include "blocks/tracks.h"
 #include "blocks/chest.h"
+#include "blocks/ladder.h"
 
 void Plugin::init()
 {
@@ -78,6 +79,8 @@ void Plugin::init()
    toClean.push_back(signblock);
    BlockTracks* tracksblock = new BlockTracks();
    toClean.push_back(tracksblock);
+   BlockLadder* ladderblock = new BlockLadder();
+   toClean.push_back(ladderblock);
 
    // Set default behaviours 
    Callback call;
@@ -94,6 +97,7 @@ void Plugin::init()
    setBlockCallback(BLOCK_SOIL, call);
    setBlockCallback(BLOCK_GLASS, call);
    /* cloth */
+   /*
    setBlockCallback(BLOCK_RED_CLOTH, call);
    setBlockCallback(BLOCK_ORANGE_CLOTH, call);
    setBlockCallback(BLOCK_YELLOW_CLOTH, call);
@@ -109,6 +113,7 @@ void Plugin::init()
    setBlockCallback(BLOCK_PINK_CLOTH, call);
    setBlockCallback(BLOCK_BLACK_CLOTH, call);
    setBlockCallback(BLOCK_GRAY_CLOTH, call);
+   */
    setBlockCallback(BLOCK_WHITE_CLOTH, call);
    /* metals */
    setBlockCallback(BLOCK_GOLD_BLOCK, call);
@@ -159,8 +164,8 @@ void Plugin::init()
 
    /* ladders */
    call.reset();
-   call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
-   call.add("onPlace", Function::from_method<BlockDefault, &BlockDefault::onPlace>(defaultblock));
+   call.add("onBroken", Function::from_method<BlockLadder, &BlockLadder::onBroken>(ladderblock));
+   call.add("onPlace", Function::from_method<BlockLadder, &BlockLadder::onPlace>(ladderblock));
    call.add("onNeighbourBroken", Function::from_method<BlockTorch, &BlockTorch::onNeighbourBroken>(torchblock));
    setBlockCallback(BLOCK_LADDER, call);
 
