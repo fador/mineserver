@@ -48,8 +48,13 @@ void BlockSnow::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
 {
 }
 
-void BlockSnow::onNeighbourBroken(User* user, int8_t block, int8_t meta, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockSnow::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
+   uint8_t block;
+   uint8_t meta;
+
+   if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
+      return;
       
    if (direction == BLOCK_TOP && this->isBlockEmpty(x,y-1,z))
    {

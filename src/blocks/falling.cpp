@@ -46,9 +46,9 @@ void BlockFalling::onBroken(User* user, int8_t status, int32_t x, int8_t y, int3
 {
 }
 
-void BlockFalling::onNeighbourBroken(User* user, int8_t block, int8_t meta, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockFalling::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-   this->onNeighbourMove(user, block, x, y, z, direction);
+   this->onNeighbourMove(user, oldblock, x, y, z, direction);
 }
 
 void BlockFalling::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)

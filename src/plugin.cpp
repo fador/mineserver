@@ -166,7 +166,7 @@ void Plugin::init()
    call.reset();
    call.add("onBroken", Function::from_method<BlockLadder, &BlockLadder::onBroken>(ladderblock));
    call.add("onPlace", Function::from_method<BlockLadder, &BlockLadder::onPlace>(ladderblock));
-   call.add("onNeighbourBroken", Function::from_method<BlockLadder, &BlockLadder::onNeighbourBroken>(ladderblock));
+   call.add("onNeighbourBroken", Function::from_method<BlockTorch, &BlockTorch::onNeighbourBroken>(torchblock));
    setBlockCallback(BLOCK_LADDER, call);
 
    /* Plants */
@@ -561,19 +561,6 @@ Callback* Plugin::getBlockCallback(const int type)
 }
 
 bool Plugin::runBlockCallback(const int type, const std::string name, const Function::invoker_type function)
-{
-  Callbacks::iterator iter = blockevents.find(type);
-
-  if (iter == blockevents.end())
-  {
-    return false;
-  }
-
-  return (*iter).second.run(name, function);
-}
-
-
-bool Plugin::runBlockCallback(const int type, const std::string name, const Function2::invoker_type function)
 {
   Callbacks::iterator iter = blockevents.find(type);
 

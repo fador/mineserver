@@ -56,7 +56,7 @@ void BlockDefault::onBroken(User* user, int8_t status, int32_t x, int8_t y, int3
   this->spawnBlockItem(x,y,z,block);
 }
 
-void BlockDefault::onNeighbourBroken(User* user, int8_t block, int8_t meta, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockDefault::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 

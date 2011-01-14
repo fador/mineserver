@@ -47,7 +47,7 @@ void BlockSign::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
 {
 }
 
-void BlockSign::onNeighbourBroken(User* user, int8_t block, int8_t meta, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockSign::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
