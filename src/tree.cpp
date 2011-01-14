@@ -9,6 +9,7 @@ Tree::Tree(int32_t x, int32_t y, int32_t z, uint8_t limit)
 {
     _x = x, _y = y, _z = z;
     this->generate(limit);
+    n_branches = 0;
 }
 
 
@@ -27,29 +28,38 @@ void Tree::generate(uint8_t limit)
     bool smalltree=false;
 
     //in this implementation we generate the trunk and as we do we call branching and canopy
-    if(m_trunkHeight<BRANCHING_HEIGHT){
+    if(m_trunkHeight<BRANCHING_HEIGHT)
+    {
         smalltree=true;
-	darkness=0;
+        darkness=0;
     }
     uint8_t th=m_trunkHeight-1;
     uint8_t i;
-    for(i = 0; i < th; i++){
-        if(smalltree){
+    for(i = 0; i < th; i++)
+    {
+        if(smalltree)
+        {
             Trunk* v = new Trunk(_x,_y+i,_z,darkness);
             if(i>=MIN_TRUNK-1){
                 m_Branch[n_branches]= v;
                 n_branches++;
-            }else{
+            }
+            else
+            {
                 delete v;
             }
         }
-        else{
+        else
+        {
             Trunk* v = new Trunk(_x,_y+i,_z,darkness);
-            if(i>BRANCHING_HEIGHT-1){
+            if(i>BRANCHING_HEIGHT-1)
+            {
                 generateBranches(v);
                 m_Branch[n_branches]=v;
                 n_branches++;
-            }else{
+            }
+            else
+            {
                 delete v;
             }
         }
@@ -62,12 +72,13 @@ void Tree::generate(uint8_t limit)
 }
 //I STRONGLY RECOMMEND TO USE Trunk Rather than a new unneeded class
 //maybe just a class Wood?
-void Tree::generateBranches(Trunk* wrap){
+void Tree::generateBranches(Trunk* wrap)
+{
     vec loc = wrap->location();
 
-    uint8_t posx = loc.x();
-    uint8_t posy = loc.y();
-    uint8_t posz = loc.z();
+    int32_t posx = loc.x();
+    int32_t posy = loc.y();
+    int32_t posz = loc.z();
 
     //Not much point to loop here
     //or make a function for the inside of the if.
@@ -85,7 +96,7 @@ void Tree::generateBranches(Trunk* wrap){
     }
     if(rand() % BRANCHING_CHANCE == 0 ){
         Branch(posx,posy+1,posz)
-            }
+    }
 }
 
 void Tree::generateCanopy(){
@@ -95,7 +106,7 @@ void Tree::generateCanopy(){
     vec loc;
 
 
-    char canopy_darkness;
+    char canopy_darkness = 0;
     //Not much point making less code with a while/for loop
     //since compiled this is alot faster
     if(rand() % 50 ==0){
@@ -113,20 +124,22 @@ void Tree::generateCanopy(){
         loc = m_Branch[i]->location();
         delete m_Branch[i];
 
-        uint8_t posx = loc.x();
-        uint8_t posy = loc.y();
-        uint8_t posz = loc.z();
+        int32_t posx = loc.x();
+        int32_t posy = loc.y();
+        int32_t posz = loc.z();
 
         for(int8_t xi=(-canopySize);xi<=canopySize;xi++){
             for(int8_t yi=(-canopySize);yi<=canopySize;yi++){
                 for(int8_t zi=(-canopySize);zi<=canopySize;zi++){
                     if(abs(xi)+abs(yi)+abs(zi) <= canopySize){
-                        uint8_t temp_posx = posx+xi;
-                        uint8_t temp_posy = posy+yi;
-                        uint8_t temp_posz = posz+zi;
-                        Mineserver::get()->map()->getBlock(temp_posx,temp_posy,temp_posz,&blocktype,&meta);
-                        if(blocktype== BLOCK_AIR){
-                            Canopy u = Canopy(temp_posx,temp_posy,temp_posz,canopy_darkness);
+                        int32_t temp_posx = posx+xi;
+                        int32_t temp_posy = posy+yi;
+                        int32_t temp_posz = posz+zi;
+                        if(Mineserver::get()->map()->getBlock(temp_posx,temp_posy,temp_posz,&blocktype,&meta, false))
+                        {
+                          if(blocktype== BLOCK_AIR){
+                              Canopy u = Canopy(temp_posx,temp_posy,temp_posz,canopy_darkness);
+                          }
                         }
                     }
                 }
