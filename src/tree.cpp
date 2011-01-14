@@ -20,7 +20,11 @@ void Tree::set(int32_t xloc, int32_t yloc, int32_t zloc, int blockType, char met
 
 void Tree::generate()
 {
+  srand((uint32_t)time(NULL));
   generateTrunk();
+  //Generate the branch section.
+  //Branch branch(_x,_y,_z);
+  //m_Branches.push_back(branch);
   generateCanopy();
   //Place these in the treeBlocks list.
   
@@ -54,40 +58,13 @@ void Tree::generateTrunk()
 
 void Tree::generateCanopy()
 {
-  m_canopyHeight = CANOPY_HEIGHT;
-
-  int topX = m_Trunk.top().getX();
-  int topY = m_Trunk.top().getY();
-  int topZ = m_Trunk.top().getZ();
-
-  for (int y = 0; y < m_canopyHeight; y++)
+  //Generate the canopy section.
+  m_canopyHeight = getRandInt(MIN_CANOPY,MAX_CANOPY);
+  for(int i = 0; i < m_canopyHeight; i++)
   {
-    int r = 2;
-    if (m_canopyHeight - y < 2)
-    {
-      r = 1;
-    }
-
-    for (int x = -r; x <= r; x++)
-    {
-      for (int z = -r; z <= r; z++)
-      {
-        int useLoc = getRandInt(0, 100);
-        int yLoc = topY + y - m_canopyHeight + 2;
-
-        // Probability of skipping a piece of canopy - based on trial and error.
-        int prob = 100 - (3 * (abs(x) + abs(z) + 1) * (3 * y + 1));
-
-        // Don't overwrite the trunk, and skip some spots at random based on probability above
-        if ((x == 0 && z == 0 && yLoc <= topY) || useLoc > prob)
-        {
-          continue;
-        }                
-
-        Canopy canopy(topX + x, yLoc, topZ + z);
-        m_Canopy.push(canopy);
-      }
-    }
-
+    Canopy canopy(m_Trunk.top());
+    canopy.setY(canopy.getY()+1 + i);
+    m_Canopy.push(canopy);
   }
+  assert(m_Canopy.size() >= MIN_CANOPY && m_Canopy.size() <= MAX_CANOPY);
 }

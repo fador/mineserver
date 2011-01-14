@@ -7,7 +7,7 @@
 #include "vec.h"
 #include <stack>
 
-enum { MAX_TRUNK = 8, MIN_TRUNK = 4, CANOPY_HEIGHT = 4 };
+enum { MAX_TRUNK = 8, MIN_TRUNK = 4, MAX_CANOPY = 3, MIN_CANOPY = 1 };
 
 class ITree {
 public:
@@ -18,9 +18,7 @@ public:
     Mineserver::get()->map()->sendBlockChange(_x, _y, _z, _type, _meta);
   }
   virtual void setY(int32_t y) { _y = y; }
-  virtual const int32_t getX(void) { return _x; }
   virtual const int32_t getY(void) { return _y; }
-  virtual const int32_t getZ(void) { return _z; }
   virtual const vec location(void) { return vec(_x,_y,_z); }
   virtual const int type(void) { return _type; }
 protected:
