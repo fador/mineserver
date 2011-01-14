@@ -82,7 +82,7 @@ public:
       @param z The z position of the current neighbour block being called
       @param direction The direction of the neighbour block that was broken
     */
-   void onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction);
+   void onNeighbourBroken(User* user, int8_t block, int8_t meta, int32_t x, int8_t y, int32_t z, int8_t direction);
 
    /** Fired when a block is placed
       @param user The user who placed the block

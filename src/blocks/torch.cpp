@@ -48,14 +48,10 @@ void BlockTorch::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
 {
 }
 
-void BlockTorch::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockTorch::onNeighbourBroken(User* user, int8_t block, int8_t meta, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-   uint8_t block;
-   uint8_t meta;
    bool destroy = false;
 
-   if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
-      return;
 
    if (direction == BLOCK_TOP && meta == BLOCK_TOP && this->isBlockEmpty(x, y-1, z))
    {
@@ -68,19 +64,19 @@ void BlockTorch::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_
         destroy = false;
       }
    }
-   else if (direction == BLOCK_NORTH && meta == BLOCK_SOUTH && this->isBlockEmpty(x+1, y, z))
+   else if (direction == BLOCK_NORTH && meta == BLOCK_SOUTH)
    {
       destroy = true;
    }
-   else if (direction == BLOCK_SOUTH && meta == BLOCK_NORTH && this->isBlockEmpty(x-1, y, z))
+   else if (direction == BLOCK_SOUTH && meta == BLOCK_NORTH)
    {
       destroy = true;
    }
-   else if (direction == BLOCK_EAST && meta == BLOCK_WEST && this->isBlockEmpty(x, y, z+1))
+   else if (direction == BLOCK_EAST && meta == BLOCK_WEST)
    {
       destroy = true;
    }
-   else if (direction == BLOCK_WEST && meta == BLOCK_EAST && this->isBlockEmpty(x, y, z-1))
+   else if (direction == BLOCK_WEST && meta == BLOCK_EAST)
    {
       destroy = true;
    }
@@ -155,5 +151,5 @@ void BlockTorch::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int
 
 void BlockTorch::onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-   this->onNeighbourBroken(user, oldblock, x, y, z, direction);
+   //this->onNeighbourBroken(user, oldblock, x, y, z, direction);
 }

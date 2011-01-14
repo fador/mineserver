@@ -83,6 +83,8 @@ class BlockBasic;
 
 typedef srutil::delegate6<void, User*, int8_t, int32_t, int8_t, int32_t, int8_t> Function;
 
+typedef srutil::delegate7<void, User*, int8_t, int8_t, int32_t, int8_t, int32_t, int8_t> Function2;
+
 class Callback
 {
 public:
@@ -118,6 +120,19 @@ public:
   }
 
   bool run(const std::string name, const Function::invoker_type function)
+  {
+    Events::iterator iter = callbacks.find(name);
+
+    if (iter == callbacks.end())
+    {
+      return false;
+    }
+
+    function(iter->second);
+    return true;
+  }
+
+  bool run(const std::string name, const Function2::invoker_type function)
   {
     Events::iterator iter = callbacks.find(name);
 
@@ -215,6 +230,7 @@ public:
   void setBlockCallback(const int type, Callback call);
   Callback* getBlockCallback(const int type);
   bool runBlockCallback(const int type, const std::string name, const Function::invoker_type function);
+  bool runBlockCallback(const int type, const std::string name, const Function2::invoker_type function);
   bool removeBlockCallback(const int type);
 
 private:

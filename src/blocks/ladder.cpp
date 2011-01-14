@@ -56,8 +56,26 @@ void BlockLadder::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32
   this->spawnBlockItem(x,y,z,block);
 }
 
-void BlockLadder::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockLadder::onNeighbourBroken(User* user, int8_t block,int8_t meta, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
+
+
+  //Ladder is not attached to top or bottom block
+  if(direction == BLOCK_TOP || direction == BLOCK_BOTTOM)
+  {
+    return;
+  }
+
+  if( (meta == 2 && direction == BLOCK_EAST) ||
+      (meta == 3 && direction == BLOCK_WEST) ||
+      (meta == 4 && direction == BLOCK_NORTH) ||
+      (meta == 5 && direction == BLOCK_SOUTH))
+  {
+    Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+    Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
+    Mineserver::get()->map()->createPickupSpawn(x, y, z, block, 1, 0, NULL);
+  }
+
 }
 
 void BlockLadder::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)

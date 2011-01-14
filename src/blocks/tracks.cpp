@@ -64,15 +64,10 @@ void BlockTracks::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32
   
 }
 
-void BlockTracks::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockTracks::onNeighbourBroken(User* user, int8_t block, int8_t meta, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-  uint8_t block;
-  uint8_t meta;
-  
-  if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
-    return;
 
-  if (this->isBlockEmpty(x, y-1, z))
+  if (direction == BLOCK_TOP)
   {
     // Break torch and spawn torch item
     Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
