@@ -8,7 +8,8 @@
 #include <stack>
 
 enum { MAX_TRUNK = 13, MIN_TRUNK = 4, MAX_CANOPY = 3, MIN_CANOPY = 2 ,
-       BRANCHING_HEIGHT= 6, BRANCHING_CHANCE = 7};// Lucky 7 for good branches ^^
+       BRANCHING_HEIGHT= 6, BRANCHING_CHANCE = 7,
+TREE_MIN_SPACE = 5 };// Lucky 7 for good branches ^^
 
 class ITree {
 public:

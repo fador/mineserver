@@ -235,7 +235,7 @@ void MapGen::AddTrees(int x, int z, uint16_t count)
   uint8_t block;
   uint8_t meta;
 
-  for(uint16_t i;i<count;i++)
+  for(uint16_t i = 0;i<count;i++)
   {
     blockX = fastrand()%16;
     blockZ = fastrand()%16;

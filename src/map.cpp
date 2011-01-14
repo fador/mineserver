@@ -155,7 +155,6 @@ void Map::addSapling(User* user, int x, int y, int z)
 
     saplings.push_back( sTree(x,y,z,mapTime,user->UID) );
 }
-#define TREE_MIN_SPACE 5 //this should be relocated to some constants header perhaps?
 void Map::checkGenTrees()
 {
     std::list<sTree>::iterator iter = saplings.begin();
