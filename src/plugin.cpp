@@ -166,7 +166,7 @@ void Plugin::init()
    call.reset();
    call.add("onBroken", Function::from_method<BlockLadder, &BlockLadder::onBroken>(ladderblock));
    call.add("onPlace", Function::from_method<BlockLadder, &BlockLadder::onPlace>(ladderblock));
-   call.add("onNeighbourBroken", Function::from_method<BlockTorch, &BlockTorch::onNeighbourBroken>(torchblock));
+   call.add("onNeighbourBroken", Function::from_method<BlockLadder, &BlockLadder::onNeighbourBroken>(ladderblock));
    setBlockCallback(BLOCK_LADDER, call);
 
    /* Plants */
