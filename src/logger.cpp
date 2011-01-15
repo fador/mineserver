@@ -38,16 +38,14 @@
 
 #include "logtype.h"
 
-// Log to terminal
 void Logger::log(const std::string& msg, const std::string& file, int line)
 {
-  Mineserver::get()->screen()->log(LogType::LOG_INFO, file, "[" + file + "@" + dtos(line) + "]: " + msg);
+  log(LogType::LOG_INFO, file, "[" + file + "@" + dtos(line) + "]: " + msg);
 }
 
 void Logger::log(LogType::LogType type, const std::string& source, const std::string& message)
 {
   (static_cast<Hook3<bool,int,const char*,const char*>*>(Mineserver::get()->plugin()->getHook("LogPost")))->doAll((int)type, source.c_str(), message.c_str());
-
-  // TODO The following should just addHook for LogPost
-  Mineserver::get()->screen()->log(type, source, message);
 }
+
+

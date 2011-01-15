@@ -506,10 +506,10 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
 #ifdef PRINT_LIGHTGEN_TIME
 #ifdef WIN32
     t_end = timeGetTime ();
-    Mineserver::get()->screen()->log("Lightgen: " + dtos(t_end-t_begin) + "ms");
+    Mineserver::get()->logger()->log("Lightgen: " + dtos(t_end-t_begin) + "ms");
 #else
     t_end = clock();
-    Mineserver::get()->screen()->log("Lightgen: " + dtos((t_end-t_begin)/(CLOCKS_PER_SEC/1000))) + "ms");
+    Mineserver::get()->logger()->log("Lightgen: " + dtos((t_end-t_begin)/(CLOCKS_PER_SEC/1000))) + "ms");
 #endif
 #endif
 
