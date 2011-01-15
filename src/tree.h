@@ -8,8 +8,8 @@
 #include <stack>
 
 enum { MAX_TRUNK = 13, MIN_TRUNK = 4, MAX_CANOPY = 3, MIN_CANOPY = 2 ,
-       BRANCHING_HEIGHT= 6, BRANCHING_CHANCE = 7,
-TREE_MIN_SPACE = 5 };// Lucky 7 for good branches ^^
+       BRANCHING_HEIGHT = 6, BRANCHING_CHANCE = 40,
+MIN_TREE_SPACE = 5 };// Lucky 7 for good branches ^^
 
 class ITree {
 public:
@@ -54,8 +54,6 @@ public:
   Tree(int32_t x, int32_t y, int32_t z,uint8_t limit = MAX_TRUNK);
   void generate(uint8_t);
   ~Tree(void);
-
-  char darkness; //For different tree types :)
 protected:
   void set(int32_t xloc, int32_t yloc, int32_t zloc, int blocktType, char metaData);
 private:
@@ -65,6 +63,7 @@ private:
                         // it is a good enough buffer for absolutely MASSIVE MASSIVE TREES
                         // Like in Avatar *_*
   uint8_t n_branches;
+
   void generateCanopy();
   void generateBranches(Trunk*);
 };

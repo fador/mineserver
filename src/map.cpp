@@ -175,16 +175,15 @@ void Map::checkGenTrees()
             getBlock(iter->x,iter->y+i,iter->z,&blocktype,&meta);
             if(blocktype == BLOCK_AIR){
                 i++;
-                goto nextblock;
+                if(i<MAX_TRUNK){
+                    goto nextblock;
+                }
             }
-            if(i>=TREE_MIN_SPACE){//If there is enough space
-                if(rand() % 50 == 0)
-                {
+            if(i>=MIN_TREE_SPACE){//If there is enough space
                     LOG(INFO, "Map", "Grow tree!");
 
                     Tree tree((*iter).x,(*iter).y,(*iter).z,i);
                     saplings.erase(iter++);  // alternatively, i = items.erase(i);
-                }
             }
             else{
                 goto increment;

@@ -18,7 +18,7 @@ Tree::~Tree(void)
 void Tree::generate(uint8_t limit)
 {
     n_branches=0;
-    darkness=1;
+    uint8_t darkness=1;
 
     srand((uint32_t)time(NULL));
 
@@ -47,8 +47,6 @@ void Tree::generate(uint8_t limit)
             Trunk* v = new Trunk(_x,_y+i,_z,darkness);
             if(i>BRANCHING_HEIGHT-1){
                 generateBranches(v);
-                m_Branch[n_branches]=v;
-                n_branches++;
             }else{
                 delete v;
             }
@@ -65,27 +63,28 @@ void Tree::generate(uint8_t limit)
 void Tree::generateBranches(Trunk* wrap){
     vec loc = wrap->location();
 
-    uint8_t posx = loc.x();
+    int32_t posx = loc.x();
     uint8_t posy = loc.y();
-    uint8_t posz = loc.z();
+    int32_t posz = loc.z();
 
+    uint8_t schanse = BRANCHING_CHANCE / (posy - _y);
     //Not much point to loop here
     //or make a function for the inside of the if.
-    if(rand() % BRANCHING_CHANCE == 0){
+    if(rand() % schanse == 0){
         Branch(posx+1,posy,posz);
     }
-    if(rand() % BRANCHING_CHANCE == 0){
+    if(rand() % schanse == 0){
         Branch(posx-1,posy,posz);
     }
-    if(rand() % BRANCHING_CHANCE == 0){
+    if(rand() % schanse == 0){
         Branch(posx,posy,posz+1);
     }
-    if(rand() % BRANCHING_CHANCE == 0 ){
+    if(rand() % schanse == 0 ){
         Branch(posx,posy,posz-1);
     }
-    if(rand() % BRANCHING_CHANCE == 0 ){
+    if(rand() % schanse == 0 ){
         Branch(posx,posy+1,posz)
-            }
+    }
 }
 
 void Tree::generateCanopy(){
@@ -98,13 +97,13 @@ void Tree::generateCanopy(){
     uint8_t canopy_darkness = 0;
     //Not much point making less code with a while/for loop
     //since compiled this is alot faster
-    if(rand() % 50 ==0){
+    if(rand() % 15 ==0){
         canopy_darkness++;
     }
-    if(rand() % 50 ==0){
+    if(rand() % 15 ==0){
         canopy_darkness++;
     }
-    if(rand() % 50 ==0){
+    if(rand() % 15 ==0){
         canopy_darkness++;
     }
     //I'm Not Proud of this looping.
@@ -120,7 +119,7 @@ void Tree::generateCanopy(){
         for(int8_t xi=(-canopySize);xi<=canopySize;xi++){
             for(int8_t yi=(-canopySize);yi<=canopySize;yi++){
                 for(int8_t zi=(-canopySize);zi<=canopySize;zi++){
-                    if(abs(xi)+abs(yi)+abs(zi) <= canopySize){
+                    if(sqrt(xi^2+yi^2+zi^2) <= canopySize){
                         int32_t temp_posx = posx+xi;
                         uint8_t temp_posy = posy+yi;
                         int32_t temp_posz = posz+zi;
