@@ -32,6 +32,8 @@
 #ifndef MINESERVER_C_API
   #define USE_HOOKS
 #endif
+#else
+#include <stdbool.h>
 #endif
 
 #ifdef USE_HOOKS
@@ -130,12 +132,12 @@ struct config_pointer_struct
 
 struct mineserver_pointer_struct
 {
-  map_pointer_struct map;
-  logger_pointer_struct logger;
-  chat_pointer_struct chat;
-  plugin_pointer_struct plugin;
-  user_pointer_struct user;
-  config_pointer_struct config;
+  struct map_pointer_struct map;
+  struct logger_pointer_struct logger;
+  struct chat_pointer_struct chat;
+  struct plugin_pointer_struct plugin;
+  struct user_pointer_struct user;
+  struct config_pointer_struct config;
 
   void *temp[100];
 };
