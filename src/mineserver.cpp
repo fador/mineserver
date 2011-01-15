@@ -137,6 +137,18 @@ void Mineserver::updatePlayerList()
   Mineserver::get()->screen()->updatePlayerList(users());
 }
 
+void Mineserver::saveAllPlayers()
+{
+  for(int i = users().size()-1; i >= 0; i--)
+  {
+    if(users()[i]->logged)
+    {
+      users()[i]->saveData();
+    }
+  }
+}
+
+
 int Mineserver::run(int argc, char *argv[])
 {
   uint32_t starttime = (uint32_t)time(0);
