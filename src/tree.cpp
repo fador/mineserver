@@ -82,6 +82,7 @@ void Tree::generate(uint8_t limit)
             if(i>BRANCHING_HEIGHT-1)
             {
                 generateBranches(v);
+            }
             else
             {
                 delete v;

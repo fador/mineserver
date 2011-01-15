@@ -173,16 +173,16 @@ void Map::addSapling(User* user, int x, int y, int z)
 
 void Map::checkGenTrees()
 {
-  std::list<sTree>::iterator iter = saplings.begin();
+    std::list<sTree>::iterator iter = saplings.begin();
 
-  static uint8_t light;
-  static uint8_t skylight;
+    static uint8_t light;
+    static uint8_t skylight;
 
-  static uint8_t blocktype;
-  static uint8_t meta;
+    static uint8_t blocktype;
+    static uint8_t meta;
 
-  while (iter != saplings.end())
-  {
+    while (iter != saplings.end())
+    {
         getLight(iter->x,iter->y+1,iter->z,&light,&skylight);
         if(light>9 || skylight >3){
             //Check above blocks
@@ -196,36 +196,22 @@ void Map::checkGenTrees()
                 }
             }
             if(i>=MIN_TREE_SPACE){//If there is enough space
-                    LOG(INFO, "Map", "Grow tree!");
+                LOG(INFO, "Map", "Grow tree!");
 
-                    Tree tree((*iter).x,(*iter).y,(*iter).z,i);
-                    saplings.erase(iter++);  // alternatively, i = items.erase(i);
+                Tree tree((*iter).x,(*iter).y,(*iter).z,i);
+                saplings.erase(iter++);  // alternatively, i = items.erase(i);
             }
             else{
                 goto increment;
 
+            }
         }
-      }
-      if(i >= TREE_MIN_SPACE)
-      {//If there is enough space
-        if(rand() % 50 == 0)
+        else
         {
-          LOG(INFO, "Map", "Grow tree!");
-
-          Tree tree((*iter).x,(*iter).y,(*iter).z,i);
-          saplings.erase(iter++);  // alternatively, i = items.erase(i);
+            increment:
+            iter++;
         }
-      }
-      else
-      {
-        iter++;
-      }
     }
-    else
-    {
-      iter++;
-    }
-  }
 }
 
 void Map::init()
