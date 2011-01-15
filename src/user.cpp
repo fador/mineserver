@@ -559,15 +559,20 @@ bool User::updatePos(double x, double y, double z, double stance)
         {
 
 
-          if(!withinViewDistance((mapx - chunkDiffX), newChunk->x) || !withinViewDistance((mapz - chunkDiffZ), newChunk->z))
-          {
-            addRemoveQueue(mapx-chunkDiffX, mapz-chunkDiffZ);
-          }
+          //Nasty hack ToDo: fix this for better?
+          //if(!withinViewDistance((mapx - chunkDiffX), newChunk->x) || !withinViewDistance((mapz - chunkDiffZ), newChunk->z))
+          //{
+          addRemoveQueue(mapx-chunkDiffX, mapz-chunkDiffZ);
+          //}
 
           //If this chunk wasn't in the view distance before
           //if(!withinViewDistance(chunkDiffX, oldChunk->x) || !withinViewDistance(chunkDiffZ, oldChunk->z))
           //{
+          
+          //This will remove the chunks from being removed if they were put to the remove queue.
           addQueue(mapx, mapz);
+          
+          
           //}
         }
       }
@@ -664,6 +669,7 @@ bool User::updatePos(double x, double y, double z, double stance)
         (*iter)->buffer.addToWrite(telePacket.getWrite(), telePacket.getWriteLen());
       }
     }
+
 
     if(newChunk->items.size())
     {
