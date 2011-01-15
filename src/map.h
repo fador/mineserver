@@ -152,8 +152,6 @@ public:
 
   bool sendPickupSpawn(spawnedItem item);
   void createPickupSpawn(int x, int y, int z, int type, int count,int health, User *user);
-
-  void setComplexEntity(User* user, int32_t x, int32_t y, int32_t z, NBT_Value* entity);
 };
 
 #endif
