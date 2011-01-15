@@ -559,11 +559,11 @@ bool User::updatePos(double x, double y, double z, double stance)
         {
 
 
-          //Nasty hack ToDo: fix this for better?
-          //if(!withinViewDistance((mapx - chunkDiffX), newChunk->x) || !withinViewDistance((mapz - chunkDiffZ), newChunk->z))
-          //{
-          addRemoveQueue(mapx-chunkDiffX, mapz-chunkDiffZ);
-          //}
+          
+          if(!withinViewDistance((mapx - chunkDiffX), newChunk->x) || !withinViewDistance((mapz - chunkDiffZ), newChunk->z))
+          {
+            addRemoveQueue(mapx-chunkDiffX, mapz-chunkDiffZ);
+          }
 
           //If this chunk wasn't in the view distance before
           //if(!withinViewDistance(chunkDiffX, oldChunk->x) || !withinViewDistance(chunkDiffZ, oldChunk->z))
