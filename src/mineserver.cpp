@@ -146,7 +146,7 @@ int Mineserver::run(int argc, char *argv[])
     init_plugin_api();
 #endif
   
-  plugin()->getHook("LogPost")->addCallback(log_to_screen);
+  plugin()->getHook("LogPost")->addCallback((void*)log_to_screen);
 
   // Init our Screen
   screen()->init(VERSION);

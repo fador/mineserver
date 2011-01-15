@@ -46,7 +46,7 @@ protected:
   bool isUserOnBlock(const int32_t x, const int8_t y, const int32_t z);
   bool translateDirection(int32_t *x, int8_t *y, int32_t *z, const int8_t direction);
   bool isBlockEmpty(const int32_t x, const int8_t y, const int32_t z);
-  bool spawnBlockItem(const int32_t x, const int8_t y, const int32_t z, const uint8_t block);
+  bool spawnBlockItem(const int32_t x, const int8_t y, const int32_t z, const uint8_t block, uint8_t meta=0);
   void notifyNeighbours(const int32_t x, const int8_t y, const int32_t z, const std::string callback, User* user, const uint8_t oldblock, const int8_t ignore_direction);
 };
 
