@@ -1,70 +1,176 @@
+/*
+   Copyright (c) 2010, The Mineserver Project
+   All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 #include "tree.h"
+#include "mineserver.h"
 
 #include "tools.h"
 
-Tree::Tree(int32_t x, int32_t y, int32_t z)
+#define Branch(x,y,z) Trunk* v = new Trunk(x,y,z);m_Branch[n_branches] = v;n_branches++;generateBranches(v);
+
+Tree::Tree(int32_t x, int32_t y, int32_t z, uint8_t limit)
 {
-  _x = x, _y = y, _z = z;
+    n_branches = 0;
+    _x = x, _y = y, _z = z;
+    this->generate(limit);
+
 }
 
 
 Tree::~Tree(void)
 {
 }
-
-
-void Tree::set(int32_t xloc, int32_t yloc, int32_t zloc, int blockType, char metaData)
+void Tree::generate(uint8_t limit)
 {
-  _x = xloc, _y = yloc, _z = zloc, _type = blockType, _meta = metaData;
-}
+    darkness=1;
 
-void Tree::generate()
-{
-  srand((uint32_t)time(NULL));
-  generateTrunk();
-  //Generate the branch section.
-  //Branch branch(_x,_y,_z);
-  //m_Branches.push_back(branch);
-  generateCanopy();
-  //Place these in the treeBlocks list.
-  
-  m_treeBlocks.push(m_Canopy);
-  m_treeBlocks.push(m_Trunk);
-  
-  //m_treeBlocks.push_back(m_Branches);
-  while(!m_treeBlocks.empty())
-  {
-    std::stack<ITree> section = m_treeBlocks.top();
-    while(!section.empty())
+    srand((uint32_t)time(NULL));
+
+    uint8_t m_trunkHeight = getRandInt(MIN_TRUNK,limit);
+
+    bool smalltree=false;
+
+    //in this implementation we generate the trunk and as we do we call branching and canopy
+    if(m_trunkHeight<BRANCHING_HEIGHT)
     {
-      section.top().update();
-      section.pop();
+        smalltree=true;
+        darkness=0;
     }
-    m_treeBlocks.pop();
-  }
+    uint8_t th=m_trunkHeight-1;
+    uint8_t i;
+    for(i = 0; i < th; i++)
+    {
+        if(smalltree)
+        {
+            Trunk* v = new Trunk(_x,_y+i,_z,darkness);
+            if(i>=MIN_TRUNK-1){
+                m_Branch[n_branches]= v;
+                n_branches++;
+            }
+            else
+            {
+                delete v;
+            }
+        }
+        else
+        {
+            Trunk* v = new Trunk(_x,_y+i,_z,darkness);
+            if(i>BRANCHING_HEIGHT-1)
+            {
+                generateBranches(v);
+                m_Branch[n_branches]=v;
+                n_branches++;
+            }
+            else
+            {
+                delete v;
+            }
+        }
+    }
+    Trunk* v = new Trunk(_x,_y+i,_z,darkness);
+    m_Branch[n_branches]= v;
+    n_branches++;
+    generateBranches(v);
+    generateCanopy();
+}
+//I STRONGLY RECOMMEND TO USE Trunk Rather than a new unneeded class
+//maybe just a class Wood?
+void Tree::generateBranches(Trunk* wrap)
+{
+    vec loc = wrap->location();
+
+    int32_t posx = loc.x();
+    int32_t posy = loc.y();
+    int32_t posz = loc.z();
+
+    //Not much point to loop here
+    //or make a function for the inside of the if.
+    if(rand() % BRANCHING_CHANCE == 0){
+        Branch(posx+1,posy,posz);
+    }
+    if(rand() % BRANCHING_CHANCE == 0){
+        Branch(posx-1,posy,posz);
+    }
+    if(rand() % BRANCHING_CHANCE == 0){
+        Branch(posx,posy,posz+1);
+    }
+    if(rand() % BRANCHING_CHANCE == 0 ){
+        Branch(posx,posy,posz-1);
+    }
+    if(rand() % BRANCHING_CHANCE == 0 ){
+        Branch(posx,posy+1,posz)
+    }
 }
 
-void Tree::generateTrunk()
-{
-  //Generate the trunk section.
-  m_trunkHeight = getRandInt(MIN_TRUNK,MAX_TRUNK);
-  for(int i = 0; i < m_trunkHeight; i++)
-  {
-    Trunk trunk(_x,_y+i,_z);
-    m_Trunk.push(trunk);
-  }
-  assert(m_Trunk.size() >= MIN_TRUNK && m_Trunk.size() <= MAX_TRUNK);
-}
+void Tree::generateCanopy(){
+    uint8_t blocktype;
+    uint8_t meta;
+    uint8_t canopySize;
+    vec loc;
 
-void Tree::generateCanopy()
-{
-  //Generate the canopy section.
-  m_canopyHeight = getRandInt(MIN_CANOPY,MAX_CANOPY);
-  for(int i = 0; i < m_canopyHeight; i++)
-  {
-    Canopy canopy(m_Trunk.top());
-    canopy.setY(canopy.getY()+1 + i);
-    m_Canopy.push(canopy);
-  }
-  assert(m_Canopy.size() >= MIN_CANOPY && m_Canopy.size() <= MAX_CANOPY);
+
+    char canopy_darkness = 0;
+    //Not much point making less code with a while/for loop
+    //since compiled this is alot faster
+    if(rand() % 50 ==0){
+        canopy_darkness++;
+    }
+    if(rand() % 50 ==0){
+        canopy_darkness++;
+    }
+    if(rand() % 50 ==0){
+        canopy_darkness++;
+    }
+    //I'm Not Proud of this looping.
+    for(uint8_t i=0;i<n_branches;i++){
+        canopySize = getRandInt(MIN_CANOPY,MAX_CANOPY);
+        loc = m_Branch[i]->location();
+        delete m_Branch[i];
+
+        int32_t posx = loc.x();
+        int32_t posy = loc.y();
+        int32_t posz = loc.z();
+
+        for(int8_t xi=(-canopySize);xi<=canopySize;xi++){
+            for(int8_t yi=(-canopySize);yi<=canopySize;yi++){
+                for(int8_t zi=(-canopySize);zi<=canopySize;zi++){
+                    if(abs(xi)+abs(yi)+abs(zi) <= canopySize){
+                        int32_t temp_posx = posx+xi;
+                        int32_t temp_posy = posy+yi;
+                        int32_t temp_posz = posz+zi;
+                        if(Mineserver::get()->map()->getBlock(temp_posx,temp_posy,temp_posz,&blocktype,&meta, false))
+                        {
+                          if(blocktype== BLOCK_AIR){
+                              Canopy u = Canopy(temp_posx,temp_posy,temp_posz,canopy_darkness);
+                          }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

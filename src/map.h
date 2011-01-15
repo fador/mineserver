@@ -47,54 +47,6 @@ struct sTree
   sTree(int32_t _x,int32_t _y, int32_t _z, int64_t _plantedTime, uint32_t _plantedBy) :
     x(_x),y(_y),z(_z),
     plantedTime(_plantedTime),plantedBy(_plantedBy) {}
-
-};
-
-//Basic chest data struct
-struct chestData
-{
-  int32_t x;
-  int32_t y;
-  int32_t z;
-  Item items[27];
-};
-
-struct signData
-{
-  int32_t x;
-  int32_t y;
-  int32_t z;
-  std::string text1;
-  std::string text2;
-  std::string text3;
-  std::string text4;
-};
-
-struct furnaceData
-{
-  int32_t x;
-  int32_t y;
-  int32_t z;
-  Item items[3];
-  int16_t burnTime;
-  int16_t cookTime;
-};
-
-struct spawnedItem
-{
-  int EID;
-  int16_t item;
-  char count;
-  int16_t health;
-  vec pos;
-  time_t spawnedAt;
-  uint32_t spawnedBy;
-
-  spawnedItem()
-  {
-    spawnedAt = time(0);
-    spawnedBy = 0;
-  }
 };
 
 class Map

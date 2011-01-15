@@ -31,6 +31,7 @@
 #include <map>
 #include <string>
 #include <stdint.h>
+#include <iostream>
 
 //
 // Mineserver constants
@@ -166,20 +167,21 @@ struct Drop
   uint16_t item_id;
   uint32_t probability;
   uint8_t count;
-  bool exclusive;
+  Drop* alt_drop;
 
-  Drop() {}
+  Drop() : item_id(0),probability(0),count(0),alt_drop(NULL) {}
+  Drop(uint16_t _item_id, uint32_t _probability, uint8_t _count, Drop* _alt_drop=NULL) : item_id(_item_id),probability(_probability),count(_count),alt_drop(_alt_drop) {}
 
-  Drop(uint16_t item_id, uint32_t probability, uint8_t count, bool exclusive)
+  ~Drop()
   {
-    this->item_id     = item_id;
-    this->probability = probability;
-    this->count       = count;
-    this->exclusive   = exclusive;
+    if (alt_drop != NULL)
+    {
+      delete alt_drop;
+    }
   }
 };
 
-extern std::map<uint8_t, Drop> BLOCKDROPS;
+extern std::map<uint8_t, Drop*> BLOCKDROPS;
 
 // Chat prefixes
 const char SERVERMSGPREFIX = '%';
@@ -189,6 +191,7 @@ const char ADMINCHATPREFIX = '&';
 const unsigned int SERVER_CONSOLE_UID = -1;
 
 void initConstants();
+void freeConstants();
 
 const int ALLOCATE_NBTFILE = 200000;
 

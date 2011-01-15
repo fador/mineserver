@@ -473,6 +473,8 @@ int Mineserver::run(int argc, char *argv[])
   delete m_mapGen;
   delete m_logger;
 
+  freeConstants();
+
   return EXIT_SUCCESS;
 }
 
