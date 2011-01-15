@@ -32,6 +32,8 @@
 #include <map>
 #include <list>
 
+#include <stdint.h>
+
 #define CONFIG_NODE_UNDEFINED 0
 #define CONFIG_NODE_LIST 1
 #define CONFIG_NODE_BOOLEAN 2
@@ -45,13 +47,13 @@ public:
   ~ConfigNode();
   bool bData() const;
   int iData() const;
-  long lData() const;
+  int64_t lData() const;
   float fData() const;
   double dData() const;
   std::string sData() const;
   void setData(bool data);
   void setData(int data);
-  void setData(long data);
+  void setData(int64_t data);
   void setData(float data);
   void setData(double data);
   void setData(const std::string& data);

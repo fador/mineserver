@@ -31,6 +31,8 @@
 #include <string>
 #include <list>
 
+#include <stdint.h>
+
 #include "config/node.h"
 
 class ConfigParser;
@@ -47,7 +49,7 @@ public:
   ConfigNode* root();
 
   int iData(const std::string& name);
-  long lData(const std::string& name);
+  int64_t lData(const std::string& name);
   float fData(const std::string& name);
   double dData(const std::string& name);
   std::string sData(const std::string& name);

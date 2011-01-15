@@ -78,7 +78,7 @@ int Config::iData(const std::string& key)
   return 0;
 }
 
-long Config::lData(const std::string& key)
+int64_t Config::lData(const std::string& key)
 {
   if (m_root->has(key))  
   {
