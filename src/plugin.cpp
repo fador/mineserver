@@ -239,7 +239,7 @@ void Plugin::init()
   
    /* Chests */
    call.reset();
-   call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
+   call.add("onBroken", Function::from_method<BlockChest, &BlockChest::onBroken>(chestblock));
    call.add("onPlace", Function::from_method<BlockChest, &BlockChest::onPlace>(chestblock));
    call.add("onStartedDigging", Function::from_method<BlockChest, &BlockChest::onStartedDigging>(chestblock));
    call.add("onReplace", Function::from_method<BlockChest, &BlockChest::onReplace>(chestblock));
