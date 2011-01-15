@@ -376,6 +376,9 @@ int Mineserver::run(int argc, char *argv[])
         User::all()[0]->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
       }
 
+      //Check for tree generation from saplings
+      map()->checkGenTrees();
+
       // TODO: Run garbage collection for chunk storage dealie?
 
       // Run 10s timer hook
@@ -421,7 +424,6 @@ int Mineserver::run(int argc, char *argv[])
         map()->mapTime = 0;
       }
 
-      map()->checkGenTrees();
 
       // Check for Furnace activity
       Mineserver::get()->furnaceManager()->update();
