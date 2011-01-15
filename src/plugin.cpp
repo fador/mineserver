@@ -296,9 +296,11 @@ void Plugin::free()
 bool Plugin::loadPlugin(const std::string name, const std::string file)
 {
   LIBRARY_HANDLE lhandle = NULL;
-  std::string lib_name = std::string("");
-  bool pass_name = false;
-  std::string load_name = name;
+#ifdef FADOR_PLUGIN
+  void (*fhandle)(mineserver_pointer_struct*) = NULL;
+#else
+  void (*fhandle)(Mineserver*) = NULL;
+#endif
 
   if (!file.empty())
   {
@@ -308,7 +310,7 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
     int statr = stat(file.c_str(), &st);
     if ((statr == 0) && !(st.st_mode & S_IFDIR))
     {
-      lib_name = file;
+      lhandle = LIBRARY_LOAD(file.c_str());
     }
     else
     {
@@ -317,60 +319,40 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
       statr = stat((file+LIBRARY_EXTENSION).c_str(), &st);
       if ((statr == 0) && !(st.st_mode & S_IFDIR))
       {
-        lib_name = file+LIBRARY_EXTENSION;
+        lhandle = LIBRARY_LOAD((file+LIBRARY_EXTENSION).c_str());
       }
       else
       {
-        LOG(INFO, "Plugin", "Could not find `"+file+"'!");
+        LOG(INFO, "Plugin", "Could not find `"+file+LIBRARY_EXTENSION+"'!");
         return false;
       }
     }
-    size_t isPy = file.rfind(std::string(".py"));
-    if(isPy!=std::string::npos){
-      // Extension of py means python ... we hope ;)
-      std::string plugin_name = std::string("./PyScript");
-      lib_name=plugin_name+LIBRARY_EXTENSION;
-      load_name=std::string("PyScript");
-      pass_name=true;
-    }
+
   }
   else
   {
     LOG(INFO, "Plugin", "Loading plugin `"+name+"' (built in)...");
     lhandle = LIBRARY_SELF();
   }
-  if (lib_name.compare("")!=0)
-  {
-    lhandle = LIBRARY_LOAD(lib_name.c_str());
-  }else{
-    LOG(INFO, "Plugin", "Could not find lib `"+lib_name+"'!");
-    return false;
-  }
 
   if (lhandle == NULL)
   {
-    LOG(INFO, "Plugin", "Could not load plugin `"+load_name+"'!");
+    LOG(INFO, "Plugin", "Could not load plugin `"+name+"'!");
     LOG(INFO, "Plugin", LIBRARY_ERROR());
     return false;
   }
 
   m_libraryHandles[name] = lhandle;
-#ifdef FADOR_PLUGIN
-  void (*fhandle)(mineserver_pointer_struct*) = NULL;
-#else
-  void (*fhandle)(Mineserver*) = NULL;
-#endif
-
 
 #ifdef FADOR_PLUGIN
-  fhandle = (void (*)(mineserver_pointer_struct*)) LIBRARY_SYMBOL(lhandle, (load_name+"_init").c_str());
+  fhandle = (void (*)(mineserver_pointer_struct*)) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
 #else
-  fhandle = (void (*)(Mineserver*)) LIBRARY_SYMBOL(lhandle, (load_name+"_init").c_str());
+  fhandle = (void (*)(Mineserver*)) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
 #endif
   if (fhandle == NULL)
   {
     LOG(INFO, "Plugin", "Could not get init function handle!");
-    unloadPlugin(load_name);
+    unloadPlugin(name);
     return false;
   }
 #ifdef FADOR_PLUGIN  
@@ -378,14 +360,6 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
 #else
   fhandle(Mineserver::get());
 #endif
-  if (pass_name){
-    void (*fhandle_name)(const char*)=NULL;
-    fhandle_name = (void(*)(const char*)) LIBRARY_SYMBOL(lhandle, "set_name");
-    if(fhandle_name != NULL){
-      fhandle_name(file.c_str());
-    }
-    // No else clause, silently assume it doesnt care otherwise
-  }
 
   return true;
 }

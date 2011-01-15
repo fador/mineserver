@@ -478,4 +478,3 @@ void init_plugin_api(void)
 
 
 }
-

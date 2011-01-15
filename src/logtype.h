@@ -37,18 +37,6 @@ namespace LogType
 {
   enum LogType
   {
-<<<<<<< HEAD
-    LOG_EMERG,    /** 0 :system is unusable */
-    LOG_ALERT,    /** 1 :action must be taken immediately*/ 
-    LOG_CRITICAL, /** 2 :critical conditions */
-    LOG_ERROR,    /** 3 :error conditions */
-    LOG_WARNING,  /** 4 :warning conditions */
-    LOG_NOTICE,   /** 5 :normal, but significant, condition */
-    LOG_INFO,     /** 6 :informational message */
-#ifdef _DEBUG
-    LOG_DEBUG,    /** 7 :debug-level message */
-#endif
-=======
     LOG_EMERG,    /** system is unusable */
     LOG_ALERT,    /** action must be taken immediately*/ 
     LOG_CRITICAL, /** critical conditions */
@@ -57,7 +45,6 @@ namespace LogType
     LOG_NOTICE,   /** normal, but significant, condition */
     LOG_INFO,     /** informational message */
     LOG_DEBUG,    /** debug-level message */
->>>>>>> upstream/master
   };
 };
 

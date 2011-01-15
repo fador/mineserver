@@ -145,5 +145,5 @@ struct mineserver_pointer_struct
 void init_plugin_api(void);
 extern mineserver_pointer_struct plugin_api_pointers;
 #endif
-#endif
 
+#endif
