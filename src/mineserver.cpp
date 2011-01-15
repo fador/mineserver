@@ -70,7 +70,6 @@
 #include "cursesScreen.h"
 #include "cliScreen.h"
 #include "hook.h"
-
 #ifdef WIN32
 static bool quit = false;
 #endif
@@ -107,6 +106,11 @@ int main(int argc, char* argv[])
   return Mineserver::get()->run(argc, argv);
 }
 
+void log_to_screen(int type, const char* source, const char* message)
+{
+  Mineserver::get()->screen()->log((LogType::LogType)type, std::string(source), std::string(message));
+}
+
 Mineserver::Mineserver()
 {
   m_map            = new Map;
@@ -141,10 +145,12 @@ int Mineserver::run(int argc, char *argv[])
 #ifdef FADOR_PLUGIN
     init_plugin_api();
 #endif
+  
+  plugin()->getHook("LogPost")->addCallback(log_to_screen);
 
   // Init our Screen
   screen()->init(VERSION);
-  screen()->log(LogType::LOG_INFO, "Mineserver", "Welcome to Mineserver v" + VERSION);
+  logger()->log(LogType::LOG_INFO, "Mineserver", "Welcome to Mineserver v" + VERSION);
   updatePlayerList();
 
   initConstants();
@@ -169,7 +175,7 @@ int Mineserver::run(int argc, char *argv[])
     //      up to this point when using curses
     m_screen = new CursesScreen;
     screen()->init(VERSION);
-    screen()->log(LogType::LOG_INFO, "Mineserver", "Interface changed to curses");
+    logger()->log(LogType::LOG_INFO, "Mineserver", "Interface changed to curses");
     updatePlayerList();
   }
 
@@ -204,7 +210,7 @@ int Mineserver::run(int argc, char *argv[])
 
   if (Mineserver::get()->config()->bData("map.generate_spawn.enabled"))
   {
-    screen()->log(LogType::LOG_INFO, "Mapgen", "Generating spawn area...");
+    logger()->log(LogType::LOG_INFO, "Mapgen", "Generating spawn area...");
     int size = Mineserver::get()->config()->iData("map.generate_spawn.size");
     bool show_progress = Mineserver::get()->config()->bData("map.generate_spawn.show_progress");
 #ifdef WIN32
@@ -235,10 +241,10 @@ int Mineserver::run(int argc, char *argv[])
       {
 #ifdef WIN32
         t_end = timeGetTime ();
-        screen()->log(LogType::LOG_INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos((t_end-t_begin)/(size*2+1)) + "ms per chunk");
+        logger()->log(LogType::LOG_INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos((t_end-t_begin)/(size*2+1)) + "ms per chunk");
 #else
         t_end = clock();
-        screen()->log(LogType::LOG_INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos(((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1)) + "ms per chunk");
+        logger()->log(LogType::LOG_INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos(((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1)) + "ms per chunk");
 #endif
       }
     }
@@ -376,6 +382,9 @@ int Mineserver::run(int argc, char *argv[])
         User::all()[0]->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
       }
 
+      //Check for tree generation from saplings
+      map()->checkGenTrees();
+
       // TODO: Run garbage collection for chunk storage dealie?
 
       // Run 10s timer hook
@@ -421,7 +430,6 @@ int Mineserver::run(int argc, char *argv[])
         map()->mapTime = 0;
       }
 
-      map()->checkGenTrees();
 
       // Check for Furnace activity
       Mineserver::get()->furnaceManager()->update();

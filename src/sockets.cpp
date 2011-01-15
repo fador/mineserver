@@ -85,6 +85,7 @@ void client_callback(int fd,
       Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket closed properly");
 
       delete user;
+      delete[] buf;
       return;
     }
 
@@ -93,6 +94,7 @@ void client_callback(int fd,
       Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket had no data to read");
 
       delete user;
+      delete[] buf;
       return;
     }
 

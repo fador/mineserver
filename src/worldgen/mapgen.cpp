@@ -332,10 +332,10 @@ void MapGen::generateWithNoise(int x, int z)
 #ifdef PRINT_MAPGEN_TIME
 #ifdef WIN32
   t_end = timeGetTime ();
-  Mineserver::get()->screen()->log("Mapgen: " + dtos(t_end-t_begin) + "ms");
+  Mineserver::get()->logger()->log("Mapgen: " + dtos(t_end-t_begin) + "ms");
 #else
   gettimeofday(&end, NULL);
-  Mineserver::get()->screen()->log("Mapgen: " + dtos(end.tv_usec - start.tv_usec));
+  Mineserver::get()->logger()->log("Mapgen: " + dtos(end.tv_usec - start.tv_usec));
 #endif
 #endif
 }
