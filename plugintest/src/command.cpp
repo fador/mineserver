@@ -220,20 +220,31 @@ void giveItems(std::string userIn, std::string command, std::deque<std::string> 
     // Check item validity
     if (isValidItem(itemId))
     {
-      int itemCount = 1, itemStacks = 1;
-      if (args.size() == 3)
+      double x,y,z;
+      if (mineserver->user.getPosition(user.c_str(),&x,&y,&z,NULL,NULL,NULL))
       {
-        itemCount = atoi(args[2].c_str());
-        if (itemCount>1024) itemCount=1024;
-        // If multiple stacks
-        itemStacks = itemCount / 64;
-        itemCount  = itemCount % 64;
-      }
+        int itemCount = 1, itemStacks = 1;
 
-      mineserver->user.giveItem(userIn.c_str(),itemId,itemCount,0);
-      for (int i = 0; i < itemStacks; i++)
-      {
-        mineserver->user.giveItem(userIn.c_str(),itemId,64,0);
+        if (args.size() == 3)
+        {
+          itemCount = atoi(args[2].c_str());
+          if (itemCount>1024) itemCount=1024;
+          // If multiple stacks
+          itemStacks = roundUpTo(itemCount, 64) / 64;
+          itemCount  -= (itemStacks-1) * 64;
+        }
+
+        int amount = 64;
+        for (int i = 0; i < itemStacks; i++)
+        {
+          // if last stack
+          if (i == itemStacks - 1)
+          {
+            amount = itemCount;
+          }
+
+          mineserver->map.createPickupSpawn((int)x,(int)y,(int)z,itemId,amount,0,user.c_str());
+        }
       }
 
     }
@@ -266,25 +277,34 @@ void giveItemsSelf(std::string user, std::string command, std::deque<std::string
     // Check item validity
     if (isValidItem(itemId))
     {
-      int itemCount = 1, itemStacks = 1;
-      if (args.size() == 3)
+      double x,y,z;
+      if (mineserver->user.getPosition(user.c_str(),&x,&y,&z,NULL,NULL,NULL))
       {
-        itemCount = atoi(args[2].c_str());
-        if (itemCount>1024) itemCount=1024;
-        // If multiple stacks
-        itemStacks = itemCount / 64;
-        itemCount  = itemCount % 64;
-      }
+        int itemCount = 1, itemStacks = 1;
 
-      mineserver->user.giveItem(user.c_str(),itemId,itemCount,0);
+        if (args.size() == 2)
+        {
+          itemCount = atoi(args[1].c_str());
+          if(itemCount>1024) itemCount=1024;
+          // If multiple stacks
+          itemStacks = roundUpTo(itemCount, 64) / 64;
+          itemCount  -= (itemStacks-1) * 64;
+        }
 
-      for (int i = 0; i < itemStacks; i++)
-      {
-        mineserver->user.giveItem(user.c_str(),itemId,64,0);
+        int amount = 64;
+        for (int i = 0; i < itemStacks; i++)
+        {
+          // if last stack
+          if (i == itemStacks - 1)
+          {
+            amount = itemCount;
+          }
+
+          mineserver->map.createPickupSpawn((int)x,(int)y,(int)z,itemId,amount,0,user.c_str());
+        }
       }
 
     }
-
     else
     {
       mineserver->chat.sendmsgTo(user.c_str(),"Not a valid item");      
