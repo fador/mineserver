@@ -763,21 +763,23 @@ bool Inventory::addItems(User *user,int16_t itemID, char count, int16_t health)
     //If same item type
     if(slot->type == itemID)
     {
-      //Put to the stack
-      if(64-slot->count >= count)
-      {
-        user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)0 << (int16_t)(i+9) << (int16_t)itemID << (int8_t)(slot->count+count) << (int16_t)health;
-        slot->type   = itemID;
-        slot->count += count;
-        break;
-      }
+      if(slot->health == health){
+        //Put to the stack
+        if(64-slot->count >= count)
+        {
+          user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)0 << (int16_t)(i+9) << (int16_t)itemID << (int8_t)(slot->count+count) << (int16_t)health;
+          slot->type   = itemID;
+          slot->count += count;
+          break;
+        }
       //Put some of the items to this stack and continue searching for space
-      else if(64-slot->count > 0)
-      {
-        user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)0 << (int16_t)(i+9) << (int16_t)itemID << (int8_t)64 << (int16_t)health;
-        slot->type = itemID;
-        slot->count = 64;
-        count -= 64-slot->count;
+        else if(64-slot->count > 0)
+        {
+          user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)0 << (int16_t)(i+9) << (int16_t)itemID << (int8_t)64 << (int16_t)health;
+          slot->type = itemID;
+          slot->count = 64;
+          count -= 64-slot->count;
+        }
       }
     }
   }

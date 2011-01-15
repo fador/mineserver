@@ -331,50 +331,60 @@ sChunk* Map::getMapData(int x, int z, bool generate)
 
 bool Map::saveWholeMap()
 {
-
-    for(std::map<uint32_t, sChunk>::const_iterator it = maps.begin(); it != maps.end(); ++it)
+    
+  //Save all player data
+  for(uint32_t i = 0; i < Mineserver::get()->users().size(); i++)
+  {
+    if(Mineserver::get()->users()[i]->logged)
     {
-        saveMap(maps[it->first].x, maps[it->first].z);
+      Mineserver::get()->users()[i]->saveData();
     }
+  }
 
-    /////////////////////
-    // Save map details
 
-    std::string infile = mapDirectory+"/level.dat";
+  for(std::map<uint32_t, sChunk>::const_iterator it = maps.begin(); it != maps.end(); ++it)
+  {
+      saveMap(maps[it->first].x, maps[it->first].z);
+  }
 
-    NBT_Value* root = NBT_Value::LoadFromFile(infile);
-    if(root != NULL)
+  /////////////////////
+  // Save map details
+
+  std::string infile = mapDirectory+"/level.dat";
+
+  NBT_Value* root = NBT_Value::LoadFromFile(infile);
+  if(root != NULL)
+  {
+    NBT_Value& data = *((*root)["Data"]);
+
+    //Get time from the map
+    *data["Time"] = mapTime;
+    NBT_Value* trees = ((*root)["Trees"]);
+
+    if(trees)
     {
-        NBT_Value& data = *((*root)["Data"]);
+      std::vector<NBT_Value*>* tree_vec = trees->GetList();
 
-        //Get time from the map
-        *data["Time"] = mapTime;
-        NBT_Value* trees = ((*root)["Trees"]);
+      tree_vec->clear();
 
-        if(trees)
-        {
-            std::vector<NBT_Value*>* tree_vec = trees->GetList();
-
-            tree_vec->clear();
-
-            for(std::list<sTree>::iterator iter = saplings.begin(); iter != saplings.end(); ++iter)
-            {
-                //(*trees)[i] = (*iter)
-                NBT_Value* tree = new NBT_Value(NBT_Value::TAG_COMPOUND);
-                tree->Insert("X", new NBT_Value( (int32_t)(*iter).x));
-                tree->Insert("Y", new NBT_Value( (int32_t)(*iter).y));
-                tree->Insert("Z", new NBT_Value( (int32_t)(*iter).z));
-                tree->Insert("plantedTime", new NBT_Value( (int32_t)(*iter).plantedTime));
-                tree->Insert("plantedBy", new NBT_Value( (int32_t)(*iter).plantedBy));
-                tree_vec->push_back(tree);
-            }
-        }
-        root->SaveToFile(infile);
-
-        delete root;
+      for(std::list<sTree>::iterator iter = saplings.begin(); iter != saplings.end(); ++iter)
+      {
+        //(*trees)[i] = (*iter)
+        NBT_Value* tree = new NBT_Value(NBT_Value::TAG_COMPOUND);
+        tree->Insert("X", new NBT_Value( (int32_t)(*iter).x));
+        tree->Insert("Y", new NBT_Value( (int32_t)(*iter).y));
+        tree->Insert("Z", new NBT_Value( (int32_t)(*iter).z));
+        tree->Insert("plantedTime", new NBT_Value( (int32_t)(*iter).plantedTime));
+        tree->Insert("plantedBy", new NBT_Value( (int32_t)(*iter).plantedBy));
+        tree_vec->push_back(tree);
+      }
     }
+    root->SaveToFile(infile);
 
-    return true;
+    delete root;
+  }
+
+  return true;
 }
 
 bool Map::generateLight(int x, int z)

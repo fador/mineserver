@@ -114,10 +114,12 @@ void Plugin::init()
    setBlockCallback(BLOCK_BLACK_CLOTH, call);
    setBlockCallback(BLOCK_GRAY_CLOTH, call);
    */
-   setBlockCallback(BLOCK_WHITE_CLOTH, call);
+   setBlockCallback(BLOCK_GRAY_CLOTH, call);
    /* metals */
    setBlockCallback(BLOCK_GOLD_BLOCK, call);
    setBlockCallback(BLOCK_IRON_BLOCK, call);
+   setBlockCallback(BLOCK_LAPIS_BLOCK, call);
+   setBlockCallback(BLOCK_SANDSTONE,call);
    
    setBlockCallback(BLOCK_DOUBLE_STEP, call);
    setBlockCallback(BLOCK_STEP, call);
@@ -137,9 +139,12 @@ void Plugin::init()
    setBlockCallback(BLOCK_GOLD_ORE, call);
    setBlockCallback(BLOCK_IRON_ORE, call);
    setBlockCallback(BLOCK_COAL_ORE, call);
+   setBlockCallback(BLOCK_LAPIS_ORE, call);
    setBlockCallback(BLOCK_DIAMOND_ORE, call);
    setBlockCallback(BLOCK_GLOWING_REDSTONE_ORE, call);
    setBlockCallback(BLOCK_REDSTONE_ORE, call);
+   setBlockCallback(BLOCK_DISPENSER,call);
+   setBlockCallback(BLOCK_NOTE_BLOCK,call);
 
    /* Falling blocks (sand, etc) */
    call.reset();

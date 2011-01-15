@@ -25,29 +25,86 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef _BLOCKS_BASIC_H
-#define _BLOCKS_BASIC_H
 
-#include <stdint.h>
+#include <iostream>
+#include <stdlib.h>
+#include <math.h>
+#include <vector>
 #include <string>
+#include <errno.h>
+#include <iostream>
+#include <dirent.h>
+#include <sys/types.h>
 
-#include "../constants.h"
+#ifndef PyWrapper
+#define PyWrapper
 
-class User;
+#include "../../plugin_api.h"
 
-/**
- * BlockBasic can be used to extend your own block classes. It contains useful
- * methods for reuse in your own block extensions.
- */
-class BlockBasic
+class PyLoc
 {
-protected:
-  bool isBlockStackable(const uint8_t block);
-  bool isUserOnBlock(const int32_t x, const int8_t y, const int32_t z);
-  bool translateDirection(int32_t *x, int8_t *y, int32_t *z, const int8_t direction);
-  bool isBlockEmpty(const int32_t x, const int8_t y, const int32_t z);
-  bool spawnBlockItem(const int32_t x, const int8_t y, const int32_t z, const uint8_t block, uint8_t meta=0);
-  void notifyNeighbours(const int32_t x, const int8_t y, const int32_t z, const std::string callback, User* user, const uint8_t oldblock, const int8_t ignore_direction);
+public:
+  double x,y,z,rot,pit;
 };
+
+class PyBlock
+{
+public:
+  int x,y,z,type,meta;
+  int get_type();
+  void set_type(int new_type);
+  int get_meta();
+  void set_meta(int new_meta);
+};
+
+class PyUser
+{
+public:
+  const char* name;
+  PyLoc* location;
+  void teleport(PyLoc new_location);
+  void set_health(int health);
+};
+
+class PyChat
+{
+public:
+  void send_message_to(const char* user, const char* message);
+  void send_message(const char* message);
+};
+
+class PymyMap
+{
+public:
+  void save();
+  void create_item(int x, int y, int z, int type, int count, int health, std::string user);
+  bool set_time(int timeValue);
+  PyLoc* get_spawn();
+  PyBlock* get_block(int x, int y, int z);
+};
+
+class PyScreen
+{
+public:
+  void log(const char* message);
+};
+
+class PyMineserver
+{
+public:
+ PymyMap map;
+ PyScreen screen;
+ PyChat chat;
+ void setMineServer(mineserver_pointer_struct* MS);
+ PyUser* get_user(const char* player_name);
+};
+
+mineserver_pointer_struct* magical();
+
+
+
+PyMineserver* get_MS();
+#ifndef SWIG
+#endif
 
 #endif
