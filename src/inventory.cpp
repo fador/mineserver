@@ -164,8 +164,6 @@ bool Inventory::readRecipe(std::string recipeFile)
     // Begin recipe
     if(line.size() == 1 && line[0] == "<-")
     {
-      //Mineserver::get()->screen()->log("<-");
-
       readingRecipe = true;
       continue;
     }
@@ -173,7 +171,6 @@ bool Inventory::readRecipe(std::string recipeFile)
     if(line.size() == 1 && line[0] == "->")
     {
       readingRecipe = false;
-      //Mineserver::get()->screen()->log("->");
       continue;
     }
 
@@ -181,7 +178,6 @@ bool Inventory::readRecipe(std::string recipeFile)
     {
       for(unsigned int i = 0; i < line.size(); i++)
       {
-        //Mineserver::get()->screen()->log(dtos(atoi(line[i].c_str())));
         recipetable.push_back(atoi(line[i].c_str()));
       }
       continue;
@@ -229,7 +225,7 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
   //Ack
   user->buffer << (int8_t)PACKET_TRANSACTION << (int8_t)windowID << (int16_t)actionNumber << (int8_t)1;
 
-  //Mineserver::get()->screen()->log(1,"window: " + dtos(windowID) + " slot: " + dtos(slot) + " (" + dtos(actionNumber) + ") itemID: " + dtos(itemID));
+  //Mineserver::get()->logger()->log(1,"window: " + dtos(windowID) + " slot: " + dtos(slot) + " (" + dtos(actionNumber) + ") itemID: " + dtos(itemID));
   //Click outside the window
   if(slot == -999)
   {
@@ -989,7 +985,7 @@ bool Inventory::doCraft(Item *slots, int8_t width, int8_t height)
 
 bool Inventory::setSlot(User *user, int8_t windowID, int16_t slot, int16_t itemID, int8_t count, int16_t health)
 {
-  //Mineserver::get()->screen()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(itemID) + " (" + dtos(count) + ") health: " + dtos(health));
+  //Mineserver::get()->logger()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(itemID) + " (" + dtos(count) + ") health: " + dtos(health));
   user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)windowID << (int16_t)slot   << (int16_t)itemID;
   if(itemID != -1)
   {
