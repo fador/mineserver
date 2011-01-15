@@ -25,27 +25,86 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-//
-// Mineserver logger.cpp
-//
 
-#include <cstdio>
 #include <iostream>
+#include <stdlib.h>
+#include <math.h>
+#include <vector>
 #include <string>
+#include <errno.h>
+#include <iostream>
+#include <dirent.h>
+#include <sys/types.h>
 
-#include "logger.h"
-#include "mineserver.h"
+#ifndef PyWrapper
+#define PyWrapper
 
-#include "logtype.h"
+#include "../../plugin_api.h"
 
-void Logger::log(const std::string& msg, const std::string& file, int line)
+class PyLoc
 {
-  log(LogType::LOG_INFO, file, "[" + file + "@" + dtos(line) + "]: " + msg);
-}
+public:
+  double x,y,z,rot,pit;
+};
 
-void Logger::log(LogType::LogType type, const std::string& source, const std::string& message)
+class PyBlock
 {
-  (static_cast<Hook3<bool,int,const char*,const char*>*>(Mineserver::get()->plugin()->getHook("LogPost")))->doAll((int)type, source.c_str(), message.c_str());
-}
+public:
+  int x,y,z,type,meta;
+  int get_type();
+  void set_type(int new_type);
+  int get_meta();
+  void set_meta(int new_meta);
+};
+
+class PyUser
+{
+public:
+  const char* name;
+  PyLoc* location;
+  void teleport(PyLoc new_location);
+  void set_health(int health);
+};
+
+class PyChat
+{
+public:
+  void send_message_to(const char* user, const char* message);
+  void send_message(const char* message);
+};
+
+class PymyMap
+{
+public:
+  void save();
+  void create_item(int x, int y, int z, int type, int count, int health, std::string user);
+  bool set_time(int timeValue);
+  PyLoc* get_spawn();
+  PyBlock* get_block(int x, int y, int z);
+};
+
+class PyScreen
+{
+public:
+  void log(const char* message);
+};
+
+class PyMineserver
+{
+public:
+ PymyMap map;
+ PyScreen screen;
+ PyChat chat;
+ void setMineServer(mineserver_pointer_struct* MS);
+ PyUser* get_user(const char* player_name);
+};
+
+mineserver_pointer_struct* magical();
 
 
+
+PyMineserver* get_MS();
+#ifndef SWIG
+#endif
+
+#endif

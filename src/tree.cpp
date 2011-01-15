@@ -1,3 +1,30 @@
+/*
+   Copyright (c) 2010, The Mineserver Project
+   All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 #include "tree.h"
 #include "mineserver.h"
 
@@ -7,8 +34,10 @@
 
 Tree::Tree(int32_t x, int32_t y, int32_t z, uint8_t limit)
 {
+    n_branches = 0;
     _x = x, _y = y, _z = z;
     this->generate(limit);
+
 }
 
 
@@ -17,7 +46,6 @@ Tree::~Tree(void)
 }
 void Tree::generate(uint8_t limit)
 {
-    n_branches=0;
     uint8_t darkness=1;
 
     srand((uint32_t)time(NULL));
@@ -27,27 +55,35 @@ void Tree::generate(uint8_t limit)
     bool smalltree=false;
 
     //in this implementation we generate the trunk and as we do we call branching and canopy
-    if(m_trunkHeight<BRANCHING_HEIGHT){
+    if(m_trunkHeight<BRANCHING_HEIGHT)
+    {
         smalltree=true;
-	darkness=0;
+        darkness=0;
     }
     uint8_t th=m_trunkHeight-1;
     uint8_t i;
-    for(i = 0; i < th; i++){
-        if(smalltree){
+    for(i = 0; i < th; i++)
+    {
+        if(smalltree)
+        {
             Trunk* v = new Trunk(_x,_y+i,_z,darkness);
             if(i>=MIN_TRUNK-1){
                 m_Branch[n_branches]= v;
                 n_branches++;
-            }else{
+            }
+            else
+            {
                 delete v;
             }
         }
-        else{
+        else
+        {
             Trunk* v = new Trunk(_x,_y+i,_z,darkness);
-            if(i>BRANCHING_HEIGHT-1){
+            if(i>BRANCHING_HEIGHT-1)
+            {
                 generateBranches(v);
-            }else{
+            else
+            {
                 delete v;
             }
         }
@@ -60,7 +96,8 @@ void Tree::generate(uint8_t limit)
 }
 //I STRONGLY RECOMMEND TO USE Trunk Rather than a new unneeded class
 //maybe just a class Wood?
-void Tree::generateBranches(Trunk* wrap){
+void Tree::generateBranches(Trunk* wrap)
+{
     vec loc = wrap->location();
 
     int32_t posx = loc.x();
@@ -92,7 +129,6 @@ void Tree::generateCanopy(){
     uint8_t meta;
     uint8_t canopySize;
     vec loc;
-
 
     uint8_t canopy_darkness = 0;
     //Not much point making less code with a while/for loop

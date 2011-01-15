@@ -108,34 +108,47 @@ struct sChunk
   std::vector<signData*>    signs;
   std::vector<furnaceData*> furnaces;
 
-  sChunk() : refCount(0),lightRegen(false),changed(false),lastused(0)
+  sChunk() : refCount(0),lightRegen(false),changed(false),lastused(0),nbt(NULL)
   {
   }
 
   ~sChunk()
   {
-    std::vector<chestData*>::iterator chest_it = chests.begin();
-    for (;chest_it!=chests.end();++chest_it)
+    if (!chests.empty())
     {
-      delete *chest_it;
+      std::vector<chestData*>::iterator chest_it = chests.begin();
+      for (;chest_it!=chests.end();++chest_it)
+      {
+        delete *chest_it;
+      }
+      chests.clear();
     }
-    chests.clear();
 
-    std::vector<signData*>::iterator sign_it = signs.begin();
-    for (;sign_it!=signs.end();++sign_it)
+    if (!signs.empty())
     {
-      delete *sign_it;
+      std::vector<signData*>::iterator sign_it = signs.begin();
+      for (;sign_it!=signs.end();++sign_it)
+      {
+        delete *sign_it;
+      }
+      signs.clear();
     }
-    signs.clear();
 
-    std::vector<furnaceData*>::iterator furnace_it = furnaces.begin();
-    for (;furnace_it!=furnaces.end();++furnace_it)
+    if (!furnaces.empty())
     {
-      delete *furnace_it;
+      std::vector<furnaceData*>::iterator furnace_it = furnaces.begin();
+      for (;furnace_it!=furnaces.end();++furnace_it)
+      {
+        delete *furnace_it;
+      }
+      furnaces.clear();
     }
-    furnaces.clear();
 
-    delete nbt;
+    if (nbt)
+    {
+      delete nbt;
+      nbt = NULL;
+    }
   }
 
   bool hasUser(User* user)
@@ -196,6 +209,7 @@ struct sChunkNode
     if (chunk != NULL)
     {
       delete chunk;
+      chunk = NULL;
     }
   }
 
@@ -289,6 +303,7 @@ public:
         if (node->chunk->refCount == 0)
         {
           delete node->chunk;
+          node->chunk = NULL;
         }
 
         // If we have both next and previous nodes, we need to connect them up
@@ -318,6 +333,7 @@ public:
 
         // Free up the memory we were using for this node.
         delete node;
+        node = NULL;
 
         return;
       }

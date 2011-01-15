@@ -115,7 +115,7 @@ bool BlockBasic::isBlockEmpty(const int32_t x, const int8_t y, const int32_t z)
   return Mineserver::get()->map()->getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR;
 }
 
-bool BlockBasic::spawnBlockItem(const int32_t x, const int8_t y, const int32_t z, const uint8_t block)
+bool BlockBasic::spawnBlockItem(const int32_t x, const int8_t y, const int32_t z, const uint8_t block, const uint8_t meta)
 {
   Drop* drop = NULL;
 
@@ -129,7 +129,7 @@ bool BlockBasic::spawnBlockItem(const int32_t x, const int8_t y, const int32_t z
       {
         if (drop->count)
         {
-          Mineserver::get()->map()->createPickupSpawn(x, y, z, drop->item_id, drop->count, 0, NULL);
+          Mineserver::get()->map()->createPickupSpawn(x, y, z, drop->item_id, drop->count, meta, NULL);
         }
         return true;
       }

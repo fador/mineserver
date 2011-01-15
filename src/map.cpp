@@ -1,4 +1,18 @@
 /*
+   Copyright (c) 2010, The Mineserver Project
+   All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
+
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -9,7 +23,8 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
+
 
 #ifdef WIN32
 #include <conio.h>
@@ -155,18 +170,19 @@ void Map::addSapling(User* user, int x, int y, int z)
 
     saplings.push_back( sTree(x,y,z,mapTime,user->UID) );
 }
+
 void Map::checkGenTrees()
 {
-    std::list<sTree>::iterator iter = saplings.begin();
+  std::list<sTree>::iterator iter = saplings.begin();
 
-    static uint8_t light;
-    static uint8_t skylight;
+  static uint8_t light;
+  static uint8_t skylight;
 
-    static uint8_t blocktype;
-    static uint8_t meta;
+  static uint8_t blocktype;
+  static uint8_t meta;
 
-    while (iter != saplings.end())
-    {
+  while (iter != saplings.end())
+  {
         getLight(iter->x,iter->y+1,iter->z,&light,&skylight);
         if(light>9 || skylight >3){
             //Check above blocks
@@ -187,14 +203,29 @@ void Map::checkGenTrees()
             }
             else{
                 goto increment;
-            }
-        }
-        else{
-            increment:
-            iter++;
-        }
-    }
 
+        }
+      }
+      if(i >= TREE_MIN_SPACE)
+      {//If there is enough space
+        if(rand() % 50 == 0)
+        {
+          LOG(INFO, "Map", "Grow tree!");
+
+          Tree tree((*iter).x,(*iter).y,(*iter).z,i);
+          saplings.erase(iter++);  // alternatively, i = items.erase(i);
+        }
+      }
+      else
+      {
+        iter++;
+      }
+    }
+    else
+    {
+      iter++;
+    }
+  }
 }
 
 void Map::init()
@@ -314,6 +345,7 @@ bool Map::saveWholeMap()
     {
         saveMap(maps[it->first].x, maps[it->first].z);
     }
+    Mineserver::get()->saveAllPlayers();
 
     /////////////////////
     // Save map details
@@ -484,10 +516,10 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
 #ifdef PRINT_LIGHTGEN_TIME
 #ifdef WIN32
     t_end = timeGetTime ();
-    Mineserver::get()->screen()->log("Lightgen: " + dtos(t_end-t_begin) + "ms");
+    Mineserver::get()->logger()->log("Lightgen: " + dtos(t_end-t_begin) + "ms");
 #else
     t_end = clock();
-    Mineserver::get()->screen()->log("Lightgen: " + dtos((t_end-t_begin)/(CLOCKS_PER_SEC/1000))) + "ms");
+    Mineserver::get()->logger()->log("Lightgen: " + dtos((t_end-t_begin)/(CLOCKS_PER_SEC/1000))) + "ms");
 #endif
 #endif
 
