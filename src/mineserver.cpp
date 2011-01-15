@@ -141,7 +141,10 @@ void Mineserver::saveAllPlayers()
 {
   for(int i = users().size()-1; i >= 0; i--)
   {
-    users()[i]->saveData();
+    if(users()[i]->logged)
+    {
+      users()[i]->saveData();
+    }
   }
 }
 
