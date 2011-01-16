@@ -31,6 +31,7 @@
 #include <map>
 #include <string>
 #include <stdint.h>
+#include <iostream>
 
 //
 // Mineserver constants
@@ -76,8 +77,8 @@ enum Block
   BLOCK_AIR, BLOCK_STONE, BLOCK_GRASS, BLOCK_DIRT, BLOCK_COBBLESTONE, BLOCK_WOOD,
   BLOCK_SAPLING, BLOCK_BEDROCK, BLOCK_WATER, BLOCK_STATIONARY_WATER, BLOCK_LAVA,
   BLOCK_STATIONARY_LAVA, BLOCK_SAND, BLOCK_GRAVEL, BLOCK_GOLD_ORE, BLOCK_IRON_ORE,
-  BLOCK_COAL_ORE, BLOCK_LOG, BLOCK_LEAVES, BLOCK_SPONGE, BLOCK_GLASS, BLOCK_RED_CLOTH,
-  BLOCK_ORANGE_CLOTH, BLOCK_YELLOW_CLOTH, BLOCK_LIME_CLOTH, BLOCK_GREEN_CLOTH,
+  BLOCK_COAL_ORE, BLOCK_LOG, BLOCK_LEAVES, BLOCK_SPONGE, BLOCK_GLASS, BLOCK_LAPIS_ORE,
+  BLOCK_LAPIS_BLOCK, BLOCK_DISPENSER, BLOCK_SANDSTONE, BLOCK_NOTE_BLOCK,
   BLOCK_AQUA_GREEN_CLOTH, BLOCK_CYAN_CLOTH, BLOCK_BLUE_CLOTH, BLOCK_PURPLE_CLOTH,
   BLOCK_INDIGO_CLOTH, BLOCK_VIOLET_CLOTH, BLOCK_MAGENTA_CLOTH, BLOCK_PINK_CLOTH,
   BLOCK_BLACK_CLOTH, BLOCK_GRAY_CLOTH, BLOCK_WHITE_CLOTH, BLOCK_YELLOW_FLOWER,
@@ -92,7 +93,7 @@ enum Block
   BLOCK_REDSTONE_ORE, BLOCK_GLOWING_REDSTONE_ORE, BLOCK_REDSTONE_TORCH_OFF,
   BLOCK_REDSTONE_TORCH_ON, BLOCK_STONE_BUTTON, BLOCK_SNOW, BLOCK_ICE, BLOCK_SNOW_BLOCK,
   BLOCK_CACTUS, BLOCK_CLAY, BLOCK_REED, BLOCK_JUKEBOX, BLOCK_FENCE, BLOCK_PUMPKIN,
-  BLOCK_NETHERSTONE, BLOCK_SLOW_SAND, BLOCK_LIGHTSTONE, BLOCK_PORTAL, BLOCK_JACK_O_LANTERN
+  BLOCK_NETHERSTONE, BLOCK_SLOW_SAND, BLOCK_LIGHTSTONE, BLOCK_PORTAL, BLOCK_JACK_O_LANTERN,BLOCK_CAKE
 };
 
 // Items
@@ -117,7 +118,8 @@ enum
   ITEM_SNOWBALL, ITEM_BOAT, ITEM_LEATHER, ITEM_MILK_BUCKET, ITEM_CLAY_BRICK,
   ITEM_CLAY_BALLS, ITEM_REED, ITEM_PAPER, ITEM_BOOK, ITEM_SLIME_BALL,
   ITEM_STORAGE_MINECART, ITEM_POWERED_MINECART, ITEM_EGG, ITEM_COMPASS, ITEM_FISHING_ROD,
-  ITEM_WATCH, ITEM_LIGHTSTONE_DUST, ITEM_RAW_FISH, ITEM_COOKED_FISH
+  ITEM_WATCH, ITEM_LIGHTSTONE_DUST, ITEM_RAW_FISH, ITEM_COOKED_FISH,ITEM_DYE,
+  ITEM_BONE,ITEM_SUGAR,ITEM_CAKE
 };
 
 // Records
@@ -166,20 +168,21 @@ struct Drop
   uint16_t item_id;
   uint32_t probability;
   uint8_t count;
-  bool exclusive;
+  Drop* alt_drop;
 
-  Drop() {}
+  Drop() : item_id(0),probability(0),count(0),alt_drop(NULL) {}
+  Drop(uint16_t _item_id, uint32_t _probability, uint8_t _count, Drop* _alt_drop=NULL) : item_id(_item_id),probability(_probability),count(_count),alt_drop(_alt_drop) {}
 
-  Drop(uint16_t item_id, uint32_t probability, uint8_t count, bool exclusive)
+  ~Drop()
   {
-    this->item_id     = item_id;
-    this->probability = probability;
-    this->count       = count;
-    this->exclusive   = exclusive;
+    if (alt_drop != NULL)
+    {
+      delete alt_drop;
+    }
   }
 };
 
-extern std::map<uint8_t, Drop> BLOCKDROPS;
+extern std::map<uint8_t, Drop*> BLOCKDROPS;
 
 // Chat prefixes
 const char SERVERMSGPREFIX = '%';
@@ -189,6 +192,7 @@ const char ADMINCHATPREFIX = '&';
 const unsigned int SERVER_CONSOLE_UID = -1;
 
 void initConstants();
+void freeConstants();
 
 const int ALLOCATE_NBTFILE = 200000;
 

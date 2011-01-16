@@ -102,6 +102,7 @@ public:
 
   Inventory* inventory() const { return m_inventory; }
   void setInventory(Inventory* inventory) { m_inventory = m_inventory; }
+  void saveAllPlayers();
 
 private:
   Mineserver();

@@ -44,9 +44,7 @@ namespace LogType
     LOG_WARNING,  /** warning conditions */
     LOG_NOTICE,   /** normal, but significant, condition */
     LOG_INFO,     /** informational message */
-#ifdef _DEBUG
     LOG_DEBUG,    /** debug-level message */
-#endif
   };
 };
 

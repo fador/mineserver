@@ -190,6 +190,8 @@ public:
     setHook("BlockReplacePre", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>);
     setHook("BlockReplacePost", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>);
     setHook("BlockNeighbourReplace", new Hook9<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t,int16_t,int16_t>);
+    setHook("LogPost", new Hook3<bool,int,const char*,const char*>);
+    setHook("PlayerChatCommand", new Hook4<bool,const char*,const char*,int,const char**>);
 
     init();
   }

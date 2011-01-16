@@ -173,20 +173,11 @@ bool User::sendLoginInfo()
   //Login OK package
   buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << std::string("") << (int64_t)0 << (int8_t)0;
 
-  //Send server time (after dawn)
-  buffer << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map()->mapTime;
 
-  //Inventory
-  for(int i=1; i<45; i++)
-  {   
-    if(inv[i].type != -1 && inv[i].count)
-    {
-      buffer << (int8_t)PACKET_SET_SLOT << (int8_t)0 << (int16_t)(i) << (int16_t)inv[i].type << (int8_t)(inv[i].count) << (int8_t)inv[i].health;
-    }
-  }
+  //Send spawn position
+  buffer << (int8_t)PACKET_SPAWN_POSITION << (int32_t)pos.x << ((int32_t)pos.y+2) << (int32_t)pos.z;
 
-  //Teleport player
-  teleport(pos.x, pos.y+2, pos.z);
+
 
   //Put nearby chunks to queue
   for(int x = -viewDistance; x <= viewDistance; x++)
@@ -197,7 +188,25 @@ bool User::sendLoginInfo()
     }
   }
   // Push chunks to user
-  pushMap();
+  pushMap(); pushMap();
+
+
+
+  //Teleport player
+  teleport(pos.x, pos.y+2, pos.z);
+
+  //Send server time (after dawn)
+  buffer << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map()->mapTime;
+
+
+  //Inventory
+  for(int i=1; i<45; i++)
+  {   
+    if(inv[i].type != -1 && inv[i].count)
+    {
+      buffer << (int8_t)PACKET_SET_SLOT << (int8_t)0 << (int16_t)(i) << (int16_t)inv[i].type << (int8_t)(inv[i].count) << (int16_t)inv[i].health;
+    }
+  }
 
   // Spawn this user to others
   spawnUser((int32_t)pos.x*32, ((int32_t)pos.y+2)*32, (int32_t)pos.z*32);
@@ -211,6 +220,11 @@ bool User::sendLoginInfo()
 
   //Update player list
   Mineserver::get()->screen()->updatePlayerList(Mineserver::get()->users());
+
+  pushMap(); pushMap(); pushMap();
+  //Teleport player (again)
+  teleport(pos.x, pos.y+2, pos.z);
+
 
   return true;
 }
@@ -545,6 +559,7 @@ bool User::updatePos(double x, double y, double z, double stance)
         {
 
 
+          
           if(!withinViewDistance((mapx - chunkDiffX), newChunk->x) || !withinViewDistance((mapz - chunkDiffZ), newChunk->z))
           {
             addRemoveQueue(mapx-chunkDiffX, mapz-chunkDiffZ);
@@ -553,7 +568,11 @@ bool User::updatePos(double x, double y, double z, double stance)
           //If this chunk wasn't in the view distance before
           //if(!withinViewDistance(chunkDiffX, oldChunk->x) || !withinViewDistance(chunkDiffZ, oldChunk->z))
           //{
+          
+          //This will remove the chunks from being removed if they were put to the remove queue.
           addQueue(mapx, mapz);
+          
+          
           //}
         }
       }
@@ -650,6 +669,7 @@ bool User::updatePos(double x, double y, double z, double stance)
         (*iter)->buffer.addToWrite(telePacket.getWrite(), telePacket.getWriteLen());
       }
     }
+
 
     if(newChunk->items.size())
     {

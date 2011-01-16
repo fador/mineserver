@@ -50,6 +50,7 @@
 #include "blocks/sign.h"
 #include "blocks/tracks.h"
 #include "blocks/chest.h"
+#include "blocks/ladder.h"
 
 void Plugin::init()
 {
@@ -78,6 +79,8 @@ void Plugin::init()
    toClean.push_back(signblock);
    BlockTracks* tracksblock = new BlockTracks();
    toClean.push_back(tracksblock);
+   BlockLadder* ladderblock = new BlockLadder();
+   toClean.push_back(ladderblock);
 
    // Set default behaviours 
    Callback call;
@@ -94,6 +97,7 @@ void Plugin::init()
    setBlockCallback(BLOCK_SOIL, call);
    setBlockCallback(BLOCK_GLASS, call);
    /* cloth */
+   /*
    setBlockCallback(BLOCK_RED_CLOTH, call);
    setBlockCallback(BLOCK_ORANGE_CLOTH, call);
    setBlockCallback(BLOCK_YELLOW_CLOTH, call);
@@ -109,10 +113,13 @@ void Plugin::init()
    setBlockCallback(BLOCK_PINK_CLOTH, call);
    setBlockCallback(BLOCK_BLACK_CLOTH, call);
    setBlockCallback(BLOCK_GRAY_CLOTH, call);
-   setBlockCallback(BLOCK_WHITE_CLOTH, call);
+   */
+   setBlockCallback(BLOCK_GRAY_CLOTH, call);
    /* metals */
    setBlockCallback(BLOCK_GOLD_BLOCK, call);
    setBlockCallback(BLOCK_IRON_BLOCK, call);
+   setBlockCallback(BLOCK_LAPIS_BLOCK, call);
+   setBlockCallback(BLOCK_SANDSTONE,call);
    
    setBlockCallback(BLOCK_DOUBLE_STEP, call);
    setBlockCallback(BLOCK_STEP, call);
@@ -132,9 +139,12 @@ void Plugin::init()
    setBlockCallback(BLOCK_GOLD_ORE, call);
    setBlockCallback(BLOCK_IRON_ORE, call);
    setBlockCallback(BLOCK_COAL_ORE, call);
+   setBlockCallback(BLOCK_LAPIS_ORE, call);
    setBlockCallback(BLOCK_DIAMOND_ORE, call);
    setBlockCallback(BLOCK_GLOWING_REDSTONE_ORE, call);
    setBlockCallback(BLOCK_REDSTONE_ORE, call);
+   setBlockCallback(BLOCK_DISPENSER,call);
+   setBlockCallback(BLOCK_NOTE_BLOCK,call);
 
    /* Falling blocks (sand, etc) */
    call.reset();
@@ -159,9 +169,9 @@ void Plugin::init()
 
    /* ladders */
    call.reset();
-   call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
-   call.add("onPlace", Function::from_method<BlockDefault, &BlockDefault::onPlace>(defaultblock));
-   call.add("onNeighbourBroken", Function::from_method<BlockTorch, &BlockTorch::onNeighbourBroken>(torchblock));
+   call.add("onBroken", Function::from_method<BlockLadder, &BlockLadder::onBroken>(ladderblock));
+   call.add("onPlace", Function::from_method<BlockLadder, &BlockLadder::onPlace>(ladderblock));
+   call.add("onNeighbourBroken", Function::from_method<BlockLadder, &BlockLadder::onNeighbourBroken>(ladderblock));
    setBlockCallback(BLOCK_LADDER, call);
 
    /* Plants */
@@ -229,7 +239,7 @@ void Plugin::init()
   
    /* Chests */
    call.reset();
-   call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
+   call.add("onBroken", Function::from_method<BlockChest, &BlockChest::onBroken>(chestblock));
    call.add("onPlace", Function::from_method<BlockChest, &BlockChest::onPlace>(chestblock));
    call.add("onStartedDigging", Function::from_method<BlockChest, &BlockChest::onStartedDigging>(chestblock));
    call.add("onReplace", Function::from_method<BlockChest, &BlockChest::onReplace>(chestblock));
