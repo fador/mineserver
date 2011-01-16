@@ -492,6 +492,7 @@ int Mineserver::run(int argc, char *argv[])
   delete m_packetHandler;
   delete m_mapGen;
   delete m_logger;
+  delete m_inventory;
 
   freeConstants();
 

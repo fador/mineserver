@@ -86,17 +86,19 @@ Inventory::Inventory()
   }
 }
 
-bool Inventory::addRecipe(int width, int height, int16_t* inputrecipe, int outputCount, 
-                          int16_t outputType, int16_t outputHealth)
+bool Inventory::addRecipe(int width, int height, int16_t* inputrecipe, int outputCount, int16_t outputType, int16_t outputHealth)
 {
   Recipe *recipe = new Recipe;
+
   recipe->width  = width;
   recipe->height = height;
   recipe->slots  = new int16_t[width*height];
-  recipe->output.count = outputCount;
-  recipe->output.type  = outputType;
-  recipe->output.health= outputHealth;
+  recipe->output.count  = outputCount;
+  recipe->output.type   = outputType;
+  recipe->output.health = outputHealth;
+
   memcpy(recipe->slots, inputrecipe, width*height*sizeof(int16_t));
+
   recipes.push_back(recipe);
 
   return true;
@@ -210,11 +212,13 @@ bool Inventory::readRecipe(std::string recipeFile)
   ifs.close();
   
   int16_t* inrecipe = new int16_t[height*width];
-  for(unsigned int i = 0; i < recipetable.size(); i++)
+  for (unsigned int i = 0; i < recipetable.size(); i++)
   {
     inrecipe[i] = recipetable[i];
   }
+
   addRecipe(width, height, inrecipe, outCount, outType, outHealth);
+
   delete [] inrecipe;
   
   return true;
