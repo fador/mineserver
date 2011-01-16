@@ -158,6 +158,9 @@ bool Chat::handleMsg(User* user, std::string msg)
       }
       break;
 
+    case CHATCMDPREFIX:
+      handleCommand(user, msg, timeStamp);
+      break;
     // Normal chat message
     default:
       handleChatMsg(user, msg, timeStamp);
@@ -166,6 +169,32 @@ bool Chat::handleMsg(User* user, std::string msg)
 
   return true;
 }
+
+void Chat::handleCommand(User* user, std::string msg, const std::string& timeStamp)
+{
+  std::deque<std::string> cmd = parseCmd(msg.substr(1));
+
+  if(!cmd.size() || !cmd[0].size())
+  {
+    return;
+  }
+
+  std::string command = cmd[0];
+  cmd.pop_front();
+
+  char **param = new char *[cmd.size()];
+
+  for(uint32_t i = 0; i < cmd.size(); i++)
+  {
+    param[i] = (char *)cmd[i].c_str();
+  }
+
+  (static_cast<Hook4<bool,const char*,const char*,int,const char**>*>(Mineserver::get()->plugin()->getHook("PlayerChatCommand")))->doAll(user->nick.c_str(), command.c_str(), cmd.size(), (const char **)param);
+
+  delete [] param;
+
+}
+
 
 void Chat::handleServerMsg(User* user, std::string msg, const std::string& timeStamp)
 {

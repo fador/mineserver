@@ -36,6 +36,8 @@
 #include <stdbool.h>
 #endif
 
+#include <stdint.h>
+
 #ifdef USE_HOOKS
 #include "hook.h"
 #endif
@@ -122,7 +124,7 @@ struct config_pointer_struct
 {
   bool (*has)(const char* name);
   int (*iData)(const char* name);
-  long (*lData)(const char* name);
+  int64_t (*lData)(const char* name);
   float (*fData)(const char* name);
   double (*dData)(const char* name);
   const char* (*sData)(const char* name);

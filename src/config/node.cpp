@@ -68,11 +68,11 @@ int ConfigNode::iData() const
   return 0;
 }
 
-long ConfigNode::lData() const
+int64_t ConfigNode::lData() const
 {
   if (m_type == CONFIG_NODE_NUMBER)
   {
-    return (long)m_nData;
+    return (int64_t)m_nData;
   }
   return 0;
 }
@@ -152,7 +152,7 @@ void ConfigNode::setData(int data)
   m_nData = (double)data;
 }
 
-void ConfigNode::setData(long data)
+void ConfigNode::setData(int64_t data)
 {
   m_type = CONFIG_NODE_NUMBER;
   m_nData = (double)data;

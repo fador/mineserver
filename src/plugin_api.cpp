@@ -398,7 +398,7 @@ int config_iData(const char* name)
   return Mineserver::get()->config()->iData(std::string(name));
 }
 
-long config_lData(const char* name)
+int64_t config_lData(const char* name)
 {
   return Mineserver::get()->config()->lData(std::string(name));
 }

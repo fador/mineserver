@@ -50,17 +50,6 @@ Furnace::Furnace(NBT_Value* entity, uint8_t blockType)
   m_slots[SLOT_OUTPUT].damage= 0;
   m_slots[SLOT_OUTPUT].id    = 0;
 
-  // Set the slots to what was passed
-  NBT_Value* slotList = (NBT_Value*)(*entity)["Items"];
-  std::vector<NBT_Value*>* slotEntities = slotList->GetList();
-  std::vector<NBT_Value*>::iterator iter = slotEntities->begin(), end = slotEntities->end();
-  for( ; iter != end; iter++ )
-  {
-    int8_t slotNum = (int8_t)(*(**iter)["Slot"]);
-    m_slots[slotNum].count = (int8_t)(*(**iter)["Count"]);
-    m_slots[slotNum].damage = (int16_t)(*(**iter)["Damage"]);
-    m_slots[slotNum].id = (int16_t)(*(**iter)["id"]);
-  }
 
   // Set the cooking time based on input type (currently all smelting takes 10 secs but this gives us flexivibility in future)
   Slot inputSlot = m_slots[SLOT_INPUT];
@@ -265,6 +254,7 @@ int16_t Furnace::cookTime()
   }
   return tempCookTime;
 }
+
 NBT_Value* Furnace::getSlotEntity(int8_t slotNumber)
 {
   // Return null of we don't have anything in this slot
@@ -284,75 +274,5 @@ NBT_Value* Furnace::getSlotEntity(int8_t slotNumber)
 }
 void Furnace::sendToAllUsers()
 {
-  // Create a new compound tag and set it's direct properties
-  NBT_Value* newEntity = new NBT_Value(NBT_Value::TAG_COMPOUND);
-  newEntity->Insert("BurnTime", new NBT_Value(burnTime()));
-  newEntity->Insert("CookTime", new NBT_Value(cookTime()));
-  newEntity->Insert("id", new NBT_Value("Furnace"));
-  newEntity->Insert("x", new NBT_Value(m_x));
-  newEntity->Insert("y", new NBT_Value(m_y));
-  newEntity->Insert("z", new NBT_Value(m_z));
-
-  // Add our 3 child compounds for each slot that contains something
-  NBT_Value* slotList = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
-  for(int i = 0; i <= 2; i++)
-  {
-    NBT_Value* slot = getSlotEntity(i);
-    if(slot != NULL)
-    {
-      slotList->GetList()->push_back(slot);
-    }
-  }
-  newEntity->Insert("Items", slotList);
-
-  // Write the entity data into a parent Compound
-  std::vector<uint8_t> buffer;
-  buffer.push_back(NBT_Value::TAG_COMPOUND);
-  buffer.push_back(0);
-  buffer.push_back(0);
-  newEntity->Write(buffer);
-  buffer.push_back(0);
-  buffer.push_back(0);
-
-  // Compress the data
-  uint8_t* compressedData = new uint8_t[ALLOCATE_NBTFILE];
-  z_stream zstream;
-  zstream.zalloc = Z_NULL;
-  zstream.zfree = Z_NULL;
-  zstream.opaque = Z_NULL;
-  zstream.next_out = compressedData;
-  zstream.next_in = &buffer[0];
-  zstream.avail_in = buffer.size();
-  zstream.avail_out = ALLOCATE_NBTFILE;
-  zstream.total_out = 0;
-  zstream.total_in = 0;
-  deflateInit2(&zstream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15+MAX_WBITS, 8, Z_DEFAULT_STRATEGY);
-
-  // Gzip the data
-  if(int state = deflate(&zstream, Z_FULL_FLUSH) != Z_OK)
-  {
-    Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Furnace", "Error in deflate: " + state);
-  }
-  deflateEnd(&zstream);
-
-  // Create a new packet to send back to client
-  /*
-  Packet pkt;
-  pkt << (int8_t)PACKET_COMPLEX_ENTITIES  << m_x << (int16_t)m_y << m_z << (int16_t)zstream.total_out;
-  pkt.addToWrite(compressedData, zstream.total_out);
-  */
-  delete[] compressedData;
-
-  // Tell all users about this guy
-  //User::sendAll((int8_t*)pkt.getWrite(), pkt.getWriteLen());
-
-#ifdef _DEBUG
-  LOG(DEBUG, "Furnace", "Furnace entity data: ");
-  std::string dump;
-  newEntity->Dump(dump);
-  LOG(DEBUG, "Furnace", dump);
-#endif
-
-  // Update our map with this guy
-  Mineserver::get()->map()->setComplexEntity(NULL, m_x, m_y, m_z, newEntity);
+ 
 }
