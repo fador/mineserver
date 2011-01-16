@@ -951,14 +951,11 @@ void Map::createPickupSpawn(int x, int y, int z, int type, int count, int health
 
 sChunk*  Map::loadMap(int x, int z, bool generate)
 {
-
   sChunk* chunk = chunks.getChunk(x,z);
   if(chunk != NULL)
   {
     return chunk;
   }
-
-  chunk = new sChunk;
 
   // Generate map file name
 
@@ -974,8 +971,10 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   if (stat(infile.c_str(), &stFileInfo) != 0)
   {
     // If generate (false only for lightmapgenerator)
-    if(generate)
+    if (generate)
     {
+      chunk = new sChunk;
+
       Mineserver::get()->mapGen()->generateChunk(x,z);
       generateLight(x, z);
 
