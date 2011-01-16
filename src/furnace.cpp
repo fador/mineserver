@@ -217,9 +217,9 @@ void Furnace::consumeFuel()
   Slot fuelSlot = m_slots[SLOT_FUEL];
   m_initialBurningTime = 0;
   if(fuelSlot.id == ITEM_COAL)           { m_initialBurningTime += 80; }
-  if(fuelSlot.id == BLOCK_WOOD)          { m_initialBurningTime += 15; }
+  if(fuelSlot.id == BLOCK_PLANK)          { m_initialBurningTime += 15; }
   if(fuelSlot.id == ITEM_STICK)          { m_initialBurningTime += 5; }
-  if(fuelSlot.id == BLOCK_LOG)           { m_initialBurningTime += 15; }
+  if(fuelSlot.id == BLOCK_WOOD)           { m_initialBurningTime += 15; }
   if(fuelSlot.id == BLOCK_WORKBENCH)     { m_initialBurningTime += 15; }
   if(fuelSlot.id == BLOCK_CHEST)         { m_initialBurningTime += 15; }
   if(fuelSlot.id == BLOCK_BOOKSHELF)     { m_initialBurningTime += 15; }

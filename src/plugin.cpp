@@ -92,8 +92,8 @@ void Plugin::init()
    setBlockCallback(BLOCK_GRASS, call);
    setBlockCallback(BLOCK_DIRT, call);
    setBlockCallback(BLOCK_COBBLESTONE, call);
+   setBlockCallback(BLOCK_PLANK, call);
    setBlockCallback(BLOCK_WOOD, call);
-   setBlockCallback(BLOCK_LOG, call);
    setBlockCallback(BLOCK_SOIL, call);
    setBlockCallback(BLOCK_GLASS, call);
    /* cloth */
@@ -132,7 +132,7 @@ void Plugin::init()
    setBlockCallback(BLOCK_PUMPKIN, call);
    setBlockCallback(BLOCK_CLAY, call);
    setBlockCallback(BLOCK_NETHERSTONE, call);
-   setBlockCallback(BLOCK_LIGHTSTONE, call);
+   setBlockCallback(BLOCK_GLOWSTONE, call);
    setBlockCallback(BLOCK_JACK_O_LANTERN, call);
    setBlockCallback(BLOCK_JUKEBOX, call);
    setBlockCallback(BLOCK_FENCE, call);

@@ -44,28 +44,6 @@ Chat::~Chat()
 {
 }
 
-bool Chat::checkMotd(const std::string& motdFile)
-{
-  //
-  // Create motdfile is it doesn't exist
-  //
-  std::ifstream ifs(motdFile.c_str());
-
-  // If file does not exist
-  if(ifs.fail())
-  {
-    Mineserver::get()->logger()->log(LogType::LOG_WARNING, "System", "> Warning: " + motdFile + " not found. Creating...");
-
-    std::ofstream motdofs(motdFile.c_str());
-    motdofs << MOTD_CONTENT << std::endl;
-    motdofs.close();
-  }
-
-  ifs.close();
-
-  return true;
-}
-
 bool Chat::sendUserlist(User* user)
 {
   this->sendMsg(user, MC_COLOR_BLUE + "[ " + dtos(User::all().size()) + " players online ]", USER);

@@ -42,7 +42,6 @@
 #include "../config.h"
 #include "../mineserver.h"
 
-#include "mersenne.h"
 #include "cavegen.h"
 
 void CaveGen::init(int seed)
@@ -51,31 +50,23 @@ void CaveGen::init(int seed)
   caveNoise.SetSeed(seed+1);
   caveNoise.SetFrequency(1.0/20);
   caveNoise.SetOctaveCount(2);
-  caveNoise.SetNoiseQuality(noise::QUALITY_STD);
 
-  addCaves = Mineserver::get()->config()->bData("mapgen.caves.enabled");
   addCaveLava = Mineserver::get()->config()->bData("mapgen.caves.lava");
-
-  seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
 }
 
-void CaveGen::AddCaves(uint8_t &block, double x, double y, double z)
+void CaveGen::AddCaves(uint8_t &block, int x, int y, int z)
 { 
-  if(addCaves)
+  value = caveNoise.GetValue(x,y,z);
+  
+  if(value < 0.07)
   {
-    value = caveNoise.GetValue(x,y,z);
-    
-    if(value < 0.1)
+    if(y < 10 && addCaveLava)
     {
-      // Add bottomlava
-      if(y < 10.0 && addCaveLava)
-      {
-        block = BLOCK_STATIONARY_LAVA;
-        return;
-      }
-      
+      block = BLOCK_LAVA;
+    }
+    else
+    {    
       block = BLOCK_AIR;
-      return;
-    } 
-  }
+    }
+  } 
 }

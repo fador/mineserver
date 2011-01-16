@@ -34,7 +34,6 @@
 #include <noise/noise.h>
 #endif
 
-#include "mersenne.h"
 #include "cavegen.h"
 
 class MapGen
@@ -58,7 +57,8 @@ private:
   int beachExtent;
   int beachHeight;
   
-  bool addOre;
+  bool addOre;  
+  bool addCaves;
 
   void generateFlatgrass();
   void generateWithNoise(int x, int z);
@@ -69,9 +69,7 @@ private:
   void AddOre(int x, int z, uint8_t type);
   void AddDeposit(int x, int y, int z, uint8_t block, int depotSize);
 
-  
   CaveGen cave;
-  Random mersenne;
 
   // Heightmap composition
   noise::module::RidgedMulti ridgedMultiNoise;

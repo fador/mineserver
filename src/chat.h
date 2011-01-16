@@ -56,7 +56,6 @@ public:
 
   bool sendMsg(User* user, std::string msg, MessageTarget action = ALL);
   bool sendUserlist(User* user);
-  bool checkMotd(const std::string& motdFile);
   void sendHelp(User* user, std::deque<std::string> args);
 
   void handleCommand(User* user, std::string msg, const std::string& timeStamp);

@@ -74,10 +74,10 @@ enum Direction
 // Blocks
 enum Block
 {
-  BLOCK_AIR, BLOCK_STONE, BLOCK_GRASS, BLOCK_DIRT, BLOCK_COBBLESTONE, BLOCK_WOOD,
+  BLOCK_AIR, BLOCK_STONE, BLOCK_GRASS, BLOCK_DIRT, BLOCK_COBBLESTONE, BLOCK_PLANK,
   BLOCK_SAPLING, BLOCK_BEDROCK, BLOCK_WATER, BLOCK_STATIONARY_WATER, BLOCK_LAVA,
   BLOCK_STATIONARY_LAVA, BLOCK_SAND, BLOCK_GRAVEL, BLOCK_GOLD_ORE, BLOCK_IRON_ORE,
-  BLOCK_COAL_ORE, BLOCK_LOG, BLOCK_LEAVES, BLOCK_SPONGE, BLOCK_GLASS, BLOCK_LAPIS_ORE,
+  BLOCK_COAL_ORE, BLOCK_WOOD, BLOCK_LEAVES, BLOCK_SPONGE, BLOCK_GLASS, BLOCK_LAPIS_ORE,
   BLOCK_LAPIS_BLOCK, BLOCK_DISPENSER, BLOCK_SANDSTONE, BLOCK_NOTE_BLOCK,
   BLOCK_AQUA_GREEN_CLOTH, BLOCK_CYAN_CLOTH, BLOCK_BLUE_CLOTH, BLOCK_PURPLE_CLOTH,
   BLOCK_INDIGO_CLOTH, BLOCK_VIOLET_CLOTH, BLOCK_MAGENTA_CLOTH, BLOCK_PINK_CLOTH,
@@ -93,7 +93,7 @@ enum Block
   BLOCK_REDSTONE_ORE, BLOCK_GLOWING_REDSTONE_ORE, BLOCK_REDSTONE_TORCH_OFF,
   BLOCK_REDSTONE_TORCH_ON, BLOCK_STONE_BUTTON, BLOCK_SNOW, BLOCK_ICE, BLOCK_SNOW_BLOCK,
   BLOCK_CACTUS, BLOCK_CLAY, BLOCK_REED, BLOCK_JUKEBOX, BLOCK_FENCE, BLOCK_PUMPKIN,
-  BLOCK_NETHERSTONE, BLOCK_SLOW_SAND, BLOCK_LIGHTSTONE, BLOCK_PORTAL, BLOCK_JACK_O_LANTERN,BLOCK_CAKE
+  BLOCK_NETHERSTONE, BLOCK_SLOW_SAND, BLOCK_GLOWSTONE, BLOCK_PORTAL, BLOCK_JACK_O_LANTERN,BLOCK_CAKE
 };
 
 // Items
@@ -118,8 +118,8 @@ enum
   ITEM_SNOWBALL, ITEM_BOAT, ITEM_LEATHER, ITEM_MILK_BUCKET, ITEM_CLAY_BRICK,
   ITEM_CLAY_BALLS, ITEM_REED, ITEM_PAPER, ITEM_BOOK, ITEM_SLIME_BALL,
   ITEM_STORAGE_MINECART, ITEM_POWERED_MINECART, ITEM_EGG, ITEM_COMPASS, ITEM_FISHING_ROD,
-  ITEM_WATCH, ITEM_LIGHTSTONE_DUST, ITEM_RAW_FISH, ITEM_COOKED_FISH,ITEM_DYE,
-  ITEM_BONE,ITEM_SUGAR,ITEM_CAKE
+  ITEM_WATCH, ITEM_GLOWSTONE_DUST, ITEM_RAW_FISH, ITEM_COOKED_FISH, ITEM_DYE,
+  ITEM_BONE, ITEM_SUGAR, ITEM_CAKE
 };
 
 // Records
@@ -137,28 +137,14 @@ const char COMMENTPREFIX  = '#';
 // Configuration
 const std::string CONFIG_FILE = "config.cfg";
 
-// Commands file
+/* Commands file
 const std::string COMMANDS_FILE    = "commands.cfg";
 const std::string COMMANDS_NAME_PREFIX = "cmd_";
 const std::string COMMANDS_CONTENT = "# This is default command permissions file. Add minimum permission rank after each command.";
-
-// Roles file
-const std::string ROLES_FILE    = "roles.txt";
-const std::string ROLES_CONTENT = "# This is default player roles file. Add nicknames here for admins, operators or members, one per line";
-
-// Motdfile
-const std::string MOTD_FILE    = "motd.txt";
-const std::string MOTD_CONTENT = "This is the default motd! Please edit motd.txt to change this message.";
-
-// Server rules
-const std::string RULES_FILE    = "rules.txt";
-const std::string RULES_CONTENT = "This is the default rules file. Please edit rules.txt to change this message.";
+*/
 
 // PID file
 const std::string PID_FILE = "mineserver.pid";
-
-// Default configuration
-extern std::map<std::string, std::string> defaultConf;
 
 //
 // Blocks that drop special things!

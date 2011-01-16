@@ -30,25 +30,17 @@
 
 #include <stdint.h>
 
-#include "mersenne.h"
-
 class CaveGen
 {
 public:
   void init(int seed);
-  void AddCaves(uint8_t &block, double x, double y, double z);
+  void AddCaves(uint8_t &block, int x, int y, int z);
 
 private:
-  Random mersenne;
-  uint8_t *blocks;
-  
   noise::module::RidgedMulti caveNoise;
   double value;
-  
-  bool addCaves;
-  bool addCaveLava;
 
-  int seaLevel;
+  bool addCaveLava;
 };
 
 #endif

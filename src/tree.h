@@ -61,7 +61,7 @@ protected:
 class Trunk : public ITree 
 {
 public:
-  Trunk(int32_t x, int32_t y, int32_t z,char meta=0 ) { _x = x, _y = y, _z = z, _type = BLOCK_LOG, _meta = meta; update();}
+  Trunk(int32_t x, int32_t y, int32_t z,char meta=0 ) { _x = x, _y = y, _z = z, _type = BLOCK_WOOD, _meta = meta; update();}
   ~Trunk() { }
 protected:
 };

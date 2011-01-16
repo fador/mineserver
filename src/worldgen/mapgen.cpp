@@ -41,7 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <noise/noise.h>
 #endif
 
-#include "mersenne.h"
 #include "cavegen.h"
 #include "mapgen.h"
 
@@ -118,6 +117,7 @@ void MapGen::init(int seed)
   beachHeight = Mineserver::get()->config()->iData("mapgen.beaches.height");
   
   addOre = Mineserver::get()->config()->bData("mapgen.caves.ore");
+  addCaves = Mineserver::get()->config()->bData("mapgen.caves.enabled");
 
 }
 
@@ -304,7 +304,8 @@ void MapGen::generateWithNoise(int x, int z)
           {
             *curBlock = BLOCK_STONE;
             // Add caves
-            cave.AddCaves(*curBlock, xBlockpos + bX, bY, zBlockpos + bZ);
+            if(addCaves)
+              cave.AddCaves(*curBlock, xBlockpos + bX, bY, zBlockpos + bZ);
           }
           else
             *curBlock = BLOCK_DIRT;
@@ -475,7 +476,7 @@ void MapGen::AddDeposit(int x, int y, int z, uint8_t block, int depotSize)
     {
       for(int bZ = z; bZ < z+depotSize; bZ++)
       {
-        if(mersenne.uniform(1000) < 500)
+        if(rand()%1000 < 500)
         {
           Mineserver::get()->map()->sendBlockChange(bX, bY, bZ, block, 0);
           Mineserver::get()->map()->setBlock(bX, bY, bZ, block, 0);
