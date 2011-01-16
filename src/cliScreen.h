@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2010, Kasper F. Brandt
+   Copyright (c) 2011, Kasper F. Brandt
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
