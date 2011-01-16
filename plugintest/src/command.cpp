@@ -69,40 +69,6 @@ std::string dtos(double n)
   return result.str();
 }
 
-std::deque<std::string> parseCmd(std::string cmd)
-{
-  int del;
-  std::deque<std::string> temp;
-
-  while(cmd.length() > 0)
-  {
-    while(cmd[0] == ' ')
-    {
-      cmd = cmd.substr(1);
-    }
-
-    del = cmd.find(' ');
-
-    if(del > -1)
-    {
-      temp.push_back(cmd.substr(0, del));
-      cmd = cmd.substr(del+1);
-    }
-    else
-    {
-      temp.push_back(cmd);
-      break;
-    }
-  }
-
-  if(temp.empty())
-  {
-    temp.push_back("empty");
-  }
-
-  return temp;
-}
-
 typedef void (*CommandCallback)(std::string nick, std::string, std::deque<std::string>);
 
 struct Command
@@ -131,44 +97,29 @@ void registerCommand(Command* command)
 }
 
 #define LOG_INFO 6
-bool chatPreFunction(const char* userIn,time_t timestamp, const char* msgIn)
+bool chatCommandFunction(const char* userIn,const char* cmdIn, int argc, char** argv)
 {
   std::string user(userIn);
-  std::string msg(msgIn);
+  std::string command(cmdIn);
+  std::deque<std::string> cmd(argv, argv+argc);
 
-  if(msg.size() == 0)
+  if(command.size() == 0)
   {
     return false;
   }
 
-  char prefix = msg[0];
 
-  std::string logMsg = "Command Plugin got from "+user+": " + msg;
+  std::string logMsg = "Command Plugin got from "+user+": " + command;
   mineserver->logger.log(LOG_INFO, "plugin.command", logMsg.c_str());
 
-  if (prefix == CHATCMDPREFIX)
+  // User commands
+  CommandList::iterator iter;
+  if((iter = m_Commands.find(command)) != m_Commands.end())
   {
-    // Timestamp
-    time_t rawTime = timestamp;
-    struct tm* Tm  = localtime(&rawTime);
-    std::string timeStamp (asctime(Tm));
-    timeStamp = timeStamp.substr(11, 5);
-
-    std::deque<std::string> cmd = parseCmd(msg.substr(1));
-
-    std::string command = cmd[0];
-    cmd.pop_front();
-
-    // User commands
-    CommandList::iterator iter;
-    if((iter = m_Commands.find(command)) != m_Commands.end())
-    {
-      iter->second->callback(user, command, cmd);
-      return false;
-    }
+    iter->second->callback(user, command, cmd);
+    return false;
   }
 
-  return true;
 }
 
 bool isValidItem(int id)
@@ -434,13 +385,13 @@ bool translateDirection(int32_t *x, int8_t *y, int32_t *z, int8_t direction)
 {
     switch(direction)
     {
-    case BLOCK_BOTTOM: (*y)--;  break;
-    case BLOCK_TOP:    (*y)++;  break;
-    case BLOCK_NORTH:  (*x)++;  break;
-    case BLOCK_SOUTH:  (*x)--;  break;
-    case BLOCK_EAST:   (*z)++;  break;
-    case BLOCK_WEST:   (*z)--;  break;
-    default:                  break;
+      case BLOCK_BOTTOM: (*y)--;  break;
+      case BLOCK_TOP:    (*y)++;  break;
+      case BLOCK_NORTH:  (*x)++;  break;
+      case BLOCK_SOUTH:  (*x)--;  break;
+      case BLOCK_EAST:   (*z)++;  break;
+      case BLOCK_WEST:   (*z)--;  break;
+      default:                    break;
     }
   return true;
 }
@@ -548,7 +499,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mi
 
   mineserver->plugin.setPluginVersion(pluginName.c_str(), PLUGIN_COMMAND_VERSION);
 
-  mineserver->plugin.addCallback("PlayerChatPre", (void *)chatPreFunction);
+  mineserver->plugin.addCallback("PlayerChatCommand", (void *)chatCommandFunction);
   mineserver->plugin.addCallback("BlockPlacePre", (void *)blockPlacePreFunction);
 
   registerCommand(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf));
@@ -569,4 +520,39 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_shutdown(void)
     mineserver->logger.log(LOG_INFO, "plugin.command", "command is not loaded!");
     return;
   }
+}
+
+
+std::deque<std::string> parseCmd(std::string cmd)
+{
+  int del;
+  std::deque<std::string> temp;
+
+  while(cmd.length() > 0)
+  {
+    while(cmd[0] == ' ')
+    {
+      cmd = cmd.substr(1);
+    }
+
+    del = cmd.find(' ');
+
+    if(del > -1)
+    {
+      temp.push_back(cmd.substr(0, del));
+      cmd = cmd.substr(del+1);
+    }
+    else
+    {
+      temp.push_back(cmd);
+      break;
+    }
+  }
+
+  if(temp.empty())
+  {
+    temp.push_back("empty");
+  }
+
+  return temp;
 }
