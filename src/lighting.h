@@ -133,7 +133,7 @@ public:
 
 
   // Light get/set
-  bool getLight(int x, int y, int z, uint8 *blocklight, uint8 *skylight, sChunk *chunk);
+  bool getLight(int x, int y, int z, uint8_t *blocklight, uint8_t *skylight, sChunk *chunk);
   bool setLight(int x, int y, int z, int blocklight, int skylight, int setLight, sChunk *chunk);
   
   bool spreadLight(std::queue<lightInfo> *lightQueue, sChunk *chunk);

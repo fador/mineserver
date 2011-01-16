@@ -159,6 +159,9 @@
     <ClCompile Include="..\src\blocks\ladder.cpp">
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\lighting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\user.h">
@@ -301,6 +304,9 @@
     </ClInclude>
     <ClInclude Include="..\src\blocks\ladder.h">
       <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lighting.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

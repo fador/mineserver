@@ -35,12 +35,14 @@
 #include <ctime>
 #include <queue>
 
+#include "mineserver.h"
 #include "logger.h"
 #include "constants.h"
 
 #include "config.h"
 #include "nbt.h"
 #include "map.h"
+
 
 #include "lighting.h"
 
@@ -50,14 +52,14 @@ Lighting *Lighting::mLight;
 bool Lighting::generateLight(int x, int z, sChunk *chunk)
 {
   
-  uint8 *blocks     = chunk->blocks;
-  uint8 *skylight   = chunk->skylight;
-  uint8 *blocklight = chunk->blocklight;
-  uint8 *heightmap  = chunk->heightmap;
+  uint8_t *blocks     = chunk->blocks;
+  uint8_t *skylight   = chunk->skylight;
+  uint8_t *blocklight = chunk->blocklight;
+  uint8_t *heightmap  = chunk->heightmap;
 
-  uint64 *blocks64 = (uint64 *)blocks;
-  uint32 *skylight32 = (uint32 *)skylight;
-  uint8 meta,block,blockl,skyl;
+  uint64_t *blocks64 = (uint64_t *)blocks;
+  uint32_t *skylight32 = (uint32_t *)skylight;
+  uint8_t meta,block,blockl,skyl;
 
   std::queue<lightInfo> lightQueue;
 
@@ -81,7 +83,7 @@ bool Lighting::generateLight(int x, int z, sChunk *chunk)
       for(int block_y = (127/8)-1; block_y >= 0; block_y--)
       {
         int index      = block_y + blockx_blockz;
-        uint64 block64 = blocks64[index];
+        uint64_t block64 = blocks64[index];
 
         // if one of these 8 blocks is 
         if(block64 != 0)
@@ -175,16 +177,16 @@ bool Lighting::generateLight(int x, int z, sChunk *chunk)
 
       for(int block_y = heightmap[block_z+(block_x<<4)]; block_y >= 0; block_y--)
       {
-        if(Map::get()->getBlock(xdir,block_y,zdir,&block,&meta,false))
+        if(Mineserver::get()->map()->getBlock(xdir,block_y,zdir,&block,&meta,false))
         {
-          uint8 curblocklight,curskylight;
+          uint8_t curblocklight,curskylight;
           if(getLight(xdir, block_y, zdir,&skyl,&blockl,chunk)                            && 
              getLight(absolute_x, block_y, absolute_z,&curskylight,&curblocklight,chunk))
           {
             if(skyl-stopLight[block]-1>curskylight)
             {              
-              uint8 curblock,curmeta;
-              if(Map::get()->getBlock(absolute_x,block_y,absolute_z,&curblock,&curmeta,false) && 
+              uint8_t curblock,curmeta;
+              if(Mineserver::get()->map()->getBlock(absolute_x,block_y,absolute_z,&curblock,&curmeta,false) && 
                 skyl-stopLight[block]-stopLight[curblock] > 1)
               {
                 lightQueue.push(lightInfo(absolute_x,block_y,absolute_z,skyl-stopLight[block]-stopLight[curblock]-1, skipdir));
@@ -210,7 +212,7 @@ bool Lighting::generateLight(int x, int z, sChunk *chunk)
 
 bool Lighting::spreadLight(std::queue<lightInfo> *lightQueue, sChunk *chunk)
 {
-  uint8 meta,block,blockl,skyl;
+  uint8_t meta,block,blockl,skyl;
     //Next up, skylight spreading  
   while(!lightQueue->empty())
   {
@@ -247,7 +249,7 @@ bool Lighting::spreadLight(std::queue<lightInfo> *lightQueue, sChunk *chunk)
         //If still light left, generate for this block also!
         if(light>1)
         {
-          if(Map::get()->getBlock(xdir,ydir,zdir,&block,&meta,false) && light-stopLight[block]>1)
+          if(Mineserver::get()->map()->getBlock(xdir,ydir,zdir,&block,&meta,false) && light-stopLight[block]>1)
           {
             lightQueue->push(lightInfo(xdir,ydir,zdir,light-stopLight[block],skipdir));
           }
@@ -260,12 +262,12 @@ bool Lighting::spreadLight(std::queue<lightInfo> *lightQueue, sChunk *chunk)
 }
 
 // Light get/set
-bool Lighting::getLight(int x, int y, int z, uint8 *skylight, uint8 *blocklight, sChunk *chunk)
+bool Lighting::getLight(int x, int y, int z, uint8_t *skylight, uint8_t *blocklight, sChunk *chunk)
 {
-  return Map::get()->getLight(x,y,z,skylight,blocklight,chunk);
+  return Mineserver::get()->map()->getLight(x,y,z,skylight,blocklight,chunk);
 }
 
 bool Lighting::setLight(int x, int y, int z, int skylight, int blocklight, int setLight, sChunk *chunk)
 {
-  return Map::get()->setLight(x,y,z,skylight,blocklight,setLight,chunk);
+  return Mineserver::get()->map()->setLight(x,y,z,skylight,blocklight,setLight,chunk);
 }

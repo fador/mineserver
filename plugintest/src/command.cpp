@@ -117,9 +117,9 @@ bool chatCommandFunction(const char* userIn,const char* cmdIn, int argc, char** 
   if((iter = m_Commands.find(command)) != m_Commands.end())
   {
     iter->second->callback(user, command, cmd);
-    return false;
+    return true;
   }
-
+  return false;
 }
 
 bool isValidItem(int id)
