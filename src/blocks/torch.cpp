@@ -25,9 +25,10 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "torch.h"
-
 #include "../mineserver.h"
+#include "../map.h"
+
+#include "torch.h"
 
 void BlockTorch::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {

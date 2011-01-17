@@ -52,6 +52,7 @@
 #include "user.h"
 #include "mineserver.h"
 #include "logger.h"
+#include "tools.h"
 
 Inventory::Inventory()
 {

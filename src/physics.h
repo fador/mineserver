@@ -64,7 +64,6 @@ private:
   };
 
   std::vector<Sim> simList;
-  static Physics *m_Physics;
 };
 
 #endif

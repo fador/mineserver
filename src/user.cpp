@@ -168,7 +168,6 @@ User::~User()
   // Update player list
   if (fd != -1)
   {
-    Mineserver::get()->screen()->updatePlayerList(Mineserver::get()->users());
     (static_cast<Hook1<bool,const char*>*>(Mineserver::get()->plugin()->getHook("PlayerQuitPost")))->doAll(nick.c_str());
   }
 }
@@ -181,11 +180,8 @@ bool User::sendLoginInfo()
   // Login OK package
   buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << std::string("") << (int64_t)0 << (int8_t)0;
 
-
   // Send spawn position
   buffer << (int8_t)PACKET_SPAWN_POSITION << (int32_t)pos.x << ((int32_t)pos.y+2) << (int32_t)pos.z;
-
-
 
   // Put nearby chunks to queue
   for (int x = -viewDistance; x <= viewDistance; x++)
@@ -226,13 +222,9 @@ bool User::sendLoginInfo()
 
   Mineserver::get()->chat()->sendMsg(this, nick+" connected!", Chat::ALL);
 
-  // Update player list
-  Mineserver::get()->screen()->updatePlayerList(Mineserver::get()->users());
-
   pushMap(); pushMap(); pushMap();
   // Teleport player (again)
   teleport(pos.x, pos.y+2, pos.z);
-
 
   return true;
 }

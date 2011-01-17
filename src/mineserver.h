@@ -30,23 +30,25 @@
 
 #include <iostream>
 #include <vector>
+#include <event.h>
 
 #ifdef WIN32
   // This is needed for event to work on Windows.
   #include <Winsock2.h>
 #endif
 
-#include "chat.h"
-#include "config.h"
-#include "furnaceManager.h"
-#include "inventory.h"
-#include "logger.h"
-#include "map.h"
-#include "physics.h"
-#include "plugin.h"
-#include "screenBase.h"
-#include "user.h"
-#include "worldgen/mapgen.h"
+class User;
+class Map;
+class Chat;
+class Plugin;
+class Screen;
+class Physics;
+class Config;
+class FurnaceManager;
+class PacketHandler;
+class MapGen;
+class Logger;
+class Inventory;
 
 #ifdef FADOR_PLUGIN
 #define MINESERVER
@@ -62,10 +64,12 @@ public:
   static Mineserver* get()
   {
     static Mineserver* m_instance;
+
     if (!m_instance)
     {
       m_instance = new Mineserver;
     }
+
     return m_instance;
   }
 
@@ -99,9 +103,9 @@ public:
   void setMapGen(MapGen* mapGen) { m_mapGen = mapGen; }
   Logger* logger() const { return m_logger; }
   void setLogger(Logger* logger) { m_logger = logger; }
-
   Inventory* inventory() const { return m_inventory; }
   void setInventory(Inventory* inventory) { m_inventory = m_inventory; }
+
   void saveAllPlayers();
 
 private:
@@ -110,8 +114,6 @@ private:
   bool m_running;
   // holds all connected users
   std::vector<User*> m_users;
-
-  static Mineserver* m_instance;
 
   Map* m_map;
   Chat* m_chat;

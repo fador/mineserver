@@ -53,11 +53,10 @@
 
 #include "logger.h"
 #include "constants.h"
-#include "config.h"
-#include "user.h"
 #include "map.h"
 #include "vec.h"
 #include "mineserver.h"
+#include "tools.h"
 
 #include "physics.h"
 

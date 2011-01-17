@@ -30,6 +30,7 @@
 
 #include "../mineserver.h"
 #include "../plugin.h"
+#include "../map.h"
 
 #include "basic.h"
 

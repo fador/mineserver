@@ -44,6 +44,8 @@
 
 #include "hook.h"
 #include "plugin.h"
+#include "config.h"
+#include "map.h"
 #include "blocks/default.h"
 #include "blocks/falling.h"
 #include "blocks/torch.h"

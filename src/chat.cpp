@@ -25,16 +25,19 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "chat.h"
-
 #include <ctime>
 #include <iostream>
 #include <fstream>
 
 #include "constants.h"
+#include "user.h"
 #include "logger.h"
 #include "mineserver.h"
 #include "permissions.h"
+#include "tools.h"
+#include "plugin.h"
+
+#include "chat.h"
 
 Chat::Chat()
 {

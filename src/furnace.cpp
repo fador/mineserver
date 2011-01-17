@@ -30,6 +30,7 @@
 #include "constants.h"
 #include "furnace.h"
 #include "mineserver.h"
+#include "map.h"
 
 Furnace::Furnace(NBT_Value* entity, uint8_t blockType)
 {

@@ -25,9 +25,10 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "fire.h"
-
 #include "../mineserver.h"
+#include "../map.h"
+
+#include "fire.h"
 
 void BlockFire::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {

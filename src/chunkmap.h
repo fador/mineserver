@@ -35,6 +35,7 @@
 
 #include "packets.h"
 #include "user.h"
+#include "nbt.h"
 
 class NBT_Value;
 
@@ -144,7 +145,7 @@ struct sChunk
       furnaces.clear();
     }
 
-    if (nbt)
+    if (nbt != NULL)
     {
       delete nbt;
       nbt = NULL;

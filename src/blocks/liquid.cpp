@@ -25,24 +25,22 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "liquid.h"
-
 #include "../mineserver.h"
+#include "../map.h"
 #include "../physics.h"
+
+#include "liquid.h"
 
 void BlockLiquid::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-
 }
 
 void BlockLiquid::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-
 }
 
 void BlockLiquid::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-
 }
 
 void BlockLiquid::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
@@ -108,4 +106,3 @@ void BlockLiquid::physics(int32_t x, int8_t y, int32_t z)
    Mineserver::get()->physics()->addSimulation(vec(x, y, z));
    //Mineserver::get()->physics()->checkSurrounding(vec(x, y, z));
 }
-

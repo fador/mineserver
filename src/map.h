@@ -31,10 +31,9 @@
 #include <map>
 #include <list>
 #include <ctime>
-#include "nbt.h"
+
 #include "vec.h"
 #include "chunkmap.h"
-#include "inventory.h"
 
 class User;
 

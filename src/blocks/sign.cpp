@@ -27,9 +27,10 @@
 
 #include <math.h>
 
-#include "sign.h"
-
 #include "../mineserver.h"
+#include "../map.h"
+
+#include "sign.h"
 
 void BlockSign::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {

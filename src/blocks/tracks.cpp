@@ -25,11 +25,13 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "tracks.h"
-
 #include <iostream>
 
 #include "../mineserver.h"
+#include "../map.h"
+#include "../logger.h"
+
+#include "tracks.h"
 
 enum {
   FLAT_NS = 0,
