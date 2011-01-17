@@ -486,7 +486,7 @@ bool User::saveData()
 bool User::updatePos(double x, double y, double z, double stance)
 {
 
-  // Riding on a minecart?
+  // Riding other entity?
   if (y==-999)
   {
     // attachedTo
@@ -509,6 +509,7 @@ bool User::updatePos(double x, double y, double z, double stance)
     }    
     else if (abs(newChunk->x - oldChunk->x) <= 1  && abs(newChunk->z - oldChunk->z) <= 1)
     {
+      
       std::list<User*> toremove;
       std::list<User*> toadd;
 
@@ -548,7 +549,7 @@ bool User::updatePos(double x, double y, double z, double stance)
                  << (int32_t)UID << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32) 
                  << angleToByte(pos.yaw) << angleToByte(pos.pitch);
       newChunk->sendPacket(telePacket, this);
-
+      
       int chunkDiffX = newChunk->x - oldChunk->x;
       int chunkDiffZ = newChunk->z - oldChunk->z;
 
@@ -1066,7 +1067,7 @@ bool User::respawn()
   buffer << (int8_t)PACKET_RESPAWN;
   Packet destroyPkt;
   destroyPkt << (int8_t)PACKET_DESTROY_ENTITY << (int32_t)UID;
-  sChunk *chunk = Mineserver::get()->map()->getMapData(blockToChunk(floor(x)),blockToChunk(floor(z)));
+  sChunk *chunk = Mineserver::get()->map()->getMapData(blockToChunk(pos.x),blockToChunk(pos.z));
   if(chunk != NULL)
   {
     chunk->sendPacket(destroyPkt, this);
@@ -1076,9 +1077,9 @@ bool User::respawn()
 
   Packet spawnPkt;
   spawnPkt << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)UID << nick
-            << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch) << (int16_t)curItem;
+            << (int32_t)(pos.x * 32) << (int32_t)(pos.y * 32) << (int32_t)(pos.z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch) << (int16_t)curItem;
 
-  chunk = Mineserver::get()->map()->getMapData(blockToChunk(floor(x)),blockToChunk(floor(z)));
+  chunk = Mineserver::get()->map()->getMapData(blockToChunk(pos.x),blockToChunk(pos.z));
   if(chunk != NULL)
   {
     chunk->sendPacket(spawnPkt, this);
