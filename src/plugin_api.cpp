@@ -252,9 +252,9 @@ bool chat_sendUserlist(const char* user)
 // MAP WRAPPER FUNCTIONS
 bool map_setTime(int timeValue)
 {
-  Mineserver::get()->map()->mapTime = timeValue;
+  Mineserver::get()->map(0)->mapTime = timeValue;
   Packet pkt;
-  pkt << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map()->mapTime;
+  pkt << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map(0)->mapTime;
 
   if(User::all().size())
   {
@@ -270,35 +270,35 @@ void map_createPickupSpawn(int x, int y, int z, int type, int count, int health,
   {
     tempUser = userFromName(std::string(user));
   }
-  Mineserver::get()->map()->createPickupSpawn(x,y,z,type,count,health,tempUser);
+  Mineserver::get()->map(tempUser->pos.map)->createPickupSpawn(x,y,z,type,count,health,tempUser);
 }
 
 void map_getSpawn(int* x, int* y, int* z)
 {  
-  *x = Mineserver::get()->map()->spawnPos.x();
-  *y = Mineserver::get()->map()->spawnPos.y();
-  *z = Mineserver::get()->map()->spawnPos.z();
+  *x = Mineserver::get()->map(0)->spawnPos.x();
+  *y = Mineserver::get()->map(0)->spawnPos.y();
+  *z = Mineserver::get()->map(0)->spawnPos.z();
 }
 
 bool map_getBlock(int x, int y, int z, unsigned char* type,unsigned char* meta)
 {
-  return Mineserver::get()->map()->getBlock(x,y,z, type, meta);
+  return Mineserver::get()->map(0)->getBlock(x,y,z, type, meta);
 }
 
 bool map_setBlock(int x, int y, int z, unsigned char type,unsigned char meta)
 {
-  Mineserver::get()->map()->sendBlockChange(x, y, z, type, meta);
-  return Mineserver::get()->map()->setBlock(x,y,z, type, meta);
+  Mineserver::get()->map(0)->sendBlockChange(x, y, z, type, meta);
+  return Mineserver::get()->map(0)->setBlock(x,y,z, type, meta);
 }
 
 void map_saveWholeMap(void)
 {
-  Mineserver::get()->map()->saveWholeMap();
+  Mineserver::get()->map(0)->saveWholeMap();
 }
 
 unsigned char* map_getMapData_block(int x, int z)
 {
-  sChunk* chunk=Mineserver::get()->map()->getMapData(x,z);
+  sChunk* chunk=Mineserver::get()->map(0)->getMapData(x,z);
   if(chunk != NULL)
   {
     return chunk->blocks;
@@ -307,7 +307,7 @@ unsigned char* map_getMapData_block(int x, int z)
 }
 unsigned char* map_getMapData_meta(int x, int z)
 {
-  sChunk* chunk=Mineserver::get()->map()->getMapData(x,z);
+  sChunk* chunk=Mineserver::get()->map(0)->getMapData(x,z);
   if(chunk != NULL)
   {
     return chunk->data;
@@ -316,7 +316,7 @@ unsigned char* map_getMapData_meta(int x, int z)
 }
 unsigned char* map_getMapData_skylight(int x, int z)
 {
-  sChunk* chunk=Mineserver::get()->map()->getMapData(x,z);
+  sChunk* chunk=Mineserver::get()->map(0)->getMapData(x,z);
   if(chunk != NULL)
   {
     return chunk->skylight;
@@ -325,7 +325,7 @@ unsigned char* map_getMapData_skylight(int x, int z)
 }
 unsigned char* map_getMapData_blocklight(int x, int z)
 {
-  sChunk* chunk=Mineserver::get()->map()->getMapData(x,z);
+  sChunk* chunk=Mineserver::get()->map(0)->getMapData(x,z);
   if(chunk != NULL)
   {
     return chunk->blocklight;
@@ -371,6 +371,17 @@ bool user_teleport(const char* user,double x, double y, double z)
   if(tempUser != NULL)
   {
     tempUser->teleport(x, y, z);
+    return true;
+  }
+  return false;
+}
+
+bool user_teleportMap(const char* user,double x, double y, double z, int map)
+{
+  User* tempUser = userFromName(std::string(user));
+  if(tempUser != NULL)
+  {
+    tempUser->teleport(x, y, z, map);
     return true;
   }
   return false;
@@ -466,6 +477,8 @@ void init_plugin_api(void)
   plugin_api_pointers.user.getPosition             = &user_getPosition;
   plugin_api_pointers.user.teleport                = &user_teleport;
   plugin_api_pointers.user.sethealth               = &user_sethealth;
+  plugin_api_pointers.user.teleportMap             = &user_teleportMap;
+
 
   plugin_api_pointers.config.has                   = &config_has;
   plugin_api_pointers.config.iData                 = &config_iData;

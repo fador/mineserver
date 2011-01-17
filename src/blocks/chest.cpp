@@ -34,7 +34,18 @@
 #include "../map.h"
 #include "../chat.h"
 
-void BlockChest::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+bool BlockChest::affectedBlock(int block)
+{
+  switch(block)
+  {
+  case BLOCK_CHEST:
+    return true;
+  }
+  return false;
+}
+
+
+void BlockChest::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   // Locksystem
   if(user->inv[36+user->currentItemSlot()].type == ITEM_WOODEN_AXE)
@@ -42,7 +53,7 @@ void BlockChest::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y
     int chunk_x = blockToChunk(x);
     int chunk_z = blockToChunk(z);
 
-    sChunk *chunk = Mineserver::get()->map()->loadMap(chunk_x, chunk_z);
+    sChunk *chunk = Mineserver::get()->map(map)->loadMap(chunk_x, chunk_z);
 
     if(chunk == NULL)
     {
@@ -119,33 +130,33 @@ void BlockChest::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y
   }
 }
 
-void BlockChest::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockChest::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-void BlockChest::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockChest::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-void BlockChest::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+bool BlockChest::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t block;
   uint8_t meta;
 
-  if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
-    return;
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
+    return true;
 
   bool destroy = false;
     
   int chunk_x = blockToChunk(x);
   int chunk_z = blockToChunk(z);
 
-  sChunk *chunk = Mineserver::get()->map()->loadMap(chunk_x, chunk_z);
+  sChunk *chunk = Mineserver::get()->map(map)->loadMap(chunk_x, chunk_z);
    
   if(chunk == NULL)
-    return;
+    return true;
     
   for(uint32_t i = 0; i < chunk->chests.size(); i++)
   {
@@ -157,7 +168,7 @@ void BlockChest::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
       {
         if(chunk->chests[i]->items[item_i].type != -1)
         {
-          Mineserver::get()->map()->createPickupSpawn(chunk->chests[i]->x,
+          Mineserver::get()->map(map)->createPickupSpawn(chunk->chests[i]->x,
                                                       chunk->chests[i]->y,
                                                       chunk->chests[i]->z,
                                                       chunk->chests[i]->items[item_i].type,
@@ -172,53 +183,55 @@ void BlockChest::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
     }
   }
 
-  Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-  Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
-  this->spawnBlockItem(x,y,z,block);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  this->spawnBlockItem(x,y,z,map,block);
+  return false;
 
 }
 
-void BlockChest::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockChest::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockChest::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+bool BlockChest::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
-    return;
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+    return true;
 
   /* Check block below allows blocks placed on top */
   if (!this->isBlockStackable(oldblock))
-    return;
+    return true;
 
   /* move the x,y,z coords dependent upon placement direction */
-  if (!this->translateDirection(&x,&y,&z,direction))
-    return;
+  if (!this->translateDirection(&x,&y,&z,map,direction))
+    return true;
 
-  if (this->isUserOnBlock(x,y,z))
-     return;
+  if (this->isUserOnBlock(x,y,z,map))
+     return true;
 
-  if (!this->isBlockEmpty(x,y,z))
-     return;
+  if (!this->isBlockEmpty(x,y,z,map))
+     return true;
 
   direction = user->relativeToBlock(x, y, z);
 
-  Mineserver::get()->map()->setBlock(x, y, z, (char)newblock, direction);
-  Mineserver::get()->map()->sendBlockChange(x, y, z, (char)newblock, direction);
+  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+  return false;
 }
 
-void BlockChest::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockChest::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockChest::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockChest::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-void BlockChest::onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockChest::onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }

@@ -40,8 +40,8 @@
 class MapGen
 {
 public:
-  void init(int seed);
-  void generateChunk(int x, int z);
+  virtual void init(int seed);
+  virtual void generateChunk(int x, int z, int map);
 
 private:
   uint8_t blocks[16*16*128];
@@ -60,14 +60,14 @@ private:
   
   bool addOre;
 
-  void generateFlatgrass();
-  void generateWithNoise(int x, int z);
+  virtual void generateFlatgrass();
+  virtual void generateWithNoise(int x, int z, int map);
 
-  void ExpandBeaches(int x, int z);
-  void AddTrees(int x, int z, uint16_t count);
+  virtual void ExpandBeaches(int x, int z, int map);
+  virtual void AddTrees(int x, int z, int map, uint16_t count);
   
-  void AddOre(int x, int z, uint8_t type);
-  void AddDeposit(int x, int y, int z, uint8_t block, int depotSize);
+  virtual void AddOre(int x, int z, int map, uint8_t type);
+  virtual void AddDeposit(int x, int y, int z, int map, uint8_t block, int depotSize);
 
   
   CaveGen cave;

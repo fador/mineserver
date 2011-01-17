@@ -37,6 +37,7 @@
 #include <string.h>
 #include <cstdlib>
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <cstdio>
 #include <ctime>
@@ -57,6 +58,19 @@
 #include "chat.h"
 #include "mineserver.h"
 #include "tree.h"
+
+Map::Map(const Map &oldmap)
+{
+  // Copy Construtor
+  maps = oldmap.maps;
+  chunks = oldmap.chunks;
+  mapLastused = oldmap.mapLastused;
+  mapChanged = oldmap.mapChanged;
+  mapLightRegen = oldmap.mapLightRegen;
+  items = oldmap.items;
+  mapTime = oldmap.mapTime;
+  mapSeed = oldmap.mapSeed;
+}
 
 Map::Map()
 {
@@ -219,9 +233,23 @@ void Map::checkGenTrees()
   }
 }
 
-void Map::init()
+void Map::init(int number)
 {
-    mapDirectory = Mineserver::get()->config()->sData("map.storage.nbt.directory");
+    m_number = number;
+    const char* key = "map.storage.nbt.directories"; // Prefix for worlds config
+    std::list<std::string>* tmp = Mineserver::get()->config()->mData(key)->keys();
+    std::list<std::string>::iterator it = tmp->begin();
+    int a=0;
+    for(;it!=tmp->end();++it)
+    {
+      std::cout << a << number << std::endl;
+      if(a==number){
+        mapDirectory = *it;
+        break;
+      }
+      a++;
+    }
+    std::cout << "World "<<mapDirectory<<std::endl;
     if(mapDirectory == "Not found!")
     {
         std::cout << "Error, mapdir not defined!" << std::endl;
@@ -312,12 +340,12 @@ void Map::init()
     /////////////////
 
     // Init mapgenerator
-    Mineserver::get()->mapGen()->init((int32_t)mapSeed);
+    Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
 
     delete root;
 }
 
-sChunk* Map::getMapData(int x, int z, bool generate)
+sChunk* Map::getMapData(int x, int z,  bool generate)
 {
 
     sChunk* chunk = chunks.getChunk(x,z);
@@ -976,7 +1004,10 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
     // If generate (false only for lightmapgenerator)
     if(generate)
     {
-      Mineserver::get()->mapGen()->generateChunk(x,z);
+      // Re-seed! We share map gens with other maps
+      Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
+
+      Mineserver::get()->mapGen(m_number)->generateChunk(x,z,m_number);
       generateLight(x, z);
 
       chunk->lightRegen = false;
@@ -1000,7 +1031,6 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
           if(foundLand)
           {
             spawnPos.y() = new_y+1;
-
             std::string infile = mapDirectory+"/level.dat";
 
             NBT_Value* root = NBT_Value::LoadFromFile(infile);

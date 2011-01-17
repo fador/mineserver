@@ -25,39 +25,72 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef _NETHERGEN_H
+#define _NETHERGEN_H
 
-#include "basic.h"
+#ifdef DEBIAN
+#include <libnoise/noise.h>
+#else
+#include <noise/noise.h>
+#endif
 
-class User;
+#include "mapgen.h"
+#include "mersenne.h"
+#include "cavegen.h"
 
-struct TrackData
-{
-  uint32_t x;
-  uint8_t y;
-  uint32_t z;
-};
-
-/** BlockTracks deals specifically with minecart tracks
-@see BlockBasic
-*/
-class BlockTracks: public BlockBasic
-{
+class NetherGen : public MapGen {
 public:
-  bool affectedBlock(int block);
+  void init(int seed);
+  void generateChunk(int x, int z, int map);
 
-  void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
-  void onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
-  void onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
-  bool onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
-  void onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
-  bool onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
-  void onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
-  void onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
-  void onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
 private:
-  TrackData trackLog[2];
-  bool isTrack(int32_t x, int8_t y, int32_t z, int map,  uint8_t& meta);
-  bool isStartPiece(int32_t x, int8_t y, int32_t z, int map);
+  uint8_t netherblocks[16*16*128];
+  uint8_t blockdata[16*16*128/2];
+  uint8_t skylight[16*16*128/2];
+  uint8_t blocklight[16*16*128/2];
+  uint8_t heightmap[16*16];
+  
+  int seaLevel;
+  
+  bool addTrees;
+  
+  bool expandBeaches;
+  int beachExtent;
+  int beachHeight;
+  
+  bool addOre;
 
+  void generateFlatgrass();
+  void generateWithNoise(int x, int z, int map);
+
+  void ExpandBeaches(int x, int z, int map);
+  void AddTrees(int x, int z, int map, uint16_t count);
+  
+  void AddOre(int x, int z, int map, uint8_t type);
+  void AddDeposit(int x, int y, int z, int map, uint8_t block, int depotSize);
+
+  
+  CaveGen cave;
+  Random mersenne;
+
+  // Heightmap composition
+  noise::module::Voronoi Randomgen;
+  noise::module::Billow Randomciel;
+  
+  /*noise::module::ScaleBias perlinBiased;
+
+  noise::module::Perlin baseFlatTerrain;  
+  noise::module::ScaleBias flatTerrain;
+  
+  noise::module::Perlin seaFloor;
+  noise::module::ScaleBias seaBias;
+
+  noise::module::Perlin terrainType;
+
+  noise::module::Perlin seaControl;
+  
+  noise::module::Select seaTerrain;
+  noise::module::Select finalTerrain;*/
 };
+
+#endif

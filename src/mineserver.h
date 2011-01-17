@@ -47,6 +47,7 @@
 #include "screenBase.h"
 #include "user.h"
 #include "worldgen/mapgen.h"
+#include "worldgen/nethergen.h"
 
 #ifdef FADOR_PLUGIN
 #define MINESERVER
@@ -79,24 +80,25 @@ public:
   int m_socketlisten;
   void updatePlayerList();
 
-  Map* map() const { return m_map; }
-  void setMap(Map* map) { m_map = map; }
+  Map* map(int n);
+//  Map* map();
+  void setMap(Map* map,int n=0);
   Chat* chat() const { return m_chat; }
   void setChat(Chat* chat) { m_chat = chat; }
   Plugin* plugin() const { return m_plugin; }
   void setPlugin(Plugin* plugin) { m_plugin = plugin; }
   Screen* screen() const { return m_screen; }
   void setScreen(Screen* screen) { m_screen = screen; }
-  Physics* physics() const { return m_physics; }
-  void setPhysics(Physics* physics) { m_physics = physics; }
+  Physics* physics(int n=0);
   Config* config() const { return m_config; }
   void setConfig(Config* config) { m_config = config; }
   FurnaceManager* furnaceManager() const { return m_furnaceManager; }
   void setFurnaceManager(FurnaceManager* furnaceManager) { m_furnaceManager = furnaceManager; }
   PacketHandler* packetHandler() const { return m_packetHandler; }
   void setPacketHandler(PacketHandler* packetHandler) { m_packetHandler = packetHandler; }
-  MapGen* mapGen() const { return m_mapGen; }
-  void setMapGen(MapGen* mapGen) { m_mapGen = mapGen; }
+  MapGen* mapGen(int n);
+  MapGen* mapGen();
+//  void setMapGen(MapGen* mapGen) { m_mapGen = mapGen; }
   Logger* logger() const { return m_logger; }
   void setLogger(Logger* logger) { m_logger = logger; }
 
@@ -113,15 +115,16 @@ private:
 
   static Mineserver* m_instance;
 
-  Map* m_map;
+  std::vector<Map*> m_map;
+  std::vector<Physics*> m_physics;
+  std::map<int, MapGen*> gennames;
   Chat* m_chat;
   Plugin* m_plugin;
   Screen* m_screen;
-  Physics* m_physics;
   Config* m_config;
   FurnaceManager* m_furnaceManager;
   PacketHandler* m_packetHandler;
-  MapGen* m_mapGen;
+  std::vector<MapGen*> m_mapGen;
   Logger* m_logger;
   Inventory* m_inventory;
 };

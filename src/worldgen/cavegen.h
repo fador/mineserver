@@ -36,7 +36,7 @@ class CaveGen
 {
 public:
   void init(int seed);
-  void AddCaves(uint8_t &block, double x, double y, double z);
+  void AddCaves(uint8_t &block, double x, double y, double z, int map);
 
 private:
   Random mersenne;

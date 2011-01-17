@@ -43,8 +43,8 @@ public:
   virtual ~ITree() { }
 
   virtual void update() {
-    Mineserver::get()->map()->setBlock(_x, _y, _z, _type, _meta);
-    Mineserver::get()->map()->sendBlockChange(_x, _y, _z, _type, _meta);
+    Mineserver::get()->map(_map)->setBlock(_x, _y, _z, _type, _meta);
+    Mineserver::get()->map(_map)->sendBlockChange(_x, _y, _z, _type, _meta);
   }
   virtual void setY(int32_t y) { _y = y; }
   virtual const int32_t getY(void) { return _y; }
@@ -54,6 +54,7 @@ protected:
   int32_t _x;
   int32_t _y;
   int32_t _z;
+  int _map;
   uint8_t _type;
   char _meta;
 };
@@ -61,7 +62,7 @@ protected:
 class Trunk : public ITree 
 {
 public:
-  Trunk(int32_t x, int32_t y, int32_t z,char meta=0 ) { _x = x, _y = y, _z = z, _type = BLOCK_LOG, _meta = meta; update();}
+  Trunk(int32_t x, int32_t y, int32_t z, int map, char meta=0 ) { _x = x, _y = y, _z = z, _map = map, _type = BLOCK_LOG, _meta = meta; update();}
   ~Trunk() { }
 protected:
 };
@@ -69,7 +70,7 @@ protected:
 class Canopy : public ITree 
 {
 public:
-  Canopy(int32_t x, int32_t y, int32_t z,char meta=0) { _x = x, _y = y, _z = z, _type = BLOCK_LEAVES, _meta = meta; update();}
+  Canopy(int32_t x, int32_t y, int32_t z, int map, char meta=0) { _x = x, _y = y, _z = z,_map=map, _type = BLOCK_LEAVES, _meta = meta; update();}
   ~Canopy() { }
 protected:
 };
@@ -77,7 +78,7 @@ protected:
 class Tree : public ITree
 {
 public:
-  Tree(int32_t x, int32_t y, int32_t z,uint8_t limit = MAX_TRUNK);
+  Tree(int32_t x, int32_t y, int32_t z, int map,uint8_t limit = MAX_TRUNK);
   void generate(uint8_t);
   ~Tree(void);
 

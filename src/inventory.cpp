@@ -231,7 +231,7 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
   {
     if(user->inventoryHolding.type != -1)
     {
-      Mineserver::get()->map()->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z, 
+      Mineserver::get()->map(user->pos.map)->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z, 
                                                   user->inventoryHolding.type, user->inventoryHolding.count,
                                                   user->inventoryHolding.health,user);
       user->inventoryHolding.count = 0;
@@ -249,7 +249,7 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
   sChunk* chunk = NULL;
   if(windowID != 0)
   {
-    chunk = Mineserver::get()->map()->chunks.getChunk(blockToChunk(user->openInv.x),blockToChunk(user->openInv.z));
+    chunk = Mineserver::get()->map(user->pos.map)->chunks.getChunk(blockToChunk(user->openInv.x),blockToChunk(user->openInv.z));
 
     if(chunk == NULL)
     {
@@ -631,7 +631,7 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
 
 bool Inventory::windowOpen(User *user, int8_t type, int32_t x, int32_t y, int32_t z)
 {
-  sChunk* chunk = Mineserver::get()->map()->chunks.getChunk(blockToChunk(x),blockToChunk(z));
+  sChunk* chunk = Mineserver::get()->map(user->pos.map)->chunks.getChunk(blockToChunk(x),blockToChunk(z));
 
   if(chunk == NULL)
   {
@@ -792,7 +792,7 @@ bool Inventory::windowClose(User *user,int8_t windowID)
   //If still holding something, dump the items to ground
   if(user->inventoryHolding.type != -1)
   {
-    Mineserver::get()->map()->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z, 
+    Mineserver::get()->map(user->pos.map)->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z, 
                                                 user->inventoryHolding.type, user->inventoryHolding.count,
                                                 user->inventoryHolding.health,user);
     user->inventoryHolding.count = 0;
@@ -891,7 +891,7 @@ bool Inventory::onwindowClose(User *user, int8_t type, int32_t x, int32_t y, int
               {
                 if((*inv)[i]->workbench[slotNumber].type != -1)
                 {
-                  Mineserver::get()->map()->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z, 
+                  Mineserver::get()->map(user->pos.map)->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z, 
                                                   (*inv)[i]->workbench[slotNumber].type, (*inv)[i]->workbench[slotNumber].count,
                                                   (*inv)[i]->workbench[slotNumber].health,user);
                 }

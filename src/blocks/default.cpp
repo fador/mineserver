@@ -29,103 +29,115 @@
 
 #include "../mineserver.h"
 
-void BlockDefault::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+bool BlockDefault::affectedBlock(int block)
+{
+  return true;
+}
+
+
+void BlockDefault::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockDefault::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockDefault::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockDefault::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockDefault::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockDefault::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+bool BlockDefault::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t block;
   uint8_t meta;
 
-  if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z,&block, &meta))
   {
-    return;
+    return true;
+  }
+  if(block != BLOCK_GRAY_CLOTH && block != BLOCK_WOOD){
+    // Only Cloth and Wood have colour metadata
+    meta = 0;
   }
 
-  Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-  Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
-  this->spawnBlockItem(x,y,z,block,meta);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  this->spawnBlockItem(x,y,z,map,block,meta);
+  return false;
 }
 
-void BlockDefault::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockDefault::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockDefault::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+bool BlockDefault::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
-    return;
+    return true;
   }
 
   //Combine two steps
   if(newblock == BLOCK_STEP && oldblock == BLOCK_STEP && direction == BLOCK_TOP)
   {
-     Mineserver::get()->map()->setBlock(x, y, z, (char)BLOCK_DOUBLE_STEP, 0);
-     Mineserver::get()->map()->sendBlockChange(x, y, z, (char)BLOCK_DOUBLE_STEP, 0);
-     return;
+     Mineserver::get()->map(map)->setBlock(x, y, z, (char)BLOCK_DOUBLE_STEP, 0);
+     Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)BLOCK_DOUBLE_STEP, 0);
+     return true;
   }
 
   /* Check block below allows blocks placed on top */
   if (!this->isBlockStackable(oldblock))
   {
-    return;
+    return true;
   }
 
   /* move the x,y,z coords dependent upon placement direction */
-  if (!this->translateDirection(&x,&y,&z,direction))
+  if (!this->translateDirection(&x,&y,&z,map,direction))
   {
-    return;
+    return true;
   }
 
-  if (this->isUserOnBlock(x,y,z))
+  if (this->isUserOnBlock(x,y,z,map))
   {
-    return;
+    return true;
   }
 
-  if (!this->isBlockEmpty(x,y,z))
+  if (!this->isBlockEmpty(x,y,z,map))
   {
-    return;
+    return true; 
   }
 
   direction = user->relativeToBlock(x, y, z);
 
-  Mineserver::get()->map()->setBlock(x, y, z, (char)newblock, direction);
-  Mineserver::get()->map()->sendBlockChange(x, y, z, (char)newblock, direction);
+  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+  return false;
 }
 
-void BlockDefault::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockDefault::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockDefault::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockDefault::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     return;
   }
 
-  Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-  Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
-  Mineserver::get()->map()->createPickupSpawn(x, y, z, oldblock, 1, 0, NULL);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map(map)->createPickupSpawn(x, y, z, oldblock, 1, 0, NULL);
 }
 
-void BlockDefault::onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockDefault::onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 

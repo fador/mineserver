@@ -29,85 +29,105 @@
 
 #include "plant.h"
 
-void BlockPlant::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+bool BlockPlant::affectedBlock(int block)
+{
+  switch(block)
+  {
+  case BLOCK_YELLOW_FLOWER:
+  case BLOCK_RED_ROSE:
+  case BLOCK_BROWN_MUSHROOM:
+  case BLOCK_RED_MUSHROOM:
+  case BLOCK_CROPS:
+  case BLOCK_CACTUS:
+  case BLOCK_REED:
+  case BLOCK_SAPLING:
+    return true;
+  }
+  return false;
+}
+
+
+void BlockPlant::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-void BlockPlant::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockPlant::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-void BlockPlant::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockPlant::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-void BlockPlant::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+bool BlockPlant::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
+  return false;
 }
 
-void BlockPlant::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockPlant::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    uint8_t block;
    uint8_t meta;
-   if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
+   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
       return;
    
-   if (direction == BLOCK_TOP && this->isBlockEmpty(x, y-1, z))
+   if (direction == BLOCK_TOP && this->isBlockEmpty(x, y-1, z,map))
    {
       // Break plant and spawn plant item
-      Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-      Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
-      this->spawnBlockItem(x, y, z, block);
+      Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+      Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+      this->spawnBlockItem(x, y, z, map, block);
    }   
 }
 
-void BlockPlant::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+bool BlockPlant::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    uint8_t oldblock;
    uint8_t oldmeta;
 
    /* move the x,y,z coords dependent upon placement direction */
-   if (!this->translateDirection(&x,&y,&z,direction))
-      return;
+   if (!this->translateDirection(&x,&y,&z,map,direction))
+      return true;
 
-   if (this->isBlockEmpty(x,y-1,z) || !this->isBlockEmpty(x,y,z))
-      return;
+   if (this->isBlockEmpty(x,y-1,z,map) || !this->isBlockEmpty(x,y,z,map))
+      return true;
 
-   if (!Mineserver::get()->map()->getBlock(x, y-1, z, &oldblock, &oldmeta))
-      return;
+   if (!Mineserver::get()->map(map)->getBlock(x, y-1, z, &oldblock, &oldmeta))
+      return true;
 
    if (!this->isBlockStackable(oldblock))
-      return;
+      return true;
 
    /* Only place on dirt or grass */
    switch(oldblock)
    {
       case BLOCK_SOIL:
          /* change to dirt block */
-         Mineserver::get()->map()->setBlock(x, y-1, z, (char)BLOCK_DIRT, 0);
-         Mineserver::get()->map()->sendBlockChange(x, y-1, z, (char)BLOCK_DIRT, 0);
+         Mineserver::get()->map(map)->setBlock(x, y-1, z, (char)BLOCK_DIRT, 0);
+         Mineserver::get()->map(map)->sendBlockChange(x, y-1, z, (char)BLOCK_DIRT, 0);
       case BLOCK_GRASS:
       case BLOCK_DIRT:
-         Mineserver::get()->map()->setBlock(x, y, z, (char)newblock, 0);
-         Mineserver::get()->map()->sendBlockChange(x, y, z, (char)newblock, 0);
+         Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, 0);
+         Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);
       break;
       default:
-         return;
+         return true;
       break;
    }
 
    if(newblock == BLOCK_SAPLING)
-      Mineserver::get()->map()->addSapling(user,x,y,z);
+      Mineserver::get()->map(map)->addSapling(user,x,y,z);
+  return false;
 }
 
-void BlockPlant::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockPlant::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockPlant::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockPlant::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 
 }

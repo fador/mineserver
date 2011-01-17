@@ -67,6 +67,7 @@
 #include "sockets.h"
 #include "tools.h"
 #include "user.h"
+#include "blocks/basic.h"
 
 #ifdef WIN32
     #define M_PI 3.141592653589793238462643
@@ -150,7 +151,7 @@ int PacketHandler::change_sign(User *user)
   newSign->text3 = strings3;
   newSign->text4 = strings4;
 
-  sChunk* chunk = Mineserver::get()->map()->chunks.getChunk(blockToChunk(x),blockToChunk(z));
+  sChunk* chunk = Mineserver::get()->map(user->pos.map)->chunks.getChunk(blockToChunk(x),blockToChunk(z));
 
   if(chunk != NULL)
   {
@@ -483,6 +484,8 @@ int PacketHandler::player_digging(User *user)
   int8_t direction;
   uint8_t block;
   uint8_t meta;
+  BlockBasic* blockcb;
+
 
   user->buffer >> status >> x >> y >> z >> direction;
 
@@ -493,31 +496,52 @@ int PacketHandler::player_digging(User *user)
 
   user->buffer.removePacket();
 
-  if(!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
+  if(!Mineserver::get()->map(user->pos.map)->getBlock(x, y, z, &block, &meta))
   {
     return PACKET_OK;
   }
-
-  Function::invoker_type inv(user, status, x, y, z, direction);
 
   switch(status)
   {
     case BLOCK_STATUS_STARTED_DIGGING:
     {
       (static_cast<Hook4<bool,const char*,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("PlayerDiggingStarted")))->doAll(user->nick.c_str(), x, y, z);
-      Mineserver::get()->plugin()->runBlockCallback(block, "onStartedDigging", inv);
+      for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+      {
+        blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+        if(blockcb!=NULL && blockcb->affectedBlock(block))
+        {
+          blockcb->onStartedDigging(user, status,x,y,z,user->pos.map,direction);
+        }
+      }
       break;
     }
     case BLOCK_STATUS_DIGGING:
     {
       (static_cast<Hook4<bool,const char*,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("PlayerDigging")))->doAll(user->nick.c_str(), x, y, z);
-      Mineserver::get()->plugin()->runBlockCallback(block, "onDigging", inv);
+      for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+      {
+        blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+        if(blockcb!=NULL && blockcb->affectedBlock(block))
+        {
+          blockcb->onDigging(user, status,x,y,z,user->pos.map,direction);
+        }
+      }
+
       break;
     }
     case BLOCK_STATUS_STOPPED_DIGGING:
     {
       (static_cast<Hook4<bool,const char*,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("PlayerDiggingStopped")))->doAll(user->nick.c_str(), x, y, z);
-      Mineserver::get()->plugin()->runBlockCallback(block, "onStoppedDigging", inv);
+      for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+      {
+        blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+        if(blockcb!=NULL && blockcb->affectedBlock(block))
+        {
+          blockcb->onStoppedDigging(user,status, x,y,z,user->pos.map,direction);
+        }
+      }
+
       break;
     }
     case BLOCK_STATUS_BLOCK_BROKEN:
@@ -550,50 +574,103 @@ int PacketHandler::player_digging(User *user)
       }
 
       (static_cast<Hook4<bool,const char*,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("BlockBreakPost")))->doAll(user->nick.c_str(), x, y, z);
-      Mineserver::get()->plugin()->runBlockCallback(block, "onBroken", inv);
+
+      for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+      {
+        blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+        if(blockcb!=NULL && blockcb->affectedBlock(block))
+        {
+          if(blockcb->onBroken(user, status,x,y,z,user->pos.map,direction)){
+            // Do not break
+            return PACKET_OK;
+          }
+        }
+      }
 
       /* notify neighbour blocks of the broken block */
       status = block;
-      if (Mineserver::get()->map()->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
+      if (Mineserver::get()->map(user->pos.map)->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
       {
         (static_cast<Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x+1, y, z, x, y, z);
-        inv = Function::invoker_type(user, block, x+1, y, z, BLOCK_SOUTH);
-        Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourBroken", inv);
+        for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+        {
+          blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+          if(blockcb!=NULL && blockcb->affectedBlock(block))
+          {
+            blockcb->onNeighbourBroken(user, status,x+1,y,z,user->pos.map,direction);
+          }
+        }
+
       }
 
-      if (Mineserver::get()->map()->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
+      if (Mineserver::get()->map(user->pos.map)->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
       {
         (static_cast<Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x-1, y, z, x, y, z);
-        inv = Function::invoker_type(user, block, x-1, y, z, BLOCK_NORTH);
-        Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourBroken", inv);
+        for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+        {
+          blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+          if(blockcb!=NULL && blockcb->affectedBlock(block))
+          {
+            blockcb->onNeighbourBroken(user, status,x-1,y,z,user->pos.map,direction);
+          }
+        }
+
       }
 
-      if (Mineserver::get()->map()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
+      if (Mineserver::get()->map(user->pos.map)->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
       {
         (static_cast<Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x, y+1, z, x, y, z);
-        inv = Function::invoker_type(user, block, x, y+1, z, BLOCK_TOP);
-        Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourBroken", inv);
+        for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+        {
+          blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+          if(blockcb!=NULL && blockcb->affectedBlock(block))
+          {
+            blockcb->onNeighbourBroken(user, status,x,y+1,z,user->pos.map,direction);
+          }
+        }
+
       }
 
-      if (Mineserver::get()->map()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
+      if (Mineserver::get()->map(user->pos.map)->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
       {
         (static_cast<Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x, y-1, z, x, y, z);
-        inv = Function::invoker_type(user, block, x, y-1, z, BLOCK_BOTTOM);
-        Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourBroken", inv);
+        for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+        {
+          blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+          if(blockcb!=NULL && blockcb->affectedBlock(block))
+          {
+            blockcb->onNeighbourBroken(user, status,x,y-1,z,user->pos.map,direction);
+          }
+        }
+
       }
 
-      if (Mineserver::get()->map()->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
+      if (Mineserver::get()->map(user->pos.map)->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
       {
         (static_cast<Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x, y, z+1, x, y, z);
-        inv = Function::invoker_type(user, block, x, y, z+1, BLOCK_WEST);
-        Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourBroken", inv);
+        for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+        {
+          blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+          if(blockcb!=NULL && blockcb->affectedBlock(block))
+          {
+            blockcb->onNeighbourBroken(user, status,x,y,z+1,user->pos.map,direction);
+          }
+        }
+
       }
 
-      if (Mineserver::get()->map()->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
+      if (Mineserver::get()->map(user->pos.map)->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
       {
         (static_cast<Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x, y, z-1, x, y, z);
-        inv = Function::invoker_type(user, block, x, y, z-1, BLOCK_EAST);
-        Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourBroken", inv);
+        for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+        {
+          blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+          if(blockcb!=NULL && blockcb->affectedBlock(block))
+          {
+            blockcb->onNeighbourBroken(user, status,x,y,z-1,user->pos.map,direction);
+          }
+        }
+
       }
 
       break;
@@ -604,7 +681,7 @@ int PacketHandler::player_digging(User *user)
       #define itemSlot (36+user->currentItemSlot())
       if(user->inv[itemSlot].type > 0)
       {
-        Mineserver::get()->map()->createPickupSpawn(user->pos.x, user->pos.y,user->pos.z,user->inv[itemSlot].type,1,user->inv[itemSlot].health,user);
+        Mineserver::get()->map(user->pos.map)->createPickupSpawn(user->pos.x, user->pos.y,user->pos.z,user->inv[itemSlot].type,1,user->inv[itemSlot].health,user);
 
         user->inv[itemSlot].count--;
         if(user->inv[itemSlot].count == 0)
@@ -640,6 +717,8 @@ int PacketHandler::player_block_placement(User *user)
   uint8_t meta  = 0;
   int8_t count  = 0;
   int16_t health = 0;
+  BlockBasic* blockcb;
+
 
   user->buffer >> x >> y >> z >> direction >> newblock;
 
@@ -654,7 +733,7 @@ int PacketHandler::player_block_placement(User *user)
   user->buffer.removePacket();
 
 
-  if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &metadata))
+  if (!Mineserver::get()->map(user->pos.map)->getBlock(x, y, z, &oldblock, &metadata))
   {
     return PACKET_OK;
   }
@@ -676,10 +755,10 @@ int PacketHandler::player_block_placement(User *user)
 
      int modifier = (metadata & 0x8) ? -1 : 1;
 
-     Mineserver::get()->map()->setBlock(x, y, z, oldblock, metadata);
-     Mineserver::get()->map()->sendBlockChange(x, y, z, (char)oldblock, metadata);  
+     Mineserver::get()->map(user->pos.map)->setBlock(x, y, z, oldblock, metadata);
+     Mineserver::get()->map(user->pos.map)->sendBlockChange(x, y, z, (char)oldblock, metadata);  
 
-     Mineserver::get()->map()->getBlock(x, y + modifier, z, &block2, &metadata2);
+     Mineserver::get()->map(user->pos.map)->getBlock(x, y + modifier, z, &block2, &metadata2);
 
      if (block2 == oldblock)
      {
@@ -690,8 +769,8 @@ int PacketHandler::player_block_placement(User *user)
        else
          metadata2 |= 0x8;
 
-       Mineserver::get()->map()->setBlock(x, y + modifier, z, block2, metadata2);
-       Mineserver::get()->map()->sendBlockChange(x, y + modifier, z, (char)oldblock, metadata2);
+       Mineserver::get()->map(user->pos.map)->setBlock(x, y + modifier, z, block2, metadata2);
+       Mineserver::get()->map(user->pos.map)->sendBlockChange(x, y + modifier, z, (char)oldblock, metadata2);
      }
 
      return PACKET_OK;
@@ -758,7 +837,7 @@ int PacketHandler::player_block_placement(User *user)
   }
 
   // Minecart testing!!
-  if(newblock == ITEM_MINECART && Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &metadata))
+  if(newblock == ITEM_MINECART && Mineserver::get()->map(user->pos.map)->getBlock(x, y, z, &oldblock, &metadata))
   {
     if (oldblock != BLOCK_MINECART_TRACKS)
     {
@@ -795,10 +874,6 @@ int PacketHandler::player_block_placement(User *user)
     direction = 6-direction;
   }
 
-  Callback callback;
-  Function event;
-  Function::invoker_type inv(user, newblock, x, y, z, direction);
-
   //if (Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &metadata))
   {
     uint8_t oldblocktop;
@@ -819,7 +894,7 @@ int PacketHandler::player_block_placement(User *user)
       default:                       break;
     }
 
-    if (Mineserver::get()->map()->getBlock(check_x, check_y, check_z, &oldblocktop, &metadatatop) && 
+    if (Mineserver::get()->map(user->pos.map)->getBlock(check_x, check_y, check_z, &oldblocktop, &metadatatop) && 
         (oldblocktop == BLOCK_LAVA || oldblocktop == BLOCK_STATIONARY_LAVA ||
          oldblocktop == BLOCK_WATER || oldblocktop == BLOCK_STATIONARY_WATER))
     {
@@ -827,8 +902,15 @@ int PacketHandler::player_block_placement(User *user)
 
       // TODO: Does this require some form of recursion for multiple water/lava blocks?
 
-      inv = Function::invoker_type(user, newblock, check_x, check_y, check_z, direction);
-      Mineserver::get()->plugin()->runBlockCallback(oldblocktop, "onReplace", inv);
+      for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+      {
+        blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+        if(blockcb!=NULL && blockcb->affectedBlock(newblock))
+        {
+          blockcb->onReplace(user, newblock,check_x,check_y,check_z,user->pos.map,direction);
+        }
+      }
+
       if ((static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>*>(Mineserver::get()->plugin()->getHook("BlockReplacePre")))->doUntilFalse(user->nick.c_str(), check_x, check_y, check_z, oldblock, newblock))
       {
         return PACKET_OK;
@@ -837,8 +919,15 @@ int PacketHandler::player_block_placement(User *user)
     }
     else
     {
-      inv = Function::invoker_type(user, newblock, x, y, z, direction);
-      Mineserver::get()->plugin()->runBlockCallback(oldblock, "onReplace", inv);
+/*      for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+      {
+        blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+        if(blockcb!=NULL && blockcb->affectedBlock(newblock))
+        {
+          blockcb->onReplace(user, newblock,check_x,check_y,check_z,user->pos.map,direction);
+        }
+      }*/
+
       if ((static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>*>(Mineserver::get()->plugin()->getHook("BlockReplacePre")))->doUntilFalse(user->nick.c_str(), x, y, z, oldblock, newblock))
       {
         return PACKET_OK;
@@ -855,57 +944,108 @@ int PacketHandler::player_block_placement(User *user)
     the callback doesn't know what type of block we're placing. Instead
     the callback's job is to describe the behaviour when placing the
     block down, not to place any specifically block itself. */
-    inv = Function::invoker_type(user, newblock, x, y, z, direction);
-    Mineserver::get()->plugin()->runBlockCallback(newblock, "onPlace", inv);
-
+    for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+    {
+      std::cout << i << std::endl;
+      blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+      if(blockcb!=NULL && blockcb->affectedBlock(newblock))
+      {
+        std::cout << "Testing plugin" << std::endl;
+        if(blockcb->onPlace(user, newblock,x,y,z,user->pos.map,direction)){
+          std::cout << "PLUGIN SAYS NO" <<std::endl;
+          return PACKET_OK;
+        }
+      }
+    }
     (static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int8_t>*>(Mineserver::get()->plugin()->getHook("BlockPlacePost")))->doAll(user->nick.c_str(), x, y, z, newblock,direction);
+    std::cout << "Place 1" << std::endl;
 
     /* notify neighbour blocks of the placed block */
-    if (Mineserver::get()->map()->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
+    if (Mineserver::get()->map(user->pos.map)->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
     {
-      inv = Function::invoker_type(user, newblock, x+1, y, z, BLOCK_SOUTH);
-      Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourPlace", inv);
+      for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+      {
+        blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+        if(blockcb!=NULL && blockcb->affectedBlock(newblock))
+        {
+          blockcb->onNeighbourPlace(user, newblock,x+1,y,z,user->pos.map,direction);
+        }
+      }
+
       (static_cast<Hook4<bool,const char*,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourPlace")))->doAll(user->nick.c_str(), x+1, y, z);
     }
 
-    if (Mineserver::get()->map()->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
+    if (Mineserver::get()->map(user->pos.map)->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
     {
-      inv = Function::invoker_type(user, newblock, x-1, y, z, BLOCK_NORTH);
-      Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourPlace", inv);
+      for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+      { 
+        blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+        if(blockcb!=NULL && blockcb->affectedBlock(newblock))
+        { 
+          blockcb->onNeighbourPlace(user, newblock,x-1,y,z,user->pos.map,direction);
+        } 
+      } 
       (static_cast<Hook4<bool,const char*,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourPlace")))->doAll(user->nick.c_str(), x-1, y, z);
     }
 
-    if (Mineserver::get()->map()->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
+    if (Mineserver::get()->map(user->pos.map)->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
     {
-      inv = Function::invoker_type(user, newblock, x, y+1, z, BLOCK_TOP);
-      Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourPlace", inv);
+      for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+      { 
+        blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+        if(blockcb!=NULL && blockcb->affectedBlock(newblock))
+        { 
+          blockcb->onNeighbourPlace(user, newblock,x,y+1,z,user->pos.map,direction);
+        } 
+      } 
       (static_cast<Hook4<bool,const char*,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourPlace")))->doAll(user->nick.c_str(), x, y+1, z);
     }
 
-    if (Mineserver::get()->map()->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
+    if (Mineserver::get()->map(user->pos.map)->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
     {
-      inv = Function::invoker_type(user, newblock, x, y-1, z, BLOCK_BOTTOM);
-      Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourPlace", inv);
+      for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+      { 
+        blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+        if(blockcb!=NULL && blockcb->affectedBlock(newblock))
+        { 
+          blockcb->onNeighbourPlace(user, newblock,x,y-1,z,user->pos.map,direction);
+        } 
+      } 
       (static_cast<Hook4<bool,const char*,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourPlace")))->doAll(user->nick.c_str(), x, y-1, z);
     }
 
-    if (Mineserver::get()->map()->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
+    if (Mineserver::get()->map(user->pos.map)->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
     {
-      inv = Function::invoker_type(user, newblock, x, y, z+1, BLOCK_WEST);
-      Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourPlace", inv);
+      for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+      { 
+        blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+        if(blockcb!=NULL && blockcb->affectedBlock(newblock))
+        { 
+          blockcb->onNeighbourPlace(user, newblock,x,y,z+1,user->pos.map,direction);
+        } 
+      } 
       (static_cast<Hook4<bool,const char*,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourPlace")))->doAll(user->nick.c_str(), x, y, z+1);
     }
 
-    if (Mineserver::get()->map()->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
+    if (Mineserver::get()->map(user->pos.map)->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
     {
-      inv = Function::invoker_type(user, newblock, x, y, z-1, BLOCK_EAST);
-      Mineserver::get()->plugin()->runBlockCallback(block, "onNeighbourPlace", inv);
+      for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+      { 
+        blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+        if(blockcb!=NULL && blockcb->affectedBlock(newblock))
+        { 
+          blockcb->onNeighbourPlace(user, newblock,x,y,z-1,user->pos.map,direction);
+        } 
+      } 
       (static_cast<Hook4<bool,const char*,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourPlace")))->doAll(user->nick.c_str(), x, y, z-1);
     }
   }
+  std::cout << "Place 2" << std::endl;
+
 
   /* TODO: Should be removed from here. Only needed for liquid related blocks? */
-  Mineserver::get()->physics()->checkSurrounding(vec(x, y, z));
+  Mineserver::get()->physics(user->pos.map)->checkSurrounding(vec(x, y, z));
+  std::cout << "Place 3" << std::endl;
   return PACKET_OK;
 }
 
@@ -991,7 +1131,7 @@ int PacketHandler::pickup_spawn(User *user)
   int z = int(sin(angle) * distanceToThrow + cos(angle) * distanceToThrow);
   item.pos += vec(x, 0, z);
 
-  Mineserver::get()->map()->sendPickupSpawn(item);
+  Mineserver::get()->map(user->pos.map)->sendPickupSpawn(item);
 
   return PACKET_OK;
 }
@@ -1078,7 +1218,7 @@ int PacketHandler::respawn(User *user)
 {
   user->dropInventory();
   user->respawn();
-  user->teleport(Mineserver::get()->map()->spawnPos.x(), Mineserver::get()->map()->spawnPos.y() + 2, Mineserver::get()->map()->spawnPos.z());
+  user->teleport(Mineserver::get()->map(user->pos.map)->spawnPos.x(), Mineserver::get()->map(user->pos.map)->spawnPos.y() + 2, Mineserver::get()->map(user->pos.map)->spawnPos.z());
   user->buffer.removePacket();
   return PACKET_OK;
 }
