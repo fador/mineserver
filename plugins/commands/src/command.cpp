@@ -38,6 +38,7 @@ copy command.so to Mineserver bin directory.
 #include <cstdlib>
 #include <map>
 #include <iostream>
+#include <fstream> // Added for MOTD
 #include <stdint.h>
 
 #define MINESERVER_C_API
@@ -482,6 +483,22 @@ void sendHelp(std::string user, std::string command, std::deque<std::string> arg
   }
 }
 
+void sendMOTD(std::string user, std::string command, std::deque<std::string> args)
+{
+	std::string line;
+	std::ifstream MOTDFile("motd.txt");
+	if (MOTDFile.is_open())
+    {
+		while (MOTDFile.good() )
+		{
+			std::getline(MOTDFile, line);
+			if(line.at(0) != '#')
+				mineserver->chat.sendmsgTo(user.c_str(), line.c_str());
+		}
+		MOTDFile.close();
+	}
+}
+
 std::string pluginName = "command";
 
 PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mineserver_temp)
@@ -511,6 +528,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mi
   registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap));  
   registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", sendHelp));
   registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport));
+  registerCommand(new Command(parseCmd("motd"), "", "Displays the MOTD", sendMOTD));
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION command_shutdown(void)
