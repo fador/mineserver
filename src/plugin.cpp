@@ -210,6 +210,7 @@ void Plugin::init()
    /* Fire */
    call.reset();
    call.add("onPlace", Function::from_method<BlockFire, &BlockFire::onPlace>(fireblock));
+   call.add("onReplace", Function::from_method<BlockDefault, &BlockDefault::onReplace>(defaultblock));
    setBlockCallback(BLOCK_FIRE, call);
    setBlockCallback(ITEM_FLINT_AND_STEEL, call);
 

@@ -238,37 +238,39 @@ void MapGen::AddTrees(int x, int z)
   int xBlockpos = x<<4;
   int zBlockpos = z<<4;
   
-    int blockX, blockZ;
-    uint8_t blockY;
+  int blockX, blockZ;
+  uint8_t blockY;
 
-    uint8_t block;
-    uint8_t meta;
+  uint8_t block;
+  uint8_t meta;
 
-    uint8_t un = fastrand()%4+2;
-    uint8_t vn = fastrand()%4+2;
+  uint8_t un = fastrand()%4+2;
+  uint8_t vn = fastrand()%4+2;
 
-    float uFactor = (16 / (float)un);   //relational to literal
-    float vFactor = (16 / (float)vn);
-    for(uint8_t u = 0;u<un;u++){            //u for x and v for z iteration
-        for(uint8_t v = 0;v<vn;v++){
-            uint8_t a = u*uFactor;
-            uint8_t b = v*vFactor;
+  float uFactor = (16 / (float)un);   //relational to literal
+  float vFactor = (16 / (float)vn);
+  for(uint8_t u = 0;u<un;u++)
+  {            //u for x and v for z iteration
+    for(uint8_t v = 0;v<vn;v++)
+    {
+      uint8_t a = u*uFactor;
+      uint8_t b = v*vFactor;
 
-            blockX = a + xBlockpos;
-            blockZ = b + zBlockpos;
-            blockY = heightmap[(a<<4)+b] + 1;
+      blockX = a + xBlockpos;
+      blockZ = b + zBlockpos;
+      blockY = heightmap[(a<<4)+b] + 1;
 
-            Mineserver::get()->map()->getBlock(blockX, blockY, blockZ, &block, &meta);
+      Mineserver::get()->map()->getBlock(blockX, blockY, blockZ, &block, &meta);
 
-            // No trees on water
-            if(block != BLOCK_WATER || block != BLOCK_STATIONARY_WATER || block != BLOCK_SAND){
-                if(abs(treenoise.GetValue(blockX,0,blockZ)) >= 0.9){
-		
-                    Tree tree(blockX, blockY, blockZ);
-                }
-            }
+      // No trees on water
+      if(block != BLOCK_WATER || block != BLOCK_STATIONARY_WATER || block != BLOCK_SAND){
+        if(abs(treenoise.GetValue(blockX,0,blockZ)) >= 0.9)
+        {
+          Tree tree(blockX, blockY, blockZ);
         }
+      }
     }
+  }
 }
 
 void MapGen::generateWithNoise(int x, int z) 
