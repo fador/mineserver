@@ -107,8 +107,10 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
 
     if (token_type == CONFIG_TOKEN_BOOLEAN)
     {
-      ConfigNode* newNode = new ConfigNode;
+      ConfigNode* newNode = (token_label.size() && currentNode->has(token_label)) ? currentNode->get(token_label) : new ConfigNode;
+
       newNode->setData(token_data == "true");
+
       if (token_label.size())
       {
         currentNode->set(token_label, newNode, true);
@@ -122,8 +124,10 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
 
     if (token_type == CONFIG_TOKEN_STRING)
     {
-      ConfigNode* newNode = new ConfigNode;
+      ConfigNode* newNode = (token_label.size() && currentNode->has(token_label)) ? currentNode->get(token_label) : new ConfigNode;
+
       newNode->setData(token_data);
+
       if (token_label.size())
       {
         currentNode->set(token_label, newNode, true);
@@ -137,8 +141,10 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
 
     if (token_type == CONFIG_TOKEN_NUMBER)
     {
-      ConfigNode* newNode = new ConfigNode;
+      ConfigNode* newNode = (token_label.size() && currentNode->has(token_label)) ? currentNode->get(token_label) : new ConfigNode;
+
       newNode->setData((double)::atof(token_data.c_str()));
+
       if (token_label.size())
       {
         currentNode->set(token_label, newNode, true);
@@ -152,15 +158,13 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
 
     if (token_type == CONFIG_TOKEN_LIST_OPEN)
     {
-      ConfigNode* newNode = new ConfigNode;
+      ConfigNode* newNode = (token_label.size() && currentNode->has(token_label)) ? currentNode->get(token_label) : new ConfigNode;
+
+      newNode->setType(CONFIG_NODE_LIST);
+
       if (token_label.size())
       {
-        if (!currentNode->has(token_label))
-        {
-          newNode = new ConfigNode;
-          newNode->setType(CONFIG_NODE_LIST);
-          currentNode->set(token_label, newNode, true);
-        }
+        currentNode->set(token_label, newNode, true);
 
         newNode = currentNode->get(token_label, true);
 
@@ -170,6 +174,7 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
       {
         currentNode->add(newNode);
       }
+
       nodeStack.push_back(currentNode);
       currentNode = newNode;
     }
