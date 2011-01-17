@@ -102,9 +102,6 @@
     <ClCompile Include="..\src\worldgen\mapgen.cpp">
       <Filter>Source Files\worldgen</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\worldgen\mersenne.cpp">
-      <Filter>Source Files\worldgen</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\worldgen\cavegen.cpp">
       <Filter>Source Files\worldgen</Filter>
     </ClCompile>
@@ -231,9 +228,6 @@
       <Filter>Header Files\blocks</Filter>
     </ClInclude>
     <ClInclude Include="..\src\worldgen\mapgen.h">
-      <Filter>Header Files\worldgen</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\worldgen\mersenne.h">
       <Filter>Header Files\worldgen</Filter>
     </ClInclude>
     <ClInclude Include="..\src\worldgen\cavegen.h">

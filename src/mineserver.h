@@ -30,12 +30,13 @@
 
 #include <iostream>
 #include <vector>
-#include <event.h>
+
 
 #ifdef WIN32
   // This is needed for event to work on Windows.
   #include <Winsock2.h>
 #endif
+#include <event.h>
 
 class User;
 class Map;

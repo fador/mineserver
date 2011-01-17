@@ -40,10 +40,11 @@ void FurnaceManager::update()
     return;
   }
 
+  /*
 #ifdef _DEBUG
   LOG(DEBUG, "Furnace", "Checking Furnaces: " + dtos(m_activeFurnaces.size()) + " active furnaces.");
 #endif
-
+  */
   // Loop thru all the furnaces
   for(unsigned int index = 0; index < m_activeFurnaces.size(); index++)
   {
