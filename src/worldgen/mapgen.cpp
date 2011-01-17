@@ -110,20 +110,20 @@ void MapGen::init(int seed)
   seaTerrain.SetBounds(-0.3, 1000.0);
   seaTerrain.SetEdgeFalloff(0.1);*/
 
-    //###### TREE GEN #####
-    treenoise.SetSeed(seed);
-    treenoise.SetOctaveCount(6);
-    treenoise.SetFrequency(1.0/180.0);
-    treenoise.SetLacunarity(2.0);
+  //###### TREE GEN #####
+  treenoise.SetSeed(seed);
+  treenoise.SetOctaveCount(6);
+  treenoise.SetFrequency(1.0/180.0);
+  treenoise.SetLacunarity(2.0);
 
-    //###### END TREE GEN #######
-    seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
-    addTrees = Mineserver::get()->config()->bData("mapgen.trees.enabled");
-    expandBeaches = Mineserver::get()->config()->bData("mapgen.beaches.expand");
-    beachExtent = Mineserver::get()->config()->iData("mapgen.beaches.extent");
-    beachHeight = Mineserver::get()->config()->iData("mapgen.beaches.height");
+  //###### END TREE GEN #######
+  seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
+  addTrees = Mineserver::get()->config()->bData("mapgen.trees.enabled");
+  expandBeaches = Mineserver::get()->config()->bData("mapgen.beaches.expand");
+  beachExtent = Mineserver::get()->config()->iData("mapgen.beaches.extent");
+  beachHeight = Mineserver::get()->config()->iData("mapgen.beaches.height");
 
-    addOre = Mineserver::get()->config()->bData("mapgen.caves.ore");
+  addOre = Mineserver::get()->config()->bData("mapgen.caves.ore");
   addCaves = Mineserver::get()->config()->bData("mapgen.caves.enabled");
 
 }
@@ -223,7 +223,7 @@ void MapGen::generateChunk(int x, int z)
   
   // Add trees
   if(addTrees)
-        AddTrees(x, z);  // add trees will make a *kind-of* forest of 16*16 chunks
+    AddTrees(x, z);  // add trees will make a *kind-of* forest of 16*16 chunks
     
   if(expandBeaches)
     ExpandBeaches(x, z);
@@ -263,7 +263,8 @@ void MapGen::AddTrees(int x, int z)
       Mineserver::get()->map()->getBlock(blockX, blockY, blockZ, &block, &meta);
 
       // No trees on water
-      if(block != BLOCK_WATER || block != BLOCK_STATIONARY_WATER || block != BLOCK_SAND){
+      if(block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER && block != BLOCK_SAND)
+      {
         if(abs(treenoise.GetValue(blockX,0,blockZ)) >= 0.9)
         {
           Tree tree(blockX, blockY, blockZ);

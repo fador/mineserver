@@ -173,45 +173,48 @@ void Map::addSapling(User* user, int x, int y, int z)
 
 void Map::checkGenTrees()
 {
-    std::list<sTree>::iterator iter = saplings.begin();
+  std::list<sTree>::iterator iter = saplings.begin();
 
-    static uint8_t light;
-    static uint8_t skylight;
+  static uint8_t light;
+  static uint8_t skylight;
 
-    static uint8_t blocktype;
-    static uint8_t meta;
+  static uint8_t blocktype;
+  static uint8_t meta;
 
-    while (iter != saplings.end())
+  while (iter != saplings.end())
+  {
+    getLight(iter->x,iter->y+1,iter->z,&light,&skylight);
+    if(light>9 || skylight >3)
     {
-        getLight(iter->x,iter->y+1,iter->z,&light,&skylight);
-        if(light>9 || skylight >3){
-            //Check above blocks
-            uint8_t i=1;
-            nextblock:
-            getBlock(iter->x,iter->y+i,iter->z,&blocktype,&meta);
-            if(blocktype == BLOCK_AIR){
-                i++;
-                if(i<MAX_TRUNK){
-                    goto nextblock;
-                }
-            }
-            if(i>=MIN_TREE_SPACE){//If there is enough space
-                LOG(INFO, "Map", "Grow tree!");
-
-                Tree tree((*iter).x,(*iter).y,(*iter).z,i);
-                saplings.erase(iter++);  // alternatively, i = items.erase(i);
-            }
-            else{
-                goto increment;
-
-            }
-        }
-        else
+      //Check above blocks
+      uint8_t i=1;
+      for(i = 1;i < MAX_TRUNK; i++)
+      {
+        if(!getBlock(iter->x,iter->y+i,iter->z,&blocktype,&meta) || blocktype != BLOCK_AIR)
         {
-            increment:
-            iter++;
+          break;
         }
+      }
+      if(i >= MIN_TREE_SPACE)
+      {//If there is enough space
+        if(rand() % 50 == 0)
+        {
+          LOG(INFO, "Map", "Grow tree!");
+
+          Tree tree((*iter).x,(*iter).y,(*iter).z,i);
+          saplings.erase(iter++);  // alternatively, i = items.erase(i);
+        }
+      }
+      else
+      {
+        iter++;
+      }
     }
+    else
+    {
+      iter++;
+    }
+  }
 }
 
 void Map::init()

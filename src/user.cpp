@@ -121,7 +121,7 @@ User::~User()
   this->buffer.reset();
 
   // Remove all known chunks
-  for (int i=0;i<mapKnown.size();i++)
+  for (uint32_t i=0;i<mapKnown.size();i++)
   {
     delKnown(mapKnown[i].x(), mapKnown[i].z());
   }
