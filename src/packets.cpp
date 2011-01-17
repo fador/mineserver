@@ -1077,8 +1077,7 @@ int PacketHandler::use_entity(User *user)
 int PacketHandler::respawn(User *user)
 {
   user->dropInventory();
-  user->respawn();
-  user->teleport(Mineserver::get()->map()->spawnPos.x(), Mineserver::get()->map()->spawnPos.y() + 2, Mineserver::get()->map()->spawnPos.z());
+  user->respawn();  
   user->buffer.removePacket();
   return PACKET_OK;
 }

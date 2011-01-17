@@ -506,7 +506,7 @@ bool User::updatePos(double x, double y, double z, double stance)
                  << (int32_t)UID << (int32_t)(x * 32) << (int32_t)(y * 32) 
                  << (int32_t)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
       newChunk->sendPacket(telePacket, this);
-    }
+    }    
     else if (abs(newChunk->x - oldChunk->x) <= 1  && abs(newChunk->z - oldChunk->z) <= 1)
     {
       std::list<User*> toremove;
@@ -557,9 +557,6 @@ bool User::updatePos(double x, double y, double z, double stance)
       {
         for (int mapz = newChunk->z-viewDistance; mapz <= newChunk->z+viewDistance; mapz++)
         {
-
-
-          
           if (!withinViewDistance((mapx - chunkDiffX), newChunk->x) || !withinViewDistance((mapz - chunkDiffZ), newChunk->z))
           {
             addRemoveQueue(mapx-chunkDiffX, mapz-chunkDiffZ);
@@ -1067,6 +1064,26 @@ bool User::respawn()
   this->health = 20;
   this->timeUnderwater = 0;
   buffer << (int8_t)PACKET_RESPAWN;
+  Packet destroyPkt;
+  destroyPkt << (int8_t)PACKET_DESTROY_ENTITY << (int32_t)UID;
+  sChunk *chunk = Mineserver::get()->map()->getMapData(blockToChunk(floor(x)),blockToChunk(floor(z)));
+  if(chunk != NULL)
+  {
+    chunk->sendPacket(destroyPkt, this);
+  }
+
+  teleport(Mineserver::get()->map()->spawnPos.x(), Mineserver::get()->map()->spawnPos.y() + 2, Mineserver::get()->map()->spawnPos.z());
+
+  Packet spawnPkt;
+  spawnPkt << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)UID << nick
+            << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch) << (int16_t)curItem;
+
+  chunk = Mineserver::get()->map()->getMapData(blockToChunk(floor(x)),blockToChunk(floor(z)));
+  if(chunk != NULL)
+  {
+    chunk->sendPacket(spawnPkt, this);
+  }
+
   return true;
 }
 

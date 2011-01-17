@@ -111,7 +111,7 @@ void MapGen::init(int seed)
   seaTerrain.SetEdgeFalloff(0.1);*/
 
   //###### TREE GEN #####
-  treenoise.SetSeed(seed);
+  treenoise.SetSeed(seed+2);
   treenoise.SetOctaveCount(6);
   treenoise.SetFrequency(1.0/180.0);
   treenoise.SetLacunarity(2.0);
