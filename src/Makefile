@@ -47,7 +47,7 @@ else
 endif
 
 ifeq ($(DEBUG), YES)
-  CXXFLAGS  += -DDEBUG
+  CXXFLAGS  += -DDEBUG -g -O0
 endif
 
 ifeq ($(PEDANTIC), YES)
@@ -66,6 +66,10 @@ endif
 
 ifeq ($(findstring Ubuntu,$(shell cat /etc/issue)),Ubuntu)
   DEBIAN     = 1
+endif
+
+ifeq ($(findstring Mint,$(shell cat /etc/issue)),Mint)
+  DEBIAN = 1
 endif
 
 ifeq ($(DEBIAN), 1)

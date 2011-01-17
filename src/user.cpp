@@ -1012,10 +1012,10 @@ bool User::pushMap()
 
 bool User::teleport(double x, double y, double z)
 {
-  if (y > 128.0)
+  if (y > 127.0)
   {
-    y = 128.0;
-    LOGLF("Player Attempted to teleport with y > 128.0");
+    y = 127.0;
+    LOGLF("Player Attempted to teleport with y > 127.0");
   }
   buffer << (int8_t)PACKET_PLAYER_POSITION_AND_LOOK << x << y << (double)0.0 << z
          << (float)0.f << (float)0.f << (int8_t)1;
