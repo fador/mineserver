@@ -193,6 +193,7 @@ void Plugin::init()
    call.reset();
    call.add("onNeighbourBroken", Function::from_method<BlockSnow, &BlockSnow::onNeighbourBroken>(snowblock));
    call.add("onPlace", Function::from_method<BlockDefault, &BlockDefault::onPlace>(defaultblock));
+   call.add("onBroken", Function::from_method<BlockDefault, &BlockDefault::onBroken>(defaultblock));
    setBlockCallback(BLOCK_SNOW, call);
 
    /* Lava and Water */
