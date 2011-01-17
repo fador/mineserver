@@ -107,9 +107,10 @@ int main(int argc, char* argv[])
   return Mineserver::get()->run(argc, argv);
 }
 
-void log_to_screen(int type, const char* source, const char* message)
+bool log_to_screen(int type, const char* source, const char* message)
 {
   Mineserver::get()->screen()->log((LogType::LogType)type, std::string(source), std::string(message));
+  return true;
 }
 
 Mineserver::Mineserver()
@@ -159,7 +160,7 @@ int Mineserver::run(int argc, char *argv[])
   init_plugin_api();
 #endif
 
-  plugin()->getHook("LogPost")->addCallback((void*)log_to_screen);
+  static_cast<Hook3<bool,int,const char*,const char*>*>(plugin()->getHook("LogPost"))->addCallback(&log_to_screen);
 
   // Init our Screen
   screen()->init(VERSION);
