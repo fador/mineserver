@@ -23,7 +23,8 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
+
 #include <stdlib.h>
 #ifdef WIN32
   #include <conio.h>
@@ -90,7 +91,7 @@ int setnonblock(int fd)
   return 1;
 }
 
-//Handle signals
+// Handle signals
 void sighandler(int sig_num)
 {
   Mineserver::get()->stop();
@@ -139,9 +140,9 @@ void Mineserver::updatePlayerList()
 
 void Mineserver::saveAllPlayers()
 {
-  for(int i = users().size()-1; i >= 0; i--)
+  for (int i = users().size()-1; i >= 0; i--)
   {
-    if(users()[i]->logged)
+    if (users()[i]->logged)
     {
       users()[i]->saveData();
     }
@@ -155,9 +156,9 @@ int Mineserver::run(int argc, char *argv[])
   uint32_t tick      = (uint32_t)time(0);
 
 #ifdef FADOR_PLUGIN
-    init_plugin_api();
+  init_plugin_api();
 #endif
-  
+
   plugin()->getHook("LogPost")->addCallback((void*)log_to_screen);
 
   // Init our Screen
@@ -178,12 +179,12 @@ int Mineserver::run(int argc, char *argv[])
   // Initialize conf
   Mineserver::get()->config()->load(file_config);
 
-  //If needed change interface and reinitialize the new Screen
+  // If needed change interface and reinitialize the new Screen
   std::string iface = Mineserver::get()->config()->sData("system.interface");
   if (iface == "curses")
   {
     screen()->end();
-    //TODO: we lose everything written to the screen
+    // TODO: we lose everything written to the screen
     //      up to this point when using curses
     m_screen = new CursesScreen;
     screen()->init(VERSION);
@@ -234,12 +235,12 @@ int Mineserver::run(int argc, char *argv[])
     for (int x=-size;x<=size;x++)
     {
 #ifdef WIN32
-      if(show_progress)
+      if (show_progress)
       {
         t_begin = timeGetTime();
       }
 #else
-      if(show_progress)
+      if (show_progress)
       {
         t_begin = clock();
       }
@@ -249,7 +250,7 @@ int Mineserver::run(int argc, char *argv[])
         Mineserver::get()->map()->loadMap(x, z);
       }
 
-      if(show_progress)
+      if (show_progress)
       {
 #ifdef WIN32
         t_end = timeGetTime ();
@@ -279,7 +280,7 @@ int Mineserver::run(int argc, char *argv[])
   int iResult;
   // Initialize Winsock
   iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-  if(iResult != 0)
+  if (iResult != 0)
   {
     printf("WSAStartup failed with error: %d\n", iResult);
     Mineserver::get()->screen()->end();
@@ -297,7 +298,7 @@ int Mineserver::run(int argc, char *argv[])
   m_socketlisten = socket(AF_INET, SOCK_STREAM, 0);
 #endif
 
-  if(m_socketlisten < 0)
+  if (m_socketlisten < 0)
   {
     Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Failed to create listen socket");
     Mineserver::get()->screen()->end();
@@ -312,15 +313,15 @@ int Mineserver::run(int argc, char *argv[])
 
   setsockopt(m_socketlisten, SOL_SOCKET, SO_REUSEADDR, (char*)&reuse, sizeof(reuse));
 
-  //Bind to port
-  if(bind(m_socketlisten, (struct sockaddr*)&addresslisten, sizeof(addresslisten)) < 0)
+  // Bind to port
+  if (bind(m_socketlisten, (struct sockaddr*)&addresslisten, sizeof(addresslisten)) < 0)
   {
     Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Failed to bind to " + ip + ":" + dtos(port));
     Mineserver::get()->screen()->end();
     return 1;
   }
   
-  if(listen(m_socketlisten, 5) < 0)
+  if (listen(m_socketlisten, 5) < 0)
   {
     Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Failed to listen to socket" );
     Mineserver::get()->screen()->end();
@@ -331,15 +332,15 @@ int Mineserver::run(int argc, char *argv[])
   event_set(&m_listenEvent, m_socketlisten, EV_WRITE|EV_READ|EV_PERSIST, accept_callback, NULL);
   event_add(&m_listenEvent, NULL);
 
-  if(ip == "0.0.0.0")
+  if (ip == "0.0.0.0")
   {
     // Print all local IPs
     char name[255];
-    gethostname ( name, sizeof(name));
+    gethostname (name, sizeof(name));
     struct hostent* hostinfo = gethostbyname(name);
     Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", "Listening on: ");
     int ipIndex = 0;
-    while(hostinfo && hostinfo->h_addr_list[ipIndex])
+    while (hostinfo && hostinfo->h_addr_list[ipIndex])
     {
       std::string ip(inet_ntoa(*(struct in_addr*)hostinfo->h_addr_list[ipIndex++]));
       Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", ip + ":" + dtos(port));
@@ -350,11 +351,11 @@ int Mineserver::run(int argc, char *argv[])
     std::string myip(ip);
     Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", myip + ":" + dtos(port));
   }
-  //std::cout << std::endl;
+  // std::cout << std::endl;
 
   timeval loopTime;
   loopTime.tv_sec  = 0;
-  loopTime.tv_usec = 200000; //200ms
+  loopTime.tv_usec = 200000; // 200ms
 
   m_running = true;
   event_base_loopexit(m_eventBase, &loopTime);
@@ -364,37 +365,37 @@ int Mineserver::run(int argc, char *argv[])
   serverUser->changeNick("[Server]");
 
   time_t timeNow = time(NULL);
-  while(m_running && event_base_loop(m_eventBase, 0) == 0)
+  while (m_running && event_base_loop(m_eventBase, 0) == 0)
   {
     // Run 200ms timer hook
     static_cast<Hook0<bool>*>(plugin()->getHook("Timer200"))->doAll();
 
     // Append current command and check if user entered return
-    if(Mineserver::get()->screen()->hasCommand())
+    if (Mineserver::get()->screen()->hasCommand())
     {
       // Now handle this command as normal
       Mineserver::get()->chat()->handleMsg(serverUser, Mineserver::get()->screen()->getCommand().c_str());
     }
 
     timeNow = time(0);
-    if(timeNow-starttime > 10)
+    if (timeNow-starttime > 10)
     {
       starttime = (uint32_t)timeNow;
 
-      //If users, ping them
-      if(User::all().size() > 0)
+      // If users, ping them
+      if (User::all().size() > 0)
       {
-        //0x00 package
+        // 0x00 package
         uint8_t data = 0;
         User::all()[0]->sendAll(&data, 1);
 
-        //Send server time
+        // Send server time
         Packet pkt;
         pkt << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map()->mapTime;
         User::all()[0]->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
       }
 
-      //Check for tree generation from saplings
+      // Check for tree generation from saplings
       map()->checkGenTrees();
 
       // TODO: Run garbage collection for chunk storage dealie?
@@ -403,15 +404,15 @@ int Mineserver::run(int argc, char *argv[])
       static_cast<Hook0<bool>*>(plugin()->getHook("Timer10000"))->doAll();
     }
 
-    //Every second
-    if(timeNow-tick > 0)
+    // Every second
+    if (timeNow-tick > 0)
     {
       tick = (uint32_t)timeNow;
-      //Loop users
-      for(int i = users().size()-1; i >= 0; i--)
+      // Loop users
+      for (int i = users().size()-1; i >= 0; i--)
       {
-        //No data received in 3s, timeout
-        if(users()[i]->logged && (timeNow-users()[i]->lastData) > 3)
+        // No data received in 3s, timeout
+        if (users()[i]->logged && (timeNow-users()[i]->lastData) > 3)
         {
           Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Player "+users()[i]->nick+" timed out");
 
@@ -423,13 +424,13 @@ int Mineserver::run(int argc, char *argv[])
           users()[i]->popMap();
         }
 
-        //Minecart hacks!!
+        // Minecart hacks!!
         /*
-        if(User::all()[i]->attachedTo)
+        if (User::all()[i]->attachedTo)
         {
           Packet pkt;
           pkt << PACKET_ENTITY_VELOCITY << (int32_t)User::all()[i]->attachedTo <<  (int16_t)10000       << (int16_t)0 << (int16_t)0;
-          //pkt << PACKET_ENTITY_RELATIVE_MOVE << (int32_t)User::all()[i]->attachedTo <<  (int8_t)100       << (int8_t)0 << (int8_t)0;
+          // pkt << PACKET_ENTITY_RELATIVE_MOVE << (int32_t)User::all()[i]->attachedTo <<  (int8_t)100       << (int8_t)0 << (int8_t)0;
           User::all()[i]->sendAll((int8_t*)pkt.getWrite(), pkt.getWriteLen());
         }
         */
@@ -454,10 +455,10 @@ int Mineserver::run(int argc, char *argv[])
     Mineserver::get()->physics()->update();
 
     // Underwater check / drowning
-    //ToDo: this could be done a bit differently? - Fador
+    // ToDo: this could be done a bit differently? - Fador
     int i = 0;
     int s = User::all().size();
-    for(i=0;i<s;i++)
+    for (i=0;i<s;i++)
     {
       User::all()[i]->isUnderwater();
     }
@@ -478,6 +479,9 @@ int Mineserver::run(int argc, char *argv[])
   unlink((Mineserver::get()->config()->sData("system.pid_file")).c_str());
 #endif
 
+  // Let the user know we're shutting the server down cleanly
+  logger()->log(LogType::LOG_INFO, "Mineserver", "Shutting down...");
+
   // End our NCurses session
   screen()->end();
 
@@ -494,14 +498,17 @@ int Mineserver::run(int argc, char *argv[])
   delete m_logger;
   delete m_inventory;
 
+  delete serverUser;
+
   freeConstants();
+
+  event_base_free(m_eventBase);
 
   return EXIT_SUCCESS;
 }
 
 bool Mineserver::stop()
 {
-  m_running=false;
-
+  m_running = false;
   return true;
 }
