@@ -168,6 +168,9 @@ public:
   bool dropInventory();
   bool isUnderwater();
 
+  void clearLoadingMap();
+
+
   // Getter/Setter for item currently in hold
   int16_t currentItemSlot();
   void setCurrentItemSlot(int16_t item_slot);

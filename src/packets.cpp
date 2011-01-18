@@ -946,19 +946,15 @@ int PacketHandler::player_block_placement(User *user)
     block down, not to place any specifically block itself. */
     for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
     {
-      std::cout << i << std::endl;
       blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
       if(blockcb!=NULL && blockcb->affectedBlock(newblock))
       {
-        std::cout << "Testing plugin" << std::endl;
         if(blockcb->onPlace(user, newblock,x,y,z,user->pos.map,direction)){
-          std::cout << "PLUGIN SAYS NO" <<std::endl;
           return PACKET_OK;
         }
       }
     }
     (static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int8_t>*>(Mineserver::get()->plugin()->getHook("BlockPlacePost")))->doAll(user->nick.c_str(), x, y, z, newblock,direction);
-    std::cout << "Place 1" << std::endl;
 
     /* notify neighbour blocks of the placed block */
     if (Mineserver::get()->map(user->pos.map)->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
@@ -1040,12 +1036,10 @@ int PacketHandler::player_block_placement(User *user)
       (static_cast<Hook4<bool,const char*,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourPlace")))->doAll(user->nick.c_str(), x, y, z-1);
     }
   }
-  std::cout << "Place 2" << std::endl;
 
 
   /* TODO: Should be removed from here. Only needed for liquid related blocks? */
   Mineserver::get()->physics(user->pos.map)->checkSurrounding(vec(x, y, z));
-  std::cout << "Place 3" << std::endl;
   return PACKET_OK;
 }
 

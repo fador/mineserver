@@ -170,7 +170,7 @@ bool User::sendLoginInfo()
   //Load user data
   loadData();
 
-  //Login OK package
+  //pos.pitchLogin OK package
   buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << std::string("") << (int64_t)0 << (int8_t)0;
 
 
@@ -485,69 +485,65 @@ bool User::saveData()
 
 bool User::updatePosM(double x, double y, double z, int map, double stance)
 {
-  std::cout << map << "  "<< pos.map << std::endl;
   if(map!=pos.map && logged)
   {
-    pos.map = map;
-
-    // Unbuffer the upcomming chunks, they're no more use to us now
-    for(int i = mapQueue.size(); i > 0 ; i--)
-    {
-      mapQueue.erase(mapQueue.begin()+i);
-    }
-    sChunk* newChunk = Mineserver::get()->map(map)->loadMap(blockToChunk((int32_t)x), blockToChunk((int32_t)z));
-    sChunk* oldChunk = Mineserver::get()->map(pos.map)->loadMap(blockToChunk((int32_t)pos.x), blockToChunk((int32_t)pos.z));
-
-    int chunkDiffX = newChunk->x - oldChunk->x;
-    int chunkDiffZ = newChunk->z - oldChunk->z;
-    // Remove 7x7 first, the quicker this is done the less chance of timeout
-    for(int mapx = newChunk->x-3; mapx <= newChunk->x+3; mapx++)
-    {
-      for(int mapz = newChunk->z-3; mapz <= newChunk->z+3; mapz++)
-      {
-        addRemoveQueue(mapx, mapz);
-      }
-    }
-    popMap();popMap();popMap();popMap();
-    for(int i = mapKnown.size() ; i >= 0; i--)
-    {
-      addRemoveQueue(mapKnown[i].x(), mapKnown[i].z());
-    }
-    popMap();popMap();popMap();popMap();
-    for(int mapx = newChunk->x-3; mapx <= newChunk->x+3; mapx++)
-    {
-      for(int mapz = newChunk->z-3; mapz <= newChunk->z+3; mapz++)
-      {
-        addQueue(mapx, mapz);
-      }
-    }
-    pushMap();    pushMap();
-    pushMap();
-    for(int mapx = newChunk->x-viewDistance; mapx <= newChunk->x+viewDistance; mapx++)
-    {
-      for(int mapz = newChunk->z-viewDistance; mapz <= newChunk->z+viewDistance; mapz++)
-      {
-        addQueue(mapx, mapz);
-      }
-    }
-
-
-
-/*    for(int i = mapQueue.size() ; i >= 0; i--)
-    {
-      mapQueue.erase(i);
-    }*/
     // TODO despawn players who are no longer in view
-    // TODO spawn players who are NOW in view
-
-    // TODO spawn self to nearby players
     // TODO despawn self to players on last world
     pos.map = map;
     std::cout << map << "world changing" <<std::endl;
+    clearLoadingMap();
+    // TODO spawn self to nearby players
+    // TODO spawn players who are NOW in view
+    return false;
   }
   updatePos(x,y,z,stance);
   pushMap();
 }
+
+void User::clearLoadingMap(){
+  for(int i = mapQueue.size(); i > 0 ; i--)
+  {
+    mapQueue.erase(mapQueue.begin()+i);
+  }
+  for(int i = mapKnown.size() ; i >= 0; i--)
+  {
+    addRemoveQueue(mapKnown[i].x(), mapKnown[i].z());
+  }
+  popMap();
+//  buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << std::string("") << (int64_t)0 << (int8_t)-1;
+
+
+  buffer << (int8_t)PACKET_SPAWN_POSITION << (int32_t)pos.x << ((int32_t)pos.y+2) << (int32_t)pos.z;
+  for(int x = -viewDistance; x <= viewDistance; x++)
+  {
+    for(int z = -viewDistance; z <= viewDistance; z++)
+    {
+      addQueue((int32_t)pos.x/16+x, (int32_t)pos.z/16+z);
+    }
+  }
+  // Push chunks to user
+  pushMap(); pushMap();
+  //Inventory
+  for(int i=1; i<45; i++)
+  {
+    if(inv[i].type != -1 && inv[i].count)
+    {
+      buffer << (int8_t)PACKET_SET_SLOT << (int8_t)0 << (int16_t)(i) << (int16_t)inv[i].type << (int8_t)(inv[i].count) << (int16_t)inv[i].health;
+    }
+  }
+
+
+  buffer << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map(pos.map)->mapTime;
+  pushMap();pushMap();pushMap();pushMap();pushMap();
+  spawnUser((int32_t)pos.x*32, ((int32_t)pos.y+2)*32, (int32_t)pos.z*32);
+  // Spawn other users for connected user
+  spawnOthers();
+
+  buffer << (int8_t)PACKET_PLAYER_POSITION_AND_LOOK << (double)pos.x << (double)pos.y << (double)pos.stance << (double)pos.z
+         << (float)pos.yaw << (float)pos.pitch << (int8_t)(double)1;
+  teleport(pos.x,pos.y,pos.z);
+}
+
 
 
 bool User::updatePos(double x, double y, double z, double stance)
@@ -1089,8 +1085,10 @@ bool User::teleport(double x, double y, double z, int map)
     y = 128.0;
     LOGLF("Player Attempted to teleport with y > 128.0");
   }
-  buffer << (int8_t)PACKET_PLAYER_POSITION_AND_LOOK << x << y << (double)0.0 << z
-         << (float)0.f << (float)0.f << (int8_t)1;
+  if(map==pos.map){
+    buffer << (int8_t)PACKET_PLAYER_POSITION_AND_LOOK << x << y << (double)0.0 << z
+           << (float)0.f << (float)0.f << (int8_t)1;
+  }
 
   //Also update pos for other players
   updatePosM(x, y, z, map, pos.stance);

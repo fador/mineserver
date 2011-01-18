@@ -291,6 +291,18 @@ bool map_setBlock(int x, int y, int z, unsigned char type,unsigned char meta)
   return Mineserver::get()->map(0)->setBlock(x,y,z, type, meta);
 }
 
+bool map_getBlockW(int x, int y, int z, int w, unsigned char* type,unsigned char* meta)
+{
+  return Mineserver::get()->map(w)->getBlock(x,y,z, type, meta);
+}
+
+bool map_setBlockW(int x, int y, int z, int w, unsigned char type,unsigned char meta)
+{
+  Mineserver::get()->map(w)->sendBlockChange(x, y, z, type, meta);
+  return Mineserver::get()->map(w)->setBlock(x,y,z, type, meta);
+}
+
+
 void map_saveWholeMap(void)
 {
   Mineserver::get()->map(0)->saveWholeMap();
@@ -334,7 +346,7 @@ unsigned char* map_getMapData_blocklight(int x, int z)
 }
 
 // USER WRAPPER FUNCTIONS
-bool user_getPosition(const char* user, double* x, double* y, double* z, float* yaw, float* pitch, double *stance)
+bool user_getPosition(const char* user, double* x, double* y, double* z,float* yaw, float* pitch, double *stance)
 {
   std::string userStr(user);
   for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
@@ -357,6 +369,40 @@ bool user_getPosition(const char* user, double* x, double* y, double* z, float* 
           *pitch=Mineserver::get()->users()[i]->pos.pitch;
         if(stance != NULL)
           *stance=Mineserver::get()->users()[i]->pos.stance;
+        //We found the user
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+
+bool user_getPositionW(const char* user, double* x, double* y, double* z, int* w,float* yaw, float* pitch, double *stance)
+{
+  std::string userStr(user);
+  for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
+  {
+    if(Mineserver::get()->users()[i]->fd && Mineserver::get()->users()[i]->logged)
+    {
+      //Is this the user?
+      if(userStr == Mineserver::get()->users()[i]->nick)
+      {
+        //For safety, check for NULL pointers!
+        if(x != NULL)
+          *x=Mineserver::get()->users()[i]->pos.x;
+        if(y != NULL)
+          *y=Mineserver::get()->users()[i]->pos.y;
+        if(z != NULL)
+          *z=Mineserver::get()->users()[i]->pos.z;
+        if(yaw != NULL)
+          *yaw=Mineserver::get()->users()[i]->pos.yaw;
+        if(pitch != NULL)
+          *pitch=Mineserver::get()->users()[i]->pos.pitch;
+        if(stance != NULL)
+          *stance=Mineserver::get()->users()[i]->pos.stance;
+        if(w != NULL)
+          *w=Mineserver::get()->users()[i]->pos.map;
         //We found the user
         return true;
       }
@@ -396,6 +442,16 @@ bool user_sethealth(const char* user,int userHealth)
     return true;
   }
   return false;
+}
+
+int user_getCount()
+{
+  return Mineserver::get()->users().size();
+}
+
+char* user_getUserNumbered(int c)
+{
+  return (char*)Mineserver::get()->users()[c]->nick.c_str();
 }
 
 // CONFIG WRAPPER FUNCTIONS
@@ -473,11 +529,17 @@ void init_plugin_api(void)
   plugin_api_pointers.map.getMapData_meta          = &map_getMapData_meta;
   plugin_api_pointers.map.getMapData_skylight      = &map_getMapData_skylight;
   plugin_api_pointers.map.getMapData_blocklight    = &map_getMapData_blocklight;
+  plugin_api_pointers.map.setBlockW                = &map_setBlockW;
+  plugin_api_pointers.map.getBlockW                = &map_getBlockW;
+
 
   plugin_api_pointers.user.getPosition             = &user_getPosition;
   plugin_api_pointers.user.teleport                = &user_teleport;
   plugin_api_pointers.user.sethealth               = &user_sethealth;
   plugin_api_pointers.user.teleportMap             = &user_teleportMap;
+  plugin_api_pointers.user.getCount                = &user_getCount;
+  plugin_api_pointers.user.getUserNumbered         = &user_getUserNumbered;
+  plugin_api_pointers.user.getPositionW            = &user_getPositionW;
 
 
   plugin_api_pointers.config.has                   = &config_has;

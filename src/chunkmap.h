@@ -162,13 +162,11 @@ struct sChunk
 
     for (;iter_a!=iter_b;++iter_a)
     {
-      std::cout << "SENDING" << std::endl;
       if ((*iter_a) != nosend)
       {
         (*iter_a)->buffer.addToWrite(packet.getWrite(), packet.getWriteLen());
       }
     }
-    std::cout << "SENT" << std::endl;
 
   }
 

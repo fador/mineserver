@@ -90,8 +90,11 @@ struct user_pointer_struct
   bool (*getPosition)(const char* user, double* x, double* y, double* z, float* yaw, float* pitch, double *stance);
   bool (*sethealth)  (const char* user,int userHealth);
   bool (*teleportMap)   (const char* user,double x, double y, double z, int map);
+  int (*getCount)();
+  char* (*getUserNumbered)(int c);
+  bool (*getPositionW)(const char* user, double* x, double* y, double* z, int* w,float* yaw, float* pitch, double *stance);
 
-  void *temp[99];
+  void *temp[96];
 };
 
 struct chat_pointer_struct
@@ -120,6 +123,8 @@ struct map_pointer_struct
   unsigned char* (*getMapData_meta) (int x, int z);
   unsigned char* (*getMapData_skylight)  (int x, int z);
   unsigned char* (*getMapData_blocklight)(int x, int z);
+  bool (*getBlockW)(int x, int y, int z, int w,unsigned char* type,unsigned char* meta);
+  bool (*setBlockW)(int x, int y, int z, int w, unsigned char type,unsigned char meta);
   void *temp[100];
 };
 

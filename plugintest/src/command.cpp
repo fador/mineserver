@@ -275,6 +275,18 @@ void home(std::string user, std::string command, std::deque<std::string> args)
   mineserver->user.teleport(user.c_str(),x, y + 2, z);
 }
 
+void userWorld(std::string user, std::string command, std::deque<std::string> args)
+{
+  if(args.size() == 1)
+  {
+     double x,y,z;
+     mineserver->user.getPosition(user.c_str(), &x,&y,&z,NULL,NULL,NULL);
+     std::cout << user.c_str() << atoi(args[0].c_str())<< std::endl;
+     mineserver->user.teleportMap(user.c_str(), x,y+2,z,atoi(args[0].c_str()));
+  }
+
+}
+
 void userTeleport(std::string user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 1)
@@ -511,6 +523,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mi
   registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap));  
   registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", sendHelp));
   registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport));
+  registerCommand(new Command(parseCmd("world"), "<world Number>", "Move between worlds", userWorld));
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION command_shutdown(void)
