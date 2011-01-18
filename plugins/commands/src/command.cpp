@@ -275,6 +275,22 @@ void home(std::string user, std::string command, std::deque<std::string> args)
   mineserver->user.teleport(user.c_str(),x, y + 2, z);
 }
 
+
+
+void coordinateTeleport(std::string user, std::string command, std::deque<std::string> args)
+{
+  if(args.size() == 3)
+  {
+    double x = atof(args[0].c_str());
+    double y = atof(args[1].c_str());
+    double z = atof(args[2].c_str());
+    mineserver->user.teleport(user.c_str(), x, y, z);
+  }
+  else
+  {
+    mineserver->chat.sendmsgTo(user.c_str(),"Usage: /ctp x y z");
+  }
+}
 void userTeleport(std::string user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 1)
@@ -502,6 +518,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mi
   mineserver->plugin.addCallback("PlayerChatCommand", (void *)chatCommandFunction);
   mineserver->plugin.addCallback("BlockPlacePre", (void *)blockPlacePreFunction);
 
+  registerCommand(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport));
   registerCommand(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf));
   registerCommand(new Command(parseCmd("home"), "", "Teleport to map spawn location", home));
   registerCommand(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime));

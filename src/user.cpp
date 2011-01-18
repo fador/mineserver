@@ -156,6 +156,7 @@ User::~User()
     }
 
     Mineserver::get()->chat()->sendMsg(this, this->nick + " disconnected!", Chat::OTHERS);
+    Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", this->nick + " removed!");
     this->saveData();
 
     // Send signal to everyone that the entity is destroyed
@@ -163,9 +164,20 @@ User::~User()
     entityData[0] = 0x1d; // Destroy entity;
     putSint32(&entityData[1], this->UID);
     this->sendOthers(&entityData[0], 5);
+
+
+    for (std::map<uint32_t, sChunk>::iterator it=Mineserver::get()->map()->maps.begin();it!=Mineserver::get()->map()->maps.end();++it)
+    {
+      if((*it).second.users.count(this) > 0)
+      {
+        Mineserver::get()->logger()->log(LogType::LOG_ERROR, "User", nick + " data left on chunk ("+dtos((*it).second.x)+","+dtos((*it).second.z)+")");
+        (*it).second.users.erase(this);
+      }
+    }
+
+
   }
 
-  // Update player list
   if (fd != -1)
   {
     (static_cast<Hook1<bool,const char*>*>(Mineserver::get()->plugin()->getHook("PlayerQuitPost")))->doAll(nick.c_str());
@@ -677,8 +689,8 @@ bool User::updatePos(double x, double y, double z, double stance)
       {
         // No more than 2 blocks away
         if ( abs((int32_t)x-((*iter)->pos.x()/32)) < 2 &&
-            abs((int32_t)y-((*iter)->pos.y()/32)) < 2 &&
-            abs((int32_t)z-((*iter)->pos.z()/32)) < 2)
+             abs((int32_t)y-((*iter)->pos.y()/32)) < 2 &&
+             abs((int32_t)z-((*iter)->pos.z()/32)) < 2)
         {
           // Dont pickup own spawns right away
           if ((*iter)->spawnedBy != this->UID || (*iter)->spawnedAt+2 < time(NULL))
@@ -1067,7 +1079,7 @@ bool User::respawn()
   buffer << (int8_t)PACKET_RESPAWN;
   Packet destroyPkt;
   destroyPkt << (int8_t)PACKET_DESTROY_ENTITY << (int32_t)UID;
-  sChunk *chunk = Mineserver::get()->map()->getMapData(blockToChunk(pos.x),blockToChunk(pos.z));
+  sChunk *chunk = Mineserver::get()->map()->getMapData(blockToChunk((int32_t)pos.x),blockToChunk((int32_t)pos.z));
   if(chunk != NULL)
   {
     chunk->sendPacket(destroyPkt, this);
@@ -1079,7 +1091,7 @@ bool User::respawn()
   spawnPkt << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)UID << nick
             << (int32_t)(pos.x * 32) << (int32_t)(pos.y * 32) << (int32_t)(pos.z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch) << (int16_t)curItem;
 
-  chunk = Mineserver::get()->map()->getMapData(blockToChunk(pos.x),blockToChunk(pos.z));
+  chunk = Mineserver::get()->map()->getMapData(blockToChunk((int32_t)pos.x),blockToChunk((int32_t)pos.z));
   if(chunk != NULL)
   {
     chunk->sendPacket(spawnPkt, this);
