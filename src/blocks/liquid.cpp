@@ -109,7 +109,7 @@ void BlockLiquid::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, in
    if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
       return;
 
-   Mineserver::get()->physics()->removeSimulation(vec(x,y,z));
+   Mineserver::get()->physics(map)->removeSimulation(vec(x,y,z));
 
    Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
    Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
@@ -117,6 +117,6 @@ void BlockLiquid::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, in
 
 void BlockLiquid::physics(int32_t x, int8_t y, int32_t z, int map)
 {
-   Mineserver::get()->physics()->addSimulation(vec(x, y, z));
+   Mineserver::get()->physics(map)->addSimulation(vec(x, y, z));
    //Mineserver::get()->physics()->checkSurrounding(vec(x, y, z));
 }

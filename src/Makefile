@@ -19,7 +19,7 @@ SRC         += blocks/liquid.cpp blocks/plant.cpp blocks/sign.cpp blocks/snow.cp
 SRC         += blocks/stair.cpp blocks/torch.cpp blocks/tracks.cpp blocks/default.cpp
 SRC         += blocks/chest.cpp blocks/ladder.cpp
 
-SRC         += worldgen/mapgen.cpp worldgen/cavegen.cpp
+SRC         += worldgen/mapgen.cpp worldgen/cavegen.cpp worldgen/nethergen.cpp
 
 SRC         += plugin.cpp plugin_api.cpp
 

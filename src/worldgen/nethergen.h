@@ -35,7 +35,6 @@
 #endif
 
 #include "mapgen.h"
-#include "mersenne.h"
 #include "cavegen.h"
 
 class NetherGen : public MapGen {
@@ -71,7 +70,6 @@ private:
 
   
   CaveGen cave;
-  Random mersenne;
 
   // Heightmap composition
   noise::module::Voronoi Randomgen;

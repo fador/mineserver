@@ -492,6 +492,8 @@ int Mineserver::run(int argc, char *argv[])
         {
           m_map[i]->mapTime = 0;
         }
+        Mineserver::get()->physics(i)->update();
+
       }
 
 
@@ -501,10 +503,6 @@ int Mineserver::run(int argc, char *argv[])
       // Run 1s timer hook
       static_cast<Hook0<bool>*>(plugin()->getHook("Timer1000"))->doAll();
     }
-
-    // Physics simulation every 200ms
-    
-    Mineserver::get()->physics()->update();
 
     // Underwater check / drowning
     // ToDo: this could be done a bit differently? - Fador
@@ -563,13 +561,6 @@ int Mineserver::run(int argc, char *argv[])
 Physics* Mineserver::physics(int n)
 {
   return m_physics[n];
-}
-
-
-MapGen* Mineserver::mapGen()
-{
-  std::cout << "WARNING. MAPGEN DEFAULT USED" << std::endl;
-  return m_mapGen[0];
 }
 
 MapGen* Mineserver::mapGen(int n)

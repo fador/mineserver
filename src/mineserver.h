@@ -31,7 +31,6 @@
 #include <iostream>
 #include <vector>
 
-
 #ifdef WIN32
   // This is needed for event to work on Windows.
   #include <Winsock2.h>
@@ -46,10 +45,10 @@ class Map;
 class Chat;
 class Plugin;
 class Screen;
-class Physics;
 class Config;
 class FurnaceManager;
 class PacketHandler;
+class Physics;
 class MapGen;
 class Logger;
 class Inventory;
@@ -121,7 +120,7 @@ private:
 
   std::vector<Map*> m_map;
   std::vector<Physics*> m_physics;
-  std::map<int, MapGen*> gennames;
+  std::vector<MapGen*> gennames;
   Chat* m_chat;
   Plugin* m_plugin;
   Screen* m_screen;

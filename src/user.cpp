@@ -200,7 +200,7 @@ bool User::sendLoginInfo()
   teleport(pos.x, pos.y+2, pos.z);
 
   // Send server time (after dawn)
-  buffer << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map()->mapTime;
+  buffer << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map(pos.map)->mapTime;
 
 
   // Inventory
@@ -1136,19 +1136,19 @@ bool User::respawn()
   buffer << (int8_t)PACKET_RESPAWN;
   Packet destroyPkt;
   destroyPkt << (int8_t)PACKET_DESTROY_ENTITY << (int32_t)UID;
-  sChunk *chunk = Mineserver::get()->map()->getMapData(blockToChunk(pos.x),blockToChunk(pos.z));
+  sChunk *chunk = Mineserver::get()->map(pos.map)->getMapData(blockToChunk(pos.x),blockToChunk(pos.z));
   if(chunk != NULL)
   {
     chunk->sendPacket(destroyPkt, this);
   }
 
-  teleport(Mineserver::get()->map()->spawnPos.x(), Mineserver::get()->map()->spawnPos.y() + 2, Mineserver::get()->map()->spawnPos.z());
+  teleport(Mineserver::get()->map(pos.map)->spawnPos.x(), Mineserver::get()->map(pos.map)->spawnPos.y() + 2, Mineserver::get()->map(pos.map)->spawnPos.z());
 
   Packet spawnPkt;
   spawnPkt << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)UID << nick
             << (int32_t)(pos.x * 32) << (int32_t)(pos.y * 32) << (int32_t)(pos.z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch) << (int16_t)curItem;
 
-  chunk = Mineserver::get()->map()->getMapData(blockToChunk(pos.x),blockToChunk(pos.z));
+  chunk = Mineserver::get()->map(pos.map)->getMapData(blockToChunk(pos.x),blockToChunk(pos.z));
   if(chunk != NULL)
   {
     chunk->sendPacket(spawnPkt, this);

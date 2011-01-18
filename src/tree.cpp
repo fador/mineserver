@@ -115,23 +115,23 @@ void Tree::generateBranches(Trunk* wrap)
   //or make a function for the inside of the if.
   if(rand() % schanse == 0)
   {
-    Branch(posx+1,posy,posz);
+    Branch(posx+1,posy,posz,_map);
   }
   if(rand() % schanse == 0)
   {
-    Branch(posx-1,posy,posz);
+    Branch(posx-1,posy,posz,_map);
   }
   if(rand() % schanse == 0)
   {
-    Branch(posx,posy,posz+1);
+    Branch(posx,posy,posz+1,_map);
   }
   if(rand() % schanse == 0 )
   {
-    Branch(posx,posy,posz-1);
+    Branch(posx,posy,posz-1,_map);
   }
   if(rand() % schanse == 0 )
   {
-    Branch(posx,posy+1,posz)
+    Branch(posx,posy+1,posz,_map);
   }
 }
 

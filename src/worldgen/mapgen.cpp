@@ -223,7 +223,7 @@ void MapGen::generateChunk(int x, int z, int map)
   
   // Add trees
   if(addTrees)
-    AddTrees(x, z);  // add trees will make a *kind-of* forest of 16*16 chunks
+    AddTrees(x, z, map);  // add trees will make a *kind-of* forest of 16*16 chunks
     
   if(expandBeaches)
     ExpandBeaches(x, z, map);
@@ -267,7 +267,7 @@ void MapGen::AddTrees(int x, int z, int map)
       {
         if(abs(treenoise.GetValue(blockX,0,blockZ)) >= 0.9)
         {
-          Tree tree(blockX, blockY, blockZ);
+          Tree tree(blockX, blockY, blockZ, map);
         }
       }
     }

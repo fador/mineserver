@@ -45,7 +45,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include "nethergen.h"
-#include "mersenne.h"
 #include "cavegen.h"
 
 #include "../mineserver.h"
@@ -213,7 +212,7 @@ void NetherGen::generateChunk(int x, int z, int map)
   
   if(addOre)
   {
-    AddOre(x, z, map, BLOCK_LIGHTSTONE);
+    AddOre(x, z, map, BLOCK_GLOWSTONE);
     AddOre(x, z, map, BLOCK_STATIONARY_LAVA);
   }
   
@@ -431,7 +430,7 @@ void NetherGen::AddOre(int x, int z, int map, uint8_t type)
   int count, startHeight;
 
   switch(type) {
-    case BLOCK_LIGHTSTONE:
+    case BLOCK_GLOWSTONE:
       count = fastrand()%4 + 15; 
       startHeight = 128;
       break;
@@ -482,7 +481,7 @@ void NetherGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int depo
     {
       for(int bZ = z; bZ < z+depotSize; bZ++)
       {
-        if(mersenne.uniform(1000) < 500)
+        if(rand()%1000 < 500)
         {
           Mineserver::get()->map(map)->sendBlockChange(bX, bY, bZ, block, 0);
           Mineserver::get()->map(map)->setBlock(bX, bY, bZ, block, 0);
