@@ -35,6 +35,9 @@
 #ifdef WIN32
   // This is needed for event to work on Windows.
   #include <Winsock2.h>
+#else
+  //Do not remove!! Required on Debian
+  #include <sys/types.h>
 #endif
 #include <event.h>
 
