@@ -35,6 +35,7 @@
 #endif
 
 #include "cavegen.h"
+#include "../map.h"
 
 class MapGen
 {
@@ -67,7 +68,7 @@ private:
   virtual void AddTrees(int x, int z, int map);
   
   virtual void AddOre(int x, int z, int map, uint8_t type);
-  virtual void AddDeposit(int x, int y, int z, int map, uint8_t block, int depotSize);
+  virtual void AddDeposit(int x, int y, int z, int map, uint8_t block, int depotSize, sChunk *chunk);
 
   CaveGen cave;
 

@@ -51,6 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../map.h"
 #include "../nbt.h"
 #include "../tree.h"
+#include "../tools.h"
 
 int g_seed;
 
@@ -162,11 +163,6 @@ void MapGen::generateChunk(int x, int z, int map)
   NBT_Value *main = new NBT_Value(NBT_Value::TAG_COMPOUND);
   NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
 
-  if(Mineserver::get()->config()->bData("mapgen.flatgrass"))
-    generateFlatgrass();
-  else
-    generateWithNoise(x, z, map);
-
   val->Insert("Blocks", new NBT_Value(blocks, 16*16*128));
   val->Insert("Data", new NBT_Value(blockdata, 16*16*128/2));
   val->Insert("SkyLight", new NBT_Value(skylight, 16*16*128/2));
@@ -205,6 +201,13 @@ void MapGen::generateChunk(int x, int z, int map)
 
   Mineserver::get()->map(map)->chunks.linkChunk(chunk, x, z);
 
+
+  
+  if(Mineserver::get()->config()->bData("mapgen.flatgrass"))
+    generateFlatgrass();
+  else
+    generateWithNoise(x, z, map);
+
   // Update last used time
   //Mineserver::get()->map()->mapLastused[chunkid] = (int)time(0);
 
@@ -215,10 +218,10 @@ void MapGen::generateChunk(int x, int z, int map)
   
   if(addOre)
   {
-    AddOre(x, z, map, BLOCK_COAL_ORE);
-    AddOre(x, z, map, BLOCK_IRON_ORE);
-    AddOre(x, z, map, BLOCK_GOLD_ORE);
-    AddOre(x, z, map, BLOCK_DIAMOND_ORE);
+    AddOre(x, z,map, BLOCK_COAL_ORE);
+    AddOre(x, z,map, BLOCK_IRON_ORE);
+    AddOre(x, z,map, BLOCK_GOLD_ORE);
+    AddOre(x, z,map, BLOCK_DIAMOND_ORE);
   }
   
   // Add trees
@@ -325,7 +328,7 @@ void MapGen::generateWithNoise(int x, int z, int map)
             *curBlock = BLOCK_STONE;
             // Add caves
             if(addCaves)
-              cave.AddCaves(*curBlock, xBlockpos + bX, bY, zBlockpos + bZ, map);
+              cave.AddCaves(*curBlock, xBlockpos + bX, bY, zBlockpos + bZ);
           }
           else
             *curBlock = BLOCK_DIRT;
@@ -427,6 +430,7 @@ void MapGen::ExpandBeaches(int x, int z, int map)
 
 void MapGen::AddOre(int x, int z, int map, uint8_t type) 
 {
+  sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(x,z);
   int xBlockpos = x<<4;
   int zBlockpos = z<<4;
 
@@ -470,25 +474,28 @@ void MapGen::AddOre(int x, int z, int map, uint8_t type)
       blockY = startHeight;
     }
 
-    blockX += xBlockpos;
-    blockZ += zBlockpos;
+    //blockX += xBlockpos;
+    //blockZ += zBlockpos;
 
     // Calculate Y
     blockY = fastrand()%blockY;
 
     i++;
-    
-    Mineserver::get()->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
+
+    //Mineserver::get()->map()->getBlock(blockX, blockY, blockZ, &block, &meta);
+    block = chunk->blocks[blockY + ((blockZ << 7) + (blockX << 11))];
     // No ore in caves
     if(block == BLOCK_AIR)
       continue;
         
-    AddDeposit(blockX, blockY, blockZ, map,type, 4);
+    AddDeposit(blockX, blockY, blockZ, map,type, 4, chunk);
+
   }
 }
 
-void MapGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int depotSize)
+void MapGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int depotSize, sChunk *chunk)
 {
+  
   for(int bX = x; bX < x+depotSize; bX++)
   {
     for(int bY = y; bY < y+depotSize; bY++)
@@ -497,8 +504,10 @@ void MapGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int depotSi
       {
         if(rand()%1000 < 500)
         {
-          Mineserver::get()->map(map)->sendBlockChange(bX, bY, bZ, block, 0);
-          Mineserver::get()->map(map)->setBlock(bX, bY, bZ, block, 0);
+          if(bX < 16 && bZ < 16)
+          {
+            chunk->blocks[bY + ((bZ << 7) + (bX << 11))] = block;
+          }
         }
       }
     }

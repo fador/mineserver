@@ -80,16 +80,6 @@ void Plugin::init()
    BlockCB.push_back(tracksblock);
    BlockLadder* ladderblock = new BlockLadder();
    BlockCB.push_back(ladderblock);
-
-
-  /* TODO: Unimplemented */
-  /* BLOCK_SPONGE */
-  /* BLOCK_REDSTONE_WIRE */
-  /* BLOCK_PORTAL */
-  /* BLOCK_LEVER, BLOCK_STONE_BUTTON */
-  /* BLOCK_WOODEN_PRESSURE_PLATE, BLOCK_STONE_PRESSURE_PLATE */
-  /* BLOCK_ICE */
-  /* BLOCK_SNOW_BLOCK */
 }
 
 void Plugin::free()

@@ -1002,11 +1002,8 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
       chunk = new sChunk;
       // Re-seed! We share map gens with other maps
       Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
-
       Mineserver::get()->mapGen(m_number)->generateChunk(x,z,m_number);
       generateLight(x, z);
-
-      chunk->lightRegen = false;
 
       //If we generated spawn pos, make sure the position is not underground!
       if(x == blockToChunk(spawnPos.x()) && z == blockToChunk(spawnPos.z()))
