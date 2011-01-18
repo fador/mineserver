@@ -539,15 +539,18 @@ int Mineserver::run(int argc, char *argv[])
 
   /* Free memory */
   
- // delete m_map;
+  for(int i =0; i<m_map.size();i++){
+    delete m_map[i];
+    delete m_physics[i];
+    delete m_mapGen[i];
+  }
+
   delete m_chat;
   delete m_plugin;
   delete m_screen;
-//  delete m_physics;
   delete m_config;
   delete m_furnaceManager;
   delete m_packetHandler;
-//  delete m_mapGen;
   delete m_logger;
   delete m_inventory;
 
