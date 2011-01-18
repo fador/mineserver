@@ -430,7 +430,7 @@ void MapGen::ExpandBeaches(int x, int z)
 
 void MapGen::AddOre(int x, int z, uint8_t type) 
 {
-  sChunk *chunk = Mineserver::get()->map()->chunks.getChunk(blockToChunk(x),blockToChunk(z));
+  sChunk *chunk = Mineserver::get()->map()->chunks.getChunk(x,z);
   int xBlockpos = x<<4;
   int zBlockpos = z<<4;
 
@@ -474,8 +474,8 @@ void MapGen::AddOre(int x, int z, uint8_t type)
       blockY = startHeight;
     }
 
-    blockX += xBlockpos;
-    blockZ += zBlockpos;
+    //blockX += xBlockpos;
+    //blockZ += zBlockpos;
 
     // Calculate Y
     blockY = fastrand()%blockY;
@@ -488,14 +488,14 @@ void MapGen::AddOre(int x, int z, uint8_t type)
     if(block == BLOCK_AIR)
       continue;
         
-    AddDeposit(blockX, blockY, blockZ, type, 4);
+    AddDeposit(blockX, blockY, blockZ, type, 4, chunk);
 
   }
 }
 
-void MapGen::AddDeposit(int x, int y, int z, uint8_t block, int depotSize)
+void MapGen::AddDeposit(int x, int y, int z, uint8_t block, int depotSize, sChunk *chunk)
 {
-  sChunk *chunk = Mineserver::get()->map()->chunks.getChunk(blockToChunk(x),blockToChunk(z));
+  
   for(int bX = x; bX < x+depotSize; bX++)
   {
     for(int bY = y; bY < y+depotSize; bY++)
@@ -504,7 +504,10 @@ void MapGen::AddDeposit(int x, int y, int z, uint8_t block, int depotSize)
       {
         if(rand()%1000 < 500)
         {
-          chunk->blocks[bY + ((bZ << 7) + (bX << 11))] = block;
+          if(bX < 16 && bZ < 16)
+          {
+            chunk->blocks[bY + ((bZ << 7) + (bX << 11))] = block;
+          }
         }
       }
     }
