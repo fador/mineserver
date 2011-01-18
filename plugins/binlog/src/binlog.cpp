@@ -49,7 +49,6 @@ std::string dtos( double n )
 mineserver_pointer_struct* mineserver;
 std::string pluginName = "binlog";
 
-
 Binlog::Binlog (std::string filename) 
 {
   log_stream.open(filename.c_str(), std::fstream::in | std::fstream::out | std::fstream::binary );
@@ -199,29 +198,32 @@ void playBack (User *user, std::string command, std::deque<std::string> args)
 bool callbackBlockBreakPre (User* user,sint32 x,sint8 y,sint32 z) 
 {
   event_t event;
-  event->x = x;
-  event->y = y;
-  event->z = z;
-  event->ntype = 0;
-  event->nmeta = 0;
+  event.nick = user;
+  event.x = x;
+  event.y = y;
+  event.z = z;
+  event.ntype = 0;
+  event.nmeta = 0;
 
-  minserver->map.getBlock(x,y,z,&event->otype, &event->ometa);
-  Binlog::get().log(event);
+  minserver->map.getBlock(x,y,z,&event.otype, &event.ometa);
+  BINLOG(event);
 
   return true;
 }
 // Block Place Callback
-bool callbackBlockPlacePre (User* user,sint32 x,sint8 y,sint32 z, int16_t type, int8_t meta) 
+bool callbackBlockPlacePre (User* user,sint32 x,sint8 y,sint32 z, unsigned char type, unsigned char meta) 
 {
   event_t event;
-  event->x = x;
-  event->y = y;
-  event->z = z;
-  event->otype = 0;
-  event->ometa = 0;
-  event->ntype = type;
-  event->nmeta = meta;
-  Binlog::get().log(event);
+  event.nick = user;
+  event.x = x;
+  event.y = y;
+  event.z = z;
+  event.otype = 0;
+  event.ometa = 0;
+  event.ntype = type;
+  event.nmeta = meta;
+
+  BINLOG(event);
 
   return true;
 }
