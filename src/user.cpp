@@ -84,6 +84,7 @@ User::User(int sock, uint32_t EID)
   this->timeUnderwater  = 0;
   this->isOpenInv       = false;
   this->lastData        = time(NULL);
+  this->permissions     = 0;
 
   this->m_currentItemSlot = 0;
   this->inventoryHolding  = Item();
