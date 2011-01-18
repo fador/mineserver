@@ -35,10 +35,9 @@
 
 Tree::Tree(int32_t x, int32_t y, int32_t z, uint8_t limit)
 {
-    n_branches = 0;
-    _x = x, _y = y, _z = z;
-    this->generate(limit);
-
+  n_branches = 0;
+  _x = x, _y = y, _z = z;
+  this->generate(limit);
 }
 
 
@@ -47,127 +46,147 @@ Tree::~Tree(void)
 }
 void Tree::generate(uint8_t limit)
 {
-    uint8_t darkness=1;
+  uint8_t darkness=1;
 
-    srand((uint32_t)time(NULL));
+  srand((uint32_t)time(NULL));
 
-    uint8_t m_trunkHeight = getRandInt(MIN_TRUNK,limit);
+  uint8_t m_trunkHeight = getRandInt(MIN_TRUNK,limit);
 
-    bool smalltree=false;
+  bool smalltree=false;
 
-    //in this implementation we generate the trunk and as we do we call branching and canopy
-    if(m_trunkHeight<BRANCHING_HEIGHT)
+  //in this implementation we generate the trunk and as we do we call branching and canopy
+  if (m_trunkHeight < BRANCHING_HEIGHT)
+  {
+    smalltree=true;
+    darkness=0;
+  }
+  uint8_t th=m_trunkHeight-1;
+  uint8_t i;
+  for (i = 0; i < th; i++)
+  {
+    if(smalltree)
     {
-        smalltree=true;
-        darkness=0;
+      Trunk* v = new Trunk(_x,_y+i,_z,darkness);
+      if(i>=MIN_TRUNK-1)
+      {
+        m_Branch[n_branches]= v;
+        n_branches++;
+      }
+      else
+      {
+        delete v;
+      }
     }
-    uint8_t th=m_trunkHeight-1;
-    uint8_t i;
-    for(i = 0; i < th; i++)
+    else
     {
-        if(smalltree)
-        {
-            Trunk* v = new Trunk(_x,_y+i,_z,darkness);
-            if(i>=MIN_TRUNK-1){
-                m_Branch[n_branches]= v;
-                n_branches++;
-            }
-            else
-            {
-                delete v;
-            }
-        }
-        else
-        {
-            Trunk* v = new Trunk(_x,_y+i,_z,darkness);
-            if(i>BRANCHING_HEIGHT-1)
-            {
-                generateBranches(v);
-            }
-            else
-            {
-                delete v;
-            }
-        }
+      Trunk* v = new Trunk(_x,_y+i,_z,darkness);
+      if(i > BRANCHING_HEIGHT-1)
+      {
+        generateBranches(v);
+        m_Branch[n_branches]=v;
+        n_branches++;
+      }
+      else
+      {
+        delete v;
+      }
     }
-    Trunk* v = new Trunk(_x,_y+i,_z,darkness);
-    m_Branch[n_branches]= v;
-    n_branches++;
-    generateBranches(v);
-    generateCanopy();
+  }
+  Trunk* v = new Trunk(_x,_y+i,_z,darkness);
+  m_Branch[n_branches]= v;
+  n_branches++;
+  generateBranches(v);
+  generateCanopy();
 }
 //I STRONGLY RECOMMEND TO USE Trunk Rather than a new unneeded class
 //maybe just a class Wood?
 void Tree::generateBranches(Trunk* wrap)
 {
-    vec loc = wrap->location();
+  uint8_t blocktype;
+  uint8_t meta;
+  vec loc = wrap->location();
 
-    int32_t posx = loc.x();
-    uint8_t posy = loc.y();
-    int32_t posz = loc.z();
+  int32_t posx = loc.x();
+  uint8_t posy = loc.y();
+  int32_t posz = loc.z();
 
-    uint8_t schanse = BRANCHING_CHANCE / (posy - _y);
-    //Not much point to loop here
-    //or make a function for the inside of the if.
-    if(rand() % schanse == 0){
-        Branch(posx+1,posy,posz);
-    }
-    if(rand() % schanse == 0){
-        Branch(posx-1,posy,posz);
-    }
-    if(rand() % schanse == 0){
-        Branch(posx,posy,posz+1);
-    }
-    if(rand() % schanse == 0 ){
-        Branch(posx,posy,posz-1);
-    }
-    if(rand() % schanse == 0 ){
-        Branch(posx,posy+1,posz)
-    }
+  uint32_t schanse = BRANCHING_CHANCE;
+  //Not much point to loop here
+  //or make a function for the inside of the if.
+  if(rand() % schanse == 0)
+  {
+    Branch(posx+1,posy,posz);
+  }
+  if(rand() % schanse == 0)
+  {
+    Branch(posx-1,posy,posz);
+  }
+  if(rand() % schanse == 0)
+  {
+    Branch(posx,posy,posz+1);
+  }
+  if(rand() % schanse == 0 )
+  {
+    Branch(posx,posy,posz-1);
+  }
+  if(rand() % schanse == 0 )
+  {
+    Branch(posx,posy+1,posz)
+  }
 }
 
-void Tree::generateCanopy(){
-    uint8_t blocktype;
-    uint8_t meta;
-    uint8_t canopySize;
-    vec loc;
+void Tree::generateCanopy()
+{
+  uint8_t blocktype;
+  uint8_t meta;
+  uint8_t canopySize;
+  vec loc;
 
-    uint8_t canopy_darkness = 0;
-    //Not much point making less code with a while/for loop
-    //since compiled this is alot faster
-    if(rand() % 15 ==0){
-        canopy_darkness++;
-    }
-    if(rand() % 15 ==0){
-        canopy_darkness++;
-    }
-    if(rand() % 15 ==0){
-        canopy_darkness++;
-    }
-    //I'm Not Proud of this looping.
-    for(uint8_t i=0;i<n_branches;i++){
-        canopySize = getRandInt(MIN_CANOPY,MAX_CANOPY);
-        loc = m_Branch[i]->location();
-        delete m_Branch[i];
+  uint8_t canopy_darkness = 0;
+  //Not much point making less code with a while/for loop
+  //since compiled this is alot faster
+  if(rand() % 15 ==0)
+  {
+      canopy_darkness++;
+  }
+  if(rand() % 15 ==0)
+  {
+      canopy_darkness++;
+  }
+  if(rand() % 15 ==0)
+  {
+      canopy_darkness++;
+  }
+  //I'm Not Proud of this looping.
+  for(uint8_t i=0;i<n_branches;i++)
+  {
+    canopySize = getRandInt(MIN_CANOPY,MAX_CANOPY);
+    loc = m_Branch[i]->location();
+    delete m_Branch[i];
 
-        int32_t posx = loc.x();
-        uint8_t posy = loc.y();
-        int32_t posz = loc.z();
+    int32_t posx = loc.x();
+    int32_t posy = loc.y();
+    int32_t posz = loc.z();
 
-        for(int8_t xi=(-canopySize);xi<=canopySize;xi++){
-            for(int8_t yi=(-canopySize);yi<=canopySize;yi++){
-                for(int8_t zi=(-canopySize);zi<=canopySize;zi++){
-                    if(sqrt(xi^2+yi^2+zi^2) <= canopySize){
-                        int32_t temp_posx = posx+xi;
-                        uint8_t temp_posy = posy+yi;
-                        int32_t temp_posz = posz+zi;
-                        Mineserver::get()->map()->getBlock(temp_posx,temp_posy,temp_posz,&blocktype,&meta);
-                        if(blocktype== BLOCK_AIR){
-                            Canopy u(temp_posx,temp_posy,temp_posz,canopy_darkness);
-                        }
-                    }
-                }
+    for(int8_t xi=(-canopySize);xi<=canopySize;xi++)
+    {
+      for(int8_t yi=(-canopySize);yi<=canopySize;yi++)
+      {
+        for(int8_t zi=(-canopySize);zi<=canopySize;zi++)
+        {
+          if(sqrtf(xi*xi+yi*yi+zi*zi) <= canopySize)
+          {
+            int32_t temp_posx = posx+xi;
+            int32_t temp_posy = posy+yi;
+            int32_t temp_posz = posz+zi;
+            
+            if(Mineserver::get()->map()->getBlock(temp_posx,temp_posy,temp_posz,&blocktype,&meta, false) && blocktype == BLOCK_AIR)
+            {
+              Canopy u(temp_posx,temp_posy,temp_posz,canopy_darkness);
             }
+          }
         }
+      }
     }
+  }
 }
