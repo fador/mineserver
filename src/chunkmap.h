@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2011, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 
 #include "packets.h"
 #include "user.h"
+#include "nbt.h"
 
 class NBT_Value;
 
@@ -144,7 +145,7 @@ struct sChunk
       furnaces.clear();
     }
 
-    if (nbt)
+    if (nbt != NULL)
     {
       delete nbt;
       nbt = NULL;

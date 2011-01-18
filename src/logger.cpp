@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010, The Mineserver Project
+  Copyright (c) 2011, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,11 @@
 #include <iostream>
 #include <string>
 
-#include "logger.h"
 #include "mineserver.h"
+#include "tools.h"
+#include "plugin.h"
 
+#include "logger.h"
 #include "logtype.h"
 
 void Logger::log(const std::string& msg, const std::string& file, int line)

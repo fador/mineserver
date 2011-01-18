@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2011, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -1212,7 +1212,6 @@ int PacketHandler::respawn(User *user)
 {
   user->dropInventory();
   user->respawn();
-  user->teleport(Mineserver::get()->map(user->pos.map)->spawnPos.x(), Mineserver::get()->map(user->pos.map)->spawnPos.y() + 2, Mineserver::get()->map(user->pos.map)->spawnPos.z());
   user->buffer.removePacket();
   return PACKET_OK;
 }

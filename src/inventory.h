@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2011, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -68,6 +68,12 @@ public:
 
   struct Recipe
   {
+    Recipe() : width(0),height(0),slots(NULL) {}
+    ~Recipe()
+    {
+      delete [] slots;
+    }
+
     int8_t width;
     int8_t height;
     int16_t *slots;
@@ -83,14 +89,16 @@ public:
 
   ~Inventory()
   {
-    for(unsigned int i = 0; i < recipes.size(); i++)
+    std::vector<Recipe*>::iterator it_a = recipes.begin();
+    std::vector<Recipe*>::iterator it_b = recipes.end();
+    for(;it_a!=it_b;++it_a)
     {
-      delete [] recipes[i]->slots;
-      delete recipes[i];
+      delete *it_a;
     }
+    recipes.clear();
   }
 
-  //Open chest/workbench/furnace inventories
+  // Open chest/workbench/furnace inventories
   std::vector<OpenInventory *> openWorkbenches;
   std::vector<OpenInventory *> openChests;
   std::vector<OpenInventory *> openFurnaces;

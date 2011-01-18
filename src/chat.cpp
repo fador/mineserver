@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010, The Mineserver Project
+  Copyright (c) 2011, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -25,16 +25,19 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "chat.h"
-
 #include <ctime>
 #include <iostream>
 #include <fstream>
 
 #include "constants.h"
+#include "user.h"
 #include "logger.h"
 #include "mineserver.h"
 #include "permissions.h"
+#include "tools.h"
+#include "plugin.h"
+
+#include "chat.h"
 
 Chat::Chat()
 {
@@ -42,28 +45,6 @@ Chat::Chat()
 
 Chat::~Chat()
 {
-}
-
-bool Chat::checkMotd(const std::string& motdFile)
-{
-  //
-  // Create motdfile is it doesn't exist
-  //
-  std::ifstream ifs(motdFile.c_str());
-
-  // If file does not exist
-  if(ifs.fail())
-  {
-    Mineserver::get()->logger()->log(LogType::LOG_WARNING, "System", "> Warning: " + motdFile + " not found. Creating...");
-
-    std::ofstream motdofs(motdFile.c_str());
-    motdofs << MOTD_CONTENT << std::endl;
-    motdofs.close();
-  }
-
-  ifs.close();
-
-  return true;
 }
 
 bool Chat::sendUserlist(User* user)

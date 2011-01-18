@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2011, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,7 @@
 #include "user.h"
 #include "mineserver.h"
 #include "logger.h"
+#include "tools.h"
 
 Inventory::Inventory()
 {
@@ -86,17 +87,19 @@ Inventory::Inventory()
   }
 }
 
-bool Inventory::addRecipe(int width, int height, int16_t* inputrecipe, int outputCount, 
-                          int16_t outputType, int16_t outputHealth)
+bool Inventory::addRecipe(int width, int height, int16_t* inputrecipe, int outputCount, int16_t outputType, int16_t outputHealth)
 {
   Recipe *recipe = new Recipe;
+
   recipe->width  = width;
   recipe->height = height;
   recipe->slots  = new int16_t[width*height];
-  recipe->output.count = outputCount;
-  recipe->output.type  = outputType;
-  recipe->output.health= outputHealth;
+  recipe->output.count  = outputCount;
+  recipe->output.type   = outputType;
+  recipe->output.health = outputHealth;
+
   memcpy(recipe->slots, inputrecipe, width*height*sizeof(int16_t));
+
   recipes.push_back(recipe);
 
   return true;
@@ -210,11 +213,13 @@ bool Inventory::readRecipe(std::string recipeFile)
   ifs.close();
   
   int16_t* inrecipe = new int16_t[height*width];
-  for(unsigned int i = 0; i < recipetable.size(); i++)
+  for (unsigned int i = 0; i < recipetable.size(); i++)
   {
     inrecipe[i] = recipetable[i];
   }
+
   addRecipe(width, height, inrecipe, outCount, outType, outHealth);
+
   delete [] inrecipe;
   
   return true;
@@ -1045,7 +1050,7 @@ int16_t Inventory::itemHealth(int16_t itemID, int8_t block, bool &rightUse)
     case ITEM_STONE_AXE:
     case ITEM_IRON_AXE:
     case ITEM_DIAMOND_AXE:
-     if(block == BLOCK_LOG || block == BLOCK_WOOD)
+     if(block == BLOCK_WOOD || block == BLOCK_PLANK)
      {
        rightUse = true;
      }
@@ -1066,7 +1071,7 @@ int16_t Inventory::itemHealth(int16_t itemID, int8_t block, bool &rightUse)
        case BLOCK_GOLD_ORE:
        case BLOCK_DIAMOND_ORE:
        case BLOCK_OBSIDIAN:
-       case BLOCK_LIGHTSTONE:
+       case BLOCK_GLOWSTONE:
        case BLOCK_NETHERSTONE:
        case BLOCK_WOODEN_STAIRS:
        case BLOCK_COBBLESTONE_STAIRS:

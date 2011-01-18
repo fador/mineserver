@@ -58,7 +58,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <OutputFile>..\bin\command.dll</OutputFile>
+      <OutputFile>..\..\bin\command.dll</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -73,7 +73,7 @@
     <Link />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\plugin_api.h" />
+    <ClInclude Include="..\..\src\plugin_api.h" />
     <ClInclude Include="src\command.h" />
   </ItemGroup>
   <ItemGroup>

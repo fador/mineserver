@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2011, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -25,10 +25,10 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "liquid.h"
-
 #include "../mineserver.h"
+#include "../map.h"
 #include "../physics.h"
+#include "liquid.h"
 
 bool BlockLiquid::affectedBlock(int block)
 {
@@ -45,17 +45,14 @@ bool BlockLiquid::affectedBlock(int block)
 
 void BlockLiquid::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-
 }
 
 void BlockLiquid::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-
 }
 
 void BlockLiquid::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-
 }
 
 bool BlockLiquid::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
@@ -123,4 +120,3 @@ void BlockLiquid::physics(int32_t x, int8_t y, int32_t z, int map)
    Mineserver::get()->physics()->addSimulation(vec(x, y, z));
    //Mineserver::get()->physics()->checkSurrounding(vec(x, y, z));
 }
-

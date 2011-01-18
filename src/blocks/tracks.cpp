@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2011, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -25,11 +25,13 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "tracks.h"
-
 #include <iostream>
 
 #include "../mineserver.h"
+#include "../map.h"
+#include "../logger.h"
+
+#include "tracks.h"
 
 bool BlockTracks::affectedBlock(int block)
 {

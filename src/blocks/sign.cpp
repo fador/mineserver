@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2011, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -27,9 +27,10 @@
 
 #include <math.h>
 
-#include "sign.h"
-
 #include "../mineserver.h"
+#include "../map.h"
+
+#include "sign.h"
 
 bool BlockSign::affectedBlock(int block)
 {

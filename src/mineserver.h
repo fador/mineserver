@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010, The Mineserver Project
+  Copyright (c) 2011, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -31,23 +31,28 @@
 #include <iostream>
 #include <vector>
 
+
 #ifdef WIN32
   // This is needed for event to work on Windows.
   #include <Winsock2.h>
+#else
+  //Do not remove!! Required on Debian
+  #include <sys/types.h>
 #endif
+#include <event.h>
 
-#include "chat.h"
-#include "config.h"
-#include "furnaceManager.h"
-#include "inventory.h"
-#include "logger.h"
-#include "map.h"
-#include "physics.h"
-#include "plugin.h"
-#include "screenBase.h"
-#include "user.h"
-#include "worldgen/mapgen.h"
-#include "worldgen/nethergen.h"
+class User;
+class Map;
+class Chat;
+class Plugin;
+class Screen;
+class Physics;
+class Config;
+class FurnaceManager;
+class PacketHandler;
+class MapGen;
+class Logger;
+class Inventory;
 
 #ifdef FADOR_PLUGIN
 #define MINESERVER
@@ -63,10 +68,12 @@ public:
   static Mineserver* get()
   {
     static Mineserver* m_instance;
+
     if (!m_instance)
     {
       m_instance = new Mineserver;
     }
+
     return m_instance;
   }
 
@@ -81,7 +88,6 @@ public:
   void updatePlayerList();
 
   Map* map(int n);
-//  Map* map();
   void setMap(Map* map,int n=0);
   Chat* chat() const { return m_chat; }
   void setChat(Chat* chat) { m_chat = chat; }
@@ -89,7 +95,7 @@ public:
   void setPlugin(Plugin* plugin) { m_plugin = plugin; }
   Screen* screen() const { return m_screen; }
   void setScreen(Screen* screen) { m_screen = screen; }
-  Physics* physics(int n=0);
+  Physics* physics(int n);
   Config* config() const { return m_config; }
   void setConfig(Config* config) { m_config = config; }
   FurnaceManager* furnaceManager() const { return m_furnaceManager; }
@@ -97,13 +103,11 @@ public:
   PacketHandler* packetHandler() const { return m_packetHandler; }
   void setPacketHandler(PacketHandler* packetHandler) { m_packetHandler = packetHandler; }
   MapGen* mapGen(int n);
-  MapGen* mapGen();
-//  void setMapGen(MapGen* mapGen) { m_mapGen = mapGen; }
   Logger* logger() const { return m_logger; }
   void setLogger(Logger* logger) { m_logger = logger; }
-
   Inventory* inventory() const { return m_inventory; }
   void setInventory(Inventory* inventory) { m_inventory = m_inventory; }
+
   void saveAllPlayers();
 
 private:

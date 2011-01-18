@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2011, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@
 #include <noise/noise.h>
 #endif
 
-#include "mersenne.h"
 #include "cavegen.h"
 
 class MapGen
@@ -58,23 +57,27 @@ private:
   int beachExtent;
   int beachHeight;
   
-  bool addOre;
+  bool addOre;  
+  bool addCaves;
 
   virtual void generateFlatgrass();
   virtual void generateWithNoise(int x, int z, int map);
 
   virtual void ExpandBeaches(int x, int z, int map);
-  virtual void AddTrees(int x, int z, int map, uint16_t count);
+  virtual void AddTrees(int x, int z, int map);
   
   virtual void AddOre(int x, int z, int map, uint8_t type);
   virtual void AddDeposit(int x, int y, int z, int map, uint8_t block, int depotSize);
 
-  
   CaveGen cave;
-  Random mersenne;
 
   // Heightmap composition
   noise::module::RidgedMulti ridgedMultiNoise;
+
+  // ##### TREE GEN #####
+
+  noise::module::Billow treenoise;
+  // ##### END TREE GEN ####
   
   /*noise::module::ScaleBias perlinBiased;
 

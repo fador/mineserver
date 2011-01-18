@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2010, The Mineserver Project
+Copyright (c) 2011, The Mineserver Project
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <noise/noise.h>
 #endif
 
-#include "mersenne.h"
 #include "cavegen.h"
 #include "mapgen.h"
 
@@ -56,8 +55,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int g_seed;
 
 inline int fastrand() { 
-  g_seed = (214013*g_seed+2531011); 
-  return (g_seed>>16)&0x7FFF; 
+  g_seed = (214013*g_seed+2531011);
+  return (g_seed>>16)&0x7FFF;
 } 
 
 void MapGen::init(int seed)
@@ -111,13 +110,21 @@ void MapGen::init(int seed)
   seaTerrain.SetBounds(-0.3, 1000.0);
   seaTerrain.SetEdgeFalloff(0.1);*/
 
+  //###### TREE GEN #####
+  treenoise.SetSeed(seed+2);
+  treenoise.SetOctaveCount(6);
+  treenoise.SetFrequency(1.0/180.0);
+  treenoise.SetLacunarity(2.0);
+
+  //###### END TREE GEN #######
   seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
   addTrees = Mineserver::get()->config()->bData("mapgen.trees.enabled");
   expandBeaches = Mineserver::get()->config()->bData("mapgen.beaches.expand");
   beachExtent = Mineserver::get()->config()->iData("mapgen.beaches.extent");
   beachHeight = Mineserver::get()->config()->iData("mapgen.beaches.height");
-  
+
   addOre = Mineserver::get()->config()->bData("mapgen.caves.ore");
+  addCaves = Mineserver::get()->config()->bData("mapgen.caves.enabled");
 
 }
 
@@ -216,7 +223,7 @@ void MapGen::generateChunk(int x, int z, int map)
   
   // Add trees
   if(addTrees)
-    AddTrees(x, z, map,  fastrand()%2+3);
+    AddTrees(x, z);  // add trees will make a *kind-of* forest of 16*16 chunks
     
   if(expandBeaches)
     ExpandBeaches(x, z, map);
@@ -226,31 +233,44 @@ void MapGen::generateChunk(int x, int z, int map)
 //#define PRINT_MAPGEN_TIME
 
 
-void MapGen::AddTrees(int x, int z, int map,uint16_t count)
+void MapGen::AddTrees(int x, int z, int map)
 {
   int xBlockpos = x<<4;
   int zBlockpos = z<<4;
   
-  int blockX, blockY, blockZ;
+  int blockX, blockZ;
+  uint8_t blockY;
+
   uint8_t block;
   uint8_t meta;
 
-  for(uint16_t i = 0;i < count; i++)
-  {
-    blockX = fastrand()%16;
-    blockZ = fastrand()%16;
-      
-    blockY = heightmap[(blockZ<<4)+blockX] + 1;
-    
-    blockX += xBlockpos;
-    blockZ += zBlockpos;
-      
-    Mineserver::get()->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
-    // No trees on water
-    if(block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
-      continue;
-        
-    Tree tree(blockX, blockY, blockZ, map);
+  uint8_t un = fastrand()%4+2;
+  uint8_t vn = fastrand()%4+2;
+
+  float uFactor = (16 / (float)un);   //relational to literal
+  float vFactor = (16 / (float)vn);
+  for(uint8_t u = 0;u<un;u++)
+  {            //u for x and v for z iteration
+    for(uint8_t v = 0;v<vn;v++)
+    {
+      uint8_t a = u*uFactor;
+      uint8_t b = v*vFactor;
+
+      blockX = a + xBlockpos;
+      blockZ = b + zBlockpos;
+      blockY = heightmap[(a<<4)+b] + 1;
+
+      Mineserver::get()->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
+
+      // No trees on water
+      if(block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER && block != BLOCK_SAND)
+      {
+        if(abs(treenoise.GetValue(blockX,0,blockZ)) >= 0.9)
+        {
+          Tree tree(blockX, blockY, blockZ);
+        }
+      }
+    }
   }
 }
 
@@ -304,7 +324,8 @@ void MapGen::generateWithNoise(int x, int z, int map)
           {
             *curBlock = BLOCK_STONE;
             // Add caves
-            cave.AddCaves(*curBlock, xBlockpos + bX, bY, zBlockpos + bZ, map);
+            if(addCaves)
+              cave.AddCaves(*curBlock, xBlockpos + bX, bY, zBlockpos + bZ, map);
           }
           else
             *curBlock = BLOCK_DIRT;
@@ -358,7 +379,7 @@ void MapGen::ExpandBeaches(int x, int z, int map)
       blockZ = zBlockpos+bZ;
 
       h = heightmap[(bZ<<4)+bX];
-      
+
       if(h < 0) 
         continue;
 
@@ -371,13 +392,13 @@ void MapGen::ExpandBeaches(int x, int z, int map)
           {
             if(dx * dx + dz * dz + dh * dh > beachExtentSqr) 
               continue;
-              
+
             int xx = bX + dx;
             int zz = bZ + dz;
             int hh = h + dh;
             if(xx < 0 || xx >= 15 || zz < 0 || zz >= 15 || hh < 0 || hh >= 127 ) 
               continue;
-            
+
             Mineserver::get()->map(map)->getBlock(xBlockpos+xx, hh, zBlockpos+zz, &block, &meta);
             if( block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER ) 
             {
@@ -408,11 +429,11 @@ void MapGen::AddOre(int x, int z, int map, uint8_t type)
 {
   int xBlockpos = x<<4;
   int zBlockpos = z<<4;
-  
+
   int blockX, blockY, blockZ;
   uint8_t block;
   uint8_t meta;
-  
+
   int count, startHeight;
 
   switch(type) {
@@ -433,28 +454,28 @@ void MapGen::AddOre(int x, int z, int map, uint8_t type)
       startHeight = 17;
       break;
   }
-  
+
   int i = 0;
   while(i < count)
   {
     blockX = fastrand()%8 + 4;
     blockZ = fastrand()%8 + 4;
-    
+
     blockY = heightmap[(blockZ<<4)+blockX];
     blockY -= 5;
-    
+
     // Check that startheight is not higher than height at that column
     if(blockY > startHeight)
     {
       blockY = startHeight;
     }
-    
+
     blockX += xBlockpos;
     blockZ += zBlockpos;
-    
+
     // Calculate Y
     blockY = fastrand()%blockY;
-    
+
     i++;
     
     Mineserver::get()->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
@@ -463,7 +484,6 @@ void MapGen::AddOre(int x, int z, int map, uint8_t type)
       continue;
         
     AddDeposit(blockX, blockY, blockZ, map,type, 4);
-    
   }
 }
 
@@ -475,7 +495,7 @@ void MapGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int depotSi
     {
       for(int bZ = z; bZ < z+depotSize; bZ++)
       {
-        if(mersenne.uniform(1000) < 500)
+        if(rand()%1000 < 500)
         {
           Mineserver::get()->map(map)->sendBlockChange(bX, bY, bZ, block, 0);
           Mineserver::get()->map(map)->setBlock(bX, bY, bZ, block, 0);

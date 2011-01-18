@@ -5,7 +5,7 @@ g++ -shared command.o -o command.so
 copy command.so to Mineserver bin directory.
 */
 /*
-  Copyright (c) 2010, The Mineserver Project
+  Copyright (c) 2011, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ copy command.so to Mineserver bin directory.
 #include <stdint.h>
 
 #define MINESERVER_C_API
-#include "../../src/plugin_api.h"
+#include "../../../src/plugin_api.h"
 //#include "../../src/logtype.h"
 
 #include "command.h"

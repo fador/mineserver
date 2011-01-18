@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010, The Mineserver Project
+  Copyright (c) 2011, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,7 @@
 #include "../mineserver.h"
 #include "../map.h"
 #include "../chat.h"
+#include "../tools.h"
 
 bool BlockChest::affectedBlock(int block)
 {

@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2011, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -184,8 +184,6 @@ void Map::addSapling(User* user, int x, int y, int z)
 
     saplings.push_back( sTree(x,y,z,mapTime,user->UID) );
 }
-#define TREE_MIN_SPACE 5 //this should be relocated to some constants header perhaps?
-#define TREE_MAX_SPACE 20
 
 void Map::checkGenTrees()
 {
@@ -204,14 +202,14 @@ void Map::checkGenTrees()
     {
       //Check above blocks
       uint8_t i=1;
-      for(i = 1;i < TREE_MAX_SPACE; i++)
+      for(i = 1;i < MAX_TRUNK; i++)
       {
         if(!getBlock(iter->x,iter->y+i,iter->z,&blocktype,&meta) || blocktype != BLOCK_AIR)
         {
           break;
         }
       }
-      if(i >= TREE_MIN_SPACE)
+      if(i >= MIN_TREE_SPACE)
       {//If there is enough space
         if(rand() % 50 == 0)
         {
@@ -979,14 +977,11 @@ void Map::createPickupSpawn(int x, int y, int z, int type, int count, int health
 
 sChunk*  Map::loadMap(int x, int z, bool generate)
 {
-
   sChunk* chunk = chunks.getChunk(x,z);
   if(chunk != NULL)
   {
     return chunk;
   }
-
-  chunk = new sChunk;
 
   // Generate map file name
 
@@ -1002,8 +997,9 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   if (stat(infile.c_str(), &stFileInfo) != 0)
   {
     // If generate (false only for lightmapgenerator)
-    if(generate)
+    if (generate)
     {
+      chunk = new sChunk;
       // Re-seed! We share map gens with other maps
       Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
 
