@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010, The Mineserver Project
+  Copyright (c) 2011, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,10 @@
 #include <dlfcn.h>
 #endif
 
+class BlockBasic;
+
 #include "delegate/delegate.hpp"
-#include "constants.h"
+//#include "constants.h"
 #include "tools.h"
 #include "user.h"
 #include "hook.h"
@@ -79,7 +81,7 @@
 // Foe INCONSISTENCY fainted!
 // You got 374¥ for winning!
 
-typedef srutil::delegate6<void, User*, sint8, sint32, sint8, sint32, sint8> Function;
+typedef srutil::delegate6<void, User*, int8_t, int32_t, int8_t, int32_t, int8_t> Function;
 
 class Callback
 {
@@ -142,48 +144,56 @@ class Plugin
 {
 public:
   // Hook registry stuff
-  bool hasHook(const std::string name);
-  void setHook(const std::string name, Hook* hook);
+  bool  hasHook(const std::string name);
   Hook* getHook(const std::string name);
-  void remHook(const std::string name);
+  void  setHook(const std::string name, Hook* hook);
+  void  remHook(const std::string name);
   // Load/Unload plugins
   bool loadPlugin(const std::string name, const std::string file="");
   void unloadPlugin(const std::string name);
   // Plugin version registry
-  void setPluginVersion(const std::string name, float version);
+  bool  hasPluginVersion(const std::string name);
   float getPluginVersion(const std::string name);
-  void remPluginVersion(const std::string name);
+  void  setPluginVersion(const std::string name, float version);
+  void  remPluginVersion(const std::string name);
   // Pointer registry stuff
-  bool hasPointer(const std::string name);
-  void setPointer(const std::string name, void* pointer);
+  bool  hasPointer(const std::string name);
+  void  setPointer(const std::string name, void* pointer);
   void* getPointer(const std::string name);
-  void remPointer(const std::string name);
+  void  remPointer(const std::string name);
   // Create default hooks
   Plugin()
   {
-    setHook("Timer200", new Hook0<void>);
-    setHook("Timer1000", new Hook0<void>);
-    setHook("Timer10000", new Hook0<void>);
-    setHook("LoginPre", new Hook2<bool,User*,std::string*>);
-    setHook("LoginPost", new Hook1<void,User*>);
-    setHook("ChatPre", new Hook3<bool,User*,time_t,std::string>);
-    setHook("ChatPost", new Hook3<void,User*,time_t,std::string>);
-    setHook("PlayerArmSwing", new Hook1<void,User*>);
-    setHook("PlayerDamagePre", new Hook3<bool,User*,User*,int>);
-    setHook("PlayerDamagePost", new Hook3<void,User*,User*,int>);
-    setHook("PlayerDisconnect", new Hook3<void,User*,uint32,uint16>);
-    setHook("PlayerDiggingStarted", new Hook4<void,User*,sint32,sint8,sint32>);
-    setHook("PlayerDigging", new Hook4<void,User*,sint32,sint8,sint32>);
-    setHook("PlayerDiggingStopped", new Hook4<void,User*,sint32,sint8,sint32>);
-    setHook("BlockBreakPre", new Hook4<bool,User*,sint32,sint8,sint32>);
-    setHook("BlockBreakPost", new Hook4<void,User*,sint32,sint8,sint32>);
-    setHook("BlockNeighbourBreak", new Hook7<void,User*,sint32,sint8,sint32,sint32,sint8,sint32>);
-    setHook("BlockPlacePre", new Hook5<bool,User*,sint32,sint8,sint32,sint16>);
-    setHook("BlockPlacePost", new Hook5<void,User*,sint32,sint8,sint32,sint16>);
-    setHook("BlockNeighbourPlace", new Hook7<void,User*,sint32,sint8,sint32,sint32,sint8,sint32>);
-    setHook("BlockReplacePre", new Hook6<void,User*,sint32,sint8,sint32,sint16,sint16>);
-    setHook("BlockReplacePost", new Hook6<void,User*,sint32,sint8,sint32,sint16,sint16>);
-    setHook("BlockNeighbourReplace", new Hook9<void,User*,sint32,sint8,sint32,sint32,sint8,sint32,sint16,sint16>);
+    setHook("Timer200", new Hook0<bool>);
+    setHook("Timer1000", new Hook0<bool>);
+    setHook("Timer10000", new Hook0<bool>);
+    setHook("PlayerLoginPre", new Hook2<bool,const char*,char***>);
+    setHook("PlayerLoginPost", new Hook1<bool,const char*>);
+    setHook("PlayerNickPost", new Hook2<bool,const char*,const char*>);
+    setHook("PlayerKickPost", new Hook2<bool,const char*,const char*>);
+    setHook("PlayerQuitPost", new Hook1<bool,const char*>);
+    setHook("PlayerChatPre", new Hook3<bool,const char*,time_t,const char*>);
+    setHook("PlayerChatPost", new Hook3<bool,const char*,time_t,const char*>);
+    setHook("PlayerArmSwing", new Hook1<bool,const char*>);
+    setHook("PlayerDamagePre", new Hook3<bool,const char*,const char*,int>);
+    setHook("PlayerDamagePost", new Hook3<bool,const char*,const char*,int>);
+    setHook("PlayerDisconnect", new Hook3<bool,const char*,uint32_t,uint16_t>);
+    setHook("PlayerDiggingStarted", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
+    setHook("PlayerDigging", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
+    setHook("PlayerDiggingStopped", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
+    setHook("BlockBreakPre", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
+    setHook("BlockBreakPost", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
+    setHook("BlockNeighbourBreak", new Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>);
+    setHook("BlockPlacePre", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int8_t>);
+    setHook("BlockPlacePost", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int8_t>);
+    setHook("BlockNeighbourPlace", new Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>);
+    setHook("BlockReplacePre", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>);
+    setHook("BlockReplacePost", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>);
+    setHook("BlockNeighbourReplace", new Hook9<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t,int16_t,int16_t>);
+    setHook("LogPost", new Hook3<bool,int,const char*,const char*>);
+    setHook("PlayerChatCommand", new Hook4<bool,const char*,const char*,int,const char**>);
+
+    init();
   }
   // Remove existing hooks
   ~Plugin()
@@ -194,6 +204,8 @@ public:
       delete it->second;
     }
     m_hooks.clear();
+
+    free();
   }
 
   // Old code
@@ -214,8 +226,9 @@ private:
   std::map<const std::string, float> m_pluginVersions;
 
   // Old stuff
-  typedef std::map<sint16, Callback> Callbacks;
+  typedef std::map<int16_t, Callback> Callbacks;
   Callbacks blockevents;
+  std::vector<BlockBasic*> toClean;
 };
 
 #endif

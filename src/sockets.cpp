@@ -1,28 +1,28 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2011, The Mineserver Project
    All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
- * Neither the name of the The Mineserver Project nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifdef WIN32
@@ -77,34 +77,28 @@ void client_callback(int fd,
 
     int read   = 1;
 
-    uint8 *buf = new uint8[2048];
+    uint8_t *buf = new uint8_t[2048];
 
     read = recv(fd, (char*)buf, 2048, 0);
     if(read == 0)
     {
-    Mineserver::get()->screen()->log("Socket closed properly");
-    //event_del(user->GetEvent());
+      Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket closed properly");
 
-#ifdef WIN32
-    closesocket(user->fd);
-#else
-    close(user->fd);
-#endif
-    delete user;
-    return;
+      delete user;
+      delete[] buf;
+      return;
     }
 
     if(read == -1)
     {
-      Mineserver::get()->screen()->log("Socket had no data to read");
-      #ifdef WIN32
-          closesocket(user->fd);
-      #else
-          close(user->fd);
-      #endif
-          delete user;
+      Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket had no data to read");
+
+      delete user;
+      delete[] buf;
       return;
     }
+
+    user->lastData = time(NULL);
 
     user->buffer.addToRead(buf, read);
 
@@ -112,7 +106,7 @@ void client_callback(int fd,
 
     user->buffer.reset();
 
-    while(user->buffer >> (sint8&)user->action)
+    while(user->buffer >> (int8_t&)user->action)
     {
       //Variable len package
       if(Mineserver::get()->packetHandler()->packets[user->action].len == PACKET_VARIABLE_LEN)
@@ -139,13 +133,6 @@ void client_callback(int fd,
       {
         printf("Unknown action: 0x%x\n", user->action);
 
-        //event_del(user->GetEvent());
-
-        #ifdef WIN32
-        closesocket(user->fd);
-        #else
-        close(user->fd);
-        #endif
         delete user;
 
         break;
@@ -173,29 +160,23 @@ void client_callback(int fd,
     int written = send(fd, (char*)user->buffer.getWrite(), writeLen, 0);
     if(written == -1)
     {
-      if((errno != EAGAIN && errno != EINTR) || user->write_err_count>200)
+      if((errno != EAGAIN && errno != EINTR))// || user->write_err_count>200)
       {
-        Mineserver::get()->screen()->log(LOG_ERROR, "Error writing to client");
-        //event_del(user->GetEvent());
+        Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Error writing to client, tried to write " + dtos(writeLen) + " bytes, code: " + dtos(errno));
 
-    #ifdef WIN32
-        closesocket(user->fd);
-    #else
-        close(user->fd);
-    #endif
         delete user;
         return;
       }
       else
       {
-        user->write_err_count++;
+        //user->write_err_count++;
       }
 
     }
     else
     {
       user->buffer.clearWrite(written);
-      user->write_err_count=0;
+      //user->write_err_count=0;
     }
 
     if(user->buffer.getWriteLen())
@@ -224,7 +205,7 @@ void accept_callback(int fd,
                      &client_len);
   if(client_fd < 0)
   {
-    LOG("Client: accept() failed");
+    LOGLF("Client: accept() failed");
     return;
   }
   User *client = new User(client_fd, generateEID());

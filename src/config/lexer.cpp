@@ -1,28 +1,28 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
-   All rights reserved.
+  Copyright (c) 2011, The Mineserver Project
+  All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
- * Neither the name of the The Mineserver Project nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <string>
@@ -88,9 +88,9 @@ bool ConfigLexer::get_token(int* type, std::string* data)
   {
     while (((buf >= 'a') && (buf <= 'z')) || ((buf >= 'A') && (buf <= 'Z')) || ((buf >= '0') && (buf <= '9')) || (buf == '.') || (buf == '_'))
     {
-      data->append(&buf, 1);
-      m_scanner->move(1);
-      buf = m_scanner->get();
+    data->append(&buf, 1);
+    m_scanner->move(1);
+    buf = m_scanner->get();
     }
 
     // Check for boolean literal is true and false
@@ -114,18 +114,18 @@ bool ConfigLexer::get_token(int* type, std::string* data)
 
     while (((buf >= '0') && (buf <= '9')) || ((buf == '.') && (found == false)) || (buf == '_'))
     {
-      if (buf == '.')
+    if (buf == '.')
       {
         found = true;
       }
 
-      if (buf != '_')
+    if (buf != '_')
       {
         data->append(&buf, 1);
       }
 
-      m_scanner->move(1);
-      buf = m_scanner->get();
+    m_scanner->move(1);
+    buf = m_scanner->get();
     }
 
     *type = CONFIG_TOKEN_NUMBER;
@@ -159,17 +159,17 @@ bool ConfigLexer::get_token(int* type, std::string* data)
     while (m_scanner->left() > 0)
     {
       // Avoid a couple of get() calls
-      temp = m_scanner->get();
+    temp = m_scanner->get();
 
       // We've found the end of the string
-      if (temp == quote)
+    if (temp == quote)
       {
         // Time to stop parsing!
         break;
       }
 
       // This is used to escape other characters or itself
-      if (temp == '\\')
+    if (temp == '\\')
       {
         // Skip past the slash
         m_scanner->move(1);
@@ -188,10 +188,10 @@ bool ConfigLexer::get_token(int* type, std::string* data)
       }
 
       // Add the character to the data string
-      data->append(&temp, 1);
+    data->append(&temp, 1);
 
       // Move forward one
-      m_scanner->move(1);
+    m_scanner->move(1);
     }
 
     // Skip past the ending quote
@@ -203,20 +203,20 @@ bool ConfigLexer::get_token(int* type, std::string* data)
     buf = m_scanner->get();
     while ((buf == ' ') || (buf == '\n') || (buf == '\r') || (buf == '\t'))
     {
-      m_scanner->move(1);
-      buf = m_scanner->get();
+    m_scanner->move(1);
+    buf = m_scanner->get();
     }
 
     // A quoted string followed by a colon is a label
     if (buf == ':')
     {
       *type = CONFIG_TOKEN_LABEL;
-      m_scanner->move(1);
+    m_scanner->move(1);
     }
     else
     {
       *type = CONFIG_TOKEN_STRING;
-      m_scanner->move(0-(m_scanner->pos()-old_pos));
+    m_scanner->move(0-(m_scanner->pos()-old_pos));
     }
 
     return true;
@@ -261,8 +261,8 @@ bool ConfigLexer::get_token(int* type, std::string* data)
   {
     while (buf != '\n')
     {
-      m_scanner->move(1);
-      buf = m_scanner->get();
+    m_scanner->move(1);
+    buf = m_scanner->get();
     }
 
     return get_token(type, data);

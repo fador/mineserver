@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010, The Mineserver Project
+  Copyright (c) 2011, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -25,17 +25,17 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "../mineserver.h"
-#include "../chat.h"
-#include "../nbt.h"
-#include "../map.h"
-#include "../logger.h"
-#include "../tools.h"
-#include "../user.h"
-
 #include "chest.h"
 
-void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+#include "../user.h"
+#include "../permissions.h"
+#include "../nbt.h"
+#include "../mineserver.h"
+#include "../map.h"
+#include "../chat.h"
+#include "../tools.h"
+
+void BlockChest::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
   // Locksystem
   if(user->inv[36+user->currentItemSlot()].type == ITEM_WOODEN_AXE)
@@ -80,9 +80,9 @@ void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, s
           continue;
         }
 
-        if((sint32)(*(**iter)["x"]) == x && (sint32)(*(**iter)["y"]) == y && (sint32)(*(**iter)["z"]) == z)
+        if((int32_t)(*(**iter)["x"]) == x && (int32_t)(*(**iter)["y"]) == y && (int32_t)(*(**iter)["z"]) == z)
         {
-          sint8 locked;
+          int8_t locked;
           NBT_Value *nbtLockdata = (**iter)["Lockdata"];
           if(nbtLockdata != NULL)
           {
@@ -96,11 +96,11 @@ void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, s
               
               if(locked == 1)
               {
-                Mineserver::get()->chat()->sendMsg(user, COLOR_RED + "Chest locked", Chat::USER);
+                Mineserver::get()->chat()->sendMsg(user, MC_COLOR_RED + "Chest locked", Chat::USER);
               }
               else
               {
-                Mineserver::get()->chat()->sendMsg(user, COLOR_RED + "Chest opened", Chat::USER);
+                Mineserver::get()->chat()->sendMsg(user, MC_COLOR_RED + "Chest opened", Chat::USER);
               }
           
             }
@@ -110,7 +110,7 @@ void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, s
             // If lockdata is missing (old chest)
             NBT_Value *nbtLock = new NBT_Value(NBT_Value::TAG_COMPOUND);
             nbtLock->Insert("player", new NBT_Value(user->nick));
-            nbtLock->Insert("locked", new NBT_Value((sint8)1));
+            nbtLock->Insert("locked", new NBT_Value((int8_t)1));
             (*iter)->Insert("Lockdata", nbtLock);
           }
           break;
@@ -120,20 +120,20 @@ void BlockChest::onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, s
   }
 }
 
-void BlockChest::onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockChest::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockChest::onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockChest::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockChest::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-  uint8 block;
-  uint8 meta;
+  uint8_t block;
+  uint8_t meta;
 
   if (!Mineserver::get()->map()->getBlock(x, y, z, &block, &meta))
     return;
@@ -148,76 +148,45 @@ void BlockChest::onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z,
   if(chunk == NULL)
     return;
     
-  NBT_Value *entityList = (*(*(chunk->nbt))["Level"])["TileEntities"];
-
-  if(!entityList)
+  for(uint32_t i = 0; i < chunk->chests.size(); i++)
   {
-    entityList = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
-    chunk->nbt->Insert("TileEntities", entityList);
-  }
-
-  if(entityList->GetType() == NBT_Value::TAG_LIST)
-  {
-    if(entityList->GetListType() != NBT_Value::TAG_COMPOUND)
+    if(chunk->chests[i]->x == x &&
+       chunk->chests[i]->y == y &&
+       chunk->chests[i]->z == z)
     {
-      entityList->SetType(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
-    }
-
-    std::vector<NBT_Value*> *entities = entityList->GetList();
-    std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
-
-    for( ; iter != end; iter++ )
-    {
-      if((**iter)["x"] == NULL || (**iter)["y"] == NULL || (**iter)["z"] == NULL ||
-         (**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
-         (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
-         (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
+      for(uint32_t item_i = 0; item_i < 27; item_i++)
       {
-        continue;
+        if(chunk->chests[i]->items[item_i].type != -1)
+        {
+          Mineserver::get()->map()->createPickupSpawn(chunk->chests[i]->x,
+                                                      chunk->chests[i]->y,
+                                                      chunk->chests[i]->z,
+                                                      chunk->chests[i]->items[item_i].type,
+                                                      chunk->chests[i]->items[item_i].count,
+                                                      chunk->chests[i]->items[item_i].health,
+                                                      NULL);
+        }
       }
 
-      if((sint32)(*(**iter)["x"]) == x && (sint32)(*(**iter)["y"]) == y && (sint32)(*(**iter)["z"]) == z)
-      {          
-        NBT_Value *nbtLockdata = (**iter)["Lockdata"];
-        if(nbtLockdata != NULL)
-        {
-          std::string player = *(*nbtLockdata)["player"]->GetString();
-          // Destroy block.
-          if(player == user->nick && IS_ADMIN(user->permissions))
-          {
-            destroy = true;
-          }
-        }
-        else
-        {
-          destroy = true;
-        }
-        break;
-      }
+      chunk->chests.erase(chunk->chests.begin()+i);
+      break;
     }
-  } 
+  }
 
-  if(destroy) 
-  {
-    Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-    Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
-    this->spawnBlockItem(x,y,z,block);
-    // TODO: spawn items in chest
-  }
-  else
-  {
-    Mineserver::get()->chat()->sendMsg(user, COLOR_RED + "Can't destroy chests that are not your!", Chat::USER);
-  }
+  Mineserver::get()->map()->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map()->setBlock(x, y, z, BLOCK_AIR, 0);
+  this->spawnBlockItem(x,y,z,block);
+
 }
 
-void BlockChest::onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockChest::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockChest::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockChest::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
-  uint8 oldblock;
-  uint8 oldmeta;
+  uint8_t oldblock;
+  uint8_t oldmeta;
 
   if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
     return;
@@ -238,30 +207,19 @@ void BlockChest::onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z
 
   direction = user->relativeToBlock(x, y, z);
 
-  NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
-  val->Insert("id", new NBT_Value("Chest"));
-  val->Insert("x", new NBT_Value((sint32)x));
-  val->Insert("y", new NBT_Value((sint32)y));
-  val->Insert("z", new NBT_Value((sint32)z));
-  
-  NBT_Value *nbtItems = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
-  val->Insert("Items", nbtItems);
-  
   Mineserver::get()->map()->setBlock(x, y, z, (char)newblock, direction);
   Mineserver::get()->map()->sendBlockChange(x, y, z, (char)newblock, direction);
-  
-  Mineserver::get()->map()->setComplexEntity(user, x, y, z, val);
 }
 
-void BlockChest::onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockChest::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 
-void BlockChest::onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockChest::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 
 }
 
-void BlockChest::onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction)
+void BlockChest::onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }

@@ -1,28 +1,28 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2011, The Mineserver Project
    All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
- * Neither the name of the The Mineserver Project nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #pragma once
@@ -45,7 +45,7 @@ public:
       @param z The z position of the current block being hit
       @param direction The direction that the user is facing
     */
-   void onStartedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction);
 
    /** Fired when the player is digging
       @param user The user who is digging
@@ -55,7 +55,7 @@ public:
       @param z The z position of the current block being hit
       @param direction The direction that the user is facing
     */
-   void onDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction);
 
    /** Fired when the player stops digging but hasn't broken the block
       @param user The user who has stopped digging
@@ -65,7 +65,7 @@ public:
       @param z The z position of the current block not being hit anymore
       @param direction The direction that the user is facing
     */
-   void onStoppedDigging(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction);
 
    /** Fired when the player has broken the block
       @param user The user who has broken the block
@@ -75,7 +75,7 @@ public:
       @param z The z position of the block that has been broken
       @param direction The direction that the user is facing
     */
-   void onBroken(User* user, sint8 status, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction);
 
    /** Fired when a neighbour block is broken.
       @param user The user who broke the block
@@ -85,7 +85,7 @@ public:
       @param z The z position of the current neighbour block being called
       @param direction The direction of the neighbour block that was broken
     */
-   void onNeighbourBroken(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction);
 
    /** Fired when a block is placed
       @param user The user who placed the block
@@ -95,7 +95,7 @@ public:
       @param z The z position of where the block was placed
       @param direction The direction that the user is facing
     */
-   void onPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction);
 
    /** Fired when a neighbour block is placed
       @param user The user who placed the block
@@ -109,7 +109,7 @@ public:
       allows another block's onReplace method to either allow of deny the replacement
       of a block with the block you're replacing it with.
     */
-   void onNeighbourPlace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction);
 
    /** Fired when a block is to be placed
       @param user The user who placed the block
@@ -123,7 +123,7 @@ public:
       the block change the block to be BLOCK_AIR and check for BLOCK_AIR
       in the onPlace callback.
     */
-   void onReplace(User* user, sint8 newblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction);
 
    /** Fired when a neighbour block is moving position.
       @param user The user who broke the block
@@ -133,6 +133,6 @@ public:
       @param z The z position of the current neighbour block being called
       @param direction The direction that the block was in
     */
-   void onNeighbourMove(User* user, sint8 oldblock, sint32 x, sint8 y, sint32 z, sint8 direction);
+   void onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction);
 };
 

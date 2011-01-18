@@ -1,28 +1,28 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2011, The Mineserver Project
    All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
- * Neither the name of the The Mineserver Project nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #ifdef WIN32
     #include <stdlib.h>
@@ -53,11 +53,10 @@
 
 #include "logger.h"
 #include "constants.h"
-#include "config.h"
-#include "user.h"
 #include "map.h"
 #include "vec.h"
 #include "mineserver.h"
+#include "tools.h"
 
 #include "physics.h"
 
@@ -102,17 +101,18 @@ bool Physics::update()
 
   clock_t starttime = clock();
 
-  std::vector<sint32> toRemove;
+  std::vector<int32_t> toRemove;
   std::vector<vec> toAdd;
 
-  Mineserver::get()->screen()->log("Simulating " + dtos(simList.size()) + " items!");
-  uint32 listSize = simList.size();
+  LOG(INFO, "Physics", "Simulating " + dtos(simList.size()) + " items!");
+
+  uint32_t listSize = simList.size();
   // Iterate each simulation
-  for(uint32 simIt = 0; simIt < listSize; simIt++)
+  for(uint32_t simIt = 0; simIt < listSize; simIt++)
   {
     vec pos = simList[simIt].blocks[0].pos;
     // Blocks
-    uint8 block, meta;
+    uint8_t block, meta;
     Mineserver::get()->map()->getBlock(pos, &block, &meta);
 
     simList[simIt].blocks[0].id   = block;
@@ -123,9 +123,9 @@ bool Physics::update()
     {
       if(isWaterBlock(block))
       {
-        sint32 it = 0;
+        int32_t it = 0;
 
-        //for(sint32 it=simList[simIt].blocks.size()-1; it>=0; it--)
+        //for(int32_t it=simList[simIt].blocks.size()-1; it>=0; it--)
         {
           bool havesource = false;
 
@@ -172,7 +172,7 @@ bool Physics::update()
           if(!havesource)
           {
             //This block will change so add surrounding blocks to simulation
-            for(uint32 i = 0; i < toAdd.size(); i++)
+            for(uint32_t i = 0; i < toAdd.size(); i++)
             {
               addSimulation(toAdd[i]);
             }
@@ -286,10 +286,9 @@ bool Physics::update()
   {
     simList.erase(simList.begin()+*rit);
   }
-
   
   clock_t endtime = clock()-starttime;
-  Mineserver::get()->screen()->log("Exit simulation, took " + dtos(endtime*1000/CLOCKS_PER_SEC) + " ms, " + dtos(simList.size()) + " items left");
+  LOG(INFO, "Physics", "Exit simulation, took " + dtos(endtime*1000/CLOCKS_PER_SEC) + " ms, " + dtos(simList.size()) + " items left");
   return true;
 }
 
@@ -299,7 +298,7 @@ bool Physics::addSimulation(vec pos)
   if(!enabled)
     return true;
 
-  uint8 block; uint8 meta;
+  uint8_t block; uint8_t meta;
   Mineserver::get()->map()->getBlock(pos, &block, &meta);
   SimBlock simulationBlock(block, pos, meta);
 
@@ -343,7 +342,7 @@ bool Physics::checkSurrounding(vec pos)
   if(!enabled)
     return true;
 
-  uint8 block; uint8 meta;
+  uint8_t block; uint8_t meta;
 
   for(int i = 0; i < 6; i++)
   {

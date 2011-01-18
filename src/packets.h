@@ -1,34 +1,35 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2011, The Mineserver Project
    All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
- * Neither the name of the The Mineserver Project nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef _PACKETS_H
 #define _PACKETS_H
 
 #include <string.h>
+#include <stdint.h>
 
 #define PACKET_NEED_MORE_DATA -3
 #define PACKET_DOES_NOT_EXIST -2
@@ -60,6 +61,7 @@ enum
   PACKET_PLAYER_BLOCK_PLACEMENT    = 0x0f,
   PACKET_HOLDING_CHANGE            = 0x10,
   PACKET_ARM_ANIMATION             = 0x12,
+  PACKET_ENTITY_CROUCH             = 0x13,
   PACKET_INVENTORY_CLOSE           = 0x65,
   PACKET_INVENTORY_CHANGE          = 0x66,
   PACKET_SET_SLOT                  = 0x67,
@@ -103,12 +105,12 @@ enum
 class Packet
 {
 private:
-  typedef std::vector<uint8> bufVector;
-  bufVector m_readBuffer;
-  bufVector::size_type m_readPos;
+  typedef std::vector<uint8_t> BufferVector;
+  BufferVector m_readBuffer;
+  BufferVector::size_type m_readPos;
   bool m_isValid;
 
-  bufVector m_writeBuffer;
+  BufferVector m_writeBuffer;
 public:
   Packet() : m_readPos(0), m_isValid(true) {}
 
@@ -128,23 +130,23 @@ public:
     m_isValid = true;
   }
 
-  void addToRead(std::vector<uint8> &buffer)
+  void addToRead(std::vector<uint8_t> &buffer)
   {
     m_readBuffer.insert(m_readBuffer.end(), buffer.begin(), buffer.end());
   }
 
-  void addToRead(const void * data, bufVector::size_type dataSize)
+  void addToRead(const void * data, BufferVector::size_type dataSize)
   {
-    bufVector::size_type start = m_readBuffer.size();
+    BufferVector::size_type start = m_readBuffer.size();
     m_readBuffer.resize(start + dataSize);
     memcpy(&m_readBuffer[start], data, dataSize);
   }
 
-  void addToWrite(const void * data, bufVector::size_type dataSize)
+  void addToWrite(const void * data, BufferVector::size_type dataSize)
   {
     if(dataSize == 0)
       return;
-    bufVector::size_type start = m_writeBuffer.size();
+    BufferVector::size_type start = m_writeBuffer.size();
     m_writeBuffer.resize(start + dataSize);
     memcpy(&m_writeBuffer[start], data, dataSize);
   }
@@ -155,151 +157,21 @@ public:
     m_readPos = 0;
   }
 
-  Packet & operator<<(sint8 val)
-  {
-    m_writeBuffer.push_back(val);
-    return *this;
-  }
-
-  Packet & operator>>(sint8 &val)
-  {
-    if(haveData(1))
-    {
-      val = *reinterpret_cast<const sint8*>(&m_readBuffer[m_readPos]);
-      m_readPos += 1;
-    }
-    return *this;
-  }
-
-  Packet & operator<<(sint16 val)
-  {
-    uint16 nval = htons(val);
-    addToWrite(&nval, 2);
-    return *this;
-  }
-
-  Packet & operator>>(sint16 &val)
-  {
-    if(haveData(2))
-    {
-      val = ntohs(*reinterpret_cast<const sint16*>(&m_readBuffer[m_readPos]));
-      m_readPos += 2;
-    }
-    return *this;
-  }
-
-  Packet & operator<<(sint32 val)
-  {
-    uint32 nval = htonl(val);
-    addToWrite(&nval, 4);
-    return *this;
-  }
-
-  Packet & operator>>(sint32 &val)
-  {
-    if(haveData(4))
-    {
-      val = ntohl(*reinterpret_cast<const sint32*>(&m_readBuffer[m_readPos]));
-      m_readPos += 4;
-    }
-    return *this;
-  }
-
-  Packet & operator<<(sint64 val)
-  {
-    uint64 nval = ntohll(val);
-    addToWrite(&nval, 8);
-    return *this;
-  }
-
-  Packet & operator>>(sint64 &val)
-  {
-    if(haveData(8))
-    {
-      val = *reinterpret_cast<const sint64*>(&m_readBuffer[m_readPos]);
-      val = ntohll(val);
-      m_readPos += 8;
-    }
-    return *this;
-  }
-
-  Packet & operator<<(float val)
-  {
-    uint32 nval;
-    memcpy(&nval, &val , 4);
-    nval = htonl(nval);
-    addToWrite(&nval, 4);
-    return *this;
-  }
-
-  Packet & operator>>(float &val)
-  {
-    if(haveData(4))
-    {
-      sint32 ival = ntohl(*reinterpret_cast<const sint32*>(&m_readBuffer[m_readPos]));
-      memcpy(&val, &ival, 4);
-      m_readPos += 4;
-    }
-    return *this;
-  }
-
-  Packet & operator<<(double val)
-  {
-    uint64 nval;
-    memcpy(&nval, &val, 8);
-    nval = ntohll(nval);
-    addToWrite(&nval, 8);
-    return *this;
-  }
-
-
-  Packet & operator>>(double &val)
-  {
-    if(haveData(8))
-    {
-      uint64 ival = *reinterpret_cast<const uint64*>(&m_readBuffer[m_readPos]);
-      ival = ntohll(ival);
-      memcpy((void*)&val, (void*)&ival, 8);
-      m_readPos += 8;
-    }
-    return *this;
-  }
-
-  Packet & operator<<(const std::string &str)
-  {
-    uint16 lenval = htons(str.size());
-    addToWrite(&lenval, 2);
-
-    addToWrite(&str[0], str.size());
-    return *this;
-  }
-
-  Packet & operator>>(std::string &str)
-  {
-    sint16 lenval;
-    if(haveData(2))
-    {
-      lenval = ntohs(*reinterpret_cast<const sint16*>(&m_readBuffer[m_readPos]));
-      m_readPos += 2;
-
-      if(haveData(lenval))
-      {
-        str.assign((char*)&m_readBuffer[m_readPos], lenval);
-        m_readPos += lenval;
-      }
-    }    
-    return *this;
-  }
-
-  void operator<<(Packet &other)
-  {
-    int dataSize = other.getWriteLen();
-    if(dataSize == 0)
-      return;
-    bufVector::size_type start = m_writeBuffer.size();
-    m_writeBuffer.resize(start + dataSize);
-    memcpy(&m_writeBuffer[start], other.getWrite(), dataSize);
-  }
+  Packet & operator<<(int8_t val);
+  Packet & operator>>(int8_t &val);
+  Packet & operator<<(int16_t val);
+  Packet & operator>>(int16_t &val);
+  Packet & operator<<(int32_t val);
+  Packet & operator>>(int32_t &val);
+  Packet & operator<<(int64_t val);
+  Packet & operator>>(int64_t &val);
+  Packet & operator<<(float val);
+  Packet & operator>>(float &val);
+  Packet & operator<<(double val);
+  Packet & operator>>(double &val);
+  Packet & operator<<(const std::string &str);
+  Packet & operator>>(std::string &str);
+  void operator<<(Packet &other);
 
   void getData(void *buf, int count)
   {
@@ -372,8 +244,8 @@ struct packet_login_request
   int version;
   std::string Username;
   std::string Password;
-  sint64 map_seed;
-  uint8 dimension;
+  int64_t map_seed;
+  uint8_t dimension;
 };
 
 struct packet_player_position
@@ -435,6 +307,8 @@ public:
   int inventory_change(User *user);
   int inventory_close(User *user);
   int destroy_entity(User *user);
+
+  int entity_crouch(User *user);
 };
 
 #endif

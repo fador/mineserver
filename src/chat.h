@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010, The Mineserver Project
+  Copyright (c) 2011, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,9 @@
 #define _CHAT_H
 
 #include <deque>
+#include <string>
+
+class User;
 
 class Chat
 {
@@ -43,8 +46,6 @@ public:
     GUESTS
   };
 
-
-
   Chat();
   ~Chat();
 
@@ -55,8 +56,9 @@ public:
 
   bool sendMsg(User* user, std::string msg, MessageTarget action = ALL);
   bool sendUserlist(User* user);
-  bool checkMotd(std::string motdFile);
   void sendHelp(User* user, std::deque<std::string> args);
+
+  void handleCommand(User* user, std::string msg, const std::string& timeStamp);
 
 private:
   std::deque<std::string> parseCmd(std::string cmd);

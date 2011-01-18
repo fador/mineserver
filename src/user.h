@@ -1,28 +1,28 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2011, The Mineserver Project
    All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
- * Neither the name of the The Mineserver Project nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef _USER_H
@@ -30,14 +30,17 @@
 
 #include <vector>
 
+#ifdef WIN32
+  // This is needed for event to work on Windows.
+  #include <winsock2.h>
+#else
+  #include <sys/types.h>
+#endif
 #include <event.h>
 
 #include "vec.h"
-#include "tools.h"
-#include "constants.h"
+#include "inventory.h"
 #include "packets.h"
-#include "permissions.h"
-
 
 struct position
 {
@@ -49,58 +52,46 @@ struct position
   float pitch;
 };
 
-struct Item
-{
-  sint16 type;
-  sint8 count;
-  sint16 health;
-  Item()
-  {
-    type   = -1;
-    count  = 0;
-    health = 0;
-  }
-};
-
-#include "inventory.h"
-
-uint32 generateEID();
+uint32_t generateEID();
 
 class User
 {
 public:
 
-  User(int sock, uint32 EID);
+  User(int sock, uint32_t EID);
   ~User();
 
   int fd;
 
+  //When we last received data from this user
+  time_t lastData;
+
   //View distance in chunks -viewDistance <-> viewDistance
   static const int viewDistance = 10;
-  uint8 action;
+  uint8_t action;
   bool waitForData;
-  uint32 write_err_count;
+  uint32_t write_err_count;
   bool logged;
   bool muted;
   bool dnd;
-  sint16 health;
-  uint16 timeUnderwater;
+  int16_t health;
+  uint16_t timeUnderwater;
   unsigned int UID;
   std::string nick;
   std::string temp_nick;
   position pos;
   vec curChunk;
   Item inv[45];
-  sint16 curItem;
+  int16_t curItem;
   Item inventoryHolding;
   //Do we have an open _shared_ inventory?
   bool isOpenInv;
   //More info on the inventory
-  openInventory openInv;
+  OpenInventory openInv;
 
   int permissions; // bitmask for permissions. See permissions.h
 
-  sint32 attachedTo;
+  int32_t attachedTo;
 
   //Input buffer
   Packet buffer;
@@ -112,15 +103,15 @@ public:
   bool changeNick(std::string _nick);
   bool updatePos(double x, double y, double z, double stance);
   /** Check if the user is standing on this block */
-  bool checkOnBlock(sint32 x, sint8 y, sint32 z);
+  bool checkOnBlock(int32_t x, int8_t y, int32_t z);
   bool updateLook(float yaw, float pitch);
-  sint8 relativeToBlock(const sint32 x, const sint8 y, const sint32 z);
+  int8_t relativeToBlock(const int32_t x, const int8_t y, const int32_t z);
 
-  bool sendOthers(uint8* data, uint32 len);
-  static bool sendAll(uint8* data, uint32 len);
-  static bool sendAdmins(uint8* data, uint32 len);
-  static bool sendOps(uint8* data, uint32 len);
-  static bool sendGuests(uint8* data, uint32 len);
+  bool sendOthers(uint8_t* data, uint32_t len);
+  static bool sendAll(uint8_t* data, uint32_t len);
+  static bool sendAdmins(uint8_t* data, uint32_t len);
+  static bool sendOps(uint8_t* data, uint32_t len);
+  static bool sendGuests(uint8_t* data, uint32_t len);
 
   //Login
   bool sendLoginInfo();
@@ -176,8 +167,8 @@ public:
   bool isUnderwater();
 
   // Getter/Setter for item currently in hold
-  sint16 currentItemSlot();
-  void setCurrentItemSlot(sint16 item_slot);
+  int16_t currentItemSlot();
+  void setCurrentItemSlot(int16_t item_slot);
 
 
   bool withinViewDistance(int a, int b)
@@ -191,7 +182,7 @@ private:
   event m_event;
 
   // Item currently in hold
-  sint16 m_currentItemSlot;
+  int16_t m_currentItemSlot;
 };
 
 #endif

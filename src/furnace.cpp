@@ -1,41 +1,44 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2011, The Mineserver Project
    All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
- * Neither the name of the The Mineserver Project nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include <iostream>
+
+#include "constants.h"
 #include "furnace.h"
 #include "mineserver.h"
+#include "map.h"
 
-Furnace::Furnace(NBT_Value* entity, uint8 blockType)
+Furnace::Furnace(NBT_Value* entity, uint8_t blockType)
 {
   // Setup this furnace
-  m_x = (sint32)(*(*entity)["x"]);
-  m_y = (sint32)(*(*entity)["y"]);
-  m_z = (sint32)(*(*entity)["z"]);
-  //m_fuelBurningTime = (sint16)(*(*entity)["BurnTime"]);
+  m_x = (int32_t)(*(*entity)["x"]);
+  m_y = (int32_t)(*(*entity)["y"]);
+  m_z = (int32_t)(*(*entity)["z"]);
+  //m_fuelBurningTime = (int16_t)(*(*entity)["BurnTime"]);
 
   // Clean out the slots
   m_slots[SLOT_INPUT].count  = 0;
@@ -48,17 +51,6 @@ Furnace::Furnace(NBT_Value* entity, uint8 blockType)
   m_slots[SLOT_OUTPUT].damage= 0;
   m_slots[SLOT_OUTPUT].id    = 0;
 
-  // Set the slots to what was passed
-  NBT_Value* slotList = (NBT_Value*)(*entity)["Items"];
-  std::vector<NBT_Value*>* slotEntities = slotList->GetList();
-  std::vector<NBT_Value*>::iterator iter = slotEntities->begin(), end = slotEntities->end();
-  for( ; iter != end; iter++ )
-  {
-    sint8 slotNum = (sint8)(*(**iter)["Slot"]);
-    m_slots[slotNum].count = (sint8)(*(**iter)["Count"]);
-    m_slots[slotNum].damage = (sint16)(*(**iter)["Damage"]);
-    m_slots[slotNum].id = (sint16)(*(**iter)["id"]);
-  }
 
   // Set the cooking time based on input type (currently all smelting takes 10 secs but this gives us flexivibility in future)
   Slot inputSlot = m_slots[SLOT_INPUT];
@@ -92,8 +84,8 @@ Furnace::Furnace(NBT_Value* entity, uint8 blockType)
 void Furnace::updateBlock()
 {
   // Get a pointer to this furnace's current block
-  uint8 block;
-  uint8 meta;
+  uint8_t block;
+  uint8_t meta;
 
   // Now make sure that it's got the correct block type based on it's current status
   if(isBurningFuel() && !m_burning)
@@ -125,7 +117,7 @@ void Furnace::smelt()
     Slot inputSlot  = m_slots[SLOT_INPUT];
     Slot fuelSlot   = m_slots[SLOT_FUEL];
     Slot outputSlot = m_slots[SLOT_OUTPUT];
-    sint32 creationID = 0;
+    int32_t creationID = 0;
     if(inputSlot.id == BLOCK_IRON_ORE)    { creationID = ITEM_IRON_INGOT; }
     if(inputSlot.id == BLOCK_GOLD_ORE)    { creationID = ITEM_GOLD_INGOT; }
     if(inputSlot.id == BLOCK_SAND)        { creationID = BLOCK_GLASS; }
@@ -226,9 +218,9 @@ void Furnace::consumeFuel()
   Slot fuelSlot = m_slots[SLOT_FUEL];
   m_initialBurningTime = 0;
   if(fuelSlot.id == ITEM_COAL)           { m_initialBurningTime += 80; }
-  if(fuelSlot.id == BLOCK_WOOD)          { m_initialBurningTime += 15; }
+  if(fuelSlot.id == BLOCK_PLANK)          { m_initialBurningTime += 15; }
   if(fuelSlot.id == ITEM_STICK)          { m_initialBurningTime += 5; }
-  if(fuelSlot.id == BLOCK_LOG)           { m_initialBurningTime += 15; }
+  if(fuelSlot.id == BLOCK_WOOD)           { m_initialBurningTime += 15; }
   if(fuelSlot.id == BLOCK_WORKBENCH)     { m_initialBurningTime += 15; }
   if(fuelSlot.id == BLOCK_CHEST)         { m_initialBurningTime += 15; }
   if(fuelSlot.id == BLOCK_BOOKSHELF)     { m_initialBurningTime += 15; }
@@ -246,24 +238,25 @@ void Furnace::consumeFuel()
   // Update our block type if need be
   updateBlock();
 }
-sint16 Furnace::burnTime()
+int16_t Furnace::burnTime()
 {
-  sint16 fuelBurningTime = (sint16)((200.0f / m_initialBurningTime) * m_fuelBurningTime);
+  int16_t fuelBurningTime = (int16_t)((200.0f / m_initialBurningTime) * m_fuelBurningTime);
   if(fuelBurningTime < 0)
     fuelBurningTime = 0;
   return fuelBurningTime;
 }
-sint16 Furnace::cookTime()
+int16_t Furnace::cookTime()
 {
   // Express cook time as a fraction of total cooking time
-  sint16 tempCookTime = (sint16)((200.0f / m_cookingTime) * m_activeCookDuration);
+  int16_t tempCookTime = (int16_t)((200.0f / m_cookingTime) * m_activeCookDuration);
   if(tempCookTime < 0)
   {
     tempCookTime = 0;
   }
   return tempCookTime;
 }
-NBT_Value* Furnace::getSlotEntity(sint8 slotNumber)
+
+NBT_Value* Furnace::getSlotEntity(int8_t slotNumber)
 {
   // Return null of we don't have anything in this slot
   if(m_slots[slotNumber].count == 0)
@@ -282,77 +275,5 @@ NBT_Value* Furnace::getSlotEntity(sint8 slotNumber)
 }
 void Furnace::sendToAllUsers()
 {
-  // Create a new compound tag and set it's direct properties
-  NBT_Value* newEntity = new NBT_Value(NBT_Value::TAG_COMPOUND);
-  newEntity->Insert("BurnTime", new NBT_Value(burnTime()));
-  newEntity->Insert("CookTime", new NBT_Value(cookTime()));
-  newEntity->Insert("id", new NBT_Value("Furnace"));
-  newEntity->Insert("x", new NBT_Value(m_x));
-  newEntity->Insert("y", new NBT_Value(m_y));
-  newEntity->Insert("z", new NBT_Value(m_z));
-
-  // Add our 3 child compounds for each slot that contains something
-  NBT_Value* slotList = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
-  for(int i = 0; i <= 2; i++)
-  {
-    NBT_Value* slot = getSlotEntity(i);
-    if(slot != NULL)
-    {
-      slotList->GetList()->push_back(slot);
-    }
-  }
-  newEntity->Insert("Items", slotList);
-
-  // Write the entity data into a parent Compound
-  std::vector<uint8> buffer;
-  buffer.push_back(NBT_Value::TAG_COMPOUND);
-  buffer.push_back(0);
-  buffer.push_back(0);
-  newEntity->Write(buffer);
-  buffer.push_back(0);
-  buffer.push_back(0);
-
-  // Compress the data
-  uint8* compressedData = new uint8[ALLOCATE_NBTFILE];
-  z_stream zstream;
-  zstream.zalloc = Z_NULL;
-  zstream.zfree = Z_NULL;
-  zstream.opaque = Z_NULL;
-  zstream.next_out = compressedData;
-  zstream.next_in = &buffer[0];
-  zstream.avail_in = buffer.size();
-  zstream.avail_out = ALLOCATE_NBTFILE;
-  zstream.total_out = 0;
-  zstream.total_in = 0;
-  deflateInit2(&zstream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15+MAX_WBITS, 8, Z_DEFAULT_STRATEGY);
-
-  // Gzip the data
-  if(int state = deflate(&zstream, Z_FULL_FLUSH) != Z_OK)
-  {
-    Mineserver::get()->screen()->log(LOG_ERROR, "Error in deflate: " + state);
-  }
-  deflateEnd(&zstream);
-
-  // Create a new packet to send back to client
-  /*
-  Packet pkt;
-  pkt << (sint8)PACKET_COMPLEX_ENTITIES  << m_x << (sint16)m_y << m_z << (sint16)zstream.total_out;
-  pkt.addToWrite(compressedData, zstream.total_out);
-  */
-  delete[] compressedData;
-
-  // Tell all users about this guy
-  //User::sendAll((uint8*)pkt.getWrite(), pkt.getWriteLen());
-
-#ifdef _DEBUG
-  Mineserver::get()->screen()->log("Furnace entity data: ");
-  std::string dump;
-  newEntity->Dump(dump);
-  Mineserver::get()->screen()->log(dump);
-#endif
-
-  // Update our map with this guy
-  Mineserver::get()->map()->setComplexEntity(NULL, m_x, m_y, m_z, newEntity);
-
+ 
 }
-

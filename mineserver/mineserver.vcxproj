@@ -17,6 +17,7 @@
     <ClCompile Include="..\src\blocks\door.cpp" />
     <ClCompile Include="..\src\blocks\falling.cpp" />
     <ClCompile Include="..\src\blocks\fire.cpp" />
+    <ClCompile Include="..\src\blocks\ladder.cpp" />
     <ClCompile Include="..\src\blocks\liquid.cpp" />
     <ClCompile Include="..\src\blocks\plant.cpp" />
     <ClCompile Include="..\src\blocks\sign.cpp" />
@@ -25,6 +26,7 @@
     <ClCompile Include="..\src\blocks\torch.cpp" />
     <ClCompile Include="..\src\blocks\tracks.cpp" />
     <ClCompile Include="..\src\chat.cpp" />
+    <ClCompile Include="..\src\cliScreen.cpp" />
     <ClCompile Include="..\src\config.cpp" />
     <ClCompile Include="..\src\config\lexer.cpp" />
     <ClCompile Include="..\src\config\node.cpp" />
@@ -34,6 +36,7 @@
     <ClCompile Include="..\src\furnace.cpp" />
     <ClCompile Include="..\src\furnaceManager.cpp" />
     <ClCompile Include="..\src\inventory.cpp" />
+    <ClCompile Include="..\src\lighting.cpp" />
     <ClCompile Include="..\src\logger.cpp" />
     <ClCompile Include="..\src\map.cpp" />
     <ClCompile Include="..\src\mineserver.cpp" />
@@ -42,14 +45,14 @@
     <ClCompile Include="..\src\physics.cpp" />
     <ClCompile Include="..\src\plugin.cpp" />
     <ClCompile Include="..\src\plugin_api.cpp" />
-    <ClCompile Include="..\src\screen.cpp" />
+    <ClCompile Include="..\src\cursesScreen.cpp" />
+    <ClCompile Include="..\src\screenBase.cpp" />
     <ClCompile Include="..\src\sockets.cpp" />
     <ClCompile Include="..\src\tools.cpp" />
     <ClCompile Include="..\src\tree.cpp" />
     <ClCompile Include="..\src\user.cpp" />
     <ClCompile Include="..\src\worldgen\cavegen.cpp" />
     <ClCompile Include="..\src\worldgen\mapgen.cpp" />
-    <ClCompile Include="..\src\worldgen\mersenne.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\blocks\basic.h" />
@@ -58,6 +61,7 @@
     <ClInclude Include="..\src\blocks\door.h" />
     <ClInclude Include="..\src\blocks\falling.h" />
     <ClInclude Include="..\src\blocks\fire.h" />
+    <ClInclude Include="..\src\blocks\ladder.h" />
     <ClInclude Include="..\src\blocks\liquid.h" />
     <ClInclude Include="..\src\blocks\plant.h" />
     <ClInclude Include="..\src\blocks\sign.h" />
@@ -67,6 +71,7 @@
     <ClInclude Include="..\src\blocks\tracks.h" />
     <ClInclude Include="..\src\chat.h" />
     <ClInclude Include="..\src\chunkmap.h" />
+    <ClInclude Include="..\src\cliScreen.h" />
     <ClInclude Include="..\src\config.h" />
     <ClInclude Include="..\src\config\lexer.h" />
     <ClInclude Include="..\src\config\node.h" />
@@ -75,8 +80,11 @@
     <ClInclude Include="..\src\constants.h" />
     <ClInclude Include="..\src\furnace.h" />
     <ClInclude Include="..\src\furnaceManager.h" />
+    <ClInclude Include="..\src\hook.h" />
     <ClInclude Include="..\src\inventory.h" />
+    <ClInclude Include="..\src\lighting.h" />
     <ClInclude Include="..\src\logger.h" />
+    <ClInclude Include="..\src\logtype.h" />
     <ClInclude Include="..\src\map.h" />
     <ClInclude Include="..\src\mineserver.h" />
     <ClInclude Include="..\src\nbt.h" />
@@ -85,7 +93,8 @@
     <ClInclude Include="..\src\physics.h" />
     <ClInclude Include="..\src\plugin.h" />
     <ClInclude Include="..\src\plugin_api.h" />
-    <ClInclude Include="..\src\screen.h" />
+    <ClInclude Include="..\src\cursesScreen.h" />
+    <ClInclude Include="..\src\screenBase.h" />
     <ClInclude Include="..\src\sockets.h" />
     <ClInclude Include="..\src\tools.h" />
     <ClInclude Include="..\src\tree.h" />
@@ -93,7 +102,6 @@
     <ClInclude Include="..\src\vec.h" />
     <ClInclude Include="..\src\worldgen\cavegen.h" />
     <ClInclude Include="..\src\worldgen\mapgen.h" />
-    <ClInclude Include="..\src\worldgen\mersenne.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7F6D1DAB-AA49-4343-B28E-C3E647BE5007}</ProjectGuid>
@@ -142,6 +150,8 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>FADOR_PLUGIN;ZLIB_WINAPI;WIN32;DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -158,7 +168,7 @@
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;ZLIB_WINAPI;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CONSOLE;FTLOG=main;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FADOR_PLUGIN;WIN32;ZLIB_WINAPI;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CONSOLE;FTLOG=main;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>

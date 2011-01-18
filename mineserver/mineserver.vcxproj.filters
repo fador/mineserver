@@ -102,9 +102,6 @@
     <ClCompile Include="..\src\worldgen\mapgen.cpp">
       <Filter>Source Files\worldgen</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\worldgen\mersenne.cpp">
-      <Filter>Source Files\worldgen</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\worldgen\cavegen.cpp">
       <Filter>Source Files\worldgen</Filter>
     </ClCompile>
@@ -126,9 +123,6 @@
     <ClCompile Include="..\src\blocks\tracks.cpp">
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\screen.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\tree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -148,6 +142,21 @@
       <Filter>Source Files\config</Filter>
     </ClCompile>
     <ClCompile Include="..\src\plugin_api.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cursesScreen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\screenBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cliScreen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\blocks\ladder.cpp">
+      <Filter>Source Files\blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lighting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -221,9 +230,6 @@
     <ClInclude Include="..\src\worldgen\mapgen.h">
       <Filter>Header Files\worldgen</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\worldgen\mersenne.h">
-      <Filter>Header Files\worldgen</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\worldgen\cavegen.h">
       <Filter>Header Files\worldgen</Filter>
     </ClInclude>
@@ -247,9 +253,6 @@
     </ClInclude>
     <ClInclude Include="..\src\blocks\tracks.h">
       <Filter>Header Files\blocks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\screen.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\tree.h">
       <Filter>Header Files</Filter>
@@ -276,6 +279,27 @@
       <Filter>Header Files\config</Filter>
     </ClInclude>
     <ClInclude Include="..\src\plugin_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\logtype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\hook.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\cursesScreen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\screenBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\cliScreen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\ladder.h">
+      <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lighting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

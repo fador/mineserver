@@ -1,41 +1,57 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2011, The Mineserver Project
    All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
- * Neither the name of the The Mineserver Project nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #ifndef _INVENTORY_H_
 #define _INVENTORY_H_
 
-#include "user.h"
+#include <stdint.h>
+#include <vector>
 
-struct openInventory
+class User;
+
+struct Item
 {
-  sint8 type;
-  sint32 x;
-  sint32 y;
-  sint32 z;
+  int16_t type;
+  int8_t count;
+  int16_t health;
+  Item()
+  {
+    type   = -1;
+    count  = 0;
+    health = 0;
+  }
+};
+
+struct OpenInventory
+{
+  int8_t type;
+  int32_t x;
+  int32_t y;
+  int32_t z;
   Item workbench[10];
   std::vector<User *> users;  
 };
@@ -44,59 +60,71 @@ enum { WINDOW_CURSOR = -1, WINDOW_PLAYER = 0, WINDOW_WORKBENCH, WINDOW_CHEST, WI
 
 enum { INVENTORYTYPE_CHEST = 0,INVENTORYTYPE_WORKBENCH, INVENTORYTYPE_FURNACE };
 
+class User;
+
 class Inventory
 {
 public:
 
   struct Recipe
   {
-    sint8 width;
-    sint8 height;
-    sint16 *slots;
+    Recipe() : width(0),height(0),slots(NULL) {}
+    ~Recipe()
+    {
+      delete [] slots;
+    }
+
+    int8_t width;
+    int8_t height;
+    int16_t *slots;
     Item output;
   };
   
   std::vector<Recipe*> recipes;
+  bool addRecipe(int width, int height, int16_t* inputrecipe, int outputCount, 
+                 int16_t outputType, int16_t outputHealth);
+  bool readRecipe(std::string recipeFile);
 
   Inventory();
 
   ~Inventory()
   {
-    for(uint32 i = 0; i < recipes.size(); i++)
+    std::vector<Recipe*>::iterator it_a = recipes.begin();
+    std::vector<Recipe*>::iterator it_b = recipes.end();
+    for(;it_a!=it_b;++it_a)
     {
-      delete [] recipes[i]->slots;
-      delete recipes[i];
+      delete *it_a;
     }
+    recipes.clear();
   }
 
-  //Open chest/workbench/furnace inventories
-  std::vector<openInventory *> openWorkbenches;
-  std::vector<openInventory *> openChests;
-  std::vector<openInventory *> openFurnaces;
+  // Open chest/workbench/furnace inventories
+  std::vector<OpenInventory *> openWorkbenches;
+  std::vector<OpenInventory *> openChests;
+  std::vector<OpenInventory *> openFurnaces;
 
-  bool onwindowOpen(User *user,sint8 type, sint32 x, sint32 y, sint32 z);
-  bool onwindowClose(User *user,sint8 type,sint32 x, sint32 y, sint32 z);
+  bool onwindowOpen(User *user,int8_t type, int32_t x, int32_t y, int32_t z);
+  bool onwindowClose(User *user,int8_t type,int32_t x, int32_t y, int32_t z);
 
 
-  bool windowOpen(User *user, sint8 type, sint32 x, sint32 y, sint32 z);
+  bool windowOpen(User *user, int8_t type, int32_t x, int32_t y, int32_t z);
 
-  bool windowClick(User *user,sint8 windowID, sint16 slot, sint8 rightClick, sint16 actionNumber, sint16 itemID, sint8 itemCount,sint8 itemUses);
+  bool windowClick(User *user,int8_t windowID, int16_t slot, int8_t rightClick, int16_t actionNumber, int16_t itemID, int8_t itemCount,int16_t itemUses);
 
-  bool windowClose(User *user,sint8 windowID);
+  bool windowClose(User *user,int8_t windowID);
     
   //Check inventory for space
-  bool isSpace(User *user, sint16 itemID, char count);
+  bool isSpace(User *user, int16_t itemID, char count);
 
   //Add items to inventory (pickups)
-  bool addItems(User *user, sint16 itemID, char count, sint16 health);
+  bool addItems(User *user, int16_t itemID, char count, int16_t health);
 
-  bool doCraft(Item *slots, sint8 width, sint8 height);
+  bool doCraft(Item *slots, int8_t width, int8_t height);
 
-  bool setSlot(User *user, sint8 windowID, sint16 slot, sint16 itemID, sint8 count, sint16 health);
+  bool setSlot(User *user, int8_t windowID, int16_t slot, int16_t itemID, int8_t count, int16_t health);
 
-  sint16 itemHealth(sint16 itemID, sint8 block, bool &rightUse);
+  int16_t itemHealth(int16_t itemID, int8_t block, bool &rightUse);
 
 };
-
 
 #endif

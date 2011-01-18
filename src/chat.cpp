@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010, The Mineserver Project
+  Copyright (c) 2011, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -25,35 +25,19 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <cstdlib>
-#include <cstdio>
-#include <iostream>
-#include <deque>
-#include <fstream>
-#include <vector>
 #include <ctime>
-#include <math.h>
-#include <algorithm>
-#include <string>
-
-#ifdef WIN32
-  #include <winsock2.h>
-#else
-  #include <netinet/in.h>
-  #include <string.h>
-#endif
+#include <iostream>
+#include <fstream>
 
 #include "constants.h"
-
-#include "tools.h"
-#include "map.h"
 #include "user.h"
-#include "chat.h"
-#include "config.h"
-#include "physics.h"
-#include "constants.h"
-#include "plugin.h"
+#include "logger.h"
 #include "mineserver.h"
+#include "permissions.h"
+#include "tools.h"
+#include "plugin.h"
+
+#include "chat.h"
 
 Chat::Chat()
 {
@@ -61,28 +45,6 @@ Chat::Chat()
 
 Chat::~Chat()
 {
-}
-
-bool Chat::checkMotd(std::string motdFile)
-{
-  //
-  // Create motdfile is it doesn't exist
-  //
-  std::ifstream ifs(motdFile.c_str());
-
-  // If file does not exist
-  if(ifs.fail())
-  {
-    Mineserver::get()->screen()->log("> Warning: " + motdFile + " not found. Creating...");
-
-    std::ofstream motdofs(motdFile.c_str());
-    motdofs << MOTD_CONTENT << std::endl;
-    motdofs.close();
-  }
-
-  ifs.close();
-
-  return true;
 }
 
 bool Chat::sendUserlist(User* user)
@@ -152,11 +114,11 @@ bool Chat::handleMsg(User* user, std::string msg)
   std::string timeStamp (asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
-  if ((static_cast<Hook3<bool,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("ChatPre")))->doUntilFalse(user, rawTime, msg))
+  if ((static_cast<Hook3<bool,const char*,time_t,const char*>*>(Mineserver::get()->plugin()->getHook("PlayerChatPre")))->doUntilFalse(user->nick.c_str(), rawTime, msg.c_str()))
   {
     return false;
   }
-  (static_cast<Hook3<void,User*,time_t,std::string>*>(Mineserver::get()->plugin()->getHook("ChatPre")))->doAll(user, rawTime, msg);
+  (static_cast<Hook3<bool,const char*,time_t,const char*>*>(Mineserver::get()->plugin()->getHook("PlayerChatPost")))->doAll(user->nick.c_str(), rawTime, msg.c_str());
   char prefix = msg[0];
 
   switch(prefix)
@@ -177,6 +139,9 @@ bool Chat::handleMsg(User* user, std::string msg)
       }
       break;
 
+    case CHATCMDPREFIX:
+      handleCommand(user, msg, timeStamp);
+      break;
     // Normal chat message
     default:
       handleChatMsg(user, msg, timeStamp);
@@ -186,17 +151,43 @@ bool Chat::handleMsg(User* user, std::string msg)
   return true;
 }
 
+void Chat::handleCommand(User* user, std::string msg, const std::string& timeStamp)
+{
+  std::deque<std::string> cmd = parseCmd(msg.substr(1));
+
+  if(!cmd.size() || !cmd[0].size())
+  {
+    return;
+  }
+
+  std::string command = cmd[0];
+  cmd.pop_front();
+
+  char **param = new char *[cmd.size()];
+
+  for(uint32_t i = 0; i < cmd.size(); i++)
+  {
+    param[i] = (char *)cmd[i].c_str();
+  }
+
+  (static_cast<Hook4<bool,const char*,const char*,int,const char**>*>(Mineserver::get()->plugin()->getHook("PlayerChatCommand")))->doAll(user->nick.c_str(), command.c_str(), cmd.size(), (const char **)param);
+
+  delete [] param;
+
+}
+
+
 void Chat::handleServerMsg(User* user, std::string msg, const std::string& timeStamp)
 {
   // Decorate server message
-  Mineserver::get()->screen()->log(LOG_CHAT, "[!] " + msg.substr(1));
+  Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "[!] " + msg.substr(1));
   msg = MC_COLOR_RED + "[!] " + MC_COLOR_GREEN + msg.substr(1);
   this->sendMsg(user, msg, ALL);
 }
 
 void Chat::handleAdminChatMsg(User* user, std::string msg, const std::string& timeStamp)
 {
-  Mineserver::get()->screen()->log(LOG_CHAT, "[@] <"+ user->nick + "> " + msg.substr(1));
+  Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "[@] <"+ user->nick + "> " + msg.substr(1));
   msg = timeStamp +  MC_COLOR_RED + " [@]" + MC_COLOR_WHITE + " <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg.substr(1);
   this->sendMsg(user, msg, ADMINS);
 }
@@ -211,17 +202,17 @@ void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeSta
   // Check for Admins or Server Console
   if (user->UID == SERVER_CONSOLE_UID)
   {
-    Mineserver::get()->screen()->log(LOG_CHAT, user->nick + " " + msg);
+    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat",  user->nick + " " + msg);
     msg = timeStamp + " " + MC_COLOR_RED + user->nick + MC_COLOR_WHITE + " " + msg;
   }
   else if(IS_ADMIN(user->permissions))
   {
-    Mineserver::get()->screen()->log(LOG_CHAT, "<"+ user->nick + "> " + msg);
+    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "<"+ user->nick + "> " + msg);
     msg = timeStamp + " <"+ MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg;
   }
   else
   {
-    Mineserver::get()->screen()->log(LOG_CHAT, "<"+ user->nick + "> " + dtos(user->UID) + " " + msg);
+    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "<"+ user->nick + "> " + msg);
     msg = timeStamp + " <"+ user->nick + "> " + msg;
   }
 
@@ -231,7 +222,7 @@ void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeSta
 bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
 {
   size_t tmpArrayLen = msg.size()+3;
-  uint8* tmpArray    = new uint8[tmpArrayLen];
+  uint8_t* tmpArray    = new uint8_t[tmpArrayLen];
 
   tmpArray[0] = 0x03;
   tmpArray[1] = 0;
