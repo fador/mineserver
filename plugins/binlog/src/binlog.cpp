@@ -49,28 +49,6 @@ std::string dtos( double n )
 mineserver_pointer_struct* mineserver;
 std::string pluginName = "binlog";
 
-PLUGIN_API_EXPORT void binlog_init(mineserver_pointer_struct* mineserver_temp)
-{
-  mineserver = mineserver_temp;
-  if (mineserver->plugin.getPluginVersion("binlog") > 0)
-  {
-    mineserver->screen.log("binlog is already loaded v." +dtos(mineserver->plugin.getPluginVersion("binlog")));
-    return;
-  }
-  mineserver->screen.log("Loaded \"binlog\"!");
-  mineserver->plugin.setPluginVersion("binlog", PLUGIN_VERSION);
-  mineserver->callback.add_hook("BlockPlacePre", (void *) callbackBlockPlacePre);
-  mineserver->callback.add_hook("BlockBreakPre", (void *) callbackBlockBreakPre);
-}
-
-PLUGIN_API_EXPORT void binlog_shutdown(void)
-{
-  if (mineserver->plugin.getPluginVersion("binlog") <= 0)
-  {
-    mineserver->screen.log("binlog is not loaded!");
-    return;
-  }
-}
 
 Binlog::Binlog (std::string filename) 
 {
@@ -211,6 +189,7 @@ void rollBack (User *user, std::string command, std::deque<std::string> args)
   }
 }
 
+// Playback Transaction Logs
 void playBack (User *user, std::string command, std::deque<std::string> args)
 {
   return;
@@ -219,15 +198,59 @@ void playBack (User *user, std::string command, std::deque<std::string> args)
 // Block Break Callback
 bool callbackBlockBreakPre (User* user,sint32 x,sint8 y,sint32 z) 
 {
+  event_t event;
+  event->x = x;
+  event->y = y;
+  event->z = z;
+  event->ntype = 0;
+  event->nmeta = 0;
+
+  minserver->map.getBlock(x,y,z,&event->otype, &event->ometa);
+  Binlog::get().log(event);
+
   return true;
 }
 // Block Place Callback
-bool callbackBlockPlacePre (User* user,sint32 x,sint8 y,sint32 z) 
+bool callbackBlockPlacePre (User* user,sint32 x,sint8 y,sint32 z, int16_t type, int8_t meta) 
+{
+  event_t event;
+  event->x = x;
+  event->y = y;
+  event->z = z;
+  event->otype = 0;
+  event->ometa = 0;
+  event->ntype = type;
+  event->nmeta = meta;
+  Binlog::get().log(event);
+
+  return true;
+}
+// Command Registration
+bool callbackPlayerChatPre (const char* user, size_t timestamp, const char* msg) 
 {
   return true;
 }
 
-bool callbackPlayerChatPre (const char* user, size_t timestamp, const char* msg) 
+PLUGIN_API_EXPORT void CALLCONVERSION binlog_init(mineserver_pointer_struct* mineserver_temp)
 {
+  mineserver = mineserver_temp;
+  if (mineserver->plugin.getPluginVersion("binlog") > 0)
+  {
+    mineserver->screen.log("binlog is already loaded v." +dtos(mineserver->plugin.getPluginVersion("binlog")));
+    return;
+  }
+  mineserver->screen.log("Loaded \"binlog\"!");
+  mineserver->plugin.setPluginVersion("binlog", PLUGIN_VERSION);
+  mineserver->callback.add_hook("BlockPlacePre", (void *) callbackBlockPlacePre);
+  mineserver->callback.add_hook("BlockBreakPre", (void *) callbackBlockBreakPre);
+  mineserver->callback.add_hook("PlayerChatPre", (void *) callbackPlayerChatPre);
+}
 
+PLUGIN_API_EXPORT void CALLCONVERSION binlog_shutdown(void)
+{
+  if (mineserver->plugin.getPluginVersion("binlog") <= 0)
+  {
+    mineserver->screen.log("binlog is not loaded!");
+    return;
+  }
 }
