@@ -971,7 +971,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
     // If generate (false only for lightmapgenerator)
     if (generate)
     {
-      chunk = new sChunk;
+      //chunk = new sChunk;
 
       Mineserver::get()->mapGen()->generateChunk(x,z);
       generateLight(x, z);

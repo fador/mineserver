@@ -51,6 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../map.h"
 #include "../nbt.h"
 #include "../tree.h"
+#include "../tools.h"
 
 int g_seed;
 
@@ -162,11 +163,6 @@ void MapGen::generateChunk(int x, int z)
   NBT_Value *main = new NBT_Value(NBT_Value::TAG_COMPOUND);
   NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
 
-  if(Mineserver::get()->config()->bData("mapgen.flatgrass"))
-    generateFlatgrass();
-  else
-    generateWithNoise(x, z);
-
   val->Insert("Blocks", new NBT_Value(blocks, 16*16*128));
   val->Insert("Data", new NBT_Value(blockdata, 16*16*128/2));
   val->Insert("SkyLight", new NBT_Value(skylight, 16*16*128/2));
@@ -204,6 +200,13 @@ void MapGen::generateChunk(int x, int z)
   chunk->z = z;
 
   Mineserver::get()->map()->chunks.linkChunk(chunk, x, z);
+
+
+  
+  if(Mineserver::get()->config()->bData("mapgen.flatgrass"))
+    generateFlatgrass();
+  else
+    generateWithNoise(x, z);
 
   // Update last used time
   //Mineserver::get()->map()->mapLastused[chunkid] = (int)time(0);
@@ -427,6 +430,7 @@ void MapGen::ExpandBeaches(int x, int z)
 
 void MapGen::AddOre(int x, int z, uint8_t type) 
 {
+  sChunk *chunk = Mineserver::get()->map()->chunks.getChunk(blockToChunk(x),blockToChunk(z));
   int xBlockpos = x<<4;
   int zBlockpos = z<<4;
 
@@ -478,7 +482,8 @@ void MapGen::AddOre(int x, int z, uint8_t type)
 
     i++;
 
-    Mineserver::get()->map()->getBlock(blockX, blockY, blockZ, &block, &meta);
+    //Mineserver::get()->map()->getBlock(blockX, blockY, blockZ, &block, &meta);
+    block = chunk->blocks[blockY + ((blockZ << 7) + (blockX << 11))];
     // No ore in caves
     if(block == BLOCK_AIR)
       continue;
@@ -490,6 +495,7 @@ void MapGen::AddOre(int x, int z, uint8_t type)
 
 void MapGen::AddDeposit(int x, int y, int z, uint8_t block, int depotSize)
 {
+  sChunk *chunk = Mineserver::get()->map()->chunks.getChunk(blockToChunk(x),blockToChunk(z));
   for(int bX = x; bX < x+depotSize; bX++)
   {
     for(int bY = y; bY < y+depotSize; bY++)
@@ -498,8 +504,7 @@ void MapGen::AddDeposit(int x, int y, int z, uint8_t block, int depotSize)
       {
         if(rand()%1000 < 500)
         {
-          Mineserver::get()->map()->sendBlockChange(bX, bY, bZ, block, 0);
-          Mineserver::get()->map()->setBlock(bX, bY, bZ, block, 0);
+          chunk->blocks[bY + ((bZ << 7) + (bX << 11))] = block;
         }
       }
     }
