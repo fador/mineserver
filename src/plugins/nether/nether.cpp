@@ -31,12 +31,14 @@ copy nether.so to Mineserver bin directory.
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <stdlib.h>
 #include <string>
 #include <deque>
 #include <ctime>
 #include <sstream>
 #include <cstdlib>
 #include <map>
+#include <vector>
 #include <iostream>
 #include <stdint.h>
 #include <math.h>
@@ -47,6 +49,21 @@ copy nether.so to Mineserver bin directory.
 #include "nether.h"
 
 #define PLUGIN_NETHER_VERSION 1.1
+
+
+class block
+{
+public:
+  int x,y,z;
+  const char* name;
+  block(const char* n, int xx, int yy, int zz){
+    x=xx;y=yy;z=zz;name=n;
+  }
+};
+
+std::vector<block*> blockToDo;
+std::vector<block*> blockDone;
+
 const char CHATCMDPREFIX   = '/';
 mineserver_pointer_struct* mineserver;
 
@@ -57,6 +74,146 @@ std::string dtos(double n)
   return result.str();
 }
 
+void setBlock(const char* name,int x,int y,int z,unsigned char id)
+{
+  int map;
+  mineserver->user.getPositionW(name,NULL,NULL,NULL,&map,NULL,NULL,NULL);
+  mineserver->map.setBlockW(x,y,z,map,(unsigned char)id,0);
+}
+
+int getBlock(const char* name,int x,int y,int z)
+{
+  int map;
+  mineserver->user.getPositionW(name,NULL,NULL,NULL,&map,NULL,NULL,NULL);
+  unsigned char type, meta;
+  if(mineserver->map.getBlockW(x,y,z,map,&type,&meta))
+  {
+    return type;
+  }
+  return 0;
+}
+
+void addToDo(const char* user, int x, int y, int z){
+  for(int i = 0;i<blockToDo.size();i++){
+    block* c=blockToDo[i];
+    if(x==c->x && y==c->y && z==c->z)
+    {
+      return;
+    }
+  }
+  for(int i = 0;i<blockDone.size();i++){
+    block* c=blockDone[i];
+    if(x==c->x && y==c->y && z==c->z)
+    {
+      return;
+    }
+  }
+  block* b = new block(user,x,y,z);
+  blockToDo.push_back(b);
+}
+
+void doPortalFromFrame(const char* user, int x,int y, int z)
+{
+  bool up=false,down=false,left=false,right=false,forward=false,backward=false;
+  for(int c=1; c<10; c++) // Yes, we start at 1 so we DONT see the start again
+  {
+    if(getBlock(user,x,y+c,z)==49){ up=true; addToDo(user,x,y+c,z);}
+    if(getBlock(user,x,y-c,z)==49){ down=true; addToDo(user,x,y-c,z);}
+    if(getBlock(user,x+c,y,z)==49){ left=true; addToDo(user,x+c,y,z);}
+    if(getBlock(user,x-c,y,z)==49){ right=true; addToDo(user,x-c,y,z);}
+    if(getBlock(user,x,y,z+c)==49){ forward=true; addToDo(user,x,y,z+c);}
+    if(getBlock(user,x,y,z-c)==49){ backward=true; addToDo(user,x,y,z-c);}
+  }
+  for(int c=1; c<10; c++)
+  {
+    if(up)
+    {
+      if(getBlock(user,x,y+c,z)!=49)
+      {
+        setBlock(user,x,y+c,z,90);
+      }else{
+        up=false;
+      }
+    }
+    if(down)
+    {
+      if(getBlock(user,x,y-c,z)!=49)
+      {
+        setBlock(user,x,y-c,z,90);
+      }else{
+        down=false;
+      }
+    }
+    if(left)
+    {
+      if(getBlock(user,x+c,y,z)!=49)
+      {
+        setBlock(user,x+c,y,z,90);
+      }else{
+        left=false;
+      }
+    }
+    if(right)
+    {
+      if(getBlock(user,x-c,y,z)!=49)
+      {
+        setBlock(user,x-c,y,z,90);
+      }else{
+        right=false;
+      }
+    }
+    if(forward)
+    {
+      if(getBlock(user,x,y,z+c)!=49)
+      {
+        setBlock(user,x,y,z+c,90);
+      }else{
+        forward=false;
+      }
+    }
+    if(backward)
+    {
+      if(getBlock(user,x,y,z-c)!=49)
+      {
+        setBlock(user,x,y,z-c,90);
+      }else{
+        backward=false;
+      }
+    } 
+  }
+}
+
+void doPortal(const char* user,int x,int y, int z)
+{
+  int cx=x,cy=y,cz=z;
+  addToDo(user,x,y,z);
+  while(blockToDo.size()>0)
+  {
+    doPortalFromFrame(user, blockToDo[0]->x, blockToDo[0]->y, blockToDo[0]->z);
+    blockDone.push_back(blockToDo[0]);
+    blockToDo.erase(blockToDo.begin());
+    cz ++;
+  }
+  for(int i = 0; i < blockDone.size(); i++)
+  {
+    delete blockDone[i];
+  }
+  blockDone.clear();
+}
+
+bool blockPlacePreFunction(const char* userIn, int32_t x, int32_t y, int32_t z,int16_t block, int8_t direction)
+{
+  if(block == 259){
+    // Should we trigger Portal creation?
+    if(getBlock(userIn,x,y,z)==49){
+      std::cout << "Portal triggered" << std::endl;
+      doPortal(userIn,x,y,z);
+    }
+  }
+  return true;
+}
+
+
 void timer200Function()
 {
   for (int i = 0; i < mineserver->user.getCount(); i++){
@@ -65,11 +222,17 @@ void timer200Function()
     double x,y,z;
     int map;
     mineserver->user.getPositionW(name, &x,&y,&z,&map,NULL,NULL,NULL);
-    std::cout << x << " " << y << " " << z << " " << map << std::endl;
     if(map<0 || map > 100)
     {
       // Watch out for this, means uninitialized!
       continue;
+    }
+    if(y>129)
+    {
+      // Player has lept at the top of the map
+      // Put them into Heaven!
+        mineserver->user.teleportMap(name, x,y+1,z,2);
+        continue;
     }
     unsigned char type, meta;
     mineserver->map.getBlockW((int)floor(x),(int)floor(y),(int)floor(z),map,&type,&meta);
@@ -93,18 +256,6 @@ void timer200Function()
   }
 }
 
-void userWorld(std::string user, std::string command, std::deque<std::string> args)
-{
-  if(args.size() == 1)
-  {
-     double x,y,z;
-     mineserver->user.getPosition(user.c_str(), &x,&y,&z,NULL,NULL,NULL);
-     std::cout << user.c_str() << atoi(args[0].c_str())<< std::endl;
-     mineserver->user.teleportMap(user.c_str(), x,y+2,z,atoi(args[0].c_str()));
-  }
-
-}
-
 std::string pluginName = "nether";
 
 PLUGIN_API_EXPORT void CALLCONVERSION nether_init(mineserver_pointer_struct* mineserver_temp)
@@ -123,6 +274,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION nether_init(mineserver_pointer_struct* min
   mineserver->plugin.setPluginVersion(pluginName.c_str(), PLUGIN_NETHER_VERSION);
 
   mineserver->plugin.addCallback("Timer200", (void *)timer200Function);
+  mineserver->plugin.addCallback("BlockPlacePre", (void *)blockPlacePreFunction);
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION command_shutdown(void)

@@ -21,7 +21,7 @@ SRC         += blocks/chest.cpp blocks/ladder.cpp
 
 SRC         += worldgen/mapgen.cpp worldgen/cavegen.cpp worldgen/nethergen.cpp
 
-SRC         += plugin.cpp plugin_api.cpp
+SRC         += plugin.cpp plugin_api.cpp worldgen/heavengen.cpp
 
 
 # Variables

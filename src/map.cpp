@@ -240,7 +240,6 @@ void Map::init(int number)
     int a=0;
     for(;it!=tmp->end();++it)
     {
-      std::cout << a << number << std::endl;
       if(a==number){
         mapDirectory = *it;
         break;
@@ -548,7 +547,8 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight)
 {
   if((y < 0) || (y > 127))
   {
-    LOGLF("Invalid y value (spreadLight)");
+    //LOGLF("Invalid y value (spreadLight)");
+    // For sky style maps or maps with holes, this spams.
     return false;
   }
 

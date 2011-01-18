@@ -63,6 +63,7 @@
 #include "chat.h"
 #include "worldgen/mapgen.h"
 #include "worldgen/nethergen.h"
+#include "worldgen/heavengen.h"
 #include "config.h"
 #include "config/node.h"
 #include "nbt.h"
@@ -147,9 +148,10 @@ Mineserver::Mineserver()
 
   MapGen* mapgen = new MapGen;
   MapGen* nethergen = (MapGen*) new NetherGen;
-  const char* thing="Nether";
-  gennames[1] = nethergen;
-  gennames[0] = mapgen;
+  MapGen* heavengen = (MapGen*) new HeavenGen;
+  gennames.push_back(mapgen);
+  gennames.push_back(nethergen);
+  gennames.push_back(heavengen);
 
   const char* key = "map.storage.nbt.directories"; // Prefix for worlds config
   if (m_config->has(key) && (m_config->type(key) == CONFIG_NODE_LIST))

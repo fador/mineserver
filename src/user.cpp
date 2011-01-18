@@ -490,6 +490,7 @@ bool User::updatePosM(double x, double y, double z, int map, double stance)
     // TODO despawn players who are no longer in view
     // TODO despawn self to players on last world
     pos.map = map;
+    pos.x = x; pos.y = y; pos.z = z;
     std::cout << map << "world changing" <<std::endl;
     clearLoadingMap();
     // TODO spawn self to nearby players
@@ -1142,7 +1143,7 @@ bool User::respawn()
     chunk->sendPacket(destroyPkt, this);
   }
 
-  teleport(Mineserver::get()->map(pos.map)->spawnPos.x(), Mineserver::get()->map(pos.map)->spawnPos.y() + 2, Mineserver::get()->map(pos.map)->spawnPos.z());
+  teleport(Mineserver::get()->map(pos.map)->spawnPos.x(), Mineserver::get()->map(pos.map)->spawnPos.y() + 2, Mineserver::get()->map(pos.map)->spawnPos.z(),0);
 
   Packet spawnPkt;
   spawnPkt << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)UID << nick

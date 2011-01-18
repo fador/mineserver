@@ -944,13 +944,15 @@ int PacketHandler::player_block_placement(User *user)
     the callback doesn't know what type of block we're placing. Instead
     the callback's job is to describe the behaviour when placing the
     block down, not to place any specifically block itself. */
-    for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
-    {
-      blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
-      if(blockcb!=NULL && blockcb->affectedBlock(newblock))
+    if(newblock<256){
+      for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
       {
-        if(blockcb->onPlace(user, newblock,x,y,z,user->pos.map,direction)){
-          return PACKET_OK;
+        blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+        if(blockcb!=NULL && blockcb->affectedBlock(newblock))
+        {
+          if(blockcb->onPlace(user, newblock,x,y,z,user->pos.map,direction)){
+            return PACKET_OK;
+          }
         }
       }
     }
