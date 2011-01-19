@@ -200,8 +200,8 @@ void Mineserver::updatePlayerList()
 }
 
 void Mineserver::saveAll(){
-  for(int i = 0; i<m_maps.size(); i++){
-    m_maps[i].saveWholeMap();
+  for(int i = 0; i<m_map.size(); i++){
+    m_map[i]->saveWholeMap();
   }
   saveAllPlayers();
 }
