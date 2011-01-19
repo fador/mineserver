@@ -227,13 +227,6 @@ void timer200Function()
       // Watch out for this, means uninitialized!
       continue;
     }
-    if(y>129)
-    {
-      // Player has lept at the top of the map
-      // Put them into Heaven!
-        mineserver->user.teleportMap(name, x,y+1,z,2);
-        continue;
-    }
     unsigned char type, meta;
     mineserver->map.getBlockW((int)floor(x),(int)floor(y),(int)floor(z),map,&type,&meta);
     if((int)type == 90)
