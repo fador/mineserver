@@ -485,7 +485,7 @@ void MapGen::AddOre(int x, int z, int map, uint8_t type)
     //Mineserver::get()->map()->getBlock(blockX, blockY, blockZ, &block, &meta);
     block = chunk->blocks[blockY + ((blockZ << 7) + (blockX << 11))];
     // No ore in caves
-    if(block == BLOCK_AIR)
+    if(block == BLOCK_AIR || block == BLOCK_GRASS)
       continue;
         
     AddDeposit(blockX, blockY, blockZ, map,type, 4, chunk);
