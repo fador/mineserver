@@ -361,8 +361,6 @@ bool Map::saveWholeMap()
   {
       saveMap(maps[it->first].x, maps[it->first].z);
   }
-  Mineserver::get()->saveAllPlayers();
-
   /////////////////////
   // Save map details
 

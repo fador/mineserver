@@ -199,6 +199,13 @@ void Mineserver::updatePlayerList()
   Mineserver::get()->screen()->updatePlayerList(users());
 }
 
+void Mineserver::saveAll(){
+  for(int i = 0; i<m_maps.size(); i++){
+    m_maps[i].saveWholeMap();
+  }
+  saveAllPlayers();
+}
+
 void Mineserver::saveAllPlayers()
 {
   for (int i = users().size()-1; i >= 0; i--)

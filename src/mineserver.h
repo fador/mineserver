@@ -108,6 +108,7 @@ public:
   void setInventory(Inventory* inventory) { m_inventory = m_inventory; }
 
   void saveAllPlayers();
+  void saveAll();
 
 private:
   Mineserver();

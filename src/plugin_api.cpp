@@ -307,7 +307,7 @@ bool map_setBlockW(int x, int y, int z, int w, unsigned char type,unsigned char 
 
 void map_saveWholeMap(void)
 {
-  Mineserver::get()->map(0)->saveWholeMap();
+  Mineserver::get()->saveAll();
 }
 
 unsigned char* map_getMapData_block(int x, int z)
