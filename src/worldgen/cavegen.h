@@ -34,7 +34,7 @@ class CaveGen
 {
 public:
   void init(int seed);
-  void AddCaves(uint8_t &block, int x, int y, int z,int map);
+  void AddCaves(uint8_t &block, int x, int y, int z);
 
 private:
   noise::module::RidgedMulti caveNoise;

@@ -54,7 +54,7 @@ void CaveGen::init(int seed)
   addCaveLava = Mineserver::get()->config()->bData("mapgen.caves.lava");
 }
 
-void CaveGen::AddCaves(uint8_t &block, int x, int y, int z,int map)
+void CaveGen::AddCaves(uint8_t &block, int x, int y, int z)
 { 
   value = caveNoise.GetValue(x,y,z);
   
