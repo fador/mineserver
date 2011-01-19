@@ -228,9 +228,9 @@ bool callbackBlockPlacePre (const char* user,int x,int y,int z, unsigned char ty
 // Command Registration
 bool callbackPlayerChatCommand (const char* user, const char* command, int argc, const char** args) 
 {
-  if(command == "rollback") {
+  if(strcmp(command, "rollback") == 0) {
     rollBack(user, argc, args);
-  } else if (command == "playback") {
+  } else if (strcmp(command, "playback") == 0) {
     playBack(user, argc, args);
   }
   return true;
