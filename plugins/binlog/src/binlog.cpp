@@ -38,7 +38,7 @@
 
 #include "../../../src/plugin_api.h"
 #include "binlog.h"
-
+                                     
 std::string dtos( double n )
 {
   std::ostringstream result;
@@ -46,20 +46,17 @@ std::string dtos( double n )
   return result.str();
 }
 
-mineserver_pointer_struct* mineserver;
-std::string pluginName = "binlog";
-
 Binlog::Binlog (std::string filename) 
 {
   log_stream.open(filename.c_str(), std::fstream::in | std::fstream::out | std::fstream::binary );
   if (!log_stream.is_open()) {
-    mineserver->screen.log("Problem opening binary log!");
+    return;
   } 
 }
 
-Binlog &Binlog::get()
+Binlog &Binlog::get(std::string filename)
 {
-  static Binlog instance(Conf::get()->sValue("binary_log"));
+  static Binlog instance(filename);
   return instance;
 }
  
@@ -81,9 +78,7 @@ void Binlog::log (event_t event)
     log_stream.write((char *) &event.nmeta, sizeof(unsigned char));
     log_stream.write((char *) &event.nsize, sizeof(int));
     log_stream.write((char *) &event.nick, event.nsize+1);
-  } else {
-    mineserver->screen.log("Binary log stream is bad!");
-  } 
+  }
 }
 
 // Get logs based on nick and timestamp
@@ -154,67 +149,70 @@ Binlog::~Binlog()
   log_stream.close();
 }
 
+mineserver_pointer_struct* mineserver;
+std::string pluginName = "binlog";
+std::string filename;
+
 // Rollback Transaction Logs
-void rollBack (User *user, std::string command, std::deque<std::string> args)
+void rollBack (const char* user, int argc, const char** args)
 {
   std::vector<event_t> logs;
   time_t timestamp;
 
-  if(args.size() > 0) {
+  if(argc > 0) {
     std::stringstream ss (std::stringstream::in | std::stringstream::out);
     ss << args[0];
     ss >> timestamp;
   }
 
-  if(args.size() == 2 ) {
+  if(argc == 2 ) {
     std::string victim = args[1];
-    Binlog::get().getLogs(timestamp, victim, &logs);
-  } else if (args.size() == 1) {
-    Binlog::get().getLogs(timestamp, &logs);
+    Binlog::get(filename).getLogs(timestamp, victim, &logs);
+  } else if (argc == 1) {
+    Binlog::get(filename).getLogs(timestamp, &logs);
   } else {
-    Binlog::get().getLogs(&logs);
+    Binlog::get(filename).getLogs(&logs);
   }
 
   std::vector<event_t>::reverse_iterator event;
   if(logs.size() > 0) {
-    mineserver->chat.sendMsg(user, "Rolling back map...", Chat::USER);
+    mineserver->chat.sendmsgTo(user, "Rolling back map...");
     for(event = logs.rbegin(); event != logs.rend(); event++) {
       mineserver->map.setBlock(event->x, event->y, event->z, event->otype, event->ometa);
-      mineserver->map.sendBlockChange(event->x, event->y, event->z, (char)event->otype, event->ometa);
     }
-    mineserver->chat.sendMsg(user, "Map roll back completed!", Chat::USER);
+    mineserver->chat.sendmsgTo(user, "Map roll back completed!");
   } else {
-    mineserver->chat.sendMsg(user, "No binary logs found!");
+    mineserver->chat.sendmsgTo(user, "No binary logs found!");
   }
 }
 
 // Playback Transaction Logs
-void playBack (User *user, std::string command, std::deque<std::string> args)
+void playBack (const char* user, int argc, const char** args)
 {
   return;
 }
 
 // Block Break Callback
-bool callbackBlockBreakPre (User* user,sint32 x,sint8 y,sint32 z) 
+bool callbackBlockBreakPre (const char* user,int x,int y,int z) 
 {
   event_t event;
-  event.nick = user;
+  strcpy(event.nick, user);
   event.x = x;
   event.y = y;
   event.z = z;
   event.ntype = 0;
   event.nmeta = 0;
 
-  minserver->map.getBlock(x,y,z,&event.otype, &event.ometa);
-  BINLOG(event);
+  mineserver->map.getBlock(x,y,z,&event.otype, &event.ometa);
+  Binlog::get(filename).log(event);
 
   return true;
 }
 // Block Place Callback
-bool callbackBlockPlacePre (User* user,sint32 x,sint8 y,sint32 z, unsigned char type, unsigned char meta) 
+bool callbackBlockPlacePre (const char* user,int x,int y,int z, unsigned char type, unsigned char meta) 
 {
   event_t event;
-  event.nick = user;
+  strcpy(event.nick, user);
   event.x = x;
   event.y = y;
   event.z = z;
@@ -223,36 +221,46 @@ bool callbackBlockPlacePre (User* user,sint32 x,sint8 y,sint32 z, unsigned char 
   event.ntype = type;
   event.nmeta = meta;
 
-  BINLOG(event);
+  Binlog::get(filename).log(event);
 
   return true;
 }
 // Command Registration
-bool callbackPlayerChatPre (const char* user, size_t timestamp, const char* msg) 
+bool callbackPlayerChatCommand (const char* user, const char* command, int argc, const char** args) 
 {
+  if(command == "rollback") {
+    rollBack(user, argc, args);
+  } else if (command == "playback") {
+    playBack(user, argc, args);
+  }
   return true;
 }
 
+#define LOG_INFO 6
 PLUGIN_API_EXPORT void CALLCONVERSION binlog_init(mineserver_pointer_struct* mineserver_temp)
 {
   mineserver = mineserver_temp;
+  filename = mineserver->config.sData("binary_log");
+
   if (mineserver->plugin.getPluginVersion("binlog") > 0)
   {
-    mineserver->screen.log("binlog is already loaded v." +dtos(mineserver->plugin.getPluginVersion("binlog")));
+    std::string msg = "binlog is already loaded v."+dtos(mineserver->plugin.getPluginVersion(pluginName.c_str()));
+    mineserver->logger.log(LOG_INFO, "plugin.binlog", msg.c_str());
     return;
   }
-  mineserver->screen.log("Loaded \"binlog\"!");
+  std::string msg = "Loaded "+pluginName+"!";
+  mineserver->logger.log(LOG_INFO, "plugin.binlog", msg.c_str());
   mineserver->plugin.setPluginVersion("binlog", PLUGIN_VERSION);
-  mineserver->callback.add_hook("BlockPlacePre", (void *) callbackBlockPlacePre);
-  mineserver->callback.add_hook("BlockBreakPre", (void *) callbackBlockBreakPre);
-  mineserver->callback.add_hook("PlayerChatPre", (void *) callbackPlayerChatPre);
+  mineserver->plugin.addCallback("BlockPlacePre", (void *) callbackBlockPlacePre);
+  mineserver->plugin.addCallback("BlockBreakPre", (void *) callbackBlockBreakPre);
+  mineserver->plugin.addCallback("PlayerChatCommand", (void *) callbackPlayerChatCommand);
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION binlog_shutdown(void)
 {
   if (mineserver->plugin.getPluginVersion("binlog") <= 0)
   {
-    mineserver->screen.log("binlog is not loaded!");
+    mineserver->logger.log(LOG_INFO, "plugin.binlog", "binlog is not loaded!");
     return;
   }
 }

@@ -37,6 +37,7 @@
 
 #ifndef _BINLOG_H
 #define _BINLOG_H
+#define PLUGIN_VERSION 0.1
 #endif
 
 #define BINLOG(event) Binlog::get().log(event)
@@ -57,7 +58,7 @@ class Binlog
 
 public:
   void log(event_t event);
-  static Binlog &get();
+  static Binlog &get(std::string filename);
   bool getLogs(time_t t, std::string &nick, std::vector<event_t> *logs);
   bool getLogs(time_t t, std::vector<event_t> *logs);
   bool getLogs(std::vector<event_t> *logs);
@@ -67,5 +68,4 @@ private:
   std::fstream log_stream;
   Binlog(std::string filename);
   ~Binlog();
-
 };
