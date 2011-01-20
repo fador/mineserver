@@ -277,7 +277,7 @@ void NBT_Value::Insert(const std::string &str, NBT_Value *val)
 
 NBT_Value::operator int8_t()
 {
-  if(m_type != TAG_BYTE)
+  if(!this || m_type != TAG_BYTE)
     return 0;
 
   return m_value.byteVal;
@@ -285,7 +285,7 @@ NBT_Value::operator int8_t()
 
 NBT_Value::operator int16_t()
 {
-  if(m_type != TAG_SHORT)
+  if(!this || m_type != TAG_SHORT)
     return 0;
 
   return m_value.shortVal;
@@ -293,7 +293,7 @@ NBT_Value::operator int16_t()
 
 NBT_Value::operator int32_t()
 {
-  if(m_type != TAG_INT)
+  if(!this || m_type != TAG_INT)
     return 0;
 
   return m_value.intVal;
@@ -301,7 +301,7 @@ NBT_Value::operator int32_t()
 
 NBT_Value::operator int64_t()
 {
-  if(m_type != TAG_LONG)
+  if(!this || m_type != TAG_LONG)
     return 0;
 
   return m_value.longVal;
@@ -309,7 +309,7 @@ NBT_Value::operator int64_t()
 
 NBT_Value::operator float()
 {
-  if(m_type != TAG_FLOAT)
+  if(!this || m_type != TAG_FLOAT)
     return 0;
 
   return m_value.floatVal;
@@ -317,7 +317,7 @@ NBT_Value::operator float()
 
 NBT_Value::operator double()
 {
-  if(m_type != TAG_DOUBLE)
+  if(!this || m_type != TAG_DOUBLE)
     return 0;
 
   return m_value.doubleVal;

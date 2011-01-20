@@ -1034,25 +1034,50 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
     return NULL;
   }
 
-  NBT_Value& level = *(*chunk->nbt)["Level"];
+  NBT_Value* level = (*chunk->nbt)["Level"];
 
-  chunk->x = (int32_t)(*level["xPos"]);
-  chunk->z = (int32_t)(*level["zPos"]);
-
-  if(chunk->x != x || chunk->z != z)
+  if (level == NULL)
   {
-    LOGLF("Error in loading map (incorrect chunk)");
+    LOGLF("Error in loading map (unable to find Level)");
     delete chunk;
     return NULL;
   }
 
-  std::vector<uint8_t>* blocks = level["Blocks"]->GetByteArray();
-  std::vector<uint8_t>* data = level["Data"]->GetByteArray();
-  std::vector<uint8_t>* blocklight = level["BlockLight"]->GetByteArray();
-  std::vector<uint8_t>* skylight = level["SkyLight"]->GetByteArray();
-  std::vector<uint8_t>* heightmap = level["HeightMap"]->GetByteArray();
+  NBT_Value* xPos = (*level)["xPos"];
+  NBT_Value* zPos = (*level)["zPos"];
 
-  if(blocks == 0 || data == 0 || blocklight == 0 || skylight == 0 || heightmap == 0)
+  if(xPos && zPos)
+  {
+    chunk->x = *xPos;
+    chunk->z = *zPos;
+  }
+  else
+  {
+    LOG(WARNING, "Map", "incorrect chunk (missing xPos or zPos)");
+    chunk->x = x;
+    chunk->z = z;
+  }
+
+  NBT_Value* nbt_blocks = (*level)["Blocks"];
+  NBT_Value* nbt_data = (*level)["Data"];
+  NBT_Value* nbt_blocklight = (*level)["BlockLight"];
+  NBT_Value* nbt_skylight = (*level)["SkyLight"];
+  NBT_Value* nbt_heightmap = (*level)["HeightMap"];
+
+  if (!nbt_blocks || !nbt_data || !nbt_blocklight || !nbt_skylight || !nbt_heightmap)
+  {
+    LOGLF("Error in loading map (chunk missing data)");
+    delete chunk;
+    return NULL;
+  }
+
+  std::vector<uint8_t>* blocks = nbt_blocks->GetByteArray();
+  std::vector<uint8_t>* data = nbt_data->GetByteArray();
+  std::vector<uint8_t>* blocklight = nbt_blocklight->GetByteArray();
+  std::vector<uint8_t>* skylight = nbt_skylight->GetByteArray();
+  std::vector<uint8_t>* heightmap = nbt_heightmap->GetByteArray();
+
+  if(!blocks || !data || !blocklight || !skylight || !heightmap)
   {
     LOGLF("Error in loading map (chunk missing data)");
     delete chunk;
@@ -1081,14 +1106,14 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   chunks.linkChunk(chunk, x, z);
 
   // Update last used time
-  chunk->lastused = (int)time(0);
+  chunk->lastused = time(NULL);
 
   // Not changed
   chunk->changed    = false;
   chunk->lightRegen = false;
     
   //Get list of chests,furnaces etc on the chunk
-  NBT_Value* entityList = level["TileEntities"];
+  NBT_Value* entityList = (*level)["TileEntities"];
 
   //Verify the type
   if(entityList && entityList->GetType() == NBT_Value::TAG_LIST && entityList->GetListType() == NBT_Value::TAG_COMPOUND)
