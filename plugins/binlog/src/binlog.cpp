@@ -39,12 +39,6 @@
 #include "../../../src/plugin_api.h"
 #include "binlog.h"
                                      
-std::string dtos( double n )
-{
-  std::ostringstream result;
-  result << n;
-  return result.str();
-}
 
 Binlog::Binlog (std::string filename) 
 {
@@ -208,6 +202,7 @@ bool callbackBlockBreakPre (const char* user,int x,int y,int z)
 
   return true;
 }
+
 // Block Place Callback
 bool callbackBlockPlacePre (const char* user,int x,int y,int z, unsigned char type, unsigned char meta) 
 {
@@ -216,15 +211,15 @@ bool callbackBlockPlacePre (const char* user,int x,int y,int z, unsigned char ty
   event.x = x;
   event.y = y;
   event.z = z;
-  event.otype = 0;
-  event.ometa = 0;
   event.ntype = type;
   event.nmeta = meta;
 
+  mineserver->map.getBlock(x,y,z,&event.otype, &event.ometa);
   Binlog::get(filename).log(event);
 
   return true;
 }
+
 // Command Registration
 bool callbackPlayerChatCommand (const char* user, const char* command, int argc, const char** args) 
 {
@@ -234,6 +229,13 @@ bool callbackPlayerChatCommand (const char* user, const char* command, int argc,
     playBack(user, argc, args);
   }
   return true;
+}
+
+std::string dtos( double n )
+{
+  std::ostringstream result;
+  result << n;
+  return result.str();
 }
 
 #define LOG_INFO 6
