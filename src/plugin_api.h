@@ -93,6 +93,12 @@ struct user_pointer_struct
   int (*getCount)();
   char* (*getUserNumbered)(int c);
   bool (*getPositionW)(const char* user, double* x, double* y, double* z, int* w,float* yaw, float* pitch, double *stance);
+  int (*getItemInHand)(const char* user);
+  bool (*addItem)(const char* user, int item, int count, int health);
+  bool (*hasItem)(const char* user, int item, int count, int health);
+  bool (*delItem)(const char* user, int item, int count, int health);
+
+
 
   void *temp[96];
 };

@@ -456,6 +456,102 @@ char* user_getUserNumbered(int c)
   return (char*)Mineserver::get()->users()[c]->nick.c_str();
 }
 
+int user_getItemInHand(const char* user)
+{
+  User* tempUser = userFromName(std::string(user));
+  if(tempUser != NULL)
+  {
+    return tempUser->inventoryHolding.type;
+  }
+  return -1;
+}
+
+bool user_addItem(const char* user, int item, int count, int health)
+{
+  User* tempUser = userFromName(std::string(user));
+  if(tempUser != NULL)
+  {
+    return Mineserver::get()->inventory()->addItems(tempUser, item, count, health);
+  }
+  return false;
+}
+
+bool user_hasItem(const char* user, int item, int count, int health)
+{
+  User* tempuser = userFromName(std::string(user));
+  if(tempuser == NULL){ return false; }
+  bool checkingTaskbar = true;
+  int total = 0;
+
+  for(uint8_t i = 36-9; i < 36-9 || checkingTaskbar; i++)
+  {
+    //First, the "task bar"
+    if(i == 36)
+    {
+      checkingTaskbar = false;
+      i=0;
+    }
+    Item *slot = &tempuser->inv[i+9];
+    if(item == slot->type && (health == slot->health || health==-1)){
+      total += slot->count;
+      if(total >= count){
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool user_delItem(const char* user, int item, int count, int health)
+{
+  User* tempuser = userFromName(std::string(user));
+  if(tempuser == NULL){ return false; }
+  bool checkingTaskbar = true;
+  int total = count;
+
+  for(uint8_t i = 36-9; i < 36-9 || checkingTaskbar; i++)
+  {
+    //First, the "task bar" 
+    if(i == 36)
+    {
+      checkingTaskbar = false;
+      i=0;
+    }
+    Item *slot = &tempuser->inv[i+9];
+    if(item == slot->type && (health == slot->health || health ==-1)){
+      if(slot->count > total)
+      {
+        slot->count -= total;
+        tempuser->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_PLAYER
+                   << (int16_t)i+9
+                   << (int16_t)slot->type;
+        if(slot->type != -1)
+        {
+          tempuser->buffer << (int8_t)slot->count
+                       << (int16_t)slot->health;
+        }
+
+        return true;
+      }
+      else
+      {
+        slot->count = 0; slot->health = 0; slot->type = -1;
+        tempuser->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_PLAYER
+                   << (int16_t)i+9
+                   << (int16_t)slot->type;
+        if(slot->type != -1)
+        {
+          tempuser->buffer << (int8_t)slot->count
+                       << (int16_t)slot->health;
+        }
+
+      }
+    }
+  }
+  return false;
+}
+
+
 // CONFIG WRAPPER FUNCTIONS
 bool config_has(const char* name)
 {
@@ -542,7 +638,10 @@ void init_plugin_api(void)
   plugin_api_pointers.user.getCount                = &user_getCount;
   plugin_api_pointers.user.getUserNumbered         = &user_getUserNumbered;
   plugin_api_pointers.user.getPositionW            = &user_getPositionW;
-
+  plugin_api_pointers.user.getItemInHand           = &user_getItemInHand;
+  plugin_api_pointers.user.addItem                 = &user_addItem;
+  plugin_api_pointers.user.hasItem                 = &user_hasItem;
+  plugin_api_pointers.user.delItem                 = &user_delItem;
 
   plugin_api_pointers.config.has                   = &config_has;
   plugin_api_pointers.config.iData                 = &config_iData;

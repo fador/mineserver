@@ -44,7 +44,7 @@ copy nether.so to Mineserver bin directory.
 #include <math.h>
 
 #define MINESERVER_C_API
-#include "../../plugin_api.h"
+#include "../../src/plugin_api.h"
 
 #include "nether.h"
 

@@ -64,7 +64,8 @@ bool BlockFire::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
 
 void BlockFire::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-
+  Mineserver::get()->map(map)->setBlock(x, y, z, (char)BLOCK_AIR, direction);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)BLOCK_AIR, direction);
 }
 
 bool BlockFire::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
