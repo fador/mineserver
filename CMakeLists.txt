@@ -9,10 +9,6 @@ set( ${PROJECT_NAME}_PATCH_LEVEL 0 )
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 
-
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
-set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-
 # Set compiler specific build flags
 IF (UNIX)
   add_definitions(-msse -Wunused -g3 -O3 -Wall)
@@ -26,9 +22,63 @@ IF (MSVC_IDE)
   set(CMAKE_CXX_FLAGS_DEBUG "${PLATFORM_C_FLAGS} /MDd")
 ENDIF (MSVC_IDE)
 
-file(GLOB_RECURSE folder_source ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-source_group("Mineserver" FILES ${folder_source})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/)
+set(mineserver_source
+  src/lighting.cpp
+  src/logger.cpp
+  src/furnace.cpp
+  src/plugin_api.cpp
+  src/constants.cpp
+  src/map.cpp
+  src/mineserver.cpp
+  src/furnaceManager.cpp
+  src/screenBase.cpp
+  src/inventory.cpp
+  src/packets.cpp
+  src/plugin.cpp
+  src/nbt.cpp
+  src/user.cpp
+  src/config.cpp
+  src/cursesScreen.cpp
+  src/config/lexer.cpp
+  src/config/scanner.cpp
+  src/config/parser.cpp
+  src/config/node.cpp
+  src/sockets.cpp
+  src/chat.cpp
+  src/tree.cpp
+  src/worldgen/cavegen.cpp
+  src/worldgen/mapgen.cpp
+  src/blocks/stair.cpp
+  src/blocks/chest.cpp
+  src/blocks/snow.cpp
+  src/blocks/fire.cpp
+  src/blocks/default.cpp
+  src/blocks/plant.cpp
+  src/blocks/sign.cpp
+  src/blocks/door.cpp
+  src/blocks/ladder.cpp
+  src/blocks/torch.cpp
+  src/blocks/basic.cpp
+  src/blocks/tracks.cpp
+  src/blocks/falling.cpp
+  src/blocks/liquid.cpp
+  src/tools.cpp
+  src/physics.cpp
+  src/cliScreen.cpp
+)
+source_group("Mineserver" FILES ${mineserver_source})
+
+set(command_source
+  plugins/commands/src/command.cpp
+)
+
+set(filelog_source
+  plugins/filelog/src/filelog.cpp
+)
+
+add_definitions(-DFADOR_PLUGIN=1)
+
+include_directories(src/)
 
 set(dependency_error False)
 
@@ -75,13 +125,19 @@ if (WINDOWS)
 endif ()
 
 if (NOT dependency_error)
+
+  add_library(command SHARED ${command_source})
+  set_target_properties(command PROPERTIES PREFIX "")
+  add_library(filelog SHARED ${filelog_source})
+  set_target_properties(filelog PROPERTIES PREFIX "")
+
   include_directories(${ZLIB_INCLUDE_DIR})
 #  include_directories(${LUA_INCLUDE_DIR})
   include_directories(${EVENT_INCLUDE_DIR})
   include_directories(${NOISE_INCLUDE_DIR})
   include_directories(${CURSES_INCLUDE_DIR})
 
-  add_executable(mineserver ${exe} ${folder_source})
+  add_executable(mineserver ${exe} ${mineserver_source})
 
   target_link_libraries(mineserver ${ZLIB_LIBRARY})
 #  target_link_libraries(mineserver ${LUA_LIBRARY})
