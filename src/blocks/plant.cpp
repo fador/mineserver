@@ -68,7 +68,7 @@ bool BlockPlant::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
   return false;
 }
 
-void BlockPlant::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockPlant::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    uint8_t block;
    uint8_t meta;
@@ -84,7 +84,7 @@ void BlockPlant::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_
    }   
 }
 
-bool BlockPlant::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockPlant::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    uint8_t oldblock;
    uint8_t oldmeta;
@@ -124,11 +124,11 @@ bool BlockPlant::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32
   return false;
 }
 
-void BlockPlant::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockPlant::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockPlant::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockPlant::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 
 }

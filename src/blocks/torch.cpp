@@ -63,7 +63,7 @@ bool BlockTorch::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
   return false;
 }
 
-void BlockTorch::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockTorch::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    uint8_t block;
    uint8_t meta;
@@ -109,7 +109,7 @@ void BlockTorch::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_
    }
 }
 
-bool BlockTorch::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockTorch::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    uint8_t oldblock;
    uint8_t oldmeta;
@@ -133,11 +133,11 @@ bool BlockTorch::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32
    return false;
 }
 
-void BlockTorch::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockTorch::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockTorch::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockTorch::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    uint8_t oldblock;
    uint8_t oldmeta;
@@ -169,7 +169,7 @@ void BlockTorch::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int
    }
 }
 
-void BlockTorch::onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockTorch::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    this->onNeighbourBroken(user, oldblock, x, y, z,map, direction);
 }

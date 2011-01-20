@@ -62,7 +62,7 @@ bool BlockSnow::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
   return false;
 }
 
-void BlockSnow::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockSnow::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    uint8_t block;
    uint8_t meta;
@@ -78,16 +78,16 @@ void BlockSnow::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t
    }   
 }
 
-bool BlockSnow::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockSnow::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   return false;
 }
 
-void BlockSnow::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockSnow::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockSnow::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockSnow::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 

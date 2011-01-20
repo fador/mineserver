@@ -32,7 +32,10 @@
 
 bool BlockDefault::affectedBlock(int block)
 {
-  return true;
+  if(block < 256)
+  {
+    return true;
+  }
 }
 
 
@@ -68,11 +71,11 @@ bool BlockDefault::onBroken(User* user, int8_t status, int32_t x, int8_t y, int3
   return false;
 }
 
-void BlockDefault::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockDefault::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-bool BlockDefault::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockDefault::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t oldblock;
   uint8_t oldmeta;
@@ -114,16 +117,19 @@ bool BlockDefault::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int
 
   direction = user->relativeToBlock(x, y, z);
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+  if(newblock<256)
+  {
+    Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
+    Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+  }
   return false;
 }
 
-void BlockDefault::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockDefault::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockDefault::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockDefault::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t oldblock;
   uint8_t oldmeta;
@@ -138,7 +144,7 @@ void BlockDefault::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, i
   Mineserver::get()->map(map)->createPickupSpawn(x, y, z, oldblock, 1, 0, NULL);
 }
 
-void BlockDefault::onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockDefault::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 

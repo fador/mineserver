@@ -207,20 +207,20 @@ bool BlockBasic::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
 {
   return false;
 }
-void BlockBasic::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z,int map,  int8_t direction)
+void BlockBasic::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z,int map,  int8_t direction)
 {
 }
-bool BlockBasic::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z,int map,  int8_t direction)
+bool BlockBasic::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z,int map,  int8_t direction)
 {
   return false;
 }
-void BlockBasic::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z,int map,  int8_t direction)
+void BlockBasic::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z,int map,  int8_t direction)
 {
 }
-void BlockBasic::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z,int map,  int8_t direction)
+void BlockBasic::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z,int map,  int8_t direction)
 {
 }
-void BlockBasic::onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockBasic::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
 

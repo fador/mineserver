@@ -97,11 +97,11 @@ bool BlockDoor::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
   return false;
 }
 
-void BlockDoor::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockDoor::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-bool BlockDoor::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockDoor::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    uint8_t oldblock;
    uint8_t oldmeta;
@@ -161,10 +161,10 @@ bool BlockDoor::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_
   return false;
 }
 
-void BlockDoor::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockDoor::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockDoor::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockDoor::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }

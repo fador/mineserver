@@ -69,7 +69,7 @@ bool BlockLadder::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32
   return false;
 }
 
-void BlockLadder::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockLadder::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t block,meta;
   Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
@@ -92,7 +92,7 @@ void BlockLadder::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8
 
 }
 
-bool BlockLadder::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockLadder::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t oldblock;
   uint8_t oldmeta;
@@ -144,11 +144,11 @@ bool BlockLadder::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int3
   return false;
 }
 
-void BlockLadder::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockLadder::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockLadder::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockLadder::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t oldblock;
   uint8_t oldmeta;
@@ -163,7 +163,7 @@ void BlockLadder::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, in
   Mineserver::get()->map(map)->createPickupSpawn(x, y, z, oldblock, 1, 0, NULL);
 }
 
-void BlockLadder::onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockLadder::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 

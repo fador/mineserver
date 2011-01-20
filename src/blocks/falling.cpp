@@ -42,12 +42,12 @@ bool BlockFalling::affectedBlock(int block)
 }
 
 
-void BlockFalling::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockFalling::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    this->onNeighbourMove(user, oldblock, x, y, z, map, direction);
 }
 
-bool BlockFalling::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockFalling::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    uint8_t oldblock;
    uint8_t oldmeta;
@@ -78,7 +78,7 @@ bool BlockFalling::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int
    return false;
 }
 
-void BlockFalling::onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockFalling::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t block;
   uint8_t meta;

@@ -585,6 +585,8 @@ int PacketHandler::player_digging(User *user)
           if(blockcb->onBroken(user, status,x,y,z,user->pos.map,direction)){
             // Do not break
             return PACKET_OK;
+          }else{
+            break;
           }
         }
       }
@@ -931,15 +933,15 @@ int PacketHandler::player_block_placement(User *user)
     the callback doesn't know what type of block we're placing. Instead
     the callback's job is to describe the behaviour when placing the
     block down, not to place any specifically block itself. */
-    if(newblock<256){
-      for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+    for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+    {
+      blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+      if(blockcb!=NULL && blockcb->affectedBlock(newblock))
       {
-        blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
-        if(blockcb!=NULL && blockcb->affectedBlock(newblock))
-        {
-          if(blockcb->onPlace(user, newblock,x,y,z,user->pos.map,direction)){
-            return PACKET_OK;
-          }
+        if(blockcb->onPlace(user, newblock,x,y,z,user->pos.map,direction)){
+          return PACKET_OK;
+        }else{
+          break;
         }
       }
     }

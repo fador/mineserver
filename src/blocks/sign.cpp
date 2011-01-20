@@ -62,11 +62,11 @@ bool BlockSign::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
   return false;
 }
 
-void BlockSign::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockSign::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-bool BlockSign::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockSign::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    uint8_t oldblock;
    uint8_t oldmeta;
@@ -178,10 +178,10 @@ bool BlockSign::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_
    return false;
 }
 
-void BlockSign::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockSign::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockSign::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockSign::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }

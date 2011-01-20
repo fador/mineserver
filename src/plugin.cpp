@@ -51,6 +51,7 @@
 #include "blocks/tracks.h"
 #include "blocks/chest.h"
 #include "blocks/ladder.h"
+#include "blocks/cake.h"
 
 void Plugin::init()
 {
@@ -80,6 +81,8 @@ void Plugin::init()
    BlockCB.push_back(tracksblock);
    BlockLadder* ladderblock = new BlockLadder();
    BlockCB.push_back(ladderblock);
+   BlockCake* cakeblock = new BlockCake();
+   BlockCB.push_back(cakeblock);
 }
 
 void Plugin::free()

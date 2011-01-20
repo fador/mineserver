@@ -60,12 +60,12 @@ bool BlockLiquid::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32
   return false;
 }
 
-void BlockLiquid::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockLiquid::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    physics(x,y,z,map);
 }
 
-bool BlockLiquid::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockLiquid::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    uint8_t oldblock;
    uint8_t oldmeta;
@@ -97,12 +97,12 @@ bool BlockLiquid::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int3
    return false;
 }
 
-void BlockLiquid::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockLiquid::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    physics(x,y,z,map);
 }
 
-void BlockLiquid::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockLiquid::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    uint8_t oldblock;
    uint8_t oldmeta;
