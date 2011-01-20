@@ -50,18 +50,11 @@ void BlockDoor::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y,
     Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
 
    // Toggle door state
-   if (metadata & 0x4)
-   {
-     metadata &= (0x8 | 0x3);
-   }
-   else
-   {
-     metadata |= 0x4;
-   }
+   metadata ^= 0x4;
 
    uint8_t metadata2, block2;
 
-   int modifier = (metadata & 0x8) ? -1 : 1;
+   int modifier = ((metadata & 0x8)==0x8) ? -1 : 1;
 
    Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
    Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)block, metadata);  
@@ -70,12 +63,10 @@ void BlockDoor::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y,
 
    if (block2 == block)
    {
-     metadata2 = metadata;
-   
-     if(metadata & 0x8)
-       metadata2 &= 0x7;
-     else
-       metadata2 |= 0x8;
+     if((metadata2 & 0x4) && !(metadata & 0x4))
+       metadata2 ^= 0x4;
+     else if(!(metadata2 & 0x4) && (metadata & 0x4))
+       metadata2 ^= 0x4;
 
      Mineserver::get()->map(map)->setBlock(x, y + modifier, z, block2, metadata2);
      Mineserver::get()->map(map)->sendBlockChange(x, y + modifier, z, (char)block, metadata2);
@@ -94,11 +85,22 @@ void BlockDoor::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y,
 
 bool BlockDoor::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
+  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
   return false;
 }
 
 void BlockDoor::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
+  uint8_t block,meta;
+  Mineserver::get()->map(map)->getBlock(x,y,z,&block,&meta);
+  if((oldblock==BLOCK_WOODEN_DOOR || oldblock==BLOCK_IRON_DOOR) &&
+     (block == BLOCK_WOODEN_DOOR || block == BLOCK_IRON_DOOR) &&
+     block == oldblock)
+  {
+    Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+    Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  }
 }
 
 bool BlockDoor::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
@@ -124,12 +126,10 @@ bool BlockDoor::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
       return true;
 
    // checking for an item rather then a block
-   int block = newblock + 256;
-
-   if (block == ITEM_WOODEN_DOOR)
+   if (newblock == ITEM_WOODEN_DOOR)
       newblock = BLOCK_WOODEN_DOOR;
 
-   if (block == ITEM_IRON_DOOR)
+   if (newblock == ITEM_IRON_DOOR)
       newblock = BLOCK_IRON_DOOR;
 
    direction = user->relativeToBlock(x, y, z);
@@ -154,7 +154,7 @@ bool BlockDoor::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
    Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
 
    /* Get correct direction for top of the door */
-   direction = 8+(direction);
+   direction ^= 8;
 
    Mineserver::get()->map(map)->setBlock(x, y+1, z, (char)newblock, direction);
    Mineserver::get()->map(map)->sendBlockChange(x, y+1, z, (char)newblock, direction);

@@ -599,7 +599,7 @@ int PacketHandler::player_digging(User *user)
         for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
         {
           blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
-          if(blockcb!=NULL && blockcb->affectedBlock(block))
+          if(blockcb!=NULL && (blockcb->affectedBlock(status)||blockcb->affectedBlock(block)))
           {
             blockcb->onNeighbourBroken(user, status,x+1,y,z,user->pos.map,direction);
           }
@@ -613,7 +613,7 @@ int PacketHandler::player_digging(User *user)
         for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
         {
           blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
-          if(blockcb!=NULL && blockcb->affectedBlock(block))
+          if(blockcb!=NULL && (blockcb->affectedBlock(status)||blockcb->affectedBlock(block)))
           {
             blockcb->onNeighbourBroken(user, status,x-1,y,z,user->pos.map,direction);
           }
@@ -627,7 +627,7 @@ int PacketHandler::player_digging(User *user)
         for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
         {
           blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
-          if(blockcb!=NULL && blockcb->affectedBlock(block))
+          if(blockcb!=NULL && (blockcb->affectedBlock(status)||blockcb->affectedBlock(block)))
           {
             blockcb->onNeighbourBroken(user, status,x,y+1,z,user->pos.map,direction);
           }
@@ -641,7 +641,7 @@ int PacketHandler::player_digging(User *user)
         for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
         {
           blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
-          if(blockcb!=NULL && blockcb->affectedBlock(block))
+          if(blockcb!=NULL && (blockcb->affectedBlock(status)||blockcb->affectedBlock(block)))
           {
             blockcb->onNeighbourBroken(user, status,x,y-1,z,user->pos.map,direction);
           }
@@ -655,7 +655,7 @@ int PacketHandler::player_digging(User *user)
         for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
         {
           blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
-          if(blockcb!=NULL && blockcb->affectedBlock(block))
+          if(blockcb!=NULL && (blockcb->affectedBlock(status)||blockcb->affectedBlock(block)))
           {
             blockcb->onNeighbourBroken(user, status,x,y,z+1,user->pos.map,direction);
           }
@@ -669,7 +669,7 @@ int PacketHandler::player_digging(User *user)
         for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
         {
           blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
-          if(blockcb!=NULL && blockcb->affectedBlock(block))
+          if(blockcb!=NULL && (blockcb->affectedBlock(status)||blockcb->affectedBlock(block)))
           {
             blockcb->onNeighbourBroken(user, status,x,y,z-1,user->pos.map,direction);
           }

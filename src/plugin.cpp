@@ -56,8 +56,6 @@
 void Plugin::init()
 {
    // Create Block* objects and put them away so we can delete them later
-   BlockDefault* defaultblock = new BlockDefault();
-   BlockCB.push_back(defaultblock);
    BlockFalling* fallingblock = new BlockFalling();
    BlockCB.push_back(fallingblock);
    BlockTorch* torchblock = new BlockTorch();
@@ -83,6 +81,9 @@ void Plugin::init()
    BlockCB.push_back(ladderblock);
    BlockCake* cakeblock = new BlockCake();
    BlockCB.push_back(cakeblock);
+   BlockDefault* defaultblock = new BlockDefault();
+   BlockCB.push_back(defaultblock);
+
 }
 
 void Plugin::free()
