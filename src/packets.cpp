@@ -812,21 +812,6 @@ int PacketHandler::player_block_placement(User *user)
   #define INV_TASKBAR_START 36
   if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].type == newblock && newblock != -1)
   {
-    //Are we really placing this?
-    user->inv[INV_TASKBAR_START+user->currentItemSlot()].count--;
-    if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].count == 0)
-    {
-      user->inv[INV_TASKBAR_START+user->currentItemSlot()] = Item();
-      //ToDo: add holding change packet.
-    }
-    user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_PLAYER 
-                 << (int16_t)(INV_TASKBAR_START+user->currentItemSlot())
-                 << (int16_t)user->inv[INV_TASKBAR_START+user->currentItemSlot()].type;
-    if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].type != -1)
-    {
-      user->buffer << (int8_t)user->inv[INV_TASKBAR_START+user->currentItemSlot()].count
-                   << (int16_t)user->inv[INV_TASKBAR_START+user->currentItemSlot()].health;
-    }
     foundFromInventory = true;
   }
   #undef INV_TASKBAR_START
@@ -1040,6 +1025,31 @@ int PacketHandler::player_block_placement(User *user)
       (static_cast<Hook4<bool,const char*,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("BlockNeighbourPlace")))->doAll(user->nick.c_str(), x, y, z-1);
     }
   }
+  // Now we're sure we're using it, lets remove from inventory!
+  #define INV_TASKBAR_START 36
+  if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].type == newblock && newblock != -1)
+  {
+    if(newblock<256)
+    {
+      // It's a block
+      user->inv[INV_TASKBAR_START+user->currentItemSlot()].count--;
+      if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].count == 0)
+      {
+        user->inv[INV_TASKBAR_START+user->currentItemSlot()] = Item();
+        //ToDo: add holding change packet.
+      }
+      user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_PLAYER
+                   << (int16_t)(INV_TASKBAR_START+user->currentItemSlot())
+                   << (int16_t)user->inv[INV_TASKBAR_START+user->currentItemSlot()].type;
+      if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].type != -1)
+      {
+        user->buffer << (int8_t)user->inv[INV_TASKBAR_START+user->currentItemSlot()].count
+                     << (int16_t)user->inv[INV_TASKBAR_START+user->currentItemSlot()].health;
+      }
+    }
+  }
+  #undef INV_TASKBAR_START
+
 
 
   /* TODO: Should be removed from here. Only needed for liquid related blocks? */
