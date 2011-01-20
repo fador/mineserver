@@ -739,7 +739,7 @@ bool Inventory::isSpace(User *user,int16_t itemID, char count)
 }
 
 
-bool Inventory::addItems(User *user,int16_t itemID, char count, int16_t health)
+bool Inventory::addItems(User *user,int16_t itemID, int16_t count, int16_t health)
 {
   bool checkingTaskbar = true;
 
