@@ -41,13 +41,14 @@ class MapGen
 {
 public:
   virtual void init(int seed);
+  virtual void re_init(int seed); // Used when generating mutliple maps
   virtual void generateChunk(int x, int z, int map);
 
 private:
-  uint8_t blocks[16*16*128];
-  uint8_t blockdata[16*16*128/2];
-  uint8_t skylight[16*16*128/2];
-  uint8_t blocklight[16*16*128/2];
+//  uint8_t blocks[16*16*128];
+////  uint8_t blockdata[16*16*128/2];
+//  uint8_t skylight[16*16*128/2];
+//  uint8_t blocklight[16*16*128/2];
   uint8_t heightmap[16*16];
   
   int seaLevel;
@@ -61,7 +62,7 @@ private:
   bool addOre;  
   bool addCaves;
 
-  virtual void generateFlatgrass();
+  virtual void generateFlatgrass(int x, int z, int map);
   virtual void generateWithNoise(int x, int z, int map);
 
   virtual void ExpandBeaches(int x, int z, int map);

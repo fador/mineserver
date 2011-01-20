@@ -64,8 +64,6 @@ inline int fastrand() {
 
 void NetherGen::init(int seed)
 {
-//  cave.init(seed+7);
-  
   neth_seed = seed;
 
   Randomgen.SetSeed(seed);
@@ -75,46 +73,6 @@ void NetherGen::init(int seed)
   Randomciel.SetFrequency(1.0/180.0);
   Randomciel.SetLacunarity(2.0);
   
-  /*perlinNoise.SetPersistence(0.1); // 0-1
-
-  // Heighmap scale..
-  perlinScale = 0.7f;
-
-  baseFlatTerrain.SetSeed(seed+1);
-  baseFlatTerrain.SetOctaveCount(2);
-  baseFlatTerrain.SetFrequency(0.5);
-  baseFlatTerrain.SetPersistence(0.2);
-
-  flatTerrain.SetSourceModule(0, baseFlatTerrain);
-  //flatTerrain.SetScale(0.125);
-  flatTerrain.SetBias(0.4);
-
-  seaFloor.SetSeed(seed+3);
-  seaFloor.SetOctaveCount(1);
-  seaFloor.SetPersistence(0.15);
-
-  seaBias.SetSourceModule(0, seaFloor);
-  seaBias.SetBias(-1.00);
-
-  terrainType.SetSeed(seed+2);
-  terrainType.SetFrequency(0.5);
-  terrainType.SetPersistence(0.10);
-
-  seaControl.SetSeed(seed+4);
-  seaControl.SetFrequency(0.15);
-
-  finalTerrain.SetSourceModule(0, flatTerrain);
-  finalTerrain.SetSourceModule(1, perlinBiased);
-  finalTerrain.SetControlModule(terrainType);
-  finalTerrain.SetBounds(0.25, 1000.0);
-  finalTerrain.SetEdgeFalloff(0.125);
-
-  seaTerrain.SetSourceModule(0, seaBias);
-  seaTerrain.SetSourceModule(1, finalTerrain);
-  seaTerrain.SetControlModule(seaControl);
-  seaTerrain.SetBounds(-0.3, 1000.0);
-  seaTerrain.SetEdgeFalloff(0.1);*/
-
   seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
   addTrees = false;//Mineserver::get()->config()->bData("mapgen.trees.enabled");
   expandBeaches = false;//Mineserver::get()->config()->bData("mapgen.beaches.expand");
@@ -122,36 +80,11 @@ void NetherGen::init(int seed)
   beachHeight = false;//Mineserver::get()->config()->iData("mapgen.beaches.height");
   
   addOre = true;//Mineserver::get()->config()->bData("mapgen.caves.ore");
-
 }
 
-void NetherGen::generateFlatgrass() 
+void NetherGen::re_init(int seed)
 {
-  for (int bX = 0; bX < 16; bX++) 
-  {
-    for (int bY = 0; bY < 128; bY++) 
-    {
-      for (int bZ = 0; bZ < 16; bZ++) 
-      {
-        if (bY == 0) 
-        {
-          netherblocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_BEDROCK; 
-        }
-        else if (bY < 64) 
-        {
-          netherblocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_DIRT;
-        }
-        else if (bY == 64) 
-        {
-          netherblocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_GRASS;
-        }
-        else 
-        {
-          netherblocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_AIR;
-        }
-      }
-    }
-  }
+  Randomgen.SetSeed(seed);
 }
 
 void NetherGen::generateChunk(int x, int z, int map)
@@ -159,10 +92,7 @@ void NetherGen::generateChunk(int x, int z, int map)
   NBT_Value *main = new NBT_Value(NBT_Value::TAG_COMPOUND);
   NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
 
-  if(Mineserver::get()->config()->bData("mapgen.flatgrass"))
-    generateFlatgrass();
-  else
-    generateWithNoise(x, z, map);
+  generateWithNoise(x, z, map);
 
   val->Insert("Blocks", new NBT_Value(netherblocks, 16*16*128));
   val->Insert("Data", new NBT_Value(blockdata, 16*16*128/2));

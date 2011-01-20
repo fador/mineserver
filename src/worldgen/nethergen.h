@@ -40,6 +40,7 @@
 class NetherGen : public MapGen {
 public:
   void init(int seed);
+  void re_init(int seed);
   void generateChunk(int x, int z, int map);
 
 private:
@@ -59,7 +60,6 @@ private:
   
   bool addOre;
 
-  void generateFlatgrass();
   void generateWithNoise(int x, int z, int map);
 
   void ExpandBeaches(int x, int z, int map);

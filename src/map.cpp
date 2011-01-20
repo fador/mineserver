@@ -337,7 +337,7 @@ void Map::init(int number)
     /////////////////
 
     // Init mapgenerator
-    Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
+    Mineserver::get()->mapGen(m_number)->re_init((int32_t)mapSeed);
 
     delete root;
 }
@@ -997,7 +997,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
     // If generate (false only for lightmapgenerator)
     if (generate)
     {
-      chunk = new sChunk;
+      //chunk = new sChunk;
       // Re-seed! We share map gens with other maps
       Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
       Mineserver::get()->mapGen(m_number)->generateChunk(x,z,m_number);

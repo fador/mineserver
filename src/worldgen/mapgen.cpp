@@ -54,63 +54,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../tools.h"
 
 int g_seed;
+int f_seed;
 
 inline int fastrand() { 
-  g_seed = (214013*g_seed+2531011);
-  return (g_seed>>16)&0x7FFF;
+  f_seed = (214013*f_seed+2531011);
+  return (f_seed>>16)&0x7FFF;
 } 
 
 void MapGen::init(int seed)
 {
   cave.init(seed+7);
+  f_seed = seed; // used for fastrand and can change
+  g_seed = seed; // used for height map, cannot change
   
-  g_seed = seed;
-
   ridgedMultiNoise.SetSeed(seed);
   ridgedMultiNoise.SetOctaveCount(6);
   ridgedMultiNoise.SetFrequency(1.0/180.0);
   ridgedMultiNoise.SetLacunarity(2.0);
   
-  /*perlinNoise.SetPersistence(0.1); // 0-1
-
-  // Heighmap scale..
-  perlinScale = 0.7f;
-
-  baseFlatTerrain.SetSeed(seed+1);
-  baseFlatTerrain.SetOctaveCount(2);
-  baseFlatTerrain.SetFrequency(0.5);
-  baseFlatTerrain.SetPersistence(0.2);
-
-  flatTerrain.SetSourceModule(0, baseFlatTerrain);
-  //flatTerrain.SetScale(0.125);
-  flatTerrain.SetBias(0.4);
-
-  seaFloor.SetSeed(seed+3);
-  seaFloor.SetOctaveCount(1);
-  seaFloor.SetPersistence(0.15);
-
-  seaBias.SetSourceModule(0, seaFloor);
-  seaBias.SetBias(-1.00);
-
-  terrainType.SetSeed(seed+2);
-  terrainType.SetFrequency(0.5);
-  terrainType.SetPersistence(0.10);
-
-  seaControl.SetSeed(seed+4);
-  seaControl.SetFrequency(0.15);
-
-  finalTerrain.SetSourceModule(0, flatTerrain);
-  finalTerrain.SetSourceModule(1, perlinBiased);
-  finalTerrain.SetControlModule(terrainType);
-  finalTerrain.SetBounds(0.25, 1000.0);
-  finalTerrain.SetEdgeFalloff(0.125);
-
-  seaTerrain.SetSourceModule(0, seaBias);
-  seaTerrain.SetSourceModule(1, finalTerrain);
-  seaTerrain.SetControlModule(seaControl);
-  seaTerrain.SetBounds(-0.3, 1000.0);
-  seaTerrain.SetEdgeFalloff(0.1);*/
-
   //###### TREE GEN #####
   treenoise.SetSeed(seed+2);
   treenoise.SetOctaveCount(6);
@@ -129,8 +90,17 @@ void MapGen::init(int seed)
 
 }
 
-void MapGen::generateFlatgrass() 
+void MapGen::re_init(int seed)
 {
+  cave.init(seed+7);
+  ridgedMultiNoise.SetSeed(seed);
+  treenoise.SetSeed(seed+2);
+}
+
+
+void MapGen::generateFlatgrass(int x, int z, int map) 
+{
+  sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(x,z);
   for (int bX = 0; bX < 16; bX++) 
   {
     for (int bY = 0; bY < 128; bY++) 
@@ -139,19 +109,19 @@ void MapGen::generateFlatgrass()
       {
         if (bY == 0) 
         {
-          blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_BEDROCK; 
+          chunk->blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_BEDROCK; 
         }
         else if (bY < 64) 
         {
-          blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_DIRT;
+          chunk->blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_DIRT;
         }
         else if (bY == 64) 
         {
-          blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_GRASS;
+          chunk->blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_GRASS;
         }
         else 
         {
-          blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_AIR;
+          chunk->blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_AIR;
         }
       }
     }
@@ -162,6 +132,12 @@ void MapGen::generateChunk(int x, int z, int map)
 {
   NBT_Value *main = new NBT_Value(NBT_Value::TAG_COMPOUND);
   NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+
+  uint8_t blocks[16*16*128];
+  uint8_t blockdata[16*16*128/2];
+  uint8_t skylight[16*16*128/2];
+  uint8_t blocklight[16*16*128/2];
+  memset(blocks, 0, 16*16*128);
 
   val->Insert("Blocks", new NBT_Value(blocks, 16*16*128));
   val->Insert("Data", new NBT_Value(blockdata, 16*16*128/2));
@@ -198,15 +174,12 @@ void MapGen::generateChunk(int x, int z, int map)
   chunk->nbt = main;
   chunk->x = x;
   chunk->z = z;
-
   Mineserver::get()->map(map)->chunks.linkChunk(chunk, x, z);
-
-
-  
   if(Mineserver::get()->config()->bData("mapgen.flatgrass"))
-    generateFlatgrass();
+    generateFlatgrass(x, z, map);
   else
     generateWithNoise(x, z, map);
+
 
   // Update last used time
   //Mineserver::get()->map()->mapLastused[chunkid] = (int)time(0);
@@ -289,12 +262,11 @@ void MapGen::generateWithNoise(int x, int z, int map)
   gettimeofday(&start, NULL);
 #endif
 #endif
-
+  sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(x,z);
   // Populate blocks in chunk
   int32_t currentHeight;
   int32_t ymax;
   uint8_t *curBlock;
-  memset(blocks, 0, 16*16*128);
 
   double xBlockpos = x<<4;
   double zBlockpos = z<<4;
@@ -312,7 +284,7 @@ void MapGen::generateWithNoise(int x, int z, int map)
 
       for(int bY = 0; bY <= ymax; bY++) 
       {
-        curBlock = &blocks[bYbX++];
+        curBlock = &(chunk->blocks[bYbX++]);
 
         // Place bedrock
         if(bY == 0) 
@@ -366,6 +338,7 @@ void MapGen::generateWithNoise(int x, int z, int map)
 
 void MapGen::ExpandBeaches(int x, int z, int map) 
 {
+  sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(blockToChunk(x),blockToChunk(z));
   int beachExtentSqr = (beachExtent + 1) * (beachExtent + 1);
   int xBlockpos = x<<4;
   int zBlockpos = z<<4;
@@ -402,7 +375,6 @@ void MapGen::ExpandBeaches(int x, int z, int map)
             if(xx < 0 || xx >= 15 || zz < 0 || zz >= 15 || hh < 0 || hh >= 127 ) 
               continue;
 
-            Mineserver::get()->map(map)->getBlock(xBlockpos+xx, hh, zBlockpos+zz, &block, &meta);
             if( block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER ) 
             {
               found = true;
