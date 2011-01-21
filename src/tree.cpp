@@ -66,7 +66,7 @@ void Tree::generate(uint8_t limit)
   {
     if(smalltree)
     {
-      Trunk* v = new Trunk(_x,_y+i,_z,darkness);
+      Trunk* v = new Trunk(_x,_y+i,_z,_map,darkness);
       if(i>=MIN_TRUNK-1)
       {
         m_Branch[n_branches]= v;
@@ -79,7 +79,7 @@ void Tree::generate(uint8_t limit)
     }
     else
     {
-      Trunk* v = new Trunk(_x,_y+i,_z,darkness);
+      Trunk* v = new Trunk(_x,_y+i,_z,_map,darkness);
       if(i > BRANCHING_HEIGHT-1)
       {
         generateBranches(v);
@@ -92,7 +92,7 @@ void Tree::generate(uint8_t limit)
       }
     }
   }
-  Trunk* v = new Trunk(_x,_y+i,_z,darkness);
+  Trunk* v = new Trunk(_x,_y+i,_z,_map,darkness);
   m_Branch[n_branches]= v;
   n_branches++;
   generateBranches(v);
