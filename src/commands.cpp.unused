@@ -275,6 +275,7 @@ void showMOTD(User* user, std::string command, std::deque<std::string> args)
   // Close motd file
   motdfs.close();
 }
+
 void emote(User* user, std::string command, std::deque<std::string> args)
 {
   if(user->isAbleToCommunicate(command) == false)
