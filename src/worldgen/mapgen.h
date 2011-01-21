@@ -40,14 +40,15 @@
 class MapGen
 {
 public:
-  void init(int seed);
-  void generateChunk(int x, int z);
+  virtual void init(int seed);
+  virtual void re_init(int seed); // Used when generating mutliple maps
+  virtual void generateChunk(int x, int z, int map);
 
 private:
-  uint8_t blocks[16*16*128];
-  uint8_t blockdata[16*16*128/2];
-  uint8_t skylight[16*16*128/2];
-  uint8_t blocklight[16*16*128/2];
+//  uint8_t blocks[16*16*128];
+////  uint8_t blockdata[16*16*128/2];
+//  uint8_t skylight[16*16*128/2];
+//  uint8_t blocklight[16*16*128/2];
   uint8_t heightmap[16*16];
   
   int seaLevel;
@@ -61,14 +62,14 @@ private:
   bool addOre;  
   bool addCaves;
 
-  void generateFlatgrass();
-  void generateWithNoise(int x, int z);
+  virtual void generateFlatgrass(int x, int z, int map);
+  virtual void generateWithNoise(int x, int z, int map);
 
-  void ExpandBeaches(int x, int z);
-  void AddTrees(int x, int z);
+  virtual void ExpandBeaches(int x, int z, int map);
+  virtual void AddTrees(int x, int z, int map);
   
-  void AddOre(int x, int z, uint8_t type);
-  void AddDeposit(int x, int y, int z, uint8_t block, int depotSize, sChunk *chunk);
+  virtual void AddOre(int x, int z, int map, uint8_t type);
+  virtual void AddDeposit(int x, int y, int z, int map, uint8_t block, int depotSize, sChunk *chunk);
 
   CaveGen cave;
 

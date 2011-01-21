@@ -157,6 +157,20 @@ int roundUpTo(int x, int nearest)
   return (((x + (nearest - 1)) / nearest) * nearest );
 }
 
+void giveItemsName(std::string userIn, int id, int count, int health)
+{
+  if (isValidItem(id))
+  {
+    int itemCount = 1, itemStacks = 1;
+    if (itemCount>1024) itemCount=1024;
+    mineserver->user.addItem(userIn.c_str(), id, itemCount, health);
+  }
+  else
+  {
+    mineserver->chat.sendmsgTo(userIn.c_str(),  "Not a valid item");
+  }
+}
+
 void giveItems(std::string userIn, std::string command, std::deque<std::string> args)
 {
   if (args.size() == 2 || args.size() == 3)
@@ -172,42 +186,15 @@ void giveItems(std::string userIn, std::string command, std::deque<std::string> 
     {
       itemId = mineserver->config.iData(args[1].c_str());
     }
-
-    // Check item validity
-    if (isValidItem(itemId))
+    if(args.size()==2)
     {
-      double x,y,z;
-      if (mineserver->user.getPosition(user.c_str(),&x,&y,&z,NULL,NULL,NULL))
-      {
-        int itemCount = 1, itemStacks = 1;
-
-        if (args.size() == 3)
-        {
-          itemCount = atoi(args[2].c_str());
-          if (itemCount>1024) itemCount=1024;
-          // If multiple stacks
-          itemStacks = roundUpTo(itemCount, 64) / 64;
-          itemCount  -= (itemStacks-1) * 64;
-        }
-
-        int amount = 64;
-        for (int i = 0; i < itemStacks; i++)
-        {
-          // if last stack
-          if (i == itemStacks - 1)
-          {
-            amount = itemCount;
-          }
-
-          mineserver->map.createPickupSpawn((int)x,(int)y,(int)z,itemId,amount,0,user.c_str());
-        }
-      }
-
+      giveItemsName(user, itemId, 1,0);
     }
     else
     {
-      mineserver->chat.sendmsgTo(userIn.c_str(),  "Not a valid item");      
+      giveItemsName(user, itemId, atoi(args[2].c_str()),0);
     }
+
   }
   else
   {
@@ -229,42 +216,16 @@ void giveItemsSelf(std::string user, std::string command, std::deque<std::string
     {
       itemId = mineserver->config.iData(args[0].c_str());
     }
-
-    // Check item validity
-    if (isValidItem(itemId))
+    if(args.size()==1)
     {
-      double x,y,z;
-      if (mineserver->user.getPosition(user.c_str(),&x,&y,&z,NULL,NULL,NULL))
-      {
-        int itemCount = 1, itemStacks = 1;
-
-        if (args.size() == 2)
-        {
-          itemCount = atoi(args[1].c_str());
-          if(itemCount>1024) itemCount=1024;
-          // If multiple stacks
-          itemStacks = roundUpTo(itemCount, 64) / 64;
-          itemCount  -= (itemStacks-1) * 64;
-        }
-
-        int amount = 64;
-        for (int i = 0; i < itemStacks; i++)
-        {
-          // if last stack
-          if (i == itemStacks - 1)
-          {
-            amount = itemCount;
-          }
-
-          mineserver->map.createPickupSpawn((int)x,(int)y,(int)z,itemId,amount,0,user.c_str());
-        }
-      }
-
+      giveItemsName(user, itemId, 1,0);
     }
     else
     {
-      mineserver->chat.sendmsgTo(user.c_str(),"Not a valid item");      
+      giveItemsName(user, itemId, atoi(args[1].c_str()),0);
     }
+
+
   }
   else
   {
@@ -280,7 +241,17 @@ void home(std::string user, std::string command, std::deque<std::string> args)
   mineserver->user.teleport(user.c_str(),x, y + 2, z);
 }
 
+void userWorld(std::string user, std::string command, std::deque<std::string> args)
+{
+  if(args.size() == 1)
+  {
+     double x,y,z;
+     mineserver->user.getPosition(user.c_str(), &x,&y,&z,NULL,NULL,NULL);
+     std::cout << user.c_str() << atoi(args[0].c_str())<< std::endl;
+     mineserver->user.teleportMap(user.c_str(), x,y+2,z,atoi(args[0].c_str()));
+  }
 
+}
 
 void coordinateTeleport(std::string user, std::string command, std::deque<std::string> args)
 {
@@ -296,6 +267,7 @@ void coordinateTeleport(std::string user, std::string command, std::deque<std::s
     mineserver->chat.sendmsgTo(user.c_str(),"Usage: /ctp x y z");
   }
 }
+
 void userTeleport(std::string user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 1)
@@ -709,6 +681,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mi
   registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap));  
   registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", sendHelp));
   registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport));
+  registerCommand(new Command(parseCmd("world"), "<world Number>", "Move between worlds", userWorld));
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION command_shutdown(void)

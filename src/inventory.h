@@ -117,7 +117,7 @@ public:
   bool isSpace(User *user, int16_t itemID, char count);
 
   //Add items to inventory (pickups)
-  bool addItems(User *user, int16_t itemID, char count, int16_t health);
+  bool addItems(User *user, int16_t itemID, int16_t count, int16_t health);
 
   bool doCraft(Item *slots, int8_t width, int8_t height);
 

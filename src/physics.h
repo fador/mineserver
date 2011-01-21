@@ -32,6 +32,7 @@ class Physics
 {
 public:
   bool enabled;
+  int map; // Which map are we affecting?
 
   bool update();
   bool addSimulation(vec pos);
