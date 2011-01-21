@@ -113,7 +113,7 @@ void client_callback(int fd,
       {
         //Call specific function
         int (PacketHandler::*function)(User *) =
-        Mineserver::get()->packetHandler()->packets[user->action].function;
+          Mineserver::get()->packetHandler()->packets[user->action].function;
         bool disconnecting = user->action == 0xFF;
         int curpos = (Mineserver::get()->packetHandler()->*function)(user);
         if(curpos == PACKET_NEED_MORE_DATA)
@@ -135,7 +135,7 @@ void client_callback(int fd,
 
         delete user;
 
-        break;
+        return;
       }
       else
       {
