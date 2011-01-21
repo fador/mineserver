@@ -150,7 +150,7 @@ std::string filename;
 // Rollback Transaction Logs
 void rollBack (const char* user, int argc, const char** args)
 {
-  std::vector<event_t> logs;
+  std::vector<event_t> logs;                                                         
   time_t timestamp;
 
   if(argc > 0) {
@@ -184,6 +184,34 @@ void rollBack (const char* user, int argc, const char** args)
 void playBack (const char* user, int argc, const char** args)
 {
   return;
+  std::vector<event_t> logs;                                                         
+  time_t timestamp;
+
+  if(argc > 0) {
+    std::stringstream ss (std::stringstream::in | std::stringstream::out);
+    ss << args[0];
+    ss >> timestamp;
+  }
+
+  if(argc == 2 ) {
+    std::string victim = args[1];
+    Binlog::get(filename).getLogs(timestamp, victim, &logs);
+  } else if (argc == 1) {
+    Binlog::get(filename).getLogs(timestamp, &logs);
+  } else {
+    Binlog::get(filename).getLogs(&logs);
+  }
+
+  std::vector<event_t>::reverse_iterator event;
+  if(logs.size() > 0) {
+    mineserver->chat.sendmsgTo(user, "Playing back binary log...");
+    for(event = logs.rbegin(); event != logs.rend(); event++) {
+      mineserver->map.setBlock(event->x, event->y, event->z, event->otype, event->ometa);
+    }
+    mineserver->chat.sendmsgTo(user, "Binary log playback completed!");
+  } else {
+    mineserver->chat.sendmsgTo(user, "No binary logs found!");
+  }
 }
 
 // Block Break Callback
