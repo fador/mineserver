@@ -40,8 +40,6 @@
 #define PLUGIN_VERSION 0.1
 #endif
 
-#define BINLOG(event) Binlog::get().log(event)
-
 struct event_t {
   time_t timestamp;
   int x;
