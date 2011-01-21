@@ -230,18 +230,40 @@ bool callbackBlockBreakPre (const char* user,int x,int y,int z)
 
   return true;
 }
+// Direction
+enum Direction
+{
+   BLOCK_BOTTOM, BLOCK_NORTH, BLOCK_SOUTH, BLOCK_EAST, BLOCK_WEST, BLOCK_TOP
+};
+
+bool translateDirection(int32_t *x, int8_t *y, int32_t *z, int8_t direction)
+{
+    switch(direction)
+    {
+      case BLOCK_BOTTOM: (*y)--;  break;
+      case BLOCK_TOP:    (*y)++;  break;
+      case BLOCK_NORTH:  (*x)++;  break;
+      case BLOCK_SOUTH:  (*x)--;  break;
+      case BLOCK_EAST:   (*z)++;  break;
+      case BLOCK_WEST:   (*z)--;  break;
+      default:                    break;
+    }
+  return true;
+}
 
 // Block Place Callback
-bool callbackBlockPlacePre (const char* user,int x,int y,int z, unsigned char type, unsigned char meta) 
+bool callbackBlockPlacePre (const char* user,int32_t x,int8_t y,int32_t z, unsigned char type, unsigned char meta) 
 {
   event_t event;
+  translateDirection(&x,&y,&z,meta);
+
   strcpy(event.nick, user);
   event.x = x;
   event.y = y;
   event.z = z;
   event.ntype = type;
   event.nmeta = meta;
-
+  
   mineserver->map.getBlock(x,y,z,&event.otype, &event.ometa);
   Binlog::get(filename).log(event);
 
