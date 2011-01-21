@@ -27,39 +27,53 @@
 
 #include "stair.h"
 
-void BlockStair::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+bool BlockStair::affectedBlock(int block)
+{
+  switch(block)
+  {
+  case BLOCK_WOODEN_STAIRS:
+  case BLOCK_COBBLESTONE_STAIRS:
+    return true;
+  }
+  return false;
+}
+
+
+void BlockStair::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-void BlockStair::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockStair::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-void BlockStair::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockStair::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-void BlockStair::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+bool BlockStair::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
+  return false;
 }
 
-void BlockStair::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockStair::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    /* TODO: add code to align stairs? */
 }
 
-void BlockStair::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+bool BlockStair::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
+  return false;
 }
 
-void BlockStair::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockStair::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    /* Align neighbour to this stair */
 }
 
-void BlockStair::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockStair::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }

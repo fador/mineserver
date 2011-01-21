@@ -90,19 +90,19 @@ void Furnace::updateBlock()
   // Now make sure that it's got the correct block type based on it's current status
   if(isBurningFuel() && !m_burning)
   {
-    Mineserver::get()->map()->getBlock(m_x, m_y, m_z, &block, &meta);
+    Mineserver::get()->map(map)->getBlock(m_x, m_y, m_z, &block, &meta);
     // Switch to burning furnace
-    Mineserver::get()->map()->setBlock(m_x, m_y, m_z, BLOCK_BURNING_FURNACE, meta);
-    Mineserver::get()->map()->sendBlockChange(m_x, m_y, m_z, BLOCK_BURNING_FURNACE, meta);
+    Mineserver::get()->map(map)->setBlock(m_x, m_y, m_z, BLOCK_BURNING_FURNACE, meta);
+    Mineserver::get()->map(map)->sendBlockChange(m_x, m_y, m_z, BLOCK_BURNING_FURNACE, meta);
     sendToAllUsers();
     m_burning = true;
   }
   else if(!isBurningFuel() && m_burning)
   {
-    Mineserver::get()->map()->getBlock(m_x, m_y, m_z, &block, &meta);
+    Mineserver::get()->map(map)->getBlock(m_x, m_y, m_z, &block, &meta);
     // Switch to regular furnace
-    Mineserver::get()->map()->setBlock(m_x, m_y, m_z, BLOCK_FURNACE, meta);
-    Mineserver::get()->map()->sendBlockChange(m_x, m_y, m_z, BLOCK_FURNACE, meta);
+    Mineserver::get()->map(map)->setBlock(m_x, m_y, m_z, BLOCK_FURNACE, meta);
+    Mineserver::get()->map(map)->sendBlockChange(m_x, m_y, m_z, BLOCK_FURNACE, meta);
     sendToAllUsers();
     m_burning = false;
   }

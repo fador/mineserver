@@ -86,9 +86,21 @@ struct plugin_pointer_struct
 struct user_pointer_struct
 {
   bool (*teleport)   (const char* user,double x, double y, double z);
+
   bool (*getPosition)(const char* user, double* x, double* y, double* z, float* yaw, float* pitch, double *stance);
   bool (*sethealth)  (const char* user,int userHealth);
-  void *temp[100];
+  bool (*teleportMap)   (const char* user,double x, double y, double z, int map);
+  int (*getCount)();
+  char* (*getUserNumbered)(int c);
+  bool (*getPositionW)(const char* user, double* x, double* y, double* z, int* w,float* yaw, float* pitch, double *stance);
+  int (*getItemInHand)(const char* user);
+  bool (*addItem)(const char* user, int item, int count, int health);
+  bool (*hasItem)(const char* user, int item, int count, int health);
+  bool (*delItem)(const char* user, int item, int count, int health);
+
+
+
+  void *temp[96];
 };
 
 struct chat_pointer_struct
@@ -117,6 +129,8 @@ struct map_pointer_struct
   unsigned char* (*getMapData_meta) (int x, int z);
   unsigned char* (*getMapData_skylight)  (int x, int z);
   unsigned char* (*getMapData_blocklight)(int x, int z);
+  bool (*getBlockW)(int x, int y, int z, int w,unsigned char* type,unsigned char* meta);
+  bool (*setBlockW)(int x, int y, int z, int w, unsigned char type,unsigned char meta);
   void *temp[100];
 };
 

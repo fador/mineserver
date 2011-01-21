@@ -47,7 +47,10 @@ set(mineserver_source
   src/chat.cpp
   src/tree.cpp
   src/worldgen/cavegen.cpp
+  src/worldgen/heavengen.cpp
   src/worldgen/mapgen.cpp
+  src/worldgen/nethergen.cpp
+  src/blocks/cake.cpp
   src/blocks/stair.cpp
   src/blocks/chest.cpp
   src/blocks/snow.cpp
@@ -74,6 +77,14 @@ set(command_source
 
 set(filelog_source
   plugins/filelog/src/filelog.cpp
+)
+
+set(nBreak_source
+  plugins/nBreak/nBreak.cpp
+)
+
+set(nether_source
+  plugins/nether/nether.cpp
 )
 
 add_definitions(-DFADOR_PLUGIN=1)
@@ -130,6 +141,10 @@ if (NOT dependency_error)
   set_target_properties(command PROPERTIES PREFIX "")
   add_library(filelog SHARED ${filelog_source})
   set_target_properties(filelog PROPERTIES PREFIX "")
+  add_library(nBreak SHARED ${nBreak_source})
+  set_target_properties(nBreak PROPERTIES PREFIX "")
+  add_library(nether SHARED ${nether_source})
+  set_target_properties(nether PROPERTIES PREFIX "")
 
   include_directories(${ZLIB_INCLUDE_DIR})
 #  include_directories(${LUA_INCLUDE_DIR})
