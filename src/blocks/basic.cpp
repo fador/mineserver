@@ -81,6 +81,10 @@ bool BlockBasic::isUserOnBlock(const int32_t x, const int8_t y, const int32_t z,
     {
       return true;
     }
+    if (User::all()[i]->checkOnBlock(x,y-1,z))
+    {
+      return true;
+    }
   }
 
   return false;
