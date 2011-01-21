@@ -427,6 +427,9 @@ bool user_teleport(const char* user,double x, double y, double z)
 bool user_teleportMap(const char* user,double x, double y, double z, int map)
 {
   User* tempUser = userFromName(std::string(user));
+  if(map > Mineserver::get()->mapCount){
+    return false;
+  }
   if(tempUser != NULL)
   {
     tempUser->teleport(x, y, z, map);
