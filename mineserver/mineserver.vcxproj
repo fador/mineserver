@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\blocks\basic.cpp" />
+    <ClCompile Include="..\src\blocks\cake.cpp" />
     <ClCompile Include="..\src\blocks\chest.cpp" />
     <ClCompile Include="..\src\blocks\default.cpp" />
     <ClCompile Include="..\src\blocks\door.cpp" />
@@ -52,10 +53,13 @@
     <ClCompile Include="..\src\tree.cpp" />
     <ClCompile Include="..\src\user.cpp" />
     <ClCompile Include="..\src\worldgen\cavegen.cpp" />
+    <ClCompile Include="..\src\worldgen\heavengen.cpp" />
     <ClCompile Include="..\src\worldgen\mapgen.cpp" />
+    <ClCompile Include="..\src\worldgen\nethergen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\blocks\basic.h" />
+    <ClInclude Include="..\src\blocks\cake.h" />
     <ClInclude Include="..\src\blocks\chest.h" />
     <ClInclude Include="..\src\blocks\default.h" />
     <ClInclude Include="..\src\blocks\door.h" />
@@ -101,7 +105,9 @@
     <ClInclude Include="..\src\user.h" />
     <ClInclude Include="..\src\vec.h" />
     <ClInclude Include="..\src\worldgen\cavegen.h" />
+    <ClInclude Include="..\src\worldgen\heavengen.h" />
     <ClInclude Include="..\src\worldgen\mapgen.h" />
+    <ClInclude Include="..\src\worldgen\nethergen.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7F6D1DAB-AA49-4343-B28E-C3E647BE5007}</ProjectGuid>

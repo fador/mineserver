@@ -57,7 +57,7 @@ struct cuboidStruct
   int x;
   char y;
   int z;
-  char block;
+  unsigned char block;
   bool active;
   int state;
   int action;
@@ -533,7 +533,7 @@ bool startedDiggingFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int
 
           if((xend-xstart) * (yend-ystart) * (zend-zstart) > 10000)
           {
-            mineserver->chat.sendmsgTo(user.c_str(),"Area too large!")
+            mineserver->chat.sendmsgTo(user.c_str(),"Area too large!");
             return true;
           }
           for(int xpos = xstart; xpos <= xend; xpos ++)

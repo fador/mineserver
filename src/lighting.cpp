@@ -177,7 +177,7 @@ bool Lighting::generateLight(int x, int z, sChunk *chunk)
 
       for(int block_y = heightmap[block_z+(block_x<<4)]; block_y >= 0; block_y--)
       {
-        if(Mineserver::get()->map()->getBlock(xdir,block_y,zdir,&block,&meta,false))
+        if(Mineserver::get()->map(0)->getBlock(xdir,block_y,zdir,&block,&meta,false))
         {
           uint8_t curblocklight,curskylight;
           if(getLight(xdir, block_y, zdir,&skyl,&blockl,chunk)                            && 
@@ -186,7 +186,7 @@ bool Lighting::generateLight(int x, int z, sChunk *chunk)
             if(skyl-stopLight[block]-1>curskylight)
             {              
               uint8_t curblock,curmeta;
-              if(Mineserver::get()->map()->getBlock(absolute_x,block_y,absolute_z,&curblock,&curmeta,false) && 
+              if(Mineserver::get()->map(0)->getBlock(absolute_x,block_y,absolute_z,&curblock,&curmeta,false) && 
                 skyl-stopLight[block]-stopLight[curblock] > 1)
               {
                 lightQueue.push(lightInfo(absolute_x,block_y,absolute_z,skyl-stopLight[block]-stopLight[curblock]-1, skipdir));
@@ -249,7 +249,7 @@ bool Lighting::spreadLight(std::queue<lightInfo> *lightQueue, sChunk *chunk)
         //If still light left, generate for this block also!
         if(light>1)
         {
-          if(Mineserver::get()->map()->getBlock(xdir,ydir,zdir,&block,&meta,false) && light-stopLight[block]>1)
+          if(Mineserver::get()->map(0)->getBlock(xdir,ydir,zdir,&block,&meta,false) && light-stopLight[block]>1)
           {
             lightQueue->push(lightInfo(xdir,ydir,zdir,light-stopLight[block],skipdir));
           }
@@ -264,10 +264,10 @@ bool Lighting::spreadLight(std::queue<lightInfo> *lightQueue, sChunk *chunk)
 // Light get/set
 bool Lighting::getLight(int x, int y, int z, uint8_t *skylight, uint8_t *blocklight, sChunk *chunk)
 {
-  return Mineserver::get()->map()->getLight(x,y,z,skylight,blocklight,chunk);
+  return Mineserver::get()->map(0)->getLight(x,y,z,skylight,blocklight,chunk);
 }
 
 bool Lighting::setLight(int x, int y, int z, int skylight, int blocklight, int setLight, sChunk *chunk)
 {
-  return Mineserver::get()->map()->setLight(x,y,z,skylight,blocklight,setLight,chunk);
+  return Mineserver::get()->map(0)->setLight(x,y,z,skylight,blocklight,setLight,chunk);
 }
