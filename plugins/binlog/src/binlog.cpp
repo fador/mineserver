@@ -275,10 +275,12 @@ bool callbackPlayerChatCommand (const char* user, const char* command, int argc,
 {
   if(strcmp(command, "rollback") == 0) {
     rollBack(user, argc, args);
+    return true;
   } else if (strcmp(command, "playback") == 0) {
     playBack(user, argc, args);
+    return true;
   }
-  return true;
+  return false;
 }
 
 std::string dtos( double n )
