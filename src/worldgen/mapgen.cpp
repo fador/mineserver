@@ -173,7 +173,7 @@ void MapGen::generateChunk(int x, int z)
   val->Insert("LastUpdate", new NBT_Value((int64_t)time(NULL)));
   val->Insert("xPos", new NBT_Value(x));
   val->Insert("zPos", new NBT_Value(z));
-  val->Insert("TerrainPopulated", new NBT_Value((char)1));
+  val->Insert("TerrainPopulated", new NBT_Value((int8_t)1));
 
   main->Insert("Level", val);
 

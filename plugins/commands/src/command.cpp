@@ -526,7 +526,7 @@ bool translateDirection(int32_t *x, int8_t *y, int32_t *z, int8_t direction)
 
 
 bool startedDiggingFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int8_t direction)
-{  
+{
   //translateDirection(&x,&y,&z,direction);
   std::string user(userIn);
   if(cuboidMap.find(user) != cuboidMap.end())
@@ -559,6 +559,11 @@ bool startedDiggingFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int
 
           unsigned char block,meta;
 
+          if((xend-xstart) * (yend-ystart) * (zend-zstart) > 10000)
+          {
+            mineserver->chat.sendmsgTo(user.c_str(),"Area too large!")
+            return true;
+          }
           for(int xpos = xstart; xpos <= xend; xpos ++)
           {
             for(int zpos = zstart;  zpos <= zend; zpos ++)
