@@ -891,76 +891,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
 
   return true;
 }
-/*
-bool Map::setBlock(int x, int y, int z, char type, char meta, std::string nick)
-{
-#ifdef _DEBUG
-  printf("setBlock(x=%d, y=%d, z=%d, type=%d, char=%d)\n", x, y, z, type, meta);
-#endif       
 
-
-  if((y < 0) || (y > 127))
-  {
-    LOG("Invalid y value (setBlock)");
-    return false;
-  }
-
-  // Map chunk pos from block pos
-  int chunk_x = ((x < 0) ? (((x+1)/16)-1) : (x/16));
-  int chunk_z = ((z < 0) ? (((z+1)/16)-1) : (z/16));
-
-  uint32 mapId;
-  //Map::posToId(chunk_x, chunk_z, &mapId);
-
-  sChunk *chunk = getMapData(chunk_x, chunk_z, true);
-
-  if(!chunk)
-  {
-    LOG("Loading chunk failed (setBlock)");
-    return false;
-  }
-
-  // Log the block update to the binary log
-  if(Conf::get()->bValue("enable_binary_log") == true) 
-  {
-    event_t entry;
-    entry.x = x;
-    entry.y = y;
-    entry.z = z;
-    strcpy(entry.nick, nick.c_str());
-
-    Map::getBlock(x,y,z, &entry.otype, &entry.ometa);
-    TRXLOG(entry);
-  }
-
-  // Which block inside the chunk
-  int chunk_block_x  = ((x < 0) ? (15+((x+1)%16)) : (x%16));
-  int chunk_block_z  = ((z < 0) ? (15+((z+1)%16)) : (z%16));
-
-  uint8 *blocks      = chunk->blocks;
-  uint8 *metapointer = chunk->data;
-  int index          = y + (chunk_block_z * 128) + (chunk_block_x * 128 * 16);
-  blocks[index] = type;
-  char metadata      = metapointer[index>>1];
-
-  if(y%2)
-  {
-    metadata &= 0x0f;
-    metadata |= meta<<4;
-  }
-  else
-  {
-    metadata &= 0xf0;
-    metadata |= meta;
-  }
-  metapointer[index >> 1] = metadata;
-
-  mapChanged[mapId]       = 1;
-  mapLastused[mapId]      = (int)time(0);
-
-  return true;
-}
-*/
 bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
 {
   Packet pkt;
