@@ -47,6 +47,7 @@ struct position
   double x;
   double y;
   double z;
+  int map;
   double stance;
   float yaw;
   float pitch;
@@ -102,6 +103,7 @@ public:
 
   bool changeNick(std::string _nick);
   bool updatePos(double x, double y, double z, double stance);
+  bool updatePosM(double x, double y, double z, int map,double stance);
   /** Check if the user is standing on this block */
   bool checkOnBlock(int32_t x, int8_t y, int32_t z);
   bool updateLook(float yaw, float pitch);
@@ -158,13 +160,16 @@ public:
   //Push remove queued map data to client
   bool popMap();
 
-  bool teleport(double x, double y, double z);
+  bool teleport(double x, double y, double z, int map =-1);
   bool spawnUser(int x, int y, int z);
   bool spawnOthers();
   bool sethealth(int userHealth);
   bool respawn();
   bool dropInventory();
   bool isUnderwater();
+
+  void clearLoadingMap();
+
 
   // Getter/Setter for item currently in hold
   int16_t currentItemSlot();

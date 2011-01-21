@@ -168,6 +168,7 @@ struct sChunk
         (*iter_a)->buffer.addToWrite(packet.getWrite(), packet.getWriteLen());
       }
     }
+
   }
 
   static bool userBoundary(sChunk* left, std::list<User*> &lusers, sChunk* right, std::list<User*> &rusers)

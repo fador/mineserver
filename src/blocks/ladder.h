@@ -34,6 +34,8 @@ class User;
 class BlockLadder: public BlockBasic
 {
 public:
+  bool affectedBlock(int block);
+
    /** Fired when the player's begins swinging to hit a block
       @param user The user who is digging
       @param status
@@ -42,7 +44,7 @@ public:
       @param z The z position of the current block being hit
       @param direction The direction that the user is facing
     */
-   void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction);
+   void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
 
    /** Fired when the player is digging
       @param user The user who is digging
@@ -52,7 +54,7 @@ public:
       @param z The z position of the current block being hit
       @param direction The direction that the user is facing
     */
-   void onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction);
+   void onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
 
    /** Fired when the player stops digging but hasn't broken the block
       @param user The user who has stopped digging
@@ -62,7 +64,7 @@ public:
       @param z The z position of the current block not being hit anymore
       @param direction The direction that the user is facing
     */
-   void onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction);
+   void onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
 
    /** Fired when the player has broken the block
       @param user The user who has broken the block
@@ -72,7 +74,7 @@ public:
       @param z The z position of the block that has been broken
       @param direction The direction that the user is facing
     */
-   void onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction);
+   bool onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
 
    /** Fired when a neighbour block is broken.
       @param user The user who broke the block
@@ -82,7 +84,7 @@ public:
       @param z The z position of the current neighbour block being called
       @param direction The direction of the neighbour block that was broken
     */
-   void onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction);
+   void onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
 
    /** Fired when a block is placed
       @param user The user who placed the block
@@ -92,7 +94,7 @@ public:
       @param z The z position of where the block was placed
       @param direction The direction that the user is facing
     */
-   void onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction);
+   bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
 
    /** Fired when a neighbour block is placed
       @param user The user who placed the block
@@ -106,7 +108,7 @@ public:
       allows another block's onReplace method to either allow of deny the replacement
       of a block with the block you're replacing it with.
     */
-   void onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction);
+   void onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
 
    /** Fired when a block is to be placed
       @param user The user who placed the block
@@ -120,7 +122,7 @@ public:
       the block change the block to be BLOCK_AIR and check for BLOCK_AIR
       in the onPlace callback.
     */
-   void onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction);
+   void onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
 
    /** Fired when a neighbour block is moving position.
       @param user The user who broke the block
@@ -130,6 +132,6 @@ public:
       @param z The z position of the current neighbour block being called
       @param direction The direction that the block was in
     */
-   void onNeighbourMove(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction);
+   void onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
 };
 

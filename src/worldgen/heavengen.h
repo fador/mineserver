@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
+   Copyright (c) 2010, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -25,28 +25,70 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef _HEAVENGEN_H
+#define _HEAVENGEN_H
 
-#include "basic.h"
-class User;
+#ifdef DEBIAN
+#include <libnoise/noise.h>
+#else
+#include <noise/noise.h>
+#endif
 
-/** The BlockDefault type comprises of the functionality seen in most of the
-blocktypes in the game. These functions are reused and mixed with multiple
-different blocks. */
+#include "mapgen.h"
+#include "cavegen.h"
 
-class BlockDefault: public BlockBasic
-{
+class HeavenGen : public MapGen {
 public:
-  bool affectedBlock(int block);
+  void init(int seed);
+  void re_init(int seed);
+  void generateChunk(int x, int z, int map);
 
-   void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   bool onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
+private:
+  uint8_t heavenblocks[16*16*128];
+  uint8_t blockdata[16*16*128/2];
+  uint8_t skylight[16*16*128/2];
+  uint8_t blocklight[16*16*128/2];
+  uint8_t heightmap[16*16];
+  
+  int seaLevel;
+  
+  bool addTrees;
+  
+  bool expandBeaches;
+  int beachExtent;
+  int beachHeight;
+  
+  bool addOre;
+
+  void generateWithNoise(int x, int z, int map);
+
+  void ExpandBeaches(int x, int z, int map);
+  void AddTrees(int x, int z, int map, uint16_t count);
+  
+  void AddOre(int x, int z, int map, uint8_t type);
+  void AddDeposit(int x, int y, int z, int map, uint8_t block, int depotSize);
+
+  
+  CaveGen cave;
+
+  // Heightmap composition
+  noise::module::Billow Randomgen;
+  noise::module::Billow Randomgen2;
+  
+  /*noise::module::ScaleBias perlinBiased;
+
+  noise::module::Perlin baseFlatTerrain;  
+  noise::module::ScaleBias flatTerrain;
+  
+  noise::module::Perlin seaFloor;
+  noise::module::ScaleBias seaBias;
+
+  noise::module::Perlin terrainType;
+
+  noise::module::Perlin seaControl;
+  
+  noise::module::Select seaTerrain;
+  noise::module::Select finalTerrain;*/
 };
 
+#endif

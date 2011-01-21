@@ -93,6 +93,7 @@ private:
   int32_t m_x;
   int32_t m_y;
   int32_t m_z;
+  int map;
   Slot m_slots[3];
 
   bool m_burning;

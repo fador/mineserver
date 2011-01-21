@@ -45,6 +45,7 @@
 #include <deque>
 #include <map>
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <event.h>
 #include <ctime>
@@ -61,6 +62,8 @@
 #include "user.h"
 #include "chat.h"
 #include "worldgen/mapgen.h"
+#include "worldgen/nethergen.h"
+#include "worldgen/heavengen.h"
 #include "config.h"
 #include "config/node.h"
 #include "nbt.h"
@@ -97,6 +100,18 @@ void sighandler(int sig_num)
   Mineserver::get()->stop();
 }
 
+std::string removeChar(std::string str, const char* c)
+{
+  std::string remove(c);
+  std::string replace("");
+  std::size_t loc = str.find(remove);
+  if(loc!=std::string::npos)
+  {
+    return str.replace(loc,1,replace);
+  }
+  return str;
+}
+
 int main(int argc, char* argv[])
 {
   signal(SIGTERM, sighandler);
@@ -115,16 +130,61 @@ bool log_to_screen(int type, const char* source, const char* message)
 
 Mineserver::Mineserver()
 {
-  m_map            = new Map;
+  initConstants();
+
+  m_config         = new Config;
+//  initConstants();
+
+  std::string file_config;
+  file_config.assign(CONFIG_FILE);
+
+//  if (argc > 1)
+//  {
+//    file_config.assign(argv[1]);
+//  }
+
+  // Initialize conf
+  m_config->load(file_config);
+
+  MapGen* mapgen = new MapGen;
+  MapGen* nethergen = (MapGen*) new NetherGen;
+  MapGen* heavengen = (MapGen*) new HeavenGen;
+  gennames.push_back(mapgen);
+  gennames.push_back(nethergen);
+  gennames.push_back(heavengen);
+
+  const char* key = "map.storage.nbt.directories"; // Prefix for worlds config
+  if (m_config->has(key) && (m_config->type(key) == CONFIG_NODE_LIST))
+  {
+    std::list<std::string>* tmp = m_config->mData(key)->keys();
+    std::list<std::string>::iterator it = tmp->begin();
+    int n = 0;
+    for (;it!=tmp->end();++it)
+    {
+      m_map.push_back(new Map);
+      Physics* phy = new Physics;
+      phy->map=n;
+      m_physics.push_back(phy);
+      int k = m_config->iData((std::string(key)+".")+(*it));
+      MapGen* m = gennames[k];
+      m_mapGen.push_back(m); 
+      n++;
+      
+    }
+    delete tmp;
+  }else{
+    std::cout << "Cannot find map.storage.nbt.directories.* in config.cfg" <<std::endl;
+  }
+  if(m_map.size()==0){
+    std::cerr << "No worlds in Config!" << std::endl;
+    exit(1);
+  }
+  m_screen         = new CliScreen;
+  m_logger         = new Logger;
   m_chat           = new Chat;
   m_plugin         = new Plugin;
-  m_screen         = new CliScreen;
-  m_physics        = new Physics;
-  m_config         = new Config;
   m_furnaceManager = new FurnaceManager;
   m_packetHandler  = new PacketHandler;
-  m_mapGen         = new MapGen;
-  m_logger         = new Logger;
   m_inventory      = new Inventory;
 }
 
@@ -137,6 +197,13 @@ void Mineserver::updatePlayerList()
 {
   // Update the player window
   Mineserver::get()->screen()->updatePlayerList(users());
+}
+
+void Mineserver::saveAll(){
+  for(int i = 0; i<m_map.size(); i++){
+    m_map[i]->saveWholeMap();
+  }
+  saveAllPlayers();
 }
 
 void Mineserver::saveAllPlayers()
@@ -167,20 +234,6 @@ int Mineserver::run(int argc, char *argv[])
   logger()->log(LogType::LOG_INFO, "Mineserver", "Welcome to Mineserver v" + VERSION);
   updatePlayerList();
 
-  initConstants();
-
-  std::string file_config;
-  file_config.assign(CONFIG_FILE);
-
-  if (argc > 1)
-  {
-    file_config.assign(argv[1]);
-  }
-
-  // Initialize conf
-  Mineserver::get()->config()->load(file_config);
-
-  // If needed change interface and reinitialize the new Screen
   std::string iface = Mineserver::get()->config()->sData("system.interface");
   if (iface == "curses")
   {
@@ -216,50 +269,51 @@ int Mineserver::run(int argc, char *argv[])
   }
   pid_out.close();
 
-  // Set physics enable state according to config
-  Mineserver::get()->physics()->enabled = (Mineserver::get()->config()->bData("system.physics.enabled"));
-
   // Initialize map
-  Mineserver::get()->map()->init();
-
-  if (Mineserver::get()->config()->bData("map.generate_spawn.enabled"))
+  for(int i=0; i<(int)m_map.size(); i++)
   {
-    logger()->log(LogType::LOG_INFO, "Mapgen", "Generating spawn area...");
-    int size = Mineserver::get()->config()->iData("map.generate_spawn.size");
-    bool show_progress = Mineserver::get()->config()->bData("map.generate_spawn.show_progress");
-#ifdef WIN32
-    DWORD t_begin = 0, t_end = 0;
-#else
-    clock_t t_begin = 0, t_end = 0;
-#endif
+    Mineserver::get()->physics(i)->enabled = (Mineserver::get()->config()->bData("system.physics.enabled"));
 
-    for (int x=-size;x<=size;x++)
+    m_map[i]->init(i);
+    if (Mineserver::get()->config()->bData("map.generate_spawn.enabled"))
     {
+      logger()->log(LogType::LOG_INFO, "Mapgen", "Generating spawn area...");
+      int size = Mineserver::get()->config()->iData("map.generate_spawn.size");
+      bool show_progress = Mineserver::get()->config()->bData("map.generate_spawn.show_progress");
 #ifdef WIN32
-      if (show_progress)
-      {
-        t_begin = timeGetTime();
-      }
+      DWORD t_begin = 0, t_end = 0;
 #else
-      if (show_progress)
-      {
-        t_begin = clock();
-      }
+      clock_t t_begin = 0, t_end = 0;
 #endif
-      for (int z = -size; z <= size; z++)
-      {
-        Mineserver::get()->map()->loadMap(x, z);
-      }
-
-      if (show_progress)
+  
+      for (int x=-size;x<=size;x++)
       {
 #ifdef WIN32
-        t_end = timeGetTime ();
-        logger()->log(LogType::LOG_INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos((t_end-t_begin)/(size*2+1)) + "ms per chunk");
+        if(show_progress)
+        {
+          t_begin = timeGetTime();
+        }
 #else
-        t_end = clock();
-        logger()->log(LogType::LOG_INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos(((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1)) + "ms per chunk");
+        if(show_progress)
+        {
+          t_begin = clock();
+        }
 #endif
+        for (int z = -size; z <= size; z++)
+        {
+          m_map[i]->loadMap(x, z);
+        }
+  
+        if(show_progress)
+        {
+#ifdef WIN32
+          t_end = timeGetTime ();
+          logger()->log(LogType::LOG_INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos((t_end-t_begin)/(size*2+1)) + "ms per chunk");
+#else
+          t_end = clock();
+          logger()->log(LogType::LOG_INFO, "Map", dtos((x+size+1)*(size*2+1)) + "/" + dtos((size*2+1)*(size*2+1)) + " done. " + dtos(((t_end-t_begin)/(CLOCKS_PER_SEC/1000))/(size*2+1)) + "ms per chunk");
+#endif
+        }
       }
     }
 #ifdef _DEBUG
@@ -352,7 +406,6 @@ int Mineserver::run(int argc, char *argv[])
     std::string myip(ip);
     Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", myip + ":" + dtos(port));
   }
-  // std::cout << std::endl;
 
   timeval loopTime;
   loopTime.tv_sec  = 0;
@@ -392,12 +445,15 @@ int Mineserver::run(int argc, char *argv[])
 
         // Send server time
         Packet pkt;
-        pkt << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map()->mapTime;
+        pkt << (int8_t)PACKET_TIME_UPDATE << (int64_t)m_map[0]->mapTime;
         User::all()[0]->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
       }
 
-      // Check for tree generation from saplings
-      map()->checkGenTrees();
+      //Check for tree generation from saplings
+      for(int i = 0; i<m_map.size(); i++)
+      {
+        m_map[i]->checkGenTrees();
+      }
 
       // TODO: Run garbage collection for chunk storage dealie?
 
@@ -438,10 +494,15 @@ int Mineserver::run(int argc, char *argv[])
 
       }
 
-      map()->mapTime+=20;
-      if (map()->mapTime >= 24000)
+      for(int i = 0 ; i<m_map.size(); i++)
       {
-        map()->mapTime = 0;
+        m_map[i]->mapTime+=20;
+        if (m_map[i]->mapTime >= 24000)
+        {
+          m_map[i]->mapTime = 0;
+        }
+        Mineserver::get()->physics(i)->update();
+
       }
 
 
@@ -451,9 +512,6 @@ int Mineserver::run(int argc, char *argv[])
       // Run 1s timer hook
       static_cast<Hook0<bool>*>(plugin()->getHook("Timer1000"))->doAll();
     }
-
-    // Physics simulation every 200ms
-    Mineserver::get()->physics()->update();
 
     // Underwater check / drowning
     // ToDo: this could be done a bit differently? - Fador
@@ -487,15 +545,19 @@ int Mineserver::run(int argc, char *argv[])
   screen()->end();
 
   /* Free memory */
-  delete m_map;
+  
+  for(int i =0; i<m_map.size();i++){
+    delete m_map[i];
+    delete m_physics[i];
+    delete m_mapGen[i];
+  }
+
   delete m_chat;
   delete m_plugin;
   delete m_screen;
-  delete m_physics;
   delete m_config;
   delete m_furnaceManager;
   delete m_packetHandler;
-  delete m_mapGen;
   delete m_logger;
   delete m_inventory;
 
@@ -506,6 +568,32 @@ int Mineserver::run(int argc, char *argv[])
   event_base_free(m_eventBase);
 
   return EXIT_SUCCESS;
+}
+
+Physics* Mineserver::physics(int n)
+{
+  return m_physics[n];
+}
+
+MapGen* Mineserver::mapGen(int n)
+{
+  return m_mapGen[n];
+}
+
+//Map* Mineserver::map()
+//{
+//  std::cout << "WARNING. MAP DEFAULT USED" << std::endl;
+//  return m_map[0];
+//}
+
+Map* Mineserver::map(int n)
+{
+  return m_map[n];
+}
+
+void Mineserver::setMap(Map* map,int n)
+{
+  m_map[n] = map;
 }
 
 bool Mineserver::stop()

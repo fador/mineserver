@@ -81,65 +81,6 @@ class BlockBasic;
 // Foe INCONSISTENCY fainted!
 // You got 374¥ for winning!
 
-typedef srutil::delegate6<void, User*, int8_t, int32_t, int8_t, int32_t, int8_t> Function;
-
-class Callback
-{
-public:
-  void add(const std::string name, Function func)
-  {
-    remove(name);
-    callbacks.insert(std::pair<std::string, Function>(name, func));
-  }
-
-  bool remove(const std::string name)
-  {
-    Events::iterator iter = callbacks.find(name);
-
-    if (iter == callbacks.end())
-    {
-      return false;
-    }
-      
-    callbacks.erase(iter);
-    return true;
-  }
-
-  Function* get(const std::string name)
-  {
-    Events::iterator iter = callbacks.find(name);
-
-    if (iter == callbacks.end())
-    {
-      return NULL;
-    }
-
-    return &iter->second;
-  }
-
-  bool run(const std::string name, const Function::invoker_type function)
-  {
-    Events::iterator iter = callbacks.find(name);
-
-    if (iter == callbacks.end())
-    {
-      return false;
-    }
-
-    function(iter->second);
-    return true;
-  }
-
-  void reset()
-  {
-    callbacks.clear();
-  }
-
-private:
-  typedef std::map<std::string, Function> Events;
-  Events callbacks;
-};
-
 class Plugin
 {
 public:
@@ -178,9 +119,9 @@ public:
     setHook("PlayerDamagePre", new Hook3<bool,const char*,const char*,int>);
     setHook("PlayerDamagePost", new Hook3<bool,const char*,const char*,int>);
     setHook("PlayerDisconnect", new Hook3<bool,const char*,uint32_t,uint16_t>);
-    setHook("PlayerDiggingStarted", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
-    setHook("PlayerDigging", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
-    setHook("PlayerDiggingStopped", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
+    setHook("PlayerDiggingStarted", new Hook5<bool,const char*,int32_t,int8_t,int32_t,int8_t>);
+    setHook("PlayerDigging", new Hook5<bool,const char*,int32_t,int8_t,int32_t,int8_t>);
+    setHook("PlayerDiggingStopped", new Hook5<bool,const char*,int32_t,int8_t,int32_t,int8_t>);
     setHook("BlockBreakPre", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
     setHook("BlockBreakPost", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
     setHook("BlockNeighbourBreak", new Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>);
@@ -213,11 +154,8 @@ public:
 
   void init();
   void free();
+  std::vector<BlockBasic*> getBlockCB(){ return BlockCB; }
 
-  void setBlockCallback(const int type, Callback call);
-  Callback* getBlockCallback(const int type);
-  bool runBlockCallback(const int type, const std::string name, const Function::invoker_type function);
-  bool removeBlockCallback(const int type);
 
 private:
   std::map<const std::string, Hook*> m_hooks;
@@ -226,9 +164,7 @@ private:
   std::map<const std::string, float> m_pluginVersions;
 
   // Old stuff
-  typedef std::map<int16_t, Callback> Callbacks;
-  Callbacks blockevents;
-  std::vector<BlockBasic*> toClean;
+  std::vector<BlockBasic*> BlockCB;
 };
 
 #endif
