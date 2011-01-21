@@ -468,11 +468,15 @@ int Mineserver::run(int argc, char *argv[])
       // Loop users
       for (int i = users().size()-1; i >= 0; i--)
       {
-        // No data received in 3s, timeout
-        if (users()[i]->logged && (timeNow-users()[i]->lastData) > 3)
+        // No data received in 20s, timeout
+        if (users()[i]->logged && (timeNow-users()[i]->lastData) > 1)
         {
           Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Player "+users()[i]->nick+" timed out");
 
+          delete users()[i];
+        }
+        else if (!users()[i]->logged && (timeNow-users()[i]->lastData) > 100)
+        {
           delete users()[i];
         }
         else
@@ -546,7 +550,8 @@ int Mineserver::run(int argc, char *argv[])
 
   /* Free memory */
   
-  for(int i =0; i<m_map.size();i++){
+  for(int i =0; i<m_map.size();i++)
+  {
     delete m_map[i];
     delete m_physics[i];
     delete m_mapGen[i];

@@ -53,6 +53,7 @@ bool Chat::sendUserlist(User* user)
 
   for(unsigned int i = 0; i < User::all().size(); i++)
   {
+    if(!User::all()[i]->logged) continue;
     std::string playerDesc = "> " + User::all()[i]->nick;
     if(User::all()[i]->muted)
     {

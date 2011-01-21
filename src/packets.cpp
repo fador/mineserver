@@ -1163,8 +1163,6 @@ int PacketHandler::disconnect(User *user)
 
   LOG(INFO, "Packets", "Disconnect: " + msg);
 
-  delete user;
-
   return PACKET_OK;
 }
 

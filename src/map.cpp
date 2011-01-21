@@ -215,7 +215,7 @@ void Map::checkGenTrees()
         {
           LOG(INFO, "Map", "Grow tree!");
 
-          Tree tree((*iter).x,(*iter).y,(*iter).z,i);
+          Tree tree((*iter).x,(*iter).y,(*iter).z,0);
           saplings.erase(iter++);  // alternatively, i = items.erase(i);
         }
       }

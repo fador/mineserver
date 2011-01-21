@@ -62,6 +62,7 @@
 #include "mineserver.h"
 
 #include "packets.h"
+#include <algorithm>
 
 extern int setnonblock(int fd);
 
@@ -72,6 +73,13 @@ void client_callback(int fd,
 {
   User *user = (User *)arg;
 
+  std::vector<User *>::const_iterator it = std::find (Mineserver::get()->users().begin(), 
+                                                      Mineserver::get()->users().end(), user);
+  if(it == Mineserver::get()->users().end())
+  {
+    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Using dead player!!!");
+    return;
+  }
   if(ev & EV_READ)
   {
 
@@ -85,6 +93,7 @@ void client_callback(int fd,
       Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket closed properly");
 
       delete user;
+      user = (User *)1;
       delete[] buf;
       return;
     }
@@ -94,6 +103,7 @@ void client_callback(int fd,
       Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket had no data to read");
 
       delete user;
+      user = (User *)2;
       delete[] buf;
       return;
     }
@@ -126,6 +136,8 @@ void client_callback(int fd,
 
         if(disconnecting) // disconnect -- player gone
         {
+          delete user;
+          user = (User *)4;
           return;
         }
       }
@@ -134,7 +146,7 @@ void client_callback(int fd,
         printf("Unknown action: 0x%x\n", user->action);
 
         delete user;
-
+        user = (User *)3;
         return;
       }
       else
@@ -165,6 +177,7 @@ void client_callback(int fd,
         Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Error writing to client, tried to write " + dtos(writeLen) + " bytes, code: " + dtos(errno));
 
         delete user;
+        user = (User *)5;
         return;
       }
       else

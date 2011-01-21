@@ -108,7 +108,10 @@ bool User::changeNick(std::string _nick)
 
 User::~User()
 {
-  event_del(GetEvent());
+  if(event_del(GetEvent()) == -1)
+  {
+    Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", this->nick + " event del failed!");
+  }
 
   if (fd != -1)
   {
@@ -134,6 +137,7 @@ User::~User()
     if ((*it_a) == this)
     {
       Mineserver::get()->users().erase(it_a);
+      //Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", this->nick + " erased!");
       break;
     }
   }
@@ -157,7 +161,7 @@ User::~User()
     }
 
     Mineserver::get()->chat()->sendMsg(this, this->nick + " disconnected!", Chat::OTHERS);
-    Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", this->nick + " removed!");
+    //Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", this->nick + " removed!");
     this->saveData();
 
     // Send signal to everyone that the entity is destroyed
@@ -166,20 +170,9 @@ User::~User()
     putSint32(&entityData[1], this->UID);
     this->sendOthers(&entityData[0], 5);
 
-
-    for (std::map<uint32_t, sChunk>::iterator it=Mineserver::get()->map(pos.map)->maps.begin();it!=Mineserver::get()->map(pos.map)->maps.end();++it)
-    {
-      if((*it).second.users.count(this) > 0)
-      {
-        Mineserver::get()->logger()->log(LogType::LOG_ERROR, "User", nick + " data left on chunk ("+dtos((*it).second.x)+","+dtos((*it).second.z)+")");
-        (*it).second.users.erase(this);
-      }
-    }
-
-
   }
 
-  if (fd != -1)
+  if (fd != -1 && logged)
   {
     (static_cast<Hook1<bool,const char*>*>(Mineserver::get()->plugin()->getHook("PlayerQuitPost")))->doAll(nick.c_str());
   }

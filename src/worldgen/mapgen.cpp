@@ -344,8 +344,8 @@ void MapGen::ExpandBeaches(int x, int z, int map)
   int zBlockpos = z<<4;
   
   int blockX, blockZ, h;
-  uint8_t block;
-  uint8_t meta;
+  uint8_t block = 0;
+  uint8_t meta = 0;
   
   for(int bX = 0; bX < 16; bX++) 
   {
@@ -375,6 +375,7 @@ void MapGen::ExpandBeaches(int x, int z, int map)
             if(xx < 0 || xx >= 15 || zz < 0 || zz >= 15 || hh < 0 || hh >= 127 ) 
               continue;
 
+            //ToDo: add getBlock!!
             if( block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER ) 
             {
               found = true;

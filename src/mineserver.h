@@ -30,6 +30,7 @@
 
 #include <iostream>
 #include <vector>
+#include <set>
 
 #ifdef WIN32
   // This is needed for event to work on Windows.
@@ -131,6 +132,7 @@ private:
   std::vector<MapGen*> m_mapGen;
   Logger* m_logger;
   Inventory* m_inventory;
+
 };
 
 #endif
