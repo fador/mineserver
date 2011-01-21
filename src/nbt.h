@@ -62,6 +62,7 @@ public:
   NBT_Value(double value);
 
   NBT_Value(uint8_t *buf, int32_t len);
+  NBT_Value(std::vector<uint8_t> const &bytes);
   NBT_Value(const std::string &str);
 
   NBT_Value(eTAG_Type type, uint8_t **buf, int &remaining);

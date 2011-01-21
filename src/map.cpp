@@ -135,7 +135,7 @@ Map::~Map()
         NBT_Value &data = *((*root)["Data"]);
 
         //Get time from the map
-        *data["Time"] = mapTime;
+        data.Insert("Time", new NBT_Value(mapTime));
 
         NBT_Value* trees = ((*root)["Trees"]);
 
