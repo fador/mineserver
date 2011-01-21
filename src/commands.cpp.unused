@@ -28,7 +28,6 @@
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>
-#include <sstream>
 #include <deque>
 #include <fstream>
 #include <vector>
@@ -276,51 +275,6 @@ void showMOTD(User* user, std::string command, std::deque<std::string> args)
   // Close motd file
   motdfs.close();
 }
-/*
-// Rollback Transaction Logs
-void rollBack(User *user, std::string command, std::deque<std::string> args)
-{
-#ifdef _DEBUG
-  printf("Starting map rollback\n");
-#endif
-  std::vector<event_t> logs;
-  time_t timestamp;
-
-  if(args.size() > 0) {
-    std::stringstream ss (std::stringstream::in | std::stringstream::out);
-    ss << args[0];
-    ss >> timestamp;
-  }
-
-  if(args.size() == 2 ) {
-    std::string victim = args[1];
-    TrxLogger::get().getLogs(timestamp, victim, &logs);
-  } else if (args.size() == 1) {
-    TrxLogger::get().getLogs(timestamp, &logs);
-  } else {
-    TrxLogger::get().getLogs(&logs);
-  }
-
-#ifdef _DEBUG
-    printf("Found %d events in binary log\n", logs.size());
-#endif
-
-  std::vector<event_t>::reverse_iterator event;
-  if(logs.size() > 0) {
-    Chat::get()->sendMsg(user, "Rolling back map...", Chat::USER);
-    for(event = logs.rbegin(); event != logs.rend(); event++) {
-      Map::get()->setBlock(event->x, event->y, event->z, event->otype, event->ometa);
-      Map::get()->sendBlockChange(event->x, event->y, event->z, (char)event->otype, event->ometa);
-    }
-    Chat::get()->sendMsg(user, "Map roll back completed!", Chat::USER);
-  } else {
-    reportError(user, "No binary logs found!");
-  }
-#ifdef _DEBUG
-  printf("Map rollback completed.\n");
-#endif
-}
-*/
 void emote(User* user, std::string command, std::deque<std::string> args)
 {
   if(user->isAbleToCommunicate(command) == false)
