@@ -254,9 +254,9 @@ bool chat_sendUserlist(const char* user)
 // MAP WRAPPER FUNCTIONS
 bool map_setTime(int timeValue)
 {
-  Mineserver::get()->map()->mapTime = timeValue;
+  Mineserver::get()->map(0)->mapTime = timeValue;
   Packet pkt;
-  pkt << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map()->mapTime;
+  pkt << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map(0)->mapTime;
 
   if(User::all().size())
   {
@@ -272,35 +272,47 @@ void map_createPickupSpawn(int x, int y, int z, int type, int count, int health,
   {
     tempUser = userFromName(std::string(user));
   }
-  Mineserver::get()->map()->createPickupSpawn(x,y,z,type,count,health,tempUser);
+  Mineserver::get()->map(tempUser->pos.map)->createPickupSpawn(x,y,z,type,count,health,tempUser);
 }
 
 void map_getSpawn(int* x, int* y, int* z)
 {  
-  *x = Mineserver::get()->map()->spawnPos.x();
-  *y = Mineserver::get()->map()->spawnPos.y();
-  *z = Mineserver::get()->map()->spawnPos.z();
+  *x = Mineserver::get()->map(0)->spawnPos.x();
+  *y = Mineserver::get()->map(0)->spawnPos.y();
+  *z = Mineserver::get()->map(0)->spawnPos.z();
 }
 
 bool map_getBlock(int x, int y, int z, unsigned char* type,unsigned char* meta)
 {
-  return Mineserver::get()->map()->getBlock(x,y,z, type, meta);
+  return Mineserver::get()->map(0)->getBlock(x,y,z, type, meta);
 }
 
 bool map_setBlock(int x, int y, int z, unsigned char type,unsigned char meta)
 {
-  Mineserver::get()->map()->sendBlockChange(x, y, z, type, meta);
-  return Mineserver::get()->map()->setBlock(x,y,z, type, meta);
+  Mineserver::get()->map(0)->sendBlockChange(x, y, z, type, meta);
+  return Mineserver::get()->map(0)->setBlock(x,y,z, type, meta);
 }
+
+bool map_getBlockW(int x, int y, int z, int w, unsigned char* type,unsigned char* meta)
+{
+  return Mineserver::get()->map(w)->getBlock(x,y,z, type, meta);
+}
+
+bool map_setBlockW(int x, int y, int z, int w, unsigned char type,unsigned char meta)
+{
+  Mineserver::get()->map(w)->sendBlockChange(x, y, z, type, meta);
+  return Mineserver::get()->map(w)->setBlock(x,y,z, type, meta);
+}
+
 
 void map_saveWholeMap(void)
 {
-  Mineserver::get()->map()->saveWholeMap();
+  Mineserver::get()->saveAll();
 }
 
 unsigned char* map_getMapData_block(int x, int z)
 {
-  sChunk* chunk=Mineserver::get()->map()->getMapData(x,z);
+  sChunk* chunk=Mineserver::get()->map(0)->getMapData(x,z);
   if(chunk != NULL)
   {
     return chunk->blocks;
@@ -309,7 +321,7 @@ unsigned char* map_getMapData_block(int x, int z)
 }
 unsigned char* map_getMapData_meta(int x, int z)
 {
-  sChunk* chunk=Mineserver::get()->map()->getMapData(x,z);
+  sChunk* chunk=Mineserver::get()->map(0)->getMapData(x,z);
   if(chunk != NULL)
   {
     return chunk->data;
@@ -318,7 +330,7 @@ unsigned char* map_getMapData_meta(int x, int z)
 }
 unsigned char* map_getMapData_skylight(int x, int z)
 {
-  sChunk* chunk=Mineserver::get()->map()->getMapData(x,z);
+  sChunk* chunk=Mineserver::get()->map(0)->getMapData(x,z);
   if(chunk != NULL)
   {
     return chunk->skylight;
@@ -327,7 +339,7 @@ unsigned char* map_getMapData_skylight(int x, int z)
 }
 unsigned char* map_getMapData_blocklight(int x, int z)
 {
-  sChunk* chunk=Mineserver::get()->map()->getMapData(x,z);
+  sChunk* chunk=Mineserver::get()->map(0)->getMapData(x,z);
   if(chunk != NULL)
   {
     return chunk->blocklight;
@@ -336,7 +348,7 @@ unsigned char* map_getMapData_blocklight(int x, int z)
 }
 
 // USER WRAPPER FUNCTIONS
-bool user_getPosition(const char* user, double* x, double* y, double* z, float* yaw, float* pitch, double *stance)
+bool user_getPosition(const char* user, double* x, double* y, double* z,float* yaw, float* pitch, double *stance)
 {
   std::string userStr(user);
   for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
@@ -367,12 +379,57 @@ bool user_getPosition(const char* user, double* x, double* y, double* z, float* 
   return false;
 }
 
+
+bool user_getPositionW(const char* user, double* x, double* y, double* z, int* w,float* yaw, float* pitch, double *stance)
+{
+  std::string userStr(user);
+  for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
+  {
+    if(Mineserver::get()->users()[i]->fd && Mineserver::get()->users()[i]->logged)
+    {
+      //Is this the user?
+      if(userStr == Mineserver::get()->users()[i]->nick)
+      {
+        //For safety, check for NULL pointers!
+        if(x != NULL)
+          *x=Mineserver::get()->users()[i]->pos.x;
+        if(y != NULL)
+          *y=Mineserver::get()->users()[i]->pos.y;
+        if(z != NULL)
+          *z=Mineserver::get()->users()[i]->pos.z;
+        if(yaw != NULL)
+          *yaw=Mineserver::get()->users()[i]->pos.yaw;
+        if(pitch != NULL)
+          *pitch=Mineserver::get()->users()[i]->pos.pitch;
+        if(stance != NULL)
+          *stance=Mineserver::get()->users()[i]->pos.stance;
+        if(w != NULL)
+          *w=Mineserver::get()->users()[i]->pos.map;
+        //We found the user
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 bool user_teleport(const char* user,double x, double y, double z)
 {
   User* tempUser = userFromName(std::string(user));
   if(tempUser != NULL)
   {
     tempUser->teleport(x, y, z);
+    return true;
+  }
+  return false;
+}
+
+bool user_teleportMap(const char* user,double x, double y, double z, int map)
+{
+  User* tempUser = userFromName(std::string(user));
+  if(tempUser != NULL)
+  {
+    tempUser->teleport(x, y, z, map);
     return true;
   }
   return false;
@@ -388,6 +445,112 @@ bool user_sethealth(const char* user,int userHealth)
   }
   return false;
 }
+
+int user_getCount()
+{
+  return Mineserver::get()->users().size();
+}
+
+char* user_getUserNumbered(int c)
+{
+  return (char*)Mineserver::get()->users()[c]->nick.c_str();
+}
+
+int user_getItemInHand(const char* user)
+{
+  User* tempUser = userFromName(std::string(user));
+  if(tempUser != NULL)
+  {
+    return tempUser->inventoryHolding.type;
+  }
+  return -1;
+}
+
+bool user_addItem(const char* user, int item, int count, int health)
+{
+  User* tempUser = userFromName(std::string(user));
+  if(tempUser != NULL)
+  {
+    return Mineserver::get()->inventory()->addItems(tempUser, item, count, health);
+  }
+  return false;
+}
+
+bool user_hasItem(const char* user, int item, int count, int health)
+{
+  User* tempuser = userFromName(std::string(user));
+  if(tempuser == NULL){ return false; }
+  bool checkingTaskbar = true;
+  int total = 0;
+
+  for(uint8_t i = 36-9; i < 36-9 || checkingTaskbar; i++)
+  {
+    //First, the "task bar"
+    if(i == 36)
+    {
+      checkingTaskbar = false;
+      i=0;
+    }
+    Item *slot = &tempuser->inv[i+9];
+    if(item == slot->type && (health == slot->health || health==-1)){
+      total += slot->count;
+      if(total >= count){
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool user_delItem(const char* user, int item, int count, int health)
+{
+  User* tempuser = userFromName(std::string(user));
+  if(tempuser == NULL){ return false; }
+  bool checkingTaskbar = true;
+  int total = count;
+
+  for(uint8_t i = 36-9; i < 36-9 || checkingTaskbar; i++)
+  {
+    //First, the "task bar" 
+    if(i == 36)
+    {
+      checkingTaskbar = false;
+      i=0;
+    }
+    Item *slot = &tempuser->inv[i+9];
+    if(item == slot->type && (health == slot->health || health ==-1)){
+      if(slot->count > total)
+      {
+        slot->count -= total;
+        tempuser->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_PLAYER
+                   << (int16_t)i+9
+                   << (int16_t)slot->type;
+        if(slot->type != -1)
+        {
+          tempuser->buffer << (int8_t)slot->count
+                       << (int16_t)slot->health;
+        }
+
+        return true;
+      }
+      else
+      {
+        slot->count = 0; slot->health = 0; slot->type = -1;
+        tempuser->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_PLAYER
+                   << (int16_t)i+9
+                   << (int16_t)slot->type;
+        if(slot->type != -1)
+        {
+          tempuser->buffer << (int8_t)slot->count
+                       << (int16_t)slot->health;
+        }
+
+      }
+    }
+  }
+  return false;
+}
+
 
 // CONFIG WRAPPER FUNCTIONS
 bool config_has(const char* name)
@@ -464,10 +627,21 @@ void init_plugin_api(void)
   plugin_api_pointers.map.getMapData_meta          = &map_getMapData_meta;
   plugin_api_pointers.map.getMapData_skylight      = &map_getMapData_skylight;
   plugin_api_pointers.map.getMapData_blocklight    = &map_getMapData_blocklight;
+  plugin_api_pointers.map.setBlockW                = &map_setBlockW;
+  plugin_api_pointers.map.getBlockW                = &map_getBlockW;
+
 
   plugin_api_pointers.user.getPosition             = &user_getPosition;
   plugin_api_pointers.user.teleport                = &user_teleport;
   plugin_api_pointers.user.sethealth               = &user_sethealth;
+  plugin_api_pointers.user.teleportMap             = &user_teleportMap;
+  plugin_api_pointers.user.getCount                = &user_getCount;
+  plugin_api_pointers.user.getUserNumbered         = &user_getUserNumbered;
+  plugin_api_pointers.user.getPositionW            = &user_getPositionW;
+  plugin_api_pointers.user.getItemInHand           = &user_getItemInHand;
+  plugin_api_pointers.user.addItem                 = &user_addItem;
+  plugin_api_pointers.user.hasItem                 = &user_hasItem;
+  plugin_api_pointers.user.delItem                 = &user_delItem;
 
   plugin_api_pointers.config.has                   = &config_has;
   plugin_api_pointers.config.iData                 = &config_iData;

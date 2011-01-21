@@ -52,6 +52,7 @@ class Map
 {
 public:
   Map();
+  Map(const Map &oldmap);
   ~Map();
 
   std::string mapDirectory;
@@ -63,6 +64,9 @@ public:
 
   // Map spawn position
   vec spawnPos;
+
+  // Map number
+  int m_number;
 
   // How blocks affect light
   int stopLight[256];
@@ -94,7 +98,7 @@ public:
 //  void posToId(int x, int z, uint32_t *id);
 //  void idToPos(uint32_t id, int *x, int *z);
 
-  void init();
+  void init(int number);
   void sendToUser(User *user, int x, int z);
 
   //Time in the map

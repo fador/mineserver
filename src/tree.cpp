@@ -31,12 +31,12 @@
 
 #include "tools.h"
 
-#define Branch(x,y,z) Trunk* v = new Trunk(x,y,z);m_Branch[n_branches] = v;n_branches++;generateBranches(v);
+#define Branch(x,y,z,m) Trunk* v = new Trunk(x,y,z,m);m_Branch[n_branches] = v;n_branches++;generateBranches(v);
 
-Tree::Tree(int32_t x, int32_t y, int32_t z, uint8_t limit)
+Tree::Tree(int32_t x, int32_t y, int32_t z, int map, uint8_t limit)
 {
   n_branches = 0;
-  _x = x, _y = y, _z = z;
+  _x = x, _y = y, _z = z, _map=map;
   this->generate(limit);
 }
 
@@ -115,23 +115,23 @@ void Tree::generateBranches(Trunk* wrap)
   //or make a function for the inside of the if.
   if(rand() % schanse == 0)
   {
-    Branch(posx+1,posy,posz);
+    Branch(posx+1,posy,posz,_map);
   }
   if(rand() % schanse == 0)
   {
-    Branch(posx-1,posy,posz);
+    Branch(posx-1,posy,posz,_map);
   }
   if(rand() % schanse == 0)
   {
-    Branch(posx,posy,posz+1);
+    Branch(posx,posy,posz+1,_map);
   }
   if(rand() % schanse == 0 )
   {
-    Branch(posx,posy,posz-1);
+    Branch(posx,posy,posz-1,_map);
   }
   if(rand() % schanse == 0 )
   {
-    Branch(posx,posy+1,posz)
+    Branch(posx,posy+1,posz,_map);
   }
 }
 
@@ -180,9 +180,9 @@ void Tree::generateCanopy()
             int32_t temp_posy = posy+yi;
             int32_t temp_posz = posz+zi;
             
-            if(Mineserver::get()->map()->getBlock(temp_posx,temp_posy,temp_posz,&blocktype,&meta, false) && blocktype == BLOCK_AIR)
+            if(Mineserver::get()->map(_map)->getBlock(temp_posx,temp_posy,temp_posz,&blocktype,&meta, false) && blocktype == BLOCK_AIR)
             {
-              Canopy u(temp_posx,temp_posy,temp_posz,canopy_darkness);
+              Canopy u(temp_posx,temp_posy,temp_posz,_map,canopy_darkness);
             }
           }
         }

@@ -32,37 +32,51 @@
 
 #include "sign.h"
 
-void BlockSign::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+bool BlockSign::affectedBlock(int block)
+{
+  switch(block)
+  {
+  case BLOCK_WALL_SIGN:
+  case BLOCK_SIGN_POST:
+  case ITEM_SIGN:
+    return true;
+  }
+  return false;
+}
+
+
+void BlockSign::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockSign::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockSign::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockSign::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockSign::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockSign::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int8_t direction)
+bool BlockSign::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+{
+  return false;
+}
+
+void BlockSign::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockSign::onNeighbourBroken(User* user, int8_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
-{
-}
-
-void BlockSign::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+bool BlockSign::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
    uint8_t oldblock;
    uint8_t oldmeta;
 
-   if (!Mineserver::get()->map()->getBlock(x, y, z, &oldblock, &oldmeta))
-      return;
+   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+      return true;
 
    /* Check block below allows blocks placed on top */
    if (!this->isBlockStackable(oldblock))
-      return;
+      return true;
 
    // 0x0 -> West  West  West  West
    // 0x1 -> West  West  West  North
@@ -152,21 +166,22 @@ void BlockSign::onPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_
       break;
       case BLOCK_BOTTOM:
       default:
-         return;
+         return true;
       break;
    }
 
-   if (!this->isBlockEmpty(x,y,z))
-      return;
+   if (!this->isBlockEmpty(x,y,z,map))
+      return true;
 
-   Mineserver::get()->map()->setBlock(x, y, z, (char)newblock, metadata);
-   Mineserver::get()->map()->sendBlockChange(x, y, z, (char)newblock, metadata);
+   Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, metadata);
+   Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, metadata);
+   return false;
 }
 
-void BlockSign::onNeighbourPlace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockSign::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockSign::onReplace(User* user, int8_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction)
+void BlockSign::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }

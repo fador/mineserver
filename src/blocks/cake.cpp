@@ -25,28 +25,58 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "../mineserver.h"
+#include "../map.h"
 
-#include "basic.h"
-class User;
+#include "cake.h"
 
-/** The BlockDefault type comprises of the functionality seen in most of the
-blocktypes in the game. These functions are reused and mixed with multiple
-different blocks. */
-
-class BlockDefault: public BlockBasic
+bool BlockCake::affectedBlock(int block)
 {
-public:
-  bool affectedBlock(int block);
+  switch(block)
+  {
+  case BLOCK_CAKE:
+  case ITEM_CAKE:
+    return true;
+  }
+  return false;
+}
 
-   void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   bool onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-};
+bool BlockCake::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+{
+  uint8_t oldblock;
+  uint8_t oldmeta;
+
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  {
+    return true;
+  }
+
+  /* Check block below allows blocks placed on top */
+  if (!this->isBlockStackable(oldblock))
+  {
+    return true;
+  }
+
+  /* move the x,y,z coords dependent upon placement direction */
+  if (!this->translateDirection(&x,&y,&z,map,direction))
+  {
+    return true;
+  }
+
+  if (this->isUserOnBlock(x,y,z,map))
+  {
+    return true;
+  }
+
+  if (!this->isBlockEmpty(x,y,z,map))
+  {
+    return true; 
+  }
+
+  direction = user->relativeToBlock(x, y, z);
+
+  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_CAKE, direction);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_CAKE, direction);
+  return false;
+}
 
