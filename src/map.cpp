@@ -821,6 +821,7 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type, 
 
   return true;
 }
+
 bool Map::setBlock(int x, int y, int z, char type, char meta)
 {
   if((y < 0) || (y > 127))
