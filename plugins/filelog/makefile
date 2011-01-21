@@ -20,7 +20,7 @@ install:
 	cp $(PLUGIN_NAME).so ../../bin/$(PLUGIN_NAME).so
 
 $(OBJS):
-	$(COMP) -c ./src/$(@:.o=.cpp) -o ./$@
+	$(COMP) -fPIC -c ./src/$(@:.o=.cpp) -o ./$@
 
 $(PLUGIN_NAME).so:
 	$(COMP) -shared $(OBJS) -o $(PLUGIN_NAME).so
