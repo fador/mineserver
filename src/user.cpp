@@ -722,6 +722,7 @@ bool User::updatePos(double x, double y, double z, double stance)
       iter = toRemove.begin(); end = toRemove.end();
       for ( ; iter != end ; iter++ )
       {
+        /*
         std::vector<User *>::const_iterator it = std::find (Mineserver::get()->users().begin(), 
                                                       Mineserver::get()->users().end(), (*iter));
         if(it == Mineserver::get()->users().end())
@@ -729,12 +730,14 @@ bool User::updatePos(double x, double y, double z, double stance)
           Mineserver::get()->logger()->log(LogType::LOG_INFO, "User", "Using dead player 1!!!");
           return true;
         }
+        */
         (*iter)->buffer.addToWrite(destroyPkt.getWrite(), destroyPkt.getWriteLen());
       }
 
       iter = toAdd.begin(); end = toAdd.end();
       for ( ; iter != end ; iter++ )
       {
+        /*
         std::vector<User *>::const_iterator it = std::find (Mineserver::get()->users().begin(), 
                                               Mineserver::get()->users().end(), (*iter));
         if(it == Mineserver::get()->users().end())
@@ -742,12 +745,14 @@ bool User::updatePos(double x, double y, double z, double stance)
           Mineserver::get()->logger()->log(LogType::LOG_INFO, "User", "Using dead player 2!!!");
           return true;
         }
+        */
         (*iter)->buffer.addToWrite(spawnPkt.getWrite(), spawnPkt.getWriteLen());
       }
 
       iter = toTeleport.begin(); end = toTeleport.end();
       for ( ; iter != end ; iter++ )
       {
+        /*
         std::vector<User *>::const_iterator it = std::find (Mineserver::get()->users().begin(), 
                                               Mineserver::get()->users().end(), (*iter));
         if(it == Mineserver::get()->users().end())
@@ -755,6 +760,7 @@ bool User::updatePos(double x, double y, double z, double stance)
           Mineserver::get()->logger()->log(LogType::LOG_INFO, "User", "Using dead player 3!!!");
           return true;
         }
+        */
         (*iter)->buffer.addToWrite(telePacket.getWrite(), telePacket.getWriteLen());
       }
     }
