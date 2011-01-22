@@ -468,8 +468,8 @@ int Mineserver::run(int argc, char *argv[])
       // Loop users
       for (int i = users().size()-1; i >= 0; i--)
       {
-        // No data received in 20s, timeout
-        if (users()[i]->logged && (timeNow-users()[i]->lastData) > 1)
+        // No data received in 30s, timeout
+        if (users()[i]->logged && (timeNow-users()[i]->lastData) > 30)
         {
           Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Player "+users()[i]->nick+" timed out");
 
