@@ -251,6 +251,25 @@ bool chat_sendUserlist(const char* user)
   return false;
 }
 
+bool chat_handleMessage(const char* username, const char* message)
+{
+  if (strcmp(username, "[Server]") == 0) {
+    User serverUser(-1, SERVER_CONSOLE_UID);
+    serverUser.changeNick("[Server]");
+
+    Mineserver::get()->chat()->handleMsg(&serverUser, message);
+  }
+  else
+  {
+    User *user = userFromName(std::string(username));  
+    if(user != NULL)
+    {
+      Mineserver::get()->chat()->handleMsg(user, message);
+    }
+  }
+  return false;
+}
+
 // MAP WRAPPER FUNCTIONS
 bool map_setTime(int timeValue)
 {
@@ -596,6 +615,7 @@ void init_plugin_api(void)
   plugin_api_pointers.chat.sendmsg                 = &chat_sendmsg;
   plugin_api_pointers.chat.sendmsgTo               = &chat_sendmsgTo;
   plugin_api_pointers.chat.sendUserlist            = &chat_sendUserlist;
+  plugin_api_pointers.chat.handleMessage           = &chat_handleMessage;
 
   plugin_api_pointers.plugin.hasPluginVersion      = &plugin_hasPluginVersion;
   plugin_api_pointers.plugin.getPluginVersion      = &plugin_getPluginVersion;

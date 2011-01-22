@@ -85,7 +85,6 @@ public:
 
   struct event m_listenEvent;
   int m_socketlisten;
-  void updatePlayerList();
 
   Map* map(int n);
   void setMap(Map* map,int n=0);

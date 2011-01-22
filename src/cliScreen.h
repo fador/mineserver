@@ -44,6 +44,9 @@ public:
   bool hasCommand();
   std::string getCommand();
 
+  static bool CheckForCommand();
+  static bool Log(int type, const char* source, const char* message);
+
 private:
   std::string currentCommand;
 #ifdef WIN32

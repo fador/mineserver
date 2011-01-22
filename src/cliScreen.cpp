@@ -37,6 +37,11 @@
   #include <unistd.h>
 #endif
 
+#include "chat.h"
+#include "constants.h"
+#include "mineserver.h"
+#include "plugin.h"
+
 #ifdef WIN32
 DWORD WINAPI CliScreen::_stdinThreadProc(LPVOID lpParameter)
 {
@@ -73,6 +78,9 @@ void CliScreen::init(std::string version)
   InitializeCriticalSection(&ccAccess);
   stdinThread = CreateThread(NULL, 0, _stdinThreadProc, (void *)this, 0, NULL);
 #endif
+
+  static_cast<Hook3<bool,int,const char*,const char*>*>(Mineserver::get()->plugin()->getHook("LogPost"))->addCallback(&CliScreen::Log);
+  static_cast<Hook0<bool>*>(Mineserver::get()->plugin()->getHook("Timer200"))->addCallback(&CliScreen::CheckForCommand);
 }
 
 void CliScreen::end()
@@ -125,6 +133,25 @@ bool CliScreen::hasCommand()
     }
   }
 #endif
+}
+
+bool CliScreen::CheckForCommand()
+{
+  if (Mineserver::get()->screen()->hasCommand())
+  {
+    // Now handle this command as normal
+    User serverUser(-1, SERVER_CONSOLE_UID);
+    serverUser.changeNick("[Server]");
+    Mineserver::get()->chat()->handleMsg(&serverUser, Mineserver::get()->screen()->getCommand());
+  }
+
+  return false;
+}
+
+bool CliScreen::Log(int type, const char* source, const char* message)
+{
+  Mineserver::get()->screen()->log((LogType::LogType)type, std::string(source), std::string(message));
+  return true;
 }
 
 std::string CliScreen::getCommand()

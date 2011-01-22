@@ -98,8 +98,6 @@ struct user_pointer_struct
   bool (*hasItem)(const char* user, int item, int count, int health);
   bool (*delItem)(const char* user, int item, int count, int health);
 
-
-
   void *temp[96];
 };
 
@@ -108,6 +106,7 @@ struct chat_pointer_struct
   bool (*sendmsgTo)   (const char* user,const char* msg);
   bool (*sendmsg)     (const char* msg);
   bool (*sendUserlist)(const char* user);
+  bool (*handleMessage)(const char* user, const char* msg);
   void *temp[100];
 };
 

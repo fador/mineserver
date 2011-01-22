@@ -71,7 +71,6 @@
 #include "physics.h"
 #include "plugin.h"
 #include "furnaceManager.h"
-#include "cursesScreen.h"
 #include "cliScreen.h"
 #include "hook.h"
 #ifdef WIN32
@@ -120,12 +119,6 @@ int main(int argc, char* argv[])
   srand((uint32_t)time(NULL));
 
   return Mineserver::get()->run(argc, argv);
-}
-
-bool log_to_screen(int type, const char* source, const char* message)
-{
-  Mineserver::get()->screen()->log((LogType::LogType)type, std::string(source), std::string(message));
-  return true;
 }
 
 Mineserver::Mineserver()
@@ -193,12 +186,6 @@ event_base* Mineserver::getEventBase()
   return m_eventBase;
 }
 
-void Mineserver::updatePlayerList()
-{
-  // Update the player window
-  Mineserver::get()->screen()->updatePlayerList(users());
-}
-
 void Mineserver::saveAll(){
   for(int i = 0; i<m_map.size(); i++){
     m_map[i]->saveWholeMap();
@@ -217,7 +204,6 @@ void Mineserver::saveAllPlayers()
   }
 }
 
-
 int Mineserver::run(int argc, char *argv[])
 {
   uint32_t starttime = (uint32_t)time(0);
@@ -227,23 +213,11 @@ int Mineserver::run(int argc, char *argv[])
   init_plugin_api();
 #endif
 
-  static_cast<Hook3<bool,int,const char*,const char*>*>(plugin()->getHook("LogPost"))->addCallback(&log_to_screen);
-
-  // Init our Screen
-  screen()->init(VERSION);
-  logger()->log(LogType::LOG_INFO, "Mineserver", "Welcome to Mineserver v" + VERSION);
-  updatePlayerList();
-
-  std::string iface = Mineserver::get()->config()->sData("system.interface");
-  if (iface == "curses")
+  if (Mineserver::get()->config()->bData("system.interface.use_cli"))
   {
-    screen()->end();
-    // TODO: we lose everything written to the screen
-    //      up to this point when using curses
-    m_screen = new CursesScreen;
+    // Init our Screen
     screen()->init(VERSION);
-    logger()->log(LogType::LOG_INFO, "Mineserver", "Interface changed to curses");
-    updatePlayerList();
+    logger()->log(LogType::LOG_INFO, "Mineserver", "Welcome to Mineserver v" + VERSION);
   }
 
   if (Mineserver::get()->config()->has("system.plugins") && (Mineserver::get()->config()->type("system.plugins") == CONFIG_NODE_LIST))
@@ -415,21 +389,12 @@ int Mineserver::run(int argc, char *argv[])
   event_base_loopexit(m_eventBase, &loopTime);
 
   // Create our Server Console user so we can issue commands
-  User* serverUser = new User(-1, SERVER_CONSOLE_UID);
-  serverUser->changeNick("[Server]");
 
   time_t timeNow = time(NULL);
   while (m_running && event_base_loop(m_eventBase, 0) == 0)
   {
     // Run 200ms timer hook
     static_cast<Hook0<bool>*>(plugin()->getHook("Timer200"))->doAll();
-
-    // Append current command and check if user entered return
-    if (Mineserver::get()->screen()->hasCommand())
-    {
-      // Now handle this command as normal
-      Mineserver::get()->chat()->handleMsg(serverUser, Mineserver::get()->screen()->getCommand().c_str());
-    }
 
     timeNow = time(0);
     if (timeNow-starttime > 10)
@@ -545,8 +510,11 @@ int Mineserver::run(int argc, char *argv[])
   // Let the user know we're shutting the server down cleanly
   logger()->log(LogType::LOG_INFO, "Mineserver", "Shutting down...");
 
-  // End our NCurses session
-  screen()->end();
+  // Close the cli session if its in use
+  if (Mineserver::get()->config()->bData("system.interface.use_cli"))
+  {
+    screen()->end();
+  }
 
   /* Free memory */
   
@@ -565,8 +533,6 @@ int Mineserver::run(int argc, char *argv[])
   delete m_packetHandler;
   delete m_logger;
   delete m_inventory;
-
-  delete serverUser;
 
   freeConstants();
 

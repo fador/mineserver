@@ -25,13 +25,22 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cursesScreen.h"
+#include "screen.h"
 
-#include "logtype.h"
-#include "user.h"
+#include "../../src/logtype.h"
+
+#define MINESERVER_C_API
+#include "../../src/plugin_api.h"
 
 #include <cstdlib>
+#include <ctime>
 #include <iostream>
+
+// Constants
+#define PLUGIN_NAME "cursesui"
+const char* pluginName = PLUGIN_NAME;
+const char* logSource = "plugin.screen";
+const float pluginVersion = 1.0f;
 
 enum 
 {
@@ -40,6 +49,20 @@ enum
   LOG_GENERAL,
   LOG_PLAYERS
 };
+
+// Variables
+mineserver_pointer_struct* mineserver;
+CursesScreen *screen;
+
+std::string currentTimestamp(bool seconds)
+{
+  time_t currentTime = time(NULL);
+  struct tm *Tm  = localtime(&currentTime);
+  std::string timeStamp (asctime(Tm));
+  timeStamp = timeStamp.substr(11, seconds ? 8 : 5);
+
+  return timeStamp;
+}
 
 void CursesScreen::init(std::string version)
 {
@@ -148,6 +171,15 @@ void CursesScreen::init(std::string version)
   wrefresh(title);
 
   keypad(commandLog, true);
+
+  // Initalise playerlist
+  wclear(playerList);
+
+  // Now fill it up!
+  if(usernames.size() == 0) 
+  {
+    log(LogType::LOG_INFO, "Players", "No active players");
+  }
 
   // Fill up the command window
 //  log(LOG_COMMAND, "");
@@ -434,21 +466,99 @@ void CursesScreen::log(LogType::LogType type, const std::string& source, const s
   
 }
 
-void CursesScreen::updatePlayerList(std::vector<User *> users)
+#include <algorithm>
+
+void CursesScreen::updatePlayerList(bool joining, const char *username)
 {
+  // Update the list
+  if (joining)
+  {
+    usernames.push_back(username);
+  } else
+  {
+    std::vector<std::string>::iterator element = std::find(usernames.begin(), usernames.end(), std::string(username));
+
+    if (element != usernames.end())
+    {
+      usernames.erase(element);
+    }
+  }
+
+  // Redraw the list
+
   // Clear the playerlist
   wclear(playerList);
 
   // Now fill it up!
-  if(users.size() == 0) 
+  if(usernames.size() == 0) 
   {
     log(LogType::LOG_INFO, "Players", "No active players");
   }
   else
   {
-    for (unsigned int i = 0; i < users.size(); i++)
+    for (std::vector<std::string>::const_iterator username = usernames.begin();
+      username != usernames.end();
+      ++username)
     {
-      log(LogType::LOG_INFO, "Players", users[i]->nick);
+      log(LogType::LOG_INFO, "Players", *username);
     }
   }
+}
+
+bool logPost(int type, const char* source, const char* message)
+{
+  screen->log((LogType::LogType)type, source, message);
+  return false;
+}
+
+static const unsigned int SERVER_CONSOLE_UID = -1;
+
+bool checkForCommand()
+{
+  if (screen->hasCommand())
+  {
+    // Now handle this command as normal
+    mineserver->chat.handleMessage("[Server]", screen->getCommand().c_str());
+  }
+  return false;
+}
+
+bool on_player_login(const char *username)
+{
+  screen->updatePlayerList(true, username);
+  return false;
+}
+
+bool on_player_quit(const char *username)
+{
+  screen->updatePlayerList(false, username);
+  return false;
+}
+
+PLUGIN_API_EXPORT void CALLCONVERSION cursesui_init(mineserver_pointer_struct* mineserver_temp)
+{
+  mineserver = mineserver_temp;
+
+  if (mineserver->plugin.getPluginVersion(pluginName) > 0)
+  {
+    mineserver->logger.log(LogType::LOG_INFO, logSource, "The " PLUGIN_NAME " plugin is already loaded");
+    return;
+  }
+
+  mineserver->plugin.setPluginVersion(pluginName, pluginVersion);
+
+  screen = new CursesScreen();
+  screen->init("1.2"); // TODO This should query mineserver for the version
+  mineserver->plugin.addCallback("LogPost", (void *)logPost);
+  mineserver->plugin.addCallback("Timer200", (void *)checkForCommand);
+  mineserver->plugin.addCallback("PlayerLoginPost", (void *)on_player_login);
+  mineserver->plugin.addCallback("PlayerQuitPost", (void *)on_player_quit);
+
+  mineserver->logger.log(LogType::LOG_INFO, logSource, "Loaded " PLUGIN_NAME);
+}
+
+PLUGIN_API_EXPORT void CALLCONVERSION cursesui_shutdown(void)
+{
+  screen->end();
+  mineserver = NULL;
 }

@@ -144,9 +144,6 @@
     <ClCompile Include="..\src\plugin_api.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\cursesScreen.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\screenBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -294,9 +291,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\hook.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\cursesScreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\screenBase.h">

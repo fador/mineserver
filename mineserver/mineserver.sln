@@ -1,8 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+# Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mineserver", "mineserver.vcxproj", "{7F6D1DAB-AA49-4343-B28E-C3E647BE5007}"
 	ProjectSection(ProjectDependencies) = postProject
+		{36E94116-E566-433A-8986-1D633E94DC5D} = {36E94116-E566-433A-8986-1D633E94DC5D}
 		{2C8A5E82-2669-4C72-BEA8-C29F61B59F49} = {2C8A5E82-2669-4C72-BEA8-C29F61B59F49}
 		{8BF3BBA7-4740-4138-BAB6-674D1E54EFC3} = {8BF3BBA7-4740-4138-BAB6-674D1E54EFC3}
 	EndProjectSection
@@ -10,6 +11,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_filelog", "..\plugins\filelog\mineserver_filelog.vcxproj", "{2C8A5E82-2669-4C72-BEA8-C29F61B59F49}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugintest", "..\plugins\commands\mineserver_plugintest.vcxproj", "{8BF3BBA7-4740-4138-BAB6-674D1E54EFC3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_cursesui", "..\plugins\cursesui\cursesui.vcxproj", "{36E94116-E566-433A-8986-1D633E94DC5D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,6 +32,10 @@ Global
 		{8BF3BBA7-4740-4138-BAB6-674D1E54EFC3}.Debug|Win32.Build.0 = Debug|Win32
 		{8BF3BBA7-4740-4138-BAB6-674D1E54EFC3}.Release|Win32.ActiveCfg = Release|Win32
 		{8BF3BBA7-4740-4138-BAB6-674D1E54EFC3}.Release|Win32.Build.0 = Release|Win32
+		{36E94116-E566-433A-8986-1D633E94DC5D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{36E94116-E566-433A-8986-1D633E94DC5D}.Debug|Win32.Build.0 = Debug|Win32
+		{36E94116-E566-433A-8986-1D633E94DC5D}.Release|Win32.ActiveCfg = Release|Win32
+		{36E94116-E566-433A-8986-1D633E94DC5D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

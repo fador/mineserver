@@ -39,10 +39,7 @@
 #include <string>
 #include <vector>
 
-#include "screenBase.h"
-#include "logtype.h"
-class User;
-
+#include "../../src/logtype.h"
 enum
 {
   TEXT_COLOR_RED = 1,
@@ -57,14 +54,14 @@ enum
 
 #define COMMAND_HISTORY_SIZE 40
 
-class CursesScreen : public Screen
+class CursesScreen
 {
 public:
   void init(std::string version);
   WINDOW* createWindow(int width, int height, int startx, int starty);
   void destroyWindow(WINDOW *local_win);
   void log(LogType::LogType type, const std::string& source, const std::string& message);
-  void updatePlayerList(std::vector<User *> users);
+  void updatePlayerList(bool joining, const char *username);
   void end();
   WINDOW *commandLog;
   bool hasCommand();
@@ -75,6 +72,8 @@ private:
   WINDOW *generalLog;
   WINDOW *chatLog;
   WINDOW *playerList;
+
+  std::vector<std::string> usernames;
 
   unsigned int commandX;
   int currentCommandHistoryIndex;

@@ -108,7 +108,7 @@ bool User::changeNick(std::string _nick)
 
 User::~User()
 {
-  if(event_del(GetEvent()) == -1)
+  if(this->UID != SERVER_CONSOLE_UID && event_del(GetEvent()) == -1)
   {
     Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", this->nick + " event del failed!");
   }
