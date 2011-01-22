@@ -72,7 +72,7 @@ void client_callback(int fd,
                      void *arg)
 {
   User *user = (User *)arg;
-
+  /*
   std::vector<User *>::const_iterator it = std::find (Mineserver::get()->users().begin(), 
                                                       Mineserver::get()->users().end(), user);
   if(it == Mineserver::get()->users().end())
@@ -80,6 +80,7 @@ void client_callback(int fd,
     Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Using dead player!!!");
     return;
   }
+  */
   if(ev & EV_READ)
   {
 
