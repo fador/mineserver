@@ -1203,7 +1203,7 @@ int PacketHandler::use_entity(User *user)
     return PACKET_OK;
   }
 
-  //This is used when punching users
+  //This is used when punching users, mobs or other entities
   for(uint32_t i = 0; i < User::all().size(); i++)
   {
     if(User::all()[i]->UID == (uint32_t)target)

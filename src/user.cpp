@@ -55,14 +55,9 @@
 #include "mineserver.h"
 #include "config.h"
 #include "permissions.h"
+#include "mob.h"
 
 // Generate "unique" entity ID
-uint32_t generateEID()
-{
-  static uint32_t EID = 0;
-  return ++EID;
-}
-
 
 User::User(int sock, uint32_t EID)
 {
@@ -108,6 +103,7 @@ bool User::changeNick(std::string _nick)
 
 User::~User()
 {
+  std::cout << "EVENT "<< GetEvent() << std::endl;
   event_del(GetEvent());
 
   if (fd != -1)
@@ -222,6 +218,26 @@ bool User::sendLoginInfo()
     if (inv[i].type != -1 && inv[i].count)
     {
       buffer << (int8_t)PACKET_SET_SLOT << (int8_t)0 << (int16_t)(i) << (int16_t)inv[i].type << (int8_t)(inv[i].count) << (int16_t)inv[i].health;
+    }
+  }
+
+  std::vector<Mob*> mob = Mineserver::get()->mobs()->getAll();
+  std::vector<Mob*>::iterator i = mob.begin();
+  for(;i!=mob.end();i++)
+  {
+    if(pos.map==(*i)->map &&  (*i)->spawned)
+    {
+      buffer << PACKET_MOB_SPAWN << (int32_t) (*i)->UID << (int8_t) (*i)->type
+             << (int32_t)(*i)->x << (int32_t) (*i)->y << (int32_t) (*i)->z 
+             << (int8_t) (*i)->yaw << (int8_t) (*i)->pitch;
+      if((*i)->type == MOB_SHEEP)
+      {
+        buffer << (int8_t) 0 << (int8_t) (*i)->meta << (int8_t) 127;
+      }
+      else
+      {
+        buffer << (int8_t) 127;
+      }
     }
   }
 

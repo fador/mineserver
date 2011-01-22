@@ -46,6 +46,7 @@
 #include "plugin.h"
 #include "config.h"
 #include "map.h"
+#include "mob.h"
 #include "blocks/default.h"
 #include "blocks/falling.h"
 #include "blocks/torch.h"
@@ -427,7 +428,7 @@ bool user_teleport(const char* user,double x, double y, double z)
 bool user_teleportMap(const char* user,double x, double y, double z, int map)
 {
   User* tempUser = userFromName(std::string(user));
-  if(map > Mineserver::get()->mapCount){
+  if(map > Mineserver::get()->mapCount()){
     return false;
   }
   if(tempUser != NULL)
@@ -591,6 +592,48 @@ bool config_bData(const char* name)
   return Mineserver::get()->config()->bData(std::string(name));
 }
 
+int mob_createMob(const char* name)
+{
+  int type = Mineserver::get()->mobs()->mobNametoType(std::string(name));
+  Mob* m = Mineserver::get()->mobs()->createMob();
+  m->type = type;
+  return Mineserver::get()->mobs()->getAll().size()-1;
+}
+
+int mob_spawnMobN(const char* name)
+{
+  int type = Mineserver::get()->mobs()->mobNametoType(std::string(name));
+  Mob* m = Mineserver::get()->mobs()->createMob();
+  m->type = type;
+  m->spawnToAll();
+  m->teleportToAll();
+  return Mineserver::get()->mobs()->getAll().size()-1;
+}
+
+void mob_spawnMob(int uid)
+{
+  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  m->spawnToAll();
+}
+
+void mob_despawnMob(int uid)
+{
+  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  m->deSpawnToAll();
+}
+
+void mob_moveMob(int uid, int x, int y, int z)
+{
+  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  m->moveTo(x,y,z,-1);
+}
+
+void mob_moveMobW(int uid, int x, int y, int z, int map)
+{
+  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  m->moveTo(x,y,z,map);
+}
+
 // Initialization of the plugin_api function pointer array
 void init_plugin_api(void)
 {
@@ -654,6 +697,11 @@ void init_plugin_api(void)
   plugin_api_pointers.config.sData                 = &config_sData;
   plugin_api_pointers.config.bData                 = &config_bData;
 
-
+  plugin_api_pointers.mob.createMob                = &mob_createMob;
+  plugin_api_pointers.mob.spawnMobN                = &mob_spawnMobN;
+  plugin_api_pointers.mob.spawnMob                 = &mob_spawnMob;
+  plugin_api_pointers.mob.despawnMob               = &mob_despawnMob;
+  plugin_api_pointers.mob.moveMob                  = &mob_moveMob;
+  plugin_api_pointers.mob.moveMobW                 = &mob_moveMobW;
 
 }

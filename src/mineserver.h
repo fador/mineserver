@@ -53,6 +53,7 @@ class MapGen;
 class Logger;
 class Inventory;
 class Mobs;
+class Mob;
 
 #ifdef FADOR_PLUGIN
 #define MINESERVER
@@ -95,6 +96,7 @@ public:
 
   Chat* chat() const { return m_chat; }
   void setChat(Chat* chat) { m_chat = chat; }
+  Mobs* mobs() const { return m_mobs; }
   Plugin* plugin() const { return m_plugin; }
   void setPlugin(Plugin* plugin) { m_plugin = plugin; }
   Screen* screen() const { return m_screen; }

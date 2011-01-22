@@ -146,6 +146,16 @@ struct config_pointer_struct
   void *temp[100];
 };
 
+struct mob_pointer_struct
+{
+  int (*createMob)(const char* name);
+  int (*spawnMobN)(const char* name);
+  void (*spawnMob)(int uid);
+  void (*despawnMob)(int uid);
+  void (*moveMob)(int uid, int x, int y, int z);
+  void (*moveMobW)(int uid, int x, int y, int z, int map);
+};
+
 struct mineserver_pointer_struct
 {
   struct map_pointer_struct map;
@@ -154,6 +164,7 @@ struct mineserver_pointer_struct
   struct plugin_pointer_struct plugin;
   struct user_pointer_struct user;
   struct config_pointer_struct config;
+  struct mob_pointer_struct mob;
 
   void *temp[100];
 };
