@@ -62,7 +62,11 @@ inline int fastrand() {
 } 
 
 MapGen::MapGen()
-    : heightmap(16*16, 0)
+    : blocks(16*16*128, 0),
+      blockdata(16*16*128/2, 0),
+      skylight(16*16*128/2, 0),
+      blocklight(16*16*128/2, 0),
+      heightmap(16*16, 0)
 {
 }
 
@@ -137,11 +141,6 @@ void MapGen::generateChunk(int x, int z, int map)
 {
   NBT_Value *main = new NBT_Value(NBT_Value::TAG_COMPOUND);
   NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
-
-  std::vector<uint8_t> blocks;
-  std::vector<uint8_t> blockdata;
-  std::vector<uint8_t> skylight;
-  std::vector<uint8_t> blocklight;
 
   val->Insert("Blocks", new NBT_Value(blocks));
   val->Insert("Data", new NBT_Value(blockdata));

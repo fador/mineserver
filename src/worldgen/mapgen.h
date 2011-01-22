@@ -46,10 +46,10 @@ public:
   virtual void generateChunk(int x, int z, int map);
 
 private:
-//  uint8_t blocks[16*16*128];
-////  uint8_t blockdata[16*16*128/2];
-//  uint8_t skylight[16*16*128/2];
-//  uint8_t blocklight[16*16*128/2];
+  std::vector<uint8_t> blocks;
+  std::vector<uint8_t> blockdata;
+  std::vector<uint8_t> skylight;
+  std::vector<uint8_t> blocklight;
   std::vector<uint8_t> heightmap;
   
   int seaLevel;
