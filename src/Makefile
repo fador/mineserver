@@ -10,7 +10,7 @@ SRC          = mineserver.cpp map.cpp chat.cpp constants.cpp logger.cpp nbt.cpp
 SRC         += furnace.cpp furnaceManager.cpp packets.cpp physics.cpp sockets.cpp
 SRC         += tools.cpp user.cpp tree.cpp inventory.cpp
 
-SRC         += screenBase.cpp cliScreen.cpp cursesScreen.cpp
+SRC         += screenBase.cpp cliScreen.cpp
 
 SRC         += config.cpp config/node.cpp config/scanner.cpp config/lexer.cpp config/parser.cpp
 
@@ -38,12 +38,6 @@ OBJS         = $(patsubst %.cpp,%.o,$(SRC))
 
 ifeq ($(PLUGIN), YES)
   OBJS      += $(patsubst %.cpp,%.o,$(PLUGINS))
-endif
-
-ifeq ($(PDCURSES), YES)
-  LDFLAGS   += -lpdcurses
-else
-  LDFLAGS   += -lncurses
 endif
 
 ifeq ($(DEBUG), YES)
