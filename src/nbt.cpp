@@ -97,6 +97,11 @@ NBT_Value::NBT_Value(uint8_t *buf, int32_t len) : m_type(TAG_BYTE_ARRAY)
   m_value.byteArrayVal = new std::vector<uint8_t>(buf, buf + len);
 }
 
+NBT_Value::NBT_Value(std::vector<uint8_t> const &bytes) : m_type(TAG_BYTE_ARRAY)
+{
+  m_value.byteArrayVal = new std::vector<uint8_t>(bytes);
+}
+
 NBT_Value::NBT_Value(const std::string &str) : m_type(TAG_STRING)
 {
   m_value.stringVal = new std::string(str);
@@ -272,12 +277,15 @@ void NBT_Value::Insert(const std::string &str, NBT_Value *val)
   if(m_value.compoundVal == 0)
     m_value.compoundVal = new std::map<std::string, NBT_Value*>();
 
+  if ((*m_value.compoundVal)[str] != 0)
+    delete (*m_value.compoundVal)[str];
+
   (*m_value.compoundVal)[str] = val;
 }
 
 NBT_Value::operator int8_t()
 {
-  if(m_type != TAG_BYTE)
+  if(!this || m_type != TAG_BYTE)
     return 0;
 
   return m_value.byteVal;
@@ -285,7 +293,7 @@ NBT_Value::operator int8_t()
 
 NBT_Value::operator int16_t()
 {
-  if(m_type != TAG_SHORT)
+  if(!this || m_type != TAG_SHORT)
     return 0;
 
   return m_value.shortVal;
@@ -293,7 +301,7 @@ NBT_Value::operator int16_t()
 
 NBT_Value::operator int32_t()
 {
-  if(m_type != TAG_INT)
+  if(!this || m_type != TAG_INT)
     return 0;
 
   return m_value.intVal;
@@ -301,7 +309,7 @@ NBT_Value::operator int32_t()
 
 NBT_Value::operator int64_t()
 {
-  if(m_type != TAG_LONG)
+  if(!this || m_type != TAG_LONG)
     return 0;
 
   return m_value.longVal;
@@ -309,7 +317,7 @@ NBT_Value::operator int64_t()
 
 NBT_Value::operator float()
 {
-  if(m_type != TAG_FLOAT)
+  if(!this || m_type != TAG_FLOAT)
     return 0;
 
   return m_value.floatVal;
@@ -317,7 +325,7 @@ NBT_Value::operator float()
 
 NBT_Value::operator double()
 {
-  if(m_type != TAG_DOUBLE)
+  if(!this || m_type != TAG_DOUBLE)
     return 0;
 
   return m_value.doubleVal;

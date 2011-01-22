@@ -61,6 +61,11 @@ inline int fastrand() {
   return (f_seed>>16)&0x7FFF;
 } 
 
+MapGen::MapGen()
+    : heightmap(16*16, 0)
+{
+}
+
 void MapGen::init(int seed)
 {
   cave.init(seed+7);
@@ -133,17 +138,16 @@ void MapGen::generateChunk(int x, int z, int map)
   NBT_Value *main = new NBT_Value(NBT_Value::TAG_COMPOUND);
   NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
 
-  uint8_t blocks[16*16*128];
-  uint8_t blockdata[16*16*128/2];
-  uint8_t skylight[16*16*128/2];
-  uint8_t blocklight[16*16*128/2];
-  memset(blocks, 0, 16*16*128);
+  std::vector<uint8_t> blocks;
+  std::vector<uint8_t> blockdata;
+  std::vector<uint8_t> skylight;
+  std::vector<uint8_t> blocklight;
 
-  val->Insert("Blocks", new NBT_Value(blocks, 16*16*128));
-  val->Insert("Data", new NBT_Value(blockdata, 16*16*128/2));
-  val->Insert("SkyLight", new NBT_Value(skylight, 16*16*128/2));
-  val->Insert("BlockLight", new NBT_Value(blocklight, 16*16*128/2));
-  val->Insert("HeightMap", new NBT_Value(heightmap, 16*16));
+  val->Insert("Blocks", new NBT_Value(blocks));
+  val->Insert("Data", new NBT_Value(blockdata));
+  val->Insert("SkyLight", new NBT_Value(skylight));
+  val->Insert("BlockLight", new NBT_Value(blocklight));
+  val->Insert("HeightMap", new NBT_Value(heightmap));
   val->Insert("Entities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
   val->Insert("TileEntities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
   val->Insert("LastUpdate", new NBT_Value((int64_t)time(NULL)));

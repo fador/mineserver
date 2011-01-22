@@ -57,6 +57,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int neth_seed;
 
+NetherGen::NetherGen()
+    : netherblocks(0, 16*16*128),
+      blockdata(0, 16*16*128/2),
+      skylight(0, 16*16*128/2),
+      blocklight(0, 16*16*128/2),
+      heightmap(0, 16*16)
+{
+}
+
 inline int fastrand() { 
   neth_seed = (214013*neth_seed+2531011); 
   return (neth_seed>>16)&0x7FFF; 
@@ -94,11 +103,11 @@ void NetherGen::generateChunk(int x, int z, int map)
 
   generateWithNoise(x, z, map);
 
-  val->Insert("Blocks", new NBT_Value(netherblocks, 16*16*128));
-  val->Insert("Data", new NBT_Value(blockdata, 16*16*128/2));
-  val->Insert("SkyLight", new NBT_Value(skylight, 16*16*128/2));
-  val->Insert("BlockLight", new NBT_Value(blocklight, 16*16*128/2));
-  val->Insert("HeightMap", new NBT_Value(heightmap, 16*16));
+  val->Insert("Blocks", new NBT_Value(netherblocks));
+  val->Insert("Data", new NBT_Value(blockdata));
+  val->Insert("SkyLight", new NBT_Value(skylight));
+  val->Insert("BlockLight", new NBT_Value(blocklight));
+  val->Insert("HeightMap", new NBT_Value(heightmap));
   val->Insert("Entities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
   val->Insert("TileEntities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
   val->Insert("LastUpdate", new NBT_Value((int64_t)time(NULL)));
@@ -204,7 +213,7 @@ void NetherGen::generateWithNoise(int x, int z, int map)
   int32_t ymax;
   uint16_t ciel;
   uint8_t *curBlock;
-  memset(netherblocks, 0, 16*16*128);
+  netherblocks.assign(16*16*128, 0);
 
   double xBlockpos = x<<4;
   double zBlockpos = z<<4;

@@ -569,6 +569,12 @@ bool User::updatePos(double x, double y, double z, double stance)
     sChunk* newChunk = Mineserver::get()->map(pos.map)->loadMap(blockToChunk((int32_t)x), blockToChunk((int32_t)z));
     sChunk* oldChunk = Mineserver::get()->map(pos.map)->loadMap(blockToChunk((int32_t)pos.x), blockToChunk((int32_t)pos.z));
 
+    if (!newChunk || !oldChunk)
+    {
+      LOG(WARNING, "user", "failed to update user position");
+      return false;
+    }
+
     if (newChunk == oldChunk)
     {
       Packet telePacket;

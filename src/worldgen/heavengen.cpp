@@ -57,6 +57,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int heaven_seed;
 
+HeavenGen::HeavenGen()
+    : heavenblocks(0, 16*16*128),
+      blockdata(0, 16*16*128/2),
+      skylight(0, 16*16*128/2),
+      blocklight(0, 16*16*128/2),
+      heightmap(0, 16*16)
+{
+}
+
+
 inline int fastrand() { 
   heaven_seed = (214013*heaven_seed+2531011); 
   return (heaven_seed>>16)&0x7FFF; 
@@ -95,11 +105,11 @@ void HeavenGen::generateChunk(int x, int z, int map)
 
   generateWithNoise(x, z, map);
 
-  val->Insert("Blocks", new NBT_Value(heavenblocks, 16*16*128));
-  val->Insert("Data", new NBT_Value(blockdata, 16*16*128/2));
-  val->Insert("SkyLight", new NBT_Value(skylight, 16*16*128/2));
-  val->Insert("BlockLight", new NBT_Value(blocklight, 16*16*128/2));
-  val->Insert("HeightMap", new NBT_Value(heightmap, 16*16));
+  val->Insert("Blocks", new NBT_Value(heavenblocks));
+  val->Insert("Data", new NBT_Value(blockdata));
+  val->Insert("SkyLight", new NBT_Value(skylight));
+  val->Insert("BlockLight", new NBT_Value(blocklight));
+  val->Insert("HeightMap", new NBT_Value(heightmap));
   val->Insert("Entities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
   val->Insert("TileEntities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
   val->Insert("LastUpdate", new NBT_Value((int64_t)time(NULL)));
@@ -206,7 +216,7 @@ void HeavenGen::generateWithNoise(int x, int z, int map)
   uint8_t *curBlock;
   uint8_t *curData;
   uint8_t col[2] = {0,8};
-  memset(heavenblocks, 0, 16*16*128);
+  heavenblocks.assign(16*16*128, 0);
 
   double xBlockpos = x<<4;
   double zBlockpos = z<<4;

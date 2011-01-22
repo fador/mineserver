@@ -40,6 +40,7 @@
 class MapGen
 {
 public:
+  MapGen();
   virtual void init(int seed);
   virtual void re_init(int seed); // Used when generating mutliple maps
   virtual void generateChunk(int x, int z, int map);
@@ -49,7 +50,7 @@ private:
 ////  uint8_t blockdata[16*16*128/2];
 //  uint8_t skylight[16*16*128/2];
 //  uint8_t blocklight[16*16*128/2];
-  uint8_t heightmap[16*16];
+  std::vector<uint8_t> heightmap;
   
   int seaLevel;
   
