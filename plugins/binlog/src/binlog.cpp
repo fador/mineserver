@@ -146,6 +146,7 @@ Binlog::~Binlog()
 mineserver_pointer_struct* mineserver;
 std::string pluginName = "binlog";
 std::string filename;
+bool enabled;
 
 // Rollback Transaction Logs
 void rollBack (const char* user, int argc, const char** args)
@@ -294,6 +295,7 @@ std::string dtos( double n )
 PLUGIN_API_EXPORT void CALLCONVERSION binlog_init(mineserver_pointer_struct* mineserver_temp)
 {
   mineserver = mineserver_temp;
+  enabled = mineserver->config.bData("enable_binary_logging");
   filename = mineserver->config.sData("binary_log");
 
   if (mineserver->plugin.getPluginVersion("binlog") > 0)
@@ -305,8 +307,11 @@ PLUGIN_API_EXPORT void CALLCONVERSION binlog_init(mineserver_pointer_struct* min
   std::string msg = "Loaded "+pluginName+"!";
   mineserver->logger.log(LOG_INFO, "plugin.binlog", msg.c_str());
   mineserver->plugin.setPluginVersion("binlog", PLUGIN_VERSION);
-  mineserver->plugin.addCallback("BlockPlacePre", (void *) callbackBlockPlacePre);
-  mineserver->plugin.addCallback("BlockBreakPre", (void *) callbackBlockBreakPre);
+  if(enabled) 
+  {
+    mineserver->plugin.addCallback("BlockPlacePre", (void *) callbackBlockPlacePre);
+    mineserver->plugin.addCallback("BlockBreakPre", (void *) callbackBlockBreakPre);
+  }
   mineserver->plugin.addCallback("PlayerChatCommand", (void *) callbackPlayerChatCommand);
 }
 
