@@ -168,13 +168,13 @@ void Tree::generateCanopy()
     int32_t posy = loc.y();
     int32_t posz = loc.z();
 
-    for(int8_t xi=(-canopySize);xi<=canopySize;xi++)
+    for (int8_t xi=(-canopySize);xi<=canopySize;xi++)
     {
-      for(int8_t yi=(-canopySize);yi<=canopySize;yi++)
+      for (int8_t yi=(-canopySize);yi<=canopySize;yi++)
       {
-        for(int8_t zi=(-canopySize);zi<=canopySize;zi++)
+        for (int8_t zi=(-canopySize);zi<=canopySize;zi++)
         {
-          if(sqrtf(xi*xi+yi*yi+zi*zi) <= canopySize)
+          if (abs(xi)+abs(yi)+abs(zi) <= canopySize)
           {
             int32_t temp_posx = posx+xi;
             int32_t temp_posy = posy+yi;
