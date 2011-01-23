@@ -73,6 +73,7 @@
 #include "furnaceManager.h"
 #include "cliScreen.h"
 #include "hook.h"
+#include "mob.h"
 #ifdef WIN32
 static bool quit = false;
 #endif
@@ -179,6 +180,8 @@ Mineserver::Mineserver()
   m_furnaceManager = new FurnaceManager;
   m_packetHandler  = new PacketHandler;
   m_inventory      = new Inventory;
+  m_mobs           = new Mobs;
+  m_mobs->mobNametoType("Creeper");
 }
 
 event_base* Mineserver::getEventBase()
@@ -562,6 +565,11 @@ Map* Mineserver::map(int n)
   return m_map[n];
 }
 
+int Mineserver::mapCount()
+{
+  return m_map.size();
+}
+
 void Mineserver::setMap(Map* map,int n)
 {
   m_map[n] = map;
@@ -572,3 +580,10 @@ bool Mineserver::stop()
   m_running = false;
   return true;
 }
+
+uint32_t generateEID()
+{
+  static uint32_t EID = 0;
+  return ++EID;
+}
+

@@ -128,6 +128,19 @@ enum
   ITEM_GOLD_RECORD = 2256, ITEM_GREEN_RECORD
 };
 
+// Mobs
+enum
+{
+  MOB_CREEPER = 50, MOB_SKELETON, MOB_SPIDER, MOB_GIANT_ZOMBIE, MOB_ZOMBIE,
+  MOB_SLIME, MOB_GHAST, MOB_ZOMBIE_PIGMAN
+};
+
+// Animals
+enum
+{
+  MOB_PIG = 90, MOB_SHEEP, MOB_COW, MOB_CHICKEN
+};
+
 const std::string VERSION = "0.1.15 (Alpha)";
 
 const int PROTOCOL_VERSION = 8;
