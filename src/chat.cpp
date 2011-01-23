@@ -30,6 +30,7 @@
 #include <fstream>
 
 #include "constants.h"
+#include "config.h"
 #include "user.h"
 #include "logger.h"
 #include "mineserver.h"
@@ -41,13 +42,6 @@
 
 Chat::Chat()
 {
-  adminPassword = Mineserver::get()->config()->iData("system.admin.password");
-  // Check if default password
-  if(adminPassword == "password") 
-  {
-    Mineserver::get()->logger()->log(LogType::LOG_ERROR, "System", "Change admin password in configuration!");
-    //adminPassword = std::string(rand());
-  }
 }
 
 Chat::~Chat()
@@ -179,9 +173,11 @@ void Chat::handleCommand(User* user, std::string msg, const std::string& timeSta
   }
   
   // If hardcoded auth command!
-  if(command == "auth" && param[0] == adminPassword) {
+  if(command == "auth" && param[0] == Mineserver::get()->config()->sData("system.admin.password")) 
+  {
     user->serverAdmin = true;
-    handleServerMsg(user, "You have been authed as admin!", "")
+    msg = MC_COLOR_RED + "[!] " + MC_COLOR_GREEN + "You have been authed as admin!";
+    sendMsg(user, msg, USER);
   }
   else
   {  

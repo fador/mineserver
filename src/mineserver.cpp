@@ -127,7 +127,6 @@ Mineserver::Mineserver()
   initConstants();
 
   m_config         = new Config;
-//  initConstants();
 
   std::string file_config;
   file_config.assign(CONFIG_FILE);

@@ -421,6 +421,7 @@ void MapGen::AddOre(int x, int z, int map, uint8_t type)
   sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(x,z);
 
   int blockX, blockY, blockZ;
+  uint8_t block;
 
   // Parameters for deposits
   int count, startHeight, minDepoSize, maxDepoSize;
