@@ -62,6 +62,7 @@ private:
   
   bool addOre;  
   bool addCaves;
+  bool winterEnabled;
 
   virtual void generateFlatgrass(int x, int z, int map);
   virtual void generateWithNoise(int x, int z, int map);

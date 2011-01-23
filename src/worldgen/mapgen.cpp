@@ -96,6 +96,8 @@ void MapGen::init(int seed)
 
   addOre = Mineserver::get()->config()->bData("mapgen.caves.ore");
   addCaves = Mineserver::get()->config()->bData("mapgen.caves.enabled");
+  
+  winterEnabled = Mineserver::get()->config()->bData("mapgen.winter.enabled");
 
 }
 
@@ -110,6 +112,10 @@ void MapGen::re_init(int seed)
 void MapGen::generateFlatgrass(int x, int z, int map) 
 {
   sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(x,z);
+  Block top = BLOCK_GRASS;
+  if(winterEnabled)
+    top = BLOCK_SNOW;  
+  
   for (int bX = 0; bX < 16; bX++) 
   {
     for (int bY = 0; bY < 128; bY++) 
@@ -126,7 +132,7 @@ void MapGen::generateFlatgrass(int x, int z, int map)
         }
         else if (bY == 64) 
         {
-          chunk->blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_GRASS;
+          chunk->blocks[bY + (bZ * 128 + (bX * 128 * 16))] = top;
         }
         else 
         {
@@ -266,6 +272,12 @@ void MapGen::generateWithNoise(int x, int z, int map)
 #endif
 #endif
   sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(x,z);
+  
+  // Winterland
+  Block topBlock = BLOCK_GRASS;
+  if(winterEnabled)
+    topBlock = BLOCK_SNOW;
+  
   // Populate blocks in chunk
   int32_t currentHeight;
   int32_t ymax;
@@ -315,12 +327,12 @@ void MapGen::generateWithNoise(int x, int z, int map)
           else if (bY < seaLevel - 1)
             *curBlock = BLOCK_GRAVEL; // FF
           else
-            *curBlock = BLOCK_GRASS; // FF
+            *curBlock = topBlock; // FF
         } 
         else 
         {
           if (bY <= seaLevel)
-            *curBlock = BLOCK_STATIONARY_WATER; // FF
+            *curBlock = BLOCK_WATER; // FF
           else
             *curBlock = BLOCK_AIR; // FF
         }        
