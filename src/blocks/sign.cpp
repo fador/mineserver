@@ -98,10 +98,11 @@ void BlockSign::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
   {
     blockBroken = true;
   }
-  else if( (meta == 2 && direction == BLOCK_EAST)  ||
+  else if( block == BLOCK_WALL_SIGN &&
+          ((meta == 2 && direction == BLOCK_EAST)  ||
            (meta == 3 && direction == BLOCK_WEST)  ||
            (meta == 4 && direction == BLOCK_NORTH) ||
-           (meta == 5 && direction == BLOCK_SOUTH))
+           (meta == 5 && direction == BLOCK_SOUTH)))
   {
     blockBroken = true;
   }
