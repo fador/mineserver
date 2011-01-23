@@ -451,7 +451,7 @@ bool user_teleportMap(const char* user,double x, double y, double z, int map)
   {
     return false;
   }
-  if(tempUser != NULL)
+  if(tempUser != NULL && map != tempUser->pos.map)
   {
     tempUser->teleport(x, y, z, map);
     return true;

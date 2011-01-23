@@ -527,6 +527,20 @@ bool User::updatePosM(double x, double y, double z, int map, double stance)
 {
   if(map!=pos.map && logged)
   {
+
+    //Loop every chunk loaded to make sure no user pointers are left!
+    for (int i=0;i<441;++i)
+    {
+      for (sChunkNode* node = Mineserver::get()->map(pos.map)->chunks.getBuckets()[i];node!=NULL;node=node->next)
+      {
+        node->chunk->users.erase(this);
+        if (node->chunk->users.size() == 0)
+        {
+          Mineserver::get()->map(pos.map)->releaseMap(node->chunk->x, node->chunk->z);
+        }
+      }
+    }
+
     // TODO despawn players who are no longer in view
     // TODO despawn self to players on last world
     pos.map = map;
@@ -543,7 +557,8 @@ bool User::updatePosM(double x, double y, double z, int map, double stance)
   return true;
 }
 
-void User::clearLoadingMap(){
+void User::clearLoadingMap()
+{
   for(int i = mapQueue.size(); i > 0 ; i--)
   {
     mapQueue.erase(mapQueue.begin()+i);
@@ -553,7 +568,7 @@ void User::clearLoadingMap(){
     addRemoveQueue(mapKnown[i].x(), mapKnown[i].z());
   }
   popMap();
-//  buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << std::string("") << (int64_t)0 << (int8_t)-1;
+  //  buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << std::string("") << (int64_t)0 << (int8_t)-1;
 
 
   buffer << (int8_t)PACKET_SPAWN_POSITION << (int32_t)pos.x << ((int32_t)pos.y+2) << (int32_t)pos.z;
@@ -1131,7 +1146,8 @@ bool User::teleport(double x, double y, double z, int map)
     y = 127.0;
     LOGLF("Player Attempted to teleport with y > 127.0");
   }
-  if(map==pos.map){
+  if(map==pos.map)
+  {
     buffer << (int8_t)PACKET_PLAYER_POSITION_AND_LOOK << x << y << (double)0.0 << z
            << (float)0.f << (float)0.f << (int8_t)1;
   }
