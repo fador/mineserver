@@ -169,13 +169,13 @@ bool BlockChest::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
       {
         if(chunk->chests[i]->items[item_i].type != -1)
         {
-          Mineserver::get()->map(map)->createPickupSpawn(chunk->chests[i]->x,
-                                                      chunk->chests[i]->y,
-                                                      chunk->chests[i]->z,
-                                                      chunk->chests[i]->items[item_i].type,
-                                                      chunk->chests[i]->items[item_i].count,
-                                                      chunk->chests[i]->items[item_i].health,
-                                                      NULL);
+          Mineserver::get()->map(map)->createPickupSpawn( chunk->chests[i]->x,
+                                                          chunk->chests[i]->y,
+                                                          chunk->chests[i]->z,
+                                                          chunk->chests[i]->items[item_i].type,
+                                                          chunk->chests[i]->items[item_i].count,
+                                                          chunk->chests[i]->items[item_i].health,
+                                                          NULL);
         }
       }
 

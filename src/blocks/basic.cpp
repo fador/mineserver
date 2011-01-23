@@ -209,6 +209,9 @@ void BlockBasic::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y
 }
 bool BlockBasic::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z,int map,  int8_t direction)
 {
+  //Clear block on destroy
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
   return false;
 }
 void BlockBasic::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z,int map,  int8_t direction)

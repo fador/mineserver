@@ -115,12 +115,12 @@ bool BlockDefault::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
     return true; 
   }
 
-  direction = user->relativeToBlock(x, y, z);
+  //direction = user->relativeToBlock(x, y, z);
 
   if(newblock<256)
   {
-    Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
-    Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+    Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, 0);
+    Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);
   }
   return false;
 }
@@ -131,6 +131,9 @@ void BlockDefault::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int
 
 void BlockDefault::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
+  //ToDo: fix spawning items on replace
+  return;
+
   uint8_t oldblock;
   uint8_t oldmeta;
 
