@@ -524,6 +524,8 @@ bool User::updatePosM(double x, double y, double z, int map, double stance)
   }
   updatePos(x,y,z,stance);
   pushMap();
+
+  return true;
 }
 
 void User::clearLoadingMap(){
