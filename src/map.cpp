@@ -357,10 +357,20 @@ sChunk* Map::getMapData(int x, int z,  bool generate)
 bool Map::saveWholeMap()
 {
 
+  //Loop every chunk loaded
+  for (int i=0;i<441;++i)
+  {
+    for (sChunkNode* node = chunks.getBuckets()[i];node!=NULL;node=node->next)
+    {
+      saveMap(node->chunk->x, node->chunk->z);
+    }
+  }
+  /*
   for(std::map<uint32_t, sChunk>::const_iterator it = maps.begin(); it != maps.end(); ++it)
   {
       saveMap(maps[it->first].x, maps[it->first].z);
   }
+  */
   /////////////////////
   // Save map details
 
