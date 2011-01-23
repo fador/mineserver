@@ -53,6 +53,8 @@ class Physics;
 class MapGen;
 class Logger;
 class Inventory;
+class Mobs;
+class Mob;
 
 #ifdef FADOR_PLUGIN
 #define MINESERVER
@@ -61,6 +63,8 @@ class Inventory;
 #endif
 
 struct event_base;
+
+uint32_t generateEID();
 
 class Mineserver
 {
@@ -88,8 +92,11 @@ public:
 
   Map* map(int n);
   void setMap(Map* map,int n=0);
+  int mapCount();
+
   Chat* chat() const { return m_chat; }
   void setChat(Chat* chat) { m_chat = chat; }
+  Mobs* mobs() const { return m_mobs; }
   Plugin* plugin() const { return m_plugin; }
   void setPlugin(Plugin* plugin) { m_plugin = plugin; }
   Screen* screen() const { return m_screen; }
@@ -131,7 +138,7 @@ private:
   std::vector<MapGen*> m_mapGen;
   Logger* m_logger;
   Inventory* m_inventory;
-
+  Mobs* m_mobs;
 };
 
 #endif

@@ -82,7 +82,7 @@ bool BlockLiquid::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
 
    direction = user->relativeToBlock(x, y, z);
 
-   int block = 256+newblock;
+   int block = newblock;
 
    if (block == ITEM_WATER_BUCKET)
       newblock = BLOCK_STATIONARY_WATER;
@@ -90,8 +90,8 @@ bool BlockLiquid::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
    if (block == ITEM_LAVA_BUCKET)
       newblock = BLOCK_STATIONARY_LAVA;
 
-   Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
-   Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+   Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, 0);
+   Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);
 
    physics(x,y,z,map);
    return false;

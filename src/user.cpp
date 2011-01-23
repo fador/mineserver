@@ -55,14 +55,9 @@
 #include "mineserver.h"
 #include "config.h"
 #include "permissions.h"
+#include "mob.h"
 
 // Generate "unique" entity ID
-uint32_t generateEID()
-{
-  static uint32_t EID = 0;
-  return ++EID;
-}
-
 
 User::User(int sock, uint32_t EID)
 {
@@ -170,6 +165,25 @@ User::~User()
     putSint32(&entityData[1], this->UID);
     this->sendOthers(&entityData[0], 5);
 
+    //Loop every chunk loaded to make sure no user pointers are left!
+    for (int i=0;i<441;++i)
+    {
+      for (sChunkNode* node = Mineserver::get()->map(pos.map)->chunks.getBuckets()[i];node!=NULL;node=node->next)
+      {
+        /*
+        //Debug
+        if (node->chunk->users.count(this) > 0)
+        {
+          Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", "Found loose user pointer!");
+        }
+        */
+        node->chunk->users.erase(this);
+        if (node->chunk->users.size() == 0)
+        {
+          Mineserver::get()->map(pos.map)->releaseMap(node->chunk->x, node->chunk->z);
+        }
+      }
+    }
   }
 
   if (fd != -1 && logged)
@@ -215,6 +229,26 @@ bool User::sendLoginInfo()
     if (inv[i].type != -1 && inv[i].count)
     {
       buffer << (int8_t)PACKET_SET_SLOT << (int8_t)0 << (int16_t)(i) << (int16_t)inv[i].type << (int8_t)(inv[i].count) << (int16_t)inv[i].health;
+    }
+  }
+
+  std::vector<Mob*> mob = Mineserver::get()->mobs()->getAll();
+  std::vector<Mob*>::iterator i = mob.begin();
+  for(;i!=mob.end();i++)
+  {
+    if(pos.map==(*i)->map &&  (*i)->spawned)
+    {
+      buffer << PACKET_MOB_SPAWN << (int32_t) (*i)->UID << (int8_t) (*i)->type
+             << (int32_t)(*i)->x << (int32_t) (*i)->y << (int32_t) (*i)->z 
+             << (int8_t) (*i)->yaw << (int8_t) (*i)->pitch;
+      if((*i)->type == MOB_SHEEP)
+      {
+        buffer << (int8_t) 0 << (int8_t) (*i)->meta << (int8_t) 127;
+      }
+      else
+      {
+        buffer << (int8_t) 127;
+      }
     }
   }
 
@@ -505,6 +539,8 @@ bool User::updatePosM(double x, double y, double z, int map, double stance)
   }
   updatePos(x,y,z,stance);
   pushMap();
+
+  return true;
 }
 
 void User::clearLoadingMap(){
@@ -598,13 +634,6 @@ bool User::updatePos(double x, double y, double z, double stance)
         std::list<User*>::iterator iter = toremove.begin(), end = toremove.end();
         for ( ; iter != end ; iter++)
         {
-          std::vector<User *>::const_iterator it = std::find (Mineserver::get()->users().begin(), 
-                                      Mineserver::get()->users().end(), (*iter));
-          if(it == Mineserver::get()->users().end())
-          {
-            //Mineserver::get()->logger()->log(LogType::LOG_INFO, "User", "Using dead player -2!!!");
-            return true;
-          }
           (*iter)->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
         }
       }
@@ -621,13 +650,6 @@ bool User::updatePos(double x, double y, double z, double stance)
         {
           if ((*iter) != this)
           {
-            std::vector<User *>::const_iterator it = std::find (Mineserver::get()->users().begin(), 
-                                      Mineserver::get()->users().end(), (*iter));
-            if(it == Mineserver::get()->users().end())
-            {
-              //Mineserver::get()->logger()->log(LogType::LOG_INFO, "User", "Using dead player -1!!!");
-              return true;
-            }
             (*iter)->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
           }
         }
@@ -742,45 +764,18 @@ bool User::updatePos(double x, double y, double z, double stance)
       iter = toRemove.begin(); end = toRemove.end();
       for ( ; iter != end ; iter++ )
       {
-        
-        std::vector<User *>::const_iterator it = std::find (Mineserver::get()->users().begin(), 
-                                                      Mineserver::get()->users().end(), (*iter));
-        if(it == Mineserver::get()->users().end())
-        {
-          //Mineserver::get()->logger()->log(LogType::LOG_INFO, "User", "Using dead player 1!!!");
-          return true;
-        }
-        
         (*iter)->buffer.addToWrite(destroyPkt.getWrite(), destroyPkt.getWriteLen());
       }
 
       iter = toAdd.begin(); end = toAdd.end();
       for ( ; iter != end ; iter++ )
       {
-        
-        std::vector<User *>::const_iterator it = std::find (Mineserver::get()->users().begin(), 
-                                              Mineserver::get()->users().end(), (*iter));
-        if(it == Mineserver::get()->users().end())
-        {
-          //Mineserver::get()->logger()->log(LogType::LOG_INFO, "User", "Using dead player 2!!!");
-          return true;
-        }
-        
         (*iter)->buffer.addToWrite(spawnPkt.getWrite(), spawnPkt.getWriteLen());
       }
 
       iter = toTeleport.begin(); end = toTeleport.end();
       for ( ; iter != end ; iter++ )
       {
-        
-        std::vector<User *>::const_iterator it = std::find (Mineserver::get()->users().begin(), 
-                                              Mineserver::get()->users().end(), (*iter));
-        if(it == Mineserver::get()->users().end())
-        {
-          //Mineserver::get()->logger()->log(LogType::LOG_INFO, "User", "Using dead player 3!!!");
-          return true;
-        }
-        
         (*iter)->buffer.addToWrite(telePacket.getWrite(), telePacket.getWriteLen());
       }
     }

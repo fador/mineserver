@@ -361,6 +361,11 @@ public:
     }
   }
 
+  sChunkNode** getBuckets()
+  {
+    return &m_buckets[0];
+  }
+
 private:
   sChunkNode* m_buckets[441];
 };

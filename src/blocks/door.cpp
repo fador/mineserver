@@ -46,8 +46,8 @@ bool BlockDoor::affectedBlock(int block)
 
 void BlockDoor::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-    uint8_t block,metadata;
-    Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
+  uint8_t block,metadata;
+  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
 
    // Toggle door state
    metadata ^= 0x4;
@@ -85,8 +85,22 @@ void BlockDoor::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y,
 
 bool BlockDoor::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
+  uint8_t block,metadata;
+  uint8_t metadata2, block2;
+  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
+  int modifier = ((metadata & 0x8)==0x8) ? -1 : 1;
+
+  Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
+
+  if (block2 == block)
+  {
+    Mineserver::get()->map(map)->setBlock(x, y + modifier, z, BLOCK_AIR, 0);
+    Mineserver::get()->map(map)->sendBlockChange(x, y + modifier, z, BLOCK_AIR, 0);
+  }
+
   Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  this->spawnBlockItem(x, y, z,map, block, 0);
   return false;
 }
 
@@ -158,7 +172,7 @@ bool BlockDoor::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
 
    Mineserver::get()->map(map)->setBlock(x, y+1, z, (char)newblock, direction);
    Mineserver::get()->map(map)->sendBlockChange(x, y+1, z, (char)newblock, direction);
-  return false;
+   return false;
 }
 
 void BlockDoor::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)

@@ -53,8 +53,6 @@ struct position
   float pitch;
 };
 
-uint32_t generateEID();
-
 class User
 {
 public:

@@ -601,7 +601,7 @@ int PacketHandler::player_digging(User *user)
           blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
           if(blockcb!=NULL && (blockcb->affectedBlock(status)||blockcb->affectedBlock(block)))
           {
-            blockcb->onNeighbourBroken(user, status,x+1,y,z,user->pos.map,direction);
+            blockcb->onNeighbourBroken(user, status,x+1,y,z,user->pos.map,BLOCK_SOUTH);
           }
         }
 
@@ -615,7 +615,7 @@ int PacketHandler::player_digging(User *user)
           blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
           if(blockcb!=NULL && (blockcb->affectedBlock(status)||blockcb->affectedBlock(block)))
           {
-            blockcb->onNeighbourBroken(user, status,x-1,y,z,user->pos.map,direction);
+            blockcb->onNeighbourBroken(user, status,x-1,y,z,user->pos.map,BLOCK_NORTH);
           }
         }
 
@@ -629,7 +629,7 @@ int PacketHandler::player_digging(User *user)
           blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
           if(blockcb!=NULL && (blockcb->affectedBlock(status)||blockcb->affectedBlock(block)))
           {
-            blockcb->onNeighbourBroken(user, status,x,y+1,z,user->pos.map,direction);
+            blockcb->onNeighbourBroken(user, status,x,y+1,z,user->pos.map,BLOCK_TOP);
           }
         }
 
@@ -643,7 +643,7 @@ int PacketHandler::player_digging(User *user)
           blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
           if(blockcb!=NULL && (blockcb->affectedBlock(status)||blockcb->affectedBlock(block)))
           {
-            blockcb->onNeighbourBroken(user, status,x,y-1,z,user->pos.map,direction);
+            blockcb->onNeighbourBroken(user, status,x,y-1,z,user->pos.map,BLOCK_BOTTOM);
           }
         }
 
@@ -657,7 +657,7 @@ int PacketHandler::player_digging(User *user)
           blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
           if(blockcb!=NULL && (blockcb->affectedBlock(status)||blockcb->affectedBlock(block)))
           {
-            blockcb->onNeighbourBroken(user, status,x,y,z+1,user->pos.map,direction);
+            blockcb->onNeighbourBroken(user, status,x,y,z+1,user->pos.map,BLOCK_WEST);
           }
         }
 
@@ -671,7 +671,7 @@ int PacketHandler::player_digging(User *user)
           blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
           if(blockcb!=NULL && (blockcb->affectedBlock(status)||blockcb->affectedBlock(block)))
           {
-            blockcb->onNeighbourBroken(user, status,x,y,z-1,user->pos.map,direction);
+            blockcb->onNeighbourBroken(user, status,x,y,z-1,user->pos.map,BLOCK_EAST);
           }
         }
 
@@ -1201,7 +1201,7 @@ int PacketHandler::use_entity(User *user)
     return PACKET_OK;
   }
 
-  //This is used when punching users
+  //This is used when punching users, mobs or other entities
   for(uint32_t i = 0; i < User::all().size(); i++)
   {
     if(User::all()[i]->UID == (uint32_t)target)

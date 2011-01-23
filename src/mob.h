@@ -1,6 +1,6 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
-   All rights reserved.
+  Copyright (c) 2011, The Mineserver Project
+  All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -23,60 +23,58 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-#include "../mineserver.h"
-#include "../map.h"
+#include <stdlib.h>
+#include <vector>
+#include <string>
+#include <stdint.h>
+#include "user.h"
+#include "constants.h"
+#include "packets.h"
+#include "mineserver.h"
 
-#include "cake.h"
 
-bool BlockCake::affectedBlock(int block)
+
+uint32_t generateEID();
+
+class Mob
 {
-  switch(block)
-  {
-  case BLOCK_CAKE:
-  case ITEM_CAKE:
-    return true;
-  }
-  return false;
-}
+public:
+  // Singular
+  int UID;
+  int8_t type;
+  int16_t x,y,z;
+  int map;
+  int8_t yaw, pitch;
+  int8_t meta;
+  bool spawned;
+  bool respawnable;
 
-bool BlockCake::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+  Mob(); // Dont create your own Mob, use Mobs.createMob()
+  ~Mob();
+
+  // Specifically packet-based commands
+  void spawnToAll();
+  void deSpawnToAll();
+  void relativeMoveToAll();
+  void teleportToAll();
+
+  void moveTo(int16_t to_x,int16_t to_y, int16_t to_z, int to_map=-1);
+
+  
+};
+
+class Mobs
 {
-  uint8_t oldblock;
-  uint8_t oldmeta;
+public:
+  Mob* getMobByID(int id);
+  int mobNametoType(std::string name);
+  int getMobCount();
+  std::vector<Mob*> getAll(){ return m_moblist; };
+  void addMob(Mob* mob) { m_moblist.push_back(mob); }
+  Mob* createMob();
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
-  {
-    return true;
-  }
-
-  /* Check block below allows blocks placed on top */
-  if (!this->isBlockStackable(oldblock))
-  {
-    return true;
-  }
-
-  /* move the x,y,z coords dependent upon placement direction */
-  if (!this->translateDirection(&x,&y,&z,map,direction))
-  {
-    return true;
-  }
-
-  if (this->isUserOnBlock(x,y,z,map))
-  {
-    return true;
-  }
-
-  if (!this->isBlockEmpty(x,y,z,map))
-  {
-    return true; 
-  }
-
-  direction = user->relativeToBlock(x, y, z);
-
-  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_CAKE, 0);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_CAKE, 0);
-  return false;
-}
-
+private:
+  std::vector<Mob*> m_moblist;
+};

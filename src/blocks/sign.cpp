@@ -59,11 +59,76 @@ void BlockSign::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y,
 
 bool BlockSign::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map(map)->createPickupSpawn(x, y, z, ITEM_SIGN, 1, 0, NULL);
+
+  //Remove sign data from the chunk
+  sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(x,z);
+  if(chunk != NULL)
+  {
+    for(uint32_t i = 0; i < chunk->signs.size(); i++)
+    {
+      if (chunk->signs[i]->x == x &&
+          chunk->signs[i]->y == y &&
+          chunk->signs[i]->z == z)
+      {
+        chunk->signs.erase(chunk->signs.begin()+i);
+        break;
+      }
+    }
+  }
   return false;
 }
 
 void BlockSign::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
+  uint8_t block,meta;
+  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
+
+  bool blockBroken = false;
+
+  //Ladder is not attached to top or bottom block
+  if(direction == BLOCK_BOTTOM)
+  {
+    return;
+  }
+
+  if(direction == BLOCK_TOP && block == BLOCK_SIGN_POST)
+  {
+    blockBroken = true;
+  }
+  else if( (meta == 2 && direction == BLOCK_EAST)  ||
+           (meta == 3 && direction == BLOCK_WEST)  ||
+           (meta == 4 && direction == BLOCK_NORTH) ||
+           (meta == 5 && direction == BLOCK_SOUTH))
+  {
+    blockBroken = true;
+  }
+
+
+  if(blockBroken)
+  {
+    Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+    Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+    this->spawnBlockItem(x, y, z,map, block, 0);
+
+    //Remove sign data from the chunk
+    sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(x,z);
+    if(chunk != NULL)
+    {
+      for(uint32_t i = 0; i < chunk->signs.size(); i++)
+      {
+        if (chunk->signs[i]->x == x &&
+            chunk->signs[i]->y == y &&
+            chunk->signs[i]->z == z)
+        {
+          chunk->signs.erase(chunk->signs.begin()+i);
+          break;
+        }
+      }
+    }
+  }
 }
 
 bool BlockSign::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)

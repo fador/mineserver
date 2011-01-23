@@ -59,6 +59,9 @@ void BlockSnow::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y,
 
 bool BlockSnow::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  this->spawnBlockItem(x,y,z,map,BLOCK_SNOW,0);
   return false;
 }
 
@@ -74,7 +77,7 @@ void BlockSnow::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
    {
       Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
       Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-      this->spawnBlockItem(x, y, z,map, block);
+      this->spawnBlockItem(x, y, z,map, block, 0);
    }   
 }
 
