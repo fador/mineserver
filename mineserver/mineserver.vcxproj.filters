@@ -165,6 +165,9 @@
     <ClCompile Include="..\src\worldgen\nethergen.cpp">
       <Filter>Source Files\worldgen</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\mob.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\user.h">
@@ -313,6 +316,9 @@
     </ClInclude>
     <ClInclude Include="..\src\worldgen\nethergen.h">
       <Filter>Header Files\worldgen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mob.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
