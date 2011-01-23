@@ -73,7 +73,7 @@ User::User(int sock, uint32_t EID)
   this->fd              = sock;
   this->UID             = EID;
   this->logged          = false;
-  // ENABLED FOR DEBUG
+  this->serverAdmin     = false;
   this->pos.map         = 0;
   this->pos.x           = Mineserver::get()->map(pos.map)->spawnPos.x();
   this->pos.y           = Mineserver::get()->map(pos.map)->spawnPos.y();

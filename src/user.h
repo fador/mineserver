@@ -90,6 +90,7 @@ public:
   //More info on the inventory
   OpenInventory openInv;
 
+  bool serverAdmin;
   int permissions; // bitmask for permissions. See permissions.h
 
   int32_t attachedTo;

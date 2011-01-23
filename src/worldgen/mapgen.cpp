@@ -419,32 +419,57 @@ void MapGen::ExpandBeaches(int x, int z, int map)
 void MapGen::AddOre(int x, int z, int map, uint8_t type) 
 {
   sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(x,z);
-  int xBlockpos = x<<4;
-  int zBlockpos = z<<4;
 
   int blockX, blockY, blockZ;
-  uint8_t block;
-  uint8_t meta;
 
-  int count, startHeight;
-
+  // Parameters for deposits
+  int count, startHeight, minDepoSize, maxDepoSize;
+  
   switch(type) {
     case BLOCK_COAL_ORE:
       count = fastrand()%10 + 20; // 20-30 coal deposits
       startHeight = 90;
+      minDepoSize = 3;
+      maxDepoSize = 7;
       break;
     case BLOCK_IRON_ORE:
       count = fastrand()%8 + 10; // 10-18 iron deposits
       startHeight = 60;
+      minDepoSize = 2;
+      maxDepoSize = 5;
       break;
     case BLOCK_GOLD_ORE:
-      count = fastrand()%5 + 5; // 5-10 gold deposits
+      count = fastrand()%4 + 5; // 4-9 gold deposits
       startHeight = 32;
+      minDepoSize = 2;
+      maxDepoSize = 4;
       break;
     case BLOCK_DIAMOND_ORE:
-      count = fastrand()%2 + 2; // 2-4 diamond deposits
+      count = fastrand()%1 + 2; // 1-3 diamond deposits
       startHeight = 17;
+      minDepoSize = 1;
+      maxDepoSize = 2;
       break;
+    case BLOCK_REDSTONE_ORE:
+      count = fastrand()%5 + 5; // 5-10 redstone deposits
+      startHeight = 25;
+      minDepoSize = 2;
+      maxDepoSize = 4;
+      break;
+    case BLOCK_LAPIS_ORE:
+      count = fastrand()%1 + 2; // 1-3 lapis lazuli deposits
+      startHeight = 17;
+      minDepoSize = 1;
+      maxDepoSize = 2;
+      break;
+    case BLOCK_GRAVEL:
+      count = fastrand()%10 + 20; // 20-30 gravel deposits
+      startHeight = 90;
+      minDepoSize = 4;
+      maxDepoSize = 10;
+      break;
+    default:
+      return;
   }
 
   int i = 0;
@@ -470,7 +495,6 @@ void MapGen::AddOre(int x, int z, int map, uint8_t type)
 
     i++;
 
-    //Mineserver::get()->map()->getBlock(blockX, blockY, blockZ, &block, &meta);
     block = chunk->blocks[blockY + ((blockZ << 7) + (blockX << 11))];
     // No ore in caves
     if(block == BLOCK_AIR || block == BLOCK_GRASS)

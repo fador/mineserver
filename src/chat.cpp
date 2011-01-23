@@ -41,6 +41,13 @@
 
 Chat::Chat()
 {
+  adminPassword = Mineserver::get()->config()->iData("system.admin.password");
+  // Check if default password
+  if(adminPassword == "password") 
+  {
+    Mineserver::get()->logger()->log(LogType::LOG_ERROR, "System", "Change admin password in configuration!");
+    //adminPassword = std::string(rand());
+  }
 }
 
 Chat::~Chat()
@@ -170,8 +177,16 @@ void Chat::handleCommand(User* user, std::string msg, const std::string& timeSta
   {
     param[i] = (char *)cmd[i].c_str();
   }
-
-  (static_cast<Hook4<bool,const char*,const char*,int,const char**>*>(Mineserver::get()->plugin()->getHook("PlayerChatCommand")))->doAll(user->nick.c_str(), command.c_str(), cmd.size(), (const char **)param);
+  
+  // If hardcoded auth command!
+  if(command == "auth" && param[0] == adminPassword) {
+    user->serverAdmin = true;
+    handleServerMsg(user, "You have been authed as admin!", "")
+  }
+  else
+  {  
+    (static_cast<Hook4<bool,const char*,const char*,int,const char**>*>(Mineserver::get()->plugin()->getHook("PlayerChatCommand")))->doAll(user->nick.c_str(), command.c_str(), cmd.size(), (const char **)param);
+  }
 
   delete [] param;
 
