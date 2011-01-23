@@ -58,11 +58,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int neth_seed;
 
 NetherGen::NetherGen()
-    : netherblocks(0, 16*16*128),
-      blockdata(0, 16*16*128/2),
-      skylight(0, 16*16*128/2),
-      blocklight(0, 16*16*128/2),
-      heightmap(0, 16*16)
+    : netherblocks(16*16*128,0),
+      blockdata(16*16*128/2,0),
+      skylight(16*16*128/2,0),
+      blocklight(16*16*128/2,0),
+      heightmap(16*16,0)
 {
 }
 
