@@ -62,6 +62,7 @@ public:
 
 private:
   std::deque<std::string> parseCmd(std::string cmd);
+  std::string adminPassword;
 };
 
 #endif

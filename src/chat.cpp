@@ -30,6 +30,7 @@
 #include <fstream>
 
 #include "constants.h"
+#include "config.h"
 #include "user.h"
 #include "logger.h"
 #include "mineserver.h"
@@ -170,8 +171,18 @@ void Chat::handleCommand(User* user, std::string msg, const std::string& timeSta
   {
     param[i] = (char *)cmd[i].c_str();
   }
-
-  (static_cast<Hook4<bool,const char*,const char*,int,const char**>*>(Mineserver::get()->plugin()->getHook("PlayerChatCommand")))->doAll(user->nick.c_str(), command.c_str(), cmd.size(), (const char **)param);
+  
+  // If hardcoded auth command!
+  if(command == "auth" && param[0] == Mineserver::get()->config()->sData("system.admin.password")) 
+  {
+    user->serverAdmin = true;
+    msg = MC_COLOR_RED + "[!] " + MC_COLOR_GREEN + "You have been authed as admin!";
+    sendMsg(user, msg, USER);
+  }
+  else
+  {  
+    (static_cast<Hook4<bool,const char*,const char*,int,const char**>*>(Mineserver::get()->plugin()->getHook("PlayerChatCommand")))->doAll(user->nick.c_str(), command.c_str(), cmd.size(), (const char **)param);
+  }
 
   delete [] param;
 
