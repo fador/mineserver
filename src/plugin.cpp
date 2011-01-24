@@ -52,6 +52,7 @@
 #include "blocks/chest.h"
 #include "blocks/ladder.h"
 #include "blocks/cake.h"
+#include "blocks/note.h"
 
 void Plugin::init()
 {
@@ -81,6 +82,8 @@ void Plugin::init()
    BlockCB.push_back(ladderblock);
    BlockCake* cakeblock = new BlockCake();
    BlockCB.push_back(cakeblock);
+   BlockNote* noteblock = new BlockNote();
+   BlockCB.push_back(noteblock);
    BlockDefault* defaultblock = new BlockDefault();
    BlockCB.push_back(defaultblock);
 
