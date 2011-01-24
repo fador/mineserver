@@ -61,7 +61,7 @@ bool BlockSign::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
 {
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
   Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-  Mineserver::get()->map(map)->createPickupSpawn(x, y, z, ITEM_SIGN, 1, 0, NULL);
+  this->spawnBlockItem(x,y,z,map,BLOCK_WALL_SIGN);
 
   //Remove sign data from the chunk
   sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(x,z);
