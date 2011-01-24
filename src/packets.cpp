@@ -1034,7 +1034,7 @@ int PacketHandler::player_block_placement(User *user)
   #define INV_TASKBAR_START 36
   if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].type == newblock && newblock != -1)
   {
-    if(newblock<256)
+    //if(newblock<256)
     {
       // It's a block
       user->inv[INV_TASKBAR_START+user->currentItemSlot()].count--;
