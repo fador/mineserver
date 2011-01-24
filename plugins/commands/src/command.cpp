@@ -608,6 +608,55 @@ bool blockPlacePreFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int1
   return true;
 }
 
+void doNotDisturb(std::string user, std::string command, std::deque<std::string> args)
+{
+  //mineserver->user.userFromName(user).toggleDND();
+  return;
+}
+
+void gps(std::string user, std::string command, std::deque<std::string> args) 
+{
+  double x,y,z,stance;
+  float yaw,pitch;
+  mineserver->user.getPosition(user.c_str(), &x, &y, &z, &yaw, &pitch, &stance);
+  std::string msg = "X: " +dtos(x) +" Y: "+ dtos(y) +"Z: "+ dtos(z);
+  mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
+}
+
+void banUser(std::string user, std::string command, std::deque<std::string> args)
+{
+  return;
+}
+
+void unbanUser(std::string user, std::string command, std::deque<std::string> args) 
+{
+  return;
+}
+
+void sendRules(std::string user, std::string command, std::deque<std::string> args) 
+{
+  std::string line;
+  std::ifstream rules("rules.txt");
+  
+  if(rules.is_open()) {
+    while(rules.good()) {
+      std::getline(rules, line);
+      if(line.at(0) != '#')
+        mineserver->chat.sendmsgTo(user.c_str(), line.c_str());
+    }
+    rules.close();
+  }
+}
+void about(std::string user, std::string command, std::deque<std::string> args)
+{
+  std::ostringstream msg;
+  if (mineserver->config.bData("system.show_version"))
+  {
+    msg  << "§9" << mineserver->config.sData("system.server_name") << " Running Mineserver v. ???";
+    mineserver->chat.sendmsgTo(user.c_str(), msg.str().c_str());
+  }
+}
+
 void sendHelp(std::string user, std::string command, std::deque<std::string> args)
 {
   // TODO: Add paging support, since not all commands will fit into
@@ -698,6 +747,9 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mi
   registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap));  
   registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", sendHelp));
   registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport));
+  registerCommand(new Command(parseCmd("gps"), "", "Display current coordinates", gps));
+  registerCommand(new Command(parseCmd("rules"), "", "Display server rules", sendRules));
+  registerCommand(new Command(parseCmd("about"), "", "Display server name and software version", about));
   registerCommand(new Command(parseCmd("motd"), "", "Displays the MOTD", sendMOTD));  registerCommand(new Command(parseCmd("world"), "<world Number>", "Move between worlds", userWorld));
 }
 
