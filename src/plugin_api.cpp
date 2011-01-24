@@ -379,6 +379,7 @@ bool user_toggleDND(const char* user)
       {
         Mineserver::get()->users()[i]->toggleDND();
       }
+    }
   }
 }
 
