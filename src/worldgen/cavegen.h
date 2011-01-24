@@ -38,9 +38,9 @@ public:
 
 private:
   noise::module::RidgedMulti caveNoise;
-  double value;
-
   bool addCaveLava;
+  int caveSize;
+  double caveTreshold;
 };
 
 #endif

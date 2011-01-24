@@ -94,7 +94,7 @@ void MapGen::init(int seed)
   beachExtent = Mineserver::get()->config()->iData("mapgen.beaches.extent");
   beachHeight = Mineserver::get()->config()->iData("mapgen.beaches.height");
 
-  addOre = Mineserver::get()->config()->bData("mapgen.caves.ore");
+  addOre = Mineserver::get()->config()->bData("mapgen.addore");
   addCaves = Mineserver::get()->config()->bData("mapgen.caves.enabled");
   
   winterEnabled = Mineserver::get()->config()->bData("mapgen.winter.enabled");
@@ -200,11 +200,15 @@ void MapGen::generateChunk(int x, int z, int map)
   
   if(addOre)
   {
-    AddOre(x, z,map, BLOCK_COAL_ORE);
-    AddOre(x, z,map, BLOCK_IRON_ORE);
-    AddOre(x, z,map, BLOCK_GOLD_ORE);
-    AddOre(x, z,map, BLOCK_DIAMOND_ORE);
+    AddOre(x, z, map, BLOCK_COAL_ORE);
+    AddOre(x, z, map, BLOCK_IRON_ORE);
+    AddOre(x, z, map, BLOCK_GOLD_ORE);
+    AddOre(x, z, map, BLOCK_DIAMOND_ORE);
+    AddOre(x, z, map, BLOCK_REDSTONE_ORE);
+    AddOre(x, z, map, BLOCK_LAPIS_ORE);
   }
+  
+  AddOre(x, z, map, BLOCK_GRAVEL);
   
   // Add trees
   if(addTrees)
@@ -498,31 +502,31 @@ void MapGen::AddOre(int x, int z, int map, uint8_t type)
 
     block = chunk->blocks[blockY + ((blockZ << 7) + (blockX << 11))];
     // No ore in caves
-    if(block == BLOCK_AIR || block == BLOCK_GRASS)
+    if(block == BLOCK_AIR)
       continue;
         
-    AddDeposit(blockX, blockY, blockZ, map,type, 4, chunk);
+    AddDeposit(blockX, blockY, blockZ, map, type, minDepoSize, maxDepoSize, chunk);
 
   }
 }
 
-void MapGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int depotSize, sChunk *chunk)
+void MapGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int minDepoSize, int maxDepoSize, sChunk *chunk)
 {
-  
-  for(int bX = x; bX < x+depotSize; bX++)
+  int depoSize = fastrand()%(maxDepoSize-minDepoSize)+minDepoSize;
+  for(int i = 0; i < depoSize; i++)
   {
-    for(int bY = y; bY < y+depotSize; bY++)
+    if(chunk->blocks[y + ((z << 7) + (x << 11))] != BLOCK_GRASS ||
+       chunk->blocks[y + ((z << 7) + (x << 11))] != BLOCK_SNOW)
     {
-      for(int bZ = z; bZ < z+depotSize; bZ++)
-      {
-        if(rand()%1000 < 500)
-        {
-          if(bX < 16 && bZ < 16)
-          {
-            chunk->blocks[bY + ((bZ << 7) + (bX << 11))] = block;
-          }
-        }
-      }
+      chunk->blocks[y + ((z << 7) + (x << 11))] = block;
     }
+    
+    z = z+((fastrand()%2)-1);
+    x = x+((fastrand()%2)-1);
+    y = y+((fastrand()%2)-1);
+    
+    // If over chunk borders
+    if(z < 0 || z > 15 || x < 0 || x > 15 || y < 1)
+      break;
   }
 }

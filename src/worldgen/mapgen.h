@@ -42,7 +42,7 @@ class MapGen
 public:
   MapGen();
   virtual void init(int seed);
-  virtual void re_init(int seed); // Used when generating mutliple maps
+  virtual void re_init(int seed); // Used when generating multiple maps
   virtual void generateChunk(int x, int z, int map);
 
 private:
@@ -71,7 +71,7 @@ private:
   virtual void AddTrees(int x, int z, int map);
   
   virtual void AddOre(int x, int z, int map, uint8_t type);
-  virtual void AddDeposit(int x, int y, int z, int map, uint8_t block, int depotSize, sChunk *chunk);
+  virtual void AddDeposit(int x, int y, int z, int map, uint8_t block, int minDepoSize, int maxDepoSize, sChunk *chunk);
 
   CaveGen cave;
 
