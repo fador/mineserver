@@ -123,9 +123,11 @@ int main(int argc, char* argv[])
 {
   signal(SIGTERM, sighandler);
   signal(SIGINT, sighandler);
-  signal(SIGBREAK, sighandler);  
+
 #ifndef WIN32
   signal(SIGPIPE, pipehandler);
+#else
+  signal(SIGBREAK, sighandler);
 #endif
 
   srand((uint32_t)time(NULL));
