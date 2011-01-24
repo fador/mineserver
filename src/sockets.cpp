@@ -66,6 +66,9 @@
 
 extern int setnonblock(int fd);
 
+#ifndef WIN32
+#define SOCKET_ERROR -1
+#endif
 
 void client_callback(int fd,
                      short ev,
