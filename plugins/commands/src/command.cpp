@@ -610,8 +610,7 @@ bool blockPlacePreFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int1
 
 void doNotDisturb(std::string user, std::string command, std::deque<std::string> args)
 {
-  //mineserver->user.userFromName(user).toggleDND();
-  return;
+  mineserver->user.toggleDND(user.c_str());
 }
 
 void gps(std::string user, std::string command, std::deque<std::string> args) 
