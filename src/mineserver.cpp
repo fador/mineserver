@@ -82,7 +82,7 @@ int setnonblock(int fd)
 {
 #ifdef WIN32
   u_long iMode = 1;
-  ioctlsocket(fd, FIONBIO, &iMode);
+  ioctlsocket(fd, FIONBIO, &iMode);   
 #else
   int flags;
 
@@ -100,6 +100,13 @@ void sighandler(int sig_num)
   Mineserver::get()->stop();
 }
 
+#ifndef WIN32
+void pipehandler(int sig_num)
+{
+ //Do nothing
+}
+#endif
+
 std::string removeChar(std::string str, const char* c)
 {
   std::string remove(c);
@@ -116,6 +123,9 @@ int main(int argc, char* argv[])
 {
   signal(SIGTERM, sighandler);
   signal(SIGINT, sighandler);
+#ifndef WIN32
+  signal(SIGPIPE, pipehandler);
+#endif
 
   srand((uint32_t)time(NULL));
 

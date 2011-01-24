@@ -99,7 +99,7 @@ void client_callback(int fd,
       return;
     }
 
-    if(read == -1)
+    if(read == SOCKET_ERROR)
     {
       Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket had no data to read");
 
@@ -171,11 +171,17 @@ void client_callback(int fd,
   if(writeLen)
   {
     int written = send(fd, (char*)user->buffer.getWrite(), writeLen, 0);
-    if(written == -1)
+    if(written == SOCKET_ERROR)
     {
-      if((errno != EAGAIN && errno != EINTR))// || user->write_err_count>200)
+      #ifdef WIN32
+      #define ERROR_NUMBER WSAGetLastError()
+      if((errno != WSATRY_AGAIN && errno != WSAEINTR))
+      #else
+      #define ERROR_NUMBER errno
+      if((errno != EAGAIN && errno != EINTR))
+      #endif
       {
-        Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Error writing to client, tried to write " + dtos(writeLen) + " bytes, code: " + dtos(errno));
+        Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Error writing to client, tried to write " + dtos(writeLen) + " bytes, code: " + dtos(ERROR_NUMBER));
 
         delete user;
         user = (User *)5;
