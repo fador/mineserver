@@ -930,7 +930,6 @@ bool Map::sendNote(int x, int y, int z, char instrument, char pitch)
     return false;
 
   chunk->sendPacket(pkt);
-
   return true;
 }
 

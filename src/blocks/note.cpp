@@ -45,6 +45,51 @@ void BlockNote::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y,
 {
   uint8_t block,metadata;
   Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
-  Mineserver::get()->map(map)->sendNote(x, y, z, 5, 10);
+  Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x,y - 1,z,map), metadata);
 }
 
+void BlockNote::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+{
+
+}
+
+void BlockNote::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+{
+
+}
+
+bool BlockNote::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+{
+  /* Taken directly from chest.cpp. Lots of useless stuff. */
+
+  if (this->isUserOnBlock(x,y,z,map))
+     return true;
+
+  if (!this->isBlockEmpty(x,y,z,map))
+     return true;
+
+  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, 0);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);
+  return false;
+}
+
+int BlockNote::getInstrument(int32_t x, int8_t y, int32_t z, int map)
+{
+ /* There has to be a cleaner way of doing this. */
+ uint8_t block,meta;
+ Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
+ if(block == BLOCK_WOOD || block == BLOCK_PLANK){
+ return 1;
+ }
+ else if(block == BLOCK_SAND || block == BLOCK_GRAVEL || block == BLOCK_SLOW_SAND){
+ return 2;
+ }
+ else if(block == BLOCK_GLASS || block ==  BLOCK_GLOWSTONE){
+ return 3;
+ }
+ else if(block == BLOCK_STONE || block ==  BLOCK_COBBLESTONE || block == BLOCK_BRICK || block == BLOCK_OBSIDIAN 
+	 || block == BLOCK_NETHERSTONE || block == BLOCK_IRON_ORE || block == BLOCK_DIAMOND_ORE ){
+ return 4;
+ }
+ return 5;
+}

@@ -744,7 +744,12 @@ int PacketHandler::player_block_placement(User *user)
   {
     return PACKET_OK;
   }
-
+  //Check if note block tuning. INCOMPLETE
+  if(oldblock == BLOCK_NOTE_BLOCK)
+  {
+	if (metadata == 0x14){
+	}
+  }
   //Check if opening a door
   if(oldblock == BLOCK_WOODEN_DOOR || oldblock == BLOCK_IRON_DOOR)
   {
