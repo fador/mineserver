@@ -610,8 +610,7 @@ bool blockPlacePreFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int1
 
 void doNotDisturb(std::string user, std::string command, std::deque<std::string> args)
 {
-  //mineserver->user.userFromName(user).toggleDND();
-  return;
+  mineserver->user.toggleDND(user.c_str());
 }
 
 void gps(std::string user, std::string command, std::deque<std::string> args) 
@@ -748,6 +747,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mi
   registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", sendHelp));
   registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport));
   registerCommand(new Command(parseCmd("gps"), "", "Display current coordinates", gps));
+  registerCommand(new Command(parseCmd("dnd"), "", "Toggle Do Not Disturb mode", doNotDisturb));
   registerCommand(new Command(parseCmd("rules"), "", "Display server rules", sendRules));
   registerCommand(new Command(parseCmd("about"), "", "Display server name and software version", about));
   registerCommand(new Command(parseCmd("motd"), "", "Displays the MOTD", sendMOTD));  registerCommand(new Command(parseCmd("world"), "<world Number>", "Move between worlds", userWorld));

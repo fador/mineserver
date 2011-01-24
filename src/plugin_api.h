@@ -86,7 +86,7 @@ struct plugin_pointer_struct
 struct user_pointer_struct
 {
   bool (*teleport)   (const char* user,double x, double y, double z);
-
+  bool (*toggleDND)   (const char* user);
   bool (*getPosition)(const char* user, double* x, double* y, double* z, float* yaw, float* pitch, double *stance);
   bool (*sethealth)  (const char* user,int userHealth);
   bool (*teleportMap)   (const char* user,double x, double y, double z, int map);

@@ -368,6 +368,21 @@ unsigned char* map_getMapData_blocklight(int x, int z)
 }
 
 // USER WRAPPER FUNCTIONS
+bool user_toggleDND(const char* user) 
+{
+  std::string username(user);
+  for(unsigned int i=0; i < Mineserver::get()->users().size(); i++)
+  {
+    if(Mineserver::get()->users()[i]->fd && Mineserver::get()->users()[i]->logged) 
+    {
+      if(username == Mineserver::get()->users()[i]->nick) 
+      {
+        Mineserver::get()->users()[i]->toggleDND();
+      }
+    }
+  }
+}
+
 bool user_getPosition(const char* user, double* x, double* y, double* z,float* yaw, float* pitch, double *stance)
 {
   std::string userStr(user);
@@ -709,6 +724,7 @@ void init_plugin_api(void)
   plugin_api_pointers.user.addItem                 = &user_addItem;
   plugin_api_pointers.user.hasItem                 = &user_hasItem;
   plugin_api_pointers.user.delItem                 = &user_delItem;
+  plugin_api_pointers.user.toggleDND               = &user_toggleDND;
 
   plugin_api_pointers.config.has                   = &config_has;
   plugin_api_pointers.config.iData                 = &config_iData;
