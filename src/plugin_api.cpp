@@ -378,9 +378,12 @@ bool user_toggleDND(const char* user)
       if(username == Mineserver::get()->users()[i]->nick) 
       {
         Mineserver::get()->users()[i]->toggleDND();
+        return true;
       }
     }
   }
+
+  return false;
 }
 
 bool user_getPosition(const char* user, double* x, double* y, double* z,float* yaw, float* pitch, double *stance)
