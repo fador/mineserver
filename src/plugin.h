@@ -122,6 +122,7 @@ public:
     setHook("PlayerDiggingStarted", new Hook5<bool,const char*,int32_t,int8_t,int32_t,int8_t>);
     setHook("PlayerDigging", new Hook5<bool,const char*,int32_t,int8_t,int32_t,int8_t>);
     setHook("PlayerDiggingStopped", new Hook5<bool,const char*,int32_t,int8_t,int32_t,int8_t>);
+	setHook("PlayerBlockInteract", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
     setHook("BlockBreakPre", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
     setHook("BlockBreakPost", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
     setHook("BlockNeighbourBreak", new Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>);

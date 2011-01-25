@@ -745,6 +745,7 @@ int PacketHandler::player_block_placement(User *user)
   {
     return PACKET_OK;
   }
+  /*
   //Check if note block tuning.
   if(oldblock == BLOCK_NOTE_BLOCK)
   {
@@ -799,7 +800,7 @@ int PacketHandler::player_block_placement(User *user)
 
      return PACKET_OK;
   }
-  
+
   //Check if we need to open a window
   if(oldblock == BLOCK_CHEST)
   {
@@ -820,7 +821,7 @@ int PacketHandler::player_block_placement(User *user)
     Mineserver::get()->inventory()->windowOpen(user,WINDOW_WORKBENCH,x, y, z);
     return PACKET_OK;
   }
-
+  
   // TODO: Handle int16_t itemID's
   /*
   if(newblock > 255 && newblock != ITEM_SIGN)
@@ -828,7 +829,21 @@ int PacketHandler::player_block_placement(User *user)
     return PACKET_OK;
   }
   */
+  
+  /* Protocol docs say this should be what interacting is. */
+  if(oldblock != BLOCK_AIR && newblock == -1){
 
+        (static_cast<Hook4<bool,const char*,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("PlayerBlockInteract")))->doAll(user->nick.c_str(), x, y, z);
+
+      for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+      {
+        blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+        if(blockcb!=NULL && blockcb->affectedBlock(block))
+        {
+          blockcb->onInteract(user, x,y,z,user->pos.map);
+        }
+      }
+  }
   bool foundFromInventory = false;
 
   #define INV_TASKBAR_START 36

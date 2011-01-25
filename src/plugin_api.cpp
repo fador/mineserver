@@ -59,6 +59,7 @@
 #include "blocks/sign.h"
 #include "blocks/tracks.h"
 #include "blocks/chest.h"
+#include "blocks/note.h"
 
 #define MINESERVER
 #include "plugin_api.h"
