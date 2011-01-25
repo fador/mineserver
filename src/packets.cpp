@@ -751,13 +751,13 @@ int PacketHandler::player_block_placement(User *user)
 	if (metadata == 0x14){
 		metadata = 0x00;
 		Mineserver::get()->map(user->pos.map)->setBlock(x, y, z, oldblock, metadata);
-		Mineserver::get()->map(user->pos.map)->sendNote(x, y, z, metadata);
+		Mineserver::get()->map(user->pos.map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, user->pos.map), metadata);
 		return PACKET_OK;
 	}
 	else{
 		metadata++;
         Mineserver::get()->map(user->pos.map)->setBlock(x, y, z, oldblock, metadata);
-		Mineserver::get()->map(user->pos.map)->sendNote(x, y, z, metadata);
+		Mineserver::get()->map(user->pos.map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, user->pos.map), metadata);
         return PACKET_OK;
 	}
 	

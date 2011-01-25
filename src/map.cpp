@@ -920,36 +920,8 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
   return true;
 }
 
-bool Map::sendNote(int x, int y, int z, char pitch)
+bool Map::sendNote(int x, int y, int z, char instrument, char pitch)
 {
-  /* There has to be a cleaner/better way of doing this.
-     This also is a POOR IMPLEMENTATION that needs to 
-	 be revised! It's a sufficent hack for it to work 
-	 for now though. */
-  uint8_t block,meta,instrument;
-  getBlock(x, y - 1, z, &block, &meta);
-  if(block == BLOCK_WOOD || block == BLOCK_PLANK)
-  {
-  instrument = 1;
-  }
-  else if(block == BLOCK_SAND || block == BLOCK_GRAVEL || block == BLOCK_SLOW_SAND)
-  {
-  instrument = 2;
-  }
-  else if(block == BLOCK_GLASS || block ==  BLOCK_GLOWSTONE)
-  {
-  instrument = 3;
-  }
-  else if(block == BLOCK_STONE || block ==  BLOCK_COBBLESTONE || block == BLOCK_BRICK || block == BLOCK_OBSIDIAN 
-	 || block == BLOCK_NETHERSTONE || block == BLOCK_IRON_ORE || block == BLOCK_DIAMOND_ORE )
-  {
-  instrument = 4;
-  }
-  else
-  {
-  instrument = 5;
-  }
-
   Packet pkt;
   pkt << PACKET_PLAY_NOTE << (int32_t)x << (int16_t)y << (int32_t)z << (int8_t)instrument << (int8_t)pitch;
 
