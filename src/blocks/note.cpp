@@ -32,75 +32,93 @@
 
 bool BlockNote::affectedBlock(int block)
 {
-  switch(block)
-  {
-  case BLOCK_NOTE_BLOCK:
-    return true;
-  }
-  return false;
+    switch(block)
+    {
+    case BLOCK_NOTE_BLOCK:
+        return true;
+    }
+    return false;
 }
 
 
 void BlockNote::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-  uint8_t block,metadata;
-  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
-  Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x,y - 1,z,map), metadata);
+    uint8_t block,metadata;
+    Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
+    Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x,y - 1,z,map), metadata);
 }
 
-bool BlockNote::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction){
-  uint8_t oldblock;
-  uint8_t oldmeta;
+bool BlockNote::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction) {
+    uint8_t oldblock;
+    uint8_t oldmeta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
-  {
-    return true;
-  }
-  /* Check block below allows blocks placed on top */
-  if (!this->isBlockStackable(oldblock))
-  {
-    return true;
-  }
+    if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+    {
+        return true;
+    }
+    /* Check block below allows blocks placed on top */
+    if (!this->isBlockStackable(oldblock))
+    {
+        return true;
+    }
 
-  /* move the x,y,z coords dependent upon placement direction */
-  if (!this->translateDirection(&x,&y,&z,map,direction))
-  {
-    return true;
-  }
+    /* move the x,y,z coords dependent upon placement direction */
+    if (!this->translateDirection(&x,&y,&z,map,direction))
+    {
+        return true;
+    }
 
-  if (this->isUserOnBlock(x,y,z,map))
-  {
-    return true;
-  }
+    if (this->isUserOnBlock(x,y,z,map))
+    {
+        return true;
+    }
 
-  if (!this->isBlockEmpty(x,y,z,map))
-  {
-    return true; 
-  }
+    if (!this->isBlockEmpty(x,y,z,map))
+    {
+        return true;
+    }
 
-  //direction = user->relativeToBlock(x, y, z);
+    //direction = user->relativeToBlock(x, y, z);
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_NOTE_BLOCK, 0);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_NOTE_BLOCK, 0);
-  return false;
+    Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_NOTE_BLOCK, 0);
+    Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_NOTE_BLOCK, 0);
+    return false;
 }
+
+bool BlockNote::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
+{
+    uint8_t block,metadata;
+    Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
+    if (metadata == 0x14) {
+        metadata = 0x00;
+        Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
+        Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
+    }
+    else {
+        metadata++;
+        Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
+        Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
+    }
+	return false;
+}
+
 int BlockNote::getInstrument(int32_t x, int8_t y, int32_t z, int map)
 {
- /* There has to be a cleaner way of doing this. */
- uint8_t block,meta;
- Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
- if(block == BLOCK_WOOD || block == BLOCK_PLANK){
- return 1;
- }
- else if(block == BLOCK_SAND || block == BLOCK_GRAVEL || block == BLOCK_SLOW_SAND){
- return 2;
- }
- else if(block == BLOCK_GLASS || block ==  BLOCK_GLOWSTONE){
- return 3;
- }
- else if(block == BLOCK_STONE || block ==  BLOCK_COBBLESTONE || block == BLOCK_BRICK || block == BLOCK_OBSIDIAN 
-	 || block == BLOCK_NETHERSTONE || block == BLOCK_IRON_ORE || block == BLOCK_DIAMOND_ORE ){
- return 4;
- }
- return 5;
+    /* There has to be a cleaner way of doing this. */
+    uint8_t block,meta;
+    Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
+    if(block == BLOCK_WOOD || block == BLOCK_PLANK) {
+        return 1;
+    }
+    else if(block == BLOCK_SAND || block == BLOCK_GRAVEL || block == BLOCK_SLOW_SAND) {
+        return 2;
+    }
+    else if(block == BLOCK_GLASS || block ==  BLOCK_GLOWSTONE) {
+        return 3;
+    }
+    else if(block == BLOCK_STONE || block ==  BLOCK_COBBLESTONE || block == BLOCK_BRICK || block == BLOCK_OBSIDIAN
+            || block == BLOCK_NETHERSTONE || block == BLOCK_IRON_ORE || block == BLOCK_DIAMOND_ORE ) {
+        return 4;
+    }
+    return 5;
 }

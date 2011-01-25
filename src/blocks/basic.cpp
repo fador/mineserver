@@ -230,6 +230,7 @@ void BlockBasic::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, in
 void BlockBasic::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
-void BlockBasic::onInteract(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z)
+bool BlockBasic::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 {
+  return false;
 }

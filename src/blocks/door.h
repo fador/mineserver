@@ -48,5 +48,6 @@ public:
    bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
    void onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
    void onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
+   bool onInteract(User* user, int32_t x, int8_t y, int32_t z, int map);
 };
 

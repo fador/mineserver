@@ -746,60 +746,7 @@ int PacketHandler::player_block_placement(User *user)
     return PACKET_OK;
   }
   /*
-  //Check if note block tuning.
-  if(oldblock == BLOCK_NOTE_BLOCK)
-  {
-	if (metadata == 0x14){
-		metadata = 0x00;
-		Mineserver::get()->map(user->pos.map)->setBlock(x, y, z, oldblock, metadata);
-		Mineserver::get()->map(user->pos.map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, user->pos.map), metadata);
-		return PACKET_OK;
-	}
-	else{
-		metadata++;
-        Mineserver::get()->map(user->pos.map)->setBlock(x, y, z, oldblock, metadata);
-		Mineserver::get()->map(user->pos.map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, user->pos.map), metadata);
-        return PACKET_OK;
-	}
-	
-  }
-  //Check if opening a door
-  if(oldblock == BLOCK_WOODEN_DOOR || oldblock == BLOCK_IRON_DOOR)
-  {
-     // Toggle door state
-     if (metadata & 0x4)
-     {
-       metadata &= (0x8 | 0x3);
-     }
-     else
-     {
-       metadata |= 0x4;
-     }
 
-     uint8_t metadata2, block2;
-
-     int modifier = (metadata & 0x8) ? -1 : 1;
-
-     Mineserver::get()->map(user->pos.map)->setBlock(x, y, z, oldblock, metadata);
-     Mineserver::get()->map(user->pos.map)->sendBlockChange(x, y, z, (char)oldblock, metadata);  
-
-     Mineserver::get()->map(user->pos.map)->getBlock(x, y + modifier, z, &block2, &metadata2);
-
-     if (block2 == oldblock)
-     {
-       metadata2 = metadata;
-   
-       if(metadata & 0x8)
-         metadata2 &= 0x7;
-       else
-         metadata2 |= 0x8;
-
-       Mineserver::get()->map(user->pos.map)->setBlock(x, y + modifier, z, block2, metadata2);
-       Mineserver::get()->map(user->pos.map)->sendBlockChange(x, y + modifier, z, (char)oldblock, metadata2);
-     }
-
-     return PACKET_OK;
-  }
 
   //Check if we need to open a window
   if(oldblock == BLOCK_CHEST)
