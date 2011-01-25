@@ -48,31 +48,42 @@ void BlockNote::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y,
   Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x,y - 1,z,map), metadata);
 }
 
-void BlockNote::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
-{
+bool BlockNote::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction){
+  uint8_t oldblock;
+  uint8_t oldmeta;
 
-}
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  {
+    return true;
+  }
+  /* Check block below allows blocks placed on top */
+  if (!this->isBlockStackable(oldblock))
+  {
+    return true;
+  }
 
-void BlockNote::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
-{
-
-}
-
-bool BlockNote::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
-{
-  /* Taken directly from chest.cpp. Lots of useless stuff. */
+  /* move the x,y,z coords dependent upon placement direction */
+  if (!this->translateDirection(&x,&y,&z,map,direction))
+  {
+    return true;
+  }
 
   if (this->isUserOnBlock(x,y,z,map))
-     return true;
+  {
+    return true;
+  }
 
   if (!this->isBlockEmpty(x,y,z,map))
-     return true;
+  {
+    return true; 
+  }
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, 0);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);
+  //direction = user->relativeToBlock(x, y, z);
+
+  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_NOTE_BLOCK, 0);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_NOTE_BLOCK, 0);
   return false;
 }
-
 int BlockNote::getInstrument(int32_t x, int8_t y, int32_t z, int map)
 {
  /* There has to be a cleaner way of doing this. */
