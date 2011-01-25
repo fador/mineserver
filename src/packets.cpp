@@ -68,6 +68,7 @@
 #include "tools.h"
 #include "user.h"
 #include "blocks/basic.h"
+#include "blocks/note.h"
 
 #ifdef WIN32
     #define M_PI 3.141592653589793238462643
@@ -744,11 +745,22 @@ int PacketHandler::player_block_placement(User *user)
   {
     return PACKET_OK;
   }
-  //Check if note block tuning. INCOMPLETE
+  //Check if note block tuning.
   if(oldblock == BLOCK_NOTE_BLOCK)
   {
 	if (metadata == 0x14){
+		metadata = 0x00;
+		Mineserver::get()->map(user->pos.map)->setBlock(x, y, z, oldblock, metadata);
+		Mineserver::get()->map(user->pos.map)->sendNote(x, y, z, metadata);
+		return PACKET_OK;
 	}
+	else{
+		metadata++;
+        Mineserver::get()->map(user->pos.map)->setBlock(x, y, z, oldblock, metadata);
+		Mineserver::get()->map(user->pos.map)->sendNote(x, y, z, metadata);
+        return PACKET_OK;
+	}
+	
   }
   //Check if opening a door
   if(oldblock == BLOCK_WOODEN_DOOR || oldblock == BLOCK_IRON_DOOR)
