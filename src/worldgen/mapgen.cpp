@@ -195,7 +195,7 @@ void MapGen::generateChunk(int x, int z, int map)
   //Mineserver::get()->map()->mapLastused[chunkid] = (int)time(0);
 
   // Not changed
-  //Mineserver::get()->map()->mapChanged[chunkid] = Mineserver::get()->config()->bData("save_unchanged_chunks");
+  chunk->changed = Mineserver::get()->config()->bData("map.save_unchanged_chunks");
 
   //Mineserver::get()->map()->maps[chunkid].nbt = main;
   

@@ -89,6 +89,9 @@ public:
 
   struct event m_listenEvent;
   int m_socketlisten;
+  int m_saveInterval;
+  time_t m_lastSave;
+  bool m_pvp_enabled;
 
   Map* map(int n);
   void setMap(Map* map,int n=0);

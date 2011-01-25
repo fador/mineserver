@@ -128,10 +128,14 @@ Map::Map()
 Map::~Map()
 {
     // Free chunk memory
-    for (std::map<uint32_t, sChunk>::iterator it=maps.begin();it!=maps.end();++it)
+    for (int i=0;i<441;++i)
     {
-        releaseMap(maps[it->first].x, maps[it->first].z);
+      for (sChunkNode* node = chunks.getBuckets()[i];node!=NULL;node=node->next)
+      {
+        releaseMap(node->chunk->x, node->chunk->z);
+      }
     }
+
 
     maps.clear();
     // Free item memory
@@ -1440,11 +1444,8 @@ bool Map::releaseMap(int x, int z)
   // save first
   saveMap(x, z);
 
-  sChunk* chunk = chunks.getChunk(x,z);
-  if(chunk == NULL)
-  {
-    return false;
-  }
+  // Unlink this chunk
+  chunks.unlinkChunk(x,z);
   return true;
 }
 

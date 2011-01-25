@@ -582,10 +582,13 @@ int PacketHandler::player_digging(User *user)
         blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
         if(blockcb!=NULL && blockcb->affectedBlock(block))
         {
-          if(blockcb->onBroken(user, status,x,y,z,user->pos.map,direction)){
+          if(blockcb->onBroken(user, status,x,y,z,user->pos.map,direction))
+          {
             // Do not break
             return PACKET_OK;
-          }else{
+          }
+          else
+          {
             break;
           }
         }
@@ -1031,7 +1034,7 @@ int PacketHandler::player_block_placement(User *user)
   #define INV_TASKBAR_START 36
   if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].type == newblock && newblock != -1)
   {
-    if(newblock<256)
+    //if(newblock<256)
     {
       // It's a block
       user->inv[INV_TASKBAR_START+user->currentItemSlot()].count--;
@@ -1201,21 +1204,24 @@ int PacketHandler::use_entity(User *user)
     return PACKET_OK;
   }
 
-  //This is used when punching users, mobs or other entities
-  for(uint32_t i = 0; i < User::all().size(); i++)
+  if(Mineserver::get()->m_pvp_enabled)
   {
-    if(User::all()[i]->UID == (uint32_t)target)
+    //This is used when punching users, mobs or other entities
+    for(uint32_t i = 0; i < User::all().size(); i++)
     {
-      User::all()[i]->health--;
-      User::all()[i]->sethealth(User::all()[i]->health);
-
-      if(User::all()[i]->health <= 0)
+      if(User::all()[i]->UID == (uint32_t)target)
       {
-        Packet pkt;
-        pkt << PACKET_DEATH_ANIMATION << (int32_t)User::all()[i]->UID << (int8_t)3;
-        User::all()[i]->sendOthers((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+        User::all()[i]->health--;
+        User::all()[i]->sethealth(User::all()[i]->health);
+
+        if(User::all()[i]->health <= 0)
+        {
+          Packet pkt;
+          pkt << PACKET_DEATH_ANIMATION << (int32_t)User::all()[i]->UID << (int8_t)3;
+          User::all()[i]->sendOthers((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+        }
+        break;
       }
-      break;
     }
   }
 

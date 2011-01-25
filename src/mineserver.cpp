@@ -82,7 +82,7 @@ int setnonblock(int fd)
 {
 #ifdef WIN32
   u_long iMode = 1;
-  ioctlsocket(fd, FIONBIO, &iMode);
+  ioctlsocket(fd, FIONBIO, &iMode);   
 #else
   int flags;
 
@@ -99,6 +99,13 @@ void sighandler(int sig_num)
 {
   Mineserver::get()->stop();
 }
+
+#ifndef WIN32
+void pipehandler(int sig_num)
+{
+ //Do nothing
+}
+#endif
 
 std::string removeChar(std::string str, const char* c)
 {
@@ -117,6 +124,12 @@ int main(int argc, char* argv[])
   signal(SIGTERM, sighandler);
   signal(SIGINT, sighandler);
 
+#ifndef WIN32
+  signal(SIGPIPE, pipehandler);
+#else
+  signal(SIGBREAK, sighandler);
+#endif
+
   srand((uint32_t)time(NULL));
 
   return Mineserver::get()->run(argc, argv);
@@ -124,6 +137,9 @@ int main(int argc, char* argv[])
 
 Mineserver::Mineserver()
 {
+  m_saveInterval = 0;
+  m_lastSave = time(NULL);
+
   initConstants();
 
   m_config         = new Config;
@@ -145,6 +161,10 @@ Mineserver::Mineserver()
   gennames.push_back(mapgen);
   gennames.push_back(nethergen);
   gennames.push_back(heavengen);
+
+  m_saveInterval = m_config->iData("map.save_interval");
+
+  m_pvp_enabled = m_config->bData("system.pvp.enabled");
 
   const char* key = "map.storage.nbt.directories"; // Prefix for worlds config
   if (m_config->has(key) && (m_config->type(key) == CONFIG_NODE_LIST))
@@ -403,6 +423,18 @@ int Mineserver::run(int argc, char *argv[])
     {
       starttime = (uint32_t)timeNow;
 
+      //Map saving on configurable interval
+      if(m_saveInterval != 0 && timeNow-m_lastSave >= m_saveInterval)
+      {
+        //Save
+        for(int i =0; i<m_map.size();i++)
+        {
+          m_map[i]->saveWholeMap();
+        }
+
+        m_lastSave = timeNow;
+      }
+
       // If users, ping them
       if (User::all().size() > 0)
       {
@@ -518,8 +550,9 @@ int Mineserver::run(int argc, char *argv[])
     screen()->end();
   }
 
+  saveAll();
+
   /* Free memory */
-  
   for(int i =0; i<m_map.size();i++)
   {
     delete m_map[i];
