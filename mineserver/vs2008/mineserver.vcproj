@@ -287,6 +287,9 @@
 				<File
 					RelativePath="..\..\src\blocks\liquid.cpp"
 					>
+				<File
+					RelativePath="..\..\src\blocks\note.cpp"
+					>	
 				</File>
 				<File
 					RelativePath="..\..\src\blocks\plant.cpp"
@@ -431,6 +434,10 @@
 				</File>
 				<File
 					RelativePath="..\..\src\blocks\liquid.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\note.h"
 					>
 				</File>
 				<File
