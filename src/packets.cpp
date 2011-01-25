@@ -1074,7 +1074,7 @@ int PacketHandler::holding_change(User *user)
 
   user->buffer.removePacket();
 
-  user->inventoryHolding.type = itemSlot;
+  user->inventoryHolding = user->inv[itemSlot+36];
 
   //Send holding change to others
   Packet pkt;
