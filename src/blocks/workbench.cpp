@@ -25,24 +25,23 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "../mineserver.h"
+#include "../map.h"
 
-#include "basic.h"
+#include "workbench.h"
 
-class User;
-
-/** BlockNote deals specifically with Note block functionality.
-@see BlockBasic
-*/
-
-class BlockNote : public BlockBasic
+bool BlockWorkbench::affectedBlock(int block)
 {
-public:
-  bool affectedBlock(int block);
-  void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int map, int32_t z, int8_t direction);
-  bool onInteract(User* user, int32_t x, int8_t y, int32_t z, int map);
-private:  
-  int getInstrument(int32_t x, int8_t y, int32_t z, int map);
-};
+  switch(block)
+  {
+  case BLOCK_WORKBENCH:
+    return true;
+  }
+  return false;
+}
 
-
+bool BlockWorkbench::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
+{
+  Mineserver::get()->inventory()->windowOpen(user,WINDOW_WORKBENCH,x, y, z);
+  return false;
+}

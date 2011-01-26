@@ -25,24 +25,25 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "../mineserver.h"
+#include "../map.h"
 
-#include "basic.h"
+#include "blockfurnace.h"
 
-class User;
-
-/** BlockNote deals specifically with Note block functionality.
-@see BlockBasic
-*/
-
-class BlockNote : public BlockBasic
+bool BlockFurnace::affectedBlock(int block)
 {
-public:
-  bool affectedBlock(int block);
-  void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int map, int32_t z, int8_t direction);
-  bool onInteract(User* user, int32_t x, int8_t y, int32_t z, int map);
-private:  
-  int getInstrument(int32_t x, int8_t y, int32_t z, int map);
-};
+  switch(block)
+  {
+  case BLOCK_FURNACE:
+  case BLOCK_BURNING_FURNACE:
+    return true;
+  }
+  return false;
+}
 
-
+bool BlockFurnace::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
+{
+  /* Not working. Might be a conflict with the pre-existing furnace stuff.*/
+  Mineserver::get()->inventory()->windowOpen(user,WINDOW_FURNACE,x, y, z);
+  return false;
+}

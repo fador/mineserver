@@ -31,18 +31,14 @@
 
 class User;
 
-/** BlockNote deals specifically with Note block functionality.
+/** BlockFurnace deals specifically with Furnace interaction.
+It does not handle furnaces cooking, only right click interaction.
 @see BlockBasic
 */
 
-class BlockNote : public BlockBasic
+class BlockFurnace : public BlockBasic
 {
 public:
   bool affectedBlock(int block);
-  void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int map, int32_t z, int8_t direction);
   bool onInteract(User* user, int32_t x, int8_t y, int32_t z, int map);
-private:  
-  int getInstrument(int32_t x, int8_t y, int32_t z, int map);
 };
-
-

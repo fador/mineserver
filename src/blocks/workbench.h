@@ -31,18 +31,14 @@
 
 class User;
 
-/** BlockNote deals specifically with Note block functionality.
+/** BlockWorkbench deals specifically with Workbench interaction.
+It does not handle crafting, only right click interaction.
 @see BlockBasic
 */
 
-class BlockNote : public BlockBasic
+class BlockWorkbench : public BlockBasic
 {
 public:
   bool affectedBlock(int block);
-  void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int map, int32_t z, int8_t direction);
   bool onInteract(User* user, int32_t x, int8_t y, int32_t z, int map);
-private:  
-  int getInstrument(int32_t x, int8_t y, int32_t z, int map);
 };
-
-

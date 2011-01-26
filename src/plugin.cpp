@@ -53,6 +53,8 @@
 #include "blocks/ladder.h"
 #include "blocks/cake.h"
 #include "blocks/note.h"
+#include "blocks/blockfurnace.h"
+#include "blocks/workbench.h"
 
 void Plugin::init()
 {
@@ -84,6 +86,10 @@ void Plugin::init()
    BlockCB.push_back(cakeblock);
    BlockNote* noteblock = new BlockNote();
    BlockCB.push_back(noteblock);
+   BlockFurnace* furnaceblock = new BlockFurnace();
+   BlockCB.push_back(furnaceblock);
+   BlockWorkbench* workbenchblock = new BlockWorkbench();
+   BlockCB.push_back(workbenchblock);
    BlockDefault* defaultblock = new BlockDefault();
    BlockCB.push_back(defaultblock);
 

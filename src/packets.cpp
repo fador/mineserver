@@ -745,29 +745,6 @@ int PacketHandler::player_block_placement(User *user)
   {
     return PACKET_OK;
   }
-  /*
-
-
-  //Check if we need to open a window
-  if(oldblock == BLOCK_CHEST)
-  {
-    //ToDo: check for large chest!
-    Mineserver::get()->inventory()->windowOpen(user,WINDOW_CHEST,x, y, z);
-    return PACKET_OK;
-  }
-
-  if(oldblock == BLOCK_FURNACE || oldblock == BLOCK_BURNING_FURNACE)
-  {
-    Mineserver::get()->inventory()->windowOpen(user,WINDOW_FURNACE,x, y, z);
-    return PACKET_OK;
-  }
-
-  if(oldblock == BLOCK_WORKBENCH)
-  {
-
-    Mineserver::get()->inventory()->windowOpen(user,WINDOW_WORKBENCH,x, y, z);
-    return PACKET_OK;
-  }
   
   // TODO: Handle int16_t itemID's
   /*
@@ -778,17 +755,16 @@ int PacketHandler::player_block_placement(User *user)
   */
   
   /* Protocol docs say this should be what interacting is. */
-  if(oldblock != BLOCK_AIR && newblock == -1){
-
-        (static_cast<Hook4<bool,const char*,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("PlayerBlockInteract")))->doAll(user->nick.c_str(), x, y, z);
-
+  if(oldblock != BLOCK_AIR && newblock == -1)
+  {
+    (static_cast<Hook4<bool,const char*,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("PlayerBlockInteract")))->doAll(user->nick.c_str(), x, y, z);
       for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
       {
         blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
-        if(blockcb!=NULL && blockcb->affectedBlock(oldblock))
-        {
-          blockcb->onInteract(user, x,y,z,user->pos.map);
-        }
+          if(blockcb!=NULL && blockcb->affectedBlock(oldblock))
+          {
+            blockcb->onInteract(user, x,y,z,user->pos.map);
+          }
       }
   }
   bool foundFromInventory = false;
