@@ -118,9 +118,10 @@ void MapGen::generateFlatgrass(int x, int z, int map)
   
   for (int bX = 0; bX < 16; bX++) 
   {
-    for (int bY = 0; bY < 128; bY++) 
+    for (int bZ = 0; bZ < 16; bZ++) 
     {
-      for (int bZ = 0; bZ < 16; bZ++) 
+      heightmap[(bZ<<4)+bX] = 64;
+      for (int bY = 0; bY < 128; bY++) 
       {
         if (bY == 0) 
         {

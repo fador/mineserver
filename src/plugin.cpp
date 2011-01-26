@@ -72,6 +72,7 @@ void Plugin::init()
    BlockFire* fireblock = new BlockFire();
    BlockCB.push_back(fireblock);
    BlockStair* stairblock = new BlockStair();
+   BlockCB.push_back(stairblock);
    BlockChest* chestblock = new BlockChest();
    BlockCB.push_back(chestblock);
    BlockDoor* doorblock = new BlockDoor();

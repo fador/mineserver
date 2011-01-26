@@ -471,6 +471,20 @@ NBT_Value * NBT_Value::LoadFromFile(const std::string &filename)
   fread(&uncompressedSize, 4, 1, fp);
   fclose(fp);
 
+  //Do endian testing!
+  int32_t endiantestint=1; int8_t *endiantestchar=(int8_t*)&endiantestint;
+  if(*endiantestchar != 1)
+  {
+    //Swap order
+    int uncompressedSizeOld = uncompressedSize;
+    uint8_t *newpointer = reinterpret_cast<uint8_t*>(&uncompressedSize);     
+    uint8_t *oldpointer = reinterpret_cast<uint8_t *>(&uncompressedSizeOld);
+    newpointer[0] = oldpointer[3];
+    newpointer[1] = oldpointer[2];
+    newpointer[2] = oldpointer[1];
+    newpointer[3] = oldpointer[0];
+  }
+
   if(uncompressedSize == 0)
   {
     std::cout << "Unable to determine uncompressed size of " << filename << std::endl;
