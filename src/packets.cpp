@@ -785,7 +785,7 @@ int PacketHandler::player_block_placement(User *user)
       for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
       {
         blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
-        if(blockcb!=NULL && blockcb->affectedBlock(block))
+        if(blockcb!=NULL && blockcb->affectedBlock(oldblock))
         {
           blockcb->onInteract(user, x,y,z,user->pos.map);
         }
