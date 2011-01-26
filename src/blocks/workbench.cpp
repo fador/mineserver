@@ -40,6 +40,33 @@ bool BlockWorkbench::affectedBlock(int block)
   return false;
 }
 
+bool BlockWorkbench::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+{
+  uint8_t oldblock;
+  uint8_t oldmeta;
+
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+    return true;
+
+  /* Check block below allows blocks placed on top */
+  if (!this->isBlockStackable(oldblock))
+    return true;
+
+  /* move the x,y,z coords dependent upon placement direction */
+  if (!this->translateDirection(&x,&y,&z,map,direction))
+    return true;
+
+  if (this->isUserOnBlock(x,y,z,map))
+     return true;
+
+  if (!this->isBlockEmpty(x,y,z,map))
+     return true;
+
+  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+  return false;
+}
+
 bool BlockWorkbench::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 {
   Mineserver::get()->inventory()->windowOpen(user,WINDOW_WORKBENCH,x, y, z);
