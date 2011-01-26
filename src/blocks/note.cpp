@@ -32,12 +32,12 @@
 
 bool BlockNote::affectedBlock(int block)
 {
-    switch(block)
-    {
-    case BLOCK_NOTE_BLOCK:
-        return true;
-    }
-    return false;
+ switch(block)
+   {
+     case BLOCK_NOTE_BLOCK:
+       return true;
+   }
+  return false;
 }
 
 
@@ -50,38 +50,51 @@ void BlockNote::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y,
 
 bool BlockNote::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 {
-    uint8_t block,metadata;
-    Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
-    if (metadata == 0x14) {
-        metadata = 0x00;
-        Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
-        Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
+  uint8_t block,metadata;
+  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
+  if (metadata == 0x14)
+    {
+      metadata = 0x00;
+      Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
+      Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
     }
-    else {
-        metadata++;
-        Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
-        Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
+    else
+	{
+      metadata++;
+      Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
+      Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
     }
-	return false;
+  return false;
 }
 
 int BlockNote::getInstrument(int32_t x, int8_t y, int32_t z, int map)
 {
-    /* There has to be a cleaner way of doing this. */
-    uint8_t block,meta;
-    Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
-    if(block == BLOCK_WOOD || block == BLOCK_PLANK) {
-        return 1;
-    }
-    else if(block == BLOCK_SAND || block == BLOCK_GRAVEL || block == BLOCK_SLOW_SAND) {
-        return 2;
-    }
-    else if(block == BLOCK_GLASS || block ==  BLOCK_GLOWSTONE) {
-        return 3;
-    }
-    else if(block == BLOCK_STONE || block ==  BLOCK_COBBLESTONE || block == BLOCK_BRICK || block == BLOCK_OBSIDIAN
-            || block == BLOCK_NETHERSTONE || block == BLOCK_IRON_ORE || block == BLOCK_DIAMOND_ORE ) {
-        return 4;
-    }
-    return 5;
+  uint8_t block,meta;
+  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
+  switch(block)
+    {
+	  case BLOCK_WOOD:
+	  case BLOCK_PLANK:
+	    return INSTRUMENT_BASS;
+	  case BLOCK_SAND:
+	  case BLOCK_GRAVEL:
+	  case BLOCK_SLOW_SAND:
+	    return INSTRUMENT_SNARE;
+	  case BLOCK_GLASS:
+	  case BLOCK_GLOWSTONE:
+	    return INSTRUMENT_STICK;
+	  case BLOCK_STONE:
+	  case BLOCK_COBBLESTONE:
+	  case BLOCK_BRICK:
+	  case BLOCK_OBSIDIAN:
+	  case BLOCK_NETHERSTONE:
+	  case BLOCK_IRON_ORE:
+	  case BLOCK_DIAMOND_ORE:
+	  case BLOCK_GOLD_ORE:
+	  case BLOCK_FURNACE:
+	  case BLOCK_BURNING_FURNACE:
+	  case BLOCK_DISPENSER:
+	    return INSTRUMENT_BASSDRUM;
+	}
+  return INSTRUMENT_HARP;
 }

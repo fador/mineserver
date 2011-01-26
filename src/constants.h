@@ -141,6 +141,13 @@ enum
   MOB_PIG = 90, MOB_SHEEP, MOB_COW, MOB_CHICKEN
 };
 
+//Instruments (based off http://www.minecraftwiki.net/wiki/Note_Block)
+
+enum
+{
+  INSTRUMENT_BASS = 1, INSTRUMENT_SNARE, INSTRUMENT_STICK, INSTRUMENT_BASSDRUM, INSTRUMENT_HARP
+};
+
 const std::string VERSION = "0.1.15 (Alpha)";
 
 const int PROTOCOL_VERSION = 8;
