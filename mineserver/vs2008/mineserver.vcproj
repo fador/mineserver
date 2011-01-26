@@ -281,6 +281,15 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\blocks\blockfurnace.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\workbench.cpp"
+					>
+				</File>
+
+				<File
 					RelativePath="..\..\src\blocks\fire.cpp"
 					>
 				</File>
@@ -433,6 +442,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\blocks\blockfurnace.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\blocks\liquid.h"
 					>
 				</File>
@@ -462,6 +475,10 @@
 				</File>
 				<File
 					RelativePath="..\..\src\blocks\tracks.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\workbench.h"
 					>
 				</File>
 			</Filter>
