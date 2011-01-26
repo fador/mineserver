@@ -4,3 +4,5 @@ all:
 	g++ -o binlogdump binlogdump.cpp binlog.o
 clean:
 	rm binlog.o binlog.so
+install:
+	cp binlogdump binlog.so ../../../bin/
