@@ -763,7 +763,15 @@ int PacketHandler::player_block_placement(User *user)
         blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
           if(blockcb!=NULL && blockcb->affectedBlock(oldblock))
           {
-            blockcb->onInteract(user, x,y,z,user->pos.map);
+			//This should actually make the boolean do something. Maybe.
+            if(blockcb->onInteract(user, x,y,z,user->pos.map))
+			{
+              return PACKET_OK;
+            }
+			else
+			{
+              break;
+            }
           }
       }
   }
