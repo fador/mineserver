@@ -68,6 +68,7 @@
 #include "tools.h"
 #include "user.h"
 #include "blocks/basic.h"
+#include "blocks/note.h"
 
 #ifdef WIN32
     #define M_PI 3.141592653589793238462643
@@ -744,66 +745,7 @@ int PacketHandler::player_block_placement(User *user)
   {
     return PACKET_OK;
   }
-
-  //Check if opening a door
-  if(oldblock == BLOCK_WOODEN_DOOR || oldblock == BLOCK_IRON_DOOR)
-  {
-     // Toggle door state
-     if (metadata & 0x4)
-     {
-       metadata &= (0x8 | 0x3);
-     }
-     else
-     {
-       metadata |= 0x4;
-     }
-
-     uint8_t metadata2, block2;
-
-     int modifier = (metadata & 0x8) ? -1 : 1;
-
-     Mineserver::get()->map(user->pos.map)->setBlock(x, y, z, oldblock, metadata);
-     Mineserver::get()->map(user->pos.map)->sendBlockChange(x, y, z, (char)oldblock, metadata);  
-
-     Mineserver::get()->map(user->pos.map)->getBlock(x, y + modifier, z, &block2, &metadata2);
-
-     if (block2 == oldblock)
-     {
-       metadata2 = metadata;
-   
-       if(metadata & 0x8)
-         metadata2 &= 0x7;
-       else
-         metadata2 |= 0x8;
-
-       Mineserver::get()->map(user->pos.map)->setBlock(x, y + modifier, z, block2, metadata2);
-       Mineserver::get()->map(user->pos.map)->sendBlockChange(x, y + modifier, z, (char)oldblock, metadata2);
-     }
-
-     return PACKET_OK;
-  }
   
-  //Check if we need to open a window
-  if(oldblock == BLOCK_CHEST)
-  {
-    //ToDo: check for large chest!
-    Mineserver::get()->inventory()->windowOpen(user,WINDOW_CHEST,x, y, z);
-    return PACKET_OK;
-  }
-
-  if(oldblock == BLOCK_FURNACE || oldblock == BLOCK_BURNING_FURNACE)
-  {
-    Mineserver::get()->inventory()->windowOpen(user,WINDOW_FURNACE,x, y, z);
-    return PACKET_OK;
-  }
-
-  if(oldblock == BLOCK_WORKBENCH)
-  {
-
-    Mineserver::get()->inventory()->windowOpen(user,WINDOW_WORKBENCH,x, y, z);
-    return PACKET_OK;
-  }
-
   // TODO: Handle int16_t itemID's
   /*
   if(newblock > 255 && newblock != ITEM_SIGN)
@@ -811,7 +753,28 @@ int PacketHandler::player_block_placement(User *user)
     return PACKET_OK;
   }
   */
-
+  
+  /* Protocol docs say this should be what interacting is. */
+  if(oldblock != BLOCK_AIR && newblock == -1)
+  {
+    (static_cast<Hook4<bool,const char*,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("PlayerBlockInteract")))->doAll(user->nick.c_str(), x, y, z);
+      for(int i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+      {
+        blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+          if(blockcb!=NULL && blockcb->affectedBlock(oldblock))
+          {
+			//This should actually make the boolean do something. Maybe.
+            if(blockcb->onInteract(user, x,y,z,user->pos.map))
+			{
+              return PACKET_OK;
+            }
+			else
+			{
+              break;
+            }
+          }
+      }
+  }
   bool foundFromInventory = false;
 
   #define INV_TASKBAR_START 36

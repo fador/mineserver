@@ -73,8 +73,6 @@ bool BlockCake::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
     return true; 
   }
 
-  direction = user->relativeToBlock(x, y, z);
-
   Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_CAKE, 0);
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_CAKE, 0);
   return false;

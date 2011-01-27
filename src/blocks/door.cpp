@@ -182,3 +182,39 @@ void BlockDoor::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t
 void BlockDoor::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
+
+bool BlockDoor::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map){
+  uint8_t block,metadata;
+  uint8_t metadata2, block2;
+  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
+  int modifier = ((metadata & 0x8)==0x8) ? -1 : 1;
+
+    Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
+     if (metadata & 0x4)
+     {
+       metadata &= (0x8 | 0x3);
+     }
+     else
+     {
+       metadata |= 0x4;
+     }
+
+     Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
+     Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)block, metadata);  
+
+     Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
+
+     if (block2 == block)
+     {
+       metadata2 = metadata;
+   
+       if(metadata & 0x8)
+         metadata2 &= 0x7;
+       else
+         metadata2 |= 0x8;
+
+       Mineserver::get()->map(map)->setBlock(x, y + modifier, z, block2, metadata2);
+       Mineserver::get()->map(map)->sendBlockChange(x, y + modifier, z, (char)block, metadata2);
+	 }
+	 return false;
+}

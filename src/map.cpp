@@ -920,6 +920,19 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
   return true;
 }
 
+bool Map::sendNote(int x, int y, int z, char instrument, char pitch)
+{
+  Packet pkt;
+  pkt << PACKET_PLAY_NOTE << (int32_t)x << (int16_t)y << (int32_t)z << (int8_t)instrument << (int8_t)pitch;
+
+  sChunk* chunk = chunks.getChunk(blockToChunk(x), blockToChunk(z));
+  if(chunk == NULL)
+    return false;
+
+  chunk->sendPacket(pkt);
+  return true;
+}
+
 bool Map::sendPickupSpawn(spawnedItem item)
 {
   //Push to global item storage
@@ -936,7 +949,7 @@ bool Map::sendPickupSpawn(spawnedItem item)
     return false;
 
   chunk->items.push_back(storedItem);
-
+	
   Packet pkt;
   pkt << PACKET_PICKUP_SPAWN << (int32_t)item.EID << (int16_t)item.item << (int8_t)item.count << (int16_t)item.health
       << (int32_t)item.pos.x() << (int32_t)item.pos.y() << (int32_t)item.pos.z()

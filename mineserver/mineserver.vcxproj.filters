@@ -168,6 +168,15 @@
     <ClCompile Include="..\src\mob.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\blocks\note.cpp">
+      <Filter>Source Files\blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\blocks\workbench.cpp">
+      <Filter>Source Files\blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\blocks\blockfurnace.cpp">
+      <Filter>Source Files\blocks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\user.h">
@@ -319,6 +328,15 @@
     </ClInclude>
     <ClInclude Include="..\src\mob.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\note.h">
+      <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\workbench.h">
+      <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\blockfurnace.h">
+      <Filter>Header Files\blocks</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
