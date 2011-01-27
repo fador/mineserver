@@ -83,6 +83,7 @@ User::User(int sock, uint32_t EID)
 
   this->m_currentItemSlot = 0;
   this->inventoryHolding  = Item();
+  this->curItem          = 0;
 
   // Ignore this user if it's the server console
   if (this->UID != SERVER_CONSOLE_UID)
