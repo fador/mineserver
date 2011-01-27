@@ -488,6 +488,16 @@ bool user_sethealth(const char* user,int userHealth)
   return false;
 }
 
+int user_gethealth(const char* user)
+{
+  User* tempUser = userFromName(std::string(user));
+  if(tempUser != NULL)
+  { 
+    return tempUser->health;
+  }
+  return 0;
+}
+
 int user_getCount()
 {
   return Mineserver::get()->users().size();
@@ -498,14 +508,35 @@ char* user_getUserNumbered(int c)
   return (char*)Mineserver::get()->users()[c]->nick.c_str();
 }
 
-int user_getItemInHand(const char* user)
+bool user_getItemInHand(const char* user, int *type, int *meta, int *quant)
 {
   User* tempUser = userFromName(std::string(user));
   if(tempUser != NULL)
   {
-    return tempUser->inventoryHolding.type;
+    Item item = tempUser->inv[tempUser->curItem+36];
+    if(type!=NULL)
+      *type = item.type;
+    if(meta!=NULL)
+      *meta = item.health;
+    if(quant!=NULL)
+      *quant = item.count;
+    return true;
   }
-  return -1;
+  return false;
+}
+
+bool user_setItemInHand(const char* user, int type, int meta, int quant)
+{
+  User* tempUser = userFromName(std::string(user));
+  if(tempUser != NULL)
+  {
+    Item item = tempUser->inv[tempUser->curItem];
+    item.type = type;
+    item.health = meta;
+    item.count = quant;
+    return true;
+  }
+  return false;
 }
 
 bool user_addItem(const char* user, int item, int count, int health)
@@ -724,10 +755,12 @@ void init_plugin_api(void)
   plugin_api_pointers.user.getUserNumbered         = &user_getUserNumbered;
   plugin_api_pointers.user.getPositionW            = &user_getPositionW;
   plugin_api_pointers.user.getItemInHand           = &user_getItemInHand;
+  plugin_api_pointers.user.setItemInHand           = &user_setItemInHand;
   plugin_api_pointers.user.addItem                 = &user_addItem;
   plugin_api_pointers.user.hasItem                 = &user_hasItem;
   plugin_api_pointers.user.delItem                 = &user_delItem;
   plugin_api_pointers.user.toggleDND               = &user_toggleDND;
+  plugin_api_pointers.user.gethealth               = &user_gethealth;
 
   plugin_api_pointers.config.has                   = &config_has;
   plugin_api_pointers.config.iData                 = &config_iData;
