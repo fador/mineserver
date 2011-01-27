@@ -303,6 +303,13 @@ void map_getSpawn(int* x, int* y, int* z)
   *z = Mineserver::get()->map(0)->spawnPos.z();
 }
 
+void map_setSpawn(int x, int y, int z)
+{  
+  Mineserver::get()->map(0)->spawnPos.x() = x;
+  Mineserver::get()->map(0)->spawnPos.y() = y;
+  Mineserver::get()->map(0)->spawnPos.z() = z;
+}
+
 bool map_getBlock(int x, int y, int z, unsigned char* type,unsigned char* meta)
 {
   return Mineserver::get()->map(0)->getBlock(x,y,z, type, meta);
@@ -737,6 +744,7 @@ void init_plugin_api(void)
   plugin_api_pointers.map.setTime                  = &map_setTime;
   plugin_api_pointers.map.createPickupSpawn        = &map_createPickupSpawn;
   plugin_api_pointers.map.getSpawn                 = &map_getSpawn;
+  plugin_api_pointers.map.setSpawn                 = &map_setSpawn;
   plugin_api_pointers.map.setBlock                 = &map_setBlock;
   plugin_api_pointers.map.getBlock                 = &map_getBlock;
   plugin_api_pointers.map.saveWholeMap             = &map_saveWholeMap;

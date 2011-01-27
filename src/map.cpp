@@ -387,6 +387,10 @@ bool Map::saveWholeMap()
 
     //Get time from the map
     *data["Time"] = mapTime;
+    *data["SpawnX"] = spawnPos.x();
+    *data["SpawnY"] = spawnPos.y();
+    *data["SpawnZ"] = spawnPos.z();
+    
     NBT_Value* trees = ((*root)["Trees"]);
 
     if(trees)

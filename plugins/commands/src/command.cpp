@@ -242,6 +242,18 @@ void home(std::string user, std::string command, std::deque<std::string> args)
   mineserver->user.teleport(user.c_str(),x, y + 2, z);
 }
 
+void setSpawn(std::string user, std::string command, std::deque<std::string> args)
+{
+  if(args.size() == 0) {
+    double x,y,z;
+    mineserver->user.getPosition(user.c_str(), &x,&y,&z,NULL,NULL,NULL);
+    
+    mineserver->chat.sendmsgTo(user.c_str(),"Set spawn!");
+    mineserver->map.setSpawn(x,y,z);
+    mineserver->user.teleport(user.c_str(),x, y + 2, z);
+  }
+}
+
 void userWorld(std::string user, std::string command, std::deque<std::string> args)
 {
   if(args.size() == 1)
@@ -744,6 +756,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mi
   registerCommand(new Command(parseCmd("players who names list"), "", "Lists online players", playerList));
   registerCommand(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems));
   registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap));  
+  registerCommand(new Command(parseCmd("setspawn"), "", "", setSpawn));  
   registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", sendHelp));
   registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport));
   registerCommand(new Command(parseCmd("gps"), "", "Display current coordinates", gps));
