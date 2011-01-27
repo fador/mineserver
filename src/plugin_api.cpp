@@ -530,10 +530,10 @@ bool user_setItemInHand(const char* user, int type, int meta, int quant)
   User* tempUser = userFromName(std::string(user));
   if(tempUser != NULL)
   {
-    Item item = tempUser->inv[tempUser->curItem];
-    item.type = type;
-    item.health = meta;
-    item.count = quant;
+    Item* item = &tempUser->inv[tempUser->curItem+36];
+    item->type = type;
+    item->health = meta;
+    item->count = quant;
     return true;
   }
   return false;
