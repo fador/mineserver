@@ -1,13 +1,19 @@
-SUBDIRS = commands filelog cursesui 
+CPP = g++
 
-.PHONY: subdirs $(SUBDIRS)
+OBJS = $(SRCS:.cpp=.o)
 
-subdirs: $(SUBDIRS)
+all: $(OBJS) $(PLUGIN_NAME).so
 
-clean: TARGET := clean
-clean:  $(SUBDIRS)
+install:
+	cp $(PLUGIN_NAME).so ../../bin/$(PLUGIN_NAME).so
 
-$(SUBDIRS):
-	$(MAKE) -C $@ $(TARGET)
+$(OBJS):
+	$(CPP) -fPIC $(LDFLAGS) -c $(@:.o=.cpp) -o ./$@
+
+$(PLUGIN_NAME).so:
+	$(CPP) -shared $(OBJS) -o $(PLUGIN_NAME).so
 
 
+clean:
+	rm $(OBJS)
+	rm $(PLUGIN_NAME).so
