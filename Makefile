@@ -21,3 +21,5 @@ dist-tar:
 	
 dist-zip:
 	zip -j mineserver-latest-`uname`-bin.zip ./bin/* ./LICENSE
+  
+dist: dist-tar dist-zip
