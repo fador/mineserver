@@ -1,19 +1,3 @@
 SUBDIRS = commands filelog cursesui nether crapMobs 
 
-.PHONY: subdirs $(SUBDIRS)
-
-subdirs: $(SUBDIRS)
-
-clean: TARGET := clean
-clean:  $(SUBDIRS)
-
-install: TARGET := install
-install: $(SUBDIRS)
-
-all: TARGET := all
-all: $(SUBDIRS)
-
-$(SUBDIRS):
-	$(MAKE) -C $@ $(TARGET)
-
-
+include ../subdir.mk
