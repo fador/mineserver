@@ -3,4 +3,4 @@ PLUGIN_NAME=crapMobs
 
 SRCS = crapMobs.cpp
 
-include ../Makefile.inc
+include ../plugins.mk

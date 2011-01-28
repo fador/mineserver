@@ -3,4 +3,4 @@ PLUGIN_NAME=filelog
 
 SRCS = ./src/filelog.cpp
 
-include ../Makefile.inc
+include ../plugins.mk

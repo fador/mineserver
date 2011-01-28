@@ -5,4 +5,4 @@ SRCS = screen.cpp
 
 LDFLAGS   += -lncurses
 
-include ../Makefile.inc
+include ../plugins.mk

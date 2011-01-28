@@ -3,4 +3,4 @@ PLUGIN_NAME=command
 
 SRCS = ./src/command.cpp
 
-include ../Makefile.inc
+include ../plugins.mk

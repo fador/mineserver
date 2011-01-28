@@ -18,34 +18,11 @@ SRC         += worldgen/heavengen.cpp
 SRC         += plugin.cpp plugin_api.cpp
 
 
-
-LIBRARIES    = 
-INC          = -I. -I/usr/include -I/usr/local/include -I/usr/include/libnoise
-CFLAGS     = -DFADOR_PLUGIN
-LDFLAGS      = -L/usr/local/lib -L/usr/lib -levent -lz -lnoise
-DEPDIR       = .deps
-BUILDDIR     = .build
 OBJS         = $(patsubst %.cpp,%.o,$(SRC))
 
-ifeq ($(DEBUG), YES)
-  CFLAGS  += -DDEBUG -g -O0
-endif
+include ../config.mk
 
-ifeq ($(PEDANTIC), YES)
-  CFLAGS  += -Wall -Werror -pedantic
-endif
-
-ifeq ($(findstring MINGW32,$(SYSTEM)),MINGW32)
-LDFLAGS += -lws2_32 -lwinmm
-else
-LDFLAGS += -ldl
-endif
-
-LIBNOISE=1
-
-ifeq ($(LIBNOISE), 1)
-  CFLAGS  += -DLIBNOISE
-endif
+LDFLAGS     += -levent -lz -lnoise
 
 COMPILE      = $(CC) $(INC) $(CFLAGS) $(ARCHFLAGS) -c $< -o $@
 MAKEDEPEND   = $(CC) -M $(INC) $(CFLAGS) $(ARCHFLAGS) -o "$(DEPDIR)/$*.d" $<

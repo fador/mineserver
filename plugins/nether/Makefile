@@ -3,4 +3,4 @@ PLUGIN_NAME=nether
 
 SRCS = nether.cpp
 
-include ../Makefile.inc
+include ../plugins.mk
