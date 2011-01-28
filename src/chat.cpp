@@ -50,12 +50,12 @@ Chat::~Chat()
 
 bool Chat::sendUserlist(User* user)
 {
-  this->sendMsg(user, MC_COLOR_BLUE + "[ " + dtos(User::all().size()) + " players online ]", USER);
-
+  this->sendMsg(user, MC_COLOR_BLUE + "[ " + dtos(User::all().size()) + " / " + dtos(Mineserver::get()->config()->iData("system.user_limit")) + " players online ]", USER);
+  std::string playerDesc;
   for(unsigned int i = 0; i < User::all().size(); i++)
   {
     if(!User::all()[i]->logged) continue;
-    std::string playerDesc = "> " + User::all()[i]->nick;
+    playerDesc += User::all()[i]->nick;
     if(User::all()[i]->muted)
     {
         playerDesc += MC_COLOR_YELLOW + " (muted)";
@@ -64,9 +64,9 @@ bool Chat::sendUserlist(User* user)
     {
       playerDesc += MC_COLOR_YELLOW + " (dnd)";
     }
-
-    this->sendMsg(user, playerDesc, USER);
+    playerDesc += ", ";
   }
+  this->sendMsg(user, playerDesc, USER);
 
   return true;
 }
