@@ -1,4 +1,4 @@
-SUBDIRS = commands filelog cursesui nether crapMobs 
+SUBDIRS = src plugins 
 
 .PHONY: subdirs $(SUBDIRS)
 
@@ -16,4 +16,8 @@ all: $(SUBDIRS)
 $(SUBDIRS):
 	$(MAKE) -C $@ $(TARGET)
 
-
+dist-tar:
+	tar cvzf mineserver-latest-`uname`-bin.tar.gz ./bin/ ./LICENSE
+	
+dist-zip:
+	zip -j mineserver-latest-`uname`-bin.zip ./bin/* ./LICENSE

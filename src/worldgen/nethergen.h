@@ -28,7 +28,7 @@
 #ifndef _NETHERGEN_H
 #define _NETHERGEN_H
 
-#ifdef DEBIAN
+#ifdef LIBNOISE
 #include <libnoise/noise.h>
 #else
 #include <noise/noise.h>

@@ -28,7 +28,7 @@
 #ifndef _MAPGEN_H
 #define _MAPGEN_H
 
-#ifdef DEBIAN
+#ifdef LIBNOISE
 #include <libnoise/noise.h>
 #else
 #include <noise/noise.h>

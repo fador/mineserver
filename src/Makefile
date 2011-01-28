@@ -1,15 +1,7 @@
-# Standard things
-.SUFFIXES:
-.SUFFIXES:  .c .o .so
-
-# Defaults
-PLUGIN       = YES
-
 # Sources
 SRC          = mineserver.cpp map.cpp chat.cpp constants.cpp logger.cpp nbt.cpp
 SRC         += furnace.cpp furnaceManager.cpp packets.cpp physics.cpp sockets.cpp
 SRC         += tools.cpp user.cpp tree.cpp inventory.cpp mob.cpp
-
 SRC         += screenBase.cpp cliScreen.cpp
 
 SRC         += config.cpp config/node.cpp config/scanner.cpp config/lexer.cpp config/parser.cpp
@@ -20,34 +12,27 @@ SRC         += blocks/stair.cpp blocks/torch.cpp blocks/tracks.cpp blocks/defaul
 SRC         += blocks/chest.cpp blocks/ladder.cpp blocks/cake.cpp blocks/note.cpp
 SRC         += blocks/workbench.cpp blocks/blockfurnace.cpp
 
-
 SRC         += worldgen/mapgen.cpp worldgen/cavegen.cpp worldgen/nethergen.cpp
+SRC         += worldgen/heavengen.cpp
 
-SRC         += plugin.cpp plugin_api.cpp worldgen/heavengen.cpp
+SRC         += plugin.cpp plugin_api.cpp
 
 
-# Variables
-ARCHFLAGS    = 
+
 LIBRARIES    = 
-INC          = -I. -I/usr/include -I/usr/local/include
-CXXFLAGS     = -DFADOR_PLUGIN
+INC          = -I. -I/usr/include -I/usr/local/include -I/usr/include/libnoise
+CFLAGS     = -DFADOR_PLUGIN
 LDFLAGS      = -L/usr/local/lib -L/usr/lib -levent -lz -lnoise
-COMMIT       = `git log | head -n1 | cut -b8-14`
-DF           = $(*F)
 DEPDIR       = .deps
 BUILDDIR     = .build
 OBJS         = $(patsubst %.cpp,%.o,$(SRC))
 
-ifeq ($(PLUGIN), YES)
-  OBJS      += $(patsubst %.cpp,%.o,$(PLUGINS))
-endif
-
 ifeq ($(DEBUG), YES)
-  CXXFLAGS  += -DDEBUG -g -O0
+  CFLAGS  += -DDEBUG -g -O0
 endif
 
 ifeq ($(PEDANTIC), YES)
-  CXXFLAGS  += -Wall -Werror -pedantic
+  CFLAGS  += -Wall -Werror -pedantic
 endif
 
 ifeq ($(findstring MINGW32,$(SYSTEM)),MINGW32)
@@ -56,52 +41,33 @@ else
 LDFLAGS += -ldl
 endif
 
-ifeq ($(findstring Debian,$(shell cat /etc/issue)),Debian)
-  DEBIAN     = 1
+LIBNOISE=1
+
+ifeq ($(LIBNOISE), 1)
+  CFLAGS  += -DLIBNOISE
 endif
 
-ifeq ($(findstring Ubuntu,$(shell cat /etc/issue)),Ubuntu)
-  DEBIAN     = 1
-endif
-
-ifeq ($(findstring Mint,$(shell cat /etc/issue)),Mint)
-  DEBIAN = 1
-endif
-
-ifeq ($(DEBIAN), 1)
-  CXXFLAGS  += -DDEBIAN
-endif
-
-# Tools
-CXX          = g++
-OBJCOPY      = objcopy
-COMPILE      = $(CXX) $(INC) $(CXXFLAGS) $(ARCHFLAGS) -c $< -o $@
-MAKEDEPEND   = $(CXX) -M $(INC) $(CXXFLAGS) $(ARCHFLAGS) -o "$(DEPDIR)/$*.d" $<
-
-# Rules
-.PHONY: clean all
+COMPILE      = $(CC) $(INC) $(CFLAGS) $(ARCHFLAGS) -c $< -o $@
+MAKEDEPEND   = $(CC) -M $(INC) $(CFLAGS) $(ARCHFLAGS) -o "$(DEPDIR)/$*.d" $<
 
 all: mineserver
 
 %.o: %.cpp
-	@echo "Compiling $<"
-	@mkdir -p $(DEPDIR)/$(dir $@)
-	@$(MAKEDEPEND)
-	@sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e '/^$$/ d' -e 's/$$/ :/' < $(DEPDIR)/$(dir $@)/$(*F).d >> $(DEPDIR)/$(dir $@)/$(*F).d
-	@$(COMPILE)
+	mkdir -p $(DEPDIR)/$(dir $@)
+	$(MAKEDEPEND)
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e '/^$$/ d' -e 's/$$/ :/' < $(DEPDIR)/$(dir $@)/$(*F).d >> $(DEPDIR)/$(dir $@)/$(*F).d
+	$(COMPILE)
 
 -include $(addprefix $(DEPDIR)/,$(OBJS:.o=.d))
 
 mineserver: $(OBJS)
-	@echo "Building $@"
-	@$(CXX) $(ARCHFLAGS) $(LDFLAGS) $(OBJS) $(LIBRARIES) -o ../bin/$@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(LIBRARIES) -o $@
 
-dist:
-	tar cvzf ../mineserver-latest-`uname`-bin.tar.gz -C ../bin/ . ../LICENSE
-	zip -j ../mineserver-latest-`uname`-bin.zip ../bin/* ../LICENSE
+install:
+	cp mineserver ../bin
 
 clean:
-	@rm -f *.o
-	@rm -f */*.o
-	@rm -f */*/*.o
-	@rm -rf $(DEPDIR)
+	-rm  *.o
+	-rm  */*.o
+	-rm  */*/*.o
+	-rm -r $(DEPDIR)
