@@ -85,23 +85,23 @@ class Plugin
 {
 public:
   // Hook registry stuff
-  bool  hasHook(const std::string name);
-  Hook* getHook(const std::string name);
-  void  setHook(const std::string name, Hook* hook);
-  void  remHook(const std::string name);
+  bool  hasHook(const std::string& name);
+  Hook* getHook(const std::string& name);
+  void  setHook(const std::string& name, Hook* hook);
+  void  remHook(const std::string& name);
   // Load/Unload plugins
   bool loadPlugin(const std::string name, const std::string file="");
   void unloadPlugin(const std::string name);
   // Plugin version registry
-  bool  hasPluginVersion(const std::string name);
-  float getPluginVersion(const std::string name);
-  void  setPluginVersion(const std::string name, float version);
-  void  remPluginVersion(const std::string name);
+  bool  hasPluginVersion(const std::string& name);
+  float getPluginVersion(const std::string& name);
+  void  setPluginVersion(const std::string& name, float version);
+  void  remPluginVersion(const std::string& name);
   // Pointer registry stuff
-  bool  hasPointer(const std::string name);
-  void  setPointer(const std::string name, void* pointer);
-  void* getPointer(const std::string name);
-  void  remPointer(const std::string name);
+  bool  hasPointer(const std::string& name);
+  void  setPointer(const std::string& name, void* pointer);
+  void* getPointer(const std::string& name);
+  void  remPointer(const std::string& name);
   // Create default hooks
   Plugin()
   {

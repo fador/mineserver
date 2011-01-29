@@ -108,11 +108,7 @@ void Plugin::free()
 bool Plugin::loadPlugin(const std::string name, const std::string file)
 {
   LIBRARY_HANDLE lhandle = NULL;
-#ifdef FADOR_PLUGIN
   void (*fhandle)(mineserver_pointer_struct*) = NULL;
-#else
-  void (*fhandle)(Mineserver*) = NULL;
-#endif
 
   if (!file.empty())
   {
@@ -156,22 +152,14 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
 
   m_libraryHandles[name] = lhandle;
 
-#ifdef FADOR_PLUGIN
   fhandle = (void (*)(mineserver_pointer_struct*)) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
-#else
-  fhandle = (void (*)(Mineserver*)) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
-#endif
   if (fhandle == NULL)
   {
     LOG(INFO, "Plugin", "Could not get init function handle!");
     unloadPlugin(name);
     return false;
   }
-#ifdef FADOR_PLUGIN  
   fhandle(&plugin_api_pointers);
-#else
-  fhandle(Mineserver::get());
-#endif
 
   return true;
 }
@@ -179,11 +167,7 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
 void Plugin::unloadPlugin(const std::string name)
 {
   LIBRARY_HANDLE lhandle = NULL;
-#ifdef FADOR_PLUGIN
   void (*fhandle)(void) = NULL;
-#else
-  void (*fhandle)(Mineserver*) = NULL;
-#endif
 
   if (m_pluginVersions.find(name) != m_pluginVersions.end())
   {
@@ -199,12 +183,7 @@ void Plugin::unloadPlugin(const std::string name)
       lhandle = LIBRARY_SELF();
     }
 
-#ifdef FADOR_PLUGIN
     fhandle = (void (*)(void)) LIBRARY_SYMBOL(lhandle, (name+"_shutdown").c_str());
-#else
-    fhandle = (void (*)(Mineserver*)) LIBRARY_SYMBOL(lhandle, (name+"_shutdown").c_str());
-#endif
-
     if (fhandle == NULL)
     {
       LOG(INFO, "Plugin","Could not get shutdown function handle!");
@@ -212,12 +191,7 @@ void Plugin::unloadPlugin(const std::string name)
     else
     {
       LOG(INFO, "Plugin","Calling shutdown function for `"+name+"'.");
-      
-#ifdef FADOR_PLUGIN  
       fhandle();
-#else
-      fhandle(Mineserver::get());
-#endif
     }
 
     LIBRARY_CLOSE(m_libraryHandles[name]);
@@ -228,10 +202,10 @@ void Plugin::unloadPlugin(const std::string name)
   }
 }
 
-bool Plugin::hasHook(const std::string name)
+bool Plugin::hasHook(const std::string& name)
 {
-  std::map<const std::string, Hook*>::iterator it_a = m_hooks.begin();
-  std::map<const std::string, Hook*>::iterator it_b = m_hooks.end();
+  std::map<const std::string, Hook*>::const_iterator it_a = m_hooks.begin();
+  std::map<const std::string, Hook*>::const_iterator it_b = m_hooks.end();
   for (;it_a!=it_b;++it_a)
   {
     if (it_a->first == name)
@@ -243,12 +217,12 @@ bool Plugin::hasHook(const std::string name)
   return false;
 }
 
-void Plugin::setHook(const std::string name, Hook* hook)
+void Plugin::setHook(const std::string& name, Hook* hook)
 {
   m_hooks[name] = hook;
 }
 
-Hook* Plugin::getHook(const std::string name)
+Hook* Plugin::getHook(const std::string& name)
 {
   if (hasHook(name))
   {
@@ -260,7 +234,7 @@ Hook* Plugin::getHook(const std::string name)
   }
 }
 
-void Plugin::remHook(const std::string name)
+void Plugin::remHook(const std::string& name)
 {
   if (hasHook(name))
   {
@@ -268,7 +242,7 @@ void Plugin::remHook(const std::string name)
   }
 }
 
-bool Plugin::hasPluginVersion(const std::string name)
+bool Plugin::hasPluginVersion(const std::string& name)
 {
   std::map<const std::string, float>::iterator it_a = m_pluginVersions.begin();
   std::map<const std::string, float>::iterator it_b = m_pluginVersions.end();
@@ -284,7 +258,7 @@ bool Plugin::hasPluginVersion(const std::string name)
   return false;
 }
 
-float Plugin::getPluginVersion(const std::string name)
+float Plugin::getPluginVersion(const std::string& name)
 {
   if (hasPluginVersion(name))
   {
@@ -296,12 +270,12 @@ float Plugin::getPluginVersion(const std::string name)
   }
 }
 
-void Plugin::setPluginVersion(const std::string name, float version)
+void Plugin::setPluginVersion(const std::string& name, float version)
 {
   m_pluginVersions[name] = version;
 }
 
-void Plugin::remPluginVersion(const std::string name)
+void Plugin::remPluginVersion(const std::string& name)
 {
   if (hasPluginVersion(name))
   {
@@ -309,10 +283,10 @@ void Plugin::remPluginVersion(const std::string name)
   }
 }
 
-bool Plugin::hasPointer(const std::string name)
+bool Plugin::hasPointer(const std::string& name)
 {
-  std::map<const std::string, void*>::iterator it_a = m_pointers.begin();
-  std::map<const std::string, void*>::iterator it_b = m_pointers.end();
+  std::map<const std::string, void*>::const_iterator it_a = m_pointers.begin();
+  std::map<const std::string, void*>::const_iterator it_b = m_pointers.end();
   for (;it_a!=it_b;++it_a)
   {
     if (it_a->first == name)
@@ -320,16 +294,15 @@ bool Plugin::hasPointer(const std::string name)
       return true;
     }
   }
-
   return false;
 }
 
-void Plugin::setPointer(const std::string name, void* pointer)
+void Plugin::setPointer(const std::string& name, void* pointer)
 {
   m_pointers[name] = pointer;
 }
 
-void* Plugin::getPointer(const std::string name)
+void* Plugin::getPointer(const std::string& name)
 {
   if (hasPointer(name))
   {
@@ -341,7 +314,7 @@ void* Plugin::getPointer(const std::string name)
   }
 }
 
-void Plugin::remPointer(const std::string name)
+void Plugin::remPointer(const std::string& name)
 {
   if (hasPointer(name))
   {
