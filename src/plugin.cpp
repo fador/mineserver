@@ -202,36 +202,26 @@ void Plugin::unloadPlugin(const std::string name)
   }
 }
 
-bool Plugin::hasHook(const std::string& name)
+bool Plugin::hasHook(const std::string& name) const
 {
-  std::map<const std::string, Hook*>::const_iterator it_a = m_hooks.begin();
-  std::map<const std::string, Hook*>::const_iterator it_b = m_hooks.end();
-  for (;it_a!=it_b;++it_a)
+  return m_hooks.find(name) != m_hooks.end();
+}
+
+Hook* Plugin::getHook(const std::string& name) const 
+{
+  std::map<const std::string, Hook*>::const_iterator hook = m_hooks.find(name);
+
+  if (hook == m_hooks.end())
   {
-    if (it_a->first == name)
-    {
-      return true;
-    }
+    return NULL;
   }
 
-  return false;
+  return hook->second;
 }
 
 void Plugin::setHook(const std::string& name, Hook* hook)
 {
   m_hooks[name] = hook;
-}
-
-Hook* Plugin::getHook(const std::string& name)
-{
-  if (hasHook(name))
-  {
-    return m_hooks[name];
-  }
-  else
-  {
-    return NULL;
-  }
 }
 
 void Plugin::remHook(const std::string& name)
@@ -242,32 +232,21 @@ void Plugin::remHook(const std::string& name)
   }
 }
 
-bool Plugin::hasPluginVersion(const std::string& name)
+bool Plugin::hasPluginVersion(const std::string& name) const
 {
-  std::map<const std::string, float>::iterator it_a = m_pluginVersions.begin();
-  std::map<const std::string, float>::iterator it_b = m_pluginVersions.end();
-
-  for (;it_a!=it_b;++it_a)
-  {
-    if (it_a->first == name)
-    {
-      return true;
-    }
-  }
-
-  return false;
+  return m_pluginVersions.find(name) != m_pluginVersions.end();
 }
 
-float Plugin::getPluginVersion(const std::string& name)
+float Plugin::getPluginVersion(const std::string& name) const
 {
-  if (hasPluginVersion(name))
-  {
-    return m_pluginVersions[name];
-  }
-  else
+  std::map<const std::string, float>::const_iterator pluginVersion = m_pluginVersions.find(name);
+
+  if (pluginVersion == m_pluginVersions.end())
   {
     return 0.0f;
   }
+
+  return pluginVersion->second;
 }
 
 void Plugin::setPluginVersion(const std::string& name, float version)
@@ -283,35 +262,26 @@ void Plugin::remPluginVersion(const std::string& name)
   }
 }
 
-bool Plugin::hasPointer(const std::string& name)
+bool Plugin::hasPointer(const std::string& name) const
 {
-  std::map<const std::string, void*>::const_iterator it_a = m_pointers.begin();
-  std::map<const std::string, void*>::const_iterator it_b = m_pointers.end();
-  for (;it_a!=it_b;++it_a)
+  return m_pointers.find(name) != m_pointers.end();
+}
+
+void* Plugin::getPointer(const std::string& name) const
+{
+  std::map<const std::string, void*>::const_iterator pointer = m_pointers.find(name);
+
+  if (pointer == m_pointers.end())
   {
-    if (it_a->first == name)
-    {
-      return true;
-    }
+    return NULL;
   }
-  return false;
+
+  return pointer->second;
 }
 
 void Plugin::setPointer(const std::string& name, void* pointer)
 {
   m_pointers[name] = pointer;
-}
-
-void* Plugin::getPointer(const std::string& name)
-{
-  if (hasPointer(name))
-  {
-    return m_pointers[name];
-  }
-  else
-  {
-    return NULL;
-  }
 }
 
 void Plugin::remPointer(const std::string& name)
@@ -321,4 +291,3 @@ void Plugin::remPointer(const std::string& name)
     m_pointers.erase(name);
   }
 }
-
