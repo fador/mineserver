@@ -30,6 +30,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include "chunkmap.h"
 
 class Furnace;
 class NBT_Value;
@@ -38,7 +39,7 @@ class FurnaceManager
 {
 public:
   void update();
-  void handleActivity(NBT_Value* entity, uint8_t blockType);
+  void handleActivity(furnaceData *data_);
 
 private:
   typedef std::vector<Furnace*> FurnaceContainer;

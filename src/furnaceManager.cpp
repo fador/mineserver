@@ -46,7 +46,7 @@ void FurnaceManager::update()
 #endif
   */
   // Loop thru all the furnaces
-  for(unsigned int index = 0; index < m_activeFurnaces.size(); index++)
+  for(int index = m_activeFurnaces.size()-1; index >= 0; index--)
   {
     // Get a pointer to this furnace
     Furnace* currentFurnace = (Furnace*)m_activeFurnaces[index];
@@ -65,8 +65,8 @@ void FurnaceManager::update()
     // If we're cooking, increment the activity and check if we're ready to smelt the output
     if(currentFurnace->isCooking())
     {
-      currentFurnace->setActiveCookDuration(currentFurnace->activeCookDuration() + 1);
-      if(currentFurnace->activeCookDuration() >= currentFurnace->cookingTime())
+      currentFurnace->setCookingTime(currentFurnace->cookingTime() + 1);
+      if(currentFurnace->cookingTime() >= currentFurnace->cookTime())
       {
         // Finished cooking time, so create the output
         currentFurnace->smelt();
@@ -88,41 +88,48 @@ void FurnaceManager::update()
   }
 }
 
-void FurnaceManager::handleActivity(NBT_Value *entity, uint8_t blockType)
+void FurnaceManager::handleActivity(furnaceData *data_)
 {
-  // Create a furnace
-  Furnace* furnace = new Furnace(entity, blockType);
 
+  Furnace* furnace = NULL;
+  int32_t arraypos = -1;
+  bool found = false;
   // Loop thru all active furnaces, to see if this one is here
   for(unsigned int index = 0; index < m_activeFurnaces.size(); index++)
   {
     Furnace* currentFurnace = (Furnace*)m_activeFurnaces[index];
-    if(currentFurnace->x() == furnace->x() && currentFurnace->y() == furnace->y() && currentFurnace->z() == furnace->z())
+    if(currentFurnace->x() == data_->x && currentFurnace->y() == data_->y && currentFurnace->z() == data_->z)
     {
-      // Preserve the current burning time
-      furnace->setFuelBurningTime(currentFurnace->fuelBurningTime());
-      furnace->setActiveCookDuration(currentFurnace->activeCookDuration());
-      // Now delete it (we'll add back later if it's active)
-      delete m_activeFurnaces[index];
-      m_activeFurnaces.erase(m_activeFurnaces.begin() + index);
+      found = true;
+      furnace = currentFurnace;
+      arraypos = index;
+      furnace->updateItems();
+      break;
     }
+  }
+
+  if(!found)
+  {
+    // Create a furnace
+    furnace = new Furnace(data_);
   }
 
   // Check if this furnace is active
   if(furnace->isBurningFuel() || furnace->slots()[SLOT_FUEL].count > 0)
   {
-    m_activeFurnaces.push_back(furnace);
+    if(!found)
+    {
+      m_activeFurnaces.push_back(furnace);
+    }
   }
   else
   {
-    delete furnace;
-    furnace = NULL;
-  }
-
-  // Let everyone know about this furnace
-  if(furnace)
-  {
-    furnace->sendToAllUsers();
+    if(found)
+    {
+      delete furnace;
+      furnace = NULL;
+      m_activeFurnaces.erase(m_activeFurnaces.begin()+arraypos);
+    }
   }
 }
 

@@ -45,8 +45,6 @@ bool BlockBasic::isBlockStackable(const uint8_t block)
   switch(block)
   {
   case BLOCK_WORKBENCH:
-  case BLOCK_FURNACE:
-  case BLOCK_BURNING_FURNACE:
   case BLOCK_CHEST:
   case BLOCK_JUKEBOX:
   case BLOCK_TORCH:

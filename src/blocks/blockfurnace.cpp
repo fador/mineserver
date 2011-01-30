@@ -72,7 +72,6 @@ bool BlockFurnace::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
 
 bool BlockFurnace::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 {
-  /* Not working. Might be a conflict with the pre-existing furnace stuff.*/
   Mineserver::get()->inventory()->windowOpen(user,WINDOW_FURNACE,x, y, z);
   return false;
 }
