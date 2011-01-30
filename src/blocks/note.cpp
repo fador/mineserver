@@ -98,7 +98,7 @@ bool BlockNote::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
       Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
       Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
     }
-  return false;
+  return true;
 }
 
 int BlockNote::getInstrument(int32_t x, int8_t y, int32_t z, int map)

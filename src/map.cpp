@@ -58,6 +58,7 @@
 #include "chat.h"
 #include "mineserver.h"
 #include "tree.h"
+#include "furnaceManager.h"
 
 Map::Map(const Map &oldmap)
 {
@@ -1272,6 +1273,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
             newFurnace->x = entityX;
             newFurnace->y = entityY;
             newFurnace->z = entityZ;
+            newFurnace->map = m_number;
             newFurnace->burnTime = (int16_t)*(**iter)["BurnTime"];
             newFurnace->cookTime = (int16_t)*(**iter)["CookTime"];
 
@@ -1292,6 +1294,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
             }
 
             chunk->furnaces.push_back(newFurnace);
+            Mineserver::get()->furnaceManager()->handleActivity(newFurnace);
           }
         }
 

@@ -30,6 +30,8 @@
 #include "furnaceManager.h"
 #include "furnace.h"
 #include "mineserver.h"
+#include "logger.h"
+#include "tools.h"
 
 void FurnaceManager::update()
 {
@@ -40,11 +42,11 @@ void FurnaceManager::update()
     return;
   }
 
-  /*
+  
 #ifdef _DEBUG
-  LOG(DEBUG, "Furnace", "Checking Furnaces: " + dtos(m_activeFurnaces.size()) + " active furnaces.");
+  Mineserver::get()->logger()->log(LogType::LOG_INFO,  "Furnace", "Checking Furnaces: " + dtos(m_activeFurnaces.size()) + " active furnaces.");
 #endif
-  */
+  
   // Loop thru all the furnaces
   for(int index = m_activeFurnaces.size()-1; index >= 0; index--)
   {
@@ -115,7 +117,8 @@ void FurnaceManager::handleActivity(furnaceData *data_)
   }
 
   // Check if this furnace is active
-  if(furnace->isBurningFuel() || furnace->slots()[SLOT_FUEL].count > 0)
+  if((furnace->isBurningFuel() || furnace->slots()[SLOT_FUEL].count > 0) &&
+      furnace->hasValidIngredient())
   {
     if(!found)
     {

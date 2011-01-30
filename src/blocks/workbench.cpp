@@ -70,5 +70,5 @@ bool BlockWorkbench::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, 
 bool BlockWorkbench::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 {
   Mineserver::get()->inventory()->windowOpen(user,WINDOW_WORKBENCH,x, y, z);
-  return false;
+  return true;
 }
