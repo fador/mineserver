@@ -3,6 +3,6 @@ PLUGIN_NAME=cursesui
 
 SRCS = screen.cpp
 
-LDFLAGS   += -lncurses
+PLDFLAGS += -lncurses
 
 include ../plugins.mk

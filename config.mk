@@ -1,18 +1,19 @@
 CC           = g++
 LIBRARIES    = 
 INC          = -I. -I/usr/include -I/usr/local/include
-CFLAGS     = -DFADOR_PLUGIN
+CFLAGS       = -O
 LDFLAGS      = -L/usr/local/lib -L/usr/lib
 DEPDIR       = .deps
 BUILDDIR     = .build
 ARCHFLAGS    =
+BUILDFLAGS   =  -DFADOR_PLUGIN
 
 ifeq ($(DEBUG), YES)
-  CFLAGS  += -DDEBUG -g -O0
+  BUILDFLAGS  += -DDEBUG -g -O0
 endif
 
 ifeq ($(PEDANTIC), YES)
-  CFLAGS  += -Wall -Werror -pedantic
+  BUILDFLAGS  += -Wall -Werror -pedantic
 endif
 
 ifeq ($(findstring MINGW32,$(SYSTEM)),MINGW32)
@@ -26,5 +27,5 @@ endif
 LIBNOISE=1
 
 ifeq ($(LIBNOISE), 1)
-  CFLAGS  += -DLIBNOISE
+  BUILDFLAGS  += -DLIBNOISE
 endif

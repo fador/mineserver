@@ -24,8 +24,8 @@ include ../config.mk
 
 LDFLAGS     += -levent -lz -lnoise
 
-COMPILE      = $(CC) $(INC) $(CFLAGS) $(ARCHFLAGS) -c $< -o $@
-MAKEDEPEND   = $(CC) -M $(INC) $(CFLAGS) $(ARCHFLAGS) -o "$(DEPDIR)/$*.d" $<
+COMPILE      = $(CC) $(INC) $(CFLAGS) $(BUILDFLAGS) $(ARCHFLAGS) -c $< -o $@
+MAKEDEPEND   = $(CC) -M $(INC) $(CFLAGS) $(BUILDFLAGS) $(ARCHFLAGS) -o "$(DEPDIR)/$*.d" $<
 
 all: mineserver
 
@@ -38,7 +38,7 @@ all: mineserver
 -include $(addprefix $(DEPDIR)/,$(OBJS:.o=.d))
 
 mineserver: $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(LIBRARIES) -o $@
+	$(CC) $(CFLAGS) $(BUILDFLAGS) $(ARCHFLAGS) $(LDFLAGS) $(OBJS) $(LIBRARIES) -o $@
 
 install:
 	cp mineserver ../bin
