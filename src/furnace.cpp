@@ -31,6 +31,7 @@
 #include "furnace.h"
 #include "mineserver.h"
 #include "map.h"
+#include "tools.h"
 
 Furnace::Furnace(furnaceData *data_)
 {
@@ -128,6 +129,7 @@ void Furnace::smelt()
         outputSlot->count++;
         inputSlot->count--;
         outputSlot->health = inputSlot->health;
+        data->cookTime = 0;
 
         if(inputSlot->count == 0)
         {
@@ -235,5 +237,32 @@ int16_t Furnace::cookTime()
 
 void Furnace::sendToAllUsers()
 {
+  sChunk* chunk = NULL;
+  chunk = Mineserver::get()->map(data->map)->chunks.getChunk(blockToChunk(data->x),blockToChunk(data->z));
   //ToDo: send changes to all with this furnace opened
+
+  std::vector<OpenInventory*>* inv = &Mineserver::get()->inventory()->openFurnaces;
+      
+  for(uint32_t openinv = 0; openinv < inv->size(); openinv ++)
+  {
+    if((*inv)[openinv]->x == data->x &&
+       (*inv)[openinv]->y == data->y &&
+       (*inv)[openinv]->z == data->z)
+    {
+      for(uint32_t user = 0; user < (*inv)[openinv]->users.size(); user ++)
+      {
+        for(int j = 0; j < 3; j++)
+        {
+          if(data->items[j].type != -1)
+          {
+            (*inv)[openinv]->users[user]->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_FURNACE << (int16_t)j << (int16_t)data->items[j].type 
+                          << (int8_t)(data->items[j].count) << (int16_t)data->items[j].health;
+          }
+        }
+      }
+
+      break;
+    }
+  }
+
 }
