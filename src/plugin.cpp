@@ -52,6 +52,9 @@
 #include "blocks/chest.h"
 #include "blocks/ladder.h"
 #include "blocks/cake.h"
+#include "blocks/note.h"
+#include "blocks/blockfurnace.h"
+#include "blocks/workbench.h"
 
 void Plugin::init()
 {
@@ -82,6 +85,12 @@ void Plugin::init()
    BlockCB.push_back(ladderblock);
    BlockCake* cakeblock = new BlockCake();
    BlockCB.push_back(cakeblock);
+   BlockNote* noteblock = new BlockNote();
+   BlockCB.push_back(noteblock);
+   BlockFurnace* furnaceblock = new BlockFurnace();
+   BlockCB.push_back(furnaceblock);
+   BlockWorkbench* workbenchblock = new BlockWorkbench();
+   BlockCB.push_back(workbenchblock);
    BlockDefault* defaultblock = new BlockDefault();
    BlockCB.push_back(defaultblock);
 
@@ -99,11 +108,7 @@ void Plugin::free()
 bool Plugin::loadPlugin(const std::string name, const std::string file)
 {
   LIBRARY_HANDLE lhandle = NULL;
-#ifdef FADOR_PLUGIN
   void (*fhandle)(mineserver_pointer_struct*) = NULL;
-#else
-  void (*fhandle)(Mineserver*) = NULL;
-#endif
 
   if (!file.empty())
   {
@@ -147,22 +152,14 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
 
   m_libraryHandles[name] = lhandle;
 
-#ifdef FADOR_PLUGIN
   fhandle = (void (*)(mineserver_pointer_struct*)) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
-#else
-  fhandle = (void (*)(Mineserver*)) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
-#endif
   if (fhandle == NULL)
   {
     LOG(INFO, "Plugin", "Could not get init function handle!");
     unloadPlugin(name);
     return false;
   }
-#ifdef FADOR_PLUGIN  
   fhandle(&plugin_api_pointers);
-#else
-  fhandle(Mineserver::get());
-#endif
 
   return true;
 }
@@ -170,11 +167,7 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
 void Plugin::unloadPlugin(const std::string name)
 {
   LIBRARY_HANDLE lhandle = NULL;
-#ifdef FADOR_PLUGIN
   void (*fhandle)(void) = NULL;
-#else
-  void (*fhandle)(Mineserver*) = NULL;
-#endif
 
   if (m_pluginVersions.find(name) != m_pluginVersions.end())
   {
@@ -190,12 +183,7 @@ void Plugin::unloadPlugin(const std::string name)
       lhandle = LIBRARY_SELF();
     }
 
-#ifdef FADOR_PLUGIN
     fhandle = (void (*)(void)) LIBRARY_SYMBOL(lhandle, (name+"_shutdown").c_str());
-#else
-    fhandle = (void (*)(Mineserver*)) LIBRARY_SYMBOL(lhandle, (name+"_shutdown").c_str());
-#endif
-
     if (fhandle == NULL)
     {
       LOG(INFO, "Plugin","Could not get shutdown function handle!");
@@ -203,12 +191,7 @@ void Plugin::unloadPlugin(const std::string name)
     else
     {
       LOG(INFO, "Plugin","Calling shutdown function for `"+name+"'.");
-      
-#ifdef FADOR_PLUGIN  
       fhandle();
-#else
-      fhandle(Mineserver::get());
-#endif
     }
 
     LIBRARY_CLOSE(m_libraryHandles[name]);
@@ -219,39 +202,29 @@ void Plugin::unloadPlugin(const std::string name)
   }
 }
 
-bool Plugin::hasHook(const std::string name)
+bool Plugin::hasHook(const std::string& name) const
 {
-  std::map<const std::string, Hook*>::iterator it_a = m_hooks.begin();
-  std::map<const std::string, Hook*>::iterator it_b = m_hooks.end();
-  for (;it_a!=it_b;++it_a)
-  {
-    if (it_a->first == name)
-    {
-      return true;
-    }
-  }
-
-  return false;
+  return m_hooks.find(name) != m_hooks.end();
 }
 
-void Plugin::setHook(const std::string name, Hook* hook)
+Hook* Plugin::getHook(const std::string& name) const 
+{
+  std::map<const std::string, Hook*>::const_iterator hook = m_hooks.find(name);
+
+  if (hook == m_hooks.end())
+  {
+    return NULL;
+  }
+
+  return hook->second;
+}
+
+void Plugin::setHook(const std::string& name, Hook* hook)
 {
   m_hooks[name] = hook;
 }
 
-Hook* Plugin::getHook(const std::string name)
-{
-  if (hasHook(name))
-  {
-    return m_hooks[name];
-  }
-  else
-  {
-    return NULL;
-  }
-}
-
-void Plugin::remHook(const std::string name)
+void Plugin::remHook(const std::string& name)
 {
   if (hasHook(name))
   {
@@ -259,40 +232,29 @@ void Plugin::remHook(const std::string name)
   }
 }
 
-bool Plugin::hasPluginVersion(const std::string name)
+bool Plugin::hasPluginVersion(const std::string& name) const
 {
-  std::map<const std::string, float>::iterator it_a = m_pluginVersions.begin();
-  std::map<const std::string, float>::iterator it_b = m_pluginVersions.end();
-
-  for (;it_a!=it_b;++it_a)
-  {
-    if (it_a->first == name)
-    {
-      return true;
-    }
-  }
-
-  return false;
+  return m_pluginVersions.find(name) != m_pluginVersions.end();
 }
 
-float Plugin::getPluginVersion(const std::string name)
+float Plugin::getPluginVersion(const std::string& name) const
 {
-  if (hasPluginVersion(name))
-  {
-    return m_pluginVersions[name];
-  }
-  else
+  std::map<const std::string, float>::const_iterator pluginVersion = m_pluginVersions.find(name);
+
+  if (pluginVersion == m_pluginVersions.end())
   {
     return 0.0f;
   }
+
+  return pluginVersion->second;
 }
 
-void Plugin::setPluginVersion(const std::string name, float version)
+void Plugin::setPluginVersion(const std::string& name, float version)
 {
   m_pluginVersions[name] = version;
 }
 
-void Plugin::remPluginVersion(const std::string name)
+void Plugin::remPluginVersion(const std::string& name)
 {
   if (hasPluginVersion(name))
   {
@@ -300,43 +262,32 @@ void Plugin::remPluginVersion(const std::string name)
   }
 }
 
-bool Plugin::hasPointer(const std::string name)
+bool Plugin::hasPointer(const std::string& name) const
 {
-  std::map<const std::string, void*>::iterator it_a = m_pointers.begin();
-  std::map<const std::string, void*>::iterator it_b = m_pointers.end();
-  for (;it_a!=it_b;++it_a)
-  {
-    if (it_a->first == name)
-    {
-      return true;
-    }
-  }
-
-  return false;
+  return m_pointers.find(name) != m_pointers.end();
 }
 
-void Plugin::setPointer(const std::string name, void* pointer)
+void* Plugin::getPointer(const std::string& name) const
+{
+  std::map<const std::string, void*>::const_iterator pointer = m_pointers.find(name);
+
+  if (pointer == m_pointers.end())
+  {
+    return NULL;
+  }
+
+  return pointer->second;
+}
+
+void Plugin::setPointer(const std::string& name, void* pointer)
 {
   m_pointers[name] = pointer;
 }
 
-void* Plugin::getPointer(const std::string name)
-{
-  if (hasPointer(name))
-  {
-    return m_pointers[name];
-  }
-  else
-  {
-    return NULL;
-  }
-}
-
-void Plugin::remPointer(const std::string name)
+void Plugin::remPointer(const std::string& name)
 {
   if (hasPointer(name))
   {
     m_pointers.erase(name);
   }
 }
-

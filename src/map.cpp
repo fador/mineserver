@@ -58,6 +58,7 @@
 #include "chat.h"
 #include "mineserver.h"
 #include "tree.h"
+#include "furnaceManager.h"
 
 Map::Map(const Map &oldmap)
 {
@@ -387,6 +388,10 @@ bool Map::saveWholeMap()
 
     //Get time from the map
     *data["Time"] = mapTime;
+    *data["SpawnX"] = spawnPos.x();
+    *data["SpawnY"] = spawnPos.y();
+    *data["SpawnZ"] = spawnPos.z();
+    
     NBT_Value* trees = ((*root)["Trees"]);
 
     if(trees)
@@ -920,6 +925,19 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
   return true;
 }
 
+bool Map::sendNote(int x, int y, int z, char instrument, char pitch)
+{
+  Packet pkt;
+  pkt << PACKET_PLAY_NOTE << (int32_t)x << (int16_t)y << (int32_t)z << (int8_t)instrument << (int8_t)pitch;
+
+  sChunk* chunk = chunks.getChunk(blockToChunk(x), blockToChunk(z));
+  if(chunk == NULL)
+    return false;
+
+  chunk->sendPacket(pkt);
+  return true;
+}
+
 bool Map::sendPickupSpawn(spawnedItem item)
 {
   //Push to global item storage
@@ -936,7 +954,7 @@ bool Map::sendPickupSpawn(spawnedItem item)
     return false;
 
   chunk->items.push_back(storedItem);
-
+	
   Packet pkt;
   pkt << PACKET_PICKUP_SPAWN << (int32_t)item.EID << (int16_t)item.item << (int8_t)item.count << (int16_t)item.health
       << (int32_t)item.pos.x() << (int32_t)item.pos.y() << (int32_t)item.pos.z()
@@ -1255,6 +1273,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
             newFurnace->x = entityX;
             newFurnace->y = entityY;
             newFurnace->z = entityZ;
+            newFurnace->map = m_number;
             newFurnace->burnTime = (int16_t)*(**iter)["BurnTime"];
             newFurnace->cookTime = (int16_t)*(**iter)["CookTime"];
 
@@ -1275,6 +1294,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
             }
 
             chunk->furnaces.push_back(newFurnace);
+            Mineserver::get()->furnaceManager()->handleActivity(newFurnace);
           }
         }
 

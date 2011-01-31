@@ -28,7 +28,7 @@
 #ifndef _HEAVENGEN_H
 #define _HEAVENGEN_H
 
-#ifdef DEBIAN
+#ifdef LIBNOISE
 #include <libnoise/noise.h>
 #else
 #include <noise/noise.h>

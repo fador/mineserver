@@ -27,54 +27,108 @@
 
 #include "../mineserver.h"
 #include "../map.h"
+#include "../tools.h"
 
-#include "cake.h"
+#include "blockfurnace.h"
 
-bool BlockCake::affectedBlock(int block)
+bool BlockFurnace::affectedBlock(int block)
 {
   switch(block)
   {
-  case BLOCK_CAKE:
-  case ITEM_CAKE:
+  case BLOCK_FURNACE:
+  case BLOCK_BURNING_FURNACE:
     return true;
   }
   return false;
 }
 
-bool BlockCake::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockFurnace::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t oldblock;
   uint8_t oldmeta;
 
   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
-  {
     return true;
-  }
 
   /* Check block below allows blocks placed on top */
   if (!this->isBlockStackable(oldblock))
-  {
     return true;
-  }
 
   /* move the x,y,z coords dependent upon placement direction */
   if (!this->translateDirection(&x,&y,&z,map,direction))
-  {
     return true;
-  }
 
   if (this->isUserOnBlock(x,y,z,map))
-  {
-    return true;
-  }
+     return true;
 
   if (!this->isBlockEmpty(x,y,z,map))
+     return true;
+
+  direction = user->relativeToBlock(x, y, z);
+
+  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+
+
+  int chunk_x = blockToChunk(x);
+  int chunk_z = blockToChunk(z);
+  sChunk *chunk = Mineserver::get()->map(map)->loadMap(chunk_x, chunk_z);
+   
+  if(chunk == NULL)
+    return true;
+
+  for(uint32_t i = 0; i < chunk->furnaces.size(); i++)
   {
-    return true; 
+    if(chunk->furnaces[i]->x == x &&
+       chunk->furnaces[i]->y == y &&
+       chunk->furnaces[i]->z == z)
+    {
+      chunk->furnaces.erase(chunk->furnaces.begin()+i);
+      break;
+    }
   }
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_CAKE, 0);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_CAKE, 0);
   return false;
 }
 
+bool BlockFurnace::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
+{
+  Mineserver::get()->inventory()->windowOpen(user,WINDOW_FURNACE,x, y, z);
+  return true;
+}
+
+
+bool BlockFurnace::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z,int map,  int8_t direction)
+{
+  uint8_t block;
+  uint8_t meta;
+
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
+    return true;
+
+  bool destroy = false;
+    
+  int chunk_x = blockToChunk(x);
+  int chunk_z = blockToChunk(z);
+
+  sChunk *chunk = Mineserver::get()->map(map)->loadMap(chunk_x, chunk_z);
+   
+  if(chunk == NULL)
+    return true;
+    
+  for(uint32_t i = 0; i < chunk->furnaces.size(); i++)
+  {
+    if(chunk->furnaces[i]->x == x &&
+       chunk->furnaces[i]->y == y &&
+       chunk->furnaces[i]->z == z)
+    {
+      chunk->furnaces.erase(chunk->furnaces.begin()+i);
+      break;
+    }
+  }
+
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  this->spawnBlockItem(x,y,z,map,block);
+  return false;
+}

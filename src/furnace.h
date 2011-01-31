@@ -30,6 +30,7 @@
 
 #include <cstdlib>
 #include <stdint.h>
+#include "chunkmap.h"
 
 class User;
 class NBT_Value;
@@ -44,18 +45,11 @@ enum
 class Furnace
 {
 
-  struct Slot
-  {
-    int8_t count;
-    int16_t damage;
-    int16_t id;
-  };
 
 public:
-  Furnace(NBT_Value* entity, uint8_t blockType);
+  Furnace(furnaceData *data_);
 
   void sendToAllUsers();
-  NBT_Value* getSlotEntity(int8_t slotNumber);
   void smelt();
   bool isBurningFuel();
   bool isCooking();
@@ -69,33 +63,23 @@ public:
 
   int16_t burnTime();
   int16_t cookTime();
+  void updateItems();
 
-  int16_t fuelBurningTime() { return m_fuelBurningTime; }
-  void setFuelBurningTime(int16_t fuelBurningTime) { m_fuelBurningTime = fuelBurningTime; }
+  int16_t fuelBurningTime() { return data->burnTime; }
 
-  int16_t activeCookDuration() { return m_activeCookDuration; }
-  void setActiveCookDuration(int16_t activeCookDuration) { m_activeCookDuration = activeCookDuration; }
+  int16_t setFuelBurningTime(int16_t burntime) { data->burnTime=burntime; return data->burnTime;}  
 
-  int16_t cookingTime() { return m_cookingTime; }
+  int16_t cookingTime() { return data->cookTime; }
+  int16_t setCookingTime(int16_t cookTime) { data->cookTime=cookTime; return data->cookTime; }  
 
-  int32_t x() { return m_x; }
-  int32_t y() { return m_y; }
-  int32_t z() { return m_z; }
+  int32_t x() { return data->x; }
+  int32_t y() { return data->y; }
+  int32_t z() { return data->z; }
 
-  Slot* slots() { return m_slots; };
+  Item* slots() { return data->items; };
 
 private:
-  int16_t m_fuelBurningTime;
-  int16_t m_initialBurningTime;
-  int16_t m_cookingTime;
-  int16_t m_activeCookDuration;
- // int16_t activeBurnDuration;
-  int32_t m_x;
-  int32_t m_y;
-  int32_t m_z;
-  int map;
-  Slot m_slots[3];
-
+  furnaceData *data;
   bool m_burning;
 };
 

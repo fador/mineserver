@@ -163,8 +163,25 @@ void giveItemsName(std::string userIn, int id, int count, int health)
   if (isValidItem(id))
   {
     int itemCount = 1, itemStacks = 1;
-    if (itemCount>1024) itemCount=1024;
-    mineserver->user.addItem(userIn.c_str(), id, itemCount, health);
+
+    if(count != 1)
+    {
+      itemCount = count;
+      if(itemCount>1024) itemCount=1024;
+      // If multiple stacks
+      itemStacks = roundUpTo(itemCount, 64) / 64;
+      itemCount  -= (itemStacks-1) * 64;
+    }
+    int amount = 64;
+    for(int i = 0; i < itemStacks; i++)
+    {
+      // if last stack
+      if(i == itemStacks - 1)
+      {
+        amount = itemCount;
+      }
+      mineserver->user.addItem(userIn.c_str(), id, amount, health);
+    }
   }
   else
   {
@@ -240,6 +257,18 @@ void home(std::string user, std::string command, std::deque<std::string> args)
   int x,y,z;
   mineserver->map.getSpawn(&x,&y,&z);
   mineserver->user.teleport(user.c_str(),x, y + 2, z);
+}
+
+void setSpawn(std::string user, std::string command, std::deque<std::string> args)
+{
+  if(args.size() == 0) {
+    double x,y,z;
+    mineserver->user.getPosition(user.c_str(), &x,&y,&z,NULL,NULL,NULL);
+    
+    mineserver->chat.sendmsgTo(user.c_str(),"Set spawn!");
+    mineserver->map.setSpawn(x,y,z);
+    mineserver->user.teleport(user.c_str(),x, y + 2, z);
+  }
 }
 
 void userWorld(std::string user, std::string command, std::deque<std::string> args)
@@ -502,6 +531,9 @@ bool startedDiggingFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int
 {
   //translateDirection(&x,&y,&z,direction);
   std::string user(userIn);
+  int map = 0;
+  mineserver->user.getPositionW(userIn, NULL, NULL, NULL, &map,NULL, NULL, NULL);
+
   if(cuboidMap.find(user) != cuboidMap.end())
   {
     if(cuboidMap[user].active)
@@ -545,7 +577,7 @@ bool startedDiggingFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int
               {  
                 if(mineserver->map.getBlock(xpos,ypos,zpos,&block,&meta) && block == cuboidMap[user].fromBlock)
                 {
-                  mineserver->map.setBlock(xpos,ypos,zpos,cuboidMap[user].toBlock,0);
+                  mineserver->map.setBlock(xpos,ypos,zpos,cuboidMap[user].toBlock,map);
                 }
               }
             }
@@ -744,6 +776,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mi
   registerCommand(new Command(parseCmd("players who names list"), "", "Lists online players", playerList));
   registerCommand(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems));
   registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap));  
+  registerCommand(new Command(parseCmd("setspawn"), "", "", setSpawn));  
   registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", sendHelp));
   registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport));
   registerCommand(new Command(parseCmd("gps"), "", "Display current coordinates", gps));

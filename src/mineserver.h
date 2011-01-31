@@ -56,11 +56,10 @@ class Inventory;
 class Mobs;
 class Mob;
 
-#ifdef FADOR_PLUGIN
 #define MINESERVER
 #include "plugin_api.h"
 #undef MINESERVER
-#endif
+
 
 struct event_base;
 

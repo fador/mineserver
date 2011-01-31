@@ -56,6 +56,7 @@
 #include "config.h"
 #include "permissions.h"
 #include "mob.h"
+#include "inventory.h"
 
 // Generate "unique" entity ID
 
@@ -83,6 +84,7 @@ User::User(int sock, uint32_t EID)
 
   this->m_currentItemSlot = 0;
   this->inventoryHolding  = Item();
+  this->curItem          = 0;
 
   // Ignore this user if it's the server console
   if (this->UID != SERVER_CONSOLE_UID)
@@ -184,6 +186,26 @@ User::~User()
         }
       }
     }
+
+
+    //If still holding something, dump the items to ground
+    if(inventoryHolding.type != -1)
+    {
+      Mineserver::get()->map(pos.map)->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, 
+                                                 inventoryHolding.type, inventoryHolding.count,
+                                                 inventoryHolding.health,this);
+      inventoryHolding.count = 0;
+      inventoryHolding.type  =-1;
+      inventoryHolding.health= 0;
+    }
+
+    //Close open inventory
+    if(isOpenInv)
+    {
+      Mineserver::get()->inventory()->onwindowClose(this,openInv.type, openInv.x, openInv.y, openInv.z);
+    }
+
+
   }
 
   if (fd != -1 && logged)

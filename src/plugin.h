@@ -85,23 +85,23 @@ class Plugin
 {
 public:
   // Hook registry stuff
-  bool  hasHook(const std::string name);
-  Hook* getHook(const std::string name);
-  void  setHook(const std::string name, Hook* hook);
-  void  remHook(const std::string name);
+  bool  hasHook(const std::string& name) const;
+  Hook* getHook(const std::string& name) const;
+  void  setHook(const std::string& name, Hook* hook);
+  void  remHook(const std::string& name);
   // Load/Unload plugins
   bool loadPlugin(const std::string name, const std::string file="");
   void unloadPlugin(const std::string name);
   // Plugin version registry
-  bool  hasPluginVersion(const std::string name);
-  float getPluginVersion(const std::string name);
-  void  setPluginVersion(const std::string name, float version);
-  void  remPluginVersion(const std::string name);
+  bool  hasPluginVersion(const std::string& name) const;
+  float getPluginVersion(const std::string& name) const;
+  void  setPluginVersion(const std::string& name, float version);
+  void  remPluginVersion(const std::string& name);
   // Pointer registry stuff
-  bool  hasPointer(const std::string name);
-  void  setPointer(const std::string name, void* pointer);
-  void* getPointer(const std::string name);
-  void  remPointer(const std::string name);
+  bool  hasPointer(const std::string& name) const;
+  void* getPointer(const std::string& name) const;
+  void  setPointer(const std::string& name, void* pointer);
+  void  remPointer(const std::string& name);
   // Create default hooks
   Plugin()
   {
@@ -122,6 +122,7 @@ public:
     setHook("PlayerDiggingStarted", new Hook5<bool,const char*,int32_t,int8_t,int32_t,int8_t>);
     setHook("PlayerDigging", new Hook5<bool,const char*,int32_t,int8_t,int32_t,int8_t>);
     setHook("PlayerDiggingStopped", new Hook5<bool,const char*,int32_t,int8_t,int32_t,int8_t>);
+	  setHook("PlayerBlockInteract", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
     setHook("BlockBreakPre", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
     setHook("BlockBreakPost", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
     setHook("BlockNeighbourBreak", new Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>);

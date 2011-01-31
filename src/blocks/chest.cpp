@@ -236,3 +236,10 @@ void BlockChest::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, in
 void BlockChest::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
+
+bool BlockChest::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
+{
+    //ToDo: check for large chest!
+    Mineserver::get()->inventory()->windowOpen(user,WINDOW_CHEST,x, y, z);
+	return true;
+}

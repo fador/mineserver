@@ -209,7 +209,7 @@ event_base* Mineserver::getEventBase()
 }
 
 void Mineserver::saveAll(){
-  for(int i = 0; i<m_map.size(); i++){
+  for(std::vector<Map*>::size_type i = 0; i<m_map.size(); i++){
     m_map[i]->saveWholeMap();
   }
   saveAllPlayers();
@@ -217,7 +217,8 @@ void Mineserver::saveAll(){
 
 void Mineserver::saveAllPlayers()
 {
-  for (int i = users().size()-1; i >= 0; i--)
+  if(users().size() == 0) return;
+  for (std::vector<User*>::size_type i = users().size()-1; i >= 0; i--)
   {
     if (users()[i]->logged)
     {
@@ -231,9 +232,7 @@ int Mineserver::run(int argc, char *argv[])
   uint32_t starttime = (uint32_t)time(0);
   uint32_t tick      = (uint32_t)time(0);
 
-#ifdef FADOR_PLUGIN
   init_plugin_api();
-#endif
 
   if (Mineserver::get()->config()->bData("system.interface.use_cli"))
   {
@@ -427,7 +426,7 @@ int Mineserver::run(int argc, char *argv[])
       if(m_saveInterval != 0 && timeNow-m_lastSave >= m_saveInterval)
       {
         //Save
-        for(int i =0; i<m_map.size();i++)
+        for(std::vector<Map*>::size_type i =0; i<m_map.size();i++)
         {
           m_map[i]->saveWholeMap();
         }
@@ -449,7 +448,7 @@ int Mineserver::run(int argc, char *argv[])
       }
 
       //Check for tree generation from saplings
-      for(int i = 0; i<m_map.size(); i++)
+      for(std::vector<Map*>::size_type i = 0; i<m_map.size(); i++)
       {
         m_map[i]->checkGenTrees();
       }
@@ -497,7 +496,7 @@ int Mineserver::run(int argc, char *argv[])
 
       }
 
-      for(int i = 0 ; i<m_map.size(); i++)
+      for(std::vector<Map*>::size_type i = 0 ; i<m_map.size(); i++)
       {
         m_map[i]->mapTime+=20;
         if (m_map[i]->mapTime >= 24000)
@@ -553,7 +552,7 @@ int Mineserver::run(int argc, char *argv[])
   saveAll();
 
   /* Free memory */
-  for(int i =0; i<m_map.size();i++)
+  for(std::vector<Map*>::size_type i =0; i<m_map.size();i++)
   {
     delete m_map[i];
     delete m_physics[i];

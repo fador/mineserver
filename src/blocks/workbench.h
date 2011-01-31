@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2010, The Mineserver Project
+   Copyright (c) 2011, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -25,71 +25,21 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _NETHERGEN_H
-#define _NETHERGEN_H
+#pragma once
 
-#ifdef LIBNOISE
-#include <libnoise/noise.h>
-#else
-#include <noise/noise.h>
-#endif
+#include "basic.h"
 
-#include "mapgen.h"
-#include "cavegen.h"
+class User;
 
-class NetherGen : public MapGen {
+/** BlockWorkbench deals specifically with Workbench interaction.
+It does not handle crafting, only right click interaction.
+@see BlockBasic
+*/
+
+class BlockWorkbench : public BlockBasic
+{
 public:
-  NetherGen();
-  void init(int seed);
-  void re_init(int seed);
-  void generateChunk(int x, int z, int map);
-
-private:
-  std::vector<uint8_t> netherblocks;
-  std::vector<uint8_t> blockdata;
-  std::vector<uint8_t> skylight;
-  std::vector<uint8_t> blocklight;
-  std::vector<uint8_t> heightmap;
-  
-  int seaLevel;
-  
-  bool addTrees;
-  
-  bool expandBeaches;
-  int beachExtent;
-  int beachHeight;
-  
-  bool addOre;
-
-  void generateWithNoise(int x, int z, int map);
-
-  void ExpandBeaches(int x, int z, int map);
-  void AddTrees(int x, int z, int map, uint16_t count);
-  
-  void AddOre(int x, int z, int map, uint8_t type);
-  void AddDeposit(int x, int y, int z, int map, uint8_t block, int depotSize);
-
-  
-  CaveGen cave;
-
-  // Heightmap composition
-  noise::module::Voronoi Randomgen;
-  noise::module::Billow Randomciel;
-  
-  /*noise::module::ScaleBias perlinBiased;
-
-  noise::module::Perlin baseFlatTerrain;  
-  noise::module::ScaleBias flatTerrain;
-  
-  noise::module::Perlin seaFloor;
-  noise::module::ScaleBias seaBias;
-
-  noise::module::Perlin terrainType;
-
-  noise::module::Perlin seaControl;
-  
-  noise::module::Select seaTerrain;
-  noise::module::Select finalTerrain;*/
+  bool affectedBlock(int block);
+  bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z,int map, int8_t direction);
+  bool onInteract(User* user, int32_t x, int8_t y, int32_t z, int map);
 };
-
-#endif

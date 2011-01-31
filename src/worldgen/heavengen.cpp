@@ -38,7 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       
 
 // libnoise
-#ifdef DEBIAN
+#ifdef LIBNOISE
 #include <libnoise/noise.h>
 #else
 #include <noise/noise.h>

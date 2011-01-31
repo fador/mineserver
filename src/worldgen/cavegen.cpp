@@ -29,7 +29,7 @@
 #include <cstdio>
 #include <iostream>
 
-#ifdef DEBIAN
+#ifdef LIBNOISE
 #include <libnoise/noise.h>
 #else
 #include <noise/noise.h>

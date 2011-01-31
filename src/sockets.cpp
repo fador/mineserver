@@ -178,7 +178,7 @@ void client_callback(int fd,
     {
       #ifdef WIN32
       #define ERROR_NUMBER WSAGetLastError()
-      if((errno != WSATRY_AGAIN && errno != WSAEINTR))
+      if((ERROR_NUMBER != WSATRY_AGAIN && ERROR_NUMBER != WSAEINTR && ERROR_NUMBER != WSAEWOULDBLOCK))
       #else
       #define ERROR_NUMBER errno
       if((errno != EAGAIN && errno != EINTR))

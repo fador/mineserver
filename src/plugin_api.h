@@ -93,10 +93,12 @@ struct user_pointer_struct
   int (*getCount)();
   char* (*getUserNumbered)(int c);
   bool (*getPositionW)(const char* user, double* x, double* y, double* z, int* w,float* yaw, float* pitch, double *stance);
-  int (*getItemInHand)(const char* user);
   bool (*addItem)(const char* user, int item, int count, int health);
   bool (*hasItem)(const char* user, int item, int count, int health);
   bool (*delItem)(const char* user, int item, int count, int health);
+  int (*gethealth) (const char* user);
+  bool (*getItemInHand)(const char* user, int *type, int *meta, int *quant);
+  bool (*setItemInHand)(const char* user, int type, int meta, int quant);
 
   void *temp[96];
 };
@@ -121,6 +123,7 @@ struct map_pointer_struct
   void (*createPickupSpawn)(int x, int y, int z, int type, int count, int health, const char* user);
   bool (*setTime) (int timeValue);
   void (*getSpawn)(int* x, int* y, int* z);
+  void (*setSpawn) (int x, int y, int z);
   bool (*getBlock)(int x, int y, int z, unsigned char* type,unsigned char* meta);
   bool (*setBlock)(int x, int y, int z, unsigned char type,unsigned char meta);
   void (*saveWholeMap)(void);

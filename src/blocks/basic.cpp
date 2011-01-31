@@ -45,8 +45,6 @@ bool BlockBasic::isBlockStackable(const uint8_t block)
   switch(block)
   {
   case BLOCK_WORKBENCH:
-  case BLOCK_FURNACE:
-  case BLOCK_BURNING_FURNACE:
   case BLOCK_CHEST:
   case BLOCK_JUKEBOX:
   case BLOCK_TORCH:
@@ -230,4 +228,7 @@ void BlockBasic::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, in
 void BlockBasic::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
-
+bool BlockBasic::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
+{
+  return false;
+}

@@ -51,6 +51,7 @@
 #include "map.h"
 #include "user.h"
 #include "mineserver.h"
+#include "furnaceManager.h"
 #include "logger.h"
 #include "tools.h"
 
@@ -302,6 +303,7 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
   }
 
   Item* slotItem = NULL;
+  furnaceData *tempFurnace = NULL;
 
   switch(windowID)
   {
@@ -362,6 +364,7 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
              chunk->furnaces[i]->z == user->openInv.z)
           {
             slotItem = &chunk->furnaces[i]->items[slot];
+            tempFurnace = chunk->furnaces[i];
           }
         }
         //Create furnace data if it doesn't exist
@@ -375,6 +378,7 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
           newFurnace->cookTime = 0;
           chunk->furnaces.push_back(newFurnace);
           slotItem = &newFurnace->items[slot];
+          tempFurnace = newFurnace;
         }
       }
       break;
@@ -538,7 +542,6 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
       *slotItem                = tempItem;
     }      
   }
-    
   
   //Update slot
   setSlot(user, windowID, slot, slotItem->type, slotItem->count, slotItem->health);
@@ -571,6 +574,12 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
       user->inv[0] = Item();
       setSlot(user, windowID, 0, -1, 0, 0);
     }
+  }
+  //If handling the "fuel" slot
+  else if(windowID == WINDOW_FURNACE && (slot == 1 || slot == 0))
+  {
+    tempFurnace->map = user->pos.map;
+    Mineserver::get()->furnaceManager()->handleActivity(tempFurnace);
   }
 
   /*
@@ -703,6 +712,8 @@ bool Inventory::windowOpen(User *user, int8_t type, int32_t x, int32_t y, int32_
                            << (int8_t)(chunk->furnaces[i]->items[j].count) << (int16_t)chunk->furnaces[i]->items[j].health;
             }
           }
+          user->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)0 << (int16_t)(chunk->furnaces[i]->cookTime*18);
+          user->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)1 << (int16_t)(chunk->furnaces[i]->burnTime*3);
           break;
         }
       }
