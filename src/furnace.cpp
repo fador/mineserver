@@ -114,26 +114,28 @@ void Furnace::smelt()
     // Update other params if we actually converted
     if(creationID != 0 && outputSlot->count != 64)
     {
-      // Ok - now check if the current output slot contains the same stuff
-      if(outputSlot->type != creationID)
+      // Check if the outputSlot is empty
+      if(outputSlot->type == 0)
       {
-        // No so overwrite it
         outputSlot->type = creationID;
-        outputSlot->count = 1;
+        outputSlot->count = 0;
       }
 
-      // Increment output and decrememnt the input source
-      outputSlot->count++;
-      inputSlot->count--;
-      outputSlot->health = inputSlot->health;
-
-      if(inputSlot->count == 0)
+      // Ok - now check if the current output slot contains the same stuff
+      if(outputSlot->type == creationID)
       {
-        *inputSlot = Item();
+        // Increment output and decrememnt the input source
+        outputSlot->count++;
+        inputSlot->count--;
+        outputSlot->health = inputSlot->health;
+
+        if(inputSlot->count == 0)
+        {
+          *inputSlot = Item();
+        }
       }
     }
   }
-
 }
 bool Furnace::isBurningFuel()
 {
