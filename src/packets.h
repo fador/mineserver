@@ -92,6 +92,7 @@ enum
   PACKET_BLOCK_CHANGE              = 0x35,
   PACKET_PLAY_NOTE                 = 0x36,
   PACKET_OPEN_WINDOW               = 0x64,
+  PACKET_PROGRESS_BAR              = 0x69,
   PACKET_TRANSACTION               = 0x6a,
   //PACKET_COMPLEX_ENTITIES          = 0x3b,
   PACKET_KICK                      = 0xff,

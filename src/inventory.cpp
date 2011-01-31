@@ -576,7 +576,7 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
     }
   }
   //If handling the "fuel" slot
-  else if(windowID == WINDOW_FURNACE && (slot == 1 || slot == 2))
+  else if(windowID == WINDOW_FURNACE && (slot == 1 || slot == 0))
   {
     tempFurnace->map = user->pos.map;
     Mineserver::get()->furnaceManager()->handleActivity(tempFurnace);
@@ -712,6 +712,8 @@ bool Inventory::windowOpen(User *user, int8_t type, int32_t x, int32_t y, int32_
                            << (int8_t)(chunk->furnaces[i]->items[j].count) << (int16_t)chunk->furnaces[i]->items[j].health;
             }
           }
+          user->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)0 << (int16_t)(chunk->furnaces[i]->cookTime*18);
+          user->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)1 << (int16_t)(chunk->furnaces[i]->burnTime*3);
           break;
         }
       }

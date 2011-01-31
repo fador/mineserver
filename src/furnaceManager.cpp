@@ -44,7 +44,7 @@ void FurnaceManager::update()
 
   
 #ifdef _DEBUG
-  Mineserver::get()->logger()->log(LogType::LOG_INFO,  "Furnace", "Checking Furnaces: " + dtos(m_activeFurnaces.size()) + " active furnaces.");
+  //Mineserver::get()->logger()->log(LogType::LOG_INFO,  "Furnace", "Checking Furnaces: " + dtos(m_activeFurnaces.size()) + " active furnaces.");
 #endif
   
   // Loop thru all the furnaces

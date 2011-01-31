@@ -103,7 +103,7 @@ void Furnace::smelt()
     Item* inputSlot  = &slots()[SLOT_INPUT];
     Item* fuelSlot   = &slots()[SLOT_FUEL];
     Item* outputSlot = &slots()[SLOT_OUTPUT];
-    int32_t creationID = 0;
+    int32_t creationID = -1;
     if(inputSlot->type == BLOCK_IRON_ORE)    { creationID = ITEM_IRON_INGOT; }
     if(inputSlot->type == BLOCK_GOLD_ORE)    { creationID = ITEM_GOLD_INGOT; }
     if(inputSlot->type == BLOCK_SAND)        { creationID = BLOCK_GLASS; }
@@ -113,7 +113,7 @@ void Furnace::smelt()
     if(inputSlot->type == ITEM_RAW_FISH)     { creationID = ITEM_COOKED_FISH; }
 
     // Update other params if we actually converted
-    if(creationID != 0 && outputSlot->count != 64)
+    if(creationID != -1 && outputSlot->count != 64)
     {
       // Check if the outputSlot is empty
       if(outputSlot->type == -1)
@@ -237,8 +237,9 @@ int16_t Furnace::cookTime()
 
 void Furnace::sendToAllUsers()
 {
-  sChunk* chunk = NULL;
-  chunk = Mineserver::get()->map(data->map)->chunks.getChunk(blockToChunk(data->x),blockToChunk(data->z));
+
+
+  enum { PROGRESS_ARROW = 0, PROGRESS_FIRE = 1 };
   //ToDo: send changes to all with this furnace opened
 
   std::vector<OpenInventory*>* inv = &Mineserver::get()->inventory()->openFurnaces;
@@ -259,6 +260,9 @@ void Furnace::sendToAllUsers()
                           << (int8_t)(data->items[j].count) << (int16_t)data->items[j].health;
           }
         }
+        
+        (*inv)[openinv]->users[user]->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)PROGRESS_ARROW << (int16_t)(data->cookTime*18);
+        (*inv)[openinv]->users[user]->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)PROGRESS_FIRE  << (int16_t)(data->burnTime*3);
       }
 
       break;
