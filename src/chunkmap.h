@@ -365,7 +365,7 @@ public:
 
   sChunkNode** getBuckets()
   {
-    return &m_buckets[0];
+    return m_buckets;
   }
 
 private:

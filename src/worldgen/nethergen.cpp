@@ -231,7 +231,7 @@ void NetherGen::generateWithNoise(int x, int z, int map)
       if(ymax < seaLevel) 
         ymax = seaLevel;
 
-      for(int bY = 0; bY <= 128; bY++) 
+      for(int bY = 0; bY < 128; bY++) 
       {
         curBlock = &netherblocks[bYbX++];
         if(bY >= 126)
