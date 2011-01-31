@@ -115,7 +115,7 @@ void Furnace::smelt()
     if(creationID != 0 && outputSlot->count != 64)
     {
       // Check if the outputSlot is empty
-      if(outputSlot->type == 0)
+      if(outputSlot->type == -1)
       {
         outputSlot->type = creationID;
         outputSlot->count = 0;
