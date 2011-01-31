@@ -163,8 +163,25 @@ void giveItemsName(std::string userIn, int id, int count, int health)
   if (isValidItem(id))
   {
     int itemCount = 1, itemStacks = 1;
-    if (itemCount>1024) itemCount=1024;
-    mineserver->user.addItem(userIn.c_str(), id, itemCount, health);
+
+    if(count != 1)
+    {
+      itemCount = count;
+      if(itemCount>1024) itemCount=1024;
+      // If multiple stacks
+      itemStacks = roundUpTo(itemCount, 64) / 64;
+      itemCount  -= (itemStacks-1) * 64;
+    }
+    int amount = 64;
+    for(int i = 0; i < itemStacks; i++)
+    {
+      // if last stack
+      if(i == itemStacks - 1)
+      {
+        amount = itemCount;
+      }
+      mineserver->user.addItem(userIn.c_str(), id, amount, health);
+    }
   }
   else
   {
@@ -514,6 +531,9 @@ bool startedDiggingFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int
 {
   //translateDirection(&x,&y,&z,direction);
   std::string user(userIn);
+  int map = 0;
+  mineserver->user.getPositionW(userIn, NULL, NULL, NULL, &map,NULL, NULL, NULL);
+
   if(cuboidMap.find(user) != cuboidMap.end())
   {
     if(cuboidMap[user].active)
@@ -557,7 +577,7 @@ bool startedDiggingFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int
               {  
                 if(mineserver->map.getBlock(xpos,ypos,zpos,&block,&meta) && block == cuboidMap[user].fromBlock)
                 {
-                  mineserver->map.setBlock(xpos,ypos,zpos,cuboidMap[user].toBlock,0);
+                  mineserver->map.setBlock(xpos,ypos,zpos,cuboidMap[user].toBlock,map);
                 }
               }
             }
