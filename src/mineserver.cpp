@@ -217,6 +217,7 @@ void Mineserver::saveAll(){
 
 void Mineserver::saveAllPlayers()
 {
+  if(users().size() == 0) return;
   for (std::vector<User*>::size_type i = users().size()-1; i >= 0; i--)
   {
     if (users()[i]->logged)
