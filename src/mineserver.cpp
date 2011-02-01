@@ -174,13 +174,13 @@ Mineserver::Mineserver()
     int n = 0;
     for (;it!=tmp->end();++it)
     {
-      m_map.push_back(new Map);
+      m_map.push_back(new Map());
       Physics* phy = new Physics;
       phy->map=n;
       m_physics.push_back(phy);
       int k = m_config->iData((std::string(key)+".")+(*it));
       MapGen* m = gennames[k];
-      m_mapGen.push_back(m); 
+      m_mapGen.push_back(m);
       n++;
       
     }
@@ -507,6 +507,12 @@ int Mineserver::run(int argc, char *argv[])
 
       }
 
+
+      for (int i = users().size()-1; i >= 0; i--)
+      {
+        users()[i]->pushMap();
+        users()[i]->popMap();
+      }
 
       // Check for Furnace activity
       Mineserver::get()->furnaceManager()->update();

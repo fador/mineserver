@@ -368,7 +368,7 @@ public:
     return m_buckets;
   }
 
-private:
+//private:
   sChunkNode* m_buckets[441];
 };
 
