@@ -183,7 +183,7 @@ User::~User()
         if (node->chunk->users.size() == 0)
         {
           Mineserver::get()->map(pos.map)->releaseMap(node->chunk->x, node->chunk->z);
-          break;
+          //break;
         }
       }
     }
@@ -561,7 +561,7 @@ bool User::updatePosM(double x, double y, double z, int map, double stance)
         if (node->chunk->users.size() == 0)
         {          
           Mineserver::get()->map(pos.map)->releaseMap(node->chunk->x, node->chunk->z);
-          break;
+          //break;
         }
       }
     }
