@@ -826,6 +826,12 @@ bool Inventory::windowClose(User *user,int8_t windowID)
 
 bool Inventory::onwindowOpen(User *user,int8_t type, int32_t x, int32_t y, int32_t z)
 {
+
+  if(user->isOpenInv)
+  {
+    onwindowClose(user,user->openInv.type, user->openInv.x, user->openInv.y, user->openInv.z);
+  }
+
   std::vector<OpenInventory *> *inv;
   switch(type)
   {

@@ -231,15 +231,16 @@ void HeavenGen::generateWithNoise(int x, int z, int map)
 
       int32_t bYbX = ((bZ << 7) + (bX << 11));
 
-      for(int bY = 0; bY <= 128; bY++) 
+      for(int bY = 0; bY < 128; bY++) 
       {
+        curData  = &blockdata[bYbX>>1];
         curBlock = &heavenblocks[bYbX++];
-        curData = &blockdata[bYbX];
+        
         
         if(bY > n-h && bY< n)
         {
           *curBlock = BLOCK_GRAY_CLOTH;
-          *curData = col[rand()%2];
+          *curData = (bYbX&1)?col[rand()%2]:col[rand()%2]<<4;
           continue;
         } 
         *curBlock = BLOCK_AIR;

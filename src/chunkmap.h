@@ -365,10 +365,10 @@ public:
 
   sChunkNode** getBuckets()
   {
-    return &m_buckets[0];
+    return m_buckets;
   }
 
-private:
+//private:
   sChunkNode* m_buckets[441];
 };
 

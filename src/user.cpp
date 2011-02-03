@@ -183,6 +183,7 @@ User::~User()
         if (node->chunk->users.size() == 0)
         {
           Mineserver::get()->map(pos.map)->releaseMap(node->chunk->x, node->chunk->z);
+          //break;
         }
       }
     }
@@ -234,7 +235,7 @@ bool User::sendLoginInfo()
     }
   }
   // Push chunks to user
-  pushMap(); pushMap();
+  pushMap(); pushMap(); pushMap();
 
 
 
@@ -553,12 +554,14 @@ bool User::updatePosM(double x, double y, double z, int map, double stance)
     //Loop every chunk loaded to make sure no user pointers are left!
     for (int i=0;i<441;++i)
     {
-      for (sChunkNode* node = Mineserver::get()->map(pos.map)->chunks.getBuckets()[i];node!=NULL;node=node->next)
+      ChunkMap* cmap = &Mineserver::get()->map(pos.map)->chunks;
+      for (sChunkNode* node = cmap->m_buckets[i]; node != NULL; node = node->next)
       {
         node->chunk->users.erase(this);
         if (node->chunk->users.size() == 0)
-        {
+        {          
           Mineserver::get()->map(pos.map)->releaseMap(node->chunk->x, node->chunk->z);
+          //break;
         }
       }
     }
@@ -574,25 +577,26 @@ bool User::updatePosM(double x, double y, double z, int map, double stance)
     return false;
   }
   updatePos(x,y,z,stance);
-  pushMap();
+  pushMap(); pushMap(); pushMap();
+  updatePos(x,y,z,stance);
 
   return true;
 }
 
 void User::clearLoadingMap()
 {
-  for(int i = mapQueue.size(); i > 0 ; i--)
-  {
-    mapQueue.erase(mapQueue.begin()+i);
-  }
-  for(int i = mapKnown.size() ; i >= 0; i--)
+
+  mapQueue.clear();
+  mapRemoveQueue.clear();
+
+  for(int i = mapKnown.size()-1; i >= 0; i--)
   {
     addRemoveQueue(mapKnown[i].x(), mapKnown[i].z());
   }
-  popMap();
-  //  buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << std::string("") << (int64_t)0 << (int8_t)-1;
 
+  popMap();  
 
+  //buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << std::string("") << (int64_t)0 << (int8_t)-1;
   buffer << (int8_t)PACKET_SPAWN_POSITION << (int32_t)pos.x << ((int32_t)pos.y+2) << (int32_t)pos.z;
   for(int x = -viewDistance; x <= viewDistance; x++)
   {
@@ -602,7 +606,7 @@ void User::clearLoadingMap()
     }
   }
   // Push chunks to user
-  pushMap(); pushMap();
+  pushMap(); pushMap(); pushMap();
   //Inventory
   for(int i=1; i<45; i++)
   {
@@ -614,14 +618,18 @@ void User::clearLoadingMap()
 
 
   buffer << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map(pos.map)->mapTime;
-  pushMap();pushMap();pushMap();pushMap();pushMap();
+  pushMap();pushMap();pushMap();
   spawnUser((int32_t)pos.x*32, ((int32_t)pos.y+2)*32, (int32_t)pos.z*32);
   // Spawn other users for connected user
   spawnOthers();
 
+  sethealth(health);
+
   buffer << (int8_t)PACKET_PLAYER_POSITION_AND_LOOK << (double)pos.x << (double)pos.y << (double)pos.stance << (double)pos.z
-         << (float)pos.yaw << (float)pos.pitch << (int8_t)(double)1;
+         << (float)pos.yaw << (float)pos.pitch << (int8_t)1;
   teleport(pos.x,pos.y,pos.z);
+
+  Mineserver::get()->chat()->sendMsg(this, "World changed!", Chat::USER);
 }
 
 
@@ -1134,7 +1142,7 @@ namespace
 bool User::pushMap()
 {
   //Dont send all at once
-  int maxcount = 30;
+  int maxcount = 5;
   // If map in queue, push it to client
   while (this->mapQueue.size() > 0 && maxcount > 0)
   {
@@ -1176,8 +1184,8 @@ bool User::teleport(double x, double y, double z, int map)
 
   //Also update pos for other players
   updatePosM(x, y, z, map, pos.stance);
-
-  pushMap();
+  pushMap(); pushMap(); pushMap();
+  updatePosM(x, y, z, map, pos.stance);
   return true;
 }
 
