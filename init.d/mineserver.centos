@@ -22,7 +22,7 @@ start() {
   ./$prog ./config.cfg &> /dev/null
   RETVAL=$?
   echo
-  [ $RETVAL -eq 0 ] && touch ${lockfile}
+  [ $RETVAL = 0 ] && touch ${lockfile}
   return $RETVAL
 }
 
@@ -31,7 +31,7 @@ stop() {
   killproc -p ${pidfile} -d 10 $BASEDIR/$prog 2
   RETVAL=$?
   echo
-  [ $RETVAL -eq 0 ] && rm -f ${lockfile}
+  [ $RETVAL = 0 ] && rm -f ${lockfile}
   return $RETVAL
 }
 
