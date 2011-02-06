@@ -28,6 +28,7 @@ endif
 
 ifeq ($(OS),FreeBSD)
   LIBNOISE=0
+  LIBRARIES+=/usr/local/lib/libnoise.so.0
 endif
 
 # define for <libnoise/noise.h> vs <noise/noise.h>
