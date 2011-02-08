@@ -32,7 +32,6 @@
 #include <string>
 #include <fstream>
 #include <time.h>
-#include <string.h>
 
 #include "../../../src/plugin_api.h"
 
