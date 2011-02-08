@@ -90,6 +90,7 @@ void BlockPlant::remBlock(PlantBlock* p2)
     if((*p)->x == p2->x && (*p)->y == p2->y && (*p)->z == p2->z && (*p)->map == p2->map)
     {
       growingPlants.erase(p);
+      delete (*p);
       return;
     }
   }
