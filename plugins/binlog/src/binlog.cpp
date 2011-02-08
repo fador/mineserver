@@ -33,6 +33,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <string.h>
 #include <time.h>
 #include <vector>
 
