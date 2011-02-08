@@ -43,6 +43,10 @@ class BlockPlant: public BlockBasic
 public:
   int grass_timeout;
   int crop_timeout;
+  int cactus_timeout;
+  int reed_timeout;
+  int cactus_max;
+  int reed_max;
   bool affectedBlock(int block);
   BlockPlant();
    void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);

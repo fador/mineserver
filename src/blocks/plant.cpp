@@ -45,6 +45,7 @@ bool BlockPlant::affectedBlock(int block)
   case BLOCK_SAPLING:
   case BLOCK_DIRT:
   case BLOCK_GRASS:
+  case BLOCK_SOIL:
   case ITEM_WOODEN_HOE:
   case ITEM_STONE_HOE:
   case ITEM_IRON_HOE:
@@ -61,6 +62,10 @@ std::vector<PlantBlock*> growingPlants;
 BlockPlant::BlockPlant(){
   grass_timeout = Mineserver::get()->config()->iData("mapgen.grassrate");
   crop_timeout = Mineserver::get()->config()->iData("mapgen.croprate");
+  cactus_timeout = Mineserver::get()->config()->iData("mapgen.cactusrate");
+  reed_timeout = Mineserver::get()->config()->iData("mapgen.reedrate");
+  cactus_max = Mineserver::get()->config()->iData("mapgen.cactusmax");
+  reed_max = Mineserver::get()->config()->iData("mapgen.reedmax");
 }
 
 void BlockPlant::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
@@ -89,8 +94,6 @@ void BlockPlant::remBlock(PlantBlock* p2)
     }
   }
 }
-      
-
 
 void BlockPlant::addBlock(PlantBlock* p2)
 {
@@ -111,7 +114,7 @@ void BlockPlant::addBlock(int x,int y,int z,int map)
   uint8_t block,meta;
   Mineserver::get()->map(map)->getBlock(x,y,z,&block,&meta);
   int b = (int) block;
-  if(b==BLOCK_GRASS || b == BLOCK_DIRT || b == BLOCK_CROPS){
+  if(b==BLOCK_GRASS || b == BLOCK_DIRT || b == BLOCK_CROPS || b == BLOCK_REED || b == BLOCK_CACTUS){
     PlantBlock *p = new PlantBlock;
     p->x = x; p->y = y; p->z = z; p->map = map; p->count = 0;
     addBlock(p);
@@ -146,7 +149,7 @@ void BlockPlant::timer200(){
     PlantBlock *p = growingPlants[i];
     uint8_t block,meta,sky,light;
     Mineserver::get()->map(p->map)->getBlock(p->x,p->y,p->z,&block,&meta);
-    Mineserver::get()->map(p->map)->getLight(p->x,p->y,p->z,&sky,&light);
+    Mineserver::get()->map(p->map)->getLight(p->x,p->y,p->z,&light,&sky);
     p->count++;
     if(p->count>grass_timeout*5 && (block == BLOCK_DIRT || block == BLOCK_GRASS)){
       uint8_t block2, meta2;
@@ -164,9 +167,12 @@ void BlockPlant::timer200(){
          block2 == BLOCK_SNOW){
         // The grass can grow
         if(block == BLOCK_DIRT){
-          Mineserver::get()->map(p->map)->sendBlockChange(p->x, p->y, p->z, (char)BLOCK_GRASS, 0);
-          Mineserver::get()->map(p->map)->setBlock(p->x,p->y,p->z,(char)BLOCK_GRASS,0);
-          addBlocks(p->x,p->y,p->z,p->map);
+          if(light >4 || sky >3)
+          {
+            Mineserver::get()->map(p->map)->sendBlockChange(p->x, p->y, p->z, (char)BLOCK_GRASS, 0);
+            Mineserver::get()->map(p->map)->setBlock(p->x,p->y,p->z,(char)BLOCK_GRASS,0);
+            addBlocks(p->x,p->y,p->z,p->map);
+          }
         }
       }else{
         if(block == BLOCK_GRASS){
@@ -181,14 +187,68 @@ void BlockPlant::timer200(){
     if(p->count>crop_timeout*5 && block==BLOCK_CROPS)
     {
       p->count = 0;
-      if(meta<7){
-        meta ++;
-      }else{
+      if(light >7 || sky >3)
+      {
+        if(meta<7){
+          meta ++;
+        }else{
+          remBlock(p);
+        }
+        Mineserver::get()->map(p->map)->sendBlockChange(p->x, p->y, p->z,(char)BLOCK_CROPS,meta);
+        Mineserver::get()->map(p->map)->setBlock(p->x,p->y,p->z,(char)BLOCK_CROPS,meta);
+      }
+    }
+    if(p->count>cactus_timeout*5 && block == BLOCK_CACTUS)
+    {
+      uint8_t block,meta;
+      Mineserver::get()->map(p->map)->getBlock(p->x,p->y+1,p->z,&block,&meta);
+      if(block == BLOCK_CACTUS){
+        // Already been grown over.
         remBlock(p);
       }
-      Mineserver::get()->map(p->map)->sendBlockChange(p->x, p->y, p->z,(char)BLOCK_CROPS,meta);
-      Mineserver::get()->map(p->map)->setBlock(p->x,p->y,p->z,(char)BLOCK_CROPS,meta);
+      p->count = 0;
+      for(int i =0 ; i<cactus_max; i++){
+        Mineserver::get()->map(p->map)->getBlock(p->x,p->y-i,p->z,&block,&meta);
+        if( block != BLOCK_CACTUS && block != BLOCK_SAND ){
+          onBroken(NULL,0,p->x,p->y,p->z,p->map,0);
+          remBlock(p);
+          i=cactus_max;
+        }
+        if( block == BLOCK_SAND )
+        {
+          Mineserver::get()->map(p->map)->sendBlockChange(p->x, p->y+1, p->z,(char)BLOCK_CACTUS,0);
+          Mineserver::get()->map(p->map)->setBlock(p->x,p->y+1,p->z,(char)BLOCK_CACTUS,0);
+          addBlocks(p->x,p->y,p->z,p->map);
+          break;
+        }
+      }
     }
+    if(p->count>reed_timeout*5 && block == BLOCK_REED)
+    {
+      uint8_t block,meta;
+      Mineserver::get()->map(p->map)->getBlock(p->x,p->y+1,p->z,&block,&meta);
+      if(block == BLOCK_REED){
+        // Already been grown over.
+        remBlock(p);
+      }
+      p->count = 0;
+      for(int i =0 ; i<reed_max; i++){
+        Mineserver::get()->map(p->map)->getBlock(p->x,p->y-i,p->z,&block,&meta);
+        if( block != BLOCK_REED && block != BLOCK_GRASS && block != BLOCK_DIRT ){
+          onBroken(NULL,0,p->x,p->y,p->z,p->map,0);
+          remBlock(p);
+          i=reed_max;
+        }
+        if( block == BLOCK_GRASS || block == BLOCK_DIRT)
+        {
+          Mineserver::get()->map(p->map)->sendBlockChange(p->x, p->y+1, p->z,(char)BLOCK_REED,0);
+          Mineserver::get()->map(p->map)->setBlock(p->x,p->y+1,p->z,(char)BLOCK_REED,0);
+          addBlocks(p->x,p->y,p->z,p->map);
+          break;
+        }
+      }
+    }
+
   }
 }
 
@@ -206,24 +266,28 @@ bool BlockPlant::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
   }else{
     this->spawnBlockItem(x,y,z,map,block);
   }
+  Mineserver::get()->map(map)->getBlock(x,y+1,z,&block,&meta);
+  if(isPlant(block)){
+    onBroken(user, status, x,y+1,z,map,direction);
+  }
   return false;
 }
 
 void BlockPlant::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-   uint8_t block,meta,up_block,up_meta;
-   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
-     return;
-   if (!Mineserver::get()->map(map)->getBlock(x, y-1, z,&up_block, &up_meta))
-     return;
-   
-   if (direction == BLOCK_TOP && isPlant(up_block))
-   {
-      // Break plant and spawn plant item
-      Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-      Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-      this->spawnBlockItem(x, y, z, map, block);
-   }   
+//   uint8_t block,meta,up_block,up_meta;
+//   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
+//     return;
+//   if (!Mineserver::get()->map(map)->getBlock(x, y-1, z,&up_block, &up_meta))
+//     return;
+//   
+//   if (direction == BLOCK_TOP && isPlant(up_block))
+//   {
+//      // Break plant and spawn plant item
+//      Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+//      Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+//      this->spawnBlockItem(x, y, z, map, block);
+//   }   
 }
 
 bool BlockPlant::isPlant(int num){
@@ -281,10 +345,7 @@ bool BlockPlant::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
        && oldblock != BLOCK_DIRT ){
      return true;
    }
-   if( newblock == BLOCK_DIRT || newblock == BLOCK_GRASS){
-     addBlocks(x,y,z,map);
-   }
-   if( newblock == BLOCK_REED && oldblock != BLOCK_GRASS){
+   if( newblock == BLOCK_REED && (oldblock != BLOCK_GRASS && oldblock != BLOCK_DIRT)){
      // TODO : Check for water
      return true;
    }
@@ -294,6 +355,7 @@ bool BlockPlant::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
    }else{
      Mineserver::get()->map(map)->sendBlockChange(x, y, z, newblock, 0);
      Mineserver::get()->map(map)->setBlock(x, y, z, newblock, 0);
+     addBlocks(x,y,z,map);
    }
   return false;
 }
