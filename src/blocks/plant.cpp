@@ -89,8 +89,8 @@ void BlockPlant::remBlock(PlantBlock* p2)
       p!=growingPlants.end(); p++){
     if((*p)->x == p2->x && (*p)->y == p2->y && (*p)->z == p2->z && (*p)->map == p2->map)
     {
-      growingPlants.erase(p);
       delete (*p);
+      growingPlants.erase(p);
       return;
     }
   }
@@ -153,7 +153,7 @@ void BlockPlant::addBlocks(int x,int y,int z,int map)
 }
 
 void BlockPlant::timer200(){
-  for(int i = 0; i < growingPlants.size(); i++){
+  for(int i = growingPlants.size()-1; i >= 0; i--){
     PlantBlock *p = growingPlants[i];
     uint8_t block,meta,sky,light;
     Mineserver::get()->map(p->map)->getBlock(p->x,p->y,p->z,&block,&meta);
@@ -311,8 +311,8 @@ bool BlockPlant::isPlant(int num){
 
 bool BlockPlant::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-   uint8_t oldblock;
-   uint8_t oldmeta;
+  uint8_t oldblock;
+  uint8_t oldmeta;
 
    /* move the x,y,z coords dependent upon placement direction */
    if (!this->translateDirection(&x,&y,&z,map,direction))
@@ -324,8 +324,9 @@ bool BlockPlant::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
    if (!Mineserver::get()->map(map)->getBlock(x, y-1, z, &oldblock, &oldmeta))
       return true;
 
-   if (!this->isBlockStackable(oldblock))
-      return true;
+   if( newblock != BLOCK_DIRT && newblock != BLOCK_SOIL && newblock != BLOCK_GRASS)
+     if (!this->isBlockStackable(oldblock))
+       return true;
 
    if(newblock == BLOCK_CACTUS && oldblock !=BLOCK_SAND)
    {
