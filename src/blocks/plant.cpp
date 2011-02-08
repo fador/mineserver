@@ -108,6 +108,13 @@ void BlockPlant::addBlock(PlantBlock* p2)
   growingPlants.push_back(p2);
 }
  
+void BlockPlant::remBlock(int x,int y,int z,int map)
+{
+  PlantBlock *p = new PlantBlock;
+  p->x = x; p->y = y; p->z = z; p->map = map;
+  remBlock(p);
+}
+  
 
 void BlockPlant::addBlock(int x,int y,int z,int map)
 {
@@ -265,6 +272,7 @@ bool BlockPlant::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
   Mineserver::get()->map(map)->getBlock(x,y,z,&block,&meta);
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
   Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  remBlock(x,y,z,map);
   if(block == BLOCK_CROPS && meta == 7){
     Mineserver::get()->map(map)->createPickupSpawn(x,y+1,z,ITEM_WHEAT,1,0,NULL);
   }else if(block == BLOCK_CROPS){

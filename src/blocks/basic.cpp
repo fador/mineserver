@@ -58,7 +58,6 @@ bool BlockBasic::isBlockStackable(const uint8_t block)
   case BLOCK_MINECART_TRACKS:
   case BLOCK_WOODEN_DOOR:
   case BLOCK_IRON_DOOR:
-  case BLOCK_SNOW:
   case BLOCK_ICE:
     return false;
     break;
@@ -90,31 +89,34 @@ bool BlockBasic::isUserOnBlock(const int32_t x, const int8_t y, const int32_t z,
 
 bool BlockBasic::translateDirection(int32_t *x, int8_t *y, int32_t *z, int map,const int8_t direction)
 {
-  switch(direction)
-  {
-  case BLOCK_SOUTH:
-    *x-=1;
-    break;
-  case BLOCK_NORTH:
-    *x+=1;
-    break;
-  case BLOCK_EAST:
-    *z+=1;
-    break;
-  case BLOCK_WEST:
-    *z-=1;
-    break;
-  case BLOCK_TOP:
-    *y+=1;
-    break;
-  case BLOCK_BOTTOM:
-    *y-=1;
-    break;
-  default:
-    return false;
-    break;
+  uint8_t block, meta;
+  Mineserver::get()->map(map)->getBlock(*x,*y,*z,&block,&meta);
+  if(block != BLOCK_SNOW){
+    switch(direction)
+    {
+    case BLOCK_SOUTH:
+      *x-=1;
+      break;
+    case BLOCK_NORTH:
+      *x+=1;
+      break;
+    case BLOCK_EAST:
+      *z+=1;
+      break;
+    case BLOCK_WEST:
+      *z-=1;
+      break;
+    case BLOCK_TOP:
+        *y+=1;
+      break;
+    case BLOCK_BOTTOM:
+      *y-=1;
+      break;
+    default:
+      return false;
+      break;
+    }
   }
-
   return true;
 }
 
@@ -122,7 +124,10 @@ bool BlockBasic::isBlockEmpty(const int32_t x, const int8_t y, const int32_t z, 
 {
   uint8_t block;
   uint8_t meta;
-  return Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta) && block == BLOCK_AIR;
+  if(!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta)){
+    return false;
+  }
+  return (block == BLOCK_AIR || block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER || block == BLOCK_LAVA || block == BLOCK_STATIONARY_LAVA || block == BLOCK_SNOW);
 }
 
 bool BlockBasic::spawnBlockItem(const int32_t x, const int8_t y, const int32_t z, int map, const uint8_t block, const uint8_t meta)

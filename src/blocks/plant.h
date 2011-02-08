@@ -62,6 +62,7 @@ public:
    void addBlock(PlantBlock* p2);
    void addBlock(int x, int y, int z, int map);
    void remBlock(PlantBlock* p2);
+   void remBlock(int x,int y,int z,int map);
    bool isPlant(int num);
 };
 

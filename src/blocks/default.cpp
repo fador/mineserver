@@ -98,7 +98,6 @@ bool BlockDefault::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
     return true;
   }
 
-  /* move the x,y,z coords dependent upon placement direction */
   if (!this->translateDirection(&x,&y,&z,map,direction))
   {
     return true;
