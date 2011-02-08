@@ -201,10 +201,13 @@ void BlockPlant::timer200(){
     if(p->count>cactus_timeout*5 && block == BLOCK_CACTUS)
     {
       uint8_t block,meta;
-      Mineserver::get()->map(p->map)->getBlock(p->x,p->y+1,p->z,&block,&meta);
-      if(block == BLOCK_CACTUS){
-        // Already been grown over.
+      if(!Mineserver::get()->map(p->map)->getBlock(p->x,p->y+1,p->z,&block,&meta)){
         remBlock(p);
+        continue;
+      }
+      if(block != BLOCK_AIR){
+        remBlock(p);
+        continue;
       }
       p->count = 0;
       for(int i =0 ; i<cactus_max; i++){
@@ -226,10 +229,13 @@ void BlockPlant::timer200(){
     if(p->count>reed_timeout*5 && block == BLOCK_REED)
     {
       uint8_t block,meta;
-      Mineserver::get()->map(p->map)->getBlock(p->x,p->y+1,p->z,&block,&meta);
-      if(block == BLOCK_REED){
-        // Already been grown over.
+      if(!Mineserver::get()->map(p->map)->getBlock(p->x,p->y+1,p->z,&block,&meta)){
         remBlock(p);
+        continue;
+      }
+      if(block != BLOCK_AIR){
+        remBlock(p);
+        continue;
       }
       p->count = 0;
       for(int i =0 ; i<reed_max; i++){
