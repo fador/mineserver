@@ -195,7 +195,6 @@ Mineserver::Mineserver()
   m_screen         = new CliScreen;
   m_logger         = new Logger;
   m_chat           = new Chat;
-  m_plugin         = new Plugin;
   m_furnaceManager = new FurnaceManager;
   m_packetHandler  = new PacketHandler;
   m_inventory      = new Inventory;
@@ -231,7 +230,7 @@ int Mineserver::run(int argc, char *argv[])
 {
   uint32_t starttime = (uint32_t)time(0);
   uint32_t tick      = (uint32_t)time(0);
-
+  m_plugin         = new Plugin;
   init_plugin_api();
 
   if (Mineserver::get()->config()->bData("system.interface.use_cli"))
@@ -416,6 +415,17 @@ int Mineserver::run(int argc, char *argv[])
   {
     // Run 200ms timer hook
     static_cast<Hook0<bool>*>(plugin()->getHook("Timer200"))->doAll();
+    // Alert any block types that care about timers
+    BlockBasic* blockcb;
+    for(uint32_t i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
+    {
+      blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+      if(blockcb!=NULL)
+      {
+        blockcb->timer200();
+      }
+    }
+
 
     timeNow = time(0);
     if (timeNow-starttime > 10)

@@ -26,10 +26,14 @@
  */
 
 #pragma once
-
 #include "basic.h"
 
 class User;
+
+class PlantBlock{
+public:
+  int x,y,z,map,count;
+}; 
 
 /** BlockPlant deals specifically with plant block functionality
 @see BlockBasic
@@ -37,8 +41,10 @@ class User;
 class BlockPlant: public BlockBasic
 {
 public:
+  int grass_timeout;
+  int crop_timeout;
   bool affectedBlock(int block);
-
+  BlockPlant();
    void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
    void onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
    void onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
@@ -47,5 +53,11 @@ public:
    bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
    void onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
    void onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
+   void timer200();
+   void addBlocks(int x, int y, int z, int map);
+   void addBlock(PlantBlock* p2);
+   void addBlock(int x, int y, int z, int map);
+   void remBlock(PlantBlock* p2);
+   bool isPlant(int num);
 };
 

@@ -32,10 +32,7 @@
 
 bool BlockDefault::affectedBlock(int block)
 {
-  if(block < 256)
-  {
-    return true;
-  }
+  return true;
 }
 
 
@@ -79,6 +76,8 @@ bool BlockDefault::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
 {
   uint8_t oldblock;
   uint8_t oldmeta;
+
+  if(newblock > 255){ return true; }
 
   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {

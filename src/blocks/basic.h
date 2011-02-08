@@ -45,6 +45,7 @@ public:
   virtual bool affectedBlock(int block);
   virtual void notifyNeighbours(const int32_t x, const int8_t y, const int32_t z, const int map, const std::string callback, User* user, const uint8_t oldblock, const int8_t ignore_direction);
 
+  virtual void timer200(){ }
   virtual void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
   virtual void onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z,int map,  int8_t direction);
   virtual void onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z,int map,  int8_t direction);

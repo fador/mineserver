@@ -42,8 +42,6 @@
 #include <dlfcn.h>
 #endif
 
-class BlockBasic;
-
 #include "delegate/delegate.hpp"
 //#include "constants.h"
 #include "tools.h"
@@ -76,6 +74,7 @@ class BlockBasic;
 #define LIBRARY_CLOSE(x) dlclose(x)
 #define LIBRARY_EXTENSION ".so"
 #endif
+#include "blocks/basic.h"
 //
 // It's SUPER EFFECTIVE!
 // Foe INCONSISTENCY fainted!
