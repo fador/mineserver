@@ -35,6 +35,12 @@
 class User;
 class NBT_Value;
 
+class Creation{
+public:
+  int output, meta, count;
+  Creation();
+};
+
 enum
 {
   SLOT_INPUT,
@@ -82,5 +88,7 @@ private:
   furnaceData *data;
   bool m_burning;
 };
+
+void readConfig();
 
 #endif // _FURNACE.H
