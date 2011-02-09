@@ -72,16 +72,16 @@ Depends on (and tested with):
 **Compiling using linux (make & gcc):**
 
  * Download and extract source or use `git clone git://github.com/fador/mineserver.git`
- * Go to mineserver/src/ directory
- * Run `make` or `make DEBIAN=1` for Debian/Ubuntu
- * Run server with `./mineserver`
+ * Go to mineserver directory
+ * Run `make all install` for Debian/Ubuntu
+ * Run server with `cd bin && ./mineserver`
 
 **Compiling using FreeBSD / PCBSD (gmake & g++):**
 
  * Download and extract source or use `git clone git://github.com/fador/mineserver.git`
- * Go to mineserver/src/ directory
- * Run `gmake`
- * Run server with `./mineserver`
+ * Go to mineserver directory
+ * Run `gmake all install`
+ * Run server with `cd bin && ./mineserver`
 
 **Compiling using windows (VS2010/VS2008):**
 
