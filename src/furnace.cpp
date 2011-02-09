@@ -32,6 +32,14 @@
 #include "mineserver.h"
 #include "map.h"
 #include "tools.h"
+#include "config.h"
+
+Creation createList[2258];
+bool configIsRead=false;
+
+Creation::Creation(){
+  output=-1; meta=0; count=0;
+}
 
 Furnace::Furnace(furnaceData *data_)
 {
@@ -40,6 +48,11 @@ Furnace::Furnace(furnaceData *data_)
   uint8_t block;
   uint8_t meta;
   Mineserver::get()->map(data->map)->getBlock(data->x, data->y, data->z, &block, &meta);
+  if(!configIsRead)
+  {
+    readConfig();
+    configIsRead=true;
+  }
 
   // Check if this is a burning block
   if(block == BLOCK_BURNING_FURNACE)
@@ -103,15 +116,8 @@ void Furnace::smelt()
     Item* inputSlot  = &slots()[SLOT_INPUT];
     Item* fuelSlot   = &slots()[SLOT_FUEL];
     Item* outputSlot = &slots()[SLOT_OUTPUT];
-    int32_t creationID = -1;
-    if(inputSlot->type == BLOCK_IRON_ORE)    { creationID = ITEM_IRON_INGOT; }
-    if(inputSlot->type == BLOCK_GOLD_ORE)    { creationID = ITEM_GOLD_INGOT; }
-    if(inputSlot->type == BLOCK_SAND)        { creationID = BLOCK_GLASS; }
-    if(inputSlot->type == BLOCK_COBBLESTONE) { creationID = BLOCK_STONE; }
-    if(inputSlot->type == ITEM_PORK)         { creationID = ITEM_GRILLED_PORK; }
-    if(inputSlot->type == ITEM_CLAY_BALLS)   { creationID = ITEM_CLAY_BRICK; }
-    if(inputSlot->type == ITEM_RAW_FISH)     { creationID = ITEM_COOKED_FISH; }
-
+    int32_t creationID = createList[inputSlot->type].output;
+ 
     // Update other params if we actually converted
     if(creationID != -1 && outputSlot->count != 64)
     {
@@ -126,9 +132,9 @@ void Furnace::smelt()
       if(outputSlot->type == creationID)
       {
         // Increment output and decrememnt the input source
-        outputSlot->count++;
+        outputSlot->count+=createList[inputSlot->type].count;
         inputSlot->count--;
-        outputSlot->health = inputSlot->health;
+        outputSlot->health = createList[inputSlot->type].meta;
         data->cookTime = 0;
 
         if(inputSlot->count == 0)
@@ -167,23 +173,9 @@ bool Furnace::hasValidIngredient()
 {
   // Check that we have a valid input type
   Item* slot = &slots()[SLOT_INPUT];
-  if((slot->count != 0) &&
-    (
-     (slot->type == BLOCK_IRON_ORE)    ||
-     (slot->type == BLOCK_GOLD_ORE)    ||
-     (slot->type == BLOCK_SAND)        ||
-     (slot->type == BLOCK_COBBLESTONE) ||
-     (slot->type == ITEM_PORK)         ||
-     (slot->type == ITEM_CLAY_BALLS)   ||
-     (slot->type == ITEM_RAW_FISH))
-     )
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
+  if(slot->type<0){ return false; }
+  if(createList[slot->type].output != -1){ return true; }
+  return false;
 }
 void Furnace::consumeFuel()
 {
@@ -270,3 +262,22 @@ void Furnace::sendToAllUsers()
   }
 
 }
+
+void readConfig(){
+  std::cout << "Adding Furnace recipes" << std::endl;
+  const char* key = "furnace.items";
+  if(Mineserver::get()->config()->has(key) && Mineserver::get()->config()->type(key) == CONFIG_NODE_LIST)
+  {
+    std::list<std::string>* tmp = Mineserver::get()->config()->mData(key)->keys();
+    std::list<std::string>::iterator it = tmp->begin();
+    for(;it!=tmp->end(); ++it)
+    {
+      int input = Mineserver::get()->config()->iData((std::string(key)+".")+(*it)+".in");
+      createList[input].output = Mineserver::get()->config()->iData((std::string(key)+".")+(*it)+".out");
+      createList[input].meta = Mineserver::get()->config()->iData((std::string(key)+".")+(*it)+".meta");
+      createList[input].count = Mineserver::get()->config()->iData((std::string(key)+".")+(*it)+".count");
+      std::cout << input << " " << createList[input].output << std::endl;
+    }
+  }
+}
+

@@ -201,6 +201,7 @@ void BlockPlant::timer200(){
           meta ++;
         }else{
           remBlock(p);
+          continue;
         }
         Mineserver::get()->map(p->map)->sendBlockChange(p->x, p->y, p->z,(char)BLOCK_CROPS,meta);
         Mineserver::get()->map(p->map)->setBlock(p->x,p->y,p->z,(char)BLOCK_CROPS,meta);
@@ -318,15 +319,17 @@ bool BlockPlant::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
    if (!this->translateDirection(&x,&y,&z,map,direction))
       return true;
 
-   if (this->isBlockEmpty(x,y-1,z,map) || !this->isBlockEmpty(x,y,z,map))
-      return true;
-
    if (!Mineserver::get()->map(map)->getBlock(x, y-1, z, &oldblock, &oldmeta))
       return true;
 
    if( newblock != BLOCK_DIRT && newblock != BLOCK_SOIL && newblock != BLOCK_GRASS)
+   {
+     if (this->isBlockEmpty(x,y-1,z,map) || !this->isBlockEmpty(x,y,z,map))
+      return true;
+
      if (!this->isBlockStackable(oldblock))
        return true;
+   }
 
    if(newblock == BLOCK_CACTUS && oldblock !=BLOCK_SAND)
    {
