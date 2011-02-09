@@ -55,10 +55,13 @@
 #include "blocks/note.h"
 #include "blocks/blockfurnace.h"
 #include "blocks/workbench.h"
+#include "blocks/dyed.h"
 
 void Plugin::init()
 {
    // Create Block* objects and put them away so we can delete them later
+   BlockDyed* dyedblock = new BlockDyed();
+   BlockCB.push_back(dyedblock);
    BlockFalling* fallingblock = new BlockFalling();
    BlockCB.push_back(fallingblock);
    BlockTorch* torchblock = new BlockTorch();

@@ -76,12 +76,12 @@ public:
 
     int8_t width;
     int8_t height;
-    int16_t *slots;
+    Item *slots;
     Item output;
   };
   
   std::vector<Recipe*> recipes;
-  bool addRecipe(int width, int height, int16_t* inputrecipe, int outputCount, 
+  bool addRecipe(int width, int height, Item* inputrecipe, int outputCount, 
                  int16_t outputType, int16_t outputHealth);
   bool readRecipe(std::string recipeFile);
 
