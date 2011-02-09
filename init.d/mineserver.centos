@@ -17,7 +17,9 @@ prog=mineserver
 
 start() {
   echo -n $"Starting $prog: "
-  $BASEDIR/$prog $BASEDIR/config.cfg &> /dev/null
+  cd $BASEDIR
+  #this doesn't seem to work
+  ./$prog ./config.cfg &> /dev/null
   RETVAL=$?
   echo
   [ $RETVAL = 0 ] && touch ${lockfile}
@@ -29,7 +31,8 @@ stop() {
   killproc -p ${pidfile} -d 10 $BASEDIR/$prog 2
   RETVAL=$?
   echo
-  [ $RETVAL = 0 ] && rm -f ${lockfile} ${pidfile}
+  [ $RETVAL = 0 ] && rm -f ${lockfile}
+  return $RETVAL
 }
 
 restart() {
@@ -48,7 +51,10 @@ case "$1" in
   restart)
     restart
     ;;
+  status)
+    status -p ${pidfile} $prog
+    ;;
   *)
-    echo $"Usage: $prog {start|stop|restart}"
+    echo $"Usage: $prog {start|stop|restart|status}"
     ;;  
 esac
