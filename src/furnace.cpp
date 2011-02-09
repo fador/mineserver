@@ -264,7 +264,6 @@ void Furnace::sendToAllUsers()
 }
 
 void readConfig(){
-  std::cout << "Adding Furnace recipes" << std::endl;
   const char* key = "furnace.items";
   if(Mineserver::get()->config()->has(key) && Mineserver::get()->config()->type(key) == CONFIG_NODE_LIST)
   {
@@ -276,7 +275,6 @@ void readConfig(){
       createList[input].output = Mineserver::get()->config()->iData((std::string(key)+".")+(*it)+".out");
       createList[input].meta = Mineserver::get()->config()->iData((std::string(key)+".")+(*it)+".meta");
       createList[input].count = Mineserver::get()->config()->iData((std::string(key)+".")+(*it)+".count");
-      std::cout << input << " " << createList[input].output << std::endl;
     }
   }
 }
