@@ -33,7 +33,7 @@
 
 #include "../constants.h"
 #include "../inventory.h"
-#include "basic.h"
+#include "itembasic.h"
 
 class ItemFood: public ItemBasic
 {

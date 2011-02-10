@@ -69,7 +69,7 @@
 #include "user.h"
 #include "blocks/basic.h"
 #include "blocks/note.h"
-#include "items/basic.h"
+#include "items/itembasic.h"
 
 #ifdef WIN32
     #define M_PI 3.141592653589793238462643

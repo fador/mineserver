@@ -32,7 +32,7 @@
 #include "../plugin.h"
 #include "../inventory.h"
 
-#include "basic.h"
+#include "itembasic.h"
 
 bool ItemBasic::affectedItem(int item)
 {

@@ -75,7 +75,7 @@
 #define LIBRARY_EXTENSION ".so"
 #endif
 #include "blocks/basic.h"
-#include "items/basic.h"
+#include "items/itembasic.h"
 //
 // It's SUPER EFFECTIVE!
 // Foe INCONSISTENCY fainted!
