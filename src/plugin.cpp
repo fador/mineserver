@@ -57,6 +57,8 @@
 #include "blocks/workbench.h"
 #include "blocks/dyed.h"
 
+#include "items/food.h"
+
 void Plugin::init()
 {
    // Create Block* objects and put them away so we can delete them later
@@ -96,6 +98,9 @@ void Plugin::init()
    BlockCB.push_back(workbenchblock);
    BlockDefault* defaultblock = new BlockDefault();
    BlockCB.push_back(defaultblock);
+
+   ItemFood* fooditem = new ItemFood();
+   ItemCB.push_back(fooditem);
 
 }
 

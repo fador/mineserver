@@ -88,18 +88,16 @@ Inventory::Inventory()
   }
 }
 
-bool Inventory::addRecipe(int width, int height, Item* inputrecipe, int outputCount, int16_t outputType, int16_t outputHealth)
+bool Inventory::addRecipe(int width, int height, std::vector<Item*> inputrecipe, int outputCount, int16_t outputType, int16_t outputHealth)
 {
   Recipe *recipe = new Recipe;
 
   recipe->width  = width;
   recipe->height = height;
-  recipe->slots  = new Item[width*height];
   recipe->output.count  = outputCount;
   recipe->output.type   = outputType;
   recipe->output.health = outputHealth;
-
-  memcpy(recipe->slots, inputrecipe, width*height*sizeof(Item));
+  recipe->slots = inputrecipe;
 
   recipes.push_back(recipe);
 
@@ -128,7 +126,7 @@ bool Inventory::readRecipe(std::string recipeFile)
   int del;
   bool readingRecipe = false;
   std::vector<std::string> line;
-  std::vector<Item> recipetable;
+  std::vector<Item*> recipetable;
   std::string text;
   while(getline(ifs, temp))
   {
@@ -183,21 +181,22 @@ bool Inventory::readRecipe(std::string recipeFile)
       for(unsigned int i = 0; i < line.size(); i++)
       {
         std::string data (line[i]);
-        Item item = Item();
-        item.count = 1; item.health=-1;
+        Item* item = new Item();
+        item->count = 1; item->health=-1;
         int location = data.find("x");
         if(location>-1){
           // Quantity before ID
-          item.count = atoi(data.substr(0,location).c_str());
+          item->count = atoi(data.substr(0,location).c_str());
           data = data.substr(location+1, std::string::npos);
         }
         location = data.find(":");
         if(location>-1){
           // Meta after ID
-          item.health = atoi(data.substr(location+1, std::string::npos).c_str());
+          item->health = atoi(data.substr(location+1, std::string::npos).c_str());
           data = data.substr(0, location);
         }
-        item.type = atoi(data.c_str());
+        item->type = atoi(data.c_str());
+        if(item->type==-1){ item->count = 0; }
         recipetable.push_back(item);
       }
       continue;
@@ -228,18 +227,10 @@ bool Inventory::readRecipe(std::string recipeFile)
     }
   }
   ifs.close();
-  
-  Item* inrecipe = new Item[height*width];
-  for (unsigned int i = 0; i < recipetable.size(); i++)
-  {
-    inrecipe[i].type = recipetable[i].type;
-    inrecipe[i].count = recipetable[i].count;
-    inrecipe[i].health = recipetable[i].health;
-  }
 
-  addRecipe(width, height, inrecipe, outCount, outType, outHealth);
+  addRecipe(width, height, recipetable, outCount, outType, outHealth);
 
-  delete [] inrecipe;
+//  delete [] inrecipe;
   
   return true;
 }
@@ -979,19 +970,19 @@ bool Inventory::doCraft(Item *slots, int8_t width, int8_t height)
         {
           for(int32_t recipePosY = 0; recipePosY < recipes[i]->height; recipePosY++)
           {
-            if(slots[(recipePosY+offsetY)*width+recipePosX+1+offsetX].type != recipes[i]->slots[recipePosY*recipes[i]->width+recipePosX].type)
+            if(slots[(recipePosY+offsetY)*width+recipePosX+1+offsetX].type != recipes[i]->slots[recipePosY*recipes[i]->width+recipePosX]->type)
             {
               mismatch = true;
               break;
             }
-            if(recipes[i]->slots[recipePosY*recipes[i]->width+recipePosX].health!=-1)
+            if(recipes[i]->slots[recipePosY*recipes[i]->width+recipePosX]->health!=-1)
             {
-              if(slots[(recipePosY+offsetY)*width+recipePosX+1+offsetX].health != recipes[i]->slots[recipePosY*recipes[i]->width+recipePosX].health){
+              if(slots[(recipePosY+offsetY)*width+recipePosX+1+offsetX].health != recipes[i]->slots[recipePosY*recipes[i]->width+recipePosX]->health){
                 mismatch = true;
                 break;
               }
             }
-            if(slots[(recipePosY+offsetY)*width+recipePosX+1+offsetX].count < recipes[i]->slots[recipePosY*recipes[i]->width+recipePosX].count)
+            if(slots[(recipePosY+offsetY)*width+recipePosX+1+offsetX].count < recipes[i]->slots[recipePosY*recipes[i]->width+recipePosX]->count)
             {
               mismatch = true;
               break;

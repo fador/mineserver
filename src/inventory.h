@@ -71,18 +71,17 @@ public:
     Recipe() : width(0),height(0),slots(NULL) {}
     ~Recipe()
     {
-      delete [] slots;
     }
 
     int8_t width;
     int8_t height;
-    Item *slots;
+    std::vector<Item*> slots;
     Item output;
   };
   
   std::vector<Recipe*> recipes;
-  bool addRecipe(int width, int height, Item* inputrecipe, int outputCount, 
-                 int16_t outputType, int16_t outputHealth);
+  bool addRecipe(int width, int height, std::vector<Item*> inputrecipe, 
+                 int outputCount, int16_t outputType, int16_t outputHealth);
   bool readRecipe(std::string recipeFile);
 
   Inventory();

@@ -69,6 +69,7 @@
 #include "user.h"
 #include "blocks/basic.h"
 #include "blocks/note.h"
+#include "items/basic.h"
 
 #ifdef WIN32
     #define M_PI 3.141592653589793238462643
@@ -740,6 +741,22 @@ int PacketHandler::player_block_placement(User *user)
   }
   user->buffer.removePacket();
 
+  
+  ItemBasic* itemcb;
+  if(x==-1 && y==-1 && z==-1)
+  {
+    // Right clicked without pointing at a tile
+    Item *item = &(user->inv[user->curItem+36]);
+    for(uint32_t i =0 ; i<Mineserver::get()->plugin()->getItemCB().size(); i++)
+    {
+      itemcb = Mineserver::get()->plugin()->getItemCB()[i];
+      if(itemcb!=NULL && itemcb->affectedItem(newblock))
+      {
+        itemcb->onRightClick(user, item);
+      }
+    }
+    return PACKET_OK;
+  }
 
   if (!Mineserver::get()->map(user->pos.map)->getBlock(x, y, z, &oldblock, &metadata))
   {
