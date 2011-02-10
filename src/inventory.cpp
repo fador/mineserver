@@ -88,18 +88,16 @@ Inventory::Inventory()
   }
 }
 
-bool Inventory::addRecipe(int width, int height, int16_t* inputrecipe, int outputCount, int16_t outputType, int16_t outputHealth)
+bool Inventory::addRecipe(int width, int height, std::vector<Item*> inputrecipe, int outputCount, int16_t outputType, int16_t outputHealth)
 {
   Recipe *recipe = new Recipe;
 
   recipe->width  = width;
   recipe->height = height;
-  recipe->slots  = new int16_t[width*height];
   recipe->output.count  = outputCount;
   recipe->output.type   = outputType;
   recipe->output.health = outputHealth;
-
-  memcpy(recipe->slots, inputrecipe, width*height*sizeof(int16_t));
+  recipe->slots = inputrecipe;
 
   recipes.push_back(recipe);
 
@@ -128,7 +126,7 @@ bool Inventory::readRecipe(std::string recipeFile)
   int del;
   bool readingRecipe = false;
   std::vector<std::string> line;
-  std::vector<int16_t> recipetable;
+  std::vector<Item*> recipetable;
   std::string text;
   while(getline(ifs, temp))
   {
@@ -182,7 +180,24 @@ bool Inventory::readRecipe(std::string recipeFile)
     {
       for(unsigned int i = 0; i < line.size(); i++)
       {
-        recipetable.push_back(atoi(line[i].c_str()));
+        std::string data (line[i]);
+        Item* item = new Item();
+        item->count = 1; item->health=-1;
+        int location = data.find("x");
+        if(location>-1){
+          // Quantity before ID
+          item->count = atoi(data.substr(0,location).c_str());
+          data = data.substr(location+1, std::string::npos);
+        }
+        location = data.find(":");
+        if(location>-1){
+          // Meta after ID
+          item->health = atoi(data.substr(location+1, std::string::npos).c_str());
+          data = data.substr(0, location);
+        }
+        item->type = atoi(data.c_str());
+        if(item->type==-1){ item->count = 0; }
+        recipetable.push_back(item);
       }
       continue;
     }
@@ -212,16 +227,10 @@ bool Inventory::readRecipe(std::string recipeFile)
     }
   }
   ifs.close();
-  
-  int16_t* inrecipe = new int16_t[height*width];
-  for (unsigned int i = 0; i < recipetable.size(); i++)
-  {
-    inrecipe[i] = recipetable[i];
-  }
 
-  addRecipe(width, height, inrecipe, outCount, outType, outHealth);
+  addRecipe(width, height, recipetable, outCount, outType, outHealth);
 
-  delete [] inrecipe;
+//  delete [] inrecipe;
   
   return true;
 }
@@ -398,7 +407,7 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
   bool playerCrafting    = false;
 
   //Empty slot and holding something
-  if((itemID == -1 || (slotItem->type == user->inventoryHolding.type && slotItem->count < 64) ) && user->inventoryHolding.type != -1)
+  if((itemID == -1 || (slotItem->type == user->inventoryHolding.type && slotItem->health == user->inventoryHolding.health && slotItem->count < 64) ) && user->inventoryHolding.type != -1)
   {
     //If accessing crafting output slot
     if(slotItem->type != -1 && (windowID == WINDOW_WORKBENCH || windowID == WINDOW_PLAYER) && slot == 0)
@@ -961,7 +970,19 @@ bool Inventory::doCraft(Item *slots, int8_t width, int8_t height)
         {
           for(int32_t recipePosY = 0; recipePosY < recipes[i]->height; recipePosY++)
           {
-            if(slots[(recipePosY+offsetY)*width+recipePosX+1+offsetX].type != recipes[i]->slots[recipePosY*recipes[i]->width+recipePosX])
+            if(slots[(recipePosY+offsetY)*width+recipePosX+1+offsetX].type != recipes[i]->slots[recipePosY*recipes[i]->width+recipePosX]->type)
+            {
+              mismatch = true;
+              break;
+            }
+            if(recipes[i]->slots[recipePosY*recipes[i]->width+recipePosX]->health!=-1)
+            {
+              if(slots[(recipePosY+offsetY)*width+recipePosX+1+offsetX].health != recipes[i]->slots[recipePosY*recipes[i]->width+recipePosX]->health){
+                mismatch = true;
+                break;
+              }
+            }
+            if(slots[(recipePosY+offsetY)*width+recipePosX+1+offsetX].count < recipes[i]->slots[recipePosY*recipes[i]->width+recipePosX]->count)
             {
               mismatch = true;
               break;

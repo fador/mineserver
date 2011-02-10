@@ -75,6 +75,7 @@
 #define LIBRARY_EXTENSION ".so"
 #endif
 #include "blocks/basic.h"
+#include "items/basic.h"
 //
 // It's SUPER EFFECTIVE!
 // Foe INCONSISTENCY fainted!
@@ -149,12 +150,11 @@ public:
     free();
   }
 
-  // Old code
-  // This needs to be phased over to the new plugin architecture
-
   void init();
   void free();
   std::vector<BlockBasic*> getBlockCB(){ return BlockCB; }
+  std::vector<ItemBasic*> getItemCB(){ return ItemCB; }
+
 
 
 private:
@@ -163,8 +163,8 @@ private:
   std::map<const std::string, void*> m_pointers;
   std::map<const std::string, float> m_pluginVersions;
 
-  // Old stuff
   std::vector<BlockBasic*> BlockCB;
+  std::vector<ItemBasic*> ItemCB;
 };
 
 #endif

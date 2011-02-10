@@ -10,10 +10,12 @@ SRC         += blocks/basic.cpp blocks/door.cpp blocks/falling.cpp blocks/fire.c
 SRC         += blocks/liquid.cpp blocks/plant.cpp blocks/sign.cpp blocks/snow.cpp 
 SRC         += blocks/stair.cpp blocks/torch.cpp blocks/tracks.cpp blocks/default.cpp
 SRC         += blocks/chest.cpp blocks/ladder.cpp blocks/cake.cpp blocks/note.cpp
-SRC         += blocks/workbench.cpp blocks/blockfurnace.cpp
+SRC         += blocks/workbench.cpp blocks/blockfurnace.cpp blocks/dyed.cpp
 
 SRC         += worldgen/mapgen.cpp worldgen/cavegen.cpp worldgen/nethergen.cpp
 SRC         += worldgen/heavengen.cpp
+
+SRC         += items/basic.cpp items/food.cpp
 
 SRC         += plugin.cpp plugin_api.cpp
 
