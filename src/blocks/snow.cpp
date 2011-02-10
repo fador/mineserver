@@ -89,17 +89,26 @@ void BlockSnow::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
 
 bool BlockSnow::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-//  uint8_t oldblock;
-//  uint8_t oldmeta;
-//
-//   if (!Mineserver::get()->map(map)->getBlock(x, y-1, z, &oldblock, &oldmeta))
-//      return true;
-//
-//   if(newblock == BLOCK_SNOW){
-//     Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_SNOW, 0);
-//     Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_SNOW, 0);
-     return false;
-//   }
+   uint8_t oldblock;
+   uint8_t oldmeta;
+
+   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+      return true;
+
+   /* Check block below allows blocks placed on top */
+   if (!this->isBlockStackable(oldblock))
+      return true;
+
+   /* move the x,y,z coords dependent upon placement direction */
+   if (!this->translateDirection(&x,&y,&z,map,direction))
+      return true;
+
+   if (!this->isBlockEmpty(x,y,z,map))
+      return true;
+
+   Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
+   Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+   return false;
 }
 
 void BlockSnow::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
