@@ -106,15 +106,19 @@ bool BlockDoor::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
 
 void BlockDoor::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-  uint8_t block,meta;
-  Mineserver::get()->map(map)->getBlock(x,y,z,&block,&meta);
-  if((oldblock==BLOCK_WOODEN_DOOR || oldblock==BLOCK_IRON_DOOR) &&
-     (block == BLOCK_WOODEN_DOOR || block == BLOCK_IRON_DOOR) &&
-     block == oldblock)
-  {
-    Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-    Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-  }
+  uint8_t block;
+  uint8_t meta;
+	if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
+      return;
+   int modifier = ((meta & 0x8)==0x8) ? -1 : 1;
+	if (direction == BLOCK_TOP && this->isBlockEmpty(x,y-1,z,map))
+{
+      Mineserver::get()->map(map)->setBlock(x, y + modifier, z, BLOCK_AIR, 0);
+      Mineserver::get()->map(map)->sendBlockChange(x, y + modifier, z, BLOCK_AIR, 0);
+      Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+      Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+      this->spawnBlockItem(x, y, z,map, block, 0);
+   }   
 }
 
 bool BlockDoor::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
