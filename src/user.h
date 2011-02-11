@@ -75,6 +75,7 @@ public:
   bool dnd;
   int16_t health;
   uint16_t timeUnderwater;
+  double fallDistance;
   unsigned int UID;
   std::string nick;
   std::string temp_nick;
@@ -82,6 +83,7 @@ public:
   vec curChunk;
   Item inv[45];
   int16_t curItem;
+  time_t healthtimeout;
   Item inventoryHolding;
   //Do we have an open _shared_ inventory?
   bool isOpenInv;
@@ -101,6 +103,7 @@ public:
   static User* byNick(std::string nick);
 
   bool changeNick(std::string _nick);
+  void checkEnvironmentDamage();
   bool updatePos(double x, double y, double z, double stance);
   bool updatePosM(double x, double y, double z, int map,double stance);
   /** Check if the user is standing on this block */

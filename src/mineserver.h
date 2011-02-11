@@ -91,6 +91,7 @@ public:
   int m_saveInterval;
   time_t m_lastSave;
   bool m_pvp_enabled;
+  bool m_damage_enabled;
 
   Map* map(int n);
   void setMap(Map* map,int n=0);

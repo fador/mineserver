@@ -32,6 +32,7 @@
 #include <algorithm>
 #include <fstream>
 #include <map>
+#include <math.h>
 
 #include <sys/stat.h>
 #ifdef WIN32
@@ -570,16 +571,12 @@ bool User::updatePosM(double x, double y, double z, int map, double stance)
     // TODO despawn self to players on last world
     pos.map = map;
     pos.x = x; pos.y = y; pos.z = z;
-    std::cout << map << "world changing" <<std::endl;
     clearLoadingMap();
     // TODO spawn self to nearby players
     // TODO spawn players who are NOW in view
     return false;
   }
   updatePos(x,y,z,stance);
-  pushMap(); pushMap(); pushMap();
-  updatePos(x,y,z,stance);
-
   return true;
 }
 
@@ -870,6 +867,44 @@ bool User::updatePos(double x, double y, double z, double stance)
     }
   }
 
+  if(Mineserver::get()->m_damage_enabled){
+    uint8_t block, meta;
+    if(Mineserver::get()->map(pos.map)->getBlock((int)floor(pos.x),
+                                              (int)floor(pos.y-0.5),
+                                              (int)floor(pos.z),
+                                              &block, &meta)){
+      switch(block){
+        case BLOCK_AIR:
+        case BLOCK_SAPLING:
+        case BLOCK_YELLOW_FLOWER:
+        case BLOCK_RED_ROSE:
+        case BLOCK_BROWN_MUSHROOM:
+        case BLOCK_RED_MUSHROOM:
+        case BLOCK_TORCH:
+        case BLOCK_FIRE:
+        case BLOCK_REDSTONE_WIRE:
+        case BLOCK_CROPS:
+        case BLOCK_MINECART_TRACKS:
+        case BLOCK_LEVER:
+        case BLOCK_REDSTONE_TORCH_OFF:
+        case BLOCK_REDSTONE_TORCH_ON:
+        case BLOCK_STONE_BUTTON:
+        case BLOCK_SNOW:
+        case BLOCK_REED:
+          fallDistance += this->pos.y - y;
+          if(fallDistance<0){ fallDistance=0; }
+          break;
+        default:
+          if(fallDistance > 3){
+            int h = health - (int)fallDistance;
+            if(h<0){ h = 0; }
+            sethealth(h);
+          }
+          fallDistance = 0;  
+          break;
+      }
+    }
+  }
   this->pos.x      = x;
   this->pos.y      = y;
   this->pos.z      = z;
@@ -1216,8 +1251,90 @@ bool User::spawnOthers()
   return true;
 }
 
+void User::checkEnvironmentDamage()
+{
+  uint8_t type,meta;
+  int16_t d = 0;
+  if(Mineserver::get()->map(pos.map)->getBlock(
+                           (int)floor(pos.x),
+                           (int)floor(pos.y-0.5),
+                           (int)floor(pos.z),&type,&meta)){
+    if(type == BLOCK_CACTUS){
+      d=1;
+    }
+  }
+  double xbit = pos.x - (int)floor(pos.x);
+  double zbit = pos.z - (int)floor(pos.z);
+  if(xbit > 0.6){
+    Mineserver::get()->map(pos.map)->getBlock((int)floor(pos.x+1),
+                                              (int)floor(pos.y+0.5),
+                                              (int)floor(pos.z),&type,&meta);
+    if(type == BLOCK_CACTUS){
+      d=1;
+    }
+  }
+  else if(xbit < 0.4)
+  {
+    Mineserver::get()->map(pos.map)->getBlock((int)floor(pos.x-1),
+                                              (int)floor(pos.y+0.5),
+                                              (int)floor(pos.z),&type,&meta);
+    if(type == BLOCK_CACTUS){
+      d=1;
+    }
+  }
+  if(zbit > 0.6){
+    Mineserver::get()->map(pos.map)->getBlock((int)floor(pos.x),
+                                              (int)floor(pos.y+0.5),
+                                              (int)floor(pos.z+1),&type,&meta);
+    if(type == BLOCK_CACTUS){
+      d=1;
+    }
+  }
+  else if(zbit < 0.4)
+  {
+    Mineserver::get()->map(pos.map)->getBlock((int)floor(pos.x),
+                                              (int)floor(pos.y+0.5),
+                                              (int)floor(pos.z-1),&type,&meta);
+    if(type == BLOCK_CACTUS){
+      d=1;
+    }
+  }
+
+  if(Mineserver::get()->map(pos.map)->getBlock(
+                           (int)floor(pos.x),
+                           (int)floor(pos.y+0.5),
+                           (int)floor(pos.z),&type,&meta)){
+    if(type == BLOCK_LAVA || type == BLOCK_STATIONARY_LAVA){
+      d=10;
+    }else if(type == BLOCK_FIRE){
+      d=5;
+    }
+  }
+
+  if(Mineserver::get()->map(pos.map)->getBlock(
+                           (int)floor(pos.x),
+                           (int)floor(pos.y+1.55),
+                           (int)floor(pos.z),&type,&meta)){
+    if(type == BLOCK_FIRE){
+      d==5;
+    }
+  }
+
+  int16_t h = health-d;
+  if(h<0){h=0;}
+  sethealth(h);
+}  
+
 bool User::sethealth(int userHealth)
 {
+  if(health == userHealth){ return false; }
+  if(userHealth < health && healthtimeout !=0 ){
+    // One hit per 2 seconds
+    if(time(NULL) - healthtimeout ==0){ return false; }
+  }
+  healthtimeout = time(NULL);
+
+
   health = userHealth;
   buffer << (int8_t)PACKET_UPDATE_HEALTH << (int16_t)userHealth;
   // ToDo: Send destroy entity and spawn entity again

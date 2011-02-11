@@ -165,6 +165,7 @@ Mineserver::Mineserver()
   m_saveInterval = m_config->iData("map.save_interval");
 
   m_pvp_enabled = m_config->bData("system.pvp.enabled");
+  m_damage_enabled = m_config->bData("system.damage.enabled");
 
   const char* key = "map.storage.nbt.directories"; // Prefix for worlds config
   if (m_config->has(key) && (m_config->type(key) == CONFIG_NODE_LIST))
@@ -491,6 +492,9 @@ int Mineserver::run(int argc, char *argv[])
         {
           users()[i]->pushMap();
           users()[i]->popMap();
+        }
+        if(m_damage_enabled){
+          users()[i]->checkEnvironmentDamage();
         }
 
         // Minecart hacks!!

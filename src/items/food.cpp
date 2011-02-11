@@ -54,7 +54,7 @@ void ItemFood::onRightClick(User* user, Item* item)
   #define INV_TASKBAR_START 36
   user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_PLAYER
                << (int16_t)(INV_TASKBAR_START+user->currentItemSlot())
-               << (int16_t)user->inv[INV_TASKBAR_START+user->currentItemSlot()].type;
+               << (int16_t)-1;
   #undef INV_TASKBAR_START
 
 }
