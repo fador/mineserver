@@ -82,6 +82,9 @@ User::User(int sock, uint32_t EID)
   this->isOpenInv       = false;
   this->lastData        = time(NULL);
   this->permissions     = 0;
+  this->fallDistance    = -10;
+  this->healthtimeout   = time(NULL)-1;
+
 
   this->m_currentItemSlot = 0;
   this->inventoryHolding  = Item();
@@ -892,10 +895,11 @@ bool User::updatePos(double x, double y, double z, double stance)
         case BLOCK_SNOW:
         case BLOCK_REED:
           fallDistance += this->pos.y - y;
-          if(fallDistance<0){ fallDistance=0; }
+          //if(fallDistance<0){ fallDistance=0; }
           break;
         default:
           if(fallDistance > 3){
+            std::cout << (int)fallDistance << std::endl;
             int h = health - (int)fallDistance;
             if(h<0){ h = 0; }
             sethealth(h);
@@ -911,7 +915,7 @@ bool User::updatePos(double x, double y, double z, double stance)
   this->pos.stance = stance;
   curChunk.x() = (int)(x/16);
   curChunk.z() = (int)(z/16);
-
+  checkEnvironmentDamage();
   return true;
 }
 
@@ -1313,10 +1317,31 @@ void User::checkEnvironmentDamage()
 
   if(Mineserver::get()->map(pos.map)->getBlock(
                            (int)floor(pos.x),
-                           (int)floor(pos.y+1.55),
+                           (int)floor(pos.y+1.5),
                            (int)floor(pos.z),&type,&meta)){
-    if(type == BLOCK_FIRE){
-      d==5;
+    switch(type){
+    case BLOCK_AIR:
+    case BLOCK_SAPLING:
+    case BLOCK_WATER: // For a certain value of "Breathable" ;)
+    case BLOCK_STATIONARY_WATER: // Water is treated seperatly
+    case BLOCK_YELLOW_FLOWER:
+    case BLOCK_RED_ROSE:
+    case BLOCK_BROWN_MUSHROOM:
+    case BLOCK_RED_MUSHROOM:
+    case BLOCK_TORCH:
+    case BLOCK_REDSTONE_WIRE:
+    case BLOCK_CROPS:
+    case BLOCK_LEVER:
+    case BLOCK_REDSTONE_TORCH_ON:
+    case BLOCK_REDSTONE_TORCH_OFF:
+    case BLOCK_SNOW:
+    case BLOCK_STONE_BUTTON:
+    case BLOCK_REED:
+    case BLOCK_PORTAL:
+      break;
+    default:
+      if(d==0){ d = 1; }
+      break;
     }
   }
 
@@ -1327,10 +1352,16 @@ void User::checkEnvironmentDamage()
 
 bool User::sethealth(int userHealth)
 {
-  if(health == userHealth){ return false; }
-  if(userHealth < health && healthtimeout !=0 ){
+  if(health == userHealth){ 
+    buffer << (int8_t)PACKET_UPDATE_HEALTH << (int16_t)userHealth;
+    return false;
+  }
+  if(userHealth < health){
     // One hit per 2 seconds
-    if(time(NULL) - healthtimeout ==0){ return false; }
+    if(time(NULL) - healthtimeout <1){
+      return false;
+      buffer << (int8_t)PACKET_UPDATE_HEALTH << (int16_t)userHealth;
+    }
   }
   healthtimeout = time(NULL);
 
