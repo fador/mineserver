@@ -47,6 +47,8 @@
 #include <zlib.h>
 
 #include "tools.h"
+#include "logger.h"
+#include "mineserver.h"
 #include "nbt.h"
 #include "constants.h"
 
@@ -487,7 +489,7 @@ NBT_Value * NBT_Value::LoadFromFile(const std::string &filename)
 
   if(uncompressedSize == 0)
   {
-    std::cout << "Unable to determine uncompressed size of " << filename << std::endl;
+    Mineserver::get()->logger()->log(LogType::LOG_WARNING, "NBT", "Unable to determine uncompressed size of " + filename);
     uncompressedSize = ALLOCATE_NBTFILE;
   }
 

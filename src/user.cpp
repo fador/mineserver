@@ -570,7 +570,7 @@ bool User::updatePosM(double x, double y, double z, int map, double stance)
     // TODO despawn self to players on last world
     pos.map = map;
     pos.x = x; pos.y = y; pos.z = z;
-    std::cout << map << "world changing" <<std::endl;
+    Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", "World changing");
     clearLoadingMap();
     // TODO spawn self to nearby players
     // TODO spawn players who are NOW in view
