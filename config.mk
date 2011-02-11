@@ -1,7 +1,8 @@
-CC           = g++
+OS           = $(shell uname -s)
+CXX          = g++
 LIBRARIES    = 
 INC          = -I. -I/usr/include -I/usr/local/include
-CFLAGS       = -O
+CXXFLAGS     = -O
 LDFLAGS      = -L/usr/local/lib -L/usr/lib
 DEPDIR       = .deps
 BUILDDIR     = .build
@@ -17,14 +18,21 @@ ifeq ($(PEDANTIC), YES)
 endif
 
 ifeq ($(findstring MINGW32,$(SYSTEM)),MINGW32)
-LDFLAGS += -lws2_32 -lwinmm
-else
-LDFLAGS += -ldl
+  LDFLAGS += -lws2_32 -lwinmm
 endif
 
+ifeq ($(OS),Linux)
+  LDFLAGS += -ldl
+  LIBNOISE=1
+endif
+
+ifeq ($(OS),FreeBSD)
+  LIBNOISE=0
+  LIBRARIES+=/usr/local/lib/libnoise.so.0
+endif
 
 # define for <libnoise/noise.h> vs <noise/noise.h>
-LIBNOISE=1
+# LIBNOISE=1
 
 ifeq ($(LIBNOISE), 1)
   BUILDFLAGS  += -DLIBNOISE

@@ -15,7 +15,7 @@ SRC         += blocks/workbench.cpp blocks/blockfurnace.cpp blocks/dyed.cpp
 SRC         += worldgen/mapgen.cpp worldgen/cavegen.cpp worldgen/nethergen.cpp
 SRC         += worldgen/heavengen.cpp
 
-SRC         += items/basic.cpp items/food.cpp
+SRC         += items/itembasic.cpp items/food.cpp
 
 SRC         += plugin.cpp plugin_api.cpp
 
@@ -26,8 +26,8 @@ include ../config.mk
 
 LDFLAGS     += -levent -lz -lnoise
 
-COMPILE      = $(CC) $(INC) $(CFLAGS) $(BUILDFLAGS) $(ARCHFLAGS) -c $< -o $@
-MAKEDEPEND   = $(CC) -M $(INC) $(CFLAGS) $(BUILDFLAGS) $(ARCHFLAGS) -o "$(DEPDIR)/$*.d" $<
+COMPILE      = $(CXX) $(INC) $(CXXFLAGS) $(BUILDFLAGS) $(ARCHFLAGS) -c $< -o $@
+MAKEDEPEND   = $(CXX) -M $(INC) $(CXXFLAGS) $(BUILDFLAGS) $(ARCHFLAGS) -o "$(DEPDIR)/$*.d" $<
 
 all: mineserver
 
@@ -40,7 +40,7 @@ all: mineserver
 -include $(addprefix $(DEPDIR)/,$(OBJS:.o=.d))
 
 mineserver: $(OBJS)
-	$(CC) $(CFLAGS) $(BUILDFLAGS) $(ARCHFLAGS) $(LDFLAGS) $(OBJS) $(LIBRARIES) -o $@
+	$(CXX) $(CXXFLAGS) $(BUILDFLAGS) $(ARCHFLAGS) $(LDFLAGS) $(OBJS) $(LIBRARIES) -o $@
 
 install:
 	cp mineserver ../bin

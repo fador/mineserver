@@ -8,10 +8,10 @@ install:
 	cp $(PLUGIN_NAME).so ../../bin/$(PLUGIN_NAME).so
 
 $(OBJS):
-	$(CC) -fPIC $(INC) $(CFLAGS) $(BUILDFLAGS) $(ARCHFLAGS) $(PLDFLAGS) $(LDFLAGS) -c $(@:.o=.cpp) -o ./$@
+	$(CXX) -fPIC $(INC) $(CXXFLAGS) $(BUILDFLAGS) $(ARCHFLAGS) $(PLDFLAGS) $(LDFLAGS) -c $(@:.o=.cpp) -o ./$@
 
 $(PLUGIN_NAME).so:
-	$(CC) -shared $(CFLAGS) $(BUILDFLAGS) $(ARCHFLAGS) $(PLDFLAGS) $(LDFLAGS) $(OBJS) -o $(PLUGIN_NAME).so
+	$(CXX) -shared $(CXXFLAGS) $(BUILDFLAGS) $(ARCHFLAGS) $(PLDFLAGS) $(LDFLAGS) $(OBJS) -o $(PLUGIN_NAME).so
 
 
 clean:

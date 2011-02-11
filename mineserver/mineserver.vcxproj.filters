@@ -31,6 +31,12 @@
     <Filter Include="Source Files\config">
       <UniqueIdentifier>{95555770-77f1-4062-bc60-1316f8fb0126}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\items">
+      <UniqueIdentifier>{b267b476-9ab6-46df-9a96-31f41bbbbc3b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\items">
+      <UniqueIdentifier>{aefe9250-04b8-4fba-81c9-5a99749255a5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\user.cpp">
@@ -176,6 +182,15 @@
     </ClCompile>
     <ClCompile Include="..\src\blocks\blockfurnace.cpp">
       <Filter>Source Files\blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\blocks\dyed.cpp">
+      <Filter>Source Files\blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\items\food.cpp">
+      <Filter>Source Files\items</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\items\itembasic.cpp">
+      <Filter>Source Files\items</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -337,6 +352,15 @@
     </ClInclude>
     <ClInclude Include="..\src\blocks\blockfurnace.h">
       <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\dyed.h">
+      <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\items\food.h">
+      <Filter>Header Files\items</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\items\itembasic.h">
+      <Filter>Header Files\items</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

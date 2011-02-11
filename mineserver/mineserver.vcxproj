@@ -16,6 +16,7 @@
     <ClCompile Include="..\src\blocks\chest.cpp" />
     <ClCompile Include="..\src\blocks\default.cpp" />
     <ClCompile Include="..\src\blocks\door.cpp" />
+    <ClCompile Include="..\src\blocks\dyed.cpp" />
     <ClCompile Include="..\src\blocks\falling.cpp" />
     <ClCompile Include="..\src\blocks\fire.cpp" />
     <ClCompile Include="..\src\blocks\blockfurnace.cpp" />
@@ -40,6 +41,8 @@
     <ClCompile Include="..\src\furnace.cpp" />
     <ClCompile Include="..\src\furnaceManager.cpp" />
     <ClCompile Include="..\src\inventory.cpp" />
+    <ClCompile Include="..\src\items\itembasic.cpp" />
+    <ClCompile Include="..\src\items\food.cpp" />
     <ClCompile Include="..\src\lighting.cpp" />
     <ClCompile Include="..\src\logger.cpp" />
     <ClCompile Include="..\src\map.cpp" />
@@ -66,6 +69,7 @@
     <ClInclude Include="..\src\blocks\chest.h" />
     <ClInclude Include="..\src\blocks\default.h" />
     <ClInclude Include="..\src\blocks\door.h" />
+    <ClInclude Include="..\src\blocks\dyed.h" />
     <ClInclude Include="..\src\blocks\falling.h" />
     <ClInclude Include="..\src\blocks\fire.h" />
     <ClInclude Include="..\src\blocks\blockfurnace.h" />
@@ -92,6 +96,8 @@
     <ClInclude Include="..\src\furnaceManager.h" />
     <ClInclude Include="..\src\hook.h" />
     <ClInclude Include="..\src\inventory.h" />
+    <ClInclude Include="..\src\items\itembasic.h" />
+    <ClInclude Include="..\src\items\food.h" />
     <ClInclude Include="..\src\lighting.h" />
     <ClInclude Include="..\src\logger.h" />
     <ClInclude Include="..\src\logtype.h" />

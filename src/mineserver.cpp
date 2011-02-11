@@ -275,6 +275,10 @@ int Mineserver::run(int argc, char *argv[])
       logger()->log(LogType::LOG_INFO, "Mapgen", "Generating spawn area...");
       int size = Mineserver::get()->config()->iData("map.generate_spawn.size");
       bool show_progress = Mineserver::get()->config()->bData("map.generate_spawn.show_progress");
+#ifdef __FreeBSD__
+      show_progress = false;
+#endif
+
 #ifdef WIN32
       DWORD t_begin = 0, t_end = 0;
 #else
