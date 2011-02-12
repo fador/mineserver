@@ -898,10 +898,14 @@ bool User::updatePos(double x, double y, double z, double stance)
           fallDistance += this->pos.y - y;
           //if(fallDistance<0){ fallDistance=0; }
           break;
+        case BLOCK_WATER:
+        case BLOCK_STATIONARY_WATER:
+          fallDistance =0;
+          break;
         default:
           if(fallDistance > 3){
             std::cout << (int)fallDistance << std::endl;
-            int h = health - (int)fallDistance;
+            int h = health - (int)fallDistance-4;
             if(h<0){ h = 0; }
             sethealth(h);
           }
