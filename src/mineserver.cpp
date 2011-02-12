@@ -187,7 +187,7 @@ Mineserver::Mineserver()
     }
     delete tmp;
   }else{
-    std::cout << "Cannot find map.storage.nbt.directories.* in config.cfg" <<std::endl;
+    Mineserver::get()->logger()->log(LogType::LOG_WARNING, "Config", "Cannot find map.storage.nbt.directories.* in config.cfg");
   }
   if(m_map.size()==0){
     std::cerr << "No worlds in Config!" << std::endl;

@@ -86,19 +86,21 @@ void BlockDoor::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y,
 
 bool BlockDoor::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
+	// get block info
   uint8_t block,metadata;
   uint8_t metadata2, block2;
   Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
+  // check if block is the upper part of the door
   int modifier = ((metadata & 0x8)==0x8) ? -1 : 1;
 
   Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
-
+  // if upper part, remove it
   if (block2 == block)
   {
     Mineserver::get()->map(map)->setBlock(x, y + modifier, z, BLOCK_AIR, 0);
     Mineserver::get()->map(map)->sendBlockChange(x, y + modifier, z, BLOCK_AIR, 0);
   }
-
+  // remove lower part
   Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
   this->spawnBlockItem(x, y, z,map, block, 0);
@@ -107,9 +109,11 @@ bool BlockDoor::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
 
 void BlockDoor::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
+// get block info
   uint8_t block,metadata;
   uint8_t metadata2, block2;
   Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
+  // check if block is the upper part of the door
   int modifier = ((metadata & 0x8)==0x8) ? -1 : 1;
 
     Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
@@ -121,10 +125,12 @@ void BlockDoor::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
      {
        metadata |= 0x4;
      }
+	 // do nothing if the block is not below door
 	 if(direction == BLOCK_BOTTOM && block == BLOCK_WOODEN_DOOR)
 	 {
 		 return;
 	 }
+	 // break the door if the block is below it
 	 if(direction == BLOCK_TOP && block == BLOCK_WOODEN_DOOR)
 	 {
      Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
