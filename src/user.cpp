@@ -1338,6 +1338,7 @@ void User::checkEnvironmentDamage()
     case BLOCK_STONE_BUTTON:
     case BLOCK_REED:
     case BLOCK_PORTAL:
+    case BLOCK_LADDER:
       break;
     default:
       if(d==0){ d = 1; }
