@@ -1051,29 +1051,31 @@ int16_t Inventory::itemHealth(int16_t itemID, int8_t block, bool &rightUse)
     case ITEM_GOLD_PICKAXE:
     case ITEM_GOLD_HOE:
     case ITEM_GOLD_SPADE:
+      health = 33;
+    break;
     case ITEM_WOODEN_AXE:
     case ITEM_WOODEN_PICKAXE:
     case ITEM_WOODEN_HOE:
     case ITEM_WOODEN_SPADE:
-      health = 32;
+      health = 60;
     break;
     case ITEM_STONE_AXE:
     case ITEM_STONE_PICKAXE:
     case ITEM_STONE_HOE:
     case ITEM_STONE_SPADE:
-      health = 64;
+      health = 132;
     break;
     case ITEM_IRON_AXE:
     case ITEM_IRON_PICKAXE:
     case ITEM_IRON_HOE:
     case ITEM_IRON_SPADE:
-      health = 128;
+      health = 251;
     break;
     case ITEM_DIAMOND_AXE:
     case ITEM_DIAMOND_PICKAXE:
     case ITEM_DIAMOND_HOE:
     case ITEM_DIAMOND_SPADE:
-      health = 1024;
+      health = 1562;
     break;
 
     default:

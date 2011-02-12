@@ -556,48 +556,34 @@ bool user_addItem(const char* user, int item, int count, int health)
   User* tempuser = userFromName(std::string(user));
   if(tempuser != NULL)
   {
-    bool checkingTaskbar = true;
-    for(uint8_t i = 36-9; i < 36-9 || checkingTaskbar; i++)
+    for(uint8_t i = 0; i < 36; i++)
     {
-      //First, the "task bar"
-      if(i == 36)
-      {
-        checkingTaskbar = false;
-        i=0;
-      }
       Item *slot = &tempuser->inv[i+9];
       if(item == slot->type && health == slot->health){
         if(slot->count < 64){
           int a = 64 - slot->count;
-          total -= a;
-          slot->count = 64;
-          tempuser->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_PLAYER
-                     << (int16_t)i+9
-                     << (int16_t)slot->type;
-          if(slot->type != -1)
-          {
-            tempuser->buffer << (int8_t)slot->count
-                         << (int16_t)slot->health;
+          if(a<total){
+            total -= a;
+            slot->count = 64;
+          }else{
+            total = 0;
+            slot->count += a;
           }
         }
       }else if(slot->type == -1){
         slot->type = item; slot->health = health;
         if(total < 65){
-          total = 0;
           slot->count = total;
+          total = 0;
         }else{
           slot->count = 64;
           total-=64;
         }
-        tempuser->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_PLAYER
-                     << (int16_t)i+9
-                     << (int16_t)slot->type;
-        if(slot->type != -1)
-        {
-          tempuser->buffer << (int8_t)slot->count
-                       << (int16_t)slot->health;
-        }
       }
+      tempuser->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)0
+                 << (int16_t)(i+9) << (int16_t)slot->type
+                 << (int8_t)slot->count << (int16_t)slot->health;
+      if(total ==0 ){ return true; }
     }
   }
   return false;
@@ -652,7 +638,7 @@ bool user_delItem(const char* user, int item, int count, int health)
         slot->count -= total;
         total -= a;
         tempuser->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_PLAYER
-                   << (int16_t)i+9
+                   << (int16_t)(i+9)
                    << (int16_t)slot->type;
         if(slot->type != -1)
         {
@@ -667,7 +653,7 @@ bool user_delItem(const char* user, int item, int count, int health)
         total -= slot->count;
         slot->count = 0; slot->health = 0; slot->type = -1;
         tempuser->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_PLAYER
-                   << (int16_t)i+9
+                   << (int16_t)(i+9)
                    << (int16_t)slot->type;
         if(slot->type != -1)
         {
