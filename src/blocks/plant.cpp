@@ -329,6 +329,11 @@ bool BlockPlant::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
 
      if (!this->isBlockStackable(oldblock))
        return true;
+   }else{
+     if (this->isUserOnBlock(x,y,z,map))
+     {
+       return true;
+     }
    }
 
    if(newblock == BLOCK_CACTUS && oldblock !=BLOCK_SAND)
