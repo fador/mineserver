@@ -1340,6 +1340,10 @@ void User::checkEnvironmentDamage()
     case BLOCK_REED:
     case BLOCK_PORTAL:
     case BLOCK_LADDER:
+    case BLOCK_WOODEN_DOOR:
+    case BLOCK_IRON_DOOR:
+    case BLOCK_WALL_SIGN:
+    case BLOCK_SIGN_POST:
       break;
     default:
       if(d==0){ d = 1; }
