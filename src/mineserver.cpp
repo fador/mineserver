@@ -494,11 +494,12 @@ int Mineserver::run(int argc, char *argv[])
         }
         else
         {
+          if(m_damage_enabled)
+          {
+            users()[i]->checkEnvironmentDamage();
+          }
           users()[i]->pushMap();
           users()[i]->popMap();
-        }
-        if(m_damage_enabled){
-          users()[i]->checkEnvironmentDamage();
         }
 
         // Minecart hacks!!
