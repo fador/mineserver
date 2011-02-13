@@ -58,6 +58,7 @@
 #include "blocks/dyed.h"
 
 #include "items/food.h"
+#include "items/projectile.h"
 
 void Plugin::init()
 {
@@ -101,6 +102,8 @@ void Plugin::init()
 
    ItemFood* fooditem = new ItemFood();
    ItemCB.push_back(fooditem);
+   ItemProjectile* projectileitem = new ItemProjectile();
+   ItemCB.push_back(projectileitem);
 
 }
 

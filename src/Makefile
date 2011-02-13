@@ -15,7 +15,7 @@ SRC         += blocks/workbench.cpp blocks/blockfurnace.cpp blocks/dyed.cpp
 SRC         += worldgen/mapgen.cpp worldgen/cavegen.cpp worldgen/nethergen.cpp
 SRC         += worldgen/heavengen.cpp
 
-SRC         += items/itembasic.cpp items/food.cpp
+SRC         += items/itembasic.cpp items/food.cpp items/projectile.cpp
 
 SRC         += plugin.cpp plugin_api.cpp
 
