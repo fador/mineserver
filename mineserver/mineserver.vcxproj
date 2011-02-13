@@ -43,6 +43,7 @@
     <ClCompile Include="..\src\inventory.cpp" />
     <ClCompile Include="..\src\items\itembasic.cpp" />
     <ClCompile Include="..\src\items\food.cpp" />
+    <ClCompile Include="..\src\items\projectile.cpp" />
     <ClCompile Include="..\src\lighting.cpp" />
     <ClCompile Include="..\src\logger.cpp" />
     <ClCompile Include="..\src\map.cpp" />
@@ -98,6 +99,7 @@
     <ClInclude Include="..\src\inventory.h" />
     <ClInclude Include="..\src\items\itembasic.h" />
     <ClInclude Include="..\src\items\food.h" />
+    <ClInclude Include="..\src\items\projectile.h" />
     <ClInclude Include="..\src\lighting.h" />
     <ClInclude Include="..\src\logger.h" />
     <ClInclude Include="..\src\logtype.h" />

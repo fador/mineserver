@@ -192,6 +192,9 @@
     <ClCompile Include="..\src\items\itembasic.cpp">
       <Filter>Source Files\items</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\items\projectile.cpp">
+      <Filter>Source Files\items</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\user.h">
@@ -360,6 +363,9 @@
       <Filter>Header Files\items</Filter>
     </ClInclude>
     <ClInclude Include="..\src\items\itembasic.h">
+      <Filter>Header Files\items</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\items\projectile.h">
       <Filter>Header Files\items</Filter>
     </ClInclude>
   </ItemGroup>
