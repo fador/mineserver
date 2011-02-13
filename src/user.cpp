@@ -905,7 +905,7 @@ bool User::updatePos(double x, double y, double z, double stance)
         default:
           if(fallDistance > 3){
             std::cout << (int)fallDistance << std::endl;
-            int h = health - (int)fallDistance-4;
+            int h = health - (int)(fallDistance-4);
             if(h<0){ h = 0; }
             sethealth(h);
           }
