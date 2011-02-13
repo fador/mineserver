@@ -42,7 +42,7 @@ void ItemProjectile::onRightClick(User* user, Item* item)
     // 0x17 == add object, 61 == snowball
     pkt << 0x17 << EID << (int8_t)projID << (int32_t)(user->pos.x*32) << (int32_t)((user->pos.y+1.5)*32) << (int32_t)(user->pos.z*32);
   
-    float tempMult = 1.f-abs(user->pos.pitch/90.f);
+    float tempMult = 1.f-((user->pos.pitch/90.f)<0?-(user->pos.pitch/90.f):(user->pos.pitch/90.f));
     //Entity velocity 
     pkt << 0x1C << EID << (int16_t)(sinf(-(user->pos.yaw / 360.f) * 2.f*M_PI)*tempMult*32768.f) << (int16_t)(-32768.f*(user->pos.pitch/90.f)) << (int16_t)(cosf(-(user->pos.yaw/ 360.f) * 2.f*M_PI)*tempMult*32768.f);
   
