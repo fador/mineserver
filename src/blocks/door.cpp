@@ -126,12 +126,12 @@ void BlockDoor::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
        metadata |= 0x4;
      }
 	 // do nothing if the block is not below door
-	 if(direction == BLOCK_BOTTOM && block == BLOCK_WOODEN_DOOR)
+	 if(direction == BLOCK_BOTTOM && (block == BLOCK_WOODEN_DOOR || BLOCK_IRON_DOOR))
 	 {
 		 return;
 	 }
 	 // break the door if the block is below it
-	 if(direction == BLOCK_TOP && block == BLOCK_WOODEN_DOOR)
+	 if(direction == BLOCK_TOP && (block == BLOCK_WOODEN_DOOR || BLOCK_IRON_DOOR))
 	 {
      Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
      Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
