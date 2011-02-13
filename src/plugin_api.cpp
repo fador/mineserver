@@ -566,8 +566,8 @@ bool user_addItem(const char* user, int item, int count, int health)
             total -= a;
             slot->count = 64;
           }else{
+            slot->count += total;
             total = 0;
-            slot->count += a;
           }
         }
       }else if(slot->type == -1){
