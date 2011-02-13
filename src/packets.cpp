@@ -693,15 +693,18 @@ int PacketHandler::player_digging(User *user)
         if(user->inv[itemSlot].type == ITEM_SNOWBALL)
         {
           int32_t EID = generateEID();
+          Packet snowballPacket;
           //Entity packet (initialization)
-          user->buffer << 0x1E << EID;
+          snowballPacket << 0x1E << EID;
 
           //Spawn snowball on player location
           // 0x17 == add object, 61 == snowball
-          user->buffer << 0x17 << EID << (int8_t)61 << (int32_t)(user->pos.x*32) << (int32_t)((user->pos.y+1.5)*32) << (int32_t)(user->pos.z*32);
+          snowballPacket << 0x17 << EID << (int8_t)61 << (int32_t)(user->pos.x*32) << (int32_t)((user->pos.y+1.5)*32) << (int32_t)(user->pos.z*32);
 
           //Entity velocity 
-          user->buffer << 0x1C << EID << (int16_t)(sinf(-(user->pos.yaw / 360.f) * 2.f*M_PI)*32768.f) << (int16_t)(-32768.f*(user->pos.pitch/90.f)) << (int16_t)(cosf(-(user->pos.yaw/ 360.f) * 2.f*M_PI)*32768.f);
+          snowballPacket << 0x1C << EID << (int16_t)(sinf(-(user->pos.yaw / 360.f) * 2.f*M_PI)*32768.f) << (int16_t)(-32768.f*(user->pos.pitch/90.f)) << (int16_t)(cosf(-(user->pos.yaw/ 360.f) * 2.f*M_PI)*32768.f);
+
+          user->sendAll((uint8_t *)snowballPacket.getWrite(), snowballPacket.getWriteLen());
 
         }
         else
