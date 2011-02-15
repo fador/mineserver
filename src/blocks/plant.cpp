@@ -46,6 +46,7 @@ bool BlockPlant::affectedBlock(int block)
   case BLOCK_DIRT:
   case BLOCK_GRASS:
   case BLOCK_SOIL:
+  case ITEM_REED:
   case ITEM_WOODEN_HOE:
   case ITEM_STONE_HOE:
   case ITEM_IRON_HOE:
@@ -235,7 +236,7 @@ void BlockPlant::timer200(){
         }
       }
     }
-    if(p->count>reed_timeout*5 && block == BLOCK_REED)
+    if(p->count>reed_timeout*5 && (block == BLOCK_REED))
     {
       uint8_t block,meta;
       if(!Mineserver::get()->map(p->map)->getBlock(p->x,p->y+1,p->z,&block,&meta)){
@@ -279,6 +280,8 @@ bool BlockPlant::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
     Mineserver::get()->map(map)->createPickupSpawn(x,y+1,z,ITEM_WHEAT,1,0,NULL);
   }else if(block == BLOCK_CROPS){
     Mineserver::get()->map(map)->createPickupSpawn(x,y+1,z,ITEM_SEEDS,1,0,NULL);
+  }else if(block == BLOCK_REED){
+    Mineserver::get()->map(map)->createPickupSpawn(x,y+1,z,ITEM_REED,1,0,NULL);
   }else{
     this->spawnBlockItem(x,y,z,map,block);
   }
@@ -336,6 +339,14 @@ bool BlockPlant::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
      }
    }
 
+   if( (newblock == BLOCK_REED || newblock == ITEM_REED)&& (oldblock == BLOCK_GRASS || oldblock == BLOCK_DIRT)){
+     // TODO : Check for water
+     Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_REED, 0);
+     Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_REED, 0);
+     addBlock(x,y,z,map);
+     return false;
+   }
+
    if(newblock == BLOCK_CACTUS && oldblock !=BLOCK_SAND)
    {
      return true;
@@ -367,10 +378,6 @@ bool BlockPlant::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
    }
    if( (newblock == BLOCK_BROWN_MUSHROOM || newblock == BLOCK_RED_MUSHROOM)
        && oldblock != BLOCK_DIRT ){
-     return true;
-   }
-   if( newblock == BLOCK_REED && (oldblock != BLOCK_GRASS && oldblock != BLOCK_DIRT)){
-     // TODO : Check for water
      return true;
    }
    if(newblock == BLOCK_SAPLING)
