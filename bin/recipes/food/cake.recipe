@@ -1,0 +1,13 @@
+# Input
+width 3
+height 3
+<-
+335 335 335
+353 344 353
+296 296 296
+->
+
+# Output
+outputcount 1
+outputtype 354
+outputhealth 0
