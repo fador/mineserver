@@ -197,7 +197,6 @@ Mineserver::Mineserver()
   m_screen         = new CliScreen;
   m_logger         = new Logger;
   m_chat           = new Chat;
-  m_plugin         = new Plugin;
   m_furnaceManager = new FurnaceManager;
   m_packetHandler  = new PacketHandler;
   m_inventory      = new Inventory;
@@ -297,6 +296,7 @@ int Mineserver::run(int argc, char *argv[])
 {
   uint32_t starttime = (uint32_t)time(0);
   uint32_t tick      = (uint32_t)time(0);
+  m_plugin         = new Plugin;
   
   init_plugin_api();
 
