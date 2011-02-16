@@ -282,7 +282,7 @@ void Mineserver::parseCommandLine(int argc, char *argv[])
 			}
 			else
 			{
-				printf( "variable %s doesn't exist!\n", variablename );
+				printf( "variable %s doesn't exist!\n", variablename.c_str() );
 			}
 		}
 		else
