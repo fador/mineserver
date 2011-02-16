@@ -19,31 +19,34 @@ bool ItemProjectile::affectedItem(int item)
 void ItemProjectile::onRightClick(User* user, Item* item)
 {
   int8_t projID = 0;
-  switch(item->type){
-  case ITEM_SNOWBALL:
-    projID = 61;
-  break;
-  case ITEM_EGG:
-    projID = 62;
-  break;
-  case ITEM_BOW:
-    projID = 60; // TODO check arrows and remove one!
-  break;
+  switch(item->type)
+  {
+    case ITEM_SNOWBALL:
+      projID = 61;
+    break;
+    case ITEM_EGG:
+      projID = 62;
+    break;
+    case ITEM_BOW:
+      projID = 60; // TODO check arrows and remove one!
+    break;
   }
-  if(projID!=0){
+  if(projID != 0)
+  {
     int32_t EID = generateEID();
-    Packet snowballPacket;
+    Packet pkt;
     //Entity packet (initialization)
-    snowballPacket << 0x1E << EID;
+    pkt << 0x1E << EID;
 
     //Spawn snowball on player location
     // 0x17 == add object, 61 == snowball
-    snowballPacket << 0x17 << EID << (int8_t)projID << (int32_t)(user->pos.x*32) << (int32_t)((user->pos.y+1.5)*32) << (int32_t)(user->pos.z*32);
+    pkt << 0x17 << EID << (int8_t)projID << (int32_t)(user->pos.x*32) << (int32_t)((user->pos.y+1.5)*32) << (int32_t)(user->pos.z*32);
   
+    float tempMult = 1.f-((user->pos.pitch/90.f)<0?-(user->pos.pitch/90.f):(user->pos.pitch/90.f));
     //Entity velocity 
-    snowballPacket << 0x1C << EID << (int16_t)(sinf(-(user->pos.yaw / 360.f) * 2.f*M_PI)*32768.f) << (int16_t)(-32768.f*(user->pos.pitch/90.f)) << (int16_t)(cosf(-(user->pos.yaw/ 360.f) * 2.f*M_PI)*32768.f);
+    pkt << 0x1C << EID << (int16_t)(sinf(-(user->pos.yaw / 360.f) * 2.f*M_PI)*tempMult*32768.f) << (int16_t)(-32768.f*(user->pos.pitch/90.f)) << (int16_t)(cosf(-(user->pos.yaw/ 360.f) * 2.f*M_PI)*tempMult*32768.f);
   
-    user->sendAll((uint8_t *)snowballPacket.getWrite(), snowballPacket.getWriteLen());
+    user->sendAll((uint8_t *)pkt.getWrite(), pkt.getWriteLen());
 
     item->count --;
     if(item->count < 1){ item->type = -1; item->health=0; item->count = 0; }

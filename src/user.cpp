@@ -174,20 +174,14 @@ User::~User()
     //Loop every chunk loaded to make sure no user pointers are left!
     for (int i=0;i<441;++i)
     {
-      for (sChunkNode* node = Mineserver::get()->map(pos.map)->chunks.getBuckets()[i];node!=NULL;node=node->next)
+      sChunkNode * nextnode = NULL;;
+      for (sChunkNode* node = Mineserver::get()->map(pos.map)->chunks.getBuckets()[i];node != NULL; node = nextnode)
       {
-        /*
-        //Debug
-        if (node->chunk->users.count(this) > 0)
-        {
-          Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", "Found loose user pointer!");
-        }
-        */
+        nextnode = node->next;
         node->chunk->users.erase(this);
         if (node->chunk->users.size() == 0)
         {
           Mineserver::get()->map(pos.map)->releaseMap(node->chunk->x, node->chunk->z);
-          //break;
         }
       }
     }
@@ -558,9 +552,11 @@ bool User::updatePosM(double x, double y, double z, int map, double stance)
     //Loop every chunk loaded to make sure no user pointers are left!
     for (int i=0;i<441;++i)
     {
+      sChunkNode * nextnode = NULL;
       ChunkMap* cmap = &Mineserver::get()->map(pos.map)->chunks;
-      for (sChunkNode* node = cmap->m_buckets[i]; node != NULL; node = node->next)
+      for (sChunkNode* node = cmap->m_buckets[i]; node != NULL; node = nextnode)
       {
+        nextnode = node->next;
         node->chunk->users.erase(this);
         if (node->chunk->users.size() == 0)
         {          

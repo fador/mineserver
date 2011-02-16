@@ -56,7 +56,7 @@ void initConstants()
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_RED_MUSHROOM, new Drop(BLOCK_RED_MUSHROOM, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_LADDER, new Drop(BLOCK_LADDER, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_CACTUS, new Drop(BLOCK_CACTUS, 10000, 1)));
-  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_REED, new Drop(BLOCK_REED, 10000, 1)));
+  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_REED, new Drop(ITEM_REED, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_PUMPKIN, new Drop(BLOCK_PUMPKIN, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_TORCH, new Drop(BLOCK_TORCH, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_REDSTONE_TORCH_OFF, new Drop(BLOCK_REDSTONE_TORCH_OFF, 10000, 1)));

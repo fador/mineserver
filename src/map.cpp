@@ -131,8 +131,10 @@ Map::~Map()
     // Free chunk memory
     for (int i=0;i<441;++i)
     {
-      for (sChunkNode* node = chunks.getBuckets()[i];node!=NULL;node=node->next)
+      sChunkNode * nextnode = NULL;
+      for (sChunkNode* node = chunks.getBuckets()[i]; node != NULL; node = nextnode)
       {
+        nextnode = node->next;
         releaseMap(node->chunk->x, node->chunk->z);
       }
     }

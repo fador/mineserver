@@ -120,6 +120,8 @@ public:
   void saveAllPlayers();
   void saveAll();
 
+  void parseCommandLine(int argc, char *argv[]);
+
 private:
   Mineserver();
   event_base* m_eventBase;
