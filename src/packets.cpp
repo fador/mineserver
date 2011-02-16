@@ -327,7 +327,7 @@ int PacketHandler::login_request(User *user)
   }
 
   // If userlimit is reached
-  if((int)User::all().size() >= Mineserver::get()->config()->iData("system.user_limit"))
+  if((int)User::all().size() > Mineserver::get()->config()->iData("system.user_limit"))
   {
     user->kick(Mineserver::get()->config()->sData("strings.server_full"));
     return PACKET_OK;
