@@ -59,6 +59,7 @@ bool BlockBasic::isBlockStackable(const uint8_t block)
   case BLOCK_WOODEN_DOOR:
   case BLOCK_IRON_DOOR:
   case BLOCK_ICE:
+  case BLOCK_CAKE:
     return false;
     break;
   default:
