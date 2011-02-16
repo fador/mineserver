@@ -76,7 +76,7 @@
 #include "cliScreen.h"
 #include "hook.h"
 #include "mob.h"
-#include "minecart.h"
+//#include "minecart.h"
 #ifdef WIN32
 static bool quit = false;
 #endif
@@ -505,9 +505,9 @@ int Mineserver::run(int argc, char *argv[])
         blockcb->timer200();
       }
     }
-    for(uint32_t i=0; i<minecarts.size(); i++){
-      minecarts[i]->timer();
-    }
+//    for(uint32_t i=0; i<minecarts.size(); i++){
+//      minecarts[i]->timer();
+//    }
 
 
     timeNow = time(0);

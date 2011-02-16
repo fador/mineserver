@@ -356,7 +356,7 @@ void BiomeGen::generateWithNoise(int x, int z, int map)
       char toplayer;
       if(biome==0){ toplayer = BLOCK_DIRT; }
       if(biome==1){ toplayer = BLOCK_SAND; }
-      if(biome==2){ toplayer = BLOCK_GRAVEL;}
+      if(biome==2){ toplayer = BLOCK_DIRT;}
       if(biome==3){ toplayer = BLOCK_DIRT; }
       if(biome==4){ toplayer = BLOCK_DIRT; }
       if(biome==5){ toplayer = BLOCK_CLAY; }
