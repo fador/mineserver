@@ -64,6 +64,7 @@
 #include "worldgen/mapgen.h"
 #include "worldgen/nethergen.h"
 #include "worldgen/heavengen.h"
+#include "worldgen/biomegen.h"
 #include "config.h"
 #include "config/node.h"
 #include "nbt.h"
@@ -74,6 +75,7 @@
 #include "cliScreen.h"
 #include "hook.h"
 #include "mob.h"
+#include "minecart.h"
 #ifdef WIN32
 static bool quit = false;
 #endif
@@ -158,9 +160,11 @@ Mineserver::Mineserver()
   MapGen* mapgen = new MapGen;
   MapGen* nethergen = (MapGen*) new NetherGen;
   MapGen* heavengen = (MapGen*) new HeavenGen;
+  MapGen* biomegen = (MapGen*) new BiomeGen;
   gennames.push_back(mapgen);
   gennames.push_back(nethergen);
   gennames.push_back(heavengen);
+  gennames.push_back(biomegen);
 
   m_saveInterval = m_config->iData("map.save_interval");
 
@@ -180,6 +184,9 @@ Mineserver::Mineserver()
       phy->map=n;
       m_physics.push_back(phy);
       int k = m_config->iData((std::string(key)+".")+(*it));
+      if(k>=gennames.size()){
+        std::cout << "Error! Mapgen number " << k << " in config. " << gennames.size() << " Mapgens known" << std::endl;
+      }
       MapGen* m = gennames[k];
       m_mapGen.push_back(m);
       n++;
@@ -429,6 +436,9 @@ int Mineserver::run(int argc, char *argv[])
       {
         blockcb->timer200();
       }
+    }
+    for(uint32_t i=0; i<minecarts.size(); i++){
+      minecarts[i]->timer();
     }
 
 

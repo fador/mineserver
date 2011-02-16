@@ -1,7 +1,7 @@
 # Sources
 SRC          = mineserver.cpp map.cpp chat.cpp constants.cpp logger.cpp nbt.cpp
 SRC         += furnace.cpp furnaceManager.cpp packets.cpp physics.cpp sockets.cpp
-SRC         += tools.cpp user.cpp tree.cpp inventory.cpp mob.cpp
+SRC         += tools.cpp user.cpp tree.cpp inventory.cpp mob.cpp minecart.cpp
 SRC         += screenBase.cpp cliScreen.cpp
 
 SRC         += config.cpp config/node.cpp config/scanner.cpp config/lexer.cpp config/parser.cpp
@@ -13,7 +13,7 @@ SRC         += blocks/chest.cpp blocks/ladder.cpp blocks/cake.cpp blocks/note.cp
 SRC         += blocks/workbench.cpp blocks/blockfurnace.cpp blocks/dyed.cpp
 
 SRC         += worldgen/mapgen.cpp worldgen/cavegen.cpp worldgen/nethergen.cpp
-SRC         += worldgen/heavengen.cpp
+SRC         += worldgen/heavengen.cpp worldgen/biomegen.cpp
 
 SRC         += items/itembasic.cpp items/food.cpp items/projectile.cpp
 

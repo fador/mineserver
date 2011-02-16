@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include "cavegen.h"
-#include "mapgen.h"
+#include "biomegen.h"
 
 #include "../mineserver.h"
 #include "../config.h"
@@ -53,15 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../tree.h"
 #include "../tools.h"
 
-int g_seed;
-int f_seed;
-
-inline int fastrand() {
-  f_seed = (214013*f_seed+2531011);
-  return (f_seed>>16)&0x7FFF;
-}
-
-MapGen::MapGen()
+BiomeGen::BiomeGen()
     : blocks(16*16*128, 0),
       blockdata(16*16*128/2, 0),
       skylight(16*16*128/2, 0),
@@ -70,23 +62,14 @@ MapGen::MapGen()
 {
 }
 
-void MapGen::init(int seed)
+void BiomeGen::init(int seed)
 {
   cave.init(seed+7);
-  f_seed = seed; // used for fastrand and can change
-  g_seed = seed; // used for height map, cannot change
-  
-  ridgedMultiNoise.SetSeed(seed);
-  ridgedMultiNoise.SetOctaveCount(6);
-  ridgedMultiNoise.SetFrequency(1.0/180.0);
-  ridgedMultiNoise.SetLacunarity(2.0);
-  
   //###### TREE GEN #####
   treenoise.SetSeed(seed+2);
   treenoise.SetOctaveCount(6);
   treenoise.SetFrequency(1.0/180.0);
   treenoise.SetLacunarity(2.0);
-
   //###### END TREE GEN #######
   seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
   addTrees = Mineserver::get()->config()->bData("mapgen.trees.enabled");
@@ -96,20 +79,60 @@ void MapGen::init(int seed)
 
   addOre = Mineserver::get()->config()->bData("mapgen.addore");
   addCaves = Mineserver::get()->config()->bData("mapgen.caves.enabled");
-  
-  winterEnabled = Mineserver::get()->config()->bData("mapgen.winter.enabled");
 
+  BiomeBase.SetFrequency(0.2);
+  BiomeBase.SetSeed(seed-1);
+  BiomeSelect.SetSourceModule(0,BiomeBase);
+  BiomeSelect.SetScale(2.5);
+  BiomeSelect.SetBias(2.5);
+  mountainTerrainBase.SetSeed(seed+1);
+  mountainTerrain.SetSourceModule(0,mountainTerrainBase);
+  mountainTerrain.SetScale(0.5);
+  mountainTerrain.SetBias(0.5);
+  baseFlatTerrain.SetSeed(seed);
+  baseFlatTerrain.SetFrequency (0.2);
+  flatTerrain.SetSourceModule(0, baseFlatTerrain);
+  flatTerrain.SetScale(0.125);
+  flatTerrain.SetBias(0.07);
+  baseWater.SetSeed(seed-1);
+  water.SetSourceModule(0,baseWater);
+  water.SetScale(0.3);
+  water.SetBias(-0.5);
+  terrainType.SetSeed(seed+2);
+  terrainType.SetFrequency(0.5);
+  terrainType.SetPersistence(0.25);
+  terrainType2.SetSeed(seed+7);
+  terrainType2.SetFrequency(0.5);
+  terrainType2.SetPersistence(0.25);
+  waterTerrain.SetSourceModule(0,water);
+  waterTerrain.SetSourceModule(1,flatTerrain);
+  waterTerrain.SetControlModule(terrainType2);
+  waterTerrain.SetEdgeFalloff(0.1);
+  waterTerrain.SetBounds(-0.5,1.0);
+  finalTerrain.SetSourceModule(1,waterTerrain);
+  finalTerrain.SetSourceModule(0,mountainTerrain);
+  finalTerrain.SetControlModule(terrainType);
+  finalTerrain.SetEdgeFalloff(0.7);
+  finalTerrain.SetBounds(-0.5,1.0);
+  flowers.SetSeed(seed+10);
+  flowers.SetFrequency(3);
+  winterEnabled = false;
 }
 
-void MapGen::re_init(int seed)
+void BiomeGen::re_init(int seed)
 {
   cave.init(seed+7);
-  ridgedMultiNoise.SetSeed(seed);
   treenoise.SetSeed(seed+2);
+  BiomeBase.SetSeed(seed-1);
+  mountainTerrainBase.SetSeed(seed+1);
+  baseFlatTerrain.SetSeed(seed);
+  baseWater.SetSeed(seed-1);
+  terrainType2.SetSeed(seed+7);
+  terrainType.SetSeed(seed+2);
 }
 
 
-void MapGen::generateFlatgrass(int x, int z, int map) 
+void BiomeGen::generateFlatgrass(int x, int z, int map) 
 {
   sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(x,z);
   Block top = BLOCK_GRASS;
@@ -144,7 +167,7 @@ void MapGen::generateFlatgrass(int x, int z, int map)
   }
 }
 
-void MapGen::generateChunk(int x, int z, int map)
+void BiomeGen::generateChunk(int x, int z, int map)
 {
   NBT_Value *main = new NBT_Value(NBT_Value::TAG_COMPOUND);
   NBT_Value *val = new NBT_Value(NBT_Value::TAG_COMPOUND);
@@ -215,15 +238,12 @@ void MapGen::generateChunk(int x, int z, int map)
   if(addTrees)
     AddTrees(x, z, map);  // add trees will make a *kind-of* forest of 16*16 chunks
     
-  if(expandBeaches)
-    ExpandBeaches(x, z, map);
-    
 }
 
 //#define PRINT_MAPGEN_TIME
 
 
-void MapGen::AddTrees(int x, int z, int map)
+void BiomeGen::AddTrees(int x, int z, int map)
 {
   int xBlockpos = x<<4;
   int zBlockpos = z<<4;
@@ -250,21 +270,58 @@ void MapGen::AddTrees(int x, int z, int map)
       blockZ = b + zBlockpos;
       blockY = heightmap[(a<<4)+b] + 1;
 
-      Mineserver::get()->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
+      if(!Mineserver::get()->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta))
+      {
+        continue;
+      }
+      if(blockY<=seaLevel)
+      {
+        continue;
+      }
+      
 
       // No trees on water
       if(block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER && block != BLOCK_SAND)
       {
         if(abs(treenoise.GetValue(blockX,0,blockZ)) >= 0.9)
         {
-          Tree tree(blockX, blockY, blockZ, map);
+          int biome = BiomeSelect.GetValue(blockX/100.0, 0, blockZ/100.0);
+          if(biome== 1){
+            // Desert, make cactus
+            sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(x,z);
+
+            uint8_t* curBlock;
+            int count = (fastrand()%3)+3;
+            if(count + blockY>127){ continue; }
+            curBlock = &(chunk->blocks[ (a<<7) + (b<<11) + blockY]);
+            for(int i = 0; i< count; i++){
+              curBlock[i]=BLOCK_CACTUS;
+            }
+          }
+          else if(biome == 4)
+          {
+            // Reed forest
+            sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(x,z);
+            uint8_t* curBlock;
+            int count = (fastrand()%3)+3;
+            if(count + blockY>127){ continue; }
+            curBlock = &(chunk->blocks[ (a<<7) + (b<<11) + blockY]);
+            for(int i = 0; i< count; i++){
+              curBlock[i]=BLOCK_REED;
+            }
+
+          }
+          else if(biome == 0 || biome == 3)
+          {
+            Tree tree(blockX, blockY, blockZ, map);
+          }
         }
       }
     }
   }
 }
 
-void MapGen::generateWithNoise(int x, int z, int map) 
+void BiomeGen::generateWithNoise(int x, int z, int map) 
 {
   // Debug..
 #ifdef PRINT_MAPGEN_TIME
@@ -294,13 +351,22 @@ void MapGen::generateWithNoise(int x, int z, int map)
   {
     for(int bZ = 0; bZ < 16; bZ++) 
     {
-      heightmap[(bZ<<4)+bX] = ymax = currentHeight = (uint8_t)((ridgedMultiNoise.GetValue(xBlockpos+bX,0, zBlockpos+bZ) * 15) + 64);
+      heightmap[(bZ<<4)+bX] = ymax = currentHeight = (uint8_t)((finalTerrain.GetValue((xBlockpos+bX)/100.0,0, (zBlockpos+bZ)/100.0) *60) + 64);
+      int biome = BiomeSelect.GetValue((xBlockpos+bX)/100.0,0,(zBlockpos+bZ)/100.0);
+      char toplayer;
+      if(biome==0){ toplayer = BLOCK_DIRT; }
+      if(biome==1){ toplayer = BLOCK_SAND; }
+      if(biome==2){ toplayer = BLOCK_GRAVEL;}
+      if(biome==3){ toplayer = BLOCK_DIRT; }
+      if(biome==4){ toplayer = BLOCK_DIRT; }
+      if(biome==5){ toplayer = BLOCK_CLAY; }
 
       int32_t stoneHeight = (int32_t)(currentHeight * 0.94);
       int32_t bYbX = ((bZ << 7) + (bX << 11));
 
       if(ymax < seaLevel) 
         ymax = seaLevel;
+      ymax++;
 
       for(int bY = 0; bY <= ymax; bY++) 
       {
@@ -323,8 +389,23 @@ void MapGen::generateWithNoise(int x, int z, int map)
               cave.AddCaves(*curBlock, xBlockpos + bX, bY, zBlockpos + bZ);
           }
           else
-            *curBlock = BLOCK_DIRT;
+            *curBlock = toplayer;
         } 
+        else if((currentHeight+1) == bY && bY>seaLevel && biome == 3){
+          *curBlock = BLOCK_SNOW;
+          continue;
+        }
+        else if((currentHeight+1)==bY && bY>seaLevel+1){
+          if(biome == 1 || biome == 2){ continue; }
+          double f = flowers.GetValue(xBlockpos+bX/10.0,0,zBlockpos+bZ/10.0);
+          if(f<-0.999){
+            *curBlock=BLOCK_RED_ROSE;
+          }else if(f>0.999){
+            *curBlock=BLOCK_YELLOW_FLOWER;
+          }else if(f<0.001 && f> -0.001){
+            *curBlock=BLOCK_PUMPKIN;
+          }
+        }
         else if(currentHeight == bY)
         {
           if (bY == seaLevel || bY == seaLevel - 1 || bY == seaLevel - 2)
@@ -332,7 +413,11 @@ void MapGen::generateWithNoise(int x, int z, int map)
           else if (bY < seaLevel - 1)
             *curBlock = BLOCK_GRAVEL; // FF
           else
-            *curBlock = topBlock; // FF
+            if(toplayer == BLOCK_DIRT){
+              *curBlock = BLOCK_GRASS;
+            }else{
+              *curBlock = toplayer; // FF
+            }
         } 
         else 
         {
@@ -340,6 +425,11 @@ void MapGen::generateWithNoise(int x, int z, int map)
             *curBlock = BLOCK_WATER; // FF
           else
             *curBlock = BLOCK_AIR; // FF
+          if (bY == seaLevel && biome==3)
+          {
+            *curBlock = BLOCK_ICE;
+          }
+
         }        
       }
     }
@@ -356,72 +446,7 @@ void MapGen::generateWithNoise(int x, int z, int map)
 #endif
 }
 
-void MapGen::ExpandBeaches(int x, int z, int map) 
-{
-  sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(blockToChunk(x),blockToChunk(z));
-  int beachExtentSqr = (beachExtent + 1) * (beachExtent + 1);
-  int xBlockpos = x<<4;
-  int zBlockpos = z<<4;
-  
-  int blockX, blockZ, h;
-  uint8_t block = 0;
-  uint8_t meta = 0;
-  
-  for(int bX = 0; bX < 16; bX++) 
-  {
-    for(int bZ = 0; bZ < 16; bZ++) 
-    {
-      blockX = xBlockpos+bX;
-      blockZ = zBlockpos+bZ;
-
-      h = heightmap[(bZ<<4)+bX];
-
-      if(h < 0) 
-        continue;
-
-      bool found = false;
-      for(int dx = -beachExtent; !found && dx <= beachExtent; dx++) 
-      {
-        for(int dz = -beachExtent; !found && dz <= beachExtent; dz++) 
-        {
-          for(int dh = -beachHeight; !found && dh <= 0; dh++) 
-          {
-            if(dx * dx + dz * dz + dh * dh > beachExtentSqr) 
-              continue;
-
-            int xx = bX + dx;
-            int zz = bZ + dz;
-            int hh = h + dh;
-            if(xx < 0 || xx >= 15 || zz < 0 || zz >= 15 || hh < 0 || hh >= 127 ) 
-              continue;
-
-            //ToDo: add getBlock!!
-            if( block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER ) 
-            {
-              found = true;
-              break;
-            }
-          }
-        }
-      }
-      if(found) 
-      {
-        Mineserver::get()->map(map)->sendBlockChange(blockX, h, blockZ, BLOCK_SAND, 0);
-        Mineserver::get()->map(map)->setBlock(blockX, h, blockZ, BLOCK_SAND, 0);
-
-        Mineserver::get()->map(map)->getBlock(blockX, h-1, blockZ, &block, &meta);
-
-        if( h > 0 && block == BLOCK_DIRT )
-        {
-          Mineserver::get()->map(map)->sendBlockChange(blockX, h-1, blockZ, BLOCK_SAND, 0);
-          Mineserver::get()->map(map)->setBlock(blockX, h-1, blockZ, BLOCK_SAND, 0);
-        }
-      }
-    }
-  }
-}
-
-void MapGen::AddOre(int x, int z, int map, uint8_t type) 
+void BiomeGen::AddOre(int x, int z, int map, uint8_t type) 
 {
   sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(x,z);
 
@@ -511,7 +536,7 @@ void MapGen::AddOre(int x, int z, int map, uint8_t type)
   }
 }
 
-void MapGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int minDepoSize, int maxDepoSize, sChunk *chunk)
+void BiomeGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int minDepoSize, int maxDepoSize, sChunk *chunk)
 {
   int depoSize = fastrand()%(maxDepoSize-minDepoSize)+minDepoSize;
   for(int i = 0; i < depoSize; i++)

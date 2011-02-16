@@ -25,8 +25,8 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _MAPGEN_H
-#define _MAPGEN_H
+#ifndef _BIOMEGEN_H
+#define _BIOMEGEN_H
 
 #ifdef LIBNOISE
 #include <libnoise/noise.h>
@@ -35,15 +35,16 @@
 #endif
 
 #include "cavegen.h"
+#include "mapgen.h"
 #include "../map.h"
 
-class MapGen
+class BiomeGen: public MapGen
 {
 public:
-  MapGen();
-  virtual void init(int seed);
-  virtual void re_init(int seed); // Used when generating multiple maps
-  virtual void generateChunk(int x, int z, int map);
+  BiomeGen();
+  void init(int seed);
+  void re_init(int seed); // Used when generating multiple maps
+  void generateChunk(int x, int z, int map);
 
 private:
   std::vector<uint8_t> blocks;
@@ -64,42 +65,33 @@ private:
   bool addCaves;
   bool winterEnabled;
 
-  virtual void generateFlatgrass(int x, int z, int map);
-  virtual void generateWithNoise(int x, int z, int map);
+  void generateFlatgrass(int x, int z, int map);
+  void generateWithNoise(int x, int z, int map);
 
-  virtual void ExpandBeaches(int x, int z, int map);
-  virtual void AddTrees(int x, int z, int map);
+  void AddTrees(int x, int z, int map);
   
-  virtual void AddOre(int x, int z, int map, uint8_t type);
-  virtual void AddDeposit(int x, int y, int z, int map, uint8_t block, int minDepoSize, int maxDepoSize, sChunk *chunk);
+  void AddOre(int x, int z, int map, uint8_t type);
+  void AddDeposit(int x, int y, int z, int map, uint8_t block, int minDepoSize, int maxDepoSize, sChunk *chunk);
 
   CaveGen cave;
 
   // Heightmap composition
-  noise::module::RidgedMulti ridgedMultiNoise;
-
+  noise::module::Perlin BiomeBase;
+  noise::module::ScaleBias BiomeSelect;
+  noise::module::RidgedMulti mountainTerrainBase;
+  noise::module::ScaleBias mountainTerrain;
+  noise::module::Billow baseFlatTerrain;
+  noise::module::ScaleBias flatTerrain;
+  noise::module::Billow baseWater;
+  noise::module::ScaleBias water;
+  noise::module::Perlin terrainType;
+  noise::module::Perlin terrainType2;
+  noise::module::Select waterTerrain;
+  noise::module::Select finalTerrain;
+  noise::module::Voronoi flowers;
   // ##### TREE GEN #####
-
   noise::module::Billow treenoise;
   // ##### END TREE GEN ####
-  
-  /*noise::module::ScaleBias perlinBiased;
-
-  noise::module::Perlin baseFlatTerrain;  
-  noise::module::ScaleBias flatTerrain;
-  
-  noise::module::Perlin seaFloor;
-  noise::module::ScaleBias seaBias;
-
-  noise::module::Perlin terrainType;
-
-  noise::module::Perlin seaControl;
-  
-  noise::module::Select seaTerrain;
-  noise::module::Select finalTerrain;*/
 };
-
-
-inline int fastrand();
 
 #endif
