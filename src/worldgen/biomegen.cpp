@@ -89,6 +89,12 @@ void BiomeGen::init(int seed)
   mountainTerrain.SetSourceModule(0,mountainTerrainBase);
   mountainTerrain.SetScale(0.5);
   mountainTerrain.SetBias(0.5);
+  jaggieEdges.SetSourceModule(0,terrainType);
+  jaggieEdges.SetSourceModule(1,plain);
+  plain.SetConstValue(0.25);
+  jaggieEdges.SetControlModule(jaggieControl);
+  jaggieEdges.SetBounds(-0.9,1.0);
+  jaggieControl.SetSeed(seed+20);
   baseFlatTerrain.SetSeed(seed);
   baseFlatTerrain.SetFrequency (0.2);
   flatTerrain.SetSourceModule(0, baseFlatTerrain);
@@ -109,11 +115,16 @@ void BiomeGen::init(int seed)
   waterTerrain.SetControlModule(terrainType2);
   waterTerrain.SetEdgeFalloff(0.1);
   waterTerrain.SetBounds(-0.5,1.0);
-  finalTerrain.SetSourceModule(1,waterTerrain);
-  finalTerrain.SetSourceModule(0,mountainTerrain);
-  finalTerrain.SetControlModule(terrainType);
-  finalTerrain.SetEdgeFalloff(0.7);
-  finalTerrain.SetBounds(-0.5,1.0);
+  secondTerrain.SetSourceModule(1,waterTerrain);
+  secondTerrain.SetSourceModule(0,mountainTerrain);
+  secondTerrain.SetControlModule(terrainType);
+  secondTerrain.SetEdgeFalloff(0.15);
+  secondTerrain.SetBounds(-0.5,1.0);
+  finalTerrain.SetSourceModule(1,secondTerrain);
+  finalTerrain.SetSourceModule(0,waterTerrain);
+  finalTerrain.SetControlModule(jaggieEdges); 
+  finalTerrain.SetEdgeFalloff(0.1);
+  finalTerrain.SetBounds(0,1.0);
   flowers.SetSeed(seed+10);
   flowers.SetFrequency(3);
   winterEnabled = false;
@@ -311,7 +322,7 @@ void BiomeGen::AddTrees(int x, int z, int map)
             }
 
           }
-          else if(biome == 0 || biome == 3)
+          else if(biome == 2 || biome == 3)
           {
             Tree tree(blockX, blockY, blockZ, map);
           }
@@ -361,7 +372,7 @@ void BiomeGen::generateWithNoise(int x, int z, int map)
       if(biome==4){ toplayer = BLOCK_DIRT; }
       if(biome==5){ toplayer = BLOCK_CLAY; }
 
-      int32_t stoneHeight = (int32_t)(currentHeight * 0.94);
+      int32_t stoneHeight = (int32_t)currentHeight-((64-(currentHeight%64))/8)+1;
       int32_t bYbX = ((bZ << 7) + (bX << 11));
 
       if(ymax < seaLevel) 
@@ -396,7 +407,7 @@ void BiomeGen::generateWithNoise(int x, int z, int map)
           continue;
         }
         else if((currentHeight+1)==bY && bY>seaLevel+1){
-          if(biome == 1 || biome == 2){ continue; }
+          if(biome == 1 || biome == 0){ continue; }
           double f = flowers.GetValue(xBlockpos+bX/10.0,0,zBlockpos+bZ/10.0);
           if(f<-0.999){
             *curBlock=BLOCK_RED_ROSE;

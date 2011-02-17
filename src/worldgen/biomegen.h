@@ -89,6 +89,10 @@ private:
   noise::module::Select waterTerrain;
   noise::module::Select finalTerrain;
   noise::module::Voronoi flowers;
+  noise::module::Select jaggieEdges;
+  noise::module::Select secondTerrain;
+  noise::module::Const plain;
+  noise::module::Billow jaggieControl;
   // ##### TREE GEN #####
   noise::module::Billow treenoise;
   // ##### END TREE GEN ####
