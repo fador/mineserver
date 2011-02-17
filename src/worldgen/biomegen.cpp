@@ -552,8 +552,7 @@ void BiomeGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int minDe
   int depoSize = fastrand()%(maxDepoSize-minDepoSize)+minDepoSize;
   for(int i = 0; i < depoSize; i++)
   {
-    if(chunk->blocks[y + ((z << 7) + (x << 11))] != BLOCK_GRASS ||
-       chunk->blocks[y + ((z << 7) + (x << 11))] != BLOCK_SNOW)
+    if(chunk->blocks[y + ((z << 7) + (x << 11))] == BLOCK_STONE)
     {
       chunk->blocks[y + ((z << 7) + (x << 11))] = block;
     }
