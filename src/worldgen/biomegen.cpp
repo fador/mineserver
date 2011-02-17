@@ -91,9 +91,10 @@ void BiomeGen::init(int seed)
   mountainTerrain.SetBias(0.5);
   jaggieEdges.SetSourceModule(0,terrainType);
   jaggieEdges.SetSourceModule(1,plain);
-  plain.SetConstValue(0.25);
+  plain.SetConstValue(0.5);
   jaggieEdges.SetControlModule(jaggieControl);
-  jaggieEdges.SetBounds(-0.9,1.0);
+  jaggieEdges.SetBounds(0.5,1.0);
+  jaggieEdges.SetEdgeFalloff(0.11);
   jaggieControl.SetSeed(seed+20);
   baseFlatTerrain.SetSeed(seed);
   baseFlatTerrain.SetFrequency (0.2);
@@ -118,13 +119,13 @@ void BiomeGen::init(int seed)
   secondTerrain.SetSourceModule(1,waterTerrain);
   secondTerrain.SetSourceModule(0,mountainTerrain);
   secondTerrain.SetControlModule(terrainType);
-  secondTerrain.SetEdgeFalloff(0.15);
+  secondTerrain.SetEdgeFalloff(0.3);
   secondTerrain.SetBounds(-0.5,1.0);
-  finalTerrain.SetSourceModule(1,secondTerrain);
-  finalTerrain.SetSourceModule(0,waterTerrain);
+  finalTerrain.SetSourceModule(0,secondTerrain);
+  finalTerrain.SetSourceModule(1,waterTerrain);
   finalTerrain.SetControlModule(jaggieEdges); 
-  finalTerrain.SetEdgeFalloff(0.1);
-  finalTerrain.SetBounds(0,1.0);
+  finalTerrain.SetEdgeFalloff(0.2);
+  finalTerrain.SetBounds(-0.3,1.0);
   flowers.SetSeed(seed+10);
   flowers.SetFrequency(3);
   winterEnabled = false;
@@ -287,6 +288,9 @@ void BiomeGen::AddTrees(int x, int z, int map)
       }
       if(blockY<=seaLevel)
       {
+        continue;
+      }
+      if(blockY>=117){
         continue;
       }
       
