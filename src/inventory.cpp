@@ -71,8 +71,12 @@ void Item::sendUpdate()
           << (int16_t)(5-(slot-4)) << (int16_t)type<< (int16_t) 0;
       player->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
     }
-    player->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)0
-                   << (int16_t)slot << (int16_t) type;
+    int window = 0;
+    int t_slot = slot;
+    if(slot==-1){window =-1; t_slot=0;}
+    std::cout << window << " " << t_slot << " " << type << std::endl;
+    player->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)window
+                   << (int16_t)t_slot << (int16_t) type;
     if(type != -1){
       player->buffer << (int8_t)count << (int16_t)health;
     }
@@ -106,7 +110,7 @@ void Item::setHealth(int16_t health)
 void Item::decCount(int c)
 {
   count -= c;
-  if(count == 0){ type = -1; health=0; }
+  if(count < 1){ type = -1; health=0; }
   sendUpdate();
 }
 
@@ -295,6 +299,66 @@ bool Inventory::readRecipe(std::string recipeFile)
   return true;
 }
 
+bool Inventory::canBeArmour(int slot, int type)
+{
+  if(slot == 5){
+    // Helmet slot. Lots of fun here
+    if(Mineserver::get()->m_only_helmets){
+      switch(type){
+        case ITEM_LEATHER_HELMET:
+        case ITEM_CHAINMAIL_HELMET:
+        case ITEM_IRON_HELMET:
+        case ITEM_DIAMOND_HELMET:
+        case ITEM_GOLD_HELMET:
+          return true;
+          break;
+      }
+      return false;
+    }else{
+      return true;
+    }
+  }else if(slot == 6){
+    switch(type)
+    {
+      case ITEM_LEATHER_CHESTPLATE:
+      case ITEM_CHAINMAIL_CHESTPLATE:
+      case ITEM_IRON_CHESTPLATE:
+      case ITEM_DIAMOND_CHESTPLATE:
+      case ITEM_GOLD_CHESTPLATE:
+        return true;
+        break;
+    }
+    return false;
+  }else if(slot == 7){
+    switch(type)
+    {
+      case ITEM_LEATHER_LEGGINGS:
+      case ITEM_CHAINMAIL_LEGGINGS:
+      case ITEM_IRON_LEGGINGS:
+      case ITEM_DIAMOND_LEGGINGS:
+      case ITEM_GOLD_LEGGINGS:
+        return true;
+        break;
+    }
+    return false;
+  }else if(slot == 8){
+    switch(type)
+    {
+      case ITEM_LEATHER_BOOTS:
+      case ITEM_CHAINMAIL_BOOTS:
+      case ITEM_IRON_BOOTS:
+      case ITEM_DIAMOND_BOOTS:
+      case ITEM_GOLD_BOOTS:
+        return true;
+        break;
+    }
+    return false;
+  }
+  Mineserver::get()->logger()->log(LogType::LOG_WARNING,"Armour", "Unknown armour slot.");
+  return false;
+}
+  
+
 bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rightClick, int16_t actionNumber, int16_t itemID, int8_t itemCount,int16_t itemUses)
 {  
   //Ack
@@ -463,6 +527,45 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
   
   bool workbenchCrafting = false;
   bool playerCrafting    = false;
+
+  if(windowID==WINDOW_PLAYER && slot >= 5 && slot <= 8){
+    // Armour slots are a strange case. Only a quantity of one should be allowed, so this must be checked for.
+    if(slotItem->getType() == -1 && user->inventoryHolding.getType()>0){
+      if(canBeArmour(slot, user->inventoryHolding.getType())){
+        slotItem->setType(user->inventoryHolding.getType());
+        slotItem->setHealth(user->inventoryHolding.getHealth());
+        slotItem->setCount(1);
+        user->inventoryHolding.decCount();
+      }else{
+        slotItem->decCount(0);
+        user->inventoryHolding.decCount(0); // Refresh both
+      }
+    }else if (slotItem->getType()>0 && user->inventoryHolding.getType()==-1){
+      user->inventoryHolding.setType(slotItem->getType());
+      user->inventoryHolding.setCount(slotItem->getCount());
+      user->inventoryHolding.setHealth(slotItem->getHealth());
+      slotItem->setType(-1);
+
+    }else if( slotItem->getType()>0 && user->inventoryHolding.getType()>0 && user->inventoryHolding.getCount() == 1){
+      if(canBeArmour(slot, user->inventoryHolding.getType())){
+        uint16_t t_type = slotItem->getType();
+        uint8_t t_count = slotItem->getCount();
+        uint16_t t_health = slotItem->getHealth();
+        slotItem->setCount(1);
+        slotItem->setHealth(user->inventoryHolding.getHealth());
+        slotItem->setType(user->inventoryHolding.getType());
+        user->inventoryHolding.setCount(t_count);
+        user->inventoryHolding.setHealth(t_health);
+        user->inventoryHolding.setType(t_type);
+      }else{
+        slotItem->decCount(0);
+        user->inventoryHolding.decCount(0); // Refresh both
+      }
+    }
+    setSlot(user, WINDOW_CURSOR, 0, user->inventoryHolding.getType(), user->inventoryHolding.getCount(), user->inventoryHolding.getHealth());
+    return false;
+  }
+  
 
   //Empty slot and holding something
   if((itemID == -1 || (slotItem->getType() == user->inventoryHolding.getType() && slotItem->getHealth() == user->inventoryHolding.getHealth() && slotItem->getCount() < 64) ) && user->inventoryHolding.getType() != -1)
@@ -857,9 +960,7 @@ bool Inventory::windowClose(User *user,int8_t windowID)
     Mineserver::get()->map(user->pos.map)->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z, 
                                                 user->inventoryHolding.getType(), user->inventoryHolding.getCount(),
                                                 user->inventoryHolding.getHealth(),user);
-    user->inventoryHolding.setCount(0);
     user->inventoryHolding.setType(-1);
-    user->inventoryHolding.setHealth(0);
   }
 
   if(user->isOpenInv)

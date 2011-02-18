@@ -169,6 +169,7 @@ Mineserver::Mineserver()
 
   m_saveInterval = m_config->iData("map.save_interval");
 
+  m_only_helmets = m_config->bData("system.armour.helmet_strict");
   m_pvp_enabled = m_config->bData("system.pvp.enabled");
   m_damage_enabled = m_config->bData("system.damage.enabled");
 

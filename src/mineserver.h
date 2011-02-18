@@ -92,6 +92,7 @@ public:
   time_t m_lastSave;
   bool m_pvp_enabled;
   bool m_damage_enabled;
+  bool m_only_helmets;
 
   Map* map(int n);
   void setMap(Map* map,int n=0);

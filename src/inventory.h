@@ -129,6 +129,7 @@ public:
   std::vector<OpenInventory *> openChests;
   std::vector<OpenInventory *> openFurnaces;
 
+  bool canBeArmour(int slot, int type);
   bool onwindowOpen(User *user,int8_t type, int32_t x, int32_t y, int32_t z);
   bool onwindowClose(User *user,int8_t type,int32_t x, int32_t y, int32_t z);
 

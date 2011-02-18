@@ -87,7 +87,7 @@ User::User(int sock, uint32_t EID)
 
 
   this->m_currentItemSlot = 0;
-  this->inventoryHolding  = Item();
+  this->inventoryHolding  = Item(this,-1);
   this->curItem          = 0;
 
   // Ignore this user if it's the server console
@@ -197,9 +197,7 @@ User::~User()
       Mineserver::get()->map(pos.map)->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z, 
                                                  inventoryHolding.getType(), inventoryHolding.getCount(),
                                                  inventoryHolding.getHealth(),this);
-      inventoryHolding.setCount(0);
       inventoryHolding.setType(-1);
-      inventoryHolding.setHealth(0);
     }
 
     //Close open inventory
