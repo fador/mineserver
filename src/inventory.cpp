@@ -74,7 +74,6 @@ void Item::sendUpdate()
     int window = 0;
     int t_slot = slot;
     if(slot==-1){window =-1; t_slot=0;}
-    std::cout << window << " " << t_slot << " " << type << std::endl;
     player->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)window
                    << (int16_t)t_slot << (int16_t) type;
     if(type != -1){

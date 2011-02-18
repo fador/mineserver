@@ -1255,7 +1255,6 @@ bool User::spawnOthers()
           n=9-b;
         }
         int type = Mineserver::get()->users()[i]->inv[n].getType();
-        std::cout << Mineserver::get()->users()[i]->UID << " " << b << " " << type << std::cout;
         buffer << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)Mineserver::get()->users()[i]->UID
                << (int16_t)b << (int16_t)type<< (int16_t) 0;
       }
