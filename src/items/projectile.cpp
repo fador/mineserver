@@ -19,7 +19,7 @@ bool ItemProjectile::affectedItem(int item)
 void ItemProjectile::onRightClick(User* user, Item* item)
 {
   int8_t projID = 0;
-  switch(item->type)
+  switch(item->getType())
   {
     case ITEM_SNOWBALL:
       projID = 61;
@@ -48,16 +48,7 @@ void ItemProjectile::onRightClick(User* user, Item* item)
   
     user->sendAll((uint8_t *)pkt.getWrite(), pkt.getWriteLen());
 
-    item->count --;
-    if(item->count < 1){ item->type = -1; item->health=0; item->count = 0; }
-    #define INV_TASKBAR_START 36
-    user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_PLAYER
-                 << (int16_t)(INV_TASKBAR_START+user->currentItemSlot())
-                 << (int16_t)item->type;
-    if(item->type != -1){
-     user->buffer << (int8_t)item->count << (int16_t) item->health;
-    }
-    #undef INV_TASKBAR_START
+    item->decCount();
   }
  
 }

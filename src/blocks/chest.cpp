@@ -49,7 +49,7 @@ bool BlockChest::affectedBlock(int block)
 void BlockChest::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   // Locksystem
-  if(user->inv[36+user->currentItemSlot()].type == ITEM_WOODEN_AXE)
+  if(user->inv[36+user->currentItemSlot()].getType() == ITEM_WOODEN_AXE)
   {    
     int chunk_x = blockToChunk(x);
     int chunk_z = blockToChunk(z);
@@ -167,14 +167,14 @@ bool BlockChest::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
     {
       for(uint32_t item_i = 0; item_i < 27; item_i++)
       {
-        if(chunk->chests[i]->items[item_i].type != -1)
+        if(chunk->chests[i]->items[item_i].getType() != -1)
         {
           Mineserver::get()->map(map)->createPickupSpawn( chunk->chests[i]->x,
                                                           chunk->chests[i]->y,
                                                           chunk->chests[i]->z,
-                                                          chunk->chests[i]->items[item_i].type,
-                                                          chunk->chests[i]->items[item_i].count,
-                                                          chunk->chests[i]->items[item_i].health,
+                                                          chunk->chests[i]->items[item_i].getType(),
+                                                          chunk->chests[i]->items[item_i].getCount(),
+                                                          chunk->chests[i]->items[item_i].getHealth(),
                                                           NULL);
         }
       }

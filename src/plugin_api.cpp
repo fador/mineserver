@@ -526,11 +526,11 @@ bool user_getItemInHand(const char* user, int *type, int *meta, int *quant)
   {
     Item item = tempUser->inv[tempUser->curItem+36];
     if(type!=NULL)
-      *type = item.type;
+      *type = item.getType();
     if(meta!=NULL)
-      *meta = item.health;
+      *meta = item.getHealth();
     if(quant!=NULL)
-      *quant = item.count;
+      *quant = item.getCount();
     return true;
   }
   return false;
@@ -542,9 +542,9 @@ bool user_setItemInHand(const char* user, int type, int meta, int quant)
   if(tempUser != NULL)
   {
     Item* item = &tempUser->inv[tempUser->curItem+36];
-    item->type = type;
-    item->health = meta;
-    item->count = quant;
+    item->setHealth(meta);
+    item->setCount(quant);
+    item->setType(type);
     return true;
   }
   return false;
@@ -556,33 +556,35 @@ bool user_addItem(const char* user, int item, int count, int health)
   User* tempuser = userFromName(std::string(user));
   if(tempuser != NULL)
   {
-    for(uint8_t i = 0; i < 36; i++)
+    bool checkingTaskbar = true;
+    for(uint8_t i = 36-9; i < 36-9||checkingTaskbar; i++)
     {
+      if(i==36){
+        checkingTaskbar=false;
+        i=0;
+      }
       Item *slot = &tempuser->inv[i+9];
-      if(item == slot->type && health == slot->health){
-        if(slot->count < 64){
-          int a = 64 - slot->count;
+      if(item == slot->getType() && health == slot->getHealth()){
+        if(slot->getCount() < 64){
+          int a = 64 - slot->getCount();
           if(a<total){
             total -= a;
-            slot->count = 64;
+            slot->setCount(64);
           }else{
-            slot->count += total;
+            slot->setCount(total);
             total = 0;
           }
         }
-      }else if(slot->type == -1){
-        slot->type = item; slot->health = health;
+      }else if(slot->getType() == -1){
+        slot->setType(item); slot->setHealth(health);
         if(total < 65){
-          slot->count = total;
+          slot->setCount(total);
           total = 0;
         }else{
-          slot->count = 64;
+          slot->setCount(64);
           total-=64;
         }
       }
-      tempuser->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)0
-                 << (int16_t)(i+9) << (int16_t)slot->type
-                 << (int8_t)slot->count << (int16_t)slot->health;
       if(total ==0 ){ return true; }
     }
   }
@@ -605,8 +607,8 @@ bool user_hasItem(const char* user, int item, int count, int health)
       i=0;
     }
     Item *slot = &tempuser->inv[i+9];
-    if(item == slot->type && (health == slot->health || health==-1)){
-      total += slot->count;
+    if(item == slot->getType() && (health == slot->getHealth() || health==-1)){
+      total += slot->getCount();
       if(total >= count){
         return true;
       }
@@ -631,36 +633,18 @@ bool user_delItem(const char* user, int item, int count, int health)
       i=0;
     }
     Item *slot = &tempuser->inv[i+9];
-    if(item == slot->type && (health == slot->health || health ==-1)){
-      if(slot->count > total)
+    if(item == slot->getType() && (health == slot->getHealth() || health ==-1)){
+      if(slot->getCount() > total)
       {
-        int a = slot->count;
-        slot->count -= total;
+        int a = slot->getCount();
+        slot->decCount(total);
         total -= a;
-        tempuser->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_PLAYER
-                   << (int16_t)(i+9)
-                   << (int16_t)slot->type;
-        if(slot->type != -1)
-        {
-          tempuser->buffer << (int8_t)slot->count
-                       << (int16_t)slot->health;
-        }
-
         return true;
       }
       else
       {
-        total -= slot->count;
-        slot->count = 0; slot->health = 0; slot->type = -1;
-        tempuser->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_PLAYER
-                   << (int16_t)(i+9)
-                   << (int16_t)slot->type;
-        if(slot->type != -1)
-        {
-          tempuser->buffer << (int8_t)slot->count
-                       << (int16_t)slot->health;
-        }
-
+        total -= slot->getCount();
+        slot->setType(-1);
       }
     }
   }

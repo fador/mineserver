@@ -116,28 +116,28 @@ void Furnace::smelt()
     Item* inputSlot  = &slots()[SLOT_INPUT];
     Item* fuelSlot   = &slots()[SLOT_FUEL];
     Item* outputSlot = &slots()[SLOT_OUTPUT];
-    int32_t creationID = createList[inputSlot->type].output;
+    int32_t creationID = createList[inputSlot->getType()].output;
  
     // Update other params if we actually converted
-    if(creationID != -1 && outputSlot->count != 64)
+    if(creationID != -1 && outputSlot->getCount() != 64)
     {
       // Check if the outputSlot is empty
-      if(outputSlot->type == -1)
+      if(outputSlot->getType() == -1)
       {
-        outputSlot->type = creationID;
-        outputSlot->count = 0;
+        outputSlot->setType(creationID);
+        outputSlot->setCount(0);
       }
 
       // Ok - now check if the current output slot contains the same stuff
-      if(outputSlot->type == creationID)
+      if(outputSlot->getType() == creationID)
       {
         // Increment output and decrememnt the input source
-        outputSlot->count+=createList[inputSlot->type].count;
-        inputSlot->count--;
-        outputSlot->health = createList[inputSlot->type].meta;
+        outputSlot->setCount( outputSlot->getCount()+createList[inputSlot->getType()].count);
+        inputSlot->setCount(inputSlot->getCount() - 1);
+        outputSlot->setHealth(createList[inputSlot->getType()].meta);
         data->cookTime = 0;
 
-        if(inputSlot->count == 0)
+        if(inputSlot->getCount() == 0)
         {
           *inputSlot = Item();
         }
@@ -173,14 +173,14 @@ bool Furnace::hasValidIngredient()
 {
   // Check that we have a valid input type
   Item* slot = &slots()[SLOT_INPUT];
-  if(slot->type<0){ return false; }
-  if(createList[slot->type].output != -1){ return true; }
+  if(slot->getType()<0){ return false; }
+  if(createList[slot->getType()].output != -1){ return true; }
   return false;
 }
 void Furnace::consumeFuel()
 {
   // Check that we have fuel
-  if(slots()[SLOT_FUEL].count == 0)
+  if(slots()[SLOT_FUEL].getCount() == 0)
     return;
 
   // Increment the fuel burning time based on fuel type
@@ -188,7 +188,7 @@ void Furnace::consumeFuel()
   Item *fuelSlot = &slots()[SLOT_FUEL];
 
   uint16_t fuelTime = 0;
-  switch(fuelSlot->type)
+  switch(fuelSlot->getType())
   {
     case ITEM_COAL:           fuelTime = 80;   break;
     case BLOCK_PLANK:         fuelTime = 15;   break;
@@ -208,8 +208,8 @@ void Furnace::consumeFuel()
   {
     data->burnTime += fuelTime;
     // Now decrement the fuel & reset
-    fuelSlot->count--;
-    if (fuelSlot->count == 0)
+    fuelSlot->setCount(fuelSlot->getCount()-1);
+    if (fuelSlot->getCount() == 0)
     {
       *fuelSlot = Item();
     }
@@ -246,10 +246,10 @@ void Furnace::sendToAllUsers()
       {
         for(int j = 0; j < 3; j++)
         {
-          if(data->items[j].type != -1)
+          if(data->items[j].getType() != -1)
           {
-            (*inv)[openinv]->users[user]->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_FURNACE << (int16_t)j << (int16_t)data->items[j].type 
-                          << (int8_t)(data->items[j].count) << (int16_t)data->items[j].health;
+            (*inv)[openinv]->users[user]->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_FURNACE << (int16_t)j << (int16_t)data->items[j].getType() 
+                          << (int8_t)(data->items[j].getCount()) << (int16_t)data->items[j].getHealth();
           }
         }
         

@@ -33,16 +33,43 @@
 
 class User;
 
-struct Item
+class Item
 {
+public:
+  void setType(int16_t type);
+  void setCount(int8_t count);
+  void setHealth(int16_t healt);
+  int16_t getType(){ return type; }
+  int8_t getCount(){ return count; }
+  int16_t getHealth(){ return health; }
+  void decCount(int c = 1);
+  void incHealth(int c = 1);
+  void sendUpdate();
+  bool ready;
+private:
+  int slot;
+  User* player;
   int16_t type;
   int8_t count;
   int16_t health;
+public:
   Item()
   {
+    player = NULL;
+    slot=-1;
     type   = -1;
     count  = 0;
     health = 0;
+    ready=false;
+  }
+  Item(User* player, int slot)
+  {
+    this->player = player;
+    this->slot = slot;
+    type   = -1;
+    count  = 0;
+    health = 0;
+    ready=false;
   }
 };
 

@@ -73,8 +73,8 @@ bool BlockDyed::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
 
   Item item = user->inv[user->curItem+36];
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, item.health);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, item.health);
+  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, item.getHealth());
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, item.getHealth());
   return false;
 }
 

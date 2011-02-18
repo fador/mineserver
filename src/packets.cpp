@@ -553,22 +553,23 @@ int PacketHandler::player_digging(User *user)
       //Player tool usage calculation etc
       #define itemSlot (36+user->currentItemSlot())
       bool rightUse;
-      int16_t itemHealth=Mineserver::get()->inventory()->itemHealth(user->inv[itemSlot].type,block,rightUse);
+      int16_t itemHealth=Mineserver::get()->inventory()->itemHealth(user->inv[itemSlot].getType(),block,rightUse);
       if(itemHealth > 0)
       {
-         user->inv[itemSlot].health++;
+         user->inv[itemSlot].incHealth();
          if(!rightUse)
-           user->inv[itemSlot].health++;
-         if(itemHealth <= user->inv[itemSlot].health)
+           user->inv[itemSlot].incHealth();
+         if(itemHealth <= user->inv[itemSlot].getHealth())
          {
-            user->inv[itemSlot].count--;
-            if(user->inv[itemSlot].count == 0)
+            user->inv[itemSlot].decCount();
+            if(user->inv[itemSlot].getCount() == 0)
             {
-              user->inv[itemSlot] = Item();
+              user->inv[itemSlot].setHealth(0);
+              user->inv[itemSlot].setType(-1);
             }            
          }
-         Mineserver::get()->inventory()->setSlot(user,WINDOW_PLAYER,itemSlot,user->inv[itemSlot].type,
-                                                 user->inv[itemSlot].count,user->inv[itemSlot].health);
+         Mineserver::get()->inventory()->setSlot(user,WINDOW_PLAYER,itemSlot,user->inv[itemSlot].getType(),
+                                                 user->inv[itemSlot].getCount(),user->inv[itemSlot].getHealth());
       }
       #undef itemSlot
 
@@ -688,17 +689,11 @@ int PacketHandler::player_digging(User *user)
     {
       //ToDo: handle
       #define itemSlot (36+user->currentItemSlot())
-      if(user->inv[itemSlot].type > 0)
+      if(user->inv[itemSlot].getType() > 0)
       {
-        Mineserver::get()->map(user->pos.map)->createPickupSpawn(user->pos.x, user->pos.y,user->pos.z,user->inv[itemSlot].type,1,user->inv[itemSlot].health,user);
+        Mineserver::get()->map(user->pos.map)->createPickupSpawn(user->pos.x, user->pos.y,user->pos.z,user->inv[itemSlot].getType(),1,user->inv[itemSlot].getHealth(),user);
 
-        user->inv[itemSlot].count--;
-        if(user->inv[itemSlot].count == 0)
-        {
-          user->inv[itemSlot] = Item();
-        }
-        Mineserver::get()->inventory()->setSlot(user,WINDOW_PLAYER,itemSlot,user->inv[itemSlot].type,
-                                                user->inv[itemSlot].count,user->inv[itemSlot].health);
+        user->inv[itemSlot].decCount();
       }
       break;
       #undef itemSlot
@@ -787,7 +782,7 @@ int PacketHandler::player_block_placement(User *user)
   bool foundFromInventory = false;
 
   #define INV_TASKBAR_START 36
-  if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].type == newblock && newblock != -1)
+  if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].getType() == newblock && newblock != -1)
   {
     foundFromInventory = true;
   }
@@ -1004,25 +999,12 @@ int PacketHandler::player_block_placement(User *user)
   }
   // Now we're sure we're using it, lets remove from inventory!
   #define INV_TASKBAR_START 36
-  if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].type == newblock && newblock != -1)
+  if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].getType() == newblock && newblock != -1)
   {
     //if(newblock<256)
     {
       // It's a block
-      user->inv[INV_TASKBAR_START+user->currentItemSlot()].count--;
-      if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].count == 0)
-      {
-        user->inv[INV_TASKBAR_START+user->currentItemSlot()] = Item();
-        //ToDo: add holding change packet.
-      }
-      user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_PLAYER
-                   << (int16_t)(INV_TASKBAR_START+user->currentItemSlot())
-                   << (int16_t)user->inv[INV_TASKBAR_START+user->currentItemSlot()].type;
-      if(user->inv[INV_TASKBAR_START+user->currentItemSlot()].type != -1)
-      {
-        user->buffer << (int8_t)user->inv[INV_TASKBAR_START+user->currentItemSlot()].count
-                     << (int16_t)user->inv[INV_TASKBAR_START+user->currentItemSlot()].health;
-      }
+      user->inv[INV_TASKBAR_START+user->currentItemSlot()].decCount();
     }
   }
   #undef INV_TASKBAR_START
@@ -1050,7 +1032,7 @@ int PacketHandler::holding_change(User *user)
 
   //Send holding change to others
   Packet pkt;
-  pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)user->UID << (int16_t)0 << (int16_t)user->inv[itemSlot+36].type << (int16_t)user->inv[itemSlot+36].health;
+  pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)user->UID << (int16_t)0 << (int16_t)user->inv[itemSlot+36].getType() << (int16_t)user->inv[itemSlot+36].getHealth();
   user->sendOthers((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
 
   // Set current itemID to user

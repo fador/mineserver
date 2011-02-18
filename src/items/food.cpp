@@ -20,7 +20,7 @@ bool ItemFood::affectedItem(int item)
 void ItemFood::onRightClick(User* user, Item* item)
 {
   int healammount = 0;
-  switch(item->type){
+  switch(item->getType()){
   case ITEM_GOLDEN_APPLE:
     healammount = 20;
     break;
@@ -50,12 +50,6 @@ void ItemFood::onRightClick(User* user, Item* item)
   if(newhealth > 20) 
     newhealth=20;
   user->sethealth(newhealth);
-  item->count = 0; item->type=-1;
-  #define INV_TASKBAR_START 36
-  user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_PLAYER
-               << (int16_t)(INV_TASKBAR_START+user->currentItemSlot())
-               << (int16_t)-1;
-  #undef INV_TASKBAR_START
-
+  item->setType(-1);
 }
 

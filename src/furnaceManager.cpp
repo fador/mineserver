@@ -117,7 +117,7 @@ void FurnaceManager::handleActivity(furnaceData *data_)
   }
 
   // Check if this furnace is active
-  if((furnace->isBurningFuel() || furnace->slots()[SLOT_FUEL].count > 0) &&
+  if((furnace->isBurningFuel() || furnace->slots()[SLOT_FUEL].getCount() > 0) &&
       furnace->hasValidIngredient())
   {
     if(!found)

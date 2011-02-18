@@ -1245,9 +1245,9 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
             {
               continue;
             }
-            newChest->items[(int8_t)*(**iter2)["Slot"]].count  =  (int8_t)*(**iter2)["Count"];
-            newChest->items[(int8_t)*(**iter2)["Slot"]].health = (int16_t)*(**iter2)["Damage"];
-            newChest->items[(int8_t)*(**iter2)["Slot"]].type   = (int16_t)*(**iter2)["id"];
+            newChest->items[(int8_t)*(**iter2)["Slot"]].setCount((int8_t)*(**iter2)["Count"]);
+            newChest->items[(int8_t)*(**iter2)["Slot"]].setHealth((int16_t)*(**iter2)["Damage"]);
+            newChest->items[(int8_t)*(**iter2)["Slot"]].setType((int16_t)*(**iter2)["id"]);
           }
 
           chunk->chests.push_back(newChest);
@@ -1291,9 +1291,9 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
                 {
                     continue;
                 }
-                newFurnace->items[(int8_t)*(**iter2)["Slot"]].count  = (int8_t)*(**iter2)["Count"];
-                newFurnace->items[(int8_t)*(**iter2)["Slot"]].health = (int16_t)*(**iter2)["Damage"];
-                newFurnace->items[(int8_t)*(**iter2)["Slot"]].type   = (int16_t)*(**iter2)["id"];
+                newFurnace->items[(int8_t)*(**iter2)["Slot"]].setCount((int8_t)*(**iter2)["Count"]);
+                newFurnace->items[(int8_t)*(**iter2)["Slot"]].setHealth((int16_t)*(**iter2)["Damage"]);
+                newFurnace->items[(int8_t)*(**iter2)["Slot"]].setType((int16_t)*(**iter2)["id"]);
             }
 
             chunk->furnaces.push_back(newFurnace);
@@ -1408,13 +1408,13 @@ bool Map::saveMap(int x, int z)
     NBT_Value* nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
     for(uint32_t slot = 0; slot < 27; slot++)
     {
-      if(chunk->chests[i]->items[slot].count && chunk->chests[i]->items[slot].type != -1)
+      if(chunk->chests[i]->items[slot].getCount() && chunk->chests[i]->items[slot].getType() != -1)
       {
         NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
-        val->Insert("Count", new NBT_Value((int8_t)chunk->chests[i]->items[slot].count));
+        val->Insert("Count", new NBT_Value((int8_t)chunk->chests[i]->items[slot].getCount()));
         val->Insert("Slot", new NBT_Value((int8_t)slot));
-        val->Insert("Damage", new NBT_Value((int16_t)chunk->chests[i]->items[slot].health));
-        val->Insert("id", new NBT_Value((int16_t)chunk->chests[i]->items[slot].type));
+        val->Insert("Damage", new NBT_Value((int16_t)chunk->chests[i]->items[slot].getHealth()));
+        val->Insert("id", new NBT_Value((int16_t)chunk->chests[i]->items[slot].getType()));
         nbtInv->GetList()->push_back(val);
       }
     }
@@ -1437,13 +1437,13 @@ bool Map::saveMap(int x, int z)
 
     for(uint32_t slot = 0; slot < 3; slot++)
     {
-      if(chunk->furnaces[i]->items[slot].count && chunk->furnaces[i]->items[slot].type != 0 && chunk->furnaces[i]->items[slot].type != -1)
+      if(chunk->furnaces[i]->items[slot].getCount() && chunk->furnaces[i]->items[slot].getType() != 0 && chunk->furnaces[i]->items[slot].getType() != -1)
       {
         NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
-        val->Insert("Count", new NBT_Value((int8_t)chunk->furnaces[i]->items[slot].count));
+        val->Insert("Count", new NBT_Value((int8_t)chunk->furnaces[i]->items[slot].getCount()));
         val->Insert("Slot", new NBT_Value((int8_t)slot));
-        val->Insert("Damage", new NBT_Value((int16_t)chunk->furnaces[i]->items[slot].health));
-        val->Insert("id", new NBT_Value((int16_t)chunk->furnaces[i]->items[slot].type));
+        val->Insert("Damage", new NBT_Value((int16_t)chunk->furnaces[i]->items[slot].getHealth()));
+        val->Insert("id", new NBT_Value((int16_t)chunk->furnaces[i]->items[slot].getType()));
         nbtInv->GetList()->push_back(val);
       }
     }
