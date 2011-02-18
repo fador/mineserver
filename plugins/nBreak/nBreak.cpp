@@ -73,7 +73,8 @@ int getBlock(const char* name,int x,int y,int z)
 bool blockBreakPreFunction(const char* userIn, int32_t x, int32_t y, int32_t z,int16_t block, int8_t direction)
 {
   int id = getBlock(userIn,x,y,z);
-  int item = mineserver->user.getItemInHand(userIn);
+  int item,meta,count;
+  mineserver->user.getItemInHand(userIn,&item, &meta, &count);
   if(id == 4 || id == 1 || id == 16 || id == 48 || id == 67)
   {
     if(item == 270 || item == 278 || item == 257 || item == 285 || item == 274)
