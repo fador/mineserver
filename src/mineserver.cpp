@@ -156,7 +156,11 @@ Mineserver::Mineserver()
 //  }
 
   // Initialize conf
-  m_config->load(file_config);
+  if(!m_config->load(file_config))
+  {
+    std::cerr << "Config file error, failed to start Mineserver!" << std::endl;
+    exit(1);
+  }
 
   MapGen* mapgen = new MapGen;
   MapGen* nethergen = (MapGen*) new NetherGen;
