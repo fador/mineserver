@@ -742,6 +742,11 @@ int PacketHandler::player_block_placement(User *user)
   {
     // Right clicked without pointing at a tile
     Item *item = &(user->inv[user->curItem+36]);
+    if ((static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int8_t>*>(Mineserver::get()->plugin()->getHook("BlockPlacePre")))->doUntilFalse(user->nick.c_str(), x, y, z, item->getType(),direction))
+    {
+      return PACKET_OK;
+    }
+
     for(uint32_t i =0 ; i<Mineserver::get()->plugin()->getItemCB().size(); i++)
     {
       itemcb = Mineserver::get()->plugin()->getItemCB()[i];
