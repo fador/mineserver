@@ -571,7 +571,7 @@ bool user_addItem(const char* user, int item, int count, int health)
             total -= a;
             slot->setCount(64);
           }else{
-            slot->setCount(total);
+            slot->decCount(-total);
             total = 0;
           }
         }
