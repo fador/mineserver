@@ -59,6 +59,7 @@
     <ClCompile Include="..\src\tools.cpp" />
     <ClCompile Include="..\src\tree.cpp" />
     <ClCompile Include="..\src\user.cpp" />
+    <ClCompile Include="..\src\worldgen\biomegen.cpp" />
     <ClCompile Include="..\src\worldgen\cavegen.cpp" />
     <ClCompile Include="..\src\worldgen\heavengen.cpp" />
     <ClCompile Include="..\src\worldgen\mapgen.cpp" />
@@ -118,6 +119,7 @@
     <ClInclude Include="..\src\tree.h" />
     <ClInclude Include="..\src\user.h" />
     <ClInclude Include="..\src\vec.h" />
+    <ClInclude Include="..\src\worldgen\biomegen.h" />
     <ClInclude Include="..\src\worldgen\cavegen.h" />
     <ClInclude Include="..\src\worldgen\heavengen.h" />
     <ClInclude Include="..\src\worldgen\mapgen.h" />

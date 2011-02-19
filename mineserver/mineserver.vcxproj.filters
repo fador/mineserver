@@ -195,6 +195,9 @@
     <ClCompile Include="..\src\items\projectile.cpp">
       <Filter>Source Files\items</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\worldgen\biomegen.cpp">
+      <Filter>Source Files\worldgen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\user.h">
@@ -367,6 +370,9 @@
     </ClInclude>
     <ClInclude Include="..\src\items\projectile.h">
       <Filter>Header Files\items</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\worldgen\biomegen.h">
+      <Filter>Header Files\worldgen</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
