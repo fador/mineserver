@@ -62,6 +62,13 @@ BiomeGen::BiomeGen()
 {
 }
 
+int biome_seed;
+
+inline int fastrand() { 
+  biome_seed = (214013*biome_seed+2531011); 
+  return (biome_seed>>16)&0x7FFF; 
+} 
+
 void BiomeGen::init(int seed)
 {
   cave.init(seed+7);
