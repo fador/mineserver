@@ -41,6 +41,7 @@
 
 #include "logger.h"
 #include "chat.h"
+#include "permissions.h"
 
 #include "hook.h"
 #include "plugin.h"
@@ -651,6 +652,14 @@ bool user_delItem(const char* user, int item, int count, int health)
   return false;
 }
 
+bool user_kick(const char* user)
+{
+  User* tempuser = userFromName(std::string(user));
+  if(tempuser == NULL){ return false; }
+  tempuser->kick("You have been kicked!"); // Need to allow other languages.
+  return true;
+}
+
 
 // CONFIG WRAPPER FUNCTIONS
 bool config_has(const char* name)
@@ -730,7 +739,61 @@ void mob_moveMobW(int uid, int x, int y, int z, int map)
   m->moveTo(x,y,z,map);
 }
 
-// Initialization of the plugin_api function pointer array
+bool permission_setAdmin(const char* name){
+  User* tempuser = userFromName(std::string(name));
+  if(tempuser == NULL){ return false; }
+  SET_ADMIN(tempuser->permissions);
+  return true;
+}
+
+bool permission_setOp(const char* name){
+  User* tempuser = userFromName(std::string(name));
+  if(tempuser == NULL){ return false; }
+  tempuser->permissions = 0; // reset any previous permissions
+  SET_OP(tempuser->permissions);
+  return true;
+}
+
+bool permission_setMember(const char* name){
+  User* tempuser = userFromName(std::string(name));
+  if(tempuser == NULL){ return false; }
+  tempuser->permissions = 0; // reset any previous permissions
+  SET_MEMBER(tempuser->permissions);
+  return true;
+} 
+
+bool permission_setGuest(const char* name){
+  User* tempuser = userFromName(std::string(name));
+  if(tempuser == NULL){ return false; }
+  tempuser->permissions = 0; // reset any previous permissions
+  SET_GUEST(tempuser->permissions);
+  return true;
+}
+
+bool permission_isAdmin(const char* name){
+  User* tempuser = userFromName(std::string(name));
+  if(tempuser == NULL){ return false; }
+  return IS_ADMIN(tempuser->permissions);
+}
+
+bool permission_isOp(const char* name){
+  User* tempuser = userFromName(std::string(name));
+  if(tempuser == NULL){ return false; }
+  return IS_OP(tempuser->permissions);
+}
+
+bool permission_isMember(const char* name){
+  User* tempuser = userFromName(std::string(name));
+  if(tempuser == NULL){ return false; }
+  return IS_MEMBER(tempuser->permissions);
+}
+
+bool permission_isGuest(const char* name){
+  User* tempuser = userFromName(std::string(name));
+  if(tempuser == NULL){ return false; }
+  return IS_GUEST(tempuser->permissions);
+}
+
 void init_plugin_api(void)
 {
   plugin_api_pointers.logger.log                   = &logger_log;
@@ -789,6 +852,7 @@ void init_plugin_api(void)
   plugin_api_pointers.user.delItem                 = &user_delItem;
   plugin_api_pointers.user.toggleDND               = &user_toggleDND;
   plugin_api_pointers.user.gethealth               = &user_gethealth;
+  plugin_api_pointers.user.kick                    = &user_kick;
 
   plugin_api_pointers.config.has                   = &config_has;
   plugin_api_pointers.config.iData                 = &config_iData;
@@ -804,5 +868,15 @@ void init_plugin_api(void)
   plugin_api_pointers.mob.despawnMob               = &mob_despawnMob;
   plugin_api_pointers.mob.moveMob                  = &mob_moveMob;
   plugin_api_pointers.mob.moveMobW                 = &mob_moveMobW;
+
+  plugin_api_pointers.permissions.setAdmin         = &permission_setAdmin;
+  plugin_api_pointers.permissions.setOp            = &permission_setOp;
+  plugin_api_pointers.permissions.setMember        = &permission_setMember;
+  plugin_api_pointers.permissions.setGuest         = &permission_setGuest;
+  plugin_api_pointers.permissions.isAdmin          = &permission_isAdmin;
+  plugin_api_pointers.permissions.isOp             = &permission_isOp;
+  plugin_api_pointers.permissions.isMember         = &permission_isMember;
+  plugin_api_pointers.permissions.isGuest          = &permission_isGuest;
+
 
 }

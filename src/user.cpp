@@ -31,6 +31,7 @@
 #include <deque>
 #include <algorithm>
 #include <fstream>
+#include <sstream>
 #include <map>
 #include <math.h>
 
@@ -106,7 +107,6 @@ bool User::changeNick(std::string _nick)
   (static_cast<Hook2<bool,const char*,const char*>*>(Mineserver::get()->plugin()->getHook("PlayerNickPost")))->doAll(nick.c_str(), _nick.c_str());
 
   nick = _nick;
-  SET_ADMIN(permissions);
 
   return true;
 }
@@ -278,7 +278,6 @@ bool User::sendLoginInfo()
   // Spawn other users for connected user
   spawnOthers();
 
-  sethealth(health);
   logged = true;
 
   Mineserver::get()->chat()->sendMsg(this, nick+" connected!", Chat::ALL);
@@ -286,6 +285,9 @@ bool User::sendLoginInfo()
   pushMap(); pushMap(); pushMap();
   // Teleport player (again)
   teleport(pos.x, pos.y+2, pos.z);
+  sethealth(health);
+  logged = true;
+
 
   return true;
 }
@@ -432,7 +434,6 @@ bool User::loadData()
       inv[(uint8_t)8+(100-slot)].setType(item_id);
     }
   }
-
   delete playerRoot;
 
   return true;
@@ -1373,19 +1374,17 @@ bool User::sethealth(int userHealth)
     // One hit per 2 seconds
     if(time(NULL) - healthtimeout <1){
       return false;
-      buffer << (int8_t)PACKET_UPDATE_HEALTH << (int16_t)userHealth;
     }
+    Packet pkt;
+    pkt << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID << (int8_t)2;
+    sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+
+
   }
   healthtimeout = time(NULL);
 
-
   health = userHealth;
   buffer << (int8_t)PACKET_UPDATE_HEALTH << (int16_t)userHealth;
-  Packet pkt;
-  pkt << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID << (int8_t)2;
-  sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
-  
-  // ToDo: Send destroy entity and spawn entity again
   return true;
 }
 

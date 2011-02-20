@@ -99,6 +99,7 @@ struct user_pointer_struct
   int (*gethealth) (const char* user);
   bool (*getItemInHand)(const char* user, int *type, int *meta, int *quant);
   bool (*setItemInHand)(const char* user, int type, int meta, int quant);
+  bool (*kick)(const char* user);
 
   void *temp[96];
 };
@@ -156,6 +157,22 @@ struct mob_pointer_struct
   void (*despawnMob)(int uid);
   void (*moveMob)(int uid, int x, int y, int z);
   void (*moveMobW)(int uid, int x, int y, int z, int map);
+  void *temp[100];
+
+};
+
+struct permission_pointer_struct
+{
+  bool (*setAdmin)(const char* name);
+  bool (*setOp)(const char* name);
+  bool (*setMember)(const char* name);
+  bool (*setGuest)(const char* name);
+  bool (*isAdmin)(const char* name);
+  bool (*isOp)(const char* name);
+  bool (*isMember)(const char* name);
+  bool (*isGuest)(const char* name);
+  void *temp[100];
+
 };
 
 struct mineserver_pointer_struct
@@ -167,8 +184,9 @@ struct mineserver_pointer_struct
   struct user_pointer_struct user;
   struct config_pointer_struct config;
   struct mob_pointer_struct mob;
+  struct permission_pointer_struct permissions;
 
-  void *temp[100];
+  void *temp[99];
 };
 
 // Ignore these, only used when compiling with Mineserver
