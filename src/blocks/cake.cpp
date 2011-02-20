@@ -98,13 +98,13 @@ bool BlockCake::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
   }
   else
   {
-	if(newhealth > 20) 
+  if(newhealth > 20) 
     newhealth=20;
   user->sethealth(newhealth);
   Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
   }
-	 return false;
+   return false;
 }
 void BlockCake::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {

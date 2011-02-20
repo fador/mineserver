@@ -150,7 +150,7 @@ public:
   bool sendBlockChange(int x, int y, int z, char type, char meta);
   bool sendBlockChange(vec pos, char type, char meta)
   {
-    return sendBlockChange(pos.x(), pos.y(), pos.z(), type, meta);	
+    return sendBlockChange(pos.x(), pos.y(), pos.z(), type, meta);  
   }
   bool sendNote(int x, int y, int z, char instrument, char pitch);
   bool sendNote(vec pos, char instrument, char pitch)

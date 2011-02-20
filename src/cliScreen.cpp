@@ -64,7 +64,7 @@ DWORD WINAPI CliScreen::stdinThreadProc()
     }
 
     EnterCriticalSection(&ccAccess);
-	currentCommand += s + "\n";
+  currentCommand += s + "\n";
     _hasCommand = true;
     LeaveCriticalSection(&ccAccess);
   }

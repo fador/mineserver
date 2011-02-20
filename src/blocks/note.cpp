@@ -93,7 +93,7 @@ bool BlockNote::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
       Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
     }
     else
-	{
+  {
       metadata++;
       Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
       Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
@@ -107,28 +107,28 @@ int BlockNote::getInstrument(int32_t x, int8_t y, int32_t z, int map)
   Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
   switch(block)
     {
-	  case BLOCK_WOOD:
-	  case BLOCK_PLANK:
-	    return INSTRUMENT_BASS;
-	  case BLOCK_SAND:
-	  case BLOCK_GRAVEL:
-	  case BLOCK_SLOW_SAND:
-	    return INSTRUMENT_SNARE;
-	  case BLOCK_GLASS:
-	  case BLOCK_GLOWSTONE:
-	    return INSTRUMENT_STICK;
-	  case BLOCK_STONE:
-	  case BLOCK_COBBLESTONE:
-	  case BLOCK_BRICK:
-	  case BLOCK_OBSIDIAN:
-	  case BLOCK_NETHERSTONE:
-	  case BLOCK_IRON_ORE:
-	  case BLOCK_DIAMOND_ORE:
-	  case BLOCK_GOLD_ORE:
-	  case BLOCK_FURNACE:
-	  case BLOCK_BURNING_FURNACE:
-	  case BLOCK_DISPENSER:
-	    return INSTRUMENT_BASSDRUM;
-	}
+    case BLOCK_WOOD:
+    case BLOCK_PLANK:
+      return INSTRUMENT_BASS;
+    case BLOCK_SAND:
+    case BLOCK_GRAVEL:
+    case BLOCK_SLOW_SAND:
+      return INSTRUMENT_SNARE;
+    case BLOCK_GLASS:
+    case BLOCK_GLOWSTONE:
+      return INSTRUMENT_STICK;
+    case BLOCK_STONE:
+    case BLOCK_COBBLESTONE:
+    case BLOCK_BRICK:
+    case BLOCK_OBSIDIAN:
+    case BLOCK_NETHERSTONE:
+    case BLOCK_IRON_ORE:
+    case BLOCK_DIAMOND_ORE:
+    case BLOCK_GOLD_ORE:
+    case BLOCK_FURNACE:
+    case BLOCK_BURNING_FURNACE:
+    case BLOCK_DISPENSER:
+      return INSTRUMENT_BASSDRUM;
+  }
   return INSTRUMENT_HARP;
 }
