@@ -156,7 +156,11 @@ Mineserver::Mineserver()
 //  }
 
   // Initialize conf
-  m_config->load(file_config);
+  if(!m_config->load(file_config))
+  {
+    std::cerr << "Config file error, failed to start Mineserver!" << std::endl;
+    exit(1);
+  }
 
   MapGen* mapgen = new MapGen;
   MapGen* nethergen = (MapGen*) new NetherGen;
@@ -238,66 +242,66 @@ void Mineserver::saveAllPlayers()
 
 void Mineserver::parseCommandLine(int argc, char *argv[])
 {
-	// Ignore the first argument
-	for( int i=1; i<argc; i++ )
-	{
-		if( argv[i][0] == '+' )
-		{
-			std::string *argument = new std::string( argv[i] );
+  // Ignore the first argument
+  for( int i=1; i<argc; i++ )
+  {
+    if( argv[i][0] == '+' )
+    {
+      std::string *argument = new std::string( argv[i] );
 
-			int seperatorPos = argument->find( '=' );
+      int seperatorPos = argument->find( '=' );
 
-			std::string variablename = argument->substr( 1, seperatorPos-1 );
-			std::string variableValue = argument->substr( seperatorPos+1, argument->length() - seperatorPos - 1 );
+      std::string variablename = argument->substr( 1, seperatorPos-1 );
+      std::string variableValue = argument->substr( seperatorPos+1, argument->length() - seperatorPos - 1 );
 
-			if( Mineserver::get()->config()->has( variablename ) )
-			{
-				ConfigNode* node = Mineserver::get()->config()->mData( variablename );
-				if( node != NULL )
-				{
-					switch( node->type() )
-					{
-					case CONFIG_NODE_UNDEFINED:
-						// theres nothing we can do here
-						break;
-					case CONFIG_NODE_LIST:
-						// theres nothing we can do here
-						break;
-					case CONFIG_NODE_BOOLEAN:
-						std::transform(	variableValue.begin(), variableValue.end(), variableValue.begin(), ::tolower );
-						if( !variableValue.compare( "true" ) )
-							node->setData( true );
-						else if( !variableValue.compare( "false" ) )
-							node->setData( false );
-						else
-							printf( "Invalid boolean value %s!\n", variableValue.c_str() );
-						break;
-					case CONFIG_NODE_NUMBER:
-						{
-							std::istringstream i(variableValue);
-							double readValue;
-							if( !(i >> readValue ) )
-								printf( "Invalid numeric value %s!\n", variableValue.c_str() );
-							else								
-								node->setData( readValue );
-						}
-						break;
-					case CONFIG_NODE_STRING:
-						node->setData( variableValue );
-						break;
-					}
-				}
-			}
-			else
-			{
-				printf( "variable %s doesn't exist!\n", variablename.c_str() );
-			}
-		}
-		else
-		{
-			printf( "Invalid argument %s\n", argv[i] );
-		}
-	}
+      if( Mineserver::get()->config()->has( variablename ) )
+      {
+        ConfigNode* node = Mineserver::get()->config()->mData( variablename );
+        if( node != NULL )
+        {
+          switch( node->type() )
+          {
+          case CONFIG_NODE_UNDEFINED:
+            // theres nothing we can do here
+            break;
+          case CONFIG_NODE_LIST:
+            // theres nothing we can do here
+            break;
+          case CONFIG_NODE_BOOLEAN:
+            std::transform(  variableValue.begin(), variableValue.end(), variableValue.begin(), ::tolower );
+            if( !variableValue.compare( "true" ) )
+              node->setData( true );
+            else if( !variableValue.compare( "false" ) )
+              node->setData( false );
+            else
+              printf( "Invalid boolean value %s!\n", variableValue.c_str() );
+            break;
+          case CONFIG_NODE_NUMBER:
+            {
+              std::istringstream i(variableValue);
+              double readValue;
+              if( !(i >> readValue ) )
+                printf( "Invalid numeric value %s!\n", variableValue.c_str() );
+              else                
+                node->setData( readValue );
+            }
+            break;
+          case CONFIG_NODE_STRING:
+            node->setData( variableValue );
+            break;
+          }
+        }
+      }
+      else
+      {
+        printf( "variable %s doesn't exist!\n", variablename.c_str() );
+      }
+    }
+    else
+    {
+      printf( "Invalid argument %s\n", argv[i] );
+    }
+  }
 }
 
 int Mineserver::run(int argc, char *argv[])

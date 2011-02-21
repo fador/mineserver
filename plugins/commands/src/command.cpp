@@ -728,18 +728,18 @@ void sendHelp(std::string user, std::string command, std::deque<std::string> arg
 
 void sendMOTD(std::string user, std::string command, std::deque<std::string> args)
 {
-	std::string line;
-	std::ifstream MOTDFile("motd.txt");
-	if (MOTDFile.is_open())
+  std::string line;
+  std::ifstream MOTDFile("motd.txt");
+  if (MOTDFile.is_open())
     {
-		while (MOTDFile.good() )
-		{
-			std::getline(MOTDFile, line);
-			if(line.at(0) != '#')
-				mineserver->chat.sendmsgTo(user.c_str(), line.c_str());
-		}
-		MOTDFile.close();
-	}
+    while (MOTDFile.good() )
+    {
+      std::getline(MOTDFile, line);
+      if(line.at(0) != '#')
+        mineserver->chat.sendmsgTo(user.c_str(), line.c_str());
+    }
+    MOTDFile.close();
+  }
 }
 
 std::string pluginName = "command";

@@ -957,7 +957,7 @@ bool Map::sendPickupSpawn(spawnedItem item)
     return false;
 
   chunk->items.push_back(storedItem);
-	
+  
   Packet pkt;
   pkt << PACKET_PICKUP_SPAWN << (int32_t)item.EID << (int16_t)item.item << (int8_t)item.count << (int16_t)item.health
       << (int32_t)item.pos.x() << (int32_t)item.pos.y() << (int32_t)item.pos.z()

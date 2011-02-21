@@ -206,8 +206,8 @@ bool chat_sendmsgTo(const char* user,const char* msg)
   std::string userStr(user);
   if (userStr == "[Server]")
   {
-	  LOG(INFO, "Chat", msg);
-	  return true;
+    LOG(INFO, "Chat", msg);
+    return true;
   }
   for(unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
   {
