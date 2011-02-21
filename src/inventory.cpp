@@ -481,7 +481,7 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
       }
       break;
     case WINDOW_FURNACE:
-      if(slot>3)
+      if(slot>=3)
       {
         slotItem=&user->inv[slot+6];
       }
