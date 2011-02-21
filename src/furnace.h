@@ -53,7 +53,7 @@ class Furnace
 
 
 public:
-  Furnace(furnaceData *data_);
+  Furnace(furnaceData *data_,int map);
 
   void sendToAllUsers();
   void smelt();
@@ -81,7 +81,7 @@ public:
   int32_t x() { return data->x; }
   int32_t y() { return data->y; }
   int32_t z() { return data->z; }
-
+  int map;
   Item* slots() { return data->items; };
 
 private:
