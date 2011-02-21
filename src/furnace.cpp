@@ -41,13 +41,14 @@ Creation::Creation(){
   output=-1; meta=0; count=0;
 }
 
-Furnace::Furnace(furnaceData *data_)
+Furnace::Furnace(furnaceData *data_,int map)
 {
 
   data = data_;
   uint8_t block;
   uint8_t meta;
-  Mineserver::get()->map(data->map)->getBlock(data->x, data->y, data->z, &block, &meta);
+  this->map = map;
+  Mineserver::get()->map(map)->getBlock(data->x, data->y, data->z, &block, &meta);
   if(!configIsRead)
   {
     readConfig();
@@ -89,19 +90,19 @@ void Furnace::updateBlock()
   // Now make sure that it's got the correct block type based on it's current status
   if(isBurningFuel() && !m_burning)
   {
-    Mineserver::get()->map(data->map)->getBlock(data->x, data->y, data->z, &block, &meta);
+    Mineserver::get()->map(map)->getBlock(data->x, data->y, data->z, &block, &meta);
     // Switch to burning furnace
-    Mineserver::get()->map(data->map)->setBlock(data->x, data->y, data->z, BLOCK_BURNING_FURNACE, meta);
-    Mineserver::get()->map(data->map)->sendBlockChange(data->x, data->y, data->z, BLOCK_BURNING_FURNACE, meta);
+    Mineserver::get()->map(map)->setBlock(data->x, data->y, data->z, BLOCK_BURNING_FURNACE, meta);
+    Mineserver::get()->map(map)->sendBlockChange(data->x, data->y, data->z, BLOCK_BURNING_FURNACE, meta);
     sendToAllUsers();
     m_burning = true;
   }
   else if(!isBurningFuel() && m_burning)
   {
-    Mineserver::get()->map(data->map)->getBlock(data->x, data->y, data->z, &block, &meta);
+    Mineserver::get()->map(map)->getBlock(data->x, data->y, data->z, &block, &meta);
     // Switch to regular furnace
-    Mineserver::get()->map(data->map)->setBlock(data->x, data->y, data->z, BLOCK_FURNACE, meta);
-    Mineserver::get()->map(data->map)->sendBlockChange(data->x, data->y, data->z, BLOCK_FURNACE, meta);
+    Mineserver::get()->map(map)->setBlock(data->x, data->y, data->z, BLOCK_FURNACE, meta);
+    Mineserver::get()->map(map)->sendBlockChange(data->x, data->y, data->z, BLOCK_FURNACE, meta);
     sendToAllUsers();
     m_burning = false;
   }

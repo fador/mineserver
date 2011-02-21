@@ -79,6 +79,7 @@ struct OpenInventory
   int32_t x;
   int32_t y;
   int32_t z;
+  int32_t map;
   Item workbench[10];
   std::vector<User *> users;  
 };

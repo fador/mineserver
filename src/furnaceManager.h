@@ -39,7 +39,7 @@ class FurnaceManager
 {
 public:
   void update();
-  void handleActivity(furnaceData *data_);
+  void handleActivity(furnaceData *data_, int map);
 
 private:
   typedef std::vector<Furnace*> FurnaceContainer;
