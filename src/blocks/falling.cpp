@@ -69,10 +69,8 @@ bool BlockFalling::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
    if (!this->isBlockEmpty(x,y,z,map))
       return true;
 
-   direction = user->relativeToBlock(x, y, z);
-
-   Mineserver::get()->map(map)->setBlock(x, y, z,(char)newblock, direction);
-   Mineserver::get()->map(map)->sendBlockChange(x, y, z,(char)newblock, direction);
+   Mineserver::get()->map(map)->setBlock(x, y, z,(char)newblock, 0);
+   Mineserver::get()->map(map)->sendBlockChange(x, y, z,(char)newblock, 0);
 
    applyPhysics(user,x,y,z,map);
    return false;
