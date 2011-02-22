@@ -535,7 +535,7 @@ int PacketHandler::player_digging(User *user)
 
       break;
     }
-    case BLOCK_STATUS_STOPPED_DIGGING:
+/*    case BLOCK_STATUS_STOPPED_DIGGING:
     {
       (static_cast<Hook5<bool,const char*,int32_t,int8_t,int32_t,int8_t>*>(Mineserver::get()->plugin()->getHook("PlayerDiggingStopped")))->doAll(user->nick.c_str(), x, y, z, direction);
       for(uint32_t i =0 ; i<Mineserver::get()->plugin()->getBlockCB().size(); i++)
@@ -547,7 +547,7 @@ int PacketHandler::player_digging(User *user)
         }
       }
       break;
-    }
+    }*/
     case BLOCK_STATUS_BLOCK_BROKEN:
     {
       //Player tool usage calculation etc
