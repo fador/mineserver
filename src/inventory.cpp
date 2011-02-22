@@ -105,7 +105,6 @@ void Item::setHealth(int16_t health)
   bool rightUse;
   if(health <= 0){ this->health = health; return;}
   int healthMax = itemHealth(type);
-  std::cout << health << " " << healthMax << std::endl;
   if(health > healthMax && healthMax>0){
     type=-1; count = 0; this->health=0;
     sendUpdate();
