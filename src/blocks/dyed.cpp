@@ -35,6 +35,7 @@ bool BlockDyed::affectedBlock(int block)
   switch(block){
   case BLOCK_GRAY_CLOTH:
   case BLOCK_WOOD:
+  case BLOCK_STEP:
     return true;
   }
   return false;
@@ -48,6 +49,20 @@ bool BlockDyed::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     return true;
+  }
+
+  //Combine two steps
+  if(newblock == BLOCK_STEP && oldblock == BLOCK_STEP && direction == BLOCK_TOP)
+  {
+    Item item = user->inv[user->curItem+36];
+
+    if(item.getHealth() == oldmeta){
+      Mineserver::get()->map(map)->setBlock(x, y, z, (char)BLOCK_DOUBLE_STEP, oldmeta);
+      Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)BLOCK_DOUBLE_STEP, oldmeta);
+      return true;
+    }else{
+      return true;
+    }
   }
 
   /* Check block below allows blocks placed on top */

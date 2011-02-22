@@ -84,14 +84,6 @@ bool BlockDefault::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
     return true;
   }
 
-  //Combine two steps
-  if(newblock == BLOCK_STEP && oldblock == BLOCK_STEP && direction == BLOCK_TOP)
-  {
-     Mineserver::get()->map(map)->setBlock(x, y, z, (char)BLOCK_DOUBLE_STEP, 0);
-     Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)BLOCK_DOUBLE_STEP, 0);
-     return true;
-  }
-
   /* Check block below allows blocks placed on top */
   if (!this->isBlockStackable(oldblock))
   {

@@ -145,7 +145,7 @@ bool isValidItem(int id)
     return true;
   }
 
-  if (id > 354)  // high items are invalid
+  if (id > 355)  // high items are invalid
   {
     return false;
   }
