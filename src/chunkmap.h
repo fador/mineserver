@@ -84,6 +84,7 @@ struct furnaceData
   Item items[3];
   int16_t burnTime;
   int16_t cookTime;
+  int32_t map;
 };
 
 struct sChunk

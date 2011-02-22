@@ -52,7 +52,6 @@ void FurnaceManager::update()
   {
     // Get a pointer to this furnace
     Furnace* currentFurnace = (Furnace*)m_activeFurnaces[index];
-    std::cout << currentFurnace->map << std::endl;
 
     // If we're burning, decrememnt the fuel
     if(currentFurnace->isBurningFuel())
@@ -91,7 +90,7 @@ void FurnaceManager::update()
   }
 }
 
-void FurnaceManager::handleActivity(furnaceData *data_, int map)
+void FurnaceManager::handleActivity(furnaceData *data_)
 {
 
   Furnace* furnace = NULL;
@@ -114,7 +113,7 @@ void FurnaceManager::handleActivity(furnaceData *data_, int map)
   if(!found)
   {
     // Create a furnace
-    furnace = new Furnace(data_, map);
+    furnace = new Furnace(data_);
   }
 
   // Check if this furnace is active

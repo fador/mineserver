@@ -722,14 +722,15 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
     }
     else
     {
-      user->inv[0].setType(-1);
+      user->inv[0] = Item();
       setSlot(user, windowID, 0, -1, 0, 0);
     }
   }
   //If handling the "fuel" slot
   else if(windowID == WINDOW_FURNACE && (slot == 1 || slot == 0))
   {
-    Mineserver::get()->furnaceManager()->handleActivity(tempFurnace, user->pos.map);
+    tempFurnace->map = user->pos.map;
+    Mineserver::get()->furnaceManager()->handleActivity(tempFurnace);
   }
 
   /*
