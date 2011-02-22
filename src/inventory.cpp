@@ -102,8 +102,17 @@ void Item::setCount(int8_t count)
 
 void Item::setHealth(int16_t health)
 {
-  this->health = health;
-  sendUpdate();
+  bool rightUse;
+  if(health <= 0){ this->health = health; return;}
+  int healthMax = itemHealth(type);
+  std::cout << health << " " << healthMax << std::endl;
+  if(health > healthMax && healthMax>0){
+    type=-1; count = 0; this->health=0;
+    sendUpdate();
+  }else{
+    this->health = health;
+    sendUpdate();
+  }
 }
 
 void Item::decCount(int c)
@@ -115,9 +124,61 @@ void Item::decCount(int c)
 
 void Item::incHealth(int c)
 {
+  int healthMax;
   health += c;
+  if(health > healthMax && healthMax>0){
+    setType(-1);
+  }
   sendUpdate();
 }
+
+int16_t Item::itemHealth(int item)
+{
+  int16_t health=0;
+  switch(type)
+  {
+    case ITEM_GOLD_AXE:
+    case ITEM_GOLD_PICKAXE:
+    case ITEM_GOLD_HOE:
+    case ITEM_GOLD_SPADE:
+    case ITEM_GOLD_SWORD:
+      health = 33;
+    break;
+    case ITEM_WOODEN_AXE:
+    case ITEM_WOODEN_PICKAXE:
+    case ITEM_WOODEN_HOE:
+    case ITEM_WOODEN_SPADE:
+    case ITEM_WOODEN_SWORD:
+      health = 60;
+    break;
+    case ITEM_STONE_AXE:
+    case ITEM_STONE_PICKAXE:
+    case ITEM_STONE_HOE:
+    case ITEM_STONE_SPADE:
+    case ITEM_STONE_SWORD:
+      health = 132;
+    break;
+    case ITEM_IRON_AXE:
+    case ITEM_IRON_PICKAXE:
+    case ITEM_IRON_HOE:
+    case ITEM_IRON_SPADE:
+    case ITEM_IRON_SWORD:
+      health = 251;
+    break;
+    case ITEM_DIAMOND_AXE:
+    case ITEM_DIAMOND_PICKAXE:
+    case ITEM_DIAMOND_HOE:
+    case ITEM_DIAMOND_SPADE:
+    case ITEM_DIAMOND_SWORD:
+      health = 1562;
+    break;
+
+    default:
+      health = 0;
+  }
+  return health;
+}
+
 
 Inventory::Inventory()
 {

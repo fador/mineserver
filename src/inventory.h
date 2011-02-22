@@ -42,6 +42,7 @@ public:
   int16_t getType(){ return type; }
   int8_t getCount(){ return count; }
   int16_t getHealth(){ return health; }
+  int16_t itemHealth(int type);
   void decCount(int c = 1);
   void incHealth(int c = 1);
   void sendUpdate();

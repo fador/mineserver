@@ -545,7 +545,9 @@ bool user_setItemInHand(const char* user, int type, int meta, int quant)
     Item* item = &tempUser->inv[tempUser->curItem+36];
     item->setHealth(meta);
     item->setCount(quant);
-    item->setType(type);
+    if(item->getType()!=-1){
+      item->setType(type);
+    }
     return true;
   }
   return false;
@@ -660,6 +662,33 @@ bool user_kick(const char* user)
   return true;
 }
 
+bool user_getItemAt(const char* user, int slotn, int* type, int* meta, int* quant)
+{
+  User* tempuser = userFromName(std::string(user));
+  if(tempuser == NULL){ return false; }
+  Item *slot = &tempuser->inv[slotn];
+  if(type != NULL){
+    *type = slot->getType();
+  }
+  if(meta != NULL){
+    *meta = slot->getHealth();
+  }
+  if(quant != NULL){
+    *quant = slot->getCount();
+  }
+  return true;
+}
+
+bool user_setItemAt(const char* user, int slotn, int type, int meta, int quant)
+{
+  User* tempuser = userFromName(std::string(user));
+  if(tempuser == NULL){ return false; }
+  Item *slot = &tempuser->inv[slotn];
+  slot->setType(type);
+  slot->setHealth(meta);
+  slot->setCount(quant);
+  return true;
+}
 
 // CONFIG WRAPPER FUNCTIONS
 bool config_has(const char* name)
@@ -853,6 +882,8 @@ void init_plugin_api(void)
   plugin_api_pointers.user.toggleDND               = &user_toggleDND;
   plugin_api_pointers.user.gethealth               = &user_gethealth;
   plugin_api_pointers.user.kick                    = &user_kick;
+  plugin_api_pointers.user.getItemAt               = &user_getItemAt;
+  plugin_api_pointers.user.setItemAt               = &user_setItemAt;
 
   plugin_api_pointers.config.has                   = &config_has;
   plugin_api_pointers.config.iData                 = &config_iData;

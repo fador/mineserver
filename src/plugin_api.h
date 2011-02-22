@@ -100,6 +100,8 @@ struct user_pointer_struct
   bool (*getItemInHand)(const char* user, int *type, int *meta, int *quant);
   bool (*setItemInHand)(const char* user, int type, int meta, int quant);
   bool (*kick)(const char* user);
+  bool (*getItemAt)(const char* user, int slot, int *type, int *meta, int* quant);
+  bool (*setItemAt)(const char* user, int slot, int type, int meta, int quant);
 
   void *temp[96];
 };
