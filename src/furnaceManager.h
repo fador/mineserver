@@ -40,10 +40,13 @@ class FurnaceManager
 public:
   void update();
   void handleActivity(furnaceData *data_);
-
+  void removeFurnace(furnaceData *data_);
 private:
   typedef std::vector<Furnace*> FurnaceContainer;
   FurnaceContainer m_activeFurnaces;
 };
+
+void removeFurnace(furnaceData *data_);
+
 
 #endif

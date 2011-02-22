@@ -90,6 +90,28 @@ void FurnaceManager::update()
   }
 }
 
+void removeFurnace(furnaceData *data_)
+{
+  Mineserver::get()->furnaceManager()->removeFurnace(data_);
+}
+
+void FurnaceManager::removeFurnace(furnaceData *data_)
+{
+  Furnace* furnace = NULL;
+  // Loop thru all active furnaces, to see if this one is here
+  for(unsigned int index = 0; index < m_activeFurnaces.size(); index++)
+  {
+    Furnace* currentFurnace = (Furnace*)m_activeFurnaces[index];
+    if(currentFurnace->x() == data_->x && currentFurnace->y() == data_->y && currentFurnace->z() == data_->z)
+    {
+      furnace = currentFurnace;
+      m_activeFurnaces.erase(m_activeFurnaces.begin()+index);
+      break;
+    }
+  }
+}
+
+
 void FurnaceManager::handleActivity(furnaceData *data_)
 {
 

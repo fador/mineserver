@@ -86,6 +86,7 @@ struct furnaceData
   int16_t cookTime;
   int32_t map;
 };
+void removeFurnace(furnaceData* data_);
 
 struct sChunk
 {
@@ -142,6 +143,7 @@ struct sChunk
       std::vector<furnaceData*>::iterator furnace_it = furnaces.begin();
       for (;furnace_it!=furnaces.end();++furnace_it)
       {
+        removeFurnace((*furnace_it));
         delete *furnace_it;
       }
       furnaces.clear();
