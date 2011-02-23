@@ -117,7 +117,7 @@ void Item::setHealth(int16_t health)
 void Item::decCount(int c)
 {
   count -= c;
-  if(count < 1){ type = -1; health=0; }
+  if(count < 1){ setType(-1); return; }
   sendUpdate();
 }
 
@@ -627,7 +627,7 @@ bool Inventory::windowClick(User *user,int8_t windowID, int16_t slot, int8_t rig
   
 
   //Empty slot and holding something
-  if((itemID == -1 || (slotItem->getType() == user->inventoryHolding.getType() && slotItem->getHealth() == user->inventoryHolding.getHealth() && slotItem->getCount() < 64) ) && user->inventoryHolding.getType() != -1)
+  if((slotItem->getType()==-1 || (slotItem->getType() == user->inventoryHolding.getType() && slotItem->getHealth() == user->inventoryHolding.getHealth() && slotItem->getCount() < 64) ) && user->inventoryHolding.getType() != -1)
   {
     //If accessing crafting output slot
     if(slotItem->getType() != -1 && (windowID == WINDOW_WORKBENCH || windowID == WINDOW_PLAYER) && slot == 0)

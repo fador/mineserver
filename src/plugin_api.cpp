@@ -685,8 +685,10 @@ bool user_setItemAt(const char* user, int slotn, int type, int meta, int quant)
   if(tempuser == NULL){ return false; }
   Item *slot = &tempuser->inv[slotn];
   slot->setType(type);
-  slot->setHealth(meta);
-  slot->setCount(quant);
+  if(slot->getType()!=-1){
+    slot->setHealth(meta);
+    slot->setCount(quant);
+  }
   return true;
 }
 
