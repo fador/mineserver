@@ -127,6 +127,7 @@ public:
     setHook("BlockBreakPost", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
     setHook("BlockNeighbourBreak", new Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>);
     setHook("BlockPlacePre", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int8_t>);
+    setHook("ItemRightClickPre", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int8_t>);
     setHook("BlockPlacePost", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int8_t>);
     setHook("BlockNeighbourPlace", new Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>);
     setHook("BlockReplacePre", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>);
@@ -134,6 +135,7 @@ public:
     setHook("BlockNeighbourReplace", new Hook9<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t,int16_t,int16_t>);
     setHook("LogPost", new Hook3<bool,int,const char*,const char*>);
     setHook("PlayerChatCommand", new Hook4<bool,const char*,const char*,int,const char**>);
+    setHook("PlayerRespawn", new Hook1<bool,const char*>);
 
     init();
   }

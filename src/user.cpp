@@ -1401,7 +1401,11 @@ bool User::respawn()
     chunk->sendPacket(destroyPkt, this);
   }
 
-  teleport(Mineserver::get()->map(pos.map)->spawnPos.x(), Mineserver::get()->map(pos.map)->spawnPos.y() + 2, Mineserver::get()->map(pos.map)->spawnPos.z(),0);
+  if ((static_cast<Hook1<bool,const char*>*>(Mineserver::get()->plugin()->getHook("PlayerRespawn")))->doUntilFalse(nick.c_str())){
+    // In this case, the plugin teleports automatically
+  }else{
+    teleport(Mineserver::get()->map(pos.map)->spawnPos.x(), Mineserver::get()->map(pos.map)->spawnPos.y() + 2, Mineserver::get()->map(pos.map)->spawnPos.z(),0);
+  }
 
   Packet spawnPkt;
   spawnPkt << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)UID << nick
