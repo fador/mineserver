@@ -25,6 +25,8 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cstdlib>
+
 #include "plant.h"
 #include "../mineserver.h"
 #include "../config.h"
@@ -371,6 +373,9 @@ bool BlockPlant::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
      // Hoe on dirt = Soil
      Mineserver::get()->map(map)->sendBlockChange(x, y-1, z, BLOCK_SOIL, 0);
      Mineserver::get()->map(map)->setBlock(x, y-1, z, BLOCK_SOIL, 0);
+     if(SEEDS_CHANCE >= rand() % 10000) {
+       Mineserver::get()->map(map)->createPickupSpawn(x, y+1, z, ITEM_SEEDS, 1, 0, NULL);
+     }
      return true;
    }
    if( newblock > 255){
