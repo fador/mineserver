@@ -63,6 +63,7 @@ bool BlockSnow::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
   uint8_t meta;
 
   if (!Mineserver::get()->map(map)->getBlock(x, y, z,&block, &meta))
+    revertBlock(user,x,y,z,map);
     return true;
 
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
@@ -93,17 +94,21 @@ bool BlockSnow::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
    uint8_t oldmeta;
 
    if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+      revertBlock(user,x,y,z,map);
       return true;
 
    /* Check block below allows blocks placed on top */
    if (!this->isBlockStackable(oldblock))
+      revertBlock(user,x,y,z,map);
       return true;
 
    /* move the x,y,z coords dependent upon placement direction */
    if (!this->translateDirection(&x,&y,&z,map,direction))
+      revertBlock(user,x,y,z,map);
       return true;
 
    if (!this->isBlockEmpty(x,y,z,map))
+      revertBlock(user,x,y,z,map);
       return true;
 
    Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);

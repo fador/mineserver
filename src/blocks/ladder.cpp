@@ -60,6 +60,7 @@ bool BlockLadder::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32
 
   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
   {
+    revertBlock(user,x,y,z,map);
     return true;
   }
 
@@ -100,33 +101,39 @@ bool BlockLadder::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
   //Cant place ladders on top or bottom of the block
   if(direction == BLOCK_TOP || direction == BLOCK_BOTTOM)
   {
+    revertBlock(user,x,y,z,map);
     return true;
   }
 
   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
+    revertBlock(user,x,y,z,map);
     return true;
   }
 
   /* Check block below allows blocks placed on top */
   if (!this->isBlockStackable(oldblock))
   {
+    revertBlock(user,x,y,z,map);
     return true;
   }
 
   /* move the x,y,z coords dependent upon placement direction */
   if (!this->translateDirection(&x,&y,&z,map,direction))
   {
+    revertBlock(user,x,y,z,map);
     return true;
   }
 
   if (this->isUserOnBlock(x,y,z,map))
   {
+    revertBlock(user,x,y,z,map);
     return true;
   }
 
   if (!this->isBlockEmpty(x,y,z,map))
   {
+    revertBlock(user,x,y,z,map);
     return true;
   }
 

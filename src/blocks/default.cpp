@@ -55,6 +55,7 @@ bool BlockDefault::onBroken(User* user, int8_t status, int32_t x, int8_t y, int3
 
   if (!Mineserver::get()->map(map)->getBlock(x, y, z,&block, &meta))
   {
+    revertBlock(user,x,y,z,map);
     return true;
   }
   if(block != BLOCK_GRAY_CLOTH && block != BLOCK_WOOD){
@@ -81,27 +82,32 @@ bool BlockDefault::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
 
   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
+    revertBlock(user,x,y,z,map);
     return true;
   }
 
   /* Check block below allows blocks placed on top */
   if (!this->isBlockStackable(oldblock))
   {
+    revertBlock(user,x,y,z,map);
     return true;
   }
 
   if (!this->translateDirection(&x,&y,&z,map,direction))
   {
+    revertBlock(user,x,y,z,map);
     return true;
   }
 
   if (this->isUserOnBlock(x,y,z,map))
   {
+    revertBlock(user,x,y,z,map);
     return true;
   }
 
   if (!this->isBlockEmpty(x,y,z,map))
   {
+    revertBlock(user,x,y,z,map);
     return true; 
   }
 

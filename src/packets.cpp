@@ -68,6 +68,7 @@
 #include "tools.h"
 #include "user.h"
 #include "blocks/basic.h"
+#include "blocks/default.h"
 #include "blocks/note.h"
 #include "items/itembasic.h"
 
@@ -488,6 +489,7 @@ int PacketHandler::player_digging(User *user)
   uint8_t block;
   uint8_t meta;
   BlockBasic* blockcb;
+  BlockDefault blockD;
 
 
   user->buffer >> status >> x >> y >> z >> direction;
@@ -501,6 +503,7 @@ int PacketHandler::player_digging(User *user)
 
   if(!Mineserver::get()->map(user->pos.map)->getBlock(x, y, z, &block, &meta))
   {
+    blockD.revertBlock(user,x,y,z,user->pos.map);
     return PACKET_OK;
   }
 
@@ -575,6 +578,7 @@ int PacketHandler::player_digging(User *user)
 
       if ((static_cast<Hook4<bool,const char*,int32_t,int8_t,int32_t>*>(Mineserver::get()->plugin()->getHook("BlockBreakPre")))->doUntilFalse(user->nick.c_str(), x, y, z))
       {
+        blockD.revertBlock(user,x,y,z,user->pos.map);
         return PACKET_OK;
       }
 
@@ -588,6 +592,7 @@ int PacketHandler::player_digging(User *user)
           if(blockcb->onBroken(user, status,x,y,z,user->pos.map,direction))
           {
             // Do not break
+            blockD.revertBlock(user,x,y,z,user->pos.map);
             return PACKET_OK;
           }
           else
@@ -722,6 +727,7 @@ int PacketHandler::player_block_placement(User *user)
   int8_t count  = 0;
   int16_t health = 0;
   BlockBasic* blockcb;
+  BlockDefault blockD;
 
 
   user->buffer >> x >> y >> z >> direction >> newblock;
@@ -761,6 +767,7 @@ int PacketHandler::player_block_placement(User *user)
 
   if (!Mineserver::get()->map(user->pos.map)->getBlock(x, y, z, &oldblock, &metadata))
   {
+    blockD.revertBlock(user,x,y,z,user->pos.map);
     return PACKET_OK;
   }
   
@@ -776,6 +783,7 @@ int PacketHandler::player_block_placement(User *user)
           //This should actually make the boolean do something. Maybe.
           if(blockcb->onInteract(user, x,y,z,user->pos.map))
           {
+            blockD.revertBlock(user,x,y,z,user->pos.map);
             return PACKET_OK;
           }
           else
@@ -798,6 +806,7 @@ int PacketHandler::player_block_placement(User *user)
   // TODO: Handle processing of
   if(direction == -1 || !foundFromInventory)
   {
+    blockD.revertBlock(user,x,y,z,user->pos.map);
     return PACKET_OK;
   }
 
@@ -878,6 +887,7 @@ int PacketHandler::player_block_placement(User *user)
 
       if ((static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>*>(Mineserver::get()->plugin()->getHook("BlockReplacePre")))->doUntilFalse(user->nick.c_str(), check_x, check_y, check_z, oldblock, newblock))
       {
+        blockD.revertBlock(user,x,y,z,user->pos.map);
         return PACKET_OK;
       }
       (static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>*>(Mineserver::get()->plugin()->getHook("BlockReplacePost")))->doAll(user->nick.c_str(), check_x, check_y, check_z, oldblock, newblock);
@@ -895,6 +905,7 @@ int PacketHandler::player_block_placement(User *user)
 
       if ((static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>*>(Mineserver::get()->plugin()->getHook("BlockReplacePre")))->doUntilFalse(user->nick.c_str(), x, y, z, oldblock, newblock))
       {
+        blockD.revertBlock(user,x,y,z,user->pos.map);
         return PACKET_OK;
       }
       (static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>*>(Mineserver::get()->plugin()->getHook("BlockReplacePost")))->doAll(user->nick.c_str(), x, y, z, oldblock, newblock);
@@ -902,6 +913,7 @@ int PacketHandler::player_block_placement(User *user)
 
     if ((static_cast<Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int8_t>*>(Mineserver::get()->plugin()->getHook("BlockPlacePre")))->doUntilFalse(user->nick.c_str(), x, y, z, newblock,direction))
     {
+      blockD.revertBlock(user,x,y,z,user->pos.map);
       return PACKET_OK;
     }
 
@@ -915,6 +927,7 @@ int PacketHandler::player_block_placement(User *user)
       if(blockcb!=NULL && blockcb->affectedBlock(newblock))
       {
         if(blockcb->onPlace(user, newblock,x,y,z,user->pos.map,direction)){
+          blockD.revertBlock(user,x,y,z,user->pos.map);
           return PACKET_OK;
         }else{
           break;

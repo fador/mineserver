@@ -320,21 +320,26 @@ bool BlockPlant::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
 
    /* move the x,y,z coords dependent upon placement direction */
    if (!this->translateDirection(&x,&y,&z,map,direction))
+      revertBlock(user,x,y,z,map);
       return true;
 
    if (!Mineserver::get()->map(map)->getBlock(x, y-1, z, &oldblock, &oldmeta))
+      revertBlock(user,x,y,z,map);
       return true;
 
    if( newblock != BLOCK_DIRT && newblock != BLOCK_SOIL && newblock != BLOCK_GRASS)
    {
      if (this->isBlockEmpty(x,y-1,z,map) || !this->isBlockEmpty(x,y,z,map))
+      revertBlock(user,x,y,z,map);
       return true;
 
      if (!this->isBlockStackable(oldblock))
+       revertBlock(user,x,y,z,map);
        return true;
    }else{
      if (this->isUserOnBlock(x,y,z,map))
      {
+       revertBlock(user,x,y,z,map);
        return true;
      }
    }
@@ -349,12 +354,14 @@ bool BlockPlant::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
 
    if(newblock == BLOCK_CACTUS && oldblock !=BLOCK_SAND)
    {
+     revertBlock(user,x,y,z,map);
      return true;
    }
 
    if( (newblock == BLOCK_YELLOW_FLOWER  ||
         newblock == BLOCK_RED_ROSE) && (oldblock != BLOCK_DIRT &&
         oldblock != BLOCK_GRASS) ){
+     revertBlock(user,x,y,z,map);
      return true;
    }
    if( (newblock == ITEM_SEEDS || newblock == BLOCK_CROPS) && (oldblock == BLOCK_SOIL) ){
@@ -364,6 +371,7 @@ bool BlockPlant::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
      return false;
    }
    if( (newblock == ITEM_SEEDS || newblock == BLOCK_CROPS) ){
+     revertBlock(user,x,y,z,map);
      return true;
    }
    if( newblock > 255 && (oldblock == BLOCK_DIRT  || oldblock == BLOCK_GRASS))
@@ -374,10 +382,12 @@ bool BlockPlant::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
      return true;
    }
    if( newblock > 255){
+     revertBlock(user,x,y,z,map);
      return true;
    }
    if( (newblock == BLOCK_BROWN_MUSHROOM || newblock == BLOCK_RED_MUSHROOM)
        && oldblock != BLOCK_DIRT ){
+     revertBlock(user,x,y,z,map);
      return true;
    }
    if(newblock == BLOCK_SAPLING)

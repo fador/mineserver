@@ -48,6 +48,7 @@ bool BlockDyed::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
 
   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
+    revertBlock(user,x,y,z,map);
     return true;
   }
 
@@ -59,8 +60,10 @@ bool BlockDyed::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
     if(item.getHealth() == oldmeta){
       Mineserver::get()->map(map)->setBlock(x, y, z, (char)BLOCK_DOUBLE_STEP, oldmeta);
       Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)BLOCK_DOUBLE_STEP, oldmeta);
+      revertBlock(user,x,y,z,map);
       return true;
     }else{
+      revertBlock(user,x,y,z,map);
       return true;
     }
   }
@@ -68,21 +71,25 @@ bool BlockDyed::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   /* Check block below allows blocks placed on top */
   if (!this->isBlockStackable(oldblock))
   {
+    revertBlock(user,x,y,z,map);
     return true;
   }
 
   if (!this->translateDirection(&x,&y,&z,map,direction))
   {
+    revertBlock(user,x,y,z,map);
     return true;
   }
 
   if (this->isUserOnBlock(x,y,z,map))
   {
+    revertBlock(user,x,y,z,map);
     return true;
   }
 
   if (!this->isBlockEmpty(x,y,z,map))
   {
+    revertBlock(user,x,y,z,map);
     return true; 
   }
 

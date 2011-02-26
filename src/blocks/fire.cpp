@@ -74,10 +74,12 @@ bool BlockFire::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
    uint8_t oldmeta;
 
    if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+    revertBlock(user,x,y,z,map);
       return true;
 
    /* Check block below allows blocks placed on top */
    if (!this->isBlockStackable(oldblock))
+    revertBlock(user,x,y,z,map);
       return true;
 
    /* burning block regardless of direction */
@@ -85,10 +87,12 @@ bool BlockFire::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
 
    /* FIXME: Need this or should be just let em burn? */
    if (this->isUserOnBlock(x,y,z,map))
+    revertBlock(user,x,y,z,map);
       return true;
 
    /* if the block isn't empty then you can't burn it */
    if (!this->isBlockEmpty(x,y,z,map))
+    revertBlock(user,x,y,z,map);
       return true;
 
    direction = user->relativeToBlock(x, y, z);
