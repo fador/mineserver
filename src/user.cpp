@@ -1366,6 +1366,8 @@ void User::checkEnvironmentDamage()
 
 bool User::sethealth(int userHealth)
 {
+  if(health>20) health=20;
+  if(health<0)  health=0;
   if(health == userHealth){ 
     buffer << (int8_t)PACKET_UPDATE_HEALTH << (int16_t)userHealth;
     return false;
