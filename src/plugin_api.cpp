@@ -522,8 +522,6 @@ char* user_getUserNumbered(int c)
 
 bool user_getItemInHand(const char* user, int *type, int *meta, int *quant)
 {
-  if(quant>64) quant = 64;
-  if(quant<0) quant = 0;
   User* tempUser = userFromName(std::string(user));
   if(tempUser != NULL)
   {
@@ -541,6 +539,8 @@ bool user_getItemInHand(const char* user, int *type, int *meta, int *quant)
 
 bool user_setItemInHand(const char* user, int type, int meta, int quant)
 {
+  if(quant>64) quant = 64;
+  if(quant<0) quant = 0;
   User* tempUser = userFromName(std::string(user));
   if(tempUser != NULL)
   {
