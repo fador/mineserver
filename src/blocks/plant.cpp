@@ -321,26 +321,28 @@ bool BlockPlant::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
   uint8_t oldmeta;
 
    /* move the x,y,z coords dependent upon placement direction */
-   if (!this->translateDirection(&x,&y,&z,map,direction))
+   this->translateDirection(&x,&y,&z,map,direction);
+
+   if (!Mineserver::get()->map(map)->getBlock(x, y-1, z, &oldblock, &oldmeta)){
       revertBlock(user,x,y,z,map);
       return true;
+   }
 
-   if (!Mineserver::get()->map(map)->getBlock(x, y-1, z, &oldblock, &oldmeta))
-      revertBlock(user,x,y,z,map);
-      return true;
-
-   if( newblock != BLOCK_DIRT && newblock != BLOCK_SOIL && newblock != BLOCK_GRASS)
+   if( newblock == BLOCK_DIRT || newblock == BLOCK_SOIL || newblock == BLOCK_GRASS)
    {
-     if (this->isBlockEmpty(x,y-1,z,map) || !this->isBlockEmpty(x,y,z,map))
-      revertBlock(user,x,y,z,map);
-      return true;
-
-     if (!this->isBlockStackable(oldblock))
-       revertBlock(user,x,y,z,map);
-       return true;
-   }else{
      if (this->isUserOnBlock(x,y,z,map))
      {
+       revertBlock(user,x,y,z,map);
+       return true;
+     }
+   }else{
+
+     if (this->isBlockEmpty(x,y-1,z,map) || !this->isBlockEmpty(x,y,z,map)){
+      revertBlock(user,x,y,z,map);
+      return true;
+     }
+
+     if (!this->isBlockStackable(oldblock)){
        revertBlock(user,x,y,z,map);
        return true;
      }

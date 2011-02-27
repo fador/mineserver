@@ -32,7 +32,7 @@
 Mob::Mob()
 {
   x=0;y=0;z=0;map=0;
-  yaw=0;pitch=0;
+  yaw=0;pitch=0;meta =0;
   UID = generateEID();
 }
 

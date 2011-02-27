@@ -107,23 +107,27 @@ bool BlockTracks::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
   uint8_t block;
   uint8_t meta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta)){
      revertBlock(user,x,y,z,map);
      return true;
+  }
 
   /* Check block below allows blocks placed on top */
-  if (!this->isBlockStackable(block))
+  if (!this->isBlockStackable(block)){
      revertBlock(user,x,y,z,map);
      return true;
+  }
 
   /* move the x,y,z coords dependent upon placement direction */
-  if (!this->translateDirection(&x,&y,&z,map,direction))
+  if (!this->translateDirection(&x,&y,&z,map,direction)){
      revertBlock(user,x,y,z,map);
      return true;
+  }
 
-  if (!this->isBlockEmpty(x,y,z,map))
+  if (!this->isBlockEmpty(x,y,z,map)){
      revertBlock(user,x,y,z,map);
      return true;
+  }
    
   uint8_t metadata = FLAT_NS;
   uint8_t elevoftrack = 2;
