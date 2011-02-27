@@ -1501,8 +1501,14 @@ bool Map::releaseMap(int x, int z)
 }
 
 // Send chunk to user
-void Map::sendToUser(User* user, int x, int z)
+void Map::sendToUser(User* user, int x, int z, bool login)
 {
+  Packet* p;
+  if(login){
+    p=&user->loginBuffer;
+  }else{
+    p=&user->buffer;
+  }
   sChunk* chunk = loadMap(x, z);
   if(chunk == NULL)
     return;
@@ -1519,10 +1525,10 @@ void Map::sendToUser(User* user, int x, int z)
     chunk->lightRegen = false;
   }
   // Pre chunk
-  user->buffer << (int8_t)PACKET_PRE_CHUNK << mapposx << mapposz << (int8_t)1;
+  (*p) << (int8_t)PACKET_PRE_CHUNK << mapposx << mapposz << (int8_t)1;
 
   // Chunk
-  user->buffer << (int8_t)PACKET_MAP_CHUNK << (int32_t)(mapposx * 16) << (int16_t)0 << (int32_t)(mapposz * 16)
+  (*p) << (int8_t)PACKET_MAP_CHUNK << (int32_t)(mapposx * 16) << (int16_t)0 << (int32_t)(mapposz * 16)
                 << (int8_t)15 << (int8_t)127 << (int8_t)15;
 
   memcpy(&mapdata[0], chunk->blocks, 32768);
@@ -1536,14 +1542,14 @@ void Map::sendToUser(User* user, int x, int z)
   // Compress data with zlib deflate
   compress(buffer, &written, &mapdata[0], 81920);
 
-  user->buffer << (int32_t)written;
-  user->buffer.addToWrite(buffer, written);
+  (*p) << (int32_t)written;
+  (*p).addToWrite(buffer, written);
 
   //Push sign data to player
   for(uint32_t i = 0; i < chunk->signs.size(); i++)
   {
-    user->buffer << (int8_t)PACKET_SIGN << chunk->signs[i]->x << (int16_t)chunk->signs[i]->y << chunk->signs[i]->z;
-    user->buffer << chunk->signs[i]->text1 << chunk->signs[i]->text2 << chunk->signs[i]->text3 << chunk->signs[i]->text4;
+    (*p) << (int8_t)PACKET_SIGN << chunk->signs[i]->x << (int16_t)chunk->signs[i]->y << chunk->signs[i]->z;
+    (*p) << chunk->signs[i]->text1 << chunk->signs[i]->text2 << chunk->signs[i]->text3 << chunk->signs[i]->text4;
   }
 
 

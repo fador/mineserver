@@ -593,7 +593,6 @@ int PacketHandler::player_digging(User *user)
           if(blockcb->onBroken(user, status,x,y,z,user->pos.map,direction))
           {
             // Do not break
-            blockD.revertBlock(user,x,y,z,user->pos.map);
             return PACKET_OK;
           }
           else
@@ -928,7 +927,6 @@ int PacketHandler::player_block_placement(User *user)
       if(blockcb!=NULL && blockcb->affectedBlock(newblock))
       {
         if(blockcb->onPlace(user, newblock,x,y,z,user->pos.map,direction)){
-          blockD.revertBlock(user,x,y,z,user->pos.map);
           return PACKET_OK;
         }else{
           break;

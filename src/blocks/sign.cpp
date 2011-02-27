@@ -137,14 +137,16 @@ bool BlockSign::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
    uint8_t oldblock;
    uint8_t oldmeta;
 
-   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta)){
       revertBlock(user,x,y,z,map);
       return true;
+   }
 
    /* Check block below allows blocks placed on top */
-   if (!this->isBlockStackable(oldblock))
+   if (!this->isBlockStackable(oldblock)){
       revertBlock(user,x,y,z,map);
       return true;
+   }
 
    // 0x0 -> West  West  West  West
    // 0x1 -> West  West  West  North
@@ -239,9 +241,10 @@ bool BlockSign::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
       break;
    }
 
-   if (!this->isBlockEmpty(x,y,z,map))
+   if (!this->isBlockEmpty(x,y,z,map)){
       revertBlock(user,x,y,z,map);
       return true;
+   }
 
    Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, metadata);
    Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, metadata);
