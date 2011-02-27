@@ -125,7 +125,7 @@ bool chatPost(const char* name, time_t time, const char* message)
   localTime = localtime(&time);
   strftime(str, sizeof(str), formatTimestamp, localTime);
   fprintf(chatFile, "%s <%s> %s\n", str, name, message);
-  return 0;
+  return false;
 }
 
 bool logPost(int type, const char* source, const char* message)
@@ -143,7 +143,7 @@ bool logPost(int type, const char* source, const char* message)
   else
     fprintf(logFile, "%s [%s] %s: %s\n", str, logTypeName[type], source, message);
 
-  return 0;
+  return false;
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION filelog_init(mineserver_pointer_struct* mineserver_temp)
