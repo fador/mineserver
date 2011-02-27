@@ -57,12 +57,13 @@ bool BlockDyed::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   {
     Item item = user->inv[user->curItem+36];
 
-    if(item.getHealth() == oldmeta){
+    if (item.getHealth() == oldmeta)
+    {
       Mineserver::get()->map(map)->setBlock(x, y, z, (char)BLOCK_DOUBLE_STEP, oldmeta);
       Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)BLOCK_DOUBLE_STEP, oldmeta);
       revertBlock(user,x,y,z,map);
       return true;
-    }else{
+    } else {
       revertBlock(user,x,y,z,map);
       return true;
     }

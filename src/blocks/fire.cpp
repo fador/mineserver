@@ -70,36 +70,44 @@ void BlockFire::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
 
 bool BlockFire::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-   uint8_t oldblock;
-   uint8_t oldmeta;
+  uint8_t oldblock;
+  uint8_t oldmeta;
 
-   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  {
     revertBlock(user,x,y,z,map);
-      return true;
+    return true;
+  }
 
-   /* Check block below allows blocks placed on top */
-   if (!this->isBlockStackable(oldblock))
+  /* Check block below allows blocks placed on top */
+  if (!this->isBlockStackable(oldblock))
+  {
     revertBlock(user,x,y,z,map);
-      return true;
+    return true;
+  }
 
-   /* burning block regardless of direction */
-   y++;
+  /* burning block regardless of direction */
+  y++;
 
-   /* FIXME: Need this or should be just let em burn? */
-   if (this->isUserOnBlock(x,y,z,map))
+  /* FIXME: Need this or should be just let em burn? */
+  if (this->isUserOnBlock(x,y,z,map))
+  {
     revertBlock(user,x,y,z,map);
-      return true;
+    return true;
+  }
 
-   /* if the block isn't empty then you can't burn it */
-   if (!this->isBlockEmpty(x,y,z,map))
+  /* if the block isn't empty then you can't burn it */
+  if (!this->isBlockEmpty(x,y,z,map))
+  {
     revertBlock(user,x,y,z,map);
-      return true;
+    return true;
+  }
 
-   direction = user->relativeToBlock(x, y, z);
+  direction = user->relativeToBlock(x, y, z);
 
-   Mineserver::get()->map(map)->setBlock(x, y, z, (char)BLOCK_FIRE, 0);
-   Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)BLOCK_FIRE, 0);
-   return false;
+  Mineserver::get()->map(map)->setBlock(x, y, z, (char)BLOCK_FIRE, 0);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)BLOCK_FIRE, 0);
+  return false;
 }
 
 void BlockFire::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)

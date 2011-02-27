@@ -35,9 +35,9 @@ bool BlockCake::affectedBlock(int block)
 {
   switch(block)
   {
-  case BLOCK_CAKE:
-  case ITEM_CAKE:
-    return true;
+    case BLOCK_CAKE:
+    case ITEM_CAKE:
+      return true;
   }
   return false;
 }
@@ -95,28 +95,30 @@ bool BlockCake::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 
   if(metadata < 6)
   {
-  if(newhealth > 20) 
-    newhealth=20;
-  user->sethealth(newhealth);
-     Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
-     Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)block, metadata);
+    if(newhealth > 20) 
+      newhealth=20;
+    user->sethealth(newhealth);
+    Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
+    Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)block, metadata);
   }
   else
   {
-  if(newhealth > 20) 
-    newhealth=20;
-  user->sethealth(newhealth);
-  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+    if(newhealth > 20) 
+      newhealth=20;
+    user->sethealth(newhealth);
+    Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+    Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
   }
    return false;
 }
 void BlockCake::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
+
 void BlockCake::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
+
 bool BlockCake::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map,  int8_t direction)
 {
   uint8_t block;

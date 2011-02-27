@@ -72,76 +72,84 @@ bool BlockTorch::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
 
 void BlockTorch::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-   uint8_t block;
-   uint8_t meta;
-   bool destroy = false;
+  uint8_t block;
+  uint8_t meta;
+  bool destroy = false;
 
-   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
-      return;
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
+    return;
 
-   if (direction == BLOCK_TOP && meta == BLOCK_TOP && this->isBlockEmpty(x, y-1, z,map))
-   {
-      destroy = true;
-      // Crude fix for weird sign destruction
-      uint8_t tempblock;
-      uint8_t tempmeta;
-      if(Mineserver::get()->map(map)->getBlock(x, y, z, &tempblock, &tempmeta) && tempblock == BLOCK_WALL_SIGN) 
-      {
-        destroy = false;
-      }
-   }
-   else if (direction == BLOCK_NORTH && meta == BLOCK_SOUTH && this->isBlockEmpty(x+1, y, z,map))
-   {
-      destroy = true;
-   }
-   else if (direction == BLOCK_SOUTH && meta == BLOCK_NORTH && this->isBlockEmpty(x-1, y, z,map))
-   {
-      destroy = true;
-   }
-   else if (direction == BLOCK_EAST && meta == BLOCK_WEST && this->isBlockEmpty(x, y, z+1,map))
-   {
-      destroy = true;
-   }
-   else if (direction == BLOCK_WEST && meta == BLOCK_EAST && this->isBlockEmpty(x, y, z-1,map))
-   {
-      destroy = true;
-   }
+  if (direction == BLOCK_TOP && meta == BLOCK_TOP && this->isBlockEmpty(x, y-1, z,map))
+  {
+    destroy = true;
+    // Crude fix for weird sign destruction
+    uint8_t tempblock;
+    uint8_t tempmeta;
+    if(Mineserver::get()->map(map)->getBlock(x, y, z, &tempblock, &tempmeta) && tempblock == BLOCK_WALL_SIGN) 
+    {
+      destroy = false;
+    }
+  }
+  else if (direction == BLOCK_NORTH && meta == BLOCK_SOUTH && this->isBlockEmpty(x+1, y, z,map))
+  {
+    destroy = true;
+  }
+  else if (direction == BLOCK_SOUTH && meta == BLOCK_NORTH && this->isBlockEmpty(x-1, y, z,map))
+  {
+    destroy = true;
+  }
+  else if (direction == BLOCK_EAST && meta == BLOCK_WEST && this->isBlockEmpty(x, y, z+1,map))
+  {
+    destroy = true;
+  }
+  else if (direction == BLOCK_WEST && meta == BLOCK_EAST && this->isBlockEmpty(x, y, z-1,map))
+  {
+    destroy = true;
+  }
 
-   if (destroy)
-   {
-      // Break torch and spawn torch item
-      Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-      Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-      this->spawnBlockItem(x, y, z,map, block);
-   }
+  if (destroy)
+  {
+    // Break torch and spawn torch item
+    Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+    Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+    this->spawnBlockItem(x, y, z,map, block);
+  }
 }
 
 bool BlockTorch::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-   uint8_t oldblock;
-   uint8_t oldmeta;
+  uint8_t oldblock;
+  uint8_t oldmeta;
 
-   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
-      revertBlock(user,x,y,z,map);
-      return true;
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  {
+    revertBlock(user,x,y,z,map);
+    return true;
+  }
 
-   /* Check block below allows blocks placed on top */
-   if (!this->isBlockStackable(oldblock))
-      revertBlock(user,x,y,z,map);
-      return true;
+  /* Check block below allows blocks placed on top */
+  if (!this->isBlockStackable(oldblock))
+  {
+    revertBlock(user,x,y,z,map);
+    return true;
+  }
 
-   /* move the x,y,z coords dependent upon placement direction */
-   if (!this->translateDirection(&x,&y,&z,map,direction))
-      revertBlock(user,x,y,z,map);
-      return true;
+  /* move the x,y,z coords dependent upon placement direction */
+  if (!this->translateDirection(&x,&y,&z,map,direction))
+  {
+    revertBlock(user,x,y,z,map);
+    return true;
+  }
 
-   if (!this->isBlockEmpty(x,y,z,map))
-      revertBlock(user,x,y,z,map);
-      return true;
+  if (!this->isBlockEmpty(x,y,z,map))
+  {
+    revertBlock(user,x,y,z,map);
+    return true;
+  }
 
-   Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
-   Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
-   return false;
+  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+  return false;
 }
 
 void BlockTorch::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
@@ -150,34 +158,38 @@ void BlockTorch::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_
 
 void BlockTorch::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-   uint8_t oldblock;
-   uint8_t oldmeta;
-   
-   switch(newblock)
-   {
-      case BLOCK_WATER:
-      case BLOCK_STATIONARY_WATER:
-         if (Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
-         {
-            // spawn item
-            Mineserver::get()->map(map)->sendBlockChange(x, y, z, 0, 0);
-            Mineserver::get()->map(map)->setBlock(x, y, z, 0, 0);
-            this->spawnBlockItem(x, y, z,map, oldblock);
-         }
-      break;
-      case BLOCK_LAVA:
-      case BLOCK_STATIONARY_LAVA:
-         if (Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
-         {
-            // destroy
-            Mineserver::get()->map(map)->sendBlockChange(x, y, z, 0, 0);
-            Mineserver::get()->map(map)->setBlock(x, y, z, 0, 0);
-         }
-      break;
-      default:
-         return;
-      break;
-   }
+  uint8_t oldblock;
+  uint8_t oldmeta;
+  
+  switch(newblock)
+  {
+    case BLOCK_WATER:
+    case BLOCK_STATIONARY_WATER:
+    {
+      if (Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+      {
+         // spawn item
+         Mineserver::get()->map(map)->sendBlockChange(x, y, z, 0, 0);
+         Mineserver::get()->map(map)->setBlock(x, y, z, 0, 0);
+         this->spawnBlockItem(x, y, z,map, oldblock);
+      }
+    }
+    break;
+    case BLOCK_LAVA:
+    case BLOCK_STATIONARY_LAVA:
+    {
+      if (Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+      {
+        // destroy
+        Mineserver::get()->map(map)->sendBlockChange(x, y, z, 0, 0);
+        Mineserver::get()->map(map)->setBlock(x, y, z, 0, 0);
+      }
+    }
+    break;
+    default:
+       return;
+    break;
+  }
 }
 
 void BlockTorch::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)

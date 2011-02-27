@@ -34,8 +34,8 @@ bool BlockWorkbench::affectedBlock(int block)
 {
   switch(block)
   {
-  case BLOCK_WORKBENCH:
-    return true;
+    case BLOCK_WORKBENCH:
+      return true;
   }
   return false;
 }
@@ -45,27 +45,37 @@ bool BlockWorkbench::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, 
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
-     revertBlock(user,x,y,z,map);
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta)) 
+  {
+    revertBlock(user,x,y,z,map);
     return true;
+  }
 
   /* Check block below allows blocks placed on top */
-  if (!this->isBlockStackable(oldblock))
-     revertBlock(user,x,y,z,map);
+  if (!this->isBlockStackable(oldblock)) 
+  {
+    revertBlock(user,x,y,z,map);
     return true;
+  }
 
   /* move the x,y,z coords dependent upon placement direction */
-  if (!this->translateDirection(&x,&y,&z,map,direction))
-     revertBlock(user,x,y,z,map);
+  if (!this->translateDirection(&x,&y,&z,map,direction)) 
+  {
+    revertBlock(user,x,y,z,map);
     return true;
+  }
 
-  if (this->isUserOnBlock(x,y,z,map))
+  if (this->isUserOnBlock(x,y,z,map)) 
+  {
      revertBlock(user,x,y,z,map);
      return true;
+  }
 
-  if (!this->isBlockEmpty(x,y,z,map))
+  if (!this->isBlockEmpty(x,y,z,map)) 
+  {
      revertBlock(user,x,y,z,map);
      return true;
+  }
 
   Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);

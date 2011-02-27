@@ -67,37 +67,43 @@ void BlockLiquid::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int
 
 bool BlockLiquid::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-   uint8_t oldblock;
-   uint8_t oldmeta;
+  uint8_t oldblock;
+  uint8_t oldmeta;
 
-   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  {
     revertBlock(user,x,y,z,map);
-      return true;
+    return true;
+  }
 
-   /* move the x,y,z coords dependent upon placement direction */
-   if (!this->translateDirection(&x,&y,&z,map,direction))
+  /* move the x,y,z coords dependent upon placement direction */
+  if (!this->translateDirection(&x,&y,&z,map,direction))
+  {
     revertBlock(user,x,y,z,map);
-      return true;
+    return true;
+  }
 
-   if (!this->isBlockEmpty(x,y,z,map))
+  if (!this->isBlockEmpty(x,y,z,map))
+  {
     revertBlock(user,x,y,z,map);
-      return true;
+    return true;
+  }
 
-   direction = user->relativeToBlock(x, y, z);
+  direction = user->relativeToBlock(x, y, z);
 
-   int block = newblock;
+  int block = newblock;
 
-   if (block == ITEM_WATER_BUCKET)
-      newblock = BLOCK_STATIONARY_WATER;
+  if (block == ITEM_WATER_BUCKET)
+     newblock = BLOCK_STATIONARY_WATER;
 
-   if (block == ITEM_LAVA_BUCKET)
-      newblock = BLOCK_STATIONARY_LAVA;
+  if (block == ITEM_LAVA_BUCKET)
+     newblock = BLOCK_STATIONARY_LAVA;
 
-   Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, 0);
-   Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);
+  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, 0);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);
 
-   physics(x,y,z,map);
-   return false;
+  physics(x,y,z,map);
+  return false;
 }
 
 void BlockLiquid::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)

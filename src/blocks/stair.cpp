@@ -76,14 +76,16 @@ void BlockStair::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8
 
 bool BlockStair::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-   if (!this->translateDirection(&x,&y,&z,map,direction))
-       revertBlock(user,x,y,z,map);
-      return true;
+  if (!this->translateDirection(&x,&y,&z,map,direction))
+  {
+    revertBlock(user,x,y,z,map);
+    return true;
+  }
+
   direction = user->relativeToBlock(x, y, z);
 
   Mineserver::get()->map(map)->setBlock(x, y, z, newblock, direction);
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, newblock, direction);
-
 
   return false;
 }
