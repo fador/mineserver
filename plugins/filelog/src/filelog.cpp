@@ -71,7 +71,7 @@ enum LogType
     LOG_COUNT
 };
 
-static char* logTypeName[] = {
+static const char* logTypeName[] = {
   "EMERG",
   "Alert",
   "Critical",
@@ -82,9 +82,14 @@ static char* logTypeName[] = {
   "Debug"
 };
 
+// limits, defaults
+#define STR_MAXLEN     80
+#define FORMAT_TIME    "%Y-%m-%d %H:%M:%S"
+#define FILENAME_LOG   "mineserver.log"
+#define FILENAME_CHAT  "mineserver_chat.log"
+
 // Constants
 #define PLUGIN_NAME "Filelog"
-#define LOG_FILENAME "mineserver.log"
 const char* pluginName = PLUGIN_NAME;
 const char* logSource = "plugin.filelog";
 const float pluginVersion = 1.0f;
@@ -93,6 +98,7 @@ const float pluginVersion = 1.0f;
 mineserver_pointer_struct* mineserver;
 FILE *logFile;
 FILE *chatFile;
+const char* formatTimestamp = FORMAT_TIME;
 
 // Configuration Helper functions
 bool filelog_config_boolean(const char* key, bool defaultValue)
@@ -111,26 +117,32 @@ const char* filelog_config_string(const char* key, const char*defaultValue)
   return mineserver->config.sData(key);
 }
 
-bool chatPost (const char* name,time_t time,const char* message)
+bool chatPost(const char* name, time_t time, const char* message)
 {
-  char timeString[22];
-  struct tm *localTime;
+  char str[STR_MAXLEN];
+  struct tm* localTime;
 
   localTime = localtime(&time);
-  // yyyy-mm-dd [hh-mm-ss] 
-  strftime(timeString, 79, "%Y-%m-%d [%H:%M:%S]", localTime);
-  fprintf(chatFile, "%s <%s> %s\n", timeString, name, message);
+  strftime(str, sizeof(str), formatTimestamp, localTime);
+  fprintf(chatFile, "%s <%s> %s\n", str, name, message);
   return 0;
 }
 
 bool logPost(int type, const char* source, const char* message)
 {
+  char str[STR_MAXLEN];
+  time_t t;
+  struct tm* tmLocal;
+
+  t = time(NULL);
+  tmLocal = localtime(&t);
+  strftime(str, sizeof(str), formatTimestamp, tmLocal);
+
   if (type >= LOG_COUNT || type < 0) // Unknown log type
-  {
-    fprintf(logFile, "%d from %s: %s\n", type, source, message);
-    return 0;
-  }
-  fprintf(logFile, "%s from %s: %s\n", logTypeName[type], source, message);
+    fprintf(logFile, "%s [%d] %s: %s\n", str, type, source, message);
+  else
+    fprintf(logFile, "%s [%s] %s: %s\n", str, logTypeName[type], source, message);
+
   return 0;
 }
 
@@ -150,7 +162,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION filelog_init(mineserver_pointer_struct* mi
   // Check if server message logging is enabled, if the option is not specified default to true.
   if (filelog_config_boolean("filelog.server.enable", true))
   {
-    const char *filename = filelog_config_string("filelog.server.filename",  "mineserver.log");
+    const char *filename = filelog_config_string("filelog.server.filename", FILENAME_LOG);
     char *message = (char *)malloc(strlen(filename) + 12); 
 
     mineserver->plugin.addCallback("LogPost", (void *)logPost);
@@ -167,7 +179,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION filelog_init(mineserver_pointer_struct* mi
   // Check if chat logging is enabled, if the option is not specified default to true.
   if (filelog_config_boolean("filelog.chat.enable", true))
   {
-    const char *filename = filelog_config_string("filelog.chat.filename",  "mineserver_chat.log");
+    const char *filename = filelog_config_string("filelog.chat.filename", FILENAME_CHAT);
     char *message = (char *)malloc(strlen(filename) + 17); 
 
     mineserver->plugin.addCallback("PlayerChatPost", (void *)chatPost);
