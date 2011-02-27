@@ -46,7 +46,5 @@ install:
 	cp mineserver ../bin
 
 clean:
-	-rm  *.o
-	-rm  */*.o
-	-rm  */*/*.o
+	find $(CURDIR) -name "*.o" -exec rm '{}' \;
 	-rm -r $(DEPDIR)
