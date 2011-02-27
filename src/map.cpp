@@ -1008,6 +1008,34 @@ void Map::createPickupSpawn(int x, int y, int z, int type, int count, int health
   sendPickupSpawn(item);
 }
 
+bool Map::sendProjectileSpawn(User* user, int8_t projID)
+{
+  if (!projID)
+  {
+    return false;
+  }
+
+  Packet  pkt;
+  int32_t EID = generateEID();
+  float   tempMult = 1.f - abs(user->pos.pitch / 90.f);
+
+  // Spawn projectile on player location
+  // TODO: add about 0.5-1 units in forward direction here
+  vec pos = vec(user->pos.x * 32, (user->pos.y + 1.5) * 32, user->pos.z * 32);
+  vec vel = vec(
+    sinf(-(user->pos.yaw / 360.f) * 2.f*M_PI)*tempMult*32768.f,
+         -(user->pos.pitch/ 90.f) * 32768.f,
+    cosf(-(user->pos.yaw / 360.f) * 2.f*M_PI)*tempMult*32768.f
+  );
+  pkt << PACKET_ENTITY << EID
+      << PACKET_ADD_OBJECT << EID << (int8_t)projID << (int32_t)pos.x() << (int32_t)pos.y() << (int32_t)pos.z()
+      << PACKET_ENTITY_VELOCITY << EID << (uint16_t)vel.x() << (uint16_t)vel.y() << (uint16_t)vel.z();
+
+  user->sendAll((uint8_t *)pkt.getWrite(), pkt.getWriteLen());
+
+  return true;
+}
+
 sChunk*  Map::loadMap(int x, int z, bool generate)
 {
   sChunk* chunk = chunks.getChunk(x,z);
