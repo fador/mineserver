@@ -234,8 +234,6 @@ bool User::sendLoginInfo()
   }
   // Push chunks to user
   pushMap(true); pushMap(true); pushMap(true);
-  pushMap(true); pushMap(true); pushMap(true);
-  pushMap(true); pushMap(true); pushMap(true);
   std::vector<Mob*> mob = Mineserver::get()->mobs()->getAll();
   std::vector<Mob*>::iterator i = mob.begin();
   for(;i!=mob.end();i++)

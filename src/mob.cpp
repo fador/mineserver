@@ -80,19 +80,21 @@ void Mob::spawnToAll()
   for (int i = 0; i < Mineserver::get()->users().size(); i++)
   {
     User* user = Mineserver::get()->users()[i];
-    user->buffer << (int8_t)PACKET_MOB_SPAWN << (int32_t) UID << (int8_t) type 
-                 << (int32_t) (x*32.0) << (int32_t) (y*32.0) << (int32_t) (z*32.0) << (int8_t) yaw 
-                 << (int8_t) pitch;
-    if(type == MOB_SHEEP)
-    {
-      user->buffer << (int8_t) 0 << (int8_t) meta << (int8_t) 127;
+    if(user->logged){
+      user->buffer << (int8_t)PACKET_MOB_SPAWN << (int32_t) UID << (int8_t) type 
+                   << (int32_t) (x*32.0) << (int32_t) (y*32.0) << (int32_t) (z*32.0) << (int8_t) yaw 
+                   << (int8_t) pitch;
+      if(type == MOB_SHEEP)
+      {
+        user->buffer << (int8_t) 0 << (int8_t) meta << (int8_t) 127;
+      }
+      else
+      {
+        user->buffer << (int8_t) 127;
+      }
     }
-    else
-    {
-      user->buffer << (int8_t) 127;
-    }
+    spawned=true;
   }
-  spawned=true;
 }
 
 void Mob::deSpawnToAll()
@@ -100,7 +102,9 @@ void Mob::deSpawnToAll()
   for (int i = 0; i < Mineserver::get()->users().size(); i++)
   {
     User* user = Mineserver::get()->users()[i];
-    user->buffer << PACKET_DESTROY_ENTITY << (int32_t) UID;
+    if(user->logged){
+      user->buffer << PACKET_DESTROY_ENTITY << (int32_t) UID;
+    }
   }
   spawned=false;
 }
@@ -116,9 +120,11 @@ void Mob::teleportToAll()
   for (int i = 0; i < Mineserver::get()->users().size(); i++)
   {
     User* user = Mineserver::get()->users()[i];
-    user->buffer << PACKET_ENTITY_TELEPORT << (int32_t) UID
+    if(user->logged){
+      user->buffer << PACKET_ENTITY_TELEPORT << (int32_t) UID
                  << (int32_t) (x*32.0) << (int32_t) (y*32.0) << (int32_t) (z*32.0)
                  << (int8_t) yaw << (int8_t) pitch;
+    }
   }
 }
 
