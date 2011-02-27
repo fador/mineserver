@@ -155,6 +155,7 @@ int16_t Item::itemHealth(int item)
     case ITEM_STONE_HOE:
     case ITEM_STONE_SPADE:
     case ITEM_STONE_SWORD:
+    case ITEM_BOW:
       health = 132;
     break;
     case ITEM_IRON_AXE:
@@ -1260,6 +1261,7 @@ int16_t Inventory::itemHealth(int16_t itemID, int8_t block, bool &rightUse)
     case ITEM_STONE_PICKAXE:
     case ITEM_STONE_HOE:
     case ITEM_STONE_SPADE:
+    case ITEM_BOW:
       health = 132;
     break;
     case ITEM_IRON_AXE:
