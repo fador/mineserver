@@ -1027,9 +1027,9 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
          -(user->pos.pitch/ 90.f) * 32768.f,
     cosf(-(user->pos.yaw / 360.f) * 2.f*M_PI)*tempMult*32768.f
   );
-  pkt << PACKET_ENTITY << EID
-      << PACKET_ADD_OBJECT << EID << (int8_t)projID << (int32_t)pos.x() << (int32_t)pos.y() << (int32_t)pos.z()
-      << PACKET_ENTITY_VELOCITY << EID << (uint16_t)vel.x() << (uint16_t)vel.y() << (uint16_t)vel.z();
+  pkt << (int8_t)PACKET_ENTITY << (int32_t)EID
+      << (int8_t)PACKET_ADD_OBJECT << (int32_t)EID << (int8_t)projID << (int32_t)pos.x() << (int32_t)pos.y() << (int32_t)pos.z()
+      << (int8_t)PACKET_ENTITY_VELOCITY << (int32_t)EID << (int16_t)vel.x() << (int16_t)vel.y() << (int16_t)vel.z();
 
   user->sendAll((uint8_t *)pkt.getWrite(), pkt.getWriteLen());
 
