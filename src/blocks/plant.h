@@ -28,6 +28,9 @@
 #pragma once
 #include "basic.h"
 
+// 10000 == 100%
+enum { SEEDS_CHANCE = 1000 };
+
 class User;
 
 class PlantBlock{

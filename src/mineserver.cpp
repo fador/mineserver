@@ -630,6 +630,8 @@ int Mineserver::run(int argc, char *argv[])
     for (i=0;i<s;i++)
     {
       User::all()[i]->isUnderwater();
+      if( User::all()[i]->pos.y < 0 )
+        User::all()[i]->sethealth( User::all()[i]->health - 5 );
     }
 
     event_base_loopexit(m_eventBase, &loopTime);

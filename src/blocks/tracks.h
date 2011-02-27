@@ -59,5 +59,5 @@ private:
   TrackData trackLog[2];
   bool isTrack(int32_t x, int8_t y, int32_t z, int map,  uint8_t& meta);
   bool isStartPiece(int32_t x, int8_t y, int32_t z, int map);
-
+  int searchTrack(int32_t x, int8_t y, int32_t z, int map, uint8_t& meta);
 };
