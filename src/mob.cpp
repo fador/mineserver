@@ -49,13 +49,39 @@ Mob::~Mob()
   }
 }
 
+void Mob::sethealth(int health)
+{
+  if(health < 0) health=0;
+  if(health>30)  health=30;
+  if(health < this->health){
+    for (int i = 0; i < Mineserver::get()->users().size(); i++)
+    {
+      User* user = Mineserver::get()->users()[i];
+      user->buffer << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID <<
+                      (int8_t)2 ;
+      // Hurt animation
+    }
+  }
+  this->health = health;
+  if(this->health <= 0){
+    deSpawnToAll();
+  }
+}
+
+    
+
 void Mob::spawnToAll()
 {
+  if(type == MOB_PIG) health = 10;
+  if(type == MOB_SHEEP) health = 10;
+  if(type == MOB_COW) health = 10;
+  if(type == MOB_CHICKEN) health = 4;
+  if(type == MOB_SQUID) health = 10;
   for (int i = 0; i < Mineserver::get()->users().size(); i++)
   {
     User* user = Mineserver::get()->users()[i];
     user->buffer << (int8_t)PACKET_MOB_SPAWN << (int32_t) UID << (int8_t) type 
-                 << (int32_t) x << (int32_t) y << (int32_t) z << (int8_t) yaw 
+                 << (int32_t) (x*32.0) << (int32_t) (y*32.0) << (int32_t) (z*32.0) << (int8_t) yaw 
                  << (int8_t) pitch;
     if(type == MOB_SHEEP)
     {
@@ -91,12 +117,12 @@ void Mob::teleportToAll()
   {
     User* user = Mineserver::get()->users()[i];
     user->buffer << PACKET_ENTITY_TELEPORT << (int32_t) UID
-                 << (int32_t) x << (int32_t) y << (int32_t) z
+                 << (int32_t) (x*32.0) << (int32_t) (y*32.0) << (int32_t) (z*32.0)
                  << (int8_t) yaw << (int8_t) pitch;
   }
 }
 
-void Mob::moveTo(int16_t to_x,int16_t to_y, int16_t to_z, int to_map)
+void Mob::moveTo(double to_x,double to_y, double to_z, int to_map)
 {
 //  int distx = abs(x-to_x);
 //  int disty = abs(y-to_y);
@@ -116,6 +142,22 @@ void Mob::moveTo(int16_t to_x,int16_t to_y, int16_t to_z, int to_map)
     teleportToAll();
 //  }
 }
+
+void Mob::look(int16_t yaw, int16_t pitch)
+{
+  // Yaw and Pitch need to be between 0 and 360
+  while(yaw<0) yaw+=360;
+  while(pitch<0) pitch+=360;
+  yaw = yaw%360; pitch = pitch%360;
+  int8_t y_byte = (int8_t)((yaw*1.0)/360.0*256.0);
+  int8_t p_byte = (int8_t)((pitch*1.0)/360.0*256.0);
+  this->pitch = p_byte; this->yaw = y_byte;
+  Packet pkt;
+  pkt << PACKET_ENTITY_LOOK << (int32_t) UID << (int8_t) y_byte << (int8_t) p_byte;
+  if(User::all().size()>0)
+    User::all()[0]->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen()); 
+}
+
 
 Mob* Mobs::getMobByID(int id)
 {
@@ -171,4 +213,5 @@ Mob* Mobs::createMob()
   Mineserver::get()->mobs()->addMob(mob);
   return mob;
 }
+
 

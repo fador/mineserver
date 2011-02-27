@@ -71,6 +71,7 @@
 #include "blocks/default.h"
 #include "blocks/note.h"
 #include "items/itembasic.h"
+#include "mob.h"
 
 #ifdef WIN32
     #define M_PI 3.141592653589793238462643
@@ -1195,6 +1196,12 @@ int PacketHandler::use_entity(User *user)
         }
         break;
       }
+    }
+  }
+  for(uint32_t i=0; i<Mineserver::get()->mobs()->getMobCount(); i++){
+    if(Mineserver::get()->mobs()->getMobByID(i)->UID == (uint32_t)target){
+      int h = Mineserver::get()->mobs()->getMobByID(i)->health - 1;
+      Mineserver::get()->mobs()->getMobByID(i)->sethealth(h);
     }
   }
 

@@ -157,9 +157,14 @@ struct mob_pointer_struct
   int (*spawnMobN)(const char* name);
   void (*spawnMob)(int uid);
   void (*despawnMob)(int uid);
-  void (*moveMob)(int uid, int x, int y, int z);
-  void (*moveMobW)(int uid, int x, int y, int z, int map);
-  void *temp[100];
+  void (*moveMob)(int uid, double x, double y, double z);
+  void (*moveMobW)(int uid, double x, double y, double z, int map);
+  bool (*getMobPositionW)(int uid, double* x, double* y, double* z, int* w);
+  int (*getHealth)(int uid);
+  int (*getType)(int uid);
+  bool (*getLook)(int uid, double* yaw, double* pitch);
+  bool (*setLook)(int uid, double yaw, double pitch);
+  void *temp[97];
 
 };
 
