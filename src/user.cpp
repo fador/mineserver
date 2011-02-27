@@ -221,11 +221,9 @@ bool User::sendLoginInfo()
   loadData();
 
   // Login OK package
-  buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << std::string("") << (int64_t)0 << (int8_t)0;
+  loginBuffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << std::string("") << (int64_t)0 << (int8_t)0;
 
-  // Send spawn position
-  buffer << (int8_t)PACKET_SPAWN_POSITION << (int32_t)pos.x << ((int32_t)pos.y+2) << (int32_t)pos.z;
-
+  spawnOthers();
   // Put nearby chunks to queue
   for (int x = -viewDistance; x <= viewDistance; x++)
   {
@@ -235,56 +233,57 @@ bool User::sendLoginInfo()
     }
   }
   // Push chunks to user
-  pushMap(); pushMap(); pushMap();
-
-
-
-  // Teleport player
-  teleport(pos.x, pos.y+2, pos.z);
-
-  // Send server time (after dawn)
-  buffer << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map(pos.map)->mapTime;
-
-
-  // Inventory
-  for (int i=1; i<45; i++)
-  {   
-    inv[i].ready=true;
-    inv[i].sendUpdate();
-  }
-
+  pushMap(true); pushMap(true); pushMap(true);
+  pushMap(true); pushMap(true); pushMap(true);
+  pushMap(true); pushMap(true); pushMap(true);
   std::vector<Mob*> mob = Mineserver::get()->mobs()->getAll();
   std::vector<Mob*>::iterator i = mob.begin();
   for(;i!=mob.end();i++)
   {
     if(pos.map==(*i)->map &&  (*i)->spawned)
     {
-      buffer << PACKET_MOB_SPAWN << (int32_t) (*i)->UID << (int8_t) (*i)->type
-             << (int32_t)(*i)->x << (int32_t) (*i)->y << (int32_t) (*i)->z 
+      loginBuffer << PACKET_MOB_SPAWN << (int32_t) (*i)->UID << (int8_t) (*i)->type
+             << (int32_t)(*i)->x << (int32_t) (*i)->y << (int32_t) (*i)->z
              << (int8_t) (*i)->yaw << (int8_t) (*i)->pitch;
       if((*i)->type == MOB_SHEEP)
       {
-        buffer << (int8_t) 0 << (int8_t) (*i)->meta << (int8_t) 127;
+        loginBuffer << (int8_t) 0 << (int8_t) (*i)->meta << (int8_t) 127;
       }
       else
       {
-        buffer << (int8_t) 127;
+        loginBuffer << (int8_t) 127;
       }
     }
   }
 
-  // Spawn this user to others
-  spawnUser((int32_t)pos.x*32, ((int32_t)pos.y+2)*32, (int32_t)pos.z*32);
-  // Spawn other users for connected user
-  spawnOthers();
+
+  // Send spawn position
+  loginBuffer << (int8_t)PACKET_SPAWN_POSITION << (int32_t)pos.x << ((int32_t)pos.y+2) << (int32_t)pos.z;
+  loginBuffer << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map(pos.map)->mapTime;
+//  loginBuffer << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)UID << nick
+//      << (int32_t)(pos.x*32) << (int32_t)((pos.y+2)*32) << (int32_t)(pos.z*32) << (int8_t)0 << (int8_t)0
+//      << (int16_t)0;
+
+
+  buffer.addToWrite((uint8_t*)loginBuffer.getWrite(), loginBuffer.getWriteLen());
+  loginBuffer.reset();
 
   logged = true;
+  spawnUser((int32_t)pos.x*32, (int32_t)((pos.y+2)*32), (int32_t)pos.z*32);
 
+  for (int i=1; i<45; i++)
+  {
+    inv[i].ready=true;
+    inv[i].sendUpdate();
+  }
+
+  // Teleport player (again)
   Mineserver::get()->chat()->sendMsg(this, nick+" connected!", Chat::ALL);
 
-  pushMap(); pushMap(); pushMap();
-  // Teleport player (again)
   teleport(pos.x, pos.y+2, pos.z);
+  teleport(pos.x, pos.y, pos.z);
+  teleport(pos.x, pos.y, pos.z);
+
   sethealth(health);
   logged = true;
 
@@ -572,7 +571,6 @@ bool User::updatePosM(double x, double y, double z, int map, double stance)
     pos.map = map;
     pos.x = x; pos.y = y; pos.z = z;
     Mineserver::get()->logger()->log(LogType::LOG_INFO, "User", "World changing");
-    clearLoadingMap();
     // TODO spawn self to nearby players
     // TODO spawn players who are NOW in view
     return false;
@@ -580,54 +578,6 @@ bool User::updatePosM(double x, double y, double z, int map, double stance)
   updatePos(x,y,z,stance);
   return true;
 }
-
-void User::clearLoadingMap()
-{
-
-  mapQueue.clear();
-  mapRemoveQueue.clear();
-
-  for(int i = mapKnown.size()-1; i >= 0; i--)
-  {
-    addRemoveQueue(mapKnown[i].x(), mapKnown[i].z());
-  }
-
-  popMap();  
-
-  //buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << std::string("") << (int64_t)0 << (int8_t)-1;
-  buffer << (int8_t)PACKET_SPAWN_POSITION << (int32_t)pos.x << ((int32_t)pos.y+2) << (int32_t)pos.z;
-  for(int x = -viewDistance; x <= viewDistance; x++)
-  {
-    for(int z = -viewDistance; z <= viewDistance; z++)
-    {
-      addQueue((int32_t)pos.x/16+x, (int32_t)pos.z/16+z);
-    }
-  }
-  // Push chunks to user
-  pushMap(); pushMap(); pushMap();
-  //Inventory
-  for(int i=1; i<45; i++)
-  {
-    inv[i].sendUpdate();
-  }
-
-
-  buffer << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map(pos.map)->mapTime;
-  pushMap();pushMap();pushMap();
-  spawnUser((int32_t)pos.x*32, ((int32_t)pos.y+2)*32, (int32_t)pos.z*32);
-  // Spawn other users for connected user
-  spawnOthers();
-
-  sethealth(health);
-
-  buffer << (int8_t)PACKET_PLAYER_POSITION_AND_LOOK << (double)pos.x << (double)pos.y << (double)pos.stance << (double)pos.z
-         << (float)pos.yaw << (float)pos.pitch << (int8_t)1;
-  teleport(pos.x,pos.y,pos.z);
-
-  Mineserver::get()->chat()->sendMsg(this, "World changed!", Chat::USER);
-}
-
-
 
 bool User::updatePos(double x, double y, double z, double stance)
 {
@@ -1176,7 +1126,7 @@ namespace
 
 }
 
-bool User::pushMap()
+bool User::pushMap(bool login)
 {
   //Dont send all at once
   int maxcount = 5;
@@ -1190,7 +1140,7 @@ bool User::pushMap()
                static_cast<int>(pos.z / 16));
     sort(mapQueue.begin(), mapQueue.end(), DistanceComparator(target));
 
-    Mineserver::get()->map(pos.map)->sendToUser(this, mapQueue[0].x(), mapQueue[0].z());
+    Mineserver::get()->map(pos.map)->sendToUser(this, mapQueue[0].x(), mapQueue[0].z(),login);
 
     // Add this to known list
     addKnown(mapQueue[0].x(), mapQueue[0].z());
@@ -1243,9 +1193,10 @@ bool User::spawnOthers()
 
   for (unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
   {
-    if (Mineserver::get()->users()[i]->logged && Mineserver::get()->users()[i]->UID != this->UID && Mineserver::get()->users()[i]->nick != this->nick)
+//    if (Mineserver::get()->users()[i]->logged && Mineserver::get()->users()[i]->UID != this->UID && Mineserver::get()->users()[i]->nick != this->nick)
+    if (Mineserver::get()->users()[i]->logged)
     {
-      buffer << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)Mineserver::get()->users()[i]->UID << Mineserver::get()->users()[i]->nick
+      loginBuffer << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)Mineserver::get()->users()[i]->UID << Mineserver::get()->users()[i]->nick
              << (int32_t)(Mineserver::get()->users()[i]->pos.x * 32) << (int32_t)(Mineserver::get()->users()[i]->pos.y * 32) << (int32_t)(Mineserver::get()->users()[i]->pos.z * 32)
              << (int8_t)0 << (int8_t)0 << (int16_t)0;
       for(int b = 0; b < 5; b++){
@@ -1256,7 +1207,7 @@ bool User::spawnOthers()
           n=9-b;
         }
         int type = Mineserver::get()->users()[i]->inv[n].getType();
-        buffer << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)Mineserver::get()->users()[i]->UID
+        loginBuffer << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)Mineserver::get()->users()[i]->UID
                << (int16_t)b << (int16_t)type<< (int16_t) 0;
       }
     }
@@ -1366,6 +1317,7 @@ void User::checkEnvironmentDamage()
 
 bool User::sethealth(int userHealth)
 {
+  if(!logged){ return false; }
   if(health>20) health=20;
   if(health<0)  health=0;
   if(health == userHealth){ 

@@ -99,7 +99,7 @@ public:
 //  void idToPos(uint32_t id, int *x, int *z);
 
   void init(int number);
-  void sendToUser(User *user, int x, int z);
+  void sendToUser(User *user, int x, int z,bool login=false);
 
   //Time in the map
   int64_t mapTime;

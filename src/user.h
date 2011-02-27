@@ -97,6 +97,7 @@ public:
 
   //Input buffer
   Packet buffer;
+  Packet loginBuffer; // Used to send all login info at once
 
   static std::vector<User*>& all();
   static bool isUser(int sock);
@@ -157,7 +158,7 @@ public:
   bool delKnown(int x, int z);
 
   //Push queued map data to client
-  bool pushMap();
+  bool pushMap(bool login=false);
 
   //Push remove queued map data to client
   bool popMap();
