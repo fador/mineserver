@@ -38,5 +38,5 @@ void ItemProjectile::onRightClick(User* user, Item* item)
   // instead of BOW itself here
   item->decCount();
 
-  Mineserver::get()->map(0)->sendProjectileSpawn(user, projID);
+  Mineserver::get()->map(user->pos.map)->sendProjectileSpawn(user, projID);
 }
