@@ -138,7 +138,7 @@ enum
 // Animals
 enum
 {
-  MOB_PIG = 90, MOB_SHEEP, MOB_COW, MOB_CHICKEN
+  MOB_PIG = 90, MOB_SHEEP, MOB_COW, MOB_CHICKEN, MOB_SQUID
 };
 
 //Instruments (based off http://www.minecraftwiki.net/wiki/Note_Block)

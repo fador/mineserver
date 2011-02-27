@@ -760,16 +760,67 @@ void mob_despawnMob(int uid)
   m->deSpawnToAll();
 }
 
-void mob_moveMob(int uid, int x, int y, int z)
+void mob_moveMob(int uid, double x, double y, double z)
 {
   Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
   m->moveTo(x,y,z,-1);
 }
 
-void mob_moveMobW(int uid, int x, int y, int z, int map)
+void mob_moveMobW(int uid, double x, double y, double z, int map)
 {
   Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
   m->moveTo(x,y,z,map);
+}
+
+int mob_getHealth(int uid)
+{
+  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  return m->health;
+}
+
+int mob_getType(int uid)
+{
+  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  return m->type;
+}
+
+bool mob_getLook(int uid, double* rot, double* pitch){
+  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  if(m!=NULL){
+    if(rot!=NULL)
+      *rot = (double)((m->yaw*1.0)*360.0/256.0);
+    if(pitch!=NULL)
+      *pitch = (double)((m->pitch*1.0)*360.0/256.0);
+    return true;
+  }
+  return false;
+}
+
+bool mob_setLook(int uid, double rot, double pitch){
+  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  if(m!=NULL){
+    m->look((int16_t)rot,(int16_t)pitch);
+    return true;
+  }
+  return false;
+}
+
+
+bool mob_getMobPositionW(int uid, double* x, double* y, double* z, int* w)
+{
+  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  if(m!=NULL){
+    if(w!=NULL)
+      *w= m->map;
+    if(x!=NULL)
+      *x = m->x;
+    if(y!=NULL)
+      *y = m->y;
+    if(z!=NULL)
+      *z = m->z;
+    return true;
+  }
+  return false;
 }
 
 bool permission_setAdmin(const char* name){
@@ -903,6 +954,11 @@ void init_plugin_api(void)
   plugin_api_pointers.mob.despawnMob               = &mob_despawnMob;
   plugin_api_pointers.mob.moveMob                  = &mob_moveMob;
   plugin_api_pointers.mob.moveMobW                 = &mob_moveMobW;
+  plugin_api_pointers.mob.getHealth                = &mob_getHealth;
+  plugin_api_pointers.mob.getType                  = &mob_getType;
+  plugin_api_pointers.mob.getMobPositionW          = &mob_getMobPositionW;
+  plugin_api_pointers.mob.getLook                  = &mob_getLook;
+  plugin_api_pointers.mob.setLook                  = &mob_setLook;
 
   plugin_api_pointers.permissions.setAdmin         = &permission_setAdmin;
   plugin_api_pointers.permissions.setOp            = &permission_setOp;
