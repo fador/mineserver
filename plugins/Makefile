@@ -1,3 +1,3 @@
-SUBDIRS = commands filelog cursesui nether crapMobs 
+SUBDIRS = commands filelog cursesui nether crapMobs passiveMobs
 
 include ../subdir.mk
