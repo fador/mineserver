@@ -42,7 +42,8 @@ all: mineserver
 mineserver: $(OBJS)
 	$(CXX) $(CXXFLAGS) $(BUILDFLAGS) $(ARCHFLAGS) $(LDFLAGS) $(OBJS) $(LIBRARIES) -o $@
 
-install:
+install: mineserver 
+	mkdir -p ../bin/
 	cp mineserver ../bin
 
 clean:
