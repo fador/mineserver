@@ -157,67 +157,75 @@ bool BlockDoor::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
    uint8_t oldblock;
    uint8_t oldmeta;
 
-   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta)){
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  {
     revertBlock(user,x,y,z,map);
-      return true;
-   }
+    return true;
+  }
 
-   /* Check block below allows blocks placed on top */
-   if (!this->isBlockStackable(oldblock)){
+  /* Check block below allows blocks placed on top */
+  if (!this->isBlockStackable(oldblock))
+  {
     revertBlock(user,x,y,z,map);
-      return true;
-   }
+    return true;
+  }
 
-   /* move the x,y,z coords dependent upon placement direction */
-   if (!this->translateDirection(&x,&y,&z,map,direction)){
+  /* move the x,y,z coords dependent upon placement direction */
+  if (!this->translateDirection(&x,&y,&z,map,direction))
+  {
     revertBlock(user,x,y,z,map);
-      return true;
-   }
+    return true;
+  }
 
-   if (this->isUserOnBlock(x,y,z,map)){
+  if (this->isUserOnBlock(x,y,z,map))
+  {
     revertBlock(user,x,y,z,map);
-      return true;
-   }
+    return true;
+  }
 
-   if (!this->isBlockEmpty(x,y,z,map)){
+  if (!this->isBlockEmpty(x,y,z,map))
+  {
     revertBlock(user,x,y,z,map);
-      return true;
-   }
+    return true;
+  }
 
-   // checking for an item rather then a block
-   if (newblock == ITEM_WOODEN_DOOR)
-      newblock = BLOCK_WOODEN_DOOR;
+  // checking for an item rather then a block
+  if (newblock == ITEM_WOODEN_DOOR)
+  {
+     newblock = BLOCK_WOODEN_DOOR;
+  }
+  else if (newblock == ITEM_IRON_DOOR)
+  {
+     newblock = BLOCK_IRON_DOOR;
+  }
 
-   if (newblock == ITEM_IRON_DOOR)
-      newblock = BLOCK_IRON_DOOR;
+  direction = user->relativeToBlock(x, y, z);
 
-   direction = user->relativeToBlock(x, y, z);
+  switch(direction)
+  {
+     case BLOCK_EAST:
+        direction = BLOCK_WEST;
+     break;
+     case BLOCK_WEST:
+        direction = BLOCK_EAST;
+     break;
+     case BLOCK_NORTH:
+        direction = BLOCK_SOUTH;
+     break;
+     case BLOCK_SOUTH:
+        direction = BLOCK_NORTH;
+     break;
+  }
 
-   switch(direction)
-   {
-      case BLOCK_EAST:
-         direction = BLOCK_WEST;
-      break;
-      case BLOCK_WEST:
-         direction = BLOCK_EAST;
-      break;
-      case BLOCK_NORTH:
-         direction = BLOCK_SOUTH;
-      break;
-      case BLOCK_SOUTH:
-         direction = BLOCK_NORTH;
-      break;
-   }
+  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
 
-   Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
-   Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+  /* Get correct direction for top of the door */
+  direction ^= 8;
 
-   /* Get correct direction for top of the door */
-   direction ^= 8;
-
-   Mineserver::get()->map(map)->setBlock(x, y+1, z, (char)newblock, direction);
-   Mineserver::get()->map(map)->sendBlockChange(x, y+1, z, (char)newblock, direction);
-   return false;
+  Mineserver::get()->map(map)->setBlock(x, y+1, z, (char)newblock, direction);
+  Mineserver::get()->map(map)->sendBlockChange(x, y+1, z, (char)newblock, direction);
+  return false;
 }
 
 void BlockDoor::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)

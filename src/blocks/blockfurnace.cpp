@@ -47,31 +47,36 @@ bool BlockFurnace::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta)){
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  {
     revertBlock(user,x,y,z,map);
     return true;
   }
 
   /* Check block below allows blocks placed on top */
-  if (!this->isBlockStackable(oldblock)){
+  if (!this->isBlockStackable(oldblock))
+  {
     revertBlock(user,x,y,z,map);
     return true;
   }
 
   /* move the x,y,z coords dependent upon placement direction */
-  if (!this->translateDirection(&x,&y,&z,map,direction)){
+  if (!this->translateDirection(&x,&y,&z,map,direction))
+  {
     revertBlock(user,x,y,z,map);
     return true;
   }
 
-  if (this->isUserOnBlock(x,y,z,map)){
+  if (this->isUserOnBlock(x,y,z,map))
+  {
     revertBlock(user,x,y,z,map);
-     return true;
+    return true;
   }
 
-  if (!this->isBlockEmpty(x,y,z,map)){
+  if (!this->isBlockEmpty(x,y,z,map))
+  {
     revertBlock(user,x,y,z,map);
-     return true;
+    return true;
   }
 
   direction = user->relativeToBlock(x, y, z);
@@ -84,10 +89,9 @@ bool BlockFurnace::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
   int chunk_z = blockToChunk(z);
   sChunk *chunk = Mineserver::get()->map(map)->loadMap(chunk_x, chunk_z);
    
-  if(chunk == NULL){
+  if(chunk == NULL)
     revertBlock(user,x,y,z,map);
     return true;
-  }
 
   for(uint32_t i = 0; i < chunk->furnaces.size(); i++)
   {
@@ -116,7 +120,9 @@ bool BlockFurnace::onBroken(User* user, int8_t status, int32_t x, int8_t y, int3
   uint8_t meta;
 
   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
+  {
     return true;
+  }
 
   bool destroy = false;
     
@@ -144,3 +150,4 @@ bool BlockFurnace::onBroken(User* user, int8_t status, int32_t x, int8_t y, int3
   this->spawnBlockItem(x,y,z,map,block);
   return false;
 }
+

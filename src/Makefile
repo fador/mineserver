@@ -42,11 +42,10 @@ all: mineserver
 mineserver: $(OBJS)
 	$(CXX) $(CXXFLAGS) $(BUILDFLAGS) $(ARCHFLAGS) $(LDFLAGS) $(OBJS) $(LIBRARIES) -o $@
 
-install:
+install: mineserver 
+	mkdir -p ../bin/
 	cp mineserver ../bin
 
 clean:
-	-rm  *.o
-	-rm  */*.o
-	-rm  */*/*.o
+	find $(CURDIR) -name "*.o" -exec rm '{}' \;
 	-rm -r $(DEPDIR)

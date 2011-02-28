@@ -44,26 +44,26 @@ bool BlockBasic::isBlockStackable(const uint8_t block)
   /* Check block below allows blocks placed on top */
   switch(block)
   {
-  case BLOCK_WORKBENCH:
-  case BLOCK_CHEST:
-  case BLOCK_JUKEBOX:
-  case BLOCK_TORCH:
-  case BLOCK_REDSTONE_TORCH_OFF:
-  case BLOCK_REDSTONE_TORCH_ON:
-  case BLOCK_WATER:
-  case BLOCK_STATIONARY_WATER:
-  case BLOCK_LAVA:
-  case BLOCK_STATIONARY_LAVA:
-  case BLOCK_AIR:
-  case BLOCK_MINECART_TRACKS:
-  case BLOCK_WOODEN_DOOR:
-  case BLOCK_IRON_DOOR:
-  case BLOCK_ICE:
-  case BLOCK_CAKE:
-    return false;
-    break;
-  default:
-    break;
+    case BLOCK_WORKBENCH:
+    case BLOCK_CHEST:
+    case BLOCK_JUKEBOX:
+    case BLOCK_TORCH:
+    case BLOCK_REDSTONE_TORCH_OFF:
+    case BLOCK_REDSTONE_TORCH_ON:
+    case BLOCK_WATER:
+    case BLOCK_STATIONARY_WATER:
+    case BLOCK_LAVA:
+    case BLOCK_STATIONARY_LAVA:
+    case BLOCK_AIR:
+    case BLOCK_MINECART_TRACKS:
+    case BLOCK_WOODEN_DOOR:
+    case BLOCK_IRON_DOOR:
+    case BLOCK_ICE:
+    case BLOCK_CAKE:
+      return false;
+      break;
+    default:
+      break;
   }
 
   return true;
@@ -92,30 +92,31 @@ bool BlockBasic::translateDirection(int32_t *x, int8_t *y, int32_t *z, int map,c
 {
   uint8_t block, meta;
   Mineserver::get()->map(map)->getBlock(*x,*y,*z,&block,&meta);
-  if(block != BLOCK_SNOW){
+  if (block != BLOCK_SNOW)
+  {
     switch(direction)
     {
-    case BLOCK_SOUTH:
-      *x-=1;
-      break;
-    case BLOCK_NORTH:
-      *x+=1;
-      break;
-    case BLOCK_EAST:
-      *z+=1;
-      break;
-    case BLOCK_WEST:
-      *z-=1;
-      break;
-    case BLOCK_TOP:
-        *y+=1;
-      break;
-    case BLOCK_BOTTOM:
-      *y-=1;
-      break;
-    default:
-      return false;
-      break;
+      case BLOCK_SOUTH:
+        *x-=1;
+        break;
+      case BLOCK_NORTH:
+        *x+=1;
+        break;
+      case BLOCK_EAST:
+        *z+=1;
+        break;
+      case BLOCK_WEST:
+        *z-=1;
+        break;
+      case BLOCK_TOP:
+          *y+=1;
+        break;
+      case BLOCK_BOTTOM:
+        *y-=1;
+        break;
+      default:
+        return false;
+        break;
     }
   }
   return true;
@@ -125,7 +126,8 @@ bool BlockBasic::isBlockEmpty(const int32_t x, const int8_t y, const int32_t z, 
 {
   uint8_t block;
   uint8_t meta;
-  if(!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta)){
+  if(!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
+  {
     return false;
   }
   return (block == BLOCK_AIR || block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER || block == BLOCK_LAVA || block == BLOCK_STATIONARY_LAVA || block == BLOCK_SNOW);
@@ -163,6 +165,9 @@ void BlockBasic::notifyNeighbours(const int32_t x, const int8_t y, const int32_t
 {
   uint8_t block;
   uint8_t meta;
+
+//why is this commented out?
+
 /*  Function::invoker_type inv(user, oldblock, x, y, z, 0);
 
   if (ignore_direction != BLOCK_SOUTH && Mineserver::get()->map(map)->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
@@ -205,12 +210,15 @@ void BlockBasic::notifyNeighbours(const int32_t x, const int8_t y, const int32_t
 void BlockBasic::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
+
 void BlockBasic::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map,  int8_t direction)
 {
 }
+
 void BlockBasic::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map,  int8_t direction)
 {
 }
+
 bool BlockBasic::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map,  int8_t direction)
 {
   //Clear block on destroy
@@ -221,28 +229,35 @@ bool BlockBasic::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
   spawnBlockItem(x, y, z, map, block, meta);
   return false;
 }
+
 void BlockBasic::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction)
 {
 }
+
 bool BlockBasic::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction)
 {
   return false;
 }
+
 void BlockBasic::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction)
 {
 }
+
 void BlockBasic::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction)
 {
 }
+
 void BlockBasic::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
 {
 }
+
 bool BlockBasic::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 {
   return false;
 }
 
-void BlockBasic::revertBlock(User* user, int32_t x, int8_t y, int32_t z, int map){
+void BlockBasic::revertBlock(User* user, int32_t x, int8_t y, int32_t z, int map)
+{
   unsigned char block, meta;
   Mineserver::get()->map(map)->getBlock((int)x, (int)y, (int)z, &block, &meta);
   user->buffer << PACKET_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int8_t)block << (int8_t)meta;

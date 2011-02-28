@@ -4,7 +4,8 @@ OBJS = $(SRCS:.cpp=.o)
 
 all: $(OBJS) $(PLUGIN_NAME).so
 
-install:
+install: $(OBJS) $(PLUGIN_NAME).so
+	mkdir -p ../../bin/
 	cp $(PLUGIN_NAME).so ../../bin/$(PLUGIN_NAME).so
 
 $(OBJS):

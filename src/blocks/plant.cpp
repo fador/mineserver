@@ -37,25 +37,25 @@ bool BlockPlant::affectedBlock(int block)
 {
   switch(block)
   {
-  case BLOCK_YELLOW_FLOWER:
-  case BLOCK_RED_ROSE:
-  case BLOCK_BROWN_MUSHROOM:
-  case BLOCK_RED_MUSHROOM:
-  case BLOCK_CROPS:
-  case BLOCK_CACTUS:
-  case BLOCK_REED:
-  case BLOCK_SAPLING:
-  case BLOCK_DIRT:
-  case BLOCK_GRASS:
-  case BLOCK_SOIL:
-  case ITEM_REED:
-  case ITEM_WOODEN_HOE:
-  case ITEM_STONE_HOE:
-  case ITEM_IRON_HOE:
-  case ITEM_DIAMOND_HOE:
-  case ITEM_GOLD_HOE:
-  case ITEM_SEEDS:
-    return true;
+    case BLOCK_YELLOW_FLOWER:
+    case BLOCK_RED_ROSE:
+    case BLOCK_BROWN_MUSHROOM:
+    case BLOCK_RED_MUSHROOM:
+    case BLOCK_CROPS:
+    case BLOCK_CACTUS:
+    case BLOCK_REED:
+    case BLOCK_SAPLING:
+    case BLOCK_DIRT:
+    case BLOCK_GRASS:
+    case BLOCK_SOIL:
+    case ITEM_REED:
+    case ITEM_WOODEN_HOE:
+    case ITEM_STONE_HOE:
+    case ITEM_IRON_HOE:
+    case ITEM_DIAMOND_HOE:
+    case ITEM_GOLD_HOE:
+    case ITEM_SEEDS:
+      return true;
   }
   return false;
 }
@@ -321,90 +321,108 @@ bool BlockPlant::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
   uint8_t oldmeta;
 
    /* move the x,y,z coords dependent upon placement direction */
-   this->translateDirection(&x,&y,&z,map,direction);
+  if (!this->translateDirection(&x,&y,&z,map,direction))
+  {
+    revertBlock(user,x,y,z,map);
+    return true;
+  }
 
-   if (!Mineserver::get()->map(map)->getBlock(x, y-1, z, &oldblock, &oldmeta)){
+  if (!Mineserver::get()->map(map)->getBlock(x, y-1, z, &oldblock, &oldmeta))
+  {
+    revertBlock(user,x,y,z,map);
+    return true;
+  }
+
+  if( newblock != BLOCK_DIRT && newblock != BLOCK_SOIL && newblock != BLOCK_GRASS)
+  {
+    if (this->isBlockEmpty(x,y-1,z,map) || !this->isBlockEmpty(x,y,z,map))
+    {
       revertBlock(user,x,y,z,map);
       return true;
-   }
+    }
 
-   if( newblock == BLOCK_DIRT || newblock == BLOCK_SOIL || newblock == BLOCK_GRASS)
-   {
-     if (this->isUserOnBlock(x,y,z,map))
-     {
-       revertBlock(user,x,y,z,map);
-       return true;
-     }
-   }else{
-
-     if (this->isBlockEmpty(x,y-1,z,map) || !this->isBlockEmpty(x,y,z,map)){
+    if (!this->isBlockStackable(oldblock))
+    {
       revertBlock(user,x,y,z,map);
       return true;
-     }
+    }
+  } else {
+    if (this->isUserOnBlock(x,y,z,map))
+    {
+      revertBlock(user,x,y,z,map);
+      return true;
+    }
+  }
 
-     if (!this->isBlockStackable(oldblock)){
-       revertBlock(user,x,y,z,map);
-       return true;
-     }
-   }
+  if( (newblock == BLOCK_REED || newblock == ITEM_REED)&& (oldblock == BLOCK_GRASS || oldblock == BLOCK_DIRT))
+  {
+    // TODO : Check for water
+    Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_REED, 0);
+    Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_REED, 0);
+    addBlock(x,y,z,map);
+    return false;
+  }
 
-   if( (newblock == BLOCK_REED || newblock == ITEM_REED)&& (oldblock == BLOCK_GRASS || oldblock == BLOCK_DIRT)){
-     // TODO : Check for water
-     Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_REED, 0);
-     Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_REED, 0);
-     addBlock(x,y,z,map);
-     return false;
-   }
+  if(newblock == BLOCK_CACTUS && oldblock !=BLOCK_SAND)
+  {
+    revertBlock(user,x,y,z,map);
+    return true;
+  }
 
-   if(newblock == BLOCK_CACTUS && oldblock !=BLOCK_SAND)
-   {
-     revertBlock(user,x,y,z,map);
-     return true;
-   }
+  if( (newblock == BLOCK_YELLOW_FLOWER  ||
+       newblock == BLOCK_RED_ROSE) && (oldblock != BLOCK_DIRT &&
+       oldblock != BLOCK_GRASS) )
+  {
+    revertBlock(user,x,y,z,map);
+    return true;
+  }
 
-   if( (newblock == BLOCK_YELLOW_FLOWER  ||
-        newblock == BLOCK_RED_ROSE) && (oldblock != BLOCK_DIRT &&
-        oldblock != BLOCK_GRASS) ){
-     revertBlock(user,x,y,z,map);
-     return true;
-   }
-   if( (newblock == ITEM_SEEDS || newblock == BLOCK_CROPS) && (oldblock == BLOCK_SOIL) ){
-     Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_CROPS, 0);
-     Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_CROPS, 0);
-     addBlock(x,y,z,map);
-     return false;
-   }
-   if( (newblock == ITEM_SEEDS || newblock == BLOCK_CROPS) ){
-     revertBlock(user,x,y,z,map);
-     return true;
-   }
-   if( newblock > 255 && (oldblock == BLOCK_DIRT  || oldblock == BLOCK_GRASS))
-   {
-     // Hoe on dirt = Soil
-     Mineserver::get()->map(map)->sendBlockChange(x, y-1, z, BLOCK_SOIL, 0);
-     Mineserver::get()->map(map)->setBlock(x, y-1, z, BLOCK_SOIL, 0);
-     if(SEEDS_CHANCE >= rand() % 10000) {
-       Mineserver::get()->map(map)->createPickupSpawn(x, y+1, z, ITEM_SEEDS, 1, 0, NULL);
-     }
-     return true;
-   }
-   if( newblock > 255){
-     revertBlock(user,x,y,z,map);
-     return true;
-   }
-   if( (newblock == BLOCK_BROWN_MUSHROOM || newblock == BLOCK_RED_MUSHROOM)
-       && oldblock != BLOCK_DIRT ){
-     revertBlock(user,x,y,z,map);
-     return true;
-   }
-   if(newblock == BLOCK_SAPLING)
-   {
-     Mineserver::get()->map(map)->addSapling(user,x,y,z);
-   }else{
-     Mineserver::get()->map(map)->sendBlockChange(x, y, z, newblock, 0);
-     Mineserver::get()->map(map)->setBlock(x, y, z, newblock, 0);
-     addBlocks(x,y,z,map);
-   }
+  if( (newblock == ITEM_SEEDS || newblock == BLOCK_CROPS) && (oldblock == BLOCK_SOIL) )
+  {
+    Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_CROPS, 0);
+    Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_CROPS, 0);
+    addBlock(x,y,z,map);
+    return false;
+  }
+
+  if( (newblock == ITEM_SEEDS || newblock == BLOCK_CROPS) )
+  {
+    revertBlock(user,x,y,z,map);
+    return true;
+  }
+
+  if( newblock > 255 && (oldblock == BLOCK_DIRT  || oldblock == BLOCK_GRASS))
+  {
+    // Hoe on dirt = Soil
+    Mineserver::get()->map(map)->sendBlockChange(x, y-1, z, BLOCK_SOIL, 0);
+    Mineserver::get()->map(map)->setBlock(x, y-1, z, BLOCK_SOIL, 0);
+    if(SEEDS_CHANCE >= rand() % 10000) {
+      Mineserver::get()->map(map)->createPickupSpawn(x, y+1, z, ITEM_SEEDS, 1, 0, NULL);
+    }
+    return true;
+  }
+
+  if (newblock > 255)
+  {
+    revertBlock(user,x,y,z,map);
+    return true;
+  }
+
+  if( (newblock == BLOCK_BROWN_MUSHROOM || newblock == BLOCK_RED_MUSHROOM)
+      && oldblock != BLOCK_DIRT )
+  {
+    revertBlock(user,x,y,z,map);
+    return true;
+  }
+
+  if(newblock == BLOCK_SAPLING)
+  {
+    Mineserver::get()->map(map)->addSapling(user,x,y,z);
+  } else {
+    Mineserver::get()->map(map)->sendBlockChange(x, y, z, newblock, 0);
+    Mineserver::get()->map(map)->setBlock(x, y, z, newblock, 0);
+    addBlocks(x,y,z,map);
+  }
   return false;
 }
 

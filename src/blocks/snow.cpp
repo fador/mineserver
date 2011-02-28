@@ -34,8 +34,8 @@ bool BlockSnow::affectedBlock(int block)
 {
   switch(block)
   {
-  case BLOCK_SNOW:
-    return true;
+    case BLOCK_SNOW:
+      return true;
   }
   return false;
 }
@@ -62,9 +62,10 @@ bool BlockSnow::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
   uint8_t block;
   uint8_t meta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z,&block, &meta)){
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z,&block, &meta))
+  {
     revertBlock(user,x,y,z,map);
-    return true; 
+    return true;
   }
 
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
@@ -91,34 +92,38 @@ void BlockSnow::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
 
 bool BlockSnow::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-   uint8_t oldblock;
-   uint8_t oldmeta;
+  uint8_t oldblock;
+  uint8_t oldmeta;
 
-   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta)){
-      revertBlock(user,x,y,z,map);
-      return true;
-   }
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  {
+     revertBlock(user,x,y,z,map);
+     return true;
+  }
 
-   /* Check block below allows blocks placed on top */
-   if (!this->isBlockStackable(oldblock)){
-      revertBlock(user,x,y,z,map);
-      return true;
-   }
+  /* Check block below allows blocks placed on top */
+  if (!this->isBlockStackable(oldblock))
+  {
+     revertBlock(user,x,y,z,map);
+     return true;
+  }
 
-   /* move the x,y,z coords dependent upon placement direction */
-   if (!this->translateDirection(&x,&y,&z,map,direction)){
-      revertBlock(user,x,y,z,map);
-      return true;
-   }
+  /* move the x,y,z coords dependent upon placement direction */
+  if (!this->translateDirection(&x,&y,&z,map,direction))
+  {
+     revertBlock(user,x,y,z,map);
+     return true;
+  }
 
-   if (!this->isBlockEmpty(x,y,z,map)){
-      revertBlock(user,x,y,z,map);
-      return true;
-   }
+  if (!this->isBlockEmpty(x,y,z,map))
+  {
+     revertBlock(user,x,y,z,map);
+     return true;
+  }
 
-   Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
-   Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
-   return false;
+  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+  return false;
 }
 
 void BlockSnow::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)

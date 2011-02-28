@@ -1,11 +1,14 @@
-SUBDIRS = src plugins 
+SUBDIRS = src plugins files
 
 include subdir.mk
 
-dist-tar:
+dist-tar: LICENSE
 	tar cvzf mineserver-latest-`uname`-bin.tar.gz ./bin/ ./LICENSE
 	
-dist-zip:
+dist-zip: LICENSE
 	zip -j mineserver-latest-`uname`-bin.zip ./bin/* ./LICENSE
   
 dist: dist-tar dist-zip
+
+clean:
+	rm -rf ./bin

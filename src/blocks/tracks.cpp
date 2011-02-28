@@ -107,24 +107,28 @@ bool BlockTracks::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
   uint8_t block;
   uint8_t meta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta)){
-     revertBlock(user,x,y,z,map);
-     return true;
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
+  {
+    revertBlock(user,x,y,z,map);
+    return true;
   }
 
   /* Check block below allows blocks placed on top */
-  if (!this->isBlockStackable(block)){
-     revertBlock(user,x,y,z,map);
-     return true;
+  if (!this->isBlockStackable(block))
+  {
+    revertBlock(user,x,y,z,map);
+    return true;
   }
 
   /* move the x,y,z coords dependent upon placement direction */
-  if (!this->translateDirection(&x,&y,&z,map,direction)){
+  if (!this->translateDirection(&x,&y,&z,map,direction))
+  {
      revertBlock(user,x,y,z,map);
      return true;
   }
 
-  if (!this->isBlockEmpty(x,y,z,map)){
+  if (!this->isBlockEmpty(x,y,z,map))
+  {
      revertBlock(user,x,y,z,map);
      return true;
   }
@@ -371,49 +375,69 @@ bool BlockTracks::isStartPiece(int32_t x, int8_t y, int32_t z, int map)
   switch(meta)
   {
     case FLAT_EW:
+    {
       x1--;
       x2++;
-      break;
+    }
+    break;
     case FLAT_NS:
+    {
       z1--;
       z2++;
-      break;
+    }
+    break;
     case CORNER_SE:
+    {
       x1++;
       z2++;
-      break;
+    }
+    break;
     case CORNER_SW:
+    {
       z1++;
       x2--;
-      break;
+    }
+    break;
     case CORNER_NE:
+    {
       x1++;
       z2--;
-      break;
+    }
+    break;
     case CORNER_NW:
+    {
       x1--;
       z2--;
-      break;
+    }
+    break;
     case ASCEND_E:
+    {
       y1++;
       x1--;
       x2++;
-      break;
+    }
+    break;
     case ASCEND_N:
+    {
       y1++;
       z1++;
       z2--;
-      break;
+    }
+    break;
     case ASCEND_S:
+    {
       y1++;
       z1--;
       z2++;
-      break;
+    }
+    break;
     case ASCEND_W:
+    {
       y1++;
       x1++;
       x2--;
-      break;
+    }
+    break;
   }
   
   if((Mineserver::get()->map(map)->getBlock(x1, y1, z1, &block, &meta) && block != BLOCK_MINECART_TRACKS) ||
@@ -426,9 +450,6 @@ bool BlockTracks::isStartPiece(int32_t x, int8_t y, int32_t z, int map)
     return false;
   }
 }
-
-
-
 
 int BlockTracks::searchTrack(int32_t x, int8_t y, int32_t z, int map, uint8_t& meta)
 {

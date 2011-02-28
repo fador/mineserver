@@ -52,39 +52,43 @@ bool BlockFalling::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
    uint8_t oldblock;
    uint8_t oldmeta;
 
-   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
-   {
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  {
     revertBlock(user,x,y,z,map);
-      return true;
-   }
+    return true;
+  }
 
-   /* Check block below allows blocks placed on top */
-   if (!this->isBlockStackable(oldblock)){
+  /* Check block below allows blocks placed on top */
+  if (!this->isBlockStackable(oldblock))
+  {
     revertBlock(user,x,y,z,map);
-      return true;
-   }
+    return true;
+  }
 
-   /* move the x,y,z coords dependent upon placement direction */
-   if (!this->translateDirection(&x,&y,&z,map, direction)){
+  /* move the x,y,z coords dependent upon placement direction */
+  if (!this->translateDirection(&x,&y,&z,map, direction))
+  {
     revertBlock(user,x,y,z,map);
-      return true;
-   }
+    return true;
+  }
 
-   if (this->isUserOnBlock(x,y,z,map)){
+  if (this->isUserOnBlock(x,y,z,map))
+  {
     revertBlock(user,x,y,z,map);
-      return true;
-   }
+    return true;
+  }
 
-   if (!this->isBlockEmpty(x,y,z,map)){
+  if (!this->isBlockEmpty(x,y,z,map))
+  {
     revertBlock(user,x,y,z,map);
-      return true;
-   }
+    return true;
+  }
 
-   Mineserver::get()->map(map)->setBlock(x, y, z,(char)newblock, 0);
-   Mineserver::get()->map(map)->sendBlockChange(x, y, z,(char)newblock, 0);
+  Mineserver::get()->map(map)->setBlock(x, y, z,(char)newblock, 0);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z,(char)newblock, 0);
 
-   applyPhysics(user,x,y,z,map);
-   return false;
+  applyPhysics(user,x,y,z,map);
+  return false;
 }
 
 void BlockFalling::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
