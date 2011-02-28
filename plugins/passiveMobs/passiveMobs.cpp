@@ -196,7 +196,7 @@ void timer200Function()
       yaw -= 30;
     }else if(action <20){
       yaw -= 15;
-      while(yaw <0){yaw+=360;}
+      while(yaw <= 0){ yaw += 360; }
       forward=0.3;
     }else if(action < 30){
       forward=+0.6;
@@ -207,6 +207,9 @@ void timer200Function()
     if(MyMobs[i]->velocity>2.0){ MyMobs[i]->velocity = 2.0; }
     if(MyMobs[i]->velocity<0.0){ MyMobs[i]->velocity = 0.0; }
     forward = MyMobs[i]->velocity;
+    
+    if(yaw<=0){yaw+=360;}
+    if( yaw>=360 ) { yaw-=360; }
 
     if(forward>0.1){
       double incz = cos_lt[(int)(yaw*10)] * forward;
