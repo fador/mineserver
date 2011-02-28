@@ -1065,44 +1065,55 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
       Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
       Mineserver::get()->mapGen(m_number)->generateChunk(x,z,m_number);
       generateLight(x, z);
-
-      //If we generated spawn pos, make sure the position is not underground!
-      if(x == blockToChunk(spawnPos.x()) && z == blockToChunk(spawnPos.z()))
-      {
-        uint8_t block,meta;
-        bool foundLand = false;
-        if(getBlock(spawnPos.x(),spawnPos.y(),spawnPos.z(), &block, &meta, false) && block == BLOCK_AIR)
-        {
-          uint8_t new_y;
-          for(new_y = spawnPos.y(); new_y > 30; new_y--)
-          {
-            if(getBlock(spawnPos.x(), new_y, spawnPos.z(), &block, &meta, false) && block != BLOCK_AIR)
-            {
-              foundLand = true;
-              break;
-            }
-          }
-          if(foundLand)
-          {
-            spawnPos.y() = new_y+1;
-            std::string infile = mapDirectory+"/level.dat";
-
-            NBT_Value* root = NBT_Value::LoadFromFile(infile);
-            if(root != NULL)
-            {
-              NBT_Value& data = *((*root)["Data"]);
-              *data["SpawnX"] = (int32_t)spawnPos.x();
-              *data["SpawnY"] = (int32_t)spawnPos.y();
-              *data["SpawnZ"] = (int32_t)spawnPos.z();
-
-              root->SaveToFile(infile);
-
-              delete root;
+      bool foundLand=false;
+      uint8_t block,meta;
+      int spx=spawnPos.x(),spy=120,spz=spawnPos.z();
+      while(!foundLand){
+        spx++;
+        for(int count = 0; count < 110; count++){
+          if(getBlock(spx,spy-count,spz, &block, &meta)){
+            switch(block){
+              case BLOCK_AIR:
+              case BLOCK_RED_ROSE:
+              case BLOCK_YELLOW_FLOWER:
+              case BLOCK_BROWN_MUSHROOM:
+              case BLOCK_RED_MUSHROOM:
+                // Not ground
+                continue;
+                break; // Does this matter here?
+              case BLOCK_GRASS:
+              case BLOCK_DIRT:
+              case BLOCK_SAND:
+              case BLOCK_NETHERSTONE:
+              case BLOCK_GRAY_CLOTH:
+                // Ground
+                foundLand=true;
+                spy=(spy-count)+2;
+                break;
+              default:
+                count=110;
+                continue;
+                break;
             }
           }
         }
       }
+      spawnPos.y() = spy;
+      spawnPos.x() = spx;
+      spawnPos.z() = spz;
+      std::string infile = mapDirectory+"/level.dat";
+      NBT_Value* root = NBT_Value::LoadFromFile(infile);
+      if(root != NULL)
+      {
+        NBT_Value& data = *((*root)["Data"]);
+        *data["SpawnX"] = (int32_t)spawnPos.x();
+        *data["SpawnY"] = (int32_t)spawnPos.y();
+        *data["SpawnZ"] = (int32_t)spawnPos.z();
 
+        root->SaveToFile(infile);
+
+        delete root;
+      }
       return chunks.getChunk(x,z);
     }
     else
