@@ -74,10 +74,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\plugin_api.h" />
-    <ClInclude Include="src\command.h" />
+    <ClInclude Include="command.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\command.cpp" />
+    <ClCompile Include="command.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

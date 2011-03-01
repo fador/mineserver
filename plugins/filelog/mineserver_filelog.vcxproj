@@ -74,7 +74,7 @@
     <Link />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\filelog.cpp" />
+    <ClCompile Include="filelog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\plugin_api.h" />
