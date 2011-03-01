@@ -9,8 +9,8 @@ Also mail to developers@mineserver.be will reach us.
 Custom Minecraft Beta server software written in C++.
 
 ### == NOTICE ==
-Currently in (early) development. (Alpha stage)
-Server still lacks some features and should be only used for testing.
+Currently in development.
+Server still lacks some features and might have some serious bugs.
 
 **Tested to build on**
 
@@ -21,21 +21,20 @@ Server still lacks some features and should be only used for testing.
 
 We are trying to minimize memory and CPU usage compared to original Java server.
 
-### Features (Some features are currently not operational because of major code rewrite)
- * Various chat commands, more to come..
+### Features
+ * Plugins (chatcommands, filelog, nether, passivemobs, etc..)
  * NBT parsing/saving
  * Lightmap generation
  * Config file
  * Normal mining/item spawning/item pickups
  * Basic physics for gravel and sand
- * Experimental physics for water
- * Flatland map generation
+ * Physics for water (currently revising this)
+ * Flatland and terrain map generation (Also biomegen!)
  * Working chests, furnaces & signs
- * Terrain map generation with caves and minerals
 
-### ToDo is located at [http://redmine.fknsrs.biz/projects/mineserver](http://redmine.fknsrs.biz/projects/mineserver)
+### Bugtracker is located at [http://redmine.fknsrs.biz/projects/mineserver](http://redmine.fknsrs.biz/projects/mineserver)
 
-### Chat commands can be found at [wiki](http://www.mineserver.be/wiki) or by typing `/help` within the client's chat
+### ToDo/Roadmap can be found at [wiki](http://www.mineserver.be/wiki)
 
 ### Compiling (Better instructions in [wiki](http://www.mineserver.be/wiki))
 Depends on (and tested with):
@@ -43,11 +42,10 @@ Depends on (and tested with):
  [zlib 1.2.5](http://www.zlib.org)
  [libevent 1.4.14b](http://monkey.org/~provos/libevent/)
  [libnoise 1.0](http://libnoise.sourceforge.net/)
- ncurses/pdcurses
 
  * Installing on Debian and Ubuntu: (For Ubuntu libevent1 -> libevent-1.4-2)
 
-    `sudo apt-get install ncurses5 ncurses5-dev libevent1 libevent-dev zlib1g zlib1g-dev libnoise-dev`
+    `sudo apt-get install libevent1 libevent-dev zlib1g zlib1g-dev libnoise-dev`
 
  * Installing on CentOS and RHEL
 
@@ -69,21 +67,23 @@ Depends on (and tested with):
     `brew install libevent libnoise`
 
 
-**Compiling using linux (make & gcc):**
+**Compiling using linux (cmake & make & gcc):**
 
  * Download and extract source or use `git clone git://github.com/fador/mineserver.git`
  * Go to mineserver directory
+ * Run `cmake .`
  * Run `make all install` for Debian/Ubuntu
  * Run server with `cd bin && ./mineserver`
 
-**Compiling using FreeBSD / PCBSD (gmake & g++):**
+**Compiling using FreeBSD / PCBSD (cmake & gmake & g++):** 
 
  * Download and extract source or use `git clone git://github.com/fador/mineserver.git`
  * Go to mineserver directory
+ * Run `cmake .`
  * Run `gmake all install`
  * Run server with `cd bin && ./mineserver`
 
-**Compiling using windows (VS2010/VS2008):**
+**Compiling using windows (VS2010/VS2008): (Might be outdated)**
 
  * Download and compile [zlib](http://www.zlib.org) or use [pre-built binaries](http://www.winimage.com/zLibDll/index.html)
  * Add zlib libraries to project (zlibstat.lib or zlibwapi.lib which requires also zlibwapi.dll in the same dir with the executable)
