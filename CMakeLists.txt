@@ -85,6 +85,11 @@ set(mineserver_plugins
   filelog
   nBreak
   nether
+  binlog
+  crapMobs
+  cursesui
+  flatpermissions
+  passiveMobs
 )
 
 set(commands_source
@@ -101,6 +106,22 @@ set(nBreak_source
 
 set(nether_source
   plugins/nether/nether.cpp
+)
+
+set(binlog_source
+  plugins/binlog/src/binlog.cpp
+)
+set(crapMobs_source
+  plugins/crapMobs/crapMobs.cpp
+)
+set(cursesui_source
+  plugins/cursesui/screen.cpp
+)
+set(flatpermissions_source
+  plugins/flatpermissions/flatpermissions.cpp
+)
+set(passiveMobs_source
+  plugins/passiveMobs/passiveMobs.cpp
 )
 
 add_definitions(-DFADOR_PLUGIN=1)
