@@ -10,5 +10,5 @@ dist-zip: LICENSE
   
 dist: dist-tar dist-zip
 
-clean:
+distclean:
 	rm -rf ./bin
