@@ -64,7 +64,7 @@ private:
 
   Lighting()
   {
-    for(int i = 0; i < 256; i++)
+    for (int i = 0; i < 256; i++)
     {
       emitLight[i] = 0;
     }
@@ -80,7 +80,7 @@ private:
     emitLight[0x5A] = 11; // Portal
     emitLight[0x5B] = 15; // Jack-O-Lantern
 
-    for(int i = 0; i < 256; i++)
+    for (int i = 0; i < 256; i++)
     {
       stopLight[i] = 16;
     }
@@ -144,7 +144,7 @@ public:
 
   static Lighting* get()
   {
-    if(!mLight)
+    if (!mLight)
     {
       mLight = new Lighting();
     }

@@ -3,7 +3,7 @@
 
 bool ItemFood::affectedItem(int item)
 {
-  switch(item)
+  switch (item)
   {
   case ITEM_GOLDEN_APPLE:
   case ITEM_MUSHROOM_SOUP:
@@ -21,7 +21,7 @@ bool ItemFood::affectedItem(int item)
 void ItemFood::onRightClick(User* user, Item* item)
 {
   int healammount = 0;
-  switch(item->getType())
+  switch (item->getType())
   {
   case ITEM_GOLDEN_APPLE:
     healammount = 20;
@@ -49,7 +49,7 @@ void ItemFood::onRightClick(User* user, Item* item)
     break;
   }
   int newhealth = user->health + healammount;
-  if(newhealth > 20)
+  if (newhealth > 20)
   {
     newhealth = 20;
   }

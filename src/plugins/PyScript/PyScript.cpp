@@ -28,7 +28,7 @@ Script* the_script;
 
 void checkPyErr()
 {
-  if(PyErr_Occurred())
+  if (PyErr_Occurred())
   {
     PyErr_Print();
   }
@@ -93,13 +93,13 @@ Script::~Script()
 PyObject* Script::callPyFunc(const char* name, PyObject* Args)
 {
   PyObject*  pValue, *pFunc;
-  if(::mod != NULL)
+  if (::mod != NULL)
   {
     pFunc = PyObject_GetAttrString(::mod, name);
-    if(pFunc && PyCallable_Check(pFunc))
+    if (pFunc && PyCallable_Check(pFunc))
     {
       pValue = PyObject_CallObject(pFunc, Args);
-      if(pValue != NULL)
+      if (pValue != NULL)
       {
         Py_XDECREF(pFunc);
         return pValue;
@@ -166,7 +166,7 @@ PyObject* Script::callPyFunc(const char* name, PyObject* Args)
 
 mineserver_pointer_struct* getMineServer()
 {
-  if((int)::ms == 0)
+  if ((int)::ms == 0)
   {
     cout << "Passing zero pointer as MineServer struct! SEGFAULT COMMING" << endl;
   }
@@ -195,7 +195,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION set_name(const char* name)
 {
   std::string script_name = std::string(name);
   size_t pos = script_name.rfind("\\");
-  while(pos != string::npos)
+  while (pos != string::npos)
   {
     script_name.replace(pos, 1, "/"); // Silently ignore backslashes
     pos = script_name.find("\\");
@@ -239,7 +239,7 @@ bool chatPreFunction(const char* userIn, time_t timestamp, const char* msgIn)
   ret = the_script->callPyFunc("cb_chat", param);
   checkPyErr();
   Py_XDECREF(param);
-  if(PyBool_Check(ret))
+  if (PyBool_Check(ret))
   {
     Py_XDECREF(ret);
     return ret == Py_True;
@@ -287,7 +287,7 @@ bool blockPlaceFunction(const char* name, int32_t x, int8_t y, int32_t z,
   checkPyErr();
   Py_XDECREF(Arg);
   Py_XDECREF(param);
-  if(ret && PyBool_Check(ret))
+  if (ret && PyBool_Check(ret))
   {
     Py_XDECREF(ret);
     return ret == Py_True;
@@ -306,7 +306,7 @@ bool blockBreakFunction(const char* name, int x, int y, int z)
   checkPyErr();
   Py_XDECREF(Arg);
   Py_XDECREF(param);
-  if(ret && PyBool_Check(ret))
+  if (ret && PyBool_Check(ret))
   {
     Py_XDECREF(ret);
     return ret == Py_True;

@@ -127,7 +127,7 @@ public:
   {
     std::vector<Recipe*>::iterator it_a = recipes.begin();
     std::vector<Recipe*>::iterator it_b = recipes.end();
-    for(; it_a != it_b; ++it_a)
+    for (; it_a != it_b; ++it_a)
     {
       delete *it_a;
     }

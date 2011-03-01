@@ -138,7 +138,7 @@ PyUser* PyMineserver::get_user(const char* player_name)
 {
   PyLoc* loc = new PyLoc();
   double stance;
-  if(getMineServer()->user.getPosition(
+  if (getMineServer()->user.getPosition(
         player_name, &loc->x, &loc->y, &loc->z,
         (float*)&loc->rot, (float*)&loc->pit, &stance))
   {

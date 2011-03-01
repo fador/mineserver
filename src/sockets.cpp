@@ -84,7 +84,7 @@ void client_callback(int fd,
     return;
   }
   */
-  if(ev & EV_READ)
+  if (ev & EV_READ)
   {
 
     int read   = 1;
@@ -92,7 +92,7 @@ void client_callback(int fd,
     uint8_t* buf = new uint8_t[2048];
 
     read = recv(fd, (char*)buf, 2048, 0);
-    if(read == 0)
+    if (read == 0)
     {
       Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket closed properly");
 
@@ -102,7 +102,7 @@ void client_callback(int fd,
       return;
     }
 
-    if(read == SOCKET_ERROR)
+    if (read == SOCKET_ERROR)
     {
       Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket had no data to read");
 
@@ -120,17 +120,17 @@ void client_callback(int fd,
 
     user->buffer.reset();
 
-    while(user->buffer >> (int8_t&)user->action)
+    while (user->buffer >> (int8_t&)user->action)
     {
       //Variable len package
-      if(Mineserver::get()->packetHandler()->packets[user->action].len == PACKET_VARIABLE_LEN)
+      if (Mineserver::get()->packetHandler()->packets[user->action].len == PACKET_VARIABLE_LEN)
       {
         //Call specific function
         int (PacketHandler::*function)(User*) =
           Mineserver::get()->packetHandler()->packets[user->action].function;
         bool disconnecting = user->action == 0xFF;
         int curpos = (Mineserver::get()->packetHandler()->*function)(user);
-        if(curpos == PACKET_NEED_MORE_DATA)
+        if (curpos == PACKET_NEED_MORE_DATA)
         {
           user->waitForData = true;
           event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
@@ -138,14 +138,14 @@ void client_callback(int fd,
           return;
         }
 
-        if(disconnecting) // disconnect -- player gone
+        if (disconnecting) // disconnect -- player gone
         {
           delete user;
           user = (User*)4;
           return;
         }
       }
-      else if(Mineserver::get()->packetHandler()->packets[user->action].len == PACKET_DOES_NOT_EXIST)
+      else if (Mineserver::get()->packetHandler()->packets[user->action].len == PACKET_DOES_NOT_EXIST)
       {
         printf("Unknown action: 0x%x\n", user->action);
 
@@ -155,7 +155,7 @@ void client_callback(int fd,
       }
       else
       {
-        if(!user->buffer.haveData(Mineserver::get()->packetHandler()->packets[user->action].len))
+        if (!user->buffer.haveData(Mineserver::get()->packetHandler()->packets[user->action].len))
         {
           user->waitForData = true;
           event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
@@ -171,17 +171,17 @@ void client_callback(int fd,
   }
 
   int writeLen = user->buffer.getWriteLen();
-  if(writeLen)
+  if (writeLen)
   {
     int written = send(fd, (char*)user->buffer.getWrite(), writeLen, 0);
-    if(written == SOCKET_ERROR)
+    if (written == SOCKET_ERROR)
     {
 #ifdef WIN32
 #define ERROR_NUMBER WSAGetLastError()
-      if((ERROR_NUMBER != WSATRY_AGAIN && ERROR_NUMBER != WSAEINTR && ERROR_NUMBER != WSAEWOULDBLOCK))
+      if ((ERROR_NUMBER != WSATRY_AGAIN && ERROR_NUMBER != WSAEINTR && ERROR_NUMBER != WSAEWOULDBLOCK))
 #else
 #define ERROR_NUMBER errno
-      if((errno != EAGAIN && errno != EINTR))
+      if ((errno != EAGAIN && errno != EINTR))
 #endif
       {
         Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Error writing to client, tried to write " + dtos(writeLen) + " bytes, code: " + dtos(ERROR_NUMBER));
@@ -202,7 +202,7 @@ void client_callback(int fd,
       //user->write_err_count=0;
     }
 
-    if(user->buffer.getWriteLen())
+    if (user->buffer.getWriteLen())
     {
       event_set(user->GetEvent(), fd, EV_WRITE | EV_READ, client_callback, user);
       event_add(user->GetEvent(), NULL);
@@ -226,7 +226,7 @@ void accept_callback(int fd,
   client_fd = accept(fd,
                      (struct sockaddr*)&client_addr,
                      &client_len);
-  if(client_fd < 0)
+  if (client_fd < 0)
   {
     LOGLF("Client: accept() failed");
     return;

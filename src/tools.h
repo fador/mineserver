@@ -62,7 +62,7 @@ int kbhit();
 
 inline uint64_t ntohll(uint64_t v)
 {
-  if(htons(1) == 1) // check if already big-endian
+  if (htons(1) == 1) // check if already big-endian
   {
     return v;
   }

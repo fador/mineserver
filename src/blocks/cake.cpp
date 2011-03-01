@@ -33,7 +33,7 @@
 
 bool BlockCake::affectedBlock(int block)
 {
-  switch(block)
+  switch (block)
   {
   case BLOCK_CAKE:
   case ITEM_CAKE:
@@ -47,33 +47,33 @@ bool BlockCake::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if(!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
   /* Check block below allows blocks placed on top */
-  if(!this->isBlockStackable(oldblock))
+  if (!this->isBlockStackable(oldblock))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
   /* move the x,y,z coords dependent upon placement direction */
-  if(!this->translateDirection(&x, &y, &z, map, direction))
+  if (!this->translateDirection(&x, &y, &z, map, direction))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
-  if(this->isUserOnBlock(x, y, z, map))
+  if (this->isUserOnBlock(x, y, z, map))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
-  if(!this->isBlockEmpty(x, y, z, map))
+  if (!this->isBlockEmpty(x, y, z, map))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -93,9 +93,9 @@ bool BlockCake::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
   int healammount = 3;
   int newhealth = user->health + healammount;
 
-  if(metadata < 6)
+  if (metadata < 6)
   {
-    if(newhealth > 20)
+    if (newhealth > 20)
     {
       newhealth = 20;
     }
@@ -105,7 +105,7 @@ bool BlockCake::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
   }
   else
   {
-    if(newhealth > 20)
+    if (newhealth > 20)
     {
       newhealth = 20;
     }
@@ -128,7 +128,7 @@ bool BlockCake::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
   uint8_t block;
   uint8_t meta;
 
-  if(!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
   {
     return true;
   }

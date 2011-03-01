@@ -146,7 +146,7 @@ public:
 
   void addToWrite(const void* data, BufferVector::size_type dataSize)
   {
-    if(dataSize == 0)
+    if (dataSize == 0)
     {
       return;
     }
@@ -179,7 +179,7 @@ public:
 
   void getData(void* buf, int count)
   {
-    if(haveData(count))
+    if (haveData(count))
     {
       memcpy(buf, &m_readBuffer[m_readPos], count);
       m_readPos += count;

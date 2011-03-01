@@ -150,19 +150,19 @@ void NetherGen::generateChunk(int x, int z, int map)
 
   //Mineserver::get()->map()->maps[chunkid].nbt = main;
 
-  if(addOre)
+  if (addOre)
   {
     AddOre(x, z, map, BLOCK_GLOWSTONE);
     AddOre(x, z, map, BLOCK_STATIONARY_LAVA);
   }
 
   // Add trees
-  if(addTrees)
+  if (addTrees)
   {
     AddTrees(x, z, map,  fastrand() % 2 + 3);
   }
 
-  if(expandBeaches)
+  if (expandBeaches)
   {
     ExpandBeaches(x, z, map);
   }
@@ -181,7 +181,7 @@ void NetherGen::AddTrees(int x, int z, int map, uint16_t count)
   uint8_t block;
   uint8_t meta;
 
-  for(uint16_t i = 0; i < count; i++)
+  for (uint16_t i = 0; i < count; i++)
   {
     blockX = fastrand() % 16;
     blockZ = fastrand() % 16;
@@ -193,7 +193,7 @@ void NetherGen::AddTrees(int x, int z, int map, uint16_t count)
 
     Mineserver::get()->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
     // No trees on water
-    if(block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
+    if (block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
     {
       continue;
     }
@@ -224,9 +224,9 @@ void NetherGen::generateWithNoise(int x, int z, int map)
 
   double xBlockpos = x << 4;
   double zBlockpos = z << 4;
-  for(int bX = 0; bX < 16; bX++)
+  for (int bX = 0; bX < 16; bX++)
   {
-    for(int bZ = 0; bZ < 16; bZ++)
+    for (int bZ = 0; bZ < 16; bZ++)
     {
       double ciel2 = (Randomciel.GetValue(xBlockpos + bX, 0 , zBlockpos + bZ) * 1.5);
       ciel = 128 - (uint16_t)(abs(ciel2 * ciel2 * ciel2 * ciel2 * ciel2 * ciel2)); // Cubed! Get some good stalagtites!
@@ -235,34 +235,34 @@ void NetherGen::generateWithNoise(int x, int z, int map)
       int32_t stoneHeight = (int32_t)(currentHeight * 0.94);
       int32_t bYbX = ((bZ << 7) + (bX << 11));
 
-      if(ymax < seaLevel)
+      if (ymax < seaLevel)
       {
         ymax = seaLevel;
       }
 
-      for(int bY = 0; bY < 128; bY++)
+      for (int bY = 0; bY < 128; bY++)
       {
         curBlock = &netherblocks[bYbX++];
-        if(bY >= 126)
+        if (bY >= 126)
         {
           *curBlock = BLOCK_BEDROCK;
           continue;
         }
-        if(bY == 0)
+        if (bY == 0)
         {
           *curBlock = BLOCK_BEDROCK;
           continue;
         }
-        if(bY > ciel)
+        if (bY > ciel)
         {
           *curBlock = BLOCK_NETHERSTONE;
           continue;
         }
 
 
-        if(bY < currentHeight)
+        if (bY < currentHeight)
         {
-          if(bY < stoneHeight)
+          if (bY < stoneHeight)
           {
             *curBlock = BLOCK_NETHERSTONE;
             // Add caves
@@ -273,13 +273,13 @@ void NetherGen::generateWithNoise(int x, int z, int map)
             *curBlock = BLOCK_NETHERSTONE;
           }
         }
-        else if(currentHeight == bY)
+        else if (currentHeight == bY)
         {
-          if(bY == seaLevel || bY == seaLevel - 1 || bY == seaLevel - 2)
+          if (bY == seaLevel || bY == seaLevel - 1 || bY == seaLevel - 2)
           {
             *curBlock = BLOCK_SLOW_SAND;  // FF
           }
-          else if(bY < seaLevel - 1)
+          else if (bY < seaLevel - 1)
           {
             *curBlock = BLOCK_GRAVEL;  // FF
           }
@@ -290,7 +290,7 @@ void NetherGen::generateWithNoise(int x, int z, int map)
         }
         else
         {
-          if(bY <= seaLevel)
+          if (bY <= seaLevel)
           {
             *curBlock = BLOCK_STATIONARY_LAVA;  // FF
           }
@@ -324,28 +324,28 @@ void NetherGen::ExpandBeaches(int x, int z, int map)
   uint8_t block;
   uint8_t meta;
 
-  for(int bX = 0; bX < 16; bX++)
+  for (int bX = 0; bX < 16; bX++)
   {
-    for(int bZ = 0; bZ < 16; bZ++)
+    for (int bZ = 0; bZ < 16; bZ++)
     {
       blockX = xBlockpos + bX;
       blockZ = zBlockpos + bZ;
 
       h = heightmap[(bZ << 4) + bX];
 
-      if(h < 0)
+      if (h < 0)
       {
         continue;
       }
 
       bool found = false;
-      for(int dx = -beachExtent; !found && dx <= beachExtent; dx++)
+      for (int dx = -beachExtent; !found && dx <= beachExtent; dx++)
       {
-        for(int dz = -beachExtent; !found && dz <= beachExtent; dz++)
+        for (int dz = -beachExtent; !found && dz <= beachExtent; dz++)
         {
-          for(int dh = -beachHeight; !found && dh <= 0; dh++)
+          for (int dh = -beachHeight; !found && dh <= 0; dh++)
           {
-            if(dx * dx + dz * dz + dh * dh > beachExtentSqr)
+            if (dx * dx + dz * dz + dh * dh > beachExtentSqr)
             {
               continue;
             }
@@ -353,13 +353,13 @@ void NetherGen::ExpandBeaches(int x, int z, int map)
             int xx = bX + dx;
             int zz = bZ + dz;
             int hh = h + dh;
-            if(xx < 0 || xx >= 15 || zz < 0 || zz >= 15 || hh < 0 || hh >= 127)
+            if (xx < 0 || xx >= 15 || zz < 0 || zz >= 15 || hh < 0 || hh >= 127)
             {
               continue;
             }
 
             Mineserver::get()->map(map)->getBlock(xBlockpos + xx, hh, zBlockpos + zz, &block, &meta);
-            if(block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
+            if (block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
             {
               found = true;
               break;
@@ -367,14 +367,14 @@ void NetherGen::ExpandBeaches(int x, int z, int map)
           }
         }
       }
-      if(found)
+      if (found)
       {
         Mineserver::get()->map(map)->sendBlockChange(blockX, h, blockZ, BLOCK_SAND, 0);
         Mineserver::get()->map(map)->setBlock(blockX, h, blockZ, BLOCK_SAND, 0);
 
         Mineserver::get()->map(map)->getBlock(blockX, h - 1, blockZ, &block, &meta);
 
-        if(h > 0 && block == BLOCK_DIRT)
+        if (h > 0 && block == BLOCK_DIRT)
         {
           Mineserver::get()->map(map)->sendBlockChange(blockX, h - 1, blockZ, BLOCK_SAND, 0);
           Mineserver::get()->map(map)->setBlock(blockX, h - 1, blockZ, BLOCK_SAND, 0);
@@ -395,7 +395,7 @@ void NetherGen::AddOre(int x, int z, int map, uint8_t type)
 
   int count, startHeight;
 
-  switch(type)
+  switch (type)
   {
   case BLOCK_GLOWSTONE:
     count = fastrand() % 4 + 15;
@@ -408,7 +408,7 @@ void NetherGen::AddOre(int x, int z, int map, uint8_t type)
   }
 
   int i = 0;
-  while(i < count)
+  while (i < count)
   {
     blockX = fastrand() % 8 + 4;
     blockZ = fastrand() % 8 + 4;
@@ -417,7 +417,7 @@ void NetherGen::AddOre(int x, int z, int map, uint8_t type)
     blockY -= 5;
 
     // Check that startheight is not higher than height at that column
-    if(blockY > startHeight)
+    if (blockY > startHeight)
     {
       blockY = startHeight;
     }
@@ -432,7 +432,7 @@ void NetherGen::AddOre(int x, int z, int map, uint8_t type)
 
     Mineserver::get()->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
     // No ore in caves
-    if(block != BLOCK_NETHERSTONE)
+    if (block != BLOCK_NETHERSTONE)
     {
       continue;
     }
@@ -444,13 +444,13 @@ void NetherGen::AddOre(int x, int z, int map, uint8_t type)
 
 void NetherGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int depotSize)
 {
-  for(int bX = x; bX < x + depotSize; bX++)
+  for (int bX = x; bX < x + depotSize; bX++)
   {
-    for(int bY = y; bY < y + depotSize; bY++)
+    for (int bY = y; bY < y + depotSize; bY++)
     {
-      for(int bZ = z; bZ < z + depotSize; bZ++)
+      for (int bZ = z; bZ < z + depotSize; bZ++)
       {
-        if(rand() % 1000 < 500)
+        if (rand() % 1000 < 500)
         {
           Mineserver::get()->map(map)->sendBlockChange(bX, bY, bZ, block, 0);
           Mineserver::get()->map(map)->setBlock(bX, bY, bZ, block, 0);
