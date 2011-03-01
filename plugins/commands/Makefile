@@ -1,6 +1,6 @@
 # Makefile for plugin
-PLUGIN_NAME=command
+PLUGIN_NAME=commands
 
-SRCS = ./src/command.cpp
+SRCS = commands.cpp
 
 include ../plugins.mk

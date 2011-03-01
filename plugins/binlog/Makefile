@@ -1,13 +1,13 @@
 # Makefile for plugin
 PLUGIN_NAME=binlog
 
-SRCS = ./src/binlog.cpp
+SRCS = binlog.cpp
 
-binlogdump: ./src/binlogdump.o ./src/binlog.o
+binlogdump: binlogdump.o binlog.o
 	$(CC) binlogdump.o binlog.o -o binlogdump
 
-binlogdump.o: ./src/binlogdump.cpp
-	$(CC) -c ./src/binlogdump.cpp
+binlogdump.o: binlogdump.cpp
+	$(CC) -c binlogdump.cpp
 
 
 include ../plugins.mk

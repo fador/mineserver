@@ -55,7 +55,7 @@
 #include <string.h>
 
 #define MINESERVER_C_API
-#include "../../../src/plugin_api.h"
+#include "../../src/plugin_api.h"
 
 // This should mirror mineserver/src/logtype.h.
 enum LogType

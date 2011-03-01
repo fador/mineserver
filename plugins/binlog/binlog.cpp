@@ -37,7 +37,7 @@
 #include <time.h>
 #include <vector>
 
-#include "../../../src/plugin_api.h"
+#include "../../src/plugin_api.h"
 #include "binlog.h"
                                      
 

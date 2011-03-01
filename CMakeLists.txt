@@ -3,11 +3,16 @@ project(Mineserver)
 cmake_policy(SET CMP0003 NEW)
 
 # project version
+# TODO: get that from src/constants.h
 set( ${PROJECT_NAME}_MAJOR_VERSION 0 )
 set( ${PROJECT_NAME}_MINOR_VERSION 1 )
-set( ${PROJECT_NAME}_PATCH_LEVEL 0 )
+set( ${PROJECT_NAME}_PATCH_LEVEL 15 )
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
+
+# Output paths
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 # Set compiler specific build flags
 IF (UNIX)
@@ -38,7 +43,6 @@ set(mineserver_source
   src/nbt.cpp
   src/user.cpp
   src/config.cpp
-  src/cursesScreen.cpp
   src/config/lexer.cpp
   src/config/scanner.cpp
   src/config/parser.cpp
@@ -68,15 +72,36 @@ set(mineserver_source
   src/tools.cpp
   src/physics.cpp
   src/cliScreen.cpp
+  src/blocks/blockfurnace.cpp
+  src/blocks/dyed.cpp
+  src/blocks/note.cpp
+  src/blocks/workbench.cpp
+  src/items/food.cpp
+  src/items/itembasic.cpp
+  src/items/projectile.cpp
+  src/mob.cpp
+  src/worldgen/biomegen.cpp
 )
 source_group("Mineserver" FILES ${mineserver_source})
 
-set(command_source
-  plugins/commands/src/command.cpp
+set(mineserver_plugins
+  commands
+  filelog
+  nBreak
+  nether
+  binlog
+  crapMobs
+  cursesui
+  flatpermissions
+  passiveMobs
+)
+
+set(commands_source
+  plugins/commands/commands.cpp
 )
 
 set(filelog_source
-  plugins/filelog/src/filelog.cpp
+  plugins/filelog/filelog.cpp
 )
 
 set(nBreak_source
@@ -85,6 +110,22 @@ set(nBreak_source
 
 set(nether_source
   plugins/nether/nether.cpp
+)
+
+set(binlog_source
+  plugins/binlog/binlog.cpp
+)
+set(crapMobs_source
+  plugins/crapMobs/crapMobs.cpp
+)
+set(cursesui_source
+  plugins/cursesui/screen.cpp
+)
+set(flatpermissions_source
+  plugins/flatpermissions/flatpermissions.cpp
+)
+set(passiveMobs_source
+  plugins/passiveMobs/passiveMobs.cpp
 )
 
 add_definitions(-DFADOR_PLUGIN=1)
@@ -124,7 +165,7 @@ endif()
 #Debian?
 FIND_PATH(NOISE_ON_DEBIANISH libnoise/noise.h ${NOISE_INCLUDE_DIR})
 if(NOISE_ON_DEBIANISH)
-  add_definitions(-DDEBIAN)
+  add_definitions(-DLIBNOISE)
 endif()
 
 #Provides ncurses, too
@@ -137,14 +178,11 @@ endif ()
 
 if (NOT dependency_error)
 
-  add_library(command SHARED ${command_source})
-  set_target_properties(command PROPERTIES PREFIX "")
-  add_library(filelog SHARED ${filelog_source})
-  set_target_properties(filelog PROPERTIES PREFIX "")
-  add_library(nBreak SHARED ${nBreak_source})
-  set_target_properties(nBreak PROPERTIES PREFIX "")
-  add_library(nether SHARED ${nether_source})
-  set_target_properties(nether PROPERTIES PREFIX "")
+  foreach(p ${mineserver_plugins})
+    message(STATUS "Plugin target added: ${p}")
+    add_library(${p} SHARED ${${p}_source})
+    set_target_properties(${p} PROPERTIES PREFIX "")
+  endforeach()
 
   include_directories(${ZLIB_INCLUDE_DIR})
 #  include_directories(${LUA_INCLUDE_DIR})
@@ -167,10 +205,10 @@ set(CPACK_PACKAGE_NAME "Mineserver")
 set(CPACK_PACKAGE_VENDOR "The Mineserver Project")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Mineserver Developers <developers@mineserver.be>")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Mineserver - C++ Minecraft server software")
-set(CPACK_PACKAGE_VERSION "0.1.12")
-set(CPACK_PACKAGE_VERSION_MAJOR "0")
-set(CPACK_PACKAGE_VERSION_MINOR "1")
-set(CPACK_PACKAGE_VERSION_PATCH "12")
+set(CPACK_PACKAGE_VERSION ${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_PATCH_LEVEL})
+set(CPACK_PACKAGE_VERSION_MAJOR ${${PROJECT_NAME}_MAJOR_VERSION})
+set(CPACK_PACKAGE_VERSION_MINOR ${${PROJECT_NAME}_MINOR_VERSION})
+set(CPACK_PACKAGE_VERSION_PATCH ${${PROJECT_NAME}_PATCH_LEVEL})
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "/usr/local/bin")
 
 include(CPack)

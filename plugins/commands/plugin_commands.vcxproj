@@ -13,8 +13,8 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8BF3BBA7-4740-4138-BAB6-674D1E54EFC3}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>mineserver_plugintest</RootNamespace>
-    <ProjectName>plugin_command</ProjectName>
+    <RootNamespace>plugin_commands</RootNamespace>
+    <ProjectName>plugin_commands</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -40,11 +40,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>..\bin\</OutDir>
-    <TargetName>command</TargetName>
+    <TargetName>commands</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>..\bin</OutDir>
-    <TargetName>command</TargetName>
+    <TargetName>commands</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -58,7 +58,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <OutputFile>..\..\bin\command.dll</OutputFile>
+      <OutputFile>..\..\bin\commands.dll</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -74,10 +74,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\plugin_api.h" />
-    <ClInclude Include="src\command.h" />
+    <ClInclude Include="commands.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\command.cpp" />
+    <ClCompile Include="commands.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
