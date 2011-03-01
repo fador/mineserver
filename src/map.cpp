@@ -1576,8 +1576,7 @@ void Map::sendToUser(User* user, int x, int z, bool login)
     generateLight(x, z, chunk);
     chunk->lightRegen = false;
   }
-  // Pre chunk
-  (*p) << (int8_t)PACKET_PRE_CHUNK << mapposx << mapposz << (int8_t)1;
+
 
   // Chunk
   (*p) << (int8_t)PACKET_MAP_CHUNK << (int32_t)(mapposx * 16) << (int16_t)0 << (int32_t)(mapposz * 16)

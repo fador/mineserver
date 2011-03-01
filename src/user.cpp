@@ -222,7 +222,7 @@ bool User::sendLoginInfo()
   loadData();
 
   // Login OK package
-  loginBuffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << std::string("") << (int64_t)0 << (int8_t)0;
+  buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << std::string("") << (int64_t)0 << (int8_t)0;
 
   spawnOthers();
   // Put nearby chunks to queue
@@ -234,8 +234,6 @@ bool User::sendLoginInfo()
     }
   }
   // Push chunks to user
-  pushMap(true);
-  pushMap(true);
   pushMap(true);
   std::vector<Mob*> mob = Mineserver::get()->mobs()->getAll();
   std::vector<Mob*>::iterator i = mob.begin();
@@ -282,8 +280,6 @@ bool User::sendLoginInfo()
   Mineserver::get()->chat()->sendMsg(this, nick + " connected!", Chat::ALL);
 
   teleport(pos.x, pos.y + 2, pos.z);
-  teleport(pos.x, pos.y, pos.z);
-  teleport(pos.x, pos.y, pos.z);
 
   sethealth(health);
   logged = true;
@@ -1051,6 +1047,9 @@ bool User::addQueue(int x, int z)
       return false;
     }
   }
+
+  // Pre chunk
+  buffer << (int8_t)PACKET_PRE_CHUNK << x << z << (int8_t)1;
 
   this->mapQueue.push_back(newMap);
 
