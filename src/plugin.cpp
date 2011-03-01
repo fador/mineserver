@@ -62,55 +62,55 @@
 
 void Plugin::init()
 {
-   // Create Block* objects and put them away so we can delete them later
-   BlockDyed* dyedblock = new BlockDyed();
-   BlockCB.push_back(dyedblock);
-   BlockFalling* fallingblock = new BlockFalling();
-   BlockCB.push_back(fallingblock);
-   BlockTorch* torchblock = new BlockTorch();
-   BlockCB.push_back(torchblock);
-   BlockPlant* plantblock = new BlockPlant();
-   BlockCB.push_back(plantblock);
-   BlockSnow* snowblock = new BlockSnow();
-   BlockCB.push_back(snowblock);
-   BlockLiquid* liquidblock = new BlockLiquid();
-   BlockCB.push_back(liquidblock);
-   BlockFire* fireblock = new BlockFire();
-   BlockCB.push_back(fireblock);
-   BlockStair* stairblock = new BlockStair();
-   BlockCB.push_back(stairblock);
-   BlockChest* chestblock = new BlockChest();
-   BlockCB.push_back(chestblock);
-   BlockDoor* doorblock = new BlockDoor();
-   BlockCB.push_back(doorblock);
-   BlockSign* signblock = new BlockSign();
-   BlockCB.push_back(signblock);
-   BlockTracks* tracksblock = new BlockTracks();
-   BlockCB.push_back(tracksblock);
-   BlockLadder* ladderblock = new BlockLadder();
-   BlockCB.push_back(ladderblock);
-   BlockCake* cakeblock = new BlockCake();
-   BlockCB.push_back(cakeblock);
-   BlockNote* noteblock = new BlockNote();
-   BlockCB.push_back(noteblock);
-   BlockFurnace* furnaceblock = new BlockFurnace();
-   BlockCB.push_back(furnaceblock);
-   BlockWorkbench* workbenchblock = new BlockWorkbench();
-   BlockCB.push_back(workbenchblock);
-   BlockDefault* defaultblock = new BlockDefault();
-   BlockCB.push_back(defaultblock);
+  // Create Block* objects and put them away so we can delete them later
+  BlockDyed* dyedblock = new BlockDyed();
+  BlockCB.push_back(dyedblock);
+  BlockFalling* fallingblock = new BlockFalling();
+  BlockCB.push_back(fallingblock);
+  BlockTorch* torchblock = new BlockTorch();
+  BlockCB.push_back(torchblock);
+  BlockPlant* plantblock = new BlockPlant();
+  BlockCB.push_back(plantblock);
+  BlockSnow* snowblock = new BlockSnow();
+  BlockCB.push_back(snowblock);
+  BlockLiquid* liquidblock = new BlockLiquid();
+  BlockCB.push_back(liquidblock);
+  BlockFire* fireblock = new BlockFire();
+  BlockCB.push_back(fireblock);
+  BlockStair* stairblock = new BlockStair();
+  BlockCB.push_back(stairblock);
+  BlockChest* chestblock = new BlockChest();
+  BlockCB.push_back(chestblock);
+  BlockDoor* doorblock = new BlockDoor();
+  BlockCB.push_back(doorblock);
+  BlockSign* signblock = new BlockSign();
+  BlockCB.push_back(signblock);
+  BlockTracks* tracksblock = new BlockTracks();
+  BlockCB.push_back(tracksblock);
+  BlockLadder* ladderblock = new BlockLadder();
+  BlockCB.push_back(ladderblock);
+  BlockCake* cakeblock = new BlockCake();
+  BlockCB.push_back(cakeblock);
+  BlockNote* noteblock = new BlockNote();
+  BlockCB.push_back(noteblock);
+  BlockFurnace* furnaceblock = new BlockFurnace();
+  BlockCB.push_back(furnaceblock);
+  BlockWorkbench* workbenchblock = new BlockWorkbench();
+  BlockCB.push_back(workbenchblock);
+  BlockDefault* defaultblock = new BlockDefault();
+  BlockCB.push_back(defaultblock);
 
-   ItemFood* fooditem = new ItemFood();
-   ItemCB.push_back(fooditem);
-   ItemProjectile* projectileitem = new ItemProjectile();
-   ItemCB.push_back(projectileitem);
+  ItemFood* fooditem = new ItemFood();
+  ItemCB.push_back(fooditem);
+  ItemProjectile* projectileitem = new ItemProjectile();
+  ItemCB.push_back(projectileitem);
 
 }
 
 void Plugin::free()
 {
   std::vector<BlockBasic*>::iterator it = BlockCB.begin();
-  for (;it!=BlockCB.end();++it)
+  for(; it != BlockCB.end(); ++it)
   {
     delete *it;
   }
@@ -121,28 +121,28 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
   LIBRARY_HANDLE lhandle = NULL;
   void (*fhandle)(mineserver_pointer_struct*) = NULL;
 
-  if (!file.empty())
+  if(!file.empty())
   {
-    LOG(INFO, "Plugin", "Loading plugin `"+name+"' (`"+file+"')...");
+    LOG(INFO, "Plugin", "Loading plugin `" + name + "' (`" + file + "')...");
 
     struct stat st;
     int statr = stat(file.c_str(), &st);
-    if ((statr == 0) && !(st.st_mode & S_IFDIR))
+    if((statr == 0) && !(st.st_mode & S_IFDIR))
     {
       lhandle = LIBRARY_LOAD(file.c_str());
     }
     else
     {
-      LOG(INFO, "Plugin", "Could not find `"+file+"', trying `"+file+LIBRARY_EXTENSION+"'.");
+      LOG(INFO, "Plugin", "Could not find `" + file + "', trying `" + file + LIBRARY_EXTENSION + "'.");
 
-      statr = stat((file+LIBRARY_EXTENSION).c_str(), &st);
-      if ((statr == 0) && !(st.st_mode & S_IFDIR))
+      statr = stat((file + LIBRARY_EXTENSION).c_str(), &st);
+      if((statr == 0) && !(st.st_mode & S_IFDIR))
       {
-        lhandle = LIBRARY_LOAD((file+LIBRARY_EXTENSION).c_str());
+        lhandle = LIBRARY_LOAD((file + LIBRARY_EXTENSION).c_str());
       }
       else
       {
-        LOG(INFO, "Plugin", "Could not find `"+file+LIBRARY_EXTENSION+"'!");
+        LOG(INFO, "Plugin", "Could not find `" + file + LIBRARY_EXTENSION + "'!");
         return false;
       }
     }
@@ -150,21 +150,21 @@ bool Plugin::loadPlugin(const std::string name, const std::string file)
   }
   else
   {
-    LOG(INFO, "Plugin", "Loading plugin `"+name+"' (built in)...");
+    LOG(INFO, "Plugin", "Loading plugin `" + name + "' (built in)...");
     lhandle = LIBRARY_SELF();
   }
 
-  if (lhandle == NULL)
+  if(lhandle == NULL)
   {
-    LOG(INFO, "Plugin", "Could not load plugin `"+name+"'!");
+    LOG(INFO, "Plugin", "Could not load plugin `" + name + "'!");
     LOG(INFO, "Plugin", LIBRARY_ERROR());
     return false;
   }
 
   m_libraryHandles[name] = lhandle;
 
-  fhandle = (void (*)(mineserver_pointer_struct*)) LIBRARY_SYMBOL(lhandle, (name+"_init").c_str());
-  if (fhandle == NULL)
+  fhandle = (void (*)(mineserver_pointer_struct*)) LIBRARY_SYMBOL(lhandle, (name + "_init").c_str());
+  if(fhandle == NULL)
   {
     LOG(INFO, "Plugin", "Could not get init function handle!");
     unloadPlugin(name);
@@ -180,11 +180,11 @@ void Plugin::unloadPlugin(const std::string name)
   LIBRARY_HANDLE lhandle = NULL;
   void (*fhandle)(void) = NULL;
 
-  if (m_pluginVersions.find(name) != m_pluginVersions.end())
+  if(m_pluginVersions.find(name) != m_pluginVersions.end())
   {
-    LOG(INFO, "Plugin", "Unloading plugin `"+name+"'...");
+    LOG(INFO, "Plugin", "Unloading plugin `" + name + "'...");
 
-    if (m_libraryHandles[name] != NULL)
+    if(m_libraryHandles[name] != NULL)
     {
       lhandle = m_libraryHandles[name];
       m_libraryHandles.erase(name);
@@ -194,14 +194,14 @@ void Plugin::unloadPlugin(const std::string name)
       lhandle = LIBRARY_SELF();
     }
 
-    fhandle = (void (*)(void)) LIBRARY_SYMBOL(lhandle, (name+"_shutdown").c_str());
-    if (fhandle == NULL)
+    fhandle = (void (*)(void)) LIBRARY_SYMBOL(lhandle, (name + "_shutdown").c_str());
+    if(fhandle == NULL)
     {
-      LOG(INFO, "Plugin","Could not get shutdown function handle!");
+      LOG(INFO, "Plugin", "Could not get shutdown function handle!");
     }
     else
     {
-      LOG(INFO, "Plugin","Calling shutdown function for `"+name+"'.");
+      LOG(INFO, "Plugin", "Calling shutdown function for `" + name + "'.");
       fhandle();
     }
 
@@ -209,7 +209,7 @@ void Plugin::unloadPlugin(const std::string name)
   }
   else
   {
-    LOG(INFO, "Plugin", "Plugin `"+name+"' not loaded!");
+    LOG(INFO, "Plugin", "Plugin `" + name + "' not loaded!");
   }
 }
 
@@ -218,11 +218,11 @@ bool Plugin::hasHook(const std::string& name) const
   return m_hooks.find(name) != m_hooks.end();
 }
 
-Hook* Plugin::getHook(const std::string& name) const 
+Hook* Plugin::getHook(const std::string& name) const
 {
   std::map<const std::string, Hook*>::const_iterator hook = m_hooks.find(name);
 
-  if (hook == m_hooks.end())
+  if(hook == m_hooks.end())
   {
     return NULL;
   }
@@ -237,7 +237,7 @@ void Plugin::setHook(const std::string& name, Hook* hook)
 
 void Plugin::remHook(const std::string& name)
 {
-  if (hasHook(name))
+  if(hasHook(name))
   {
     m_hooks.erase(name);
   }
@@ -252,7 +252,7 @@ float Plugin::getPluginVersion(const std::string& name) const
 {
   std::map<const std::string, float>::const_iterator pluginVersion = m_pluginVersions.find(name);
 
-  if (pluginVersion == m_pluginVersions.end())
+  if(pluginVersion == m_pluginVersions.end())
   {
     return 0.0f;
   }
@@ -267,7 +267,7 @@ void Plugin::setPluginVersion(const std::string& name, float version)
 
 void Plugin::remPluginVersion(const std::string& name)
 {
-  if (hasPluginVersion(name))
+  if(hasPluginVersion(name))
   {
     m_pluginVersions.erase(name);
   }
@@ -282,7 +282,7 @@ void* Plugin::getPointer(const std::string& name) const
 {
   std::map<const std::string, void*>::const_iterator pointer = m_pointers.find(name);
 
-  if (pointer == m_pointers.end())
+  if(pointer == m_pointers.end())
   {
     return NULL;
   }
@@ -297,7 +297,7 @@ void Plugin::setPointer(const std::string& name, void* pointer)
 
 void Plugin::remPointer(const std::string& name)
 {
-  if (hasPointer(name))
+  if(hasPointer(name))
   {
     m_pointers.erase(name);
   }

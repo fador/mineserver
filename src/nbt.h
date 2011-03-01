@@ -61,18 +61,18 @@ public:
   NBT_Value(float value);
   NBT_Value(double value);
 
-  NBT_Value(uint8_t *buf, int32_t len);
-  NBT_Value(std::vector<uint8_t> const &bytes);
-  NBT_Value(const std::string &str);
+  NBT_Value(uint8_t* buf, int32_t len);
+  NBT_Value(std::vector<uint8_t> const& bytes);
+  NBT_Value(const std::string& str);
 
-  NBT_Value(eTAG_Type type, uint8_t **buf, int &remaining);
+  NBT_Value(eTAG_Type type, uint8_t** buf, int& remaining);
 
   ~NBT_Value();
 
-  NBT_Value *operator[](const std::string &index);
-  NBT_Value *operator[](const char *index);
+  NBT_Value* operator[](const std::string& index);
+  NBT_Value* operator[](const char* index);
 
-  void Insert(const std::string &str, NBT_Value *val);
+  void Insert(const std::string& str, NBT_Value* val);
 
   operator int8_t();
   operator int16_t();
@@ -80,16 +80,16 @@ public:
   operator int64_t();
   operator float();
   operator double();
-  
-  NBT_Value &operator =(int8_t val);
-  NBT_Value &operator =(int16_t val);
-  NBT_Value &operator =(int32_t val);
-  NBT_Value &operator =(int64_t val);
-  NBT_Value &operator =(float val);
-  NBT_Value &operator =(double val);
+
+  NBT_Value& operator =(int8_t val);
+  NBT_Value& operator =(int16_t val);
+  NBT_Value& operator =(int32_t val);
+  NBT_Value& operator =(int64_t val);
+  NBT_Value& operator =(float val);
+  NBT_Value& operator =(double val);
 
   std::vector<uint8_t> *GetByteArray();
-  std::string *GetString();
+  std::string* GetString();
   eTAG_Type GetListType();
   std::vector<NBT_Value*> *GetList();
 
@@ -98,12 +98,12 @@ public:
   eTAG_Type GetType();
   void cleanup();
 
-  static NBT_Value * LoadFromFile(const std::string &filename);
-  void SaveToFile(const std::string &filename);
-  
+  static NBT_Value* LoadFromFile(const std::string& filename);
+  void SaveToFile(const std::string& filename);
+
   void Write(std::vector<uint8_t> &buffer);
 
-  void Dump(std::string& data, const std::string &name = std::string(""), int tabs=0);
+  void Dump(std::string& data, const std::string& name = std::string(""), int tabs = 0);
 private:
   eTAG_Type m_type;
   union
@@ -114,7 +114,7 @@ private:
     int64_t longVal;
     float floatVal;
     double doubleVal;
-    std::string *stringVal;
+    std::string* stringVal;
     std::vector<uint8_t> *byteArrayVal;
     struct
     {

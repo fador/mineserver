@@ -73,16 +73,16 @@ bool BlockFire::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if(!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
-    revertBlock(user,x,y,z,map);
+    revertBlock(user, x, y, z, map);
     return true;
   }
 
   /* Check block below allows blocks placed on top */
-  if (!this->isBlockStackable(oldblock))
+  if(!this->isBlockStackable(oldblock))
   {
-    revertBlock(user,x,y,z,map);
+    revertBlock(user, x, y, z, map);
     return true;
   }
 
@@ -90,16 +90,16 @@ bool BlockFire::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   y++;
 
   /* FIXME: Need this or should be just let em burn? */
-  if (this->isUserOnBlock(x,y,z,map))
+  if(this->isUserOnBlock(x, y, z, map))
   {
-    revertBlock(user,x,y,z,map);
+    revertBlock(user, x, y, z, map);
     return true;
   }
 
   /* if the block isn't empty then you can't burn it */
-  if (!this->isBlockEmpty(x,y,z,map))
+  if(!this->isBlockEmpty(x, y, z, map))
   {
-    revertBlock(user,x,y,z,map);
+    revertBlock(user, x, y, z, map);
     return true;
   }
 
@@ -116,7 +116,7 @@ void BlockFire::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t
 
 void BlockFire::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-   Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-   Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
 }
 

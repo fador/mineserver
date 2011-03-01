@@ -42,13 +42,13 @@ void FurnaceManager::update()
     return;
   }
 
-  
+
 #ifdef _DEBUG
   //Mineserver::get()->logger()->log(LogType::LOG_INFO,  "Furnace", "Checking Furnaces: " + dtos(m_activeFurnaces.size()) + " active furnaces.");
 #endif
-  
+
   // Loop thru all the furnaces
-  for(int index = m_activeFurnaces.size()-1; index >= 0; index--)
+  for(int index = m_activeFurnaces.size() - 1; index >= 0; index--)
   {
     // Get a pointer to this furnace
     Furnace* currentFurnace = (Furnace*)m_activeFurnaces[index];
@@ -59,7 +59,7 @@ void FurnaceManager::update()
       currentFurnace->setFuelBurningTime(currentFurnace->fuelBurningTime() - 1);
     }
     // Now that we've decremented, if we're no longer burning fuel but still have stuff to cook, consume fuel
-    if (!currentFurnace->isBurningFuel() && currentFurnace->hasValidIngredient())
+    if(!currentFurnace->isBurningFuel() && currentFurnace->hasValidIngredient())
     {
       currentFurnace->consumeFuel();
     }
@@ -90,12 +90,12 @@ void FurnaceManager::update()
   }
 }
 
-void removeFurnace(furnaceData *data_)
+void removeFurnace(furnaceData* data_)
 {
   Mineserver::get()->furnaceManager()->removeFurnace(data_);
 }
 
-void FurnaceManager::removeFurnace(furnaceData *data_)
+void FurnaceManager::removeFurnace(furnaceData* data_)
 {
   Furnace* furnace = NULL;
   // Loop thru all active furnaces, to see if this one is here
@@ -105,14 +105,14 @@ void FurnaceManager::removeFurnace(furnaceData *data_)
     if(currentFurnace->x() == data_->x && currentFurnace->y() == data_->y && currentFurnace->z() == data_->z)
     {
       furnace = currentFurnace;
-      m_activeFurnaces.erase(m_activeFurnaces.begin()+index);
+      m_activeFurnaces.erase(m_activeFurnaces.begin() + index);
       break;
     }
   }
 }
 
 
-void FurnaceManager::handleActivity(furnaceData *data_)
+void FurnaceManager::handleActivity(furnaceData* data_)
 {
 
   Furnace* furnace = NULL;
@@ -153,7 +153,7 @@ void FurnaceManager::handleActivity(furnaceData *data_)
     {
       delete furnace;
       furnace = NULL;
-      m_activeFurnaces.erase(m_activeFurnaces.begin()+arraypos);
+      m_activeFurnaces.erase(m_activeFurnaces.begin() + arraypos);
     }
   }
 }

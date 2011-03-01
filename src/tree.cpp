@@ -36,7 +36,7 @@
 Tree::Tree(int32_t x, int32_t y, int32_t z, int map, uint8_t limit)
 {
   n_branches = 0;
-  _x = x, _y = y, _z = z, _map=map;
+  _x = x, _y = y, _z = z, _map = map;
   this->generate(limit);
 }
 
@@ -46,30 +46,30 @@ Tree::~Tree(void)
 }
 void Tree::generate(uint8_t limit)
 {
-  uint8_t darkness=1;
+  uint8_t darkness = 1;
 
   srand((uint32_t)time(NULL));
 
-  uint8_t m_trunkHeight = getRandInt(MIN_TRUNK,limit);
+  uint8_t m_trunkHeight = getRandInt(MIN_TRUNK, limit);
 
-  bool smalltree=false;
+  bool smalltree = false;
 
   //in this implementation we generate the trunk and as we do we call branching and canopy
-  if (m_trunkHeight < BRANCHING_HEIGHT)
+  if(m_trunkHeight < BRANCHING_HEIGHT)
   {
-    smalltree=true;
-    darkness=0;
+    smalltree = true;
+    darkness = 0;
   }
-  uint8_t th=m_trunkHeight-1;
+  uint8_t th = m_trunkHeight - 1;
   uint8_t i;
-  for (i = 0; i < th; i++)
+  for(i = 0; i < th; i++)
   {
     if(smalltree)
     {
-      Trunk* v = new Trunk(_x,_y+i,_z,_map,darkness);
-      if(i>=MIN_TRUNK-1)
+      Trunk* v = new Trunk(_x, _y + i, _z, _map, darkness);
+      if(i >= MIN_TRUNK - 1)
       {
-        m_Branch[n_branches]= v;
+        m_Branch[n_branches] = v;
         n_branches++;
       }
       else
@@ -79,11 +79,11 @@ void Tree::generate(uint8_t limit)
     }
     else
     {
-      Trunk* v = new Trunk(_x,_y+i,_z,_map,darkness);
-      if(i > BRANCHING_HEIGHT-1)
+      Trunk* v = new Trunk(_x, _y + i, _z, _map, darkness);
+      if(i > BRANCHING_HEIGHT - 1)
       {
         generateBranches(v);
-        m_Branch[n_branches]=v;
+        m_Branch[n_branches] = v;
         n_branches++;
       }
       else
@@ -92,8 +92,8 @@ void Tree::generate(uint8_t limit)
       }
     }
   }
-  Trunk* v = new Trunk(_x,_y+i,_z,_map,darkness);
-  m_Branch[n_branches]= v;
+  Trunk* v = new Trunk(_x, _y + i, _z, _map, darkness);
+  m_Branch[n_branches] = v;
   n_branches++;
   generateBranches(v);
   generateCanopy();
@@ -115,23 +115,23 @@ void Tree::generateBranches(Trunk* wrap)
   //or make a function for the inside of the if.
   if(rand() % schanse == 0)
   {
-    Branch(posx+1,posy,posz,_map);
+    Branch(posx + 1, posy, posz, _map);
   }
   if(rand() % schanse == 0)
   {
-    Branch(posx-1,posy,posz,_map);
+    Branch(posx - 1, posy, posz, _map);
   }
   if(rand() % schanse == 0)
   {
-    Branch(posx,posy,posz+1,_map);
+    Branch(posx, posy, posz + 1, _map);
   }
-  if(rand() % schanse == 0 )
+  if(rand() % schanse == 0)
   {
-    Branch(posx,posy,posz-1,_map);
+    Branch(posx, posy, posz - 1, _map);
   }
-  if(rand() % schanse == 0 )
+  if(rand() % schanse == 0)
   {
-    Branch(posx,posy+1,posz,_map);
+    Branch(posx, posy + 1, posz, _map);
   }
 }
 
@@ -145,22 +145,22 @@ void Tree::generateCanopy()
   uint8_t canopy_darkness = 0;
   //Not much point making less code with a while/for loop
   //since compiled this is alot faster
-  if(rand() % 15 ==0)
+  if(rand() % 15 == 0)
   {
-      canopy_darkness++;
+    canopy_darkness++;
   }
-  if(rand() % 15 ==0)
+  if(rand() % 15 == 0)
   {
-      canopy_darkness++;
+    canopy_darkness++;
   }
-  if(rand() % 15 ==0)
+  if(rand() % 15 == 0)
   {
-      canopy_darkness++;
+    canopy_darkness++;
   }
   //I'm Not Proud of this looping.
-  for(uint8_t i=0;i<n_branches;i++)
+  for(uint8_t i = 0; i < n_branches; i++)
   {
-    canopySize = getRandInt(MIN_CANOPY,MAX_CANOPY);
+    canopySize = getRandInt(MIN_CANOPY, MAX_CANOPY);
     loc = m_Branch[i]->location();
     delete m_Branch[i];
 
@@ -168,21 +168,21 @@ void Tree::generateCanopy()
     int32_t posy = loc.y();
     int32_t posz = loc.z();
 
-    for (int8_t xi=(-canopySize);xi<=canopySize;xi++)
+    for(int8_t xi = (-canopySize); xi <= canopySize; xi++)
     {
-      for (int8_t yi=(-canopySize);yi<=canopySize;yi++)
+      for(int8_t yi = (-canopySize); yi <= canopySize; yi++)
       {
-        for (int8_t zi=(-canopySize);zi<=canopySize;zi++)
+        for(int8_t zi = (-canopySize); zi <= canopySize; zi++)
         {
-          if (abs(xi)+abs(yi)+abs(zi) <= canopySize)
+          if(abs(xi) + abs(yi) + abs(zi) <= canopySize)
           {
-            int32_t temp_posx = posx+xi;
-            int32_t temp_posy = posy+yi;
-            int32_t temp_posz = posz+zi;
-            
-            if(Mineserver::get()->map(_map)->getBlock(temp_posx,temp_posy,temp_posz,&blocktype,&meta, false) && blocktype == BLOCK_AIR)
+            int32_t temp_posx = posx + xi;
+            int32_t temp_posy = posy + yi;
+            int32_t temp_posz = posz + zi;
+
+            if(Mineserver::get()->map(_map)->getBlock(temp_posx, temp_posy, temp_posz, &blocktype, &meta, false) && blocktype == BLOCK_AIR)
             {
-              Canopy u(temp_posx,temp_posy,temp_posz,_map,canopy_darkness);
+              Canopy u(temp_posx, temp_posy, temp_posz, _map, canopy_darkness);
             }
           }
         }

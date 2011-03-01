@@ -80,7 +80,7 @@ void initConstants()
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_DIAMOND_BLOCK, new Drop(BLOCK_DIAMOND_BLOCK, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_LAPIS_BLOCK, new Drop(BLOCK_LAPIS_BLOCK, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_LAPIS_ORE, new Drop(BLOCK_LAPIS_ORE, 10000, 1)));
-  
+
 
   // Always drop but give more than one item
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_REDSTONE_ORE, new Drop(ITEM_REDSTONE, 10000, 4)));
@@ -105,7 +105,7 @@ void freeConstants()
 {
   std::map<uint8_t, Drop*>::iterator it_a = BLOCKDROPS.begin();
   std::map<uint8_t, Drop*>::iterator it_b = BLOCKDROPS.end();
-  for (;it_a!=it_b;++it_a)
+  for(; it_a != it_b; ++it_a)
   {
     delete it_a->second;
   }

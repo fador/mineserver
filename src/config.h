@@ -58,7 +58,7 @@ public:
 
   bool has(const std::string& name);
   int type(const std::string& name) const;
-  std::list<std::string>* keys(int type=CONFIG_NODE_UNDEFINED);
+  std::list<std::string>* keys(int type = CONFIG_NODE_UNDEFINED);
 
 private:
   ConfigParser* m_parser;

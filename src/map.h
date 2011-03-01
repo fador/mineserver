@@ -37,22 +37,22 @@
 
 class User;
 
-struct sTree  
+struct sTree
 {
-  int32_t x,y,z;
+  int32_t x, y, z;
   int64_t plantedTime;
   uint32_t plantedBy;
 
-  sTree(int32_t _x,int32_t _y, int32_t _z, int64_t _plantedTime, uint32_t _plantedBy) :
-    x(_x),y(_y),z(_z),
-    plantedTime(_plantedTime),plantedBy(_plantedBy) {}
+  sTree(int32_t _x, int32_t _y, int32_t _z, int64_t _plantedTime, uint32_t _plantedBy) :
+    x(_x), y(_y), z(_z),
+    plantedTime(_plantedTime), plantedBy(_plantedBy) {}
 };
 
 class Map
 {
 public:
   Map();
-  Map(const Map &oldmap);
+  Map(const Map& oldmap);
   ~Map();
 
   std::string mapDirectory;
@@ -95,11 +95,11 @@ public:
   //All spawned items on map
   std::map<uint32_t, spawnedItem*> items;
 
-//  void posToId(int x, int z, uint32_t *id);
-//  void idToPos(uint32_t id, int *x, int *z);
+  //  void posToId(int x, int z, uint32_t *id);
+  //  void idToPos(uint32_t id, int *x, int *z);
 
   void init(int number);
-  void sendToUser(User *user, int x, int z,bool login=false);
+  void sendToUser(User* user, int x, int z, bool login = false);
 
   //Time in the map
   int64_t mapTime;
@@ -150,7 +150,7 @@ public:
   bool sendBlockChange(int x, int y, int z, char type, char meta);
   bool sendBlockChange(vec pos, char type, char meta)
   {
-    return sendBlockChange(pos.x(), pos.y(), pos.z(), type, meta);  
+    return sendBlockChange(pos.x(), pos.y(), pos.z(), type, meta);
   }
   bool sendNote(int x, int y, int z, char instrument, char pitch);
   bool sendNote(vec pos, char instrument, char pitch)
@@ -159,7 +159,7 @@ public:
   }
 
   bool sendPickupSpawn(spawnedItem item);
-  void createPickupSpawn(int x, int y, int z, int type, int count,int health, User *user);
+  void createPickupSpawn(int x, int y, int z, int type, int count, int health, User* user);
 
   bool sendProjectileSpawn(User* user, int8_t projID);
 };

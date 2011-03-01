@@ -52,16 +52,16 @@ private:
   std::vector<uint8_t> skylight;
   std::vector<uint8_t> blocklight;
   std::vector<uint8_t> heightmap;
-  
+
   int seaLevel;
-  
+
   bool addTrees;
-  
+
   bool expandBeaches;
   int beachExtent;
   int beachHeight;
-  
-  bool addOre;  
+
+  bool addOre;
   bool addCaves;
   bool winterEnabled;
 
@@ -69,9 +69,9 @@ private:
   void generateWithNoise(int x, int z, int map);
 
   void AddTrees(int x, int z, int map);
-  
+
   void AddOre(int x, int z, int map, uint8_t type);
-  void AddDeposit(int x, int y, int z, int map, uint8_t block, int minDepoSize, int maxDepoSize, sChunk *chunk);
+  void AddDeposit(int x, int y, int z, int map, uint8_t block, int minDepoSize, int maxDepoSize, sChunk* chunk);
 
   CaveGen cave;
 

@@ -61,7 +61,7 @@ private:
   {
     char type;
     std::vector<SimBlock> blocks;
-    Sim(char stype, SimBlock initblock) : type(stype),blocks(1, initblock) {}
+    Sim(char stype, SimBlock initblock) : type(stype), blocks(1, initblock) {}
   };
 
   std::vector<Sim> simList;

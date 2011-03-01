@@ -39,7 +39,7 @@ public:
   virtual ~Screen(void) = 0;
   virtual void init(std::string version) = 0;
   virtual void log(LogType::LogType type, const std::string& source, const std::string& message) = 0;
-  virtual void updatePlayerList(std::vector<User *> users) = 0;
+  virtual void updatePlayerList(std::vector<User*> users) = 0;
   virtual void end() = 0;
   virtual bool hasCommand() = 0;
   virtual std::string getCommand() = 0;

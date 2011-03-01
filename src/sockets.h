@@ -25,4 +25,4 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-void accept_callback(int fd, short ev, void *arg);
+void accept_callback(int fd, short ev, void* arg);

@@ -71,7 +71,7 @@ public:
     data.arrayValue[1] = 0;
     data.arrayValue[2] = 0;
   }
-  vec(const vec &ov)
+  vec(const vec& ov)
   {
 #ifdef VEC_VECTORISED
     data.vectorValue   = ov.data.vectorValue;
@@ -82,7 +82,7 @@ public:
 #endif
   }
 
-  vec& operator=(const vec &ov)
+  vec& operator=(const vec& ov)
   {
 #ifdef VEC_VECTORISED
     data.vectorValue   = ov.data.vectorValue;
@@ -94,32 +94,32 @@ public:
     return *this;
   }
 
-  int &x()
+  int& x()
   {
     return data.arrayValue[0];
   }
-  int &y()
+  int& y()
   {
     return data.arrayValue[1];
   }
-  int &z()
+  int& z()
   {
     return data.arrayValue[2];
   }
-  const int &x() const
+  const int& x() const
   {
     return data.arrayValue[0];
   }
-  const int &y() const
+  const int& y() const
   {
     return data.arrayValue[1];
   }
-  const int &z() const
+  const int& z() const
   {
     return data.arrayValue[2];
   }
 
-  vec operator+(const vec &ov) const
+  vec operator+(const vec& ov) const
   {
 #ifdef VEC_VECTORISED
     return vec(data.vectorValue + ov.data.vectorValue);
@@ -131,7 +131,7 @@ public:
 
 #endif
   }
-  vec operator-(const vec &ov) const
+  vec operator-(const vec& ov) const
   {
 #ifdef VEC_VECTORISED
     return vec(data.vectorValue - ov.data.vectorValue);
@@ -156,21 +156,21 @@ public:
 #endif
   }
 
-  vec& operator+=(const vec &ov)
+  vec& operator+=(const vec& ov)
   {
     return *this = *this + ov;
   }
-  vec& operator-=(const vec &ov)
+  vec& operator-=(const vec& ov)
   {
     return *this = *this - ov;
   }
 
   int squareLength() const
   {
-    return x()*x() + y()*y() + z()*z();
+    return x() * x() + y() * y() + z() * z();
   }
 
-  static int squareDistance(const vec &x, const vec &y)
+  static int squareDistance(const vec& x, const vec& y)
   {
     return (x - y).squareLength();
   }

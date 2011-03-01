@@ -32,46 +32,47 @@
 
 bool BlockNote::affectedBlock(int block)
 {
- switch(block)
-   {
-     case BLOCK_NOTE_BLOCK:
-       return true;
-   }
+  switch(block)
+  {
+  case BLOCK_NOTE_BLOCK:
+    return true;
+  }
   return false;
 }
 
-bool BlockNote::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction) {
+bool BlockNote::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+{
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if(!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
-    revertBlock(user,x,y,z,map);
+    revertBlock(user, x, y, z, map);
     return true;
   }
   /* Check block below allows blocks placed on top */
-  if (!this->isBlockStackable(oldblock))
+  if(!this->isBlockStackable(oldblock))
   {
-    revertBlock(user,x,y,z,map);
+    revertBlock(user, x, y, z, map);
     return true;
   }
 
   /* move the x,y,z coords dependent upon placement direction */
-  if (!this->translateDirection(&x,&y,&z,map,direction))
+  if(!this->translateDirection(&x, &y, &z, map, direction))
   {
-    revertBlock(user,x,y,z,map);
+    revertBlock(user, x, y, z, map);
     return true;
   }
 
-  if (this->isUserOnBlock(x,y,z,map))
+  if(this->isUserOnBlock(x, y, z, map))
   {
-    revertBlock(user,x,y,z,map);
+    revertBlock(user, x, y, z, map);
     return true;
   }
 
-  if (!this->isBlockEmpty(x,y,z,map))
+  if(!this->isBlockEmpty(x, y, z, map))
   {
-    revertBlock(user,x,y,z,map);
+    revertBlock(user, x, y, z, map);
     return true;
   }
 
@@ -82,21 +83,23 @@ bool BlockNote::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
 
 void BlockNote::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-    uint8_t block,metadata;
-    Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
-    Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x,y - 1,z,map), metadata);
+  uint8_t block, metadata;
+  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
+  Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
 }
 
 bool BlockNote::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 {
-  uint8_t block,metadata;
+  uint8_t block, metadata;
   Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
-  if (metadata == 0x14)
+  if(metadata == 0x14)
   {
     metadata = 0x00;
     Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
     Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
-  } else {
+  }
+  else
+  {
     metadata++;
     Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
     Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
@@ -106,32 +109,32 @@ bool BlockNote::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 
 int BlockNote::getInstrument(int32_t x, int8_t y, int32_t z, int map)
 {
-  uint8_t block,meta;
+  uint8_t block, meta;
   Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
   switch(block)
   {
-    case BLOCK_WOOD:
-    case BLOCK_PLANK:
-      return INSTRUMENT_BASS;
-    case BLOCK_SAND:
-    case BLOCK_GRAVEL:
-    case BLOCK_SLOW_SAND:
-      return INSTRUMENT_SNARE;
-    case BLOCK_GLASS:
-    case BLOCK_GLOWSTONE:
-      return INSTRUMENT_STICK;
-    case BLOCK_STONE:
-    case BLOCK_COBBLESTONE:
-    case BLOCK_BRICK:
-    case BLOCK_OBSIDIAN:
-    case BLOCK_NETHERSTONE:
-    case BLOCK_IRON_ORE:
-    case BLOCK_DIAMOND_ORE:
-    case BLOCK_GOLD_ORE:
-    case BLOCK_FURNACE:
-    case BLOCK_BURNING_FURNACE:
-    case BLOCK_DISPENSER:
-      return INSTRUMENT_BASSDRUM;
+  case BLOCK_WOOD:
+  case BLOCK_PLANK:
+    return INSTRUMENT_BASS;
+  case BLOCK_SAND:
+  case BLOCK_GRAVEL:
+  case BLOCK_SLOW_SAND:
+    return INSTRUMENT_SNARE;
+  case BLOCK_GLASS:
+  case BLOCK_GLOWSTONE:
+    return INSTRUMENT_STICK;
+  case BLOCK_STONE:
+  case BLOCK_COBBLESTONE:
+  case BLOCK_BRICK:
+  case BLOCK_OBSIDIAN:
+  case BLOCK_NETHERSTONE:
+  case BLOCK_IRON_ORE:
+  case BLOCK_DIAMOND_ORE:
+  case BLOCK_GOLD_ORE:
+  case BLOCK_FURNACE:
+  case BLOCK_BURNING_FURNACE:
+  case BLOCK_DISPENSER:
+    return INSTRUMENT_BASSDRUM;
   }
   return INSTRUMENT_HARP;
 }

@@ -39,7 +39,7 @@ class CliScreen : public Screen
 public:
   void init(std::string version);
   void log(LogType::LogType type, const std::string& source, const std::string& message);
-  void updatePlayerList(std::vector<User *> users);
+  void updatePlayerList(std::vector<User*> users);
   void end();
   bool hasCommand();
   std::string getCommand();

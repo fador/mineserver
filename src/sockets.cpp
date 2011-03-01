@@ -26,10 +26,10 @@
  */
 
 #ifdef WIN32
-    #include <stdlib.h>
-    #include <conio.h>
-    #include <winsock2.h>
-    typedef  int socklen_t;
+#include <stdlib.h>
+#include <conio.h>
+#include <winsock2.h>
+typedef  int socklen_t;
 #else
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -72,11 +72,11 @@ extern int setnonblock(int fd);
 
 void client_callback(int fd,
                      short ev,
-                     void *arg)
+                     void* arg)
 {
-  User *user = (User *)arg;
+  User* user = (User*)arg;
   /*
-  std::vector<User *>::const_iterator it = std::find (Mineserver::get()->users().begin(), 
+  std::vector<User *>::const_iterator it = std::find (Mineserver::get()->users().begin(),
                                                       Mineserver::get()->users().end(), user);
   if(it == Mineserver::get()->users().end())
   {
@@ -89,7 +89,7 @@ void client_callback(int fd,
 
     int read   = 1;
 
-    uint8_t *buf = new uint8_t[2048];
+    uint8_t* buf = new uint8_t[2048];
 
     read = recv(fd, (char*)buf, 2048, 0);
     if(read == 0)
@@ -97,7 +97,7 @@ void client_callback(int fd,
       Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket closed properly");
 
       delete user;
-      user = (User *)1;
+      user = (User*)1;
       delete[] buf;
       return;
     }
@@ -107,7 +107,7 @@ void client_callback(int fd,
       Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket had no data to read");
 
       delete user;
-      user = (User *)2;
+      user = (User*)2;
       delete[] buf;
       return;
     }
@@ -126,7 +126,7 @@ void client_callback(int fd,
       if(Mineserver::get()->packetHandler()->packets[user->action].len == PACKET_VARIABLE_LEN)
       {
         //Call specific function
-        int (PacketHandler::*function)(User *) =
+        int (PacketHandler::*function)(User*) =
           Mineserver::get()->packetHandler()->packets[user->action].function;
         bool disconnecting = user->action == 0xFF;
         int curpos = (Mineserver::get()->packetHandler()->*function)(user);
@@ -141,7 +141,7 @@ void client_callback(int fd,
         if(disconnecting) // disconnect -- player gone
         {
           delete user;
-          user = (User *)4;
+          user = (User*)4;
           return;
         }
       }
@@ -150,7 +150,7 @@ void client_callback(int fd,
         printf("Unknown action: 0x%x\n", user->action);
 
         delete user;
-        user = (User *)3;
+        user = (User*)3;
         return;
       }
       else
@@ -164,7 +164,7 @@ void client_callback(int fd,
         }
 
         //Call specific function
-        int (PacketHandler::*function)(User *) = Mineserver::get()->packetHandler()->packets[user->action].function;
+        int (PacketHandler::*function)(User*) = Mineserver::get()->packetHandler()->packets[user->action].function;
         (Mineserver::get()->packetHandler()->*function)(user);
       }
     } //End while
@@ -176,18 +176,18 @@ void client_callback(int fd,
     int written = send(fd, (char*)user->buffer.getWrite(), writeLen, 0);
     if(written == SOCKET_ERROR)
     {
-      #ifdef WIN32
-      #define ERROR_NUMBER WSAGetLastError()
+#ifdef WIN32
+#define ERROR_NUMBER WSAGetLastError()
       if((ERROR_NUMBER != WSATRY_AGAIN && ERROR_NUMBER != WSAEINTR && ERROR_NUMBER != WSAEWOULDBLOCK))
-      #else
-      #define ERROR_NUMBER errno
+#else
+#define ERROR_NUMBER errno
       if((errno != EAGAIN && errno != EINTR))
-      #endif
+#endif
       {
         Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Error writing to client, tried to write " + dtos(writeLen) + " bytes, code: " + dtos(ERROR_NUMBER));
 
         delete user;
-        user = (User *)5;
+        user = (User*)5;
         return;
       }
       else
@@ -204,7 +204,7 @@ void client_callback(int fd,
 
     if(user->buffer.getWriteLen())
     {
-      event_set(user->GetEvent(), fd, EV_WRITE|EV_READ, client_callback, user);
+      event_set(user->GetEvent(), fd, EV_WRITE | EV_READ, client_callback, user);
       event_add(user->GetEvent(), NULL);
       return;
     }
@@ -216,7 +216,7 @@ void client_callback(int fd,
 
 void accept_callback(int fd,
                      short ev,
-                     void *arg)
+                     void* arg)
 {
   int client_fd;
   struct sockaddr_in client_addr;
@@ -224,17 +224,17 @@ void accept_callback(int fd,
 
 
   client_fd = accept(fd,
-                     (struct sockaddr *)&client_addr,
+                     (struct sockaddr*)&client_addr,
                      &client_len);
   if(client_fd < 0)
   {
     LOGLF("Client: accept() failed");
     return;
   }
-  User *client = new User(client_fd, generateEID());
+  User* client = new User(client_fd, generateEID());
   setnonblock(client_fd);
 
-  event_set(client->GetEvent(), client_fd,EV_WRITE|EV_READ, client_callback, client);
+  event_set(client->GetEvent(), client_fd, EV_WRITE | EV_READ, client_callback, client);
   event_add(client->GetEvent(), NULL);
 
 }
