@@ -42,7 +42,7 @@ copy command.so to Mineserver bin directory.
 #include <stdint.h>
 
 #define MINESERVER_C_API
-#include "../../../src/plugin_api.h"
+#include "../../src/plugin_api.h"
 //#include "../../src/logtype.h"
 
 #include "command.h"

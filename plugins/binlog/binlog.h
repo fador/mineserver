@@ -33,7 +33,7 @@
 #include <fstream>
 #include <time.h>
 
-#include "../../../src/plugin_api.h"
+#include "../../src/plugin_api.h"
 
 #ifndef _BINLOG_H
 #define _BINLOG_H
