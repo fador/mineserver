@@ -1,10 +1,4 @@
 /*
-g++ -c command.cpp
-g++ -shared command.o -o command.so
-
-copy command.so to Mineserver bin directory.
-*/
-/*
   Copyright (c) 2011, The Mineserver Project
   All rights reserved.
 
@@ -45,11 +39,11 @@ copy command.so to Mineserver bin directory.
 #include "../../src/plugin_api.h"
 //#include "../../src/logtype.h"
 
-#include "command.h"
+#include "commands.h"
 
 enum { PLANE,REPLACE };
 
-#define PLUGIN_COMMAND_VERSION 1.1
+#define PLUGIN_COMMANDS_VERSION 1.1
 const char CHATCMDPREFIX   = '/';
 mineserver_pointer_struct* mineserver;
 
@@ -115,8 +109,8 @@ bool chatCommandFunction(const char* userIn,const char* cmdIn, int argc, char** 
   }
 
 
-  std::string logMsg = "Command Plugin got from "+user+": " + command;
-  mineserver->logger.log(LOG_INFO, "plugin.command", logMsg.c_str());
+  std::string logMsg = user + ": " + command;
+  mineserver->logger.log(LOG_INFO, "plugin.commands", logMsg.c_str());
 
   // User commands
   CommandList::iterator iter;
@@ -742,22 +736,22 @@ void sendMOTD(std::string user, std::string command, std::deque<std::string> arg
   }
 }
 
-std::string pluginName = "command";
+std::string pluginName = "commands";
 
-PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mineserver_temp)
+PLUGIN_API_EXPORT void CALLCONVERSION commands_init(mineserver_pointer_struct* mineserver_temp)
 {
   mineserver = mineserver_temp;
 
   if (mineserver->plugin.getPluginVersion(pluginName.c_str()) > 0)
   {
-    std::string msg = "command is already loaded v."+dtos(mineserver->plugin.getPluginVersion(pluginName.c_str()));
-    mineserver->logger.log(LOG_INFO, "plugin.command", msg.c_str());
+    std::string msg = "commands is already loaded v."+dtos(mineserver->plugin.getPluginVersion(pluginName.c_str()));
+    mineserver->logger.log(LOG_INFO, "plugin.commands", msg.c_str());
     return;
   }
   std::string msg = "Loaded "+pluginName+"!";
-  mineserver->logger.log(LOG_INFO, "plugin.command", msg.c_str());
+  mineserver->logger.log(LOG_INFO, "plugin.commands", msg.c_str());
 
-  mineserver->plugin.setPluginVersion(pluginName.c_str(), PLUGIN_COMMAND_VERSION);
+  mineserver->plugin.setPluginVersion(pluginName.c_str(), PLUGIN_COMMANDS_VERSION);
 
   mineserver->plugin.addCallback("PlayerChatCommand", (void *)chatCommandFunction);
   mineserver->plugin.addCallback("BlockPlacePre", (void *)blockPlacePreFunction);
@@ -783,14 +777,15 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_init(mineserver_pointer_struct* mi
   registerCommand(new Command(parseCmd("dnd"), "", "Toggle Do Not Disturb mode", doNotDisturb));
   registerCommand(new Command(parseCmd("rules"), "", "Display server rules", sendRules));
   registerCommand(new Command(parseCmd("about"), "", "Display server name and software version", about));
-  registerCommand(new Command(parseCmd("motd"), "", "Displays the MOTD", sendMOTD));  registerCommand(new Command(parseCmd("world"), "<world Number>", "Move between worlds", userWorld));
+  registerCommand(new Command(parseCmd("motd"), "", "Displays the MOTD", sendMOTD));
+  registerCommand(new Command(parseCmd("world"), "<world Number>", "Move between worlds", userWorld));
 }
 
-PLUGIN_API_EXPORT void CALLCONVERSION command_shutdown(void)
+PLUGIN_API_EXPORT void CALLCONVERSION commands_shutdown(void)
 {
   if (mineserver->plugin.getPluginVersion(pluginName.c_str()) <= 0)
   {
-    mineserver->logger.log(LOG_INFO, "plugin.command", "command is not loaded!");
+    mineserver->logger.log(LOG_INFO, "plugin.commands", "commands is not loaded!");
     return;
   }
 }
