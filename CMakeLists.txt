@@ -93,11 +93,11 @@ set(mineserver_plugins
 )
 
 set(commands_source
-  plugins/commands/src/command.cpp
+  plugins/commands/command.cpp
 )
 
 set(filelog_source
-  plugins/filelog/src/filelog.cpp
+  plugins/filelog/filelog.cpp
 )
 
 set(nBreak_source
@@ -109,7 +109,7 @@ set(nether_source
 )
 
 set(binlog_source
-  plugins/binlog/src/binlog.cpp
+  plugins/binlog/binlog.cpp
 )
 set(crapMobs_source
   plugins/crapMobs/crapMobs.cpp
