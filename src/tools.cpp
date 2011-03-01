@@ -122,7 +122,7 @@ std::string base36_encode(int value)
 {
   std::string output;
   my_itoa((int)abs(value), output, 36);
-  if(value < 0)
+  if (value < 0)
   {
     output.insert(output.begin(), '-');
   }
@@ -136,12 +136,12 @@ void my_itoa(int value, std::string& buf, int base)
   int i = 30;
   buf = "";
 
-  if(!value)
+  if (!value)
   {
     buf = "0";
   }
 
-  for(; value && i; --i, value /= base)
+  for (; value && i; --i, value /= base)
   {
     buf.insert(buf.begin(), (char)hexarray[value % base]);
   }
@@ -151,7 +151,7 @@ std::string strToLower(std::string temp)
 {
   const int len = temp.length();
 
-  for(int i = 0; i != len; ++i)
+  for (int i = 0; i != len; ++i)
   {
     temp[i] = std::tolower(temp[i]);
   }
@@ -175,7 +175,7 @@ std::string hash(std::string value)
 
   char* cvalue = const_cast<char*>(value.c_str());
 
-  while((c = *cvalue++))
+  while ((c = *cvalue++))
   {
     hash = ((hash << 5) + hash) + c;  /* hash * 33 + c */
   }

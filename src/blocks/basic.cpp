@@ -43,7 +43,7 @@ bool BlockBasic::affectedBlock(int block)
 bool BlockBasic::isBlockStackable(const uint8_t block)
 {
   /* Check block below allows blocks placed on top */
-  switch(block)
+  switch (block)
   {
   case BLOCK_WORKBENCH:
   case BLOCK_CHEST:
@@ -73,14 +73,14 @@ bool BlockBasic::isBlockStackable(const uint8_t block)
 bool BlockBasic::isUserOnBlock(const int32_t x, const int8_t y, const int32_t z, const int map)
 {
   /* TODO: Get Users by chunk rather then whole list */
-  for(unsigned int i = 0; i < User::all().size(); i++)
+  for (unsigned int i = 0; i < User::all().size(); i++)
   {
     /* don't allow block placement on top of player */
-    if(User::all()[i]->checkOnBlock(x, y, z))
+    if (User::all()[i]->checkOnBlock(x, y, z))
     {
       return true;
     }
-    if(User::all()[i]->checkOnBlock(x, y - 1, z))
+    if (User::all()[i]->checkOnBlock(x, y - 1, z))
     {
       return true;
     }
@@ -93,9 +93,9 @@ bool BlockBasic::translateDirection(int32_t* x, int8_t* y, int32_t* z, int map, 
 {
   uint8_t block, meta;
   Mineserver::get()->map(map)->getBlock(*x, *y, *z, &block, &meta);
-  if(block != BLOCK_SNOW)
+  if (block != BLOCK_SNOW)
   {
-    switch(direction)
+    switch (direction)
     {
     case BLOCK_SOUTH:
       *x -= 1;
@@ -127,7 +127,7 @@ bool BlockBasic::isBlockEmpty(const int32_t x, const int8_t y, const int32_t z, 
 {
   uint8_t block;
   uint8_t meta;
-  if(!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
   {
     return false;
   }
@@ -138,15 +138,15 @@ bool BlockBasic::spawnBlockItem(const int32_t x, const int8_t y, const int32_t z
 {
   Drop* drop = NULL;
 
-  if(BLOCKDROPS.count(block))
+  if (BLOCKDROPS.count(block))
   {
     drop = BLOCKDROPS[block];
 
-    while(drop)
+    while (drop)
     {
-      if((int)drop->probability >= rand() % 10000)
+      if ((int)drop->probability >= rand() % 10000)
       {
-        if(drop->count)
+        if (drop->count)
         {
           Mineserver::get()->map(map)->createPickupSpawn(x, y, z, drop->item_id, drop->count, meta, NULL);
         }

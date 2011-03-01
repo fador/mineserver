@@ -32,7 +32,7 @@
 
 bool BlockLiquid::affectedBlock(int block)
 {
-  switch(block)
+  switch (block)
   {
   case BLOCK_WATER:
   case BLOCK_STATIONARY_WATER:
@@ -70,20 +70,20 @@ bool BlockLiquid::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if(!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
   /* move the x,y,z coords dependent upon placement direction */
-  if(!this->translateDirection(&x, &y, &z, map, direction))
+  if (!this->translateDirection(&x, &y, &z, map, direction))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
-  if(!this->isBlockEmpty(x, y, z, map))
+  if (!this->isBlockEmpty(x, y, z, map))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -93,12 +93,12 @@ bool BlockLiquid::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
 
   int block = newblock;
 
-  if(block == ITEM_WATER_BUCKET)
+  if (block == ITEM_WATER_BUCKET)
   {
     newblock = BLOCK_STATIONARY_WATER;
   }
 
-  if(block == ITEM_LAVA_BUCKET)
+  if (block == ITEM_LAVA_BUCKET)
   {
     newblock = BLOCK_STATIONARY_LAVA;
   }
@@ -119,7 +119,7 @@ void BlockLiquid::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, i
 {
   uint8_t oldblock;
   uint8_t oldmeta;
-  if(!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     return;
   }

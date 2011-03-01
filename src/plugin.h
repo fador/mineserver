@@ -143,7 +143,7 @@ public:
   ~Plugin()
   {
     std::map<const std::string, Hook*>::iterator it = m_hooks.begin();
-    for(; it != m_hooks.end(); ++it)
+    for (; it != m_hooks.end(); ++it)
     {
       delete it->second;
     }

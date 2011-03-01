@@ -50,12 +50,12 @@ DWORD WINAPI CliScreen::_stdinThreadProc(LPVOID lpParameter)
 
 DWORD WINAPI CliScreen::stdinThreadProc()
 {
-  while(true)
+  while (true)
   {
     std::string s;
     std::getline(std::cin, s);
 
-    if(std::cin.rdstate() != std::ios::goodbit)
+    if (std::cin.rdstate() != std::ios::goodbit)
     {
       EnterCriticalSection(&ccAccess);
       currentCommand.clear();
@@ -108,22 +108,22 @@ bool CliScreen::hasCommand()
   char readchar;
   pollfd stdinfd[1];
 
-  while(true)
+  while (true)
   {
     stdinfd[0].fd = fileno(stdin);
     stdinfd[0].events = POLLIN;
 
-    if(!poll(stdinfd, 1, 0))
+    if (!poll(stdinfd, 1, 0))
     {
       return false;
     }
 
-    if(read(STDIN_FILENO, &readchar, 1) == -1)
+    if (read(STDIN_FILENO, &readchar, 1) == -1)
     {
       return false;
     }
 
-    if(readchar == '\n')
+    if (readchar == '\n')
     {
       return true;
     }
@@ -137,7 +137,7 @@ bool CliScreen::hasCommand()
 
 bool CliScreen::CheckForCommand()
 {
-  if(Mineserver::get()->screen()->hasCommand())
+  if (Mineserver::get()->screen()->hasCommand())
   {
     // Now handle this command as normal
     User serverUser(-1, SERVER_CONSOLE_UID);

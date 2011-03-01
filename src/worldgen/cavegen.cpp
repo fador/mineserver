@@ -58,9 +58,9 @@ void CaveGen::init(int seed)
 
 void CaveGen::AddCaves(uint8_t& block, int x, int y, int z)
 {
-  if(caveNoise.GetValue(x, y, z) < caveTreshold)
+  if (caveNoise.GetValue(x, y, z) < caveTreshold)
   {
-    if(y < 10 && addCaveLava)
+    if (y < 10 && addCaveLava)
     {
       block = BLOCK_LAVA;
     }

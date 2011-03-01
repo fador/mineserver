@@ -42,7 +42,7 @@ ConfigNode::~ConfigNode()
   std::map<std::string, ConfigNode*>::iterator iter_a = m_list.begin();
   std::map<std::string, ConfigNode*>::iterator iter_b = m_list.end();
 
-  for(; iter_a != iter_b; ++iter_a)
+  for (; iter_a != iter_b; ++iter_a)
   {
     delete iter_a->second;
   }
@@ -53,7 +53,7 @@ ConfigNode::~ConfigNode()
 bool ConfigNode::bData() const
 {
   bool tmp = false;
-  if(m_type == CONFIG_NODE_BOOLEAN)
+  if (m_type == CONFIG_NODE_BOOLEAN)
   {
     tmp = m_nData != 0.0;
   }
@@ -62,7 +62,7 @@ bool ConfigNode::bData() const
 
 int ConfigNode::iData() const
 {
-  if(m_type == CONFIG_NODE_NUMBER)
+  if (m_type == CONFIG_NODE_NUMBER)
   {
     return (int)m_nData;
   }
@@ -71,7 +71,7 @@ int ConfigNode::iData() const
 
 int64_t ConfigNode::lData() const
 {
-  if(m_type == CONFIG_NODE_NUMBER)
+  if (m_type == CONFIG_NODE_NUMBER)
   {
     return (int64_t)m_nData;
   }
@@ -80,7 +80,7 @@ int64_t ConfigNode::lData() const
 
 float ConfigNode::fData() const
 {
-  if(m_type == CONFIG_NODE_NUMBER)
+  if (m_type == CONFIG_NODE_NUMBER)
   {
     return (float)m_nData;
   }
@@ -89,7 +89,7 @@ float ConfigNode::fData() const
 
 double ConfigNode::dData() const
 {
-  if(m_type == CONFIG_NODE_NUMBER)
+  if (m_type == CONFIG_NODE_NUMBER)
   {
     return m_nData;
   }
@@ -99,7 +99,7 @@ double ConfigNode::dData() const
 std::string ConfigNode::sData() const
 {
   std::string tmp("");
-  if(m_type == CONFIG_NODE_STRING)
+  if (m_type == CONFIG_NODE_STRING)
   {
     tmp.assign(m_sData);
   }
@@ -117,19 +117,19 @@ std::list<std::string>* ConfigNode::keys(int type)
 
   std::list<std::string>* keys = new std::list<std::string>;
 
-  for(; iter_a != iter_b; ++iter_a)
+  for (; iter_a != iter_b; ++iter_a)
   {
-    if((type == CONFIG_NODE_UNDEFINED) || (iter_a->second->type() == type))
+    if ((type == CONFIG_NODE_UNDEFINED) || (iter_a->second->type() == type))
     {
       keys->push_back(iter_a->first);
     }
 
-    if(iter_a->second->type() == CONFIG_NODE_LIST)
+    if (iter_a->second->type() == CONFIG_NODE_LIST)
     {
       std::list<std::string>* tmp_list = iter_a->second->keys(type);
       std::list<std::string>::iterator tmp_iter = tmp_list->begin();
 
-      for(; tmp_iter != tmp_list->end(); ++tmp_iter)
+      for (; tmp_iter != tmp_list->end(); ++tmp_iter)
       {
         keys->push_back((iter_a->first) + "." + (*tmp_iter));
       }
@@ -189,20 +189,20 @@ void ConfigNode::setType(int type)
 
 bool ConfigNode::has(const std::string& key)
 {
-  if(m_type != CONFIG_NODE_LIST)
+  if (m_type != CONFIG_NODE_LIST)
   {
     return false;
   }
 
   size_t pos = key.find('.');
 
-  if(pos != std::string::npos)
+  if (pos != std::string::npos)
   {
     const std::string keyA(key.substr(0, pos));
     const std::string keyB(key.substr(pos + 1));
     ConfigNode* tmp;
 
-    if(m_list.count(keyA) == 0)
+    if (m_list.count(keyA) == 0)
     {
       return false;
     }
@@ -212,7 +212,7 @@ bool ConfigNode::has(const std::string& key)
       return tmp->has(keyB);
     }
   }
-  else if(m_list.count(key) == 1)
+  else if (m_list.count(key) == 1)
   {
     return true;
   }
@@ -224,26 +224,26 @@ bool ConfigNode::has(const std::string& key)
 
 ConfigNode* ConfigNode::get(const std::string& key, bool createMissing)
 {
-  if(m_type != CONFIG_NODE_LIST)
+  if (m_type != CONFIG_NODE_LIST)
   {
     return NULL;
   }
 
   size_t pos = key.find('.');
 
-  if(pos != std::string::npos)
+  if (pos != std::string::npos)
   {
     std::string keyA(key.substr(0, pos));
     std::string keyB(key.substr(pos + 1));
     ConfigNode* tmp;
 
-    if(m_list.count(keyA))
+    if (m_list.count(keyA))
     {
       tmp = m_list[keyA];
     }
     else
     {
-      if(createMissing == false)
+      if (createMissing == false)
       {
         return NULL;
       }
@@ -258,9 +258,9 @@ ConfigNode* ConfigNode::get(const std::string& key, bool createMissing)
   }
   else
   {
-    if(m_list.count(key) == 0)
+    if (m_list.count(key) == 0)
     {
-      if(createMissing == true)
+      if (createMissing == true)
       {
         m_list[key] = new ConfigNode;
       }
@@ -280,15 +280,15 @@ bool ConfigNode::set(const std::string& key, ConfigNode* ptr, bool createMissing
 
   size_t pos = key.find('.');
 
-  if(pos != std::string::npos)
+  if (pos != std::string::npos)
   {
     std::string keyA(key.substr(0, pos));
     std::string keyB(key.substr(pos + 1));
     ConfigNode* tmp;
 
-    if(m_list.count(keyA) == 0)
+    if (m_list.count(keyA) == 0)
     {
-      if(createMissing == false)
+      if (createMissing == false)
       {
         return false;
       }
@@ -329,12 +329,12 @@ void ConfigNode::clear()
 
 void ConfigNode::dump(int indent = 0) const
 {
-  for(int i = 0; i < indent; i++)
+  for (int i = 0; i < indent; i++)
   {
     std::cout << "  ";
   }
 
-  switch(m_type)
+  switch (m_type)
   {
   case CONFIG_NODE_UNDEFINED:
   {
@@ -349,9 +349,9 @@ void ConfigNode::dump(int indent = 0) const
     std::map<std::string, ConfigNode*>::const_iterator iter_a = m_list.begin();
     std::map<std::string, ConfigNode*>::const_iterator iter_b = m_list.end();
 
-    for(; iter_a != iter_b; ++iter_a)
+    for (; iter_a != iter_b; ++iter_a)
     {
-      for(int i = 0; i < (indent + 1); i++)
+      for (int i = 0; i < (indent + 1); i++)
       {
         std::cout << "  ";
       }

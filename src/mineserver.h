@@ -72,7 +72,7 @@ public:
   {
     static Mineserver* m_instance;
 
-    if(!m_instance)
+    if (!m_instance)
     {
       m_instance = new Mineserver;
     }

@@ -75,7 +75,7 @@ Map::Map(const Map& oldmap)
 
 Map::Map()
 {
-  for(int i = 0; i < 256; i++)
+  for (int i = 0; i < 256; i++)
   {
     emitLight[i] = 0;
   }
@@ -91,7 +91,7 @@ Map::Map()
   emitLight[0x5A] = 11; // Portal
   emitLight[0x5B] = 15; // Jack-O-Lantern
 
-  for(int i = 0; i < 256; i++)
+  for (int i = 0; i < 256; i++)
   {
     stopLight[i] = 16;
   }
@@ -129,10 +129,10 @@ Map::Map()
 Map::~Map()
 {
   // Free chunk memory
-  for(int i = 0; i < 441; ++i)
+  for (int i = 0; i < 441; ++i)
   {
     sChunkNode* nextnode = NULL;
-    for(sChunkNode* node = chunks.getBuckets()[i]; node != NULL; node = nextnode)
+    for (sChunkNode* node = chunks.getBuckets()[i]; node != NULL; node = nextnode)
     {
       nextnode = node->next;
       releaseMap(node->chunk->x, node->chunk->z);
@@ -142,7 +142,7 @@ Map::~Map()
 
   maps.clear();
   // Free item memory
-  for(std::map<uint32_t, spawnedItem*>::iterator it = items.begin(); it != items.end(); ++it)
+  for (std::map<uint32_t, spawnedItem*>::iterator it = items.begin(); it != items.end(); ++it)
   {
     delete items[it->first];
   }
@@ -151,7 +151,7 @@ Map::~Map()
   std::string infile = mapDirectory + "/level.dat";
 
   NBT_Value* root = NBT_Value::LoadFromFile(infile);
-  if(root != NULL)
+  if (root != NULL)
   {
     NBT_Value& data = *((*root)["Data"]);
 
@@ -160,13 +160,13 @@ Map::~Map()
 
     NBT_Value* trees = ((*root)["Trees"]);
 
-    if(trees)
+    if (trees)
     {
       std::vector<NBT_Value*>* tree_vec = trees->GetList();
 
       tree_vec->clear();
 
-      for(std::list<sTree>::iterator iter = saplings.begin(); iter != saplings.end(); ++iter)
+      for (std::list<sTree>::iterator iter = saplings.begin(); iter != saplings.end(); ++iter)
       {
         //(*trees)[i] = (*iter)
         NBT_Value* tree = new NBT_Value(NBT_Value::TAG_COMPOUND);
@@ -202,24 +202,24 @@ void Map::checkGenTrees()
   static uint8_t blocktype;
   static uint8_t meta;
 
-  while(iter != saplings.end())
+  while (iter != saplings.end())
   {
     getLight(iter->x, iter->y + 1, iter->z, &light, &skylight);
-    if(light > 9 || skylight > 3)
+    if (light > 9 || skylight > 3)
     {
       //Check above blocks
       uint8_t i = 1;
-      for(i = 1; i < MAX_TRUNK; i++)
+      for (i = 1; i < MAX_TRUNK; i++)
       {
-        if(!getBlock(iter->x, iter->y + i, iter->z, &blocktype, &meta) || blocktype != BLOCK_AIR)
+        if (!getBlock(iter->x, iter->y + i, iter->z, &blocktype, &meta) || blocktype != BLOCK_AIR)
         {
           break;
         }
       }
-      if(i >= MIN_TREE_SPACE)
+      if (i >= MIN_TREE_SPACE)
       {
         //If there is enough space
-        if(rand() % 50 == 0)
+        if (rand() % 50 == 0)
         {
           LOG(INFO, "Map", "Grow tree!");
 
@@ -246,9 +246,9 @@ void Map::init(int number)
   std::list<std::string>* tmp = Mineserver::get()->config()->mData(key)->keys();
   std::list<std::string>::iterator it = tmp->begin();
   int a = 0;
-  for(; it != tmp->end(); ++it)
+  for (; it != tmp->end(); ++it)
   {
-    if(a == number)
+    if (a == number)
     {
       mapDirectory = *it;
       break;
@@ -257,7 +257,7 @@ void Map::init(int number)
   }
   Mineserver::get()->logger()->log(LogType::LOG_INFO, "Map", "World " + mapDirectory);
 
-  if(mapDirectory == "Not found!")
+  if (mapDirectory == "Not found!")
   {
     Mineserver::get()->logger()->log(LogType::LOG_WARNING, "Map", "mapdir not defined");
     exit(EXIT_FAILURE);
@@ -266,14 +266,14 @@ void Map::init(int number)
   std::string infile = mapDirectory + "/level.dat";
 
   struct stat stFileInfo;
-  if(stat(mapDirectory.c_str(), &stFileInfo) != 0)
+  if (stat(mapDirectory.c_str(), &stFileInfo) != 0)
   {
     LOG(WARNING, "Map", "Warning: Map directory not found, creating it now.");
 
 #ifdef WIN32
-    if(_mkdir(mapDirectory.c_str()) == -1)
+    if (_mkdir(mapDirectory.c_str()) == -1)
 #else
-    if(mkdir(mapDirectory.c_str(), 0755) == -1)
+    if (mkdir(mapDirectory.c_str(), 0755) == -1)
 #endif
     {
       LOG(EMERG, "Map", "Error: Could not create map directory.");
@@ -282,7 +282,7 @@ void Map::init(int number)
     }
   }
 
-  if(stat((infile).c_str(), &stFileInfo) != 0)
+  if (stat((infile).c_str(), &stFileInfo) != 0)
   {
     LOG(WARNING, "Map", "Warning: level.dat not found, creating it now.");
 
@@ -298,7 +298,7 @@ void Map::init(int number)
 
     level.SaveToFile(infile);
 
-    if(stat(infile.c_str(), &stFileInfo) != 0)
+    if (stat(infile.c_str(), &stFileInfo) != 0)
     {
       LOG(EMERG, "Map", "Error: Could not create level.dat");
       exit(EXIT_FAILURE);
@@ -322,7 +322,7 @@ void Map::init(int number)
   // Get list of saplings from map:
   NBT_Value* trees = ((*root)["Trees"]);
 
-  if(!trees || trees->GetListType() != NBT_Value::TAG_COMPOUND)
+  if (!trees || trees->GetListType() != NBT_Value::TAG_COMPOUND)
   {
     LOG(INFO, "Map", "No Trees in level.dat, creating..");
     root->Insert("Trees", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
@@ -332,7 +332,7 @@ void Map::init(int number)
 
   std::vector<NBT_Value*>* tree_list = trees->GetList();
 
-  for(std::vector<NBT_Value*>::iterator iter = (*tree_list).begin(); iter != (*tree_list).end(); ++iter)
+  for (std::vector<NBT_Value*>::iterator iter = (*tree_list).begin(); iter != (*tree_list).end(); ++iter)
   {
     NBT_Value& tree = *(*iter);
     int32_t x = (int32_t) * tree["X"];
@@ -357,7 +357,7 @@ sChunk* Map::getMapData(int x, int z,  bool generate)
 
   sChunk* chunk = chunks.getChunk(x, z);
 
-  if(chunk != NULL || generate == false)
+  if (chunk != NULL || generate == false)
   {
     return chunk;
   }
@@ -370,9 +370,9 @@ bool Map::saveWholeMap()
 {
 
   //Loop every chunk loaded
-  for(int i = 0; i < 441; ++i)
+  for (int i = 0; i < 441; ++i)
   {
-    for(sChunkNode* node = chunks.getBuckets()[i]; node != NULL; node = node->next)
+    for (sChunkNode* node = chunks.getBuckets()[i]; node != NULL; node = node->next)
     {
       saveMap(node->chunk->x, node->chunk->z);
     }
@@ -389,7 +389,7 @@ bool Map::saveWholeMap()
   std::string infile = mapDirectory + "/level.dat";
 
   NBT_Value* root = NBT_Value::LoadFromFile(infile);
-  if(root != NULL)
+  if (root != NULL)
   {
     NBT_Value& data = *((*root)["Data"]);
 
@@ -401,13 +401,13 @@ bool Map::saveWholeMap()
 
     NBT_Value* trees = ((*root)["Trees"]);
 
-    if(trees)
+    if (trees)
     {
       std::vector<NBT_Value*>* tree_vec = trees->GetList();
 
       tree_vec->clear();
 
-      for(std::list<sTree>::iterator iter = saplings.begin(); iter != saplings.end(); ++iter)
+      for (std::list<sTree>::iterator iter = saplings.begin(); iter != saplings.end(); ++iter)
       {
         //(*trees)[i] = (*iter)
         NBT_Value* tree = new NBT_Value(NBT_Value::TAG_COMPOUND);
@@ -431,7 +431,7 @@ bool Map::generateLight(int x, int z)
 {
 
   sChunk* chunk = chunks.getChunk(x, z);
-  if(chunk == NULL)
+  if (chunk == NULL)
   {
     LOGLF("Loading chunk failed (generateLight)");
     return false;
@@ -468,15 +468,15 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
   // Sky light
   int light = 0;
   bool foundheight = false;
-  for(int block_x = 0; block_x < 16; block_x++)
+  for (int block_x = 0; block_x < 16; block_x++)
   {
-    for(int block_z = 0; block_z < 16; block_z++)
+    for (int block_z = 0; block_z < 16; block_z++)
     {
       light = 15;
       foundheight = false;
       int32_t blockx_blockz = (block_z << 7) + (block_x << 11);
 
-      for(int block_y = 127; block_y > 0; block_y--)
+      for (int block_y = 127; block_y > 0; block_y--)
       {
         int index      = block_y + blockx_blockz;
         int absolute_x = x * 16 + block_x;
@@ -484,21 +484,21 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
         uint8_t block    = blocks[index];
 
         light -= stopLight[block];
-        if(light < 0)
+        if (light < 0)
         {
           light = 0;
         }
 
         // Calculate heightmap while looping this
-        if((block != BLOCK_AIR) && (foundheight == false))
+        if ((block != BLOCK_AIR) && (foundheight == false))
         {
           heightmap[block_z + (block_x << 4)] = ((block_y == 127) ? block_y : block_y + 1);
           foundheight = true;
         }
 
-        if(light < 1)
+        if (light < 1)
         {
-          if(block_y > highest_y)
+          if (block_y > highest_y)
           {
             highest_y = block_y;
           }
@@ -512,12 +512,12 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
   }
 
   // Block light
-  for(int block_x = 0; block_x < 16; block_x++)
+  for (int block_x = 0; block_x < 16; block_x++)
   {
-    for(int block_z = 0; block_z < 16; block_z++)
+    for (int block_z = 0; block_z < 16; block_z++)
     {
       int32_t blockx_blockz = (block_z << 7) + (block_x << 11);
-      for(int block_y = highest_y; block_y >= 0; block_y--)
+      for (int block_y = highest_y; block_y >= 0; block_y--)
       {
         int index      = block_y + blockx_blockz;
         int absolute_x = x * 16 + block_x;
@@ -525,7 +525,7 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
         uint8_t block    = blocks[index];
 
         // If light emitting block
-        if(emitLight[block] > 0)
+        if (emitLight[block] > 0)
         {
           setLight(absolute_x, block_y, absolute_z, 0, emitLight[block], 2, chunk);
         }
@@ -534,11 +534,11 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
   }
 
   // Spread light
-  for(int block_x = 0; block_x < 16; block_x++)
+  for (int block_x = 0; block_x < 16; block_x++)
   {
-    for(int block_z = 0; block_z < 16; block_z++)
+    for (int block_z = 0; block_z < 16; block_z++)
     {
-      for(int block_y = heightmap[block_z + (block_x << 4)]; block_y >= 0; block_y--)
+      for (int block_y = heightmap[block_z + (block_x << 4)]; block_y >= 0; block_y--)
       {
         int absolute_x = x * 16 + block_x;
         int absolute_z = z * 16 + block_z;
@@ -546,7 +546,7 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
 
         getLight(absolute_x, block_y, absolute_z, &skylight_s, &blocklight_s, chunk);
 
-        if(skylight_s || blocklight_s)
+        if (skylight_s || blocklight_s)
         {
           spreadLight(absolute_x, block_y, absolute_z, skylight_s, blocklight_s);
         }
@@ -569,7 +569,7 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
 
 bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight)
 {
-  if((y < 0) || (y > 127))
+  if ((y < 0) || (y > 127))
   {
     //LOGLF("Invalid y value (spreadLight)");
     // For sky style maps or maps with holes, this spams.
@@ -581,7 +581,7 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight)
 
   sChunk* chunk = getMapData(chunk_x, chunk_z, false);
 
-  if(!chunk)
+  if (!chunk)
   {
     LOGLF("Loading chunk failed (spreadLight)");
     return false;
@@ -596,20 +596,20 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk*
   uint8_t block, meta;
 
   // If no light, stop!
-  if((skylight < 1) && (blocklight < 1))
+  if ((skylight < 1) && (blocklight < 1))
   {
     return false;
   }
 
-  for(int i = 0; i < 6; i++)
+  for (int i = 0; i < 6; i++)
   {
     // Going too high
-    if((y == 127) && (i == 2))
+    if ((y == 127) && (i == 2))
     {
       i++;
     }
     // going negative
-    if((y == 0) && (i == 3))
+    if ((y == 0) && (i == 3))
     {
       i++;
     }
@@ -618,7 +618,7 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk*
     int y_toset = y;
     int z_toset = z;
 
-    switch(i)
+    switch (i)
     {
     case 0:
       x_toset++;
@@ -640,39 +640,39 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk*
       break;
     }
 
-    if(getBlock(x_toset, y_toset, z_toset, &block, &meta, false))
+    if (getBlock(x_toset, y_toset, z_toset, &block, &meta, false))
     {
       uint8_t skylightCurrent, blocklightCurrent;
       int skylightNew, blocklightNew;
       bool spread = false;
 
       skylightNew = skylight - stopLight[block] - 1;
-      if(skylightNew < 0)
+      if (skylightNew < 0)
       {
         skylightNew = 0;
       }
 
       blocklightNew = blocklight - stopLight[block] - 1;
-      if(blocklightNew < 0)
+      if (blocklightNew < 0)
       {
         blocklightNew = 0;
       }
 
       getLight(x_toset, y_toset, z_toset, &skylightCurrent, &blocklightCurrent, chunk);
 
-      if(skylightNew > skylightCurrent)
+      if (skylightNew > skylightCurrent)
       {
         skylightCurrent = skylightNew;
         spread = true;
       }
 
-      if(blocklightNew > blocklightCurrent)
+      if (blocklightNew > blocklightCurrent)
       {
         blocklightCurrent = blocklightNew;
         spread = true;
       }
 
-      if(spread)
+      if (spread)
       {
         setLight(x_toset, y_toset, z_toset, skylightCurrent, blocklightCurrent, 4, chunk);
         spreadLight(x_toset, y_toset, z_toset, skylightCurrent, blocklightCurrent, chunk);
@@ -685,7 +685,7 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk*
 
 bool Map::getBlock(int x, int y, int z, uint8_t* type, uint8_t* meta, bool generate)
 {
-  if((y < 0) || (y > 127))
+  if ((y < 0) || (y > 127))
   {
     printf("(%i, %i, %i) ", x, y, z);
     LOGLF("Invalid y value (getBlock)");
@@ -697,9 +697,9 @@ bool Map::getBlock(int x, int y, int z, uint8_t* type, uint8_t* meta, bool gener
 
   sChunk* chunk = getMapData(chunk_x, chunk_z, generate);
 
-  if(!chunk)
+  if (!chunk)
   {
-    if(generate)
+    if (generate)
     {
       LOGLF("Loading chunk failed (getBlock)");
     }
@@ -721,7 +721,7 @@ bool Map::getBlock(int x, int y, int z, uint8_t* type, uint8_t* meta, bool gener
   *type                = blocks[index];
   uint8_t metadata     = metapointer[(index) >> 1];
 
-  if(y & 1)
+  if (y & 1)
   {
     metadata  &= 0xf0;
     metadata >>= 4;
@@ -739,7 +739,7 @@ bool Map::getBlock(int x, int y, int z, uint8_t* type, uint8_t* meta, bool gener
 
 bool Map::getLight(int x, int y, int z, uint8_t* skylight, uint8_t* blocklight)
 {
-  if((y < 0) || (y > 127))
+  if ((y < 0) || (y > 127))
   {
     LOGLF("Invalid y value (getLight)");
     return false;
@@ -751,7 +751,7 @@ bool Map::getLight(int x, int y, int z, uint8_t* skylight, uint8_t* blocklight)
 
   sChunk* chunk = getMapData(chunk_x, chunk_z, false);
 
-  if(!chunk)
+  if (!chunk)
   {
     LOGLF("Loading chunk failed (getLight)");
     return false;
@@ -772,7 +772,7 @@ bool Map::getLight(int x, int y, int z, uint8_t* skylight, uint8_t* blocklight, 
   *blocklight = blocklightPtr[(index) >> 1];
   *skylight   = skylightPtr[(index) >> 1];
 
-  if(y % 2)
+  if (y % 2)
   {
     *blocklight  &= 0xf0;
     *blocklight >>= 4;
@@ -792,7 +792,7 @@ bool Map::getLight(int x, int y, int z, uint8_t* skylight, uint8_t* blocklight, 
 bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type)
 {
 
-  if((y < 0) || (y > 127))
+  if ((y < 0) || (y > 127))
   {
     LOGLF("Invalid y value (setLight)");
     return false;
@@ -803,7 +803,7 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type)
 
   sChunk* chunk = getMapData(chunk_x, chunk_z, false);
 
-  if(!chunk)
+  if (!chunk)
   {
     LOGLF("Loading chunk failed (setLight)");
     return false;
@@ -824,15 +824,15 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type, 
   char skylight_local      = skylightPtr[index >> 1];
   char blocklight_local    = blocklightPtr[index >> 1];
 
-  if(y & 1)
+  if (y & 1)
   {
-    if(type & 0x5)  // 1 or 4
+    if (type & 0x5) // 1 or 4
     {
       skylight_local &= 0x0f;
       skylight_local |= skylight << 4;
     }
 
-    if(type & 0x6)  // 2 or 4
+    if (type & 0x6) // 2 or 4
     {
       blocklight_local &= 0x0f;
       blocklight_local |= blocklight << 4;
@@ -840,25 +840,25 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type, 
   }
   else
   {
-    if(type & 0x5)  // 1 or 4
+    if (type & 0x5) // 1 or 4
     {
       skylight_local &= 0xf0;
       skylight_local |= skylight;
     }
 
-    if(type & 0x6)  // 2 or 4
+    if (type & 0x6) // 2 or 4
     {
       blocklight_local &= 0xf0;
       blocklight_local |= blocklight;
     }
   }
 
-  if(type & 0x5)  // 1 or 4
+  if (type & 0x5) // 1 or 4
   {
     skylightPtr[index >> 1] = skylight_local;
   }
 
-  if(type & 0x6)  // 2 or 4
+  if (type & 0x6) // 2 or 4
   {
     blocklightPtr[index >> 1] = blocklight_local;
   }
@@ -868,7 +868,7 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type, 
 
 bool Map::setBlock(int x, int y, int z, char type, char meta)
 {
-  if((y < 0) || (y > 127))
+  if ((y < 0) || (y > 127))
   {
     LOGLF("Invalid y value (setBlock)");
     return false;
@@ -880,7 +880,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
 
   sChunk* chunk = getMapData(chunk_x, chunk_z, true);
 
-  if(!chunk)
+  if (!chunk)
   {
     LOGLF("Loading chunk failed (setBlock)");
     return false;
@@ -896,7 +896,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   blocks[index] = type;
   char metadata      = metapointer[index >> 1];
 
-  if(y & 1)
+  if (y & 1)
   {
     metadata &= 0x0f;
     metadata |= meta << 4;
@@ -912,11 +912,11 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   chunk->lightRegen    = true;
   chunk->lastused      = (int)time(NULL);
 
-  if(type == BLOCK_AIR)
+  if (type == BLOCK_AIR)
   {
     uint8_t temp_type = 0, temp_meta = 0;
     int8_t temp_y = y;
-    while(getBlock(x, temp_y, z, &temp_type, &temp_meta, false) && (temp_type == BLOCK_AIR))
+    while (getBlock(x, temp_y, z, &temp_type, &temp_meta, false) && (temp_type == BLOCK_AIR))
     {
       temp_y--;
     }
@@ -924,9 +924,9 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
     temp_y++;
 
     std::map<uint32_t, spawnedItem*>::const_iterator it_a = items.begin(), it_b = items.end();
-    for(; it_a != it_b; ++it_a)
+    for (; it_a != it_b; ++it_a)
     {
-      if((floor(static_cast<double>(it_a->second->pos.x()) / 32) == x) && (floor(static_cast<double>(it_a->second->pos.y()) / 32) == y + 1) && (floor(static_cast<double>(it_a->second->pos.z()) / 32) == z))
+      if ((floor(static_cast<double>(it_a->second->pos.x()) / 32) == x) && (floor(static_cast<double>(it_a->second->pos.y()) / 32) == y + 1) && (floor(static_cast<double>(it_a->second->pos.z()) / 32) == z))
       {
         it_a->second->pos.y() = temp_y * 32;
       }
@@ -942,7 +942,7 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
   pkt << PACKET_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int8_t)type << (int8_t)meta;
 
   sChunk* chunk = chunks.getChunk(blockToChunk(x), blockToChunk(z));
-  if(chunk == NULL)
+  if (chunk == NULL)
   {
     return false;
   }
@@ -958,7 +958,7 @@ bool Map::sendNote(int x, int y, int z, char instrument, char pitch)
   pkt << PACKET_PLAY_NOTE << (int32_t)x << (int16_t)y << (int32_t)z << (int8_t)instrument << (int8_t)pitch;
 
   sChunk* chunk = chunks.getChunk(blockToChunk(x), blockToChunk(z));
-  if(chunk == NULL)
+  if (chunk == NULL)
   {
     return false;
   }
@@ -979,7 +979,7 @@ bool Map::sendPickupSpawn(spawnedItem item)
   int chunk_z = blockToChunk(item.pos.z() / 32);
 
   sChunk* chunk = chunks.getChunk(chunk_x, chunk_z);
-  if(chunk == NULL)
+  if (chunk == NULL)
   {
     return false;
   }
@@ -1003,7 +1003,7 @@ void Map::createPickupSpawn(int x, int y, int z, int type, int count, int health
   item.health   = health;
   item.item     = type;
   item.count    = count;
-  if(user != NULL)
+  if (user != NULL)
   {
     item.spawnedBy = user->UID;
   }
@@ -1014,9 +1014,9 @@ void Map::createPickupSpawn(int x, int y, int z, int type, int count, int health
   // Effectively we get... Gravity!
   uint8_t temp_type = 0, temp_meta = 0;
   int8_t temp_y = y;
-  if(getBlock(x, temp_y, z, &temp_type, &temp_meta, false) && (temp_type == BLOCK_AIR))
+  if (getBlock(x, temp_y, z, &temp_type, &temp_meta, false) && (temp_type == BLOCK_AIR))
   {
-    while(getBlock(x, temp_y, z, &temp_type, &temp_meta, false) && (temp_type == BLOCK_AIR))
+    while (getBlock(x, temp_y, z, &temp_type, &temp_meta, false) && (temp_type == BLOCK_AIR))
     {
       temp_y--;
     }
@@ -1038,7 +1038,7 @@ void Map::createPickupSpawn(int x, int y, int z, int type, int count, int health
 
 bool Map::sendProjectileSpawn(User* user, int8_t projID)
 {
-  if(!projID)
+  if (!projID)
   {
     return false;
   }
@@ -1067,7 +1067,7 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
 sChunk*  Map::loadMap(int x, int z, bool generate)
 {
   sChunk* chunk = chunks.getChunk(x, z);
-  if(chunk != NULL)
+  if (chunk != NULL)
   {
     return chunk;
   }
@@ -1083,10 +1083,10 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   std::string infile = mapDirectory + "/" + base36_encode(modulox) + "/" + base36_encode(moduloz) + "/c." + base36_encode(mapposx) + "." + base36_encode(mapposz) + ".dat";
 
   struct stat stFileInfo;
-  if(stat(infile.c_str(), &stFileInfo) != 0)
+  if (stat(infile.c_str(), &stFileInfo) != 0)
   {
     // If generate (false only for lightmapgenerator)
-    if(generate)
+    if (generate)
     {
       //chunk = new sChunk;
       // Re-seed! We share map gens with other maps
@@ -1096,14 +1096,14 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
       bool foundLand = false;
       uint8_t block, meta;
       int spx = spawnPos.x(), spy = 120, spz = spawnPos.z();
-      while(!foundLand)
+      while (!foundLand)
       {
         spx++;
-        for(int count = 0; count < 110; count++)
+        for (int count = 0; count < 110; count++)
         {
-          if(getBlock(spx, spy - count, spz, &block, &meta))
+          if (getBlock(spx, spy - count, spz, &block, &meta))
           {
-            switch(block)
+            switch (block)
             {
             case BLOCK_AIR:
             case BLOCK_RED_ROSE:
@@ -1135,7 +1135,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
       spawnPos.z() = spz;
       std::string infile = mapDirectory + "/level.dat";
       NBT_Value* root = NBT_Value::LoadFromFile(infile);
-      if(root != NULL)
+      if (root != NULL)
       {
         NBT_Value& data = *((*root)["Data"]);
         *data["SpawnX"] = (int32_t)spawnPos.x();
@@ -1159,7 +1159,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   chunk->nbt = NBT_Value::LoadFromFile(infile.c_str());
 
 
-  if(chunk->nbt == NULL)
+  if (chunk->nbt == NULL)
   {
     LOGLF("Error in loading map (unable to load file)");
     delete chunk;
@@ -1168,7 +1168,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
 
   NBT_Value* level = (*chunk->nbt)["Level"];
 
-  if(level == NULL)
+  if (level == NULL)
   {
     LOGLF("Error in loading map (unable to find Level)");
     delete chunk;
@@ -1178,7 +1178,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   NBT_Value* xPos = (*level)["xPos"];
   NBT_Value* zPos = (*level)["zPos"];
 
-  if(xPos && zPos)
+  if (xPos && zPos)
   {
     chunk->x = *xPos;
     chunk->z = *zPos;
@@ -1196,7 +1196,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   NBT_Value* nbt_skylight = (*level)["SkyLight"];
   NBT_Value* nbt_heightmap = (*level)["HeightMap"];
 
-  if(!nbt_blocks || !nbt_data || !nbt_blocklight || !nbt_skylight || !nbt_heightmap)
+  if (!nbt_blocks || !nbt_data || !nbt_blocklight || !nbt_skylight || !nbt_heightmap)
   {
     LOGLF("Error in loading map (chunk missing data)");
     delete chunk;
@@ -1209,7 +1209,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   std::vector<uint8_t>* skylight = nbt_skylight->GetByteArray();
   std::vector<uint8_t>* heightmap = nbt_heightmap->GetByteArray();
 
-  if(!blocks || !data || !blocklight || !skylight || !heightmap)
+  if (!blocks || !data || !blocklight || !skylight || !heightmap)
   {
     LOGLF("Error in loading map (chunk missing data)");
     delete chunk;
@@ -1219,7 +1219,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   size_t fullLen = (16 * 128 * 16);
   size_t halfLen = fullLen >> 1;
 
-  if(blocks->size()     != fullLen ||
+  if (blocks->size()     != fullLen ||
       data->size()       != halfLen ||
       blocklight->size() != halfLen ||
       skylight->size()   != halfLen)
@@ -1248,26 +1248,26 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   NBT_Value* entityList = (*level)["TileEntities"];
 
   //Verify the type
-  if(entityList && entityList->GetType() == NBT_Value::TAG_LIST && entityList->GetListType() == NBT_Value::TAG_COMPOUND)
+  if (entityList && entityList->GetType() == NBT_Value::TAG_LIST && entityList->GetListType() == NBT_Value::TAG_COMPOUND)
   {
     std::vector<NBT_Value*>* entities = entityList->GetList();
     std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
 
-    for(; iter != end ; iter++)
+    for (; iter != end ; iter++)
     {
       std::vector<uint8_t> buffer;
       NBT_Value* idVal = (**iter)["id"];
-      if(idVal == NULL)
+      if (idVal == NULL)
       {
         continue;
       }
       std::string* id = idVal->GetString();
-      if(id == NULL)
+      if (id == NULL)
       {
         continue;
       }
 
-      if((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
+      if ((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
           (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
           (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
       {
@@ -1278,7 +1278,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
       int32_t entityY = *(**iter)["y"];
       int32_t entityZ = *(**iter)["z"];
 
-      if((*id == "Sign"))
+      if ((*id == "Sign"))
       {
         signData* newSign = new signData;
         newSign->x = entityX;
@@ -1291,13 +1291,13 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
 
         chunk->signs.push_back(newSign);
       }
-      else if((*id == "Chest"))
+      else if ((*id == "Chest"))
       {
         NBT_Value* chestItems = (**iter)["Items"];
 
-        if(chestItems->GetType() == NBT_Value::TAG_LIST)
+        if (chestItems->GetType() == NBT_Value::TAG_LIST)
         {
-          if(chestItems->GetListType() != NBT_Value::TAG_COMPOUND)
+          if (chestItems->GetListType() != NBT_Value::TAG_COMPOUND)
           {
             continue;
           }
@@ -1310,9 +1310,9 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
           newChest->y = entityY;
           newChest->z = entityZ;
 
-          for(; iter2 != end2; iter2++)
+          for (; iter2 != end2; iter2++)
           {
-            if((**iter2)["Count"] == NULL || (**iter2)["Slot"] == NULL || (**iter2)["Damage"] == NULL || (**iter2)["id"] == NULL ||
+            if ((**iter2)["Count"] == NULL || (**iter2)["Slot"] == NULL || (**iter2)["Damage"] == NULL || (**iter2)["id"] == NULL ||
                 (**iter2)["Count"]->GetType() != NBT_Value::TAG_BYTE ||
                 (**iter2)["Slot"]->GetType() != NBT_Value::TAG_BYTE ||
                 (**iter2)["Damage"]->GetType() != NBT_Value::TAG_SHORT ||
@@ -1328,13 +1328,13 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
           chunk->chests.push_back(newChest);
         }
       }
-      else if((*id == "Furnace"))
+      else if ((*id == "Furnace"))
       {
         NBT_Value* chestItems = (**iter)["Items"];
 
-        if(chestItems->GetType() == NBT_Value::TAG_LIST)
+        if (chestItems->GetType() == NBT_Value::TAG_LIST)
         {
-          if(chestItems->GetListType() != NBT_Value::TAG_COMPOUND)
+          if (chestItems->GetListType() != NBT_Value::TAG_COMPOUND)
           {
             continue;
           }
@@ -1342,7 +1342,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
           std::vector<NBT_Value*>* entities2 = chestItems->GetList();
           std::vector<NBT_Value*>::iterator iter2 = entities2->begin(), end2 = entities2->end();
 
-          if((**iter)["BurnTime"] == NULL || (**iter)["CookTime"] == NULL)
+          if ((**iter)["BurnTime"] == NULL || (**iter)["CookTime"] == NULL)
           {
             continue;
           }
@@ -1355,9 +1355,9 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
           newFurnace->burnTime = (int16_t) * (**iter)["BurnTime"];
           newFurnace->cookTime = (int16_t) * (**iter)["CookTime"];
 
-          for(; iter2 != end2; iter2++)
+          for (; iter2 != end2; iter2++)
           {
-            if((**iter2)["Count"] == NULL || (**iter)["Slot"] == NULL || (**iter)["Damage"] == NULL || (**iter)["id"] == NULL ||
+            if ((**iter2)["Count"] == NULL || (**iter)["Slot"] == NULL || (**iter)["Damage"] == NULL || (**iter)["id"] == NULL ||
                 (**iter2)["Count"]->GetType()  != NBT_Value::TAG_BYTE  ||
                 (**iter2)["Slot"]->GetType()   != NBT_Value::TAG_BYTE  ||
                 (**iter2)["Damage"]->GetType() != NBT_Value::TAG_SHORT ||
@@ -1393,7 +1393,7 @@ bool Map::saveMap(int x, int z)
 
   sChunk*  chunk = chunks.getChunk(x, z);
 
-  if(!chunk->changed)
+  if (!chunk->changed)
   {
     return true;
   }
@@ -1401,7 +1401,7 @@ bool Map::saveMap(int x, int z)
 
 
   // Recalculate light maps
-  if(chunk->lightRegen)
+  if (chunk->lightRegen)
   {
     generateLight(x, z, chunk);
   }
@@ -1419,28 +1419,28 @@ bool Map::saveMap(int x, int z)
 
   // Try to create parent directories if necessary
   struct stat stFileInfo;
-  if(stat(outfile.c_str(), &stFileInfo) != 0)
+  if (stat(outfile.c_str(), &stFileInfo) != 0)
   {
     std::string outdir_a = mapDirectory + "/" + base36_encode(modulox);
     std::string outdir_b = mapDirectory + "/" + base36_encode(modulox) + "/" + base36_encode(moduloz);
 
-    if(stat(outdir_b.c_str(), &stFileInfo) != 0)
+    if (stat(outdir_b.c_str(), &stFileInfo) != 0)
     {
-      if(stat(outdir_a.c_str(), &stFileInfo) != 0)
+      if (stat(outdir_a.c_str(), &stFileInfo) != 0)
       {
 #ifdef WIN32
-        if(_mkdir(outdir_a.c_str()) == -1)
+        if (_mkdir(outdir_a.c_str()) == -1)
 #else
-        if(mkdir(outdir_a.c_str(), 0755) == -1)
+        if (mkdir(outdir_a.c_str(), 0755) == -1)
 #endif
 
           return false;
       }
 
 #ifdef WIN32
-      if(_mkdir(outdir_b.c_str()) == -1)
+      if (_mkdir(outdir_b.c_str()) == -1)
 #else
-      if(mkdir(outdir_b.c_str(), 0755) == -1)
+      if (mkdir(outdir_b.c_str(), 0755) == -1)
 #endif
 
         return false;
@@ -1450,14 +1450,14 @@ bool Map::saveMap(int x, int z)
 
   NBT_Value* entityList = (*(*chunk->nbt)["Level"])["TileEntities"];
 
-  if(!entityList)
+  if (!entityList)
   {
     entityList = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
     chunk->nbt->Insert("TileEntities", entityList);
   }
 
   //Save signs
-  for(uint32_t i = 0; i < chunk->signs.size(); i++)
+  for (uint32_t i = 0; i < chunk->signs.size(); i++)
   {
     NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
     val->Insert("id", new NBT_Value(std::string("Sign")));
@@ -1473,7 +1473,7 @@ bool Map::saveMap(int x, int z)
   }
 
   //Save chests
-  for(uint32_t i = 0; i < chunk->chests.size(); i++)
+  for (uint32_t i = 0; i < chunk->chests.size(); i++)
   {
     NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
     val->Insert("id", new NBT_Value(std::string("Chest")));
@@ -1481,9 +1481,9 @@ bool Map::saveMap(int x, int z)
     val->Insert("y", new NBT_Value((int32_t)chunk->chests[i]->y));
     val->Insert("z", new NBT_Value((int32_t)chunk->chests[i]->z));
     NBT_Value* nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
-    for(uint32_t slot = 0; slot < 27; slot++)
+    for (uint32_t slot = 0; slot < 27; slot++)
     {
-      if(chunk->chests[i]->items[slot].getCount() && chunk->chests[i]->items[slot].getType() != -1)
+      if (chunk->chests[i]->items[slot].getCount() && chunk->chests[i]->items[slot].getType() != -1)
       {
         NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
         val->Insert("Count", new NBT_Value((int8_t)chunk->chests[i]->items[slot].getCount()));
@@ -1499,7 +1499,7 @@ bool Map::saveMap(int x, int z)
   }
 
   //Save furnaces
-  for(uint32_t i = 0; i < chunk->furnaces.size(); i++)
+  for (uint32_t i = 0; i < chunk->furnaces.size(); i++)
   {
     NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
     val->Insert("id", new NBT_Value(std::string("Furnace")));
@@ -1510,9 +1510,9 @@ bool Map::saveMap(int x, int z)
     val->Insert("CookTime", new NBT_Value((int16_t)chunk->furnaces[i]->cookTime));
     NBT_Value* nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
 
-    for(uint32_t slot = 0; slot < 3; slot++)
+    for (uint32_t slot = 0; slot < 3; slot++)
     {
-      if(chunk->furnaces[i]->items[slot].getCount() && chunk->furnaces[i]->items[slot].getType() != 0 && chunk->furnaces[i]->items[slot].getType() != -1)
+      if (chunk->furnaces[i]->items[slot].getCount() && chunk->furnaces[i]->items[slot].getType() != 0 && chunk->furnaces[i]->items[slot].getType() != -1)
       {
         NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
         val->Insert("Count", new NBT_Value((int8_t)chunk->furnaces[i]->items[slot].getCount()));
@@ -1551,7 +1551,7 @@ bool Map::releaseMap(int x, int z)
 void Map::sendToUser(User* user, int x, int z, bool login)
 {
   Packet* p;
-  if(login)
+  if (login)
   {
     p = &user->loginBuffer;
   }
@@ -1560,7 +1560,7 @@ void Map::sendToUser(User* user, int x, int z, bool login)
     p = &user->buffer;
   }
   sChunk* chunk = loadMap(x, z);
-  if(chunk == NULL)
+  if (chunk == NULL)
   {
     return;
   }
@@ -1571,7 +1571,7 @@ void Map::sendToUser(User* user, int x, int z, bool login)
   int32_t mapposz    = z;
 
   //Regenerate lighting if needed
-  if(chunk->lightRegen)
+  if (chunk->lightRegen)
   {
     generateLight(x, z, chunk);
     chunk->lightRegen = false;
@@ -1598,7 +1598,7 @@ void Map::sendToUser(User* user, int x, int z, bool login)
   (*p).addToWrite(buffer, written);
 
   //Push sign data to player
-  for(uint32_t i = 0; i < chunk->signs.size(); i++)
+  for (uint32_t i = 0; i < chunk->signs.size(); i++)
   {
     (*p) << (int8_t)PACKET_SIGN << chunk->signs[i]->x << (int16_t)chunk->signs[i]->y << chunk->signs[i]->z;
     (*p) << chunk->signs[i]->text1 << chunk->signs[i]->text2 << chunk->signs[i]->text3 << chunk->signs[i]->text4;

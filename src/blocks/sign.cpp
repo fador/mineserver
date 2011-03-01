@@ -34,7 +34,7 @@
 
 bool BlockSign::affectedBlock(int block)
 {
-  switch(block)
+  switch (block)
   {
   case BLOCK_WALL_SIGN:
   case BLOCK_SIGN_POST:
@@ -65,11 +65,11 @@ bool BlockSign::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
 
   //Remove sign data from the chunk
   sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
-  if(chunk != NULL)
+  if (chunk != NULL)
   {
-    for(uint32_t i = 0; i < chunk->signs.size(); i++)
+    for (uint32_t i = 0; i < chunk->signs.size(); i++)
     {
-      if(chunk->signs[i]->x == x &&
+      if (chunk->signs[i]->x == x &&
           chunk->signs[i]->y == y &&
           chunk->signs[i]->z == z)
       {
@@ -89,26 +89,26 @@ void BlockSign::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
   bool blockBroken = false;
 
   //Ladder is not attached to top or bottom block
-  if(direction == BLOCK_BOTTOM)
+  if (direction == BLOCK_BOTTOM)
   {
     return;
   }
 
-  if(direction == BLOCK_TOP && block == BLOCK_SIGN_POST)
+  if (direction == BLOCK_TOP && block == BLOCK_SIGN_POST)
   {
     blockBroken = true;
   }
-  else if(block == BLOCK_WALL_SIGN &&
-          ((meta == 2 && direction == BLOCK_EAST)  ||
-           (meta == 3 && direction == BLOCK_WEST)  ||
-           (meta == 4 && direction == BLOCK_NORTH) ||
-           (meta == 5 && direction == BLOCK_SOUTH)))
+  else if (block == BLOCK_WALL_SIGN &&
+           ((meta == 2 && direction == BLOCK_EAST)  ||
+            (meta == 3 && direction == BLOCK_WEST)  ||
+            (meta == 4 && direction == BLOCK_NORTH) ||
+            (meta == 5 && direction == BLOCK_SOUTH)))
   {
     blockBroken = true;
   }
 
 
-  if(blockBroken)
+  if (blockBroken)
   {
     Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
     Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
@@ -116,11 +116,11 @@ void BlockSign::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
 
     //Remove sign data from the chunk
     sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
-    if(chunk != NULL)
+    if (chunk != NULL)
     {
-      for(uint32_t i = 0; i < chunk->signs.size(); i++)
+      for (uint32_t i = 0; i < chunk->signs.size(); i++)
       {
-        if(chunk->signs[i]->x == x &&
+        if (chunk->signs[i]->x == x &&
             chunk->signs[i]->y == y &&
             chunk->signs[i]->z == z)
         {
@@ -137,14 +137,14 @@ bool BlockSign::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if(!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
   /* Check block below allows blocks placed on top */
-  if(!this->isBlockStackable(oldblock))
+  if (!this->isBlockStackable(oldblock))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -211,13 +211,13 @@ bool BlockSign::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   double angleDegree = ((atan2(diffZ, diffX) * 180 / M_PI + 90) / 22.5);
 
   uint8_t metadata;
-  if(angleDegree < 0)
+  if (angleDegree < 0)
   {
     angleDegree += 16;
   }
   newblock = BLOCK_WALL_SIGN;
   metadata = 6 - direction;
-  switch(direction)
+  switch (direction)
   {
   case BLOCK_SOUTH:
     x--;
@@ -243,7 +243,7 @@ bool BlockSign::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
     break;
   }
 
-  if(!this->isBlockEmpty(x, y, z, map))
+  if (!this->isBlockEmpty(x, y, z, map))
   {
     revertBlock(user, x, y, z, map);
     return true;

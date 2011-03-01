@@ -152,18 +152,18 @@ void HeavenGen::generateChunk(int x, int z, int map)
 
   //Mineserver::get()->map()->maps[chunkid].nbt = main;
 
-  if(addOre)
+  if (addOre)
   {
     AddOre(x, z, map, BLOCK_STATIONARY_WATER);
   }
 
   // Add trees
-  if(addTrees)
+  if (addTrees)
   {
     AddTrees(x, z, map,  fastrand() % 2 + 3);
   }
 
-  if(expandBeaches)
+  if (expandBeaches)
   {
     ExpandBeaches(x, z, map);
   }
@@ -182,7 +182,7 @@ void HeavenGen::AddTrees(int x, int z, int map, uint16_t count)
   uint8_t block;
   uint8_t meta;
 
-  for(uint16_t i = 0; i < count; i++)
+  for (uint16_t i = 0; i < count; i++)
   {
     blockX = fastrand() % 16;
     blockZ = fastrand() % 16;
@@ -194,7 +194,7 @@ void HeavenGen::AddTrees(int x, int z, int map, uint16_t count)
 
     Mineserver::get()->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
     // No trees on water
-    if(block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
+    if (block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
     {
       continue;
     }
@@ -227,9 +227,9 @@ void HeavenGen::generateWithNoise(int x, int z, int map)
 
   double xBlockpos = x << 4;
   double zBlockpos = z << 4;
-  for(int bX = 0; bX < 16; bX++)
+  for (int bX = 0; bX < 16; bX++)
   {
-    for(int bZ = 0; bZ < 16; bZ++)
+    for (int bZ = 0; bZ < 16; bZ++)
     {
       double h = (int8_t)((Randomgen.GetValue(xBlockpos + bX, 0 , zBlockpos + bZ) * 20));
       double n = (int8_t)((Randomgen2.GetValue(xBlockpos + bX, 0, zBlockpos + bZ) * 10) + 64);
@@ -238,13 +238,13 @@ void HeavenGen::generateWithNoise(int x, int z, int map)
 
       int32_t bYbX = ((bZ << 7) + (bX << 11));
 
-      for(int bY = 0; bY < 128; bY++)
+      for (int bY = 0; bY < 128; bY++)
       {
         curData  = &blockdata[bYbX >> 1];
         curBlock = &heavenblocks[bYbX++];
 
 
-        if(bY > n - h && bY < n)
+        if (bY > n - h && bY < n)
         {
           *curBlock = BLOCK_GRAY_CLOTH;
           *curData = (bYbX & 1) ? col[rand() % 2] : col[rand() % 2] << 4;
@@ -276,28 +276,28 @@ void HeavenGen::ExpandBeaches(int x, int z, int map)
   uint8_t block;
   uint8_t meta;
 
-  for(int bX = 0; bX < 16; bX++)
+  for (int bX = 0; bX < 16; bX++)
   {
-    for(int bZ = 0; bZ < 16; bZ++)
+    for (int bZ = 0; bZ < 16; bZ++)
     {
       blockX = xBlockpos + bX;
       blockZ = zBlockpos + bZ;
 
       h = heightmap[(bZ << 4) + bX];
 
-      if(h < 0)
+      if (h < 0)
       {
         continue;
       }
 
       bool found = false;
-      for(int dx = -beachExtent; !found && dx <= beachExtent; dx++)
+      for (int dx = -beachExtent; !found && dx <= beachExtent; dx++)
       {
-        for(int dz = -beachExtent; !found && dz <= beachExtent; dz++)
+        for (int dz = -beachExtent; !found && dz <= beachExtent; dz++)
         {
-          for(int dh = -beachHeight; !found && dh <= 0; dh++)
+          for (int dh = -beachHeight; !found && dh <= 0; dh++)
           {
-            if(dx * dx + dz * dz + dh * dh > beachExtentSqr)
+            if (dx * dx + dz * dz + dh * dh > beachExtentSqr)
             {
               continue;
             }
@@ -305,13 +305,13 @@ void HeavenGen::ExpandBeaches(int x, int z, int map)
             int xx = bX + dx;
             int zz = bZ + dz;
             int hh = h + dh;
-            if(xx < 0 || xx >= 15 || zz < 0 || zz >= 15 || hh < 0 || hh >= 127)
+            if (xx < 0 || xx >= 15 || zz < 0 || zz >= 15 || hh < 0 || hh >= 127)
             {
               continue;
             }
 
             Mineserver::get()->map(map)->getBlock(xBlockpos + xx, hh, zBlockpos + zz, &block, &meta);
-            if(block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
+            if (block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
             {
               found = true;
               break;
@@ -319,14 +319,14 @@ void HeavenGen::ExpandBeaches(int x, int z, int map)
           }
         }
       }
-      if(found)
+      if (found)
       {
         Mineserver::get()->map(map)->sendBlockChange(blockX, h, blockZ, BLOCK_SAND, 0);
         Mineserver::get()->map(map)->setBlock(blockX, h, blockZ, BLOCK_SAND, 0);
 
         Mineserver::get()->map(map)->getBlock(blockX, h - 1, blockZ, &block, &meta);
 
-        if(h > 0 && block == BLOCK_DIRT)
+        if (h > 0 && block == BLOCK_DIRT)
         {
           Mineserver::get()->map(map)->sendBlockChange(blockX, h - 1, blockZ, BLOCK_SAND, 0);
           Mineserver::get()->map(map)->setBlock(blockX, h - 1, blockZ, BLOCK_SAND, 0);
@@ -347,7 +347,7 @@ void HeavenGen::AddOre(int x, int z, int map, uint8_t type)
 
   int count, startHeight;
 
-  switch(type)
+  switch (type)
   {
   case BLOCK_STATIONARY_WATER:
     count = fastrand() % 20 + 20;
@@ -356,7 +356,7 @@ void HeavenGen::AddOre(int x, int z, int map, uint8_t type)
   }
 
   int i = 0;
-  while(i < count)
+  while (i < count)
   {
     blockX = fastrand() % 8 + 4;
     blockZ = fastrand() % 8 + 4;
@@ -365,7 +365,7 @@ void HeavenGen::AddOre(int x, int z, int map, uint8_t type)
     blockY -= 5;
 
     // Check that startheight is not higher than height at that column
-    if(blockY > startHeight)
+    if (blockY > startHeight)
     {
       blockY = startHeight;
     }
@@ -380,7 +380,7 @@ void HeavenGen::AddOre(int x, int z, int map, uint8_t type)
 
     Mineserver::get()->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
     // No ore in caves
-    if(block != BLOCK_GRAY_CLOTH)
+    if (block != BLOCK_GRAY_CLOTH)
     {
       continue;
     }
@@ -392,13 +392,13 @@ void HeavenGen::AddOre(int x, int z, int map, uint8_t type)
 
 void HeavenGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int depotSize)
 {
-  for(int bX = x; bX < x + depotSize; bX++)
+  for (int bX = x; bX < x + depotSize; bX++)
   {
-    for(int bY = y; bY < y + depotSize; bY++)
+    for (int bY = y; bY < y + depotSize; bY++)
     {
-      for(int bZ = z; bZ < z + depotSize; bZ++)
+      for (int bZ = z; bZ < z + depotSize; bZ++)
       {
-        if(rand() % 1000 < 500)
+        if (rand() % 1000 < 500)
         {
           Mineserver::get()->map(map)->sendBlockChange(bX, bY, bZ, block, 0);
           Mineserver::get()->map(map)->setBlock(bX, bY, bZ, block, 0);

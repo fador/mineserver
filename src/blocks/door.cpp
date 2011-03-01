@@ -33,7 +33,7 @@
 
 bool BlockDoor::affectedBlock(int block)
 {
-  switch(block)
+  switch (block)
   {
   case BLOCK_WOODEN_DOOR:
   case BLOCK_IRON_DOOR:
@@ -61,13 +61,13 @@ void BlockDoor::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y,
 
   Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
 
-  if(block2 == block)
+  if (block2 == block)
   {
-    if((metadata2 & 0x4) && !(metadata & 0x4))
+    if ((metadata2 & 0x4) && !(metadata & 0x4))
     {
       metadata2 ^= 0x4;
     }
-    else if(!(metadata2 & 0x4) && (metadata & 0x4))
+    else if (!(metadata2 & 0x4) && (metadata & 0x4))
     {
       metadata2 ^= 0x4;
     }
@@ -97,7 +97,7 @@ bool BlockDoor::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
   int modifier = ((metadata & 0x8) == 0x8) ? -1 : 1;
   Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
   // if upper part, remove it
-  if(block2 == block)
+  if (block2 == block)
   {
     Mineserver::get()->map(map)->setBlock(x, y + modifier, z, BLOCK_AIR, 0);
     Mineserver::get()->map(map)->sendBlockChange(x, y + modifier, z, BLOCK_AIR, 0);
@@ -119,7 +119,7 @@ void BlockDoor::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
   int modifier = ((metadata & 0x8) == 0x8) ? -1 : 1;
 
   Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
-  if(metadata & 0x4)
+  if (metadata & 0x4)
   {
     metadata &= (0x8 | 0x3);
   }
@@ -128,12 +128,12 @@ void BlockDoor::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
     metadata |= 0x4;
   }
   // do nothing if the block is not below door
-  if(direction == BLOCK_BOTTOM && (block == BLOCK_WOODEN_DOOR || block == BLOCK_IRON_DOOR))
+  if (direction == BLOCK_BOTTOM && (block == BLOCK_WOODEN_DOOR || block == BLOCK_IRON_DOOR))
   {
     return;
   }
   // break the door if the block is below it
-  if(direction == BLOCK_TOP && (block == BLOCK_WOODEN_DOOR || block == BLOCK_IRON_DOOR))
+  if (direction == BLOCK_TOP && (block == BLOCK_WOODEN_DOOR || block == BLOCK_IRON_DOOR))
   {
     Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
     Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
@@ -141,11 +141,11 @@ void BlockDoor::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
 
     Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
 
-    if(block2 == block)
+    if (block2 == block)
     {
       metadata2 = metadata;
 
-      if(metadata & 0x8)
+      if (metadata & 0x8)
       {
         metadata2 &= 0x7;
       }
@@ -165,51 +165,51 @@ bool BlockDoor::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if(!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
   /* Check block below allows blocks placed on top */
-  if(!this->isBlockStackable(oldblock))
+  if (!this->isBlockStackable(oldblock))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
   /* move the x,y,z coords dependent upon placement direction */
-  if(!this->translateDirection(&x, &y, &z, map, direction))
+  if (!this->translateDirection(&x, &y, &z, map, direction))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
-  if(this->isUserOnBlock(x, y, z, map))
+  if (this->isUserOnBlock(x, y, z, map))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
-  if(!this->isBlockEmpty(x, y, z, map))
+  if (!this->isBlockEmpty(x, y, z, map))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
   // checking for an item rather then a block
-  if(newblock == ITEM_WOODEN_DOOR)
+  if (newblock == ITEM_WOODEN_DOOR)
   {
     newblock = BLOCK_WOODEN_DOOR;
   }
-  else if(newblock == ITEM_IRON_DOOR)
+  else if (newblock == ITEM_IRON_DOOR)
   {
     newblock = BLOCK_IRON_DOOR;
   }
 
   direction = user->relativeToBlock(x, y, z);
 
-  switch(direction)
+  switch (direction)
   {
   case BLOCK_EAST:
     direction = BLOCK_WEST;
@@ -252,7 +252,7 @@ bool BlockDoor::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
   int modifier = ((metadata & 0x8) == 0x8) ? -1 : 1;
 
   Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
-  if(metadata & 0x4)
+  if (metadata & 0x4)
   {
     metadata &= (0x8 | 0x3);
   }
@@ -266,11 +266,11 @@ bool BlockDoor::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 
   Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
 
-  if(block2 == block)
+  if (block2 == block)
   {
     metadata2 = metadata;
 
-    if(metadata & 0x8)
+    if (metadata & 0x8)
     {
       metadata2 &= 0x7;
     }

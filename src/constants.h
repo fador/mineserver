@@ -181,7 +181,7 @@ struct Drop
 
   ~Drop()
   {
-    if(alt_drop != NULL)
+    if (alt_drop != NULL)
     {
       delete alt_drop;
     }

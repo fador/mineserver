@@ -37,7 +37,7 @@
 
 bool BlockChest::affectedBlock(int block)
 {
-  switch(block)
+  switch (block)
   {
   case BLOCK_CHEST:
     return true;
@@ -49,29 +49,29 @@ bool BlockChest::affectedBlock(int block)
 void BlockChest::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   // Locksystem
-  if(user->inv[36 + user->currentItemSlot()].getType() == ITEM_WOODEN_AXE)
+  if (user->inv[36 + user->currentItemSlot()].getType() == ITEM_WOODEN_AXE)
   {
     int chunk_x = blockToChunk(x);
     int chunk_z = blockToChunk(z);
 
     sChunk* chunk = Mineserver::get()->map(map)->loadMap(chunk_x, chunk_z);
 
-    if(chunk == NULL)
+    if (chunk == NULL)
     {
       return;
     }
 
     NBT_Value* entityList = (*(*(chunk->nbt))["Level"])["TileEntities"];
 
-    if(!entityList)
+    if (!entityList)
     {
       entityList = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
       chunk->nbt->Insert("TileEntities", entityList);
     }
 
-    if(entityList->GetType() == NBT_Value::TAG_LIST)
+    if (entityList->GetType() == NBT_Value::TAG_LIST)
     {
-      if(entityList->GetListType() != NBT_Value::TAG_COMPOUND)
+      if (entityList->GetListType() != NBT_Value::TAG_COMPOUND)
       {
         entityList->SetType(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
       }
@@ -81,9 +81,9 @@ void BlockChest::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y
 
       //bool done = false; // Unused variable
 
-      for(; iter != end; iter++)
+      for (; iter != end; iter++)
       {
-        if((**iter)["x"] == NULL || (**iter)["y"] == NULL || (**iter)["z"] == NULL ||
+        if ((**iter)["x"] == NULL || (**iter)["y"] == NULL || (**iter)["z"] == NULL ||
             (**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
             (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
             (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
@@ -91,21 +91,21 @@ void BlockChest::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y
           continue;
         }
 
-        if((int32_t)(*(**iter)["x"]) == x && (int32_t)(*(**iter)["y"]) == y && (int32_t)(*(**iter)["z"]) == z)
+        if ((int32_t)(*(**iter)["x"]) == x && (int32_t)(*(**iter)["y"]) == y && (int32_t)(*(**iter)["z"]) == z)
         {
           int8_t locked;
           NBT_Value* nbtLockdata = (**iter)["Lockdata"];
-          if(nbtLockdata != NULL)
+          if (nbtLockdata != NULL)
           {
             std::string player = *(*nbtLockdata)["player"]->GetString();
             // Toggle lock if player is the owner of block
-            if(player == user->nick)
+            if (player == user->nick)
             {
               locked = *(*nbtLockdata)["locked"];
               locked = (locked == 1) ? 0 : 1;
               *(*nbtLockdata)["locked"] = locked;
 
-              if(locked == 1)
+              if (locked == 1)
               {
                 Mineserver::get()->chat()->sendMsg(user, MC_COLOR_RED + "Chest locked", Chat::USER);
               }
@@ -146,7 +146,7 @@ bool BlockChest::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
   uint8_t block;
   uint8_t meta;
 
-  if(!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
   {
     return true;
   }
@@ -158,20 +158,20 @@ bool BlockChest::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
 
   sChunk* chunk = Mineserver::get()->map(map)->loadMap(chunk_x, chunk_z);
 
-  if(chunk == NULL)
+  if (chunk == NULL)
   {
     return true;
   }
 
-  for(uint32_t i = 0; i < chunk->chests.size(); i++)
+  for (uint32_t i = 0; i < chunk->chests.size(); i++)
   {
-    if(chunk->chests[i]->x == x &&
+    if (chunk->chests[i]->x == x &&
         chunk->chests[i]->y == y &&
         chunk->chests[i]->z == z)
     {
-      for(uint32_t item_i = 0; item_i < 27; item_i++)
+      for (uint32_t item_i = 0; item_i < 27; item_i++)
       {
-        if(chunk->chests[i]->items[item_i].getType() != -1)
+        if (chunk->chests[i]->items[item_i].getType() != -1)
         {
           Mineserver::get()->map(map)->createPickupSpawn(chunk->chests[i]->x,
               chunk->chests[i]->y,
@@ -204,33 +204,33 @@ bool BlockChest::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if(!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
   /* Check block below allows blocks placed on top */
-  if(!this->isBlockStackable(oldblock))
+  if (!this->isBlockStackable(oldblock))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
   /* move the x,y,z coords dependent upon placement direction */
-  if(!this->translateDirection(&x, &y, &z, map, direction))
+  if (!this->translateDirection(&x, &y, &z, map, direction))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
-  if(this->isUserOnBlock(x, y, z, map))
+  if (this->isUserOnBlock(x, y, z, map))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
-  if(!this->isBlockEmpty(x, y, z, map))
+  if (!this->isBlockEmpty(x, y, z, map))
   {
     revertBlock(user, x, y, z, map);
     return true;

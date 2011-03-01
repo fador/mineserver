@@ -52,18 +52,18 @@ bool Chat::sendUserlist(User* user)
 {
   this->sendMsg(user, MC_COLOR_BLUE + "[ " + dtos(User::all().size()) + " / " + dtos(Mineserver::get()->config()->iData("system.user_limit")) + " players online ]", USER);
   std::string playerDesc;
-  for(unsigned int i = 0; i < User::all().size(); i++)
+  for (unsigned int i = 0; i < User::all().size(); i++)
   {
-    if(!User::all()[i]->logged)
+    if (!User::all()[i]->logged)
     {
       continue;
     }
     playerDesc += User::all()[i]->nick;
-    if(User::all()[i]->muted)
+    if (User::all()[i]->muted)
     {
       playerDesc += MC_COLOR_YELLOW + " (muted)";
     }
-    if(User::all()[i]->dnd)
+    if (User::all()[i]->dnd)
     {
       playerDesc += MC_COLOR_YELLOW + " (dnd)";
     }
@@ -79,16 +79,16 @@ std::deque<std::string> Chat::parseCmd(std::string cmd)
   int del;
   std::deque<std::string> temp;
 
-  while(cmd.length() > 0)
+  while (cmd.length() > 0)
   {
-    while(cmd[0] == ' ')
+    while (cmd[0] == ' ')
     {
       cmd = cmd.substr(1);
     }
 
     del = cmd.find(' ');
 
-    if(del > -1)
+    if (del > -1)
     {
       temp.push_back(cmd.substr(0, del));
       cmd = cmd.substr(del + 1);
@@ -100,7 +100,7 @@ std::deque<std::string> Chat::parseCmd(std::string cmd)
     }
   }
 
-  if(temp.empty())
+  if (temp.empty())
   {
     temp.push_back("empty");
   }
@@ -110,7 +110,7 @@ std::deque<std::string> Chat::parseCmd(std::string cmd)
 
 bool Chat::handleMsg(User* user, std::string msg)
 {
-  if(msg.empty())  // If the message is empty handle it as if there is no message.
+  if (msg.empty()) // If the message is empty handle it as if there is no message.
   {
     return true;
   }
@@ -121,18 +121,18 @@ bool Chat::handleMsg(User* user, std::string msg)
   std::string timeStamp(asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
-  if((static_cast<Hook3<bool, const char*, time_t, const char*>*>(Mineserver::get()->plugin()->getHook("PlayerChatPre")))->doUntilFalse(user->nick.c_str(), rawTime, msg.c_str()))
+  if ((static_cast<Hook3<bool, const char*, time_t, const char*>*>(Mineserver::get()->plugin()->getHook("PlayerChatPre")))->doUntilFalse(user->nick.c_str(), rawTime, msg.c_str()))
   {
     return false;
   }
   (static_cast<Hook3<bool, const char*, time_t, const char*>*>(Mineserver::get()->plugin()->getHook("PlayerChatPost")))->doAll(user->nick.c_str(), rawTime, msg.c_str());
   char prefix = msg[0];
 
-  switch(prefix)
+  switch (prefix)
   {
     // Servermsg (Admin-only)
   case SERVERMSGPREFIX:
-    if(IS_ADMIN(user->permissions))
+    if (IS_ADMIN(user->permissions))
     {
       handleServerMsg(user, msg, timeStamp);
     }
@@ -140,7 +140,7 @@ bool Chat::handleMsg(User* user, std::string msg)
 
     // Admin message
   case ADMINCHATPREFIX:
-    if(IS_ADMIN(user->permissions))
+    if (IS_ADMIN(user->permissions))
     {
       handleAdminChatMsg(user, msg, timeStamp);
     }
@@ -162,7 +162,7 @@ void Chat::handleCommand(User* user, std::string msg, const std::string& timeSta
 {
   std::deque<std::string> cmd = parseCmd(msg.substr(1));
 
-  if(!cmd.size() || !cmd[0].size())
+  if (!cmd.size() || !cmd[0].size())
   {
     return;
   }
@@ -172,13 +172,13 @@ void Chat::handleCommand(User* user, std::string msg, const std::string& timeSta
 
   char** param = new char *[cmd.size()];
 
-  for(uint32_t i = 0; i < cmd.size(); i++)
+  for (uint32_t i = 0; i < cmd.size(); i++)
   {
     param[i] = (char*)cmd[i].c_str();
   }
 
   // If hardcoded auth command!
-  if(command == "auth" && param[0] == Mineserver::get()->config()->sData("system.admin.password"))
+  if (command == "auth" && param[0] == Mineserver::get()->config()->sData("system.admin.password"))
   {
     user->serverAdmin = true;
     msg = MC_COLOR_RED + "[!] " + MC_COLOR_GREEN + "You have been authed as admin!";
@@ -211,18 +211,18 @@ void Chat::handleAdminChatMsg(User* user, std::string msg, const std::string& ti
 
 void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeStamp)
 {
-  if(user->isAbleToCommunicate("chat") == false)
+  if (user->isAbleToCommunicate("chat") == false)
   {
     return;
   }
 
   // Check for Admins or Server Console
-  if(user->UID == SERVER_CONSOLE_UID)
+  if (user->UID == SERVER_CONSOLE_UID)
   {
     Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat",  user->nick + " " + msg);
     msg = timeStamp + " " + MC_COLOR_RED + user->nick + MC_COLOR_WHITE + " " + msg;
   }
-  else if(IS_ADMIN(user->permissions))
+  else if (IS_ADMIN(user->permissions))
   {
     Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "<" + user->nick + "> " + msg);
     msg = timeStamp + " <" + MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg;
@@ -245,12 +245,12 @@ bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
   tmpArray[1] = 0;
   tmpArray[2] = msg.size() & 0xff;
 
-  for(unsigned int i = 0; i < msg.size(); i++)
+  for (unsigned int i = 0; i < msg.size(); i++)
   {
     tmpArray[i + 3] = msg[i];
   }
 
-  switch(action)
+  switch (action)
   {
   case ALL:
     user->sendAll(tmpArray, tmpArrayLen);

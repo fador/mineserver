@@ -118,30 +118,30 @@ struct sChunk
 
   ~sChunk()
   {
-    if(!chests.empty())
+    if (!chests.empty())
     {
       std::vector<chestData*>::iterator chest_it = chests.begin();
-      for(; chest_it != chests.end(); ++chest_it)
+      for (; chest_it != chests.end(); ++chest_it)
       {
         delete *chest_it;
       }
       chests.clear();
     }
 
-    if(!signs.empty())
+    if (!signs.empty())
     {
       std::vector<signData*>::iterator sign_it = signs.begin();
-      for(; sign_it != signs.end(); ++sign_it)
+      for (; sign_it != signs.end(); ++sign_it)
       {
         delete *sign_it;
       }
       signs.clear();
     }
 
-    if(!furnaces.empty())
+    if (!furnaces.empty())
     {
       std::vector<furnaceData*>::iterator furnace_it = furnaces.begin();
-      for(; furnace_it != furnaces.end(); ++furnace_it)
+      for (; furnace_it != furnaces.end(); ++furnace_it)
       {
         removeFurnace((*furnace_it));
         delete *furnace_it;
@@ -149,7 +149,7 @@ struct sChunk
       furnaces.clear();
     }
 
-    if(nbt != NULL)
+    if (nbt != NULL)
     {
       delete nbt;
       nbt = NULL;
@@ -165,11 +165,11 @@ struct sChunk
   {
     std::set<User*>::iterator iter_a = users.begin(), iter_b = users.end();
 
-    for(; iter_a != iter_b; ++iter_a)
+    for (; iter_a != iter_b; ++iter_a)
     {
-      if((*iter_a) != nosend)
+      if ((*iter_a) != nosend)
       {
-        if((*iter_a)->logged)
+        if ((*iter_a)->logged)
         {
           (*iter_a)->buffer.addToWrite(packet.getWrite(), packet.getWriteLen());
         }
@@ -186,9 +186,9 @@ struct sChunk
     std::set<User*>::iterator iter_b;
 
     iter_a = left->users.begin(), iter_b = left->users.end();
-    for(; iter_a != iter_b; ++iter_a)
+    for (; iter_a != iter_b; ++iter_a)
     {
-      if(!right->users.count(*iter_a))
+      if (!right->users.count(*iter_a))
       {
         lusers.push_front(*iter_a);
         diff = true;
@@ -196,9 +196,9 @@ struct sChunk
     }
 
     iter_a = right->users.begin(), iter_b = right->users.end();
-    for(; iter_a != iter_b; ++iter_a)
+    for (; iter_a != iter_b; ++iter_a)
     {
-      if(!left->users.count(*iter_a))
+      if (!left->users.count(*iter_a))
       {
         rusers.push_front(*iter_a);
         diff = true;
@@ -215,7 +215,7 @@ struct sChunkNode
 
   ~sChunkNode()
   {
-    if(chunk != NULL)
+    if (chunk != NULL)
     {
       delete chunk;
       chunk = NULL;
@@ -237,11 +237,11 @@ public:
 
   ~ChunkMap()
   {
-    for(int i = 0; i < 441; ++i)
+    for (int i = 0; i < 441; ++i)
     {
       sChunkNode* node = m_buckets[i];
       sChunkNode* next = NULL;
-      if(node != NULL)
+      if (node != NULL)
       {
         next = node->next;
         delete node;
@@ -254,13 +254,13 @@ public:
   int hash(int x, int z)
   {
     x %= 21;
-    if(x < 0)
+    if (x < 0)
     {
       x += 21;
     }
 
     z %= 21;
-    if(z < 0)
+    if (z < 0)
     {
       z += 21;
     }
@@ -272,8 +272,8 @@ public:
   {
     int num = 0;
 
-    for(int i = 0; i < 441; ++i)
-      for(sChunkNode* node = m_buckets[i]; node != NULL; node = node->next)
+    for (int i = 0; i < 441; ++i)
+      for (sChunkNode* node = m_buckets[i]; node != NULL; node = node->next)
       {
         num++;
       }
@@ -285,9 +285,9 @@ public:
   {
     sChunkNode* node = NULL;
 
-    for(node = m_buckets[hash(x, z)]; node != NULL; node = node->next)
+    for (node = m_buckets[hash(x, z)]; node != NULL; node = node->next)
     {
-      if((node->chunk->x == x) && (node->chunk->z == z))
+      if ((node->chunk->x == x) && (node->chunk->z == z))
       {
         return node->chunk;
       }
@@ -304,14 +304,14 @@ public:
     sChunkNode* node = root;
 
     // Loop until we reach the end of the chain
-    while(node != NULL)
+    while (node != NULL)
     {
       // We've got the right node, time to get to work!
-      if((node->chunk->x == x) && (node->chunk->z == z))
+      if ((node->chunk->x == x) && (node->chunk->z == z))
       {
         node->chunk->refCount--;
 
-        if(node->chunk->refCount == 0)
+        if (node->chunk->refCount == 0)
         {
           delete node->chunk;
           node->chunk = NULL;
@@ -319,25 +319,25 @@ public:
 
         // If we have both next and previous nodes, we need to connect them up
         // when we remove this node because we're in the middle of the chain.
-        if(node->next != NULL && node->prev != NULL)
+        if (node->next != NULL && node->prev != NULL)
         {
           node->next->prev = node->prev;
           node->prev->next = node->next;
         }
         // Otherwise we're at one of the ends of the chain, so we just need to
         // cut it off where it is.
-        else if(node->next != NULL)
+        else if (node->next != NULL)
         {
           node->next->prev = NULL;
         }
-        else if(node->prev != NULL)
+        else if (node->prev != NULL)
         {
           node->prev->next = NULL;
         }
 
         // If the node we're looking at is the root node, we need to update the
         // bucket to point at the new start of the chain.
-        if(node == root)
+        if (node == root)
         {
           m_buckets[_hash] = node->next;
         }
@@ -364,7 +364,7 @@ public:
 
     m_buckets[_hash] = new sChunkNode(chunk, NULL, m_buckets[_hash]);
 
-    if(m_buckets[_hash]->next != NULL)
+    if (m_buckets[_hash]->next != NULL)
     {
       m_buckets[_hash]->next->prev = m_buckets[_hash];
     }

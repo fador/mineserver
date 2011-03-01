@@ -105,7 +105,7 @@ void freeConstants()
 {
   std::map<uint8_t, Drop*>::iterator it_a = BLOCKDROPS.begin();
   std::map<uint8_t, Drop*>::iterator it_b = BLOCKDROPS.end();
-  for(; it_a != it_b; ++it_a)
+  for (; it_a != it_b; ++it_a)
   {
     delete it_a->second;
   }

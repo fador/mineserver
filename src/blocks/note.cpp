@@ -32,7 +32,7 @@
 
 bool BlockNote::affectedBlock(int block)
 {
-  switch(block)
+  switch (block)
   {
   case BLOCK_NOTE_BLOCK:
     return true;
@@ -45,32 +45,32 @@ bool BlockNote::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if(!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
   /* Check block below allows blocks placed on top */
-  if(!this->isBlockStackable(oldblock))
+  if (!this->isBlockStackable(oldblock))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
   /* move the x,y,z coords dependent upon placement direction */
-  if(!this->translateDirection(&x, &y, &z, map, direction))
+  if (!this->translateDirection(&x, &y, &z, map, direction))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
-  if(this->isUserOnBlock(x, y, z, map))
+  if (this->isUserOnBlock(x, y, z, map))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
-  if(!this->isBlockEmpty(x, y, z, map))
+  if (!this->isBlockEmpty(x, y, z, map))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -92,7 +92,7 @@ bool BlockNote::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 {
   uint8_t block, metadata;
   Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
-  if(metadata == 0x14)
+  if (metadata == 0x14)
   {
     metadata = 0x00;
     Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
@@ -111,7 +111,7 @@ int BlockNote::getInstrument(int32_t x, int8_t y, int32_t z, int map)
 {
   uint8_t block, meta;
   Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
-  switch(block)
+  switch (block)
   {
   case BLOCK_WOOD:
   case BLOCK_PLANK:

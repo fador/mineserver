@@ -94,9 +94,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -144,9 +144,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -168,9 +168,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))();
       }
@@ -192,18 +192,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))())
+        if ((reinterpret_cast<fatype_t>(ia->second))())
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first))
         {
           return true;
         }
@@ -224,18 +224,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))())
+        if (!(reinterpret_cast<fatype_t>(ia->second))())
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first))
         {
           return true;
         }
@@ -256,7 +256,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))();
     }
@@ -308,9 +308,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -358,9 +358,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -382,9 +382,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1);
       }
@@ -406,18 +406,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1))
         {
           return true;
         }
@@ -438,18 +438,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1))
         {
           return true;
         }
@@ -470,7 +470,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1);
     }
@@ -522,9 +522,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -572,9 +572,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -596,9 +596,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2);
       }
@@ -621,18 +621,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2))
         {
           return true;
         }
@@ -654,18 +654,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2))
         {
           return true;
         }
@@ -687,7 +687,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2);
     }
@@ -740,9 +740,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -790,9 +790,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -814,9 +814,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3);
       }
@@ -840,18 +840,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3))
         {
           return true;
         }
@@ -874,18 +874,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3))
         {
           return true;
         }
@@ -908,7 +908,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3);
     }
@@ -962,9 +962,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -1012,9 +1012,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -1036,9 +1036,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4);
       }
@@ -1063,18 +1063,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4))
         {
           return true;
         }
@@ -1098,18 +1098,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4))
         {
           return true;
         }
@@ -1133,7 +1133,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3, a4);
     }
@@ -1188,9 +1188,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -1238,9 +1238,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -1262,9 +1262,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5);
       }
@@ -1290,18 +1290,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5))
         {
           return true;
         }
@@ -1326,18 +1326,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5))
         {
           return true;
         }
@@ -1362,7 +1362,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3, a4, a5);
     }
@@ -1418,9 +1418,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -1468,9 +1468,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -1492,9 +1492,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6);
       }
@@ -1521,18 +1521,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6))
         {
           return true;
         }
@@ -1558,18 +1558,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6))
         {
           return true;
         }
@@ -1595,7 +1595,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3, a4, a5, a6);
     }
@@ -1652,9 +1652,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -1702,9 +1702,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -1726,9 +1726,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7);
       }
@@ -1756,18 +1756,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7))
         {
           return true;
         }
@@ -1794,18 +1794,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7))
         {
           return true;
         }
@@ -1832,7 +1832,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3, a4, a5, a6, a7);
     }
@@ -1890,9 +1890,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -1940,9 +1940,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -1964,9 +1964,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8);
       }
@@ -1995,18 +1995,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8))
         {
           return true;
         }
@@ -2034,18 +2034,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8))
         {
           return true;
         }
@@ -2073,7 +2073,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3, a4, a5, a6, a7, a8);
     }
@@ -2132,9 +2132,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -2182,9 +2182,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -2206,9 +2206,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9);
       }
@@ -2238,18 +2238,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9))
         {
           return true;
         }
@@ -2278,18 +2278,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9))
         {
           return true;
         }
@@ -2318,7 +2318,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
@@ -2378,9 +2378,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -2428,9 +2428,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -2452,9 +2452,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
       }
@@ -2485,18 +2485,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10))
         {
           return true;
         }
@@ -2526,18 +2526,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10))
         {
           return true;
         }
@@ -2567,7 +2567,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
@@ -2628,9 +2628,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -2678,9 +2678,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -2702,9 +2702,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
       }
@@ -2736,18 +2736,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11))
         {
           return true;
         }
@@ -2778,18 +2778,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11))
         {
           return true;
         }
@@ -2820,7 +2820,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
     }
@@ -2882,9 +2882,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -2932,9 +2932,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -2956,9 +2956,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
       }
@@ -2991,18 +2991,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12))
         {
           return true;
         }
@@ -3034,18 +3034,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12))
         {
           return true;
         }
@@ -3077,7 +3077,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
     }
@@ -3140,9 +3140,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -3190,9 +3190,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -3214,9 +3214,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
       }
@@ -3250,18 +3250,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13))
         {
           return true;
         }
@@ -3294,18 +3294,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13))
         {
           return true;
         }
@@ -3338,7 +3338,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
     }
@@ -3402,9 +3402,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -3452,9 +3452,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -3476,9 +3476,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
       }
@@ -3513,18 +3513,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14))
         {
           return true;
         }
@@ -3558,18 +3558,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14))
         {
           return true;
         }
@@ -3603,7 +3603,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
     }
@@ -3668,9 +3668,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -3718,9 +3718,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -3742,9 +3742,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
       }
@@ -3780,18 +3780,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15))
         {
           return true;
         }
@@ -3826,18 +3826,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15))
         {
           return true;
         }
@@ -3872,7 +3872,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
     }
@@ -3938,9 +3938,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -3988,9 +3988,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -4012,9 +4012,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16);
       }
@@ -4051,18 +4051,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16))
         {
           return true;
         }
@@ -4098,18 +4098,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16))
         {
           return true;
         }
@@ -4145,7 +4145,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16);
     }
@@ -4212,9 +4212,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -4262,9 +4262,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -4286,9 +4286,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17);
       }
@@ -4326,18 +4326,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17))
         {
           return true;
         }
@@ -4374,18 +4374,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17))
         {
           return true;
         }
@@ -4422,7 +4422,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17);
     }
@@ -4490,9 +4490,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -4540,9 +4540,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -4564,9 +4564,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18);
       }
@@ -4605,18 +4605,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18))
         {
           return true;
         }
@@ -4654,18 +4654,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18))
         {
           return true;
         }
@@ -4703,7 +4703,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18);
     }
@@ -4772,9 +4772,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -4822,9 +4822,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -4846,9 +4846,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19);
       }
@@ -4888,18 +4888,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19))
         {
           return true;
         }
@@ -4938,18 +4938,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19))
         {
           return true;
         }
@@ -4988,7 +4988,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19);
     }
@@ -5058,9 +5058,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if((ia)->second == function)
+      if ((ia)->second == function)
       {
         return true;
       }
@@ -5108,9 +5108,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->second == function)
+      if (ia->second == function)
       {
         m_callbacks.erase(ia);
         break;
@@ -5132,9 +5132,9 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
         (reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20);
       }
@@ -5175,18 +5175,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20))
+        if ((reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20))
         {
           return true;
         }
       }
       else
       {
-        if((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20))
+        if ((reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20))
         {
           return true;
         }
@@ -5226,18 +5226,18 @@ public:
   {
     typename std::vector<std::pair<void*, void*> >::iterator ia = m_callbacks.begin();
     typename std::vector<std::pair<void*, void*> >::iterator ib = m_callbacks.end();
-    for(; ia != ib; ++ia)
+    for (; ia != ib; ++ia)
     {
-      if(ia->first == NULL)
+      if (ia->first == NULL)
       {
-        if(!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20))
+        if (!(reinterpret_cast<fatype_t>(ia->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20))
         {
           return true;
         }
       }
       else
       {
-        if(!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20))
+        if (!(reinterpret_cast<fitype_t>(ia->second))(ia->first, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20))
         {
           return true;
         }
@@ -5277,7 +5277,7 @@ public:
   {
     std::pair<void*, void*>* cb = &(m_callbacks[n]);
 
-    if(cb->first == NULL)
+    if (cb->first == NULL)
     {
       return (reinterpret_cast<fatype_t>(cb->second))(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20);
     }
