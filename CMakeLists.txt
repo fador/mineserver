@@ -10,6 +10,10 @@ set( ${PROJECT_NAME}_PATCH_LEVEL 15 )
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 
+# Output paths
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+
 # Set compiler specific build flags
 IF (UNIX)
   add_definitions(-msse -Wunused -g3 -O3 -Wall)
