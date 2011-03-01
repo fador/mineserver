@@ -80,7 +80,14 @@ set(mineserver_source
 )
 source_group("Mineserver" FILES ${mineserver_source})
 
-set(command_source
+set(mineserver_plugins
+  commands
+  filelog
+  nBreak
+  nether
+)
+
+set(commands_source
   plugins/commands/src/command.cpp
 )
 
@@ -146,14 +153,11 @@ endif ()
 
 if (NOT dependency_error)
 
-  add_library(command SHARED ${command_source})
-  set_target_properties(command PROPERTIES PREFIX "")
-  add_library(filelog SHARED ${filelog_source})
-  set_target_properties(filelog PROPERTIES PREFIX "")
-  add_library(nBreak SHARED ${nBreak_source})
-  set_target_properties(nBreak PROPERTIES PREFIX "")
-  add_library(nether SHARED ${nether_source})
-  set_target_properties(nether PROPERTIES PREFIX "")
+  foreach(p ${mineserver_plugins})
+    message(STATUS "Plugin target added: ${p}")
+    add_library(${p} SHARED ${${p}_source})
+    set_target_properties(${p} PROPERTIES PREFIX "")
+  endforeach()
 
   include_directories(${ZLIB_INCLUDE_DIR})
 #  include_directories(${LUA_INCLUDE_DIR})
