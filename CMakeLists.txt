@@ -38,7 +38,6 @@ set(mineserver_source
   src/nbt.cpp
   src/user.cpp
   src/config.cpp
-  src/cursesScreen.cpp
   src/config/lexer.cpp
   src/config/scanner.cpp
   src/config/parser.cpp
@@ -124,7 +123,7 @@ endif()
 #Debian?
 FIND_PATH(NOISE_ON_DEBIANISH libnoise/noise.h ${NOISE_INCLUDE_DIR})
 if(NOISE_ON_DEBIANISH)
-  add_definitions(-DDEBIAN)
+  add_definitions(-DLIBNOISE)
 endif()
 
 #Provides ncurses, too
