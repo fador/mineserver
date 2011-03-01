@@ -1,5 +1,3 @@
-*.o
-*.so
 complete
 MineServer_wr*
 MineServer.py*

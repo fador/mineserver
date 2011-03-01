@@ -2,11 +2,8 @@
 # OS junk
 .DS_Store
 Thumbs.db
-
-# Default test map
-src/testmap
-
-bin/
+*.bak
+*[~-]
 
 # CMake generated files
 CMakeCache.txt
@@ -14,16 +11,13 @@ CMakeFiles/*
 CPackConfig.cmake
 CPackSourceConfig.cmake
 cmake_install.cmake
-
-# Makefile generated files
-src/.deps
+# only generated one for now
+/Makefile
 
 #Test world
 mineserver/world
 
 #VS stuff
-#ignore thumbnails created by windows
-Thumbs.db
 #Ignore files build by Visual Studio
 *.obj
 *.exe
@@ -38,7 +32,6 @@ Thumbs.db
 *.suo
 *.tlb
 *.tlh
-*.bak
 *.cache
 *.ilk
 *.log
@@ -55,7 +48,6 @@ obj/
 _ReSharper*/
 [Tt]est[Rr]esult*
 
-#Linux files
-*~
-*-
-*.swp
+# *nix build output
+*.[oa]
+*.so
