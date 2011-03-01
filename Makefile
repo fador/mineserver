@@ -9,6 +9,3 @@ dist-zip: LICENSE
 	zip -j mineserver-latest-`uname`-bin.zip ./bin/* ./LICENSE
   
 dist: dist-tar dist-zip
-
-clean:
-	rm -rf ./bin
