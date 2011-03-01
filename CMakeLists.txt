@@ -97,7 +97,7 @@ set(mineserver_plugins
 )
 
 set(commands_source
-  plugins/commands/command.cpp
+  plugins/commands/commands.cpp
 )
 
 set(filelog_source
