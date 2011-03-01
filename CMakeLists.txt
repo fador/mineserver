@@ -3,9 +3,10 @@ project(Mineserver)
 cmake_policy(SET CMP0003 NEW)
 
 # project version
+# TODO: get that from src/constants.h
 set( ${PROJECT_NAME}_MAJOR_VERSION 0 )
 set( ${PROJECT_NAME}_MINOR_VERSION 1 )
-set( ${PROJECT_NAME}_PATCH_LEVEL 0 )
+set( ${PROJECT_NAME}_PATCH_LEVEL 15 )
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 
@@ -67,6 +68,15 @@ set(mineserver_source
   src/tools.cpp
   src/physics.cpp
   src/cliScreen.cpp
+  src/blocks/blockfurnace.cpp
+  src/blocks/dyed.cpp
+  src/blocks/note.cpp
+  src/blocks/workbench.cpp
+  src/items/food.cpp
+  src/items/itembasic.cpp
+  src/items/projectile.cpp
+  src/mob.cpp
+  src/worldgen/biomegen.cpp
 )
 source_group("Mineserver" FILES ${mineserver_source})
 
@@ -166,10 +176,10 @@ set(CPACK_PACKAGE_NAME "Mineserver")
 set(CPACK_PACKAGE_VENDOR "The Mineserver Project")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Mineserver Developers <developers@mineserver.be>")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Mineserver - C++ Minecraft server software")
-set(CPACK_PACKAGE_VERSION "0.1.12")
-set(CPACK_PACKAGE_VERSION_MAJOR "0")
-set(CPACK_PACKAGE_VERSION_MINOR "1")
-set(CPACK_PACKAGE_VERSION_PATCH "12")
+set(CPACK_PACKAGE_VERSION ${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_PATCH_LEVEL})
+set(CPACK_PACKAGE_VERSION_MAJOR ${${PROJECT_NAME}_MAJOR_VERSION})
+set(CPACK_PACKAGE_VERSION_MINOR ${${PROJECT_NAME}_MINOR_VERSION})
+set(CPACK_PACKAGE_VERSION_PATCH ${${PROJECT_NAME}_PATCH_LEVEL})
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "/usr/local/bin")
 
 include(CPack)
