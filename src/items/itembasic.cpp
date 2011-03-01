@@ -41,7 +41,7 @@ bool ItemBasic::affectedItem(int item)
 
 void ItemBasic::onRightClick(User* user, Item* item)
 {
-  
+
 }
 
 

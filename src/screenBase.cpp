@@ -30,10 +30,11 @@
 
 Screen::~Screen(void) {}
 
-std::string Screen::currentTimestamp(bool seconds) {
+std::string Screen::currentTimestamp(bool seconds)
+{
   time_t currentTime = time(NULL);
-  struct tm *Tm  = localtime(&currentTime);
-  std::string timeStamp (asctime(Tm));
+  struct tm* Tm  = localtime(&currentTime);
+  std::string timeStamp(asctime(Tm));
   timeStamp = timeStamp.substr(11, seconds ? 8 : 5);
 
   return timeStamp;

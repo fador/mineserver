@@ -36,21 +36,36 @@
 
 enum { MAX_TRUNK = 13, MIN_TRUNK = 4, MAX_CANOPY = 3, MIN_CANOPY = 2 ,
        BRANCHING_HEIGHT = 6, BRANCHING_CHANCE = 40,
-MIN_TREE_SPACE = 5 };// Lucky 7 for good branches ^^
+       MIN_TREE_SPACE = 5
+     };// Lucky 7 for good branches ^^
 
-class ITree {
+class ITree
+{
 public:
   ITree() { }
   virtual ~ITree() { }
 
-  virtual void update() {
+  virtual void update()
+  {
     Mineserver::get()->map(_map)->setBlock(_x, _y, _z, _type, _meta);
     Mineserver::get()->map(_map)->sendBlockChange(_x, _y, _z, _type, _meta);
   }
-  virtual void setY(int32_t y) { _y = y; }
-  virtual const int32_t getY(void) { return _y; }
-  virtual const vec location(void) { return vec(_x,_y,_z); }
-  virtual const int type(void) { return _type; }
+  virtual void setY(int32_t y)
+  {
+    _y = y;
+  }
+  virtual const int32_t getY(void)
+  {
+    return _y;
+  }
+  virtual const vec location(void)
+  {
+    return vec(_x, _y, _z);
+  }
+  virtual const int type(void)
+  {
+    return _type;
+  }
 protected:
   int32_t _x;
   int32_t _y;
@@ -60,18 +75,26 @@ protected:
   char _meta;
 };
 
-class Trunk : public ITree 
+class Trunk : public ITree
 {
 public:
-  Trunk(int32_t x, int32_t y, int32_t z, int map, char meta=0 ) { _x = x, _y = y, _z = z, _map = map, _type = BLOCK_WOOD, _meta = meta; update();}
+  Trunk(int32_t x, int32_t y, int32_t z, int map, char meta = 0)
+  {
+    _x = x, _y = y, _z = z, _map = map, _type = BLOCK_WOOD, _meta = meta;
+    update();
+  }
   ~Trunk() { }
 protected:
 };
 
-class Canopy : public ITree 
+class Canopy : public ITree
 {
 public:
-  Canopy(int32_t x, int32_t y, int32_t z, int map, char meta=0) { _x = x, _y = y, _z = z,_map=map, _type = BLOCK_LEAVES, _meta = meta; update();}
+  Canopy(int32_t x, int32_t y, int32_t z, int map, char meta = 0)
+  {
+    _x = x, _y = y, _z = z, _map = map, _type = BLOCK_LEAVES, _meta = meta;
+    update();
+  }
   ~Canopy() { }
 protected:
 };
@@ -79,17 +102,17 @@ protected:
 class Tree : public ITree
 {
 public:
-  Tree(int32_t x, int32_t y, int32_t z, int map,uint8_t limit = MAX_TRUNK);
+  Tree(int32_t x, int32_t y, int32_t z, int map, uint8_t limit = MAX_TRUNK);
   void generate(uint8_t);
   ~Tree(void);
 protected:
   void set(int32_t xloc, int32_t yloc, int32_t zloc, int blocktType, char metaData);
 private:
   Trunk* m_Branch[256]; // 1KB on x86 and 2KB on x86_64 Faster than stack or vector tho :)
-                        // With full array of allocated classes it rounds up to...
-                        // 3.6KB on x86 :F 4.6KB on x86_64
-                        // it is a good enough buffer for absolutely MASSIVE MASSIVE TREES
-                        // Like in Avatar *_*
+  // With full array of allocated classes it rounds up to...
+  // 3.6KB on x86 :F 4.6KB on x86_64
+  // it is a good enough buffer for absolutely MASSIVE MASSIVE TREES
+  // Like in Avatar *_*
   uint8_t n_branches;
 
   void generateCanopy();

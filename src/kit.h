@@ -35,15 +35,16 @@
  * A Kit represents a list of items that a player can spawn (if given
  * the required permissions a Kit has), via the /kit command.
  */
-struct Kit {
+struct Kit
+{
   std::string name;
   std::vector<int> items;
   int permissions;
 
   Kit(std::string name, std::vector<int> items, int permissions)
-  : name(name),
-    items(items),
-    permissions(permissions)
+    : name(name),
+      items(items),
+      permissions(permissions)
   {}
 };
 

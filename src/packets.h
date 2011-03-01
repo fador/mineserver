@@ -137,17 +137,19 @@ public:
     m_readBuffer.insert(m_readBuffer.end(), buffer.begin(), buffer.end());
   }
 
-  void addToRead(const void * data, BufferVector::size_type dataSize)
+  void addToRead(const void* data, BufferVector::size_type dataSize)
   {
     BufferVector::size_type start = m_readBuffer.size();
     m_readBuffer.resize(start + dataSize);
     memcpy(&m_readBuffer[start], data, dataSize);
   }
 
-  void addToWrite(const void * data, BufferVector::size_type dataSize)
+  void addToWrite(const void* data, BufferVector::size_type dataSize)
   {
     if(dataSize == 0)
+    {
       return;
+    }
     BufferVector::size_type start = m_writeBuffer.size();
     m_writeBuffer.resize(start + dataSize);
     memcpy(&m_writeBuffer[start], data, dataSize);
@@ -159,23 +161,23 @@ public:
     m_readPos = 0;
   }
 
-  Packet & operator<<(int8_t val);
-  Packet & operator>>(int8_t &val);
-  Packet & operator<<(int16_t val);
-  Packet & operator>>(int16_t &val);
-  Packet & operator<<(int32_t val);
-  Packet & operator>>(int32_t &val);
-  Packet & operator<<(int64_t val);
-  Packet & operator>>(int64_t &val);
-  Packet & operator<<(float val);
-  Packet & operator>>(float &val);
-  Packet & operator<<(double val);
-  Packet & operator>>(double &val);
-  Packet & operator<<(const std::string &str);
-  Packet & operator>>(std::string &str);
-  void operator<<(Packet &other);
+  Packet& operator<<(int8_t val);
+  Packet& operator>>(int8_t& val);
+  Packet& operator<<(int16_t val);
+  Packet& operator>>(int16_t& val);
+  Packet& operator<<(int32_t val);
+  Packet& operator>>(int32_t& val);
+  Packet& operator<<(int64_t val);
+  Packet& operator>>(int64_t& val);
+  Packet& operator<<(float val);
+  Packet& operator>>(float& val);
+  Packet& operator<<(double val);
+  Packet& operator>>(double& val);
+  Packet& operator<<(const std::string& str);
+  Packet& operator>>(std::string& str);
+  void operator<<(Packet& other);
 
-  void getData(void *buf, int count)
+  void getData(void* buf, int count)
   {
     if(haveData(count))
     {
@@ -184,12 +186,12 @@ public:
     }
   }
 
-  void *getWrite()
+  void* getWrite()
   {
     return &m_writeBuffer[0];
   }
 
-  const void *getWrite() const
+  const void* getWrite() const
   {
     return &m_writeBuffer[0];
   }
@@ -210,7 +212,7 @@ public:
 struct Packets
 {
   int len;
-  int (PacketHandler::*function)(User *);
+  int (PacketHandler::*function)(User*);
 
   //int (PacketHandler::*varLenFunction)(User *);
 
@@ -222,19 +224,19 @@ struct Packets
   {
     len = newlen;
   }
-/*  Packets(int newlen, void (PacketHandler::*newfunction)(uint *, User *))
-  {
-    len      = newlen;
-    function = newfunction;
-  }
+  /*  Packets(int newlen, void (PacketHandler::*newfunction)(uint *, User *))
+    {
+      len      = newlen;
+      function = newfunction;
+    }
 
-  Packets(int newlen, void (PacketHandler::*newfunction)(User *))
-  {
-    len            = newlen;
-    function = newfunction;
-  }
-*/
-  Packets(int newlen, int (PacketHandler::*newfunction)(User *))
+    Packets(int newlen, void (PacketHandler::*newfunction)(User *))
+    {
+      len            = newlen;
+      function = newfunction;
+    }
+  */
+  Packets(int newlen, int (PacketHandler::*newfunction)(User*))
   {
     len            = newlen;
     function = newfunction;
@@ -287,30 +289,30 @@ public:
   Packets packets[256];
 
   // The packet functions
-  int keep_alive(User *user);
-  int login_request(User *user);
-  int handshake(User *user);
-  int chat_message(User *user);
-  int player(User *user);
-  int player_position(User *user);
-  int player_look(User *user);
-  int player_position_and_look(User *user);
-  int player_digging(User *user);
-  int player_block_placement(User *user);
-  int holding_change(User *user);
-  int arm_animation(User *user);
-  int pickup_spawn(User *user);
-  int disconnect(User *user);
-  int use_entity(User *user);
-  int respawn(User *user);
-  int change_sign(User *user);
-  int inventory_transaction(User *user);
+  int keep_alive(User* user);
+  int login_request(User* user);
+  int handshake(User* user);
+  int chat_message(User* user);
+  int player(User* user);
+  int player_position(User* user);
+  int player_look(User* user);
+  int player_position_and_look(User* user);
+  int player_digging(User* user);
+  int player_block_placement(User* user);
+  int holding_change(User* user);
+  int arm_animation(User* user);
+  int pickup_spawn(User* user);
+  int disconnect(User* user);
+  int use_entity(User* user);
+  int respawn(User* user);
+  int change_sign(User* user);
+  int inventory_transaction(User* user);
 
-  int inventory_change(User *user);
-  int inventory_close(User *user);
-  int destroy_entity(User *user);
+  int inventory_change(User* user);
+  int inventory_close(User* user);
+  int destroy_entity(User* user);
 
-  int entity_crouch(User *user);
+  int entity_crouch(User* user);
 };
 
 #endif

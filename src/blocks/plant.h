@@ -33,10 +33,11 @@ enum { SEEDS_CHANCE = 1000 };
 
 class User;
 
-class PlantBlock{
+class PlantBlock
+{
 public:
-  int x,y,z,map,count;
-}; 
+  int x, y, z, map, count;
+};
 
 /** BlockPlant deals specifically with plant block functionality
 @see BlockBasic
@@ -52,20 +53,20 @@ public:
   int reed_max;
   bool affectedBlock(int block);
   BlockPlant();
-   void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   bool onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void timer200();
-   void addBlocks(int x, int y, int z, int map);
-   void addBlock(PlantBlock* p2);
-   void addBlock(int x, int y, int z, int map);
-   void remBlock(PlantBlock* p2);
-   void remBlock(int x,int y,int z,int map);
-   bool isPlant(int num);
+  void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
+  void onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
+  void onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
+  bool onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
+  void onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
+  bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
+  void onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
+  void onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
+  void timer200();
+  void addBlocks(int x, int y, int z, int map);
+  void addBlock(PlantBlock* p2);
+  void addBlock(int x, int y, int z, int map);
+  void remBlock(PlantBlock* p2);
+  void remBlock(int x, int y, int z, int map);
+  bool isPlant(int num);
 };
 

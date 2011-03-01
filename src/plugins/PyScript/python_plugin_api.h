@@ -44,13 +44,13 @@
 class PyLoc
 {
 public:
-  double x,y,z,rot,pit;
+  double x, y, z, rot, pit;
 };
 
 class PyBlock
 {
 public:
-  int x,y,z,type,meta;
+  int x, y, z, type, meta;
   int get_type();
   void set_type(int new_type);
   int get_meta();
@@ -92,11 +92,11 @@ public:
 class PyMineserver
 {
 public:
- PymyMap map;
- PyScreen screen;
- PyChat chat;
- void setMineServer(mineserver_pointer_struct* MS);
- PyUser* get_user(const char* player_name);
+  PymyMap map;
+  PyScreen screen;
+  PyChat chat;
+  void setMineServer(mineserver_pointer_struct* MS);
+  PyUser* get_user(const char* player_name);
 };
 
 mineserver_pointer_struct* magical();

@@ -33,24 +33,24 @@
 #include <string>
 
 #ifdef WIN32
-  #include <Winsock2.h>
+#include <Winsock2.h>
 #else
-  #include <arpa/inet.h>
+#include <arpa/inet.h>
 #endif
 
-void putSint64(uint8_t *buf, int64_t value);
-void putSint32(uint8_t *buf, int32_t value);
-void putSint16(uint8_t *buf, short value);
-void putDouble(uint8_t *buf, double value);
-void putFloat(uint8_t *buf, float value);
+void putSint64(uint8_t* buf, int64_t value);
+void putSint32(uint8_t* buf, int32_t value);
+void putSint16(uint8_t* buf, short value);
+void putDouble(uint8_t* buf, double value);
+void putFloat(uint8_t* buf, float value);
 
-int64_t getSint64(uint8_t *buf);
-double getDouble(uint8_t *buf);
-float  getFloat(uint8_t *buf);
-int32_t getSint32(uint8_t *buf);
-int32_t getSint16(uint8_t *buf);
+int64_t getSint64(uint8_t* buf);
+double getDouble(uint8_t* buf);
+float  getFloat(uint8_t* buf);
+int32_t getSint32(uint8_t* buf);
+int32_t getSint16(uint8_t* buf);
 
-void my_itoa(int value, std::string &buf, int base);
+void my_itoa(int value, std::string& buf, int base);
 std::string base36_encode(int value);
 std::string strToLower(std::string temp);
 
@@ -63,20 +63,22 @@ int kbhit();
 inline uint64_t ntohll(uint64_t v)
 {
   if(htons(1) == 1) // check if already big-endian
-        return v;
-  return (uint64_t)ntohl(v & 0x00000000ffffffff) << 32 | (uint64_t)ntohl( (v >> 32) & 0x00000000ffffffff);
+  {
+    return v;
+  }
+  return (uint64_t)ntohl(v & 0x00000000ffffffff) << 32 | (uint64_t)ntohl((v >> 32) & 0x00000000ffffffff);
 }
 
 //Converts block-coordinates to chunk coordinate
 inline int32_t blockToChunk(int32_t value)
 {
-  return value>>4;//(value < 0) ? (((value+1)/16)-1) : (value/16);
+  return value >> 4; //(value < 0) ? (((value+1)/16)-1) : (value/16);
 }
 
 //Converts absolute block-coordinates to chunk-block-coordinates
 inline int32_t blockToChunkBlock(int32_t value)
 {
-  return value&15;//(value < 0) ? (15+((value+1)%16)) : (value%16);
+  return value & 15; //(value < 0) ? (15+((value+1)%16)) : (value%16);
 }
 
 inline int8_t angleToByte(float angle)
@@ -84,6 +86,9 @@ inline int8_t angleToByte(float angle)
   return (int8_t)((angle / 360.f) * 256);
 }
 
-inline int getRandInt(int min, int max) { return (rand() % ((max-min)+1) + min); }
+inline int getRandInt(int min, int max)
+{
+  return (rand() % ((max - min) + 1) + min);
+}
 
 #endif

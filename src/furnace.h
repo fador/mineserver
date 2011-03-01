@@ -35,7 +35,8 @@
 class User;
 class NBT_Value;
 
-class Creation{
+class Creation
+{
 public:
   int output, meta, count;
   Creation();
@@ -53,7 +54,7 @@ class Furnace
 
 
 public:
-  Furnace(furnaceData *data_);
+  Furnace(furnaceData* data_);
 
   void sendToAllUsers();
   void smelt();
@@ -71,21 +72,47 @@ public:
   int16_t cookTime();
   void updateItems();
 
-  int16_t fuelBurningTime() { return data->burnTime; }
+  int16_t fuelBurningTime()
+  {
+    return data->burnTime;
+  }
 
-  int16_t setFuelBurningTime(int16_t burntime) { data->burnTime=burntime; return data->burnTime;}  
+  int16_t setFuelBurningTime(int16_t burntime)
+  {
+    data->burnTime = burntime;
+    return data->burnTime;
+  }
 
-  int16_t cookingTime() { return data->cookTime; }
-  int16_t setCookingTime(int16_t cookTime) { data->cookTime=cookTime; return data->cookTime; }  
+  int16_t cookingTime()
+  {
+    return data->cookTime;
+  }
+  int16_t setCookingTime(int16_t cookTime)
+  {
+    data->cookTime = cookTime;
+    return data->cookTime;
+  }
 
-  int32_t x() { return data->x; }
-  int32_t y() { return data->y; }
-  int32_t z() { return data->z; }
+  int32_t x()
+  {
+    return data->x;
+  }
+  int32_t y()
+  {
+    return data->y;
+  }
+  int32_t z()
+  {
+    return data->z;
+  }
 
-  Item* slots() { return data->items; };
+  Item* slots()
+  {
+    return data->items;
+  };
 
 private:
-  furnaceData *data;
+  furnaceData* data;
   bool m_burning;
 };
 

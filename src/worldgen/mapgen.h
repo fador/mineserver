@@ -51,16 +51,16 @@ private:
   std::vector<uint8_t> skylight;
   std::vector<uint8_t> blocklight;
   std::vector<uint8_t> heightmap;
-  
+
   int seaLevel;
-  
+
   bool addTrees;
-  
+
   bool expandBeaches;
   int beachExtent;
   int beachHeight;
-  
-  bool addOre;  
+
+  bool addOre;
   bool addCaves;
   bool winterEnabled;
 
@@ -69,9 +69,9 @@ private:
 
   virtual void ExpandBeaches(int x, int z, int map);
   virtual void AddTrees(int x, int z, int map);
-  
+
   virtual void AddOre(int x, int z, int map, uint8_t type);
-  virtual void AddDeposit(int x, int y, int z, int map, uint8_t block, int minDepoSize, int maxDepoSize, sChunk *chunk);
+  virtual void AddDeposit(int x, int y, int z, int map, uint8_t block, int minDepoSize, int maxDepoSize, sChunk* chunk);
 
   CaveGen cave;
 
@@ -82,19 +82,19 @@ private:
 
   noise::module::Billow treenoise;
   // ##### END TREE GEN ####
-  
+
   /*noise::module::ScaleBias perlinBiased;
 
-  noise::module::Perlin baseFlatTerrain;  
+  noise::module::Perlin baseFlatTerrain;
   noise::module::ScaleBias flatTerrain;
-  
+
   noise::module::Perlin seaFloor;
   noise::module::ScaleBias seaBias;
 
   noise::module::Perlin terrainType;
 
   noise::module::Perlin seaControl;
-  
+
   noise::module::Select seaTerrain;
   noise::module::Select finalTerrain;*/
 };

@@ -61,19 +61,19 @@ bool BlockSign::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
 {
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
   Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-  this->spawnBlockItem(x,y,z,map,BLOCK_WALL_SIGN);
+  this->spawnBlockItem(x, y, z, map, BLOCK_WALL_SIGN);
 
   //Remove sign data from the chunk
-  sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(x,z);
+  sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
   if(chunk != NULL)
   {
     for(uint32_t i = 0; i < chunk->signs.size(); i++)
     {
-      if (chunk->signs[i]->x == x &&
+      if(chunk->signs[i]->x == x &&
           chunk->signs[i]->y == y &&
           chunk->signs[i]->z == z)
       {
-        chunk->signs.erase(chunk->signs.begin()+i);
+        chunk->signs.erase(chunk->signs.begin() + i);
         break;
       }
     }
@@ -83,7 +83,7 @@ bool BlockSign::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
 
 void BlockSign::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-  uint8_t block,meta;
+  uint8_t block, meta;
   Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
 
   bool blockBroken = false;
@@ -98,7 +98,7 @@ void BlockSign::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
   {
     blockBroken = true;
   }
-  else if( block == BLOCK_WALL_SIGN &&
+  else if(block == BLOCK_WALL_SIGN &&
           ((meta == 2 && direction == BLOCK_EAST)  ||
            (meta == 3 && direction == BLOCK_WEST)  ||
            (meta == 4 && direction == BLOCK_NORTH) ||
@@ -112,19 +112,19 @@ void BlockSign::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
   {
     Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
     Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-    this->spawnBlockItem(x, y, z,map, block, 0);
+    this->spawnBlockItem(x, y, z, map, block, 0);
 
     //Remove sign data from the chunk
-    sChunk *chunk = Mineserver::get()->map(map)->chunks.getChunk(x,z);
+    sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
     if(chunk != NULL)
     {
       for(uint32_t i = 0; i < chunk->signs.size(); i++)
       {
-        if (chunk->signs[i]->x == x &&
+        if(chunk->signs[i]->x == x &&
             chunk->signs[i]->y == y &&
             chunk->signs[i]->z == z)
         {
-          chunk->signs.erase(chunk->signs.begin()+i);
+          chunk->signs.erase(chunk->signs.begin() + i);
           break;
         }
       }
@@ -137,17 +137,17 @@ bool BlockSign::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if(!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
-     revertBlock(user,x,y,z,map);
-     return true;
+    revertBlock(user, x, y, z, map);
+    return true;
   }
 
   /* Check block below allows blocks placed on top */
-  if (!this->isBlockStackable(oldblock))
+  if(!this->isBlockStackable(oldblock))
   {
-     revertBlock(user,x,y,z,map);
-     return true;
+    revertBlock(user, x, y, z, map);
+    return true;
   }
 
   // 0x0 -> West  West  West  West
@@ -203,7 +203,7 @@ bool BlockSign::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   //           +Z                              -Z
   //
   //                          South
-  
+
   // We place according to the player's position
   double diffX = (x + 0.5) - user->pos.x; // + 0.5 to get the middle of the square
   double diffZ = (z + 0.5) - user->pos.z; // + 0.5 to get the middle of the square
@@ -211,42 +211,42 @@ bool BlockSign::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   double angleDegree = ((atan2(diffZ, diffX) * 180 / M_PI + 90) / 22.5);
 
   uint8_t metadata;
-  if (angleDegree < 0)
+  if(angleDegree < 0)
   {
-     angleDegree += 16;
+    angleDegree += 16;
   }
   newblock = BLOCK_WALL_SIGN;
-  metadata = 6-direction;
+  metadata = 6 - direction;
   switch(direction)
   {
-     case BLOCK_SOUTH:
-        x--;
-     break;
-     case BLOCK_NORTH:
-        x++;
-     break;
-     case BLOCK_EAST:
-        z++;
-     break;
-     case BLOCK_WEST:
-        z--;
-     break;
-     case BLOCK_TOP:
-        y++;
-        newblock = BLOCK_SIGN_POST;
-        metadata = (uint8_t)(angleDegree + 0.5);
-     break;
-     case BLOCK_BOTTOM:
-     default:
-        revertBlock(user,x,y,z,map);
-        return true;
-     break;
+  case BLOCK_SOUTH:
+    x--;
+    break;
+  case BLOCK_NORTH:
+    x++;
+    break;
+  case BLOCK_EAST:
+    z++;
+    break;
+  case BLOCK_WEST:
+    z--;
+    break;
+  case BLOCK_TOP:
+    y++;
+    newblock = BLOCK_SIGN_POST;
+    metadata = (uint8_t)(angleDegree + 0.5);
+    break;
+  case BLOCK_BOTTOM:
+  default:
+    revertBlock(user, x, y, z, map);
+    return true;
+    break;
   }
 
-  if (!this->isBlockEmpty(x,y,z,map))
+  if(!this->isBlockEmpty(x, y, z, map))
   {
-     revertBlock(user,x,y,z,map);
-     return true;
+    revertBlock(user, x, y, z, map);
+    return true;
   }
 
   Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, metadata);

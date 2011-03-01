@@ -37,18 +37,18 @@ struct lightInfo
   lightInfo() { };
   lightInfo(int _x, int _y, int _z, int _light)
   {
-    x=_x;
-    y=_y;
-    z=_z;
-    light=_light;
+    x = _x;
+    y = _y;
+    z = _z;
+    light = _light;
     skipdir = -1;
   }
   lightInfo(int _x, int _y, int _z, int _light, int _skipdir)
   {
-    x=_x;
-    y=_y;
-    z=_z;
-    light=_light;
+    x = _x;
+    y = _y;
+    z = _z;
+    light = _light;
     skipdir = _skipdir;
   }
   int x;
@@ -65,7 +65,9 @@ private:
   Lighting()
   {
     for(int i = 0; i < 256; i++)
+    {
       emitLight[i] = 0;
+    }
     emitLight[0x0A] = 15; // Lava
     emitLight[0x0B] = 15; // Stationary Lava
     emitLight[0x27] = 1;  // Brown mushroom
@@ -79,7 +81,9 @@ private:
     emitLight[0x5B] = 15; // Jack-O-Lantern
 
     for(int i = 0; i < 256; i++)
+    {
       stopLight[i] = 16;
+    }
     stopLight[0x00] = 0; // Empty
     stopLight[0x06] = 0; // Sapling
     stopLight[0x08] = 3; // Water
@@ -117,7 +121,7 @@ private:
 
   }
 
-  static Lighting *mLight;
+  static Lighting* mLight;
 
 public:
 
@@ -129,18 +133,19 @@ public:
   int emitLight[256];
 
   // Generate light maps for chunk
-  bool generateLight(int x, int z, sChunk *chunk);
+  bool generateLight(int x, int z, sChunk* chunk);
 
 
   // Light get/set
-  bool getLight(int x, int y, int z, uint8_t *blocklight, uint8_t *skylight, sChunk *chunk);
-  bool setLight(int x, int y, int z, int blocklight, int skylight, int setLight, sChunk *chunk);
-  
-  bool spreadLight(std::queue<lightInfo> *lightQueue, sChunk *chunk);
+  bool getLight(int x, int y, int z, uint8_t* blocklight, uint8_t* skylight, sChunk* chunk);
+  bool setLight(int x, int y, int z, int blocklight, int skylight, int setLight, sChunk* chunk);
+
+  bool spreadLight(std::queue<lightInfo> *lightQueue, sChunk* chunk);
 
   static Lighting* get()
   {
-    if(!mLight) {
+    if(!mLight)
+    {
       mLight = new Lighting();
     }
     return mLight;

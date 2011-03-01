@@ -9,7 +9,8 @@ uint32_t generateEID();
 
 bool ItemProjectile::affectedItem(int item)
 {
-  switch(item){
+  switch(item)
+  {
   case ITEM_SNOWBALL:
   case ITEM_EGG:
   case ITEM_BOW:
@@ -23,14 +24,14 @@ void ItemProjectile::onRightClick(User* user, Item* item)
   int8_t projID = 0;
   switch(item->getType())
   {
-    case ITEM_SNOWBALL:
-      projID = 61;
+  case ITEM_SNOWBALL:
+    projID = 61;
     break;
-    case ITEM_EGG:
-      projID = 62;
+  case ITEM_EGG:
+    projID = 62;
     break;
-    case ITEM_BOW:
-      projID = 60;
+  case ITEM_BOW:
+    projID = 60;
     break;
   }
 

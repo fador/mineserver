@@ -35,13 +35,16 @@
 #include "config.h"
 
 Creation createList[2258];
-bool configIsRead=false;
+bool configIsRead = false;
 
-Creation::Creation(){
-  output=-1; meta=0; count=0;
+Creation::Creation()
+{
+  output = -1;
+  meta = 0;
+  count = 0;
 }
 
-Furnace::Furnace(furnaceData *data_)
+Furnace::Furnace(furnaceData* data_)
 {
 
   data = data_;
@@ -51,7 +54,7 @@ Furnace::Furnace(furnaceData *data_)
   if(!configIsRead)
   {
     readConfig();
-    configIsRead=true;
+    configIsRead = true;
   }
 
   // Check if this is a burning block
@@ -117,7 +120,7 @@ void Furnace::smelt()
     Item* fuelSlot   = &slots()[SLOT_FUEL];
     Item* outputSlot = &slots()[SLOT_OUTPUT];
     int32_t creationID = createList[inputSlot->getType()].output;
- 
+
     // Update other params if we actually converted
     if(creationID != -1 && outputSlot->getCount() != 64)
     {
@@ -132,7 +135,7 @@ void Furnace::smelt()
       if(outputSlot->getType() == creationID)
       {
         // Increment output and decrememnt the input source
-        outputSlot->setCount( outputSlot->getCount()+createList[inputSlot->getType()].count);
+        outputSlot->setCount(outputSlot->getCount() + createList[inputSlot->getType()].count);
         inputSlot->setCount(inputSlot->getCount() - 1);
         outputSlot->setHealth(createList[inputSlot->getType()].meta);
         data->cookTime = 0;
@@ -173,43 +176,74 @@ bool Furnace::hasValidIngredient()
 {
   // Check that we have a valid input type
   Item* slot = &slots()[SLOT_INPUT];
-  if(slot->getType()<0){ return false; }
-  if(createList[slot->getType()].output != -1){ return true; }
+  if(slot->getType() < 0)
+  {
+    return false;
+  }
+  if(createList[slot->getType()].output != -1)
+  {
+    return true;
+  }
   return false;
 }
 void Furnace::consumeFuel()
 {
   // Check that we have fuel
   if(slots()[SLOT_FUEL].getCount() == 0)
+  {
     return;
+  }
 
   // Increment the fuel burning time based on fuel type
   // http://www.minecraftwiki.net/wiki/Furnace#Fuel_efficiency
-  Item *fuelSlot = &slots()[SLOT_FUEL];
+  Item* fuelSlot = &slots()[SLOT_FUEL];
 
   uint16_t fuelTime = 0;
   switch(fuelSlot->getType())
   {
-    case ITEM_COAL:           fuelTime = 80;   break;
-    case BLOCK_PLANK:         fuelTime = 15;   break;
-    case ITEM_STICK:          fuelTime = 5;    break;
-    case BLOCK_WOOD:          fuelTime = 15;   break;
-    case BLOCK_WORKBENCH:     fuelTime = 15;   break;
-    case BLOCK_CHEST:         fuelTime = 15;   break;
-    case BLOCK_BOOKSHELF:     fuelTime = 15;   break;
-    case BLOCK_JUKEBOX:       fuelTime = 15;   break;
-    case BLOCK_FENCE:         fuelTime = 15;   break;
-    case BLOCK_WOODEN_STAIRS: fuelTime = 15;   break;
-    case ITEM_LAVA_BUCKET:    fuelTime = 1000; break;
-    default: break;
+  case ITEM_COAL:
+    fuelTime = 80;
+    break;
+  case BLOCK_PLANK:
+    fuelTime = 15;
+    break;
+  case ITEM_STICK:
+    fuelTime = 5;
+    break;
+  case BLOCK_WOOD:
+    fuelTime = 15;
+    break;
+  case BLOCK_WORKBENCH:
+    fuelTime = 15;
+    break;
+  case BLOCK_CHEST:
+    fuelTime = 15;
+    break;
+  case BLOCK_BOOKSHELF:
+    fuelTime = 15;
+    break;
+  case BLOCK_JUKEBOX:
+    fuelTime = 15;
+    break;
+  case BLOCK_FENCE:
+    fuelTime = 15;
+    break;
+  case BLOCK_WOODEN_STAIRS:
+    fuelTime = 15;
+    break;
+  case ITEM_LAVA_BUCKET:
+    fuelTime = 1000;
+    break;
+  default:
+    break;
   }
 
   if(fuelTime > 0)
   {
     data->burnTime += fuelTime;
     // Now decrement the fuel & reset
-    fuelSlot->setCount(fuelSlot->getCount()-1);
-    if (fuelSlot->getCount() == 0)
+    fuelSlot->setCount(fuelSlot->getCount() - 1);
+    if(fuelSlot->getCount() == 0)
     {
       *fuelSlot = Item();
     }
@@ -235,12 +269,12 @@ void Furnace::sendToAllUsers()
   //ToDo: send changes to all with this furnace opened
 
   std::vector<OpenInventory*>* inv = &Mineserver::get()->inventory()->openFurnaces;
-      
+
   for(uint32_t openinv = 0; openinv < inv->size(); openinv ++)
   {
     if((*inv)[openinv]->x == data->x &&
-       (*inv)[openinv]->y == data->y &&
-       (*inv)[openinv]->z == data->z)
+        (*inv)[openinv]->y == data->y &&
+        (*inv)[openinv]->z == data->z)
     {
       for(uint32_t user = 0; user < (*inv)[openinv]->users.size(); user ++)
       {
@@ -248,13 +282,13 @@ void Furnace::sendToAllUsers()
         {
           if(data->items[j].getType() != -1)
           {
-            (*inv)[openinv]->users[user]->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_FURNACE << (int16_t)j << (int16_t)data->items[j].getType() 
-                          << (int8_t)(data->items[j].getCount()) << (int16_t)data->items[j].getHealth();
+            (*inv)[openinv]->users[user]->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_FURNACE << (int16_t)j << (int16_t)data->items[j].getType()
+                                                 << (int8_t)(data->items[j].getCount()) << (int16_t)data->items[j].getHealth();
           }
         }
-        
-        (*inv)[openinv]->users[user]->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)PROGRESS_ARROW << (int16_t)(data->cookTime*18);
-        (*inv)[openinv]->users[user]->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)PROGRESS_FIRE  << (int16_t)(data->burnTime*3);
+
+        (*inv)[openinv]->users[user]->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)PROGRESS_ARROW << (int16_t)(data->cookTime * 18);
+        (*inv)[openinv]->users[user]->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)PROGRESS_FIRE  << (int16_t)(data->burnTime * 3);
       }
 
       break;
@@ -263,18 +297,19 @@ void Furnace::sendToAllUsers()
 
 }
 
-void readConfig(){
+void readConfig()
+{
   const char* key = "furnace.items";
   if(Mineserver::get()->config()->has(key) && Mineserver::get()->config()->type(key) == CONFIG_NODE_LIST)
   {
     std::list<std::string>* tmp = Mineserver::get()->config()->mData(key)->keys();
     std::list<std::string>::iterator it = tmp->begin();
-    for(;it!=tmp->end(); ++it)
+    for(; it != tmp->end(); ++it)
     {
-      int input = Mineserver::get()->config()->iData((std::string(key)+".")+(*it)+".in");
-      createList[input].output = Mineserver::get()->config()->iData((std::string(key)+".")+(*it)+".out");
-      createList[input].meta = Mineserver::get()->config()->iData((std::string(key)+".")+(*it)+".meta");
-      createList[input].count = Mineserver::get()->config()->iData((std::string(key)+".")+(*it)+".count");
+      int input = Mineserver::get()->config()->iData((std::string(key) + ".") + (*it) + ".in");
+      createList[input].output = Mineserver::get()->config()->iData((std::string(key) + ".") + (*it) + ".out");
+      createList[input].meta = Mineserver::get()->config()->iData((std::string(key) + ".") + (*it) + ".meta");
+      createList[input].count = Mineserver::get()->config()->iData((std::string(key) + ".") + (*it) + ".count");
     }
   }
 }

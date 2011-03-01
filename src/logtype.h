@@ -28,24 +28,24 @@
 #ifndef _LOG_TYPE_H
 #define _LOG_TYPE_H
 
-/** 
+/**
  * An enumeration of types of log messages..
  *
  * Inspired by syslog.
  */
 namespace LogType
 {
-  enum LogType
-  {
-    LOG_EMERG,    /** system is unusable */
-    LOG_ALERT,    /** action must be taken immediately*/ 
-    LOG_CRITICAL, /** critical conditions */
-    LOG_ERROR,    /** error conditions */
-    LOG_WARNING,  /** warning conditions */
-    LOG_NOTICE,   /** normal, but significant, condition */
-    LOG_INFO,     /** informational message */
-    LOG_DEBUG,    /** debug-level message */
-  };
+enum LogType
+{
+  LOG_EMERG,    /** system is unusable */
+  LOG_ALERT,    /** action must be taken immediately*/
+  LOG_CRITICAL, /** critical conditions */
+  LOG_ERROR,    /** error conditions */
+  LOG_WARNING,  /** warning conditions */
+  LOG_NOTICE,   /** normal, but significant, condition */
+  LOG_INFO,     /** informational message */
+  LOG_DEBUG,    /** debug-level message */
+};
 };
 
 #endif

@@ -37,7 +37,8 @@
 #include "mapgen.h"
 #include "cavegen.h"
 
-class NetherGen : public MapGen {
+class NetherGen : public MapGen
+{
 public:
   NetherGen();
   void init(int seed);
@@ -50,44 +51,44 @@ private:
   std::vector<uint8_t> skylight;
   std::vector<uint8_t> blocklight;
   std::vector<uint8_t> heightmap;
-  
+
   int seaLevel;
-  
+
   bool addTrees;
-  
+
   bool expandBeaches;
   int beachExtent;
   int beachHeight;
-  
+
   bool addOre;
 
   void generateWithNoise(int x, int z, int map);
 
   void ExpandBeaches(int x, int z, int map);
   void AddTrees(int x, int z, int map, uint16_t count);
-  
+
   void AddOre(int x, int z, int map, uint8_t type);
   void AddDeposit(int x, int y, int z, int map, uint8_t block, int depotSize);
 
-  
+
   CaveGen cave;
 
   // Heightmap composition
   noise::module::Voronoi Randomgen;
   noise::module::Billow Randomciel;
-  
+
   /*noise::module::ScaleBias perlinBiased;
 
-  noise::module::Perlin baseFlatTerrain;  
+  noise::module::Perlin baseFlatTerrain;
   noise::module::ScaleBias flatTerrain;
-  
+
   noise::module::Perlin seaFloor;
   noise::module::ScaleBias seaBias;
 
   noise::module::Perlin terrainType;
 
   noise::module::Perlin seaControl;
-  
+
   noise::module::Select seaTerrain;
   noise::module::Select finalTerrain;*/
 };

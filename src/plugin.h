@@ -90,7 +90,7 @@ public:
   void  setHook(const std::string& name, Hook* hook);
   void  remHook(const std::string& name);
   // Load/Unload plugins
-  bool loadPlugin(const std::string name, const std::string file="");
+  bool loadPlugin(const std::string name, const std::string file = "");
   void unloadPlugin(const std::string name);
   // Plugin version registry
   bool  hasPluginVersion(const std::string& name) const;
@@ -108,42 +108,42 @@ public:
     setHook("Timer200", new Hook0<bool>);
     setHook("Timer1000", new Hook0<bool>);
     setHook("Timer10000", new Hook0<bool>);
-    setHook("PlayerLoginPre", new Hook2<bool,const char*,char***>);
-    setHook("PlayerLoginPost", new Hook1<bool,const char*>);
-    setHook("PlayerNickPost", new Hook2<bool,const char*,const char*>);
-    setHook("PlayerKickPost", new Hook2<bool,const char*,const char*>);
-    setHook("PlayerQuitPost", new Hook1<bool,const char*>);
-    setHook("PlayerChatPre", new Hook3<bool,const char*,time_t,const char*>);
-    setHook("PlayerChatPost", new Hook3<bool,const char*,time_t,const char*>);
-    setHook("PlayerArmSwing", new Hook1<bool,const char*>);
-    setHook("PlayerDamagePre", new Hook3<bool,const char*,const char*,int>);
-    setHook("PlayerDamagePost", new Hook3<bool,const char*,const char*,int>);
-    setHook("PlayerDisconnect", new Hook3<bool,const char*,uint32_t,uint16_t>);
-    setHook("PlayerDiggingStarted", new Hook5<bool,const char*,int32_t,int8_t,int32_t,int8_t>);
-    setHook("PlayerDigging", new Hook5<bool,const char*,int32_t,int8_t,int32_t,int8_t>);
-    setHook("PlayerDiggingStopped", new Hook5<bool,const char*,int32_t,int8_t,int32_t,int8_t>);
-    setHook("PlayerBlockInteract", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
-    setHook("BlockBreakPre", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
-    setHook("BlockBreakPost", new Hook4<bool,const char*,int32_t,int8_t,int32_t>);
-    setHook("BlockNeighbourBreak", new Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>);
-    setHook("BlockPlacePre", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int8_t>);
-    setHook("ItemRightClickPre", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int8_t>);
-    setHook("BlockPlacePost", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int8_t>);
-    setHook("BlockNeighbourPlace", new Hook7<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t>);
-    setHook("BlockReplacePre", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>);
-    setHook("BlockReplacePost", new Hook6<bool,const char*,int32_t,int8_t,int32_t,int16_t,int16_t>);
-    setHook("BlockNeighbourReplace", new Hook9<bool,const char*,int32_t,int8_t,int32_t,int32_t,int8_t,int32_t,int16_t,int16_t>);
-    setHook("LogPost", new Hook3<bool,int,const char*,const char*>);
-    setHook("PlayerChatCommand", new Hook4<bool,const char*,const char*,int,const char**>);
-    setHook("PlayerRespawn", new Hook1<bool,const char*>);
+    setHook("PlayerLoginPre", new Hook2<bool, const char*, char***>);
+    setHook("PlayerLoginPost", new Hook1<bool, const char*>);
+    setHook("PlayerNickPost", new Hook2<bool, const char*, const char*>);
+    setHook("PlayerKickPost", new Hook2<bool, const char*, const char*>);
+    setHook("PlayerQuitPost", new Hook1<bool, const char*>);
+    setHook("PlayerChatPre", new Hook3<bool, const char*, time_t, const char*>);
+    setHook("PlayerChatPost", new Hook3<bool, const char*, time_t, const char*>);
+    setHook("PlayerArmSwing", new Hook1<bool, const char*>);
+    setHook("PlayerDamagePre", new Hook3<bool, const char*, const char*, int>);
+    setHook("PlayerDamagePost", new Hook3<bool, const char*, const char*, int>);
+    setHook("PlayerDisconnect", new Hook3<bool, const char*, uint32_t, uint16_t>);
+    setHook("PlayerDiggingStarted", new Hook5<bool, const char*, int32_t, int8_t, int32_t, int8_t>);
+    setHook("PlayerDigging", new Hook5<bool, const char*, int32_t, int8_t, int32_t, int8_t>);
+    setHook("PlayerDiggingStopped", new Hook5<bool, const char*, int32_t, int8_t, int32_t, int8_t>);
+    setHook("PlayerBlockInteract", new Hook4<bool, const char*, int32_t, int8_t, int32_t>);
+    setHook("BlockBreakPre", new Hook4<bool, const char*, int32_t, int8_t, int32_t>);
+    setHook("BlockBreakPost", new Hook4<bool, const char*, int32_t, int8_t, int32_t>);
+    setHook("BlockNeighbourBreak", new Hook7<bool, const char*, int32_t, int8_t, int32_t, int32_t, int8_t, int32_t>);
+    setHook("BlockPlacePre", new Hook6<bool, const char*, int32_t, int8_t, int32_t, int16_t, int8_t>);
+    setHook("ItemRightClickPre", new Hook6<bool, const char*, int32_t, int8_t, int32_t, int16_t, int8_t>);
+    setHook("BlockPlacePost", new Hook6<bool, const char*, int32_t, int8_t, int32_t, int16_t, int8_t>);
+    setHook("BlockNeighbourPlace", new Hook7<bool, const char*, int32_t, int8_t, int32_t, int32_t, int8_t, int32_t>);
+    setHook("BlockReplacePre", new Hook6<bool, const char*, int32_t, int8_t, int32_t, int16_t, int16_t>);
+    setHook("BlockReplacePost", new Hook6<bool, const char*, int32_t, int8_t, int32_t, int16_t, int16_t>);
+    setHook("BlockNeighbourReplace", new Hook9<bool, const char*, int32_t, int8_t, int32_t, int32_t, int8_t, int32_t, int16_t, int16_t>);
+    setHook("LogPost", new Hook3<bool, int, const char*, const char*>);
+    setHook("PlayerChatCommand", new Hook4<bool, const char*, const char*, int, const char**>);
+    setHook("PlayerRespawn", new Hook1<bool, const char*>);
 
     init();
   }
   // Remove existing hooks
   ~Plugin()
   {
-    std::map<const std::string,Hook*>::iterator it = m_hooks.begin();
-    for (;it!=m_hooks.end();++it)
+    std::map<const std::string, Hook*>::iterator it = m_hooks.begin();
+    for(; it != m_hooks.end(); ++it)
     {
       delete it->second;
     }
@@ -154,8 +154,14 @@ public:
 
   void init();
   void free();
-  std::vector<BlockBasic*> getBlockCB(){ return BlockCB; }
-  std::vector<ItemBasic*> getItemCB(){ return ItemCB; }
+  std::vector<BlockBasic*> getBlockCB()
+  {
+    return BlockCB;
+  }
+  std::vector<ItemBasic*> getItemCB()
+  {
+    return ItemCB;
+  }
 
 
 

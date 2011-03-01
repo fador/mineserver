@@ -50,7 +50,7 @@ bool ConfigScanner::read(const std::string& file)
   std::ifstream handle;
   handle.open(file.c_str(), std::ios_base::binary);
 
-  if (handle.bad())
+  if(handle.bad())
   {
     return false;
   }
@@ -85,12 +85,12 @@ int ConfigScanner::left()
 
 int ConfigScanner::move(int len)
 {
-  if ((unsigned int)(m_pos + len) > m_data.length())
+  if((unsigned int)(m_pos + len) > m_data.length())
   {
     len = m_data.length() - m_pos;
   }
 
-  if ((m_pos + len) < 0)
+  if((m_pos + len) < 0)
   {
     len = (0 - m_pos);
   }
@@ -107,7 +107,7 @@ char ConfigScanner::get()
 
 char ConfigScanner::at(int offset)
 {
-  if ((unsigned int)offset >= m_data.length())
+  if((unsigned int)offset >= m_data.length())
   {
     return -1;
   }

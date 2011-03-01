@@ -26,8 +26,8 @@
  */
 
 #ifdef WIN32
-  #include <conio.h>
-  #include <WinSock2.h>
+#include <conio.h>
+#include <WinSock2.h>
 #else
 #include <netinet/in.h>
 #endif
@@ -46,25 +46,25 @@
 
 #include "tools.h"
 
-void putSint64(uint8_t *buf, int64_t value)
+void putSint64(uint8_t* buf, int64_t value)
 {
   uint64_t nval = ntohll(value);
   memcpy(buf, &nval, 8);
 }
 
-void putSint32(uint8_t *buf, int32_t value)
+void putSint32(uint8_t* buf, int32_t value)
 {
   uint32_t nval = htonl(value);
   memcpy(buf, &nval, 4);
 }
 
-void putSint16(uint8_t *buf, int16_t value)
+void putSint16(uint8_t* buf, int16_t value)
 {
-  short value2=htons(value);
+  short value2 = htons(value);
   memcpy(buf, &value2, 2);
 }
 
-void putFloat(uint8_t *buf, float value)
+void putFloat(uint8_t* buf, float value)
 {
   uint32_t nval;
   memcpy(&nval, &value, 4);
@@ -72,7 +72,7 @@ void putFloat(uint8_t *buf, float value)
   memcpy(buf, &nval, 4);
 }
 
-void putDouble(uint8_t *buf, double value)
+void putDouble(uint8_t* buf, double value)
 {
   uint64_t nval;
   memcpy(&nval, &value, 8);
@@ -80,7 +80,7 @@ void putDouble(uint8_t *buf, double value)
   memcpy(buf, &nval, 8);
 }
 
-double getDouble(uint8_t *buf)
+double getDouble(uint8_t* buf)
 {
   double val;
   uint64_t ival = *reinterpret_cast<const int64_t*>(buf);
@@ -89,7 +89,7 @@ double getDouble(uint8_t *buf)
   return val;
 }
 
-float getFloat(uint8_t *buf)
+float getFloat(uint8_t* buf)
 {
   float val;
   int ival = ntohl(*reinterpret_cast<const int32_t*>(buf));
@@ -97,7 +97,7 @@ float getFloat(uint8_t *buf)
   return val;
 }
 
-int64_t getSint64(uint8_t *buf)
+int64_t getSint64(uint8_t* buf)
 {
   int64_t val;
   val = *reinterpret_cast<const int64_t*>(buf);
@@ -105,13 +105,13 @@ int64_t getSint64(uint8_t *buf)
   return val;
 }
 
-int32_t getSint32(uint8_t *buf)
+int32_t getSint32(uint8_t* buf)
 {
   int val = ntohl(*reinterpret_cast<const int32_t*>(buf));
   return val;
 }
 
-int32_t getSint16(uint8_t *buf)
+int32_t getSint16(uint8_t* buf)
 {
   short val = ntohs(*reinterpret_cast<const int16_t*>(buf));
 
@@ -123,19 +123,23 @@ std::string base36_encode(int value)
   std::string output;
   my_itoa((int)abs(value), output, 36);
   if(value < 0)
-    output.insert (output.begin(), '-');
+  {
+    output.insert(output.begin(), '-');
+  }
 
   return output;
 }
 
-void my_itoa(int value, std::string &buf, int base)
+void my_itoa(int value, std::string& buf, int base)
 {
   std::string hexarray("0123456789abcdefghijklmnopqrstuvwxyz");
   int i = 30;
   buf = "";
 
   if(!value)
+  {
     buf = "0";
+  }
 
   for(; value && i; --i, value /= base)
   {
@@ -155,7 +159,7 @@ std::string strToLower(std::string temp)
   return temp;
 }
 
-std::string dtos( double n )
+std::string dtos(double n)
 {
   std::ostringstream result;
   result << n;
@@ -168,14 +172,16 @@ std::string hash(std::string value)
   // Uses the DJB2 algorithm
   unsigned long hash = 5381;
   int c;
-  
-  char *cvalue = const_cast<char *>(value.c_str());
-  
-  while ((c = *cvalue++))
-    hash = ((hash <<5) + hash) + c;  /* hash * 33 + c */
-    
+
+  char* cvalue = const_cast<char*>(value.c_str());
+
+  while((c = *cvalue++))
+  {
+    hash = ((hash << 5) + hash) + c;  /* hash * 33 + c */
+  }
+
   std::ostringstream hashString;
   hashString << hash;
-    
+
   return hashString.str();
 }

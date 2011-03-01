@@ -39,9 +39,18 @@ public:
   void setType(int16_t type);
   void setCount(int8_t count);
   void setHealth(int16_t healt);
-  int16_t getType(){ return type; }
-  int8_t getCount(){ return count; }
-  int16_t getHealth(){ return health; }
+  int16_t getType()
+  {
+    return type;
+  }
+  int8_t getCount()
+  {
+    return count;
+  }
+  int16_t getHealth()
+  {
+    return health;
+  }
   int16_t itemHealth(int type);
   void decCount(int c = 1);
   void incHealth(int c = 1);
@@ -57,11 +66,11 @@ public:
   Item()
   {
     player = NULL;
-    slot=-1;
+    slot = -1;
     type   = -1;
     count  = 0;
     health = 0;
-    ready=false;
+    ready = false;
   }
   Item(User* player, int slot)
   {
@@ -70,7 +79,7 @@ public:
     type   = -1;
     count  = 0;
     health = 0;
-    ready=false;
+    ready = false;
   }
 };
 
@@ -81,12 +90,12 @@ struct OpenInventory
   int32_t y;
   int32_t z;
   Item workbench[10];
-  std::vector<User *> users;  
+  std::vector<User*> users;
 };
 
 enum { WINDOW_CURSOR = -1, WINDOW_PLAYER = 0, WINDOW_WORKBENCH, WINDOW_CHEST, WINDOW_LARGE_CHEST, WINDOW_FURNACE };
 
-enum { INVENTORYTYPE_CHEST = 0,INVENTORYTYPE_WORKBENCH, INVENTORYTYPE_FURNACE };
+enum { INVENTORYTYPE_CHEST = 0, INVENTORYTYPE_WORKBENCH, INVENTORYTYPE_FURNACE };
 
 class User;
 
@@ -96,7 +105,7 @@ public:
 
   struct Recipe
   {
-    Recipe() : width(0),height(0),slots(NULL) {}
+    Recipe() : width(0), height(0), slots(NULL) {}
     ~Recipe()
     {
     }
@@ -106,9 +115,9 @@ public:
     std::vector<Item*> slots;
     Item output;
   };
-  
+
   std::vector<Recipe*> recipes;
-  bool addRecipe(int width, int height, std::vector<Item*> inputrecipe, 
+  bool addRecipe(int width, int height, std::vector<Item*> inputrecipe,
                  int outputCount, int16_t outputType, int16_t outputHealth);
   bool readRecipe(std::string recipeFile);
 
@@ -118,7 +127,7 @@ public:
   {
     std::vector<Recipe*>::iterator it_a = recipes.begin();
     std::vector<Recipe*>::iterator it_b = recipes.end();
-    for(;it_a!=it_b;++it_a)
+    for(; it_a != it_b; ++it_a)
     {
       delete *it_a;
     }
@@ -126,32 +135,32 @@ public:
   }
 
   // Open chest/workbench/furnace inventories
-  std::vector<OpenInventory *> openWorkbenches;
-  std::vector<OpenInventory *> openChests;
-  std::vector<OpenInventory *> openFurnaces;
+  std::vector<OpenInventory*> openWorkbenches;
+  std::vector<OpenInventory*> openChests;
+  std::vector<OpenInventory*> openFurnaces;
 
   bool canBeArmour(int slot, int type);
-  bool onwindowOpen(User *user,int8_t type, int32_t x, int32_t y, int32_t z);
-  bool onwindowClose(User *user,int8_t type,int32_t x, int32_t y, int32_t z);
+  bool onwindowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_t z);
+  bool onwindowClose(User* user, int8_t type, int32_t x, int32_t y, int32_t z);
 
 
-  bool windowOpen(User *user, int8_t type, int32_t x, int32_t y, int32_t z);
+  bool windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_t z);
 
-  bool windowClick(User *user,int8_t windowID, int16_t slot, int8_t rightClick, int16_t actionNumber, int16_t itemID, int8_t itemCount,int16_t itemUses);
+  bool windowClick(User* user, int8_t windowID, int16_t slot, int8_t rightClick, int16_t actionNumber, int16_t itemID, int8_t itemCount, int16_t itemUses);
 
-  bool windowClose(User *user,int8_t windowID);
-    
+  bool windowClose(User* user, int8_t windowID);
+
   //Check inventory for space
-  bool isSpace(User *user, int16_t itemID, char count);
+  bool isSpace(User* user, int16_t itemID, char count);
 
   //Add items to inventory (pickups)
-  bool addItems(User *user, int16_t itemID, int16_t count, int16_t health);
+  bool addItems(User* user, int16_t itemID, int16_t count, int16_t health);
 
-  bool doCraft(Item *slots, int8_t width, int8_t height);
+  bool doCraft(Item* slots, int8_t width, int8_t height);
 
-  bool setSlot(User *user, int8_t windowID, int16_t slot, int16_t itemID, int8_t count, int16_t health);
+  bool setSlot(User* user, int8_t windowID, int16_t slot, int16_t itemID, int8_t count, int16_t health);
 
-  int16_t itemHealth(int16_t itemID, int8_t block, bool &rightUse);
+  int16_t itemHealth(int16_t itemID, int8_t block, bool& rightUse);
 
 };
 

@@ -33,11 +33,11 @@
 #include <set>
 
 #ifdef WIN32
-  // This is needed for event to work on Windows.
-  #include <Winsock2.h>
+// This is needed for event to work on Windows.
+#include <Winsock2.h>
 #else
-  //Do not remove!! Required on Debian
-  #include <sys/types.h>
+//Do not remove!! Required on Debian
+#include <sys/types.h>
 #endif
 #include <event.h>
 
@@ -72,7 +72,7 @@ public:
   {
     static Mineserver* m_instance;
 
-    if (!m_instance)
+    if(!m_instance)
     {
       m_instance = new Mineserver;
     }
@@ -84,7 +84,10 @@ public:
   bool stop();
   event_base* getEventBase();
 
-  std::vector<User*>& users() { return m_users; }
+  std::vector<User*>& users()
+  {
+    return m_users;
+  }
 
   struct event m_listenEvent;
   int m_socketlisten;
@@ -95,33 +98,84 @@ public:
   bool m_only_helmets;
 
   Map* map(int n);
-  void setMap(Map* map,int n=0);
+  void setMap(Map* map, int n = 0);
   int mapCount();
 
-  Chat* chat() const { return m_chat; }
-  void setChat(Chat* chat) { m_chat = chat; }
-  Mobs* mobs() const { return m_mobs; }
-  Plugin* plugin() const { return m_plugin; }
-  void setPlugin(Plugin* plugin) { m_plugin = plugin; }
-  Screen* screen() const { return m_screen; }
-  void setScreen(Screen* screen) { m_screen = screen; }
+  Chat* chat() const
+  {
+    return m_chat;
+  }
+  void setChat(Chat* chat)
+  {
+    m_chat = chat;
+  }
+  Mobs* mobs() const
+  {
+    return m_mobs;
+  }
+  Plugin* plugin() const
+  {
+    return m_plugin;
+  }
+  void setPlugin(Plugin* plugin)
+  {
+    m_plugin = plugin;
+  }
+  Screen* screen() const
+  {
+    return m_screen;
+  }
+  void setScreen(Screen* screen)
+  {
+    m_screen = screen;
+  }
   Physics* physics(int n);
-  Config* config() const { return m_config; }
-  void setConfig(Config* config) { m_config = config; }
-  FurnaceManager* furnaceManager() const { return m_furnaceManager; }
-  void setFurnaceManager(FurnaceManager* furnaceManager) { m_furnaceManager = furnaceManager; }
-  PacketHandler* packetHandler() const { return m_packetHandler; }
-  void setPacketHandler(PacketHandler* packetHandler) { m_packetHandler = packetHandler; }
+  Config* config() const
+  {
+    return m_config;
+  }
+  void setConfig(Config* config)
+  {
+    m_config = config;
+  }
+  FurnaceManager* furnaceManager() const
+  {
+    return m_furnaceManager;
+  }
+  void setFurnaceManager(FurnaceManager* furnaceManager)
+  {
+    m_furnaceManager = furnaceManager;
+  }
+  PacketHandler* packetHandler() const
+  {
+    return m_packetHandler;
+  }
+  void setPacketHandler(PacketHandler* packetHandler)
+  {
+    m_packetHandler = packetHandler;
+  }
   MapGen* mapGen(int n);
-  Logger* logger() const { return m_logger; }
-  void setLogger(Logger* logger) { m_logger = logger; }
-  Inventory* inventory() const { return m_inventory; }
-  void setInventory(Inventory* inventory) { m_inventory = m_inventory; }
+  Logger* logger() const
+  {
+    return m_logger;
+  }
+  void setLogger(Logger* logger)
+  {
+    m_logger = logger;
+  }
+  Inventory* inventory() const
+  {
+    return m_inventory;
+  }
+  void setInventory(Inventory* inventory)
+  {
+    m_inventory = m_inventory;
+  }
 
   void saveAllPlayers();
   void saveAll();
 
-  void parseCommandLine(int argc, char *argv[]);
+  void parseCommandLine(int argc, char* argv[]);
 
 private:
   Mineserver();

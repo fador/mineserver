@@ -42,7 +42,7 @@ enum
 {
   BLOCK_STATUS_STARTED_DIGGING,
   BLOCK_STATUS_DIGGING,
-//  BLOCK_STATUS_STOPPED_DIGGING,
+  //  BLOCK_STATUS_STOPPED_DIGGING,
   BLOCK_STATUS_BLOCK_BROKEN,
   BLOCK_STATUS_PICKUP_SPAWN = 0x4
 };
@@ -68,7 +68,7 @@ enum
 // Direction
 enum Direction
 {
-   BLOCK_BOTTOM, BLOCK_NORTH, BLOCK_SOUTH, BLOCK_EAST, BLOCK_WEST, BLOCK_TOP
+  BLOCK_BOTTOM, BLOCK_NORTH, BLOCK_SOUTH, BLOCK_EAST, BLOCK_WEST, BLOCK_TOP
 };
 
 // Blocks
@@ -93,7 +93,7 @@ enum Block
   BLOCK_REDSTONE_ORE, BLOCK_GLOWING_REDSTONE_ORE, BLOCK_REDSTONE_TORCH_OFF,
   BLOCK_REDSTONE_TORCH_ON, BLOCK_STONE_BUTTON, BLOCK_SNOW, BLOCK_ICE, BLOCK_SNOW_BLOCK,
   BLOCK_CACTUS, BLOCK_CLAY, BLOCK_REED, BLOCK_JUKEBOX, BLOCK_FENCE, BLOCK_PUMPKIN,
-  BLOCK_NETHERSTONE, BLOCK_SLOW_SAND, BLOCK_GLOWSTONE, BLOCK_PORTAL, BLOCK_JACK_O_LANTERN,BLOCK_CAKE
+  BLOCK_NETHERSTONE, BLOCK_SLOW_SAND, BLOCK_GLOWSTONE, BLOCK_PORTAL, BLOCK_JACK_O_LANTERN, BLOCK_CAKE
 };
 
 // Items
@@ -176,12 +176,12 @@ struct Drop
   uint8_t count;
   Drop* alt_drop;
 
-  Drop() : item_id(0),probability(0),count(0),alt_drop(NULL) {}
-  Drop(uint16_t _item_id, uint32_t _probability, uint8_t _count, Drop* _alt_drop=NULL) : item_id(_item_id),probability(_probability),count(_count),alt_drop(_alt_drop) {}
+  Drop() : item_id(0), probability(0), count(0), alt_drop(NULL) {}
+  Drop(uint16_t _item_id, uint32_t _probability, uint8_t _count, Drop* _alt_drop = NULL) : item_id(_item_id), probability(_probability), count(_count), alt_drop(_alt_drop) {}
 
   ~Drop()
   {
-    if (alt_drop != NULL)
+    if(alt_drop != NULL)
     {
       delete alt_drop;
     }

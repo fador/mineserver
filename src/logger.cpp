@@ -47,7 +47,7 @@ void Logger::log(const std::string& msg, const std::string& file, int line)
 
 void Logger::log(LogType::LogType type, const std::string& source, const std::string& message)
 {
-  (static_cast<Hook3<bool,int,const char*,const char*>*>(Mineserver::get()->plugin()->getHook("LogPost")))->doAll((int)type, source.c_str(), message.c_str());
+  (static_cast<Hook3<bool, int, const char*, const char*>*>(Mineserver::get()->plugin()->getHook("LogPost")))->doAll((int)type, source.c_str(), message.c_str());
 }
 
 

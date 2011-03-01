@@ -31,10 +31,10 @@
 #include <vector>
 
 #ifdef WIN32
-  // This is needed for event to work on Windows.
-  #include <winsock2.h>
+// This is needed for event to work on Windows.
+#include <winsock2.h>
 #else
-  #include <sys/types.h>
+#include <sys/types.h>
 #endif
 #include <event.h>
 
@@ -106,7 +106,7 @@ public:
   bool changeNick(std::string _nick);
   void checkEnvironmentDamage();
   bool updatePos(double x, double y, double z, double stance);
-  bool updatePosM(double x, double y, double z, int map,double stance);
+  bool updatePosM(double x, double y, double z, int map, double stance);
   /** Check if the user is standing on this block */
   bool checkOnBlock(int32_t x, int8_t y, int32_t z);
   bool updateLook(float yaw, float pitch);
@@ -158,12 +158,12 @@ public:
   bool delKnown(int x, int z);
 
   //Push queued map data to client
-  bool pushMap(bool login=false);
+  bool pushMap(bool login = false);
 
   //Push remove queued map data to client
   bool popMap();
 
-  bool teleport(double x, double y, double z, int map =-1);
+  bool teleport(double x, double y, double z, int map = -1);
   bool spawnUser(int x, int y, int z);
   bool spawnOthers();
   bool sethealth(int userHealth);
@@ -181,7 +181,7 @@ public:
 
   bool withinViewDistance(int a, int b)
   {
-    return a > b ? (a-b)<viewDistance : (b-a)<viewDistance;
+    return a > b ? (a - b) < viewDistance : (b - a) < viewDistance;
   }
 
   struct event* GetEvent();
