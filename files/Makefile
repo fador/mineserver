@@ -6,7 +6,7 @@ FILES = commands.cfg \
         permissions.txt \
         roles.txt \
         rules.txt \
-        whitelist.txt \
+        whitelist.txt 
 
 DIRS = recipes
 
@@ -16,5 +16,5 @@ INSTALL_DIR = ../bin/
 
 install: $(FILES)
 	mkdir -p $(INSTALL_DIR)
-	cp $(FILES) $(INSTALL_DIR)
-	cp -r $(DIRS) $(INSTALL_DIR) 
+	cp -n $(FILES) $(INSTALL_DIR)
+	cp -nr $(DIRS) $(INSTALL_DIR) 
