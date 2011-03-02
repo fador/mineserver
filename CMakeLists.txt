@@ -234,6 +234,16 @@ foreach(p ${mineserver_plugins})
   set_target_properties(${p} PROPERTIES PREFIX "")
 endforeach()
 
+# copy configs for local usage
+foreach(path ${mineserver_configs})
+  # destination doesn't have files/ prefix
+  string(REGEX REPLACE "^files/" "${EXECUTABLE_OUTPUT_PATH}/" dest "${path}")
+  if(NOT EXISTS ${dest})
+    message(STATUS "NOT EXISTS: ${dest}")
+    file(INSTALL ${path} DESTINATION ${EXECUTABLE_OUTPUT_PATH})
+  endif()
+endforeach()
+
 
 #
 # install
