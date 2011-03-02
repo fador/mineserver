@@ -72,7 +72,7 @@ Depends on (and tested with):
  * Download and extract source or use `git clone git://github.com/fador/mineserver.git`
  * Go to mineserver directory
  * Run `cmake .`
- * Run `make` for Debian/Ubuntu
+ * Run `make all install`
  * Run server with `cd bin && ./mineserver`
 
 **Compiling using FreeBSD / PCBSD (cmake & gmake & g++):**
