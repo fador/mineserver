@@ -1,0 +1,22 @@
+//
+// defines provided by configuration (cmake)
+//
+
+#ifndef _CONFIGURE_H
+#define _CONFIGURE_H
+
+
+// prefix and directory names
+#cmakedefine CONFIG_PREFIX    "@CONFIG_PREFIX@"
+#cmakedefine CONFIG_DIR_BIN   "@CONFIG_DIR_BIN@"
+#cmakedefine CONFIG_DIR_ETC   "@CONFIG_DIR_ETC@"
+#cmakedefine CONFIG_DIR_SHARE "@CONFIG_DIR_SHARE@"
+
+// paths
+// NOTE: these paths are absolute only when prefix is absolute path!
+#define CONFIG_PATH_BIN   CONFIG_PREFIX""CONFIG_DIR_BIN
+#define CONFIG_PATH_ETC   CONFIG_PREFIX""CONFIG_DIR_ETC
+#define CONFIG_PATH_SHARE CONFIG_PREFIX""CONFIG_DIR_SHARE
+
+
+#endif // _CONFIGURE_H

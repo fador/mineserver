@@ -13,6 +13,8 @@ CPackSourceConfig.cmake
 cmake_install.cmake
 # only generated one for now
 /Makefile
+# generated from configure.h.in
+configure.h
 
 #Test world
 mineserver/world

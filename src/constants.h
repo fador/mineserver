@@ -33,6 +33,9 @@
 #include <stdint.h>
 #include <iostream>
 
+// configuration from build system
+#include "configure.h"
+
 //
 // Mineserver constants
 //

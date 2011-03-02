@@ -202,9 +202,13 @@ int16_t Item::itemHealth(int item)
 }
 
 
+const std::string RECIPE_PATH = std::string(CONFIG_PATH_SHARE) + "recipes/";
+const std::string RECIPE_SUFFIX = ".recipe";
+const std::string RECIPE_LIST = "ENABLED_RECIPES.cfg";
+
 Inventory::Inventory()
 {
-  std::ifstream ifs("recipes/ENABLED_RECIPES.cfg");
+  std::ifstream ifs(std::string(RECIPE_PATH + RECIPE_LIST).c_str());
 
   if (ifs.fail())
   {
@@ -229,13 +233,13 @@ Inventory::Inventory()
       continue;
     }
 
-    receiptFiles.push_back(temp + ".recipe");
+    receiptFiles.push_back(temp + RECIPE_SUFFIX);
   }
   ifs.close();
 
   for (unsigned int i = 0; i < receiptFiles.size(); i++)
   {
-    readRecipe("recipes/" + receiptFiles[i]);
+    readRecipe(RECIPE_PATH + receiptFiles[i]);
   }
 }
 

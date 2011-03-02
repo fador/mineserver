@@ -10,9 +10,37 @@ set( ${PROJECT_NAME}_PATCH_LEVEL 15 )
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 
+#
+# Configure paths
+#
+set(CONFIG_DIR_BIN   bin/)
+set(CONFIG_DIR_ETC   etc/)
+set(CONFIG_DIR_SHARE share/)
+# local build by default
+set(CONFIG_LOCAL True)
+
+if(CONFIG_LOCAL)
+  message(STATUS "CONFIG_LOCAL is set -- assuming local build")
+  set(CONFIG_PREFIX    "../" CACHE STRING "CONFIG_PREFIX" FORCE)
+  set(CONFIG_DIR_BIN   bin/)
+  set(CONFIG_DIR_ETC   bin/)
+  set(CONFIG_DIR_SHARE files/)
+else()
+  message(STATUS "CONFIG_LOCAL is not set -- assuming installation build")
+  set(CONFIG_PREFIX    ${CMAKE_INSTALL_PREFIX})
+endif()
+set(CMAKE_INSTALL_PREFIX ${CONFIG_PREFIX})
+
+# preprocess configuration file
+configure_file(${PROJECT_SOURCE_DIR}/src/configure.h.in
+  ${PROJECT_SOURCE_DIR}/src/configure.h
+)
+
+
 # Output paths
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+
 
 # Set compiler specific build flags
 IF (UNIX)
