@@ -4,7 +4,7 @@
 You can find the core team from #mineserver @ irc.esper.net
 Also mail to developers@mineserver.be will reach us.
 
-    Copyright (c) 2010, The Mineserver Project
+    Copyright (c) 2010-2011, The Mineserver Project
 
 Custom Minecraft Beta server software written in C++.
 
@@ -15,7 +15,7 @@ Server still lacks some features and might have some serious bugs.
 **Tested to build on**
 
  * Windows (VS2010 and VS2008 projects included)
- * Linux (Makefile included)
+ * Linux
  * Mac OS X
  * FreeBSD / PCBSD
 
@@ -63,11 +63,11 @@ Depends on (and tested with):
       on [krono's homebrew fork](http://github.com/krono/homebrew).
 
     So for homebrew do
-    
+
     `brew install libevent libnoise`
 
 
-**Compiling using linux (cmake & make & gcc):**
+**Compiling using Linux (cmake & make & g++):**
 
  * Download and extract source or use `git clone git://github.com/fador/mineserver.git`
  * Go to mineserver directory
@@ -75,7 +75,7 @@ Depends on (and tested with):
  * Run `make all install` for Debian/Ubuntu
  * Run server with `cd bin && ./mineserver`
 
-**Compiling using FreeBSD / PCBSD (cmake & gmake & g++):** 
+**Compiling using FreeBSD / PCBSD (cmake & gmake & g++):**
 
  * Download and extract source or use `git clone git://github.com/fador/mineserver.git`
  * Go to mineserver directory
@@ -83,7 +83,7 @@ Depends on (and tested with):
  * Run `gmake all install`
  * Run server with `cd bin && ./mineserver`
 
-**Compiling using windows (VS2010/VS2008): (Might be outdated)**
+**Compiling using Windows (VS2010/VS2008): (Might be outdated)**
 
  * Download and compile [zlib](http://www.zlib.org) or use [pre-built binaries](http://www.winimage.com/zLibDll/index.html)
  * Add zlib libraries to project (zlibstat.lib or zlibwapi.lib which requires also zlibwapi.dll in the same dir with the executable)
