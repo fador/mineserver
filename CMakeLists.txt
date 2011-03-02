@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(Mineserver)
+project(mineserver)
 cmake_policy(SET CMP0003 NEW)
 
 # project version
@@ -24,7 +24,6 @@ IF (CMAKE_SYSTEM_NAME MATCHES Linux)
 ENDIF()
 
 
-
 IF (MSVC_IDE)
   set(PLATFORM_C_FLAGS "/D \"WIN32\" /D \"_WINDOWS\" /fp:fast /EHsc")
   set(CMAKE_CXX_FLAGS "${PLATFORM_C_FLAGS}")
@@ -32,6 +31,10 @@ IF (MSVC_IDE)
   set(CMAKE_CXX_FLAGS_DEBUG "${PLATFORM_C_FLAGS} /MDd")
 ENDIF (MSVC_IDE)
 
+
+#
+# mineserver sources
+#
 set(mineserver_source
   src/lighting.cpp
   src/logger.cpp
@@ -87,8 +90,12 @@ set(mineserver_source
   src/mob.cpp
   src/worldgen/biomegen.cpp
 )
-source_group("Mineserver" FILES ${mineserver_source})
+source_group(${PROJECT_NAME} FILES ${mineserver_source})
 
+
+#
+# plugin sources
+#
 set(mineserver_plugins
   commands
   filelog
@@ -104,19 +111,15 @@ set(mineserver_plugins
 set(commands_source
   plugins/commands/commands.cpp
 )
-
 set(filelog_source
   plugins/filelog/filelog.cpp
 )
-
 set(nBreak_source
   plugins/nBreak/nBreak.cpp
 )
-
 set(nether_source
   plugins/nether/nether.cpp
 )
-
 set(binlog_source
   plugins/binlog/binlog.cpp
 )
@@ -133,13 +136,16 @@ set(passiveMobs_source
   plugins/passiveMobs/passiveMobs.cpp
 )
 
+
 add_definitions(-DFADOR_PLUGIN=1)
 
 include_directories(src/)
 
-set(dependency_error False)
 
+#
 # find libraries
+#
+set(dependency_error False)
 
 find_package(ZLIB REQUIRED)
 if (NOT ZLIB_FOUND)
@@ -147,13 +153,11 @@ if (NOT ZLIB_FOUND)
   set(dependency_error True)
 endif()
 
-
 #find_package(Lua51)
 #if (NOT LUA51_FOUND)
 #  set(errors "${errors}\t\t- LUA 5.1\n")
 #  set(dependency_error True)
 #endif()
-
 
 find_package(Event REQUIRED)
 if (NOT EVENT_FOUND)
@@ -181,32 +185,39 @@ if (WINDOWS)
   set(exe "WIN32")
 endif ()
 
-if (NOT dependency_error)
-
-  foreach(p ${mineserver_plugins})
-    message(STATUS "Plugin target added: ${p}")
-    add_library(${p} SHARED ${${p}_source})
-    set_target_properties(${p} PROPERTIES PREFIX "")
-  endforeach()
-
-  include_directories(${ZLIB_INCLUDE_DIR})
-#  include_directories(${LUA_INCLUDE_DIR})
-  include_directories(${EVENT_INCLUDE_DIR})
-  include_directories(${NOISE_INCLUDE_DIR})
-  include_directories(${CURSES_INCLUDE_DIR})
-
-  add_executable(mineserver ${exe} ${mineserver_source})
-
-  target_link_libraries(mineserver ${ZLIB_LIBRARY})
-#  target_link_libraries(mineserver ${LUA_LIBRARY})
-  target_link_libraries(mineserver ${EVENT_LIBRARY})
-  target_link_libraries(mineserver ${NOISE_LIBRARY})
-  target_link_libraries(mineserver ${CURSES_LIBRARY})
-else()
+if (dependency_error)
   message(FATAL_ERROR "\n\tNot all dependencies could be found:\n${errors}\n After installing them please rerun cmake.\n")
 endif()
 
-set(CPACK_PACKAGE_NAME "Mineserver")
+
+#
+# build targets
+#
+include_directories(${ZLIB_INCLUDE_DIR})
+#include_directories(${LUA_INCLUDE_DIR})
+include_directories(${EVENT_INCLUDE_DIR})
+include_directories(${NOISE_INCLUDE_DIR})
+include_directories(${CURSES_INCLUDE_DIR})
+
+add_executable(mineserver ${exe} ${mineserver_source})
+
+target_link_libraries(mineserver ${ZLIB_LIBRARY})
+#target_link_libraries(mineserver ${LUA_LIBRARY})
+target_link_libraries(mineserver ${EVENT_LIBRARY})
+target_link_libraries(mineserver ${NOISE_LIBRARY})
+target_link_libraries(mineserver ${CURSES_LIBRARY})
+
+# plugins
+foreach(p ${mineserver_plugins})
+  message(STATUS "Plugin target added: ${p}")
+  add_library(${p} SHARED ${${p}_source})
+  set_target_properties(${p} PROPERTIES PREFIX "")
+endforeach()
+
+
+#
+# cpack
+#
 set(CPACK_PACKAGE_VENDOR "The Mineserver Project")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Mineserver Developers <developers@mineserver.be>")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Mineserver - C++ Minecraft server software")
