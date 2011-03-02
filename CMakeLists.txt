@@ -137,6 +137,26 @@ set(passiveMobs_source
 )
 
 
+#
+# project files
+#
+set(mineserver_configs
+  files/banned.txt
+  files/commands.cfg
+  files/config.cfg
+  files/item_alias.cfg
+  files/motd.txt
+  files/permissions.txt
+  files/roles.txt
+  files/rules.txt
+  files/whitelist.txt
+)
+
+set(mineserver_dirs
+  files/recipes
+)
+
+
 add_definitions(-DFADOR_PLUGIN=1)
 
 include_directories(src/)
@@ -213,6 +233,22 @@ foreach(p ${mineserver_plugins})
   add_library(${p} SHARED ${${p}_source})
   set_target_properties(${p} PROPERTIES PREFIX "")
 endforeach()
+
+
+#
+# install
+#
+install(TARGETS mineserver ${mineserver_plugins}
+  RUNTIME DESTINATION bin/
+  LIBRARY DESTINATION share/${PROJECT_NAME}/plugins/
+)
+
+install(FILES ${mineserver_configs}
+  DESTINATION etc/${PROJECT_NAME}/
+)
+install(DIRECTORY ${mineserver_dirs}
+  DESTINATION share/${PROJECT_NAME}/
+)
 
 
 #
