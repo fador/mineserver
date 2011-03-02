@@ -239,7 +239,6 @@ foreach(path ${mineserver_configs})
   # destination doesn't have files/ prefix
   string(REGEX REPLACE "^files/" "${EXECUTABLE_OUTPUT_PATH}/" dest "${path}")
   if(NOT EXISTS ${dest})
-    message(STATUS "NOT EXISTS: ${dest}")
     file(INSTALL ${path} DESTINATION ${EXECUTABLE_OUTPUT_PATH})
   endif()
 endforeach()
