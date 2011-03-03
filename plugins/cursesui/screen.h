@@ -38,6 +38,7 @@
 
 #include <string>
 #include <vector>
+#include <stack>
 
 #include "../../src/logtype.h"
 enum
@@ -52,7 +53,7 @@ enum
   TEXT_COLOR_INVERSE
 };
 
-#define COMMAND_HISTORY_SIZE 40
+#define COMMAND_HISTORY_SIZE 50
 
 class CursesScreen
 {
@@ -68,21 +69,32 @@ public:
   std::string getCommand();
 
 private:
-  WINDOW *title;
-  WINDOW *generalLog;
-  WINDOW *chatLog;
-  WINDOW *playerList;
+  WINDOW *titleWin;
+  WINDOW *logWin;
+  WINDOW *chatWin;
+  WINDOW *commandWin;
+  WINDOW *playerWin;
 
   std::vector<std::string> usernames;
+  
+  std::string version;
+  
+  std::string command;
+  std::string commandBuf;
+  std::stack<std::string> prevCommands;
+  std::stack<std::string> nextCommands;
 
-  unsigned int commandX;
-  int currentCommandHistoryIndex;
-  int nextCommandHistoryIndex;
 
-  std::string currentCommand;
-  std::string commandHistory[COMMAND_HISTORY_SIZE];
+  
+  /* Helper funcions */
+  std::string prevCommand();
+  std::string nextCommand();
+  void addCommand(std::string str);
 
-  static const int commandHistorySize = COMMAND_HISTORY_SIZE;
+  /* Screen Helpers */
+  void initWindows();
+  void redraw();
+  void redrawPlayerList();
 };
 
 #undef COMMAND_HISTORY_SIZE

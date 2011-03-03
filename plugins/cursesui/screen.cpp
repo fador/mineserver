@@ -35,6 +35,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <stack>
 
 // Constants
 #define PLUGIN_NAME "cursesui"
@@ -64,46 +65,53 @@ std::string currentTimestamp(bool seconds)
   return timeStamp;
 }
 
-void CursesScreen::init(std::string version)
+void CursesScreen::initWindows()
 {
-  initscr(); // Start NCurses
-  timeout(0); // Non blocking
-  //noecho();
-  echo();
-  refresh();
-
-  currentCommandHistoryIndex = 0;
-  nextCommandHistoryIndex = 0;
-  for (int i = 0; i < commandHistorySize; i++)
-  {
-    commandHistory[i].clear();
-  }
-
-  // Work out our dimensions - 7 for top row - 7 for bottom command row
+  // Work out our dimensions
   int titleHeight = 5;
-  int commandHeight = 5;
-  int logHeight = int((LINES - titleHeight - commandHeight) / 2);
-  int chatHeight = LINES - titleHeight - commandHeight - logHeight - 3;
+  int logBar = titleHeight - 1;
+  int commandHeight = 1;
+  int commandBar = LINES - commandHeight - 1;
+  int helpBar = commandBar - 1;
+  int chatBar = (commandBar - logBar)/2 + logBar + 1;
+  int logHeight = chatBar - logBar - 1;
+  int chatHeight = helpBar - chatBar - 1;
+  int playerWidth = 20;
+  int playerHeight = commandBar - logBar - 1;
   
   // Create our windows
-  title = createWindow(COLS, titleHeight, 0, 0);
-  generalLog = createWindow(COLS - 21, logHeight, 0, titleHeight);
-  chatLog = createWindow(COLS - 21, chatHeight, 0, logHeight + titleHeight + 1);
-  commandLog = createWindow(COLS, 5, 0, LINES - 5);  
-  playerList = createWindow(20, LINES - 14, COLS - 20, 5);
+  // CursesScreen::createWindow(int width, int height, int startx, int starty)
+  titleWin = createWindow(COLS, titleHeight, 0, 0);
+  logWin = createWindow(COLS - (playerWidth + 1),
+                        logHeight, 
+                        0, 
+                        logBar + 1);
+  chatWin = createWindow(COLS - (playerWidth + 1), 
+                         chatHeight, 
+                         0, 
+                         chatBar + 1);
+  playerWin = createWindow(playerWidth, 
+                           playerHeight, 
+                           COLS - playerWidth, 
+                           logBar + 1);
+  commandWin = createWindow(COLS, 
+                            commandHeight, 
+                            0, 
+                            commandBar + 1);  
 
+  
   // Make sure nothing waits for input
-  wtimeout(title, 0);
-  wtimeout(generalLog, 0);
-  wtimeout(chatLog, 0);
-  wtimeout(commandLog, 0);
-  wtimeout(playerList, 0);
-  nodelay(title, true);
-  nodelay(generalLog, true);
-  nodelay(chatLog, true);
-  nodelay(commandLog, true);
-  nodelay(playerList, true);
-
+  wtimeout(titleWin, 0);
+  wtimeout(logWin, 0);
+  wtimeout(chatWin, 0);
+  wtimeout(commandWin, 0);
+  wtimeout(playerWin, 0);
+  nodelay(titleWin, true);
+  nodelay(logWin, true);
+  nodelay(chatWin, true);
+  nodelay(commandWin, true);
+  nodelay(playerWin, true);
+  
   // Setup color if we haz it
   if (has_colors())
   {
@@ -118,42 +126,45 @@ void CursesScreen::init(std::string version)
     init_pair(TEXT_COLOR_WHITE, COLOR_WHITE, -1);
     init_pair(TEXT_COLOR_INVERSE, COLOR_BLACK, COLOR_WHITE);
     
-    wattron(title, COLOR_PAIR(TEXT_COLOR_CYAN));
-    wattron(playerList, COLOR_PAIR(TEXT_COLOR_WHITE));
-  }
-
+    wattron(titleWin, COLOR_PAIR(TEXT_COLOR_CYAN));
+    wattron(playerWin, COLOR_PAIR(TEXT_COLOR_WHITE));
+  }  
+  
   // Write our border lines on the regular stdscr
   attron(COLOR_PAIR(TEXT_COLOR_WHITE));
-
-  // TODO: These mvaddch calls are cast to void to avoid an unused return value
-  // warning in clang. If there's a better way to do it, feel free to change
-  // things.
-
-  // Top row
+  
+  /* Draw dividers */  
+  /* These mvaddch calls are cast to void to avoid an unused return value
+     warning in clang. If there's a better way to do it, feel free to change
+     things. */
+  // log bar
   for (int x = 0; x < COLS; x++)
-    (void)mvaddch(titleHeight - 1, x, '=');
+    (void)mvaddch(logBar, x, '=');
 
-  // Middle row
-  for(int x = 0; x < COLS - 21; x++)
-    (void)mvaddch(logHeight + titleHeight, x, '=');
+  // chat bar
+  for(int x = 0; x < COLS - (playerWidth + 1); x++)
+    (void)mvaddch(chatBar, x, '=');
 
-  // Bottom row
+  // help bar
+  const char* helpStr = "Help:/help History:<UP>|<DOWN> Delete:<BACKSACE> CLEAR:<HOME>";
+  mvaddstr(helpBar, 0, helpStr);
+
+  // command bar
   for (int x = 0; x < COLS; x++)
-    (void)mvaddch((logHeight + chatHeight + titleHeight + 1), x, '=');
+    (void)mvaddch(commandBar, x, '=');
 
-  // Far column divider
-  for (int y = 5; y < (logHeight + chatHeight + titleHeight + 1); y++)
-    (void)mvaddch(y, COLS - 21, '|');
+  // playerlist column divider
+  for (int y = logBar + 1; y < commandBar; y++)
+    (void)mvaddch(y, COLS - (playerWidth + 1), '|');
 
   attroff(COLOR_PAIR(TEXT_COLOR_MAGENTA));
   
   // Write the window labels
   attron(COLOR_PAIR(TEXT_COLOR_WHITE));
   attron(WA_BOLD);
-  mvprintw(titleHeight - 1, 2, " Log ");
-  mvprintw(titleHeight - 1, COLS - 15, " Players ");
-  mvprintw(logHeight + titleHeight, 2, " Chat ");
-  mvprintw((logHeight + chatHeight + titleHeight + 1), 2, " Command History ");
+  mvprintw(logBar, 2, " Log ");
+  mvprintw(logBar, COLS - 15, " Players ");
+  mvprintw(chatBar, 2, " Chat ");
   attroff(COLOR_PAIR(TEXT_COLOR_WHITE));
   attroff(WA_BOLD);
   refresh();
@@ -164,167 +175,164 @@ void CursesScreen::init(std::string version)
   log(LogType::LOG_INFO, "Title", "/ /\\/\\ \\ | | | |  __|__ \\  __/ |   \\ V /  __/ |   ");
   log(LogType::LOG_INFO, "Title", "\\/    \\/_|_| |_|\\___|___/\\___|_|    \\_/ \\___|_|  ");
 
-  wmove(title, 3, 50);
-  wattron(title, COLOR_PAIR(TEXT_COLOR_WHITE));
-  wprintw(title, ("v" + version).c_str());
-  wattroff(title, COLOR_PAIR(TEXT_COLOR_WHITE));
-  wrefresh(title);
+  wmove(titleWin, logBar - 1, 50);
+  wattron(titleWin, COLOR_PAIR(TEXT_COLOR_WHITE));
+  wprintw(titleWin, ("v"+this->version).c_str());
+  wattroff(titleWin, COLOR_PAIR(TEXT_COLOR_WHITE));
+  wrefresh(titleWin);
 
-  keypad(commandLog, true);
+  keypad(commandWin, true);
 
-  // Initalise playerlist
-  wclear(playerList);
-
-  // Now fill it up!
-  if(usernames.size() == 0) 
-  {
-    log(LogType::LOG_INFO, "Players", "No active players");
-  }
-
-  // Fill up the command window
-//  log(LOG_COMMAND, "");
-//  log(LOG_COMMAND, "");
-//  log(LOG_COMMAND, "");
-//  log(LOG_COMMAND, "");
-//  log(LOG_COMMAND, "");     
-
-  commandX = 0;
 }
 
+void CursesScreen::init(std::string version)
+{
+  this->version = version;
+  commandBuf = "";
+  
+  initscr(); // Start NCurses
+  timeout(0); // Non blocking
+  //noecho();
+  echo();
+  refresh();
+
+  CursesScreen::initWindows();
+  CursesScreen::redrawPlayerList();
+}
+
+void CursesScreen::redraw()
+{
+  timeout(0);
+  refresh();
+  CursesScreen::initWindows();
+  CursesScreen::redrawPlayerList();
+  
+  wclear(commandWin);
+  waddstr(commandWin, commandBuf.c_str());
+  wrefresh(commandWin);
+}
+
+std::string CursesScreen::prevCommand()
+{
+  std::string str = "";
+  if (prevCommands.size() > 0)
+  {
+    str = prevCommands.top();
+    prevCommands.pop();
+    nextCommands.push(str);
+  }
+  return str;
+}
+
+std::string CursesScreen::nextCommand()
+{
+  std::string str = "";
+  if (nextCommands.size() > 0)
+  {
+    str = nextCommands.top();
+    nextCommands.pop();
+    prevCommands.push(str);
+  }
+  return str;
+}
+
+void CursesScreen::addCommand(std::string str)
+{
+  while (!prevCommands.empty())
+  {
+    nextCommands.push(prevCommands.top());
+    prevCommands.pop();
+  }
+  nextCommands.push(str);
+}
+
+/* This is where the keyboard interactions are handled. */
 bool CursesScreen::hasCommand()
 {
-  int readchar;
   bool running = true;
+  std::string str = "";
+  int c;
 
-  // Get the chars in the buffer
-  wmove(commandLog, 4, commandX + 1);
-
-  do
-  {
-    readchar = wgetch(commandLog); // FIXME
-
-    // Add to our string buffer
-    if (readchar != ERR)
+  do{
+    c = wgetch(commandWin);
+    switch(c)
     {
-      if (readchar == '\b') // Backspace
-      {
-        if (!currentCommand.empty())
-        {
-          currentCommand.erase(commandX - 1, 1);
-          wdelch(commandLog);
-          --commandX;
-        }
-      }
-      else if (readchar == '\n')
-      {
+      case ERR:
+      case KEY_RIGHT:
+      case KEY_END:
         running = false;
-      }
-      else if (readchar == KEY_LEFT)
-      {
-        if (commandX > 0)
+        break;
+      case KEY_RESIZE:
+        CursesScreen::redraw();
+        wdeleteln(commandWin);
+        wclear(commandWin);
+        waddstr(commandWin, commandBuf.c_str());
+        running = false;
+        break;
+      case KEY_UP:
+      case KEY_PPAGE:
+        str = nextCommand();
+        wdeleteln(commandWin);
+        wclear(commandWin);
+        if (str == "")
         {
-          --commandX;
-        }
-      }
-      else if (readchar == KEY_RIGHT)
-      {
-        if ( commandX < currentCommand.size() )
-        {
-          ++commandX;
-        }
-      }
-      else if (readchar == KEY_DOWN)
-      {
-        // Get the next command in the history
-        currentCommandHistoryIndex = (currentCommandHistoryIndex + 1) % commandHistorySize;
-
-        if (currentCommandHistoryIndex == nextCommandHistoryIndex)
-        {
-          // At the start of the history
-          currentCommand = "";
-          if ((--currentCommandHistoryIndex) < 0)
-          {
-            currentCommandHistoryIndex += CursesScreen::commandHistorySize;
-          }
+          waddstr(commandWin, commandBuf.c_str());
         }
         else
         {
-          currentCommand = commandHistory[currentCommandHistoryIndex];
+          waddstr(commandWin, str.c_str());
+          commandBuf = str;
         }
-
-        // Render the command to the screen
-        wdeleteln(commandLog);
-        wmove(commandLog, 4, 1);
-        waddstr(commandLog, currentCommand.c_str());
-        commandX = currentCommand.size();
-      }
-      else if (readchar == KEY_UP)
-      {
-        // Get the previous command from the command history.
-        if (!commandHistory[currentCommandHistoryIndex].empty())
-        {
-          currentCommand = commandHistory[currentCommandHistoryIndex];
-        }
-
-        if (currentCommandHistoryIndex != nextCommandHistoryIndex)
-        {
-          // Set it up to go to the previous command next time.
-          currentCommandHistoryIndex = currentCommandHistoryIndex - 1;
-          if (currentCommandHistoryIndex < 0)
-          {
-            currentCommandHistoryIndex += CursesScreen::commandHistorySize;
-          }
-        }
-
-        if (!currentCommand.empty())
-        {
-          // Render the command to the screen.
-          wdeleteln(commandLog);
-          wmove(commandLog, 4, 1);
-          waddstr(commandLog, currentCommand.c_str());
-          commandX = currentCommand.size();
-        }
-      }
-      else
-      {
-        currentCommand += readchar;
-        ++commandX;
-      }
+        break;
+      case KEY_DOWN:
+      case KEY_NPAGE:
+        str = prevCommand();
+        wdeleteln(commandWin);
+        wclear(commandWin);
+        waddstr(commandWin, str.c_str());
+        commandBuf = str;
+        break;
+      case KEY_ENTER:
+      case '\n':
+      case '\r':
+        wdeleteln(commandWin);
+        wclear(commandWin);
+        command = commandBuf;
+        addCommand(commandBuf);
+        commandBuf = "";
+        return true;
+        break;
+      case KEY_HOME:
+        wdeleteln(commandWin);
+        wclear(commandWin);
+        commandBuf = "";
+        running = false;
+        break;
+      case KEY_BACKSPACE:
+      case KEY_LEFT:
+      case KEY_SDC:
+      case KEY_DC:
+      case '\b':
+        if (commandBuf.length() > 0)
+          commandBuf.erase(commandBuf.length()-1,1);
+        wdeleteln(commandWin);
+        wclear(commandWin);
+        waddstr(commandWin, commandBuf.c_str());
+        running = false;
+        break;
+      default:
+        commandBuf += c;
     }
-    else
-      running = false;
   } while(running);
 
-  //int crlfEntered = wgetnstr(commandLog, commandBuffer, 80);
-
-  // Check if we've got a full command waiting
-  if (readchar == '\n')//crlfEntered == OK)
-  {
-    wmove(commandLog, 3, commandX + 1);
-    waddstr(commandLog, currentCommand.substr(commandX).c_str());
-    return true;
-  }
-
-  wmove(commandLog, 4, commandX + 1);
-  wrefresh(commandLog);
   return false;
 }
 
 std::string CursesScreen::getCommand()
 {
-  // Get a copy of the current command, clear it and return the copy
-  std::string command = currentCommand;
-  currentCommand.clear();
-  commandX = 0;
-  if (!command.empty())
-  {
-    wmove(commandLog, 4, command.size() + 1);
-    log(LogType::LOG_INFO, "Command", "");
-    currentCommandHistoryIndex =  nextCommandHistoryIndex;
-    commandHistory[nextCommandHistoryIndex++] = command;
-    nextCommandHistoryIndex = nextCommandHistoryIndex % CursesScreen::commandHistorySize;    
-  }
-  return command;
+  std::string str = command;
+  command = "";
+  return str;
 }
 
 WINDOW* CursesScreen::createWindow(int width, int height, int startx, int starty)
@@ -332,7 +340,6 @@ WINDOW* CursesScreen::createWindow(int width, int height, int startx, int starty
   WINDOW *local_win;
 
   local_win = newwin(height, width, starty, startx);
-//  box(local_win, 0 , 0);    // Border the window    
   scrollok(local_win, 1);    // Fine to scroll
   wrefresh(local_win);  
 
@@ -364,40 +371,38 @@ void CursesScreen::destroyWindow(WINDOW *local_win)
 void CursesScreen::end()
 {
   // Kill our windows
-  destroyWindow(title);
-  destroyWindow(generalLog);
-  destroyWindow(chatLog);
-  destroyWindow(playerList);
-
+  destroyWindow(titleWin);
+  destroyWindow(logWin);
+  destroyWindow(chatWin);
+  destroyWindow(playerWin);
+  
   // Stop NCurses
   endwin();
 }
 
-/*void Screen::log(std::string message)
-{
-  // Default to general log
-  this->log(LOG_GENERAL, message);
-}*/
-
 void CursesScreen::log(LogType::LogType type, const std::string& source, const std::string& message)
 {
-  WINDOW *window = generalLog;
-
+  WINDOW *window;
+  
   if (source == "Chat")
   {
-    window = chatLog;
+    window = chatWin;
   }
   else if (source == "Command")
   {
-    window = commandLog;
+    window = commandWin;
   }
   else if (source == "Players")
   {
-    window = playerList;
+    window = playerWin;
   }
   else if (source == "Title")
   {
-    window = title;
+    window = titleWin;
+  }
+  else
+  {
+    window = logWin;
   }
 
   // Set the color
@@ -410,46 +415,23 @@ void CursesScreen::log(LogType::LogType type, const std::string& source, const s
   int x, y;
   getyx(window, y, x);
 
-/*
-  // Print the message to the correct window
-  if (window == chatLog)
+  if (type != LogType::LOG_ERROR && (window == chatWin || window == logWin))
   {
-    // Display the timestamp
-    waddstr(window, (currentTimestamp(false) + " ").c_str());
-
-    // Check for special messages
-    if (message.substr(0,3) == "[!]" || message.substr(0,3) == "[@]")    // Server or AdminChat message
-    {
-      wattron(window, COLOR_PAIR(TEXT_COLOR_RED));  
-      waddstr(window, message.substr(0,3).c_str());
-      wattroff(window, COLOR_PAIR(TEXT_COLOR_RED));  
-      if(message.substr(0,3) == "[!]") { wattron(window, COLOR_PAIR(TEXT_COLOR_GREEN)); }      
-      waddstr(window, (message.substr(3) + "\n").c_str());
-      if(message.substr(0,3) == "[!]") { wattroff(window, COLOR_PAIR(TEXT_COLOR_GREEN)); }          
-    }
-    else if (message.substr(0, 1) == "*") // Emotes
-    {
-      wattron(window, COLOR_PAIR(TEXT_COLOR_YELLOW));  
-      waddstr(window, (message + "\n").c_str());
-      wattroff(window, COLOR_PAIR(TEXT_COLOR_YELLOW));  
-    }
-    else // Regular chat
-    {
-       waddstr(window, (message + "\n").c_str());
-    }
-  }
-*/
-
-  if (type != LogType::LOG_ERROR && (window == chatLog || window == generalLog))
-  {
+    waddstr(window, "\n");
     wattron(window, WA_BOLD);
     waddstr(window, ("[" + currentTimestamp(true) + "] ").c_str());
     wattroff(window, WA_BOLD);
-    waddstr(window, (message + "\n").c_str());
+    waddstr(window, (message).c_str());
   }
-  else
+  else if (window == titleWin || window == playerWin)
   {
-    waddstr(window, (message + "\n").c_str());
+    waddstr(window, (message).c_str());
+    waddstr(window, "\n");
+  }
+  else 
+  {
+    waddstr(window, "\n");
+    waddstr(window, (message).c_str());
   }
     
   // Turn off color again
@@ -459,14 +441,30 @@ void CursesScreen::log(LogType::LogType type, const std::string& source, const s
   }
 
   wrefresh(window);  
-  
-//  wprintw(commandLog, "> ", 5, 0);
-//  wmove(commandLog, 5, 2);
-//  wrefresh(commandLog);
-  
 }
 
 #include <algorithm>
+
+void CursesScreen::redrawPlayerList()
+{
+  // Clear the playerlist
+  wclear(playerWin);
+
+  // Now fill it up!
+  if(usernames.size() == 0) 
+  {
+    log(LogType::LOG_INFO, "Players", "No active players");
+  }
+  else
+  {
+    for (std::vector<std::string>::const_iterator username = usernames.begin();
+         username != usernames.end();
+         ++username)
+    {
+      log(LogType::LOG_INFO, "Players", *username);
+    }
+  }
+}
 
 void CursesScreen::updatePlayerList(bool joining, const char *username)
 {
@@ -474,7 +472,8 @@ void CursesScreen::updatePlayerList(bool joining, const char *username)
   if (joining)
   {
     usernames.push_back(username);
-  } else
+  } 
+  else
   {
     std::vector<std::string>::iterator element = std::find(usernames.begin(), usernames.end(), std::string(username));
 
@@ -485,24 +484,7 @@ void CursesScreen::updatePlayerList(bool joining, const char *username)
   }
 
   // Redraw the list
-
-  // Clear the playerlist
-  wclear(playerList);
-
-  // Now fill it up!
-  if(usernames.size() == 0) 
-  {
-    log(LogType::LOG_INFO, "Players", "No active players");
-  }
-  else
-  {
-    for (std::vector<std::string>::const_iterator username = usernames.begin();
-      username != usernames.end();
-      ++username)
-    {
-      log(LogType::LOG_INFO, "Players", *username);
-    }
-  }
+  CursesScreen::redrawPlayerList();
 }
 
 bool logPost(int type, const char* source, const char* message)
@@ -560,5 +542,5 @@ PLUGIN_API_EXPORT void CALLCONVERSION cursesui_init(mineserver_pointer_struct* m
 PLUGIN_API_EXPORT void CALLCONVERSION cursesui_shutdown(void)
 {
   screen->end();
-  mineserver = NULL;
+  //mineserver = NULL;
 }
