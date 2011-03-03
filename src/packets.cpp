@@ -397,7 +397,17 @@ int PacketHandler::login_request(User* user)
       if(allow_access || (stringbuffer.size()>=3 && stringbuffer.find("\r\n\r\nYES",0) != std::string::npos))
       {
         LOG(INFO, "Packets","  Verified!");
-        user->sendLoginInfo();
+
+        char* kickMessage = NULL;
+        if ((static_cast<Hook2<bool, const char*, char**>*>(Mineserver::get()->plugin()->getHook("PlayerLoginPre")))->doUntilFalse(player.c_str(), &kickMessage))
+        {
+          user->kick(std::string(kickMessage));
+        }
+        else
+        {
+          user->sendLoginInfo();
+          (static_cast<Hook1<bool, const char*>*>(Mineserver::get()->plugin()->getHook("PlayerLoginPost")))->doAll(player.c_str());
+        }
       }
       else
       {
