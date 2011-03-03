@@ -122,50 +122,6 @@ source_group(${PROJECT_NAME} FILES ${mineserver_source})
 
 
 #
-# plugin sources
-#
-set(mineserver_plugins
-  commands
-  filelog
-  nBreak
-  nether
-  binlog
-  crapMobs
-  cursesui
-  flatpermissions
-  passiveMobs
-)
-
-set(commands_source
-  plugins/commands/commands.cpp
-)
-set(filelog_source
-  plugins/filelog/filelog.cpp
-)
-set(nBreak_source
-  plugins/nBreak/nBreak.cpp
-)
-set(nether_source
-  plugins/nether/nether.cpp
-)
-set(binlog_source
-  plugins/binlog/binlog.cpp
-)
-set(crapMobs_source
-  plugins/crapMobs/crapMobs.cpp
-)
-set(cursesui_source
-  plugins/cursesui/screen.cpp
-)
-set(flatpermissions_source
-  plugins/flatpermissions/flatpermissions.cpp
-)
-set(passiveMobs_source
-  plugins/passiveMobs/passiveMobs.cpp
-)
-
-
-#
 # project files
 #
 set(mineserver_configs
@@ -184,8 +140,6 @@ set(mineserver_dirs
   files/recipes
 )
 
-
-add_definitions(-DFADOR_PLUGIN=1)
 
 include_directories(src/)
 
@@ -225,9 +179,6 @@ if(NOISE_ON_DEBIANISH)
   add_definitions(-DLIBNOISE)
 endif()
 
-#Provides ncurses, too
-find_package(Curses)
-
 if (WINDOWS)
   # even if 64bit this is set
   set(exe "WIN32")
@@ -239,13 +190,18 @@ endif()
 
 
 #
+# subdirectories
+#
+add_subdirectory(plugins)
+
+
+#
 # build targets
 #
 include_directories(${ZLIB_INCLUDE_DIR})
 #include_directories(${LUA_INCLUDE_DIR})
 include_directories(${EVENT_INCLUDE_DIR})
 include_directories(${NOISE_INCLUDE_DIR})
-include_directories(${CURSES_INCLUDE_DIR})
 
 add_executable(mineserver ${exe} ${mineserver_source})
 
@@ -253,14 +209,6 @@ target_link_libraries(mineserver ${ZLIB_LIBRARY})
 #target_link_libraries(mineserver ${LUA_LIBRARY})
 target_link_libraries(mineserver ${EVENT_LIBRARY})
 target_link_libraries(mineserver ${NOISE_LIBRARY})
-target_link_libraries(mineserver ${CURSES_LIBRARY})
-
-# plugins
-foreach(p ${mineserver_plugins})
-  message(STATUS "Plugin target added: ${p}")
-  add_library(${p} SHARED ${${p}_source})
-  set_target_properties(${p} PROPERTIES PREFIX "")
-endforeach()
 
 # copy configs for local usage
 foreach(path ${mineserver_configs})
@@ -275,9 +223,8 @@ endforeach()
 #
 # install
 #
-install(TARGETS mineserver ${mineserver_plugins}
+install(TARGETS mineserver
   RUNTIME DESTINATION bin/
-  LIBRARY DESTINATION share/${PROJECT_NAME}/plugins/
 )
 
 install(FILES ${mineserver_configs}

@@ -7,7 +7,7 @@ Thumbs.db
 
 # CMake generated files
 CMakeCache.txt
-CMakeFiles/*
+CMakeFiles/
 CPackConfig.cmake
 CPackSourceConfig.cmake
 cmake_install.cmake
