@@ -198,6 +198,9 @@
     <ClCompile Include="..\src\worldgen\biomegen.cpp">
       <Filter>Source Files\worldgen</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\blocks\redstone.cpp">
+      <Filter>Source Files\blocks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\user.h">
@@ -373,6 +376,9 @@
     </ClInclude>
     <ClInclude Include="..\src\worldgen\biomegen.h">
       <Filter>Header Files\worldgen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\redstone.h">
+      <Filter>Header Files\blocks</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
