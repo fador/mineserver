@@ -42,7 +42,7 @@
 #include <dlfcn.h>
 #endif
 
-#include "delegate/delegate.hpp"
+//#include "delegate/delegate.hpp"
 //#include "constants.h"
 #include "tools.h"
 #include "user.h"
