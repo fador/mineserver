@@ -21,7 +21,7 @@ set(CONFIG_LOCAL True)
 
 if(CONFIG_LOCAL)
   message(STATUS "CONFIG_LOCAL is set -- assuming local build")
-  set(CONFIG_PREFIX    "../" CACHE STRING "CONFIG_PREFIX" FORCE)
+  set(CONFIG_PREFIX    "./" CACHE STRING "CONFIG_PREFIX" FORCE)
   set(CONFIG_DIR_BIN   bin/)
   set(CONFIG_DIR_ETC   bin/)
   set(CONFIG_DIR_SHARE files/)
