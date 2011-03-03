@@ -602,6 +602,13 @@ int PacketHandler::player_digging(User* user)
     return PACKET_OK;
   }
 
+  if (status == BLOCK_STATUS_STARTED_DIGGING && 
+     (block == BLOCK_SNOW || block == BLOCK_REED || block == BLOCK_TORCH
+     || block == BLOCK_TNT) )
+  {
+    status = BLOCK_STATUS_BLOCK_BROKEN;
+  }
+
   switch (status)
   {
   case BLOCK_STATUS_STARTED_DIGGING:
