@@ -56,6 +56,7 @@
 #include "blocks/blockfurnace.h"
 #include "blocks/workbench.h"
 #include "blocks/dyed.h"
+#include "blocks/redstone.h"
 
 #include "items/food.h"
 #include "items/projectile.h"
@@ -63,6 +64,8 @@
 void Plugin::init()
 {
   // Create Block* objects and put them away so we can delete them later
+  BlockRedstone* redstoneblock = new BlockRedstone();
+  BlockCB.push_back(redstoneblock);
   BlockDyed* dyedblock = new BlockDyed();
   BlockCB.push_back(dyedblock);
   BlockFalling* fallingblock = new BlockFalling();
@@ -99,6 +102,7 @@ void Plugin::init()
   BlockCB.push_back(workbenchblock);
   BlockDefault* defaultblock = new BlockDefault();
   BlockCB.push_back(defaultblock);
+  
 
   ItemFood* fooditem = new ItemFood();
   ItemCB.push_back(fooditem);

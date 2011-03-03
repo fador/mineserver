@@ -601,10 +601,11 @@ int PacketHandler::player_digging(User* user)
     blockD.revertBlock(user, x, y, z, user->pos.map);
     return PACKET_OK;
   }
-
+  
+  // Blocks that break with first hit
   if (status == BLOCK_STATUS_STARTED_DIGGING && 
      (block == BLOCK_SNOW || block == BLOCK_REED || block == BLOCK_TORCH
-     || block == BLOCK_TNT) )
+     || block == BLOCK_TNT || block == BLOCK_REDSTONE_WIRE) )
   {
     status = BLOCK_STATUS_BLOCK_BROKEN;
   }
