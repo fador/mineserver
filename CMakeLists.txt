@@ -15,6 +15,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_P
 #
 set(CONFIG_DIR_BIN   bin/)
 set(CONFIG_DIR_ETC   etc/)
+set(CONFIG_DIR_LIB   lib/)
 set(CONFIG_DIR_SHARE share/)
 # local build by default
 set(CONFIG_LOCAL True)
@@ -24,6 +25,7 @@ if(CONFIG_LOCAL)
   set(CONFIG_PREFIX    "./" CACHE STRING "CONFIG_PREFIX" FORCE)
   set(CONFIG_DIR_BIN   bin/)
   set(CONFIG_DIR_ETC   bin/)
+  set(CONFIG_DIR_LIB   bin/)
   set(CONFIG_DIR_SHARE files/)
 else()
   message(STATUS "CONFIG_LOCAL is not set -- assuming installation build")

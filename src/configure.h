@@ -1,5 +1,6 @@
 //
-// defines provided by configuration (cmake)
+// this is default configure.h for non-cmake builds
+// it will be overwritten by running cmake
 //
 
 #ifndef _CONFIGURE_H
@@ -7,11 +8,11 @@
 
 
 // prefix and directory names
-#cmakedefine CONFIG_PREFIX    "@CONFIG_PREFIX@"
-#cmakedefine CONFIG_DIR_BIN   "@CONFIG_DIR_BIN@"
-#cmakedefine CONFIG_DIR_ETC   "@CONFIG_DIR_ETC@"
-#cmakedefine CONFIG_DIR_LIB   "@CONFIG_DIR_LIB@"
-#cmakedefine CONFIG_DIR_SHARE "@CONFIG_DIR_SHARE@"
+#define CONFIG_PREFIX    "./"
+#define CONFIG_DIR_BIN   "bin/"
+#define CONFIG_DIR_ETC   "bin/"
+#define CONFIG_DIR_LIB   "bin/"
+#define CONFIG_DIR_SHARE "files/"
 
 // paths
 // NOTE: these paths are absolute only when prefix is absolute path!
