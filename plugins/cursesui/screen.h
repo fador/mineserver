@@ -53,8 +53,6 @@ enum
   TEXT_COLOR_INVERSE
 };
 
-#define COMMAND_HISTORY_SIZE 50
-
 class CursesScreen
 {
 public:
@@ -96,7 +94,5 @@ private:
   void redraw();
   void redrawPlayerList();
 };
-
-#undef COMMAND_HISTORY_SIZE
 
 #endif /* _CURSESSCREEN_H */
