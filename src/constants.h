@@ -45,7 +45,7 @@ enum
 {
   BLOCK_STATUS_STARTED_DIGGING,
   BLOCK_STATUS_DIGGING,
-  //  BLOCK_STATUS_STOPPED_DIGGING,
+  //BLOCK_STATUS_STOPPED_DIGGING,
   BLOCK_STATUS_BLOCK_BROKEN,
   BLOCK_STATUS_PICKUP_SPAWN = 0x4
 };
@@ -160,17 +160,11 @@ const char COMMENTPREFIX  = '#';
 // Configuration
 const std::string CONFIG_FILE = "config.cfg";
 
-/* Commands file
-const std::string COMMANDS_FILE    = "commands.cfg";
-const std::string COMMANDS_NAME_PREFIX = "cmd_";
-const std::string COMMANDS_CONTENT = "# This is default command permissions file. Add minimum permission rank after each command.";
-*/
-
 // PID file
 const std::string PID_FILE = "mineserver.pid";
 
 //
-// Blocks that drop special things!
+// Drops from blocks
 //
 struct Drop
 {

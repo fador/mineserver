@@ -51,6 +51,7 @@ bool BlockBasic::isBlockStackable(const uint8_t block)
   case BLOCK_TORCH:
   case BLOCK_REDSTONE_TORCH_OFF:
   case BLOCK_REDSTONE_TORCH_ON:
+  case BLOCK_REDSTONE_WIRE:
   case BLOCK_WATER:
   case BLOCK_STATIONARY_WATER:
   case BLOCK_LAVA:

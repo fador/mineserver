@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.6)
 project(mineserver)
 cmake_policy(SET CMP0003 NEW)
 
@@ -105,6 +105,7 @@ set(mineserver_source
   src/blocks/tracks.cpp
   src/blocks/falling.cpp
   src/blocks/liquid.cpp
+  src/blocks/redstone.cpp
   src/tools.cpp
   src/physics.cpp
   src/cliScreen.cpp
