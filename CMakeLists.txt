@@ -14,24 +14,17 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_P
 # Configure paths
 #
 set(CONFIG_DIR_BIN   bin/)
-set(CONFIG_DIR_ETC   etc/)
-set(CONFIG_DIR_LIB   lib/)
-set(CONFIG_DIR_SHARE share/)
-# local build by default
-set(CONFIG_LOCAL True)
-
-if(CONFIG_LOCAL)
+set(CONFIG_DIR_ETC   etc/${PROJECT_NAME}/)
+set(CONFIG_DIR_LIB   lib/${PROJECT_NAME}/)
+set(CONFIG_DIR_SHARE share/${PROJECT_NAME}/)
+if(WIN32)
   message(STATUS "CONFIG_LOCAL is set -- assuming local build")
-  set(CONFIG_PREFIX    "./" CACHE STRING "CONFIG_PREFIX" FORCE)
   set(CONFIG_DIR_BIN   bin/)
   set(CONFIG_DIR_ETC   bin/)
   set(CONFIG_DIR_LIB   bin/)
   set(CONFIG_DIR_SHARE files/)
-else()
-  message(STATUS "CONFIG_LOCAL is not set -- assuming installation build")
   set(CONFIG_PREFIX    ${CMAKE_INSTALL_PREFIX})
 endif()
-set(CMAKE_INSTALL_PREFIX ${CONFIG_PREFIX})
 
 # preprocess configuration file
 configure_file(${PROJECT_SOURCE_DIR}/src/configure.h.in
@@ -222,14 +215,14 @@ endforeach()
 # install
 #
 install(TARGETS mineserver
-  RUNTIME DESTINATION ${CONFIG_DIR_BIN}
+  RUNTIME DESTINATION ${CONFIG_DIR_BIN}/
 )
 
 install(FILES ${mineserver_configs}
-  DESTINATION ${CONFIG_DIR_ETC}/${PROJECT_NAME}/
+  DESTINATION ${CONFIG_DIR_ETC}/
 )
 install(DIRECTORY ${mineserver_dirs}
-  DESTINATION ${CONFIG_DIR_SHARE}/${PROJECT_NAME}/
+  DESTINATION ${CONFIG_DIR_SHARE}/
 )
 
 
