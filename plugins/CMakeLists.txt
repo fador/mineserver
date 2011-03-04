@@ -1,3 +1,9 @@
+cmake_minimum_required(VERSION 2.6)
+# forbid running cmake from this subdir
+if(PROJECT_NAME STREQUAL "Project")
+  message(FATAL_ERROR "\nplease run cmake from the project's parent directory\n")
+endif()
+
 #
 # plugin sources
 # RULES: each unique subdirectory is plugin name
