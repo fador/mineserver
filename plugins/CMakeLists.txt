@@ -1,47 +1,23 @@
 #
 # plugin sources
+# RULES: each unique subdirectory is plugin name
 #
-set(plugins
-  commands
-  filelog
-  nBreak
-  nether
-  binlog
-  crapMobs
-  cursesui
-  flatpermissions
-  passiveMobs
-)
-
-set(commands_source
+set(plugins_source
   commands/commands.cpp
-)
-set(filelog_source
   filelog/filelog.cpp
-)
-set(nBreak_source
   nBreak/nBreak.cpp
-)
-set(nether_source
   nether/nether.cpp
-)
-set(binlog_source
   binlog/binlog.cpp
-)
-set(crapMobs_source
   crapMobs/crapMobs.cpp
-)
-set(cursesui_source
   cursesui/screen.cpp
-)
-set(flatpermissions_source
   flatpermissions/flatpermissions.cpp
-)
-set(passiveMobs_source
   passiveMobs/passiveMobs.cpp
 )
 
 
+#
+# custom defines
+#
 add_definitions(-DFADOR_PLUGIN=1)
 
 
@@ -51,6 +27,20 @@ add_definitions(-DFADOR_PLUGIN=1)
 set(cursesui_depends
   Curses
 )
+
+
+###############################################################################
+
+
+#
+# make lists from plugins_source
+#
+foreach(src ${plugins_source})
+  string(REGEX REPLACE "/.*$" "" p "${src}")
+  list(APPEND plugins ${p})
+  list(APPEND ${p}_source ${src})
+endforeach()
+list(REMOVE_DUPLICATES plugins)
 
 
 #
