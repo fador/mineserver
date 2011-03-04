@@ -327,6 +327,9 @@ int PacketHandler::login_request(User* user)
 
   user->buffer.removePacket();
 
+  while (User::byNick(player) != NULL)
+	  player.append("_");
+
   LOG(INFO, "Packets", "Player " + dtos(user->UID) + " login v." + dtos(version) + " : " + player + ":" + passwd);
 
   user->nick = player;
