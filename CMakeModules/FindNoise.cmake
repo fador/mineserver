@@ -1,24 +1,10 @@
 # NOISE_LIBRARY
 # NOISE_FOUND, if false, libnoise wasn't found
 # NOISE_INCLUDE_DIR, where to find the headers
+# NOISE_DIR_IS_LIBNOISE, if true, include as libnoise/noise.h (Debian)
 
-FIND_PATH(NOISE_INCLUDE_DIR noise/noise.h
-    $ENV{NOISE_DIR}/include
-    $ENV{NOISE_DIR}
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local/include
-    /usr/include
-    /sw/include # Fink
-    /opt/local/include # DarwinPorts
-    /opt/csw/include # Blastwave
-    /opt/include
-    /usr/freeware/include
-)
-
-#Debian
-IF(NOT NOISE_INCLUDE_DIR)
-    FIND_PATH(NOISE_INCLUDE_DIR libnoise/noise.h
+foreach(header noise/noise.h libnoise/noise.h)
+    FIND_PATH(NOISE_INCLUDE_DIR ${header}
         $ENV{NOISE_DIR}/include
         $ENV{NOISE_DIR}
         ~/Library/Frameworks
@@ -31,7 +17,14 @@ IF(NOT NOISE_INCLUDE_DIR)
         /opt/include
         /usr/freeware/include
     )
-ENDIF(NOT NOISE_INCLUDE_DIR)
+    if(NOISE_INCLUDE_DIR)
+      break()
+    endif()
+endforeach()
+
+if(EXISTS ${NOISE_INCLUDE_DIR}/libnoise/noise.h)
+  set(NOISE_DIR_IS_LIBNOISE True)
+endif()
 
 IF(CMAKE_SYSTEM_NAME MATCHES FreeBSD)
  set(CMAKE_FIND_LIBRARY_SUFFIXES_ORIG ${CMAKE_FIND_LIBRARY_SUFFIXES})
