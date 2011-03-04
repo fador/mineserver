@@ -328,7 +328,7 @@ int PacketHandler::login_request(User* user)
   user->buffer.removePacket();
 
   while (User::byNick(player) != NULL)
-	  player.append("_");
+    player.append("_");
 
   LOG(INFO, "Packets", "Player " + dtos(user->UID) + " login v." + dtos(version) + " : " + player + ":" + passwd);
 
@@ -660,8 +660,9 @@ int PacketHandler::player_digging(User* user)
   case BLOCK_STATUS_BLOCK_BROKEN:
   {
     //Player tool usage calculation etc
-#define itemSlot (36+user->currentItemSlot())
+
     bool rightUse;
+    int16_t itemSlot = user->currentItemSlot() + 36;
     int16_t itemHealth = Mineserver::get()->inventory()->itemHealth(user->inv[itemSlot].getType(), block, rightUse);
     if (itemHealth > 0)
     {
@@ -670,9 +671,11 @@ int PacketHandler::player_digging(User* user)
       {
         user->inv[itemSlot].incHealth();
       }
+
       if (itemHealth <= user->inv[itemSlot].getHealth())
       {
         user->inv[itemSlot].decCount();
+
         if (user->inv[itemSlot].getCount() == 0)
         {
           user->inv[itemSlot].setHealth(0);
@@ -682,7 +685,6 @@ int PacketHandler::player_digging(User* user)
       Mineserver::get()->inventory()->setSlot(user, WINDOW_PLAYER, itemSlot, user->inv[itemSlot].getType(),
                                               user->inv[itemSlot].getCount(), user->inv[itemSlot].getHealth());
     }
-#undef itemSlot
 
     if ((static_cast<Hook4<bool, const char*, int32_t, int8_t, int32_t>*>(Mineserver::get()->plugin()->getHook("BlockBreakPre")))->doUntilFalse(user->nick.c_str(), x, y, z))
     {
@@ -1178,7 +1180,6 @@ int PacketHandler::holding_change(User* user)
 
   // Set current itemID to user
   user->setCurrentItemSlot(itemSlot);
-
   return PACKET_OK;
 }
 
