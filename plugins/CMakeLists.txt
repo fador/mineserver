@@ -92,5 +92,5 @@ endforeach()
 # install
 #
 install(TARGETS ${TARGETS}
-  LIBRARY DESTINATION share/${PROJECT_NAME}/plugins/
+  LIBRARY DESTINATION ${CONFIG_DIR_LIB}/${PROJECT_NAME}/
 )

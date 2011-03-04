@@ -157,9 +157,10 @@ set(mineserver_depends
 #
 # dependency check
 #
-message(STATUS "Dependency check: ${PROJECT_NAME}")
+set(TARGET mineserver)
+message(STATUS "Dependency check: ${TARGET}")
 set(dependency_error False)
-foreach(lib ${mineserver_depends})
+foreach(lib ${${TARGET}_depends})
   find_package(${lib})
   string(TOUPPER ${lib} LIB)
   if (NOT ${LIB}_FOUND)
@@ -195,14 +196,15 @@ add_subdirectory(plugins)
 #
 # build targets
 #
-message(STATUS "Target: ${PROJECT_NAME}")
-add_executable(${PROJECT_NAME} ${exe} ${mineserver_source})
-target_link_libraries(${PROJECT_NAME} ${CMAKE_DL_LIBS})
+set(TARGET mineserver)
+message(STATUS "Target: ${TARGET}")
+add_executable(${TARGET} ${exe} ${${TARGET}_source})
+target_link_libraries(${TARGET} ${CMAKE_DL_LIBS})
 
-foreach(lib ${${PROJECT_NAME}_depends})
+foreach(lib ${${TARGET}_depends})
   string(TOUPPER ${lib} LIB)
   include_directories(${${LIB}_INCLUDE_DIR})
-  target_link_libraries(${PROJECT_NAME} ${${LIB}_LIBRARY})
+  target_link_libraries(${TARGET} ${${LIB}_LIBRARY})
 endforeach()
 
 # copy configs for local usage
@@ -220,14 +222,14 @@ endforeach()
 # install
 #
 install(TARGETS mineserver
-  RUNTIME DESTINATION bin/
+  RUNTIME DESTINATION ${CONFIG_DIR_BIN}
 )
 
 install(FILES ${mineserver_configs}
-  DESTINATION etc/${PROJECT_NAME}/
+  DESTINATION ${CONFIG_DIR_ETC}/${PROJECT_NAME}/
 )
 install(DIRECTORY ${mineserver_dirs}
-  DESTINATION share/${PROJECT_NAME}/
+  DESTINATION ${CONFIG_DIR_SHARE}/${PROJECT_NAME}/
 )
 
 
