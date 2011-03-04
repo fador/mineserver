@@ -213,10 +213,11 @@ target_link_libraries(mineserver ${NOISE_LIBRARY})
 
 # copy configs for local usage
 foreach(path ${mineserver_configs})
-  # destination doesn't have files/ prefix
+  # make full path w/o "files/"
   string(REGEX REPLACE "^files/" "${EXECUTABLE_OUTPUT_PATH}/" dest "${path}")
   if(NOT EXISTS ${dest})
-    file(INSTALL ${path} DESTINATION ${EXECUTABLE_OUTPUT_PATH})
+    message(STATUS "Configuring: ${dest}")
+    configure_file(${path} ${dest} COPYONLY)
   endif()
 endforeach()
 
