@@ -49,10 +49,6 @@ IF (UNIX)
   add_definitions(-msse -Wunused -g3 -O3 -Wall)
 ENDIF()
 
-IF (CMAKE_SYSTEM_NAME MATCHES Linux)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ldl")
-ENDIF()
-
 
 IF (MSVC_IDE)
   set(PLATFORM_C_FLAGS "/D \"WIN32\" /D \"_WINDOWS\" /fp:fast /EHsc")
@@ -201,11 +197,12 @@ add_subdirectory(plugins)
 #
 message(STATUS "Target: ${PROJECT_NAME}")
 add_executable(${PROJECT_NAME} ${exe} ${mineserver_source})
+target_link_libraries(${PROJECT_NAME} ${CMAKE_DL_LIBS})
 
-foreach(lib ${mineserver_depends})
+foreach(lib ${${PROJECT_NAME}_depends})
   string(TOUPPER ${lib} LIB)
   include_directories(${${LIB}_INCLUDE_DIR})
-  target_link_libraries(mineserver ${${LIB}_LIBRARY})
+  target_link_libraries(${PROJECT_NAME} ${${LIB}_LIBRARY})
 endforeach()
 
 # copy configs for local usage
