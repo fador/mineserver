@@ -38,6 +38,9 @@ bool BlockLiquid::affectedBlock(int block)
   case BLOCK_STATIONARY_WATER:
   case BLOCK_LAVA:
   case BLOCK_STATIONARY_LAVA:
+  case ITEM_BUCKET:
+  case ITEM_WATER_BUCKET:
+  case ITEM_LAVA_BUCKET:
     return true;
   }
   return false;
@@ -82,32 +85,80 @@ bool BlockLiquid::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
     revertBlock(user, x, y, z, map);
     return true;
   }
-
-  if (!this->isBlockEmpty(x, y, z, map))
+  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
+
+  Item* item = &user->inv[user->curItem + 36];
+  if(newblock>255)
+  {
+    if(item->getCount()>1)
+    {
+      // Too many bugs working with multi-buckets
+      revertBlock(user, x, y, z, map);
+      item->sendUpdate();
+      return true;
+    }
+  }
+  // Remove liquid from map, add to bucket.
+  if (newblock == ITEM_BUCKET && oldmeta==0 && affectedBlock(oldblock))
+  {
+    int new_item = -1;
+    if(oldblock == BLOCK_LAVA || oldblock == BLOCK_STATIONARY_LAVA)
+    {
+      new_item = ITEM_LAVA_BUCKET;
+    }
+    else
+    {
+      new_item = ITEM_WATER_BUCKET;
+    }
+    item->setType(new_item);
+
+    Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+    Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+    return true;
+  }
+  if (!this->isBlockEmpty(x, y, z, map))
+  {
+    revertBlock(user, x, y, z, map);
+    item->sendUpdate();
+    return true;
+  }
+  if (oldblock!=BLOCK_AIR)
+  {
+    // Shouldnt replace liquids.
+    revertBlock(user, x,y,z,map);
+    item->sendUpdate();
+    return true;
+  }
+
   direction = user->relativeToBlock(x, y, z);
 
-  int block = newblock;
-
-  if (block == ITEM_WATER_BUCKET)
+  if (newblock == ITEM_WATER_BUCKET)
   {
-    newblock = BLOCK_STATIONARY_WATER;
+    newblock = BLOCK_WATER;
+  }
+  else if (newblock == ITEM_LAVA_BUCKET)
+  {
+    newblock = BLOCK_LAVA;
+  }
+  else if (newblock > 255)
+  {
+    revertBlock(user,x,y,z,map);
+    item->sendUpdate();
+    return true;
   }
 
-  if (block == ITEM_LAVA_BUCKET)
-  {
-    newblock = BLOCK_STATIONARY_LAVA;
-  }
+  item->setType(ITEM_BUCKET);
 
   Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, 0);
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);
 
   physics(x, y, z, map);
-  return false;
+  return true;
 }
 
 void BlockLiquid::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
@@ -119,6 +170,10 @@ void BlockLiquid::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, i
 {
   uint8_t oldblock;
   uint8_t oldmeta;
+  if (newblock > 255)
+  {
+    return;
+  }
   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     return;
