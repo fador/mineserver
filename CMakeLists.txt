@@ -146,47 +146,46 @@ include_directories(src/)
 
 
 #
-# find libraries
+# dependencies
 #
+set(mineserver_depends
+  ZLIB
+  #Lua51
+  Event
+  Noise
+)
+
+
+#
+# dependency check
+#
+message(STATUS "Dependency check: ${PROJECT_NAME}")
 set(dependency_error False)
-
-find_package(ZLIB REQUIRED)
-if (NOT ZLIB_FOUND)
-  set(errors "${errors}\t\t- ZLib\n")
-  set(dependency_error True)
-endif()
-
-#find_package(Lua51)
-#if (NOT LUA51_FOUND)
-#  set(errors "${errors}\t\t- LUA 5.1\n")
-#  set(dependency_error True)
-#endif()
-
-find_package(Event REQUIRED)
-if (NOT EVENT_FOUND)
-  set(errors "${errors}\t\t- Event library\n")
-  set(dependency_error True)
-endif()
-
-find_package(Noise REQUIRED)
-if (NOT NOISE_FOUND)
-  set(errors "${errors}\t\t- libNoise library\n")
-  set(dependency_error True)
-endif()
-
-#Debian?
-FIND_PATH(NOISE_ON_DEBIANISH libnoise/noise.h ${NOISE_INCLUDE_DIR})
-if(NOISE_ON_DEBIANISH)
-  add_definitions(-DLIBNOISE)
-endif()
-
-if (WINDOWS)
-  # even if 64bit this is set
-  set(exe "WIN32")
-endif ()
+foreach(lib ${mineserver_depends})
+  find_package(${lib})
+  string(TOUPPER ${lib} LIB)
+  if (NOT ${LIB}_FOUND)
+    set(errors "${errors}\t\t- ${lib}\n")
+    set(dependency_error True)
+  endif()
+endforeach()
 
 if (dependency_error)
-  message(FATAL_ERROR "\n\tNot all dependencies could be found:\n${errors}\n After installing them please rerun cmake.\n")
+  message(FATAL_ERROR "\n\tNot all dependencies could be found:\n${errors}\nAfter installing them please rerun cmake.\n")
+endif()
+
+
+#
+# platform-specific tweaks
+#
+if(WIN32)
+  # even if 64bit this is set
+  set(exe "WIN32")
+else()
+  find_path(NOISE_ON_DEBIANISH libnoise/noise.h ${NOISE_INCLUDE_DIR})
+  if(NOISE_ON_DEBIANISH)
+    add_definitions(-DLIBNOISE)
+  endif()
 endif()
 
 
@@ -199,17 +198,14 @@ add_subdirectory(plugins)
 #
 # build targets
 #
-include_directories(${ZLIB_INCLUDE_DIR})
-#include_directories(${LUA_INCLUDE_DIR})
-include_directories(${EVENT_INCLUDE_DIR})
-include_directories(${NOISE_INCLUDE_DIR})
+message(STATUS "Target: ${PROJECT_NAME}")
+add_executable(${PROJECT_NAME} ${exe} ${mineserver_source})
 
-add_executable(mineserver ${exe} ${mineserver_source})
-
-target_link_libraries(mineserver ${ZLIB_LIBRARY})
-#target_link_libraries(mineserver ${LUA_LIBRARY})
-target_link_libraries(mineserver ${EVENT_LIBRARY})
-target_link_libraries(mineserver ${NOISE_LIBRARY})
+foreach(lib ${mineserver_depends})
+  string(TOUPPER ${lib} LIB)
+  include_directories(${${LIB}_INCLUDE_DIR})
+  target_link_libraries(mineserver ${${LIB}_LIBRARY})
+endforeach()
 
 # copy configs for local usage
 foreach(path ${mineserver_configs})
