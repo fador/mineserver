@@ -99,12 +99,18 @@ void Item::setType(int16_t type)
     count = 0;
     health = 0;
   }
+
   sendUpdate();
 }
 
 void Item::setCount(int8_t count)
 {
   this->count = count;
+  if(count < 1)
+  {
+    setType(-1);
+    return;
+  }
   sendUpdate();
 }
 
@@ -833,7 +839,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
     }
     else
     {
-      currentInventory->workbench[0] = Item();
+      currentInventory->workbench[0].setType(-1);
       setSlot(user, windowID, 0, -1, 0, 0);
     }
   }
@@ -845,7 +851,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
     }
     else
     {
-      user->inv[0] = Item();
+      user->inv[0].setType(-1);
       setSlot(user, windowID, 0, -1, 0, 0);
     }
   }
