@@ -208,7 +208,7 @@ int16_t Item::itemHealth(int item)
 }
 
 
-const std::string RECIPE_PATH = std::string(CONFIG_PATH_SHARE) + "recipes/";
+const std::string RECIPE_PATH = std::string(CONFIG_DIR_SHARE) + "recipes/";
 const std::string RECIPE_SUFFIX = ".recipe";
 const std::string RECIPE_LIST = "ENABLED_RECIPES.cfg";
 

@@ -7,7 +7,7 @@ Thumbs.db
 
 # CMake generated files
 CMakeCache.txt
-CMakeFiles/*
+CMakeFiles/
 CPackConfig.cmake
 CPackSourceConfig.cmake
 cmake_install.cmake
@@ -15,6 +15,7 @@ cmake_install.cmake
 /Makefile
 # generated from configure.h.in
 configure.h
+/install_manifest.txt
 
 #Test world
 mineserver/world
