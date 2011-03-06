@@ -666,7 +666,7 @@ void sendRules(std::string user, std::string command, std::deque<std::string> ar
   if(rules.is_open()) {
     while(rules.good()) {
       std::getline(rules, line);
-      if(line.at(0) != '#')
+      if(line.size() > 0 && line.at(0) != '#')
         mineserver->chat.sendmsgTo(user.c_str(), line.c_str());
     }
     rules.close();
@@ -729,7 +729,7 @@ void sendMOTD(std::string user, std::string command, std::deque<std::string> arg
     while (MOTDFile.good() )
     {
       std::getline(MOTDFile, line);
-      if(line.at(0) != '#')
+      if(line.size() > 0 && line.at(0) != '#')
         mineserver->chat.sendmsgTo(user.c_str(), line.c_str());
     }
     MOTDFile.close();
