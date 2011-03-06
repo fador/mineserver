@@ -162,6 +162,8 @@ public:
   void createPickupSpawn(int x, int y, int z, int type, int count, int health, User* user);
 
   bool sendProjectileSpawn(User* user, int8_t projID);
+
+  bool sendMultiBlocks(std::vector<vec>* blocks);
 };
 
 #endif

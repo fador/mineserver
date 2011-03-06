@@ -532,6 +532,11 @@ int Mineserver::run(int argc, char* argv[])
     //    for(uint32_t i=0; i<minecarts.size(); i++){
     //      minecarts[i]->timer();
     //    }
+    for (std::vector<Map*>::size_type i = 0 ; i < m_map.size(); i++)
+    {
+      Mineserver::get()->physics(i)->update();
+    }
+
 
 
     timeNow = time(0);
@@ -624,8 +629,6 @@ int Mineserver::run(int argc, char* argv[])
         {
           m_map[i]->mapTime = 0;
         }
-        Mineserver::get()->physics(i)->update();
-
       }
 
 

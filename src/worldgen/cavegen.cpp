@@ -51,14 +51,14 @@ void CaveGen::init(int seed)
   caveTreshold = Mineserver::get()->config()->dData("mapgen.caves.treshold");
 
   // Set up us the Perlin-noise module.
-  caveNoise.SetSeed(seed + 1);
-  caveNoise.SetFrequency(1.0 / caveSize); // 1/20
-  caveNoise.SetOctaveCount(2);
+  caveNoise.SetSeed(seed + 22);
+  caveNoise.SetFrequency(1.0 / caveSize); 
+  caveNoise.SetOctaveCount(4);
 }
 
 void CaveGen::AddCaves(uint8_t& block, int x, int y, int z)
 {
-  if (caveNoise.GetValue(x, y, z) < caveTreshold)
+  if (caveNoise.GetValue(x/4.0, y/1.5, z/4.0) > caveTreshold)
   {
     if (y < 10 && addCaveLava)
     {

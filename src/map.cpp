@@ -1093,58 +1093,40 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
       Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
       Mineserver::get()->mapGen(m_number)->generateChunk(x, z, m_number);
       generateLight(x, z);
-      bool foundLand = false;
-      uint8_t block, meta;
-      int spx = spawnPos.x(), spy = 120, spz = spawnPos.z();
-      while (!foundLand)
+      //If we generated spawn pos, make sure the position is not underground!
+      if(x == blockToChunk(spawnPos.x()) && z == blockToChunk(spawnPos.z()))
       {
-        spx++;
-        for (int count = 0; count < 110; count++)
+        uint8_t block,meta;
+        bool foundLand = false;
+        if(getBlock(spawnPos.x(),spawnPos.y(),spawnPos.z(), &block, &meta, false) && block == BLOCK_AIR)
         {
-          if (getBlock(spx, spy - count, spz, &block, &meta))
+          uint8_t new_y;
+          for(new_y = spawnPos.y(); new_y > 30; new_y--)
           {
-            switch (block)
+            if(getBlock(spawnPos.x(), new_y, spawnPos.z(), &block, &meta, false) && block != BLOCK_AIR)
             {
-            case BLOCK_AIR:
-            case BLOCK_RED_ROSE:
-            case BLOCK_YELLOW_FLOWER:
-            case BLOCK_BROWN_MUSHROOM:
-            case BLOCK_RED_MUSHROOM:
-              // Not ground
-              continue;
-              break; // Does this matter here?
-            case BLOCK_GRASS:
-            case BLOCK_DIRT:
-            case BLOCK_SAND:
-            case BLOCK_NETHERSTONE:
-            case BLOCK_GRAY_CLOTH:
-              // Ground
               foundLand = true;
-              spy = (spy - count) + 2;
-              break;
-            default:
-              count = 110;
-              continue;
               break;
             }
           }
+          if(foundLand)
+          {
+            spawnPos.y() = new_y+1;
+            std::string infile = mapDirectory+"/level.dat";
+            NBT_Value* root = NBT_Value::LoadFromFile(infile);
+            if(root != NULL)
+            {
+              NBT_Value& data = *((*root)["Data"]);
+              *data["SpawnX"] = (int32_t)spawnPos.x();
+              *data["SpawnY"] = (int32_t)spawnPos.y();
+              *data["SpawnZ"] = (int32_t)spawnPos.z();
+
+              root->SaveToFile(infile);
+
+              delete root;
+            }
+          }
         }
-      }
-      spawnPos.y() = spy;
-      spawnPos.x() = spx;
-      spawnPos.z() = spz;
-      std::string infile = mapDirectory + "/level.dat";
-      NBT_Value* root = NBT_Value::LoadFromFile(infile);
-      if (root != NULL)
-      {
-        NBT_Value& data = *((*root)["Data"]);
-        *data["SpawnX"] = (int32_t)spawnPos.x();
-        *data["SpawnY"] = (int32_t)spawnPos.y();
-        *data["SpawnZ"] = (int32_t)spawnPos.z();
-
-        root->SaveToFile(infile);
-
-        delete root;
       }
       return chunks.getChunk(x, z);
     }
@@ -1545,6 +1527,67 @@ bool Map::releaseMap(int x, int z)
   // Unlink this chunk
   chunks.unlinkChunk(x, z);
   return true;
+}
+
+bool Map::sendMultiBlocks(std::vector<vec>* blocks)
+{
+  while(blocks->size()>0)
+  {
+    std::vector<vec> toRem;
+    int chunk_x = blockToChunk((*blocks)[0].x());
+    int chunk_z = blockToChunk((*blocks)[0].z());
+    for(int i=0; i < blocks->size(); i++)
+    {
+      int t_chunk_x = blockToChunk((*blocks)[i].x());
+      int t_chunk_z = blockToChunk((*blocks)[i].z());
+      if(chunk_x == t_chunk_x && chunk_z == t_chunk_z)
+      {
+        for(int j = toRem.size()-1; j>=0; j--)
+        {
+          if(toRem[j].x() == (*blocks)[i].x() &&
+             toRem[j].y() == (*blocks)[i].y() &&
+             toRem[j].z() == (*blocks)[i].z())
+          {
+            continue;
+          }
+        }
+        toRem.push_back((*blocks)[i]);
+      }  
+    }
+    Packet packet,pC,pT,pM;
+    int offsetx = chunk_x<<4, offsetz = chunk_z<<4;
+    packet << (int8_t) PACKET_MULTI_BLOCK_CHANGE << (int32_t) chunk_x << (int32_t) chunk_z << (int16_t) toRem.size();
+    for(int i = 0;i<toRem.size();i++)
+    {
+      uint8_t block,meta;
+      Mineserver::get()->map(m_number)->getBlock(toRem[i].x(), toRem[i].y(), toRem[i].z(), &block, &meta);
+      // Sending packet a uint16_t makes it assume int...
+      uint16_t coord = (((toRem[i].x()-offsetx)<<12)+((toRem[i].z()-offsetz)<<8)+(toRem[i].y()));
+      int16_t* coord2 = (int16_t*)&coord;
+      pC << (int16_t) (*coord2);
+      pT << (int8_t) block;
+      pM << (int8_t) meta;
+      for(int j = blocks->size()-1; j >= 0; j--)
+      {
+        if((*blocks)[j].x() == toRem[i].x() &&
+           (*blocks)[j].y() == toRem[j].y() &&
+           (*blocks)[j].z() == toRem[i].z())
+        {
+          blocks->erase(blocks->begin()+j);
+        }
+      }
+    }
+    toRem.clear();
+    sChunk* chunk = chunks.getChunk(chunk_x,chunk_z);
+    if (chunk == NULL)
+    {
+      return false;
+    }
+    chunk->sendPacket(packet);
+    chunk->sendPacket(pC);
+    chunk->sendPacket(pT);
+    chunk->sendPacket(pM);
+  }
 }
 
 // Send chunk to user

@@ -140,10 +140,12 @@ bool BlockLiquid::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
   if (newblock == ITEM_WATER_BUCKET)
   {
     newblock = BLOCK_WATER;
+    item->setType(ITEM_BUCKET);
   }
   else if (newblock == ITEM_LAVA_BUCKET)
   {
     newblock = BLOCK_LAVA;
+    item->setType(ITEM_BUCKET);
   }
   else if (newblock > 255)
   {
@@ -151,8 +153,10 @@ bool BlockLiquid::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
     item->sendUpdate();
     return true;
   }
-
-  item->setType(ITEM_BUCKET);
+  else
+  {
+    item->decCount();
+  }
 
   Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, 0);
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);

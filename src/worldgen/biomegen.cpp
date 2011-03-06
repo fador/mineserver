@@ -549,44 +549,44 @@ void BiomeGen::AddOre(int x, int z, int map, uint8_t type)
   case BLOCK_COAL_ORE:
     count = fastrand() % 10 + 20; // 20-30 coal deposits
     startHeight = 90;
-    minDepoSize = 3;
-    maxDepoSize = 7;
+    minDepoSize = 8;
+    maxDepoSize = 20;
     break;
   case BLOCK_IRON_ORE:
     count = fastrand() % 8 + 10; // 10-18 iron deposits
     startHeight = 60;
-    minDepoSize = 2;
-    maxDepoSize = 5;
+    minDepoSize = 5;
+    maxDepoSize = 10;
     break;
   case BLOCK_GOLD_ORE:
     count = fastrand() % 4 + 5; // 4-9 gold deposits
     startHeight = 32;
-    minDepoSize = 2;
-    maxDepoSize = 4;
+    minDepoSize = 5;
+    maxDepoSize = 8;
     break;
   case BLOCK_DIAMOND_ORE:
     count = fastrand() % 1 + 2; // 1-3 diamond deposits
     startHeight = 17;
-    minDepoSize = 1;
-    maxDepoSize = 2;
+    minDepoSize = 4;
+    maxDepoSize = 7;
     break;
   case BLOCK_REDSTONE_ORE:
     count = fastrand() % 5 + 5; // 5-10 redstone deposits
     startHeight = 25;
-    minDepoSize = 2;
-    maxDepoSize = 4;
+    minDepoSize = 5;
+    maxDepoSize = 20;
     break;
   case BLOCK_LAPIS_ORE:
     count = fastrand() % 1 + 2; // 1-3 lapis lazuli deposits
     startHeight = 17;
-    minDepoSize = 1;
-    maxDepoSize = 2;
+    minDepoSize = 5;
+    maxDepoSize = 20;
     break;
   case BLOCK_GRAVEL:
     count = fastrand() % 10 + 20; // 20-30 gravel deposits
     startHeight = 90;
-    minDepoSize = 4;
-    maxDepoSize = 10;
+    minDepoSize = 5;
+    maxDepoSize = 50;
     break;
   default:
     return;
