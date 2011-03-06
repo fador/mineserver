@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.6)
 project(mineserver)
 cmake_policy(SET CMP0003 NEW)
 
@@ -14,22 +14,17 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_P
 # Configure paths
 #
 set(CONFIG_DIR_BIN   bin/)
-set(CONFIG_DIR_ETC   etc/)
-set(CONFIG_DIR_SHARE share/)
-# local build by default
-set(CONFIG_LOCAL True)
-
-if(CONFIG_LOCAL)
+set(CONFIG_DIR_ETC   etc/${PROJECT_NAME}/)
+set(CONFIG_DIR_LIB   lib/${PROJECT_NAME}/)
+set(CONFIG_DIR_SHARE share/${PROJECT_NAME}/)
+if(WIN32)
   message(STATUS "CONFIG_LOCAL is set -- assuming local build")
-  set(CONFIG_PREFIX    "../" CACHE STRING "CONFIG_PREFIX" FORCE)
   set(CONFIG_DIR_BIN   bin/)
   set(CONFIG_DIR_ETC   bin/)
+  set(CONFIG_DIR_LIB   bin/)
   set(CONFIG_DIR_SHARE files/)
-else()
-  message(STATUS "CONFIG_LOCAL is not set -- assuming installation build")
   set(CONFIG_PREFIX    ${CMAKE_INSTALL_PREFIX})
 endif()
-set(CMAKE_INSTALL_PREFIX ${CONFIG_PREFIX})
 
 # preprocess configuration file
 configure_file(${PROJECT_SOURCE_DIR}/src/configure.h.in
@@ -45,10 +40,6 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 # Set compiler specific build flags
 IF (UNIX)
   add_definitions(-msse -Wunused -g3 -O3 -Wall)
-ENDIF()
-
-IF (CMAKE_SYSTEM_NAME MATCHES Linux)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ldl")
 ENDIF()
 
 
@@ -123,50 +114,6 @@ source_group(${PROJECT_NAME} FILES ${mineserver_source})
 
 
 #
-# plugin sources
-#
-set(mineserver_plugins
-  commands
-  filelog
-  nBreak
-  nether
-  binlog
-  crapMobs
-  cursesui
-  flatpermissions
-  passiveMobs
-)
-
-set(commands_source
-  plugins/commands/commands.cpp
-)
-set(filelog_source
-  plugins/filelog/filelog.cpp
-)
-set(nBreak_source
-  plugins/nBreak/nBreak.cpp
-)
-set(nether_source
-  plugins/nether/nether.cpp
-)
-set(binlog_source
-  plugins/binlog/binlog.cpp
-)
-set(crapMobs_source
-  plugins/crapMobs/crapMobs.cpp
-)
-set(cursesui_source
-  plugins/cursesui/screen.cpp
-)
-set(flatpermissions_source
-  plugins/flatpermissions/flatpermissions.cpp
-)
-set(passiveMobs_source
-  plugins/passiveMobs/passiveMobs.cpp
-)
-
-
-#
 # project files
 #
 set(mineserver_configs
@@ -186,89 +133,80 @@ set(mineserver_dirs
 )
 
 
-add_definitions(-DFADOR_PLUGIN=1)
-
 include_directories(src/)
 
 
 #
-# find libraries
+# dependencies
 #
+set(mineserver_depends
+  ZLIB
+  #Lua51
+  Event
+  Noise
+)
+
+
+#
+# dependency check
+#
+set(TARGET mineserver)
+message(STATUS "Dependency check: ${TARGET}")
 set(dependency_error False)
-
-find_package(ZLIB REQUIRED)
-if (NOT ZLIB_FOUND)
-  set(errors "${errors}\t\t- ZLib\n")
-  set(dependency_error True)
-endif()
-
-#find_package(Lua51)
-#if (NOT LUA51_FOUND)
-#  set(errors "${errors}\t\t- LUA 5.1\n")
-#  set(dependency_error True)
-#endif()
-
-find_package(Event REQUIRED)
-if (NOT EVENT_FOUND)
-  set(errors "${errors}\t\t- Event library\n")
-  set(dependency_error True)
-endif()
-
-find_package(Noise REQUIRED)
-if (NOT NOISE_FOUND)
-  set(errors "${errors}\t\t- libNoise library\n")
-  set(dependency_error True)
-endif()
-
-#Debian?
-FIND_PATH(NOISE_ON_DEBIANISH libnoise/noise.h ${NOISE_INCLUDE_DIR})
-if(NOISE_ON_DEBIANISH)
-  add_definitions(-DLIBNOISE)
-endif()
-
-#Provides ncurses, too
-find_package(Curses)
-
-if (WINDOWS)
-  # even if 64bit this is set
-  set(exe "WIN32")
-endif ()
+foreach(lib ${${TARGET}_depends})
+  find_package(${lib})
+  string(TOUPPER ${lib} LIB)
+  if (NOT ${LIB}_FOUND)
+    set(errors "${errors}\t\t- ${lib}\n")
+    set(dependency_error True)
+  endif()
+endforeach()
 
 if (dependency_error)
-  message(FATAL_ERROR "\n\tNot all dependencies could be found:\n${errors}\n After installing them please rerun cmake.\n")
+  message(FATAL_ERROR "\n\tNot all dependencies could be found:\n${errors}\nAfter installing them please rerun cmake.\n")
 endif()
+
+
+#
+# platform-specific tweaks
+#
+if(WIN32)
+  # even if 64bit this is set
+  set(exe "WIN32")
+else()
+  if(NOISE_DIR_IS_LIBNOISE)
+    add_definitions(-DLIBNOISE)
+  endif()
+endif()
+
+
+#
+# subdirectories
+#
+add_subdirectory(plugins)
 
 
 #
 # build targets
 #
-include_directories(${ZLIB_INCLUDE_DIR})
-#include_directories(${LUA_INCLUDE_DIR})
-include_directories(${EVENT_INCLUDE_DIR})
-include_directories(${NOISE_INCLUDE_DIR})
-include_directories(${CURSES_INCLUDE_DIR})
+set(TARGET mineserver)
+message(STATUS "Target: ${TARGET}")
+add_executable(${TARGET} ${exe} ${${TARGET}_source})
+target_link_libraries(${TARGET} ${CMAKE_DL_LIBS})
 
-add_executable(mineserver ${exe} ${mineserver_source})
-
-target_link_libraries(mineserver ${ZLIB_LIBRARY})
-#target_link_libraries(mineserver ${LUA_LIBRARY})
-target_link_libraries(mineserver ${EVENT_LIBRARY})
-target_link_libraries(mineserver ${NOISE_LIBRARY})
-target_link_libraries(mineserver ${CURSES_LIBRARY})
-
-# plugins
-foreach(p ${mineserver_plugins})
-  message(STATUS "Plugin target added: ${p}")
-  add_library(${p} SHARED ${${p}_source})
-  set_target_properties(${p} PROPERTIES PREFIX "")
+foreach(lib ${${TARGET}_depends})
+  string(TOUPPER ${lib} LIB)
+  include_directories(${${LIB}_INCLUDE_DIR})
+  target_link_libraries(${TARGET} ${${LIB}_LIBRARY})
 endforeach()
 
 # copy configs for local usage
 foreach(path ${mineserver_configs})
-  # destination doesn't have files/ prefix
+  # make full path w/o "files/"
   string(REGEX REPLACE "^files/" "${EXECUTABLE_OUTPUT_PATH}/" dest "${path}")
   if(NOT EXISTS ${dest})
-    file(INSTALL ${path} DESTINATION ${EXECUTABLE_OUTPUT_PATH})
+    message(STATUS "Configuring: ${dest}")
+    configure_file(${path} ${dest} COPYONLY)
   endif()
 endforeach()
 
@@ -276,16 +214,15 @@ endforeach()
 #
 # install
 #
-install(TARGETS mineserver ${mineserver_plugins}
-  RUNTIME DESTINATION bin/
-  LIBRARY DESTINATION share/${PROJECT_NAME}/plugins/
+install(TARGETS mineserver
+  RUNTIME DESTINATION ${CONFIG_DIR_BIN}/
 )
 
 install(FILES ${mineserver_configs}
-  DESTINATION etc/${PROJECT_NAME}/
+  DESTINATION ${CONFIG_DIR_ETC}/
 )
 install(DIRECTORY ${mineserver_dirs}
-  DESTINATION share/${PROJECT_NAME}/
+  DESTINATION ${CONFIG_DIR_SHARE}/
 )
 
 
