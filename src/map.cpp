@@ -63,7 +63,6 @@
 Map::Map(const Map& oldmap)
 {
   // Copy Construtor
-  maps = oldmap.maps;
   chunks = oldmap.chunks;
   mapLastused = oldmap.mapLastused;
   mapChanged = oldmap.mapChanged;
@@ -139,8 +138,6 @@ Map::~Map()
     }
   }
 
-
-  maps.clear();
   // Free item memory
   for (std::map<uint32_t, spawnedItem*>::iterator it = items.begin(); it != items.end(); ++it)
   {
