@@ -74,9 +74,6 @@ public:
   // Blocks that emit light
   int emitLight[256];
 
-  // Store all maps here
-  std::map<uint32_t, sChunk> maps;
-
   // Store chunks here (remove maps)
   ChunkMap chunks;
 
