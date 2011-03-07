@@ -31,6 +31,7 @@
 
 #include <cstdio>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include "mineserver.h"
@@ -42,7 +43,18 @@
 
 void Logger::log(const std::string& msg, const std::string& file, int line)
 {
-  log(LogType::LOG_INFO, file, "[" + file + "@" + dtos(line) + "]: " + msg);
+  std::ostringstream str;
+  size_t pos;
+
+  pos = file.rfind(PATH_SEPARATOR);
+  if (pos != std::string::npos)
+  {
+    str << file.substr(pos + 1, file.length());
+  }
+  str << ":";
+  str << (int)line;
+
+  log(LogType::LOG_INFO, str.str(), msg);
 }
 
 void Logger::log(LogType::LogType type, const std::string& source, const std::string& message)
