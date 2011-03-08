@@ -79,8 +79,6 @@
 #define DEGREES_TO_RADIANS(x) ((x) / 180.0 * M_PI)
 #define RADIANS_TO_DEGREES(x) ((x) / M_PI * 180.0)
 
-//#define _DEBUG
-
 void PacketHandler::init()
 {
   packets[PACKET_KEEP_ALIVE]               = Packets(0, &PacketHandler::keep_alive);
@@ -937,7 +935,7 @@ int PacketHandler::player_block_placement(User* user)
 
   if (newblock == -1 && newblock != ITEM_SIGN)
   {
-#ifdef _DEBUG
+#ifdef DEBUG
     LOG(DEBUG, "Packets", "ignoring: " + dtos(newblock));
 #endif
     return PACKET_OK;
@@ -948,7 +946,7 @@ int PacketHandler::player_block_placement(User* user)
     return PACKET_OK;
   }
 
-#ifdef _DEBUG
+#ifdef DEBUG
   LOG(DEBUG, "Packets", "Block_placement: " + dtos(newblock) + " (" + dtos(x) + "," + dtos((int)y) + "," + dtos(z) + ") dir: " + dtos((int)direction));
 #endif
 

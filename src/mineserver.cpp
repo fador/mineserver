@@ -414,7 +414,7 @@ int Mineserver::run(int argc, char* argv[])
         }
       }
     }
-#ifdef _DEBUG
+#ifdef DEBUG
     LOG(DEBUG, "Map", "Spawn area ready!");
 #endif
   }
