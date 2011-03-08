@@ -35,12 +35,6 @@
 
 #include "logtype.h"
 
-#ifdef WIN32
-#define PATH_SEPARATOR  '\\'
-#else
-#define PATH_SEPARATOR  '/'
-#endif
-
 #define LOGLF(msg) Mineserver::get()->logger()->log(msg, std::string(__FILE__), __LINE__)
 
 #define LOG(type, source, msg) Mineserver::get()->logger()->log(LogType::LOG_##type, source, msg)

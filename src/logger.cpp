@@ -39,7 +39,6 @@
 #include "plugin.h"
 
 #include "logger.h"
-#include "logtype.h"
 
 void Logger::log(const std::string& msg, const std::string& file, int line)
 {

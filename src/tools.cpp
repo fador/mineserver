@@ -30,6 +30,7 @@
 #include <WinSock2.h>
 #else
 #include <netinet/in.h>
+#include <pwd.h>
 #endif
 
 #include <cstdlib>
@@ -184,4 +185,44 @@ std::string hash(std::string value)
   hashString << hash;
 
   return hashString.str();
+}
+
+std::string pathExpandUser(std::string path)
+{
+  std::string out;
+  std::string user;
+  size_t pos;
+
+  if (path[0] != '~')
+    return path;
+
+  pos = path.find(PATH_SEPARATOR);
+  if (pos == std::string::npos)
+    pos = path.length();
+
+  user = path.substr(1, pos - 1);
+  if (!user.empty())
+  {
+#ifdef WIN32
+    std::cerr << "~user notation is not implemented for this platform :P" << std::endl;
+    return path;
+#else
+    struct passwd* entry = getpwnam(user.c_str());
+    if (!entry)
+    {
+      std::cerr << user << ": no such user!" << std::endl;
+      return path;
+    }
+
+    out += entry->pw_dir;
+#endif
+  }
+  else
+  {
+    out.assign(getenv("HOME"));
+  }
+
+  out += '/';
+  out += path.substr(pos + 1, path.length());
+  return out;
 }
