@@ -150,7 +150,7 @@ void Item::decCount(int c)
 
 void Item::incHealth(int c)
 {
-  int healthMax;
+  int healthMax = itemHealth(type);
   health += c;
   if (health > healthMax && healthMax > 0)
   {

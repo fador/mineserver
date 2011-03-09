@@ -44,10 +44,10 @@ ENDIF()
 
 
 IF (MSVC_IDE)
-  set(PLATFORM_C_FLAGS "/D \"WIN32\" /D \"_WINDOWS\" /fp:fast /EHsc")
+  set(PLATFORM_C_FLAGS "/D \"WIN32\" /D \"_CONSOLE\" /D \"ZLIB_WINAPI\" /fp:fast /EHsc")
   set(CMAKE_CXX_FLAGS "${PLATFORM_C_FLAGS}")
-  set(CMAKE_CXX_FLAGS_RELEASE "${PLATFORM_C_FLAGS}")
-  set(CMAKE_CXX_FLAGS_DEBUG "${PLATFORM_C_FLAGS} /MDd")
+  set(CMAKE_CXX_FLAGS_RELEASE "${PLATFORM_C_FLAGS} /MT")
+  set(CMAKE_CXX_FLAGS_DEBUG "${PLATFORM_C_FLAGS} /MTd /Zi")
 ENDIF (MSVC_IDE)
 
 
@@ -171,8 +171,10 @@ endif()
 # platform-specific tweaks
 #
 if(WIN32)
-  # even if 64bit this is set
-  set(exe "WIN32")
+  # this requires WinMain() entry, disabled until console/GUI option is added
+  #set(exe "WIN32")
+  # do we really need winmm?
+  set(mineserver_depends "${mineserver_depends} ws2_32 winmm")
 else()
   if(NOISE_DIR_IS_LIBNOISE)
     add_definitions(-DLIBNOISE)
