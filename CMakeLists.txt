@@ -77,6 +77,7 @@ set(mineserver_source
   src/sockets.cpp
   src/chat.cpp
   src/tree.cpp
+  src/mcregion.cpp
   src/worldgen/cavegen.cpp
   src/worldgen/heavengen.cpp
   src/worldgen/mapgen.cpp
