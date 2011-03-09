@@ -28,17 +28,17 @@
 #ifndef _MCREGION_H_
 #define _MCREGION_H_
 
+  enum { VERSION_GZIP = 1,VERSION_DEFLATE };
 
 class RegionFile
 {
   private:
-    const int VERSION_GZIP = 1;
-    const int VERSION_DEFLATE = 2;
 
-    const int SECTOR_BYTES = 4096;
-    const int SECTOR_INTS = SECTOR_BYTES / 4;
 
-    const int CHUNK_HEADER_SIZE = 5;
+    static const int SECTOR_BYTES = 4096;
+    static const int SECTOR_INTS = SECTOR_BYTES / 4;
+
+    static const int CHUNK_HEADER_SIZE = 5;
 
     std::fstream regionFile;
     size_t fileLength;

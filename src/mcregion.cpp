@@ -64,6 +64,7 @@ struct RegionFile {
 #include "tools.h"
 
 RegionFile::RegionFile(): sizeDelta(0)
+
 {
 
 }
@@ -151,7 +152,7 @@ bool RegionFile::openFile(std::string mapDir, int32_t chunkX, int32_t chunkZ)
     lastModValue = ntohl(lastModValue);
     timestamps[i] = lastModValue;
   }
-
+  return true;
 }
 
 bool RegionFile::writeChunk(int8_t *chunkdata, int32_t datalen, int32_t x, int32_t z)

@@ -48,6 +48,7 @@
     <ClCompile Include="..\src\lighting.cpp" />
     <ClCompile Include="..\src\logger.cpp" />
     <ClCompile Include="..\src\map.cpp" />
+    <ClCompile Include="..\src\mcregion.cpp" />
     <ClCompile Include="..\src\mineserver.cpp" />
     <ClCompile Include="..\src\mob.cpp" />
     <ClCompile Include="..\src\nbt.cpp" />
@@ -107,6 +108,7 @@
     <ClInclude Include="..\src\logger.h" />
     <ClInclude Include="..\src\logtype.h" />
     <ClInclude Include="..\src\map.h" />
+    <ClInclude Include="..\src\mcregion.h" />
     <ClInclude Include="..\src\mineserver.h" />
     <ClInclude Include="..\src\mob.h" />
     <ClInclude Include="..\src\nbt.h" />
