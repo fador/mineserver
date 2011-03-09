@@ -55,7 +55,8 @@ class RegionFile
   public:
 
     RegionFile();
-    ~RegionFile();
+    ~RegionFile();    
+
     bool openFile(std::string mapDir,int32_t x, int32_t z);
 
     bool writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int32_t z);
@@ -107,5 +108,8 @@ class RegionFile
         regionFile.write((char *)data, datalen); // chunk data
     }
 };
+
+
+bool convertMap(std::string mapDir);
 
 #endif

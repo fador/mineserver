@@ -51,9 +51,11 @@ struct RegionFile {
 #ifdef WIN32
 #include <conio.h>
 #include <WinSock2.h>
+#include <direct.h>
 #else
 #include <netinet/in.h>
 #endif
+#include <sys/stat.h>
 #include <fstream>
 #include <vector>
 #include <string>
@@ -61,8 +63,11 @@ struct RegionFile {
 #include <time.h>
 #include <iostream>
 
+#include "constants.h"
 #include "mcregion.h"
 #include "tools.h"
+#include "logger.h"
+#include "nbt.h"
 
 RegionFile::RegionFile(): sizeDelta(0)
 {
@@ -320,4 +325,157 @@ bool RegionFile::readChunk(uint8_t *chunkdata, uint32_t *datalen, int32_t x, int
   //std::cout << "Read " << *datalen << " bytes!" << std::endl;
   return true;
 
+}
+
+
+/*function... might want it in some class?*/
+int getdir (std::string dir, std::vector<std::string> &files)
+{
+#ifdef WIN32
+  HANDLE hFind = INVALID_HANDLE_VALUE;
+  WIN32_FIND_DATA ffd; // File information
+  dir += "\\*.*";
+  hFind = FindFirstFile(dir.c_str(), &ffd);
+
+   if (INVALID_HANDLE_VALUE == hFind) 
+   {
+      return 0;
+   }
+   
+   // List all the files in the directory with some info about them.
+   do
+   {
+     if(std::string(ffd.cFileName) != "." && std::string(ffd.cFileName) != "..")
+      files.push_back(ffd.cFileName);
+   }
+   while (FindNextFile(hFind, &ffd) != 0);
+#else
+    DIR *dp;
+    struct dirent *dirp;
+    if((dp  = opendir(dir.c_str())) == NULL) {
+        std::cout << "Error(" << errno << ") opening " << dir << std::endl;
+        return errno;
+    }
+
+    while ((dirp = readdir(dp)) != NULL) {
+      if(std::string(dirp->d_name) != "." && std::string(dirp->d_name) != "..")
+        files.push_back(std::string(dirp->d_name));
+    }
+    closedir(dp);
+
+#endif
+    return 1;
+}
+
+bool isMapDir(std::string filename)
+{
+  std::string hexarray("0123456789abcdefghijklmnopqrstuvwxyz");
+  if(filename.size() < 3)
+  {    
+    for(int ch = 0; ch < filename.size(); ch ++)
+    {
+      bool found = false;
+      for(int check = 0; check < hexarray.length(); check++)
+      {
+        if(filename[ch] == hexarray[check])
+        {
+          found = true;
+          break;
+        }
+      }
+      if(!found) return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+bool convertMap(std::string mapDir)
+{
+  std::cout << "Start conversion of " << mapDir << std::endl;
+
+  struct stat stFileInfo;
+  std::string regionDir = mapDir+"/region";
+  if (stat(regionDir.c_str(), &stFileInfo) != 0)
+  {
+    std::cout << "Creating region dir" << std::endl;
+  #ifdef WIN32
+    if (_mkdir(std::string(regionDir).c_str()) == -1)
+#else
+    if (mkdir(std::string(regionDir).c_str(), 0755) == -1)
+#endif
+    {
+      //LOG(EMERG, "Map", "Error: Could not create map directory.");
+
+      exit(EXIT_FAILURE);
+    }
+  }
+    std::vector<std::string> files;
+    std::vector<std::string> files2;
+    std::vector<std::string> files3;
+    getdir(mapDir,files);
+
+    for(int i = 0; i < files.size(); i++)
+    {
+      if(isMapDir(files[i]))
+      {
+        std::string filename = mapDir+"/"+files[i];
+        getdir(filename,files2);
+        for(int ii = 0; ii < files2.size(); ii++)
+        {
+          if(isMapDir(files2[ii]))
+          {
+            int32_t x,z;
+            std::string filename = mapDir+"/"+files[i]+"/"+files2[ii];
+            getdir(filename,files3);
+            for(int j = 0; j < files3.size(); j++)
+            {
+              if(files3[j].length() > 7 && files3[j].substr(files3[j].length()-3) =="dat" && files3[j][0] == 'c')
+              {
+                std::string filename = mapDir+"/"+files[i]+"/"+files2[ii]+"/"+files3[j];
+                //std::cout << filename << std::endl;
+                NBT_Value* chunk = NBT_Value::LoadFromFile(filename);
+
+                if (chunk == NULL)
+                {
+                  continue;
+                }
+
+                NBT_Value* level = (*chunk)["Level"];
+
+                if (level == NULL)
+                {
+                  delete chunk;
+                  continue;
+                }
+
+                NBT_Value* xPos = (*level)["xPos"];
+                NBT_Value* zPos = (*level)["zPos"];
+                if (xPos && zPos)
+                {
+                  x = *xPos;
+                  z = *zPos;
+                  uint8_t *buffer = new uint8_t[ALLOCATE_NBTFILE];
+                  uint32_t len = 0;
+                  chunk->SaveToMemory(buffer, &len);
+
+                  RegionFile newRegion;
+                  newRegion.openFile(mapDir, x,z);
+                  newRegion.writeChunk(buffer, len, x, z);
+                  std::cout << ".";
+                  delete [] buffer;
+                  delete chunk;
+                }
+                else
+                {
+                  delete chunk;
+                  continue;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    std::cout << "converted" << std::endl;
 }

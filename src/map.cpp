@@ -291,7 +291,9 @@ void Map::init(int number)
     level["Data"]->Insert("SpawnY", new NBT_Value((int32_t)120));
     level["Data"]->Insert("SpawnZ", new NBT_Value((int32_t)0));
     level["Data"]->Insert("RandomSeed", new NBT_Value((int64_t)(rand() * 65535)));
-
+    level["Data"]->Insert("version", new NBT_Value((int32_t)19132));
+    level["Data"]->Insert("LevelName", new NBT_Value(std::string("Mineserver map")));
+    
     level.Insert("Trees", new NBT_Value(NBT_Value::TAG_LIST));
 
     level.SaveToFile(infile);
@@ -321,8 +323,11 @@ void Map::init(int number)
   //Not in McRegion format?
   if(version != 19132)
   {
-    LOG(EMERG, "Map", "Error: map not in McRegion format, exiting");
-    exit(EXIT_FAILURE);
+    LOG(EMERG, "Map", "Error: map not in McRegion format, converting..(old mapdata is not removed!)");
+    convertMap(mapDirectory);
+    *data["version"] = (int32_t)19132;
+    *data["LevelName"] = std::string("Mineserver level");
+    root->SaveToFile(infile);
   }
 
   /////////////
