@@ -129,19 +129,21 @@ void timer200Function()
       int randomPlayer = rand()%mineserver->user.getCount();
       double x,y,z;
       int w;
-      mineserver->user.getPositionW(mineserver->user.getUserNumbered(randomPlayer),&x,&y,&z,&w,NULL,NULL,NULL);
-      x += ((rand()%100)-50);
-      z += ((rand()%100)-50);
-      y = topBlockSuitable(x,z,w);
-      if(y>0){
-        y+=1;
-        int randomMob = rand()%4;
-        int newMob = mineserver->mob.createMob(Mobnames[randomMob].c_str());
-        MyPetMob* newMobData = new MyPetMob(newMob);
-        MyMobs.push_back(newMobData);
-        mineserver->mob.moveMobW(newMob,x,y,z,w);
-        mineserver->mob.spawnMob(newMob);
-        lastSpawn=time(NULL);
+      if(mineserver->user.getPositionW(mineserver->user.getUserNumbered(randomPlayer),&x,&y,&z,&w,NULL,NULL,NULL))
+      {
+        x += ((rand()%100)-50);
+        z += ((rand()%100)-50);
+        y = topBlockSuitable(x,z,w);
+        if(y>0){
+          y+=1;
+          int randomMob = rand()%4;
+          int newMob = mineserver->mob.createMob(Mobnames[randomMob].c_str());
+          MyPetMob* newMobData = new MyPetMob(newMob);
+          MyMobs.push_back(newMobData);
+          mineserver->mob.moveMobW(newMob,x,y,z,w);
+          mineserver->mob.spawnMob(newMob);
+          lastSpawn=time(NULL);
+        }
       }
     }
   }

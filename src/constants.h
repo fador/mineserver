@@ -197,6 +197,7 @@ const unsigned int SERVER_CONSOLE_UID = -1;
 void initConstants();
 void freeConstants();
 
-const int ALLOCATE_NBTFILE = 200000;
+//allocate 1 MB for chunk files
+const int ALLOCATE_NBTFILE = 1048576;
 
 #endif

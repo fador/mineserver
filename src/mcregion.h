@@ -37,13 +37,13 @@ class RegionFile
   private:
 
 
-    static const int SECTOR_BYTES = 4096;
-    static const int SECTOR_INTS = SECTOR_BYTES / 4;
+    static const uint32_t SECTOR_BYTES = 4096;
+    static const uint32_t SECTOR_INTS = SECTOR_BYTES / 4;
 
-    static const int CHUNK_HEADER_SIZE = 5;
+    static const uint32_t CHUNK_HEADER_SIZE = 5;
 
     std::fstream regionFile;
-    size_t fileLength;
+    uint32_t fileLength;
 
     int offsets[SECTOR_INTS];
     int timestamps[SECTOR_INTS];
@@ -55,10 +55,11 @@ class RegionFile
   public:
 
     RegionFile();
+    ~RegionFile();
     bool openFile(std::string mapDir,int32_t x, int32_t z);
 
-    bool writeChunk(int8_t *chunkdata, int32_t datalen, int32_t x, int32_t z);
-    bool readChunk(int8_t *chunkdata, int32_t *datalen, int32_t x, int32_t z);
+    bool writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int32_t z);
+    bool readChunk(uint8_t *chunkdata, uint32_t *datalen, int32_t x, int32_t z);
 
   private:
     /* is this an invalid chunk coordinate? */    
@@ -95,7 +96,7 @@ class RegionFile
 
 
     /* write a chunk data to the region file at specified sector number */
-    void write(int sectorNumber, int8_t *data, int datalen)
+    void write(int sectorNumber, uint8_t *data, uint32_t datalen)
     {
         regionFile.seekp(sectorNumber * SECTOR_BYTES);
         int chunklen = datalen + 1;

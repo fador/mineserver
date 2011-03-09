@@ -731,7 +731,7 @@ Map* Mineserver::map(int n)
   {
     return m_map[n];
   }
-  logger()->log(LogType::LOG_WARNING, "Map", "None existant map requested in Mineserver::get()->map(x). Map 0 passed");
+  logger()->log(LogType::LOG_WARNING, "Map", "None existant map requested in Mineserver::get()->map(x). Map 0 passed ");
   return m_map[0];
 }
 

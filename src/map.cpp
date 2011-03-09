@@ -59,6 +59,7 @@
 #include "mineserver.h"
 #include "tree.h"
 #include "furnaceManager.h"
+#include "mcregion.h"
 
 Map::Map(const Map& oldmap)
 {
@@ -313,6 +314,17 @@ void Map::init(int number)
   mapTime      = (int64_t) * data["Time"];
   mapSeed      = (int64_t) * data["RandomSeed"];
 
+
+  //Check for McRegion format!
+  int32_t version = (int32_t)*data["version"];
+
+  //Not in McRegion format?
+  if(version != 19132)
+  {
+    LOG(EMERG, "Map", "Error: map not in McRegion format, exiting");
+    exit(EXIT_FAILURE);
+  }
+
   /////////////
   // Basic tree handling
 
@@ -395,6 +407,9 @@ bool Map::saveWholeMap()
     *data["SpawnX"] = spawnPos.x();
     *data["SpawnY"] = spawnPos.y();
     *data["SpawnZ"] = spawnPos.z();
+
+    *data["version"] = (int32_t)19132;
+    *data["LevelName"] = std::string("Mineserver level");
 
     NBT_Value* trees = ((*root)["Trees"]);
 
@@ -1077,11 +1092,23 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   int mapposz = z;
   int moduloz = mapposz & 0x3F;
 
-  std::string infile = mapDirectory + "/" + base36_encode(modulox) + "/" + base36_encode(moduloz) + "/c." + base36_encode(mapposx) + "." + base36_encode(mapposz) + ".dat";
-
-  struct stat stFileInfo;
-  if (stat(infile.c_str(), &stFileInfo) != 0)
+  RegionFile *newRegion = new RegionFile;
+  if(!newRegion->openFile(mapDirectory, x,z))
   {
+    std::cout << "Error loading file" << std::endl;
+    delete newRegion;
+    return NULL;
+  }
+  uint8_t *chunkPointer =  new uint8_t[ALLOCATE_NBTFILE];
+  uint32_t chunkLen = 0;
+  if(!newRegion->readChunk(chunkPointer, &chunkLen, x, z))
+  {
+
+  //std::string infile = mapDirectory + "/" + base36_encode(modulox) + "/" + base36_encode(moduloz) + "/c." + base36_encode(mapposx) + "." + base36_encode(mapposz) + ".dat";
+
+  //struct stat stFileInfo;
+  //if (stat(infile.c_str(), &stFileInfo) != 0)
+  //{
     // If generate (false only for lightmapgenerator)
     if (generate)
     {
@@ -1117,6 +1144,8 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
               *data["SpawnX"] = (int32_t)spawnPos.x();
               *data["SpawnY"] = (int32_t)spawnPos.y();
               *data["SpawnZ"] = (int32_t)spawnPos.z();
+              *data["version"] = (int32_t)19132;
+              *data["LevelName"] = std::string("Mineserver level");
 
               root->SaveToFile(infile);
 
@@ -1129,13 +1158,16 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
     }
     else
     {
+      delete newRegion;
       return NULL;
     }
   }
-
+  delete newRegion;
   chunk = new sChunk();
 
-  chunk->nbt = NBT_Value::LoadFromFile(infile.c_str());
+  chunk->nbt = NBT_Value::LoadFromMemory(chunkPointer, chunkLen);
+
+  delete [] chunkPointer;
 
 
   if (chunk->nbt == NULL)
@@ -1393,10 +1425,11 @@ bool Map::saveMap(int x, int z)
   int mapposz = z;
   int moduloz = mapposz & 0x3F;
 
-  std::string outfile = mapDirectory + "/" + base36_encode(modulox) + "/" + base36_encode(moduloz) + "/c." +
-                        base36_encode(mapposx) + "." + base36_encode(mapposz) + ".dat";
+  //std::string outfile = mapDirectory + "/" + base36_encode(modulox) + "/" + base36_encode(moduloz) + "/c." +
+  //                      base36_encode(mapposx) + "." + base36_encode(mapposz) + ".dat";
 
   // Try to create parent directories if necessary
+  /*
   struct stat stFileInfo;
   if (stat(outfile.c_str(), &stFileInfo) != 0)
   {
@@ -1425,7 +1458,7 @@ bool Map::saveMap(int x, int z)
         return false;
     }
   }
-
+  */
 
   NBT_Value* entityList = (*(*chunk->nbt)["Level"])["TileEntities"];
 
@@ -1506,8 +1539,16 @@ bool Map::saveMap(int x, int z)
     entityList->GetList()->push_back(val);
   }
 
+  uint8_t *buffer = new uint8_t[ALLOCATE_NBTFILE];
+  uint32_t len;
+  chunk->nbt->SaveToMemory(buffer, &len);
 
-  chunk->nbt->SaveToFile(outfile);
+  RegionFile newRegion;
+  newRegion.openFile(mapDirectory, x,z);
+
+  newRegion.writeChunk(buffer, len, x, z);
+
+  //chunk->nbt->SaveToFile(outfile);
 
   // Set "not changed"
   chunk->changed    = false;
@@ -1585,6 +1626,8 @@ bool Map::sendMultiBlocks(std::vector<vec>* blocks)
     chunk->sendPacket(pT);
     chunk->sendPacket(pM);
   }
+
+  return true;
 }
 
 // Send chunk to user

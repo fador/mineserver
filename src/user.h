@@ -51,6 +51,8 @@ struct position
   double stance;
   float yaw;
   float pitch;
+  position(): x(0),y(0),z(0),map(0)
+  { }
 };
 
 class User
