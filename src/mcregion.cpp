@@ -78,7 +78,7 @@ bool RegionFile::openFile(std::string mapDir, int32_t chunkX, int32_t chunkZ)
   if((chunkZ < 0)) strchunkZ.append('-',1);
   my_itoa(abs(chunkX >> 5),strchunkX,10);
   if((chunkX < 0)) strchunkX.append('-',1);
-  regionFile.open(mapDir + "/r." + strchunkZ + "." + strchunkX + ".mcr", std::ios::binary);
+  regionFile.open(std::string(mapDir + "/r." + strchunkZ + "." + strchunkX + ".mcr"), std::ios::binary);
 
   //Store file length
   regionFile.seekg (0, std::ios::end);

@@ -28,6 +28,8 @@
 #ifndef _MCREGION_H_
 #define _MCREGION_H_
 
+#include <fstream>
+
   enum { VERSION_GZIP = 1,VERSION_DEFLATE };
 
 class RegionFile
