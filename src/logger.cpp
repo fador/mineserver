@@ -35,7 +35,6 @@
 #include <string>
 
 #include "mineserver.h"
-#include "tools.h"
 #include "plugin.h"
 
 #include "logger.h"
