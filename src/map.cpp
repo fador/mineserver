@@ -324,6 +324,8 @@ void Map::init(int number)
   if(version != 19132)
   {
     LOG(EMERG, "Map", "Error: map not in McRegion format, converting..(old mapdata is not removed!)");
+    LOG(EMERG, "Map", "Error: aborted!");
+    exit(EXIT_SUCCESS);
     convertMap(mapDirectory);
     *data["version"] = (int32_t)19132;
     *data["LevelName"] = std::string("Mineserver level");

@@ -183,7 +183,6 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
   uint32_t sectorsAllocated = offset & 0xFF;
   uint32_t sectorsNeeded = (datalen + CHUNK_HEADER_SIZE) / SECTOR_BYTES + 1;
 
-
   // maximum chunk size is 1MB
   if (sectorsNeeded >= 256)
   {
@@ -482,7 +481,7 @@ bool convertMap(std::string mapDir)
                   uint32_t len = 0;
                   chunk->SaveToMemory(buffer, &len);                  
                   
-                  region->writeChunk(buffer, len, x, z, true);
+                  region->writeChunk(buffer, len, x, z);
                 }
                 delete chunk;
               }
@@ -500,4 +499,6 @@ bool convertMap(std::string mapDir)
       delete fileMap[it->first];
     }
     std::cout << "converted" << std::endl;
+
+    return true;
 }
