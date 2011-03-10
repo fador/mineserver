@@ -79,7 +79,10 @@ RegionFile::RegionFile(): sizeDelta(0)
 
 RegionFile::~RegionFile()
 {
-
+  if (regionFile != NULL)
+  {
+    fclose(regionFile);
+  }
 }
 
 bool RegionFile::openFile(std::string mapDir, int32_t chunkX, int32_t chunkZ)
@@ -93,18 +96,28 @@ bool RegionFile::openFile(std::string mapDir, int32_t chunkX, int32_t chunkZ)
   if((chunkZ < 0)) strchunkZ = "-" + strchunkZ;
   my_itoa(abs(chunkX >> 5),strchunkX,10);
   if((chunkX < 0)) strchunkX = "-" + strchunkX;
-  regionFile.open(std::string(mapDir + "/region/r." + strchunkX + "." + strchunkZ + ".mcr").c_str(), std::ios::binary | std::ios_base::out | std::ios_base::in | std::ios_base::app);
+  //regionFile.open(std::string(mapDir + "/region/r." + strchunkX + "." + strchunkZ + ".mcr").c_str(), std::ios::binary | std::ios_base::app);
+  //regionFile.close();
+  struct stat stFileInfo;
+  if (stat(std::string(mapDir + "/region/r." + strchunkX + "." + strchunkZ + ".mcr").c_str(), &stFileInfo) != 0)
+  {
+    regionFile = fopen(std::string(mapDir + "/region/r." + strchunkX + "." + strchunkZ + ".mcr").c_str(), "w+");
+  }
+  else
+  {
+    regionFile = fopen(std::string(mapDir + "/region/r." + strchunkX + "." + strchunkZ + ".mcr").c_str(), "rb+");
+  }
 
-  if(!regionFile.is_open())
+  if (regionFile == NULL)
   {
     std::cout << "Failed to open file " << std::string(mapDir + "/region/r." + strchunkX + "." + strchunkZ + ".mcr") << std::endl;
     return false;
   }
 
   //Store file length
-  regionFile.seekg (0, std::ios::end);
-  fileLength = (uint32_t)regionFile.tellg();
-  regionFile.seekg (0, std::ios::beg);
+  fseek(regionFile,0, SEEK_END);
+  fileLength = (uint32_t)ftell(regionFile);
+  fseek(regionFile,0, SEEK_SET);
 
 
   //New file?
@@ -114,46 +127,47 @@ bool RegionFile::openFile(std::string mapDir, int32_t chunkX, int32_t chunkZ)
     //Offsets
     for (int i = 0; i < SECTOR_INTS; i++)
     {
-      regionFile.write(reinterpret_cast<const char *>(&zeroInt),4);
+      fwrite(reinterpret_cast<const char *>(&zeroInt),4,1,regionFile);
     }
     //Timestamps
     for (int i = 0; i < SECTOR_INTS; i++)
     {
-      regionFile.write(reinterpret_cast<const char *>(&zeroInt),4);
+      fwrite(reinterpret_cast<const char *>(&zeroInt),4,1,regionFile);
     }
 
-    //Get new size
-    regionFile.seekg (0, std::ios::end);
-    fileLength = (uint32_t)regionFile.tellg();
-    regionFile.seekg (0, std::ios::beg);
+      //Get new size
+    fseek(regionFile,0, SEEK_END);
+    fileLength = (uint32_t)ftell(regionFile);
+    fseek(regionFile,0, SEEK_SET);
   }
   //Not multiple of 4096
-  if((fileLength & 0xffff) != 0)
+  if((fileLength & 0xfff) != 0)
   {
     int zeroInt = 0;
     for (uint32_t i = 0; i < 0xfff-(fileLength & 0xfff); i++)
     {
-      regionFile.write(reinterpret_cast<const char *>(&zeroInt),1);
+      fwrite(reinterpret_cast<const char *>(&zeroInt),1,1,regionFile);
     }
     //Get new size
-    regionFile.seekg (0, std::ios::end);
-    fileLength = (uint32_t)regionFile.tellg();
-    regionFile.seekg (0, std::ios::beg);
+    fseek(regionFile,0, SEEK_END);
+    fileLength = (uint32_t)ftell(regionFile);
+    fseek(regionFile,0, SEEK_SET);
   }
   int sectorCount = fileLength/SECTOR_BYTES;
 
+  sectorFree.clear();
   sectorFree.resize(sectorCount,true);
   //Offsets
   sectorFree[0] = false;
   //Timestamps
   sectorFree[1] = false;
 
-  regionFile.seekg (0, std::ios::beg);
+  fseek(regionFile,0, SEEK_SET);
   //Read sectors and mark used
   for (uint32_t i = 0; i < SECTOR_INTS; i++)
   {
     uint32_t offset = 0;
-    regionFile.read(reinterpret_cast<char *>(&offset),4);
+    fread(reinterpret_cast<char *>(&offset),4,1,regionFile);
     offset = ntohl(offset);
     offsets[i] = offset;
     if (offset != 0 && (offset >> 8) + (offset & 0xFF) <= sectorFree.size())
@@ -168,7 +182,7 @@ bool RegionFile::openFile(std::string mapDir, int32_t chunkX, int32_t chunkZ)
   for (uint32_t i = 0; i < SECTOR_INTS; ++i)
   {
     uint32_t lastModValue = 0;
-    regionFile.read(reinterpret_cast<char *>(&lastModValue),4);
+    fread(reinterpret_cast<char *>(&lastModValue),4,1,regionFile);
     lastModValue = ntohl(lastModValue);
     timestamps[i] = lastModValue;
   }
@@ -184,7 +198,7 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
   uint32_t offset = getOffset(x, z);
   uint32_t sectorNumber = offset >> 8;
   uint32_t sectorsAllocated = offset & 0xFF;
-  uint32_t sectorsNeeded = (datalen + CHUNK_HEADER_SIZE) / SECTOR_BYTES + 1;
+  uint32_t sectorsNeeded = (datalen + CHUNK_HEADER_SIZE +SECTOR_BYTES-1) / SECTOR_BYTES + 1;
 
   // maximum chunk size is 1MB
   if (sectorsNeeded >= 256)
@@ -195,10 +209,11 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
   //Current space is large enought
   if (sectorNumber != 0 && sectorsAllocated >= sectorsNeeded)
   {
+    //std::cout << "Save rewrite" << std::endl;
     write(sectorNumber, chunkdata, datalen);
   }
   //Need more space!
-  else if(!newChunk)
+  else
   {
     //Free current sectors
     for (uint32_t i = 0; i < sectorsAllocated; i++)
@@ -207,7 +222,7 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
     }
 
     int runStart = -1;
-    for(uint32_t i = 0; i < sectorFree.size(); i++)
+    for(uint32_t i = 2; i < sectorFree.size(); i++)
     {
       if(sectorFree[i])
       {
@@ -216,6 +231,7 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
       }
     }
     uint32_t runLength = 0;
+
     if (runStart != -1)
     {
       for (uint32_t i = runStart; i < sectorFree.size(); i++)
@@ -242,8 +258,9 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
     }
 
     //Did we find the space we need?
-    if (!newChunk && runLength >= sectorsNeeded)
+    if (runLength >= sectorsNeeded)
     {
+      //std::cout << "Save reuse" << std::endl;
       sectorNumber = runStart;
       setOffset(x, z, (sectorNumber << 8) | sectorsNeeded);
 
@@ -258,11 +275,12 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
     //If no space, grow file
     else
     {
-      regionFile.seekp(0, std::ios::end);
+      //std::cout << "Save grow" << std::endl;
+      fseek(regionFile,0, SEEK_END);
       sectorNumber = sectorFree.size();
       char *zerobytes = new char[SECTOR_BYTES*sectorsNeeded];
       memset(zerobytes, 0, SECTOR_BYTES*sectorsNeeded);
-      regionFile.write(zerobytes, SECTOR_BYTES*sectorsNeeded);
+      fwrite(zerobytes, SECTOR_BYTES*sectorsNeeded,1,regionFile);
       for (uint32_t i = 0; i < sectorsNeeded; i++)
       {
         sectorFree.push_back(false);
@@ -306,9 +324,9 @@ bool RegionFile::readChunk(uint8_t *chunkdata, uint32_t *datalen, int32_t x, int
     return false;
   }
 
-  regionFile.seekg(sectorNumber * SECTOR_BYTES);
+  fseek(regionFile,sectorNumber * SECTOR_BYTES, SEEK_SET);
   uint32_t length = 0;
-  regionFile.read(reinterpret_cast<char *>(&length),4);
+  fread(reinterpret_cast<char *>(&length),4,1,regionFile);
   length = ntohl(length);
 
   //Invalid length?
@@ -319,11 +337,11 @@ bool RegionFile::readChunk(uint8_t *chunkdata, uint32_t *datalen, int32_t x, int
   }
 
   char version;
-  regionFile.read(&version,1);
+  fread(&version,1,1,regionFile);
   //TODO: do something with version?
 
   *datalen = length;
-  regionFile.read((char *)chunkdata, length);
+  fread((char *)chunkdata, length,1,regionFile);
 
   //std::cout << "Read " << *datalen << " bytes!" << std::endl;
   return true;
@@ -474,6 +492,7 @@ bool convertMap(std::string mapDir)
                     if(fileMap.count(hash))
                     {
                       delete fileMap[hash];
+                      fileMap[hash] = NULL;
                     }
                     //std::cout << "Create new file "  << hash << std::endl;
                     region = new RegionFile;
@@ -496,10 +515,13 @@ bool convertMap(std::string mapDir)
       }
     }
     delete [] buffer;
-
+    
     for (std::map<uint32_t,RegionFile*>::iterator it = fileMap.begin(); it != fileMap.end(); ++it)
     {
-      delete fileMap[it->first];
+      if(fileMap[it->first] != NULL)
+      {
+        delete fileMap[it->first];
+      }
     }
     std::cout << "converted" << std::endl;
 

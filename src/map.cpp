@@ -292,7 +292,7 @@ void Map::init(int number)
     level["Data"]->Insert("SpawnZ", new NBT_Value((int32_t)0));
     level["Data"]->Insert("RandomSeed", new NBT_Value((int64_t)(rand() * 65535)));
     level["Data"]->Insert("version", new NBT_Value((int32_t)19132));
-    level["Data"]->Insert("LevelName", new NBT_Value(std::string("Mineserver map")));
+    //level["Data"]->Insert("LevelName", new NBT_Value(std::string("Mineserver map")));
     
     level.Insert("Trees", new NBT_Value(NBT_Value::TAG_LIST));
 
@@ -324,11 +324,13 @@ void Map::init(int number)
   if(version != 19132)
   {
     LOG(EMERG, "Map", "Error: map not in McRegion format, converting..(old mapdata is not removed!)");
-    LOG(EMERG, "Map", "Error: aborted!");
-    exit(EXIT_SUCCESS);
+    LOG(EMERG, "Map", "THIS MIGHT TAKE A WHILE");
+    LOG(EMERG, "Map", "every dot is converted subfolder and | is root level folder");
+    //LOG(EMERG, "Map", "Error: aborted!");
+    //exit(EXIT_SUCCESS);
     convertMap(mapDirectory);
     *data["version"] = (int32_t)19132;
-    *data["LevelName"] = std::string("Mineserver level");
+    //*data["LevelName"] = std::string("Mineserver level");
     root->SaveToFile(infile);
   }
 
@@ -416,7 +418,7 @@ bool Map::saveWholeMap()
     *data["SpawnZ"] = spawnPos.z();
 
     *data["version"] = (int32_t)19132;
-    *data["LevelName"] = std::string("Mineserver level");
+    //*data["LevelName"] = std::string("Mineserver level");
 
     NBT_Value* trees = ((*root)["Trees"]);
 
@@ -1152,7 +1154,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
               *data["SpawnY"] = (int32_t)spawnPos.y();
               *data["SpawnZ"] = (int32_t)spawnPos.z();
               *data["version"] = (int32_t)19132;
-              *data["LevelName"] = std::string("Mineserver level");
+              //*data["LevelName"] = std::string("Mineserver level");
 
               root->SaveToFile(infile);
 
@@ -1466,6 +1468,23 @@ bool Map::saveMap(int x, int z)
     }
   }
   */
+
+  //Create directory for region files
+  struct stat stFileInfo;
+  std::string regionDir = mapDirectory+"/region";
+  if (stat(regionDir.c_str(), &stFileInfo) != 0)
+  {
+  #ifdef WIN32
+    if (_mkdir(std::string(regionDir).c_str()) == -1)
+#else
+    if (mkdir(std::string(regionDir).c_str(), 0755) == -1)
+#endif
+    {
+      LOG(EMERG, "Map", "Error: Could not create map/region directory.");
+
+      exit(EXIT_FAILURE);
+    }
+  }
 
   NBT_Value* entityList = (*(*chunk->nbt)["Level"])["TileEntities"];
 

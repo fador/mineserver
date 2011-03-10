@@ -42,10 +42,10 @@ class RegionFile
 
     static const uint32_t CHUNK_HEADER_SIZE = 5;
 
-    std::fstream regionFile;
+    FILE *regionFile;
     uint32_t fileLength;
 
-    int offsets[SECTOR_INTS];
+    uint32_t offsets[SECTOR_INTS];
     int timestamps[SECTOR_INTS];
     int sizeDelta;
     std::vector<bool> sectorFree;
@@ -71,7 +71,7 @@ class RegionFile
         return x < 0 || x >= 32 || z < 0 || z >= 32;
     }
     
-    int getOffset(int x, int z)
+    uint32_t getOffset(int x, int z)
     {
         return offsets[(x + z * 32)];
     }
@@ -84,30 +84,31 @@ class RegionFile
     void setOffset(int x, int z, int offset)
     {    
       offsets[(x + z * 32)] = offset;
-      regionFile.seekp((x + z * 32) * 4, std::ios::beg);
+      fseek(regionFile,(x + z * 32) * 4, SEEK_SET);
+      
       offset = htonl(offset);
-      regionFile.write(reinterpret_cast<const char *>(&offset),4);
+      const char *tempBuf = (const char *)&offset;
+      fwrite(tempBuf,4,1,regionFile);
     }
 
     void setTimestamp(int x, int z, int timestamp)
     {        
       timestamps[(x + z * 32)] = timestamp;
-      regionFile.seekp(SECTOR_BYTES + (x + z * 32) * 4, std::ios::beg);
+      fseek(regionFile,SECTOR_BYTES + (x + z * 32) * 4, SEEK_SET);
       timestamp = htonl(timestamp);
-      regionFile.write(reinterpret_cast<const char *>(&timestamp),4);
+      fwrite(reinterpret_cast<const char *>(&timestamp),4,1,regionFile);
     }
-
-
+    
     /* write a chunk data to the region file at specified sector number */
     void write(int sectorNumber, uint8_t *data, uint32_t datalen)
     {
-        regionFile.seekp(sectorNumber * SECTOR_BYTES, std::ios::beg);
+        fseek(regionFile,sectorNumber * SECTOR_BYTES, SEEK_SET);
         int chunklen = datalen + 1;
         chunklen = htonl(chunklen);
-        regionFile.write(reinterpret_cast<const char *>(&chunklen),4); // chunk length
+        fwrite(reinterpret_cast<const char *>(&chunklen),4,1,regionFile); // chunk length
         char version = VERSION_DEFLATE;
-        regionFile.write(&version,1); // chunk version number
-        regionFile.write((char *)data, datalen); // chunk data
+        fwrite(&version,1,1,regionFile); // chunk version number
+        fwrite((char *)data, datalen,1,regionFile); // chunk data
     }
 };
 
