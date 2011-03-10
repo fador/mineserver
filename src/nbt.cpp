@@ -553,7 +553,7 @@ NBT_Value* NBT_Value::LoadFromFile(const std::string& filename)
   if (uncompressedSize == 0)
   {
     Mineserver::get()->logger()->log(LogType::LOG_WARNING, "NBT", "Unable to determine uncompressed size of " + filename);
-    uncompressedSize = ALLOCATE_NBTFILE;
+    uncompressedSize = ALLOCATE_NBTFILE*10;
   }
 
   uint8_t* uncompressedData = new uint8_t[uncompressedSize];
@@ -593,7 +593,7 @@ NBT_Value* NBT_Value::LoadFromMemory(uint8_t* buffer, uint32_t len)
   //inflateInit2(&zstream,16+MAX_WBITS);
   inflateInit(&zstream);
 
-  uint32_t uncompressedSize   = ALLOCATE_NBTFILE;
+  uint32_t uncompressedSize   = ALLOCATE_NBTFILE*10;
   uint8_t *uncompressedBuffer = new uint8_t[uncompressedSize];
 
   zstream.avail_out = uncompressedSize;
@@ -657,31 +657,10 @@ void NBT_Value::SaveToMemory(uint8_t* buffer, uint32_t* len)
   NBTBuffer.push_back(0);
   NBTBuffer.push_back(0);
 
-  z_stream zstream2;
-  zstream2.zalloc = Z_NULL;
-  zstream2.zfree = Z_NULL;
-  zstream2.opaque = Z_NULL;
-  zstream2.next_out=buffer;
-  zstream2.next_in=&NBTBuffer[0];
-  zstream2.avail_in=NBTBuffer.size();
-  zstream2.avail_out=ALLOCATE_NBTFILE;
-  zstream2.total_out=0;
-  zstream2.total_in=0;
-  deflateInit(&zstream2, Z_DEFAULT_COMPRESSION);
-  /*
-  deflateInit2(&zstream2, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15+MAX_WBITS, 8,
-             Z_DEFAULT_STRATEGY);
-             */
+  uLongf written = 0;
+  compress(buffer, &written, &NBTBuffer[0], NBTBuffer.size());
+  *len = written;
 
-  //Deflate the data
-  if(int state=deflate(&zstream2,Z_FULL_FLUSH)!=Z_OK)
-  {
-    std::cout << "Error in deflate: " << state << std::endl;            
-  }
-
-  deflateEnd(&zstream2);
-
-  *len = zstream2.total_out;
 }
 
 void NBT_Value::Write(std::vector<uint8_t> &buffer)
