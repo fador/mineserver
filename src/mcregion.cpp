@@ -360,8 +360,8 @@ bool RegionFile::readChunk(uint8_t *chunkdata, uint32_t *datalen, int32_t x, int
     return false;
   }
 
-  *datalen = length;
-  fread((char *)chunkdata, length,1,regionFile);
+  *datalen = length-1;
+  fread((char *)chunkdata, length-1,1,regionFile);
 
   //std::cout << "Read " << *datalen << " bytes!" << std::endl;
   return true;
