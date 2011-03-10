@@ -82,7 +82,7 @@ class RegionFile
     void setOffset(int x, int z, int offset)
     {    
       offsets[(x + z * 32)] = offset;
-      regionFile.seekp((x + z * 32) * 4);
+      regionFile.seekp((x + z * 32) * 4, std::ios::beg);
       offset = htonl(offset);
       regionFile.write(reinterpret_cast<const char *>(&offset),4);
     }
@@ -90,7 +90,7 @@ class RegionFile
     void setTimestamp(int x, int z, int timestamp)
     {        
       timestamps[(x + z * 32)] = timestamp;
-      regionFile.seekp(SECTOR_BYTES + (x + z * 32) * 4);
+      regionFile.seekp(SECTOR_BYTES + (x + z * 32) * 4, std::ios::beg);
       timestamp = htonl(timestamp);
       regionFile.write(reinterpret_cast<const char *>(&timestamp),4);
     }
@@ -99,7 +99,7 @@ class RegionFile
     /* write a chunk data to the region file at specified sector number */
     void write(int sectorNumber, uint8_t *data, uint32_t datalen)
     {
-        regionFile.seekp(sectorNumber * SECTOR_BYTES);
+        regionFile.seekp(sectorNumber * SECTOR_BYTES, std::ios::beg);
         int chunklen = datalen + 1;
         chunklen = htonl(chunklen);
         regionFile.write(reinterpret_cast<const char *>(&chunklen),4); // chunk length

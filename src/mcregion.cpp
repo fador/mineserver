@@ -137,7 +137,7 @@ bool RegionFile::openFile(std::string mapDir, int32_t chunkX, int32_t chunkZ)
   }
   int sectorCount = fileLength/SECTOR_BYTES;
 
-  sectorFree.resize(sectorCount, true);
+  sectorFree.resize(sectorCount,true);
   //Offsets
   sectorFree[0] = false;
   //Timestamps
@@ -189,7 +189,7 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
   }
 
   //Current space is large enought
-  if (sectorNumber != 0 && sectorsAllocated == sectorsNeeded)
+  if (sectorNumber != 0 && sectorsAllocated >= sectorsNeeded)
   {
     write(sectorNumber, chunkdata, datalen);
   }
@@ -256,15 +256,14 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
     {
       regionFile.seekp(0, std::ios::end);
       sectorNumber = sectorFree.size();
+      char *zerobytes = new char[SECTOR_BYTES*sectorsNeeded];
+      memset(zerobytes, 0, SECTOR_BYTES*sectorsNeeded);
+      regionFile.write(zerobytes, SECTOR_BYTES*sectorsNeeded);
       for (uint32_t i = 0; i < sectorsNeeded; i++)
       {
-        char zerobyte = 0;
-        for(uint32_t b = 0; b < SECTOR_BYTES; b++)
-        {
-          regionFile.write(&zerobyte, 1);
-        }
         sectorFree.push_back(false);
       }
+      delete [] zerobytes;
       sizeDelta += SECTOR_BYTES * sectorsNeeded;
 
       //Write chunk data
@@ -414,6 +413,10 @@ bool convertMap(std::string mapDir)
     std::vector<std::string> files2;
     std::vector<std::string> files3;
     getdir(mapDir,files);
+    uint8_t *buffer = new uint8_t[ALLOCATE_NBTFILE];
+
+    RegionFile *region;
+    std::map<int,RegionFile*> fileMap;
 
     for(int i = 0; i < files.size(); i++)
     {
@@ -426,14 +429,14 @@ bool convertMap(std::string mapDir)
           if(isMapDir(files2[ii]))
           {
             int32_t x,z;
-            std::string filename = mapDir+"/"+files[i]+"/"+files2[ii];
+            filename = mapDir+"/"+files[i]+"/"+files2[ii];
             getdir(filename,files3);
             for(int j = 0; j < files3.size(); j++)
             {
               if(files3[j].length() > 7 && files3[j].substr(files3[j].length()-3) =="dat" && files3[j][0] == 'c')
               {
-                std::string filename = mapDir+"/"+files[i]+"/"+files2[ii]+"/"+files3[j];
-                //std::cout << filename << std::endl;
+                filename = mapDir+"/"+files[i]+"/"+files2[ii]+"/"+files3[j];
+                
                 NBT_Value* chunk = NBT_Value::LoadFromFile(filename);
 
                 if (chunk == NULL)
@@ -455,27 +458,37 @@ bool convertMap(std::string mapDir)
                 {
                   x = *xPos;
                   z = *zPos;
-                  uint8_t *buffer = new uint8_t[ALLOCATE_NBTFILE];
-                  uint32_t len = 0;
-                  chunk->SaveToMemory(buffer, &len);
+                  if(x & 0xffff0000 || z & 0xffff0000)
+                  {
+                    continue;
+                  }
+                  int hash = x<<16 | z;
 
-                  RegionFile newRegion;
-                  newRegion.openFile(mapDir, x,z);
-                  newRegion.writeChunk(buffer, len, x, z);
+                  if(fileMap.count(hash))
+                  {
+                    region = fileMap[hash];
+                  }
+                  else
+                  {
+                    region = new RegionFile;
+                    fileMap[hash] = region;
+                    region->openFile(mapDir, x,z);
+                  }
+
+                  uint32_t len = 0;
+                  chunk->SaveToMemory(buffer, &len);                  
+                  
+                  region->writeChunk(buffer, len, x, z);
                   std::cout << ".";
-                  delete [] buffer;
-                  delete chunk;
                 }
-                else
-                {
-                  delete chunk;
-                  continue;
-                }
+                delete chunk;
               }
             }
-          }
+          }          
         }
+        std::cout << filename << std::endl;
       }
     }
+    delete [] buffer;
     std::cout << "converted" << std::endl;
 }
