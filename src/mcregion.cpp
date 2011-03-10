@@ -81,6 +81,8 @@ RegionFile::~RegionFile()
 
 bool RegionFile::openFile(std::string mapDir, int32_t chunkX, int32_t chunkZ)
 {
+  this->x = chunkX;
+  this->z = chunkZ;
   std::string strchunkZ;
   std::string strchunkX;
   //std::cout << "openFile(" << chunkX << "," << chunkZ << ")";
@@ -170,7 +172,7 @@ bool RegionFile::openFile(std::string mapDir, int32_t chunkX, int32_t chunkZ)
   return true;
 }
 
-bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int32_t z)
+bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int32_t z, bool newChunk)
 {
    
   x = x & 31;
@@ -194,7 +196,7 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
     write(sectorNumber, chunkdata, datalen);
   }
   //Need more space!
-  else
+  else if(!newChunk)
   {
     //Free current sectors
     for (uint32_t i = 0; i < sectorsAllocated; i++)
@@ -238,7 +240,7 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
     }
 
     //Did we find the space we need?
-    if (runLength >= sectorsNeeded)
+    if (!newChunk && runLength >= sectorsNeeded)
     {
       sectorNumber = runStart;
       setOffset(x, z, (sectorNumber << 8) | sectorsNeeded);
@@ -416,7 +418,7 @@ bool convertMap(std::string mapDir)
     uint8_t *buffer = new uint8_t[ALLOCATE_NBTFILE];
 
     RegionFile *region;
-    std::map<int,RegionFile*> fileMap;
+    std::map<uint32_t,RegionFile*> fileMap;
 
     for(int i = 0; i < files.size(); i++)
     {
@@ -458,18 +460,20 @@ bool convertMap(std::string mapDir)
                 {
                   x = *xPos;
                   z = *zPos;
-                  if(x & 0xffff0000 || z & 0xffff0000)
-                  {
-                    continue;
-                  }
-                  int hash = x<<16 | z;
 
-                  if(fileMap.count(hash))
+                  uint32_t hash = (((x >> 5)&0xffff)<<16) | ((z >> 5)&0xffff);
+
+                  if(fileMap.count(hash) && fileMap[hash]->x == x && fileMap[hash]->z == z)
                   {
                     region = fileMap[hash];
                   }
                   else
                   {
+                    if(fileMap.count(hash))
+                    {
+                      delete fileMap[hash];
+                    }
+                    //std::cout << "Create new file "  << hash << std::endl;
                     region = new RegionFile;
                     fileMap[hash] = region;
                     region->openFile(mapDir, x,z);
@@ -478,17 +482,22 @@ bool convertMap(std::string mapDir)
                   uint32_t len = 0;
                   chunk->SaveToMemory(buffer, &len);                  
                   
-                  region->writeChunk(buffer, len, x, z);
-                  std::cout << ".";
+                  region->writeChunk(buffer, len, x, z, true);
                 }
                 delete chunk;
               }
             }
+            std::cout << ".";
           }          
         }
-        std::cout << filename << std::endl;
+        std::cout << "|";
       }
     }
     delete [] buffer;
+
+    for (std::map<uint32_t,RegionFile*>::iterator it = fileMap.begin(); it != fileMap.end(); ++it)
+    {
+      delete fileMap[it->first];
+    }
     std::cout << "converted" << std::endl;
 }

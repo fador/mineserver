@@ -54,12 +54,14 @@ class RegionFile
 
   public:
 
+    int x,z;
+
     RegionFile();
     ~RegionFile();    
 
     bool openFile(std::string mapDir,int32_t x, int32_t z);
 
-    bool writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int32_t z);
+    bool writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int32_t z, bool newChunk = false);
     bool readChunk(uint8_t *chunkdata, uint32_t *datalen, int32_t x, int32_t z);
 
   private:
