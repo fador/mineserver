@@ -56,6 +56,7 @@ struct RegionFile {
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <cstring>
 #endif
 #include <sys/stat.h>
 #include <fstream>
@@ -355,8 +356,8 @@ int getdir (std::string dir, std::vector<std::string> &files)
     DIR *dp;
     struct dirent *dirp;
     if((dp  = opendir(dir.c_str())) == NULL) {
-        std::cout << "Error(" << errno << ") opening " << dir << std::endl;
-        return errno;
+        //std::cout << "Error(" << errno << ") opening " << dir << std::endl;
+        return 0;
     }
 
     while ((dirp = readdir(dp)) != NULL) {
