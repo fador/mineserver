@@ -54,6 +54,8 @@ struct RegionFile {
 #include <direct.h>
 #else
 #include <netinet/in.h>
+#include <sys/types.h>
+#include <dirent.h>
 #endif
 #include <sys/stat.h>
 #include <fstream>
