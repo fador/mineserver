@@ -208,7 +208,7 @@ int16_t Item::itemHealth(int item)
 }
 
 
-Inventory::Inventory(std::string path, std::string suffix, std::string cfg)
+Inventory::Inventory(const std::string& path, const std::string& suffix, const std::string& cfg)
 {
   std::ifstream ifs(cfg.c_str());
 

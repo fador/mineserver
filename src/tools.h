@@ -63,7 +63,7 @@ std::string hash(std::string value);
 #define PATH_SEPARATOR  '/'
 #endif
 
-std::string pathExpandUser(std::string path);
+std::string pathExpandUser(const std::string& path);
 
 #ifndef WIN32
 int kbhit();

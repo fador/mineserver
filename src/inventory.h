@@ -121,7 +121,7 @@ public:
                  int outputCount, int16_t outputType, int16_t outputHealth);
   bool readRecipe(std::string recipeFile);
 
-  Inventory(std::string path, std::string suffix, std::string cfg);
+  Inventory(const std::string& path, const std::string& suffix, const std::string& cfg);
 
   ~Inventory()
   {

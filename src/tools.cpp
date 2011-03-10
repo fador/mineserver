@@ -187,7 +187,7 @@ std::string hash(std::string value)
   return hashString.str();
 }
 
-std::string pathExpandUser(std::string path)
+std::string pathExpandUser(const std::string& path)
 {
   std::string out;
   std::string user;
