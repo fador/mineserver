@@ -445,6 +445,7 @@ bool convertMap(std::string mapDir)
       if(isMapDir(files[i]))
       {
         std::string filename = mapDir+"/"+files[i];
+        files2.clear();
         getdir(filename,files2);
         for(int ii = 0; ii < files2.size(); ii++)
         {
@@ -452,6 +453,7 @@ bool convertMap(std::string mapDir)
           {
             int32_t x,z;
             filename = mapDir+"/"+files[i]+"/"+files2[ii];
+            files3.clear();
             getdir(filename,files3);
             for(int j = 0; j < files3.size(); j++)
             {
