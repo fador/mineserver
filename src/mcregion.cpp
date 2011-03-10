@@ -198,7 +198,7 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
   uint32_t offset = getOffset(x, z);
   uint32_t sectorNumber = offset >> 8;
   uint32_t sectorsAllocated = offset & 0xFF;
-  uint32_t sectorsNeeded = (datalen + CHUNK_HEADER_SIZE +SECTOR_BYTES-1) / SECTOR_BYTES + 1;
+  uint32_t sectorsNeeded = (datalen + CHUNK_HEADER_SIZE) / SECTOR_BYTES + 1;
 
   // maximum chunk size is 1MB
   if (sectorsNeeded >= 256)

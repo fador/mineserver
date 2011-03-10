@@ -329,7 +329,7 @@ void Map::init(int number)
     //LOG(EMERG, "Map", "Error: aborted!");
     //exit(EXIT_SUCCESS);
     convertMap(mapDirectory);
-    *data["version"] = (int32_t)19132;
+    (*root)["Data"]->Insert("version", new NBT_Value((int32_t)19132));
     //*data["LevelName"] = std::string("Mineserver level");
     root->SaveToFile(infile);
   }
