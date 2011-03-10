@@ -1163,11 +1163,13 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
           }
         }
       }
+      delete [] chunkPointer;
       return chunks.getChunk(x, z);
     }
     else
     {
       delete newRegion;
+      delete [] chunkPointer;
       return NULL;
     }
   }
