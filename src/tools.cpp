@@ -219,7 +219,12 @@ std::string pathExpandUser(std::string path)
   }
   else
   {
-    out.assign(getenv("HOME"));
+#ifdef WIN32
+#define ENV_HOME "APPDATA"
+#else
+#define ENV_HOME "HOME"
+#endif
+    out.assign(getenv(ENV_HOME));
   }
 
   out += '/';
