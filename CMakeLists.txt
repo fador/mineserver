@@ -130,6 +130,7 @@ set(mineserver_configs
   files/commands.cfg
   files/config.cfg
   files/item_alias.cfg
+  files/ENABLED_RECIPES.cfg
   files/motd.txt
   files/permissions.txt
   files/roles.txt

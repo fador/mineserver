@@ -215,7 +215,7 @@ Mineserver::Mineserver()
   m_chat           = new Chat;
   m_furnaceManager = new FurnaceManager;
   m_packetHandler  = new PacketHandler;
-  m_inventory      = new Inventory;
+  m_inventory      = new Inventory(std::string(CONFIG_DIR_SHARE) + '/' + "recipes", ".recipe", "ENABLED_RECIPES.cfg");
   m_mobs           = new Mobs;
   m_mobs->mobNametoType("Creeper");
 }
