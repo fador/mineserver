@@ -1577,6 +1577,7 @@ bool Map::saveMap(int x, int z)
 
   newRegion.writeChunk(buffer, len, x, z);
 
+  delete [] buffer;
   //chunk->nbt->SaveToFile(outfile);
 
   // Set "not changed"
