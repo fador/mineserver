@@ -1210,6 +1210,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
     LOG(WARNING, "Map", "incorrect chunk (missing xPos or zPos)");
     chunk->x = x;
     chunk->z = z;
+    delete chunk;
     return NULL;
   }
 
