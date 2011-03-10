@@ -601,8 +601,9 @@ NBT_Value* NBT_Value::LoadFromMemory(uint8_t* buffer, uint32_t len)
   
   //Uncompress
   int returnvalue = 0;
-  if((returnvalue = inflate(&zstream, Z_FINISH)) != Z_STREAM_END)
+  if((returnvalue = inflate(&zstream, Z_FINISH)) != Z_STREAM_END && returnvalue != Z_BUF_ERROR)
   {
+    
     std::cout << "Error in inflate! " << returnvalue << std::endl;
     delete[] uncompressedBuffer;
     return NULL;

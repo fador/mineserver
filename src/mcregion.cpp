@@ -98,7 +98,22 @@ bool RegionFile::openFile(std::string mapDir, int32_t chunkX, int32_t chunkZ)
   if((chunkX < 0)) strchunkX = "-" + strchunkX;
   //regionFile.open(std::string(mapDir + "/region/r." + strchunkX + "." + strchunkZ + ".mcr").c_str(), std::ios::binary | std::ios_base::app);
   //regionFile.close();
-  struct stat stFileInfo;
+
+    struct stat stFileInfo;
+  std::string regionDir = mapDir+"/region";
+  if (stat(regionDir.c_str(), &stFileInfo) != 0)
+  {
+  #ifdef WIN32
+    if (_mkdir(std::string(regionDir).c_str()) == -1)
+#else
+    if (mkdir(std::string(regionDir).c_str(), 0755) == -1)
+#endif
+    {
+
+      exit(EXIT_FAILURE);
+    }
+  }
+
   if (stat(std::string(mapDir + "/region/r." + strchunkX + "." + strchunkZ + ".mcr").c_str(), &stFileInfo) != 0)
   {
     regionFile = fopen(std::string(mapDir + "/region/r." + strchunkX + "." + strchunkZ + ".mcr").c_str(), "w+");
@@ -207,7 +222,7 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
   }
 
   //Current space is large enought
-  if (sectorNumber != 0 && sectorsAllocated >= sectorsNeeded)
+  if (sectorNumber != 0 && sectorsAllocated != sectorsNeeded)
   {
     //std::cout << "Save rewrite" << std::endl;
     write(sectorNumber, chunkdata, datalen);
@@ -339,6 +354,11 @@ bool RegionFile::readChunk(uint8_t *chunkdata, uint32_t *datalen, int32_t x, int
   char version;
   fread(&version,1,1,regionFile);
   //TODO: do something with version?
+  if(version != VERSION_DEFLATE)
+  {
+    std::cout << "Found gzipped region file!" << std::endl;
+    return false;
+  }
 
   *datalen = length;
   fread((char *)chunkdata, length,1,regionFile);
@@ -435,7 +455,7 @@ bool convertMap(std::string mapDir)
     std::vector<std::string> files2;
     std::vector<std::string> files3;
     getdir(mapDir,files);
-    uint8_t *buffer = new uint8_t[ALLOCATE_NBTFILE];
+    uint8_t *buffer = new uint8_t[ALLOCATE_NBTFILE*10];
 
     RegionFile *region;
     std::map<uint32_t,RegionFile*> fileMap;

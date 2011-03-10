@@ -1108,7 +1108,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
     delete newRegion;
     return NULL;
   }
-  uint8_t *chunkPointer =  new uint8_t[ALLOCATE_NBTFILE];
+  uint8_t *chunkPointer =  new uint8_t[ALLOCATE_NBTFILE*10];
   uint32_t chunkLen = 0;
   if(!newRegion->readChunk(chunkPointer, &chunkLen, x, z))
   {
