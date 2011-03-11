@@ -267,7 +267,7 @@ bool Inventory::readRecipe(std::string recipeFile)
 
   if (ifs.fail())
   {
-    std::cerr <<  "Could not find: " <<  recipeFile << std::endl;
+    LOG2(ERROR, "Could not find: " + recipeFile);
     ifs.close();
     return false;
   }

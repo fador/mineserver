@@ -206,7 +206,7 @@ bool blockPlacePreFunction(const char* userIn, int32_t x, int32_t y, int32_t z,i
   if(block == 259){
     // Should we trigger Portal creation?
     if(getBlock(userIn,x,y,z)==49){
-      std::cout << "Portal triggered" << std::endl;
+      mineserver->logger.log(LOG_INFO, "plugin.nether", "Portal triggered");
       doPortal(userIn,x,y,z);
     }
   }
@@ -258,11 +258,11 @@ PLUGIN_API_EXPORT void CALLCONVERSION nether_init(mineserver_pointer_struct* min
   if (mineserver->plugin.getPluginVersion(pluginName.c_str()) > 0)
   {
     std::string msg = "nether is already loaded v."+dtos(mineserver->plugin.getPluginVersion(pluginName.c_str()));
-    mineserver->logger.log(6, "plugin.nether", msg.c_str());
+    mineserver->logger.log(LOG_INFO, "plugin.nether", msg.c_str());
     return;
   }
   std::string msg = "Loaded "+pluginName+"!";
-  mineserver->logger.log(6, "plugin.nether", msg.c_str());
+  mineserver->logger.log(LOG_INFO, "plugin.nether", msg.c_str());
 
   mineserver->plugin.setPluginVersion(pluginName.c_str(), PLUGIN_NETHER_VERSION);
 
@@ -274,7 +274,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_shutdown(void)
 {
   if (mineserver->plugin.getPluginVersion(pluginName.c_str()) <= 0)
   {
-    mineserver->logger.log(6, "plugin.nether", "nether is not loaded!");
+    mineserver->logger.log(LOG_INFO, "plugin.nether", "nether is not loaded!");
     return;
   }
 }

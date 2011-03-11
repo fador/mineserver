@@ -58,19 +58,6 @@
 #include "../../src/plugin_api.h"
 
 // This should mirror mineserver/src/logtype.h.
-enum LogType
-{
-    LOG_EMERG,    /** system is unusable */
-    LOG_ALERT,    /** action must be taken immediately*/ 
-    LOG_CRITICAL, /** critical conditions */
-    LOG_ERROR,    /** error conditions */
-    LOG_WARNING,  /** warning conditions */
-    LOG_NOTICE,   /** normal, but significant, condition */
-    LOG_INFO,     /** informational message */
-    LOG_DEBUG,    /** debug-level message */
-    LOG_COUNT
-};
-
 static const char* logTypeName[] = {
   "EMERG",
   "Alert",

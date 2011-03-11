@@ -46,6 +46,9 @@
 #include <cctype>
 
 #include "tools.h"
+// zomg
+#include "logger.h"
+#include "mineserver.h"
 
 void putSint64(uint8_t* buf, int64_t value)
 {
@@ -204,13 +207,13 @@ std::string pathExpandUser(const std::string& path)
   if (!user.empty())
   {
 #ifdef WIN32
-    std::cerr << "~user notation is not implemented for this platform :P" << std::endl;
+    LOG2(ERROR, "~user notation is not implemented for this platform :P");
     return path;
 #else
     struct passwd* entry = getpwnam(user.c_str());
     if (!entry)
     {
-      std::cerr << user << ": no such user!" << std::endl;
+      LOG2(ERROR, user + ": no such user!");
       return path;
     }
 
