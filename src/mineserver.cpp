@@ -517,6 +517,8 @@ int Mineserver::run(int argc, char* argv[])
   time_t timeNow = time(NULL);
   while (m_running && event_base_loop(m_eventBase, 0) == 0)
   {
+    event_base_loopexit(m_eventBase, &loopTime);
+
     // Run 200ms timer hook
     static_cast<Hook0<bool>*>(plugin()->getHook("Timer200"))->doAll();
     // Alert any block types that care about timers
@@ -529,16 +531,14 @@ int Mineserver::run(int argc, char* argv[])
         blockcb->timer200();
       }
     }
-    //    for(uint32_t i=0; i<minecarts.size(); i++){
-    //      minecarts[i]->timer();
-    //    }
+
+    //Update physics every 200ms
     for (std::vector<Map*>::size_type i = 0 ; i < m_map.size(); i++)
     {
       Mineserver::get()->physics(i)->update();
     }
 
-
-
+    //Every 10 seconds..
     timeNow = time(0);
     if (timeNow - starttime > 10)
     {
@@ -559,10 +559,6 @@ int Mineserver::run(int argc, char* argv[])
       // If users, ping them
       if (User::all().size() > 0)
       {
-        // 0x00 package
-        uint8_t data = 0;
-        User::all()[0]->sendAll(&data, 1);
-
         // Send server time
         Packet pkt;
         pkt << (int8_t)PACKET_TIME_UPDATE << (int64_t)m_map[0]->mapTime;
@@ -609,17 +605,6 @@ int Mineserver::run(int argc, char* argv[])
           users()[i]->popMap();
         }
 
-        // Minecart hacks!!
-        /*
-        if (User::all()[i]->attachedTo)
-        {
-          Packet pkt;
-          pkt << PACKET_ENTITY_VELOCITY << (int32_t)User::all()[i]->attachedTo <<  (int16_t)10000       << (int16_t)0 << (int16_t)0;
-          // pkt << PACKET_ENTITY_RELATIVE_MOVE << (int32_t)User::all()[i]->attachedTo <<  (int8_t)100       << (int8_t)0 << (int8_t)0;
-          User::all()[i]->sendAll((int8_t*)pkt.getWrite(), pkt.getWriteLen());
-        }
-        */
-
       }
 
       for (std::vector<Map*>::size_type i = 0 ; i < m_map.size(); i++)
@@ -656,9 +641,7 @@ int Mineserver::run(int argc, char* argv[])
       {
         User::all()[i]->sethealth(User::all()[i]->health - 5);
       }
-    }
-
-    event_base_loopexit(m_eventBase, &loopTime);
+    }    
   }
 
 #ifdef WIN32

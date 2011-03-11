@@ -836,7 +836,12 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type)
 
 bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type, sChunk* chunk)
 {
-
+  //Make sure we are inside boundaries
+  if ((y < 0) || (y > 127))
+  {
+    LOGLF("Invalid y value (setLight 2)");
+    return false;
+  }
   int chunk_block_x        = blockToChunkBlock(x);
   int chunk_block_z        = blockToChunkBlock(z);
 
@@ -1292,12 +1297,15 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
       {
         continue;
       }
+
+      //Get TileEntity ID
       std::string* id = idVal->GetString();
       if (id == NULL)
       {
         continue;
       }
 
+      //Check that x,y and z are present and in correct format
       if ((**iter)["x"]->GetType() != NBT_Value::TAG_INT ||
           (**iter)["y"]->GetType() != NBT_Value::TAG_INT ||
           (**iter)["z"]->GetType() != NBT_Value::TAG_INT)
@@ -1309,6 +1317,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
       int32_t entityY = *(**iter)["y"];
       int32_t entityZ = *(**iter)["z"];
 
+      //Extract sign data
       if ((*id == "Sign"))
       {
         signData* newSign = new signData;
@@ -1322,6 +1331,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
 
         chunk->signs.push_back(newSign);
       }
+      //Extract chest data
       else if ((*id == "Chest"))
       {
         NBT_Value* chestItems = (**iter)["Items"];
@@ -1333,32 +1343,38 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
             continue;
           }
 
-          std::vector<NBT_Value*>* entities2 = chestItems->GetList();
-          std::vector<NBT_Value*>::iterator iter2 = entities2->begin(), end2 = entities2->end();
+          std::vector<NBT_Value*>* itemList = chestItems->GetList();
+          std::vector<NBT_Value*>::iterator itemIterator = itemList->begin(), itemIteratorEnd = itemList->end();
 
           chestData* newChest = new chestData;
           newChest->x = entityX;
           newChest->y = entityY;
           newChest->z = entityZ;
 
-          for (; iter2 != end2; iter2++)
+          //Loop items
+          for (; itemIterator != itemIteratorEnd; itemIterator++)
           {
-            if ((**iter2)["Count"] == NULL || (**iter2)["Slot"] == NULL || (**iter2)["Damage"] == NULL || (**iter2)["id"] == NULL ||
-                (**iter2)["Count"]->GetType() != NBT_Value::TAG_BYTE ||
-                (**iter2)["Slot"]->GetType() != NBT_Value::TAG_BYTE ||
-                (**iter2)["Damage"]->GetType() != NBT_Value::TAG_SHORT ||
-                (**iter2)["id"]->GetType() != NBT_Value::TAG_SHORT)
+            //Check that all info exists and is the right type
+            if ((**itemIterator)["Count"] == NULL  || (**itemIterator)["Slot"] == NULL ||
+                (**itemIterator)["Damage"] == NULL || (**itemIterator)["id"] == NULL   ||
+
+                (**itemIterator)["Count"]->GetType() != NBT_Value::TAG_BYTE ||
+                (**itemIterator)["Slot"]->GetType() != NBT_Value::TAG_BYTE ||
+                (**itemIterator)["Damage"]->GetType() != NBT_Value::TAG_SHORT ||
+                (**itemIterator)["id"]->GetType() != NBT_Value::TAG_SHORT)
             {
               continue;
             }
-            newChest->items[(int8_t) * (**iter2)["Slot"]].setCount((int8_t) * (**iter2)["Count"]);
-            newChest->items[(int8_t) * (**iter2)["Slot"]].setHealth((int16_t) * (**iter2)["Damage"]);
-            newChest->items[(int8_t) * (**iter2)["Slot"]].setType((int16_t) * (**iter2)["id"]);
+            newChest->items[(int8_t) * (**itemIterator)["Slot"]].setCount((int8_t) * (**itemIterator)["Count"]);
+            newChest->items[(int8_t) * (**itemIterator)["Slot"]].setHealth((int16_t) * (**itemIterator)["Damage"]);
+            newChest->items[(int8_t) * (**itemIterator)["Slot"]].setType((int16_t) * (**itemIterator)["id"]);
           }
-
+          //Push to our chest storage at chunk
           chunk->chests.push_back(newChest);
         }
       }
+
+      //Next, furnace data
       else if ((*id == "Furnace"))
       {
         NBT_Value* chestItems = (**iter)["Items"];
@@ -1370,11 +1386,12 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
             continue;
           }
 
-          std::vector<NBT_Value*>* entities2 = chestItems->GetList();
-          std::vector<NBT_Value*>::iterator iter2 = entities2->begin(), end2 = entities2->end();
+          std::vector<NBT_Value*>* itemList = chestItems->GetList();
+          std::vector<NBT_Value*>::iterator itemIterator = itemList->begin(), itemIteratorEnd = itemList->end();
 
           if ((**iter)["BurnTime"] == NULL || (**iter)["CookTime"] == NULL)
           {
+            //Skip
             continue;
           }
 
@@ -1386,22 +1403,28 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
           newFurnace->burnTime = (int16_t) * (**iter)["BurnTime"];
           newFurnace->cookTime = (int16_t) * (**iter)["CookTime"];
 
-          for (; iter2 != end2; iter2++)
+          //Loop through all items
+          for (; itemIterator != itemIteratorEnd; itemIterator++)
           {
-            if ((**iter2)["Count"] == NULL || (**iter)["Slot"] == NULL || (**iter)["Damage"] == NULL || (**iter)["id"] == NULL ||
-                (**iter2)["Count"]->GetType()  != NBT_Value::TAG_BYTE  ||
-                (**iter2)["Slot"]->GetType()   != NBT_Value::TAG_BYTE  ||
-                (**iter2)["Damage"]->GetType() != NBT_Value::TAG_SHORT ||
-                (**iter2)["id"]->GetType()     != NBT_Value::TAG_SHORT ||
-                (int8_t) * (**iter2)["Slot"] > 3 || (int8_t) * (**iter2)["Slot"] < 0)
+            //Check that all info exists and is the right type
+            if ((**itemIterator)["Count"] == NULL || (**itemIterator)["Slot"] == NULL ||
+                (**itemIterator)["Damage"] == NULL || (**itemIterator)["id"] == NULL ||
+
+                (**itemIterator)["Count"]->GetType()  != NBT_Value::TAG_BYTE  ||
+                (**itemIterator)["Slot"]->GetType()   != NBT_Value::TAG_BYTE  ||
+                (**itemIterator)["Damage"]->GetType() != NBT_Value::TAG_SHORT ||
+                (**itemIterator)["id"]->GetType()     != NBT_Value::TAG_SHORT ||
+                (int8_t) * (**itemIterator)["Slot"] > 3 || (int8_t) * (**itemIterator)["Slot"] < 0)
             {
+              //Skip
               continue;
             }
-            newFurnace->items[(int8_t) * (**iter2)["Slot"]].setCount((int8_t) * (**iter2)["Count"]);
-            newFurnace->items[(int8_t) * (**iter2)["Slot"]].setHealth((int16_t) * (**iter2)["Damage"]);
-            newFurnace->items[(int8_t) * (**iter2)["Slot"]].setType((int16_t) * (**iter2)["id"]);
+            newFurnace->items[(int8_t) * (**itemIterator)["Slot"]].setCount((int8_t) * (**itemIterator)["Count"]);
+            newFurnace->items[(int8_t) * (**itemIterator)["Slot"]].setHealth((int16_t) * (**itemIterator)["Damage"]);
+            newFurnace->items[(int8_t) * (**itemIterator)["Slot"]].setType((int16_t) * (**itemIterator)["id"]);
           }
 
+          //Push to our furnace storage at chunk and check for possible activity
           chunk->furnaces.push_back(newFurnace);
           Mineserver::get()->furnaceManager()->handleActivity(newFurnace);
         }
@@ -1429,56 +1452,11 @@ bool Map::saveMap(int x, int z)
     return true;
   }
 
-
-
   // Recalculate light maps
   if (chunk->lightRegen)
   {
     generateLight(x, z, chunk);
   }
-
-  // Generate map file name
-
-  int mapposx = x;
-  int modulox = mapposx & 0x3F;
-
-  int mapposz = z;
-  int moduloz = mapposz & 0x3F;
-
-  //std::string outfile = mapDirectory + "/" + base36_encode(modulox) + "/" + base36_encode(moduloz) + "/c." +
-  //                      base36_encode(mapposx) + "." + base36_encode(mapposz) + ".dat";
-
-  // Try to create parent directories if necessary
-  /*
-  struct stat stFileInfo;
-  if (stat(outfile.c_str(), &stFileInfo) != 0)
-  {
-    std::string outdir_a = mapDirectory + "/" + base36_encode(modulox);
-    std::string outdir_b = mapDirectory + "/" + base36_encode(modulox) + "/" + base36_encode(moduloz);
-
-    if (stat(outdir_b.c_str(), &stFileInfo) != 0)
-    {
-      if (stat(outdir_a.c_str(), &stFileInfo) != 0)
-      {
-#ifdef WIN32
-        if (_mkdir(outdir_a.c_str()) == -1)
-#else
-        if (mkdir(outdir_a.c_str(), 0755) == -1)
-#endif
-
-          return false;
-      }
-
-#ifdef WIN32
-      if (_mkdir(outdir_b.c_str()) == -1)
-#else
-      if (mkdir(outdir_b.c_str(), 0755) == -1)
-#endif
-
-        return false;
-    }
-  }
-  */
 
   //Create directory for region files
   struct stat stFileInfo;
@@ -1497,6 +1475,7 @@ bool Map::saveMap(int x, int z)
     }
   }
 
+  //Store tile entities separately because they are stored in our own arrays with chunk data
   NBT_Value* entityList = (*(*chunk->nbt)["Level"])["TileEntities"];
 
   if (!entityList)
@@ -1561,6 +1540,7 @@ bool Map::saveMap(int x, int z)
 
     for (uint32_t slot = 0; slot < 3; slot++)
     {
+      //Store only non-null info
       if (chunk->furnaces[i]->items[slot].getCount() && chunk->furnaces[i]->items[slot].getType() != 0 && chunk->furnaces[i]->items[slot].getType() != -1)
       {
         NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
@@ -1576,17 +1556,17 @@ bool Map::saveMap(int x, int z)
     entityList->GetList()->push_back(val);
   }
 
+  //Allocate memory for NBT and save (+deflate) it
   uint8_t *buffer = new uint8_t[ALLOCATE_NBTFILE];
   uint32_t len;
   chunk->nbt->SaveToMemory(buffer, &len);
 
+  //Open regionfile and write chunk
   RegionFile newRegion;
   newRegion.openFile(mapDirectory, x,z);
-
   newRegion.writeChunk(buffer, len, x, z);
 
   delete [] buffer;
-  //chunk->nbt->SaveToFile(outfile);
 
   // Set "not changed"
   chunk->changed    = false;
