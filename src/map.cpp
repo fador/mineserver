@@ -292,7 +292,7 @@ void Map::init(int number)
     level["Data"]->Insert("SpawnZ", new NBT_Value((int32_t)0));
     level["Data"]->Insert("RandomSeed", new NBT_Value((int64_t)(rand() * 65535)));
     level["Data"]->Insert("version", new NBT_Value((int32_t)19132));
-    //level["Data"]->Insert("LevelName", new NBT_Value(std::string("Mineserver map")));
+    level["Data"]->Insert("LevelName", new NBT_Value(std::string("Mineserver world")));
     
     level.Insert("Trees", new NBT_Value(NBT_Value::TAG_LIST));
 
@@ -330,6 +330,7 @@ void Map::init(int number)
     //exit(EXIT_SUCCESS);
     convertMap(mapDirectory);
     (*root)["Data"]->Insert("version", new NBT_Value((int32_t)19132));
+    (*root)["Data"]->Insert("LevelName", new NBT_Value(std::string("Mineserver world")));
     //*data["LevelName"] = std::string("Mineserver level");
     root->SaveToFile(infile);
   }
@@ -1153,8 +1154,6 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
               *data["SpawnX"] = (int32_t)spawnPos.x();
               *data["SpawnY"] = (int32_t)spawnPos.y();
               *data["SpawnZ"] = (int32_t)spawnPos.z();
-              *data["version"] = (int32_t)19132;
-              //*data["LevelName"] = std::string("Mineserver level");
 
               root->SaveToFile(infile);
 
