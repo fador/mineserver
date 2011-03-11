@@ -222,7 +222,7 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
   }
 
   //Current space is large enought
-  if (sectorNumber != 0 && sectorsAllocated != sectorsNeeded)
+  if (sectorNumber != 0 && sectorsAllocated == sectorsNeeded)
   {
     //std::cout << "Save rewrite" << std::endl;
     write(sectorNumber, chunkdata, datalen);
