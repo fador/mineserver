@@ -50,6 +50,7 @@ typedef  int socklen_t;
 #include <event.h>
 #include <sys/stat.h>
 #include <zlib.h>
+#include <sstream>
 
 #include "tools.h"
 
@@ -147,7 +148,9 @@ void client_callback(int fd,
       }
       else if (Mineserver::get()->packetHandler()->packets[user->action].len == PACKET_DOES_NOT_EXIST)
       {
-        LOG2(DEBUG, (std::ostringstream("Unknown action: 0x") << std::hex << user->action).str());
+        std::ostringstream str;
+        str << "Unknown action: 0x" << std::hex << user->action;
+        LOG2(DEBUG, str.str());
 
         delete user;
         user = (User*)3;

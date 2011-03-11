@@ -38,6 +38,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <vector>
 #include <cstdio>
 #include <ctime>
@@ -684,7 +685,9 @@ bool Map::getBlock(int x, int y, int z, uint8_t* type, uint8_t* meta, bool gener
 {
   if ((y < 0) || (y > 127))
   {
-    LOG2(DEBUG, std::string("Invalid y value (") + x + ", " + y + ", " + z + ")");
+    std::ostringstream str;
+    str << "Invalid y value (" << x << ", " << y << ", " << z << ")";
+    LOG2(DEBUG, str.str());
     return false;
   }
 
