@@ -466,7 +466,7 @@ bool Inventory::canBeArmour(int slot, int type)
     }
     return false;
   }
-  Mineserver::get()->logger()->log(LogType::LOG_WARNING, "Armour", "Unknown armour slot.");
+  LOG2(WARNING, "Unknown armour slot.");
   return false;
 }
 

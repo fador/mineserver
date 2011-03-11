@@ -80,7 +80,7 @@ void client_callback(int fd,
                                                       Mineserver::get()->users().end(), user);
   if(it == Mineserver::get()->users().end())
   {
-    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Using dead player!!!");
+    LOG2(INFO, "Using dead player!!!");
     return;
   }
   */
@@ -94,7 +94,7 @@ void client_callback(int fd,
     read = recv(fd, (char*)buf, 2048, 0);
     if (read == 0)
     {
-      Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket closed properly");
+      LOG2(INFO, "Socket closed properly");
 
       delete user;
       user = (User*)1;
@@ -104,7 +104,7 @@ void client_callback(int fd,
 
     if (read == SOCKET_ERROR)
     {
-      Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket had no data to read");
+      LOG2(INFO, "Socket had no data to read");
 
       delete user;
       user = (User*)2;
@@ -184,7 +184,7 @@ void client_callback(int fd,
       if ((errno != EAGAIN && errno != EINTR))
 #endif
       {
-        Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Error writing to client, tried to write " + dtos(writeLen) + " bytes, code: " + dtos(ERROR_NUMBER));
+        LOG2(ERROR, "Error writing to client, tried to write " + dtos(writeLen) + " bytes, code: " + dtos(ERROR_NUMBER));
 
         delete user;
         user = (User*)5;

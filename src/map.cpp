@@ -252,11 +252,11 @@ void Map::init(int number)
     }
     a++;
   }
-  Mineserver::get()->logger()->log(LogType::LOG_INFO, "Map", "World " + mapDirectory);
+  LOG2(INFO, "World " + mapDirectory);
 
   if (mapDirectory == "Not found!")
   {
-    Mineserver::get()->logger()->log(LogType::LOG_WARNING, "Map", "mapdir not defined");
+    LOG2(WARNING, "mapdir not defined");
     exit(EXIT_FAILURE);
   }
 

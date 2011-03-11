@@ -552,7 +552,7 @@ NBT_Value* NBT_Value::LoadFromFile(const std::string& filename)
 
   if (uncompressedSize == 0)
   {
-    Mineserver::get()->logger()->log(LogType::LOG_WARNING, "NBT", "Unable to determine uncompressed size of " + filename);
+    LOG2(WARNING, "Unable to determine uncompressed size of " + filename);
     uncompressedSize = ALLOCATE_NBTFILE;
   }
 

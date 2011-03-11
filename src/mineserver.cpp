@@ -204,7 +204,7 @@ Mineserver::Mineserver()
   else
   {
     // WARNING: winex: infinite loop here
-    //logger()->log(LogType::LOG_WARNING, "Config", "Cannot find map.storage.nbt.directories.* in config.cfg");
+    //LOG2(WARNING, "Cannot find map.storage.nbt.directories.*");
   }
   if (m_map.size() == 0)
   {
@@ -338,7 +338,7 @@ int Mineserver::run(int argc, char* argv[])
   {
     // Init our Screen
     screen()->init(VERSION);
-    logger()->log(LogType::LOG_INFO, "Mineserver", "Welcome to Mineserver v" + VERSION);
+    LOG2(INFO, "Welcome to Mineserver v" + VERSION);
   }
 
   m_inventory      = new Inventory(std::string(CONFIG_DIR_SHARE) + '/' + "recipes", ".recipe", "ENABLED_RECIPES.cfg");
@@ -374,7 +374,7 @@ int Mineserver::run(int argc, char* argv[])
     m_map[i]->init(i);
     if (config()->bData("map.generate_spawn.enabled"))
     {
-      logger()->log(LogType::LOG_INFO, "Mapgen", "Generating spawn area...");
+      LOG2(INFO, "Generating spawn area...");
       int size = config()->iData("map.generate_spawn.size");
       bool show_progress = config()->bData("map.generate_spawn.show_progress");
 #ifdef __FreeBSD__
@@ -409,10 +409,10 @@ int Mineserver::run(int argc, char* argv[])
         {
 #ifdef WIN32
           t_end = timeGetTime();
-          logger()->log(LogType::LOG_INFO, "Map", dtos((x + size + 1) * (size * 2 + 1)) + "/" + dtos((size * 2 + 1) * (size * 2 + 1)) + " done. " + dtos((t_end - t_begin) / (size * 2 + 1)) + "ms per chunk");
+          LOG2(INFO, dtos((x + size + 1) * (size * 2 + 1)) + "/" + dtos((size * 2 + 1) * (size * 2 + 1)) + " done. " + dtos((t_end - t_begin) / (size * 2 + 1)) + "ms per chunk");
 #else
           t_end = clock();
-          logger()->log(LogType::LOG_INFO, "Map", dtos((x + size + 1) * (size * 2 + 1)) + "/" + dtos((size * 2 + 1) * (size * 2 + 1)) + " done. " + dtos(((t_end - t_begin) / (CLOCKS_PER_SEC / 1000)) / (size * 2 + 1)) + "ms per chunk");
+          LOG2(INFO, dtos((x + size + 1) * (size * 2 + 1)) + "/" + dtos((size * 2 + 1) * (size * 2 + 1)) + " done. " + dtos(((t_end - t_begin) / (CLOCKS_PER_SEC / 1000)) / (size * 2 + 1)) + "ms per chunk");
 #endif
         }
       }
@@ -456,7 +456,7 @@ int Mineserver::run(int argc, char* argv[])
 
   if (m_socketlisten < 0)
   {
-    logger()->log(LogType::LOG_ERROR, "Socket", "Failed to create listen socket");
+    LOG2(ERROR, "Failed to create listen socket");
     screen()->end();
     return 1;
   }
@@ -472,14 +472,14 @@ int Mineserver::run(int argc, char* argv[])
   // Bind to port
   if (bind(m_socketlisten, (struct sockaddr*)&addresslisten, sizeof(addresslisten)) < 0)
   {
-    logger()->log(LogType::LOG_ERROR, "Socket", "Failed to bind to " + ip + ":" + dtos(port));
+    LOG2(ERROR, "Failed to bind to " + ip + ":" + dtos(port));
     screen()->end();
     return 1;
   }
 
   if (listen(m_socketlisten, 5) < 0)
   {
-    logger()->log(LogType::LOG_ERROR, "Socket", "Failed to listen to socket");
+    LOG2(ERROR, "Failed to listen to socket");
     screen()->end();
     return 1;
   }
@@ -494,18 +494,18 @@ int Mineserver::run(int argc, char* argv[])
     char name[255];
     gethostname(name, sizeof(name));
     struct hostent* hostinfo = gethostbyname(name);
-    logger()->log(LogType::LOG_INFO, "Socket", "Listening on: ");
+    LOG2(INFO, "Listening on: ");
     int ipIndex = 0;
     while (hostinfo && hostinfo->h_addr_list[ipIndex])
     {
       std::string ip(inet_ntoa(*(struct in_addr*)hostinfo->h_addr_list[ipIndex++]));
-      logger()->log(LogType::LOG_INFO, "Socket", ip + ":" + dtos(port));
+      LOG2(INFO, ip + ":" + dtos(port));
     }
   }
   else
   {
     std::string myip(ip);
-    logger()->log(LogType::LOG_INFO, "Socket", myip + ":" + dtos(port));
+    LOG2(INFO, myip + ":" + dtos(port));
   }
 
   timeval loopTime;
@@ -594,7 +594,7 @@ int Mineserver::run(int argc, char* argv[])
         // No data received in 30s, timeout
         if (users()[i]->logged && (timeNow - users()[i]->lastData) > 30)
         {
-          logger()->log(LogType::LOG_INFO, "Sockets", "Player " + users()[i]->nick + " timed out");
+          LOG2(INFO, "Player " + users()[i]->nick + " timed out");
 
           delete users()[i];
         }
@@ -678,7 +678,7 @@ int Mineserver::run(int argc, char* argv[])
 #endif
 
   // Let the user know we're shutting the server down cleanly
-  logger()->log(LogType::LOG_INFO, "Mineserver", "Shutting down...");
+  LOG2(INFO, "Shutting down...");
 
   // Close the cli session if its in use
   if (config()->bData("system.interface.use_cli"))
@@ -735,7 +735,7 @@ Map* Mineserver::map(int n)
   {
     return m_map[n];
   }
-  logger()->log(LogType::LOG_WARNING, "Map", "None existant map requested in Mineserver::get()->map(x). Map 0 passed");
+  LOG2(WARNING, "Nonexistent map requested. Map 0 passed");
   return m_map[0];
 }
 

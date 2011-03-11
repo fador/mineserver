@@ -197,14 +197,14 @@ void Chat::handleCommand(User* user, std::string msg, const std::string& timeSta
 void Chat::handleServerMsg(User* user, std::string msg, const std::string& timeStamp)
 {
   // Decorate server message
-  Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "[!] " + msg.substr(1));
+  LOG2(INFO, "[!] " + msg.substr(1));
   msg = MC_COLOR_RED + "[!] " + MC_COLOR_GREEN + msg.substr(1);
   this->sendMsg(user, msg, ALL);
 }
 
 void Chat::handleAdminChatMsg(User* user, std::string msg, const std::string& timeStamp)
 {
-  Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "[@] <" + user->nick + "> " + msg.substr(1));
+  LOG2(INFO, "[@] <" + user->nick + "> " + msg.substr(1));
   msg = timeStamp +  MC_COLOR_RED + " [@]" + MC_COLOR_WHITE + " <" + MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg.substr(1);
   this->sendMsg(user, msg, ADMINS);
 }
@@ -219,17 +219,17 @@ void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeSta
   // Check for Admins or Server Console
   if (user->UID == SERVER_CONSOLE_UID)
   {
-    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat",  user->nick + " " + msg);
+    LOG2(INFO, user->nick + " " + msg);
     msg = timeStamp + " " + MC_COLOR_RED + user->nick + MC_COLOR_WHITE + " " + msg;
   }
   else if (IS_ADMIN(user->permissions))
   {
-    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "<" + user->nick + "> " + msg);
+    LOG2(INFO, "<" + user->nick + "> " + msg);
     msg = timeStamp + " <" + MC_COLOR_DARK_MAGENTA + user->nick + MC_COLOR_WHITE + "> " + msg;
   }
   else
   {
-    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Chat", "<" + user->nick + "> " + msg);
+    LOG2(INFO, "<" + user->nick + "> " + msg);
     msg = timeStamp + " <" + user->nick + "> " + msg;
   }
 

@@ -116,7 +116,7 @@ User::~User()
 {
   if (this->UID != SERVER_CONSOLE_UID && event_del(GetEvent()) == -1)
   {
-    Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", this->nick + " event del failed!");
+    LOG2(WARNING, this->nick + " event del failed!");
   }
 
   if (fd != -1)
@@ -143,7 +143,7 @@ User::~User()
     if ((*it_a) == this)
     {
       Mineserver::get()->users().erase(it_a);
-      //Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", this->nick + " erased!");
+      //LOG2(WARNING, this->nick + " erased!");
       break;
     }
   }
@@ -167,7 +167,7 @@ User::~User()
     }
 
     Mineserver::get()->chat()->sendMsg(this, this->nick + " disconnected!", Chat::OTHERS);
-    //Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", this->nick + " removed!");
+    //LOG2(WARNING, this->nick + " removed!");
     this->saveData();
 
     // Send signal to everyone that the entity is destroyed
@@ -295,7 +295,7 @@ bool User::kick(std::string kickMsg)
 
   (static_cast<Hook2<bool, const char*, const char*>*>(Mineserver::get()->plugin()->getHook("PlayerKickPost")))->doAll(nick.c_str(), kickMsg.c_str());
 
-  Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", nick + " kicked. Reason: " + kickMsg);
+  LOG2(WARNING, nick + " kicked. Reason: " + kickMsg);
 
   return true;
 }
@@ -313,7 +313,7 @@ bool User::mute(std::string muteMsg)
 
   Mineserver::get()->chat()->sendMsg(this, muteMsg, Chat::USER);
   this->muted = true;
-  Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", nick + " muted. Reason: " + muteMsg);
+  LOG2(WARNING, nick + " muted. Reason: " + muteMsg);
   return true;
 }
 
@@ -321,7 +321,7 @@ bool User::unmute()
 {
   Mineserver::get()->chat()->sendMsg(this, MC_COLOR_YELLOW + "You have been unmuted.", Chat::USER);
   this->muted = false;
-  Mineserver::get()->logger()->log(LogType::LOG_WARNING, "User", nick + " unmuted.");
+  LOG2(WARNING, nick + " unmuted.");
   return true;
 }
 
@@ -575,7 +575,7 @@ bool User::updatePosM(double x, double y, double z, int map, double stance)
     pos.x = x;
     pos.y = y;
     pos.z = z;
-    Mineserver::get()->logger()->log(LogType::LOG_INFO, "User", "World changing");
+    LOG2(INFO, "World changing");
     // TODO spawn self to nearby players
     // TODO spawn players who are NOW in view
     return false;
@@ -602,7 +602,7 @@ bool User::updatePos(double x, double y, double z, double stance)
 
     if (!newChunk || !oldChunk)
     {
-      LOG(WARNING, "user", "failed to update user position");
+      LOG2(WARNING, "failed to update user position");
       return false;
     }
 

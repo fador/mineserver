@@ -115,7 +115,7 @@ int PacketHandler::entity_crouch(User* user)
   user->buffer >> EID >> action;
 
   //ToDo: inform other players
-  //Mineserver::get()->logger()->log(LogType::LOG_INFO, "Packets", "Entity action: EID: " + dtos(EID) +" Action: " +dtos(action));
+  //LOG2(INFO, "Entity action: EID: " + dtos(EID) +" Action: " +dtos(action));
 
   user->buffer.removePacket();
   return PACKET_OK;
@@ -190,7 +190,7 @@ int PacketHandler::change_sign(User* user)
     user->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
   }
 
-  Mineserver::get()->logger()->log(LogType::LOG_INFO, "Packets", "Sign: " + strings1 + strings2 + strings3 + strings4);
+  LOG2(INFO, "Sign: " + strings1 + strings2 + strings3 + strings4);
 
   //No need to do anything
   user->buffer.removePacket();
