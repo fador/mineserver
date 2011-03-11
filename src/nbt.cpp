@@ -657,7 +657,7 @@ void NBT_Value::SaveToMemory(uint8_t* buffer, uint32_t* len)
   NBTBuffer.push_back(0);
   NBTBuffer.push_back(0);
 
-  uLongf written = 0;
+  uLongf written = ALLOCATE_NBTFILE*10;
   compress(buffer, &written, &NBTBuffer[0], NBTBuffer.size());
   *len = written;
 

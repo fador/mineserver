@@ -335,7 +335,7 @@ bool RegionFile::readChunk(uint8_t *chunkdata, uint32_t *datalen, int32_t x, int
   //Invalid sector
   if (sectorNumber + numSectors > sectorFree.size())
   {
-    //std::cout << "Invalid sector " << offset << std::endl;
+    std::cout << "Invalid sector " << offset << std::endl;
     return false;
   }
 
@@ -347,7 +347,7 @@ bool RegionFile::readChunk(uint8_t *chunkdata, uint32_t *datalen, int32_t x, int
   //Invalid length?
   if(length > SECTOR_BYTES * numSectors)
   {
-    //std::cout << "Invalid length" << std::endl;
+    std::cout << "Invalid length " << length << std::endl;
     return false;
   }
 
@@ -356,7 +356,7 @@ bool RegionFile::readChunk(uint8_t *chunkdata, uint32_t *datalen, int32_t x, int
   //TODO: do something with version?
   if(version != VERSION_DEFLATE)
   {
-    std::cout << "Found gzipped region file!" << std::endl;
+    std::cout << "Found gzipped region file, abort!" << std::endl;
     return false;
   }
 
@@ -524,8 +524,14 @@ bool convertMap(std::string mapDir)
 
                   uint32_t len = 0;
                   chunk->SaveToMemory(buffer, &len);                  
-                  
-                  region->writeChunk(buffer, len, x, z);
+                  if(len > 0)
+                  {
+                    region->writeChunk(buffer, len, x, z);
+                  }
+                  else
+                  {
+                    std::cout << "Chunk saving error at " << x << "," << z << std::endl;
+                  }
                 }
                 delete chunk;
               }
