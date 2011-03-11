@@ -166,10 +166,10 @@ Mineserver::Mineserver()
   MapGen* nethergen = (MapGen*) new NetherGen;
   MapGen* heavengen = (MapGen*) new HeavenGen;
   MapGen* biomegen = (MapGen*) new BiomeGen;
-  gennames.push_back(mapgen);
-  gennames.push_back(nethergen);
-  gennames.push_back(heavengen);
-  gennames.push_back(biomegen);
+  m_mapGenNames.push_back(mapgen);
+  m_mapGenNames.push_back(nethergen);
+  m_mapGenNames.push_back(heavengen);
+  m_mapGenNames.push_back(biomegen);
 
   m_saveInterval = m_config->iData("map.save_interval");
 
@@ -190,11 +190,11 @@ Mineserver::Mineserver()
       phy->map = n;
       m_physics.push_back(phy);
       int k = m_config->iData((std::string(key) + ".") + (*it));
-      if (k >= gennames.size())
+      if (k >= m_mapGenNames.size())
       {
-        std::cout << "Error! Mapgen number " << k << " in config. " << gennames.size() << " Mapgens known" << std::endl;
+        std::cout << "Error! Mapgen number " << k << " in config. " << m_mapGenNames.size() << " Mapgens known" << std::endl;
       }
-      MapGen* m = gennames[k];
+      MapGen* m = m_mapGenNames[k];
       m_mapGen.push_back(m);
       n++;
 

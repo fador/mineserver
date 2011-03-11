@@ -97,8 +97,10 @@ public:
 
   struct event m_listenEvent;
   int m_socketlisten;
-  int m_saveInterval;
+
+  int    m_saveInterval;
   time_t m_lastSave;
+
   bool m_pvp_enabled;
   bool m_damage_enabled;
   bool m_only_helmets;
@@ -185,24 +187,31 @@ public:
 
 private:
   Mineserver();
-  event_base* m_eventBase;
-  bool m_running;
-  // holds all connected users
-  std::vector<User*> m_users;
+  ~Mineserver();
 
-  std::vector<Map*> m_map;
+  bool m_running;
+
+  event_base* m_eventBase;
+
+  // holds all connected users
+  std::vector<User*>    m_users;
+
+  std::vector<Map*>     m_map;
   std::vector<Physics*> m_physics;
-  std::vector<MapGen*> gennames;
-  Chat* m_chat;
-  Plugin* m_plugin;
-  Screen* m_screen;
+  std::vector<MapGen*>  m_mapGenNames;
+  std::vector<MapGen*>  m_mapGen;
+
+  // core modules
   Config* m_config;
-  FurnaceManager* m_furnaceManager;
-  PacketHandler* m_packetHandler;
-  std::vector<MapGen*> m_mapGen;
+  Screen* m_screen;
   Logger* m_logger;
-  Inventory* m_inventory;
-  Mobs* m_mobs;
+
+  Plugin*         m_plugin;
+  Chat*           m_chat;
+  FurnaceManager* m_furnaceManager;
+  PacketHandler*  m_packetHandler;
+  Inventory*      m_inventory;
+  Mobs*           m_mobs;
 };
 
 #endif
