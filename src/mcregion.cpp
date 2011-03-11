@@ -72,34 +72,37 @@ struct RegionFile {
 #include "logger.h"
 #include "nbt.h"
 
-RegionFile::RegionFile(): sizeDelta(0)
+RegionFile::RegionFile(): sizeDelta(0),x(0),z(0)
 {
 
 }
 
 RegionFile::~RegionFile()
 {
+  //If open file, close it
   if (regionFile != NULL)
   {
     fclose(regionFile);
   }
 }
 
+//Opens the region file and reads offset and timestamp tables
 bool RegionFile::openFile(std::string mapDir, int32_t chunkX, int32_t chunkZ)
 {
   this->x = chunkX;
   this->z = chunkZ;
   std::string strchunkZ;
   std::string strchunkX;
-  //std::cout << "openFile(" << chunkX << "," << chunkZ << ")";
+
+  //Convert chunk x and z pos to strings
   my_itoa(abs(chunkZ >> 5),strchunkZ,10);
+  //If negative, add - in front
   if((chunkZ < 0)) strchunkZ = "-" + strchunkZ;
   my_itoa(abs(chunkX >> 5),strchunkX,10);
   if((chunkX < 0)) strchunkX = "-" + strchunkX;
-  //regionFile.open(std::string(mapDir + "/region/r." + strchunkX + "." + strchunkZ + ".mcr").c_str(), std::ios::binary | std::ios_base::app);
-  //regionFile.close();
 
-    struct stat stFileInfo;
+  //Make sure we have the region directory inside mapDir
+  struct stat stFileInfo;
   std::string regionDir = mapDir+"/region";
   if (stat(regionDir.c_str(), &stFileInfo) != 0)
   {
@@ -114,15 +117,18 @@ bool RegionFile::openFile(std::string mapDir, int32_t chunkX, int32_t chunkZ)
     }
   }
 
+  //If the file doesn't exist, create it, otherwise open it for reading and writing
   if (stat(std::string(mapDir + "/region/r." + strchunkX + "." + strchunkZ + ".mcr").c_str(), &stFileInfo) != 0)
   {
-    regionFile = fopen(std::string(mapDir + "/region/r." + strchunkX + "." + strchunkZ + ".mcr").c_str(), "w+");
+    //This will overwrite existing file
+    regionFile = fopen(std::string(mapDir + "/region/r." + strchunkX + "." + strchunkZ + ".mcr").c_str(), "wb+");
   }
   else
   {
     regionFile = fopen(std::string(mapDir + "/region/r." + strchunkX + "." + strchunkZ + ".mcr").c_str(), "rb+");
   }
 
+  //Couldn't open the file?
   if (regionFile == NULL)
   {
     std::cout << "Failed to open file " << std::string(mapDir + "/region/r." + strchunkX + "." + strchunkZ + ".mcr") << std::endl;
@@ -155,7 +161,7 @@ bool RegionFile::openFile(std::string mapDir, int32_t chunkX, int32_t chunkZ)
     fileLength = (uint32_t)ftell(regionFile);
     fseek(regionFile,0, SEEK_SET);
   }
-  //Not multiple of 4096
+  //If not multiple of 4096, expand
   if((fileLength & 0xfff) != 0)
   {
     int zeroInt = 0;
@@ -178,6 +184,7 @@ bool RegionFile::openFile(std::string mapDir, int32_t chunkX, int32_t chunkZ)
   sectorFree[1] = false;
 
   fseek(regionFile,0, SEEK_SET);
+
   //Read sectors and mark used
   for (uint32_t i = 0; i < SECTOR_INTS; i++)
   {
@@ -204,7 +211,8 @@ bool RegionFile::openFile(std::string mapDir, int32_t chunkX, int32_t chunkZ)
   return true;
 }
 
-bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int32_t z, bool newChunk)
+//Write chunk data to regionfile
+bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int32_t z)
 {
    
   x = x & 31;
@@ -236,6 +244,7 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
       sectorFree[sectorNumber + i] = true;
     }
 
+    //Search for first free sector
     int runStart = -1;
     for(uint32_t i = 2; i < sectorFree.size(); i++)
     {
@@ -247,6 +256,7 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
     }
     uint32_t runLength = 0;
 
+    //Start searching for a free sector
     if (runStart != -1)
     {
       for (uint32_t i = runStart; i < sectorFree.size(); i++)
@@ -305,7 +315,7 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
 
       //Write chunk data
       write(sectorNumber, chunkdata, datalen);
-
+      //Write offset info to the file
       setOffset(x, z, (sectorNumber << 8) | sectorsNeeded);
     }
   }
@@ -314,6 +324,7 @@ bool RegionFile::writeChunk(uint8_t *chunkdata, uint32_t datalen, int32_t x, int
   return true;
 }
 
+//Read chunk data from the file
 bool RegionFile::readChunk(uint8_t *chunkdata, uint32_t *datalen, int32_t x, int32_t z)
 {
   x = x & 31;
@@ -339,10 +350,13 @@ bool RegionFile::readChunk(uint8_t *chunkdata, uint32_t *datalen, int32_t x, int
     return false;
   }
 
+  //Get to the chunk data
   fseek(regionFile,sectorNumber * SECTOR_BYTES, SEEK_SET);
-  uint32_t length = 0;
+
+  //Read chunkdata length from the file
+  uint32_t length = 0;  
   fread(reinterpret_cast<char *>(&length),4,1,regionFile);
-  length = ntohl(length);
+  length = ntohl(length); //Change byte order is not on big endian system
 
   //Invalid length?
   if(length > SECTOR_BYTES * numSectors)
@@ -351,6 +365,7 @@ bool RegionFile::readChunk(uint8_t *chunkdata, uint32_t *datalen, int32_t x, int
     return false;
   }
 
+  //Read version info
   char version;
   fread(&version,1,1,regionFile);
   //TODO: do something with version?
@@ -360,6 +375,7 @@ bool RegionFile::readChunk(uint8_t *chunkdata, uint32_t *datalen, int32_t x, int
     return false;
   }
 
+  //Read chunkdata to the given buffer
   *datalen = length-1;
   fread((char *)chunkdata, length-1,1,regionFile);
 
@@ -369,7 +385,7 @@ bool RegionFile::readChunk(uint8_t *chunkdata, uint32_t *datalen, int32_t x, int
 }
 
 
-/*function... might want it in some class?*/
+//Function to grab a list of all the files in a folder, both win32 and linux
 int getdir (std::string dir, std::vector<std::string> &files)
 {
 #ifdef WIN32
@@ -408,6 +424,7 @@ int getdir (std::string dir, std::vector<std::string> &files)
     return 1;
 }
 
+//Simple check that a folder is like in old chunk format, not perfect
 bool isMapDir(std::string filename)
 {
   std::string hexarray("0123456789abcdefghijklmnopqrstuvwxyz");
@@ -446,8 +463,6 @@ bool convertMap(std::string mapDir)
     if (mkdir(std::string(regionDir).c_str(), 0755) == -1)
 #endif
     {
-      //LOG(EMERG, "Map", "Error: Could not create map directory.");
-
       exit(EXIT_FAILURE);
     }
   }
@@ -460,6 +475,7 @@ bool convertMap(std::string mapDir)
     RegionFile *region;
     std::map<uint32_t,RegionFile*> fileMap;
 
+    //Loop every folder and subfolder there is
     for(int i = 0; i < files.size(); i++)
     {
       if(isMapDir(files[i]))
@@ -474,6 +490,8 @@ bool convertMap(std::string mapDir)
             int32_t x,z;
             filename = mapDir+"/"+files[i]+"/"+files2[ii];
             files3.clear();
+
+            //Here we finally get to the chunk files
             getdir(filename,files3);
             for(int j = 0; j < files3.size(); j++)
             {
@@ -481,6 +499,7 @@ bool convertMap(std::string mapDir)
               {
                 filename = mapDir+"/"+files[i]+"/"+files2[ii]+"/"+files3[j];
                 
+                //Load chunk file
                 NBT_Value* chunk = NBT_Value::LoadFromFile(filename);
 
                 if (chunk == NULL)
@@ -496,6 +515,7 @@ bool convertMap(std::string mapDir)
                   continue;
                 }
 
+                //Get chunk x and z pos
                 NBT_Value* xPos = (*level)["xPos"];
                 NBT_Value* zPos = (*level)["zPos"];
                 if (xPos && zPos)
@@ -503,27 +523,35 @@ bool convertMap(std::string mapDir)
                   x = *xPos;
                   z = *zPos;
 
+                  //Optimization, store opened RegionFiles to array with hash
                   uint32_t hash = (((x >> 5)&0xffff)<<16) | ((z >> 5)&0xffff);
 
+                  //Check for hash and correct chunk
                   if(fileMap.count(hash) && fileMap[hash]->x == x && fileMap[hash]->z == z)
                   {
                     region = fileMap[hash];
                   }
                   else
                   {
+                    //If old hash exists
                     if(fileMap.count(hash))
                     {
                       delete fileMap[hash];
                       fileMap[hash] = NULL;
                     }
                     //std::cout << "Create new file "  << hash << std::endl;
+
+                    //Open up new RegionFile
                     region = new RegionFile;
                     fileMap[hash] = region;
                     region->openFile(mapDir, x,z);
                   }
 
+                  //Store NBT to memory (deflated)
                   uint32_t len = 0;
-                  chunk->SaveToMemory(buffer, &len);                  
+                  chunk->SaveToMemory(buffer, &len);
+
+                  //Make sure deflation produces something
                   if(len > 0)
                   {
                     region->writeChunk(buffer, len, x, z);
@@ -542,8 +570,11 @@ bool convertMap(std::string mapDir)
         std::cout << "|";
       }
     }
+
+    //Cleanup
     delete [] buffer;
     
+    //Free RegionFiles
     for (std::map<uint32_t,RegionFile*>::iterator it = fileMap.begin(); it != fileMap.end(); ++it)
     {
       if(fileMap[it->first] != NULL)
