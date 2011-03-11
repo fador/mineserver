@@ -203,7 +203,8 @@ Mineserver::Mineserver()
   }
   else
   {
-    Mineserver::get()->logger()->log(LogType::LOG_WARNING, "Config", "Cannot find map.storage.nbt.directories.* in config.cfg");
+    // WARNING: winex: infinite loop here
+    //logger()->log(LogType::LOG_WARNING, "Config", "Cannot find map.storage.nbt.directories.* in config.cfg");
   }
   if (m_map.size() == 0)
   {
@@ -263,9 +264,9 @@ void Mineserver::parseCommandLine(int argc, char* argv[])
       std::string variablename = argument->substr(1, seperatorPos - 1);
       std::string variableValue = argument->substr(seperatorPos + 1, argument->length() - seperatorPos - 1);
 
-      if (Mineserver::get()->config()->has(variablename))
+      if (config()->has(variablename))
       {
-        ConfigNode* node = Mineserver::get()->config()->mData(variablename);
+        ConfigNode* node = config()->mData(variablename);
         if (node != NULL)
         {
           switch (node->type())
@@ -331,9 +332,9 @@ int Mineserver::run(int argc, char* argv[])
 
   init_plugin_api();
 
-  Mineserver::get()->parseCommandLine(argc, argv);
+  parseCommandLine(argc, argv);
 
-  if (Mineserver::get()->config()->bData("system.interface.use_cli"))
+  if (config()->bData("system.interface.use_cli"))
   {
     // Init our Screen
     screen()->init(VERSION);
@@ -342,19 +343,19 @@ int Mineserver::run(int argc, char* argv[])
 
   m_inventory      = new Inventory(std::string(CONFIG_DIR_SHARE) + '/' + "recipes", ".recipe", "ENABLED_RECIPES.cfg");
 
-  if (Mineserver::get()->config()->has("system.plugins") && (Mineserver::get()->config()->type("system.plugins") == CONFIG_NODE_LIST))
+  if (config()->has("system.plugins") && (config()->type("system.plugins") == CONFIG_NODE_LIST))
   {
-    std::list<std::string>* tmp = Mineserver::get()->config()->mData("system.plugins")->keys();
+    std::list<std::string>* tmp = config()->mData("system.plugins")->keys();
     std::list<std::string>::iterator it = tmp->begin();
     for (; it != tmp->end(); ++it)
     {
-      Mineserver::get()->plugin()->loadPlugin(*it, Mineserver::get()->config()->sData("system.plugins." + (*it)));
+      plugin()->loadPlugin(*it, config()->sData("system.plugins." + (*it)));
     }
     delete tmp;
   }
 
   // Write PID to file
-  std::ofstream pid_out((Mineserver::get()->config()->sData("system.pid_file")).c_str());
+  std::ofstream pid_out((config()->sData("system.pid_file")).c_str());
   if (!pid_out.fail())
   {
 #ifdef WIN32
@@ -368,14 +369,14 @@ int Mineserver::run(int argc, char* argv[])
   // Initialize map
   for (int i = 0; i < (int)m_map.size(); i++)
   {
-    Mineserver::get()->physics(i)->enabled = (Mineserver::get()->config()->bData("system.physics.enabled"));
+    physics(i)->enabled = (config()->bData("system.physics.enabled"));
 
     m_map[i]->init(i);
-    if (Mineserver::get()->config()->bData("map.generate_spawn.enabled"))
+    if (config()->bData("map.generate_spawn.enabled"))
     {
       logger()->log(LogType::LOG_INFO, "Mapgen", "Generating spawn area...");
-      int size = Mineserver::get()->config()->iData("map.generate_spawn.size");
-      bool show_progress = Mineserver::get()->config()->bData("map.generate_spawn.show_progress");
+      int size = config()->iData("map.generate_spawn.size");
+      bool show_progress = config()->bData("map.generate_spawn.show_progress");
 #ifdef __FreeBSD__
       show_progress = false;
 #endif
@@ -422,13 +423,13 @@ int Mineserver::run(int argc, char* argv[])
   }
 
   // Initialize packethandler
-  Mineserver::get()->packetHandler()->init();
+  packetHandler()->init();
 
   // Load ip from config
-  std::string ip = Mineserver::get()->config()->sData("net.ip");
+  std::string ip = config()->sData("net.ip");
 
   // Load port from config
-  int port = Mineserver::get()->config()->iData("net.port");
+  int port = config()->iData("net.port");
 
 #ifdef WIN32
   WSADATA wsaData;
@@ -438,7 +439,7 @@ int Mineserver::run(int argc, char* argv[])
   if (iResult != 0)
   {
     printf("WSAStartup failed with error: %d\n", iResult);
-    Mineserver::get()->screen()->end();
+    screen()->end();
     return EXIT_FAILURE;
   }
 #endif
@@ -455,8 +456,8 @@ int Mineserver::run(int argc, char* argv[])
 
   if (m_socketlisten < 0)
   {
-    Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Failed to create listen socket");
-    Mineserver::get()->screen()->end();
+    logger()->log(LogType::LOG_ERROR, "Socket", "Failed to create listen socket");
+    screen()->end();
     return 1;
   }
 
@@ -471,15 +472,15 @@ int Mineserver::run(int argc, char* argv[])
   // Bind to port
   if (bind(m_socketlisten, (struct sockaddr*)&addresslisten, sizeof(addresslisten)) < 0)
   {
-    Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Failed to bind to " + ip + ":" + dtos(port));
-    Mineserver::get()->screen()->end();
+    logger()->log(LogType::LOG_ERROR, "Socket", "Failed to bind to " + ip + ":" + dtos(port));
+    screen()->end();
     return 1;
   }
 
   if (listen(m_socketlisten, 5) < 0)
   {
-    Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Failed to listen to socket");
-    Mineserver::get()->screen()->end();
+    logger()->log(LogType::LOG_ERROR, "Socket", "Failed to listen to socket");
+    screen()->end();
     return 1;
   }
 
@@ -493,18 +494,18 @@ int Mineserver::run(int argc, char* argv[])
     char name[255];
     gethostname(name, sizeof(name));
     struct hostent* hostinfo = gethostbyname(name);
-    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", "Listening on: ");
+    logger()->log(LogType::LOG_INFO, "Socket", "Listening on: ");
     int ipIndex = 0;
     while (hostinfo && hostinfo->h_addr_list[ipIndex])
     {
       std::string ip(inet_ntoa(*(struct in_addr*)hostinfo->h_addr_list[ipIndex++]));
-      Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", ip + ":" + dtos(port));
+      logger()->log(LogType::LOG_INFO, "Socket", ip + ":" + dtos(port));
     }
   }
   else
   {
     std::string myip(ip);
-    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Socket", myip + ":" + dtos(port));
+    logger()->log(LogType::LOG_INFO, "Socket", myip + ":" + dtos(port));
   }
 
   timeval loopTime;
@@ -523,9 +524,9 @@ int Mineserver::run(int argc, char* argv[])
     static_cast<Hook0<bool>*>(plugin()->getHook("Timer200"))->doAll();
     // Alert any block types that care about timers
     BlockBasic* blockcb;
-    for (uint32_t i = 0 ; i < Mineserver::get()->plugin()->getBlockCB().size(); i++)
+    for (uint32_t i = 0 ; i < plugin()->getBlockCB().size(); i++)
     {
-      blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
+      blockcb = plugin()->getBlockCB()[i];
       if (blockcb != NULL)
       {
         blockcb->timer200();
@@ -536,7 +537,7 @@ int Mineserver::run(int argc, char* argv[])
     //    }
     for (std::vector<Map*>::size_type i = 0 ; i < m_map.size(); i++)
     {
-      Mineserver::get()->physics(i)->update();
+      physics(i)->update();
     }
 
 
@@ -593,7 +594,7 @@ int Mineserver::run(int argc, char* argv[])
         // No data received in 30s, timeout
         if (users()[i]->logged && (timeNow - users()[i]->lastData) > 30)
         {
-          Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Player " + users()[i]->nick + " timed out");
+          logger()->log(LogType::LOG_INFO, "Sockets", "Player " + users()[i]->nick + " timed out");
 
           delete users()[i];
         }
@@ -641,7 +642,7 @@ int Mineserver::run(int argc, char* argv[])
       }
 
       // Check for Furnace activity
-      Mineserver::get()->furnaceManager()->update();
+      furnaceManager()->update();
 
       // Run 1s timer hook
       static_cast<Hook0<bool>*>(plugin()->getHook("Timer1000"))->doAll();
@@ -671,16 +672,16 @@ int Mineserver::run(int argc, char* argv[])
 
   // Remove the PID file
 #ifdef WIN32
-  _unlink((Mineserver::get()->config()->sData("system.pid_file")).c_str());
+  _unlink((config()->sData("system.pid_file")).c_str());
 #else
-  unlink((Mineserver::get()->config()->sData("system.pid_file")).c_str());
+  unlink((config()->sData("system.pid_file")).c_str());
 #endif
 
   // Let the user know we're shutting the server down cleanly
   logger()->log(LogType::LOG_INFO, "Mineserver", "Shutting down...");
 
   // Close the cli session if its in use
-  if (Mineserver::get()->config()->bData("system.interface.use_cli"))
+  if (config()->bData("system.interface.use_cli"))
   {
     screen()->end();
   }
@@ -727,12 +728,6 @@ MapGen* Mineserver::mapGen(int n)
 {
   return m_mapGen[n];
 }
-
-//Map* Mineserver::map()
-//{
-//  std::cout << "WARNING. MAP DEFAULT USED" << std::endl;
-//  return m_map[0];
-//}
 
 Map* Mineserver::map(int n)
 {
