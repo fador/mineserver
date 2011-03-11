@@ -183,7 +183,6 @@ public:
   void saveAllPlayers();
   void saveAll();
 
-  void parseCommandLine(int argc, char* argv[]);
   bool homePrepare(const std::string& path);
 
 private:
