@@ -53,6 +53,7 @@
 #include <vector>
 #include <zlib.h>
 #include <signal.h>
+#include <errno.h>
 
 #include "constants.h"
 #include "mineserver.h"
@@ -122,6 +123,15 @@ std::string removeChar(std::string str, const char* c)
   return str;
 }
 
+int printHelp(int code)
+{
+  std::cout
+    << "Usage: mineserver [CONFIG_FILE]\n"
+    << "   or: mineserver -h|--help\n";
+  return code;
+}
+
+
 int main(int argc, char* argv[])
 {
   signal(SIGTERM, sighandler);
@@ -135,7 +145,23 @@ int main(int argc, char* argv[])
 
   srand((uint32_t)time(NULL));
 
-  return Mineserver::get()->run(argc, argv);
+  // accept at most 1 argument
+  if (argc > 2)
+    return printHelp(EXIT_FAILURE);
+
+  std::string cfg;
+  for (int i = 1; i < argc; i++)
+  {
+    cfg = std::string(argv[i]);
+    if (cfg[0] == '-')
+      return printHelp(EXIT_SUCCESS);
+  }
+
+  bool ret = false;
+
+  ret = Mineserver::get()->run();
+
+  return ret ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 Mineserver::Mineserver()
@@ -318,7 +344,7 @@ void Mineserver::parseCommandLine(int argc, char* argv[])
   }
 }
 
-int Mineserver::run(int argc, char* argv[])
+bool Mineserver::run()
 {
   uint32_t starttime = (uint32_t)time(0);
   uint32_t tick      = (uint32_t)time(0);
@@ -326,7 +352,7 @@ int Mineserver::run(int argc, char* argv[])
 
   init_plugin_api();
 
-  parseCommandLine(argc, argv);
+  //parseCommandLine(argc, argv);
 
   if (config()->bData("system.interface.use_cli"))
   {
@@ -434,7 +460,7 @@ int Mineserver::run(int argc, char* argv[])
   {
     LOG2(ERROR, std::string("WSAStartup failed with error: ") + iResult);
     screen()->end();
-    return EXIT_FAILURE;
+    return false;
   }
 #endif
 
@@ -452,7 +478,7 @@ int Mineserver::run(int argc, char* argv[])
   {
     LOG2(ERROR, "Failed to create listen socket");
     screen()->end();
-    return 1;
+    return false;
   }
 
   memset(&addresslisten, 0, sizeof(addresslisten));
@@ -468,14 +494,14 @@ int Mineserver::run(int argc, char* argv[])
   {
     LOG2(ERROR, "Failed to bind to " + ip + ":" + dtos(port));
     screen()->end();
-    return 1;
+    return false;
   }
 
   if (listen(m_socketlisten, 5) < 0)
   {
     LOG2(ERROR, "Failed to listen to socket");
     screen()->end();
-    return 1;
+    return false;
   }
 
   setnonblock(m_socketlisten);
@@ -703,7 +729,7 @@ int Mineserver::run(int argc, char* argv[])
 
   event_base_free(m_eventBase);
 
-  return EXIT_SUCCESS;
+  return true;
 }
 
 bool Mineserver::stop()
@@ -712,6 +738,67 @@ bool Mineserver::stop()
   return true;
 }
 
+
+bool Mineserver::homePrepare(const std::string& path)
+{
+  struct stat st;
+  if (stat(path.c_str(), &st) != 0)
+  {
+    LOG2(INFO, "Creating: " + path);
+#ifdef WIN32
+    if (_mkdir(path.c_str() == -1)
+#else
+    if (mkdir(path.c_str(), 0755) == -1)
+#endif
+    {
+      LOG2(ERROR, path + ": " + strerror(errno));
+      return false;
+    }
+  }
+
+  // copy example configs
+  const std::string files[] = {
+    "banned.txt",
+    "commands.cfg",
+    "config.cfg",
+    "item_alias.cfg",
+    "ENABLED_RECIPES.cfg",
+    "motd.txt",
+    "permissions.txt",
+    "roles.txt",
+    "rules.txt",
+    "whitelist.txt",
+  };
+  for (uint32_t i = 0; i < sizeof(files)/sizeof(files[0]); i++)
+  {
+    // TODO: winex: hardcoded path won't work on installation
+    std::string namein  = std::string("../files") + '/' + files[i];
+    std::string nameout = path + '/' + files[i];
+
+    // don't overwrite existing files
+    if ( (stat(nameout.c_str(), &st) == 0) && S_ISREG(st.st_mode) )
+      continue;
+
+    std::ifstream fin(namein.c_str(), std::ios_base::binary | std::ios_base::in);
+    if (fin.fail())
+    {
+      LOG2(ERROR, "Failed to open: " + namein);
+      continue;
+    }
+
+    LOG2(INFO, "Copying: " + nameout);
+    std::ofstream fout(nameout.c_str(), std::ios_base::binary);
+    if (fout.fail())
+    {
+      LOG2(ERROR, "Failed to write to: " + nameout);
+      continue;
+    }
+
+    fout << fin.rdbuf();
+  }
+
+  return true;
+}
 
 Physics* Mineserver::physics(int n)
 {

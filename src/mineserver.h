@@ -85,7 +85,7 @@ public:
   }
 
 
-  int run(int argc, char* argv[]);
+  bool run();
   bool stop();
 
   event_base* getEventBase();
@@ -184,6 +184,7 @@ public:
   void saveAll();
 
   void parseCommandLine(int argc, char* argv[]);
+  bool homePrepare(const std::string& path);
 
 private:
   Mineserver();
