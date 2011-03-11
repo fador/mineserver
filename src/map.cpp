@@ -1185,7 +1185,10 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   {
     LOGLF("Error in loading map (unable to load file)");
     delete chunk;
-    return NULL;
+    Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
+    Mineserver::get()->mapGen(m_number)->generateChunk(x, z, m_number);
+    generateLight(x, z);
+    return chunks.getChunk(x, z);
   }
 
   NBT_Value* level = (*chunk->nbt)["Level"];
@@ -1194,7 +1197,10 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   {
     LOGLF("Error in loading map (unable to find Level)");
     delete chunk;
-    return NULL;
+    Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
+    Mineserver::get()->mapGen(m_number)->generateChunk(x, z, m_number);
+    generateLight(x, z);
+    return chunks.getChunk(x, z);
   }
 
   NBT_Value* xPos = (*level)["xPos"];
@@ -1207,11 +1213,12 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   }
   else
   {
-    LOG(WARNING, "Map", "incorrect chunk (missing xPos or zPos)");
-    chunk->x = x;
-    chunk->z = z;
+    LOG(WARNING, "Map", "incorrect chunk (missing xPos or zPos) regenerating");
     delete chunk;
-    return NULL;
+    Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
+    Mineserver::get()->mapGen(m_number)->generateChunk(x, z, m_number);
+    generateLight(x, z);
+    return chunks.getChunk(x, z);
   }
 
   NBT_Value* nbt_blocks = (*level)["Blocks"];
