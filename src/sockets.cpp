@@ -231,7 +231,7 @@ void accept_callback(int fd,
     LOGLF("Client: accept() failed");
     return;
   }
-  User* client = new User(client_fd, generateEID());
+  User* client = new User(client_fd, Mineserver::generateEID());
   setnonblock(client_fd);
 
   event_set(client->GetEvent(), client_fd, EV_WRITE | EV_READ, client_callback, client);

@@ -709,6 +709,13 @@ int Mineserver::run(int argc, char* argv[])
   return EXIT_SUCCESS;
 }
 
+bool Mineserver::stop()
+{
+  m_running = false;
+  return true;
+}
+
+
 Physics* Mineserver::physics(int n)
 {
   return m_physics[n];
@@ -744,16 +751,3 @@ void Mineserver::setMap(Map* map, int n)
 {
   m_map[n] = map;
 }
-
-bool Mineserver::stop()
-{
-  m_running = false;
-  return true;
-}
-
-uint32_t generateEID()
-{
-  static uint32_t EID = 0;
-  return ++EID;
-}
-

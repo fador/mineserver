@@ -926,7 +926,7 @@ int PacketHandler::player_block_placement(User* user)
     }
 
     LOG(INFO, "Packets", "Spawn minecart");
-    int32_t EID = generateEID();
+    int32_t EID = Mineserver::generateEID();
     Packet pkt;
     // MINECART
     pkt << PACKET_ADD_OBJECT << (int32_t)EID << (int8_t)10 << (int32_t)(x * 32 + 16) << (int32_t)(y * 32) << (int32_t)(z * 32 + 16);
@@ -1226,7 +1226,7 @@ int PacketHandler::pickup_spawn(User* user)
 
   user->buffer.removePacket();
 
-  item.EID       = generateEID();
+  item.EID       = Mineserver::generateEID();
 
   item.spawnedBy = user->UID;
   item.spawnedAt = time(NULL);

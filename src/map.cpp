@@ -996,7 +996,7 @@ bool Map::sendPickupSpawn(spawnedItem item)
 void Map::createPickupSpawn(int x, int y, int z, int type, int count, int health, User* user)
 {
   spawnedItem item;
-  item.EID      = generateEID();
+  item.EID      = Mineserver::generateEID();
   item.health   = health;
   item.item     = type;
   item.count    = count;
@@ -1041,7 +1041,7 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
   }
 
   Packet  pkt;
-  int32_t EID = generateEID();
+  int32_t EID = Mineserver::generateEID();
   float   tempMult = 1.f - abs(user->pos.pitch / 90.f);
 
   // Spawn projectile on player location

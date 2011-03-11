@@ -63,14 +63,12 @@ class Mob;
 
 struct event_base;
 
-uint32_t generateEID();
-
 class Mineserver
 {
 public:
   static Mineserver* get()
   {
-    static Mineserver* m_instance;
+    static Mineserver* m_instance = NULL;
 
     if (!m_instance)
     {
@@ -80,8 +78,16 @@ public:
     return m_instance;
   }
 
+  static uint32_t generateEID()
+  {
+    static uint32_t m_EID = 0;
+    return ++m_EID;
+  }
+
+
   int run(int argc, char* argv[]);
   bool stop();
+
   event_base* getEventBase();
 
   std::vector<User*>& users()
@@ -183,8 +189,6 @@ private:
   bool m_running;
   // holds all connected users
   std::vector<User*> m_users;
-
-  static Mineserver* m_instance;
 
   std::vector<Map*> m_map;
   std::vector<Physics*> m_physics;
