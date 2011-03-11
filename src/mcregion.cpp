@@ -406,9 +406,11 @@ int getdir (std::string dir, std::vector<std::string> &files)
       files.push_back(ffd.cFileName);
    }
    while (FindNextFile(hFind, &ffd) != 0);
+
+   FindClose(hFind);
 #else
-    DIR *dp;
-    struct dirent *dirp;
+    DIR *dp = NULL;
+    struct dirent *dirp = NULL;
     if((dp  = opendir(dir.c_str())) == NULL) {
         //std::cout << "Error(" << errno << ") opening " << dir << std::endl;
         return 0;
