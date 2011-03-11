@@ -150,11 +150,6 @@ Mineserver::Mineserver()
   std::string file_config;
   file_config.assign(CONFIG_FILE);
 
-  //  if (argc > 1)
-  //  {
-  //    file_config.assign(argv[1]);
-  //  }
-
   // Initialize conf
   if (!m_config->load(file_config))
   {
@@ -163,9 +158,9 @@ Mineserver::Mineserver()
   }
 
   MapGen* mapgen = new MapGen;
-  MapGen* nethergen = (MapGen*) new NetherGen;
-  MapGen* heavengen = (MapGen*) new HeavenGen;
-  MapGen* biomegen = (MapGen*) new BiomeGen;
+  MapGen* nethergen = new NetherGen;
+  MapGen* heavengen = new HeavenGen;
+  MapGen* biomegen = new BiomeGen;
   m_mapGenNames.push_back(mapgen);
   m_mapGenNames.push_back(nethergen);
   m_mapGenNames.push_back(heavengen);
@@ -218,7 +213,6 @@ Mineserver::Mineserver()
   m_packetHandler  = new PacketHandler;
   //m_inventory      = new Inventory(std::string(CONFIG_DIR_SHARE) + '/' + "recipes", ".recipe", "ENABLED_RECIPES.cfg");
   m_mobs           = new Mobs;
-  m_mobs->mobNametoType("Creeper");
 }
 
 event_base* Mineserver::getEventBase()
@@ -438,7 +432,7 @@ int Mineserver::run(int argc, char* argv[])
   iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
   if (iResult != 0)
   {
-    printf("WSAStartup failed with error: %d\n", iResult);
+    LOG2(ERROR, std::string("WSAStartup failed with error: ") + iResult);
     screen()->end();
     return EXIT_FAILURE;
   }

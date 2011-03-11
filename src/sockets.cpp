@@ -147,7 +147,7 @@ void client_callback(int fd,
       }
       else if (Mineserver::get()->packetHandler()->packets[user->action].len == PACKET_DOES_NOT_EXIST)
       {
-        printf("Unknown action: 0x%x\n", user->action);
+        LOG2(DEBUG, (std::ostringstream("Unknown action: 0x") << std::hex << user->action).str());
 
         delete user;
         user = (User*)3;

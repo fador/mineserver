@@ -684,8 +684,7 @@ bool Map::getBlock(int x, int y, int z, uint8_t* type, uint8_t* meta, bool gener
 {
   if ((y < 0) || (y > 127))
   {
-    printf("(%i, %i, %i) ", x, y, z);
-    LOGLF("Invalid y value (getBlock)");
+    LOG2(DEBUG, std::string("Invalid y value (") + x + ", " + y + ", " + z + ")");
     return false;
   }
 
