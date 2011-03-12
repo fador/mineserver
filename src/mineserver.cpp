@@ -159,6 +159,9 @@ int main(int argc, char* argv[])
 
   const std::string DEFAULT_HOME = pathExpandUser(std::string("~/.mineserver"));
 
+  // create home and copy files if necessary
+  Mineserver::get()->homePrepare(DEFAULT_HOME);
+
 #ifdef DEBUG
   // using CONFIG_FILE in current directory is only for development purposes
   std::string cfgcwd = std::string("./") + CONFIG_FILE;
@@ -264,6 +267,13 @@ bool Mineserver::init(const std::string& cfg)
   }
   if (error)
     return false;
+
+  std::string str = config()->sData("system.path.home");
+  if (chdir(str.c_str()) != 0)
+  {
+    LOG2(ERROR, "Failed to change working directory to: " + str);
+    return false;
+  }
 
   // Write PID to file
   std::ofstream pid_out((config()->sData("system.pid_file")).c_str());
