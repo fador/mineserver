@@ -172,12 +172,34 @@ int main(int argc, char* argv[])
 
 Mineserver::Mineserver()
 {
+  memset(&m_listenEvent, 0, sizeof(event));
+  m_socketlisten = 0;
+
   m_saveInterval = 0;
   m_lastSave = time(NULL);
 
+  m_pvp_enabled    = false;
+  m_damage_enabled = false;
+  m_only_helmets   = false;
+
+  m_running = false;
+
+  m_eventBase = NULL;
+
+  // core modules
+  m_config = new Config;
+  m_screen = new CliScreen;
+  m_logger = new Logger;
+
+  m_plugin         = NULL;
+  m_chat           = NULL;
+  m_furnaceManager = NULL;
+  m_packetHandler  = NULL;
+  m_inventory      = NULL;
+  m_mobs           = NULL;
+
   initConstants();
 
-  m_config         = new Config;
 
   std::string file_config;
   file_config.assign(CONFIG_FILE);
@@ -238,8 +260,7 @@ Mineserver::Mineserver()
     std::cerr << "No worlds in Config!" << std::endl;
     exit(1);
   }
-  m_screen         = new CliScreen;
-  m_logger         = new Logger;
+
   m_chat           = new Chat;
   m_furnaceManager = new FurnaceManager;
   m_packetHandler  = new PacketHandler;
@@ -259,6 +280,33 @@ Mineserver::~Mineserver()
 
 bool Mineserver::init(const std::string& cfg)
 {
+  // Write PID to file
+  std::ofstream pid_out((config()->sData("system.pid_file")).c_str());
+  if (!pid_out.fail())
+  {
+#ifdef WIN32
+    pid_out << _getpid();
+#else
+    pid_out << getpid();
+#endif
+  }
+  pid_out.close();
+
+
+  // screen::init() needs m_plugin
+  m_plugin = new Plugin;
+
+  init_plugin_api();
+
+  if (config()->bData("system.interface.use_cli"))
+  {
+    // Init our Screen
+    screen()->init(VERSION);
+  }
+
+
+  LOG2(INFO, "Welcome to Mineserver v" + VERSION);
+
   return true;
 }
 
@@ -337,19 +385,10 @@ bool Mineserver::run()
 {
   uint32_t starttime = (uint32_t)time(0);
   uint32_t tick      = (uint32_t)time(0);
-  m_plugin         = new Plugin;
-
-  init_plugin_api();
-
-  if (config()->bData("system.interface.use_cli"))
-  {
-    // Init our Screen
-    screen()->init(VERSION);
-    LOG2(INFO, "Welcome to Mineserver v" + VERSION);
-  }
 
   m_inventory      = new Inventory(std::string(CONFIG_DIR_SHARE) + '/' + "recipes", ".recipe", "ENABLED_RECIPES.cfg");
 
+  // load plugins
   if (config()->has("system.plugins") && (config()->type("system.plugins") == CONFIG_NODE_LIST))
   {
     std::list<std::string>* tmp = config()->mData("system.plugins")->keys();
@@ -360,18 +399,6 @@ bool Mineserver::run()
     }
     delete tmp;
   }
-
-  // Write PID to file
-  std::ofstream pid_out((config()->sData("system.pid_file")).c_str());
-  if (!pid_out.fail())
-  {
-#ifdef WIN32
-    pid_out << _getpid();
-#else
-    pid_out << getpid();
-#endif
-  }
-  pid_out.close();
 
   // Initialize map
   for (int i = 0; i < (int)m_map.size(); i++)
