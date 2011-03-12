@@ -448,7 +448,17 @@ bool Mineserver::run()
     std::list<std::string>::iterator it = tmp->begin();
     for (; it != tmp->end(); ++it)
     {
-      plugin()->loadPlugin(*it, config()->sData("system.plugins." + (*it)));
+      std::string path  = config()->sData("system.path.plugins");
+      std::string name  = config()->sData("system.plugins." + (*it));
+      std::string alias = *it;
+      if (name[0] == '_')
+      {
+        path = "";
+        alias = name;
+        name = name.substr(1);
+      }
+
+      plugin()->loadPlugin(name, path, alias);
     }
     delete tmp;
   }
