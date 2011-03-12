@@ -157,6 +157,11 @@ int main(int argc, char* argv[])
       return printHelp(EXIT_SUCCESS);
   }
 
+  const std::string DEFAULT_HOME = pathExpandUser(std::string("~/.mineserver"));
+
+  if (cfg.empty())
+    cfg = DEFAULT_HOME + '/' + CONFIG_FILE;
+
   bool ret = false;
   ret = Mineserver::get()->init(cfg);
   if (!ret)
@@ -176,7 +181,7 @@ Mineserver::Mineserver()
   m_socketlisten = 0;
 
   m_saveInterval = 0;
-  m_lastSave = time(NULL);
+  m_lastSave     = time(NULL);
 
   m_pvp_enabled    = false;
   m_damage_enabled = false;
@@ -213,15 +218,13 @@ Mineserver::~Mineserver()
 
 bool Mineserver::init(const std::string& cfg)
 {
-  std::string file_config;
-  file_config.assign(CONFIG_FILE);
-
-  // Initialize conf
-  if (!m_config->load(file_config))
+  // load config
+  if (!m_config->load(cfg))
   {
-    std::cerr << "Config file error, failed to start Mineserver!" << std::endl;
-    exit(1);
+    return false;
   }
+
+  LOG2(INFO, "Using config: " + cfg);
 
   // Write PID to file
   std::ofstream pid_out((config()->sData("system.pid_file")).c_str());
@@ -280,7 +283,9 @@ bool Mineserver::init(const std::string& cfg)
       int k = m_config->iData((std::string(key) + ".") + (*it));
       if (k >= m_mapGenNames.size())
       {
-        std::cout << "Error! Mapgen number " << k << " in config. " << m_mapGenNames.size() << " Mapgens known" << std::endl;
+        std::ostringstream s;
+        s << "Error! Mapgen number " << k << " in config. " << m_mapGenNames.size() << " Mapgens known";
+        LOG2(INFO, s.str());
       }
       MapGen* m = m_mapGenNames[k];
       m_mapGen.push_back(m);
@@ -291,19 +296,19 @@ bool Mineserver::init(const std::string& cfg)
   }
   else
   {
-    // WARNING: winex: infinite loop here
-    //LOG2(WARNING, "Cannot find map.storage.nbt.directories.*");
+    LOG2(WARNING, "Cannot find map.storage.nbt.directories.*");
   }
+
   if (m_map.size() == 0)
   {
-    std::cerr << "No worlds in Config!" << std::endl;
-    exit(1);
+    LOG2(ERROR, "No worlds in Config!");
+    return false;
   }
 
   m_chat           = new Chat;
   m_furnaceManager = new FurnaceManager;
   m_packetHandler  = new PacketHandler;
-  //m_inventory      = new Inventory(std::string(CONFIG_DIR_SHARE) + '/' + "recipes", ".recipe", "ENABLED_RECIPES.cfg");
+  m_inventory      = new Inventory(m_config->sData("system.path.data") + '/' + "recipes", ".recipe", "ENABLED_RECIPES.cfg");
   m_mobs           = new Mobs;
 
   return true;
@@ -380,12 +385,12 @@ void Mineserver::saveAllPlayers()
   }
 }
 
+
 bool Mineserver::run()
 {
   uint32_t starttime = (uint32_t)time(0);
   uint32_t tick      = (uint32_t)time(0);
 
-  m_inventory      = new Inventory(std::string(CONFIG_DIR_SHARE) + '/' + "recipes", ".recipe", "ENABLED_RECIPES.cfg");
 
   // load plugins
   if (config()->has("system.plugins") && (config()->type("system.plugins") == CONFIG_NODE_LIST))
