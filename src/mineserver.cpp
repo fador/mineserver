@@ -199,8 +199,20 @@ Mineserver::Mineserver()
   m_mobs           = NULL;
 
   initConstants();
+}
+
+Mineserver::~Mineserver()
+{
+  freeConstants();
+
+  delete m_logger;
+  delete m_screen;
+  delete m_config;
+}
 
 
+bool Mineserver::init(const std::string& cfg)
+{
   std::string file_config;
   file_config.assign(CONFIG_FILE);
 
@@ -210,6 +222,33 @@ Mineserver::Mineserver()
     std::cerr << "Config file error, failed to start Mineserver!" << std::endl;
     exit(1);
   }
+
+  // Write PID to file
+  std::ofstream pid_out((config()->sData("system.pid_file")).c_str());
+  if (!pid_out.fail())
+  {
+#ifdef WIN32
+    pid_out << _getpid();
+#else
+    pid_out << getpid();
+#endif
+  }
+  pid_out.close();
+
+
+  // screen::init() needs m_plugin
+  m_plugin = new Plugin;
+
+  init_plugin_api();
+
+  if (config()->bData("system.interface.use_cli"))
+  {
+    // Init our Screen
+    screen()->init(VERSION);
+  }
+
+
+  LOG2(INFO, "Welcome to Mineserver v" + VERSION);
 
   MapGen* mapgen = new MapGen;
   MapGen* nethergen = new NetherGen;
@@ -266,46 +305,6 @@ Mineserver::Mineserver()
   m_packetHandler  = new PacketHandler;
   //m_inventory      = new Inventory(std::string(CONFIG_DIR_SHARE) + '/' + "recipes", ".recipe", "ENABLED_RECIPES.cfg");
   m_mobs           = new Mobs;
-}
-
-Mineserver::~Mineserver()
-{
-  freeConstants();
-
-  delete m_logger;
-  delete m_screen;
-  delete m_config;
-}
-
-
-bool Mineserver::init(const std::string& cfg)
-{
-  // Write PID to file
-  std::ofstream pid_out((config()->sData("system.pid_file")).c_str());
-  if (!pid_out.fail())
-  {
-#ifdef WIN32
-    pid_out << _getpid();
-#else
-    pid_out << getpid();
-#endif
-  }
-  pid_out.close();
-
-
-  // screen::init() needs m_plugin
-  m_plugin = new Plugin;
-
-  init_plugin_api();
-
-  if (config()->bData("system.interface.use_cli"))
-  {
-    // Init our Screen
-    screen()->init(VERSION);
-  }
-
-
-  LOG2(INFO, "Welcome to Mineserver v" + VERSION);
 
   return true;
 }
