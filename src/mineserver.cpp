@@ -234,6 +234,37 @@ bool Mineserver::init(const std::string& cfg)
 
   LOG2(INFO, "Using config: " + cfg);
 
+  // expand '~', '~user' in next vars
+  bool error = false;
+  const char* vars[] = {
+    "system.path.data",
+    "system.path.plugins",
+    "system.path.home",
+    "system.pid_file",
+  };
+  for (uint32_t i = 0; i < sizeof(vars)/sizeof(vars[0]); i++)
+  {
+    ConfigNode* node = config()->mData(vars[i]);
+    if (!node)
+    {
+      LOG2(ERROR, std::string("Variable is missing: ") + vars[i]);
+      error = true;
+      continue;
+    }
+    if (node->type() != CONFIG_NODE_STRING)
+    {
+      LOG2(ERROR, std::string("Variable is not string: ") + vars[i]);
+      error = true;
+      continue;
+    }
+
+    std::string newvalue = pathExpandUser(node->sData());
+    node->setData(newvalue);
+    LOG2(INFO, std::string(vars[i]) + " = \"" + newvalue + "\"");
+  }
+  if (error)
+    return false;
+
   // Write PID to file
   std::ofstream pid_out((config()->sData("system.pid_file")).c_str());
   if (!pid_out.fail())
