@@ -169,6 +169,7 @@ int main(int argc, char* argv[])
   return ret ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
+
 Mineserver::Mineserver()
 {
   m_saveInterval = 0;
@@ -248,6 +249,11 @@ Mineserver::Mineserver()
 
 Mineserver::~Mineserver()
 {
+  freeConstants();
+
+  delete m_logger;
+  delete m_screen;
+  delete m_config;
 }
 
 
@@ -258,6 +264,42 @@ bool Mineserver::init(const std::string& cfg)
 
 bool Mineserver::free()
 {
+  // Let the user know we're shutting the server down cleanly
+  LOG2(INFO, "Shutting down...");
+
+  // Close the cli session if its in use
+  if (config() && config()->bData("system.interface.use_cli"))
+  {
+    screen()->end();
+  }
+
+  // Free memory
+  for (std::vector<Map*>::size_type i = 0; i < m_map.size(); i++)
+  {
+    delete m_map[i];
+    delete m_physics[i];
+    delete m_mapGen[i];
+  }
+
+  delete m_chat;
+  delete m_furnaceManager;
+  delete m_packetHandler;
+  delete m_inventory;
+  delete m_mobs;
+
+  if (m_plugin)
+  {
+    delete m_plugin;
+    m_plugin = NULL;
+  }
+
+  // Remove the PID file
+#ifdef WIN32
+  _unlink((config()->sData("system.pid_file")).c_str());
+#else
+  unlink((config()->sData("system.pid_file")).c_str());
+#endif
+
   return true;
 }
 
@@ -404,7 +446,6 @@ bool Mineserver::run()
   if (iResult != 0)
   {
     LOG2(ERROR, std::string("WSAStartup failed with error: ") + iResult);
-    screen()->end();
     return false;
   }
 #endif
@@ -422,7 +463,6 @@ bool Mineserver::run()
   if (m_socketlisten < 0)
   {
     LOG2(ERROR, "Failed to create listen socket");
-    screen()->end();
     return false;
   }
 
@@ -438,14 +478,12 @@ bool Mineserver::run()
   if (bind(m_socketlisten, (struct sockaddr*)&addresslisten, sizeof(addresslisten)) < 0)
   {
     LOG2(ERROR, "Failed to bind to " + ip + ":" + dtos(port));
-    screen()->end();
     return false;
   }
 
   if (listen(m_socketlisten, 5) < 0)
   {
     LOG2(ERROR, "Failed to listen to socket");
-    screen()->end();
     return false;
   }
 
@@ -635,42 +673,7 @@ bool Mineserver::run()
   close(m_socketlisten);
 #endif
 
-  // Remove the PID file
-#ifdef WIN32
-  _unlink((config()->sData("system.pid_file")).c_str());
-#else
-  unlink((config()->sData("system.pid_file")).c_str());
-#endif
-
-  // Let the user know we're shutting the server down cleanly
-  LOG2(INFO, "Shutting down...");
-
-  // Close the cli session if its in use
-  if (config()->bData("system.interface.use_cli"))
-  {
-    screen()->end();
-  }
-
   saveAll();
-
-  /* Free memory */
-  for (std::vector<Map*>::size_type i = 0; i < m_map.size(); i++)
-  {
-    delete m_map[i];
-    delete m_physics[i];
-    delete m_mapGen[i];
-  }
-
-  delete m_chat;
-  delete m_plugin;
-  delete m_screen;
-  delete m_config;
-  delete m_furnaceManager;
-  delete m_packetHandler;
-  delete m_logger;
-  delete m_inventory;
-
-  freeConstants();
 
   event_base_free(m_eventBase);
 
