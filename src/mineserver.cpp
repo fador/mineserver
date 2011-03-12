@@ -158,8 +158,13 @@ int main(int argc, char* argv[])
   }
 
   bool ret = false;
+  ret = Mineserver::get()->init(cfg);
+  if (!ret)
+    LOG2(ERROR, "Failed to start Mineserver!");
+  else
+    ret = Mineserver::get()->run();
 
-  ret = Mineserver::get()->run();
+  Mineserver::get()->free();
 
   return ret ? EXIT_SUCCESS : EXIT_FAILURE;
 }
@@ -240,6 +245,22 @@ Mineserver::Mineserver()
   //m_inventory      = new Inventory(std::string(CONFIG_DIR_SHARE) + '/' + "recipes", ".recipe", "ENABLED_RECIPES.cfg");
   m_mobs           = new Mobs;
 }
+
+Mineserver::~Mineserver()
+{
+}
+
+
+bool Mineserver::init(const std::string& cfg)
+{
+  return true;
+}
+
+bool Mineserver::free()
+{
+  return true;
+}
+
 
 event_base* Mineserver::getEventBase()
 {
