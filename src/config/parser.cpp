@@ -36,6 +36,8 @@
 #include "parser.h"
 #include "node.h"
 
+#include "tools.h"
+
 bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
 {
   ConfigScanner scanner;
@@ -73,9 +75,28 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
       lexer.get_token(&tmp_type, &tmp_data);
       if (tmp_type == CONFIG_TOKEN_STRING)
       {
+        // allow only filename without path
+        if ( (tmp_data.find('/')  != std::string::npos)
+          || (tmp_data.find('\\') != std::string::npos) )
+        {
+          std::cerr << file << ": include directive accepts only filename: " << tmp_data << "\n";
+          return false;
+        }
+
+        // prepend home path
+        const std::string var  = "system.path.home";
+        ConfigNode*       node = root->get(var, false);
+        std::string       home;
+        if ( !node || (home = node->sData()).empty() )
+        {
+          std::cerr << file << ": include directive is not allowed before: " << var << "\n";
+          return false;
+        }
+
+        tmp_data = pathExpandUser(home) + '/' + tmp_data;
         if (tmp_data == file)
         {
-          std::cerr << "Warning: recursion detected! Not including `" << tmp_data << "`.\n";
+          std::cerr << file << ": recursion detected! Not including: " << tmp_data << "\n";
           continue;
         }
 
