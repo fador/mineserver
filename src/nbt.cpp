@@ -553,7 +553,7 @@ NBT_Value* NBT_Value::LoadFromFile(const std::string& filename)
   if (uncompressedSize == 0)
   {
     LOG2(WARNING, "Unable to determine uncompressed size of " + filename);
-    uncompressedSize = ALLOCATE_NBTFILE;
+    uncompressedSize = ALLOCATE_NBTFILE*10;
   }
 
   uint8_t* uncompressedData = new uint8_t[uncompressedSize];
@@ -576,6 +576,51 @@ NBT_Value* NBT_Value::LoadFromFile(const std::string& filename)
   return root;
 }
 
+NBT_Value* NBT_Value::LoadFromMemory(uint8_t* buffer, uint32_t len)
+{
+    //Initialize zstream to handle gzip format
+  z_stream zstream;
+  zstream.zalloc    = (alloc_func)0;
+  zstream.zfree     = (free_func)0;
+  zstream.opaque    = (voidpf)0;
+  zstream.next_in   = buffer;
+  zstream.next_out  = 0;
+  zstream.avail_in  = len;
+  zstream.avail_out = 0;
+  zstream.total_in  = 0;
+  zstream.total_out = 0;
+  zstream.data_type = Z_BINARY;
+  //inflateInit2(&zstream,16+MAX_WBITS);
+  inflateInit(&zstream);
+
+  uint32_t uncompressedSize   = ALLOCATE_NBTFILE*10;
+  uint8_t *uncompressedBuffer = new uint8_t[uncompressedSize];
+
+  zstream.avail_out = uncompressedSize;
+  zstream.next_out = uncompressedBuffer;
+  
+  //Uncompress
+  int returnvalue = 0;
+  if((returnvalue = inflate(&zstream, Z_FINISH)) != Z_STREAM_END && returnvalue != Z_BUF_ERROR)
+  {
+    
+    std::cout << "Error in inflate! " << returnvalue << std::endl;
+    delete[] uncompressedBuffer;
+    return NULL;
+  }
+
+  inflateEnd(&zstream);
+
+  uint8_t* ptr = uncompressedBuffer + 3; // Jump blank compound
+  int remaining = uncompressedSize;
+
+  NBT_Value* root = new NBT_Value(TAG_COMPOUND, &ptr, remaining);
+
+  delete[] uncompressedBuffer;
+
+  return root;
+}
+
 void NBT_Value::SaveToFile(const std::string& filename)
 {
   std::vector<uint8_t> buffer;
@@ -594,6 +639,28 @@ void NBT_Value::SaveToFile(const std::string& filename)
   gzFile nbtFile = gzopen(filename.c_str(), "wb");
   gzwrite(nbtFile, &buffer[0], buffer.size());
   gzclose(nbtFile);
+}
+
+
+void NBT_Value::SaveToMemory(uint8_t* buffer, uint32_t* len)
+{
+
+  std::vector<uint8_t> NBTBuffer;
+  // Blank compound tag
+  NBTBuffer.push_back(TAG_COMPOUND);
+  NBTBuffer.push_back(0);
+  NBTBuffer.push_back(0);
+
+  Write(NBTBuffer);
+
+  NBTBuffer.push_back(0);
+  NBTBuffer.push_back(0);
+  NBTBuffer.push_back(0);
+
+  uLongf written = ALLOCATE_NBTFILE*10;
+  compress(buffer, &written, &NBTBuffer[0], NBTBuffer.size());
+  *len = written;
+
 }
 
 void NBT_Value::Write(std::vector<uint8_t> &buffer)

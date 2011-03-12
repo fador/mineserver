@@ -2,7 +2,7 @@
 SRC          = mineserver.cpp map.cpp chat.cpp constants.cpp logger.cpp nbt.cpp
 SRC         += furnace.cpp furnaceManager.cpp packets.cpp physics.cpp sockets.cpp
 SRC         += tools.cpp user.cpp tree.cpp inventory.cpp mob.cpp 
-SRC         += screenBase.cpp cliScreen.cpp
+SRC         += screenBase.cpp cliScreen.cpp mcregion.cpp
 
 SRC         += config.cpp config/node.cpp config/scanner.cpp config/lexer.cpp config/parser.cpp
 

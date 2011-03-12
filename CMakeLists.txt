@@ -24,13 +24,13 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_P
 set(CONFIG_DIR_BIN   bin/)
 set(CONFIG_DIR_ETC   etc/${PROJECT_NAME}/)
 set(CONFIG_DIR_LIB   lib/${PROJECT_NAME}/)
-set(CONFIG_DIR_SHARE share/${PROJECT_NAME}/)
+set(CONFIG_DIR_SHARE ./)
 if(WIN32)
   message(STATUS "CONFIG_LOCAL is set -- assuming local build")
   set(CONFIG_DIR_BIN   bin/)
   set(CONFIG_DIR_ETC   bin/)
   set(CONFIG_DIR_LIB   bin/)
-  set(CONFIG_DIR_SHARE files/)
+  set(CONFIG_DIR_SHARE ./)
   set(CONFIG_PREFIX    ${CMAKE_INSTALL_PREFIX})
 endif()
 
@@ -86,6 +86,7 @@ set(mineserver_source
   src/sockets.cpp
   src/chat.cpp
   src/tree.cpp
+  src/mcregion.cpp
   src/worldgen/cavegen.cpp
   src/worldgen/heavengen.cpp
   src/worldgen/mapgen.cpp

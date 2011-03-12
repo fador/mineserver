@@ -201,6 +201,9 @@
     <ClCompile Include="..\src\blocks\redstone.cpp">
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\mcregion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\user.h">
@@ -379,6 +382,9 @@
     </ClInclude>
     <ClInclude Include="..\src\blocks\redstone.h">
       <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mcregion.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
