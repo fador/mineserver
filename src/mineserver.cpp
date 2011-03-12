@@ -159,6 +159,14 @@ int main(int argc, char* argv[])
 
   const std::string DEFAULT_HOME = pathExpandUser(std::string("~/.mineserver"));
 
+#ifdef DEBUG
+  // using CONFIG_FILE in current directory is only for development purposes
+  std::string cfgcwd = std::string("./") + CONFIG_FILE;
+  struct stat st;
+  if ( (stat(cfgcwd.c_str(), &st) == 0) && S_ISREG(st.st_mode) )
+    cfg = cfgcwd;
+#endif
+
   if (cfg.empty())
     cfg = DEFAULT_HOME + '/' + CONFIG_FILE;
 
