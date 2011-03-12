@@ -1060,6 +1060,15 @@ bool User::addRemoveQueue(int x, int z)
 {
   vec newMap(x, 0, z);
 
+  for (unsigned int i = 0; i < mapQueue.size(); i++)
+  {
+    // Check if the chunk is going to be loaded
+    if (mapQueue[i].x() == newMap.x() && mapQueue[i].z() == newMap.z())
+    {
+      return false;
+    }
+  }
+
   this->mapRemoveQueue.push_back(newMap);
 
   return true;
