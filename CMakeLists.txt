@@ -184,8 +184,14 @@ endif()
 if(WIN32)
   # this requires WinMain() entry, disabled until console/GUI option is added
   #set(exe "WIN32")
+
+  # this shouldn't be here, but can cmake find these .lib's?
   # do we really need winmm?
-  set(mineserver_depends "${mineserver_depends} ws2_32 winmm")
+  foreach(lib ws2_32 winmm)
+    string(TOUPPER ${lib} LIB)
+    list(APPEND mineserver_depends "${lib}")
+    set(${LIB}_LIBRARY "${lib}")
+  endforeach()
 else()
   if(NOISE_DIR_IS_LIBNOISE)
     add_definitions(-DLIBNOISE)
