@@ -26,11 +26,12 @@
 */
 
 #include <stdlib.h>
+
+#include <sys/stat.h>
 #ifdef WIN32
 #include <conio.h>
 #include <winsock2.h>
 #include <process.h>
-#include <sys/stat.h>
 #include <direct.h>
 #else
 #include <sys/socket.h>
