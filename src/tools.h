@@ -100,4 +100,14 @@ inline int getRandInt(int min, int max)
   return (rand() % ((max - min) + 1) + min);
 }
 
+inline double BetterRand()
+{
+  return (rand() * (1.0 / (RAND_MAX + 1.0)));
+}
+
+inline int getBetterRandInt(int min, int max)
+{
+  return (BetterRand() * (max - min)) + min;
+}
+
 #endif

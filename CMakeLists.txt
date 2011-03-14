@@ -91,6 +91,8 @@ set(mineserver_source
   src/worldgen/heavengen.cpp
   src/worldgen/mapgen.cpp
   src/worldgen/nethergen.cpp
+  src/worldgen/biomegen.cpp
+  src/worldgen/eximgen.cpp
   src/blocks/cake.cpp
   src/blocks/stair.cpp
   src/blocks/chest.cpp
@@ -107,6 +109,7 @@ set(mineserver_source
   src/blocks/falling.cpp
   src/blocks/liquid.cpp
   src/blocks/redstone.cpp
+  src/blocks/leaves.cpp
   src/tools.cpp
   src/physics.cpp
   src/cliScreen.cpp
@@ -118,7 +121,6 @@ set(mineserver_source
   src/items/itembasic.cpp
   src/items/projectile.cpp
   src/mob.cpp
-  src/worldgen/biomegen.cpp
 )
 source_group(${PROJECT_NAME} FILES ${mineserver_source})
 

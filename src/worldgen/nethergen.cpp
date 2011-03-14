@@ -55,6 +55,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../nbt.h"
 #include "../tree.h"
 
+#include "../tools.h"
+
 int neth_seed;
 
 NetherGen::NetherGen()
@@ -450,7 +452,7 @@ void NetherGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int depo
     {
       for (int bZ = z; bZ < z + depotSize; bZ++)
       {
-        if (rand() % 1000 < 500)
+        if (BetterRand() < 0.5)
         {
           Mineserver::get()->map(map)->sendBlockChange(bX, bY, bZ, block, 0);
           Mineserver::get()->map(map)->setBlock(bX, bY, bZ, block, 0);

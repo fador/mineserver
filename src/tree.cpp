@@ -25,18 +25,17 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <math.h>
+#include <cmath>
 #include "tree.h"
 #include "mineserver.h"
 
 #include "tools.h"
 
-#define Branch(x,y,z,m) Trunk* v = new Trunk(x,y,z,m);m_Branch[n_branches] = v;n_branches++;generateBranches(v);
 
 Tree::Tree(int32_t x, int32_t y, int32_t z, int map, uint8_t limit)
 {
   n_branches = 0;
-  _x = x, _y = y, _z = z, _map = map;
+  _x = x, _y = y, _z = z, _map=map;
   this->generate(limit);
 }
 
@@ -46,30 +45,34 @@ Tree::~Tree(void)
 }
 void Tree::generate(uint8_t limit)
 {
-  uint8_t darkness = 1;
+  uint8_t type=0;
 
-  srand((uint32_t)time(NULL));
+  uint8_t m_trunkHeight = getBetterRandInt(MIN_TRUNK,limit);
 
-  uint8_t m_trunkHeight = getRandInt(MIN_TRUNK, limit);
+  bool smalltree=false;
 
-  bool smalltree = false;
-
-  //in this implementation we generate the trunk and as we do we call branching and canopy
   if (m_trunkHeight < BRANCHING_HEIGHT)
   {
-    smalltree = true;
-    darkness = 0;
+    smalltree=true;
   }
-  uint8_t th = m_trunkHeight - 1;
+  if(BetterRand() >0.5) // 1/2 chance
+  {
+      type++;
+      if(BetterRand() > 0.5) // 1/4
+      {
+          type++;
+      }
+  }
+  uint8_t th=m_trunkHeight-1; // Trunk Height
   uint8_t i;
   for (i = 0; i < th; i++)
   {
-    if (smalltree)
+    if(smalltree)
     {
-      Trunk* v = new Trunk(_x, _y + i, _z, _map, darkness);
-      if (i >= MIN_TRUNK - 1)
+      Trunk* v = new Trunk(_x,_y+i,_z,_map,type);
+      if(i>=MIN_TRUNK-1)
       {
-        m_Branch[n_branches] = v;
+        m_Branch[n_branches]= v;
         n_branches++;
       }
       else
@@ -79,11 +82,11 @@ void Tree::generate(uint8_t limit)
     }
     else
     {
-      Trunk* v = new Trunk(_x, _y + i, _z, _map, darkness);
-      if (i > BRANCHING_HEIGHT - 1)
+      Trunk* v = new Trunk(_x,_y+i,_z,_map,type);
+      if(i > BRANCHING_HEIGHT-1)
       {
         generateBranches(v);
-        m_Branch[n_branches] = v;
+        m_Branch[n_branches]=v;
         n_branches++;
       }
       else
@@ -92,97 +95,91 @@ void Tree::generate(uint8_t limit)
       }
     }
   }
-  Trunk* v = new Trunk(_x, _y + i, _z, _map, darkness);
-  m_Branch[n_branches] = v;
+  Trunk* v = new Trunk(_x,_y+i,_z,_map,type);
+  m_Branch[n_branches]= v;
   n_branches++;
   generateBranches(v);
   generateCanopy();
 }
-//I STRONGLY RECOMMEND TO USE Trunk Rather than a new unneeded class
-//maybe just a class Wood?
 void Tree::generateBranches(Trunk* wrap)
 {
   uint8_t blocktype;
   uint8_t meta;
-  vec loc = wrap->location();
 
-  int32_t posx = loc.x();
-  uint8_t posy = loc.y();
-  int32_t posz = loc.z();
+  int32_t x = wrap->_x;
+  uint8_t y = wrap->_y;
+  int32_t z = wrap->_z;
 
   uint32_t schanse = BRANCHING_CHANCE;
-  //Not much point to loop here
-  //or make a function for the inside of the if.
-  if (rand() % schanse == 0)
+  
+  if(BetterRand() > 1.0- (1.0/BRANCHING_CHANCE))
   {
-    Branch(posx + 1, posy, posz, _map);
-  }
-  if (rand() % schanse == 0)
-  {
-    Branch(posx - 1, posy, posz, _map);
-  }
-  if (rand() % schanse == 0)
-  {
-    Branch(posx, posy, posz + 1, _map);
-  }
-  if (rand() % schanse == 0)
-  {
-    Branch(posx, posy, posz - 1, _map);
-  }
-  if (rand() % schanse == 0)
-  {
-    Branch(posx, posy + 1, posz, _map);
+      float r = BetterRand();
+      if(r < 0.2){
+          x--;
+      }
+      else if(r < 0.4){
+          x++;
+      }
+      else if(r < 0.6){
+          z++;
+      }
+      else if(r < 0.8){
+          z--;
+      }
+      if(r > 0.5) y++;
+
+    Trunk* v = new Trunk(x,y,z,_map);
+    m_Branch[n_branches] = v;
+    n_branches++;
+    generateBranches(v);
   }
 }
 
 void Tree::generateCanopy()
 {
-  uint8_t blocktype;
-  uint8_t meta;
+  uint8_t block,meta;
   uint8_t canopySize;
-  vec loc;
 
-  uint8_t canopy_darkness = 0;
-  //Not much point making less code with a while/for loop
-  //since compiled this is alot faster
-  if (rand() % 15 == 0)
+  uint8_t canopy_type = 0;
+
+  int32_t posx, posy, posz;
+  int32_t t_posx, t_posy, t_posz;
+
+  if(BetterRand() > 0.5)  // 1/2
   {
-    canopy_darkness++;
+      canopy_type++;
+      if(BetterRand() > 0.5)  // 1/4
+      {
+          canopy_type++;
+      }
   }
-  if (rand() % 15 == 0)
+  canopySize = 3;
+  //canopySize = (BetterRand()*(MAX_CANOPY - MIN_CANOPY)) + MIN_CANOPY;
+
+  for(uint8_t i=0;i<n_branches;i++)
   {
-    canopy_darkness++;
-  }
-  if (rand() % 15 == 0)
-  {
-    canopy_darkness++;
-  }
-  //I'm Not Proud of this looping.
-  for (uint8_t i = 0; i < n_branches; i++)
-  {
-    canopySize = getRandInt(MIN_CANOPY, MAX_CANOPY);
-    loc = m_Branch[i]->location();
+
+    posx = m_Branch[i]->_x;
+    posy = m_Branch[i]->_y;
+    posz = m_Branch[i]->_z;
     delete m_Branch[i];
 
-    int32_t posx = loc.x();
-    int32_t posy = loc.y();
-    int32_t posz = loc.z();
-
-    for (int8_t xi = (-canopySize); xi <= canopySize; xi++)
+    for (int8_t xi=(-canopySize);xi<=canopySize;xi++)
     {
-      for (int8_t yi = (-canopySize); yi <= canopySize; yi++)
+      for (int8_t yi=(-canopySize);yi<=canopySize;yi++)
       {
-        for (int8_t zi = (-canopySize); zi <= canopySize; zi++)
+        for (int8_t zi=(-canopySize);zi<=canopySize;zi++)
         {
-          if (abs(xi) + abs(yi) + abs(zi) <= canopySize)
+          if (abs(xi)+abs(yi)+abs(zi) <= canopySize)
           {
-            int32_t temp_posx = posx + xi;
-            int32_t temp_posy = posy + yi;
-            int32_t temp_posz = posz + zi;
-
-            if (Mineserver::get()->map(_map)->getBlock(temp_posx, temp_posy, temp_posz, &blocktype, &meta, false) && blocktype == BLOCK_AIR)
+            t_posx = posx+xi;
+            t_posy = posy+yi;
+            t_posz = posz+zi;
+            
+            if(Mineserver::get()->map(_map)->getBlock(t_posx,t_posy,t_posz,&block,&meta, true) && block == BLOCK_AIR)
             {
-              Canopy u(temp_posx, temp_posy, temp_posz, _map, canopy_darkness);
+              Canopy u(t_posx,t_posy,t_posz,_map,canopy_type);
             }
           }
         }
