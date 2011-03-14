@@ -164,6 +164,16 @@ public:
   {
     return *this = *this - ov;
   }
+  bool operator==(const vec& b)
+  {
+    if (data.arrayValue[0] == b.x() &&
+        data.arrayValue[1] == b.y() &&
+        data.arrayValue[2] == b.z()) 
+    {
+      return true;
+    }
+    return false;
+  }
 
   int squareLength() const
   {

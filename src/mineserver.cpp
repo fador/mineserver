@@ -57,6 +57,7 @@
 #include <zlib.h>
 #include <signal.h>
 #include <errno.h>
+#include <sys/stat.h>
 
 #include "constants.h"
 #include "mineserver.h"
@@ -70,6 +71,7 @@
 #include "worldgen/nethergen.h"
 #include "worldgen/heavengen.h"
 #include "worldgen/biomegen.h"
+#include "worldgen/eximgen.h"
 #include "config.h"
 #include "config/node.h"
 #include "nbt.h"
@@ -317,10 +319,12 @@ bool Mineserver::init(const std::string& cfg)
   MapGen* nethergen = new NetherGen;
   MapGen* heavengen = new HeavenGen;
   MapGen* biomegen = new BiomeGen;
+  MapGen* eximgen = new EximGen;
   m_mapGenNames.push_back(mapgen);
   m_mapGenNames.push_back(nethergen);
   m_mapGenNames.push_back(heavengen);
   m_mapGenNames.push_back(biomegen);
+  m_mapGenNames.push_back(eximgen);
 
   m_saveInterval = m_config->iData("map.save_interval");
 

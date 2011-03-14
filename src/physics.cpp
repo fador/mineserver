@@ -63,22 +63,22 @@ typedef  int socklen_t;
 namespace
 {
 
-bool isWaterBlock(int id)
+inline bool isWaterBlock(int id)
 {
   return ((id == BLOCK_WATER) || (id == BLOCK_STATIONARY_WATER));
 }
 
-bool isLavaBlock(int id)
+inline bool isLavaBlock(int id)
 {
   return ((id == BLOCK_LAVA) || (id == BLOCK_STATIONARY_LAVA));
 }
 
-bool isLiquidBlock(int id)
+inline bool isLiquidBlock(int id)
 {
   return ((id == BLOCK_LAVA) || (id == BLOCK_STATIONARY_LAVA) || (id == BLOCK_WATER) || (id == BLOCK_STATIONARY_WATER));
 }
 
-bool mayFallThrough(int id)
+inline bool mayFallThrough(int id)
 {
   return ((id == BLOCK_AIR) || (id == BLOCK_WATER) || (id == BLOCK_STATIONARY_WATER) || (id == BLOCK_SNOW));
 }
