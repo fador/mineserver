@@ -30,6 +30,8 @@
 #include <conio.h>
 #include <winsock2.h>
 #include <process.h>
+#include <sys/stat.h>
+#include <direct.h>
 #else
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -166,7 +168,7 @@ int main(int argc, char* argv[])
   // using CONFIG_FILE in current directory is only for development purposes
   std::string cfgcwd = std::string("./") + CONFIG_FILE;
   struct stat st;
-  if ( (stat(cfgcwd.c_str(), &st) == 0) && S_ISREG(st.st_mode) )
+  if ( (stat(cfgcwd.c_str(), &st) == 0))// && S_ISREG(st.st_mode) )
     cfg = cfgcwd;
 #endif
 
@@ -269,7 +271,11 @@ bool Mineserver::init(const std::string& cfg)
     return false;
 
   std::string str = config()->sData("system.path.home");
+  #ifdef WIN32
+  if (_chdir(str.c_str()) != 0)
+  #else
   if (chdir(str.c_str()) != 0)
+  #endif
   {
     LOG2(ERROR, "Failed to change working directory to: " + str);
     return false;
@@ -330,7 +336,7 @@ bool Mineserver::init(const std::string& cfg)
       phy->map = n;
       m_physics.push_back(phy);
       int k = m_config->iData((std::string(key) + ".") + (*it));
-      if (k >= m_mapGenNames.size())
+      if ((uint32_t)k >= m_mapGenNames.size())
       {
         std::ostringstream s;
         s << "Error! Mapgen number " << k << " in config. " << m_mapGenNames.size() << " Mapgens known";
@@ -535,7 +541,7 @@ bool Mineserver::run()
   iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
   if (iResult != 0)
   {
-    LOG2(ERROR, std::string("WSAStartup failed with error: ") + iResult);
+    LOG2(ERROR, std::string("WSAStartup failed with error: " + iResult));
     return false;
   }
 #endif
@@ -767,12 +773,12 @@ bool Mineserver::homePrepare(const std::string& path)
   {
     LOG2(INFO, "Creating: " + path);
 #ifdef WIN32
-    if (_mkdir(path.c_str() == -1)
+    if (_mkdir(path.c_str()) == -1)
 #else
     if (mkdir(path.c_str(), 0755) == -1)
 #endif
     {
-      LOG2(ERROR, path + ": " + strerror(errno));
+      LOG2(ERROR, std::string(path + ": " + std::string(strerror(errno))));
       return false;
     }
   }
@@ -797,7 +803,7 @@ bool Mineserver::homePrepare(const std::string& path)
     std::string nameout = path + '/' + files[i];
 
     // don't overwrite existing files
-    if ( (stat(nameout.c_str(), &st) == 0) && S_ISREG(st.st_mode) )
+    if ( (stat(nameout.c_str(), &st) == 0))// && S_ISREG(st.st_mode) )
       continue;
 
     std::ifstream fin(namein.c_str(), std::ios_base::binary | std::ios_base::in);
@@ -833,7 +839,7 @@ MapGen* Mineserver::mapGen(int n)
 
 Map* Mineserver::map(int n)
 {
-  if (m_map.size() > n)
+  if (m_map.size() > (uint32_t)n)
   {
     return m_map[n];
   }
