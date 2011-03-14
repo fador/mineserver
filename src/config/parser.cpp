@@ -36,7 +36,7 @@
 #include "parser.h"
 #include "node.h"
 
-#include "tools.h"
+#include "../tools.h"
 
 bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
 {
