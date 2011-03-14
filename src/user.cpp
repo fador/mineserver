@@ -1062,10 +1062,11 @@ bool User::addRemoveQueue(int x, int z)
 
   for (unsigned int i = 0; i < mapQueue.size(); i++)
   {
-    // Check if the chunk is going to be loaded
+    // Check if the chunk is going to be loaded, and erase it from the queue
     if (mapQueue[i].x() == newMap.x() && mapQueue[i].z() == newMap.z())
     {
-      return false;
+      mapQueue.erase(mapQueue.begin() + i);
+      break;
     }
   }
 
