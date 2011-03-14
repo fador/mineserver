@@ -37,7 +37,6 @@
 
 #define MINESERVER_C_API
 #include "../../src/plugin_api.h"
-//#include "../../src/logtype.h"
 
 #include "commands.h"
 
@@ -96,7 +95,6 @@ void registerCommand(Command* command)
   }
 }
 
-#define LOG_INFO 6
 bool chatCommandFunction(const char* userIn,const char* cmdIn, int argc, char** argv)
 {
   std::string user(userIn);
@@ -271,7 +269,7 @@ void userWorld(std::string user, std::string command, std::deque<std::string> ar
   {
      double x,y,z;
      mineserver->user.getPosition(user.c_str(), &x,&y,&z,NULL,NULL,NULL);
-     std::cout << user.c_str() << atoi(args[0].c_str())<< std::endl;
+     mineserver->logger.log(LOG_INFO, "plugin.commands", (user + args[0]).c_str());
      mineserver->user.teleportMap(user.c_str(), x,y+2,z,atoi(args[0].c_str()));
   }
 

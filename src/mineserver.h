@@ -63,14 +63,12 @@ class Mob;
 
 struct event_base;
 
-uint32_t generateEID();
-
 class Mineserver
 {
 public:
   static Mineserver* get()
   {
-    static Mineserver* m_instance;
+    static Mineserver* m_instance = NULL;
 
     if (!m_instance)
     {
@@ -80,8 +78,19 @@ public:
     return m_instance;
   }
 
-  int run(int argc, char* argv[]);
+  static uint32_t generateEID()
+  {
+    static uint32_t m_EID = 0;
+    return ++m_EID;
+  }
+
+
+  bool init(const std::string& cfg);
+  bool free();
+
+  bool run();
   bool stop();
+
   event_base* getEventBase();
 
   std::vector<User*>& users()
@@ -91,8 +100,10 @@ public:
 
   struct event m_listenEvent;
   int m_socketlisten;
-  int m_saveInterval;
+
+  int    m_saveInterval;
   time_t m_lastSave;
+
   bool m_pvp_enabled;
   bool m_damage_enabled;
   bool m_only_helmets;
@@ -175,30 +186,35 @@ public:
   void saveAllPlayers();
   void saveAll();
 
-  void parseCommandLine(int argc, char* argv[]);
+  bool homePrepare(const std::string& path);
 
 private:
   Mineserver();
-  event_base* m_eventBase;
+  ~Mineserver();
+
   bool m_running;
+
+  event_base* m_eventBase;
+
   // holds all connected users
-  std::vector<User*> m_users;
+  std::vector<User*>    m_users;
 
-  static Mineserver* m_instance;
-
-  std::vector<Map*> m_map;
+  std::vector<Map*>     m_map;
   std::vector<Physics*> m_physics;
-  std::vector<MapGen*> gennames;
-  Chat* m_chat;
-  Plugin* m_plugin;
-  Screen* m_screen;
+  std::vector<MapGen*>  m_mapGenNames;
+  std::vector<MapGen*>  m_mapGen;
+
+  // core modules
   Config* m_config;
-  FurnaceManager* m_furnaceManager;
-  PacketHandler* m_packetHandler;
-  std::vector<MapGen*> m_mapGen;
+  Screen* m_screen;
   Logger* m_logger;
-  Inventory* m_inventory;
-  Mobs* m_mobs;
+
+  Plugin*         m_plugin;
+  Chat*           m_chat;
+  FurnaceManager* m_furnaceManager;
+  PacketHandler*  m_packetHandler;
+  Inventory*      m_inventory;
+  Mobs*           m_mobs;
 };
 
 #endif

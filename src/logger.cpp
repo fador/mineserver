@@ -35,11 +35,9 @@
 #include <string>
 
 #include "mineserver.h"
-#include "tools.h"
 #include "plugin.h"
 
 #include "logger.h"
-#include "logtype.h"
 
 void Logger::log(const std::string& msg, const std::string& file, int line)
 {
@@ -59,7 +57,17 @@ void Logger::log(const std::string& msg, const std::string& file, int line)
 
 void Logger::log(LogType::LogType type, const std::string& source, const std::string& message)
 {
-  (static_cast<Hook3<bool, int, const char*, const char*>*>(Mineserver::get()->plugin()->getHook("LogPost")))->doAll((int)type, source.c_str(), message.c_str());
+  Hook* hook = NULL;
+  if ( !Mineserver::get()->plugin()
+    || !(hook = Mineserver::get()->plugin()->getHook("LogPost")) )
+  {
+    std::clog.tie(&std::cout);
+    if (type < LogType::LOG_WARNING)
+      std::clog.tie(&std::cerr);
+
+    std::clog << source << ": " << message << std::endl;
+    return;
+  }
+
+  (static_cast<Hook3<bool, int, const char*, const char*>*>(hook))->doAll((int)type, source.c_str(), message.c_str());
 }
-
-

@@ -38,6 +38,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <vector>
 #include <cstdio>
 #include <ctime>
@@ -253,11 +254,11 @@ void Map::init(int number)
     }
     a++;
   }
-  Mineserver::get()->logger()->log(LogType::LOG_INFO, "Map", "World " + mapDirectory);
+  LOG2(INFO, "World " + mapDirectory);
 
   if (mapDirectory == "Not found!")
   {
-    Mineserver::get()->logger()->log(LogType::LOG_WARNING, "Map", "mapdir not defined");
+    LOG2(WARNING, "mapdir not defined");
     exit(EXIT_FAILURE);
   }
 
@@ -694,8 +695,9 @@ bool Map::getBlock(int x, int y, int z, uint8_t* type, uint8_t* meta, bool gener
 {
   if ((y < 0) || (y > 127))
   {
-    printf("(%i, %i, %i) ", x, y, z);
-    LOGLF("Invalid y value (getBlock)");
+    std::ostringstream str;
+    str << "Invalid y value (" << x << ", " << y << ", " << z << ")";
+    LOG2(DEBUG, str.str());
     return false;
   }
 
@@ -1011,7 +1013,7 @@ bool Map::sendPickupSpawn(spawnedItem item)
 void Map::createPickupSpawn(int x, int y, int z, int type, int count, int health, User* user)
 {
   spawnedItem item;
-  item.EID      = generateEID();
+  item.EID      = Mineserver::generateEID();
   item.health   = health;
   item.item     = type;
   item.count    = count;
@@ -1056,7 +1058,7 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
   }
 
   Packet  pkt;
-  int32_t EID = generateEID();
+  int32_t EID = Mineserver::generateEID();
   float   tempMult = 1.f - abs(user->pos.pitch / 90.f);
 
   // Spawn projectile on player location

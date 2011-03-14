@@ -208,13 +208,9 @@ int16_t Item::itemHealth(int item)
 }
 
 
-const std::string RECIPE_PATH = std::string(CONFIG_DIR_SHARE) + "recipes/";
-const std::string RECIPE_SUFFIX = ".recipe";
-const std::string RECIPE_LIST = "ENABLED_RECIPES.cfg";
-
-Inventory::Inventory()
+Inventory::Inventory(const std::string& path, const std::string& suffix, const std::string& cfg)
 {
-  std::ifstream ifs(std::string(RECIPE_PATH + RECIPE_LIST).c_str());
+  std::ifstream ifs(cfg.c_str());
 
   if (ifs.fail())
   {
@@ -239,13 +235,13 @@ Inventory::Inventory()
       continue;
     }
 
-    receiptFiles.push_back(temp + RECIPE_SUFFIX);
+    receiptFiles.push_back(temp + suffix);
   }
   ifs.close();
 
   for (unsigned int i = 0; i < receiptFiles.size(); i++)
   {
-    readRecipe(RECIPE_PATH + receiptFiles[i]);
+    readRecipe(path + '/' + receiptFiles[i]);
   }
 }
 
@@ -271,7 +267,7 @@ bool Inventory::readRecipe(std::string recipeFile)
 
   if (ifs.fail())
   {
-    std::cerr <<  "Could not find: " <<  recipeFile << std::endl;
+    LOG2(ERROR, "Could not find: " + recipeFile);
     ifs.close();
     return false;
   }
@@ -470,7 +466,7 @@ bool Inventory::canBeArmour(int slot, int type)
     }
     return false;
   }
-  Mineserver::get()->logger()->log(LogType::LOG_WARNING, "Armour", "Unknown armour slot.");
+  LOG2(WARNING, "Unknown armour slot.");
   return false;
 }
 

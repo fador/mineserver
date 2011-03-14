@@ -56,6 +56,15 @@ std::string strToLower(std::string temp);
 
 std::string dtos(double n);
 std::string hash(std::string value);
+
+#ifdef WIN32
+#define PATH_SEPARATOR  '\\'
+#else
+#define PATH_SEPARATOR  '/'
+#endif
+
+std::string pathExpandUser(const std::string& path);
+
 #ifndef WIN32
 int kbhit();
 #endif

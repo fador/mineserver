@@ -90,7 +90,7 @@ public:
   void  setHook(const std::string& name, Hook* hook);
   void  remHook(const std::string& name);
   // Load/Unload plugins
-  bool loadPlugin(const std::string name, const std::string file = "");
+  bool loadPlugin(const std::string& name, const std::string& path = "", std::string alias = "");
   void unloadPlugin(const std::string name);
   // Plugin version registry
   bool  hasPluginVersion(const std::string& name) const;

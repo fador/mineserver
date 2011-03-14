@@ -8,6 +8,14 @@ set( ${PROJECT_NAME}_MAJOR_VERSION 0 )
 set( ${PROJECT_NAME}_MINOR_VERSION 1 )
 set( ${PROJECT_NAME}_PATCH_LEVEL 15 )
 
+# set default build to Debug
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug
+    CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+    FORCE
+  )
+endif()
+
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 
 #
@@ -39,15 +47,16 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 # Set compiler specific build flags
 IF (UNIX)
-  add_definitions(-msse -Wunused -g3 -O3 -Wall)
+  set(CMAKE_CXX_FLAGS "-msse -Wunused -Wall")
+  set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g")
+  set(CMAKE_CXX_FLAGS_RELEASE "-O2 -s")
 ENDIF()
 
 
 IF (MSVC_IDE)
-  set(PLATFORM_C_FLAGS "/D \"WIN32\" /D \"_CONSOLE\" /D \"ZLIB_WINAPI\" /fp:fast /EHsc")
-  set(CMAKE_CXX_FLAGS "${PLATFORM_C_FLAGS}")
-  set(CMAKE_CXX_FLAGS_RELEASE "${PLATFORM_C_FLAGS} /MT")
-  set(CMAKE_CXX_FLAGS_DEBUG "${PLATFORM_C_FLAGS} /MTd /Zi")
+  set(CMAKE_CXX_FLAGS "/DWIN32 /D_CONSOLE /DZLIB_WINAPI /fp:fast /EHsc")
+  set(CMAKE_CXX_FLAGS_DEBUG "/DDEBUG /D_DEBUG /MTd /Zi")
+  set(CMAKE_CXX_FLAGS_RELEASE "/MT")
 ENDIF (MSVC_IDE)
 
 
@@ -122,6 +131,7 @@ set(mineserver_configs
   files/commands.cfg
   files/config.cfg
   files/item_alias.cfg
+  files/ENABLED_RECIPES.cfg
   files/motd.txt
   files/permissions.txt
   files/roles.txt
@@ -174,8 +184,14 @@ endif()
 if(WIN32)
   # this requires WinMain() entry, disabled until console/GUI option is added
   #set(exe "WIN32")
+
+  # this shouldn't be here, but can cmake find these .lib's?
   # do we really need winmm?
-  set(mineserver_depends "${mineserver_depends} ws2_32 winmm")
+  foreach(lib ws2_32 winmm)
+    string(TOUPPER ${lib} LIB)
+    list(APPEND mineserver_depends "${lib}")
+    set(${LIB}_LIBRARY "${lib}")
+  endforeach()
 else()
   if(NOISE_DIR_IS_LIBNOISE)
     add_definitions(-DLIBNOISE)

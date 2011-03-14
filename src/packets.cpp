@@ -79,8 +79,6 @@
 #define DEGREES_TO_RADIANS(x) ((x) / 180.0 * M_PI)
 #define RADIANS_TO_DEGREES(x) ((x) / M_PI * 180.0)
 
-//#define _DEBUG
-
 void PacketHandler::init()
 {
   packets[PACKET_KEEP_ALIVE]               = Packets(0, &PacketHandler::keep_alive);
@@ -117,7 +115,7 @@ int PacketHandler::entity_crouch(User* user)
   user->buffer >> EID >> action;
 
   //ToDo: inform other players
-  //Mineserver::get()->logger()->log(LogType::LOG_INFO, "Packets", "Entity action: EID: " + dtos(EID) +" Action: " +dtos(action));
+  //LOG2(INFO, "Entity action: EID: " + dtos(EID) +" Action: " +dtos(action));
 
   user->buffer.removePacket();
   return PACKET_OK;
@@ -192,7 +190,7 @@ int PacketHandler::change_sign(User* user)
     user->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
   }
 
-  Mineserver::get()->logger()->log(LogType::LOG_INFO, "Packets", "Sign: " + strings1 + strings2 + strings3 + strings4);
+  LOG2(INFO, "Sign: " + strings1 + strings2 + strings3 + strings4);
 
   //No need to do anything
   user->buffer.removePacket();
@@ -928,7 +926,7 @@ int PacketHandler::player_block_placement(User* user)
     }
 
     LOG(INFO, "Packets", "Spawn minecart");
-    int32_t EID = generateEID();
+    int32_t EID = Mineserver::generateEID();
     Packet pkt;
     // MINECART
     pkt << PACKET_ADD_OBJECT << (int32_t)EID << (int8_t)10 << (int32_t)(x * 32 + 16) << (int32_t)(y * 32) << (int32_t)(z * 32 + 16);
@@ -937,7 +935,7 @@ int PacketHandler::player_block_placement(User* user)
 
   if (newblock == -1 && newblock != ITEM_SIGN)
   {
-#ifdef _DEBUG
+#ifdef DEBUG
     LOG(DEBUG, "Packets", "ignoring: " + dtos(newblock));
 #endif
     return PACKET_OK;
@@ -948,7 +946,7 @@ int PacketHandler::player_block_placement(User* user)
     return PACKET_OK;
   }
 
-#ifdef _DEBUG
+#ifdef DEBUG
   LOG(DEBUG, "Packets", "Block_placement: " + dtos(newblock) + " (" + dtos(x) + "," + dtos((int)y) + "," + dtos(z) + ") dir: " + dtos((int)direction));
 #endif
 
@@ -1228,7 +1226,7 @@ int PacketHandler::pickup_spawn(User* user)
 
   user->buffer.removePacket();
 
-  item.EID       = generateEID();
+  item.EID       = Mineserver::generateEID();
 
   item.spawnedBy = user->UID;
   item.spawnedAt = time(NULL);

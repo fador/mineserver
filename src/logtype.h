@@ -33,8 +33,10 @@
  *
  * Inspired by syslog.
  */
+#ifndef MINESERVER_C_API
 namespace LogType
 {
+#endif
 enum LogType
 {
   LOG_EMERG,    /** system is unusable */
@@ -45,7 +47,12 @@ enum LogType
   LOG_NOTICE,   /** normal, but significant, condition */
   LOG_INFO,     /** informational message */
   LOG_DEBUG,    /** debug-level message */
+
+  // keep last and don't use for logging :P
+  LOG_COUNT
 };
+#ifndef MINESERVER_C_API
 };
+#endif
 
 #endif

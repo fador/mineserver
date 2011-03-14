@@ -34,16 +34,23 @@
 #include <string>
 
 #include "logtype.h"
-
-#ifdef WIN32
-#define PATH_SEPARATOR  '\\'
-#else
-#define PATH_SEPARATOR  '/'
-#endif
+#include "tools.h"
 
 #define LOGLF(msg) Mineserver::get()->logger()->log(msg, std::string(__FILE__), __LINE__)
 
 #define LOG(type, source, msg) Mineserver::get()->logger()->log(LogType::LOG_##type, source, msg)
+
+
+// TODO: winex: log(type, file, line, msg) might be better than this
+#define LOG_FILENAME std::string(__FILE__).substr(std::string(__FILE__).rfind(PATH_SEPARATOR) + 1)
+#ifdef DEBUG
+#define LOG_FORMAT   LOG_FILENAME + ":" + dtos(__LINE__) + "::" + std::string(__FUNCTION__) + "()"
+#else
+#define LOG_FORMAT   LOG_FILENAME + "::" + std::string(__FUNCTION__) + "()"
+#endif
+
+#define LOG2(type, msg) Mineserver::get()->logger()->log(LogType::LOG_##type, LOG_FORMAT, msg)
+
 
 class Logger
 {

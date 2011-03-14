@@ -86,7 +86,7 @@ void timer200Function()
   myPetGiantz+=1;
   if(myPetGiantz > 40)
     myPetGiantz = 0;
-  std::cout << myPetGiantz << std::endl;
+  //mineserver->logger.log(LOG_INFO, "crapMobs", dtos(myPetGiantz));
   mineserver->mob.moveMob(myPetGiant, 0,85,myPetGiantz);
 }
 
@@ -99,11 +99,11 @@ PLUGIN_API_EXPORT void CALLCONVERSION crapMobs_init(mineserver_pointer_struct* m
   if (mineserver->plugin.getPluginVersion(pluginName.c_str()) > 0)
   {
     std::string msg = "crapMobs is already loaded";
-    mineserver->logger.log(6, "plugin.crapMobs", msg.c_str());
+    mineserver->logger.log(LOG_INFO, "plugin.crapMobs", msg.c_str());
     return;
   }
   std::string msg = "Loaded "+pluginName+"!";
-  mineserver->logger.log(6, "plugin.crapMobs", msg.c_str());
+  mineserver->logger.log(LOG_INFO, "plugin.crapMobs", msg.c_str());
 
   mineserver->plugin.setPluginVersion(pluginName.c_str(), PLUGIN_CRAPMOBS_VERSION);
 
@@ -117,7 +117,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION command_shutdown(void)
 {
   if (mineserver->plugin.getPluginVersion(pluginName.c_str()) <= 0)
   {
-    mineserver->logger.log(6, "plugin.crapMobs", "crapMobs is not loaded!");
+    mineserver->logger.log(LOG_INFO, "plugin.crapMobs", "crapMobs is not loaded!");
     return;
   }
 }

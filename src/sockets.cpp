@@ -50,6 +50,7 @@ typedef  int socklen_t;
 #include <event.h>
 #include <sys/stat.h>
 #include <zlib.h>
+#include <sstream>
 
 #include "tools.h"
 
@@ -80,7 +81,7 @@ void client_callback(int fd,
                                                       Mineserver::get()->users().end(), user);
   if(it == Mineserver::get()->users().end())
   {
-    Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Using dead player!!!");
+    LOG2(INFO, "Using dead player!!!");
     return;
   }
   */
@@ -94,7 +95,7 @@ void client_callback(int fd,
     read = recv(fd, (char*)buf, 2048, 0);
     if (read == 0)
     {
-      Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket closed properly");
+      LOG2(INFO, "Socket closed properly");
 
       delete user;
       user = (User*)1;
@@ -104,7 +105,7 @@ void client_callback(int fd,
 
     if (read == SOCKET_ERROR)
     {
-      Mineserver::get()->logger()->log(LogType::LOG_INFO, "Sockets", "Socket had no data to read");
+      LOG2(INFO, "Socket had no data to read");
 
       delete user;
       user = (User*)2;
@@ -147,7 +148,9 @@ void client_callback(int fd,
       }
       else if (Mineserver::get()->packetHandler()->packets[user->action].len == PACKET_DOES_NOT_EXIST)
       {
-        printf("Unknown action: 0x%x\n", user->action);
+        std::ostringstream str;
+        str << "Unknown action: 0x" << std::hex << user->action;
+        LOG2(DEBUG, str.str());
 
         delete user;
         user = (User*)3;
@@ -184,7 +187,7 @@ void client_callback(int fd,
       if ((errno != EAGAIN && errno != EINTR))
 #endif
       {
-        Mineserver::get()->logger()->log(LogType::LOG_ERROR, "Socket", "Error writing to client, tried to write " + dtos(writeLen) + " bytes, code: " + dtos(ERROR_NUMBER));
+        LOG2(ERROR, "Error writing to client, tried to write " + dtos(writeLen) + " bytes, code: " + dtos(ERROR_NUMBER));
 
         delete user;
         user = (User*)5;
@@ -231,7 +234,7 @@ void accept_callback(int fd,
     LOGLF("Client: accept() failed");
     return;
   }
-  User* client = new User(client_fd, generateEID());
+  User* client = new User(client_fd, Mineserver::generateEID());
   setnonblock(client_fd);
 
   event_set(client->GetEvent(), client_fd, EV_WRITE | EV_READ, client_callback, client);

@@ -30,6 +30,7 @@
 #include <WinSock2.h>
 #else
 #include <netinet/in.h>
+#include <pwd.h>
 #endif
 
 #include <cstdlib>
@@ -45,6 +46,9 @@
 #include <cctype>
 
 #include "tools.h"
+// zomg
+#include "logger.h"
+#include "mineserver.h"
 
 void putSint64(uint8_t* buf, int64_t value)
 {
@@ -184,4 +188,49 @@ std::string hash(std::string value)
   hashString << hash;
 
   return hashString.str();
+}
+
+std::string pathExpandUser(const std::string& path)
+{
+  std::string out;
+  std::string user;
+  size_t pos;
+
+  if (path[0] != '~')
+    return path;
+
+  pos = path.find(PATH_SEPARATOR);
+  if (pos == std::string::npos)
+    pos = path.length();
+
+  user = path.substr(1, pos - 1);
+  if (!user.empty())
+  {
+#ifdef WIN32
+    LOG2(ERROR, "~user notation is not implemented for this platform :P");
+    return path;
+#else
+    struct passwd* entry = getpwnam(user.c_str());
+    if (!entry)
+    {
+      LOG2(ERROR, user + ": no such user!");
+      return path;
+    }
+
+    out += entry->pw_dir;
+#endif
+  }
+  else
+  {
+#ifdef WIN32
+#define ENV_HOME "APPDATA"
+#else
+#define ENV_HOME "HOME"
+#endif
+    out.assign(getenv(ENV_HOME));
+  }
+
+  out += '/';
+  out += path.substr(pos + 1, path.length());
+  return out;
 }

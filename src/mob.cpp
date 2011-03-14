@@ -38,7 +38,7 @@ Mob::Mob()
   yaw = 0;
   pitch = 0;
   meta = 0;
-  UID = generateEID();
+  UID = Mineserver::generateEID();
 }
 
 Mob::~Mob()

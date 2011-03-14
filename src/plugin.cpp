@@ -120,58 +120,60 @@ void Plugin::free()
   }
 }
 
-bool Plugin::loadPlugin(const std::string name, const std::string file)
+bool Plugin::loadPlugin(const std::string& name, const std::string& path, std::string alias)
 {
   LIBRARY_HANDLE lhandle = NULL;
   void (*fhandle)(mineserver_pointer_struct*) = NULL;
 
-  if (!file.empty())
+  if (  name.empty()
+    || (name.find('/')  != std::string::npos)
+    || (name.find('\\') != std::string::npos) )
   {
-    LOG(INFO, "Plugin", "Loading plugin `" + name + "' (`" + file + "')...");
+    LOG(INFO, "Plugin", "Invalid name: " + name);
+    return false;
+  }
+
+  if (alias.empty())
+    alias = name;
+
+  if (!path.empty())
+  {
+    std::string file;
+    file = path + '/' + name + LIBRARY_EXTENSION;
 
     struct stat st;
     int statr = stat(file.c_str(), &st);
     if ((statr == 0) && !(st.st_mode & S_IFDIR))
     {
+      LOG(INFO, "Plugin", "Loading: " + file);
       lhandle = LIBRARY_LOAD(file.c_str());
     }
     else
     {
-      LOG(INFO, "Plugin", "Could not find `" + file + "', trying `" + file + LIBRARY_EXTENSION + "'.");
-
-      statr = stat((file + LIBRARY_EXTENSION).c_str(), &st);
-      if ((statr == 0) && !(st.st_mode & S_IFDIR))
-      {
-        lhandle = LIBRARY_LOAD((file + LIBRARY_EXTENSION).c_str());
-      }
-      else
-      {
-        LOG(INFO, "Plugin", "Could not find `" + file + LIBRARY_EXTENSION + "'!");
-        return false;
-      }
+      LOG(INFO, "Plugin", "Could not find: " + file);
+      return false;
     }
-
   }
   else
   {
-    LOG(INFO, "Plugin", "Loading plugin `" + name + "' (built in)...");
+    LOG(INFO, "Plugin", "Loading built-in: " + name);
     lhandle = LIBRARY_SELF();
   }
 
   if (lhandle == NULL)
   {
-    LOG(INFO, "Plugin", "Could not load plugin `" + name + "'!");
+    LOG(INFO, "Plugin", "Could not load: " + name);
     LOG(INFO, "Plugin", LIBRARY_ERROR());
     return false;
   }
 
-  m_libraryHandles[name] = lhandle;
+  m_libraryHandles[alias] = lhandle;
 
   fhandle = (void (*)(mineserver_pointer_struct*)) LIBRARY_SYMBOL(lhandle, (name + "_init").c_str());
   if (fhandle == NULL)
   {
     LOG(INFO, "Plugin", "Could not get init function handle!");
-    unloadPlugin(name);
+    unloadPlugin(alias);
     return false;
   }
   fhandle(&plugin_api_pointers);
@@ -186,7 +188,7 @@ void Plugin::unloadPlugin(const std::string name)
 
   if (m_pluginVersions.find(name) != m_pluginVersions.end())
   {
-    LOG(INFO, "Plugin", "Unloading plugin `" + name + "'...");
+    LOG(INFO, "Plugin", "Unloading: " + name);
 
     if (m_libraryHandles[name] != NULL)
     {
@@ -205,7 +207,7 @@ void Plugin::unloadPlugin(const std::string name)
     }
     else
     {
-      LOG(INFO, "Plugin", "Calling shutdown function for `" + name + "'.");
+      LOG(INFO, "Plugin", "Calling shutdown function for: " + name);
       fhandle();
     }
 
@@ -213,7 +215,7 @@ void Plugin::unloadPlugin(const std::string name)
   }
   else
   {
-    LOG(INFO, "Plugin", "Plugin `" + name + "' not loaded!");
+    LOG(WARNING, "Plugin", name + " is not loaded!");
   }
 }
 
