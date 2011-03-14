@@ -74,10 +74,9 @@ void BiomeGen::init(int seed)
 {
   cave.init(seed + 7);
   //###### TREE GEN #####
-  treenoise.SetSeed(seed + 2);
-  treenoise.SetOctaveCount(6);
-  treenoise.SetFrequency(1.0 / 180.0);
-  treenoise.SetLacunarity(2.0);
+  treenoise.SetSeed(seed+404);
+  treenoise.SetFrequency(0.01);
+  treenoise.SetOctaveCount(3);
   //###### END TREE GEN #######
   seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
   addTrees = Mineserver::get()->config()->bData("mapgen.trees.enabled");
@@ -142,7 +141,7 @@ void BiomeGen::init(int seed)
 void BiomeGen::re_init(int seed)
 {
   cave.init(seed + 7);
-  treenoise.SetSeed(seed + 2);
+  treenoise.SetSeed(seed+404);
   BiomeBase.SetSeed(seed - 1);
   mountainTerrainBase.SetSeed(seed + 1);
   baseFlatTerrain.SetSeed(seed);
@@ -273,71 +272,66 @@ void BiomeGen::generateChunk(int x, int z, int map)
 
 void BiomeGen::AddTrees(int x, int z, int map)
 {
-  int xBlockpos = x << 4;
-  int zBlockpos = z << 4;
+    int32_t xBlockpos = x<<4;
+    int32_t zBlockpos = z<<4;
+    int blockX, blockZ;
+    uint8_t blockY, block, meta;
 
-  int blockX, blockZ;
-  uint8_t blockY;
+    bool empty[16][16]; // is block emptey~
 
-  uint8_t block;
-  uint8_t meta;
+    memset(empty,1,256);
 
-  uint8_t un = fastrand() % 4 + 2;
-  uint8_t vn = fastrand() % 4 + 2;
+    uint8_t trees = BetterRand()*7+13;
+    uint8_t i=0;
+    while(i<trees){
+        uint8_t a = BetterRand()*16;
+        uint8_t b = BetterRand()*16;
 
-  float uFactor = (16 / (float)un);   //relational to literal
-  float vFactor = (16 / (float)vn);
-  for (uint8_t u = 0; u < un; u++)
-  {
-    //u for x and v for z iteration
-    for (uint8_t v = 0; v < vn; v++)
-    {
-      uint8_t a = u * uFactor;
-      uint8_t b = v * vFactor;
-
-      blockX = a + xBlockpos;
-      blockZ = b + zBlockpos;
-      blockY = heightmap[(a << 4) + b] + 1;
-
-      if (!Mineserver::get()->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta))
-      {
-        continue;
-      }
-      if (blockY <= seaLevel)
-      {
-        continue;
-      }
-      if (blockY >= 117)
-      {
-        continue;
-      }
-
-
-      // No trees on water
-      if (block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER && block != BLOCK_SAND)
-      {
-        if (abs(treenoise.GetValue(blockX, 0, blockZ)) >= 0.9)
-        {
-          int biome = BiomeSelect.GetValue(blockX / 100.0, 0, blockZ / 100.0);
-          if (biome == 1)
-          {
-            // Desert, make cactus
-            sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
-
-            uint8_t* curBlock;
-            int count = (fastrand() % 3) + 3;
-            if (count + blockY > 127)
+        if(empty[a][b]){
+            blockX = a+xBlockpos;
+            blockZ = b+zBlockpos;
+            blockY = heightmap[(b<<4)+a];
+            
+            // Another dirty haxx!
+            if(blockY > 120)
             {
               continue;
             }
-            curBlock = &(chunk->blocks[(a << 7) + (b << 11) + blockY]);
-            for (int i = 0; i < count; i++)
+
+            Mineserver::get()->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
+            
+            int biome = BiomeSelect.GetValue(blockX / 100.0, 0, blockZ / 100.0);
+            if (biome == 1 && 
+                block == BLOCK_SAND &&
+                treenoise.GetValue(blockX,0,blockZ) > -0.1 &&
+                ((rand() % 100) < 30)) // Dirty haxx!
             {
-              curBlock[i] = BLOCK_CACTUS;
+              // Desert, make cactus
+              
+              // Check that it's not in water
+              Mineserver::get()->map(map)->getBlock(blockX, ++blockY, blockZ, &block, &meta);
+              if(!(block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER))
+              {
+                sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
+
+                uint8_t* curBlock;
+                int count = (fastrand() % 3) + 3;
+                if (count + blockY > 127)
+                {
+                  continue;
+                }
+                curBlock = &(chunk->blocks[(a << 7) + (b << 11) + blockY]);
+                for (int i = 0; i < count; i++)
+                {
+                  curBlock[i] = BLOCK_CACTUS;
+                }
+              }
             }
-          }
-          else if (biome == 4)
-          {
+            else if (biome == 4 &&
+                     block != BLOCK_WATER && 
+                     block != BLOCK_STATIONARY_WATER && 
+                     treenoise.GetValue(blockX,0,blockZ) > -0.4)
+           {
             // Reed forest
             sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
             uint8_t* curBlock;
@@ -346,7 +340,7 @@ void BiomeGen::AddTrees(int x, int z, int map)
             {
               continue;
             }
-            curBlock = &(chunk->blocks[(a << 7) + (b << 11) + blockY]);
+            curBlock = &(chunk->blocks[(a << 7) + (b << 11) + ++blockY]);
             for (int i = 0; i < count; i++)
             {
               curBlock[i] = BLOCK_REED;
@@ -355,12 +349,24 @@ void BiomeGen::AddTrees(int x, int z, int map)
           }
           else if (biome == 2 || biome == 3)
           {
-            Tree tree(blockX, blockY, blockZ, map);
+            if(block == BLOCK_DIRT || block == BLOCK_GRASS){
+                // Trees only grow on dirt and grass? =b
+                Mineserver::get()->map(map)->getBlock(blockX, ++blockY, blockZ, &block, &meta);
+                if(block == BLOCK_AIR || block == BLOCK_SNOW){
+                    if(treenoise.GetValue(blockX,0,blockZ) > -0.4){
+                        Tree tree(blockX, blockY, blockZ,map);
+                    }
+                }
+            }
           }
+          for(int8_t u=-2;u<2;u++){
+              for(int8_t v=-2;v<2;v++){
+                  empty[a+u][b+v] = false;
+              }
+          }
+          i++;
         }
-      }
     }
-  }
 }
 
 void BiomeGen::generateWithNoise(int x, int z, int map)
