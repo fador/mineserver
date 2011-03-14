@@ -1263,6 +1263,8 @@ int PacketHandler::disconnect(User* user)
   }
 
   user->buffer.removePacket();
+  
+  (static_cast<Hook3<bool, const char*, time_t, const char*>*>(Mineserver::get()->plugin()->getHook("PlayerDisconnect")))->doAll(user->nick.c_str(), 0, 0);
 
   LOG(INFO, "Packets", "Disconnect: " + msg);
 
