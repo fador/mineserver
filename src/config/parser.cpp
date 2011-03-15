@@ -41,6 +41,11 @@
 
 #include "../tools.h"
 
+ConfigParser::ConfigParser()
+{
+  m_includes = 0;
+}
+
 bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
 {
   struct stat st;
@@ -107,6 +112,12 @@ bool ConfigParser::parse(const std::istream& data, ConfigNode* ptr)
       lexer.get_token(&tmp_type, &tmp_data);
       if (tmp_type == CONFIG_TOKEN_STRING)
       {
+        if (m_includes >= MAX_INCLUDES)
+        {
+          std::cerr << "reached maximum number of include directives: " << m_includes << "\n";
+          return false;
+        }
+
         // allow only filename without path
         if ((tmp_data.find('/')  != std::string::npos)
             || (tmp_data.find('\\') != std::string::npos))
@@ -130,6 +141,7 @@ bool ConfigParser::parse(const std::istream& data, ConfigNode* ptr)
         {
           return false;
         }
+        m_includes++;
 
         continue;
       }
