@@ -166,11 +166,7 @@ int main(int argc, char* argv[])
     }
   }
 
-#ifdef WIN32
-  const std::string DEFAULT_HOME = pathExpandUser(std::string("./"));
-#else
   const std::string DEFAULT_HOME = pathExpandUser(std::string("~/.mineserver"));
-#endif
 
   // create home and copy files if necessary
   Mineserver::get()->homePrepare(DEFAULT_HOME);
