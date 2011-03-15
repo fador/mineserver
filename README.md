@@ -1,7 +1,7 @@
 # Mineserver
 *by Fador & Nredor and others*
 
-You can find the core team from #mineserver @ irc.esper.net
+You can find the core team from #mineserver @ irc.freenode.net
 Also mail to developers@mineserver.be will reach us.
 
     Copyright (c) 2010-2011, The Mineserver Project
