@@ -24,7 +24,7 @@
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 #include "../mineserver.h"
 #include "../map.h"
 #include "../logger.h"
@@ -119,7 +119,7 @@ bool BlockRedstone::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, i
     revertBlock(user, x, y, z, map);
     return true;
   }
-  
+
   newblock = 55;
   meta = 0;
 

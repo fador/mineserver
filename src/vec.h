@@ -168,7 +168,7 @@ public:
   {
     if (data.arrayValue[0] == b.x() &&
         data.arrayValue[1] == b.y() &&
-        data.arrayValue[2] == b.z()) 
+        data.arrayValue[2] == b.z())
     {
       return true;
     }

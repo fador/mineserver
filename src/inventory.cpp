@@ -106,7 +106,7 @@ void Item::setType(int16_t type)
 void Item::setCount(int8_t count)
 {
   this->count = count;
-  if(count < 1)
+  if (count < 1)
   {
     setType(-1);
     return;

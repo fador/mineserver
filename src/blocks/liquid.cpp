@@ -93,9 +93,9 @@ bool BlockLiquid::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
 
 
   Item* item = &user->inv[user->curItem + 36];
-  if(newblock>255)
+  if (newblock > 255)
   {
-    if(item->getCount()>1)
+    if (item->getCount() > 1)
     {
       // Too many bugs working with multi-buckets
       revertBlock(user, x, y, z, map);
@@ -104,10 +104,10 @@ bool BlockLiquid::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
     }
   }
   // Remove liquid from map, add to bucket.
-  if (newblock == ITEM_BUCKET && oldmeta==0 && affectedBlock(oldblock))
+  if (newblock == ITEM_BUCKET && oldmeta == 0 && affectedBlock(oldblock))
   {
     int new_item = -1;
-    if(oldblock == BLOCK_LAVA || oldblock == BLOCK_STATIONARY_LAVA)
+    if (oldblock == BLOCK_LAVA || oldblock == BLOCK_STATIONARY_LAVA)
     {
       new_item = ITEM_LAVA_BUCKET;
     }
@@ -127,10 +127,10 @@ bool BlockLiquid::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
     item->sendUpdate();
     return true;
   }
-  if (oldblock!=BLOCK_AIR)
+  if (oldblock != BLOCK_AIR)
   {
     // Shouldnt replace liquids.
-    revertBlock(user, x,y,z,map);
+    revertBlock(user, x, y, z, map);
     item->sendUpdate();
     return true;
   }
@@ -149,7 +149,7 @@ bool BlockLiquid::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
   }
   else if (newblock > 255)
   {
-    revertBlock(user,x,y,z,map);
+    revertBlock(user, x, y, z, map);
     item->sendUpdate();
     return true;
   }

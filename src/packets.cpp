@@ -326,7 +326,9 @@ int PacketHandler::login_request(User* user)
   user->buffer.removePacket();
 
   while (User::byNick(player) != NULL)
+  {
     player.append("_");
+  }
 
   LOG(INFO, "Packets", "Player " + dtos(user->UID) + " login v." + dtos(version) + " : " + player + ":" + passwd);
 
@@ -346,58 +348,58 @@ int PacketHandler::login_request(User* user)
     return PACKET_OK;
   }
 
-  
+
 
   // Check if we're to do user validation
-  if(Mineserver::get()->config()->bData("system.user_validation") == true)
-  {    
+  if (Mineserver::get()->config()->bData("system.user_validation") == true)
+  {
     std::string url = "/game/checkserver.jsp?user=" + player + "&serverId=" + hash(player);
-    LOG(INFO, "Packets","Validating " + player + " against minecraft.net: ");
+    LOG(INFO, "Packets", "Validating " + player + " against minecraft.net: ");
 
-    std::string http_request ="GET " + url + " HTTP/1.1\r\n"
-                             +"Host: www.minecraft.net\r\n"
-                             +"Connection: close\r\n\r\n";
+    std::string http_request = "GET " + url + " HTTP/1.1\r\n"
+                               + "Host: www.minecraft.net\r\n"
+                               + "Connection: close\r\n\r\n";
 
-    int fd=socket_connect((char*)"50.16.200.224", 80);
-    if(fd)
+    int fd = socket_connect((char*)"50.16.200.224", 80);
+    if (fd)
     {
-      #ifdef WIN32
-      send(fd, http_request.c_str(), http_request.length(),NULL);
-      #else
+#ifdef WIN32
+      send(fd, http_request.c_str(), http_request.length(), NULL);
+#else
       write(fd, http_request.c_str(), http_request.length());
-      #endif
+#endif
 
-      #define BUFFER_SIZE 1024
-      char *buffer = new char[BUFFER_SIZE];
+#define BUFFER_SIZE 1024
+      char* buffer = new char[BUFFER_SIZE];
       std::string stringbuffer;
 
-      #ifdef WIN32
-      while(int received=recv(fd, buffer, BUFFER_SIZE - 1, NULL) != 0)
+#ifdef WIN32
+      while (int received = recv(fd, buffer, BUFFER_SIZE - 1, NULL) != 0)
       {
-      #else
-      while(read(fd, buffer, BUFFER_SIZE - 1) != 0)
+#else
+      while (read(fd, buffer, BUFFER_SIZE - 1) != 0)
       {
-      #endif
-        stringbuffer+=std::string(buffer);
+#endif
+        stringbuffer += std::string(buffer);
       }
       delete [] buffer;
-      #ifdef WIN32
+#ifdef WIN32
       closesocket(fd);
-      #else
+#else
       close(fd);
-      #endif
+#endif
 
       bool allow_access = false;
       //No response data, timeout
-      if(stringbuffer.size() == 0 && Mineserver::get()->config()->bData("system.allow_connect_on_auth_timeout"))
+      if (stringbuffer.size() == 0 && Mineserver::get()->config()->bData("system.allow_connect_on_auth_timeout"))
       {
-        LOG(INFO, "Packets","  Auth skipped on timeout ");
+        LOG(INFO, "Packets", "  Auth skipped on timeout ");
         allow_access = true;
       }
-      
-      if(allow_access || (stringbuffer.size()>=3 && stringbuffer.find("\r\n\r\nYES",0) != std::string::npos))
+
+      if (allow_access || (stringbuffer.size() >= 3 && stringbuffer.find("\r\n\r\nYES", 0) != std::string::npos))
       {
-        LOG(INFO, "Packets","  Verified!");
+        LOG(INFO, "Packets", "  Verified!");
 
         char* kickMessage = NULL;
         if ((static_cast<Hook2<bool, const char*, char**>*>(Mineserver::get()->plugin()->getHook("PlayerLoginPre")))->doUntilFalse(player.c_str(), &kickMessage))
@@ -412,13 +414,13 @@ int PacketHandler::login_request(User* user)
       }
       else
       {
-        LOG(INFO, "Packets","  Failed"  + stringbuffer.substr(stringbuffer.size()-3));
+        LOG(INFO, "Packets", "  Failed"  + stringbuffer.substr(stringbuffer.size() - 3));
         user->kick("Failed to verify username!");
       }
     }
     else
     {
-      LOG(INFO, "Packets","  Failed");
+      LOG(INFO, "Packets", "  Failed");
       user->kick("Failed to verify username!");
     }
 
@@ -602,11 +604,11 @@ int PacketHandler::player_digging(User* user)
     blockD.revertBlock(user, x, y, z, user->pos.map);
     return PACKET_OK;
   }
-  
+
   // Blocks that break with first hit
-  if (status == BLOCK_STATUS_STARTED_DIGGING && 
-     (block == BLOCK_SNOW || block == BLOCK_REED || block == BLOCK_TORCH
-     || block == BLOCK_TNT || block == BLOCK_REDSTONE_WIRE) )
+  if (status == BLOCK_STATUS_STARTED_DIGGING &&
+      (block == BLOCK_SNOW || block == BLOCK_REED || block == BLOCK_TORCH
+       || block == BLOCK_TNT || block == BLOCK_REDSTONE_WIRE))
   {
     status = BLOCK_STATUS_BLOCK_BROKEN;
   }

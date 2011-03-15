@@ -119,44 +119,44 @@ bool Physics::update()
     simList[simIt].blocks[0].meta = meta;
 
     bool used = false;
-    for (int i = 0; i<5; i++)
+    for (int i = 0; i < 5; i++)
     {
       vec local(pos);
-      bool falling =false;
-      switch(i)
+      bool falling = false;
+      switch (i)
       {
       case 0:
-        local += vec(0,-1,0); // First tries to go down
-        falling=true;
+        local += vec(0, -1, 0); // First tries to go down
+        falling = true;
         break;
       case 1:
-        local += vec(1,0,0); // Might be bad to have the 4 cardinal dir' 
-                             // so predictable
+        local += vec(1, 0, 0); // Might be bad to have the 4 cardinal dir'
+        // so predictable
         break;
       case 2:
-        local += vec(-1,0,0);
+        local += vec(-1, 0, 0);
         break;
       case 3:
-        local += vec(0,0,1);
+        local += vec(0, 0, 1);
         break;
       case 4:
-        local += vec(0,0,-1);
+        local += vec(0, 0, -1);
         break;
       case 5:
-//        local += vec(0,1,0); // Going UP
+        //        local += vec(0,1,0); // Going UP
         break;
       }
-      uint8_t newblock,newmeta;
+      uint8_t newblock, newmeta;
       Mineserver::get()->map(map)->getBlock(pos, &block, &meta);
       Mineserver::get()->map(map)->getBlock(local, &newblock, &newmeta);
-      if(!isLiquidBlock(block))
+      if (!isLiquidBlock(block))
       {
         toRem.push_back(pos);
         break;
       }
-      if((isWaterBlock(newblock) && isWaterBlock(block)) || (isLavaBlock(newblock) && isLavaBlock(block)) || (isLiquidBlock(block) && mayFallThrough(newblock)) )
+      if ((isWaterBlock(newblock) && isWaterBlock(block)) || (isLavaBlock(newblock) && isLavaBlock(block)) || (isLiquidBlock(block) && mayFallThrough(newblock)))
       {
-        if(falling && !isLiquidBlock(newblock))
+        if (falling && !isLiquidBlock(newblock))
         {
           Mineserver::get()->map(map)->setBlock(local, block, meta);
           changed.push_back(local);
@@ -164,15 +164,15 @@ bool Physics::update()
           changed.push_back(pos);
           toRem.push_back(pos);
           toAdd.push_back(local);
-          used=true;
+          used = true;
           continue;
         }
-        if(falling && isLiquidBlock(newblock))
+        if (falling && isLiquidBlock(newblock))
         {
           int top = 8 - meta;
           int bot = 8 - newmeta;
-          int volume = top+bot;
-          if(volume > 8)
+          int volume = top + bot;
+          if (volume > 8)
           {
             top = volume - 8;
             bot = 8;
@@ -185,15 +185,15 @@ bool Physics::update()
           int a_meta = 8 - top;
           int a_newmeta = 8 - bot;
           toAdd.push_back(local);
-          if(a_meta == meta && a_newmeta == newmeta)
+          if (a_meta == meta && a_newmeta == newmeta)
           {
             toRem.push_back(pos);
             toRem.push_back(local);
             continue;
           }
-          if((isWaterBlock(block) && a_meta<8) || (isLavaBlock(block) && a_meta<4))
+          if ((isWaterBlock(block) && a_meta < 8) || (isLavaBlock(block) && a_meta < 4))
           {
-            Mineserver::get()->map(map)->setBlock(pos,block,a_meta);
+            Mineserver::get()->map(map)->setBlock(pos, block, a_meta);
 
             changed.push_back(pos);
           }
@@ -203,18 +203,18 @@ bool Physics::update()
             changed.push_back(pos);
           }
           Mineserver::get()->map(map)->setBlock(local, block, a_newmeta);
-          used=true;
+          used = true;
           toAdd.push_back(local);
           toAdd.push_back(pos);
           changed.push_back(pos);
           continue;
         }
 
-        if(!isLiquidBlock(newblock))
+        if (!isLiquidBlock(newblock))
         {
-          if(!falling)
+          if (!falling)
           {
-            if((isWaterBlock(block) && meta==7) || (isLavaBlock(block) && meta>=3))
+            if ((isWaterBlock(block) && meta == 7) || (isLavaBlock(block) && meta >= 3))
             {
               toRem.push_back(pos);
               break;
@@ -225,7 +225,7 @@ bool Physics::update()
           Mineserver::get()->map(map)->setBlock(local, block, newmeta);
           changed.push_back(local);
           meta++;
-          if(meta<8)
+          if (meta < 8)
           {
             Mineserver::get()->map(map)->setBlock(pos, block, meta);
             changed.push_back(pos);
@@ -237,15 +237,16 @@ bool Physics::update()
             toRem.push_back(pos);
           }
           toAdd.push_back(local);
-          used=true;
+          used = true;
           continue;
         }
-        if(meta<newmeta-1 || (meta==newmeta && falling)){
+        if (meta < newmeta - 1 || (meta == newmeta && falling))
+        {
           newmeta --;
           Mineserver::get()->map(map)->setBlock(local, block, newmeta);
           changed.push_back(local);
           meta ++;
-          if(meta<8)
+          if (meta < 8)
           {
             Mineserver::get()->map(map)->setBlock(pos, block, meta);
             changed.push_back(pos);
@@ -257,28 +258,28 @@ bool Physics::update()
             toRem.push_back(pos);
           }
           toAdd.push_back(local);
-          used=true;
+          used = true;
           continue;
         }
       }
     }
-    if(!used)
+    if (!used)
     {
       toRem.push_back(pos);
     }
   }
-  for(int i = toRem.size()-1; i>=0; i--)
+  for (int i = toRem.size() - 1; i >= 0; i--)
   {
     removeSimulation(toRem[i]);
   }
-  for(int i = 0; i < toAdd.size(); i++)
+  for (int i = 0; i < toAdd.size(); i++)
   {
     addSimulation(toAdd[i]);
   }
   Mineserver::get()->map(map)->sendMultiBlocks(&changed);
 
   clock_t endtime = clock() - starttime;
-//  LOG(INFO, "Physics", "Exit simulation, took " + dtos(endtime * 1000 / CLOCKS_PER_SEC) + " ms, " + dtos(simList.size()) + " items left");
+  //  LOG(INFO, "Physics", "Exit simulation, took " + dtos(endtime * 1000 / CLOCKS_PER_SEC) + " ms, " + dtos(simList.size()) + " items left");
   return true;
 }
 

@@ -131,8 +131,8 @@ std::string removeChar(std::string str, const char* c)
 int printHelp(int code)
 {
   std::cout
-    << "Usage: mineserver [CONFIG_FILE]\n"
-    << "   or: mineserver -h|--help\n";
+      << "Usage: mineserver [CONFIG_FILE]\n"
+      << "   or: mineserver -h|--help\n";
   return code;
 }
 
@@ -152,14 +152,18 @@ int main(int argc, char* argv[])
 
   // accept at most 1 argument
   if (argc > 2)
+  {
     return printHelp(EXIT_FAILURE);
+  }
 
   std::string cfg;
   for (int i = 1; i < argc; i++)
   {
     cfg = std::string(argv[i]);
     if (cfg[0] == '-')
+    {
       return printHelp(EXIT_SUCCESS);
+    }
   }
 
 #ifdef WIN32
@@ -175,19 +179,27 @@ int main(int argc, char* argv[])
   // using CONFIG_FILE in current directory is only for development purposes
   std::string cfgcwd = std::string("./") + CONFIG_FILE;
   struct stat st;
-  if ( (stat(cfgcwd.c_str(), &st) == 0))// && S_ISREG(st.st_mode) )
+  if ((stat(cfgcwd.c_str(), &st) == 0)) // && S_ISREG(st.st_mode) )
+  {
     cfg = cfgcwd;
+  }
 #endif
 
   if (cfg.empty())
+  {
     cfg = DEFAULT_HOME + '/' + CONFIG_FILE;
+  }
 
   bool ret = false;
   ret = Mineserver::get()->init(cfg);
   if (!ret)
+  {
     LOG2(ERROR, "Failed to start Mineserver!");
+  }
   else
+  {
     ret = Mineserver::get()->run();
+  }
 
   Mineserver::get()->free();
 
@@ -248,13 +260,14 @@ bool Mineserver::init(const std::string& cfg)
 
   // expand '~', '~user' in next vars
   bool error = false;
-  const char* vars[] = {
+  const char* vars[] =
+  {
     "system.path.data",
     "system.path.plugins",
     "system.path.home",
     "system.pid_file",
   };
-  for (uint32_t i = 0; i < sizeof(vars)/sizeof(vars[0]); i++)
+  for (uint32_t i = 0; i < sizeof(vars) / sizeof(vars[0]); i++)
   {
     ConfigNode* node = config()->mData(vars[i]);
     if (!node)
@@ -275,14 +288,16 @@ bool Mineserver::init(const std::string& cfg)
     LOG2(INFO, std::string(vars[i]) + " = \"" + newvalue + "\"");
   }
   if (error)
+  {
     return false;
+  }
 
   std::string str = config()->sData("system.path.home");
-  #ifdef WIN32
+#ifdef WIN32
   if (_chdir(str.c_str()) != 0)
-  #else
+#else
   if (chdir(str.c_str()) != 0)
-  #endif
+#endif
   {
     LOG2(ERROR, "Failed to change working directory to: " + str);
     return false;
@@ -521,10 +536,10 @@ bool Mineserver::run()
         {
 #ifdef WIN32
           t_end = timeGetTime();
-          LOG2(INFO, dtos((x + size + 1) * (size * 2 + 1)) + "/" + dtos((size * 2 + 1) * (size * 2 + 1)) + " done. " + dtos((t_end - t_begin) / (size * 2 + 1)) + "ms per chunk");
+          LOG2(INFO, dtos((x + size + 1) *(size * 2 + 1)) + "/" + dtos((size * 2 + 1) *(size * 2 + 1)) + " done. " + dtos((t_end - t_begin) / (size * 2 + 1)) + "ms per chunk");
 #else
           t_end = clock();
-          LOG2(INFO, dtos((x + size + 1) * (size * 2 + 1)) + "/" + dtos((size * 2 + 1) * (size * 2 + 1)) + " done. " + dtos(((t_end - t_begin) / (CLOCKS_PER_SEC / 1000)) / (size * 2 + 1)) + "ms per chunk");
+          LOG2(INFO, dtos((x + size + 1) *(size * 2 + 1)) + "/" + dtos((size * 2 + 1) *(size * 2 + 1)) + " done. " + dtos(((t_end - t_begin) / (CLOCKS_PER_SEC / 1000)) / (size * 2 + 1)) + "ms per chunk");
 #endif
         }
       }
@@ -793,7 +808,8 @@ bool Mineserver::homePrepare(const std::string& path)
   }
 
   // copy example configs
-  const std::string files[] = {
+  const std::string files[] =
+  {
     "banned.txt",
     "commands.cfg",
     "config.cfg",
@@ -805,15 +821,17 @@ bool Mineserver::homePrepare(const std::string& path)
     "rules.txt",
     "whitelist.txt",
   };
-  for (uint32_t i = 0; i < sizeof(files)/sizeof(files[0]); i++)
+  for (uint32_t i = 0; i < sizeof(files) / sizeof(files[0]); i++)
   {
     // TODO: winex: hardcoded path won't work on installation
     std::string namein  = std::string("../files") + '/' + files[i];
     std::string nameout = path + '/' + files[i];
 
     // don't overwrite existing files
-    if ( (stat(nameout.c_str(), &st) == 0))// && S_ISREG(st.st_mode) )
+    if ((stat(nameout.c_str(), &st) == 0)) // && S_ISREG(st.st_mode) )
+    {
       continue;
+    }
 
     std::ifstream fin(namein.c_str(), std::ios_base::binary | std::ios_base::in);
     if (fin.fail())

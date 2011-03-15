@@ -197,11 +197,15 @@ std::string pathExpandUser(const std::string& path)
   size_t pos;
 
   if (path[0] != '~')
+  {
     return path;
+  }
 
   pos = path.find(PATH_SEPARATOR);
   if (pos == std::string::npos)
+  {
     pos = path.length();
+  }
 
   user = path.substr(1, pos - 1);
   if (!user.empty())
