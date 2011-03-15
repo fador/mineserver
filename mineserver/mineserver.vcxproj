@@ -21,6 +21,7 @@
     <ClCompile Include="..\src\blocks\fire.cpp" />
     <ClCompile Include="..\src\blocks\blockfurnace.cpp" />
     <ClCompile Include="..\src\blocks\ladder.cpp" />
+    <ClCompile Include="..\src\blocks\leaves.cpp" />
     <ClCompile Include="..\src\blocks\liquid.cpp" />
     <ClCompile Include="..\src\blocks\note.cpp" />
     <ClCompile Include="..\src\blocks\plant.cpp" />
@@ -63,6 +64,7 @@
     <ClCompile Include="..\src\user.cpp" />
     <ClCompile Include="..\src\worldgen\biomegen.cpp" />
     <ClCompile Include="..\src\worldgen\cavegen.cpp" />
+    <ClCompile Include="..\src\worldgen\eximgen.cpp" />
     <ClCompile Include="..\src\worldgen\heavengen.cpp" />
     <ClCompile Include="..\src\worldgen\mapgen.cpp" />
     <ClCompile Include="..\src\worldgen\nethergen.cpp" />
@@ -78,6 +80,7 @@
     <ClInclude Include="..\src\blocks\fire.h" />
     <ClInclude Include="..\src\blocks\blockfurnace.h" />
     <ClInclude Include="..\src\blocks\ladder.h" />
+    <ClInclude Include="..\src\blocks\leaves.h" />
     <ClInclude Include="..\src\blocks\liquid.h" />
     <ClInclude Include="..\src\blocks\note.h" />
     <ClInclude Include="..\src\blocks\plant.h" />
@@ -125,6 +128,7 @@
     <ClInclude Include="..\src\vec.h" />
     <ClInclude Include="..\src\worldgen\biomegen.h" />
     <ClInclude Include="..\src\worldgen\cavegen.h" />
+    <ClInclude Include="..\src\worldgen\eximgen.h" />
     <ClInclude Include="..\src\worldgen\heavengen.h" />
     <ClInclude Include="..\src\worldgen\mapgen.h" />
     <ClInclude Include="..\src\worldgen\nethergen.h" />

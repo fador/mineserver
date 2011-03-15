@@ -20,6 +20,7 @@
 
 inline int32_t abs(int32_t a){ // <cmath> <math.h> and even stdlib (which is included in basic block) doesn't work here for some reason =/
     if(a<0) return -a;
+    return a;
 }
 bool BlockLeaves::affectedBlock(int block){
     if(block == BLOCK_LEAVES) return true;
