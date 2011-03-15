@@ -297,6 +297,7 @@ void BiomeGen::AddTrees(int x, int z, int map)
       // Another dirty haxx!
       if (blockY > 120)
       {
+        i++;
         continue;
       }
 
@@ -368,7 +369,9 @@ void BiomeGen::AddTrees(int x, int z, int map)
       {
         for (int8_t v = -2; v < 2; v++)
         {
-          if(a+u >= 0 && b+v >= 0 && a+u < 16 && b+v < 16)
+          //Check for array boundaries
+          if((a+u) >= 0 && (b+v) >= 0 &&
+             (a+u) < 16 && (b+v) < 16)
           {
             empty[a+u][b+v] = false;
           }
