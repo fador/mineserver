@@ -24,6 +24,7 @@ inline int32_t abs(int32_t a)  // <cmath> <math.h> and even stdlib (which is inc
   {
     return -a;
   }
+  return a;
 }
 bool BlockLeaves::affectedBlock(int block)
 {
