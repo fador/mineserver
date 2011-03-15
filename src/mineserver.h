@@ -85,7 +85,7 @@ public:
   }
 
 
-  bool init(const std::string& cfg);
+  bool init();
   bool free();
 
   bool run();

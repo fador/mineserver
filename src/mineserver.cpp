@@ -131,8 +131,14 @@ std::string removeChar(std::string str, const char* c)
 int printHelp(int code)
 {
   std::cout
-      << "Usage: mineserver [CONFIG_FILE]\n"
-      << "   or: mineserver -h|--help\n";
+      << "Mineserver " << VERSION << "\n"
+      << "Usage: mineserver [CONFIG_FILE] [OVERRIDE]...\n"
+      << "   or: mineserver -h|--help\n"
+      << "\n"
+      << "Syntax for overrides is: +VARIABLE=VALUE\n"
+      << "\n"
+      << "Examples:\n"
+      << "  mineserver /etc/mineserver/config.cfg +system.path.home=\"/var/lib/mineserver\" +net.port=25565\n";
   return code;
 }
 
@@ -150,25 +156,39 @@ int main(int argc, char* argv[])
 
   srand((uint32_t)time(NULL));
 
-  // accept at most 1 argument
-  if (argc > 2)
-  {
-    return printHelp(EXIT_FAILURE);
-  }
-
   std::string cfg;
+  std::vector<std::string> overrides;
+
+  std::string arg;
   for (int i = 1; i < argc; i++)
   {
-    cfg = std::string(argv[i]);
-    if (cfg[0] == '-')
+    arg = std::string(argv[i]);
+
+    switch (arg[0])
     {
+    case '-':   // option
+      // we have only '-h' and '--help' now, so just return with help
       return printHelp(EXIT_SUCCESS);
+
+    case '+':   // override
+      overrides.push_back(arg.substr(1));
+      break;
+
+    default:    // otherwise, it is config file
+      if (!cfg.empty())
+      {
+        LOG2(ERROR, "Only single CONFIG_FILE argument is allowed!");
+        return EXIT_FAILURE;
+      }
+      cfg = arg;
+      break;
     }
   }
 
   const std::string DEFAULT_HOME = pathExpandUser(std::string("~/.mineserver"));
 
   // create home and copy files if necessary
+  // TODO: winex: this one needs cfg and overrides to be taken into account!
   Mineserver::get()->homePrepare(DEFAULT_HOME);
 
 #ifdef DEBUG
@@ -186,8 +206,33 @@ int main(int argc, char* argv[])
     cfg = DEFAULT_HOME + '/' + CONFIG_FILE;
   }
 
+  // load config
+  Config* config = Mineserver::get()->config();
+  if (!config->load(cfg))
+  {
+    return EXIT_FAILURE;
+  }
+
+  LOG2(INFO, "Using config: " + cfg);
+
+  if (overrides.size())
+  {
+    std::stringstream override_config;
+    for (uint32_t i = 0; i < overrides.size(); i++)
+    {
+      LOG2(INFO, "Overriden: " + overrides[i]);
+      override_config << overrides[i] << ';' << std::endl;
+    }
+    // override config
+    if (!config->load(override_config))
+    {
+      LOG2(ERROR, "Error when parsing overrides: maybe you forgot to doublequote string values?");
+      return EXIT_FAILURE;
+    }
+  }
+
   bool ret = false;
-  ret = Mineserver::get()->init(cfg);
+  ret = Mineserver::get()->init();
   if (!ret)
   {
     LOG2(ERROR, "Failed to start Mineserver!");
@@ -244,16 +289,8 @@ Mineserver::~Mineserver()
 }
 
 
-bool Mineserver::init(const std::string& cfg)
+bool Mineserver::init()
 {
-  // load config
-  if (!m_config->load(cfg))
-  {
-    return false;
-  }
-
-  LOG2(INFO, "Using config: " + cfg);
-
   // expand '~', '~user' in next vars
   bool error = false;
   const char* vars[] =
