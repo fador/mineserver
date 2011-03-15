@@ -26,8 +26,6 @@
 */
 
 #include <string>
-#include <fstream>
-#include <sys/stat.h>
 
 #include "scanner.h"
 
@@ -39,36 +37,15 @@ ConfigScanner::~ConfigScanner()
 {
 }
 
-bool ConfigScanner::read(const std::string& file)
+bool ConfigScanner::read(const std::string& buf)
 {
-  struct stat tmp;
-  if (stat(file.c_str(), &tmp) != 0)
-  {
-    return false;
-  }
-
-  std::ifstream handle;
-  handle.open(file.c_str(), std::ios_base::binary);
-
-  if (handle.bad())
+  if (buf.empty())
   {
     return false;
   }
 
   m_data.clear();
-
-  handle.seekg(0, std::ios::end);
-  int size = handle.tellg();
-  handle.seekg(0, std::ios::beg);
-
-  char* buf = new char [size];
-  handle.read(buf, size);
-
-  handle.close();
-
-  m_data.assign(buf, size);
-
-  delete [] buf;
+  m_data.assign(buf);
 
   return true;
 }

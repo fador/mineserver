@@ -48,6 +48,11 @@ bool Config::load(const std::string& file)
   return m_parser->parse(file, m_root);
 }
 
+bool Config::load(const std::istream& data)
+{
+  return m_parser->parse(data, m_root);
+}
+
 void Config::dump()
 {
   m_root->dump();

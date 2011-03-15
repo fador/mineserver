@@ -30,12 +30,18 @@
 
 #include <string>
 
+enum
+{
+  MAX_FILESIZE = 1*1024*1024,   //!< maximum allowed file size
+};
+
 class ConfigNode;
 
 class ConfigParser
 {
 public:
   bool parse(const std::string& file, ConfigNode* ptr);
+  bool parse(const std::istream& data, ConfigNode* ptr);
 };
 
 #endif

@@ -44,6 +44,7 @@ public:
   ~Config();
 
   bool load(const std::string& file);
+  bool load(const std::istream& data);
   void dump();
 
   ConfigNode* root();

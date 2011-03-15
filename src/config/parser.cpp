@@ -30,6 +30,9 @@
 #include <deque>
 #include <iostream>
 #include <cstdlib>
+#include <fstream>
+#include <sstream>
+#include <sys/stat.h>
 
 #include "scanner.h"
 #include "lexer.h"
@@ -40,13 +43,42 @@
 
 bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
 {
+  struct stat st;
+  std::ifstream ifs;
+
+  if ((stat(file.c_str(), &st) != 0) || (st.st_size >= MAX_FILESIZE))
+  {
+    std::cerr << "Couldn't stat file: " << file << "\n";
+    return false;
+  }
+
+  ifs.open(file.c_str(), std::ios_base::binary);
+  if (ifs.fail())
+  {
+    std::cerr << "Couldn't open file: " << file << "\n";
+    return false;
+  }
+
+  bool ret = false;
+  ret = parse(ifs, ptr);
+
+  ifs.close();
+  return ret;
+}
+
+bool ConfigParser::parse(const std::istream& data, ConfigNode* ptr)
+{
   ConfigScanner scanner;
   ConfigLexer lexer;
   ConfigNode* root = ptr;
 
-  if (!scanner.read(file))
+  // that's ugly!
+  std::stringstream ss;
+  ss << data.rdbuf();
+
+  if (!scanner.read(ss.str()))
   {
-    std::cerr << "Couldn't find config file: " << file << "\n";
+    std::cerr << "Couldn't read data!\n";
     return false;
   }
 
@@ -79,7 +111,7 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
         if ((tmp_data.find('/')  != std::string::npos)
             || (tmp_data.find('\\') != std::string::npos))
         {
-          std::cerr << file << ": include directive accepts only filename: " << tmp_data << "\n";
+          std::cerr << "include directive accepts only filename: " << tmp_data << "\n";
           return false;
         }
 
@@ -89,17 +121,11 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
         std::string       home;
         if (!node || (home = node->sData()).empty())
         {
-          std::cerr << file << ": include directive is not allowed before: " << var << "\n";
+          std::cerr << "include directive is not allowed before: " << var << "\n";
           return false;
         }
 
         tmp_data = pathExpandUser(home) + '/' + tmp_data;
-        if (tmp_data == file)
-        {
-          std::cerr << file << ": recursion detected! Not including: " << tmp_data << "\n";
-          continue;
-        }
-
         if (!parse(tmp_data, root))
         {
           return false;
