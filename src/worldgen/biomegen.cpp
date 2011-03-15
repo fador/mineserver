@@ -368,7 +368,10 @@ void BiomeGen::AddTrees(int x, int z, int map)
       {
         for (int8_t v = -2; v < 2; v++)
         {
-          empty[a+u][b+v] = false;
+          if(a+u >= 0 && b+v >= 0 && a+u < 16 && b+v < 16)
+          {
+            empty[a+u][b+v] = false;
+          }
         }
       }
       i++;
