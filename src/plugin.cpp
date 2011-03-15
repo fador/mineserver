@@ -105,7 +105,7 @@ void Plugin::init()
   BlockCB.push_back(workbenchblock);
   BlockDefault* defaultblock = new BlockDefault();
   BlockCB.push_back(defaultblock);
-  
+
 
   ItemFood* fooditem = new ItemFood();
   ItemCB.push_back(fooditem);
@@ -128,16 +128,18 @@ bool Plugin::loadPlugin(const std::string& name, const std::string& path, std::s
   LIBRARY_HANDLE lhandle = NULL;
   void (*fhandle)(mineserver_pointer_struct*) = NULL;
 
-  if (  name.empty()
-    || (name.find('/')  != std::string::npos)
-    || (name.find('\\') != std::string::npos) )
+  if (name.empty()
+      || (name.find('/')  != std::string::npos)
+      || (name.find('\\') != std::string::npos))
   {
     LOG(INFO, "Plugin", "Invalid name: " + name);
     return false;
   }
 
   if (alias.empty())
+  {
     alias = name;
+  }
 
   if (!path.empty())
   {

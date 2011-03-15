@@ -80,7 +80,12 @@ bool Lighting::generateLight(int x, int z, sChunk* chunk)
       int absolute_x    = (x << 4) + block_x;
       int absolute_z    = (z << 4) + block_z;
 
-      for (int block_y = (127 / 8) - 1; block_y >= 0; block_y--)
+      for (int block_y = (127 / 8)
+    {
+      - 1;
+    }
+    block_y >= 0;
+         block_y--)
       {
         int index      = block_y + blockx_blockz;
         uint64_t block64 = blocks64[index];

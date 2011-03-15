@@ -76,8 +76,8 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
       if (tmp_type == CONFIG_TOKEN_STRING)
       {
         // allow only filename without path
-        if ( (tmp_data.find('/')  != std::string::npos)
-          || (tmp_data.find('\\') != std::string::npos) )
+        if ((tmp_data.find('/')  != std::string::npos)
+            || (tmp_data.find('\\') != std::string::npos))
         {
           std::cerr << file << ": include directive accepts only filename: " << tmp_data << "\n";
           return false;
@@ -87,7 +87,7 @@ bool ConfigParser::parse(const std::string& file, ConfigNode* ptr)
         const std::string var  = "system.path.home";
         ConfigNode*       node = root->get(var, false);
         std::string       home;
-        if ( !node || (home = node->sData()).empty() )
+        if (!node || (home = node->sData()).empty())
         {
           std::cerr << file << ": include directive is not allowed before: " << var << "\n";
           return false;

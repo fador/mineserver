@@ -33,23 +33,24 @@
 
 #include "basic.h"
 
-struct Decay{
-   Decay(time_t decayStart,int32_t x,uint8_t y,int32_t z,int map)
-   : decayStart(decayStart),x(x),y(y),z(z),map(map){}
-    time_t decayStart;
-    int32_t x,z;
-    int y,map;
+struct Decay
+{
+  Decay(time_t decayStart, int32_t x, uint8_t y, int32_t z, int map)
+    : decayStart(decayStart), x(x), y(y), z(z), map(map) {}
+  time_t decayStart;
+  int32_t x, z;
+  int y, map;
 };
 
 class BlockLeaves: public BlockBasic
 {
-    std::vector<Decay> decaying;
+  std::vector<Decay> decaying;
 public:
-   bool affectedBlock(int block);
-   BlockLeaves();
-   bool onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-   void timer200();
+  bool affectedBlock(int block);
+  BlockLeaves();
+  bool onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
+  void onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
+  void timer200();
 };
 
 #endif //_BLOCKS_LEAVES

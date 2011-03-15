@@ -60,16 +60,16 @@ struct plugin_pointer_struct
   void (*remPluginVersion)(const char* name);
 
   bool (*hasPointer)(const char* name);
-  void* (*getPointer)(const char* name);
+  void*(*getPointer)(const char* name);
   void (*setPointer)(const char* name, void* pointer);
   void (*remPointer)(const char* name);
 
   bool (*hasHook)(const char* hookID);
 #ifdef USE_HOOKS
-  Hook* (*getHook)(const char* hookID);
+  Hook*(*getHook)(const char* hookID);
   void (*setHook)(const char* hookID, Hook* hook);
 #else
-  void* (*getHook)(const char* hookID);
+  void*(*getHook)(const char* hookID);
   void (*setHook)(const char* hookID, void* hook);
 #endif
   void (*remHook)(const char* hookID);
@@ -93,7 +93,7 @@ struct user_pointer_struct
   bool (*sethealth)(const char* user, int userHealth);
   bool (*teleportMap)(const char* user, double x, double y, double z, int map);
   int (*getCount)();
-  char* (*getUserNumbered)(int c);
+  char*(*getUserNumbered)(int c);
   bool (*getPositionW)(const char* user, double* x, double* y, double* z, int* w, float* yaw, float* pitch, double* stance);
   bool (*addItem)(const char* user, int item, int count, int health);
   bool (*hasItem)(const char* user, int item, int count, int health);
@@ -132,10 +132,10 @@ struct map_pointer_struct
   bool (*getBlock)(int x, int y, int z, unsigned char* type, unsigned char* meta);
   bool (*setBlock)(int x, int y, int z, unsigned char type, unsigned char meta);
   void (*saveWholeMap)(void);
-  unsigned char* (*getMapData_block)(int x, int z);
-  unsigned char* (*getMapData_meta)(int x, int z);
-  unsigned char* (*getMapData_skylight)(int x, int z);
-  unsigned char* (*getMapData_blocklight)(int x, int z);
+  unsigned char*(*getMapData_block)(int x, int z);
+  unsigned char*(*getMapData_meta)(int x, int z);
+  unsigned char*(*getMapData_skylight)(int x, int z);
+  unsigned char*(*getMapData_blocklight)(int x, int z);
   bool (*getBlockW)(int x, int y, int z, int w, unsigned char* type, unsigned char* meta);
   bool (*setBlockW)(int x, int y, int z, int w, unsigned char type, unsigned char meta);
   void* temp[100];
@@ -148,7 +148,7 @@ struct config_pointer_struct
   int64_t (*lData)(const char* name);
   float(*fData)(const char* name);
   double(*dData)(const char* name);
-  const char* (*sData)(const char* name);
+  const char*(*sData)(const char* name);
   bool (*bData)(const char* name);
   void* temp[100];
 };

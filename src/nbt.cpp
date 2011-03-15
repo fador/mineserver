@@ -553,7 +553,7 @@ NBT_Value* NBT_Value::LoadFromFile(const std::string& filename)
   if (uncompressedSize == 0)
   {
     LOG2(WARNING, "Unable to determine uncompressed size of " + filename);
-    uncompressedSize = ALLOCATE_NBTFILE*10;
+    uncompressedSize = ALLOCATE_NBTFILE * 10;
   }
 
   uint8_t* uncompressedData = new uint8_t[uncompressedSize];
@@ -578,7 +578,7 @@ NBT_Value* NBT_Value::LoadFromFile(const std::string& filename)
 
 NBT_Value* NBT_Value::LoadFromMemory(uint8_t* buffer, uint32_t len)
 {
-    //Initialize zstream to handle gzip format
+  //Initialize zstream to handle gzip format
   z_stream zstream;
   zstream.zalloc    = (alloc_func)0;
   zstream.zfree     = (free_func)0;
@@ -593,17 +593,17 @@ NBT_Value* NBT_Value::LoadFromMemory(uint8_t* buffer, uint32_t len)
   //inflateInit2(&zstream,16+MAX_WBITS);
   inflateInit(&zstream);
 
-  uint32_t uncompressedSize   = ALLOCATE_NBTFILE*10;
-  uint8_t *uncompressedBuffer = new uint8_t[uncompressedSize];
+  uint32_t uncompressedSize   = ALLOCATE_NBTFILE * 10;
+  uint8_t* uncompressedBuffer = new uint8_t[uncompressedSize];
 
   zstream.avail_out = uncompressedSize;
   zstream.next_out = uncompressedBuffer;
-  
+
   //Uncompress
   int returnvalue = 0;
-  if((returnvalue = inflate(&zstream, Z_FINISH)) != Z_STREAM_END && returnvalue != Z_BUF_ERROR)
+  if ((returnvalue = inflate(&zstream, Z_FINISH)) != Z_STREAM_END && returnvalue != Z_BUF_ERROR)
   {
-    
+
     std::cout << "Error in inflate! " << returnvalue << std::endl;
     delete[] uncompressedBuffer;
     return NULL;
@@ -657,7 +657,7 @@ void NBT_Value::SaveToMemory(uint8_t* buffer, uint32_t* len)
   NBTBuffer.push_back(0);
   NBTBuffer.push_back(0);
 
-  uLongf written = ALLOCATE_NBTFILE*10;
+  uLongf written = ALLOCATE_NBTFILE * 10;
   compress(buffer, &written, &NBTBuffer[0], NBTBuffer.size());
   *len = written;
 
