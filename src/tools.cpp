@@ -201,7 +201,8 @@ std::string pathExpandUser(const std::string& path)
     return path;
   }
 
-  pos = path.find(PATH_SEPARATOR);
+  // current config system supports only unix-style paths
+  pos = path.find('/');
   if (pos == std::string::npos)
   {
     pos = path.length();
