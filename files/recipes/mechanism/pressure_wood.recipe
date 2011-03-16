@@ -1,8 +1,8 @@
 # Input
-width 3
+width 2
 height 1
 <-
-5 5 5
+5 5
 ->
 
 # Output
