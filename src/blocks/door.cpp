@@ -27,7 +27,6 @@
 
 #include "../mineserver.h"
 #include "../map.h"
-//#include "../logger.h"
 
 #include "door.h"
 
@@ -50,9 +49,6 @@ void BlockDoor::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y,
 {
   uint8_t block, metadata;
   Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
-  
-  if (block != BLOCK_IRON_DOOR)
-  {
 
   // Toggle door state
   metadata ^= 0x4;
@@ -79,7 +75,7 @@ void BlockDoor::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y,
     Mineserver::get()->map(map)->setBlock(x, y + modifier, z, block2, metadata2);
     Mineserver::get()->map(map)->sendBlockChange(x, y + modifier, z, (char)block, metadata2);
   }
-  }
+
 }
 
 void BlockDoor::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
@@ -216,19 +212,15 @@ bool BlockDoor::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   switch (direction)
   {
   case BLOCK_EAST:
-	//LOG(INFO, "Map", "EAST");
-    direction = BLOCK_EAST;
-    break;
-  case BLOCK_WEST:
-	//LOG(INFO, "Map", "WEST");
     direction = BLOCK_WEST;
     break;
+  case BLOCK_WEST:
+    direction = BLOCK_EAST;
+    break;
   case BLOCK_NORTH:
-	//LOG(INFO, "Map", "NORTH");
     direction = BLOCK_SOUTH;
     break;
   case BLOCK_SOUTH:
-	//LOG(INFO, "Map", "SOUTH");
     direction = BLOCK_NORTH;
     break;
   }
@@ -258,9 +250,6 @@ bool BlockDoor::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
   uint8_t metadata2, block2;
   Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
   int modifier = ((metadata & 0x8) == 0x8) ? -1 : 1;
-
-  if (block != BLOCK_IRON_DOOR)
-  {
 
   Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
   if (metadata & 0x4)
@@ -293,6 +282,5 @@ bool BlockDoor::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
     Mineserver::get()->map(map)->setBlock(x, y + modifier, z, block2, metadata2);
     Mineserver::get()->map(map)->sendBlockChange(x, y + modifier, z, (char)block, metadata2);
   }
- }
   return false;
 }
