@@ -264,8 +264,8 @@ void MapGen::AddTrees(int x, int z, int map)
 
       Mineserver::get()->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
 
-      // No trees on water
-      if (block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER && block != BLOCK_SAND)
+      // No trees on water, sand or air
+      if (block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER && block != BLOCK_SAND && block != BLOCK_AIR)
       {
         if (abs(treenoise.GetValue(blockX, 0, blockZ)) >= 0.9)
         {
