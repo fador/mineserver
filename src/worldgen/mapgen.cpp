@@ -260,7 +260,7 @@ void MapGen::AddTrees(int x, int z, int map)
 
       blockX = a + xBlockpos;
       blockZ = b + zBlockpos;
-      blockY = heightmap[(a << 4) + b] + 1;
+      blockY = heightmap[(b << 4) + a] + 1;
 
       Mineserver::get()->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
 
