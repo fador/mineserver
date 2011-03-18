@@ -497,6 +497,13 @@ void setTime(std::string user, std::string command, std::deque<std::string> args
   }
 }
 
+void getTime(std::string user, std::string command, std::deque<std::string> args)
+{
+	std::string msg = "The current server time is " + dtos(mineserver->map.getTime());
+	mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
+}
+
+
 // Direction
 enum Direction
 {
@@ -777,6 +784,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION commands_init(mineserver_pointer_struct* m
   registerCommand(new Command(parseCmd("about"), "", "Display server name and software version", about));
   registerCommand(new Command(parseCmd("motd"), "", "Displays the MOTD", sendMOTD));
   registerCommand(new Command(parseCmd("world"), "<world Number>", "Move between worlds", userWorld));
+  registerCommand(new Command(parseCmd("gettime"), "<time>", "Get the serverTime", getTime));
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION commands_shutdown(void)

@@ -127,6 +127,7 @@ struct map_pointer_struct
 {
   void (*createPickupSpawn)(int x, int y, int z, int type, int count, int health, const char* user);
   bool (*setTime)(int timeValue);
+  int (*getTime)();
   void (*getSpawn)(int* x, int* y, int* z);
   void (*setSpawn)(int x, int y, int z);
   bool (*getBlock)(int x, int y, int z, unsigned char* type, unsigned char* meta);

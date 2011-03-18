@@ -288,6 +288,11 @@ bool map_setTime(int timeValue)
   return true;
 }
 
+int map_getTime()
+{
+  return (int64_t)Mineserver::get()->map(0)->mapTime;
+}
+
 void map_createPickupSpawn(int x, int y, int z, int type, int count, int health, const char* user)
 {
   User* tempUser = NULL;
@@ -1036,6 +1041,7 @@ void init_plugin_api(void)
   plugin_api_pointers.plugin.doAll                 = &hook_doAll;
 
   plugin_api_pointers.map.setTime                  = &map_setTime;
+  plugin_api_pointers.map.getTime                  = &map_getTime;
   plugin_api_pointers.map.createPickupSpawn        = &map_createPickupSpawn;
   plugin_api_pointers.map.getSpawn                 = &map_getSpawn;
   plugin_api_pointers.map.setSpawn                 = &map_setSpawn;
