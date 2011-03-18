@@ -54,14 +54,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../tree.h"
 #include "../tools.h"
 
-int eximseed;
-
-inline int fastrand()
-{
-  eximseed = (214013 * eximseed + 2531011);
-  return (eximseed >> 16) & 0x7FFF;
-}
-
 EximGen::EximGen()
   : blocks(16 * 16 * 128, 0),
     blockdata(16 * 16 * 128 / 2, 0),
@@ -75,7 +67,6 @@ EximGen::EximGen()
 void EximGen::init(int seed)
 {
   cave.init(seed + 7);
-  eximseed = seed;
 
   mountainTerrain.SetSeed(seed);
   mountainTerrain.SetFrequency(0.005);
@@ -194,12 +185,6 @@ void EximGen::generateChunk(int x, int z, int map)
 
   main->Insert("Level", val);
 
-  /*  uint32_t chunkid;
-    Mineserver::get()->map()->posToId(x, z, &chunkid);
-
-    Mineserver::get()->map()->maps[chunkid].x = x;
-    Mineserver::get()->map()->maps[chunkid].z = z; */
-
   std::vector<uint8_t> *t_blocks = (*val)["Blocks"]->GetByteArray();
   std::vector<uint8_t> *t_data = (*val)["Data"]->GetByteArray();
   std::vector<uint8_t> *t_blocklight = (*val)["BlockLight"]->GetByteArray();
@@ -226,13 +211,8 @@ void EximGen::generateChunk(int x, int z, int map)
   }
 
 
-  // Update last used time
-  //Mineserver::get()->map()->mapLastused[chunkid] = (int)time(0);
-
   // Not changed
   chunk->changed = Mineserver::get()->config()->bData("map.save_unchanged_chunks");
-
-  //Mineserver::get()->map()->maps[chunkid].nbt = main;
 
   if (addOre)
   {
@@ -604,9 +584,6 @@ void EximGen::AddOre(int x, int z, int map, uint8_t type)
       blockY = startHeight;
     }
 
-    //blockX += xBlockpos;
-    //blockZ += zBlockpos;
-
     // Calculate Y
     blockY = BetterRand() * (blockY);
 
@@ -653,20 +630,4 @@ void EximGen::AddDeposit(int x, int y, int z, int map, uint8_t block, uint8_t mi
       }
     }
   }
-  /*
-    for(int i = 0; i < depoSize; i++)
-    {
-  if(chunk->blocks[y + (z << 7) + (x << 11)] == BLOCK_STONE)
-  {
-    chunk->blocks[y + (z << 7) + (x << 11)] = block;
-  }
-
-  z = z+(BetterRand()*2)-1;
-  x = x+(BetterRand()*2)-1;
-  y = y+(BetterRand()*2)-1;
-
-  // If over chunk borders
-  if(z < 0 || z > 15 || x < 0 || x > 15 || y < 1)
-    break;
-    }*/
 }
