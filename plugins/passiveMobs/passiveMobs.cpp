@@ -61,6 +61,7 @@ std::string dtos(double n)
 }
 
 std::string Mobnames[] = {"Chicken","Pig","Sheep","Cow"};
+std::string enemyMobNames[] = {"Spider","Zombie","Skeleton","Creeper"};
  
 // The list of Mobs this plugin has control of
 // Note that other plugins may make other mobs, and control them itself
@@ -72,7 +73,7 @@ class MyPetMob{
 };
 std::vector<MyPetMob*> MyMobs;
 
-int maxMobs = 20; // Maximum ammount of mobs allowed
+int maxMobs = 15; // Maximum ammount of mobs allowed
 time_t lastSpawn = time(NULL);
 
 int topBlockSuitable(int x, int z, int w){
@@ -91,7 +92,7 @@ int topBlockSuitable(int x, int z, int w){
 bool canStepIn(int type){
   if(type == 0 || type == 6 || type == 8 || type == 9 || type == 10 ||
      type == 11 || type == 37 || type == 38 || type == 39 || type == 40 ||
-     type == 50 || type == 50 || type == 51 || type == 55 || type == 59 ||
+     type == 50 || type == 51 || type == 55 || type == 59 ||
      type == 69 || type == 70 || type == 72 || type == 75 || type == 76 ||
      type == 77 || type == 78 || type == 83)
     return true;
@@ -103,11 +104,11 @@ bool moveSuitable(double* x, double* y, double* z, int w){
   mineserver->map.getBlockW((int)floor(*x),(int)*y,(int)floor(*z),w,&block,&meta);
   if(canStepIn(block))
     return true;
-  mineserver->map.getBlockW((int)floor(*x),(int)(*y)+1,(int)floor(*z),w,&block,&meta);
-  if(canStepIn(block)){
-    (*y)++;
-    return true;
-  }
+  //mineserver->map.getBlockW((int)floor(*x),(int)(*y)+1,(int)floor(*z),w,&block,&meta);
+  //if(canStepIn(block)){
+    //(*y)++;
+    //return true;
+  //}
   return false;
 }
 
@@ -137,7 +138,12 @@ void timer200Function()
         if(y>0){
           y+=1;
           int randomMob = rand()%4;
-          int newMob = mineserver->mob.createMob(Mobnames[randomMob].c_str());
+			int newMob = 0;
+		  if (mineserver->map.getTime() > 18000 && mineserver->map.getTime() < 24000) {
+			 newMob = mineserver->mob.createMob(enemyMobNames[randomMob].c_str());
+		  } else {
+			newMob = mineserver->mob.createMob(Mobnames[randomMob].c_str());
+		  }
           MyPetMob* newMobData = new MyPetMob(newMob);
           MyMobs.push_back(newMobData);
           mineserver->mob.moveMobW(newMob,x,y,z,w);
@@ -152,7 +158,6 @@ void timer200Function()
     int w;
     mineserver->mob.getMobPositionW(MyMobs[i]->ID,&x,&y,&z,&w);
 
-
     if(mineserver->mob.getHealth(MyMobs[i]->ID)==0){
       int type = mineserver->mob.getType(MyMobs[i]->ID);
       int item = 0,count = 0;
@@ -160,6 +165,7 @@ void timer200Function()
       if(type == 91){ item = 35; count = (rand()%5);  }
       if(type == 92){ item = 334; count = (rand()%6); }
       if(type == 93){ item = 288; count = (rand()%8); }
+	  mineserver->mob.despawnMob(MyMobs[i]->ID);
       if(item != 0){
         mineserver->map.createPickupSpawn((int)floor(x),(int)floor(y),(int)floor(z),
                                          item, count, 0,NULL);
@@ -213,10 +219,11 @@ void timer200Function()
     if(yaw<=0){yaw+=360;}
     if( yaw>=360 ) { yaw-=360; }
 
-    if(forward>0.1){
+    if(forward>0.1 && rand()%6 == 3){
       double incz = cos_lt[(int)(yaw*10)] * forward;
       double incx = sin_lt[(int)(yaw*10)] * forward;
       x-=incx; z+=incz;
+
       if(moveSuitable(&x,&y,&z,w)){
         fallMob(&x,&y,&z,w);
         mineserver->mob.moveMobW(MyMobs[i]->ID,x,y,z,w);
@@ -226,8 +233,23 @@ void timer200Function()
     mineserver->mob.setLook(MyMobs[i]->ID, yaw, pitch);
       
   }
-        
-    
+}
+
+void gotAttacked(int mobID) {
+	
+	int mobHealth = mineserver->mob.getHealth(mobID);
+	std::string msg = "Testing it! - "+dtos(mobHealth);
+    mineserver->logger.log(6, "plugin.passiveMobs", msg.c_str());
+	if (mobHealth > 0) {
+		mineserver->mob.animateMob(mobID, 2);
+		mineserver->logger.log(6, "plugin.passiveMobs", "Being killed!");
+		mobHealth--;
+	} else {
+		mineserver->mob.animateState(mobID, 3);
+		mineserver->logger.log(6, "plugin.passiveMobs", "Dead Rabbit!!");
+	}
+	mineserver->mob.setHealth(mobID, mobHealth);
+
 
 }
 
@@ -236,10 +258,10 @@ std::string pluginName = "passiveMobs";
 PLUGIN_API_EXPORT void CALLCONVERSION passiveMobs_init(mineserver_pointer_struct* mineserver_temp)
 {
   mineserver = mineserver_temp;
-
+  
   if (mineserver->plugin.getPluginVersion(pluginName.c_str()) > 0)
   {
-    std::string msg = "passiveMobs is already loaded v."+dtos(mineserver->plugin.getPluginVersion(pluginName.c_str()));
+    std::string msg = atoi(pluginName.c_str())+ " is already loaded v."+dtos(mineserver->plugin.getPluginVersion(pluginName.c_str()));
     mineserver->logger.log(6, "plugin.passiveMobs", msg.c_str());
     return;
   }
@@ -253,13 +275,14 @@ PLUGIN_API_EXPORT void CALLCONVERSION passiveMobs_init(mineserver_pointer_struct
     cos_lt[i] = cos(((double)(i/10)*PI/180));
   }
   mineserver->plugin.addCallback("Timer200", (void *)timer200Function);
+  mineserver->plugin.addCallback("gotAttacked", (void *)gotAttacked);
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION passiveMobs_shutdown(void)
 {
   if (mineserver->plugin.getPluginVersion(pluginName.c_str()) <= 0)
   {
-    mineserver->logger.log(6, "plugin.passiveMobs", "pluginMobs is not loaded!");
+    mineserver->logger.log(6, "plugin.passiveMobs", atoi(pluginName.c_str()) + " is not loaded!");
     return;
   }
 }

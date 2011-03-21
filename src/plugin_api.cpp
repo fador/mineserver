@@ -858,8 +858,28 @@ void mob_moveMobW(int uid, double x, double y, double z, int map)
 
 int mob_getHealth(int uid)
 {
-  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
-  return m->health;
+  return Mineserver::get()->mobs()->getMobByID(uid)->health;
+}
+
+void mob_setHealth(int uid, int mobHealth)
+{
+	if (mobHealth < 0) {
+		mobHealth = 0;
+	} else if (mobHealth > 20) {
+		mobHealth = 20;
+	}
+	Mineserver::get()->mobs()->getMobByID(uid)->health = mobHealth;
+}
+
+void mob_animateMob(int mobID, int animID) {
+
+	Mineserver::get()->mobs()->getMobByID(mobID)->animateMob(animID);
+}
+
+void mob_animateState(int mobID, int animID) {
+	
+	Mineserver::get()->mobs()->getMobByID(mobID)->animateState(animID);
+
 }
 
 int mob_getType(int uid)
@@ -1089,6 +1109,9 @@ void init_plugin_api(void)
   plugin_api_pointers.mob.moveMob                  = &mob_moveMob;
   plugin_api_pointers.mob.moveMobW                 = &mob_moveMobW;
   plugin_api_pointers.mob.getHealth                = &mob_getHealth;
+  plugin_api_pointers.mob.setHealth                = &mob_setHealth;
+  plugin_api_pointers.mob.animateMob               = &mob_animateMob;
+  plugin_api_pointers.mob.animateState             = &mob_animateState;
   plugin_api_pointers.mob.getType                  = &mob_getType;
   plugin_api_pointers.mob.getMobPositionW          = &mob_getMobPositionW;
   plugin_api_pointers.mob.getLook                  = &mob_getLook;

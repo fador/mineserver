@@ -54,34 +54,21 @@ Mob::~Mob()
   }
 }
 
-void Mob::sethealth(int health)
-{
-  if (health < 0)
-  {
-    health = 0;
-  }
-  if (health > 30)
-  {
-    health = 30;
-  }
-  if (health < this->health)
-  {
-    for (int i = 0; i < Mineserver::get()->users().size(); i++)
-    {
-      User* user = Mineserver::get()->users()[i];
-      user->buffer << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID <<
-                   (int8_t)2 ;
-      // Hurt animation
-    }
-  }
-  this->health = health;
-  if (this->health <= 0)
-  {
-    deSpawnToAll();
-  }
+//Can be 0 (no animation), 1 (swing arm), 2 (damage animation)
+//, 3 (leave bed), 104 (crouch), or 105 (uncrouch). Getting 102 somewhat often, too. 
+void Mob::animateMob(int animID) { 
+	for (int i = 0; i < Mineserver::get()->users().size(); i++) {
+		User* user = Mineserver::get()->users()[i];
+		user->buffer << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID << (int8_t)animID;
+	}
 }
-
-
+//Possible values: 2 (entity hurt), 3 (entity dead?), 4, 5
+void Mob::animateState(int animID) { 
+	for (int i = 0; i < Mineserver::get()->users().size(); i++) {
+		User* user = Mineserver::get()->users()[i];
+		user->buffer << (int8_t)PACKET_DEATH_ANIMATION << (int32_t)UID << (int8_t)animID;
+	}
+}
 
 void Mob::spawnToAll()
 {

@@ -135,6 +135,7 @@ public:
     setHook("LogPost", new Hook3<bool, int, const char*, const char*>);
     setHook("PlayerChatCommand", new Hook4<bool, const char*, const char*, int, const char**>);
     setHook("PlayerRespawn", new Hook1<bool, const char*>);
+	setHook("gotAttacked", new Hook1<bool, int32_t>);
 
     init();
   }

@@ -61,6 +61,8 @@ public:
   void deSpawnToAll();
   void relativeMoveToAll();
   void teleportToAll();
+  void animateMob(int animID);
+  void animateState(int animID);
 
   void moveTo(double to_x, double to_y, double to_z, int to_map = -1);
   void look(int16_t yaw, int16_t pitch);
