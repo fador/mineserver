@@ -47,9 +47,6 @@
 
 #define PI 3.14159265
 
-double sin_lt[3600];
-double cos_lt[3600];
-
 const char CHATCMDPREFIX   = '/';
 mineserver_pointer_struct* mineserver;
 
@@ -192,7 +189,7 @@ void timer200Function()
     }
     int action = rand()%100;
     double yaw, pitch;
-    double forward=0;
+    float forward=0;
     mineserver->mob.getLook(MyMobs[i]->ID, &yaw, &pitch);
     if(action < 5){
       yaw += 30;
@@ -220,8 +217,8 @@ void timer200Function()
     if( yaw>=360 ) { yaw-=360; }
 
     if(forward>0.1 && rand()%6 == 3){
-      double incz = cos_lt[(int)(yaw*10)] * forward;
-      double incx = sin_lt[(int)(yaw*10)] * forward;
+      float incz = cos((yaw*PI)/180)* forward;
+	  float incx = sin((yaw*PI)/180)* forward;
       x-=incx; z+=incz;
 
       if(moveSuitable(&x,&y,&z,w)){
@@ -236,21 +233,16 @@ void timer200Function()
 }
 
 void gotAttacked(int mobID) {
-	
 	int mobHealth = mineserver->mob.getHealth(mobID);
-	std::string msg = "Testing it! - "+dtos(mobHealth);
+	std::string msg = "Testing it! - "+mobHealth;
     mineserver->logger.log(6, "plugin.passiveMobs", msg.c_str());
 	if (mobHealth > 0) {
 		mineserver->mob.animateMob(mobID, 2);
-		mineserver->logger.log(6, "plugin.passiveMobs", "Being killed!");
 		mobHealth--;
+		mineserver->mob.setHealth(mobID, mobHealth);
 	} else {
 		mineserver->mob.animateState(mobID, 3);
-		mineserver->logger.log(6, "plugin.passiveMobs", "Dead Rabbit!!");
 	}
-	mineserver->mob.setHealth(mobID, mobHealth);
-
-
 }
 
 std::string pluginName = "passiveMobs";
@@ -270,10 +262,6 @@ PLUGIN_API_EXPORT void CALLCONVERSION passiveMobs_init(mineserver_pointer_struct
 
   mineserver->plugin.setPluginVersion(pluginName.c_str(), PLUGIN_PASSIVEMOBS_VERSION);
 
-  for(int i=0; i<3600; i ++){
-    sin_lt[i] = sin(((double)(i/10)*PI/180));
-    cos_lt[i] = cos(((double)(i/10)*PI/180));
-  }
   mineserver->plugin.addCallback("Timer200", (void *)timer200Function);
   mineserver->plugin.addCallback("gotAttacked", (void *)gotAttacked);
 }

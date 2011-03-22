@@ -871,15 +871,16 @@ void mob_setHealth(int uid, int mobHealth)
 	Mineserver::get()->mobs()->getMobByID(uid)->health = mobHealth;
 }
 
-void mob_animateMob(int mobID, int animID) {
-
+void mob_animateMob(int mobID, int animID) 
+{
+	sprintf("animMob1: %d","%d",animID);
 	Mineserver::get()->mobs()->getMobByID(mobID)->animateMob(animID);
 }
 
-void mob_animateState(int mobID, int animID) {
-	
+void mob_animateState(int mobID, int animID) 
+{
+	sprintf("animState1: %d","%d",animID);
 	Mineserver::get()->mobs()->getMobByID(mobID)->animateState(animID);
-
 }
 
 int mob_getType(int uid)
@@ -1075,7 +1076,6 @@ void init_plugin_api(void)
   plugin_api_pointers.map.setBlockW                = &map_setBlockW;
   plugin_api_pointers.map.getBlockW                = &map_getBlockW;
 
-
   plugin_api_pointers.user.getPosition             = &user_getPosition;
   plugin_api_pointers.user.teleport                = &user_teleport;
   plugin_api_pointers.user.sethealth               = &user_sethealth;
@@ -1125,6 +1125,5 @@ void init_plugin_api(void)
   plugin_api_pointers.permissions.isOp             = &permission_isOp;
   plugin_api_pointers.permissions.isMember         = &permission_isMember;
   plugin_api_pointers.permissions.isGuest          = &permission_isGuest;
-
 
 }
