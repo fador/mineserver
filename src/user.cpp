@@ -942,7 +942,7 @@ int8_t User::relativeToBlock(const int32_t x, const int8_t y, const int32_t z)
     // We compare on the x axis
     if (diffX > 0)
     {
-      direction = BLOCK_WEST;
+      direction = BLOCK_BOTTOM;
     }
     else
     {
