@@ -57,7 +57,6 @@ Mob::~Mob()
 //Can be 0 (no animation), 1 (swing arm), 2 (damage animation)
 //, 3 (leave bed), 104 (crouch), or 105 (uncrouch). Getting 102 somewhat often, too. 
 void Mob::animateMob(int animID) { 
-	printf("animMob: " + animID);
 	for (int i = 0; i < Mineserver::get()->users().size(); i++) {
 		User* user = Mineserver::get()->users()[i];
 		user->buffer << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID << (int8_t)animID;
@@ -65,11 +64,14 @@ void Mob::animateMob(int animID) {
 }
 //Possible values: 2 (entity hurt), 3 (entity dead?), 4, 5
 void Mob::animateState(int animID) { 
-	printf("animState: " + animID);
 	for (int i = 0; i < Mineserver::get()->users().size(); i++) {
 		User* user = Mineserver::get()->users()[i];
-		user->buffer << (int8_t)PACKET_DEATH_ANIMATION << (int32_t)UID << (int8_t)animID;
+		user->buffer << (int8_t)PACKET_DEATH_ANIMATION << (int32_t)UID << (int8_t)3;
 	}
+}
+
+void Mob::updateHealth(int health) { 
+	//animateState(4);
 }
 
 void Mob::spawnToAll()
@@ -208,6 +210,30 @@ Mob* Mobs::getMobByID(int id)
   }
   return m_moblist[id];
 }
+
+int Mobs::getMobByTarget(int mobID)
+{
+for (int i = 0; i < m_moblist.size(); i++)
+  {
+    if(mobID == m_moblist[i]->UID) {
+		return i;
+		break;
+	}
+  }
+  return NULL;
+}
+
+/*Mob* Mobs::getMobByTarget(int mobID)
+{
+for (int i = 0; i < m_moblist.size(); i++)
+  {
+    if(mobID == m_moblist[i]->UID) {
+		return m_moblist[i];
+		break;
+	}
+  }
+  return NULL;
+}*/
 
 int Mobs::mobNametoType(std::string name)
 {

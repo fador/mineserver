@@ -163,6 +163,7 @@ struct mob_pointer_struct
   void (*moveMob)(int uid, double x, double y, double z);
   void (*moveMobW)(int uid, double x, double y, double z, int map);
   bool (*getMobPositionW)(int uid, double* x, double* y, double* z, int* w);
+  int (*getMobID)(int uid);
   int (*getHealth)(int uid);
   void (*setHealth)(int uid, int mobHealth);
   int (*getType)(int uid);

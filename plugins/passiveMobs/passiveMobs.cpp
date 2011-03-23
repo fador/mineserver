@@ -65,6 +65,7 @@ std::string enemyMobNames[] = {"Spider","Zombie","Skeleton","Creeper"};
 class MyPetMob{
   public:
   int ID;
+  int deSpawn;
   double velocity;
   MyPetMob(int ID){ this->ID = ID; }
 };
@@ -145,6 +146,7 @@ void timer200Function()
           MyMobs.push_back(newMobData);
           mineserver->mob.moveMobW(newMob,x,y,z,w);
           mineserver->mob.spawnMob(newMob);
+	
           lastSpawn=time(NULL);
         }
       }
@@ -156,6 +158,10 @@ void timer200Function()
     mineserver->mob.getMobPositionW(MyMobs[i]->ID,&x,&y,&z,&w);
 
     if(mineserver->mob.getHealth(MyMobs[i]->ID)==0){
+		if (MyMobs[i]->deSpawn < 13) {
+			MyMobs[i]->deSpawn++;
+		} else {
+			printf("the spawn: %d",MyMobs[i]->deSpawn);
       int type = mineserver->mob.getType(MyMobs[i]->ID);
       int item = 0,count = 0;
       if(type == 90){ item = 319; count = (rand()%4); }
@@ -163,14 +169,17 @@ void timer200Function()
       if(type == 92){ item = 334; count = (rand()%6); }
       if(type == 93){ item = 288; count = (rand()%8); }
 	  mineserver->mob.despawnMob(MyMobs[i]->ID);
-      if(item != 0){
+	  if(item != 0){
         mineserver->map.createPickupSpawn((int)floor(x),(int)floor(y),(int)floor(z),
                                          item, count, 0,NULL);
       }
       // TODO : Fix obvious gaping memory leak
       MyMobs.erase(MyMobs.begin()+i);
-      continue;
-    }
+      		}
+		continue;
+    } else {
+		MyMobs[i]->deSpawn=0;
+	}
     int nearest = 10000;
     for (int j = 0; j < mineserver->user.getCount(); j++){
       char *name;
@@ -233,16 +242,14 @@ void timer200Function()
 }
 
 void gotAttacked(int mobID) {
-	int mobHealth = mineserver->mob.getHealth(mobID);
-	std::string msg = "Testing it! - "+mobHealth;
-    mineserver->logger.log(6, "plugin.passiveMobs", msg.c_str());
-	if (mobHealth > 0) {
-		mineserver->mob.animateMob(mobID, 2);
-		mobHealth--;
-		mineserver->mob.setHealth(mobID, mobHealth);
+	int mobHealth = mineserver->mob.getHealth((int)mobID);
+	mobHealth--;
+	if (mobHealth != 0) {
+		mineserver->mob.animateMob((int)mobID, 2);
 	} else {
-		mineserver->mob.animateState(mobID, 3);
+		mineserver->mob.animateState((int)mobID, 3);
 	}
+	mineserver->mob.setHealth((int)mobID, (int)mobHealth);
 }
 
 std::string pluginName = "passiveMobs";

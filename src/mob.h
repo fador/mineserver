@@ -63,6 +63,7 @@ public:
   void teleportToAll();
   void animateMob(int animID);
   void animateState(int animID);
+  void updateHealth(int health);
 
   void moveTo(double to_x, double to_y, double to_z, int to_map = -1);
   void look(int16_t yaw, int16_t pitch);
@@ -73,6 +74,7 @@ class Mobs
 {
 public:
   Mob* getMobByID(int id);
+  int getMobByTarget(int mobID);
   int mobNametoType(std::string name);
   int getMobCount();
   std::vector<Mob*> getAll()
