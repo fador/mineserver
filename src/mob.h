@@ -61,9 +61,9 @@ public:
   void deSpawnToAll();
   void relativeMoveToAll();
   void teleportToAll();
-  void animateMob(int animID);
-  void animateState(int animID);
-  void updateHealth(int health);
+  void animateMob(const char* userIn, int animID);
+  void animateDamage(const char* userIn, int animID);
+  void moveAnimal(const char* userIn);
 
   void moveTo(double to_x, double to_y, double to_z, int to_map = -1);
   void look(int16_t yaw, int16_t pitch);

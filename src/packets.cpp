@@ -1329,7 +1329,7 @@ int PacketHandler::use_entity(User* user)
     {
       //int h = Mineserver::get()->mobs()->getMobByID(i)->health - 1;
       //Mineserver::get()->mobs()->getMobByID(i)->sethealth(h);
-	  (static_cast<Hook1<bool, int32_t>*>(Mineserver::get()->plugin()->getHook("gotAttacked")))->doAll((int32_t)Mineserver::get()->mobs()->getMobByTarget(target));
+	  (static_cast<Hook2<bool, const char* ,int32_t>*>(Mineserver::get()->plugin()->getHook("gotAttacked")))->doAll(user->nick.c_str(),(int32_t)Mineserver::get()->mobs()->getMobByTarget(target));
 	  //make a callback
 	  break;
     }

@@ -169,8 +169,9 @@ struct mob_pointer_struct
   int (*getType)(int uid);
   bool (*getLook)(int uid, double* yaw, double* pitch);
   bool (*setLook)(int uid, double yaw, double pitch);
-  void (*animateMob)(int mobID, int animID);
-  void (*animateState)(int mobID, int animID);
+  void (*moveAnimal)(const char* userIn, int mobID);
+  void (*animateMob)(const char* userIn, int mobID, int animID);
+  void (*animateDamage)(const char* userIn, int mobID, int animID);
   void* temp[97];
 
 };

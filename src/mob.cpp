@@ -56,22 +56,40 @@ Mob::~Mob()
 
 //Can be 0 (no animation), 1 (swing arm), 2 (damage animation)
 //, 3 (leave bed), 104 (crouch), or 105 (uncrouch). Getting 102 somewhat often, too. 
-void Mob::animateMob(int animID) { 
+void Mob::animateMob(const char* userIn, int animID) { 
+	std::string user(userIn);
 	for (int i = 0; i < Mineserver::get()->users().size(); i++) {
 		User* user = Mineserver::get()->users()[i];
 		user->buffer << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID << (int8_t)animID;
 	}
 }
 //Possible values: 2 (entity hurt), 3 (entity dead?), 4, 5
-void Mob::animateState(int animID) { 
+void Mob::animateDamage(const char* userIn, int animID) { 
+	std::string user(userIn);
 	for (int i = 0; i < Mineserver::get()->users().size(); i++) {
 		User* user = Mineserver::get()->users()[i];
-		user->buffer << (int8_t)PACKET_DEATH_ANIMATION << (int32_t)UID << (int8_t)3;
+		user->buffer << (int8_t)PACKET_DEATH_ANIMATION << (int32_t)UID << (int8_t)animID;
 	}
 }
 
-void Mob::updateHealth(int health) { 
-	//animateState(4);
+void Mob::moveAnimal(const char* userIn) {
+	/*std::string user2(userIn);
+	User* user = User::byNick(user2);
+	float tempMult = 1.f - abs(user->pos.pitch / 25.f);
+		vec pos = vec(user->pos.x * 32, (user->pos.y + 1.5) * 32, user->pos.z * 32);
+		vec vel = vec(
+			sinf(-(user->pos.yaw / 360.f) * 2.f * M_PI) * tempMult * 32768.f,
+			-(user->pos.pitch / 90.f) * 32768.f,
+			cosf(-(user->pos.yaw / 360.f) * 2.f * M_PI) * tempMult * 32768.f
+			);
+		x=vel.x(); y=vel.y();z=vel.z();
+	x += vel.x()*0.01;
+	y += vel.y()*0.01;	
+	z += vel.z()*0.01;	
+	for (int i = 0; i < Mineserver::get()->users().size(); i++) {
+		User* user2 = Mineserver::get()->users()[i];
+	user2->buffer << (int8_t)PACKET_ENTITY_VELOCITY << (int32_t)UID << (int16_t)vel.x() << (int16_t)vel.y() << (int16_t)vel.z();
+	}*/
 }
 
 void Mob::spawnToAll()
