@@ -66,7 +66,7 @@ void Mob::sethealth(int health)
   }
   if (health < this->health)
   {
-    for (int i = 0; i < Mineserver::get()->users().size(); i++)
+    for (size_t i = 0; i < Mineserver::get()->users().size(); i++)
     {
       User* user = Mineserver::get()->users()[i];
       user->buffer << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID <<
@@ -105,7 +105,7 @@ void Mob::spawnToAll()
   {
     health = 10;
   }
-  for (int i = 0; i < Mineserver::get()->users().size(); i++)
+  for (size_t i = 0; i < Mineserver::get()->users().size(); i++)
   {
     User* user = Mineserver::get()->users()[i];
     if (user->logged)
@@ -128,7 +128,7 @@ void Mob::spawnToAll()
 
 void Mob::deSpawnToAll()
 {
-  for (int i = 0; i < Mineserver::get()->users().size(); i++)
+  for (size_t i = 0; i < Mineserver::get()->users().size(); i++)
   {
     User* user = Mineserver::get()->users()[i];
     if (user->logged)
@@ -150,7 +150,7 @@ void Mob::teleportToAll()
   {
     return;
   }
-  for (int i = 0; i < Mineserver::get()->users().size(); i++)
+  for (size_t i = 0; i < Mineserver::get()->users().size(); i++)
   {
     User* user = Mineserver::get()->users()[i];
     if (user->logged)
@@ -211,7 +211,7 @@ void Mob::look(int16_t yaw, int16_t pitch)
 }
 
 
-Mob* Mobs::getMobByID(int id)
+Mob* Mobs::getMobByID(size_t id)
 {
   if (m_moblist.size() < id || id < 0)
   {

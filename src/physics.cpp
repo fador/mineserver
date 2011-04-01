@@ -25,7 +25,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #ifdef WIN32
-#include <stdlib.h>
+#include <cstdlib>
 #include <conio.h>
 #include <winsock2.h>
 typedef  int socklen_t;
@@ -34,9 +34,9 @@ typedef  int socklen_t;
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
 #include <fcntl.h>
 #include <unistd.h>
 #endif

@@ -63,7 +63,7 @@ struct RegionFile {
 #include <vector>
 #include <string>
 #include <stdint.h>
-#include <time.h>
+#include <ctime>
 #include <iostream>
 
 #include "constants.h"

@@ -25,7 +25,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <vector>
 #include <string>
 #include <stdint.h>
@@ -70,7 +70,7 @@ public:
 class Mobs
 {
 public:
-  Mob* getMobByID(int id);
+  Mob* getMobByID(size_t id);
   int mobNametoType(std::string name);
   int getMobCount();
   std::vector<Mob*> getAll()

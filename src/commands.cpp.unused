@@ -32,12 +32,12 @@
 #include <fstream>
 #include <vector>
 #include <ctime>
-#include <math.h>
+#include <cmath>
 #ifdef WIN32
   #include <winsock2.h>
 #else
   #include <netinet/in.h>
-  #include <string.h>
+  #include <cstring>
 #endif
 
 #include "logger.h"

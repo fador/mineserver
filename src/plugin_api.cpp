@@ -28,7 +28,7 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <stdarg.h>
+#include <cstdarg>
 
 #include "sys/stat.h"
 

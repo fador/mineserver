@@ -30,7 +30,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <stdio.h>
+#include <cstdio>
 
 #ifndef WIN32
 #include <poll.h>

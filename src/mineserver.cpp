@@ -25,7 +25,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <sys/stat.h>
 #ifdef WIN32
@@ -37,7 +37,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <string.h>
+#include <cstring>
 #include <netdb.h>
 #include <unistd.h>
 #include <sys/times.h>

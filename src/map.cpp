@@ -34,7 +34,7 @@
 #include <netinet/in.h>
 #endif
 
-#include <string.h>
+#include <cstring>
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
