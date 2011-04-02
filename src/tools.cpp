@@ -87,7 +87,8 @@ void putDouble(uint8_t* buf, double value)
 double getDouble(uint8_t* buf)
 {
   double val;
-  uint64_t ival = *reinterpret_cast<const int64_t*>(buf);
+  uint64_t ival;
+  memcpy(&ival, buf, 8);
   ival = ntohll(ival);
   memcpy(&val, &ival, 8);
   return val;
@@ -104,7 +105,7 @@ float getFloat(uint8_t* buf)
 int64_t getSint64(uint8_t* buf)
 {
   int64_t val;
-  val = *reinterpret_cast<const int64_t*>(buf);
+  memcpy(&val, buf, 8);
   val = ntohll(val);
   return val;
 }
