@@ -63,7 +63,7 @@ struct RegionFile {
 #include <vector>
 #include <string>
 #include <stdint.h>
-#include <time.h>
+#include <ctime>
 #include <iostream>
 
 #include "constants.h"
@@ -152,12 +152,12 @@ bool RegionFile::openFile(std::string mapDir, int32_t chunkX, int32_t chunkZ)
   {
     int zeroInt = 0;
     //Offsets
-    for (int i = 0; i < SECTOR_INTS; i++)
+    for (unsigned int i = 0; i < SECTOR_INTS; i++)
     {
       fwrite(reinterpret_cast<const char*>(&zeroInt), 4, 1, regionFile);
     }
     //Timestamps
-    for (int i = 0; i < SECTOR_INTS; i++)
+    for (unsigned int i = 0; i < SECTOR_INTS; i++)
     {
       fwrite(reinterpret_cast<const char*>(&zeroInt), 4, 1, regionFile);
     }
@@ -450,10 +450,10 @@ bool isMapDir(std::string filename)
   std::string hexarray("0123456789abcdefghijklmnopqrstuvwxyz");
   if (filename.size() < 3)
   {
-    for (int ch = 0; ch < filename.size(); ch ++)
+    for (size_t ch = 0; ch < filename.size(); ch ++)
     {
       bool found = false;
-      for (int check = 0; check < hexarray.length(); check++)
+      for (size_t check = 0; check < hexarray.length(); check++)
       {
         if (filename[ch] == hexarray[check])
         {
@@ -499,14 +499,14 @@ bool convertMap(std::string mapDir)
   std::map<uint32_t, RegionFile*> fileMap;
 
   //Loop every folder and subfolder there is
-  for (int i = 0; i < files.size(); i++)
+  for (size_t i = 0; i < files.size(); i++)
   {
     if (isMapDir(files[i]))
     {
       std::string filename = mapDir + "/" + files[i];
       files2.clear();
       getdir(filename, files2);
-      for (int ii = 0; ii < files2.size(); ii++)
+      for (size_t ii = 0; ii < files2.size(); ii++)
       {
         if (isMapDir(files2[ii]))
         {
@@ -516,7 +516,7 @@ bool convertMap(std::string mapDir)
 
           //Here we finally get to the chunk files
           getdir(filename, files3);
-          for (int j = 0; j < files3.size(); j++)
+          for (size_t j = 0; j < files3.size(); j++)
           {
             if (files3[j].length() > 7 && files3[j].substr(files3[j].length() - 3) == "dat" && files3[j][0] == 'c')
             {

@@ -28,9 +28,8 @@
 #ifndef _MINESERVER_H
 #define _MINESERVER_H
 
-#include <iostream>
 #include <vector>
-#include <set>
+#include <string>
 
 #ifdef WIN32
 // This is needed for event to work on Windows.
@@ -94,6 +93,11 @@ public:
   event_base* getEventBase();
 
   std::vector<User*>& users()
+  {
+    return m_users;
+  }
+
+  const std::vector<User*>& users() const
   {
     return m_users;
   }

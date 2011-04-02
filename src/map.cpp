@@ -34,7 +34,7 @@
 #include <netinet/in.h>
 #endif
 
-#include <string.h>
+#include <cstring>
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
@@ -1583,7 +1583,7 @@ bool Map::sendMultiBlocks(std::vector<vec>* blocks)
     std::vector<vec> toRem;
     int chunk_x = blockToChunk((*blocks)[0].x());
     int chunk_z = blockToChunk((*blocks)[0].z());
-    for (int i = 0; i < blocks->size(); i++)
+    for (size_t i = 0; i < blocks->size(); i++)
     {
       int t_chunk_x = blockToChunk((*blocks)[i].x());
       int t_chunk_z = blockToChunk((*blocks)[i].z());
@@ -1604,7 +1604,7 @@ bool Map::sendMultiBlocks(std::vector<vec>* blocks)
     Packet packet, pC, pT, pM;
     int offsetx = chunk_x << 4, offsetz = chunk_z << 4;
     packet << (int8_t) PACKET_MULTI_BLOCK_CHANGE << (int32_t) chunk_x << (int32_t) chunk_z << (int16_t) toRem.size();
-    for (int i = 0; i < toRem.size(); i++)
+    for (size_t i = 0; i < toRem.size(); i++)
     {
       uint8_t block, meta;
       Mineserver::get()->map(m_number)->getBlock(toRem[i].x(), toRem[i].y(), toRem[i].z(), &block, &meta);

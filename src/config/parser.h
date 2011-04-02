@@ -34,7 +34,7 @@
 enum
 {
   MAX_FILESIZE = 1*1024*1024,   //!< maximum allowed file size
-  MAX_INCLUDES = 16,            //!< maximum allowed number of inclusions
+  MAX_INCLUDES = 16             //!< maximum allowed number of inclusions
 };
 
 class ConfigNode;

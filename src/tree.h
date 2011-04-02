@@ -54,15 +54,15 @@ public:
   {
     _y = y;
   }
-  virtual const int32_t getY(void)
+  virtual int32_t getY(void)
   {
     return _y;
   }
-  virtual const vec location(void)
+  virtual vec location(void)
   {
     return vec(_x, _y, _z);
   }
-  virtual const int type(void)
+  virtual int type(void)
   {
     return _type;
   }

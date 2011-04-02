@@ -531,10 +531,10 @@ PLUGIN_API_EXPORT void CALLCONVERSION cursesui_init(mineserver_pointer_struct* m
 
   screen = new CursesScreen();
   screen->init("1.2"); // TODO This should query mineserver for the version
-  mineserver->plugin.addCallback("LogPost", (void *)logPost);
-  mineserver->plugin.addCallback("Timer200", (void *)checkForCommand);
-  mineserver->plugin.addCallback("PlayerLoginPost", (void *)on_player_login);
-  mineserver->plugin.addCallback("PlayerQuitPost", (void *)on_player_quit);
+  mineserver->plugin.addCallback("LogPost", reinterpret_cast<voidF>(logPost));
+  mineserver->plugin.addCallback("Timer200", reinterpret_cast<voidF>(checkForCommand));
+  mineserver->plugin.addCallback("PlayerLoginPost", reinterpret_cast<voidF>(on_player_login));
+  mineserver->plugin.addCallback("PlayerQuitPost", reinterpret_cast<voidF>(on_player_quit));
 
   mineserver->logger.log(LogType::LOG_INFO, logSource, "Loaded " PLUGIN_NAME);
 }

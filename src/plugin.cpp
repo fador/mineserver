@@ -122,11 +122,13 @@ void Plugin::free()
     delete *it;
   }
 }
+typedef void (*pfms)(mineserver_pointer_struct*);
+typedef void (*pfv)();
 
 bool Plugin::loadPlugin(const std::string& name, const std::string& path, std::string alias)
 {
   LIBRARY_HANDLE lhandle = NULL;
-  void (*fhandle)(mineserver_pointer_struct*) = NULL;
+  pfms fhandle = NULL;
 
   if (name.empty()
       || (name.find('/')  != std::string::npos)
@@ -174,7 +176,7 @@ bool Plugin::loadPlugin(const std::string& name, const std::string& path, std::s
 
   m_libraryHandles[alias] = lhandle;
 
-  fhandle = (void (*)(mineserver_pointer_struct*)) LIBRARY_SYMBOL(lhandle, (name + "_init").c_str());
+  *reinterpret_cast<void**>(&fhandle) = LIBRARY_SYMBOL(lhandle, (name + "_init").c_str());
   if (fhandle == NULL)
   {
     LOG(INFO, "Plugin", "Could not get init function handle!");
@@ -189,7 +191,7 @@ bool Plugin::loadPlugin(const std::string& name, const std::string& path, std::s
 void Plugin::unloadPlugin(const std::string name)
 {
   LIBRARY_HANDLE lhandle = NULL;
-  void (*fhandle)(void) = NULL;
+  pfv fhandle = NULL;
 
   if (m_pluginVersions.find(name) != m_pluginVersions.end())
   {
@@ -205,7 +207,7 @@ void Plugin::unloadPlugin(const std::string name)
       lhandle = LIBRARY_SELF();
     }
 
-    fhandle = (void (*)(void)) LIBRARY_SYMBOL(lhandle, (name + "_shutdown").c_str());
+    *reinterpret_cast<void**>(&fhandle) = LIBRARY_SYMBOL(lhandle, (name + "_shutdown").c_str());
     if (fhandle == NULL)
     {
       LOG(INFO, "Plugin", "Could not get shutdown function handle!");

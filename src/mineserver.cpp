@@ -25,7 +25,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <sys/stat.h>
 #ifdef WIN32
@@ -37,7 +37,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <string.h>
+#include <cstring>
 #include <netdb.h>
 #include <unistd.h>
 #include <sys/times.h>
@@ -118,12 +118,10 @@ void pipehandler(int sig_num)
 
 std::string removeChar(std::string str, const char* c)
 {
-  std::string remove(c);
-  std::string replace("");
-  std::size_t loc = str.find(remove);
+  const size_t loc = str.find(c);
   if (loc != std::string::npos)
   {
-    return str.replace(loc, 1, replace);
+    return str.replace(loc, 1, "");
   }
   return str;
 }
@@ -154,15 +152,14 @@ int main(int argc, char* argv[])
   signal(SIGBREAK, sighandler);
 #endif
 
-  srand((uint32_t)time(NULL));
+  std::srand((uint32_t)std::time(NULL));
 
   std::string cfg;
   std::vector<std::string> overrides;
 
-  std::string arg;
   for (int i = 1; i < argc; i++)
   {
-    arg = std::string(argv[i]);
+    const std::string arg(argv[i]);
 
     switch (arg[0])
     {
@@ -193,7 +190,7 @@ int main(int argc, char* argv[])
 
 #ifdef DEBUG
   // using CONFIG_FILE in current directory is only for development purposes
-  std::string cfgcwd = std::string("./") + CONFIG_FILE;
+  const std::string cfgcwd = std::string("./") + CONFIG_FILE;
   struct stat st;
   if ((stat(cfgcwd.c_str(), &st) == 0)) // && S_ISREG(st.st_mode) )
   {
@@ -231,8 +228,8 @@ int main(int argc, char* argv[])
     }
   }
 
-  bool ret = false;
-  ret = Mineserver::get()->init();
+  bool ret = Mineserver::get()->init();
+
   if (!ret)
   {
     LOG2(ERROR, "Failed to start Mineserver!");
@@ -249,33 +246,28 @@ int main(int argc, char* argv[])
 
 
 Mineserver::Mineserver()
+  :  m_socketlisten  (0),
+     m_saveInterval  (0),
+     m_lastSave      (std::time(NULL)),
+     m_pvp_enabled   (false),
+     m_damage_enabled(false),
+     m_only_helmets  (false),
+     m_running       (false),
+     m_eventBase     (NULL),
+
+     // core modules
+     m_config        (new Config),
+     m_screen        (new CliScreen),
+     m_logger        (new Logger),
+
+     m_plugin        (NULL),
+     m_chat          (NULL),
+     m_furnaceManager(NULL),
+     m_packetHandler (NULL),
+     m_inventory     (NULL),
+     m_mobs          (NULL)
 {
   memset(&m_listenEvent, 0, sizeof(event));
-  m_socketlisten = 0;
-
-  m_saveInterval = 0;
-  m_lastSave     = time(NULL);
-
-  m_pvp_enabled    = false;
-  m_damage_enabled = false;
-  m_only_helmets   = false;
-
-  m_running = false;
-
-  m_eventBase = NULL;
-
-  // core modules
-  m_config = new Config;
-  m_screen = new CliScreen;
-  m_logger = new Logger;
-
-  m_plugin         = NULL;
-  m_chat           = NULL;
-  m_furnaceManager = NULL;
-  m_packetHandler  = NULL;
-  m_inventory      = NULL;
-  m_mobs           = NULL;
-
   initConstants();
 }
 
@@ -300,7 +292,7 @@ bool Mineserver::init()
     "system.path.home",
     "system.pid_file",
   };
-  for (uint32_t i = 0; i < sizeof(vars) / sizeof(vars[0]); i++)
+  for (size_t i = 0; i < sizeof(vars) / sizeof(vars[0]); i++)
   {
     ConfigNode* node = config()->mData(vars[i]);
     if (!node)

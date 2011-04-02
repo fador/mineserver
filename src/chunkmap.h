@@ -32,7 +32,7 @@
 #include <list>
 #include <vector>
 #include <iostream>
-#include <time.h>
+#include <ctime>
 
 #include "packets.h"
 #include "user.h"

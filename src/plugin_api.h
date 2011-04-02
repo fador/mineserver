@@ -52,6 +52,8 @@
 #define CALLCONVERSION
 #endif
 
+typedef void (*voidF)(); // voidF is a "void"-like function pointer
+
 struct plugin_pointer_struct
 {
   bool (*hasPluginVersion)(const char* name);
@@ -74,10 +76,10 @@ struct plugin_pointer_struct
 #endif
   void (*remHook)(const char* hookID);
 
-  bool (*hasCallback)(const char* hookID, void* function);
-  void (*addCallback)(const char* hookID, void* function);
-  void (*addIdentifiedCallback)(const char* hookID, void* identifier, void* function);
-  void (*remCallback)(const char* hookID, void* function);
+  bool (*hasCallback)(const char* hookID, voidF function);
+  void (*addCallback)(const char* hookID, voidF function);
+  void (*addIdentifiedCallback)(const char* hookID, void* identifier, voidF function);
+  void (*remCallback)(const char* hookID, voidF function);
   bool (*doUntilTrue)(const char* hookID, ...);
   bool (*doUntilFalse)(const char* hookID, ...);
   void (*doAll)(const char* hookID, ...);

@@ -31,7 +31,7 @@ g++ -shared flatpermissions.o -o flatpermissions.so
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <string>
 #include <algorithm>
 #include <iostream>
@@ -106,5 +106,5 @@ PLUGIN_API_EXPORT void CALLCONVERSION flatpermissions_init(mineserver_pointer_st
   mineserver->logger.log(6, "plugin.flatpermissions", msg.c_str());
 
   mineserver->plugin.setPluginVersion(pluginName.c_str(), PLUGIN_VERSION);
-  mineserver->plugin.addCallback("PlayerLoginPost", (void*)loginPost);
+  mineserver->plugin.addCallback("PlayerLoginPost", reinterpret_cast<voidF>(loginPost));
 }

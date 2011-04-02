@@ -107,7 +107,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION crapMobs_init(mineserver_pointer_struct* m
 
   mineserver->plugin.setPluginVersion(pluginName.c_str(), PLUGIN_CRAPMOBS_VERSION);
 
-  mineserver->plugin.addCallback("Timer200", (void *)timer200Function);
+  mineserver->plugin.addCallback("Timer200", reinterpret_cast<voidF>(timer200Function));
   myPetGiant = mineserver->mob.spawnMobN("Giant");
   mineserver->mob.spawnMob(myPetGiant);
   mineserver->mob.moveMob(myPetGiant,0,0,0);

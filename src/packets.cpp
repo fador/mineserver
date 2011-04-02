@@ -25,7 +25,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <sys/types.h>
 #ifdef WIN32
 #include <conio.h>
@@ -34,7 +34,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <string.h>
+#include <cstring>
 #include <netdb.h>
 #include <netinet/tcp.h>
 #endif
@@ -1322,7 +1322,7 @@ int PacketHandler::use_entity(User* user)
       }
     }
   }
-  for (uint32_t i = 0; i < Mineserver::get()->mobs()->getMobCount(); i++)
+  for (size_t i = 0; i < Mineserver::get()->mobs()->getMobCount(); i++)
   {
     if (Mineserver::get()->mobs()->getMobByID(i)->UID == (uint32_t)target)
     {

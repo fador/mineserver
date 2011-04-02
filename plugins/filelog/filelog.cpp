@@ -152,7 +152,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION filelog_init(mineserver_pointer_struct* mi
     const char *filename = filelog_config_string("filelog.server.filename", FILENAME_LOG);
     char *message = (char *)malloc(strlen(filename) + 12); 
 
-    mineserver->plugin.addCallback("LogPost", (void *)logPost);
+    mineserver->plugin.addCallback("LogPost", reinterpret_cast<voidF>(logPost));
     logFile = fopen(filename, "a");   
     sprintf(message, "Logging to %s", filename);
     mineserver->logger.log(LOG_INFO, logSource, message);
@@ -169,7 +169,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION filelog_init(mineserver_pointer_struct* mi
     const char *filename = filelog_config_string("filelog.chat.filename", FILENAME_CHAT);
     char *message = (char *)malloc(strlen(filename) + 17); 
 
-    mineserver->plugin.addCallback("PlayerChatPost", (void *)chatPost);
+    mineserver->plugin.addCallback("PlayerChatPost", reinterpret_cast<voidF>(chatPost));
     chatFile = fopen(filename, "a");    
     sprintf(message, "Logging chat to %s", filename);
     mineserver->logger.log(LOG_INFO, logSource, message);

@@ -38,7 +38,7 @@
 #include <sstream>
 #include <vector>
 #include <string>
-#include <string.h>
+#include <cstring>
 #include <cstdio>
 #include <ctime>
 #include <cmath>

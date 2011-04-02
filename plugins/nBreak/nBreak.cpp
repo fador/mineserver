@@ -145,7 +145,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION nBreak_init(mineserver_pointer_struct* min
 
   mineserver->plugin.setPluginVersion(pluginName.c_str(), PLUGIN_NBREAK_VERSION);
 
-  mineserver->plugin.addCallback("BlockBreakPre", (void *)blockBreakPreFunction);
+  mineserver->plugin.addCallback("BlockBreakPre", reinterpret_cast<voidF>(blockBreakPreFunction));
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION command_shutdown(void)

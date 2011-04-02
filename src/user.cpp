@@ -33,7 +33,7 @@
 #include <fstream>
 #include <sstream>
 #include <map>
-#include <math.h>
+#include <cmath>
 
 #include <sys/stat.h>
 #ifdef WIN32
@@ -41,7 +41,7 @@
 #include <direct.h>
 #else
 #include <netinet/in.h>
-#include <string.h>
+#include <cstring>
 #endif
 #include <zlib.h>
 #include <ctime>
