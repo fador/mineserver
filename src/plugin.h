@@ -165,10 +165,10 @@ public:
 
 
 private:
-  std::map<const std::string, Hook*> m_hooks;
-  std::map<const std::string, LIBRARY_HANDLE> m_libraryHandles;
-  std::map<const std::string, void*> m_pointers;
-  std::map<const std::string, float> m_pluginVersions;
+  std::map<std::string, Hook*> m_hooks;
+  std::map<std::string, LIBRARY_HANDLE> m_libraryHandles;
+  std::map<std::string, void*> m_pointers;
+  std::map<std::string, float> m_pluginVersions;
 
   std::vector<BlockBasic*> BlockCB;
   std::vector<ItemBasic*> ItemCB;

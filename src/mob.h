@@ -45,7 +45,7 @@ public:
   uint32_t UID;
   int8_t type;
   double x, y, z;
-  int map;
+  size_t map;
   int8_t yaw, pitch;
   int8_t meta;
   bool spawned;

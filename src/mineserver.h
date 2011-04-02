@@ -92,12 +92,12 @@ public:
 
   event_base* getEventBase();
 
-  std::vector<User*>& users()
+  inline std::vector<User*>& users()
   {
     return m_users;
   }
 
-  const std::vector<User*>& users() const
+  inline const std::vector<User*>& users() const
   {
     return m_users;
   }
@@ -112,77 +112,88 @@ public:
   bool m_damage_enabled;
   bool m_only_helmets;
 
-  Map* map(int n);
-  void setMap(Map* map, int n = 0);
-  int mapCount();
-
-  Chat* chat() const
+  Map* map(size_t n) const;
+  inline void setMap(Map* map, size_t n = 0)
+  {
+    m_map[n] = map;
+  }
+  inline size_t mapCount()
+  {
+    return m_map.size();
+  }
+  inline Chat* chat() const
   {
     return m_chat;
   }
-  void setChat(Chat* chat)
+  inline void setChat(Chat* chat)
   {
     m_chat = chat;
   }
-  Mobs* mobs() const
+  inline Mobs* mobs() const
   {
     return m_mobs;
   }
-  Plugin* plugin() const
+  inline Plugin* plugin() const
   {
     return m_plugin;
   }
-  void setPlugin(Plugin* plugin)
+  inline void setPlugin(Plugin* plugin)
   {
     m_plugin = plugin;
   }
-  Screen* screen() const
+  inline Screen* screen() const
   {
     return m_screen;
   }
-  void setScreen(Screen* screen)
+  inline void setScreen(Screen* screen)
   {
     m_screen = screen;
   }
-  Physics* physics(int n);
-  Config* config() const
+  inline Physics* physics(size_t n) const
+  {
+    return m_physics[n];
+  }
+  inline Config* config() const
   {
     return m_config;
   }
-  void setConfig(Config* config)
+  inline void setConfig(Config* config)
   {
     m_config = config;
   }
-  FurnaceManager* furnaceManager() const
+  inline FurnaceManager* furnaceManager() const
   {
     return m_furnaceManager;
   }
-  void setFurnaceManager(FurnaceManager* furnaceManager)
+  inline void setFurnaceManager(FurnaceManager* furnaceManager)
   {
     m_furnaceManager = furnaceManager;
   }
-  PacketHandler* packetHandler() const
+  inline PacketHandler* packetHandler() const
   {
     return m_packetHandler;
   }
-  void setPacketHandler(PacketHandler* packetHandler)
+  inline void setPacketHandler(PacketHandler* packetHandler)
   {
     m_packetHandler = packetHandler;
   }
-  MapGen* mapGen(int n);
-  Logger* logger() const
+  inline MapGen* mapGen(size_t n) const
+  {
+    return m_mapGen[n];
+  }
+  inline Logger* logger() const
   {
     return m_logger;
   }
-  void setLogger(Logger* logger)
+  inline void setLogger(Logger* logger)
   {
     m_logger = logger;
   }
-  Inventory* inventory() const
+  inline Inventory* inventory() const
   {
     return m_inventory;
   }
-  void setInventory(Inventory* inventory)
+  inline void setInventory(Inventory* inventory)
   {
     m_inventory = m_inventory;
   }

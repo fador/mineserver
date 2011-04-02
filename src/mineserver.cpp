@@ -126,6 +126,7 @@ std::string removeChar(std::string str, const char* c)
   return str;
 }
 
+// What is the purpose of "code"? -- louisdx
 int printHelp(int code)
 {
   std::cout
@@ -308,7 +309,7 @@ bool Mineserver::init()
       continue;
     }
 
-    std::string newvalue = pathExpandUser(node->sData());
+    const std::string newvalue = pathExpandUser(node->sData());
     node->setData(newvalue);
     LOG2(INFO, std::string(vars[i]) + " = \"" + newvalue + "\"");
   }
@@ -317,7 +318,7 @@ bool Mineserver::init()
     return false;
   }
 
-  std::string str = config()->sData("system.path.home");
+  const std::string str = config()->sData("system.path.home");
 #ifdef WIN32
   if (_chdir(str.c_str()) != 0)
 #else
@@ -376,9 +377,8 @@ bool Mineserver::init()
   if (m_config->has(key) && (m_config->type(key) == CONFIG_NODE_LIST))
   {
     std::list<std::string>* tmp = m_config->mData(key)->keys();
-    std::list<std::string>::iterator it = tmp->begin();
     int n = 0;
-    for (; it != tmp->end(); ++it)
+    for (std::list<std::string>::const_iterator it = tmp->begin(); it != tmp->end(); ++it)
     {
       m_map.push_back(new Map());
       Physics* phy = new Physics;
@@ -391,6 +391,7 @@ bool Mineserver::init()
         s << "Error! Mapgen number " << k << " in config. " << m_mapGenNames.size() << " Mapgens known";
         LOG2(INFO, s.str());
       }
+      // WARNING: if k is too big this will be an access error! -- louisdx
       MapGen* m = m_mapGenNames[k];
       m_mapGen.push_back(m);
       n++;
@@ -500,8 +501,7 @@ bool Mineserver::run()
   if (config()->has("system.plugins") && (config()->type("system.plugins") == CONFIG_NODE_LIST))
   {
     std::list<std::string>* tmp = config()->mData("system.plugins")->keys();
-    std::list<std::string>::iterator it = tmp->begin();
-    for (; it != tmp->end(); ++it)
+    for (std::list<std::string>::iterator it = tmp->begin(); it != tmp->end(); ++it)
     {
       std::string path  = config()->sData("system.path.plugins");
       std::string name  = config()->sData("system.plugins." + (*it));
@@ -541,17 +541,14 @@ bool Mineserver::run()
 
       for (int x = -size; x <= size; x++)
       {
+        if (show_progress)
+        {
 #ifdef WIN32
-        if (show_progress)
-        {
           t_begin = timeGetTime();
-        }
 #else
-        if (show_progress)
-        {
           t_begin = clock();
-        }
 #endif
+        }
         for (int z = -size; z <= size; z++)
         {
           m_map[i]->loadMap(x, z);
@@ -578,10 +575,10 @@ bool Mineserver::run()
   packetHandler()->init();
 
   // Load ip from config
-  std::string ip = config()->sData("net.ip");
+  const std::string ip = config()->sData("net.ip");
 
   // Load port from config
-  int port = config()->iData("net.port");
+  const int port = config()->iData("net.port");
 
 #ifdef WIN32
   WSADATA wsaData;
@@ -598,7 +595,7 @@ bool Mineserver::run()
   struct sockaddr_in addresslisten;
   int reuse = 1;
 
-  m_eventBase = (event_base*)event_init();
+  m_eventBase = reinterpret_cast<event_base*>(event_init());
 #ifdef WIN32
   m_socketlisten = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 #else
@@ -646,14 +643,13 @@ bool Mineserver::run()
     int ipIndex = 0;
     while (hostinfo && hostinfo->h_addr_list[ipIndex])
     {
-      std::string ip(inet_ntoa(*(struct in_addr*)hostinfo->h_addr_list[ipIndex++]));
+      const std::string ip(inet_ntoa(*(struct in_addr*)hostinfo->h_addr_list[ipIndex++]));
       LOG2(INFO, ip + ":" + dtos(port));
     }
   }
   else
   {
-    std::string myip(ip);
-    LOG2(INFO, myip + ":" + dtos(port));
+    LOG2(INFO, ip + ":" + dtos(port));
   }
 
   timeval loopTime;
@@ -674,7 +670,7 @@ bool Mineserver::run()
     static_cast<Hook0<bool>*>(plugin()->getHook("Timer200"))->doAll();
     // Alert any block types that care about timers
     BlockBasic* blockcb;
-    for (uint32_t i = 0 ; i < plugin()->getBlockCB().size(); i++)
+    for (size_t i = 0 ; i < plugin()->getBlockCB().size(); i++)
     {
       blockcb = plugin()->getBlockCB()[i];
       if (blockcb != NULL)
@@ -708,7 +704,7 @@ bool Mineserver::run()
       }
 
       // If users, ping them
-      if (User::all().size() > 0)
+      if (!User::all().empty())
       {
         // Send server time
         Packet pkt;
@@ -733,7 +729,7 @@ bool Mineserver::run()
     {
       tick = (uint32_t)timeNow;
       // Loop users
-      for (int i = users().size() - 1; i >= 0; i--)
+      for (int i = int(users().size()) - 1; i >= 0; i--)
       {
         // No data received in 30s, timeout
         if (users()[i]->logged && (timeNow - users()[i]->lastData) > 30)
@@ -768,7 +764,7 @@ bool Mineserver::run()
       }
 
 
-      for (int i = users().size() - 1; i >= 0; i--)
+      for (int i = int(users().size()) - 1; i >= 0; i--)
       {
         users()[i]->pushMap();
         users()[i]->popMap();
@@ -783,14 +779,13 @@ bool Mineserver::run()
 
     // Underwater check / drowning
     // ToDo: this could be done a bit differently? - Fador
-    int i = 0;
-    int s = User::all().size();
-    for (i = 0; i < s; i++)
+    // -- User::all() == users() - louisdx
+    for (size_t i = 0; i < users().size(); ++i)
     {
-      User::all()[i]->isUnderwater();
-      if (User::all()[i]->pos.y < 0)
+      users()[i]->isUnderwater();
+      if (users()[i]->pos.y < 0)
       {
-        User::all()[i]->sethealth(User::all()[i]->health - 5);
+        users()[i]->sethealth(users()[i]->health - 5);
       }
     }
   }
@@ -814,7 +809,6 @@ bool Mineserver::stop()
   return true;
 }
 
-
 bool Mineserver::homePrepare(const std::string& path)
 {
   struct stat st;
@@ -827,7 +821,7 @@ bool Mineserver::homePrepare(const std::string& path)
     if (mkdir(path.c_str(), 0755) == -1)
 #endif
     {
-      LOG2(ERROR, std::string(path + ": " + std::string(strerror(errno))));
+      LOG2(ERROR, path + ": " + strerror(errno));
       return false;
     }
   }
@@ -846,11 +840,11 @@ bool Mineserver::homePrepare(const std::string& path)
     "rules.txt",
     "whitelist.txt",
   };
-  for (uint32_t i = 0; i < sizeof(files) / sizeof(files[0]); i++)
+  for (size_t i = 0; i < sizeof(files) / sizeof(files[0]); i++)
   {
     // TODO: winex: hardcoded path won't work on installation
-    std::string namein  = std::string("../files") + '/' + files[i];
-    std::string nameout = path + '/' + files[i];
+    const std::string namein  = std::string("../files") + '/' + files[i];
+    const std::string nameout = path + '/' + files[i];
 
     // don't overwrite existing files
     if ((stat(nameout.c_str(), &st) == 0)) // && S_ISREG(st.st_mode) )
@@ -879,32 +873,12 @@ bool Mineserver::homePrepare(const std::string& path)
   return true;
 }
 
-Physics* Mineserver::physics(int n)
+Map* Mineserver::map(size_t n) const
 {
-  return m_physics[n];
-}
-
-MapGen* Mineserver::mapGen(int n)
-{
-  return m_mapGen[n];
-}
-
-Map* Mineserver::map(int n)
-{
-  if (m_map.size() > (uint32_t)n)
+  if (n < m_map.size())
   {
     return m_map[n];
   }
   LOG2(WARNING, "Nonexistent map requested. Map 0 passed");
   return m_map[0];
-}
-
-int Mineserver::mapCount()
-{
-  return m_map.size();
-}
-
-void Mineserver::setMap(Map* map, int n)
-{
-  m_map[n] = map;
 }
