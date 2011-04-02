@@ -74,7 +74,19 @@ BlockPlant::BlockPlant()
 
 void BlockPlant::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-
+  // get block info
+  uint8_t block, meta;
+  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
+  // make sure blocks are flower/mushroom
+  if (block == BLOCK_RED_ROSE || block == BLOCK_YELLOW_FLOWER || block == BLOCK_BROWN_MUSHROOM || block == BLOCK_RED_MUSHROOM)
+  {
+   // break flower/mushroom block
+   Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+   Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+   // spawn corresponding item
+   this->spawnBlockItem(x, y, z, map, block, 0);
+   return;
+  }
 }
 
 void BlockPlant::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
