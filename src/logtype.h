@@ -52,7 +52,7 @@ enum LogType
   LOG_COUNT
 };
 #ifndef MINESERVER_C_API
-};
+}
 #endif
 
 #endif

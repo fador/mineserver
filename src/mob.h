@@ -70,9 +70,9 @@ public:
 class Mobs
 {
 public:
-  Mob* getMobByID(size_t id);
+  Mob* getMobByID(int id);
   int mobNametoType(std::string name);
-  int getMobCount();
+  size_t getMobCount();
   std::vector<Mob*> getAll()
   {
     return m_moblist;

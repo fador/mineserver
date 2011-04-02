@@ -268,11 +268,11 @@ bool Physics::update()
       toRem.push_back(pos);
     }
   }
-  for (int i = toRem.size() - 1; i >= 0; i--)
+  for (int i = int(toRem.size()) - 1; i >= 0; i--)
   {
     removeSimulation(toRem[i]);
   }
-  for (int i = 0; i < toAdd.size(); i++)
+  for (size_t i = 0; i < toAdd.size(); i++)
   {
     addSimulation(toAdd[i]);
   }

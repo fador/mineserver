@@ -36,7 +36,12 @@
 struct Decay
 {
   Decay(time_t decayStart, int32_t x, uint8_t y, int32_t z, int map)
-    : decayStart(decayStart), x(x), y(y), z(z), map(map) {}
+    : decayStart(decayStart),
+      x(x),
+      z(z),
+      y(y),
+      map(map)
+  {}
   time_t decayStart;
   int32_t x, z;
   int y, map;

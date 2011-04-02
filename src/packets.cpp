@@ -1322,7 +1322,7 @@ int PacketHandler::use_entity(User* user)
       }
     }
   }
-  for (uint32_t i = 0; i < Mineserver::get()->mobs()->getMobCount(); i++)
+  for (size_t i = 0; i < Mineserver::get()->mobs()->getMobCount(); i++)
   {
     if (Mineserver::get()->mobs()->getMobByID(i)->UID == (uint32_t)target)
     {

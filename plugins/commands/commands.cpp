@@ -72,11 +72,16 @@ typedef void (*CommandCallback)(std::string nick, std::string, std::deque<std::s
 
 struct Command
 {
-  CommandCallback callback;  
-  Command(std::deque<std::string> _names, std::string _arguments, std::string _description, CommandCallback _callback) : names(_names),arguments(_arguments),description(_description),callback(_callback) {}
+  Command(std::deque<std::string> _names, std::string _arguments, std::string _description, CommandCallback _callback)
+    : names(_names),
+      arguments(_arguments),
+      description(_description),
+      callback(_callback)
+  {}
   std::deque<std::string> names;
   std::string arguments;
   std::string description;
+  CommandCallback callback;  
 };
 
 typedef std::map<std::string, Command*> CommandList;
@@ -758,10 +763,10 @@ PLUGIN_API_EXPORT void CALLCONVERSION commands_init(mineserver_pointer_struct* m
 
   mineserver->plugin.setPluginVersion(pluginName.c_str(), PLUGIN_COMMANDS_VERSION);
 
-  mineserver->plugin.addCallback("PlayerChatCommand", (void *)chatCommandFunction);
-  mineserver->plugin.addCallback("BlockPlacePre", (void *)blockPlacePreFunction);
+  mineserver->plugin.addCallback("PlayerChatCommand", reinterpret_cast<voidF>(chatCommandFunction));
+  mineserver->plugin.addCallback("BlockPlacePre", reinterpret_cast<voidF>(blockPlacePreFunction));
 
-  mineserver->plugin.addCallback("PlayerDiggingStarted", (void *)startedDiggingFunction);
+  mineserver->plugin.addCallback("PlayerDiggingStarted", reinterpret_cast<voidF>(startedDiggingFunction));
   
 
 

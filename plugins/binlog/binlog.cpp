@@ -33,13 +33,12 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <string.h>
-#include <time.h>
+#include <cstring>
+#include <ctime>
 #include <vector>
 
 #include "../../src/plugin_api.h"
 #include "binlog.h"
-                                     
 
 Binlog::Binlog (std::string filename) 
 {
@@ -310,10 +309,10 @@ PLUGIN_API_EXPORT void CALLCONVERSION binlog_init(mineserver_pointer_struct* min
   mineserver->plugin.setPluginVersion("binlog", PLUGIN_VERSION);
   if(enabled) 
   {
-    mineserver->plugin.addCallback("BlockPlacePre", (void *) callbackBlockPlacePre);
-    mineserver->plugin.addCallback("BlockBreakPre", (void *) callbackBlockBreakPre);
+    mineserver->plugin.addCallback("BlockPlacePre", reinterpret_cast<voidF>(callbackBlockPlacePre));
+    mineserver->plugin.addCallback("BlockBreakPre", reinterpret_cast<voidF>(callbackBlockBreakPre));
   }
-  mineserver->plugin.addCallback("PlayerChatCommand", (void *) callbackPlayerChatCommand);
+  mineserver->plugin.addCallback("PlayerChatCommand", reinterpret_cast<voidF>(callbackPlayerChatCommand));
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION binlog_shutdown(void)

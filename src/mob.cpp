@@ -211,9 +211,9 @@ void Mob::look(int16_t yaw, int16_t pitch)
 }
 
 
-Mob* Mobs::getMobByID(size_t id)
+Mob* Mobs::getMobByID(int id)
 {
-  if (m_moblist.size() < id || id < 0)
+  if (int(m_moblist.size()) <= id || id < 0)
   {
     return NULL;
   }
@@ -282,7 +282,7 @@ int Mobs::mobNametoType(std::string name)
   return NULL;
 }
 
-int Mobs::getMobCount()
+size_t Mobs::getMobCount()
 {
   return m_moblist.size();
 }

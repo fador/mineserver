@@ -25,7 +25,6 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <stdlib.h>
 #include <string>
 #include <deque>
 #include <ctime>
@@ -36,7 +35,7 @@
 #include <iostream>
 #include <ctime>
 #include <stdint.h>
-#include <math.h>
+#include <cmath>
 
 #define MINESERVER_C_API
 #include "../../src/plugin_api.h"
@@ -72,7 +71,7 @@ class MyPetMob{
 };
 std::vector<MyPetMob*> MyMobs;
 
-int maxMobs = 20; // Maximum ammount of mobs allowed
+const unsigned int maxMobs = 20; // Maximum ammount of mobs allowed
 time_t lastSpawn = time(NULL);
 
 int topBlockSuitable(int x, int z, int w){
@@ -252,7 +251,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION passiveMobs_init(mineserver_pointer_struct
     sin_lt[i] = sin(((double)(i/10)*PI/180));
     cos_lt[i] = cos(((double)(i/10)*PI/180));
   }
-  mineserver->plugin.addCallback("Timer200", (void *)timer200Function);
+  mineserver->plugin.addCallback("Timer200", reinterpret_cast<voidF>(timer200Function));
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION passiveMobs_shutdown(void)

@@ -146,22 +146,22 @@ void plugin_remHook(const char* hookID)
   Mineserver::get()->plugin()->remHook(hookID);
 }
 
-bool hook_hasCallback(const char* hookID, void* function)
+bool hook_hasCallback(const char* hookID, voidF function)
 {
   return Mineserver::get()->plugin()->getHook(hookID)->hasCallback(function);
 }
 
-void hook_addCallback(const char* hookID, void* function)
+void hook_addCallback(const char* hookID, voidF function)
 {
   Mineserver::get()->plugin()->getHook(hookID)->addCallback(function);
 }
 
-void hook_addIdentifiedCallback(const char* hookID, void* identifier, void* function)
+void hook_addIdentifiedCallback(const char* hookID, void* identifier, voidF function)
 {
   Mineserver::get()->plugin()->getHook(hookID)->addIdentifiedCallback(identifier, function);
 }
 
-void hook_remCallback(const char* hookID, void* function)
+void hook_remCallback(const char* hookID, voidF function)
 {
   Mineserver::get()->plugin()->getHook(hookID)->remCallback(function);
 }

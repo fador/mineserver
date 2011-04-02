@@ -47,9 +47,9 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 # Set compiler specific build flags
 IF (UNIX)
-  set(CMAKE_CXX_FLAGS "-msse -Wunused -Wall")
+  set(CMAKE_CXX_FLAGS "-march=native -W -Wall -Wno-unused -pedantic")
   set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g")
-  set(CMAKE_CXX_FLAGS_RELEASE "-O2 -s")
+  set(CMAKE_CXX_FLAGS_RELEASE "-O2 -s -DNDEBUG")
 ENDIF()
 
 

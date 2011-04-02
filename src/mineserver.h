@@ -97,6 +97,11 @@ public:
     return m_users;
   }
 
+  const std::vector<User*>& users() const
+  {
+    return m_users;
+  }
+
   struct event m_listenEvent;
   int m_socketlisten;
 

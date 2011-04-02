@@ -31,7 +31,6 @@ copy nether.so to Mineserver bin directory.
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <stdlib.h>
 #include <string>
 #include <deque>
 #include <ctime>
@@ -41,7 +40,7 @@ copy nether.so to Mineserver bin directory.
 #include <vector>
 #include <iostream>
 #include <stdint.h>
-#include <math.h>
+#include <cmath>
 
 #define MINESERVER_C_API
 #include "../../src/plugin_api.h"
@@ -94,14 +93,14 @@ int getBlock(const char* name,int x,int y,int z)
 }
 
 void addToDo(const char* user, int x, int y, int z){
-  for(int i = 0;i<blockToDo.size();i++){
+  for(size_t i = 0;i<blockToDo.size();i++){
     block* c=blockToDo[i];
     if(x==c->x && y==c->y && z==c->z)
     {
       return;
     }
   }
-  for(int i = 0;i<blockDone.size();i++){
+  for(size_t i = 0;i<blockDone.size();i++){
     block* c=blockDone[i];
     if(x==c->x && y==c->y && z==c->z)
     {
@@ -194,7 +193,7 @@ void doPortal(const char* user,int x,int y, int z)
     blockToDo.erase(blockToDo.begin());
     cz ++;
   }
-  for(int i = 0; i < blockDone.size(); i++)
+  for(size_t i = 0; i < blockDone.size(); i++)
   {
     delete blockDone[i];
   }
@@ -266,8 +265,8 @@ PLUGIN_API_EXPORT void CALLCONVERSION nether_init(mineserver_pointer_struct* min
 
   mineserver->plugin.setPluginVersion(pluginName.c_str(), PLUGIN_NETHER_VERSION);
 
-  mineserver->plugin.addCallback("Timer200", (void *)timer200Function);
-  mineserver->plugin.addCallback("BlockPlacePre", (void *)blockPlacePreFunction);
+  mineserver->plugin.addCallback("Timer200", reinterpret_cast<voidF>(timer200Function));
+  mineserver->plugin.addCallback("BlockPlacePre", reinterpret_cast<voidF>(blockPlacePreFunction));
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION command_shutdown(void)
