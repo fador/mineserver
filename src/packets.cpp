@@ -1470,7 +1470,7 @@ Packet& Packet::operator>>(std::string& str)
     lenval = ntohs(*reinterpret_cast<const int16_t*>(&m_readBuffer[m_readPos]));
     m_readPos += 2;
 
-    if (haveData(lenval))
+    if (lenval && haveData(lenval))
     {
       str.assign((char*)&m_readBuffer[m_readPos], lenval);
       m_readPos += lenval;
