@@ -213,6 +213,12 @@
     <ClCompile Include="..\src\blocks\pumpkin.cpp">
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\blocks\bed.cpp">
+      <Filter>Source Files\blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\blocks\step.cpp">
+      <Filter>Source Files\blocks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\user.h">
@@ -402,6 +408,12 @@
       <Filter>Header Files\blocks</Filter>
     </ClInclude>
     <ClInclude Include="..\src\blocks\pumpkin.h">
+      <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\bed.h">
+      <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\step.h">
       <Filter>Header Files\blocks</Filter>
     </ClInclude>
   </ItemGroup>
