@@ -59,6 +59,8 @@
 #include "blocks/dyed.h"
 #include "blocks/redstone.h"
 #include "blocks/pumpkin.h"
+#include "blocks/step.h"
+#include "blocks/bed.h"
 
 #include "items/food.h"
 #include "items/projectile.h"
@@ -106,6 +108,10 @@ void Plugin::init()
   BlockCB.push_back(workbenchblock);
   BlockPumpkin* pumpkinblock = new BlockPumpkin();
   BlockCB.push_back(pumpkinblock);
+  BlockStep* stepblock = new BlockStep();
+  BlockCB.push_back(stepblock);
+  BlockBed* bedblock = new BlockBed();
+  BlockCB.push_back(bedblock);
   BlockDefault* defaultblock = new BlockDefault();
   BlockCB.push_back(defaultblock);
 

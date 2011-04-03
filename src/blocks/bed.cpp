@@ -1,6 +1,6 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
-   All rights reserved.
+  Copyright (c) 2011, The Mineserver Project
+  All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -23,59 +23,56 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
 #include "../mineserver.h"
 #include "../map.h"
 
-#include "pumpkin.h"
+#include "bed.h"
 
-bool BlockPumpkin::affectedBlock(int block)
+
+bool BlockBed::affectedBlock(int block)
 {
   switch (block)
   {
-  case BLOCK_PUMPKIN:
+  case BLOCK_BED:
+  case ITEM_BED:
     return true;
   }
   return false;
 }
 
 
-void BlockPumpkin::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockBed::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-void BlockPumpkin::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockBed::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-void BlockPumpkin::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockBed::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-bool BlockPumpkin::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockBed::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-  uint8_t block, meta;
-  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
-
-  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-
-  this->spawnBlockItem(x, y, z, map, block, 0);
   return false;
 }
 
-void BlockPumpkin::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockBed::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
+
 }
 
-bool BlockPumpkin::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockBed::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t oldblock;
   uint8_t oldmeta;
+  int zMod = 0, xMod = 0;
 
   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
@@ -109,34 +106,58 @@ bool BlockPumpkin::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
     return true;
   }
 
+  // checking for an item rather then a block
+  if (newblock == ITEM_BED)
+  {
+    newblock = BLOCK_BED;
+  }
+
   direction = user->relativeToBlock(x, y, z);
 
   switch (direction)
   {
   case BLOCK_EAST:
     direction = BLOCK_SOUTH;
+	zMod = -1;
+	xMod = 0;
     break;
   case BLOCK_BOTTOM:
     direction = BLOCK_EAST;
+	zMod = 0;
+	xMod = +1;
     break;
   case BLOCK_NORTH:
     direction = BLOCK_NORTH;
+	zMod = 0;
+	xMod = -1;
     break;
   case BLOCK_SOUTH:
     direction = BLOCK_BOTTOM;
+	zMod = +1;
+	xMod = 0;
     break;
   }
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, newblock, direction);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, newblock, direction);
+  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
 
+  // set head of the bed
+  direction ^= 8;
+
+  Mineserver::get()->map(map)->setBlock(x + xMod, y, z + zMod, (char)newblock, direction);
+  Mineserver::get()->map(map)->sendBlockChange(x + xMod, y, z + zMod, (char)newblock, direction);
   return false;
 }
 
-void BlockPumpkin::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockBed::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockPumpkin::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockBed::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
+}
+
+bool BlockBed::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
+{
+  return false;
 }

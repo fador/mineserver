@@ -80,6 +80,7 @@ void initConstants()
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_DIAMOND_BLOCK, new Drop(BLOCK_DIAMOND_BLOCK, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_LAPIS_BLOCK, new Drop(BLOCK_LAPIS_BLOCK, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_LAPIS_ORE, new Drop(BLOCK_LAPIS_ORE, 10000, 1)));
+  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_BED, new Drop(ITEM_BED, 10000, 1)));
 
 
   // Always drop but give more than one item
