@@ -45,19 +45,6 @@ bool BlockTorch::affectedBlock(int block)
 
 void BlockTorch::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-// get block info
-  uint8_t block, meta;
-  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
-  // make sure torch block is redstone torch
-  if (block == BLOCK_REDSTONE_TORCH_OFF || block == BLOCK_REDSTONE_TORCH_ON)
-  {
-	  // break redstone torch
-	  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-	  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-          // spawn redstone torch item
-	  this->spawnBlockItem(x, y, z, map, block, 0);
-	  return;
-  }
 
 }
 
