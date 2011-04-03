@@ -25,6 +25,7 @@
     <ClCompile Include="..\src\blocks\liquid.cpp" />
     <ClCompile Include="..\src\blocks\note.cpp" />
     <ClCompile Include="..\src\blocks\plant.cpp" />
+    <ClCompile Include="..\src\blocks\pumpkin.cpp" />
     <ClCompile Include="..\src\blocks\redstone.cpp" />
     <ClCompile Include="..\src\blocks\sign.cpp" />
     <ClCompile Include="..\src\blocks\snow.cpp" />
@@ -84,6 +85,7 @@
     <ClInclude Include="..\src\blocks\liquid.h" />
     <ClInclude Include="..\src\blocks\note.h" />
     <ClInclude Include="..\src\blocks\plant.h" />
+    <ClInclude Include="..\src\blocks\pumpkin.h" />
     <ClInclude Include="..\src\blocks\redstone.h" />
     <ClInclude Include="..\src\blocks\sign.h" />
     <ClInclude Include="..\src\blocks\snow.h" />

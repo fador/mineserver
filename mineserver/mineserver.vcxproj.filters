@@ -210,6 +210,9 @@
     <ClCompile Include="..\src\blocks\leaves.cpp">
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\blocks\pumpkin.cpp">
+      <Filter>Source Files\blocks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\user.h">
@@ -396,6 +399,9 @@
       <Filter>Header Files\worldgen</Filter>
     </ClInclude>
     <ClInclude Include="..\src\blocks\leaves.h">
+      <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\pumpkin.h">
       <Filter>Header Files\blocks</Filter>
     </ClInclude>
   </ItemGroup>
