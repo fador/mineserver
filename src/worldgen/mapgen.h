@@ -41,6 +41,7 @@ class MapGen
 {
 public:
   MapGen();
+  virtual ~MapGen() { }
   virtual void init(int seed);
   virtual void re_init(int seed); // Used when generating multiple maps
   virtual void generateChunk(int x, int z, int map);
