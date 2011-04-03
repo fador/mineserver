@@ -236,7 +236,7 @@ bool Plugin::hasHook(const std::string& name) const
 
 Hook* Plugin::getHook(const std::string& name) const
 {
-  std::map<const std::string, Hook*>::const_iterator hook = m_hooks.find(name);
+  std::map<std::string, Hook*>::const_iterator hook = m_hooks.find(name);
 
   if (hook == m_hooks.end())
   {
@@ -266,7 +266,7 @@ bool Plugin::hasPluginVersion(const std::string& name) const
 
 float Plugin::getPluginVersion(const std::string& name) const
 {
-  std::map<const std::string, float>::const_iterator pluginVersion = m_pluginVersions.find(name);
+  std::map<std::string, float>::const_iterator pluginVersion = m_pluginVersions.find(name);
 
   if (pluginVersion == m_pluginVersions.end())
   {
@@ -296,7 +296,7 @@ bool Plugin::hasPointer(const std::string& name) const
 
 void* Plugin::getPointer(const std::string& name) const
 {
-  std::map<const std::string, void*>::const_iterator pointer = m_pointers.find(name);
+  std::map<std::string, void*>::const_iterator pointer = m_pointers.find(name);
 
   if (pointer == m_pointers.end())
   {

@@ -141,7 +141,7 @@ public:
   // Remove existing hooks
   ~Plugin()
   {
-    std::map<const std::string, Hook*>::iterator it = m_hooks.begin();
+    std::map<std::string, Hook*>::iterator it = m_hooks.begin();
     for (; it != m_hooks.end(); ++it)
     {
       delete it->second;
