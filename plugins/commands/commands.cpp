@@ -504,8 +504,8 @@ void setTime(std::string user, std::string command, std::deque<std::string> args
 
 void getTime(std::string user, std::string command, std::deque<std::string> args)
 {
-	std::string msg = "The current server time is " + dtos(mineserver->map.getTime());
-	mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
+  std::string msg = "The current server time is " + dtos(mineserver->map.getTime());
+  mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
 }
 
 

@@ -608,9 +608,9 @@ int PacketHandler::player_digging(User* user)
   // Blocks that break with first hit
   if (status == BLOCK_STATUS_STARTED_DIGGING &&
       (block == BLOCK_SNOW || block == BLOCK_REED || block == BLOCK_TORCH || block == BLOCK_TNT 
-	  || block == BLOCK_REDSTONE_WIRE || block == BLOCK_RED_ROSE || block == BLOCK_YELLOW_FLOWER 
-	  || block == BLOCK_BROWN_MUSHROOM || block == BLOCK_RED_MUSHROOM 
-	  || block == BLOCK_REDSTONE_TORCH_OFF || block == BLOCK_REDSTONE_TORCH_ON))
+    || block == BLOCK_REDSTONE_WIRE || block == BLOCK_RED_ROSE || block == BLOCK_YELLOW_FLOWER 
+    || block == BLOCK_BROWN_MUSHROOM || block == BLOCK_RED_MUSHROOM 
+    || block == BLOCK_REDSTONE_TORCH_OFF || block == BLOCK_REDSTONE_TORCH_ON))
   {
     status = BLOCK_STATUS_BLOCK_BROKEN;
   }
@@ -1331,9 +1331,9 @@ int PacketHandler::use_entity(User* user)
     {
       //int h = Mineserver::get()->mobs()->getMobByID(i)->health - 1;
       //Mineserver::get()->mobs()->getMobByID(i)->sethealth(h);
-	  (static_cast<Hook2<bool, const char* ,int32_t>*>(Mineserver::get()->plugin()->getHook("gotAttacked")))->doAll(user->nick.c_str(),(int32_t)Mineserver::get()->mobs()->getMobByTarget(target));
-	  //make a callback
-	  break;
+    (static_cast<Hook2<bool, const char* ,int32_t>*>(Mineserver::get()->plugin()->getHook("gotAttacked")))->doAll(user->nick.c_str(),(int32_t)Mineserver::get()->mobs()->getMobByTarget(target));
+    //make a callback
+    break;
     }
   }
 

@@ -870,25 +870,29 @@ int mob_getHealth(int uid)
 
 void mob_setHealth(int uid, int mobHealth)
 {
-	if (mobHealth < 0) {
-		mobHealth = 0;
-	} else if (mobHealth > 20) {
-		mobHealth = 20;
-	}
-	Mineserver::get()->mobs()->getMobByID(uid)->health = mobHealth;
+  if (mobHealth < 0)
+  {
+    mobHealth = 0;
+  }
+  else if (mobHealth > 20)
+  {
+    mobHealth = 20;
+  }
+  Mineserver::get()->mobs()->getMobByID(uid)->health = mobHealth;
 }
 
-void mob_moveAnimal(const char* userIn, int mobID) {
-	std::string user(userIn);
-	Mob* m = Mineserver::get()->mobs()->getMobByID((int)mobID);
-	m->moveAnimal(user.c_str());
+void mob_moveAnimal(const char* userIn, int mobID)
+{
+  std::string user(userIn);
+  Mob* m = Mineserver::get()->mobs()->getMobByID((int)mobID);
+  m->moveAnimal(user.c_str());
 }
 
 void mob_animateMob(const char* userIn,int mobID, int animID) 
 {
-	std::string user(userIn);
-	Mob* m = Mineserver::get()->mobs()->getMobByID((int)mobID);
-	m->animateMob(user.c_str(), animID);
+  std::string user(userIn);
+  Mob* m = Mineserver::get()->mobs()->getMobByID((int)mobID);
+  m->animateMob(user.c_str(), animID);
 }
 
 void mob_animateDamage(const char* userIn,int mobID, int animID) 

@@ -216,19 +216,19 @@ bool BlockDoor::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   switch (direction)
   {
   case BLOCK_EAST:
-	//LOG(INFO, "Map", "EAST");
+  //LOG(INFO, "Map", "EAST");
     direction = BLOCK_EAST;
     break;
   case BLOCK_WEST:
-	//LOG(INFO, "Map", "WEST");
+  //LOG(INFO, "Map", "WEST");
     direction = BLOCK_WEST;
     break;
   case BLOCK_NORTH:
-	//LOG(INFO, "Map", "NORTH");
+  //LOG(INFO, "Map", "NORTH");
     direction = BLOCK_SOUTH;
     break;
   case BLOCK_SOUTH:
-	//LOG(INFO, "Map", "SOUTH");
+  //LOG(INFO, "Map", "SOUTH");
     direction = BLOCK_NORTH;
     break;
   }
