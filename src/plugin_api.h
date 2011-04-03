@@ -165,10 +165,15 @@ struct mob_pointer_struct
   void (*moveMob)(int uid, double x, double y, double z);
   void (*moveMobW)(int uid, double x, double y, double z, int map);
   bool (*getMobPositionW)(int uid, double* x, double* y, double* z, int* w);
+  int (*getMobID)(int uid);
   int (*getHealth)(int uid);
+  void (*setHealth)(int uid, int mobHealth);
   int (*getType)(int uid);
   bool (*getLook)(int uid, double* yaw, double* pitch);
   bool (*setLook)(int uid, double yaw, double pitch);
+  void (*moveAnimal)(const char* userIn, int mobID);
+  void (*animateMob)(const char* userIn, int mobID, int animID);
+  void (*animateDamage)(const char* userIn, int mobID, int animID);
   void* temp[97];
 
 };

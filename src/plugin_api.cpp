@@ -856,10 +856,46 @@ void mob_moveMobW(int uid, double x, double y, double z, int map)
   m->moveTo(x, y, z, map);
 }
 
+int mob_getMobID(int uid)
+{
+  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  return m->UID;
+}
+
 int mob_getHealth(int uid)
 {
   Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
   return m->health;
+}
+
+void mob_setHealth(int uid, int mobHealth)
+{
+	if (mobHealth < 0) {
+		mobHealth = 0;
+	} else if (mobHealth > 20) {
+		mobHealth = 20;
+	}
+	Mineserver::get()->mobs()->getMobByID(uid)->health = mobHealth;
+}
+
+void mob_moveAnimal(const char* userIn, int mobID) {
+	std::string user(userIn);
+	Mob* m = Mineserver::get()->mobs()->getMobByID((int)mobID);
+	m->moveAnimal(user.c_str());
+}
+
+void mob_animateMob(const char* userIn,int mobID, int animID) 
+{
+	std::string user(userIn);
+	Mob* m = Mineserver::get()->mobs()->getMobByID((int)mobID);
+	m->animateMob(user.c_str(), animID);
+}
+
+void mob_animateDamage(const char* userIn,int mobID, int animID) 
+{
+std::string user(userIn);
+ Mob* m = Mineserver::get()->mobs()->getMobByID((int)mobID);
+ m->animateDamage(user.c_str(), animID);
 }
 
 int mob_getType(int uid)
@@ -1055,7 +1091,6 @@ void init_plugin_api(void)
   plugin_api_pointers.map.setBlockW                = &map_setBlockW;
   plugin_api_pointers.map.getBlockW                = &map_getBlockW;
 
-
   plugin_api_pointers.user.getPosition             = &user_getPosition;
   plugin_api_pointers.user.teleport                = &user_teleport;
   plugin_api_pointers.user.sethealth               = &user_sethealth;
@@ -1089,6 +1124,11 @@ void init_plugin_api(void)
   plugin_api_pointers.mob.moveMob                  = &mob_moveMob;
   plugin_api_pointers.mob.moveMobW                 = &mob_moveMobW;
   plugin_api_pointers.mob.getHealth                = &mob_getHealth;
+  plugin_api_pointers.mob.getMobID                 = &mob_getMobID;
+  plugin_api_pointers.mob.setHealth                = &mob_setHealth;
+  plugin_api_pointers.mob.moveAnimal               = &mob_moveAnimal;
+  plugin_api_pointers.mob.animateMob               = &mob_animateMob;
+  plugin_api_pointers.mob.animateDamage            = &mob_animateDamage;
   plugin_api_pointers.mob.getType                  = &mob_getType;
   plugin_api_pointers.mob.getMobPositionW          = &mob_getMobPositionW;
   plugin_api_pointers.mob.getLook                  = &mob_getLook;
@@ -1102,6 +1142,5 @@ void init_plugin_api(void)
   plugin_api_pointers.permissions.isOp             = &permission_isOp;
   plugin_api_pointers.permissions.isMember         = &permission_isMember;
   plugin_api_pointers.permissions.isGuest          = &permission_isGuest;
-
 
 }

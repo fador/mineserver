@@ -61,6 +61,9 @@ public:
   void deSpawnToAll();
   void relativeMoveToAll();
   void teleportToAll();
+  void animateMob(const char* userIn, int animID);
+  void animateDamage(const char* userIn, int animID);
+  void moveAnimal(const char* userIn);
 
   void moveTo(double to_x, double to_y, double to_z, int to_map = -1);
   void look(int16_t yaw, int16_t pitch);
@@ -71,6 +74,7 @@ class Mobs
 {
 public:
   Mob* getMobByID(int id);
+  int getMobByTarget(int mobID);
   int mobNametoType(std::string name);
   inline size_t getMobCount()
   {

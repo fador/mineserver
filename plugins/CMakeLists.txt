@@ -92,5 +92,5 @@ endforeach()
 # install
 #
 install(TARGETS ${TARGETS}
-  LIBRARY DESTINATION ${CONFIG_DIR_LIB}/
+  DESTINATION ${CONFIG_DIR_LIB}/
 )

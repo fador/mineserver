@@ -1274,6 +1274,7 @@ int PacketHandler::use_entity(User* user)
 {
   int32_t userID, target;
   int8_t targetType;
+ 
 
   user->buffer >> userID >> target >> targetType;
 
@@ -1328,8 +1329,11 @@ int PacketHandler::use_entity(User* user)
   {
     if (Mineserver::get()->mobs()->getMobByID(i)->UID == (uint32_t)target)
     {
-      int h = Mineserver::get()->mobs()->getMobByID(i)->health - 1;
-      Mineserver::get()->mobs()->getMobByID(i)->sethealth(h);
+      //int h = Mineserver::get()->mobs()->getMobByID(i)->health - 1;
+      //Mineserver::get()->mobs()->getMobByID(i)->sethealth(h);
+	  (static_cast<Hook2<bool, const char* ,int32_t>*>(Mineserver::get()->plugin()->getHook("gotAttacked")))->doAll(user->nick.c_str(),(int32_t)Mineserver::get()->mobs()->getMobByTarget(target));
+	  //make a callback
+	  break;
     }
   }
 
