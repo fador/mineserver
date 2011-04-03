@@ -8,8 +8,8 @@
 
 // directory names
 #define CONFIG_DIR_BIN   "bin/"
-#define CONFIG_DIR_ETC   "bin/"
-#define CONFIG_DIR_LIB   "bin/"
+#define CONFIG_DIR_ETC   "etc/mineserver/"
+#define CONFIG_DIR_LIB   "lib/mineserver/"
 #define CONFIG_DIR_SHARE "./"
 
 

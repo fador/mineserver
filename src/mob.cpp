@@ -26,7 +26,6 @@
 */
 
 #include "mob.h"
-// #include "math.h"   // ??? do you mean <math.h> ? -- louisdx 
 #include <algorithm>
 
 Mob::Mob()
@@ -45,24 +44,6 @@ Mob::Mob()
 
 Mob::~Mob()
 {
-  // louisdx: Does this destructor at all do what you want?
-  //   Right now you are making a COPY of a vector and erase
-  //   the elements of that copy. You are NOT deleting the objects
-  //   pointed to by those elements.
-
-  /*
-    std::vector<Mob*> mobs = Mineserver::get()->mobs()->getAll();
-    for (std::vector<Mob*>::iterator i = mobs.begin() ; i != mobs.end(); i++)
-    {
-      if ((*i)->UID == UID)
-      {
-      mobs.erase(i);
-      break;
-      }
-    }
-  */
-
-  // louisdx: Suggested fix follows. I will change Mobs::getAll() as well.
   std::vector<Mob*>::iterator it = std::find(Mineserver::get()->mobs()->getAll().begin(),
                                              Mineserver::get()->mobs()->getAll().end(),
                                              this);
@@ -70,18 +51,19 @@ Mob::~Mob()
   {
     Mineserver::get()->mobs()->getAll().erase(it);
   }
-
 }
 
 //Can be 0 (no animation), 1 (swing arm), 2 (damage animation)
 //, 3 (leave bed), 104 (crouch), or 105 (uncrouch). Getting 102 somewhat often, too. 
-void Mob::animateMob(const char* userIn, int animID) { 
-  std::string user(userIn);
-  for (int i = 0; i < Mineserver::get()->users().size(); i++) {
+void Mob::animateMob(const char* userIn, int animID)
+{ 
+  for (size_t i = 0; i < Mineserver::get()->users().size(); ++i)
+  {
     User* user = Mineserver::get()->users()[i];
     user->buffer << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID << (int8_t)animID;
   }
 }
+
 void Mob::sethealth(int health)
 {
   if (health < 0)
@@ -109,9 +91,9 @@ void Mob::sethealth(int health)
   }
 }
 //Possible values: 2 (entity hurt), 3 (entity dead?), 4, 5
-void Mob::animateDamage(const char* userIn, int animID) { 
-  std::string user(userIn);
-  for (int i = 0; i < Mineserver::get()->users().size(); i++) {
+void Mob::animateDamage(const char* userIn, int animID)
+{ 
+  for (size_t i = 0; i < Mineserver::get()->users().size(); i++) {
     User* user = Mineserver::get()->users()[i];
     user->buffer << (int8_t)PACKET_DEATH_ANIMATION << (int32_t)UID << (int8_t)animID;
   }
@@ -274,16 +256,17 @@ Mob* Mobs::getMobByID(int id)
   return m_moblist[id];
 }
 
-int Mobs::getMobByTarget(int mobID)
+size_t Mobs::getMobByTarget(uint32_t mobID)
 {
-for (int i = 0; i < m_moblist.size(); i++)
+  for (size_t i = 0; i < m_moblist.size(); i++)
   {
-    if(mobID == m_moblist[i]->UID) {
-    return i;
-    break;
+    if (mobID == m_moblist[i]->UID)
+    {
+      return i;
+    }
   }
-  }
-  return NULL;
+  // This is dangerous! Why return 0? - louisdx
+  return 0;
 }
 
 /*Mob* Mobs::getMobByTarget(int mobID)
@@ -357,5 +340,6 @@ int Mobs::mobNametoType(std::string name)
   {
     return MOB_CHICKEN;
   }
+  return -1;
 }
 

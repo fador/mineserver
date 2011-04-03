@@ -74,7 +74,7 @@ class Mobs
 {
 public:
   Mob* getMobByID(int id);
-  int getMobByTarget(int mobID);
+  size_t getMobByTarget(uint32_t mobID);
   int mobNametoType(std::string name);
   inline size_t getMobCount()
   {
