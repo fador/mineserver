@@ -58,6 +58,7 @@
 #include "blocks/workbench.h"
 #include "blocks/dyed.h"
 #include "blocks/redstone.h"
+#include "blocks/pumpkin.h"
 
 #include "items/food.h"
 #include "items/projectile.h"
@@ -103,6 +104,8 @@ void Plugin::init()
   BlockCB.push_back(furnaceblock);
   BlockWorkbench* workbenchblock = new BlockWorkbench();
   BlockCB.push_back(workbenchblock);
+  BlockPumpkin* pumpkinblock = new BlockPumpkin();
+  BlockCB.push_back(pumpkinblock);
   BlockDefault* defaultblock = new BlockDefault();
   BlockCB.push_back(defaultblock);
 
