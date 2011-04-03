@@ -1406,7 +1406,7 @@ Packet& Packet::operator>>(int64_t& val)
 {
   if (haveData(8))
   {
-    val = *reinterpret_cast<const int64_t*>(&m_readBuffer[m_readPos]);
+    memcpy(&val, &m_readBuffer[m_readPos], 8);
     val = ntohll(val);
     m_readPos += 8;
   }
@@ -1447,7 +1447,8 @@ Packet& Packet::operator>>(double& val)
 {
   if (haveData(8))
   {
-    uint64_t ival = *reinterpret_cast<const uint64_t*>(&m_readBuffer[m_readPos]);
+    uint64_t ival;
+    memcpy(&ival, &m_readBuffer[m_readPos], 8);
     ival = ntohll(ival);
     memcpy((void*)&val, (void*)&ival, 8);
     m_readPos += 8;
