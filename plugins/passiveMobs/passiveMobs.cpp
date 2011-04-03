@@ -59,16 +59,18 @@ std::string dtos(double n)
   return result.str();
 }
 
-std::string Mobnames[] = {"Chicken","Pig","Sheep","Cow"};
+std::string Mobnames[] = { "Chicken", "Pig", "Sheep", "Cow" };
  
 // The list of Mobs this plugin has control of
 // Note that other plugins may make other mobs, and control them itself
-class MyPetMob{
-  public:
+class MyPetMob
+{
+public:
   int ID;
   double velocity;
-  MyPetMob(int ID){ this->ID = ID; }
+  explicit MyPetMob(int ID, double velocity = 0) : ID(ID), velocity(velocity) { }
 };
+
 std::vector<MyPetMob*> MyMobs;
 
 const unsigned int maxMobs = 20; // Maximum ammount of mobs allowed

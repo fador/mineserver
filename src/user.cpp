@@ -235,9 +235,10 @@ bool User::sendLoginInfo()
   }
   // Push chunks to user
   pushMap(true);
-  std::vector<Mob*> mob = Mineserver::get()->mobs()->getAll();
-  std::vector<Mob*>::iterator i = mob.begin();
-  for (; i != mob.end(); i++)
+
+  const std::vector<Mob*> & mobs = Mineserver::get()->mobs()->getAll();
+
+  for (std::vector<Mob*>::const_iterator i = mobs.begin(); i != mobs.end(); ++i)
   {
     if (pos.map == (*i)->map && (*i)->spawned)
     {
@@ -547,7 +548,7 @@ bool User::saveData()
 }
 
 
-bool User::updatePosM(double x, double y, double z, int map, double stance)
+bool User::updatePosM(double x, double y, double z, size_t map, double stance)
 {
   if (map != pos.map && logged)
   {
@@ -1184,9 +1185,9 @@ bool User::pushMap(bool login)
   return true;
 }
 
-bool User::teleport(double x, double y, double z, int map)
+bool User::teleport(double x, double y, double z, size_t map)
 {
-  if (map == -1)
+  if (map == size_t(-1))
   {
     map = pos.map;
   }
@@ -1197,8 +1198,7 @@ bool User::teleport(double x, double y, double z, int map)
   }
   if (map == pos.map)
   {
-    buffer << (int8_t)PACKET_PLAYER_POSITION_AND_LOOK << x << y << (double)0.0 << z
-           << (float)0.f << (float)0.f << (int8_t)1;
+    buffer << (int8_t)PACKET_PLAYER_POSITION_AND_LOOK << x << y << 0.0 << z << 0.f << 0.f << (int8_t)1;
   }
 
   //Also update pos for other players
