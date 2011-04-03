@@ -26,32 +26,51 @@
 */
 
 #include "mob.h"
-#include "math.h"
+// #include "math.h"   // ??? do you mean <math.h> ? -- louisdx 
 #include <algorithm>
 
 Mob::Mob()
+  :
+  UID(Mineserver::generateEID()),
+  x(0),
+  y(0),
+  z(0),
+  map(0),
+  yaw(0),
+  pitch(0),
+  meta(0)
+  // louidx: We MUST initialize spawned
 {
-  x = 0;
-  y = 0;
-  z = 0;
-  map = 0;
-  yaw = 0;
-  pitch = 0;
-  meta = 0;
-  UID = Mineserver::generateEID();
 }
 
 Mob::~Mob()
 {
-  std::vector<Mob*> mobs = Mineserver::get()->mobs()->getAll();
-  for (std::vector<Mob*>::iterator i = mobs.begin() ; i != mobs.end(); i++)
-  {
-    if ((*i)->UID == UID)
+  // louisdx: Does this destructor at all do what you want?
+  //   Right now you are making a COPY of a vector and erase
+  //   the elements of that copy. You are NOT deleting the objects
+  //   pointed to by those elements.
+
+  /*
+    std::vector<Mob*> mobs = Mineserver::get()->mobs()->getAll();
+    for (std::vector<Mob*>::iterator i = mobs.begin() ; i != mobs.end(); i++)
     {
+      if ((*i)->UID == UID)
+      {
       mobs.erase(i);
       break;
+      }
     }
+  */
+
+  // louisdx: Suggested fix follows. I will change Mobs::getAll() as well.
+  std::vector<Mob*>::iterator it = std::find(Mineserver::get()->mobs()->getAll().begin(),
+                                             Mineserver::get()->mobs()->getAll().end(),
+                                             this);
+  if (it != Mineserver::get()->mobs()->getAll().end())
+  {
+    Mineserver::get()->mobs()->getAll().erase(it);
   }
+
 }
 
 void Mob::sethealth(int health)
@@ -220,78 +239,65 @@ Mob* Mobs::getMobByID(int id)
   return m_moblist[id];
 }
 
+// louisdx: may be easier to use an std::tr1::unordered_map<std::string, int>
 int Mobs::mobNametoType(std::string name)
 {
   std::transform(name.begin(), name.end(), name.begin(), ::toupper);
-  if (name.compare("CREEPER") == 0)
+  if (name == "CREEPER")
   {
     return MOB_CREEPER;
   }
-  if (name.compare("SKELETON") == 0)
+  if (name == "SKELETON")
   {
     return MOB_SKELETON;
   }
-  if (name.compare("SPIDER") == 0)
+  if (name == "SPIDER")
   {
     return MOB_SPIDER;
   }
-  if (name.compare("GIANTZOMBIE") == 0)
+  if (name == "GIANTZOMBIE")
   {
     return MOB_GIANT_ZOMBIE;
   }
-  if (name.compare("GIANT") == 0)
+  if (name == "GIANT")
   {
     return MOB_GIANT_ZOMBIE;
   }
-  if (name.compare("ZOMBIE") == 0)
+  if (name == "ZOMBIE")
   {
     return MOB_ZOMBIE;
   }
-  if (name.compare("SLIME") == 0)
+  if (name == "SLIME")
   {
     return MOB_SLIME;
   }
-  if (name.compare("GHAST") == 0)
+  if (name == "GHAST")
   {
     return MOB_GHAST;
   }
-  if (name.compare("ZOMBIEPIGMAN") == 0)
+  if (name == "ZOMBIEPIGMAN")
   {
     return MOB_ZOMBIE_PIGMAN;
   }
-  if (name.compare("PIGMAN") == 0)
+  if (name == "PIGMAN")
   {
     return MOB_ZOMBIE_PIGMAN;
   }
-  if (name.compare("PIG") == 0)
+  if (name == "PIG")
   {
     return MOB_PIG;
   }
-  if (name.compare("SHEEP") == 0)
+  if (name == "SHEEP")
   {
     return MOB_SHEEP;
   }
-  if (name.compare("COW") == 0)
+  if (name == "COW")
   {
     return MOB_COW;
   }
-  if (name.compare("CHICKEN") == 0)
+  if (name == "CHICKEN")
   {
     return MOB_CHICKEN;
   }
-  return NULL;
+  return 0;
 }
-
-size_t Mobs::getMobCount()
-{
-  return m_moblist.size();
-}
-
-Mob* Mobs::createMob()
-{
-  Mob* mob = new Mob();
-  Mineserver::get()->mobs()->addMob(mob);
-  return mob;
-}
-
-

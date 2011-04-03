@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
   if (overrides.size())
   {
     std::stringstream override_config;
-    for (uint32_t i = 0; i < overrides.size(); i++)
+    for (size_t i = 0; i < overrides.size(); i++)
     {
       LOG2(INFO, "Overriden: " + overrides[i]);
       override_config << overrides[i] << ';' << std::endl;
@@ -501,7 +501,7 @@ bool Mineserver::run()
   if (config()->has("system.plugins") && (config()->type("system.plugins") == CONFIG_NODE_LIST))
   {
     std::list<std::string>* tmp = config()->mData("system.plugins")->keys();
-    for (std::list<std::string>::iterator it = tmp->begin(); it != tmp->end(); ++it)
+    for (std::list<std::string>::const_iterator it = tmp->begin(); it != tmp->end(); ++it)
     {
       std::string path  = config()->sData("system.path.plugins");
       std::string name  = config()->sData("system.plugins." + (*it));

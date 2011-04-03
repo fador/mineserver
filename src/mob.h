@@ -72,16 +72,28 @@ class Mobs
 public:
   Mob* getMobByID(int id);
   int mobNametoType(std::string name);
-  size_t getMobCount();
-  std::vector<Mob*> getAll()
+  inline size_t getMobCount()
+  {
+    return m_moblist.size();
+  }
+  inline std::vector<Mob*> & getAll()
   {
     return m_moblist;
   };
-  void addMob(Mob* mob)
+  inline const std::vector<Mob*> & getAll() const
+  {
+    return m_moblist;
+  };
+  inline void addMob(Mob* mob)
   {
     m_moblist.push_back(mob);
   }
-  Mob* createMob();
+  inline Mob* createMob()
+  {
+    Mob* mob = new Mob();
+    addMob(mob);
+    return mob;
+  }
 
 private:
   std::vector<Mob*> m_moblist;

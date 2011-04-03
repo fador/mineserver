@@ -236,8 +236,7 @@ bool User::sendLoginInfo()
   // Push chunks to user
   pushMap(true);
 
-  // Do we REALLY want a _copy_ here?? -- louisdx
-  std::vector<Mob*> mob = Mineserver::get()->mobs()->getAll();
+  const std::vector<Mob*> & mob = Mineserver::get()->mobs()->getAll();
 
   for (std::vector<Mob*>::const_iterator i; i != mob.end(); i++)
   {
