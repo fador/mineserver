@@ -28,35 +28,36 @@
 #include "../mineserver.h"
 #include "../map.h"
 
-#include "pumpkin.h"
+#include "step.h"
 
-bool BlockPumpkin::affectedBlock(int block)
+bool BlockStep::affectedBlock(int block)
 {
   switch (block)
   {
-  case BLOCK_PUMPKIN:
+  case BLOCK_STEP:
+  case BLOCK_DOUBLE_STEP:
     return true;
   }
   return false;
 }
 
 
-void BlockPumpkin::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockStep::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-void BlockPumpkin::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockStep::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-void BlockPumpkin::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockStep::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-bool BlockPumpkin::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockStep::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t block, meta;
   Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
@@ -64,15 +65,15 @@ bool BlockPumpkin::onBroken(User* user, int8_t status, int32_t x, int8_t y, int3
   Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
 
-  this->spawnBlockItem(x, y, z, map, block, 0);
+  this->spawnBlockItem(x, y, z, map, block, meta);
   return false;
 }
 
-void BlockPumpkin::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockStep::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-bool BlockPumpkin::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockStep::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t oldblock;
   uint8_t oldmeta;
@@ -110,33 +111,16 @@ bool BlockPumpkin::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
   }
 
   direction = user->relativeToBlock(x, y, z);
-
-  switch (direction)
-  {
-  case BLOCK_EAST:
-    direction = BLOCK_SOUTH;
-    break;
-  case BLOCK_BOTTOM:
-    direction = BLOCK_EAST;
-    break;
-  case BLOCK_NORTH:
-    direction = BLOCK_NORTH;
-    break;
-  case BLOCK_SOUTH:
-    direction = BLOCK_BOTTOM;
-    break;
-  }
-
   Mineserver::get()->map(map)->setBlock(x, y, z, newblock, direction);
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, newblock, direction);
 
   return false;
 }
 
-void BlockPumpkin::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockStep::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockPumpkin::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockStep::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
 }
