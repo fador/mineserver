@@ -61,6 +61,7 @@
 #include "blocks/pumpkin.h"
 #include "blocks/step.h"
 #include "blocks/bed.h"
+#include "blocks/jackolantern.h"
 
 #include "items/food.h"
 #include "items/projectile.h"
@@ -112,6 +113,8 @@ void Plugin::init()
   BlockCB.push_back(stepblock);
   BlockBed* bedblock = new BlockBed();
   BlockCB.push_back(bedblock);
+  Blockjackolantern* jackolanternblock = new Blockjackolantern();
+  BlockCB.push_back(jackolanternblock);
   BlockDefault* defaultblock = new BlockDefault();
   BlockCB.push_back(defaultblock);
 
