@@ -11,7 +11,7 @@ SRC         += blocks/liquid.cpp blocks/plant.cpp blocks/sign.cpp blocks/snow.cp
 SRC         += blocks/stair.cpp blocks/torch.cpp blocks/tracks.cpp blocks/default.cpp
 SRC         += blocks/chest.cpp blocks/ladder.cpp blocks/leaves.cpp blocks/cake.cpp blocks/note.cpp
 SRC         += blocks/workbench.cpp blocks/blockfurnace.cpp blocks/redstone.cpp
-SRC         += blocks/bed.cpp blocks/step.cpp blocks/pumpkin.cpp blocks/wood.cpp blocks/dye.cpp
+SRC         += blocks/bed.cpp blocks/step.cpp blocks/pumpkin.cpp blocks/wood.cpp
 SRC         += blocks/wool.cpp
 
 SRC         += worldgen/mapgen.cpp worldgen/cavegen.cpp worldgen/nethergen.cpp
