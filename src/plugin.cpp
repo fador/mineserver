@@ -56,11 +56,12 @@
 #include "blocks/note.h"
 #include "blocks/blockfurnace.h"
 #include "blocks/workbench.h"
-#include "blocks/dyed.h"
+#include "blocks/wood.h"
 #include "blocks/redstone.h"
 #include "blocks/pumpkin.h"
 #include "blocks/step.h"
 #include "blocks/bed.h"
+#include "blocks/wool.h"
 
 #include "items/food.h"
 #include "items/projectile.h"
@@ -70,8 +71,8 @@ void Plugin::init()
   // Create Block* objects and put them away so we can delete them later
   BlockRedstone* redstoneblock = new BlockRedstone();
   BlockCB.push_back(redstoneblock);
-  BlockDyed* dyedblock = new BlockDyed();
-  BlockCB.push_back(dyedblock);
+  BlockWood* woodblock = new BlockWood();
+  BlockCB.push_back(woodblock);
   BlockFalling* fallingblock = new BlockFalling();
   BlockCB.push_back(fallingblock);
   BlockTorch* torchblock = new BlockTorch();
@@ -112,6 +113,8 @@ void Plugin::init()
   BlockCB.push_back(stepblock);
   BlockBed* bedblock = new BlockBed();
   BlockCB.push_back(bedblock);
+  BlockWool* woolblock = new BlockWool();
+  BlockCB.push_back(woolblock);
   BlockDefault* defaultblock = new BlockDefault();
   BlockCB.push_back(defaultblock);
 

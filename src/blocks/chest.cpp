@@ -238,6 +238,23 @@ bool BlockChest::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
 
   direction = user->relativeToBlock(x, y, z);
 
+  // Fix orientation
+    switch (direction)
+  {
+  case BLOCK_EAST:
+    direction = BLOCK_SOUTH;
+    break;
+  case BLOCK_BOTTOM:
+    direction = BLOCK_EAST;
+    break;
+  case BLOCK_NORTH:
+    direction = BLOCK_NORTH;
+    break;
+  case BLOCK_SOUTH:
+    direction = BLOCK_BOTTOM;
+    break;
+  }
+
   Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
   return false;

@@ -48,7 +48,7 @@ void initConstants()
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_GOLD_ORE, new Drop(BLOCK_GOLD_ORE, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_DIAMOND_ORE, new Drop(ITEM_DIAMOND, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_WOOD, new Drop(BLOCK_WOOD, 10000, 1)));
-  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_GRAY_CLOTH, new Drop(BLOCK_GRAY_CLOTH, 10000, 1)));
+  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_WOOL, new Drop(BLOCK_WOOL, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_WOODEN_STAIRS, new Drop(BLOCK_PLANK, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_RED_ROSE, new Drop(BLOCK_RED_ROSE, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_YELLOW_FLOWER, new Drop(BLOCK_YELLOW_FLOWER, 10000, 1)));
