@@ -21,6 +21,7 @@
     <ClCompile Include="..\src\blocks\falling.cpp" />
     <ClCompile Include="..\src\blocks\fire.cpp" />
     <ClCompile Include="..\src\blocks\blockfurnace.cpp" />
+    <ClCompile Include="..\src\blocks\jackolantern.cpp" />
     <ClCompile Include="..\src\blocks\ladder.cpp" />
     <ClCompile Include="..\src\blocks\leaves.cpp" />
     <ClCompile Include="..\src\blocks\liquid.cpp" />
@@ -83,6 +84,7 @@
     <ClInclude Include="..\src\blocks\falling.h" />
     <ClInclude Include="..\src\blocks\fire.h" />
     <ClInclude Include="..\src\blocks\blockfurnace.h" />
+    <ClInclude Include="..\src\blocks\jackolantern.h" />
     <ClInclude Include="..\src\blocks\ladder.h" />
     <ClInclude Include="..\src\blocks\leaves.h" />
     <ClInclude Include="..\src\blocks\liquid.h" />
