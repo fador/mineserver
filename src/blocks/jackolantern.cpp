@@ -27,8 +27,6 @@
 
 #include "../mineserver.h"
 #include "../map.h"
-#include "../chat.h"
-#include "../user.h"
 
 #include "jackolantern.h"
 
@@ -45,7 +43,7 @@ bool Blockjackolantern::affectedBlock(int block)
 
 void Blockjackolantern::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-	Mineserver::get()->chat()->sendMsg(user, MC_COLOR_RED + "Chest locked", Chat::USER);
+
 }
 
 void Blockjackolantern::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
