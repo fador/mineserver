@@ -633,13 +633,13 @@ bool Mineserver::run()
   event_set(&m_listenEvent, m_socketlisten, EV_WRITE | EV_READ | EV_PERSIST, accept_callback, NULL);
   event_add(&m_listenEvent, NULL);
 
+  LOG2(INFO, "Listening on: ");
   if (ip == "0.0.0.0")
   {
     // Print all local IPs
     char name[255];
     gethostname(name, sizeof(name));
     struct hostent* hostinfo = gethostbyname(name);
-    LOG2(INFO, "Listening on: ");
     int ipIndex = 0;
     while (hostinfo && hostinfo->h_addr_list[ipIndex])
     {
