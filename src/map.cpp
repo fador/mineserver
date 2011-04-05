@@ -248,16 +248,11 @@ void Map::init(int number)
   m_number = number;
   const char* key = "map.storage.nbt.directories"; // Prefix for worlds config
   std::list<std::string>* tmp = Mineserver::get()->config()->mData(key)->keys();
-  int a = 0;
-  for (std::list<std::string>::const_iterator it = tmp->begin(); it != tmp->end(); ++it)
-  {
-    if (a == number)
-    {
-      mapDirectory = *it;
-      break;
-    }
-    a++;
-  }
+
+  std::list<std::string>::const_iterator it = tmp->begin();
+  std::advance(it, number);
+  mapDirectory = *it;
+
   LOG2(INFO, "World " + mapDirectory);
 
   if (mapDirectory == "Not found!")
