@@ -63,15 +63,16 @@
 #include "mcregion.h"
 
 Map::Map(const Map& oldmap)
-{
   // Copy Construtor
-  chunks = oldmap.chunks;
-  mapLastused = oldmap.mapLastused;
-  mapChanged = oldmap.mapChanged;
-  mapLightRegen = oldmap.mapLightRegen;
-  items = oldmap.items;
-  mapTime = oldmap.mapTime;
-  mapSeed = oldmap.mapSeed;
+  :
+  chunks(oldmap.chunks),
+  mapLastused(oldmap.mapLastused),
+  mapChanged(oldmap.mapChanged),
+  mapLightRegen(oldmap.mapLightRegen),
+  items(oldmap.items),
+  mapTime(oldmap.mapTime),
+  mapSeed(oldmap.mapSeed)
+{
 }
 
 Map::Map()
@@ -129,6 +130,10 @@ Map::Map()
 
 Map::~Map()
 {
+
+  // louisdx: This destructor is doing WAY too much. All this should be in a separate function.
+  // A destructor must never throw, and this destructor does tons of non-exception-safe stuff.
+
   // Free chunk memory
   for (int i = 0; i < 441; ++i)
   {
@@ -141,9 +146,9 @@ Map::~Map()
   }
 
   // Free item memory
-  for (std::map<uint32_t, spawnedItem*>::iterator it = items.begin(); it != items.end(); ++it)
+  for (std::map<uint32_t, spawnedItem*>::const_iterator it = items.begin(); it != items.end(); ++it)
   {
-    delete items[it->first];
+    delete it->second;
   }
 
   items.clear();
@@ -243,9 +248,8 @@ void Map::init(int number)
   m_number = number;
   const char* key = "map.storage.nbt.directories"; // Prefix for worlds config
   std::list<std::string>* tmp = Mineserver::get()->config()->mData(key)->keys();
-  std::list<std::string>::iterator it = tmp->begin();
   int a = 0;
-  for (; it != tmp->end(); ++it)
+  for (std::list<std::string>::const_iterator it = tmp->begin(); it != tmp->end(); ++it)
   {
     if (a == number)
     {

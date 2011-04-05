@@ -106,13 +106,15 @@ enum
 
 class Packet
 {
-private:
   typedef std::vector<uint8_t> BufferVector;
+
+private:
   BufferVector m_readBuffer;
   BufferVector::size_type m_readPos;
   bool m_isValid;
 
   BufferVector m_writeBuffer;
+
 public:
   Packet() : m_readPos(0), m_isValid(true) {}
 
@@ -132,7 +134,7 @@ public:
     m_isValid = true;
   }
 
-  void addToRead(std::vector<uint8_t> &buffer)
+  void addToRead(const BufferVector& buffer)
   {
     m_readBuffer.insert(m_readBuffer.end(), buffer.begin(), buffer.end());
   }
@@ -216,14 +218,11 @@ struct Packets
 
   //int (PacketHandler::*varLenFunction)(User *);
 
-  Packets()
+  Packets(int newlen = PACKET_DOES_NOT_EXIST)
+  : len(newlen)
   {
-    len = PACKET_DOES_NOT_EXIST;
   }
-  Packets(int newlen)
-  {
-    len = newlen;
-  }
+
   /*  Packets(int newlen, void (PacketHandler::*newfunction)(uint *, User *))
     {
       len      = newlen;
@@ -236,10 +235,15 @@ struct Packets
       function = newfunction;
     }
   */
+
   Packets(int newlen, int (PacketHandler::*newfunction)(User*))
+  : len(newlen), function(newfunction)
   {
-    len            = newlen;
-    function = newfunction;
+  }
+
+  Packets(const Packets & other)
+  : len(other.len), function(other.function)
+  {
   }
 };
 

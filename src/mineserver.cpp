@@ -477,11 +477,11 @@ void Mineserver::saveAll()
 
 void Mineserver::saveAllPlayers()
 {
-  if (users().size() == 0)
+  if (users().empty())
   {
     return;
   }
-  for (int32_t i = users().size() - 1; i >= 0; i--)
+  for (int i = int(users().size()) - 1; i >= 0; i--)
   {
     if (users()[i]->logged)
     {
