@@ -183,9 +183,6 @@
     <ClCompile Include="..\src\blocks\blockfurnace.cpp">
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\blocks\dyed.cpp">
-      <Filter>Source Files\blocks</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\items\food.cpp">
       <Filter>Source Files\items</Filter>
     </ClCompile>
@@ -220,6 +217,12 @@
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
     <ClCompile Include="..\src\blocks\jackolantern.cpp">
+      <Filter>Source Files\blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\blocks\wool.cpp">
+      <Filter>Source Files\blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\blocks\wood.cpp">
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
   </ItemGroup>
@@ -383,9 +386,6 @@
     <ClInclude Include="..\src\blocks\blockfurnace.h">
       <Filter>Header Files\blocks</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\blocks\dyed.h">
-      <Filter>Header Files\blocks</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\items\food.h">
       <Filter>Header Files\items</Filter>
     </ClInclude>
@@ -421,6 +421,12 @@
     </ClInclude>
     <ClInclude Include="..\src\blocks\jackolantern.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\wool.h">
+      <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\wood.h">
+      <Filter>Header Files\blocks</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
