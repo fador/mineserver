@@ -120,6 +120,8 @@ set(mineserver_source
   src/blocks/bed.cpp
   src/blocks/step.cpp
   src/blocks/jackolantern.cpp
+  src/blocks/wool.cpp
+  src/blocks/wood.cpp
   src/items/food.cpp
   src/items/itembasic.cpp
   src/items/projectile.cpp
