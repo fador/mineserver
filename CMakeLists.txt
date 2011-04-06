@@ -114,7 +114,6 @@ set(mineserver_source
   src/physics.cpp
   src/cliScreen.cpp
   src/blocks/blockfurnace.cpp
-  src/blocks/dyed.cpp
   src/blocks/note.cpp
   src/blocks/workbench.cpp
   src/blocks/pumpkin.cpp
