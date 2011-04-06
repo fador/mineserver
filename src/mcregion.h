@@ -28,8 +28,6 @@
 #ifndef _MCREGION_H_
 #define _MCREGION_H_
 
-#include <fstream>
-
 enum { VERSION_GZIP = 1, VERSION_DEFLATE };
 
 class RegionFile
@@ -61,53 +59,31 @@ public:
 private:
 
   /* is this an invalid chunk coordinate? */
-  bool outOfBounds(int x, int z)
+  inline bool outOfBounds(int x, int z) const
   {
     return x < 0 || x >= 32 || z < 0 || z >= 32;
   }
 
   //Get chunk offset from the table
-  uint32_t getOffset(int x, int z)
+  inline uint32_t getOffset(int x, int z) const
   {
     return offsets[(x + z * 32)];
   }
 
-  bool hasChunk(int x, int z)
+  //Check if the chunk at (x,z) exists
+  inline bool hasChunk(int x, int z) const
   {
     return getOffset(x, z) != 0;
   }
 
   //Set new offset for a chunk
-  void setOffset(int x, int z, int offset)
-  {
-    offsets[(x + z * 32)] = offset;
-    fseek(regionFile, (x + z * 32) * 4, SEEK_SET);
-
-    offset = htonl(offset);
-    const char* tempBuf = (const char*)&offset;
-    fwrite(tempBuf, 4, 1, regionFile);
-  }
+  void setOffset(int x, int z, int offset);
 
   //Set timestamp
-  void setTimestamp(int x, int z, int timestamp)
-  {
-    timestamps[(x + z * 32)] = timestamp;
-    fseek(regionFile, SECTOR_BYTES + (x + z * 32) * 4, SEEK_SET);
-    timestamp = htonl(timestamp);
-    fwrite(reinterpret_cast<const char*>(&timestamp), 4, 1, regionFile);
-  }
+  void setTimestamp(int x, int z, int timestamp);
 
   // write a chunk data to the region file at specified sector number
-  void write(int sectorNumber, uint8_t* data, uint32_t datalen)
-  {
-    fseek(regionFile, sectorNumber * SECTOR_BYTES, SEEK_SET);
-    int chunklen = datalen + 1;
-    chunklen = htonl(chunklen);
-    fwrite(reinterpret_cast<const char*>(&chunklen), 4, 1, regionFile); // chunk length
-    char version = VERSION_DEFLATE;
-    fwrite(&version, 1, 1, regionFile); // chunk version number
-    fwrite((char*)data, datalen, 1, regionFile); // chunk data
-  }
+  void write(int sectorNumber, uint8_t* data, uint32_t datalen);
 };
 
 //For converting old mapformat to McRegion

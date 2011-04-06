@@ -396,6 +396,35 @@ bool RegionFile::readChunk(uint8_t* chunkdata, uint32_t* datalen, int32_t x, int
 
 }
 
+void RegionFile::setOffset(int x, int z, int offset)
+{
+  offsets[(x + z * 32)] = offset;
+  fseek(regionFile, (x + z * 32) * 4, SEEK_SET);
+
+  offset = htonl(offset);
+  const char* tempBuf = (const char*)&offset;
+  fwrite(tempBuf, 4, 1, regionFile);
+}
+
+void RegionFile::setTimestamp(int x, int z, int timestamp)
+{
+  timestamps[(x + z * 32)] = timestamp;
+  fseek(regionFile, SECTOR_BYTES + (x + z * 32) * 4, SEEK_SET);
+  timestamp = htonl(timestamp);
+  fwrite(reinterpret_cast<const char*>(&timestamp), 4, 1, regionFile);
+}
+
+void RegionFile::write(int sectorNumber, uint8_t* data, uint32_t datalen)
+{
+  fseek(regionFile, sectorNumber * SECTOR_BYTES, SEEK_SET);
+  int chunklen = datalen + 1;
+  chunklen = htonl(chunklen);
+  fwrite(reinterpret_cast<const char*>(&chunklen), 4, 1, regionFile); // chunk length
+  char version = VERSION_DEFLATE;
+  fwrite(&version, 1, 1, regionFile); // chunk version number
+  fwrite((char*)data, datalen, 1, regionFile); // chunk data
+}
+
 
 //Function to grab a list of all the files in a folder, both win32 and linux
 int getdir(std::string dir, std::vector<std::string> &files)
