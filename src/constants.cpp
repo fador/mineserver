@@ -71,7 +71,6 @@ void initConstants()
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_MOSSY_COBBLESTONE, new Drop(BLOCK_MOSSY_COBBLESTONE, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_OBSIDIAN, new Drop(BLOCK_OBSIDIAN, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_STEP, new Drop(BLOCK_STEP, 10000, 1)));
-  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_DOUBLE_STEP, new Drop(BLOCK_STEP, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_WOODEN_DOOR, new Drop(ITEM_WOODEN_DOOR, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_IRON_DOOR, new Drop(ITEM_IRON_DOOR, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_SNOW, new Drop(ITEM_SNOWBALL, 10000, 1)));
@@ -81,22 +80,23 @@ void initConstants()
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_LAPIS_BLOCK, new Drop(BLOCK_LAPIS_BLOCK, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_LAPIS_ORE, new Drop(BLOCK_LAPIS_ORE, 10000, 1)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_BED, new Drop(ITEM_BED, 10000, 1)));
+  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_FURNACE, new Drop(BLOCK_FURNACE, 10000, 1)));
+  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_BURNING_FURNACE, new Drop(BLOCK_FURNACE, 10000, 1)));
+  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_CHEST, new Drop(BLOCK_CHEST, 10000, 1)));
+  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_WORKBENCH, new Drop(BLOCK_WORKBENCH, 10000, 1)));
+  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_SIGN_POST, new Drop(ITEM_SIGN, 10000, 1)));
+  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_WALL_SIGN, new Drop(ITEM_SIGN, 10000, 1)));
 
 
   // Always drop but give more than one item
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_REDSTONE_ORE, new Drop(ITEM_REDSTONE, 10000, 4)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_CLAY, new Drop(ITEM_CLAY_BALLS, 10000, 4)));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_SNOW_BLOCK, new Drop(ITEM_SNOWBALL, 10000, 4)));
-  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_FURNACE, new Drop(BLOCK_FURNACE, 10000, 1)));
-  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_BURNING_FURNACE, new Drop(BLOCK_FURNACE, 10000, 1)));
-  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_CHEST, new Drop(BLOCK_CHEST, 10000, 1)));
-  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_WORKBENCH, new Drop(BLOCK_WORKBENCH, 10000, 1)));
+  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_DOUBLE_STEP, new Drop(BLOCK_STEP, 10000, 2)));
 
   // Blocks that drop items by chance
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_GRAVEL, new Drop(ITEM_FLINT, 850, 1, new Drop(BLOCK_GRAVEL, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_LEAVES, new Drop(BLOCK_SAPLING, 1200, 1)));
-  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_SIGN_POST, new Drop(ITEM_SIGN, 10000, 1)));
-  BLOCKDROPS.insert(std::pair<uint8_t, Drop*>(BLOCK_WALL_SIGN, new Drop(ITEM_SIGN, 10000, 1)));
 
   // Blocks that drop nothing:
   // BLOCK_TNT, BLOCK_GLASS, BLOCK_MOB_SPAWNER
