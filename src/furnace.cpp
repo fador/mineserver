@@ -128,11 +128,14 @@ void Furnace::smelt()
       if (outputSlot->getType() == -1)
       {
         outputSlot->setType(creationID);
-        outputSlot->setCount(0);
+        outputSlot->setCount(1);
+        outputSlot->setHealth(createList[inputSlot->getType()].meta);
+        inputSlot->setCount(inputSlot->getCount() - 1);
+        data->cookTime = 0;
       }
 
       // Ok - now check if the current output slot contains the same stuff
-      if (outputSlot->getType() == creationID)
+      if (outputSlot->getType() == creationID && data->cookTime != 0)
       {
         // Increment output and decrememnt the input source
         outputSlot->setCount(outputSlot->getCount() + createList[inputSlot->getType()].count);
