@@ -290,12 +290,8 @@ void MapGen::generateWithNoise(int x, int z, int map)
 #endif
   sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
 
-  // Winterland
-  Block topBlock = BLOCK_GRASS;
-  if (winterEnabled)
-  {
-    topBlock = BLOCK_SNOW;
-  }
+  // Winterland or Summerland
+  Block topBlock = winterEnabled ? BLOCK_SNOW : BLOCK_GRASS;
 
   // Populate blocks in chunk
   int32_t currentHeight;
