@@ -212,6 +212,7 @@ void BlockPlant::timer200()
       }
 
       remBlock(p);
+      continue;
     }
     if (p->count > crop_timeout * 5 && block == BLOCK_CROPS)
     {
