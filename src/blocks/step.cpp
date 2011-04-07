@@ -84,6 +84,25 @@ bool BlockStep::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
     return true;
   }
 
+  //Combine two steps
+  if (newblock == BLOCK_STEP && oldblock == BLOCK_STEP && direction == BLOCK_TOP)
+  {
+    Item item = user->inv[user->curItem + 36];
+
+    if (item.getHealth() == oldmeta)
+    {
+      Mineserver::get()->map(map)->setBlock(x, y, z, (char)BLOCK_DOUBLE_STEP, oldmeta);
+      Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)BLOCK_DOUBLE_STEP, oldmeta);
+      revertBlock(user, x, y, z, map);
+      return true;
+    }
+    else
+    {
+      revertBlock(user, x, y, z, map);
+      return true;
+    }
+  }
+
   /* Check block below allows blocks placed on top */
   if (!this->isBlockStackable(oldblock))
   {
@@ -91,7 +110,6 @@ bool BlockStep::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
     return true;
   }
 
-  /* move the x,y,z coords dependent upon placement direction */
   if (!this->translateDirection(&x, &y, &z, map, direction))
   {
     revertBlock(user, x, y, z, map);
@@ -110,10 +128,10 @@ bool BlockStep::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
     return true;
   }
 
-  direction = user->relativeToBlock(x, y, z);
-  Mineserver::get()->map(map)->setBlock(x, y, z, newblock, direction);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, newblock, direction);
+  Item item = user->inv[user->curItem + 36];
 
+  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, item.getHealth());
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, item.getHealth());
   return false;
 }
 

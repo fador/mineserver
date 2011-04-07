@@ -58,9 +58,9 @@ bool BlockDefault::onBroken(User* user, int8_t status, int32_t x, int8_t y, int3
     revertBlock(user, x, y, z, map);
     return true;
   }
-  if (block != BLOCK_GRAY_CLOTH && block != BLOCK_WOOD)
+  if (block != BLOCK_WOOL && block != BLOCK_WOOD && block != BLOCK_STEP)
   {
-    // Only Cloth and Wood have colour metadata
+    // Only Cloth, Wood and Step have colour metadata
     meta = 0;
   }
 
@@ -87,15 +87,6 @@ bool BlockDefault::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
   if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
-    return true;
-  }
-
-  //Combine two steps
-  //NOTE: I added this back. Was this removed intentionally?
-  if (newblock == BLOCK_STEP && oldblock == BLOCK_STEP && direction == BLOCK_TOP)
-  {
-    Mineserver::get()->map(map)->setBlock(x, y, z, (char)BLOCK_DOUBLE_STEP, 0);
-    Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)BLOCK_DOUBLE_STEP, 0);
     return true;
   }
 

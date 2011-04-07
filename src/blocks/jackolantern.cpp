@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2011, The Mineserver Project
-  All rights reserved.
+   Copyright (c) 2011, The Mineserver Project
+   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -23,32 +23,56 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #include "../mineserver.h"
 #include "../map.h"
 
-#include "falling.h"
+#include "jackolantern.h"
 
-bool BlockFalling::affectedBlock(int block)
+bool Blockjackolantern::affectedBlock(int block)
 {
   switch (block)
   {
-  case BLOCK_SAND:
-  case BLOCK_SLOW_SAND:
-  case BLOCK_GRAVEL:
+  case BLOCK_JACK_O_LANTERN:
     return true;
   }
   return false;
 }
 
 
-void BlockFalling::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void Blockjackolantern::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-  this->onNeighbourMove(user, oldblock, x, y, z, map, direction);
+
 }
 
-bool BlockFalling::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void Blockjackolantern::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+{
+
+}
+
+void Blockjackolantern::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+{
+
+}
+
+bool Blockjackolantern::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+{
+  uint8_t block, meta;
+  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
+
+  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+
+  this->spawnBlockItem(x, y, z, map, block, 0);
+  return false;
+}
+
+void Blockjackolantern::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+{
+}
+
+bool Blockjackolantern::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t oldblock;
   uint8_t oldmeta;
@@ -85,66 +109,34 @@ bool BlockFalling::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
     return true;
   }
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, 0);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);
+  direction = user->relativeToBlock(x, y, z);
 
-  applyPhysics(user, x, y, z, map);
+  switch (direction)
+  {
+  case BLOCK_EAST:
+    direction = BLOCK_SOUTH;
+    break;
+  case BLOCK_BOTTOM:
+    direction = BLOCK_EAST;
+    break;
+  case BLOCK_NORTH:
+    direction = BLOCK_NORTH;
+    break;
+  case BLOCK_SOUTH:
+    direction = BLOCK_BOTTOM;
+    break;
+  }
+
+  Mineserver::get()->map(map)->setBlock(x, y, z, newblock, direction);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, newblock, direction);
+
   return false;
 }
 
-void BlockFalling::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void Blockjackolantern::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-  uint8_t block;
-  uint8_t meta;
-
-  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
-  if (block == BLOCK_SAND || block == BLOCK_SLOW_SAND ||block == BLOCK_GRAVEL)
-  {
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
-  {
-    return;
-  }
-
-  applyPhysics(user, x, y, z, map);
-  }
 }
 
-void BlockFalling::applyPhysics(User* user, int32_t x, int8_t y, int32_t z, int map)
+void Blockjackolantern::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-  uint8_t fallblock, block;
-  uint8_t fallmeta, meta;
-
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &fallblock, &fallmeta))
-  {
-    return;
-  }
-
-  while (Mineserver::get()->map(map)->getBlock(x, y - 1, z, &block, &meta))
-  {
-    switch (block)
-    {
-    case BLOCK_AIR:
-    case BLOCK_WATER:
-    case BLOCK_STATIONARY_WATER:
-    case BLOCK_LAVA:
-    case BLOCK_STATIONARY_LAVA:
-      break;
-    default:
-      // stop falling
-      return;
-      break;
-    }
-
-    // Destroy original block
-    Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-    Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-
-    y--;
-
-    Mineserver::get()->map(map)->setBlock(x, y, z, fallblock, fallmeta);
-    Mineserver::get()->map(map)->sendBlockChange(x, y, z, fallblock, fallmeta);
-
-    this->notifyNeighbours(x, y + 1, z, map, "onNeighbourMove", user, block, BLOCK_BOTTOM);
-  }
 }
-

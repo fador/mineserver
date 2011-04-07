@@ -34,7 +34,7 @@ class User;
 blocktypes in the game. These functions are reused and mixed with multiple
 different blocks. */
 
-class BlockDyed: public BlockBasic
+class BlockWool: public BlockBasic
 {
 public:
   bool affectedBlock(int block);

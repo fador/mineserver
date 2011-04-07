@@ -248,7 +248,7 @@ void HeavenGen::generateWithNoise(int x, int z, int map)
 
         if (bY > n - h && bY < n)
         {
-          *curBlock = BLOCK_GRAY_CLOTH;
+          *curBlock = BLOCK_WOOL;
           *curData = (bYbX & 1) ? col[rand() % 2] : col[rand() % 2] << 4;
           continue;
         }
@@ -382,7 +382,7 @@ void HeavenGen::AddOre(int x, int z, int map, uint8_t type)
 
     Mineserver::get()->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
     // No ore in caves
-    if (block != BLOCK_GRAY_CLOTH)
+    if (block != BLOCK_WOOL)
     {
       continue;
     }

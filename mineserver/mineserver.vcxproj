@@ -17,10 +17,10 @@
     <ClCompile Include="..\src\blocks\chest.cpp" />
     <ClCompile Include="..\src\blocks\default.cpp" />
     <ClCompile Include="..\src\blocks\door.cpp" />
-    <ClCompile Include="..\src\blocks\dyed.cpp" />
     <ClCompile Include="..\src\blocks\falling.cpp" />
     <ClCompile Include="..\src\blocks\fire.cpp" />
     <ClCompile Include="..\src\blocks\blockfurnace.cpp" />
+    <ClCompile Include="..\src\blocks\jackolantern.cpp" />
     <ClCompile Include="..\src\blocks\ladder.cpp" />
     <ClCompile Include="..\src\blocks\leaves.cpp" />
     <ClCompile Include="..\src\blocks\liquid.cpp" />
@@ -34,6 +34,8 @@
     <ClCompile Include="..\src\blocks\step.cpp" />
     <ClCompile Include="..\src\blocks\torch.cpp" />
     <ClCompile Include="..\src\blocks\tracks.cpp" />
+    <ClCompile Include="..\src\blocks\wood.cpp" />
+    <ClCompile Include="..\src\blocks\wool.cpp" />
     <ClCompile Include="..\src\blocks\workbench.cpp" />
     <ClCompile Include="..\src\chat.cpp" />
     <ClCompile Include="..\src\cliScreen.cpp" />
@@ -79,10 +81,10 @@
     <ClInclude Include="..\src\blocks\chest.h" />
     <ClInclude Include="..\src\blocks\default.h" />
     <ClInclude Include="..\src\blocks\door.h" />
-    <ClInclude Include="..\src\blocks\dyed.h" />
     <ClInclude Include="..\src\blocks\falling.h" />
     <ClInclude Include="..\src\blocks\fire.h" />
     <ClInclude Include="..\src\blocks\blockfurnace.h" />
+    <ClInclude Include="..\src\blocks\jackolantern.h" />
     <ClInclude Include="..\src\blocks\ladder.h" />
     <ClInclude Include="..\src\blocks\leaves.h" />
     <ClInclude Include="..\src\blocks\liquid.h" />
@@ -96,6 +98,8 @@
     <ClInclude Include="..\src\blocks\step.h" />
     <ClInclude Include="..\src\blocks\torch.h" />
     <ClInclude Include="..\src\blocks\tracks.h" />
+    <ClInclude Include="..\src\blocks\wood.h" />
+    <ClInclude Include="..\src\blocks\wool.h" />
     <ClInclude Include="..\src\blocks\workbench.h" />
     <ClInclude Include="..\src\chat.h" />
     <ClInclude Include="..\src\chunkmap.h" />
