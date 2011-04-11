@@ -676,7 +676,7 @@ void Map::spreadLight(int x, int y, int z, int light_value, sChunk* chunk, uint8
       {
         if      (type == 0) setLight(x_toset, y_toset, z_toset, lightNew, 0, 1, chunk);
         else if (type == 1) setLight(x_toset, y_toset, z_toset, 0, lightNew, 2, chunk);
-        spreadLight(x_toset, y_toset, z_toset, light_value, chunk, type);
+        spreadLight(x_toset, y_toset, z_toset, lightNew, chunk, type);
       }
     }
   }
