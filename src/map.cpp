@@ -563,9 +563,14 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
 
         getLight(absolute_x, block_y, absolute_z, &skylight_s, &blocklight_s, chunk);
 
-        if (skylight_s || blocklight_s)
+        if (skylight_s)
         {
-          spreadLight(absolute_x, block_y, absolute_z, skylight_s, blocklight_s);
+          spreadLight(absolute_x, block_y, absolute_z, skylight_s, 0);
+        }
+
+        if (blocklight_s)
+        {
+          spreadLight(absolute_x, block_y, absolute_z, blocklight_s, 1);
         }
       }
     }
@@ -584,38 +589,19 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
   return true;
 }
 
-bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight)
+void Map::spreadLight(int x, int y, int z, int light_value, uint8_t type /* 0: sky, 1: block */)
 {
   if ((y < 0) || (y > 127))
   {
     //LOGLF("Invalid y value (spreadLight)");
     // For sky style maps or maps with holes, this spams.
-    return false;
+    return;
   }
-
-  int chunk_x = blockToChunk(x);
-  int chunk_z = blockToChunk(z);
-
-  sChunk* chunk = getMapData(chunk_x, chunk_z, false);
-
-  if (!chunk)
-  {
-    LOGLF("Loading chunk failed (spreadLight)");
-    return false;
-  }
-
-  return spreadLight(x, y, z, skylight, blocklight, chunk);
-}
-
-bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk* chunk)
-{
-
-  uint8_t block, meta;
 
   // If no light, stop!
-  if ((skylight < 1) && (blocklight < 1))
+  if (light_value < 1)
   {
-    return false;
+    return;
   }
 
   for (int direction = 0; direction < 6; direction++)
@@ -659,47 +645,31 @@ bool Map::spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk*
       break;
     }
 
-    if (getBlock(x_toset, y_toset, z_toset, &block, &meta, false))
+    sChunk * chunk = getMapData(blockToChunk(x_toset), blockToChunk(z_toset), false);
+
+    if (chunk != NULL)
     {
-      uint8_t skylightCurrent, blocklightCurrent;
-      int skylightNew, blocklightNew;
-      bool spread = false;
+      uint8_t block, meta, skylightCurrent, blocklightCurrent;
 
-      skylightNew = skylight - stopLight[block] - 1;
-      if (skylightNew < 0)
-      {
-        skylightNew = 0;
-      }
-
-      blocklightNew = blocklight - stopLight[block] - 1;
-      if (blocklightNew < 0)
-      {
-        blocklightNew = 0;
-      }
+      getBlock(x_toset, y_toset, z_toset, &block, &meta, false, chunk);
 
       getLight(x_toset, y_toset, z_toset, &skylightCurrent, &blocklightCurrent, chunk);
 
-      if (skylightNew > skylightCurrent)
-      {
-        skylightCurrent = skylightNew;
-        spread = true;
-      }
+      const int lightNew = std::max(0, light_value - int(stopLight[block]) - 1);
 
-      if (blocklightNew > blocklightCurrent)
+      if (lightNew > (type == 0 ? skylightCurrent : blocklightCurrent))
       {
-        blocklightCurrent = blocklightNew;
-        spread = true;
-      }
-
-      if (spread)
-      {
-        setLight(x_toset, y_toset, z_toset, skylightCurrent, blocklightCurrent, 4, chunk);
-        spreadLight(x_toset, y_toset, z_toset, skylightCurrent, blocklightCurrent, chunk);
+        if      (type == 0) setLight(x_toset, y_toset, z_toset, lightNew, 0, 1, chunk);
+        else if (type == 1) setLight(x_toset, y_toset, z_toset, 0, lightNew, 2, chunk);
+        spreadLight(x_toset, y_toset, z_toset, lightNew, type);
       }
     }
+    else
+    {
+      LOGLF("Loading chunk failed (spreadLight)");
+      return;
+    }
   }
-
-  return true;
 }
 
 bool Map::getBlock(int x, int y, int z, uint8_t* type, uint8_t* meta, bool generate)

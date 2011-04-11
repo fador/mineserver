@@ -128,8 +128,7 @@ public:
   bool getLight(int x, int y, int z, uint8_t* blocklight, uint8_t* skylight, sChunk* chunk);
   bool setLight(int x, int y, int z, int blocklight, int skylight, int setLight);
   bool setLight(int x, int y, int z, int blocklight, int skylight, int setLight, sChunk* chunk);
-  bool spreadLight(int x, int y, int z, int skylight, int blocklight);
-  bool spreadLight(int x, int y, int z, int skylight, int blocklight, sChunk* chunk);
+  void spreadLight(int x, int y, int z, int light_value, uint8_t type /* 0: sky, 1: block */);
 
   // Block value/meta get/set
   bool getBlock(int x, int y, int z, uint8_t* type, uint8_t* meta, bool generate = true);
