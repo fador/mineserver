@@ -598,25 +598,6 @@ void Map::spreadLight(int x, int y, int z, int light_value, uint8_t type /* 0: s
     return;
   }
 
-  const int chunk_x = blockToChunk(x);
-  const int chunk_z = blockToChunk(z);
-
-  sChunk* chunk = getMapData(chunk_x, chunk_z, false);
-
-  if (!chunk)
-  {
-    LOGLF("Loading chunk failed (spreadLight)");
-    return;
-  }
-
-  spreadLight(x, y, z, light_value, chunk, type);
-}
-
-void Map::spreadLight(int x, int y, int z, int light_value, sChunk* chunk, uint8_t type)
-{
-
-  uint8_t block, meta;
-
   // If no light, stop!
   if (light_value < 1)
   {
@@ -664,20 +645,29 @@ void Map::spreadLight(int x, int y, int z, int light_value, sChunk* chunk, uint8
       break;
     }
 
-    if (getBlock(x_toset, y_toset, z_toset, &block, &meta, false))
-    {
-      uint8_t skylightCurrent, blocklightCurrent;
+    sChunk * chunk = getMapData(blockToChunk(x_toset), blockToChunk(z_toset), false);
 
-      const int lightNew = std::max(0, light_value - stopLight[block] - 1);
+    if (chunk != NULL)
+    {
+      uint8_t block, meta, skylightCurrent, blocklightCurrent;
+
+      getBlock(x_toset, y_toset, z_toset, &block, &meta, false, chunk);
 
       getLight(x_toset, y_toset, z_toset, &skylightCurrent, &blocklightCurrent, chunk);
+
+      const int lightNew = std::max(0, light_value - int(stopLight[block]) - 1);
 
       if (lightNew > (type == 0 ? skylightCurrent : blocklightCurrent))
       {
         if      (type == 0) setLight(x_toset, y_toset, z_toset, lightNew, 0, 1, chunk);
         else if (type == 1) setLight(x_toset, y_toset, z_toset, 0, lightNew, 2, chunk);
-        spreadLight(x_toset, y_toset, z_toset, lightNew, chunk, type);
+        spreadLight(x_toset, y_toset, z_toset, lightNew, type);
       }
+    }
+    else
+    {
+      LOGLF("Loading chunk failed (spreadLight)");
+      return;
     }
   }
 }
