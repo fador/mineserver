@@ -617,30 +617,38 @@ bool blockPlacePreFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int1
       {
         if(cuboidMap[user].block == block)
         {
-          if(cuboidMap[user].y == y)
-          {
             int xstart,xend;
+            int ystart,yend;
             int zstart,zend;
             xstart=(x<cuboidMap[user].x)?x:cuboidMap[user].x;
             xend=(x<cuboidMap[user].x)?cuboidMap[user].x:x;
 
+            ystart=(y<cuboidMap[user].y)?y:cuboidMap[user].y;
+            yend=(y<cuboidMap[user].y)?cuboidMap[user].y:y;
+
             zstart=(z<cuboidMap[user].z)?z:cuboidMap[user].z;
             zend=(z<cuboidMap[user].z)?cuboidMap[user].z:z;
+            if((xend-xstart) * (yend-ystart) * (zend-zstart) > 10000)
+            {
+              mineserver->chat.sendmsgTo(user.c_str(),"Area too large!");
+              return true;
+            }
             for(int xpos = xstart; xpos <= xend; xpos ++)
             {
               for(int zpos = zstart;  zpos <= zend; zpos ++)
               {                
-                mineserver->map.setBlock(xpos,y,zpos,block,0);
+                for(int ypos = ystart;  ypos <= yend; ypos ++)
+                {
+                  mineserver->map.setBlock(xpos,ypos,zpos,block,0);
+                }
               }
             }
-            mineserver->chat.sendmsgTo(user.c_str(),"Cuboid done");
-          }
+          mineserver->chat.sendmsgTo(user.c_str(),"Cuboid done");
+          cuboidMap.erase(cuboidMap.find(user));
         }
-        cuboidMap.erase(cuboidMap.find(user));
       }
     }
   }
-
   return true;
 }
 
