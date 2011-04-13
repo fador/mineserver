@@ -109,16 +109,6 @@ public:
     remCallback(reinterpret_cast<voidF>(function));
   }
 
-  virtual bool doUntilTrueVA(va_list vl)
-  {
-    return false;
-  }
-  virtual bool doUntilFalseVA(va_list vl)
-  {
-    return false;
-  }
-  virtual void doAllVA(va_list vl) {}
-
   inline size_t numCallbacks() const
   {
     return m_callbacks.size();
@@ -126,6 +116,11 @@ public:
 
   inline       CallbackStore& getCallbacks()       { return m_callbacks; }
   inline const CallbackStore& getCallbacks() const { return m_callbacks; }
+
+  /// All the work is done by the descendant classes.
+  virtual bool doUntilTrueVA(va_list vl)  = 0;
+  virtual bool doUntilFalseVA(va_list vl) = 0;
+  virtual void doAllVA(va_list vl)        = 0;
 
 protected:
 
