@@ -241,36 +241,6 @@ void Plugin::unloadPlugin(const std::string name)
   }
 }
 
-bool Plugin::hasHook(const std::string& name) const
-{
-  return m_hooks.find(name) != m_hooks.end();
-}
-
-Hook* Plugin::getHook(const std::string& name) const
-{
-  std::map<std::string, Hook*>::const_iterator hook = m_hooks.find(name);
-
-  if (hook == m_hooks.end())
-  {
-    return NULL;
-  }
-
-  return hook->second;
-}
-
-void Plugin::setHook(const std::string& name, Hook* hook)
-{
-  m_hooks[name] = hook;
-}
-
-void Plugin::remHook(const std::string& name)
-{
-  if (hasHook(name))
-  {
-    m_hooks.erase(name);
-  }
-}
-
 bool Plugin::hasPluginVersion(const std::string& name) const
 {
   return m_pluginVersions.find(name) != m_pluginVersions.end();

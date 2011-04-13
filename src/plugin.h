@@ -30,6 +30,7 @@
 
 #include <string>
 #include <map>
+#include <tr1/unordered_map>
 #include <vector>
 #include <ctime>
 
@@ -83,24 +84,35 @@
 class Plugin
 {
 public:
+
+  typedef std::tr1::unordered_map<std::string, Hook*> HookMap;
+
   // Hook registry stuff
-  bool  hasHook(const std::string& name) const;
-  Hook* getHook(const std::string& name) const;
-  void  setHook(const std::string& name, Hook* hook);
-  void  remHook(const std::string& name);
+  inline bool  hasHook(const HookMap::key_type& name) const { return m_hooks.count(name) > 0; }
+  inline HookMap::mapped_type getHook(const HookMap::key_type& name) const
+  {
+    HookMap::const_iterator hook = m_hooks.find(name);
+    return hook == m_hooks.end() ? NULL : hook->second;
+  }
+  inline void  setHook(const HookMap::key_type& name, Hook* hook) { m_hooks[name] = hook; }
+  inline void  remHook(const HookMap::key_type& name) { m_hooks.erase(name); /* erases 0 or 1 elements */ }
+
   // Load/Unload plugins
   bool loadPlugin(const std::string& name, const std::string& path = "", std::string alias = "");
   void unloadPlugin(const std::string name);
+
   // Plugin version registry
   bool  hasPluginVersion(const std::string& name) const;
   float getPluginVersion(const std::string& name) const;
   void  setPluginVersion(const std::string& name, float version);
   void  remPluginVersion(const std::string& name);
+
   // Pointer registry stuff
   bool  hasPointer(const std::string& name) const;
   void* getPointer(const std::string& name) const;
   void  setPointer(const std::string& name, void* pointer);
   void  remPointer(const std::string& name);
+
   // Create default hooks
   Plugin()
   {
@@ -135,38 +147,33 @@ public:
     setHook("LogPost", new Hook3<bool, int, const char*, const char*>);
     setHook("PlayerChatCommand", new Hook4<bool, const char*, const char*, int, const char**>);
     setHook("PlayerRespawn", new Hook1<bool, const char*>);
-  setHook("gotAttacked", new Hook2<bool, const char*, int32_t>);
+    setHook("gotAttacked", new Hook2<bool, const char*, int32_t>);
 
     init();
   }
   // Remove existing hooks
   ~Plugin()
   {
-    std::map<std::string, Hook*>::iterator it = m_hooks.begin();
-    for (; it != m_hooks.end(); ++it)
+    for (HookMap::iterator it = m_hooks.begin(); it != m_hooks.end(); ++it)
     {
       delete it->second;
     }
+
     m_hooks.clear();
 
     free();
   }
 
   void init();
+
   void free();
-  std::vector<BlockBasic*> getBlockCB()
-  {
-    return BlockCB;
-  }
-  std::vector<ItemBasic*> getItemCB()
-  {
-    return ItemCB;
-  }
 
+  inline const std::vector<BlockBasic*> & getBlockCB() const { return BlockCB; }
 
+  inline const std::vector<ItemBasic*> & getItemCB() const { return ItemCB; }
 
 private:
-  std::map<std::string, Hook*> m_hooks;
+  HookMap m_hooks;
   std::map<std::string, LIBRARY_HANDLE> m_libraryHandles;
   std::map<std::string, void*> m_pointers;
   std::map<std::string, float> m_pluginVersions;
