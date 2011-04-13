@@ -131,12 +131,12 @@ void Plugin::init()
 
 void Plugin::free()
 {
-  std::vector<BlockBasic*>::iterator it = BlockCB.begin();
-  for (; it != BlockCB.end(); ++it)
+  for (std::vector<BlockBasic*>::iterator it = BlockCB.begin(); it != BlockCB.end(); ++it)
   {
     delete *it;
   }
 }
+
 typedef void (*pfms)(mineserver_pointer_struct*);
 typedef void (*pfv)();
 
@@ -238,65 +238,5 @@ void Plugin::unloadPlugin(const std::string name)
   else
   {
     LOG(WARNING, "Plugin", name + " is not loaded!");
-  }
-}
-
-bool Plugin::hasPluginVersion(const std::string& name) const
-{
-  return m_pluginVersions.find(name) != m_pluginVersions.end();
-}
-
-float Plugin::getPluginVersion(const std::string& name) const
-{
-  std::map<std::string, float>::const_iterator pluginVersion = m_pluginVersions.find(name);
-
-  if (pluginVersion == m_pluginVersions.end())
-  {
-    return 0.0f;
-  }
-
-  return pluginVersion->second;
-}
-
-void Plugin::setPluginVersion(const std::string& name, float version)
-{
-  m_pluginVersions[name] = version;
-}
-
-void Plugin::remPluginVersion(const std::string& name)
-{
-  if (hasPluginVersion(name))
-  {
-    m_pluginVersions.erase(name);
-  }
-}
-
-bool Plugin::hasPointer(const std::string& name) const
-{
-  return m_pointers.find(name) != m_pointers.end();
-}
-
-void* Plugin::getPointer(const std::string& name) const
-{
-  std::map<std::string, void*>::const_iterator pointer = m_pointers.find(name);
-
-  if (pointer == m_pointers.end())
-  {
-    return NULL;
-  }
-
-  return pointer->second;
-}
-
-void Plugin::setPointer(const std::string& name, void* pointer)
-{
-  m_pointers[name] = pointer;
-}
-
-void Plugin::remPointer(const std::string& name)
-{
-  if (hasPointer(name))
-  {
-    m_pointers.erase(name);
   }
 }

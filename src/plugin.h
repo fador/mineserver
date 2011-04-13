@@ -29,7 +29,6 @@
 #define _PLUGIN_H
 
 #include <string>
-#include <map>
 #include <tr1/unordered_map>
 #include <vector>
 #include <ctime>
@@ -86,6 +85,9 @@ class Plugin
 public:
 
   typedef std::tr1::unordered_map<std::string, Hook*> HookMap;
+  typedef std::tr1::unordered_map<std::string, LIBRARY_HANDLE> LibHandleMap;
+  typedef std::tr1::unordered_map<std::string, void*> PointerMap;
+  typedef std::tr1::unordered_map<std::string, float> VersionMap;
 
   // Hook registry stuff
   inline bool  hasHook(const HookMap::key_type& name) const { return m_hooks.count(name) > 0; }
@@ -94,7 +96,7 @@ public:
     HookMap::const_iterator hook = m_hooks.find(name);
     return hook == m_hooks.end() ? NULL : hook->second;
   }
-  inline void  setHook(const HookMap::key_type& name, Hook* hook) { m_hooks[name] = hook; }
+  inline void  setHook(const HookMap::key_type& name, HookMap::mapped_type hook) { m_hooks[name] = hook; }
   inline void  remHook(const HookMap::key_type& name) { m_hooks.erase(name); /* erases 0 or 1 elements */ }
 
   // Load/Unload plugins
@@ -102,16 +104,24 @@ public:
   void unloadPlugin(const std::string name);
 
   // Plugin version registry
-  bool  hasPluginVersion(const std::string& name) const;
-  float getPluginVersion(const std::string& name) const;
-  void  setPluginVersion(const std::string& name, float version);
-  void  remPluginVersion(const std::string& name);
+  inline bool  hasPluginVersion(const VersionMap::key_type& name) const { return m_pluginVersions.find(name) != m_pluginVersions.end(); }
+  inline float getPluginVersion(const VersionMap::key_type& name) const
+  {
+    VersionMap::const_iterator pluginVersion = m_pluginVersions.find(name);
+    return pluginVersion == m_pluginVersions.end() ? 0 : pluginVersion->second;
+  }
+  inline void  setPluginVersion(const VersionMap::key_type& name, VersionMap::mapped_type version) { m_pluginVersions[name] = version; }
+  inline void  remPluginVersion(const VersionMap::key_type& name) { m_pluginVersions.erase(name); }
 
   // Pointer registry stuff
-  bool  hasPointer(const std::string& name) const;
-  void* getPointer(const std::string& name) const;
-  void  setPointer(const std::string& name, void* pointer);
-  void  remPointer(const std::string& name);
+  inline bool  hasPointer(const PointerMap::key_type& name) const { return m_pointers.find(name) != m_pointers.end(); }
+  inline void* getPointer(const PointerMap::key_type& name) const
+  {
+    PointerMap::const_iterator pointer = m_pointers.find(name);
+    return pointer == m_pointers.end() ? NULL : pointer->second;
+  }
+  inline void  setPointer(const PointerMap::key_type& name, PointerMap::mapped_type pointer) {m_pointers[name] = pointer; }
+  inline void  remPointer(const PointerMap::key_type& name) { m_pointers.erase(name); }
 
   // Create default hooks
   Plugin()
@@ -173,10 +183,10 @@ public:
   inline const std::vector<ItemBasic*> & getItemCB() const { return ItemCB; }
 
 private:
-  HookMap m_hooks;
-  std::map<std::string, LIBRARY_HANDLE> m_libraryHandles;
-  std::map<std::string, void*> m_pointers;
-  std::map<std::string, float> m_pluginVersions;
+  HookMap      m_hooks;
+  LibHandleMap m_libraryHandles;
+  PointerMap   m_pointers;
+  VersionMap   m_pluginVersions;
 
   std::vector<BlockBasic*> BlockCB;
   std::vector<ItemBasic*> ItemCB;
