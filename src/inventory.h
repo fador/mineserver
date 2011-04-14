@@ -39,47 +39,34 @@ public:
   void setType(int16_t type);
   void setCount(int8_t count);
   void setHealth(int16_t healt);
-  int16_t getType()
-  {
-    return type;
-  }
-  int8_t getCount()
-  {
-    return count;
-  }
-  int16_t getHealth()
-  {
-    return health;
-  }
+
+  inline int16_t getType()   const { return type;   }
+  inline int8_t  getCount()  const { return count;  }
+  inline int16_t getHealth() const { return health; }
+
   int16_t itemHealth(int type);
   void decCount(int c = 1);
   void incHealth(int c = 1);
   void sendUpdate();
   bool ready;
+
 private:
-  int slot;
   User* player;
+  int slot;
   int16_t type;
   int8_t count;
   int16_t health;
+
 public:
-  Item()
+  Item(User* player = NULL, int slot = -1)
+    :
+    ready(false),
+    player(player),
+    slot(slot),
+    type(-1),
+    count(0),
+    health(0)
   {
-    player = NULL;
-    slot = -1;
-    type   = -1;
-    count  = 0;
-    health = 0;
-    ready = false;
-  }
-  Item(User* player, int slot)
-  {
-    this->player = player;
-    this->slot = slot;
-    type   = -1;
-    count  = 0;
-    health = 0;
-    ready = false;
   }
 };
 
