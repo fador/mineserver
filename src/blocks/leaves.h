@@ -29,33 +29,57 @@
 #define _BLOCKS_LEAVES_H
 
 #include <time.h>
-#include <vector>
+#include <set>
 
 #include "basic.h"
 
 struct Decay
 {
-  Decay(time_t decayStart, int32_t x, uint8_t y, int32_t z, int map)
+  Decay(time_t decayStart, int32_t x, int32_t y, int32_t z, int32_t map)
     : decayStart(decayStart),
       x(x),
-      z(z),
       y(y),
+      z(z),
       map(map)
-  {}
+  {
+  }
+
+  inline bool operator<(const Decay& o) const
+  {
+    return decayStart > o.decayStart               // Oldest first
+      || (decayStart == o.decayStart && x < o.x)
+      || (decayStart == o.decayStart && x == o.x && y < o.y)
+      || (decayStart == o.decayStart && x == o.x && y == o.y && z < o.z)
+      || (decayStart == o.decayStart && x == o.x && y == o.y && z == o.z && map < o.map);
+  }
+
   time_t decayStart;
-  int32_t x, z;
-  int y, map;
+  int32_t x, y, z, map;
 };
 
 class BlockLeaves: public BlockBasic
 {
-  std::vector<Decay> decaying;
+  std::set<Decay> decaying;
+
+  struct DecayFinder
+  {
+    DecayFinder(int32_t x, int32_t y, int32_t z, int32_t map) : x(x), y(y), z(z), map(map) { }
+    inline bool operator()(const Decay& d) const { return x == d.x && y == d.y && z == d.z && map == d.map; }
+  private:
+    int32_t x, y, z, map;
+  };
+
+
 public:
-  bool affectedBlock(int block);
-  BlockLeaves();
+
+  inline bool affectedBlock(int block) const { return block == BLOCK_LEAVES; }
+
   bool onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
+
   void onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
+
   void timer200();
+
 };
 
 #endif //_BLOCKS_LEAVES

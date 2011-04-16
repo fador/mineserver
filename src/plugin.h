@@ -89,6 +89,9 @@ public:
   typedef std::tr1::unordered_map<std::string, void*> PointerMap;
   typedef std::tr1::unordered_map<std::string, float> VersionMap;
 
+  typedef std::vector<BlockBasic*> BlockCBs;
+  typedef std::vector<ItemBasic*>  ItemCBs;
+
    Plugin();
   ~Plugin();
 
@@ -130,9 +133,9 @@ public:
 
   void free();
 
-  inline const std::vector<BlockBasic*> & getBlockCB() const { return BlockCB; }
+  inline const BlockCBs & getBlockCB() const { return m_block_CBs; }
 
-  inline const std::vector<ItemBasic*> & getItemCB() const { return ItemCB; }
+  inline const ItemCBs  & getItemCB()  const { return m_item_CBs; }
 
 private:
   HookMap      m_hooks;
@@ -140,8 +143,8 @@ private:
   PointerMap   m_pointers;
   VersionMap   m_pluginVersions;
 
-  std::vector<BlockBasic*> BlockCB;
-  std::vector<ItemBasic*> ItemCB;
+  BlockCBs     m_block_CBs;
+  ItemCBs      m_item_CBs;
 };
 
 #endif

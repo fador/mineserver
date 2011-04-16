@@ -123,67 +123,67 @@ void Plugin::init()
 {
   // Create Block* objects and put them away so we can delete them later
   BlockRedstone* redstoneblock = new BlockRedstone();
-  BlockCB.push_back(redstoneblock);
+  m_block_CBs.push_back(redstoneblock);
   BlockWood* woodblock = new BlockWood();
-  BlockCB.push_back(woodblock);
+  m_block_CBs.push_back(woodblock);
   BlockFalling* fallingblock = new BlockFalling();
-  BlockCB.push_back(fallingblock);
+  m_block_CBs.push_back(fallingblock);
   BlockTorch* torchblock = new BlockTorch();
-  BlockCB.push_back(torchblock);
+  m_block_CBs.push_back(torchblock);
   BlockPlant* plantblock = new BlockPlant();
-  BlockCB.push_back(plantblock);
+  m_block_CBs.push_back(plantblock);
   BlockSnow* snowblock = new BlockSnow();
-  BlockCB.push_back(snowblock);
+  m_block_CBs.push_back(snowblock);
   BlockLiquid* liquidblock = new BlockLiquid();
-  BlockCB.push_back(liquidblock);
+  m_block_CBs.push_back(liquidblock);
   BlockFire* fireblock = new BlockFire();
-  BlockCB.push_back(fireblock);
+  m_block_CBs.push_back(fireblock);
   BlockStair* stairblock = new BlockStair();
-  BlockCB.push_back(stairblock);
+  m_block_CBs.push_back(stairblock);
   BlockChest* chestblock = new BlockChest();
-  BlockCB.push_back(chestblock);
+  m_block_CBs.push_back(chestblock);
   BlockDoor* doorblock = new BlockDoor();
-  BlockCB.push_back(doorblock);
+  m_block_CBs.push_back(doorblock);
   BlockSign* signblock = new BlockSign();
-  BlockCB.push_back(signblock);
+  m_block_CBs.push_back(signblock);
   BlockTracks* tracksblock = new BlockTracks();
-  BlockCB.push_back(tracksblock);
+  m_block_CBs.push_back(tracksblock);
   BlockLadder* ladderblock = new BlockLadder();
-  BlockCB.push_back(ladderblock);
+  m_block_CBs.push_back(ladderblock);
   BlockLeaves* leavesblock = new BlockLeaves();
-  BlockCB.push_back(leavesblock);
+  m_block_CBs.push_back(leavesblock);
   BlockCake* cakeblock = new BlockCake();
-  BlockCB.push_back(cakeblock);
+  m_block_CBs.push_back(cakeblock);
   BlockNote* noteblock = new BlockNote();
-  BlockCB.push_back(noteblock);
+  m_block_CBs.push_back(noteblock);
   BlockFurnace* furnaceblock = new BlockFurnace();
-  BlockCB.push_back(furnaceblock);
+  m_block_CBs.push_back(furnaceblock);
   BlockWorkbench* workbenchblock = new BlockWorkbench();
-  BlockCB.push_back(workbenchblock);
+  m_block_CBs.push_back(workbenchblock);
   BlockPumpkin* pumpkinblock = new BlockPumpkin();
-  BlockCB.push_back(pumpkinblock);
+  m_block_CBs.push_back(pumpkinblock);
   BlockStep* stepblock = new BlockStep();
-  BlockCB.push_back(stepblock);
+  m_block_CBs.push_back(stepblock);
   BlockBed* bedblock = new BlockBed();
-  BlockCB.push_back(bedblock);
+  m_block_CBs.push_back(bedblock);
   BlockWool* woolblock = new BlockWool();
-  BlockCB.push_back(woolblock);
+  m_block_CBs.push_back(woolblock);
   Blockjackolantern* jackolanternblock = new Blockjackolantern();
-  BlockCB.push_back(jackolanternblock);
+  m_block_CBs.push_back(jackolanternblock);
   BlockDefault* defaultblock = new BlockDefault();
-  BlockCB.push_back(defaultblock);
+  m_block_CBs.push_back(defaultblock);
 
 
   ItemFood* fooditem = new ItemFood();
-  ItemCB.push_back(fooditem);
+  m_item_CBs.push_back(fooditem);
   ItemProjectile* projectileitem = new ItemProjectile();
-  ItemCB.push_back(projectileitem);
+  m_item_CBs.push_back(projectileitem);
 
 }
 
 void Plugin::free()
 {
-  for (std::vector<BlockBasic*>::iterator it = BlockCB.begin(); it != BlockCB.end(); ++it)
+  for (std::vector<BlockBasic*>::iterator it = m_block_CBs.begin(); it != m_block_CBs.end(); ++it)
   {
     delete *it;
   }
