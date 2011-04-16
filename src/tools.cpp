@@ -197,19 +197,25 @@ std::string pathExpandUser(const std::string& path)
   std::string user;
   size_t pos;
 
-  if (path[0] != '~')
+  // The behaviour of this function used to be undefined when path == "".
+  // Please examine it and ensure it behaves as intended in that case.
+
+  if (path.empty() || path[0] != '~')
   {
     return path;
   }
 
   // current config system supports only unix-style paths
+
   pos = path.find('/');
+
   if (pos == std::string::npos)
   {
     pos = path.length();
   }
 
-  user = path.substr(1, pos - 1);
+  user = path.substr(1, pos - 1); // OK, we checked that path is non-empty.
+
   if (!user.empty())
   {
 #ifdef WIN32
@@ -236,7 +242,7 @@ std::string pathExpandUser(const std::string& path)
     out.assign(getenv(ENV_HOME));
   }
 
-  out += '/';
-  if (pos + 1 < path.length()) out += path.substr(pos + 1, path.length());
+  out += pos < path.length() ? path.substr(pos) : "/";
+
   return out;
 }
