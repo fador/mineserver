@@ -18,16 +18,7 @@
 #include "../constants.h"
 #include "../plugin.h"
 
-/*
-inline int32_t abs(int32_t a)  // <cmath> <math.h> and even stdlib (which is included in basic block) doesn't work here for some reason =/
-{
-  if (a < 0)
-  {
-    return -a;
-  }
-  return a;
-}
-*/
+
 bool BlockLeaves::affectedBlock(int block)
 {
   if (block == BLOCK_LEAVES)
@@ -39,17 +30,23 @@ bool BlockLeaves::affectedBlock(int block)
     return false;
   }
 }
+
 BlockLeaves::BlockLeaves()
 {
   decaying.reserve(64);
 }
+
 bool BlockLeaves::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-  for (uint16_t i = 0; i < decaying.size(); i++)
+  for (uint16_t i = 0; i < decaying.size(); )
   {
-    if (decaying[i].x == x && decaying[i].y == y && decaying[i].z == z && decaying[i].map)
+    if (decaying[i].x == x && decaying[i].y == y && decaying[i].z == z && decaying[i].map == map)
     {
       decaying.erase(decaying.begin() + i);
+    }
+    else
+    {
+      ++i;
     }
   }
   return true;
@@ -61,7 +58,7 @@ void BlockLeaves::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int
   {
     for (uint16_t i = 0; i < decaying.size(); i++)
     {
-      if (decaying[i].x == x && decaying[i].y == y && decaying[i].z == z && decaying[i].map)
+      if (decaying[i].x == x && decaying[i].y == y && decaying[i].z == z && decaying[i].map == map)
       {
         return;
       }
@@ -87,11 +84,13 @@ void BlockLeaves::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int
     decaying.push_back(Decay(time(0), x, y, z, map));
   }
 }
-inline void decayIt(Decay decaying)
+inline void decayIt(const Decay & decaying)
 {
   uint8_t block, meta;
   BlockBasic* blockcb;
+
   //this->notifyNeighbours(decaying[0].x,decaying[0].y,decaying[0].z,decaying[0].map,"onNeighbourBroken",0,BLOCK_LEAVES,0); // <--- USE THIS WHEN IT's FIXED
+
   for (int8_t xoff = -1; xoff <= 1; xoff++)
   {
     for (int8_t yoff = -1; yoff <= 1; yoff++)
@@ -113,6 +112,7 @@ inline void decayIt(Decay decaying)
       }
     }
   }
+
   for (uint16_t i = 0 ; i < Mineserver::get()->plugin()->getBlockCB().size(); i++)
   {
     blockcb = Mineserver::get()->plugin()->getBlockCB()[i];
@@ -130,10 +130,13 @@ void BlockLeaves::timer200()
 {
   while (decaying.size() > 0)
   {
+    std::cout << "Still in leaves loop, now " << decaying.size() << " units left." << std::endl;
     if ((time(NULL) - decaying[0].decayStart) >= 5)
     {
-      decayIt(decaying[0]);
+      // This is still very inelegant, but we'll make it nicer next time.
+      Decay d = decaying.front();
       decaying.erase(decaying.begin());
+      decayIt(d);
     }
     else
     {
