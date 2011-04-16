@@ -237,6 +237,6 @@ std::string pathExpandUser(const std::string& path)
   }
 
   out += '/';
-  out += path.substr(pos + 1, path.length());
+  if (pos + 1 < path.length()) out += path.substr(pos + 1, path.length());
   return out;
 }
