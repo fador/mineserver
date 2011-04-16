@@ -644,7 +644,11 @@ bool blockPlacePreFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int1
               }
             }
           mineserver->chat.sendmsgTo(user.c_str(),"Cuboid done");
+<<<<<<< HEAD
           cuboidMap.erase(user);
+=======
+          cuboidMap.erase(cuboidMap.find(user));
+>>>>>>> odium/master
         }
       }
     }
