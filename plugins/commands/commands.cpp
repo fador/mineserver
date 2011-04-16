@@ -30,7 +30,7 @@
 #include <ctime>
 #include <sstream>
 #include <cstdlib>
-#include <map>
+#include <tr1/unordered_map>
 #include <iostream>
 #include <fstream> // Added for MOTD
 #include <stdint.h>
@@ -59,7 +59,7 @@ struct cuboidStruct
   int toBlock;
 };
 
-std::map<std::string,cuboidStruct> cuboidMap;
+std::tr1::unordered_map<std::string, cuboidStruct> cuboidMap;
 
 std::string dtos(double n)
 {
@@ -84,7 +84,7 @@ struct Command
   CommandCallback callback;  
 };
 
-typedef std::map<std::string, Command*> CommandList;
+typedef std::tr1::unordered_map<std::string, Command*> CommandList;
 CommandList m_Commands;
 
 void registerCommand(Command* command)
@@ -337,11 +337,11 @@ void userTeleport(std::string user, std::string command, std::deque<std::string>
 
 void replace(std::string user, std::string command, std::deque<std::string> args)
 {
-  if(cuboidMap.find(user) != cuboidMap.end())
+  if (cuboidMap.find(user) != cuboidMap.end())
   {
-    cuboidMap.erase(cuboidMap.find(user));
+    cuboidMap.erase(user);
   }
-  if(args.size() == 2)
+  if (args.size() == 2)
   {
     cuboidMap[user].active = 1;
     cuboidMap[user].state = 0;
@@ -357,7 +357,7 @@ void replace(std::string user, std::string command, std::deque<std::string> args
 
     if(blockID < 1 || blockID > 255)
     {
-      cuboidMap.erase(cuboidMap.find(user));
+      cuboidMap.erase(user);
       return;
     }
 
@@ -373,7 +373,7 @@ void replace(std::string user, std::string command, std::deque<std::string> args
 
     if(blockID < 0 || blockID > 255)
     {
-      cuboidMap.erase(cuboidMap.find(user));
+      cuboidMap.erase(user);
       return;
     }
 
@@ -445,7 +445,7 @@ void cuboid(std::string user, std::string command, std::deque<std::string> args)
 {
   if(cuboidMap.find(user) != cuboidMap.end())
   {
-    cuboidMap.erase(cuboidMap.find(user));
+    cuboidMap.erase(user);
   }
   cuboidMap[user].active = 1;
   cuboidMap[user].state = 0;
@@ -587,7 +587,7 @@ bool startedDiggingFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int
             }
           }
           mineserver->chat.sendmsgTo(user.c_str(),"Replace done");
-          cuboidMap.erase(cuboidMap.find(user));
+          cuboidMap.erase(user);
         }        
       }
     }
@@ -644,7 +644,7 @@ bool blockPlacePreFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int1
               }
             }
           mineserver->chat.sendmsgTo(user.c_str(),"Cuboid done");
-          cuboidMap.erase(cuboidMap.find(user));
+          cuboidMap.erase(user);
         }
       }
     }
