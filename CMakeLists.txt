@@ -46,8 +46,8 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 
 # Set compiler specific build flags
-IF (UNIX)
-  set(CMAKE_CXX_FLAGS "-march=native -W -Wall -Wno-unused -pedantic")
+IF (CMAKE_COMPILER_IS_GNUCXX)
+  set(CMAKE_CXX_FLAGS "-W -Wall -Wno-unused -pedantic")
   set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g")
   set(CMAKE_CXX_FLAGS_PROFILE "-DDEBUG -g -pg")
   set(CMAKE_CXX_FLAGS_RELEASE "-O2 -s -DNDEBUG")
@@ -57,7 +57,7 @@ ENDIF()
 IF (MSVC_IDE)
   set(CMAKE_CXX_FLAGS "/DWIN32 /D_CONSOLE /DZLIB_WINAPI /fp:fast /EHsc")
   set(CMAKE_CXX_FLAGS_DEBUG "/DDEBUG /D_DEBUG /MTd /Zi")
-  set(CMAKE_CXX_FLAGS_RELEASE "/MT")
+  set(CMAKE_CXX_FLAGS_RELEASE "/MT /D_SECURE_SCL=0")
 ENDIF (MSVC_IDE)
 
 
