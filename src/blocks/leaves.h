@@ -46,7 +46,7 @@ struct Decay
 
   inline bool operator<(const Decay& o) const
   {
-    return decayStart > o.decayStart               // Oldest first
+    return decayStart < o.decayStart               // Oldest first
       || (decayStart == o.decayStart && x < o.x)
       || (decayStart == o.decayStart && x == o.x && y < o.y)
       || (decayStart == o.decayStart && x == o.x && y == o.y && z < o.z)
