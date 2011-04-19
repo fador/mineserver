@@ -238,16 +238,18 @@ void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeSta
 
 bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
 {
-  size_t tmpArrayLen = msg.size() + 3;
+  size_t tmpArrayLen = 2 * msg.size() + 3;
   uint8_t* tmpArray    = new uint8_t[tmpArrayLen];
 
   tmpArray[0] = 0x03;
-  tmpArray[1] = 0;
-  tmpArray[2] = msg.size() & 0xff;
+  tmpArray[1] = (msg.size() >> 8) & 0xFF;
+  tmpArray[2] = msg.size()        & 0xFF;
 
   for (unsigned int i = 0; i < msg.size(); i++)
   {
-    tmpArray[i + 3] = msg[i];
+    // This is a very crude "UTF16 encoder" that only works for ASCII characters. DANGEROUS.
+    tmpArray[2 * i + 3] = 0;
+    tmpArray[2 * i + 4] = msg[i];
   }
 
   switch (action)
