@@ -64,7 +64,7 @@ bool BlockSign::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
   this->spawnBlockItem(x, y, z, map, BLOCK_WALL_SIGN);
 
   //Remove sign data from the chunk
-  sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
+  sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
   if (chunk != NULL)
   {
     for (uint32_t i = 0; i < chunk->signs.size(); i++)
@@ -115,7 +115,7 @@ void BlockSign::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
     this->spawnBlockItem(x, y, z, map, block, 0);
 
     //Remove sign data from the chunk
-    sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
+    sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
     if (chunk != NULL)
     {
       for (uint32_t i = 0; i < chunk->signs.size(); i++)

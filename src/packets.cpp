@@ -164,7 +164,7 @@ int PacketHandler::change_sign(User* user)
   newSign->text3 = strings3;
   newSign->text4 = strings4;
 
-  sChunk* chunk = Mineserver::get()->map(user->pos.map)->chunks.getChunk(blockToChunk(x), blockToChunk(z));
+  sChunk* chunk = Mineserver::get()->map(user->pos.map)->getChunk(blockToChunk(x), blockToChunk(z));
 
   if (chunk != NULL)
   {

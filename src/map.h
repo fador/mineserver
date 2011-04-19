@@ -112,16 +112,24 @@ public:
 
   // Save map chunk to disc
   bool saveMap(int x, int z);
+  inline bool saveMap(const Coords& c) { return saveMap(c.first, c.second); }
 
   // Save whole map to disc (/save command)
   bool saveWholeMap();
 
-  // Generate light maps for chunk
-  bool generateLight(int x, int z);
-  bool generateLight(int x, int z, sChunk* chunk);
+  // Generate light maps for chunk. Optional chunk hint.
+  bool generateLight(int x, int z, sChunk* chunk = NULL);
 
   // Release/save map chunk
   bool releaseMap(int x, int z);
+  inline bool releaseMap(const Coords& c) { return releaseMap(c.first, c.second); }
+
+  // Get a chunk pointer or NULL on failure
+  inline sChunk* getChunk(int x, int z) const
+  {
+    const ChunkMap::const_iterator it = chunks.find(Coords(x, z));
+    return it == chunks.end() ? NULL : it->second;
+  }
 
   // Light get/set
   bool getLight(int x, int y, int z, uint8_t* blocklight, uint8_t* skylight);
@@ -159,7 +167,7 @@ public:
 
   bool sendProjectileSpawn(User* user, int8_t projID);
 
-  bool sendMultiBlocks(std::vector<vec>* blocks);
+  bool sendMultiBlocks(std::vector<vec> & blocks);
 };
 
 #endif

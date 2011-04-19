@@ -112,7 +112,7 @@ void MapGen::re_init(int seed)
 
 void MapGen::generateFlatgrass(int x, int z, int map)
 {
-  sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
+  sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
   Block top = BLOCK_GRASS;
   if (winterEnabled)
   {
@@ -187,7 +187,7 @@ void MapGen::generateChunk(int x, int z, int map)
   chunk->nbt = main;
   chunk->x = x;
   chunk->z = z;
-  Mineserver::get()->map(map)->chunks.linkChunk(chunk, x, z);
+  Mineserver::get()->map(map)->chunks.insert(ChunkMap::value_type(ChunkMap::key_type(x, z), chunk));
   if (Mineserver::get()->config()->bData("mapgen.flatgrass"))
   {
     generateFlatgrass(x, z, map);
@@ -288,7 +288,7 @@ void MapGen::generateWithNoise(int x, int z, int map)
   gettimeofday(&start, NULL);
 #endif
 #endif
-  sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
+  sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
 
   // Winterland or Summerland
   Block topBlock = winterEnabled ? BLOCK_SNOW : BLOCK_GRASS;
@@ -384,7 +384,7 @@ void MapGen::generateWithNoise(int x, int z, int map)
 
 void MapGen::ExpandBeaches(int x, int z, int map)
 {
-  sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(blockToChunk(x), blockToChunk(z));
+  sChunk* chunk = Mineserver::get()->map(map)->getChunk(blockToChunk(x), blockToChunk(z));
   int beachExtentSqr = (beachExtent + 1) * (beachExtent + 1);
   int xBlockpos = x << 4;
   int zBlockpos = z << 4;
@@ -455,7 +455,7 @@ void MapGen::ExpandBeaches(int x, int z, int map)
 
 void MapGen::AddOre(int x, int z, int map, uint8_t type)
 {
-  sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
+  sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
 
   int blockX, blockY, blockZ;
   uint8_t block;

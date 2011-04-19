@@ -276,7 +276,7 @@ bool Physics::update()
   {
     addSimulation(toAdd[i]);
   }
-  Mineserver::get()->map(map)->sendMultiBlocks(&changed);
+  Mineserver::get()->map(map)->sendMultiBlocks(changed);
 
   clock_t endtime = clock() - starttime;
   //  LOG(INFO, "Physics", "Exit simulation, took " + dtos(endtime * 1000 / CLOCKS_PER_SEC) + " ms, " + dtos(simList.size()) + " items left");

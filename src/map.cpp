@@ -62,8 +62,8 @@
 #include "furnaceManager.h"
 #include "mcregion.h"
 
+// Copy Construtor
 Map::Map(const Map& oldmap)
-  // Copy Construtor
   :
   chunks(oldmap.chunks),
   mapLastused(oldmap.mapLastused),
@@ -76,11 +76,11 @@ Map::Map(const Map& oldmap)
 }
 
 Map::Map()
+  :
+  chunks(441) // buckets!
 {
-  for (int i = 0; i < 256; i++)
-  {
-    emitLight[i] = 0;
-  }
+  std::fill(emitLight, emitLight + 256, 0);
+
   emitLight[0x0A] = 15; // Lava
   emitLight[0x0B] = 15; // Stationary Lava
   emitLight[0x27] = 1;  // Brown mushroom
@@ -93,10 +93,8 @@ Map::Map()
   emitLight[0x5A] = 11; // Portal
   emitLight[0x5B] = 15; // Jack-O-Lantern
 
-  for (int i = 0; i < 256; i++)
-  {
-    stopLight[i] = 16;
-  }
+  std::fill(stopLight, stopLight + 256, 16);
+
   stopLight[0x00] = 0; // Empty
   stopLight[0x06] = 0; // Sapling
   stopLight[0x08] = 3; // Water
@@ -134,15 +132,9 @@ Map::~Map()
   // louisdx: This destructor is doing WAY too much. All this should be in a separate function.
   // A destructor must never throw, and this destructor does tons of non-exception-safe stuff.
 
-  // Free chunk memory
-  for (int i = 0; i < 441; ++i)
+  for (ChunkMap::const_iterator it = chunks.begin(); it != chunks.end(); ++it)
   {
-    sChunkNode* nextnode = NULL;
-    for (sChunkNode* node = chunks.getBuckets()[i]; node != NULL; node = nextnode)
-    {
-      nextnode = node->next;
-      releaseMap(node->chunk->x, node->chunk->z);
-    }
+    releaseMap(it->first);
   }
 
   // Free item memory
@@ -379,28 +371,18 @@ void Map::init(int number)
 
 sChunk* Map::getMapData(int x, int z,  bool generate)
 {
+  const ChunkMap::const_iterator it = chunks.find(Coords(x, z));
 
-  sChunk* chunk = chunks.getChunk(x, z);
+  if (it != chunks.end()) return it->second;
 
-  if (chunk != NULL || generate == false)
-  {
-    return chunk;
-  }
-
-  return loadMap(x, z, generate);
-
+  return generate == false ? NULL : loadMap(x, z, true);
 }
 
 bool Map::saveWholeMap()
 {
-
-  //Loop every chunk loaded
-  for (int i = 0; i < 441; ++i)
+  for (ChunkMap::const_iterator it = chunks.begin(); it != chunks.end(); ++it)
   {
-    for (sChunkNode* node = chunks.getBuckets()[i]; node != NULL; node = node->next)
-    {
-      saveMap(node->chunk->x, node->chunk->z);
-    }
+    saveMap(it->first);
   }
 
   /////////////////////
@@ -447,23 +429,25 @@ bool Map::saveWholeMap()
   return true;
 }
 
-bool Map::generateLight(int x, int z)
-{
-
-  sChunk* chunk = chunks.getChunk(x, z);
-  if (chunk == NULL)
-  {
-    LOGLF("Loading chunk failed (generateLight)");
-    return false;
-  }
-
-  return generateLight(x, z, chunk);
-}
-
 //#define PRINT_LIGHTGEN_TIME
 
 bool Map::generateLight(int x, int z, sChunk* chunk)
 {
+  if (chunk == NULL)
+  {
+    const ChunkMap::const_iterator it = chunks.find(Coords(x, z));
+
+    if (it == chunks.end())
+    {
+      LOGLF("Loading chunk failed (generateLight)");
+      return false;
+    }
+    else
+    {
+      chunk = it->second;
+    }
+  }
+
 #ifdef PRINT_LIGHTGEN_TIME
 #ifdef WIN32
   DWORD t_begin, t_end;
@@ -936,32 +920,37 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
 
 bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
 {
-  Packet pkt;
-  pkt << PACKET_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int8_t)type << (int8_t)meta;
+  const ChunkMap::const_iterator it = chunks.find(Coords(blockToChunk(x), blockToChunk(z)));
 
-  sChunk* chunk = chunks.getChunk(blockToChunk(x), blockToChunk(z));
-  if (chunk == NULL)
+  if (it == chunks.end())
   {
     return false;
   }
 
-  chunk->sendPacket(pkt);
+  Packet pkt;
+
+  pkt << PACKET_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int8_t)type << (int8_t)meta;
+
+  it->second->sendPacket(pkt);
 
   return true;
 }
 
 bool Map::sendNote(int x, int y, int z, char instrument, char pitch)
 {
-  Packet pkt;
-  pkt << PACKET_PLAY_NOTE << (int32_t)x << (int16_t)y << (int32_t)z << (int8_t)instrument << (int8_t)pitch;
+  const ChunkMap::const_iterator it = chunks.find(Coords(blockToChunk(x), blockToChunk(z)));
 
-  sChunk* chunk = chunks.getChunk(blockToChunk(x), blockToChunk(z));
-  if (chunk == NULL)
+  if (it == chunks.end())
   {
     return false;
   }
 
-  chunk->sendPacket(pkt);
+  Packet pkt;
+
+  pkt << PACKET_PLAY_NOTE << (int32_t)x << (int16_t)y << (int32_t)z << (int8_t)instrument << (int8_t)pitch;
+
+  it->second->sendPacket(pkt);
+
   return true;
 }
 
@@ -976,20 +965,22 @@ bool Map::sendPickupSpawn(spawnedItem item)
   int chunk_x = blockToChunk(item.pos.x() / 32);
   int chunk_z = blockToChunk(item.pos.z() / 32);
 
-  sChunk* chunk = chunks.getChunk(chunk_x, chunk_z);
-  if (chunk == NULL)
+  const ChunkMap::const_iterator it = chunks.find(Coords(chunk_x, chunk_z));
+
+  if (it == chunks.end())
   {
     return false;
   }
 
-  chunk->items.push_back(storedItem);
+  it->second->items.push_back(storedItem);
 
   Packet pkt;
+
   pkt << PACKET_PICKUP_SPAWN << (int32_t)item.EID << (int16_t)item.item << (int8_t)item.count << (int16_t)item.health
       << (int32_t)item.pos.x() << (int32_t)item.pos.y() << (int32_t)item.pos.z()
       << (int8_t)0 << (int8_t)0 << (int8_t)0;
 
-  chunk->sendPacket(pkt);
+  it->second->sendPacket(pkt);
 
   return true;
 }
@@ -1062,15 +1053,17 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
   return true;
 }
 
-sChunk*  Map::loadMap(int x, int z, bool generate)
+sChunk* Map::loadMap(int x, int z, bool generate)
 {
-  sChunk* chunk = chunks.getChunk(x, z);
-  if (chunk != NULL)
+  const ChunkMap::const_iterator it = chunks.find(Coords(x, z));
+
+  // Case 1: We already have the chunk.
+  if (it != chunks.end())
   {
-    return chunk;
+    return it->second;
   }
 
-  //Try to open region file
+  // Case 2: We don't have the chunk but it's on file. Try to open region file.
   RegionFile* newRegion = new RegionFile;
   if (!newRegion->openFile(mapDirectory, x, z))
   {
@@ -1083,7 +1076,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   uint8_t* chunkPointer =  new uint8_t[ALLOCATE_NBTFILE*10];
   uint32_t chunkLen = 0;
 
-  //Try to load chunk, if fails, generate a new chunk
+  // Try to load chunk. If fails, Case 3: Generate a new chunk.
   if (!newRegion->readChunk(chunkPointer, &chunkLen, x, z))
   {
     // If generate (false only for lightmapgenerator)
@@ -1131,7 +1124,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
       }
       delete newRegion;
       delete [] chunkPointer;
-      return chunks.getChunk(x, z);
+      return getChunk(x, z);
     }
     else
     {
@@ -1140,8 +1133,10 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
       return NULL;
     }
   }
+
   delete newRegion;
-  chunk = new sChunk();
+
+  sChunk* chunk = new sChunk();
 
   //Load NBT from memory
   chunk->nbt = NBT_Value::LoadFromMemory(chunkPointer, chunkLen);
@@ -1156,7 +1151,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
     Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
     Mineserver::get()->mapGen(m_number)->generateChunk(x, z, m_number);
     generateLight(x, z);
-    return chunks.getChunk(x, z);
+    return getChunk(x, z);
   }
 
   NBT_Value* level = (*chunk->nbt)["Level"];
@@ -1168,7 +1163,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
     Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
     Mineserver::get()->mapGen(m_number)->generateChunk(x, z, m_number);
     generateLight(x, z);
-    return chunks.getChunk(x, z);
+    return getChunk(x, z);
   }
 
   NBT_Value* xPos = (*level)["xPos"];
@@ -1186,7 +1181,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
     Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
     Mineserver::get()->mapGen(m_number)->generateChunk(x, z, m_number);
     generateLight(x, z);
-    return chunks.getChunk(x, z);
+    return getChunk(x, z);
   }
 
   NBT_Value* nbt_blocks     = (*level)["Blocks"];
@@ -1234,7 +1229,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   chunk->skylight   = &((*skylight)[0]);
   chunk->heightmap  = &((*heightmap)[0]);
 
-  chunks.linkChunk(chunk, x, z);
+  chunks.insert(ChunkMap::value_type(ChunkMap::key_type(x, z), chunk));
 
   // Update last used time
   chunk->lastused = time(NULL);
@@ -1249,10 +1244,9 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
   //Verify the type
   if (entityList && entityList->GetType() == NBT_Value::TAG_LIST && entityList->GetListType() == NBT_Value::TAG_COMPOUND)
   {
-    std::vector<NBT_Value*>* entities = entityList->GetList();
-    std::vector<NBT_Value*>::iterator iter = entities->begin(), end = entities->end();
+    std::vector<NBT_Value*>* const entities = entityList->GetList();
 
-    for (; iter != end ; iter++)
+    for (std::vector<NBT_Value*>::iterator iter = entities->begin(); iter != entities->end() ; ++iter)
     {
       std::vector<uint8_t> buffer;
       NBT_Value* idVal = (**iter)["id"];
@@ -1407,8 +1401,7 @@ sChunk*  Map::loadMap(int x, int z, bool generate)
 
 bool Map::saveMap(int x, int z)
 {
-
-  sChunk*  chunk = chunks.getChunk(x, z);
+  sChunk* chunk = getChunk(x, z);
 
   if (!chunk->changed)
   {
@@ -1543,34 +1536,38 @@ bool Map::releaseMap(int x, int z)
   // save first
   saveMap(x, z);
 
-  // Unlink this chunk
-  chunks.unlinkChunk(x, z);
+  // free the memory allocated to the sChunk
+  delete getChunk(x, z);
+
+  // erase the chunk pointer from the collection
+  chunks.erase(Coords(x, z));
+
   return true;
 }
 
-bool Map::sendMultiBlocks(std::vector<vec>* blocks)
+bool Map::sendMultiBlocks(std::vector<vec> & blocks)
 {
-  while (blocks->size() > 0)
+  while (blocks.size() > 0)
   {
     std::vector<vec> toRem;
-    int chunk_x = blockToChunk((*blocks)[0].x());
-    int chunk_z = blockToChunk((*blocks)[0].z());
-    for (size_t i = 0; i < blocks->size(); i++)
+    int chunk_x = blockToChunk(blocks[0].x());
+    int chunk_z = blockToChunk(blocks[0].z());
+    for (size_t i = 0; i < blocks.size(); i++)
     {
-      int t_chunk_x = blockToChunk((*blocks)[i].x());
-      int t_chunk_z = blockToChunk((*blocks)[i].z());
+      int t_chunk_x = blockToChunk(blocks[i].x());
+      int t_chunk_z = blockToChunk(blocks[i].z());
       if (chunk_x == t_chunk_x && chunk_z == t_chunk_z)
       {
         for (int j = toRem.size() - 1; j >= 0; j--)
         {
-          if (toRem[j].x() == (*blocks)[i].x() &&
-              toRem[j].y() == (*blocks)[i].y() &&
-              toRem[j].z() == (*blocks)[i].z())
+          if (toRem[j].x() == blocks[i].x() &&
+              toRem[j].y() == blocks[i].y() &&
+              toRem[j].z() == blocks[i].z())
           {
             continue;
           }
         }
-        toRem.push_back((*blocks)[i]);
+        toRem.push_back(blocks[i]);
       }
     }
     Packet packet, pC, pT, pM;
@@ -1586,26 +1583,30 @@ bool Map::sendMultiBlocks(std::vector<vec>* blocks)
       pC << (int16_t)(*coord2);
       pT << (int8_t) block;
       pM << (int8_t) meta;
-      for (int j = blocks->size() - 1; j >= 0; j--)
+      for (int j = blocks.size() - 1; j >= 0; j--)
       {
-        if ((*blocks)[j].x() == toRem[i].x() &&
-            (*blocks)[j].y() == toRem[j].y() &&
-            (*blocks)[j].z() == toRem[i].z())
+        if (blocks[j].x() == toRem[i].x() &&
+            blocks[j].y() == toRem[j].y() &&
+            blocks[j].z() == toRem[i].z())
         {
-          blocks->erase(blocks->begin() + j);
+          blocks.erase(blocks.begin() + j);
         }
       }
     }
     toRem.clear();
-    sChunk* chunk = chunks.getChunk(chunk_x, chunk_z);
-    if (chunk == NULL)
+
+    const ChunkMap::const_iterator it = chunks.find(Coords(chunk_x, chunk_z));
+
+    if (it == chunks.end())
     {
-      return false;
+      //return false;
+      continue;
     }
-    chunk->sendPacket(packet);
-    chunk->sendPacket(pC);
-    chunk->sendPacket(pT);
-    chunk->sendPacket(pM);
+
+    it->second->sendPacket(packet);
+    it->second->sendPacket(pC);
+    it->second->sendPacket(pT);
+    it->second->sendPacket(pM);
   }
 
   return true;

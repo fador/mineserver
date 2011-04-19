@@ -144,7 +144,7 @@ void HeavenGen::generateChunk(int x, int z, int map)
   chunk->x = x;
   chunk->z = z;
 
-  Mineserver::get()->map(map)->chunks.linkChunk(chunk, x, z);
+  Mineserver::get()->map(map)->chunks.insert(ChunkMap::value_type(ChunkMap::key_type(x, z), chunk));
 
   // Update last used time
   //Mineserver::get()->map()->mapLastused[chunkid] = (int)time(0);

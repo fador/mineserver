@@ -153,7 +153,7 @@ void BiomeGen::re_init(int seed)
 
 void BiomeGen::generateFlatgrass(int x, int z, int map)
 {
-  sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
+  sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
   Block top = BLOCK_GRASS;
   if (winterEnabled)
   {
@@ -228,7 +228,9 @@ void BiomeGen::generateChunk(int x, int z, int map)
   chunk->nbt = main;
   chunk->x = x;
   chunk->z = z;
-  Mineserver::get()->map(map)->chunks.linkChunk(chunk, x, z);
+
+  Mineserver::get()->map(map)->chunks.insert(ChunkMap::value_type(ChunkMap::key_type(x, z), chunk));
+
   if (Mineserver::get()->config()->bData("mapgen.flatgrass"))
   {
     generateFlatgrass(x, z, map);
@@ -315,7 +317,7 @@ void BiomeGen::AddTrees(int x, int z, int map)
         Mineserver::get()->map(map)->getBlock(blockX, ++blockY, blockZ, &block, &meta);
         if (!(block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER))
         {
-          sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
+          sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
 
           uint8_t* curBlock;
           int count = (fastrand() % 3) + 3;
@@ -336,7 +338,7 @@ void BiomeGen::AddTrees(int x, int z, int map)
                treenoise.GetValue(blockX, 0, blockZ) > -0.4)
       {
         // Reed forest
-        sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
+        sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
         uint8_t* curBlock;
         int count = (fastrand() % 3) + 3;
         if (count + blockY > 127)
@@ -394,7 +396,7 @@ void BiomeGen::generateWithNoise(int x, int z, int map)
   gettimeofday(&start, NULL);
 #endif
 #endif
-  sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
+  sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
 
   // Winterland
   Block topBlock = BLOCK_GRASS;
@@ -555,7 +557,7 @@ void BiomeGen::generateWithNoise(int x, int z, int map)
 
 void BiomeGen::AddOre(int x, int z, int map, uint8_t type)
 {
-  sChunk* chunk = Mineserver::get()->map(map)->chunks.getChunk(x, z);
+  sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
 
   int blockX, blockY, blockZ;
   uint8_t block;

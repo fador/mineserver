@@ -31,8 +31,8 @@
 #include <set>
 #include <list>
 #include <vector>
-#include <iostream>
 #include <ctime>
+#include <tr1/unordered_map>
 
 #include "packets.h"
 #include "user.h"
@@ -50,10 +50,8 @@ struct spawnedItem
   time_t spawnedAt;
   uint32_t spawnedBy;
 
-  spawnedItem()
+  spawnedItem() : spawnedAt(std::time(NULL)), spawnedBy(0)
   {
-    spawnedAt = time(NULL);
-    spawnedBy = 0;
   }
 };
 
@@ -120,8 +118,7 @@ struct sChunk
   {
     if (!chests.empty())
     {
-      std::vector<chestData*>::iterator chest_it = chests.begin();
-      for (; chest_it != chests.end(); ++chest_it)
+      for (std::vector<chestData*>::iterator chest_it = chests.begin(); chest_it != chests.end(); ++chest_it)
       {
         delete *chest_it;
       }
@@ -130,8 +127,7 @@ struct sChunk
 
     if (!signs.empty())
     {
-      std::vector<signData*>::iterator sign_it = signs.begin();
-      for (; sign_it != signs.end(); ++sign_it)
+      for (std::vector<signData*>::iterator sign_it = signs.begin(); sign_it != signs.end(); ++sign_it)
       {
         delete *sign_it;
       }
@@ -140,8 +136,7 @@ struct sChunk
 
     if (!furnaces.empty())
     {
-      std::vector<furnaceData*>::iterator furnace_it = furnaces.begin();
-      for (; furnace_it != furnaces.end(); ++furnace_it)
+      for (std::vector<furnaceData*>::iterator furnace_it = furnaces.begin(); furnace_it != furnaces.end(); ++furnace_it)
       {
         removeFurnace((*furnace_it));
         delete *furnace_it;
@@ -149,58 +144,46 @@ struct sChunk
       furnaces.clear();
     }
 
-    if (nbt != NULL)
+    if (nbt != NULL) // unnecessary check, it's safe to delete the null pointer
     {
       delete nbt;
-      nbt = NULL;
     }
   }
 
-  bool hasUser(User* user)
+  bool hasUser(User* user) const
   {
     return users.count(user) != 0;
   }
 
   void sendPacket(const Packet& packet, User* nosend = NULL)
   {
-    std::set<User*>::iterator iter_a = users.begin(), iter_b = users.end();
-
-    for (; iter_a != iter_b; ++iter_a)
+    for (std::set<User*>::iterator it = users.begin(); it != users.end(); ++it)
     {
-      if ((*iter_a) != nosend)
+      if ((*it) != nosend && (*it)->logged)
       {
-        if ((*iter_a)->logged)
-        {
-          (*iter_a)->buffer.addToWrite(packet.getWrite(), packet.getWriteLen());
-        }
+        (*it)->buffer.addToWrite(packet.getWrite(), packet.getWriteLen());
       }
     }
-
   }
 
-  static bool userBoundary(sChunk* left, std::list<User*> &lusers, sChunk* right, std::list<User*> &rusers)
+  static bool userBoundary(sChunk* left, std::list<User*>& lusers, sChunk* right, std::list<User*>& rusers)
   {
     bool diff = false;
 
-    std::set<User*>::iterator iter_a;
-    std::set<User*>::iterator iter_b;
-
-    iter_a = left->users.begin(), iter_b = left->users.end();
-    for (; iter_a != iter_b; ++iter_a)
+    for (std::set<User*>::const_iterator it = left->users.begin(); it != left->users.end(); ++it)
     {
-      if (!right->users.count(*iter_a))
+      if (right->users.count(*it) == 0)
       {
-        lusers.push_front(*iter_a);
+        lusers.push_front(*it);
         diff = true;
       }
     }
 
-    iter_a = right->users.begin(), iter_b = right->users.end();
-    for (; iter_a != iter_b; ++iter_a)
+    for (std::set<User*>::const_iterator it = right->users.begin(); it != right->users.end(); ++it)
     {
-      if (!left->users.count(*iter_a))
+      if (left->users.count(*it) == 0)
       {
-        rusers.push_front(*iter_a);
+        rusers.push_front(*it);
         diff = true;
       }
     }
@@ -209,174 +192,32 @@ struct sChunk
   }
 };
 
-struct sChunkNode
+/*  STL does not yet come with a hash_combine(), so I'm lifting this
+ *  implementation from boost. It creates a hash function for every
+ *  pair of hashable types. For further generalizations, see boost/functional/hash.
+ */
+
+template <class T>
+inline void hash_combine(std::size_t & seed, T const & v)
 {
-  sChunkNode(sChunk* _chunk, sChunkNode* _prev, sChunkNode* _next) : chunk(_chunk), prev(_prev), next(_next) {}
+  std::tr1::hash<T> hasher;
+  seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+}
 
-  ~sChunkNode()
+template<typename S, typename T>
+struct PairHash : public std::unary_function<std::pair<S, T>, size_t>
+{
+  inline size_t operator()(const std::pair<S, T> & v) const
   {
-    if (chunk != NULL)
-    {
-      delete chunk;
-      chunk = NULL;
-    }
+    std::size_t seed = 0;
+    hash_combine(seed, v.first);
+    hash_combine(seed, v.second);
+    return seed;
   }
-
-  sChunk* chunk;
-  sChunkNode* prev;
-  sChunkNode* next;
 };
 
-class ChunkMap
-{
-public:
-  ChunkMap()
-  {
-    memset(m_buckets, 0, sizeof(m_buckets));
-  }
+typedef std::pair<int, int> Coords;
+typedef std::tr1::unordered_map<Coords, sChunk*, PairHash<int, int> > ChunkMap;
 
-  ~ChunkMap()
-  {
-    for (int i = 0; i < 441; ++i)
-    {
-      sChunkNode* node = m_buckets[i];
-      sChunkNode* next = NULL;
-      if (node != NULL)
-      {
-        next = node->next;
-        delete node;
-        node = next;
-      }
-      m_buckets[i] = NULL;
-    }
-  }
-
-  int hash(int x, int z)
-  {
-    x %= 21;
-    if (x < 0)
-    {
-      x += 21;
-    }
-
-    z %= 21;
-    if (z < 0)
-    {
-      z += 21;
-    }
-
-    return x + z * 21;
-  }
-
-  int numChunks()
-  {
-    int num = 0;
-
-    for (int i = 0; i < 441; ++i)
-      for (sChunkNode* node = m_buckets[i]; node != NULL; node = node->next)
-      {
-        num++;
-      }
-
-    return num;
-  }
-
-  sChunk* getChunk(int x, int z)
-  {
-    sChunkNode* node = NULL;
-
-    for (node = m_buckets[hash(x, z)]; node != NULL; node = node->next)
-    {
-      if ((node->chunk->x == x) && (node->chunk->z == z))
-      {
-        return node->chunk;
-      }
-    }
-
-    return NULL;
-  }
-
-  void unlinkChunk(int x, int z)
-  {
-    int _hash = hash(x, z);
-
-    sChunkNode* root = m_buckets[_hash];
-    sChunkNode* node = root;
-
-    // Loop until we reach the end of the chain
-    while (node != NULL)
-    {
-      // We've got the right node, time to get to work!
-      if ((node->chunk->x == x) && (node->chunk->z == z))
-      {
-        node->chunk->refCount--;
-
-        if (node->chunk->refCount == 0)
-        {
-          delete node->chunk;
-          node->chunk = NULL;
-        }
-
-        // If we have both next and previous nodes, we need to connect them up
-        // when we remove this node because we're in the middle of the chain.
-        if (node->next != NULL && node->prev != NULL)
-        {
-          node->next->prev = node->prev;
-          node->prev->next = node->next;
-        }
-        // Otherwise we're at one of the ends of the chain, so we just need to
-        // cut it off where it is.
-        else if (node->next != NULL)
-        {
-          node->next->prev = NULL;
-        }
-        else if (node->prev != NULL)
-        {
-          node->prev->next = NULL;
-        }
-
-        // If the node we're looking at is the root node, we need to update the
-        // bucket to point at the new start of the chain.
-        if (node == root)
-        {
-          m_buckets[_hash] = node->next;
-        }
-
-        // Free up the memory we were using for this node.
-        delete node;
-        node = NULL;
-
-        return;
-      }
-      // This isn't the right node, look at the next one.
-      else
-      {
-        node = node->next;
-      }
-    }
-  }
-
-  void linkChunk(sChunk* chunk, int x, int z)
-  {
-    int _hash = hash(x, z);
-
-    chunk->refCount++;
-
-    m_buckets[_hash] = new sChunkNode(chunk, NULL, m_buckets[_hash]);
-
-    if (m_buckets[_hash]->next != NULL)
-    {
-      m_buckets[_hash]->next->prev = m_buckets[_hash];
-    }
-  }
-
-  sChunkNode** getBuckets()
-  {
-    return m_buckets;
-  }
-
-  //private:
-  sChunkNode* m_buckets[441];
-};
 
 #endif
