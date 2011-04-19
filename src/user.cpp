@@ -224,6 +224,7 @@ bool User::sendLoginInfo()
   buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << (int64_t)0 << (int8_t)0;
 
   spawnOthers();
+
   // Put nearby chunks to queue
   for (int x = -viewDistance; x <= viewDistance; x++)
   {
@@ -255,13 +256,9 @@ bool User::sendLoginInfo()
     }
   }
 
-
   // Send spawn position
   loginBuffer << (int8_t)PACKET_SPAWN_POSITION << (int32_t)pos.x << ((int32_t)pos.y + 2) << (int32_t)pos.z;
   loginBuffer << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map(pos.map)->mapTime;
-  //  loginBuffer << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)UID << nick
-  //      << (int32_t)(pos.x*32) << (int32_t)((pos.y+2)*32) << (int32_t)(pos.z*32) << (int8_t)0 << (int8_t)0
-  //      << (int16_t)0;
 
 
   buffer.addToWrite((uint8_t*)loginBuffer.getWrite(), loginBuffer.getWriteLen());
@@ -277,9 +274,9 @@ bool User::sendLoginInfo()
   }
 
   // Teleport player (again)
-  Mineserver::get()->chat()->sendMsg(this, nick + " connected!", Chat::ALL);
-
   teleport(pos.x, pos.y + 2, pos.z);
+
+  //Mineserver::get()->chat()->sendMsg(this, nick + " connected!", Chat::ALL);
 
   sethealth(health);
   logged = true;
