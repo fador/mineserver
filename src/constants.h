@@ -152,7 +152,7 @@ enum
 
 const std::string VERSION = "0.1.15 (Alpha)";
 
-const int PROTOCOL_VERSION = 10;
+const int PROTOCOL_VERSION = 11;
 
 const char COMMENTPREFIX  = '#';
 

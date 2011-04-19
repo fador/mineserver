@@ -72,6 +72,7 @@
 #include "blocks/note.h"
 #include "items/itembasic.h"
 #include "mob.h"
+#include "utf8.h"
 
 #ifdef WIN32
 #define M_PI 3.141592653589793238462643
@@ -316,7 +317,9 @@ int PacketHandler::login_request(User* user)
   int64_t mapseed;
   int8_t dimension;
 
-  user->buffer >> version >> player >> passwd >> mapseed >> dimension;
+  // As of version 1.5, the password is no longer sent (at least for non-authenticated mode)
+  //user->buffer >> version >> player >> passwd >> mapseed >> dimension;
+  user->buffer >> version >> player >> mapseed >> dimension;
 
   if (!user->buffer)
   {
@@ -334,7 +337,7 @@ int PacketHandler::login_request(User* user)
 
   user->nick = player;
 
-  // If version is not 2 or 3
+  // If version is not the current version
   if (version != PROTOCOL_VERSION)
   {
     user->kick(Mineserver::get()->config()->sData("strings.wrong_protocol"));
@@ -1464,10 +1467,17 @@ Packet& Packet::operator>>(double& val)
 
 Packet& Packet::operator<<(const std::string& str)
 {
-  uint16_t lenval = htons(str.size());
+  uint16_t lenval = htons(str.length());
   addToWrite(&lenval, 2);
 
-  addToWrite(&str[0], str.size());
+  // The naive zero-padding only works for ASCII (< 128) characters!!
+  // A real conversion to UTF16 would use iconv() on the input string.
+  char buf[2] = { 0, 0};
+  for (size_t i = 0;  i < str.length(); ++i)
+  {
+    buf[1] = str[i];
+    addToWrite(buf, 2);
+  }
   return *this;
 }
 
@@ -1479,10 +1489,19 @@ Packet& Packet::operator>>(std::string& str)
     lenval = ntohs(*reinterpret_cast<const int16_t*>(&m_readBuffer[m_readPos]));
     m_readPos += 2;
 
-    if (lenval && haveData(lenval))
+    if (lenval && haveData(2 * lenval)) // We ASSUME that every character takes 2 bytes. DANGEROUS.
     {
-      str.assign((char*)&m_readBuffer[m_readPos], lenval);
-      m_readPos += lenval;
+      char buf[2];
+      t_codepoint ccp;
+
+      for (size_t i = 0;  i < lenval; ++i)
+      {
+        buf[0] = m_readBuffer[m_readPos++];
+        buf[1] = m_readBuffer[m_readPos++];
+
+        codepointToUTF8(((unsigned int)(buf[0]) << 8) | ((unsigned int)(buf[1])), &ccp);
+        str += std::string(ccp.c);
+      }
     }
   }
   return *this;
