@@ -199,4 +199,6 @@ void freeConstants();
 //allocate 1 MB for chunk files
 const int ALLOCATE_NBTFILE = 1048576;
 
+const int kMaxChatMessageLength = 119;
+
 #endif
