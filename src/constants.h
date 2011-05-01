@@ -152,7 +152,7 @@ enum
 
 const std::string VERSION = "0.1.15 (Alpha)";
 
-const int PROTOCOL_VERSION = 10;
+const int PROTOCOL_VERSION = 11;
 
 const char COMMENTPREFIX  = '#';
 
@@ -198,5 +198,7 @@ void freeConstants();
 
 //allocate 1 MB for chunk files
 const int ALLOCATE_NBTFILE = 1048576;
+
+const int kMaxChatMessageLength = 119;
 
 #endif

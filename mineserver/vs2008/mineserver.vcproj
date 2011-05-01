@@ -20,75 +20,21 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="0"
 			CharacterSet="0"
 			>
 			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="../../lib/zlib;../../lib/libevent2;../../src;../../lib"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
-				MinimalRebuild="true"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				DebugInformationFormat="4"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib ../../lib/zlib/zdll.lib ../../lib/libevent2/libevent.lib ws2_32.lib ../../lib/noise/libnoise.lib"
-				OutputFile="..\..\bin\$(ProjectName)-d.exe"
-				LinkIncremental="2"
-				AdditionalLibraryDirectories="../../lib"
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
+				Name="VCNMakeTool"
+				BuildCommandLine="..\..\..\do_build.bat onlybuild"
+				ReBuildCommandLine=""
+				CleanCommandLine=""
+				Output=""
+				PreprocessorDefinitions=""
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
 			/>
 		</Configuration>
 		<Configuration
@@ -173,12 +119,28 @@
 	</References>
 	<Files>
 		<Filter
-			Name="Source Files"
-			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			Name="src"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
 				RelativePath="..\..\src\chat.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\chat.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\chunkmap.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\cliScreen.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\cliScreen.h"
 				>
 			</File>
 			<File
@@ -190,157 +152,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\constants.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\furnace.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\furnaceManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\logger.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\map.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\mineserver.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\nbt.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\packets.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\physics.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\plugin.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\sockets.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\tools.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\user.cpp"
-				>
-			</File>
-			<Filter
-				Name="worldgen"
-				>
-				<File
-					RelativePath="..\..\src\worldgen\cavegen.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\worldgen\mapgen.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\worldgen\mersenne.cpp"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="blocks"
-				>
-				<File
-					RelativePath="..\..\src\blocks\basic.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\blocks\chest.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\blocks\default.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\blocks\door.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\blocks\falling.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\blocks\blockfurnace.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\blocks\workbench.cpp"
-					>
-				</File>
-
-				<File
-					RelativePath="..\..\src\blocks\fire.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\blocks\liquid.cpp"
-					>
-				<File
-					RelativePath="..\..\src\blocks\note.cpp"
-					>	
-				</File>
-				<File
-					RelativePath="..\..\src\blocks\plant.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\blocks\sign.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\blocks\snow.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\blocks\stair.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\blocks\torch.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\blocks\tracks.cpp"
-					>
-				</File>
-			</Filter>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-			>
-			<File
-				RelativePath="..\..\src\chat.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\chunkmap.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\config.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\configure.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\constants.cpp"
 				>
 			</File>
 			<File
@@ -348,7 +168,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\furnace.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\furnace.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\furnaceManager.cpp"
 				>
 			</File>
 			<File
@@ -356,10 +184,43 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\hook.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\inventory.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\inventory.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\kit.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\lighting.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\lighting.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\logger.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\logger.h"
 				>
+			</File>
 			<File
 				RelativePath="..\..\src\logtype.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\map.cpp"
 				>
 			</File>
 			<File
@@ -367,7 +228,31 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\mcregion.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\mcregion.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\mineserver.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\mineserver.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\mob.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\mob.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\nbt.cpp"
 				>
 			</File>
 			<File
@@ -375,7 +260,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\packets.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\packets.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\permissions.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\physics.cpp"
 				>
 			</File>
 			<File
@@ -383,11 +280,55 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\plugin.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\plugin.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\plugin_api.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\plugin_api.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\screenBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\screenBase.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\sockets.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\sockets.h"
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\tools.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\tools.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\tree.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\tree.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\user.cpp"
 				>
 			</File>
 			<File
@@ -402,7 +343,39 @@
 				Name="worldgen"
 				>
 				<File
+					RelativePath="..\..\src\worldgen\biomegen.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\biomegen.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\cavegen.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\worldgen\cavegen.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\eximgen.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\eximgen.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\heavengen.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\heavengen.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\mapgen.cpp"
 					>
 				</File>
 				<File
@@ -410,7 +383,19 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\worldgen\mersenne.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\worldgen\mersenne.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\nethergen.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\worldgen\nethergen.h"
 					>
 				</File>
 			</Filter>
@@ -418,27 +403,23 @@
 				Name="blocks"
 				>
 				<File
+					RelativePath="..\..\src\blocks\basic.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\blocks\basic.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\blocks\chest.h"
+					RelativePath="..\..\src\blocks\bed.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\blocks\default.h"
+					RelativePath="..\..\src\blocks\bed.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\blocks\door.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\blocks\falling.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\blocks\fire.h"
+					RelativePath="..\..\src\blocks\blockfurnace.cpp"
 					>
 				</File>
 				<File
@@ -446,7 +427,87 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\blocks\cake.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\cake.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\chest.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\chest.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\default.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\default.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\door.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\door.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\falling.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\falling.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\fire.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\fire.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\jackolantern.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\jackolantern.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\ladder.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\ladder.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\leaves.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\leaves.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\liquid.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\blocks\liquid.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\note.cpp"
 					>
 				</File>
 				<File
@@ -454,7 +515,31 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\blocks\plant.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\blocks\plant.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\pumpkin.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\pumpkin.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\redstone.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\redstone.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\sign.cpp"
 					>
 				</File>
 				<File
@@ -462,7 +547,15 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\blocks\snow.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\blocks\snow.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\stair.cpp"
 					>
 				</File>
 				<File
@@ -470,7 +563,23 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\blocks\step.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\step.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\torch.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\blocks\torch.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\tracks.cpp"
 					>
 				</File>
 				<File
@@ -478,16 +587,150 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\blocks\wood.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\wood.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\wool.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\wool.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\blocks\workbench.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\blocks\workbench.h"
 					>
 				</File>
 			</Filter>
-		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
+			<Filter
+				Name="config"
+				>
+				<File
+					RelativePath="..\..\src\config\lexer.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\config\lexer.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\config\node.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\config\node.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\config\parser.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\config\parser.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\config\scanner.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\config\scanner.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="items"
+				>
+				<File
+					RelativePath="..\..\src\items\food.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\items\food.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\items\itembasic.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\items\itembasic.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\items\projectile.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\items\projectile.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="plugins"
+				>
+				<Filter
+					Name="banlist"
+					>
+					<File
+						RelativePath="..\..\src\plugins\banlist\banlist.cpp.unused"
+						>
+					</File>
+					<File
+						RelativePath="..\..\src\plugins\banlist\banlist.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="command"
+					>
+					<File
+						RelativePath="..\..\src\plugins\command\command.cpp.unused"
+						>
+					</File>
+					<File
+						RelativePath="..\..\src\plugins\command\command.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="PyScript"
+					>
+					<File
+						RelativePath="..\..\src\plugins\PyScript\makefile"
+						>
+					</File>
+					<File
+						RelativePath="..\..\src\plugins\PyScript\MineServer.i"
+						>
+					</File>
+					<File
+						RelativePath="..\..\src\plugins\PyScript\PyScript.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\src\plugins\PyScript\PyScript.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\src\plugins\PyScript\python_plugin_api.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\src\plugins\PyScript\python_plugin_api.h"
+						>
+					</File>
+				</Filter>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>
