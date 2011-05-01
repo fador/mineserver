@@ -250,32 +250,32 @@ bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
     tmpArray[i + 3] = msg[i];
   }
 
-  switch (action)
-  {
-  case ALL:
-    user->sendAll(tmpArray, tmpArrayLen);
-    break;
+  //switch (action)
+  //{
+  //case ALL:
+  //  user->sendAll(tmpArray, tmpArrayLen);
+  //  break;
 
-  case USER:
-    user->buffer.addToWrite(tmpArray, tmpArrayLen);
-    break;
+  //case USER:
+  //  user->buffer.addToWrite(tmpArray, tmpArrayLen);
+  //  break;
 
-  case ADMINS:
-    user->sendAdmins(tmpArray, tmpArrayLen);
-    break;
+  //case ADMINS:
+  //  user->sendAdmins(tmpArray, tmpArrayLen);
+  //  break;
 
-  case OPS:
-    user->sendOps(tmpArray, tmpArrayLen);
-    break;
+  //case OPS:
+  //  user->sendOps(tmpArray, tmpArrayLen);
+  //  break;
 
-  case GUESTS:
-    user->sendGuests(tmpArray, tmpArrayLen);
-    break;
+  //case GUESTS:
+  //  user->sendGuests(tmpArray, tmpArrayLen);
+  //  break;
 
-  case OTHERS:
-    user->sendOthers(tmpArray, tmpArrayLen);
-    break;
-  }
+  //case OTHERS:
+  //  user->sendOthers(tmpArray, tmpArrayLen);
+  //  break;
+  //}
 
   delete[] tmpArray;
 

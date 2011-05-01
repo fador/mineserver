@@ -136,6 +136,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\cliScreen.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\cliScreen.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\commands.cpp"
 				>
 			</File>
@@ -145,6 +153,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\config.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\configure.h"
 				>
 			</File>
 			<File
@@ -172,6 +184,30 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\hook.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\inventory.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\inventory.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\kit.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\lighting.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\lighting.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\logger.cpp"
 				>
 			</File>
@@ -192,11 +228,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\mcregion.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\mcregion.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\mineserver.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\mineserver.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\mob.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\mob.h"
 				>
 			</File>
 			<File
@@ -216,6 +268,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\permissions.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\physics.cpp"
 				>
 			</File>
@@ -225,6 +281,26 @@
 			</File>
 			<File
 				RelativePath="..\..\src\plugin.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\plugin.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\plugin_api.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\plugin_api.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\screenBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\screenBase.h"
 				>
 			</File>
 			<File
@@ -241,6 +317,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\tools.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\tree.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\tree.h"
 				>
 			</File>
 			<File

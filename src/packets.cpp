@@ -102,10 +102,18 @@ void PacketHandler::init()
   packets[PACKET_SIGN]                     = Packets(PACKET_VARIABLE_LEN, &PacketHandler::change_sign);
   packets[PACKET_TRANSACTION]              = Packets(4, &PacketHandler::inventory_transaction);
   packets[PACKET_ENTITY_CROUCH]            = Packets(5, &PacketHandler::entity_crouch);
+  packets[PACKET_WEATHER]				   = Packets(18, &PacketHandler::unhadledPacket);
+  packets[PACKET_INCREMENT_STATISTICS]     = Packets(6, &PacketHandler::unhadledPacket);
+  
 
 
 }
 
+int PacketHandler::unhadledPacket(User* user)
+{
+	user->buffer.removePacket();
+	return PACKET_OK;
+}
 
 int PacketHandler::entity_crouch(User* user)
 {
@@ -236,11 +244,12 @@ int PacketHandler::inventory_change(User* user)
   int16_t slot = 0;
   int8_t rightClick = 0;
   int16_t actionNumber = 0;
+  int8_t shift = 0;
   int16_t itemID = 0;
   int8_t itemCount = 0;
   int16_t itemUses  = 0;
 
-  user->buffer >> windowID >> slot >> rightClick >> actionNumber >> itemID;
+  user->buffer >> windowID >> slot >> rightClick >> actionNumber >> shift >> itemID;
   if (itemID != -1)
   {
     if (!user->buffer.haveData(2))
@@ -305,23 +314,23 @@ int socket_connect(char* host, int port)
 // Login request (http://mc.kev009.com/wiki/Protocol#Login_Request_.280x01.29)
 int PacketHandler::login_request(User* user)
 {
-  //Check that we have enought data in the buffer
-  if (!user->buffer.haveData(12))
+  //Check that we have enough data in the buffer
+  if (!user->buffer.haveData(18))
   {
     return PACKET_NEED_MORE_DATA;
   }
 
   int32_t version;
-  std::string player, passwd;
+  std::string player;
   int64_t mapseed;
   int8_t dimension;
 
-  user->buffer >> version >> player >> passwd >> mapseed >> dimension;
+  user->buffer >> version >> player >> mapseed >> dimension;
 
-  if (!user->buffer)
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
+  //if (!user->buffer)
+  //{
+  //  return PACKET_NEED_MORE_DATA;
+  //}
 
   user->buffer.removePacket();
 
@@ -330,7 +339,7 @@ int PacketHandler::login_request(User* user)
     player.append("_");
   }
 
-  LOG(INFO, "Packets", "Player " + dtos(user->UID) + " login v." + dtos(version) + " : " + player + ":" + passwd);
+  LOG(INFO, "Packets", "Player " + dtos(user->UID) + " login v." + dtos(version) + " : " + player /*+ ":" + passwd*/);
 
   user->nick = player;
 
@@ -348,84 +357,82 @@ int PacketHandler::login_request(User* user)
     return PACKET_OK;
   }
 
-
-
   // Check if we're to do user validation
-  if (Mineserver::get()->config()->bData("system.user_validation") == true)
-  {
-    std::string url = "/game/checkserver.jsp?user=" + player + "&serverId=" + hash(player);
-    LOG(INFO, "Packets", "Validating " + player + " against minecraft.net: ");
-
-    std::string http_request = "GET " + url + " HTTP/1.1\r\n"
-                               + "Host: www.minecraft.net\r\n"
-                               + "Connection: close\r\n\r\n";
-
-    int fd = socket_connect((char*)"50.16.200.224", 80);
-    if (fd)
-    {
-#ifdef WIN32
-      send(fd, http_request.c_str(), http_request.length(), NULL);
-#else
-      write(fd, http_request.c_str(), http_request.length());
-#endif
-
-#define BUFFER_SIZE 1024
-      char* buffer = new char[BUFFER_SIZE];
-      std::string stringbuffer;
-
-#ifdef WIN32
-      while (int received = recv(fd, buffer, BUFFER_SIZE - 1, NULL) != 0)
-      {
-#else
-      while (read(fd, buffer, BUFFER_SIZE - 1) != 0)
-      {
-#endif
-        stringbuffer += std::string(buffer);
-      }
-      delete [] buffer;
-#ifdef WIN32
-      closesocket(fd);
-#else
-      close(fd);
-#endif
-
-      bool allow_access = false;
-      //No response data, timeout
-      if (stringbuffer.size() == 0 && Mineserver::get()->config()->bData("system.allow_connect_on_auth_timeout"))
-      {
-        LOG(INFO, "Packets", "  Auth skipped on timeout ");
-        allow_access = true;
-      }
-
-      if (allow_access || (stringbuffer.size() >= 3 && stringbuffer.find("\r\n\r\nYES", 0) != std::string::npos))
-      {
-        LOG(INFO, "Packets", "  Verified!");
-
-        char* kickMessage = NULL;
-        if ((static_cast<Hook2<bool, const char*, char**>*>(Mineserver::get()->plugin()->getHook("PlayerLoginPre")))->doUntilFalse(player.c_str(), &kickMessage))
-        {
-          user->kick(std::string(kickMessage));
-        }
-        else
-        {
-          user->sendLoginInfo();
-          (static_cast<Hook1<bool, const char*>*>(Mineserver::get()->plugin()->getHook("PlayerLoginPost")))->doAll(player.c_str());
-        }
-      }
-      else
-      {
-        LOG(INFO, "Packets", "  Failed"  + stringbuffer.substr(stringbuffer.size() - 3));
-        user->kick("Failed to verify username!");
-      }
-    }
-    else
-    {
-      LOG(INFO, "Packets", "  Failed");
-      user->kick("Failed to verify username!");
-    }
-
-    return PACKET_OK;
-  }
+//  if (Mineserver::get()->config()->bData("system.user_validation") == true)
+//  {
+//    std::string url = "/game/checkserver.jsp?user=" + player + "&serverId=" + hash(player);
+//    LOG(INFO, "Packets", "Validating " + player + " against minecraft.net: ");
+//
+//    std::string http_request = "GET " + url + " HTTP/1.1\r\n"
+//                               + "Host: www.minecraft.net\r\n"
+//                               + "Connection: close\r\n\r\n";
+//
+//    int fd = socket_connect((char*)"50.16.200.224", 80);
+//    if (fd)
+//    {
+//#ifdef WIN32
+//      send(fd, http_request.c_str(), http_request.length(), NULL);
+//#else
+//      write(fd, http_request.c_str(), http_request.length());
+//#endif
+//
+//#define BUFFER_SIZE 1024
+//      char* buffer = new char[BUFFER_SIZE];
+//      std::string stringbuffer;
+//
+//#ifdef WIN32
+//      while (int received = recv(fd, buffer, BUFFER_SIZE - 1, NULL) != 0)
+//      {
+//#else
+//      while (read(fd, buffer, BUFFER_SIZE - 1) != 0)
+//      {
+//#endif
+//        stringbuffer += std::string(buffer);
+//      }
+//      delete [] buffer;
+//#ifdef WIN32
+//      closesocket(fd);
+//#else
+//      close(fd);
+//#endif
+//
+//      bool allow_access = false;
+//      //No response data, timeout
+//      if (stringbuffer.size() == 0 && Mineserver::get()->config()->bData("system.allow_connect_on_auth_timeout"))
+//      {
+//        LOG(INFO, "Packets", "  Auth skipped on timeout ");
+//        allow_access = true;
+//      }
+//
+//      if (allow_access || (stringbuffer.size() >= 3 && stringbuffer.find("\r\n\r\nYES", 0) != std::string::npos))
+//      {
+//        LOG(INFO, "Packets", "  Verified!");
+//
+//        char* kickMessage = NULL;
+//        if ((static_cast<Hook2<bool, const char*, char**>*>(Mineserver::get()->plugin()->getHook("PlayerLoginPre")))->doUntilFalse(player.c_str(), &kickMessage))
+//        {
+//          user->kick(std::string(kickMessage));
+//        }
+//        else
+//        {
+//          user->sendLoginInfo();
+//          (static_cast<Hook1<bool, const char*>*>(Mineserver::get()->plugin()->getHook("PlayerLoginPost")))->doAll(player.c_str());
+//        }
+//      }
+//      else
+//      {
+//        LOG(INFO, "Packets", "  Failed"  + stringbuffer.substr(stringbuffer.size() - 3));
+//        user->kick("Failed to verify username!");
+//      }
+//    }
+//    else
+//    {
+//      LOG(INFO, "Packets", "  Failed");
+//      user->kick("Failed to verify username!");
+//    }
+//
+//    return PACKET_OK;
+//  }
 
 
   char* kickMessage = NULL;
@@ -473,7 +480,7 @@ int PacketHandler::handshake(User* user)
   {
     // Send "no validation or password needed" validation
     LOG(INFO, "Packets", "Handshake: No validation required for player " + player + ".");
-    user->buffer << (int8_t)PACKET_HANDSHAKE << std::string("-");
+    user->buffer << (int8_t)PACKET_HANDSHAKE << std::wstring(L"-");
   }
   // TODO: Add support for prompting user for Server password (once client supports it)
 
@@ -1460,16 +1467,16 @@ Packet& Packet::operator>>(double& val)
   return *this;
 }
 
-Packet& Packet::operator<<(const std::string& str)
+Packet& Packet::operator<<(const std::wstring& str)
 {
   uint16_t lenval = htons(str.size());
   addToWrite(&lenval, 2);
 
-  addToWrite(&str[0], str.size());
+  addToWrite(&str[0], str.size()*2);
   return *this;
 }
 
-Packet& Packet::operator>>(std::string& str)
+Packet& Packet::operator>>(std::wstring& str)
 {
   uint16_t lenval;
   if (haveData(2))
@@ -1477,13 +1484,58 @@ Packet& Packet::operator>>(std::string& str)
     lenval = ntohs(*reinterpret_cast<const int16_t*>(&m_readBuffer[m_readPos]));
     m_readPos += 2;
 
-    if (lenval && haveData(lenval))
+    if (lenval && haveData(lenval*2))
     {
-      str.assign((char*)&m_readBuffer[m_readPos], lenval);
-      m_readPos += lenval;
+      str.assign((wchar_t*)&m_readBuffer[m_readPos], lenval);
+      m_readPos += lenval*2;
     }
   }
   return *this;
+}
+
+Packet& Packet::operator<<(const std::string& str)
+{
+	// std::string -> std::wstring
+	std::string s("string");
+	std::wstring ws;
+	ws.assign(str.begin(), str.end());
+	(*this)<<ws;
+	return *this;
+}
+
+Packet& Packet::operator>>(std::string& str)
+{
+	// std::wstring -> std::string
+	std::wstring ws;
+	(*this) >> ws;
+	str.assign(ws.begin(), ws.end());
+	return *this;
+}
+
+
+void Packet::writeString(const std::string& str)
+{
+	uint16_t lenval = htons(str.size());
+	addToWrite(&lenval, 2);
+
+	addToWrite(&str[0], str.size());
+}
+std::string& Packet::readString()
+{
+	std::string str;
+	uint16_t lenval;
+	if (haveData(2))
+	{
+		lenval = ntohs(*reinterpret_cast<const int16_t*>(&m_readBuffer[m_readPos]));
+		m_readPos += 2;
+
+		if (lenval && haveData(lenval))
+		{
+			str.assign((char*)&m_readBuffer[m_readPos], lenval);
+			m_readPos += lenval;
+		}
+	}
+	return str;
 }
 
 void Packet::operator<<(Packet& other)
