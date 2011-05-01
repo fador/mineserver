@@ -105,7 +105,7 @@ enum
 
   // TODO unhandled packets
   PACKET_WEATHER = 0x47,
-  PACKET_INCREMENT_STATISTICS = 0xC8,
+  PACKET_INCREMENT_STATISTICS = 0xC8
 };
 
 class Packet
