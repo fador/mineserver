@@ -71,26 +71,26 @@ int kbhit();
 
 inline uint64_t ntohll(uint64_t v)
 {
-	return (uint64_t)ntohl(v & 0x00000000ffffffff) << 32 | (uint64_t)ntohl((v >> 32) & 0x00000000ffffffff);
+  return (uint64_t)ntohl(v & 0x00000000ffffffff) << 32 | (uint64_t)ntohl((v >> 32) & 0x00000000ffffffff);
 }
 
 // host wstring to net wstring
 inline std::wstring hsttonst(std::wstring v)
 {
-	std::wstring outBuffer = L"";
-	for(int strItr=0;strItr<v.length();strItr++)
-	{
-		outBuffer+=(wchar_t)htons(v[strItr]);
-	}
+  std::wstring outBuffer = L"";
+  for(uint32_t strItr=0;strItr<v.length();strItr++)
+  {
+    outBuffer+=(wchar_t)htons(v[strItr]);
+  }
 
-	return outBuffer;
+  return outBuffer;
 }
 
 // net wstring to host wstring
 inline std::wstring nsttohst(std::wstring v)
 {
 	std::wstring outBuffer = L"";
-	for(int strItr=0;strItr<v.length();strItr++)
+	for(uint32_t strItr=0;strItr<v.length();strItr++)
 	{
 		outBuffer+=(wchar_t)ntohs(v[strItr]);
 	}
