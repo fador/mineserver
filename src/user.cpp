@@ -222,7 +222,7 @@ bool User::sendLoginInfo()
   loadData();
 
   // Login OK package
-  buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << std::string("") << (int64_t)0 << (int8_t)0;
+  buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << hsttonst(std::wstring(L"")) << (int64_t)0 << (int8_t)0;
 
   spawnOthers();
   // Put nearby chunks to queue

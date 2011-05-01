@@ -71,11 +71,47 @@ int kbhit();
 
 inline uint64_t ntohll(uint64_t v)
 {
-  if (htons(1) == 1) // check if already big-endian
-  {
-    return v;
-  }
-  return (uint64_t)ntohl(v & 0x00000000ffffffff) << 32 | (uint64_t)ntohl((v >> 32) & 0x00000000ffffffff);
+	return (uint64_t)ntohl(v & 0x00000000ffffffff) << 32 | (uint64_t)ntohl((v >> 32) & 0x00000000ffffffff);
+}
+
+// host wstring to net wstring
+inline std::wstring hsttonst(std::wstring v)
+{
+	std::wstring outBuffer = L"";
+	for(int strItr=0;strItr<v.length();strItr++)
+	{
+		outBuffer+=(wchar_t)htons(v[strItr]);
+	}
+
+	return outBuffer;
+}
+
+// net wstring to host wstring
+inline std::wstring nsttohst(std::wstring v)
+{
+	std::wstring outBuffer = L"";
+	for(int strItr=0;strItr<v.length();strItr++)
+	{
+		outBuffer+=(wchar_t)ntohs(v[strItr]);
+	}
+
+	return outBuffer;
+}
+
+// std::wstring -> std::string
+inline std::string wstos(const std::wstring &in)
+{
+	std::string out;
+	out.assign(in.begin(), in.end());
+	return out;
+}
+
+// std::string -> std::wstring
+inline std::wstring stows(const std::string &in)
+{
+	std::wstring out;
+	out.assign(in.begin(), in.end());
+	return out;
 }
 
 //Converts block-coordinates to chunk coordinate
