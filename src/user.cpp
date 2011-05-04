@@ -219,9 +219,7 @@ bool User::sendLoginInfo()
   loadData();
 
   // Login OK package
-  // As of 1.5, we send one less empty string, at least in non-authenticated mode.
-  //buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << std::string("") << (int64_t)0 << (int8_t)0;
-  buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << (int64_t)0 << (int8_t)0;
+  buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << hsttonst(std::wstring(L"")) << (int64_t)0 << (int8_t)0;
 
   spawnOthers();
 

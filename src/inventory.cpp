@@ -933,7 +933,9 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
   switch (type)
   {
   case WINDOW_CHEST:
-    user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)WINDOW_CHEST  << (int8_t)INVENTORYTYPE_CHEST << std::string("Chest") << (int8_t)27;
+    user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)WINDOW_CHEST  << (int8_t)INVENTORYTYPE_CHEST;
+	user->buffer.writeString(std::string("Chest"));
+	user->buffer << (int8_t)27;
 
     for (uint32_t i = 0; i < chunk->chests.size(); i++)
     {
@@ -952,7 +954,9 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
     }
     break;
   case WINDOW_WORKBENCH:
-    user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)WINDOW_WORKBENCH  << (int8_t)INVENTORYTYPE_WORKBENCH << std::string("Workbench") << (int8_t)0;
+	  user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)WINDOW_WORKBENCH  << (int8_t)INVENTORYTYPE_WORKBENCH;
+	  user->buffer.writeString(std::string("Workbench"));
+	  user->buffer  << (int8_t)0;
 
     for (uint32_t i = 0; i < openWorkbenches.size(); i++)
     {
@@ -974,7 +978,9 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
     break;
   case WINDOW_FURNACE:
 
-    user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)WINDOW_FURNACE  << (int8_t)INVENTORYTYPE_FURNACE << std::string("Furnace") << (int8_t)0;
+    user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)WINDOW_FURNACE  << (int8_t)INVENTORYTYPE_FURNACE;
+	user->buffer.writeString(std::string("Furnace"));
+	user->buffer << (int8_t)0;
 
     for (uint32_t i = 0; i < chunk->furnaces.size(); i++)
     {

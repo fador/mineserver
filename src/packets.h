@@ -101,7 +101,11 @@ enum
   //v4 Packets
   PACKET_USE_ENTITY      = 0x07,
   PACKET_ENTITY_VELOCITY = 0x1c,
-  PACKET_ATTACH_ENTITY   = 0x27
+  PACKET_ATTACH_ENTITY   = 0x27,
+
+  // TODO unhandled packets
+  PACKET_WEATHER = 0x47,
+  PACKET_INCREMENT_STATISTICS = 0xC8
 };
 
 class Packet
@@ -175,8 +179,16 @@ public:
   Packet& operator>>(float& val);
   Packet& operator<<(double val);
   Packet& operator>>(double& val);
+  Packet& operator<<(const std::wstring& str);
+  Packet& operator>>(std::wstring& str);
+
+  // convert to wstring and call that operator
   Packet& operator<<(const std::string& str);
   Packet& operator>>(std::string& str);
+
+  void writeString(const std::string& str);
+  std::string readString();
+
   void operator<<(Packet& other);
 
   void getData(void* buf, int count)
@@ -250,8 +262,8 @@ struct Packets
 struct packet_login_request
 {
   int version;
-  std::string Username;
-  std::string Password;
+  std::wstring Username;
+  std::wstring Password;
   int64_t map_seed;
   uint8_t dimension;
 };
@@ -317,6 +329,8 @@ public:
   int destroy_entity(User* user);
 
   int entity_crouch(User* user);
+
+  int unhadledPacket(User* user);
 };
 
 #endif

@@ -1,28 +1,28 @@
 /*
-  Copyright (c) 2011, The Mineserver Project
-  All rights reserved.
+Copyright (c) 2011, The Mineserver Project
+All rights reserved.
 
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions are met:
-  * Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-  * Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in the
-    documentation and/or other materials provided with the distribution.
-  * Neither the name of the The Mineserver Project nor the
-    names of its contributors may be used to endorse or promote products
-    derived from this software without specific prior written permission.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+* Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+* Neither the name of the The Mineserver Project nor the
+names of its contributors may be used to endorse or promote products
+derived from this software without specific prior written permission.
 
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <ctime>
@@ -39,6 +39,8 @@
 #include "plugin.h"
 
 #include "chat.h"
+
+using std::min;
 
 Chat::Chat()
 {
@@ -238,18 +240,21 @@ void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeSta
 
 bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
 {
-  size_t tmpArrayLen = 2 * msg.size() + 3;
+  std::wstring wMsg = stows(msg);
+  uint32_t strLength = min((uint32_t)kMaxChatMessageLength,(uint32_t)wMsg.size());
+  size_t tmpArrayLen = strLength*2 + 3;
+
   uint8_t* tmpArray    = new uint8_t[tmpArrayLen];
 
   tmpArray[0] = 0x03;
-  tmpArray[1] = (msg.size() >> 8) & 0xFF;
-  tmpArray[2] = msg.size()        & 0xFF;
+  tmpArray[1] = 0;
+  tmpArray[2] = msg.size() & 0xff;
 
-  for (unsigned int i = 0; i < msg.size(); i++)
+  for (unsigned int i = 0; i < strLength; i++)
   {
-    // This is a very crude "UTF16 encoder" that only works for ASCII characters. DANGEROUS.
-    tmpArray[2 * i + 3] = 0;
-    tmpArray[2 * i + 4] = msg[i];
+    uint8_t* currentChar = (uint8_t*)(wMsg.c_str()+i); 
+    tmpArray[(i*2)+3] = *(currentChar+1);
+    tmpArray[(i*2)+1+3] = *(currentChar);
   }
 
   switch (action)
