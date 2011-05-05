@@ -113,7 +113,7 @@ public:
     return m_root->has(key) ? m_root->get(key)->type() : CONFIG_NODE_UNDEFINED;
   }
 
-  inline std::list<std::string>* keys(int type = CONFIG_NODE_UNDEFINED) const
+  inline std::list<std::string> keys(int type = CONFIG_NODE_UNDEFINED) const
   {
     return m_root->keys();
   }

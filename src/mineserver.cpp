@@ -376,9 +376,9 @@ bool Mineserver::init()
   const char* key = "map.storage.nbt.directories"; // Prefix for worlds config
   if (m_config->has(key) && (m_config->type(key) == CONFIG_NODE_LIST))
   {
-    std::list<std::string>* tmp = m_config->mData(key)->keys();
+    std::list<std::string> tmp = m_config->mData(key)->keys();
     int n = 0;
-    for (std::list<std::string>::const_iterator it = tmp->begin(); it != tmp->end(); ++it)
+    for (std::list<std::string>::const_iterator it = tmp.begin(); it != tmp.end(); ++it)
     {
       m_map.push_back(new Map());
       Physics* phy = new Physics;
@@ -397,7 +397,6 @@ bool Mineserver::init()
       n++;
 
     }
-    delete tmp;
   }
   else
   {
@@ -500,8 +499,8 @@ bool Mineserver::run()
   // load plugins
   if (config()->has("system.plugins") && (config()->type("system.plugins") == CONFIG_NODE_LIST))
   {
-    std::list<std::string>* tmp = config()->mData("system.plugins")->keys();
-    for (std::list<std::string>::const_iterator it = tmp->begin(); it != tmp->end(); ++it)
+    std::list<std::string> tmp = config()->mData("system.plugins")->keys();
+    for (std::list<std::string>::const_iterator it = tmp.begin(); it != tmp.end(); ++it)
     {
       std::string path  = config()->sData("system.path.plugins");
       std::string name  = config()->sData("system.plugins." + (*it));
@@ -515,7 +514,6 @@ bool Mineserver::run()
 
       plugin()->loadPlugin(name, path, alias);
     }
-    delete tmp;
   }
 
   // Initialize map

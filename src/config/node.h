@@ -57,7 +57,7 @@ public:
   void setData(float data);
   void setData(double data);
   void setData(const std::string& data);
-  std::list<std::string>* keys(int type = CONFIG_NODE_UNDEFINED);
+  std::list<std::string> keys(int type = CONFIG_NODE_UNDEFINED) const;
   int type() const;
   void setType(int type);
   bool has(const std::string& key);
@@ -65,11 +65,8 @@ public:
   bool set(const std::string& key, ConfigNode* ptr, bool createMissing = true);
   bool add(ConfigNode* ptr);
   void clear();
-  void dump(int indent) const;
-  void dump() const
-  {
-    dump(0);
-  }
+  void dump(int indent = 0) const;
+
 private:
   int m_type;
   int m_index;

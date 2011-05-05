@@ -302,18 +302,16 @@ void Furnace::sendToAllUsers()
 
 void readConfig()
 {
-  const char* key = "furnace.items";
+  const std::string key = "furnace.items";
   if (Mineserver::get()->config()->has(key) && Mineserver::get()->config()->type(key) == CONFIG_NODE_LIST)
   {
-    std::list<std::string>* tmp = Mineserver::get()->config()->mData(key)->keys();
-    std::list<std::string>::iterator it = tmp->begin();
-    for (; it != tmp->end(); ++it)
+    std::list<std::string> tmp = Mineserver::get()->config()->mData(key)->keys();
+    for (std::list<std::string>::const_iterator it = tmp.begin(); it != tmp.end(); ++it)
     {
-      int input = Mineserver::get()->config()->iData((std::string(key) + ".") + (*it) + ".in");
-      createList[input].output = Mineserver::get()->config()->iData((std::string(key) + ".") + (*it) + ".out");
-      createList[input].meta = Mineserver::get()->config()->iData((std::string(key) + ".") + (*it) + ".meta");
-      createList[input].count = Mineserver::get()->config()->iData((std::string(key) + ".") + (*it) + ".count");
+      int input = Mineserver::get()->config()->iData(key + "." + *it + ".in");
+      createList[input].output = Mineserver::get()->config()->iData(key + "." + *it + ".out");
+      createList[input].meta = Mineserver::get()->config()->iData(key + "." + *it + ".meta");
+      createList[input].count = Mineserver::get()->config()->iData(key + "." + *it + ".count");
     }
   }
 }
-
