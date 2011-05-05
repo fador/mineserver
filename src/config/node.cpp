@@ -271,13 +271,12 @@ bool ConfigNode::set(const std::string& key, ConfigNode* ptr, bool createMissing
 {
   m_type = CONFIG_NODE_LIST;
 
-  size_t pos = key.find('.');
+  const size_t pos = key.find('.');
 
   if (pos != std::string::npos)
   {
-    std::string keyA(key.substr(0, pos));
-    std::string keyB(key.substr(pos + 1));
-    ConfigNode* tmp;
+    const std::string keyA(key.substr(0, pos));
+    const std::string keyB(key.substr(pos + 1));
 
     if (m_list.count(keyA) == 0)
     {
@@ -291,12 +290,12 @@ bool ConfigNode::set(const std::string& key, ConfigNode* ptr, bool createMissing
       }
     }
 
-    tmp = m_list[keyA];
-    return tmp->set(keyB, ptr, createMissing);
+    return m_list[keyA]->set(keyB, ptr, createMissing);
   }
   else
   {
     m_index++;
+    // WARNING: Shouldn't the old node be deleted here?
     m_list[key] = ptr;
     return true;
   }
@@ -317,6 +316,7 @@ void ConfigNode::clear()
   m_type = 0;
   m_nData = 0;
   m_sData.clear();
+  // WARNING: Shouldn't those nodes be deleted before m_list is clear()ed?
   m_list.clear();
 }
 
@@ -339,17 +339,14 @@ void ConfigNode::dump(int indent) const
   {
     std::cout << "list:\n";
 
-    std::map<std::string, ConfigNode*>::const_iterator iter_a = m_list.begin();
-    std::map<std::string, ConfigNode*>::const_iterator iter_b = m_list.end();
-
-    for (; iter_a != iter_b; ++iter_a)
+    for (std::map<std::string, ConfigNode*>::const_iterator it = m_list.begin(); it != m_list.end(); ++it)
     {
-      for (int i = 0; i < (indent + 1); i++)
+      for (int i = 0; i < indent + 1; ++i)
       {
         std::cout << "  ";
       }
-      std::cout << iter_a->first << " =>\n";
-      iter_a->second->dump(indent + 1);
+      std::cout << it->first << " =>\n";
+      it->second->dump(indent + 1);
     }
 
     break;
