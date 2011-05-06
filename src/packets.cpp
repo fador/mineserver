@@ -28,7 +28,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdlib>
 #include <sys/types.h>
 #ifdef WIN32
-#include <conio.h>
 #include <winsock2.h>
 #else
 #include <sys/socket.h>

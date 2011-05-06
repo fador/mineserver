@@ -49,7 +49,6 @@ struct RegionFile {
 */
 
 #ifdef WIN32
-#include <conio.h>
 #include <winsock2.h>
 #include <direct.h>
 #else

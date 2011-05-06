@@ -27,7 +27,6 @@
 
 
 #ifdef WIN32
-#include <conio.h>
 #include <direct.h>
 #include <winsock2.h>
 #else

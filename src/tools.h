@@ -65,10 +65,6 @@ std::string hash(std::string value);
 
 std::string pathExpandUser(const std::string& path);
 
-#ifndef WIN32
-int kbhit();
-#endif
-
 inline uint64_t ntohll(uint64_t v)
 {
   return (uint64_t)ntohl(v & 0x00000000ffffffff) << 32 | (uint64_t)ntohl((v >> 32) & 0x00000000ffffffff);
