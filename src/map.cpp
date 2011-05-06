@@ -132,9 +132,9 @@ Map::~Map()
   // louisdx: This destructor is doing WAY too much. All this should be in a separate function.
   // A destructor must never throw, and this destructor does tons of non-exception-safe stuff.
 
-  for (ChunkMap::const_iterator it = chunks.begin(); it != chunks.end(); ++it)
+  for (ChunkMap::const_iterator it = chunks.begin(); it != chunks.end(); )
   {
-    releaseMap(it->first);
+    releaseMap((it++)->first);
   }
 
   // Free item memory
