@@ -30,6 +30,7 @@
 
 #include <string>
 #include <stdint.h>
+#include <tr1/memory>
 
 enum
 {
@@ -45,8 +46,8 @@ public:
   ConfigParser();
 
 public:
-  bool parse(const std::string& file, ConfigNode* ptr);
-  bool parse(const std::istream& data, ConfigNode* ptr);
+  bool parse(const std::string& file, std::tr1::shared_ptr<ConfigNode> ptr);
+  bool parse(const std::istream& data, std::tr1::shared_ptr<ConfigNode> ptr);
 
 private:
   uint32_t m_includes;

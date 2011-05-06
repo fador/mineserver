@@ -33,90 +33,21 @@
 
 #include "node.h"
 
-ConfigNode::ConfigNode() : m_type(0), m_index(0), m_nData(0)
+ConfigNode::ConfigNode()
+  :
+  m_type(0),
+  m_index(0),
+  m_nData(0)
 {
-}
-
-ConfigNode::~ConfigNode()
-{
-  std::map<std::string, ConfigNode*>::iterator iter_a = m_list.begin();
-  std::map<std::string, ConfigNode*>::iterator iter_b = m_list.end();
-
-  for (; iter_a != iter_b; ++iter_a)
-  {
-    delete iter_a->second;
-  }
-}
-
-
-
-bool ConfigNode::bData() const
-{
-  bool tmp = false;
-  if (m_type == CONFIG_NODE_BOOLEAN)
-  {
-    tmp = m_nData != 0.0;
-  }
-  return tmp;
-}
-
-int ConfigNode::iData() const
-{
-  if (m_type == CONFIG_NODE_NUMBER)
-  {
-    return (int)m_nData;
-  }
-  return 0;
-}
-
-int64_t ConfigNode::lData() const
-{
-  if (m_type == CONFIG_NODE_NUMBER)
-  {
-    return (int64_t)m_nData;
-  }
-  return 0;
-}
-
-float ConfigNode::fData() const
-{
-  if (m_type == CONFIG_NODE_NUMBER)
-  {
-    return (float)m_nData;
-  }
-  return 0.0f;
-}
-
-double ConfigNode::dData() const
-{
-  if (m_type == CONFIG_NODE_NUMBER)
-  {
-    return m_nData;
-  }
-  return 0.0;
-}
-
-std::string ConfigNode::sData() const
-{
-  std::string tmp("");
-  if (m_type == CONFIG_NODE_STRING)
-  {
-    tmp.assign(m_sData);
-  }
-  else
-  {
-    tmp.clear();
-  }
-  return tmp;
 }
 
 std::list<std::string> ConfigNode::keys(int type) const
 {
   std::list<std::string> keys;
 
-  for (std::map<std::string, ConfigNode*>::const_iterator it = m_list.begin(); it != m_list.end(); ++it)
+  for (Map::const_iterator it = m_list.begin(); it != m_list.end(); ++it)
   {
-    if ((type == CONFIG_NODE_UNDEFINED) || (it->second->type() == type))
+    if (type == CONFIG_NODE_UNDEFINED || it->second->type() == type)
     {
       keys.push_back(it->first);
     }
@@ -134,92 +65,34 @@ std::list<std::string> ConfigNode::keys(int type) const
   return keys;
 }
 
-void ConfigNode::setData(bool data)
-{
-  m_type = CONFIG_NODE_BOOLEAN;
-  m_nData = (double)data;
-}
-
-void ConfigNode::setData(int data)
-{
-  m_type = CONFIG_NODE_NUMBER;
-  m_nData = (double)data;
-}
-
-void ConfigNode::setData(int64_t data)
-{
-  m_type = CONFIG_NODE_NUMBER;
-  m_nData = (double)data;
-}
-
-void ConfigNode::setData(float data)
-{
-  m_type = CONFIG_NODE_NUMBER;
-  m_nData = (double)data;
-}
-
-void ConfigNode::setData(double data)
-{
-  m_type = CONFIG_NODE_NUMBER;
-  m_nData = (double)data;
-}
-
-void ConfigNode::setData(const std::string& data)
-{
-  m_type = CONFIG_NODE_STRING;
-  m_sData.assign(data);
-}
-
-int ConfigNode::type() const
-{
-  return m_type;
-}
-
-void ConfigNode::setType(int type)
-{
-  m_type = type;
-}
-
-bool ConfigNode::has(const std::string& key)
+bool ConfigNode::has(const std::string& key) const
 {
   if (m_type != CONFIG_NODE_LIST)
   {
     return false;
   }
 
-  size_t pos = key.find('.');
+  const size_t pos = key.find('.');
 
   if (pos != std::string::npos)
   {
     const std::string keyA(key.substr(0, pos));
     const std::string keyB(key.substr(pos + 1));
-    ConfigNode* tmp;
 
-    if (m_list.count(keyA) == 0)
-    {
-      return false;
-    }
-    else
-    {
-      tmp = m_list[keyA];
-      return tmp->has(keyB);
-    }
-  }
-  else if (m_list.count(key) == 1)
-  {
-    return true;
+    const Map::const_iterator it = m_list.find(keyA);
+    return it == m_list.end() ? false : it->second->has(keyB);
   }
   else
   {
-    return false;
+    return m_list.count(key) > 0;
   }
 }
 
-ConfigNode* ConfigNode::get(const std::string& key, bool createMissing)
+ConfigNode::Ptr ConfigNode::get(const std::string& key, bool createMissing)
 {
   if (m_type != CONFIG_NODE_LIST)
   {
-    return NULL;
+    return Ptr();
   }
 
   size_t pos = key.find('.');
@@ -228,46 +101,42 @@ ConfigNode* ConfigNode::get(const std::string& key, bool createMissing)
   {
     std::string keyA(key.substr(0, pos));
     std::string keyB(key.substr(pos + 1));
-    ConfigNode* tmp;
 
-    if (m_list.count(keyA))
+    const Map::const_iterator it = m_list.find(keyA);
+
+    if (it != m_list.end())
     {
-      tmp = m_list[keyA];
+      return it->second->get(keyB, createMissing);
+    }
+    else if (createMissing == false)
+    {
+      return Ptr();
     }
     else
     {
-      if (createMissing == false)
-      {
-        return NULL;
-      }
-      else
-      {
-        tmp = new ConfigNode();
-        m_list[keyA] = tmp;
-      }
+      return m_list.insert(Map::value_type(keyA, std::tr1::shared_ptr<ConfigNode>(new ConfigNode))).first->second->get(keyB, createMissing);
     }
-
-    return tmp->get(keyB, createMissing);
   }
   else
   {
-    if (m_list.count(key) == 0)
-    {
-      if (createMissing == true)
-      {
-        m_list[key] = new ConfigNode;
-      }
-      else
-      {
-        return NULL;
-      }
-    }
+    const Map::const_iterator it = m_list.find(key);
 
-    return m_list[key];
+    if (it != m_list.end())
+    {
+      return it->second;
+    }
+    else if (createMissing == false)
+    {
+      return Ptr();
+    }
+    else
+    {
+      return m_list.insert(Map::value_type(key, Map::mapped_type(new ConfigNode))).first->second;
+    }
   }
 }
 
-bool ConfigNode::set(const std::string& key, ConfigNode* ptr, bool createMissing)
+bool ConfigNode::set(const std::string& key, std::tr1::shared_ptr<ConfigNode> ptr, bool createMissing)
 {
   m_type = CONFIG_NODE_LIST;
 
@@ -278,7 +147,9 @@ bool ConfigNode::set(const std::string& key, ConfigNode* ptr, bool createMissing
     const std::string keyA(key.substr(0, pos));
     const std::string keyB(key.substr(pos + 1));
 
-    if (m_list.count(keyA) == 0)
+    const Map::const_iterator it = m_list.find(keyA);
+
+    if (it == m_list.end())
     {
       if (createMissing == false)
       {
@@ -286,29 +157,28 @@ bool ConfigNode::set(const std::string& key, ConfigNode* ptr, bool createMissing
       }
       else
       {
-        m_list[keyA] = new ConfigNode;
+        return m_list.insert(Map::value_type(keyA, Map::mapped_type(new ConfigNode))).first->second->set(keyB, ptr, createMissing);
       }
     }
-
-    return m_list[keyA]->set(keyB, ptr, createMissing);
+    else
+    {
+      return it->second->set(keyB, ptr, createMissing);
+    }
   }
   else
   {
-    m_index++;
-    // WARNING: Shouldn't the old node be deleted here?
+    ++m_index;
     m_list[key] = ptr;
     return true;
   }
 }
 
-bool ConfigNode::add(ConfigNode* ptr)
+bool ConfigNode::add(ConfigNode::Ptr ptr)
 {
-  std::string key;
   std::stringstream ss;
   ss << m_index;
-  ss >> key;
 
-  return set(key, ptr);
+  return set(ss.str(), ptr);
 }
 
 void ConfigNode::clear()
@@ -316,7 +186,6 @@ void ConfigNode::clear()
   m_type = 0;
   m_nData = 0;
   m_sData.clear();
-  // WARNING: Shouldn't those nodes be deleted before m_list is clear()ed?
   m_list.clear();
 }
 
@@ -339,7 +208,7 @@ void ConfigNode::dump(int indent) const
   {
     std::cout << "list:\n";
 
-    for (std::map<std::string, ConfigNode*>::const_iterator it = m_list.begin(); it != m_list.end(); ++it)
+    for (Map::const_iterator it = m_list.begin(); it != m_list.end(); ++it)
     {
       for (int i = 0; i < indent + 1; ++i)
       {

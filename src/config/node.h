@@ -31,6 +31,7 @@
 #include <string>
 #include <map>
 #include <list>
+#include <tr1/memory>
 
 #include <stdint.h>
 
@@ -43,27 +44,94 @@
 class ConfigNode
 {
 public:
+
+  typedef std::tr1::shared_ptr<ConfigNode> Ptr;
+  typedef std::map<std::string, Ptr> Map;
+
   ConfigNode();
-  ~ConfigNode();
-  bool bData() const;
-  int iData() const;
-  int64_t lData() const;
-  float fData() const;
-  double dData() const;
-  std::string sData() const;
-  void setData(bool data);
-  void setData(int data);
-  void setData(int64_t data);
-  void setData(float data);
-  void setData(double data);
-  void setData(const std::string& data);
+
+  inline bool bData() const
+  {
+    return m_type == CONFIG_NODE_BOOLEAN ? (m_nData != 0) : false;
+  }
+
+  inline int iData() const
+  {
+    return m_type == CONFIG_NODE_NUMBER ? m_nData : 0;
+  }
+
+  inline int64_t lData() const
+  {
+    return m_type == CONFIG_NODE_NUMBER ? m_nData : 0;
+  }
+
+  inline float fData() const
+  {
+    return m_type == CONFIG_NODE_NUMBER ? m_nData : 0;
+  }
+
+  inline double dData() const
+  {
+    return m_type == CONFIG_NODE_NUMBER ? m_nData : 0;
+  }
+
+  inline std::string sData() const
+  {
+    return m_type == CONFIG_NODE_STRING ? m_sData : "";
+  }
+
+  inline void setData(bool data)
+  {
+    m_type = CONFIG_NODE_BOOLEAN;
+    m_nData = data ? 1 : 0;
+  }
+
+  inline void setData(int data)
+  {
+    m_type = CONFIG_NODE_NUMBER;
+    m_nData = data;
+  }
+
+  inline void setData(int64_t data)
+  {
+    m_type = CONFIG_NODE_NUMBER;
+    m_nData = data;
+  }
+
+  inline void setData(float data)
+  {
+    m_type = CONFIG_NODE_NUMBER;
+    m_nData = data;
+  }
+
+  inline void setData(double data)
+  {
+    m_type = CONFIG_NODE_NUMBER;
+    m_nData = data;
+  }
+
+  inline void setData(const std::string& data)
+  {
+    m_type = CONFIG_NODE_STRING;
+    m_sData = data;
+  }
+
   std::list<std::string> keys(int type = CONFIG_NODE_UNDEFINED) const;
-  int type() const;
-  void setType(int type);
-  bool has(const std::string& key);
-  ConfigNode* get(const std::string& key, bool createMissing = true);
-  bool set(const std::string& key, ConfigNode* ptr, bool createMissing = true);
-  bool add(ConfigNode* ptr);
+
+  inline int type() const
+  {
+    return m_type;
+  }
+
+  inline void setType(int type)
+  {
+    m_type = type;
+  }
+
+  bool has(const std::string& key) const;
+  Ptr  get(const std::string& key, bool createMissing = true);
+  bool set(const std::string& key, Ptr ptr, bool createMissing = true);
+  bool add(Ptr ptr);
   void clear();
   void dump(int indent = 0) const;
 
@@ -72,7 +140,7 @@ private:
   int m_index;
   double m_nData;
   std::string m_sData;
-  std::map<std::string, ConfigNode*> m_list;
+  Map m_list;
 };
 
 #endif

@@ -50,12 +50,12 @@ public:
 
   inline bool load(const std::string& file) const
   {
-    return m_parser->parse(file, m_root.get());
+    return m_parser->parse(file, m_root);
   }
 
   inline bool load(const std::istream& data) const
   {
-    return m_parser->parse(data, m_root.get());
+    return m_parser->parse(data, m_root);
   }
 
   inline void dump() const
@@ -63,9 +63,9 @@ public:
     m_root->dump();
   }
 
-  inline ConfigNode* root() const
+  inline ConfigNode::Ptr root() const
   {
-    return m_root.get();
+    return m_root;
   }
 
   inline int iData(const std::string& key)
@@ -100,7 +100,7 @@ public:
 
   inline ConfigNode* mData(const std::string& key)
   {
-    return m_root->has(key) ? m_root->get(key, false) : NULL;
+    return m_root->has(key) ? m_root->get(key, false).get() : NULL;
   }
 
   inline bool has(const std::string& key) const
@@ -120,7 +120,7 @@ public:
 
 private:
   std::tr1::shared_ptr<ConfigParser> m_parser;
-  std::tr1::shared_ptr<ConfigNode>   m_root;
+  ConfigNode::Ptr m_root;
 };
 
 #endif
