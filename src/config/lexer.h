@@ -31,35 +31,42 @@
 #include <string>
 #include <stack>
 #include <utility>
+#include <tr1/memory>
 
-#define CONFIG_TOKEN_ENTITY 1
-#define CONFIG_TOKEN_LABEL 2
-#define CONFIG_TOKEN_NUMBER 3
-#define CONFIG_TOKEN_STRING 4
-#define CONFIG_TOKEN_BOOLEAN 5
+enum {
+  CONFIG_TOKEN_ENTITY = 1,
+  CONFIG_TOKEN_LABEL = 2,
+  CONFIG_TOKEN_NUMBER = 3,
+  CONFIG_TOKEN_STRING = 4,
+  CONFIG_TOKEN_BOOLEAN = 5,
 
-#define CONFIG_TOKEN_LIST_OPEN 10
-#define CONFIG_TOKEN_LIST_CLOSE 11
-#define CONFIG_TOKEN_LIST_DELIMITER 12
-#define CONFIG_TOKEN_LIST_LABEL 13
+  CONFIG_TOKEN_LIST_OPEN = 10,
+  CONFIG_TOKEN_LIST_CLOSE = 11,
+  CONFIG_TOKEN_LIST_DELIMITER = 12,
+  CONFIG_TOKEN_LIST_LABEL = 13,
 
-#define CONFIG_TOKEN_OPERATOR_ASSIGN 20
-#define CONFIG_TOKEN_OPERATOR_APPEND 21
+  CONFIG_TOKEN_OPERATOR_ASSIGN = 20,
+  CONFIG_TOKEN_OPERATOR_APPEND = 21,
 
-#define CONFIG_TOKEN_TERMINATOR 30
+  CONFIG_TOKEN_TERMINATOR = 30
+};
 
 class ConfigScanner;
 
 class ConfigLexer
 {
+  typedef std::pair<int, std::string> Token;
+  typedef std::tr1::shared_ptr<Token> TokenPtr;
+
 public:
-  bool get_token(int* type, std::string* data);
+  ConfigLexer(ConfigScanner& scanner) : m_scanner(scanner) { }
+
+  bool get_token(int& type, std::string& data);
   void put_token(int type, const std::string& data);
-  void setScanner(ConfigScanner* scanner);
-  ConfigScanner* scanner();
+
 private:
-  ConfigScanner* m_scanner;
-  std::stack<std::pair<int, std::string>*> m_tokenStack;
+  ConfigScanner& m_scanner;
+  std::stack<TokenPtr> m_tokenStack;
 };
 
 #endif

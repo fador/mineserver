@@ -74,7 +74,7 @@ bool ConfigParser::parse(const std::string& file, ConfigNode::Ptr ptr)
 bool ConfigParser::parse(const std::istream& data, ConfigNode::Ptr ptr)
 {
   ConfigScanner scanner;
-  ConfigLexer lexer;
+  ConfigLexer lexer(scanner);
   ConfigNode::Ptr root = ptr;
 
   // that's ugly!
@@ -87,8 +87,6 @@ bool ConfigParser::parse(const std::istream& data, ConfigNode::Ptr ptr)
     return false;
   }
 
-  lexer.setScanner(&scanner);
-
   int token_type;
   std::string token_data;
   std::string token_label;
@@ -96,7 +94,7 @@ bool ConfigParser::parse(const std::istream& data, ConfigNode::Ptr ptr)
   ConfigNode::Ptr currentNode = root;
   nodeStack.push_back(currentNode);
 
-  while (lexer.get_token(&token_type, &token_data))
+  while (lexer.get_token(token_type, token_data))
   {
     if (!token_type)
     {
@@ -110,7 +108,7 @@ bool ConfigParser::parse(const std::istream& data, ConfigNode::Ptr ptr)
       int tmp_type;
       std::string tmp_data;
 
-      lexer.get_token(&tmp_type, &tmp_data);
+      lexer.get_token(tmp_type, tmp_data);
       if (tmp_type == CONFIG_TOKEN_STRING)
       {
         if (m_includes >= MAX_INCLUDES)

@@ -136,7 +136,7 @@ ConfigNode::Ptr ConfigNode::get(const std::string& key, bool createMissing)
   }
 }
 
-bool ConfigNode::set(const std::string& key, std::tr1::shared_ptr<ConfigNode> ptr, bool createMissing)
+bool ConfigNode::set(const std::string& key, ConfigNode::Ptr ptr, bool createMissing)
 {
   m_type = CONFIG_NODE_LIST;
 
