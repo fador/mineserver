@@ -26,8 +26,7 @@
  */
 
 #ifdef WIN32
-#include <conio.h>
-#include <WinSock2.h>
+#include <winsock2.h>
 #else
 #include <netinet/in.h>
 #include <pwd.h>

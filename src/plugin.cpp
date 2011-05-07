@@ -243,7 +243,7 @@ bool Plugin::loadPlugin(const std::string& name, const std::string& path, std::s
 
   m_libraryHandles[alias] = lhandle;
 
-  *reinterpret_cast<void**>(&fhandle) = LIBRARY_SYMBOL(lhandle, (name + "_init").c_str());
+  *reinterpret_cast<void**>(&fhandle) = (void*)LIBRARY_SYMBOL(lhandle, (name + "_init").c_str());
   if (fhandle == NULL)
   {
     LOG(INFO, "Plugin", "Could not get init function handle!");
@@ -274,7 +274,7 @@ void Plugin::unloadPlugin(const std::string name)
       lhandle = LIBRARY_SELF();
     }
 
-    *reinterpret_cast<void**>(&fhandle) = LIBRARY_SYMBOL(lhandle, (name + "_shutdown").c_str());
+    *reinterpret_cast<void**>(&fhandle) = (void*)LIBRARY_SYMBOL(lhandle, (name + "_shutdown").c_str());
     if (fhandle == NULL)
     {
       LOG(INFO, "Plugin", "Could not get shutdown function handle!");

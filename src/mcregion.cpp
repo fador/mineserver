@@ -49,8 +49,7 @@ struct RegionFile {
 */
 
 #ifdef WIN32
-#include <conio.h>
-#include <WinSock2.h>
+#include <winsock2.h>
 #include <direct.h>
 #else
 #include <netinet/in.h>

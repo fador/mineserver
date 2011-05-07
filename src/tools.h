@@ -33,7 +33,7 @@
 #include <string>
 
 #ifdef WIN32
-#include <Winsock2.h>
+#include <winsock2.h>
 #else
 #include <arpa/inet.h>
 #endif
@@ -64,10 +64,6 @@ std::string hash(std::string value);
 #endif
 
 std::string pathExpandUser(const std::string& path);
-
-#ifndef WIN32
-int kbhit();
-#endif
 
 inline uint64_t ntohll(uint64_t v)
 {

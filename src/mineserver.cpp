@@ -29,7 +29,6 @@
 
 #include <sys/stat.h>
 #ifdef WIN32
-#include <conio.h>
 #include <winsock2.h>
 #include <process.h>
 #include <direct.h>
