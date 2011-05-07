@@ -31,6 +31,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <tr1/unordered_map>
+#include <tr1/memory>
 #include <iostream>
 #include <fstream> // Added for MOTD
 #include <stdint.h>
@@ -84,17 +85,18 @@ struct Command
   CommandCallback callback;  
 };
 
-typedef std::tr1::unordered_map<std::string, Command*> CommandList;
+typedef std::tr1::shared_ptr<Command> ComPtr;
+typedef std::tr1::unordered_map<std::string, ComPtr> CommandList;
 CommandList m_Commands;
 
-void registerCommand(Command* command)
+void registerCommand(ComPtr command)
 {
   // Loop thru all the words for this command
   std::string currentWord;
   std::deque<std::string> words = command->names;
   while(!words.empty())
   {
-    currentWord = words[0];
+    currentWord = words.front();
     words.pop_front();
     m_Commands[currentWord] = command;
   }
@@ -778,26 +780,26 @@ PLUGIN_API_EXPORT void CALLCONVERSION commands_init(mineserver_pointer_struct* m
   
 
 
-  registerCommand(new Command(parseCmd("replace"), "", "", replace));
-  registerCommand(new Command(parseCmd("replacechunk"), "", "", replacechunk));
-  registerCommand(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport));
-  registerCommand(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf));
-  registerCommand(new Command(parseCmd("home"), "", "Teleport to map spawn location", home));
-  registerCommand(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime));
-  registerCommand(new Command(parseCmd("cuboid"), "", "type in the command and place two blocks, it will fill the space between them", cuboid));  
-  registerCommand(new Command(parseCmd("players who names list"), "", "Lists online players", playerList));
-  registerCommand(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems));
-  registerCommand(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap));  
-  registerCommand(new Command(parseCmd("setspawn"), "", "", setSpawn));  
-  registerCommand(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", sendHelp));
-  registerCommand(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport));
-  registerCommand(new Command(parseCmd("gps"), "", "Display current coordinates", gps));
-  registerCommand(new Command(parseCmd("dnd"), "", "Toggle Do Not Disturb mode", doNotDisturb));
-  registerCommand(new Command(parseCmd("rules"), "", "Display server rules", sendRules));
-  registerCommand(new Command(parseCmd("about"), "", "Display server name and software version", about));
-  registerCommand(new Command(parseCmd("motd"), "", "Displays the MOTD", sendMOTD));
-  registerCommand(new Command(parseCmd("world"), "<world Number>", "Move between worlds", userWorld));
-  registerCommand(new Command(parseCmd("gettime"), "<time>", "Get the serverTime", getTime));
+  registerCommand(ComPtr(new Command(parseCmd("replace"), "", "", replace)));
+  registerCommand(ComPtr(new Command(parseCmd("replacechunk"), "", "", replacechunk)));
+  registerCommand(ComPtr(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport)));
+  registerCommand(ComPtr(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf)));
+  registerCommand(ComPtr(new Command(parseCmd("home"), "", "Teleport to map spawn location", home)));
+  registerCommand(ComPtr(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime)));
+  registerCommand(ComPtr(new Command(parseCmd("cuboid"), "", "type in the command and place two blocks, it will fill the space between them", cuboid)));  
+  registerCommand(ComPtr(new Command(parseCmd("players who names list"), "", "Lists online players", playerList)));
+  registerCommand(ComPtr(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems)));
+  registerCommand(ComPtr(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap)));  
+  registerCommand(ComPtr(new Command(parseCmd("setspawn"), "", "", setSpawn)));  
+  registerCommand(ComPtr(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", sendHelp)));
+  registerCommand(ComPtr(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport)));
+  registerCommand(ComPtr(new Command(parseCmd("gps"), "", "Display current coordinates", gps)));
+  registerCommand(ComPtr(new Command(parseCmd("dnd"), "", "Toggle Do Not Disturb mode", doNotDisturb)));
+  registerCommand(ComPtr(new Command(parseCmd("rules"), "", "Display server rules", sendRules)));
+  registerCommand(ComPtr(new Command(parseCmd("about"), "", "Display server name and software version", about)));
+  registerCommand(ComPtr(new Command(parseCmd("motd"), "", "Displays the MOTD", sendMOTD)));
+  registerCommand(ComPtr(new Command(parseCmd("world"), "<world Number>", "Move between worlds", userWorld)));
+  registerCommand(ComPtr(new Command(parseCmd("gettime"), "<time>", "Get the serverTime", getTime)));
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION commands_shutdown(void)
