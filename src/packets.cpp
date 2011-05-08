@@ -1467,17 +1467,18 @@ Packet& Packet::operator>>(double& val)
 
 Packet& Packet::operator<<(const std::string& str)
 {
-  uint16_t lenval = htons(str.length());
+  std::vector<uint16_t> result;
+  makeUCS2MessageFromUTF8(str, result);
+
+  uint16_t lenval = htons(result.size());
   addToWrite(&lenval, 2);
 
-  // The naive zero-padding only works for ASCII (< 128) characters!!
-  // A real conversion to UTF16 would use iconv() on the input string.
-  char buf[2] = { 0, 0};
-  for (size_t i = 0;  i < str.length(); ++i)
+  for (size_t i = 0;  i < result.size(); ++i)
   {
-    buf[1] = str[i];
-    addToWrite(buf, 2);
+    uint16_t character = htons(result[i]);
+    addToWrite(&character, 2);
   }
+
   return *this;
 }
 
