@@ -330,7 +330,7 @@ public:
 
   int entity_crouch(User* user);
 
-  int unhadledPacket(User* user);
+  int unhandledPacket(User* user);
 };
 
 #endif
