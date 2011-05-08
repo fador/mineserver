@@ -179,8 +179,6 @@ public:
   Packet& operator>>(float& val);
   Packet& operator<<(double val);
   Packet& operator>>(double& val);
-  Packet& operator<<(const std::wstring& str);
-  Packet& operator>>(std::wstring& str);
 
   // convert to wstring and call that operator
   Packet& operator<<(const std::string& str);
@@ -262,8 +260,8 @@ struct Packets
 struct packet_login_request
 {
   int version;
-  std::wstring Username;
-  std::wstring Password;
+  std::string Username;
+  std::string Password;
   int64_t map_seed;
   uint8_t dimension;
 };
