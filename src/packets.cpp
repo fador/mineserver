@@ -388,7 +388,7 @@ int PacketHandler::login_request(User* user)
 #endif
         stringbuffer += std::string(buffer);
       }
-      delete [] buffer;
+      delete[] buffer;
 #ifdef WIN32
       closesocket(fd);
 #else
@@ -592,7 +592,7 @@ int PacketHandler::player_digging(User* user)
   int8_t direction;
   uint8_t block;
   uint8_t meta;
-  BlockBasic* blockcb;
+  BlockBasicPtr blockcb;
   BlockDefault blockD;
 
 
@@ -843,7 +843,7 @@ int PacketHandler::player_block_placement(User* user)
   uint8_t meta  = 0;
   int8_t count  = 0;
   int16_t health = 0;
-  BlockBasic* blockcb;
+  BlockBasicPtr blockcb;
   BlockDefault blockD;
 
 
@@ -860,7 +860,7 @@ int PacketHandler::player_block_placement(User* user)
   user->buffer.removePacket();
 
 
-  ItemBasic* itemcb;
+  ItemBasicPtr itemcb;
   if (x == -1 && y == -1 && z == -1)
   {
     // Right clicked without pointing at a tile

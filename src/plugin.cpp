@@ -115,79 +115,41 @@ Plugin::~Plugin()
   }
 
   m_hooks.clear();
-
-  free();
 }
 
 void Plugin::init()
 {
   // Create Block* objects and put them away so we can delete them later
-  BlockRedstone* redstoneblock = new BlockRedstone();
-  m_block_CBs.push_back(redstoneblock);
-  BlockWood* woodblock = new BlockWood();
-  m_block_CBs.push_back(woodblock);
-  BlockFalling* fallingblock = new BlockFalling();
-  m_block_CBs.push_back(fallingblock);
-  BlockTorch* torchblock = new BlockTorch();
-  m_block_CBs.push_back(torchblock);
-  BlockPlant* plantblock = new BlockPlant();
-  m_block_CBs.push_back(plantblock);
-  BlockSnow* snowblock = new BlockSnow();
-  m_block_CBs.push_back(snowblock);
-  BlockLiquid* liquidblock = new BlockLiquid();
-  m_block_CBs.push_back(liquidblock);
-  BlockFire* fireblock = new BlockFire();
-  m_block_CBs.push_back(fireblock);
-  BlockStair* stairblock = new BlockStair();
-  m_block_CBs.push_back(stairblock);
-  BlockChest* chestblock = new BlockChest();
-  m_block_CBs.push_back(chestblock);
-  BlockDoor* doorblock = new BlockDoor();
-  m_block_CBs.push_back(doorblock);
-  BlockSign* signblock = new BlockSign();
-  m_block_CBs.push_back(signblock);
-  BlockTracks* tracksblock = new BlockTracks();
-  m_block_CBs.push_back(tracksblock);
-  BlockLadder* ladderblock = new BlockLadder();
-  m_block_CBs.push_back(ladderblock);
-  BlockLeaves* leavesblock = new BlockLeaves();
-  m_block_CBs.push_back(leavesblock);
-  BlockCake* cakeblock = new BlockCake();
-  m_block_CBs.push_back(cakeblock);
-  BlockNote* noteblock = new BlockNote();
-  m_block_CBs.push_back(noteblock);
-  BlockFurnace* furnaceblock = new BlockFurnace();
-  m_block_CBs.push_back(furnaceblock);
-  BlockWorkbench* workbenchblock = new BlockWorkbench();
-  m_block_CBs.push_back(workbenchblock);
-  BlockPumpkin* pumpkinblock = new BlockPumpkin();
-  m_block_CBs.push_back(pumpkinblock);
-  BlockStep* stepblock = new BlockStep();
-  m_block_CBs.push_back(stepblock);
-  BlockBed* bedblock = new BlockBed();
-  m_block_CBs.push_back(bedblock);
-  BlockWool* woolblock = new BlockWool();
-  m_block_CBs.push_back(woolblock);
-  Blockjackolantern* jackolanternblock = new Blockjackolantern();
-  m_block_CBs.push_back(jackolanternblock);
-  BlockDefault* defaultblock = new BlockDefault();
-  m_block_CBs.push_back(defaultblock);
+  m_block_CBs.push_back(BlockBasicPtr(new BlockRedstone));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockWood));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockFalling));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockTorch));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockPlant));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockSnow));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockLiquid));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockFire));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockStair));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockChest));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockDoor));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockSign));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockTracks));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockLadder));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockLeaves));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockCake));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockNote));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockFurnace));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockWorkbench));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockPumpkin));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockStep));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockBed));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockWool));
+  m_block_CBs.push_back(BlockBasicPtr(new Blockjackolantern));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockDefault));
 
-
-  ItemFood* fooditem = new ItemFood();
-  m_item_CBs.push_back(fooditem);
-  ItemProjectile* projectileitem = new ItemProjectile();
-  m_item_CBs.push_back(projectileitem);
-
+  m_item_CBs.push_back(ItemBasicPtr(new ItemFood));
+  m_item_CBs.push_back(ItemBasicPtr(new ItemProjectile));
 }
 
-void Plugin::free()
-{
-  for (std::vector<BlockBasic*>::iterator it = m_block_CBs.begin(); it != m_block_CBs.end(); ++it)
-  {
-    delete *it;
-  }
-}
 
 typedef void (*pfms)(mineserver_pointer_struct*);
 typedef void (*pfv)();

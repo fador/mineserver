@@ -30,6 +30,7 @@
 
 #include <string>
 #include <tr1/unordered_map>
+#include <tr1/memory>
 #include <vector>
 #include <ctime>
 
@@ -80,6 +81,9 @@
 // Foe INCONSISTENCY fainted!
 // You got 374¥ for winning!
 
+typedef std::tr1::shared_ptr<BlockBasic> BlockBasicPtr;
+typedef std::tr1::shared_ptr<ItemBasic>  ItemBasicPtr;
+
 class Plugin
 {
 public:
@@ -89,8 +93,8 @@ public:
   typedef std::tr1::unordered_map<std::string, void*> PointerMap;
   typedef std::tr1::unordered_map<std::string, float> VersionMap;
 
-  typedef std::vector<BlockBasic*> BlockCBs;
-  typedef std::vector<ItemBasic*>  ItemCBs;
+  typedef std::vector<BlockBasicPtr> BlockCBs;
+  typedef std::vector<ItemBasicPtr>  ItemCBs;
 
    Plugin();
   ~Plugin();
@@ -130,8 +134,6 @@ public:
   inline void  remPointer(const PointerMap::key_type& name) { m_pointers.erase(name); }
 
   void init();
-
-  void free();
 
   inline const BlockCBs & getBlockCB() const { return m_block_CBs; }
 

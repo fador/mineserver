@@ -663,11 +663,11 @@ bool Mineserver::run()
 
     // Run 200ms timer hook
     static_cast<Hook0<bool>*>(plugin()->getHook("Timer200"))->doAll();
+
     // Alert any block types that care about timers
-    BlockBasic* blockcb;
-    for (size_t i = 0 ; i < plugin()->getBlockCB().size(); i++)
+    for (size_t i = 0 ; i < plugin()->getBlockCB().size(); ++i)
     {
-      blockcb = plugin()->getBlockCB()[i];
+      const BlockBasicPtr blockcb = plugin()->getBlockCB()[i];
       if (blockcb != NULL)
       {
         blockcb->timer200();
