@@ -138,7 +138,7 @@ bool BlockBasic::isBlockEmpty(const int32_t x, const int8_t y, const int32_t z, 
 
 bool BlockBasic::spawnBlockItem(const int32_t x, const int8_t y, const int32_t z, int map, const uint8_t block, const uint8_t meta)
 {
-  Drop* drop = NULL;
+  DropPtr drop;
 
   if (BLOCKDROPS.count(block))
   {

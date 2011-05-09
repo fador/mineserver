@@ -33,6 +33,8 @@
 #include <stdint.h>
 #include <iostream>
 
+#include <tr1/memory>
+
 // configuration from build system
 #include "configure.h"
 
@@ -165,26 +167,27 @@ const std::string PID_FILE = "mineserver.pid";
 //
 // Drops from blocks
 //
+struct Drop;
+typedef std::tr1::shared_ptr<Drop> DropPtr;
+
 struct Drop
 {
   uint16_t item_id;
   uint32_t probability;
   uint8_t count;
-  Drop* alt_drop;
+  DropPtr alt_drop;
 
-  Drop() : item_id(0), probability(0), count(0), alt_drop(NULL) {}
-  Drop(uint16_t _item_id, uint32_t _probability, uint8_t _count, Drop* _alt_drop = NULL) : item_id(_item_id), probability(_probability), count(_count), alt_drop(_alt_drop) {}
-
-  ~Drop()
+  explicit Drop(uint16_t _item_id = 0, uint32_t _probability = 0, uint8_t _count = 0, DropPtr _alt_drop = DropPtr())
+    :
+    item_id(_item_id),
+    probability(_probability),
+    count(_count),
+    alt_drop(_alt_drop)
   {
-    if (alt_drop != NULL)
-    {
-      delete alt_drop;
-    }
   }
 };
 
-extern std::map<uint8_t, Drop*> BLOCKDROPS;
+extern std::map<uint8_t, DropPtr> BLOCKDROPS;
 
 // Chat prefixes
 const char SERVERMSGPREFIX = '%';
@@ -194,7 +197,6 @@ const char ADMINCHATPREFIX = '&';
 const unsigned int SERVER_CONSOLE_UID = -1;
 
 void initConstants();
-void freeConstants();
 
 //allocate 1 MB for chunk files
 const int ALLOCATE_NBTFILE = 1048576;
