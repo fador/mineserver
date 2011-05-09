@@ -31,6 +31,8 @@
 #include <stdint.h>
 #include <vector>
 
+#include <tr1/memory>
+
 class User;
 
 class Item
@@ -70,6 +72,8 @@ public:
   }
 };
 
+typedef std::tr1::shared_ptr<Item> ItemPtr;
+
 struct OpenInventory
 {
   int8_t type;
@@ -79,6 +83,8 @@ struct OpenInventory
   Item workbench[10];
   std::vector<User*> users;
 };
+
+typedef std::tr1::shared_ptr<OpenInventory> OpenInvPtr;
 
 enum { WINDOW_CURSOR = -1, WINDOW_PLAYER = 0, WINDOW_WORKBENCH, WINDOW_CHEST, WINDOW_LARGE_CHEST, WINDOW_FURNACE };
 
@@ -93,38 +99,28 @@ public:
   struct Recipe
   {
     Recipe() : width(0), height(0), slots(NULL) {}
-    ~Recipe()
-    {
-    }
 
     int8_t width;
     int8_t height;
-    std::vector<Item*> slots;
+    std::vector<ItemPtr> slots;
     Item output;
   };
 
-  std::vector<Recipe*> recipes;
-  bool addRecipe(int width, int height, std::vector<Item*> inputrecipe,
+  typedef std::tr1::shared_ptr<Recipe> RecipePtr;
+
+  bool addRecipe(int width, int height, std::vector<ItemPtr> inputrecipe,
                  int outputCount, int16_t outputType, int16_t outputHealth);
-  bool readRecipe(std::string recipeFile);
+  bool readRecipe(const std::string& recipeFile);
 
   Inventory(const std::string& path, const std::string& suffix, const std::string& cfg);
 
-  ~Inventory()
-  {
-    std::vector<Recipe*>::iterator it_a = recipes.begin();
-    std::vector<Recipe*>::iterator it_b = recipes.end();
-    for (; it_a != it_b; ++it_a)
-    {
-      delete *it_a;
-    }
-    recipes.clear();
-  }
+  // Recipes
+  std::vector<RecipePtr> recipes;
 
   // Open chest/workbench/furnace inventories
-  std::vector<OpenInventory*> openWorkbenches;
-  std::vector<OpenInventory*> openChests;
-  std::vector<OpenInventory*> openFurnaces;
+  std::vector<OpenInvPtr> openWorkbenches;
+  std::vector<OpenInvPtr> openChests;
+  std::vector<OpenInvPtr> openFurnaces;
 
   bool canBeArmour(int slot, int type);
   bool onwindowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_t z);

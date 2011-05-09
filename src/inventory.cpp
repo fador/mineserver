@@ -42,6 +42,7 @@
 #include <cmath>
 #include <algorithm>
 
+
 #include <zlib.h>
 #include <sys/stat.h>
 
@@ -244,9 +245,9 @@ Inventory::Inventory(const std::string& path, const std::string& suffix, const s
   }
 }
 
-bool Inventory::addRecipe(int width, int height, std::vector<Item*> inputrecipe, int outputCount, int16_t outputType, int16_t outputHealth)
+bool Inventory::addRecipe(int width, int height, std::vector<ItemPtr> inputrecipe, int outputCount, int16_t outputType, int16_t outputHealth)
 {
-  Recipe* recipe = new Recipe;
+  RecipePtr recipe(new Recipe);
 
   recipe->width  = width;
   recipe->height = height;
@@ -260,7 +261,7 @@ bool Inventory::addRecipe(int width, int height, std::vector<Item*> inputrecipe,
   return true;
 }
 
-bool Inventory::readRecipe(std::string recipeFile)
+bool Inventory::readRecipe(const std::string& recipeFile)
 {
   std::ifstream ifs(recipeFile.c_str());
 
@@ -282,12 +283,12 @@ bool Inventory::readRecipe(std::string recipeFile)
   int del;
   bool readingRecipe = false;
   std::vector<std::string> line;
-  std::vector<Item*> recipetable;
+  std::vector<ItemPtr> recipetable;
   std::string text;
   while (getline(ifs, temp))
   {
     //If empty line
-    if (temp.size() == 0)
+    if (temp.empty())
     {
       continue;
     }
@@ -303,7 +304,7 @@ bool Inventory::readRecipe(std::string recipeFile)
     line.clear();
 
     // Process line
-    while (temp.length() > 0)
+    while (!temp.empty())
     {
       // Remove white spaces
       while (temp[0] == ' ')
@@ -343,7 +344,7 @@ bool Inventory::readRecipe(std::string recipeFile)
       for (unsigned int i = 0; i < line.size(); i++)
       {
         std::string data(line[i]);
-        Item* item = new Item();
+        ItemPtr item(new Item);
         item->setCount(1);
         item->setHealth(-1);
         int location = data.find("x");
@@ -393,8 +394,6 @@ bool Inventory::readRecipe(std::string recipeFile)
   ifs.close();
 
   addRecipe(width, height, recipetable, outCount, outType, outHealth);
-
-  //  delete [] inrecipe;
 
   return true;
 }
@@ -508,32 +507,34 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   }
 
   std::vector<User*>* otherUsers = NULL;
-  OpenInventory* currentInventory = NULL;
+  OpenInvPtr currentInventory;
 
   if (windowID != WINDOW_PLAYER)
   {
-    std::vector<OpenInventory*>* inv = NULL;
+    std::vector<OpenInvPtr>* pinv = NULL;
     switch (user->openInv.type)
     {
     case WINDOW_CHEST:
-      inv = &openChests;
+      pinv = &openChests;
       break;
     case WINDOW_FURNACE:
-      inv = &openFurnaces;
+      pinv = &openFurnaces;
       break;
     case WINDOW_WORKBENCH:
-      inv = &openWorkbenches;
+      pinv = &openWorkbenches;
       break;
     }
 
-    for (uint32_t i = 0; i < inv->size(); i++)
+    std::vector<OpenInvPtr>& inv = *pinv;
+
+    for (size_t i = 0; i < inv.size(); i++)
     {
-      if ((*inv)[i]->x == user->openInv.x &&
-          (*inv)[i]->y == user->openInv.y &&
-          (*inv)[i]->z == user->openInv.z)
+      if (inv[i]->x == user->openInv.x &&
+          inv[i]->y == user->openInv.y &&
+          inv[i]->z == user->openInv.z)
       {
-        otherUsers = &(*inv)[i]->users;
-        currentInventory = (*inv)[i];
+        otherUsers = &inv[i]->users;
+        currentInventory = inv[i];
         break;
       }
     }
@@ -1109,33 +1110,36 @@ bool Inventory::onwindowOpen(User* user, int8_t type, int32_t x, int32_t y, int3
     onwindowClose(user, user->openInv.type, user->openInv.x, user->openInv.y, user->openInv.z);
   }
 
-  std::vector<OpenInventory*> *inv;
+  std::vector<OpenInvPtr>* pinv;
   switch (type)
   {
   case WINDOW_CHEST:
-    inv = &openChests;
+    pinv = &openChests;
     break;
   case WINDOW_FURNACE:
-    inv = &openFurnaces;
+    pinv = &openFurnaces;
     break;
   case WINDOW_WORKBENCH:
-    inv = &openWorkbenches;
+    pinv = &openWorkbenches;
     break;
   }
-  for (uint32_t i = 0; i < inv->size(); i++)
+
+  std::vector<OpenInvPtr>& inv = *pinv;
+
+  for (size_t i = 0; i < inv.size(); ++i)
   {
-    if ((*inv)[i]->x == user->openInv.x &&
-        (*inv)[i]->y == user->openInv.y &&
-        (*inv)[i]->z == user->openInv.z)
+    if (inv[i]->x == user->openInv.x &&
+        inv[i]->y == user->openInv.y &&
+        inv[i]->z == user->openInv.z)
     {
-      (*inv)[i]->users.push_back(user);
+      inv[i]->users.push_back(user);
       user->isOpenInv = true;
       return true;
     }
   }
 
   //If the inventory not yet opened, create it
-  OpenInventory* newInv = new OpenInventory();
+  OpenInvPtr newInv(new OpenInventory());
   newInv->type = type;
   newInv->x    = x;
   newInv->y    = y;
@@ -1144,7 +1148,7 @@ bool Inventory::onwindowOpen(User* user, int8_t type, int32_t x, int32_t y, int3
 
   newInv->users.push_back(user);
 
-  inv->push_back(newInv);
+  inv.push_back(newInv);
   user->isOpenInv = true;
 
   return true;
@@ -1152,52 +1156,54 @@ bool Inventory::onwindowOpen(User* user, int8_t type, int32_t x, int32_t y, int3
 
 bool Inventory::onwindowClose(User* user, int8_t type, int32_t x, int32_t y, int32_t z)
 {
-  std::vector<OpenInventory*>* inv = NULL;
+  std::vector<OpenInvPtr>* pinv = NULL;
 
   switch (type)
   {
   case WINDOW_CHEST:
-    inv = &openChests;
+    pinv = &openChests;
     break;
   case WINDOW_FURNACE:
-    inv = &openFurnaces;
+    pinv = &openFurnaces;
     break;
   case WINDOW_WORKBENCH:
-    inv = &openWorkbenches;
+    pinv = &openWorkbenches;
     break;
   default:
     return false;
   }
 
-  for (uint32_t i = 0; i < inv->size(); i++)
-  {
-    if ((*inv)[i]->x == user->openInv.x &&
-        (*inv)[i]->y == user->openInv.y &&
-        (*inv)[i]->z == user->openInv.z)
-    {
-      for (uint32_t j = 0; j < (*inv)[i]->users.size(); j++)
-      {
-        if ((*inv)[i]->users[j] == user)
-        {
-          (*inv)[i]->users.erase((*inv)[i]->users.begin() + j);
+  std::vector<OpenInvPtr>& inv = *pinv;
 
-          if ((*inv)[i]->users.size() == 0)
+  for (size_t i = 0; i < inv.size(); ++i)
+  {
+    if (inv[i]->x == user->openInv.x &&
+        inv[i]->y == user->openInv.y &&
+        inv[i]->z == user->openInv.z)
+    {
+      for (size_t j = 0; j < inv[i]->users.size(); ++j)
+      {
+        if (inv[i]->users[j] == user)
+        {
+          // We should make users into a container that supports fast erase.
+          inv[i]->users.erase(inv[i]->users.begin() + j);
+
+          if (inv[i]->users.empty())
           {
             //Dump stuff to ground if workbench and no other users
             if (type == WINDOW_WORKBENCH)
             {
-              for (uint32_t slotNumber = 1; slotNumber < 10; slotNumber ++)
+              for (uint32_t slotNumber = 1; slotNumber < 10; ++slotNumber)
               {
-                if ((*inv)[i]->workbench[slotNumber].getType() != -1)
+                if (inv[i]->workbench[slotNumber].getType() != -1)
                 {
                   Mineserver::get()->map(user->pos.map)->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z,
-                      (*inv)[i]->workbench[slotNumber].getType(), (*inv)[i]->workbench[slotNumber].getCount(),
-                      (*inv)[i]->workbench[slotNumber].getHealth(), user);
+                      inv[i]->workbench[slotNumber].getType(), inv[i]->workbench[slotNumber].getCount(),
+                      inv[i]->workbench[slotNumber].getHealth(), user);
                 }
               }
             }
-            delete(*inv)[i];
-            (*inv).erase((*inv).begin() + i);
+            inv.erase(inv.begin() + i);
           }
 
           user->isOpenInv = false;

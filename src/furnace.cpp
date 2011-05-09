@@ -271,27 +271,27 @@ void Furnace::sendToAllUsers()
   enum { PROGRESS_ARROW = 0, PROGRESS_FIRE = 1 };
   //ToDo: send changes to all with this furnace opened
 
-  std::vector<OpenInventory*>* inv = &Mineserver::get()->inventory()->openFurnaces;
+  std::vector<OpenInvPtr>& inv = Mineserver::get()->inventory()->openFurnaces;
 
-  for (uint32_t openinv = 0; openinv < inv->size(); openinv ++)
+  for (size_t openinv = 0; openinv < inv.size(); ++openinv)
   {
-    if ((*inv)[openinv]->x == data->x &&
-        (*inv)[openinv]->y == data->y &&
-        (*inv)[openinv]->z == data->z)
+    if (inv[openinv]->x == data->x &&
+        inv[openinv]->y == data->y &&
+        inv[openinv]->z == data->z)
     {
-      for (uint32_t user = 0; user < (*inv)[openinv]->users.size(); user ++)
+      for (size_t user = 0; user < inv[openinv]->users.size(); ++user)
       {
-        for (int j = 0; j < 3; j++)
+        for (size_t j = 0; j < 3; ++j)
         {
           if (data->items[j].getType() != -1)
           {
-            (*inv)[openinv]->users[user]->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_FURNACE << (int16_t)j << (int16_t)data->items[j].getType()
+            inv[openinv]->users[user]->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_FURNACE << (int16_t)j << (int16_t)data->items[j].getType()
                                                  << (int8_t)(data->items[j].getCount()) << (int16_t)data->items[j].getHealth();
           }
         }
 
-        (*inv)[openinv]->users[user]->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)PROGRESS_ARROW << (int16_t)(data->cookTime * 18);
-        (*inv)[openinv]->users[user]->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)PROGRESS_FIRE  << (int16_t)(data->burnTime * 3);
+        inv[openinv]->users[user]->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)PROGRESS_ARROW << (int16_t)(data->cookTime * 18);
+        inv[openinv]->users[user]->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)PROGRESS_FIRE  << (int16_t)(data->burnTime * 3);
       }
 
       break;
