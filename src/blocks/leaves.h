@@ -36,11 +36,12 @@
 struct Decay
 {
   Decay(time_t decayStart, int32_t x, int32_t y, int32_t z, int32_t map)
-    : decayStart(decayStart),
-      x(x),
-      y(y),
-      z(z),
-      map(map)
+    :
+    decayStart(decayStart),
+    x(x),
+    y(y),
+    z(z),
+    map(map)
   {
   }
 
@@ -57,7 +58,7 @@ struct Decay
   int32_t x, y, z, map;
 };
 
-class BlockLeaves: public BlockBasic
+class BlockLeaves : public BlockBasic
 {
   std::set<Decay> decaying;
 

@@ -32,20 +32,6 @@
 #include "door.h"
 
 
-bool BlockDoor::affectedBlock(int block)
-{
-  switch (block)
-  {
-  case BLOCK_WOODEN_DOOR:
-  case BLOCK_IRON_DOOR:
-  case ITEM_WOODEN_DOOR:
-  case ITEM_IRON_DOOR:
-    return true;
-  }
-  return false;
-}
-
-
 void BlockDoor::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t block, metadata;

@@ -30,16 +30,6 @@
 
 #include "jackolantern.h"
 
-bool Blockjackolantern::affectedBlock(int block)
-{
-  switch (block)
-  {
-  case BLOCK_JACK_O_LANTERN:
-    return true;
-  }
-  return false;
-}
-
 
 void Blockjackolantern::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {

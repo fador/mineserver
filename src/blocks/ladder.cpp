@@ -30,16 +30,6 @@
 
 #include "ladder.h"
 
-bool BlockLadder::affectedBlock(int block)
-{
-  switch (block)
-  {
-  case BLOCK_LADDER:
-    return true;
-  }
-  return false;
-}
-
 
 void BlockLadder::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {

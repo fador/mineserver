@@ -39,7 +39,8 @@ It does not handle crafting, only right click interaction.
 class BlockWorkbench : public BlockBasic
 {
 public:
-  bool affectedBlock(int block);
+  inline bool affectedBlock(int block) const { return block == BLOCK_WORKBENCH; }
+
   bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
   bool onInteract(User* user, int32_t x, int8_t y, int32_t z, int map);
 };

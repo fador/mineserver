@@ -30,21 +30,6 @@
 #include "../physics.h"
 #include "liquid.h"
 
-bool BlockLiquid::affectedBlock(int block)
-{
-  switch (block)
-  {
-  case BLOCK_WATER:
-  case BLOCK_STATIONARY_WATER:
-  case BLOCK_LAVA:
-  case BLOCK_STATIONARY_LAVA:
-  case ITEM_BUCKET:
-  case ITEM_WATER_BUCKET:
-  case ITEM_LAVA_BUCKET:
-    return true;
-  }
-  return false;
-}
 
 void BlockLiquid::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {

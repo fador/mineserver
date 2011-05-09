@@ -33,33 +33,6 @@
 #include "../map.h"
 
 
-bool BlockPlant::affectedBlock(int block)
-{
-  switch (block)
-  {
-  case BLOCK_YELLOW_FLOWER:
-  case BLOCK_RED_ROSE:
-  case BLOCK_BROWN_MUSHROOM:
-  case BLOCK_RED_MUSHROOM:
-  case BLOCK_CROPS:
-  case BLOCK_CACTUS:
-  case BLOCK_REED:
-  case BLOCK_SAPLING:
-  case BLOCK_DIRT:
-  case BLOCK_GRASS:
-  case BLOCK_SOIL:
-  case ITEM_REED:
-  case ITEM_WOODEN_HOE:
-  case ITEM_STONE_HOE:
-  case ITEM_IRON_HOE:
-  case ITEM_DIAMOND_HOE:
-  case ITEM_GOLD_HOE:
-  case ITEM_SEEDS:
-    return true;
-  }
-  return false;
-}
-
 std::vector<PlantBlock*> growingPlants;
 
 BlockPlant::BlockPlant()

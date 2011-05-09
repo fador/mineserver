@@ -35,16 +35,6 @@
 #include "../chat.h"
 #include "../tools.h"
 
-bool BlockChest::affectedBlock(int block)
-{
-  switch (block)
-  {
-  case BLOCK_CHEST:
-    return true;
-  }
-  return false;
-}
-
 
 void BlockChest::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {

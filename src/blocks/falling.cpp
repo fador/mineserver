@@ -30,18 +30,6 @@
 
 #include "falling.h"
 
-bool BlockFalling::affectedBlock(int block)
-{
-  switch (block)
-  {
-  case BLOCK_SAND:
-  case BLOCK_SLOW_SAND:
-  case BLOCK_GRAVEL:
-    return true;
-  }
-  return false;
-}
-
 
 void BlockFalling::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {

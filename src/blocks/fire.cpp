@@ -30,17 +30,6 @@
 
 #include "fire.h"
 
-bool BlockFire::affectedBlock(int block)
-{
-  switch (block)
-  {
-  case BLOCK_FIRE:
-  case ITEM_FLINT_AND_STEEL:
-    return true;
-  }
-  return false;
-}
-
 
 void BlockFire::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {

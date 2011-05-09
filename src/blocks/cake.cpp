@@ -31,16 +31,6 @@
 
 #include "cake.h"
 
-bool BlockCake::affectedBlock(int block)
-{
-  switch (block)
-  {
-  case BLOCK_CAKE:
-  case ITEM_CAKE:
-    return true;
-  }
-  return false;
-}
 
 bool BlockCake::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {

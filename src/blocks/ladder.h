@@ -34,7 +34,7 @@ class User;
 class BlockLadder: public BlockBasic
 {
 public:
-  bool affectedBlock(int block);
+  inline bool affectedBlock(int block) const { return block == BLOCK_LADDER; }
 
   /** Fired when the player's begins swinging to hit a block
      @param user The user who is digging

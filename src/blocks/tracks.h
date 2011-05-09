@@ -44,7 +44,7 @@ struct TrackData
 class BlockTracks: public BlockBasic
 {
 public:
-  bool affectedBlock(int block);
+  inline bool affectedBlock(int block) const { return block == BLOCK_MINECART_TRACKS; }
 
   void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
   void onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);

@@ -119,7 +119,7 @@ Plugin::~Plugin()
 
 void Plugin::init()
 {
-  // Create Block* objects and put them away so we can delete them later
+  // Create Block objects
   m_block_CBs.push_back(BlockBasicPtr(new BlockRedstone));
   m_block_CBs.push_back(BlockBasicPtr(new BlockWood));
   m_block_CBs.push_back(BlockBasicPtr(new BlockFalling));

@@ -31,17 +31,6 @@
 
 #include "blockfurnace.h"
 
-bool BlockFurnace::affectedBlock(int block)
-{
-  switch (block)
-  {
-  case BLOCK_FURNACE:
-  case BLOCK_BURNING_FURNACE:
-    return true;
-  }
-  return false;
-}
-
 bool BlockFurnace::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t oldblock;

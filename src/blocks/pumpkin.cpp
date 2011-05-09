@@ -30,16 +30,6 @@
 
 #include "pumpkin.h"
 
-bool BlockPumpkin::affectedBlock(int block)
-{
-  switch (block)
-  {
-  case BLOCK_PUMPKIN:
-    return true;
-  }
-  return false;
-}
-
 
 void BlockPumpkin::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {

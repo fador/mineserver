@@ -90,7 +90,6 @@ void BlockLeaves::timer200()
 {
   while (!decaying.empty())
   {
-    std::cout << "Still in leaves loop, now " << decaying.size() << " units left." << std::endl;
     const Decay& d = *decaying.begin();
 
     if ((time(NULL) - d.decayStart) >= 5)

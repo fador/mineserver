@@ -30,17 +30,6 @@
 
 #include "snow.h"
 
-bool BlockSnow::affectedBlock(int block)
-{
-  switch (block)
-  {
-  case BLOCK_SNOW:
-    return true;
-  }
-  return false;
-}
-
-
 
 void BlockSnow::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {

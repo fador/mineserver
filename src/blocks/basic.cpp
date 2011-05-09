@@ -34,11 +34,6 @@
 
 #include "basic.h"
 
-bool BlockBasic::affectedBlock(int block)
-{
-  return false;
-}
-
 
 bool BlockBasic::isBlockStackable(const uint8_t block)
 {

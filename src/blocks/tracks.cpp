@@ -33,16 +33,6 @@
 
 #include "tracks.h"
 
-bool BlockTracks::affectedBlock(int block)
-{
-  switch (block)
-  {
-  case BLOCK_MINECART_TRACKS:
-    return true;
-  }
-  return false;
-}
-
 
 enum
 {

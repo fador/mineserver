@@ -30,11 +30,6 @@
 
 #include "default.h"
 
-bool BlockDefault::affectedBlock(int block)
-{
-  return true;
-}
-
 
 void BlockDefault::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {

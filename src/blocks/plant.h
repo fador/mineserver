@@ -51,7 +51,12 @@ public:
   int reed_timeout;
   int cactus_max;
   int reed_max;
-  bool affectedBlock(int block);
+
+  inline bool affectedBlock(int block) const
+  {
+    return block == BLOCK_YELLOW_FLOWER || block == BLOCK_RED_ROSE || block == BLOCK_BROWN_MUSHROOM || block == BLOCK_RED_MUSHROOM || block == BLOCK_CROPS || block == BLOCK_CACTUS || block == BLOCK_REED || block == BLOCK_SAPLING || block == BLOCK_DIRT || block == BLOCK_GRASS || block == BLOCK_SOIL || block == ITEM_REED || block == ITEM_WOODEN_HOE || block == ITEM_STONE_HOE || block == ITEM_IRON_HOE || block == ITEM_DIAMOND_HOE || block == ITEM_GOLD_HOE || block == ITEM_SEEDS;
+  }
+
   BlockPlant();
   void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
   void onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);

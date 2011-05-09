@@ -30,18 +30,6 @@
 
 #include "torch.h"
 
-bool BlockTorch::affectedBlock(int block)
-{
-  switch (block)
-  {
-  case BLOCK_TORCH:
-  case BLOCK_REDSTONE_TORCH_OFF:
-  case BLOCK_REDSTONE_TORCH_ON:
-    return true;
-  }
-  return false;
-}
-
 
 void BlockTorch::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {

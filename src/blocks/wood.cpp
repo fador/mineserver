@@ -30,15 +30,6 @@
 
 #include "wood.h"
 
-bool BlockWood::affectedBlock(int block)
-{
-  switch (block)
-  {
-  case BLOCK_WOOD:
-    return true;
-  }
-  return false;
-}
 
 bool BlockWood::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {

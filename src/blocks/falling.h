@@ -40,7 +40,7 @@
 class BlockFalling: public BlockBasic
 {
 public:
-  bool affectedBlock(int block);
+  inline bool affectedBlock(int block) const { return block == BLOCK_SAND || block == BLOCK_SLOW_SAND || block == BLOCK_GRAVEL; }
 
   void onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
   bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
