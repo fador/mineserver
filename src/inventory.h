@@ -98,7 +98,7 @@ public:
 
   struct Recipe
   {
-    Recipe() : width(0), height(0), slots(NULL) {}
+    Recipe() : width(0), height(0), slots() {}
 
     int8_t width;
     int8_t height;

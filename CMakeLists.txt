@@ -182,9 +182,8 @@ endforeach()
 
 SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.43" "1.44" "1.44" "1.45" "1.46")
 find_package(Boost REQUIRED)
-message("Boost.TR1 include at ${Boost_INCLUDE_DIRS}boost/tr1/tr1")
+message("Boost.TR1 include at ${Boost_INCLUDE_DIRS}/boost/tr1/tr1")
 include_directories("${Boost_INCLUDE_DIRS}/boost/tr1/tr1")
-
 if (dependency_error)
   message(FATAL_ERROR "\n\tNot all dependencies could be found:\n${errors}\nAfter installing them please rerun cmake.\n")
 endif()
