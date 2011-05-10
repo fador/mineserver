@@ -47,8 +47,8 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 # Set compiler specific build flags
 IF (CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS "-W -Wall -Wno-unused -pedantic")
-#  set(CMAKE_CXX_FLAGS "-W -Wall -Wno-unused -pedantic -DBOOST_HAS_TR1 -DBOOST_HAS_GCC_TR1 -DBOOST_TR1_DISABLE_INCLUDE_NEXT=1")
+#  set(CMAKE_CXX_FLAGS "-W -Wall -Wno-unused -pedantic")
+  set(CMAKE_CXX_FLAGS "-W -Wall -Wno-unused -pedantic -DBOOST_HAS_TR1 -DBOOST_HAS_GCC_TR1 -DBOOST_TR1_DISABLE_INCLUDE_NEXT=1")
   set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g")
   set(CMAKE_CXX_FLAGS_PROFILE "-DDEBUG -g -pg")
   set(CMAKE_CXX_FLAGS_RELEASE "-O2 -s -DNDEBUG")
