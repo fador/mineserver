@@ -38,7 +38,7 @@
 class ItemProjectile: public ItemBasic
 {
 public:
-  bool affectedItem(int item);
+  bool affectedItem(int item) const;
   void onRightClick(User* user, Item* item);
 };
 

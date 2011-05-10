@@ -34,11 +34,6 @@
 
 #include "itembasic.h"
 
-bool ItemBasic::affectedItem(int item)
-{
-  return false;
-}
-
 void ItemBasic::onRightClick(User* user, Item* item)
 {
 

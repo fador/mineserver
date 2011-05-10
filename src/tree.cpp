@@ -32,75 +32,54 @@
 #include "tools.h"
 
 
-Tree::Tree(int32_t x, int32_t y, int32_t z, int map, uint8_t limit)
-{
-  n_branches = 0;
-  _x = x, _y = y, _z = z, _map = map;
-  this->generate(limit);
-}
-
-
-Tree::~Tree(void)
-{
-}
 void Tree::generate(uint8_t limit)
 {
-  uint8_t type = 0;
 
-  uint8_t m_trunkHeight = getBetterRandInt(MIN_TRUNK, limit);
+  const uint8_t m_trunkHeight = getBetterRandInt(MIN_TRUNK, limit);
 
   bool smalltree = false;
+  uint8_t type = 0;
 
   if (m_trunkHeight < BRANCHING_HEIGHT)
   {
     smalltree = true;
   }
+
   if (BetterRand() > 0.5) // 1/2 chance
   {
-    type++;
+    ++type;
     if (BetterRand() > 0.5) // 1/4
     {
-      type++;
+      ++type;
     }
   }
-  uint8_t th = m_trunkHeight - 1; // Trunk Height
-  uint8_t i;
-  for (i = 0; i < th; i++)
+
+  for (unsigned int i = 0; i + 1 < m_trunkHeight /* Trunk Height */; ++i)
   {
     if (smalltree)
     {
-      Trunk* v = new Trunk(_x, _y + i, _z, _map, type);
       if (i >= MIN_TRUNK - 1)
       {
-        m_Branch[n_branches] = v;
-        n_branches++;
-      }
-      else
-      {
-        delete v;
+        m_Branch[n_branches++] = new Trunk(_x, _y + i, _z, _map, type);
       }
     }
     else
     {
-      Trunk* v = new Trunk(_x, _y + i, _z, _map, type);
       if (i > BRANCHING_HEIGHT - 1)
       {
+        Trunk* const v = new Trunk(_x, _y + i, _z, _map, type);
         generateBranches(v);
-        m_Branch[n_branches] = v;
-        n_branches++;
-      }
-      else
-      {
-        delete v;
+        m_Branch[n_branches++] = v;
       }
     }
   }
-  Trunk* v = new Trunk(_x, _y + i, _z, _map, type);
-  m_Branch[n_branches] = v;
-  n_branches++;
+
+  Trunk* const v = new Trunk(_x, _y + m_trunkHeight - 1, _z, _map, type);
   generateBranches(v);
   generateCanopy();
+  m_Branch[n_branches++] = v;
 }
+
 void Tree::generateBranches(Trunk* wrap)
 {
   uint8_t blocktype;
@@ -136,9 +115,8 @@ void Tree::generateBranches(Trunk* wrap)
       y++;
     }
 
-    Trunk* v = new Trunk(x, y, z, _map);
-    m_Branch[n_branches] = v;
-    n_branches++;
+    Trunk* const v = new Trunk(x, y, z, _map);
+    m_Branch[n_branches++] = v;
     generateBranches(v);
   }
 }

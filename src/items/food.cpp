@@ -1,7 +1,7 @@
 #include "food.h"
 #include "../packets.h"
 
-bool ItemFood::affectedItem(int item)
+bool ItemFood::affectedItem(int item) const
 {
   switch (item)
   {

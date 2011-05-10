@@ -43,7 +43,8 @@
 class ItemBasic
 {
 public:
-  virtual bool affectedItem(int item);
+  virtual ~ItemBasic() { }
+  virtual bool affectedItem(int item) const = 0;
   virtual void timer200() { }
   virtual void onRightClick(User* user, Item* item);
 };

@@ -7,7 +7,7 @@
 
 uint32_t generateEID();
 
-bool ItemProjectile::affectedItem(int item)
+bool ItemProjectile::affectedItem(int item) const
 {
   switch (item)
   {
