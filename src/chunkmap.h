@@ -32,7 +32,7 @@
 #include <list>
 #include <vector>
 #include <ctime>
-#include <tr1/unordered_map>
+#include <unordered_map>
 
 #include "packets.h"
 #include "user.h"

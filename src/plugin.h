@@ -29,8 +29,8 @@
 #define _PLUGIN_H
 
 #include <string>
-#include <tr1/unordered_map>
-#include <tr1/memory>
+#include <unordered_map>
+#include <memory>
 #include <vector>
 #include <ctime>
 

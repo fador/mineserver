@@ -31,7 +31,7 @@
 #include <string>
 #include <stack>
 #include <utility>
-#include <tr1/memory>
+#include <memory>
 
 enum {
   CONFIG_TOKEN_ENTITY = 1,

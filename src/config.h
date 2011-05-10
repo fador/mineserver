@@ -31,7 +31,7 @@
 #include <string>
 #include <list>
 #include <stdint.h>
-#include <tr1/memory>
+#include <memory>
 
 #include "config/parser.h"
 #include "config/node.h"
