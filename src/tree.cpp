@@ -58,18 +58,27 @@ void Tree::generate(uint8_t limit)
   {
     if (smalltree)
     {
+      Trunk* const v = new Trunk(_x, _y + i, _z, _map, type);
       if (i >= MIN_TRUNK - 1)
       {
-        m_Branch[n_branches++] = new Trunk(_x, _y + i, _z, _map, type);
+        m_Branch[n_branches++] = v;
+      }
+      else
+      {
+        delete v;
       }
     }
     else
     {
+      Trunk* const v = new Trunk(_x, _y + i, _z, _map, type);
       if (i > BRANCHING_HEIGHT - 1)
       {
-        Trunk* const v = new Trunk(_x, _y + i, _z, _map, type);
         generateBranches(v);
         m_Branch[n_branches++] = v;
+      }
+      else
+      {
+        delete v;
       }
     }
   }
@@ -82,9 +91,6 @@ void Tree::generate(uint8_t limit)
 
 void Tree::generateBranches(Trunk* wrap)
 {
-  uint8_t blocktype;
-  uint8_t meta;
-
   int32_t x = wrap->_x;
   uint8_t y = wrap->_y;
   int32_t z = wrap->_z;

@@ -50,19 +50,11 @@ public:
 
   virtual ~ITree() { }
 
-  inline void update()
+  inline virtual void update()
   {
     Mineserver::get()->map(_map)->setBlock(_x, _y, _z, _type, _meta);
     Mineserver::get()->map(_map)->sendBlockChange(_x, _y, _z, _type, _meta);
   }
-
-  inline void setY(int32_t y) { _y = y; }
-
-  inline int32_t getY(void) const { return _y; }
-
-  inline vec location(void) const { return vec(_x, _y, _z); }
-
-  inline int type() const { return _type; }
 
   int32_t _x;
   int32_t _y;
