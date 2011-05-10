@@ -31,7 +31,9 @@
 #include <string>
 #include <stack>
 #include <utility>
-#include <memory>
+
+#include "tr1.h"
+#include TR1INCLUDE(memory)
 
 enum {
   CONFIG_TOKEN_ENTITY = 1,

@@ -31,7 +31,9 @@
 #include <string>
 #include <map>
 #include <list>
-#include <memory>
+
+#include "tr1.h"
+#include TR1INCLUDE(memory)
 
 #include <stdint.h>
 

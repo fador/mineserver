@@ -33,7 +33,8 @@
 #include <stdint.h>
 #include <iostream>
 
-#include <memory>
+#include "tr1.h"
+#include TR1INCLUDE(memory)
 
 // configuration from build system
 #include "configure.h"

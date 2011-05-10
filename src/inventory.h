@@ -31,7 +31,8 @@
 #include <stdint.h>
 #include <vector>
 
-#include <memory>
+#include "tr1.h"
+#include TR1INCLUDE(memory)
 
 class User;
 

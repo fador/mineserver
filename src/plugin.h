@@ -29,10 +29,12 @@
 #define _PLUGIN_H
 
 #include <string>
-#include <unordered_map>
-#include <memory>
 #include <vector>
 #include <ctime>
+
+#include "tr1.h"
+#include TR1INCLUDE(memory)
+#include TR1INCLUDE(unordered_map)
 
 //Fix Winsock2 error that occurs when Windows.h is included before it.
 #define _WINSOCKAPI_

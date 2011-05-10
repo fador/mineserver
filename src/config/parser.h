@@ -30,7 +30,9 @@
 
 #include <string>
 #include <stdint.h>
-#include <memory>
+
+#include "tr1.h"
+#include TR1INCLUDE(memory)
 
 enum
 {
