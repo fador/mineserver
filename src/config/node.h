@@ -32,7 +32,7 @@
 #include <map>
 #include <list>
 
-#include "tr1.h"
+#include "../tr1.h"
 #include TR1INCLUDE(memory)
 
 #include <stdint.h>
