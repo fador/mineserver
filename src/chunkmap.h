@@ -197,12 +197,16 @@ struct sChunk
  *  pair of hashable types. For further generalizations, see boost/functional/hash.
  */
 
+/** Update: We are temporarily switching to Boost.TR1, so we can use Boost's hash_combine(). **/
+
+/*
 template <class T>
 inline void hash_combine(std::size_t & seed, T const & v)
 {
-  std::tr1::hash<T> hasher;
+  boost::hash<T> hasher;
   seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
 }
+*/
 
 template<typename S, typename T>
 struct PairHash : public std::unary_function<std::pair<S, T>, size_t>
@@ -210,14 +214,15 @@ struct PairHash : public std::unary_function<std::pair<S, T>, size_t>
   inline size_t operator()(const std::pair<S, T> & v) const
   {
     std::size_t seed = 0;
-    hash_combine(seed, v.first);
-    hash_combine(seed, v.second);
+    boost::hash_combine(seed, v.first);
+    boost::hash_combine(seed, v.second);
     return seed;
   }
 };
 
 typedef std::pair<int, int> Coords;
-typedef std::tr1::unordered_map<Coords, sChunk*, PairHash<int, int> > ChunkMap;
+//typedef std::tr1::unordered_map<Coords, sChunk*, PairHash<int, int> > ChunkMap;
+typedef std::tr1::unordered_map<Coords, sChunk*> ChunkMap;
 
 
 #endif

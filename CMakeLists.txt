@@ -47,7 +47,8 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 # Set compiler specific build flags
 IF (CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS "-W -Wall -Wno-unused -pedantic -DBOOST_HAS_TR1 -DBOOST_HAS_GCC_TR1 -DBOOST_TR1_DISABLE_INCLUDE_NEXT=1")
+  set(CMAKE_CXX_FLAGS "-W -Wall -Wno-unused -pedantic")
+#  set(CMAKE_CXX_FLAGS "-W -Wall -Wno-unused -pedantic -DBOOST_HAS_TR1 -DBOOST_HAS_GCC_TR1 -DBOOST_TR1_DISABLE_INCLUDE_NEXT=1")
   set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g")
   set(CMAKE_CXX_FLAGS_PROFILE "-DDEBUG -g -pg")
   set(CMAKE_CXX_FLAGS_RELEASE "-O2 -s -DNDEBUG")
@@ -183,12 +184,7 @@ endforeach()
 SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.43" "1.44" "1.44" "1.45" "1.46")
 find_package(Boost REQUIRED)
 message("Boost.TR1 include at ${Boost_INCLUDE_DIRS}/boost/tr1/tr1")
-#include_directories("${Boost_INCLUDE_DIRS}/boost/tr1/tr1")
-
-set(Boost_INCLUDE_DIRS "/tmp/boost_1_46_1")
-message("Boost.TR1 include at ${Boost_INCLUDE_DIRS}/boost/tr1/tr1")
 include_directories("${Boost_INCLUDE_DIRS}/boost/tr1/tr1")
-
 if (dependency_error)
   message(FATAL_ERROR "\n\tNot all dependencies could be found:\n${errors}\nAfter installing them please rerun cmake.\n")
 endif()
