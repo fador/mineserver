@@ -309,7 +309,7 @@ void BiomeGen::AddTrees(int x, int z, int map)
 
       int biome = BiomeSelect.GetValue(blockX / 100.0, 0, blockZ / 100.0);
       if (biome == 1 &&
-          treenoise.GetValue(blockX, 0, blockZ) > -0.1 &&
+          treenoise.GetValue(blockX, 0, blockZ) > -0.2 &&
           ((rand() % 80) < 30)) // Dirty haxx!
       {
         // Desert, make cactus
