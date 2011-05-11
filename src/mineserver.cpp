@@ -204,8 +204,8 @@ int main(int argc, char* argv[])
   }
 
   // load config
-  Config* config = Mineserver::get()->config();
-  if (!config->load(cfg))
+  Config & config = *Mineserver::get()->config();
+  if (!config.load(cfg))
   {
     return EXIT_FAILURE;
   }
@@ -221,7 +221,7 @@ int main(int argc, char* argv[])
       override_config << overrides[i] << ';' << std::endl;
     }
     // override config
-    if (!config->load(override_config))
+    if (!config.load(override_config))
     {
       LOG2(ERROR, "Error when parsing overrides: maybe you forgot to doublequote string values?");
       return EXIT_FAILURE;
@@ -271,19 +271,11 @@ Mineserver::Mineserver()
   initConstants();
 }
 
-Mineserver::~Mineserver()
-{
-  delete m_logger;
-  delete m_screen;
-  delete m_config;
-}
-
-
 bool Mineserver::init()
 {
   // expand '~', '~user' in next vars
   bool error = false;
-  const char* vars[] =
+  const char* const vars[] =
   {
     "system.path.data",
     "system.path.plugins",
@@ -292,7 +284,7 @@ bool Mineserver::init()
   };
   for (size_t i = 0; i < sizeof(vars) / sizeof(vars[0]); i++)
   {
-    ConfigNode* node = config()->mData(vars[i]);
+    ConfigNode::Ptr node = config()->mData(vars[i]);
     if (!node)
     {
       LOG2(ERROR, std::string("Variable is missing: ") + vars[i]);

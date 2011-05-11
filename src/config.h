@@ -100,9 +100,9 @@ public:
     return m_root->has(key) ? m_root->get(key, false)->bData() : false;
   }
 
-  inline ConfigNode* mData(const std::string& key)
+  inline ConfigNode::Ptr mData(const std::string& key)
   {
-    return m_root->has(key) ? m_root->get(key, false).get() : NULL;
+    return m_root->has(key) ? m_root->get(key, false) : ConfigNode::Ptr();
   }
 
   inline bool has(const std::string& key) const

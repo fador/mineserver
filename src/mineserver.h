@@ -31,6 +31,9 @@
 #include <vector>
 #include <string>
 
+#include "tr1.h"
+#include TR1INCLUDE(memory)
+
 #ifdef WIN32
 // This is needed for event to work on Windows.
 #include <winsock2.h>
@@ -141,11 +144,11 @@ public:
   {
     m_plugin = plugin;
   }
-  inline Screen* screen() const
+  inline std::tr1::shared_ptr<Screen> screen() const
   {
     return m_screen;
   }
-  inline void setScreen(Screen* screen)
+  inline void setScreen(std::tr1::shared_ptr<Screen> screen)
   {
     m_screen = screen;
   }
@@ -153,11 +156,11 @@ public:
   {
     return m_physics[n];
   }
-  inline Config* config() const
+  inline std::tr1::shared_ptr<Config> config() const
   {
     return m_config;
   }
-  inline void setConfig(Config* config)
+  inline void setConfig(std::tr1::shared_ptr<Config> config)
   {
     m_config = config;
   }
@@ -181,11 +184,11 @@ public:
   {
     return m_mapGen[n];
   }
-  inline Logger* logger() const
+  inline std::tr1::shared_ptr<Logger> logger() const
   {
     return m_logger;
   }
-  inline void setLogger(Logger* logger)
+  inline void setLogger(std::tr1::shared_ptr<Logger> logger)
   {
     m_logger = logger;
   }
@@ -205,7 +208,6 @@ public:
 
 private:
   Mineserver();
-  ~Mineserver();
 
   bool m_running;
 
@@ -220,9 +222,9 @@ private:
   std::vector<MapGen*>  m_mapGen;
 
   // core modules
-  Config* m_config;
-  Screen* m_screen;
-  Logger* m_logger;
+  std::tr1::shared_ptr<Config> m_config;
+  std::tr1::shared_ptr<Screen> m_screen;
+  std::tr1::shared_ptr<Logger> m_logger;
 
   Plugin*         m_plugin;
   Chat*           m_chat;

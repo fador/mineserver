@@ -34,15 +34,17 @@ class ConfigScanner
 {
 public:
   ConfigScanner();
-  ~ConfigScanner();
+
   bool read(const std::string& buf);
-  int size();
-  int left();
+
   int move(int len);
-  char get();
-  int get(std::string* str, int len);
-  char at(int pos);
-  int pos();
+
+  inline size_t size() const       { return m_data.length(); }
+  inline int left() const          { return m_data.length() - m_pos; }
+  inline char get() const          { return m_data[m_pos]; }
+  inline char at(size_t pos) const { return pos < m_data.length() ? m_data[pos] : -1; }
+  inline size_t pos() const        { return m_pos; }
+
 private:
   std::string m_data;
   int m_pos;

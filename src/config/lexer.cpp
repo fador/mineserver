@@ -56,8 +56,7 @@ bool ConfigLexer::get_token(int& type, std::string& data)
     return true;
   }
 
-  char buf;
-  buf = m_scanner.get();
+  char buf = m_scanner.get();
 
   // Skip past spaces and newlines
   while ((buf == ' ') || (buf == '\n') || (buf == '\r') || (buf == '\t'))

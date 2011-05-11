@@ -42,33 +42,21 @@
 #include "../tools.h"
 
 ConfigParser::ConfigParser()
+  : m_includes(0)
 {
-  m_includes = 0;
 }
 
 bool ConfigParser::parse(const std::string& file, ConfigNode::Ptr ptr)
 {
-  struct stat st;
-  std::ifstream ifs;
+  std::ifstream ifs(file.c_str(), std::ios_base::binary);
 
-  if ((stat(file.c_str(), &st) != 0) || (st.st_size >= MAX_FILESIZE))
-  {
-    std::cerr << "Couldn't stat file: " << file << "\n";
-    return false;
-  }
-
-  ifs.open(file.c_str(), std::ios_base::binary);
-  if (ifs.fail())
+  if (!ifs)
   {
     std::cerr << "Couldn't open file: " << file << "\n";
     return false;
   }
 
-  bool ret = false;
-  ret = parse(ifs, ptr);
-
-  ifs.close();
-  return ret;
+  return parse(ifs, ptr);
 }
 
 bool ConfigParser::parse(const std::istream& data, ConfigNode::Ptr ptr)
