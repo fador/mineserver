@@ -286,7 +286,7 @@ void BiomeGen::AddTrees(int x, int z, int map)
 
   memset(empty, 1, 256);
 
-  uint8_t trees = BetterRand() * 6 + 5;
+  uint8_t trees = BetterRand() * 7 + 13;
   uint8_t i = 0;
   while (i < trees)
   {
