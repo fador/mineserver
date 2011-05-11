@@ -33,6 +33,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <cmath>
 #include <ctime>
+#include <stdio.h>
+#include <stdlib.h>
+
 
 // libnoise
 #ifdef LIBNOISE
@@ -302,19 +305,32 @@ void BiomeGen::AddTrees(int x, int z, int map)
         i++;
         continue;
       }
-
       Mineserver::get()->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
 
       int biome = BiomeSelect.GetValue(blockX / 100.0, 0, blockZ / 100.0);
       if (biome == 1 &&
-          block == BLOCK_SAND &&
-          treenoise.GetValue(blockX, 0, blockZ) > -0.1 &&
-          ((rand() % 100) < 30)) // Dirty haxx!
+          treenoise.GetValue(blockX, 0, blockZ) > -0.3 &&
+          ((rand() % 16) < 7)) // Dirty haxx!
       {
         // Desert, make cactus
+        int count = 3;
+        if ((count + blockY) > 126)
+        {
+          continue;
+        }
+          //LOGLF("testing reed area");
+          Mineserver::get()->map(map)->getBlock(blockX, (blockY + i), blockZ, &block, &meta);
+          if(block == BLOCK_SAND){
+            Mineserver::get()->map(map)->setBlock(blockX, (blockY + 1 + i), blockZ, (char)BLOCK_CACTUS, (char)meta);
+            Mineserver::get()->map(map)->setBlock(blockX, (blockY + 2 + i), blockZ, (char)BLOCK_CACTUS, (char)meta);
+            Mineserver::get()->map(map)->setBlock(blockX, (blockY + 3 + i), blockZ, (char)BLOCK_CACTUS, (char)meta);
+            //printf("successful cactus! x%d y%d z%d\n", blockX, blockY, blockZ);
+          }
+
+
 
         // Check that it's not in water
-        Mineserver::get()->map(map)->getBlock(blockX, ++blockY, blockZ, &block, &meta);
+        /*Mineserver::get()->map(map)->getBlock(blockX, ++blockY, blockZ, &block, &meta);
         if (!(block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER))
         {
           sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
@@ -330,26 +346,32 @@ void BiomeGen::AddTrees(int x, int z, int map)
           {
             curBlock[i] = BLOCK_CACTUS;
           }
-        }
+        }*/
       }
       else if (biome == 4 &&
                block != BLOCK_WATER &&
                block != BLOCK_STATIONARY_WATER &&
-               treenoise.GetValue(blockX, 0, blockZ) > -0.4)
+               treenoise.GetValue(blockX, 0, blockZ) > -0.2)
       {
-        // Reed forest
-        sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
-        uint8_t* curBlock;
-        int count = (fastrand() % 3) + 3;
-        if (count + blockY > 127)
+        //Reed forest
+        int count = 3;
+        if ((count + blockY) > 126)
         {
           continue;
         }
-        curBlock = &(chunk->blocks[(a << 7) + (b << 11) + ++blockY]);
-        for (int i = 0; i < count; i++)
-        {
-          curBlock[i] = BLOCK_REED;
-        }
+          //LOGLF("testing reed area");
+	  int xOffset = 0;
+	  Mineserver::get()->map(map)->getBlock(blockX + xOffset, (blockY + i), blockZ, &block, &meta);
+          if(block == BLOCK_DIRT || block == BLOCK_REED || block == BLOCK_GRASS){
+            if(block == BLOCK_GRASS){
+	      Mineserver::get()->map(map)->setBlock(blockX + xOffset, (blockY + i), blockZ, (char)BLOCK_DIRT, (char)meta);
+              block = BLOCK_DIRT;
+            }
+            Mineserver::get()->map(map)->setBlock(blockX + xOffset, (blockY + 1 + i), blockZ, (char)BLOCK_REED, (char)meta);
+            Mineserver::get()->map(map)->setBlock(blockX + xOffset, (blockY + 2 + i), blockZ, (char)BLOCK_REED, (char)meta);
+            Mineserver::get()->map(map)->setBlock(blockX + xOffset, (blockY + 3 + i), blockZ, (char)BLOCK_REED, (char)meta);
+            //printf("successful reed! x%d y%d z%d\n", blockX + xOffset, blockY, blockZ);
+          }
 
       }
       else if (biome == 2 || biome == 3)
