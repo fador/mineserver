@@ -309,8 +309,8 @@ void BiomeGen::AddTrees(int x, int z, int map)
 
       int biome = BiomeSelect.GetValue(blockX / 100.0, 0, blockZ / 100.0);
       if (biome == 1 &&
-          treenoise.GetValue(blockX, 0, blockZ) > -0.2 &&
-          ((rand() % 80) < 30)) // Dirty haxx!
+          treenoise.GetValue(blockX, 0, blockZ) > -0.3 &&
+          ((rand() % 16) < 7)) // Dirty haxx!
       {
         // Desert, make cactus
         int count = 3;
@@ -319,11 +319,11 @@ void BiomeGen::AddTrees(int x, int z, int map)
           continue;
         }
           //LOGLF("testing reed area");
-          Mineserver::get()->map(map)->getBlock(blockX, (blockY - 1 + i), blockZ, &block, &meta);
+          Mineserver::get()->map(map)->getBlock(blockX, (blockY + i), blockZ, &block, &meta);
           if(block == BLOCK_SAND){
-            Mineserver::get()->map(map)->setBlock(blockX, (blockY + 0 + i), blockZ, (char)BLOCK_CACTUS, (char)meta);
             Mineserver::get()->map(map)->setBlock(blockX, (blockY + 1 + i), blockZ, (char)BLOCK_CACTUS, (char)meta);
             Mineserver::get()->map(map)->setBlock(blockX, (blockY + 2 + i), blockZ, (char)BLOCK_CACTUS, (char)meta);
+            Mineserver::get()->map(map)->setBlock(blockX, (blockY + 3 + i), blockZ, (char)BLOCK_CACTUS, (char)meta);
             //printf("successful cactus! x%d y%d z%d\n", blockX, blockY, blockZ);
           }
 
@@ -351,7 +351,7 @@ void BiomeGen::AddTrees(int x, int z, int map)
       else if (biome == 4 &&
                block != BLOCK_WATER &&
                block != BLOCK_STATIONARY_WATER &&
-               treenoise.GetValue(blockX, 0, blockZ) > -0.1)
+               treenoise.GetValue(blockX, 0, blockZ) > -0.2)
       {
         //Reed forest
         int count = 3;
@@ -361,15 +361,15 @@ void BiomeGen::AddTrees(int x, int z, int map)
         }
           //LOGLF("testing reed area");
 	  int xOffset = 0;
-	  Mineserver::get()->map(map)->getBlock(blockX + xOffset, (blockY - 1 + i), blockZ, &block, &meta);
+	  Mineserver::get()->map(map)->getBlock(blockX + xOffset, (blockY + i), blockZ, &block, &meta);
           if(block == BLOCK_DIRT || block == BLOCK_REED || block == BLOCK_GRASS){
             if(block == BLOCK_GRASS){
-	      Mineserver::get()->map(map)->setBlock(blockX + xOffset, (blockY - 1 + i), blockZ, (char)BLOCK_DIRT, (char)meta);
+	      Mineserver::get()->map(map)->setBlock(blockX + xOffset, (blockY + i), blockZ, (char)BLOCK_DIRT, (char)meta);
               block = BLOCK_DIRT;
             }
-            Mineserver::get()->map(map)->setBlock(blockX + xOffset, (blockY + 0 + i), blockZ, (char)BLOCK_REED, (char)meta);
             Mineserver::get()->map(map)->setBlock(blockX + xOffset, (blockY + 1 + i), blockZ, (char)BLOCK_REED, (char)meta);
             Mineserver::get()->map(map)->setBlock(blockX + xOffset, (blockY + 2 + i), blockZ, (char)BLOCK_REED, (char)meta);
+            Mineserver::get()->map(map)->setBlock(blockX + xOffset, (blockY + 3 + i), blockZ, (char)BLOCK_REED, (char)meta);
             //printf("successful reed! x%d y%d z%d\n", blockX + xOffset, blockY, blockZ);
           }
 
