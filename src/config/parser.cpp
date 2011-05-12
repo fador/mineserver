@@ -27,7 +27,7 @@
 
 #include <string>
 #include <map>
-#include <deque>
+#include <stack>
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
@@ -59,17 +59,22 @@ bool ConfigParser::parse(const std::string& file, ConfigNode::Ptr ptr)
   return parse(ifs, ptr);
 }
 
-bool ConfigParser::parse(const std::istream& data, ConfigNode::Ptr ptr)
+bool ConfigParser::parse(std::istream& data, ConfigNode::Ptr ptr)
 {
   ConfigScanner scanner;
   ConfigLexer lexer(scanner);
   ConfigNode::Ptr root = ptr;
 
-  // that's ugly!
-  std::stringstream ss;
-  ss << data.rdbuf();
+  data.seekg(0, std::ios::end);
+  const size_t data_size = data.tellg();
+  data.seekg(0, std::ios::beg);
 
-  if (!scanner.read(ss.str()))
+  char* buf = new char[data_size];
+  data.read(buf, data_size);
+  std::string data_str(buf, data_size);
+  delete[] buf;
+
+  if (!scanner.read(data_str))
   {
     std::cerr << "Couldn't read data!\n";
     return false;
@@ -78,9 +83,9 @@ bool ConfigParser::parse(const std::istream& data, ConfigNode::Ptr ptr)
   int token_type;
   std::string token_data;
   std::string token_label;
-  std::deque<ConfigNode::Ptr> nodeStack;
+  std::stack<ConfigNode::Ptr> nodeStack;
   ConfigNode::Ptr currentNode = root;
-  nodeStack.push_back(currentNode);
+  nodeStack.push(currentNode);
 
   while (lexer.get_token(token_type, token_data))
   {
@@ -221,14 +226,14 @@ bool ConfigParser::parse(const std::istream& data, ConfigNode::Ptr ptr)
         currentNode->add(newNode);
       }
 
-      nodeStack.push_back(currentNode);
+      nodeStack.push(currentNode);
       currentNode = newNode;
     }
 
     else if (token_type == CONFIG_TOKEN_LIST_CLOSE)
     {
-      currentNode = nodeStack.back();
-      nodeStack.pop_back();
+      currentNode = nodeStack.top();
+      nodeStack.pop();
     }
   }
 

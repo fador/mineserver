@@ -77,7 +77,7 @@ bool ConfigLexer::get_token(int& type, std::string& data)
   {
     while (((buf >= 'a') && (buf <= 'z')) || ((buf >= 'A') && (buf <= 'Z')) || ((buf >= '0') && (buf <= '9')) || (buf == '.') || (buf == '_'))
     {
-      data.append(&buf, 1);
+      data += buf;
       m_scanner.move(1);
       buf = m_scanner.get();
     }
@@ -110,7 +110,7 @@ bool ConfigLexer::get_token(int& type, std::string& data)
 
       if (buf != '_')
       {
-        data.append(&buf, 1);
+        data += buf;
       }
 
       m_scanner.move(1);
@@ -177,7 +177,7 @@ bool ConfigLexer::get_token(int& type, std::string& data)
       }
 
       // Add the character to the data string
-      data.append(&temp, 1);
+      data += temp;
 
       // Move forward one
       m_scanner.move(1);

@@ -55,7 +55,7 @@ public:
     return m_parser->parse(file, m_root);
   }
 
-  inline bool load(const std::istream& data) const
+  inline bool load(std::istream& data) const
   {
     return m_parser->parse(data, m_root);
   }
