@@ -29,6 +29,10 @@
 #include <vector>
 #include <string>
 #include <stdint.h>
+
+#include "tr1.h"
+#include TR1INCLUDE(memory)
+
 #include "user.h"
 #include "constants.h"
 #include "packets.h"
@@ -61,44 +65,66 @@ public:
   void deSpawnToAll();
   void relativeMoveToAll();
   void teleportToAll();
-  void animateMob(const char* userIn, int animID);
-  void animateDamage(const char* userIn, int animID);
-  void moveAnimal(const char* userIn);
+  void animateMob(int animID);
+  void animateDamage(int animID);
+  void moveAnimal();
 
   void moveTo(double to_x, double to_y, double to_z, int to_map = -1);
   void look(int16_t yaw, int16_t pitch);
 
 };
 
+typedef std::tr1::shared_ptr<Mob> MobPtr;
+
 class Mobs
 {
 public:
-  Mob* getMobByID(int id);
-  size_t getMobByTarget(uint32_t mobID);
+  inline MobPtr getMobByID(size_t id) const
+  {
+    return id < m_moblist.size() ? m_moblist[id] : MobPtr();
+  }
+
+  inline size_t getMobByTarget(uint32_t mobID) const
+  {
+    for (size_t i = 0; i < m_moblist.size(); ++i)
+    {
+      if (mobID == m_moblist[i]->UID)
+      {
+        return i;
+      }
+    }
+    return -1; // louisdx: This should be checked; at least it should cause a crash if used unchecked.
+  }
+
   int mobNametoType(std::string name);
+
   inline size_t getMobCount()
   {
     return m_moblist.size();
   }
-  inline std::vector<Mob*> & getAll()
+
+  inline std::vector<MobPtr>& getAll()
   {
     return m_moblist;
-  };
-  inline const std::vector<Mob*> & getAll() const
+  }
+
+  inline const std::vector<MobPtr>& getAll() const
   {
     return m_moblist;
-  };
-  inline void addMob(Mob* mob)
+  }
+
+  inline void addMob(MobPtr mob)
   {
     m_moblist.push_back(mob);
   }
-  inline Mob* createMob()
+
+  inline MobPtr createMob()
   {
-    Mob* mob = new Mob();
+    const MobPtr mob(new Mob);
     addMob(mob);
     return mob;
   }
 
 private:
-  std::vector<Mob*> m_moblist;
+  std::vector<MobPtr> m_moblist;
 };

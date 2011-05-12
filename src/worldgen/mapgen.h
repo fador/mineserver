@@ -101,6 +101,4 @@ private:
 };
 
 
-inline int fastrand();
-
 #endif

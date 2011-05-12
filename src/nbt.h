@@ -88,10 +88,10 @@ public:
   NBT_Value& operator =(float val);
   NBT_Value& operator =(double val);
 
-  std::vector<uint8_t> *GetByteArray();
+  std::vector<uint8_t>* GetByteArray();
   std::string* GetString();
   eTAG_Type GetListType();
-  std::vector<NBT_Value*> *GetList();
+  std::vector<NBT_Value*>* GetList();
 
   void SetType(eTAG_Type type, eTAG_Type listType = TAG_END);
 
@@ -106,6 +106,7 @@ public:
   void Write(std::vector<uint8_t> &buffer);
 
   void Dump(std::string& data, const std::string& name = std::string(""), int tabs = 0);
+
 private:
   eTAG_Type m_type;
   union
@@ -117,13 +118,13 @@ private:
     float floatVal;
     double doubleVal;
     std::string* stringVal;
-    std::vector<uint8_t> *byteArrayVal;
+    std::vector<uint8_t>* byteArrayVal;
     struct
     {
       eTAG_Type type;
       std::vector<NBT_Value*> *data;
     } listVal;
-    std::map<std::string, NBT_Value*> *compoundVal;
+    std::map<std::string, NBT_Value*>* compoundVal;
   } m_value;
 };
 

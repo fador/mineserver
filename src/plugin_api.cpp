@@ -817,7 +817,7 @@ bool config_bData(const char* name)
 int mob_createMob(const char* name)
 {
   int type = Mineserver::get()->mobs()->mobNametoType(std::string(name));
-  Mob* m = Mineserver::get()->mobs()->createMob();
+  MobPtr m = Mineserver::get()->mobs()->createMob();
   m->type = type;
   return Mineserver::get()->mobs()->getAll().size() - 1;
 }
@@ -825,7 +825,7 @@ int mob_createMob(const char* name)
 int mob_spawnMobN(const char* name)
 {
   int type = Mineserver::get()->mobs()->mobNametoType(std::string(name));
-  Mob* m = Mineserver::get()->mobs()->createMob();
+  MobPtr m = Mineserver::get()->mobs()->createMob();
   m->type = type;
   m->spawnToAll();
   m->teleportToAll();
@@ -834,37 +834,37 @@ int mob_spawnMobN(const char* name)
 
 void mob_spawnMob(int uid)
 {
-  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
   m->spawnToAll();
 }
 
 void mob_despawnMob(int uid)
 {
-  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
   m->deSpawnToAll();
 }
 
 void mob_moveMob(int uid, double x, double y, double z)
 {
-  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
   m->moveTo(x, y, z, -1);
 }
 
 void mob_moveMobW(int uid, double x, double y, double z, int map)
 {
-  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
   m->moveTo(x, y, z, map);
 }
 
 int mob_getMobID(int uid)
 {
-  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
   return m->UID;
 }
 
 int mob_getHealth(int uid)
 {
-  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
   return m->health;
 }
 
@@ -881,36 +881,33 @@ void mob_setHealth(int uid, int mobHealth)
   Mineserver::get()->mobs()->getMobByID(uid)->health = mobHealth;
 }
 
-void mob_moveAnimal(const char* userIn, int mobID)
+void mob_moveAnimal(const char*, size_t mobID)
 {
-  std::string user(userIn);
-  Mob* m = Mineserver::get()->mobs()->getMobByID((int)mobID);
-  m->moveAnimal(user.c_str());
+  MobPtr m = Mineserver::get()->mobs()->getMobByID((int)mobID);
+  m->moveAnimal();
 }
 
-void mob_animateMob(const char* userIn,int mobID, int animID) 
+void mob_animateMob(const char*, size_t mobID, int animID) 
 {
-  std::string user(userIn);
-  Mob* m = Mineserver::get()->mobs()->getMobByID((int)mobID);
-  m->animateMob(user.c_str(), animID);
+  MobPtr m = Mineserver::get()->mobs()->getMobByID(mobID);
+  m->animateMob(animID);
 }
 
-void mob_animateDamage(const char* userIn,int mobID, int animID) 
+void mob_animateDamage(const char*, size_t mobID, int animID) 
 {
-std::string user(userIn);
- Mob* m = Mineserver::get()->mobs()->getMobByID((int)mobID);
- m->animateDamage(user.c_str(), animID);
+ MobPtr m = Mineserver::get()->mobs()->getMobByID(mobID);
+ m->animateDamage(animID);
 }
 
-int mob_getType(int uid)
+int mob_getType(size_t uid)
 {
-  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
   return m->type;
 }
 
 bool mob_getLook(int uid, double* rot, double* pitch)
 {
-  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
   if (m != NULL)
   {
     if (rot != NULL)
@@ -928,7 +925,7 @@ bool mob_getLook(int uid, double* rot, double* pitch)
 
 bool mob_setLook(int uid, double rot, double pitch)
 {
-  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
   if (m != NULL)
   {
     m->look((int16_t)rot, (int16_t)pitch);
@@ -940,7 +937,7 @@ bool mob_setLook(int uid, double rot, double pitch)
 
 bool mob_getMobPositionW(int uid, double* x, double* y, double* z, int* w)
 {
-  Mob* m = Mineserver::get()->mobs()->getMobByID(uid);
+  MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
   if (m != NULL)
   {
     if (w != NULL)

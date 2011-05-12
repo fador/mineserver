@@ -69,7 +69,7 @@ HeavenGen::HeavenGen()
 }
 
 
-inline int fastrand()
+static inline int fastrand()
 {
   heaven_seed = (214013 * heaven_seed + 2531011);
   return (heaven_seed >> 16) & 0x7FFF;

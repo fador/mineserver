@@ -42,11 +42,20 @@ Mob::Mob()
 {
 }
 
+struct PtrComp
+{
+private:
+  Mob* m_ptr;
+public:
+  PtrComp(Mob* ptr) : m_ptr(ptr) { }
+  bool operator()(const MobPtr ptr) const { return m_ptr == ptr.get(); }
+};
+
 Mob::~Mob()
 {
-  std::vector<Mob*>::iterator it = std::find(Mineserver::get()->mobs()->getAll().begin(),
-                                             Mineserver::get()->mobs()->getAll().end(),
-                                             this);
+  std::vector<MobPtr>::iterator it = std::find_if(Mineserver::get()->mobs()->getAll().begin(),
+                                                  Mineserver::get()->mobs()->getAll().end(),
+                                                  PtrComp(this));
   if (it != Mineserver::get()->mobs()->getAll().end())
   {
     Mineserver::get()->mobs()->getAll().erase(it);
@@ -55,7 +64,7 @@ Mob::~Mob()
 
 //Can be 0 (no animation), 1 (swing arm), 2 (damage animation)
 //, 3 (leave bed), 104 (crouch), or 105 (uncrouch). Getting 102 somewhat often, too. 
-void Mob::animateMob(const char* userIn, int animID)
+void Mob::animateMob(int animID)
 { 
   for (size_t i = 0; i < Mineserver::get()->users().size(); ++i)
   {
@@ -91,7 +100,7 @@ void Mob::sethealth(int health)
   }
 }
 //Possible values: 2 (entity hurt), 3 (entity dead?), 4, 5
-void Mob::animateDamage(const char* userIn, int animID)
+void Mob::animateDamage(int animID)
 { 
   for (size_t i = 0; i < Mineserver::get()->users().size(); i++) {
     User* user = Mineserver::get()->users()[i];
@@ -99,7 +108,8 @@ void Mob::animateDamage(const char* userIn, int animID)
   }
 }
 
-void Mob::moveAnimal(const char* userIn) {
+void Mob::moveAnimal()
+{
   /*std::string user2(userIn);
   User* user = User::byNick(user2);
   float tempMult = 1.f - abs(user->pos.pitch / 25.f);
@@ -246,41 +256,6 @@ void Mob::look(int16_t yaw, int16_t pitch)
   }
 }
 
-
-Mob* Mobs::getMobByID(int id)
-{
-  if (int(m_moblist.size()) <= id || id < 0)
-  {
-    return NULL;
-  }
-  return m_moblist[id];
-}
-
-size_t Mobs::getMobByTarget(uint32_t mobID)
-{
-  for (size_t i = 0; i < m_moblist.size(); i++)
-  {
-    if (mobID == m_moblist[i]->UID)
-    {
-      return i;
-    }
-  }
-  // This is dangerous! Why return 0? - louisdx
-  return 0;
-}
-
-/*Mob* Mobs::getMobByTarget(int mobID)
-{
-for (int i = 0; i < m_moblist.size(); i++)
-  {
-    if(mobID == m_moblist[i]->UID) {
-    return m_moblist[i];
-    break;
-  }
-  }
-  return NULL;
-}*/
-
 int Mobs::mobNametoType(std::string name)
 {
   std::transform(name.begin(), name.end(), name.begin(), ::toupper);
@@ -342,4 +317,3 @@ int Mobs::mobNametoType(std::string name)
   }
   return -1;
 }
-

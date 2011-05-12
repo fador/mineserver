@@ -28,11 +28,18 @@
 #ifndef _TREE_H_
 #define _TREE_H_
 
+#include <stack>
+
+#include "tr1.h"
+#include TR1INCLUDE(memory)
+#include TR1INCLUDE(array)
+
 #include "constants.h"
 #include "mineserver.h"
 #include "map.h"
 #include "vec.h"
-#include <stack>
+
+
 
 enum { MAX_TRUNK = 13, MIN_TRUNK = 5, MAX_CANOPY = 4, MIN_CANOPY = 3 ,
        BRANCHING_HEIGHT = 7, BRANCHING_CHANCE = 10,
@@ -77,6 +84,8 @@ public:
   }
 };
 
+typedef std::tr1::shared_ptr<Trunk> TrunkPtr;
+
 
 class Canopy : public ITree
 {
@@ -101,7 +110,7 @@ public:
 
 private:
   void set(int32_t xloc, int32_t yloc, int32_t zloc, int blocktType, char metaData);
-  Trunk* m_Branch[256]; // 1KB on x86 and 2KB on x86_64 Faster than stack or vector tho :)
+  std::tr1::array<TrunkPtr, 256> m_Branch; // 1KB on x86 and 2KB on x86_64 Faster than stack or vector tho :)
 
   // With full array of allocated classes it rounds up to...
   // 3.6KB on x86 :F 4.6KB on x86_64
@@ -111,7 +120,7 @@ private:
   uint8_t n_branches;
 
   void generateCanopy();
-  void generateBranches(Trunk*);
+  void generateBranches(TrunkPtr);
 };
 
 #endif

@@ -58,38 +58,30 @@ void Tree::generate(uint8_t limit)
   {
     if (smalltree)
     {
-      Trunk* const v = new Trunk(_x, _y + i, _z, _map, type);
+      const TrunkPtr v(new Trunk(_x, _y + i, _z, _map, type));
       if (i >= MIN_TRUNK - 1)
       {
         m_Branch[n_branches++] = v;
       }
-      else
-      {
-        delete v;
-      }
     }
     else
     {
-      Trunk* const v = new Trunk(_x, _y + i, _z, _map, type);
+      const TrunkPtr v(new Trunk(_x, _y + i, _z, _map, type));
       if (i > BRANCHING_HEIGHT - 1)
       {
         generateBranches(v);
         m_Branch[n_branches++] = v;
       }
-      else
-      {
-        delete v;
-      }
     }
   }
 
-  Trunk* const v = new Trunk(_x, _y + m_trunkHeight - 1, _z, _map, type);
+  const TrunkPtr v(new Trunk(_x, _y + m_trunkHeight - 1, _z, _map, type));
   generateBranches(v);
   generateCanopy();
   m_Branch[n_branches++] = v;
 }
 
-void Tree::generateBranches(Trunk* wrap)
+void Tree::generateBranches(TrunkPtr wrap)
 {
   int32_t x = wrap->_x;
   uint8_t y = wrap->_y;
@@ -121,7 +113,7 @@ void Tree::generateBranches(Trunk* wrap)
       y++;
     }
 
-    Trunk* const v = new Trunk(x, y, z, _map);
+    const TrunkPtr v(new Trunk(x, y, z, _map));
     m_Branch[n_branches++] = v;
     generateBranches(v);
   }
@@ -134,7 +126,6 @@ void Tree::generateCanopy()
 
   uint8_t canopy_type = 0;
 
-  int32_t posx, posy, posz;
   int32_t t_posx, t_posy, t_posz;
 
   if (BetterRand() > 0.5) // 1/2
@@ -150,12 +141,6 @@ void Tree::generateCanopy()
 
   for (uint8_t i = 0; i < n_branches; i++)
   {
-
-    posx = m_Branch[i]->_x;
-    posy = m_Branch[i]->_y;
-    posz = m_Branch[i]->_z;
-    delete m_Branch[i];
-
     for (int8_t xi = (-canopySize); xi <= canopySize; xi++)
     {
       for (int8_t yi = (-canopySize); yi <= canopySize; yi++)
@@ -164,9 +149,9 @@ void Tree::generateCanopy()
         {
           if (abs(xi) + abs(yi) + abs(zi) <= canopySize)
           {
-            t_posx = posx + xi;
-            t_posy = posy + yi;
-            t_posz = posz + zi;
+            t_posx = m_Branch[i]->_x + xi;
+            t_posy = m_Branch[i]->_y + yi;
+            t_posz = m_Branch[i]->_z + zi;
 
             if (Mineserver::get()->map(_map)->getBlock(t_posx, t_posy, t_posz, &block, &meta, true) && block == BLOCK_AIR)
             {

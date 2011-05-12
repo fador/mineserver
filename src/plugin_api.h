@@ -168,12 +168,12 @@ struct mob_pointer_struct
   int (*getMobID)(int uid);
   int (*getHealth)(int uid);
   void (*setHealth)(int uid, int mobHealth);
-  int (*getType)(int uid);
+  int (*getType)(size_t uid);
   bool (*getLook)(int uid, double* yaw, double* pitch);
   bool (*setLook)(int uid, double yaw, double pitch);
-  void (*moveAnimal)(const char* userIn, int mobID);
-  void (*animateMob)(const char* userIn, int mobID, int animID);
-  void (*animateDamage)(const char* userIn, int mobID, int animID);
+  void (*moveAnimal)(const char* userIn, size_t mobID);
+  void (*animateMob)(const char* userIn, size_t mobID, int animID);
+  void (*animateDamage)(const char* userIn, size_t mobID, int animID);
   void* temp[97];
 
 };

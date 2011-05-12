@@ -56,7 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int g_seed;
 int f_seed;
 
-inline int fastrand()
+static inline int fastrand()
 {
   f_seed = (214013 * f_seed + 2531011);
   return (f_seed >> 16) & 0x7FFF;

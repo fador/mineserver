@@ -1,40 +1,38 @@
 /*
-Copyright (c) 2011, The Mineserver Project
-All rights reserved.
+    Copyright (c) 2011, The Mineserver Project
+    All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-* Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-* Redistributions in binary form must reproduce the above copyright
-notice, this list of conditions and the following disclaimer in the
-documentation and/or other materials provided with the distribution.
-* Neither the name of the The Mineserver Project nor the
-names of its contributors may be used to endorse or promote products
-derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the The Mineserver Project nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <cstdlib>
-#include <cstdio>
 #include <iostream>
 #include <string>
 #include <algorithm>
 #include <vector>
 #include <cmath>
 #include <ctime>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdlib>
+#include <cstdio>
 
 
 // libnoise
@@ -67,7 +65,7 @@ BiomeGen::BiomeGen()
 
 int biome_seed;
 
-inline int fastrand()
+static inline int fastrand()
 {
   biome_seed = (214013 * biome_seed + 2531011);
   return (biome_seed >> 16) & 0x7FFF;
@@ -75,6 +73,8 @@ inline int fastrand()
 
 void BiomeGen::init(int seed)
 {
+  biome_seed = seed;
+
   cave.init(seed + 7);
   //###### TREE GEN #####
   treenoise.SetSeed(seed + 404);
@@ -216,11 +216,11 @@ void BiomeGen::generateChunk(int x, int z, int map)
   Mineserver::get()->map()->maps[chunkid].x = x;
   Mineserver::get()->map()->maps[chunkid].z = z; */
 
-  std::vector<uint8_t> *t_blocks = (*val)["Blocks"]->GetByteArray();
-  std::vector<uint8_t> *t_data = (*val)["Data"]->GetByteArray();
-  std::vector<uint8_t> *t_blocklight = (*val)["BlockLight"]->GetByteArray();
-  std::vector<uint8_t> *t_skylight = (*val)["SkyLight"]->GetByteArray();
-  std::vector<uint8_t> *heightmap = (*val)["HeightMap"]->GetByteArray();
+  std::vector<uint8_t>* t_blocks = (*val)["Blocks"]->GetByteArray();
+  std::vector<uint8_t>* t_data = (*val)["Data"]->GetByteArray();
+  std::vector<uint8_t>* t_blocklight = (*val)["BlockLight"]->GetByteArray();
+  std::vector<uint8_t>* t_skylight = (*val)["SkyLight"]->GetByteArray();
+  std::vector<uint8_t>* heightmap = (*val)["HeightMap"]->GetByteArray();
 
   sChunk* chunk = new sChunk();
   chunk->blocks = &((*t_blocks)[0]);
@@ -282,7 +282,7 @@ void BiomeGen::AddTrees(int x, int z, int map)
   int blockX, blockZ;
   uint8_t blockY, block, meta;
 
-  bool empty[16][16]; // is block emptey~
+  bool empty[16][16]; // is block empty 
 
   memset(empty, 1, 256);
 
