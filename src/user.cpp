@@ -820,7 +820,7 @@ bool User::updatePos(double x, double y, double z, double stance)
   if (Mineserver::get()->m_damage_enabled)
   {
     uint8_t block, meta;
-    if (Mineserver::get()->map(pos.map)->getBlock((int)floor(pos.x),
+    if (((int)floor(pos.y - 0.5) < 128) && Mineserver::get()->map(pos.map)->getBlock((int)floor(pos.x),
         (int)floor(pos.y - 0.5),
         (int)floor(pos.z),
         &block, &meta))
@@ -1250,9 +1250,13 @@ void User::checkEnvironmentDamage()
 {
   uint8_t type, meta;
   int16_t d = 0;
+  int yVal = (int)floor(pos.y - 0.5);
+  if(yVal > 127){
+    return;
+  }
   if (Mineserver::get()->map(pos.map)->getBlock(
         (int)floor(pos.x),
-        (int)floor(pos.y - 0.5),
+        yVal,
         (int)floor(pos.z), &type, &meta))
   {
     if (type == BLOCK_CACTUS)
@@ -1262,6 +1266,16 @@ void User::checkEnvironmentDamage()
   }
   double xbit = pos.x - (int)floor(pos.x);
   double zbit = pos.z - (int)floor(pos.z);
+  if((int)floor(pos.y + 0.5) > 127){
+    int16_t h = health - d;
+    if (h < 0)
+    {
+      h = 0;
+    }
+    sethealth(h);
+    return;
+  }
+
   if (xbit > 0.6)
   {
     Mineserver::get()->map(pos.map)->getBlock((int)floor(pos.x + 1),
@@ -1317,7 +1331,15 @@ void User::checkEnvironmentDamage()
       d = 5;
     }
   }
-
+  if((int)floor(pos.y + 1.5) > 127){
+    int16_t h = health - d;
+    if (h < 0)
+    {
+      h = 0;
+    }
+    sethealth(h);
+    return;
+  }
   if (Mineserver::get()->map(pos.map)->getBlock(
         (int)floor(pos.x),
         (int)floor(pos.y + 1.5),
@@ -1457,6 +1479,11 @@ bool User::isUnderwater()
 {
   uint8_t topblock, topmeta;
   int y = (pos.y - int(pos.y) <= 0.25) ? (int)pos.y + 1 : (int)pos.y + 2;
+
+  if(y > 127)
+  {
+    return false;
+  }
 
   Mineserver::get()->map(pos.map)->getBlock((int)pos.x, y, (int)pos.z, &topblock, &topmeta);
 
