@@ -236,7 +236,7 @@ bool User::sendLoginInfo()
   // Push chunks to user
   pushMap(true);
 
-  const std::vector<MobPtr> & mobs = Mineserver::get()->mobs()->getAll();
+  const std::vector<MobPtr>& mobs = Mineserver::get()->mobs()->getAll();
 
   for (std::vector<MobPtr>::const_iterator i = mobs.begin(); i != mobs.end(); ++i)
   {
