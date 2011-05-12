@@ -60,6 +60,10 @@
 #include "mob.h"
 #include "inventory.h"
 
+
+#define LOADBLOCK(x,y,z) Mineserver::get()->map(pos.map)->getBlock(int(std::floor(x)), int(std::floor(y)), int(std::floor(z)), &type, &meta)
+
+
 // Generate "unique" entity ID
 
 User::User(int sock, uint32_t EID)
@@ -819,13 +823,10 @@ bool User::updatePos(double x, double y, double z, double stance)
 
   if (Mineserver::get()->m_damage_enabled)
   {
-    uint8_t block, meta;
-    if (((int)floor(pos.y - 0.5) < 128) && Mineserver::get()->map(pos.map)->getBlock((int)floor(pos.x),
-        (int)floor(pos.y - 0.5),
-        (int)floor(pos.z),
-        &block, &meta))
+    uint8_t type, meta;
+    if ((std::floor(pos.y - 0.5) < 128) && LOADBLOCK(pos.x, pos.y - 0.5, pos.z))
     {
-      switch (block)
+      switch (type)
       {
       case BLOCK_AIR:
       case BLOCK_SAPLING:
@@ -854,12 +855,7 @@ bool User::updatePos(double x, double y, double z, double stance)
       default:
         if (fallDistance > 3)
         {
-          int h = health - (int)(fallDistance - 4);
-          if (h < 0)
-          {
-            h = 0;
-          }
-          sethealth(h);
+          sethealth(std::max(0, health - int(fallDistance - 4)));
         }
         fallDistance = 0;
         break;
@@ -878,8 +874,8 @@ bool User::updatePos(double x, double y, double z, double stance)
 
 bool User::checkOnBlock(int32_t x, int8_t y, int32_t z)
 {
-  double diffX = x - this->pos.x;
-  double diffZ = z - this->pos.z;
+  const double diffX = x - this->pos.x;
+  const double diffZ = z - this->pos.z;
 
   if ((y == (int)this->pos.y)
       && (diffZ > -1.3 && diffZ < 0.3)
@@ -1248,39 +1244,27 @@ bool User::spawnOthers()
 
 void User::checkEnvironmentDamage()
 {
-  uint8_t type, meta;
-  int16_t d = 0;
-  int yVal = (int)floor(pos.y - 0.5);
-  if(yVal > 127){
-    return;
-  }
-  if (Mineserver::get()->map(pos.map)->getBlock(
-        (int)floor(pos.x),
-        yVal,
-        (int)floor(pos.z), &type, &meta))
+  const int yVal = floor(pos.y - 0.5);
+
+  if (yVal > 127)
   {
-    if (type == BLOCK_CACTUS)
-    {
-      d = 1;
-    }
-  }
-  double xbit = pos.x - (int)floor(pos.x);
-  double zbit = pos.z - (int)floor(pos.z);
-  if((int)floor(pos.y + 0.5) > 127){
-    int16_t h = health - d;
-    if (h < 0)
-    {
-      h = 0;
-    }
-    sethealth(h);
     return;
   }
 
+  uint8_t type, meta;
+  int16_t d = 0;
+
+  if (type == BLOCK_CACTUS && LOADBLOCK(pos.x, yVal, pos.z))
+  {
+    d = 1;
+  }
+
+  const double xbit = pos.x - std::floor(pos.x);
+  const double zbit = pos.z - std::floor(pos.z);
+
   if (xbit > 0.6)
   {
-    Mineserver::get()->map(pos.map)->getBlock((int)floor(pos.x + 1),
-        (int)floor(pos.y + 0.5),
-        (int)floor(pos.z), &type, &meta);
+    LOADBLOCK(pos.x + 1, pos.y + 0.5, pos.z);
     if (type == BLOCK_CACTUS)
     {
       d = 1;
@@ -1288,9 +1272,7 @@ void User::checkEnvironmentDamage()
   }
   else if (xbit < 0.4)
   {
-    Mineserver::get()->map(pos.map)->getBlock((int)floor(pos.x - 1),
-        (int)floor(pos.y + 0.5),
-        (int)floor(pos.z), &type, &meta);
+    LOADBLOCK(pos.x - 1, pos.y + 0.5, pos.z);
     if (type == BLOCK_CACTUS)
     {
       d = 1;
@@ -1298,9 +1280,7 @@ void User::checkEnvironmentDamage()
   }
   if (zbit > 0.6)
   {
-    Mineserver::get()->map(pos.map)->getBlock((int)floor(pos.x),
-        (int)floor(pos.y + 0.5),
-        (int)floor(pos.z + 1), &type, &meta);
+    LOADBLOCK(pos.x, pos.y + 0.5, pos.z + 1);
     if (type == BLOCK_CACTUS)
     {
       d = 1;
@@ -1308,19 +1288,14 @@ void User::checkEnvironmentDamage()
   }
   else if (zbit < 0.4)
   {
-    Mineserver::get()->map(pos.map)->getBlock((int)floor(pos.x),
-        (int)floor(pos.y + 0.5),
-        (int)floor(pos.z - 1), &type, &meta);
+    LOADBLOCK(pos.x, pos.y + 0.5, pos.z - 1);
     if (type == BLOCK_CACTUS)
     {
       d = 1;
     }
   }
 
-  if (Mineserver::get()->map(pos.map)->getBlock(
-        (int)floor(pos.x),
-        (int)floor(pos.y + 0.5),
-        (int)floor(pos.z), &type, &meta))
+  if (LOADBLOCK(pos.x, pos.y + 0.5, pos.z))
   {
     if (type == BLOCK_LAVA || type == BLOCK_STATIONARY_LAVA)
     {
@@ -1331,25 +1306,20 @@ void User::checkEnvironmentDamage()
       d = 5;
     }
   }
-  if((int)floor(pos.y + 1.5) > 127){
-    int16_t h = health - d;
-    if (h < 0)
-    {
-      h = 0;
-    }
-    sethealth(h);
+
+  if(std::floor(pos.y + 1.5) > 127)
+  {
+    sethealth(std::max(0, health - d));
     return;
   }
-  if (Mineserver::get()->map(pos.map)->getBlock(
-        (int)floor(pos.x),
-        (int)floor(pos.y + 1.5),
-        (int)floor(pos.z), &type, &meta))
+
+  if (LOADBLOCK(pos.x, pos.y + 1.5, pos.z))
   {
     switch (type)
     {
     case BLOCK_AIR:
     case BLOCK_SAPLING:
-    case BLOCK_WATER: // For a certain value of "Breathable" ;)
+    case BLOCK_WATER:            // For a certain value of "breathable" ;)
     case BLOCK_STATIONARY_WATER: // Water is treated seperatly
     case BLOCK_YELLOW_FLOWER:
     case BLOCK_RED_ROSE:
@@ -1380,12 +1350,7 @@ void User::checkEnvironmentDamage()
     }
   }
 
-  int16_t h = health - d;
-  if (h < 0)
-  {
-    h = 0;
-  }
-  sethealth(h);
+  sethealth(std::max(0, health - d));
 }
 
 bool User::sethealth(int userHealth)
@@ -1478,9 +1443,9 @@ bool User::dropInventory()
 bool User::isUnderwater()
 {
   uint8_t topblock, topmeta;
-  int y = (pos.y - int(pos.y) <= 0.25) ? (int)pos.y + 1 : (int)pos.y + 2;
+  const int y = (pos.y - int(pos.y) <= 0.25) ? pos.y + 1 : pos.y + 2;
 
-  if(y > 127)
+  if (y > 127)
   {
     return false;
   }
