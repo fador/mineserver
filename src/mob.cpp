@@ -42,26 +42,6 @@ Mob::Mob()
 {
 }
 
-struct PtrComp
-{
-private:
-  Mob* m_ptr;
-public:
-  PtrComp(Mob* ptr) : m_ptr(ptr) { }
-  bool operator()(const MobPtr ptr) const { return m_ptr == ptr.get(); }
-};
-
-Mob::~Mob()
-{
-  std::vector<MobPtr>::iterator it = std::find_if(Mineserver::get()->mobs()->getAll().begin(),
-                                                  Mineserver::get()->mobs()->getAll().end(),
-                                                  PtrComp(this));
-  if (it != Mineserver::get()->mobs()->getAll().end())
-  {
-    Mineserver::get()->mobs()->getAll().erase(it);
-  }
-}
-
 //Can be 0 (no animation), 1 (swing arm), 2 (damage animation)
 //, 3 (leave bed), 104 (crouch), or 105 (uncrouch). Getting 102 somewhat often, too. 
 void Mob::animateMob(int animID)

@@ -45,6 +45,8 @@ uint32_t generateEID();
 class Mob
 {
 public:
+  Mob(); // Dont create your own Mob, use Mobs.createMob()
+
   // Singular
   uint32_t UID;
   int8_t type;
@@ -56,8 +58,6 @@ public:
   bool respawnable;
   int health;
 
-  Mob(); // Dont create your own Mob, use Mobs.createMob()
-  ~Mob();
   void sethealth(int health);
 
   // Specifically packet-based commands
@@ -71,7 +71,6 @@ public:
 
   void moveTo(double to_x, double to_y, double to_z, int to_map = -1);
   void look(int16_t yaw, int16_t pitch);
-
 };
 
 typedef std::tr1::shared_ptr<Mob> MobPtr;
