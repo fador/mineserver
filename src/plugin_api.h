@@ -95,7 +95,7 @@ struct user_pointer_struct
   bool (*sethealth)(const char* user, int userHealth);
   bool (*teleportMap)(const char* user, double x, double y, double z, size_t map);
   int (*getCount)();
-  char*(*getUserNumbered)(int c);
+  const char* (*getUserNumbered)(int c);
   bool (*getPositionW)(const char* user, double* x, double* y, double* z, int* w, float* yaw, float* pitch, double* stance);
   bool (*addItem)(const char* user, int item, int count, int health);
   bool (*hasItem)(const char* user, int item, int count, int health);

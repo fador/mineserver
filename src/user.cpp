@@ -98,7 +98,7 @@ User::User(int sock, uint32_t EID)
   // Ignore this user if it's the server console
   if (this->UID != SERVER_CONSOLE_UID)
   {
-    Mineserver::get()->users().push_back(this);
+    Mineserver::get()->users().insert(this);
   }
 
   for (int count = 0; count < 45; count ++)
@@ -140,13 +140,11 @@ User::~User()
     delKnown(mapKnown[i].x(), mapKnown[i].z());
   }
 
-  std::vector<User*>::iterator it_a = Mineserver::get()->users().begin();
-  std::vector<User*>::iterator it_b = Mineserver::get()->users().end();
-  for (; it_a != it_b; ++it_a)
+  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    if ((*it_a) == this)
+    if (*it == this)
     {
-      Mineserver::get()->users().erase(it_a);
+      Mineserver::get()->users().erase(it);
       //LOG2(WARNING, this->nick + " erased!");
       break;
     }
@@ -904,17 +902,14 @@ bool User::updateLook(float yaw, float pitch)
 
 bool User::sendOthers(uint8_t* data, uint32_t len)
 {
-  for (unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
+  for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    if (Mineserver::get()->users()[i]->fd != this->fd && Mineserver::get()->users()[i]->logged)
+    if ((*it)->fd != this->fd && (*it)->logged && !((*it)->dnd && data[0] == PACKET_CHAT_MESSAGE))
     {
-      // Don't send to his user if he is DND and the message is a chat message
-      if (!(Mineserver::get()->users()[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
-      {
-        Mineserver::get()->users()[i]->buffer.addToWrite(data, len);
-      }
+      (*it)->buffer.addToWrite(data, len);
     }
   }
+
   return true;
 }
 
@@ -954,53 +949,53 @@ int8_t User::relativeToBlock(const int32_t x, const int8_t y, const int32_t z)
 
 bool User::sendAll(uint8_t* data, uint32_t len)
 {
-  for (unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
+  for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    if (Mineserver::get()->users()[i]->fd && Mineserver::get()->users()[i]->logged)
+    if ((*it)->fd && (*it)->logged && !((*it)->dnd && data[0] == PACKET_CHAT_MESSAGE))
     {
-      // Don't send to his user if he is DND and the message is a chat message
-      if (!(Mineserver::get()->users()[i]->dnd && data[0] == PACKET_CHAT_MESSAGE))
-      {
-        Mineserver::get()->users()[i]->buffer.addToWrite(data, len);
-      }
+      (*it)->buffer.addToWrite(data, len);
     }
   }
+
   return true;
 }
 
 bool User::sendAdmins(uint8_t* data, uint32_t len)
 {
-  for (unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
+  for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    if (Mineserver::get()->users()[i]->fd && Mineserver::get()->users()[i]->logged && IS_ADMIN(Mineserver::get()->users()[i]->permissions))
+    if ((*it)->fd && (*it)->logged && IS_ADMIN((*it)->permissions))
     {
-      Mineserver::get()->users()[i]->buffer.addToWrite(data, len);
+      (*it)->buffer.addToWrite(data, len);
     }
   }
+
   return true;
 }
 
 bool User::sendOps(uint8_t* data, uint32_t len)
 {
-  for (unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
+  for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    if (Mineserver::get()->users()[i]->fd && Mineserver::get()->users()[i]->logged && IS_ADMIN(Mineserver::get()->users()[i]->permissions))
+    if ((*it)->fd && (*it)->logged && IS_ADMIN((*it)->permissions))
     {
-      Mineserver::get()->users()[i]->buffer.addToWrite(data, len);
+      (*it)->buffer.addToWrite(data, len);
     }
   }
+
   return true;
 }
 
 bool User::sendGuests(uint8_t* data, uint32_t len)
 {
-  for (unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
+  for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    if (Mineserver::get()->users()[i]->fd && Mineserver::get()->users()[i]->logged && IS_ADMIN(Mineserver::get()->users()[i]->permissions))
+    if ((*it)->fd && (*it)->logged && IS_ADMIN((*it)->permissions))
     {
-      Mineserver::get()->users()[i]->buffer.addToWrite(data, len);
+      (*it)->buffer.addToWrite(data, len);
     }
   }
+
   return true;
 }
 
@@ -1213,28 +1208,20 @@ bool User::spawnUser(int x, int y, int z)
 
 bool User::spawnOthers()
 {
-
-  for (unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
+  for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    //    if (Mineserver::get()->users()[i]->logged && Mineserver::get()->users()[i]->UID != this->UID && Mineserver::get()->users()[i]->nick != this->nick)
-    if (Mineserver::get()->users()[i]->logged)
+    //    if ((*it)->logged && (*it)->UID != this->UID && (*it)->nick != this->nick)
+    if ((*it)->logged)
     {
-      loginBuffer << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)Mineserver::get()->users()[i]->UID << Mineserver::get()->users()[i]->nick
-                  << (int32_t)(Mineserver::get()->users()[i]->pos.x * 32) << (int32_t)(Mineserver::get()->users()[i]->pos.y * 32) << (int32_t)(Mineserver::get()->users()[i]->pos.z * 32)
+      loginBuffer << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)(*it)->UID << (*it)->nick
+                  << (int32_t)((*it)->pos.x * 32) << (int32_t)((*it)->pos.y * 32) << (int32_t)((*it)->pos.z * 32)
                   << (int8_t)0 << (int8_t)0 << (int16_t)0;
       for (int b = 0; b < 5; b++)
       {
-        int n = b;
-        if (b == 0)
-        {
-          n = Mineserver::get()->users()[i]->curItem + 36;
-        }
-        else
-        {
-          n = 9 - b;
-        }
-        int type = Mineserver::get()->users()[i]->inv[n].getType();
-        loginBuffer << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)Mineserver::get()->users()[i]->UID
+        const int n = b == 0 ? (*it)->curItem + 36 : 9 - b;
+        const int type = (*it)->inv[n].getType();
+
+        loginBuffer << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)(*it)->UID
                     << (int16_t)b << (int16_t)type << (int16_t) 0;
       }
     }
@@ -1471,21 +1458,18 @@ struct event* User::GetEvent()
   return &m_event;
 }
 
-std::vector<User*>& User::all()
+std::set<User*>& User::all()
 {
   return Mineserver::get()->users();
 }
 
 bool User::isUser(int sock)
 {
-  uint8_t i;
-  for (i = 0; i < Mineserver::get()->users().size(); i++)
+  for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    if (Mineserver::get()->users()[i]->fd == sock)
-    {
-      return true;
-    }
+    if ((*it)->fd == sock) return true;
   }
+
   return false;
 }
 
@@ -1493,11 +1477,11 @@ bool User::isUser(int sock)
 User* User::byNick(std::string nick)
 {
   // Get coordinates
-  for (unsigned int i = 0; i < Mineserver::get()->users().size(); i++)
+  for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    if (strToLower(Mineserver::get()->users()[i]->nick) == strToLower(nick))
+    if (strToLower((*it)->nick) == strToLower(nick))
     {
-      return Mineserver::get()->users()[i];
+      return *it;
     }
   }
   return NULL;

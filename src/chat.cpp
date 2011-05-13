@@ -51,26 +51,27 @@ Chat::~Chat()
 
 bool Chat::sendUserlist(User* user)
 {
-  this->sendMsg(user, MC_COLOR_BLUE + "[ " + dtos(User::all().size()) + " / " + dtos(Mineserver::get()->config()->iData("system.user_limit")) + " players online ]", USER);
+  sendMsg(user, MC_COLOR_BLUE + "[ " + dtos(User::all().size()) + " / " + dtos(Mineserver::get()->config()->iData("system.user_limit")) + " players online ]", USER);
   std::string playerDesc;
-  for (unsigned int i = 0; i < User::all().size(); i++)
+
+  for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    if (!User::all()[i]->logged)
+    if (!(*it)->logged)
     {
       continue;
     }
-    playerDesc += User::all()[i]->nick;
-    if (User::all()[i]->muted)
+    playerDesc += (*it)->nick;
+    if ((*it)->muted)
     {
       playerDesc += MC_COLOR_YELLOW + " (muted)";
     }
-    if (User::all()[i]->dnd)
+    if ((*it)->dnd)
     {
       playerDesc += MC_COLOR_YELLOW + " (dnd)";
     }
     playerDesc += ", ";
   }
-  this->sendMsg(user, playerDesc, USER);
+  sendMsg(user, playerDesc, USER);
 
   return true;
 }

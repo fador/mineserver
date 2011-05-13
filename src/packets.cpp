@@ -1313,18 +1313,18 @@ int PacketHandler::use_entity(User* user)
   if (Mineserver::get()->m_pvp_enabled)
   {
     //This is used when punching users, mobs or other entities
-    for (uint32_t i = 0; i < User::all().size(); i++)
+    for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
     {
-      if (User::all()[i]->UID == (uint32_t)target)
+      if ((*it)->UID == (uint32_t)target)
       {
-        User::all()[i]->health--;
-        User::all()[i]->sethealth(User::all()[i]->health);
+        (*it)->health--;
+        (*it)->sethealth((*it)->health);
 
-        if (User::all()[i]->health <= 0)
+        if ((*it)->health <= 0)
         {
           Packet pkt;
-          pkt << PACKET_DEATH_ANIMATION << (int32_t)User::all()[i]->UID << (int8_t)3;
-          User::all()[i]->sendOthers((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+          pkt << PACKET_DEATH_ANIMATION << (int32_t)(*it)->UID << (int8_t)3;
+          (*it)->sendOthers((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
         }
         break;
       }

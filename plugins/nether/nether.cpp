@@ -216,8 +216,7 @@ bool blockPlacePreFunction(const char* userIn, int32_t x, int32_t y, int32_t z,i
 void timer200Function()
 {
   for (int i = 0; i < mineserver->user.getCount(); i++){
-    char *name;
-    name= mineserver->user.getUserNumbered(i);
+    const char* const name = mineserver->user.getUserNumbered(i);
     double x,y,z;
     int map;
     mineserver->user.getPositionW(name, &x,&y,&z,&map,NULL,NULL,NULL);

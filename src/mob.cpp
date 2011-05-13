@@ -46,10 +46,9 @@ Mob::Mob()
 //, 3 (leave bed), 104 (crouch), or 105 (uncrouch). Getting 102 somewhat often, too. 
 void Mob::animateMob(int animID)
 { 
-  for (size_t i = 0; i < Mineserver::get()->users().size(); ++i)
+  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    User* user = Mineserver::get()->users()[i];
-    user->buffer << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID << (int8_t)animID;
+    (*it)->buffer << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID << (int8_t)animID;
   }
 }
 
@@ -65,11 +64,9 @@ void Mob::sethealth(int health)
   }
   if (health < this->health)
   {
-    for (size_t i = 0; i < Mineserver::get()->users().size(); i++)
+    for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
     {
-      User* user = Mineserver::get()->users()[i];
-      user->buffer << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID <<
-                   (int8_t)2 ;
+      (*it)->buffer << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID << (int8_t)2;
       // Hurt animation
     }
   }
@@ -82,9 +79,9 @@ void Mob::sethealth(int health)
 //Possible values: 2 (entity hurt), 3 (entity dead?), 4, 5
 void Mob::animateDamage(int animID)
 { 
-  for (size_t i = 0; i < Mineserver::get()->users().size(); i++) {
-    User* user = Mineserver::get()->users()[i];
-    user->buffer << (int8_t)PACKET_DEATH_ANIMATION << (int32_t)UID << (int8_t)animID;
+  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
+  {
+    (*it)->buffer << (int8_t)PACKET_DEATH_ANIMATION << (int32_t)UID << (int8_t)animID;
   }
 }
 
@@ -131,21 +128,21 @@ void Mob::spawnToAll()
   {
     health = 10;
   }
-  for (size_t i = 0; i < Mineserver::get()->users().size(); i++)
+
+  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    User* user = Mineserver::get()->users()[i];
-    if (user->logged)
+    if ((*it)->logged)
     {
-      user->buffer << (int8_t)PACKET_MOB_SPAWN << (int32_t) UID << (int8_t) type
+      (*it)->buffer << (int8_t)PACKET_MOB_SPAWN << (int32_t) UID << (int8_t) type
                    << (int32_t)(x * 32.0) << (int32_t)(y * 32.0) << (int32_t)(z * 32.0) << (int8_t) yaw
                    << (int8_t) pitch;
       if (type == MOB_SHEEP)
       {
-        user->buffer << (int8_t) 0 << (int8_t) meta << (int8_t) 127;
+        (*it)->buffer << (int8_t) 0 << (int8_t) meta << (int8_t) 127;
       }
       else
       {
-        user->buffer << (int8_t) 127;
+        (*it)->buffer << (int8_t) 127;
       }
     }
     spawned = true;
@@ -154,12 +151,11 @@ void Mob::spawnToAll()
 
 void Mob::deSpawnToAll()
 {
-  for (size_t i = 0; i < Mineserver::get()->users().size(); i++)
+  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    User* user = Mineserver::get()->users()[i];
-    if (user->logged)
+    if ((*it)->logged)
     {
-      user->buffer << PACKET_DESTROY_ENTITY << (int32_t) UID;
+      (*it)->buffer << PACKET_DESTROY_ENTITY << (int32_t) UID;
     }
   }
   spawned = false;
@@ -176,12 +172,12 @@ void Mob::teleportToAll()
   {
     return;
   }
-  for (size_t i = 0; i < Mineserver::get()->users().size(); i++)
+
+  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    User* user = Mineserver::get()->users()[i];
-    if (user->logged)
+    if ((*it)->logged)
     {
-      user->buffer << PACKET_ENTITY_TELEPORT << (int32_t) UID
+      (*it)->buffer << PACKET_ENTITY_TELEPORT << (int32_t) UID
                    << (int32_t)(x * 32.0) << (int32_t)(y * 32.0) << (int32_t)(z * 32.0)
                    << (int8_t) yaw << (int8_t) pitch;
     }
@@ -230,9 +226,9 @@ void Mob::look(int16_t yaw, int16_t pitch)
   this->yaw = y_byte;
   Packet pkt;
   pkt << PACKET_ENTITY_LOOK << (int32_t) UID << (int8_t) y_byte << (int8_t) p_byte;
-  if (User::all().size() > 0)
+  if (!User::all().empty())
   {
-    User::all()[0]->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+    (*User::all().begin())->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
   }
 }
 

@@ -1,6 +1,6 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
-   All rights reserved.
+    Copyright (c) 2011, The Mineserver Project
+    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -23,12 +23,13 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
 #ifndef _USER_H
 #define _USER_H
 
 #include <vector>
+#include <set>
 
 #ifdef WIN32
 // This is needed for event to work on Windows.
@@ -101,7 +102,7 @@ public:
   Packet buffer;
   Packet loginBuffer; // Used to send all login info at once
 
-  static std::vector<User*>& all();
+  static std::set<User*>& all();
   static bool isUser(int sock);
   static User* byNick(std::string nick);
 

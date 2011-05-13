@@ -29,6 +29,7 @@
 #define _MINESERVER_H
 
 #include <vector>
+#include <set>
 #include <string>
 
 #include "tr1.h"
@@ -95,12 +96,12 @@ public:
 
   event_base* getEventBase();
 
-  inline std::vector<User*>& users()
+  inline std::set<User*>& users()
   {
     return m_users;
   }
 
-  inline const std::vector<User*>& users() const
+  inline const std::set<User*>& users() const
   {
     return m_users;
   }
@@ -214,7 +215,7 @@ private:
   event_base* m_eventBase;
 
   // holds all connected users
-  std::vector<User*>    m_users;
+  std::set<User*>    m_users;
 
   std::vector<Map*>     m_map;
   std::vector<Physics*> m_physics;

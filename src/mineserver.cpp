@@ -465,19 +465,11 @@ void Mineserver::saveAll()
 
 void Mineserver::saveAllPlayers()
 {
-  if (users().empty())
+  for (std::set<User*>::const_iterator it = users().begin(); it != users().end(); ++it)
   {
-    return;
-  }
-  for (int i = int(users().size()) - 1; i >= 0; i--)
-  {
-    if (users()[i]->logged)
-    {
-      users()[i]->saveData();
-    }
+    if ((*it)->logged) (*it)->saveData();
   }
 }
-
 
 bool Mineserver::run()
 {
@@ -696,7 +688,7 @@ bool Mineserver::run()
         // Send server time
         Packet pkt;
         pkt << (int8_t)PACKET_TIME_UPDATE << (int64_t)m_map[0]->mapTime;
-        User::all()[0]->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+        (*User::all().begin())->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
       }
 
       //Check for tree generation from saplings
@@ -715,28 +707,28 @@ bool Mineserver::run()
     if (timeNow - tick > 0)
     {
       tick = (uint32_t)timeNow;
+
       // Loop users
-      for (int i = int(users().size()) - 1; i >= 0; i--)
+      for (std::set<User*>::const_iterator it = users().begin(); it != users().end(); ++it)
       {
         // No data received in 30s, timeout
-        if (users()[i]->logged && (timeNow - users()[i]->lastData) > 30)
+        if ((*it)->logged && timeNow - (*it)->lastData > 30)
         {
-          LOG2(INFO, "Player " + users()[i]->nick + " timed out");
-
-          delete users()[i];
+          LOG2(INFO, "Player " + (*it)->nick + " timed out");
+          delete *it;
         }
-        else if (!users()[i]->logged && (timeNow - users()[i]->lastData) > 100)
+        else if (!(*it)->logged && timeNow - (*it)->lastData > 100)
         {
-          delete users()[i];
+          delete (*it);
         }
         else
         {
           if (m_damage_enabled)
           {
-            users()[i]->checkEnvironmentDamage();
+            (*it)->checkEnvironmentDamage();
           }
-          users()[i]->pushMap();
-          users()[i]->popMap();
+          (*it)->pushMap();
+          (*it)->popMap();
         }
 
       }
@@ -750,11 +742,10 @@ bool Mineserver::run()
         }
       }
 
-
-      for (int i = int(users().size()) - 1; i >= 0; i--)
+      for (std::set<User*>::const_iterator it = users().begin(); it != users().end(); ++it)
       {
-        users()[i]->pushMap();
-        users()[i]->popMap();
+        (*it)->pushMap();
+        (*it)->popMap();
       }
 
       // Check for Furnace activity
@@ -767,12 +758,13 @@ bool Mineserver::run()
     // Underwater check / drowning
     // ToDo: this could be done a bit differently? - Fador
     // -- User::all() == users() - louisdx
-    for (size_t i = 0; i < users().size(); ++i)
+
+    for (std::set<User*>::const_iterator it = users().begin(); it != users().end(); ++it)
     {
-      users()[i]->isUnderwater();
-      if (users()[i]->pos.y < 0)
+      (*it)->isUnderwater();
+      if ((*it)->pos.y < 0)
       {
-        users()[i]->sethealth(users()[i]->health - 5);
+        (*it)->sethealth((*it)->health - 5);
       }
     }
   }

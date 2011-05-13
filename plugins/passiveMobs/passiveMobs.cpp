@@ -201,8 +201,7 @@ void timer200Function()
     int nearest = 10000;
     for (int j = 0; j < mineserver->user.getCount(); j++)
     {
-      char *name;
-      name = mineserver->user.getUserNumbered(j);
+      const char * const name = mineserver->user.getUserNumbered(j);
       double px,py,pz;
       int pmap;
       mineserver->user.getPositionW(name, &px,&py,&pz,&pmap,NULL,NULL,NULL);
