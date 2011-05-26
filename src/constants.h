@@ -153,18 +153,6 @@ enum
   INSTRUMENT_BASS = 1, INSTRUMENT_SNARE, INSTRUMENT_STICK, INSTRUMENT_BASSDRUM, INSTRUMENT_HARP
 };
 
-const std::string VERSION = "0.1.15 (Alpha)";
-
-const int PROTOCOL_VERSION = 11;
-
-const char COMMENTPREFIX  = '#';
-
-// Configuration
-const std::string CONFIG_FILE = "config.cfg";
-
-// PID file
-const std::string PID_FILE = "mineserver.pid";
-
 //
 // Drops from blocks
 //
@@ -188,20 +176,35 @@ struct Drop
   }
 };
 
+void initConstants();
+
 extern std::map<uint8_t, DropPtr> BLOCKDROPS;
 
 // Chat prefixes
-const char SERVERMSGPREFIX = '%';
-const char CHATCMDPREFIX   = '/';
-const char ADMINCHATPREFIX = '&';
+enum
+{
+  SERVERMSGPREFIX = '%',
+  CHATCMDPREFIX   = '/',
+  ADMINCHATPREFIX = '&'
+};
 
-const unsigned int SERVER_CONSOLE_UID = -1;
+extern const unsigned int SERVER_CONSOLE_UID;
 
-void initConstants();
+extern const std::string VERSION;
+
+extern const int PROTOCOL_VERSION;
+
+extern const char COMMENTPREFIX;
+
+// Configuration
+extern const std::string CONFIG_FILE;
+
+// PID file
+extern const std::string PID_FILE;
 
 //allocate 1 MB for chunk files
-const int ALLOCATE_NBTFILE = 1048576;
+extern const int ALLOCATE_NBTFILE;
 
-const int kMaxChatMessageLength = 119;
+extern const int kMaxChatMessageLength;
 
 #endif

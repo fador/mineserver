@@ -31,6 +31,25 @@
 
 std::map<uint8_t, DropPtr> BLOCKDROPS;
 
+const unsigned int SERVER_CONSOLE_UID = -1;
+
+const std::string VERSION = "0.1.15 (Alpha)";
+
+const int PROTOCOL_VERSION = 13;
+
+const char COMMENTPREFIX  = '#';
+
+// Configuration
+const std::string CONFIG_FILE = "config.cfg";
+
+// PID file
+const std::string PID_FILE = "mineserver.pid";
+
+//allocate 1 MB for chunk files
+const int ALLOCATE_NBTFILE = 1048576;
+
+const int kMaxChatMessageLength = 119;
+
 void initConstants()
 {
   // Block drops (10000 = 100%)
