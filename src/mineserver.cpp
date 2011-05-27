@@ -63,6 +63,7 @@
 #include "logger.h"
 #include "sockets.h"
 #include "tools.h"
+#include "random.h"
 #include "map.h"
 #include "user.h"
 #include "chat.h"
@@ -153,6 +154,7 @@ int main(int argc, char* argv[])
 #endif
 
   std::srand((uint32_t)std::time(NULL));
+  initPRNG();
 
   std::string cfg;
   std::vector<std::string> overrides;

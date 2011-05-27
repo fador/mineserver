@@ -79,6 +79,7 @@ set(mineserver_source
   src/plugin.cpp
   src/nbt.cpp
   src/user.cpp
+  src/random.cpp
   src/config/lexer.cpp
   src/config/scanner.cpp
   src/config/parser.cpp

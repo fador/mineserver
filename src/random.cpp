@@ -25,67 +25,32 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef _TOOLS_H
-#define _TOOLS_H
+#include <fstream>
+#include <iostream>
+#include <limits>
+#include <ctime>
 
-#include <stdint.h>
-#include <cstdlib>
-#include <string>
+#include "random.h"
 
-#ifdef WIN32
-#include <winsock2.h>
-#else
-#include <arpa/inet.h>
-#endif
+uint32_t prng_seed = 0;
 
-void putSint64(uint8_t* buf, int64_t value);
-void putSint32(uint8_t* buf, int32_t value);
-void putSint16(uint8_t* buf, short value);
-void putDouble(uint8_t* buf, double value);
-void putFloat(uint8_t* buf, float value);
+MyRNG prng;
 
-int64_t getSint64(uint8_t* buf);
-double getDouble(uint8_t* buf);
-float  getFloat(uint8_t* buf);
-int32_t getSint32(uint8_t* buf);
-int32_t getSint16(uint8_t* buf);
+std::tr1::uniform_int<uint32_t> m_uniformUINT32(0, std::numeric_limits<uint32_t>::max());
 
-void my_itoa(int value, std::string& buf, int base);
-std::string base36_encode(int value);
-std::string strToLower(std::string temp);
-
-std::string dtos(double n);
-std::string hash(std::string value);
-
-#ifdef WIN32
-#define PATH_SEPARATOR  '\\'
-#else
-#define PATH_SEPARATOR  '/'
-#endif
-
-std::string pathExpandUser(const std::string& path);
-
-inline uint64_t ntohll(uint64_t v)
+void initPRNG()
 {
-  return (uint64_t)ntohl(v & 0x00000000ffffffff) << 32 | (uint64_t)ntohl((v >> 32) & 0x00000000ffffffff);
+  std::ifstream urandom("/dev/urandom");
+  if (urandom)
+  {
+    urandom.read(reinterpret_cast<char*>(&prng_seed), sizeof(prng_seed));
+  }
+  else
+  {
+    prng_seed = std::time(NULL);
+  }
+
+  //std::cout << "Seeding the PRNG with: 0x" << std::hex << std::uppercase << std::setfill('0') << std::setw(8) << prng_seed << std::endl;
+
+  prng.seed(prng_seed);
 }
-
-//Converts block-coordinates to chunk coordinate
-inline int32_t blockToChunk(int32_t value)
-{
-  return value >> 4; //(value < 0) ? (((value+1)/16)-1) : (value/16);
-}
-
-//Converts absolute block-coordinates to chunk-block-coordinates
-inline int32_t blockToChunkBlock(int32_t value)
-{
-  return value & 15; //(value < 0) ? (15+((value+1)%16)) : (value%16);
-}
-
-inline int8_t angleToByte(float angle)
-{
-  return (int8_t)((angle / 360.f) * 256);
-}
-
-
-#endif

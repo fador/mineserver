@@ -25,67 +25,60 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef _TOOLS_H
-#define _TOOLS_H
+#ifndef _RANDOM_H
+#define _RANDOM_H
+
 
 #include <stdint.h>
-#include <cstdlib>
-#include <string>
 
-#ifdef WIN32
-#include <winsock2.h>
-#else
-#include <arpa/inet.h>
-#endif
+#include "tr1.h"
+#include TR1INCLUDE(random)
 
-void putSint64(uint8_t* buf, int64_t value);
-void putSint32(uint8_t* buf, int32_t value);
-void putSint16(uint8_t* buf, short value);
-void putDouble(uint8_t* buf, double value);
-void putFloat(uint8_t* buf, float value);
+typedef std::tr1::mt19937 MyRNG;
 
-int64_t getSint64(uint8_t* buf);
-double getDouble(uint8_t* buf);
-float  getFloat(uint8_t* buf);
-int32_t getSint32(uint8_t* buf);
-int32_t getSint16(uint8_t* buf);
 
-void my_itoa(int value, std::string& buf, int base);
-std::string base36_encode(int value);
-std::string strToLower(std::string temp);
+/// Global objects: The PRNG, its seed value, and a 32-bit uniform distribution.
+/// Other distribution objects are instantiated locally as needed.
 
-std::string dtos(double n);
-std::string hash(std::string value);
+extern MyRNG prng;
+extern uint32_t prng_seed;
+extern std::tr1::uniform_int<uint32_t> m_uniformUINT32;
 
-#ifdef WIN32
-#define PATH_SEPARATOR  '\\'
-#else
-#define PATH_SEPARATOR  '/'
-#endif
 
-std::string pathExpandUser(const std::string& path);
+/// A function to initialize the PRNG.
 
-inline uint64_t ntohll(uint64_t v)
+void initPRNG();
+
+
+/// Some global accessor functions for useful distributions.
+
+inline uint32_t uniformUINT32()
 {
-  return (uint64_t)ntohl(v & 0x00000000ffffffff) << 32 | (uint64_t)ntohl((v >> 32) & 0x00000000ffffffff);
+  return m_uniformUINT32(prng);
 }
 
-//Converts block-coordinates to chunk coordinate
-inline int32_t blockToChunk(int32_t value)
+inline uint32_t uniformUINT32(uint32_t min, uint32_t max)
 {
-  return value >> 4; //(value < 0) ? (((value+1)/16)-1) : (value/16);
+  std::tr1::uniform_int<uint32_t> uni(min, max);
+  return uni(prng);
 }
 
-//Converts absolute block-coordinates to chunk-block-coordinates
-inline int32_t blockToChunkBlock(int32_t value)
+inline uint8_t uniformUINT8(uint8_t min, uint8_t max)
 {
-  return value & 15; //(value < 0) ? (15+((value+1)%16)) : (value%16);
+  std::tr1::uniform_int<uint8_t> uni(min, max);
+  return uni(prng);
 }
 
-inline int8_t angleToByte(float angle)
+inline double uniform01()
 {
-  return (int8_t)((angle / 360.f) * 256);
+  std::tr1::uniform_real<double> uni(0, 1);
+  return uni(prng);
 }
 
+#define MAKE_UNIFORM_DIST(A,B) static inline unsigned int uniform_ ## A ## _ ## B()\
+{\
+  std::tr1::uniform_int<unsigned int> uni(A, B);\
+  return uni(prng);\
+}\
 
 #endif

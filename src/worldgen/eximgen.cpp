@@ -53,6 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../nbt.h"
 #include "../tree.h"
 #include "../tools.h"
+#include "../random.h"
 
 EximGen::EximGen()
   : blocks(16 * 16 * 128, 0),
@@ -255,12 +256,12 @@ void EximGen::AddTrees(int x, int z, int map)
 
   memset(empty, 1, 256);
 
-  uint8_t trees = BetterRand() * 7 + 13;
+  uint8_t trees = uniform01() * 7 + 13;
   uint8_t i = 0;
   while (i < trees)
   {
-    uint8_t a = BetterRand() * 16;
-    uint8_t b = BetterRand() * 16;
+    uint8_t a = uniform01() * 16;
+    uint8_t b = uniform01() * 16;
 
     if (empty[a][b])
     {
@@ -332,7 +333,7 @@ void EximGen::generateWithNoise(int x, int z, int map)
     {
       heightmap[(bZ<<4)+bX]  = ymax = currentHeight = (int32_t)(finalTerrain.GetValue(xBlockpos + bX, 0, zBlockpos + bZ));
 
-      uint8_t stoneHeight = currentHeight - (BetterRand() * 3);
+      uint8_t stoneHeight = currentHeight - (uniform01() * 3);
       int32_t bYbX = ((bZ << 7) + (bX << 11));
 
       if (currentHeight < seaLevel)
@@ -373,7 +374,7 @@ void EximGen::generateWithNoise(int x, int z, int map)
           {
             if (bY > 70)
             {
-              if (BetterRand() > 0.999)
+              if (uniform01() > 0.999)
               {
                 *curBlock = BLOCK_STATIONARY_WATER; // mountain water spring
                 if (bYbX & 1)
@@ -519,49 +520,49 @@ void EximGen::AddOre(int x, int z, int map, uint8_t type)
   switch (type)
   {
   case BLOCK_COAL_ORE:
-    count = BetterRand() * 10 + 20; // 20-30 coal deposits
+    count = uniform01() * 10 + 20; // 20-30 coal deposits
     //startHeight = 90;
     minDepoSize = 3;
     maxDepoSize = 7;
     break;
   case BLOCK_IRON_ORE:
-    count = BetterRand() * 8 + 10; // 10-18 iron deposits
+    count = uniform01() * 8 + 10; // 10-18 iron deposits
     startHeight = 90;
     minDepoSize = 2;
     maxDepoSize = 5;
     break;
   case BLOCK_GOLD_ORE:
-    count = BetterRand() * 4 + 5; // 4-9 gold deposits
+    count = uniform01() * 4 + 5; // 4-9 gold deposits
     startHeight = 42;
     minDepoSize = 2;
     maxDepoSize = 4;
     break;
   case BLOCK_DIAMOND_ORE:
-    count = BetterRand() * 1 + 2; // 1-3 diamond deposits
+    count = uniform01() * 1 + 2; // 1-3 diamond deposits
     startHeight = 17;
     minDepoSize = 1;
     maxDepoSize = 2;
     break;
   case BLOCK_REDSTONE_ORE:
-    count = BetterRand() * 5 + 5; // 5-10 redstone deposits
+    count = uniform01() * 5 + 5; // 5-10 redstone deposits
     startHeight = 25;
     minDepoSize = 2;
     maxDepoSize = 4;
     break;
   case BLOCK_LAPIS_ORE:
-    count = BetterRand() * 1 + 2; // 1-3 lapis lazuli deposits
+    count = uniform01() * 1 + 2; // 1-3 lapis lazuli deposits
     startHeight = 17;
     minDepoSize = 1;
     maxDepoSize = 2;
     break;
   case BLOCK_GRAVEL:
-    count = BetterRand() * 10 + 20; // 20-30 gravel deposits
+    count = uniform01() * 10 + 20; // 20-30 gravel deposits
     //startHeight = 90;
     minDepoSize = 6;
     maxDepoSize = 10;
     break;
   case BLOCK_DIRT:
-    count = BetterRand() * 10 + 20; // 20-30 gravel deposits
+    count = uniform01() * 10 + 20; // 20-30 gravel deposits
     //startHeight = 90;
     minDepoSize = 6;
     maxDepoSize = 10;
@@ -573,11 +574,11 @@ void EximGen::AddOre(int x, int z, int map, uint8_t type)
   int i = 0;
   while (i < count)
   {
-    blockX = BetterRand() * 16;
-    blockZ = BetterRand() * 16;
+    blockX = uniform01() * 16;
+    blockZ = uniform01() * 16;
 
     blockY = heightmap[(blockZ<<4)+blockX];
-    blockY -= BetterRand() * 5;
+    blockY -= uniform01() * 5;
 
     // Check that startheight is not higher than height at that column
     if (blockY > startHeight)
@@ -586,7 +587,7 @@ void EximGen::AddOre(int x, int z, int map, uint8_t type)
     }
 
     // Calculate Y
-    blockY = BetterRand() * (blockY);
+    blockY = uniform01() * (blockY);
 
     i++;
 
@@ -604,7 +605,7 @@ void EximGen::AddOre(int x, int z, int map, uint8_t type)
 
 void EximGen::AddDeposit(int x, int y, int z, int map, uint8_t block, uint8_t minDepoSize, uint8_t maxDepoSize, sChunk* chunk)
 {
-  uint8_t depoSize = (BetterRand() * (maxDepoSize - minDepoSize) + minDepoSize) / 2;
+  uint8_t depoSize = (uniform01() * (maxDepoSize - minDepoSize) + minDepoSize) / 2;
   int32_t t_posx, t_posy, t_posz;
   for (int8_t xi = (-depoSize); xi <= depoSize; xi++)
   {

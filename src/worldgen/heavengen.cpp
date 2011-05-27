@@ -56,6 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../tree.h"
 
 #include "../tools.h"
+#include "../random.h"
 
 int heaven_seed;
 
@@ -400,7 +401,7 @@ void HeavenGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int depo
     {
       for (int bZ = z; bZ < z + depotSize; bZ++)
       {
-        if (BetterRand() < 0.5)
+        if (uniform01() < 0.5)
         {
           Mineserver::get()->map(map)->sendBlockChange(bX, bY, bZ, block, 0);
           Mineserver::get()->map(map)->setBlock(bX, bY, bZ, block, 0);

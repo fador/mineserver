@@ -30,12 +30,13 @@
 #include "mineserver.h"
 
 #include "tools.h"
+#include "random.h"
 
 
 void Tree::generate(uint8_t limit)
 {
 
-  const uint8_t m_trunkHeight = getBetterRandInt(MIN_TRUNK, limit);
+  const uint8_t m_trunkHeight = uniformUINT8(MIN_TRUNK, limit);
 
   bool smalltree = false;
   uint8_t type = 0;
@@ -45,10 +46,10 @@ void Tree::generate(uint8_t limit)
     smalltree = true;
   }
 
-  if (BetterRand() > 0.5) // 1/2 chance
+  if (uniform01() > 0.5) // 1/2 chance
   {
     ++type;
-    if (BetterRand() > 0.5) // 1/4
+    if (uniform01() > 0.5) // 1/4
     {
       ++type;
     }
@@ -89,9 +90,9 @@ void Tree::generateBranches(TrunkPtr wrap)
 
   uint32_t schanse = BRANCHING_CHANCE;
 
-  if (BetterRand() > 1.0 - (1.0 / BRANCHING_CHANCE))
+  if (uniform01() > 1.0 - (1.0 / BRANCHING_CHANCE))
   {
-    float r = BetterRand();
+    const double r = uniform01();
     if (r < 0.2)
     {
       x--;
@@ -128,10 +129,10 @@ void Tree::generateCanopy()
 
   int32_t t_posx, t_posy, t_posz;
 
-  if (BetterRand() > 0.5) // 1/2
+  if (uniform01() > 0.5) // 1/2
   {
     canopy_type++;
-    if (BetterRand() > 0.5) // 1/4
+    if (uniform01() > 0.5) // 1/4
     {
       canopy_type++;
     }

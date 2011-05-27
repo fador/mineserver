@@ -53,6 +53,7 @@
 #include "../nbt.h"
 #include "../tree.h"
 #include "../tools.h"
+#include "../random.h"
 
 BiomeGen::BiomeGen()
   : blocks(16 * 16 * 128, 0),
@@ -63,18 +64,8 @@ BiomeGen::BiomeGen()
 {
 }
 
-int biome_seed;
-
-static inline int fastrand()
-{
-  biome_seed = (214013 * biome_seed + 2531011);
-  return (biome_seed >> 16) & 0x7FFF;
-}
-
 void BiomeGen::init(int seed)
 {
-  biome_seed = seed;
-
   cave.init(seed + 7);
   //###### TREE GEN #####
   treenoise.SetSeed(seed + 404);
@@ -286,12 +277,12 @@ void BiomeGen::AddTrees(int x, int z, int map)
 
   memset(empty, 1, 256);
 
-  uint8_t trees = BetterRand() * 7 + 13;
+  uint8_t trees = uniform01() * 7 + 13;
   uint8_t i = 0;
   while (i < trees)
   {
-    uint8_t a = BetterRand() * 16;
-    uint8_t b = BetterRand() * 16;
+    uint8_t a = uniform01() * 16;
+    uint8_t b = uniform01() * 16;
 
     if (empty[a][b])
     {
@@ -577,6 +568,17 @@ void BiomeGen::generateWithNoise(int x, int z, int map)
 #endif
 }
 
+
+MAKE_UNIFORM_DIST(10, 30)
+MAKE_UNIFORM_DIST(20, 30)
+MAKE_UNIFORM_DIST( 1,  3)
+MAKE_UNIFORM_DIST(10, 18)
+MAKE_UNIFORM_DIST( 4,  9)
+MAKE_UNIFORM_DIST( 5, 10)
+MAKE_UNIFORM_DIST( 8, 12)
+MAKE_UNIFORM_DIST( 0,  1)
+
+
 void BiomeGen::AddOre(int x, int z, int map, uint8_t type)
 {
   sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
@@ -585,48 +587,49 @@ void BiomeGen::AddOre(int x, int z, int map, uint8_t type)
   uint8_t block;
 
   // Parameters for deposits
-  int count, startHeight, minDepoSize, maxDepoSize;
+  int startHeight, minDepoSize, maxDepoSize;
+  unsigned int count;
 
   switch (type)
   {
   case BLOCK_COAL_ORE:
-    count = fastrand() % 10 + 20; // 20-30 coal deposits
+    count = uniform_20_30(); // 20-30 coal deposits
     startHeight = 90;
     minDepoSize = 8;
     maxDepoSize = 20;
     break;
   case BLOCK_IRON_ORE:
-    count = fastrand() % 8 + 10; // 10-18 iron deposits
+    count = uniform_10_18(); // 10-18 iron deposits
     startHeight = 60;
     minDepoSize = 5;
     maxDepoSize = 10;
     break;
   case BLOCK_GOLD_ORE:
-    count = fastrand() % 4 + 5; // 4-9 gold deposits
+    count = uniform_4_9(); // 4-9 gold deposits
     startHeight = 32;
     minDepoSize = 5;
     maxDepoSize = 8;
     break;
   case BLOCK_DIAMOND_ORE:
-    count = fastrand() % 1 + 2; // 1-3 diamond deposits
+    count = uniform_1_3(); // 1-3 diamond deposits
     startHeight = 17;
     minDepoSize = 4;
     maxDepoSize = 7;
     break;
   case BLOCK_REDSTONE_ORE:
-    count = fastrand() % 5 + 5; // 5-10 redstone deposits
+    count = uniform_5_10(); // 5-10 redstone deposits
     startHeight = 25;
     minDepoSize = 5;
     maxDepoSize = 20;
     break;
   case BLOCK_LAPIS_ORE:
-    count = fastrand() % 1 + 2; // 1-3 lapis lazuli deposits
+    count = uniform_1_3(); // 1-3 lapis lazuli deposits
     startHeight = 17;
     minDepoSize = 5;
     maxDepoSize = 20;
     break;
   case BLOCK_GRAVEL:
-    count = fastrand() % 10 + 20; // 20-30 gravel deposits
+    count = uniform_10_30(); // 10-30 gravel deposits
     startHeight = 90;
     minDepoSize = 5;
     maxDepoSize = 50;
@@ -635,11 +638,10 @@ void BiomeGen::AddOre(int x, int z, int map, uint8_t type)
     return;
   }
 
-  int i = 0;
-  while (i < count)
+  for (unsigned int i = 0; i < count; ++i)
   {
-    blockX = fastrand() % 8 + 4;
-    blockZ = fastrand() % 8 + 4;
+    blockX = uniform_8_12();
+    blockZ = uniform_8_12();
 
     blockY = heightmap[(blockZ << 4) + blockX];
     blockY -= 5;
@@ -654,11 +656,10 @@ void BiomeGen::AddOre(int x, int z, int map, uint8_t type)
     //blockZ += zBlockpos;
 
     // Calculate Y
-    blockY = fastrand() % blockY;
-
-    i++;
+    blockY = uniformUINT32(0, blockY);
 
     block = chunk->blocks[blockY + ((blockZ << 7) + (blockX << 11))];
+
     // No ore in caves
     if (block == BLOCK_AIR)
     {
@@ -666,13 +667,13 @@ void BiomeGen::AddOre(int x, int z, int map, uint8_t type)
     }
 
     AddDeposit(blockX, blockY, blockZ, map, type, minDepoSize, maxDepoSize, chunk);
-
   }
 }
 
 void BiomeGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int minDepoSize, int maxDepoSize, sChunk* chunk)
 {
-  int depoSize = fastrand() % (maxDepoSize - minDepoSize) + minDepoSize;
+  int depoSize = uniformUINT32(maxDepoSize - minDepoSize, maxDepoSize);
+
   for (int i = 0; i < depoSize; i++)
   {
     if (chunk->blocks[y + ((z << 7) + (x << 11))] == BLOCK_STONE)
@@ -680,9 +681,9 @@ void BiomeGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int minDe
       chunk->blocks[y + ((z << 7) + (x << 11))] = block;
     }
 
-    z = z + ((fastrand() % 2) - 1);
-    x = x + ((fastrand() % 2) - 1);
-    y = y + ((fastrand() % 2) - 1);
+    z = z + int(uniform_0_1()) - 1;
+    x = x + int(uniform_0_1()) - 1;
+    y = y + int(uniform_0_1()) - 1;
 
     // If over chunk borders
     if (z < 0 || z > 15 || x < 0 || x > 15 || y < 1)
