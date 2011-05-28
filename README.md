@@ -8,7 +8,7 @@ Also mail to developers@mineserver.be will reach us.
 
 Custom Minecraft Beta server software written in C++.
 
-### == NOTICE ==
+### NOTICE
 Currently in development.
 Server still lacks some features and might have some serious bugs.
 
@@ -21,7 +21,11 @@ Server still lacks some features and might have some serious bugs.
 
 We are trying to minimize memory and CPU usage compared to original Java server.
 
+*Important:* The language is C++98 with STL/TR1 library support, so you will need a reasonably modern
+C++ compiler. MS Visual C++ 10 and GCC 4.4 should be sufficient. The build system requires [http://www.cmake.org/](cmake).
+
 ### Features
+
  * Plugins (chatcommands, filelog, nether, passivemobs, etc..)
  * NBT parsing/saving
  * Lightmap generation
@@ -32,16 +36,22 @@ We are trying to minimize memory and CPU usage compared to original Java server.
  * Flatland and terrain map generation (Also biomegen!)
  * Working chests, furnaces & signs
 
-### Bugtracker is located at [http://redmine.fknsrs.biz/projects/mineserver](http://redmine.fknsrs.biz/projects/mineserver)
+### Bug tracker
 
-### ToDo/Roadmap can be found at [wiki](http://www.mineserver.be/wiki)
+Here is the [bug tracker](http://redmine.fknsrs.biz/projects/mineserver).
+
+### To Do / Roadmap
+
+Please check the [Mineserver wiki]((http://www.mineserver.be/wiki) for details about the project status and development plans.
+Check the [fork network](https://github.com/fador/mineserver/network) for the latest development status.
 
 ### Compiling (Better instructions in [wiki](http://www.mineserver.be/wiki))
-Depends on (and tested with):
 
- [zlib 1.2.5](http://www.zlib.org)
- [libevent 1.4.14b](http://monkey.org/~provos/libevent/)
- [libnoise 1.0](http://libnoise.sourceforge.net/)
+Mineserver requires the following libraries:
+
+ * [zlib 1.2.5](http://www.zlib.org)
+ * [libevent 1.4.14b](http://monkey.org/~provos/libevent/)
+ * [libnoise 1.0](http://libnoise.sourceforge.net/)
 
  * Installing on Debian and Ubuntu: (For Ubuntu libevent1 -> libevent-1.4-2)
 
