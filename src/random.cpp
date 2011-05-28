@@ -54,3 +54,8 @@ void initPRNG()
 
   prng.seed(prng_seed);
 }
+
+double uniform01()
+{
+  return double(m_uniformUINT32(prng)) / double(std::numeric_limits<uint32_t>::max());
+}

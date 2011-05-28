@@ -69,11 +69,7 @@ inline uint8_t uniformUINT8(uint8_t min, uint8_t max)
   return uni(prng);
 }
 
-inline double uniform01()
-{
-  std::tr1::uniform_real<double> uni(0, 1);
-  return uni(prng);
-}
+double uniform01();
 
 #define MAKE_UNIFORM_DIST(A,B) static inline unsigned int uniform_ ## A ## _ ## B()\
 {\
