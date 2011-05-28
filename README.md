@@ -22,7 +22,7 @@ Server still lacks some features and might have some serious bugs.
 We are trying to minimize memory and CPU usage compared to original Java server.
 
 *Important:* The language is C++98 with STL/TR1 library support, so you will need a reasonably modern
-C++ compiler. MS Visual C++ 10 and GCC 4.4 should be sufficient. The build system requires [http://www.cmake.org/](cmake).
+C++ compiler. MS Visual C++ 10 and GCC 4.4 should be sufficient. The build system requires [cmake](http://www.cmake.org/).
 
 ### Features
 
