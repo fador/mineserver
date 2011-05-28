@@ -1238,7 +1238,10 @@ void User::checkEnvironmentDamage()
     return;
   }
 
-  uint8_t type, meta;
+  /// louisdx: This makes no sense at the moment; type is not initialized!
+  //uint8_t type, meta;
+  uint8_t type = 0, meta = 0;
+ 
   int16_t d = 0;
 
   if (type == BLOCK_CACTUS && LOADBLOCK(pos.x, yVal, pos.z))

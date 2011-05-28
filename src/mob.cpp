@@ -37,8 +37,8 @@ Mob::Mob()
   map(0),
   yaw(0),
   pitch(0),
-  meta(0)
-  // louidx: We MUST initialize spawned
+  meta(0),
+  spawned(false)
 {
 }
 
