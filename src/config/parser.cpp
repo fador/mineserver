@@ -50,6 +50,7 @@ bool ConfigParser::parse(const std::string& file, ConfigNode::Ptr ptr)
 {
   std::ifstream ifs(file.c_str(), std::ios_base::binary);
 
+  std::cout << "Parser opening file " << file << std::endl;
   if (!ifs)
   {
     std::cerr << "Couldn't open file: " << file << "\n";

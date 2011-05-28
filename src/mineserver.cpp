@@ -206,6 +206,7 @@ int main(int argc, char* argv[])
   }
 
   // load config
+  std::cout << "Trying to load config file " << cfg << ". DEFAULT_HOME = " << DEFAULT_HOME << std::endl;
   Config & config = *Mineserver::get()->config();
   if (!config.load(cfg))
   {
@@ -790,6 +791,8 @@ bool Mineserver::stop()
   return true;
 }
 
+// This entire function should be removed and handled by the build/install process;
+// it's missing plugin and recipe file handling as it is.
 bool Mineserver::homePrepare(const std::string& path)
 {
   struct stat st;
@@ -824,7 +827,7 @@ bool Mineserver::homePrepare(const std::string& path)
   for (size_t i = 0; i < sizeof(files) / sizeof(files[0]); i++)
   {
     // TODO: winex: hardcoded path won't work on installation
-    const std::string namein  = std::string("../files") + '/' + files[i];
+    const std::string namein  = std::string("./files") + '/' + files[i];
     const std::string nameout = path + '/' + files[i];
 
     // don't overwrite existing files
