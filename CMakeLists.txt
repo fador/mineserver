@@ -147,6 +147,8 @@ set(mineserver_configs
   files/whitelist.txt
 )
 
+file(GLOB_RECURSE mineserver_recipes RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} files/recipes/*)
+
 set(mineserver_dirs
   files/recipes
 )
@@ -227,9 +229,8 @@ foreach(lib ${${TARGET}_depends})
 endforeach()
 
 # copy configs for local usage
-foreach(path ${mineserver_configs})
-  # make full path w/o "files/"
-  string(REGEX REPLACE "^files/" "${EXECUTABLE_OUTPUT_PATH}/" dest "${path}")
+foreach(path ${mineserver_configs} ${mineserver_recipes})
+  set(dest "${EXECUTABLE_OUTPUT_PATH}/${path}")
   if(NOT EXISTS ${dest})
     message(STATUS "Configuring: ${dest}")
     configure_file(${path} ${dest} COPYONLY)

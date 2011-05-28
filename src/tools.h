@@ -65,6 +65,13 @@ std::string hash(std::string value);
 
 std::string pathExpandUser(const std::string& path);
 
+bool fileExists(const std::string& filename);
+std::string canonicalizePath(const std::string& pathname);
+std::string getHomeDir();
+std::string pathOfExecutable();
+std::pair<std::string, std::string> pathOfFile(const std::string& filename);
+std::string relativeToAbsolute(std::string pathname);
+
 inline uint64_t ntohll(uint64_t v)
 {
   return (uint64_t)ntohl(v & 0x00000000ffffffff) << 32 | (uint64_t)ntohl((v >> 32) & 0x00000000ffffffff);

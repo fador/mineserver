@@ -32,22 +32,29 @@
 #include <pwd.h>
 #endif
 
-#include <cstdlib>
+#ifdef linux
+#include <unistd.h>
+#include <libgen.h>
+#include <wordexp.h>
+#include <climits>
+#endif
+
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <vector>
 #include <string>
+#include <cstdlib>
 #include <cstring>
 #include <cstdio>
 #include <ctime>
 #include <cmath>
-#include <string>
 #include <cctype>
 
 #include "tools.h"
-// zomg
 #include "logger.h"
 #include "mineserver.h"
+#include "config.h"
 
 void putSint64(uint8_t* buf, int64_t value)
 {
@@ -190,58 +197,147 @@ std::string hash(std::string value)
   return hashString.str();
 }
 
-std::string pathExpandUser(const std::string& path)
+bool fileExists(const std::string& filename)
 {
-  std::string out;
-  std::string user;
-  size_t pos;
+  std::ifstream i(filename.c_str());
+  return i;
+}
 
-  // The behaviour of this function used to be undefined when path == "".
-  // Please examine it and ensure it behaves as intended in that case.
+std::string canonicalizePath(const std::string& pathname)
+{
+  // We assume that pathname is already a path name, with no file component!
 
-  if (path.empty() || path[0] != '~')
-  {
-    return path;
-  }
+#if defined(linux)
 
-  // current config system supports only unix-style paths
+  wordexp_t exp_result;
 
-  pos = path.find('/');
+  wordexp(pathname.c_str(), &exp_result, 0);
 
-  if (pos == std::string::npos)
-  {
-    pos = path.length();
-  }
+  char * d = strdup(exp_result.we_wordv[0]);
 
-  user = path.substr(1, pos - 1); // OK, we checked that path is non-empty.
+  wordfree(&exp_result);
 
-  if (!user.empty())
-  {
-#ifdef WIN32
-    LOG2(ERROR, "~user notation is not implemented for this platform :P");
-    return path;
+  char * rp = new char[PATH_MAX];
+  std::memset(rp, 0, PATH_MAX);
+  realpath(d, rp);
+
+  std::string res(rp);
+
+  free(d);
+  delete rp;
+
+  return res;
+
+#elif defined(WIN32)
+
+  return pathname;
+
 #else
-    struct passwd* entry = getpwnam(user.c_str());
-    if (!entry)
-    {
-      LOG2(ERROR, user + ": no such user!");
-      return path;
-    }
 
-    out += entry->pw_dir;
+  return pathname;
+
 #endif
+
+}
+
+std::string relativeToAbsolute(std::string pathname)
+{
+  /// This is a very crude way to check if the path is relative.
+  /// We must replace this by a more portable "pathIsRelative()" check.
+  if (!pathname.empty() && pathname[0] != PATH_SEPARATOR)
+    pathname = Mineserver::get()->config()->config_path + PATH_SEPARATOR + pathname;
+
+  pathname = canonicalizePath(pathname);
+
+  return pathname;
+}
+
+std::string getHomeDir()
+{
+
+#if defined(linux)
+
+  return canonicalizePath("~/.mineserver");
+
+#elif defined(WIN32)
+
+  return "%APPDATA%\Mineserver";
+
+#else
+
+  return "[ERROR: getHomeDir() not implemented]";
+
+#endif
+
+}
+
+std::string pathOfExecutable()
+{
+  const size_t dest_len = 4096;
+  char path[dest_len];
+  std::memset(path, 0, dest_len);
+
+#if defined(linux)
+
+  if (readlink ("/proc/self/exe", path, dest_len) != -1)
+  {
+    dirname(path);
   }
+
+  return std::string(path);
+
+#elif defined(WIN32)
+
+  if (0 == GetModuleFileName(NULL, path, dest_len))
+  {
+    return "";
+  }
+
+  return pathOfFile(path).first;
+
+#else
+
+  return "";
+
+#endif
+
+}
+
+std::pair<std::string, std::string> pathOfFile(const std::string& filename)
+{
+
+#if defined(linux)
+
+  char * a = strdup(filename.c_str());
+  char * b = strdup(filename.c_str());
+  char * d = dirname(a);
+
+  std::string res_p(d), res_f(basename(b));
+
+  free(a);
+  free(b);
+
+  return std::make_pair(canonicalizePath(res_p), res_f);
+
+#elif defined(WIN32)
+
+  const size_t dest_len = 4096;
+  char path[dest_len], *pPart;
+  std::memset(path, 0, dest_len);
+
+  GetFullPathName(filename.c_str(), dest_len, path, &pPart);
+
+  const size_t diff = pPart - buffer;
+
+  if (diff > 0 && diff != size_t(-1))
+    return std::make_pair(std::string(path, diff - 1), std::string(pPart));
   else
-  {
-#ifdef WIN32
-#define ENV_HOME "APPDATA"
+    return std::make_pair(std::string(path), "");
+
 #else
-#define ENV_HOME "HOME"
+
+  return std::make_pair("[ERROR IN PATH RECONSTRUCTION: Unknown platform, please implement.]", "");
+
 #endif
-    out.assign(getenv(ENV_HOME));
-  }
 
-  out += pos < path.length() ? path.substr(pos) : "/";
-
-  return out;
 }

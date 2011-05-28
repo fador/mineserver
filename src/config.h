@@ -120,6 +120,8 @@ public:
     return m_root->keys();
   }
 
+  std::string config_path;
+
 private:
   std::tr1::shared_ptr<ConfigParser> m_parser;
   ConfigNode::Ptr m_root;

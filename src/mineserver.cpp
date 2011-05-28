@@ -184,29 +184,67 @@ int main(int argc, char* argv[])
     }
   }
 
-  const std::string DEFAULT_HOME = pathExpandUser(std::string("~/.mineserver"));
+  const std::string path_exe = pathOfExecutable();
+  unsigned int search_count = 0;
 
-  // create home and copy files if necessary
-  // TODO: winex: this one needs cfg and overrides to be taken into account!
-  Mineserver::get()->homePrepare(DEFAULT_HOME);
+  std::cout << "Executable is in directory \"" << path_exe << "\".\n"
+            << "Home/App directory is \"" << getHomeDir() << "\".\n"
+            << "Searching for configuration file..." << std::endl;
 
-#ifdef DEBUG
-  // using CONFIG_FILE in current directory is only for development purposes
-  const std::string cfgcwd = std::string("./") + CONFIG_FILE;
-  struct stat st;
-  if ((stat(cfgcwd.c_str(), &st) == 0)) // && S_ISREG(st.st_mode) )
+  if (!cfg.empty())
   {
-    cfg = cfgcwd;
+    std::cout << ++search_count << ". in specified file (\"" << cfg << "\"): ";
+    if (fileExists(cfg))
+    {
+      const std::pair<std::string, std::string> fullpath = pathOfFile(cfg);
+      cfg = fullpath.first + PATH_SEPARATOR + fullpath.second;
+      Mineserver::get()->config()->config_path = fullpath.first;
+      std::cout << "FOUND at \"" << cfg << "\"!\n";
+    }
+    else
+    {
+      std::cout << "not found\n";
+      cfg.clear();
+    }
   }
-#endif
-
   if (cfg.empty())
   {
-    cfg = DEFAULT_HOME + '/' + CONFIG_FILE;
+#ifdef DEBUG
+    std::cout << ++search_count << ". in executable directory: ";
+    if (fileExists(path_exe + PATH_SEPARATOR + CONFIG_FILE))
+    {
+      cfg = path_exe + PATH_SEPARATOR + CONFIG_FILE;
+      Mineserver::get()->config()->config_path = path_exe;
+      std::cout << "FOUND at \"" << cfg << "\"!\n";
+    }
+    else
+    {
+#endif
+      std::cout << "not found\n"
+                << ++search_count << ". in home/app directory: ";
+
+      if (fileExists(getHomeDir() + PATH_SEPARATOR + CONFIG_FILE))
+      {
+        cfg = getHomeDir() + PATH_SEPARATOR + CONFIG_FILE;
+        Mineserver::get()->config()->config_path = getHomeDir();
+        std::cout << "FOUND at \"" << cfg << "\"!\n";
+      }
+      else
+      {
+        std::cout << "not found\n" << "Giving up, no config file!" << std::endl;
+        return 0;
+      }
+#ifdef DEBUG
+    }
+#endif
   }
+  std::cout << "Configuration directory is \"" << Mineserver::get()->config()->config_path << "\"." << std::endl;
+
+
+  // create home and copy files if necessary
+  Mineserver::get()->homePrepare(Mineserver::get()->config()->config_path);
 
   // load config
-  std::cout << "Trying to load config file " << cfg << ". DEFAULT_HOME = " << DEFAULT_HOME << std::endl;
   Config & config = *Mineserver::get()->config();
   if (!config.load(cfg))
   {
@@ -301,10 +339,12 @@ bool Mineserver::init()
       continue;
     }
 
-    const std::string newvalue = pathExpandUser(node->sData());
+    const std::string newvalue = relativeToAbsolute(node->sData());
+
     node->setData(newvalue);
     LOG2(INFO, std::string(vars[i]) + " = \"" + newvalue + "\"");
   }
+
   if (error)
   {
     return false;
@@ -826,9 +866,8 @@ bool Mineserver::homePrepare(const std::string& path)
   };
   for (size_t i = 0; i < sizeof(files) / sizeof(files[0]); i++)
   {
-    // TODO: winex: hardcoded path won't work on installation
-    const std::string namein  = std::string("./files") + '/' + files[i];
-    const std::string nameout = path + '/' + files[i];
+    const std::string namein  = pathOfExecutable() + PATH_SEPARATOR + "files" + PATH_SEPARATOR + files[i];
+    const std::string nameout = path + PATH_SEPARATOR + files[i];
 
     // don't overwrite existing files
     if ((stat(nameout.c_str(), &st) == 0)) // && S_ISREG(st.st_mode) )

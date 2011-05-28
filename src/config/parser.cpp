@@ -129,7 +129,8 @@ bool ConfigParser::parse(std::istream& data, ConfigNode::Ptr ptr)
           return false;
         }
 
-        tmp_data = pathExpandUser(home) + '/' + tmp_data;
+        tmp_data = relativeToAbsolute(home) + PATH_SEPARATOR + tmp_data;
+
         if (!parse(tmp_data, root))
         {
           return false;
