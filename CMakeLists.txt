@@ -206,6 +206,9 @@ endif()
 #
 # subdirectories
 #
+
+## This is bad practice and will cause a warning.
+## The real solution would make the plugins separately and then copy them into the appropriate directory.
 add_subdirectory(plugins .)
 
 
