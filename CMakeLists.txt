@@ -41,8 +41,8 @@ configure_file(${PROJECT_SOURCE_DIR}/src/configure.h.in
 
 
 # Output paths
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
-set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+set(EXECUTABLE_OUTPUT_PATH bin)
+set(LIBRARY_OUTPUT_PATH bin)
 
 
 # Set compiler specific build flags
