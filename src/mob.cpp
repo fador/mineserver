@@ -31,6 +31,7 @@
 Mob::Mob()
   :
   UID(Mineserver::generateEID()),
+  type(0),
   x(0),
   y(0),
   z(0),
@@ -38,7 +39,9 @@ Mob::Mob()
   yaw(0),
   pitch(0),
   meta(0),
-  spawned(false)
+  spawned(false),
+  respawnable(false),
+  health(0)
 {
 }
 
