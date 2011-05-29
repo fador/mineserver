@@ -54,7 +54,7 @@ class Furnace
 
 
 public:
-  Furnace(furnaceData* data_);
+  Furnace(furnaceDataPtr data);
 
   void sendToAllUsers();
   void smelt();
@@ -72,47 +72,38 @@ public:
   int16_t cookTime();
   void updateItems();
 
-  int16_t fuelBurningTime()
+  inline int16_t fuelBurningTime() const
   {
-    return data->burnTime;
+    return m_data->burnTime;
   }
 
-  int16_t setFuelBurningTime(int16_t burntime)
+  inline int16_t setFuelBurningTime(int16_t burntime)
   {
-    data->burnTime = burntime;
-    return data->burnTime;
+    m_data->burnTime = burntime;
+    return m_data->burnTime;
   }
 
-  int16_t cookingTime()
+  inline int16_t cookingTime() const
   {
-    return data->cookTime;
+    return m_data->cookTime;
   }
-  int16_t setCookingTime(int16_t cookTime)
+  inline int16_t setCookingTime(int16_t cookTime)
   {
-    data->cookTime = cookTime;
-    return data->cookTime;
+    m_data->cookTime = cookTime;
+    return m_data->cookTime;
   }
 
-  int32_t x()
-  {
-    return data->x;
-  }
-  int32_t y()
-  {
-    return data->y;
-  }
-  int32_t z()
-  {
-    return data->z;
-  }
+  inline int32_t x() const { return m_data->x; }
+  inline int32_t y() const { return m_data->y; }
+  inline int32_t z() const { return m_data->z; }
 
   Item* slots()
   {
-    return data->items;
+    return m_data->items;
   };
 
 private:
-  furnaceData* data;
+  furnaceDataPtr m_data;
   bool m_burning;
 };
 

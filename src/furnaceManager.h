@@ -29,24 +29,28 @@
 #define _FURNACE_MANAGER_H
 
 #include <stdint.h>
-#include <vector>
+#include <list>
 #include "chunkmap.h"
+
 
 class Furnace;
 class NBT_Value;
+
+typedef std::tr1::shared_ptr<Furnace> FurnacePtr;
 
 class FurnaceManager
 {
 public:
   void update();
-  void handleActivity(furnaceData* data_);
-  void removeFurnace(furnaceData* data_);
+  void handleActivity(std::tr1::shared_ptr<furnaceData> data);
+  void removeFurnace(std::tr1::shared_ptr<furnaceData> data);
+
 private:
-  typedef std::vector<Furnace*> FurnaceContainer;
+  typedef std::list<FurnacePtr> FurnaceContainer;
   FurnaceContainer m_activeFurnaces;
 };
 
-void removeFurnace(furnaceData* data_);
+void removeFurnace(std::tr1::shared_ptr<furnaceData> data);
 
 
 #endif

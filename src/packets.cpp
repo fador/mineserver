@@ -144,7 +144,7 @@ int PacketHandler::change_sign(User* user)
   user->buffer >> strings4;
 
   //ToDo: Save signs!
-  signData* newSign = new signData;
+  signDataPtr newSign(new signData);
   newSign->x = x;
   newSign->y = y;
   newSign->z = z;
@@ -158,14 +158,14 @@ int PacketHandler::change_sign(User* user)
   if (chunk != NULL)
   {
     //Check if this sign data already exists and remove
-    for (uint32_t i = 0; i < chunk->signs.size(); i++)
+    //louisdx: Ugh, erase() from vector is not nice
+    for (size_t i = 0; i < chunk->signs.size(); ++i)
     {
       if (chunk->signs[i]->x == x &&
           chunk->signs[i]->y == y &&
           chunk->signs[i]->z == z)
       {
         //Erase existing data
-        delete chunk->signs[i];
         chunk->signs.erase(chunk->signs.begin() + i);
         break;
       }

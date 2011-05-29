@@ -35,23 +35,11 @@
 
 void FurnaceManager::update()
 {
-
-  // Bail if we don't have any furnaces
-  if (m_activeFurnaces.size() == 0)
-  {
-    return;
-  }
-
-
-#ifdef DEBUG
-  //LOG2(INFO, "Checking Furnaces: " + dtos(m_activeFurnaces.size()) + " active furnaces.");
-#endif
-
   // Loop thru all the furnaces
-  for (int index = m_activeFurnaces.size() - 1; index >= 0; index--)
+  for (FurnaceContainer::iterator it = m_activeFurnaces.begin(); it != m_activeFurnaces.end(); )
   {
     // Get a pointer to this furnace
-    Furnace* currentFurnace = (Furnace*)m_activeFurnaces[index];
+    FurnacePtr currentFurnace = *it;
 
     // If we're burning, decrememnt the fuel
     if (currentFurnace->isBurningFuel())
@@ -84,77 +72,53 @@ void FurnaceManager::update()
     // Remove this furnace from the list once it stops burning it's current fuel
     if (!currentFurnace->isBurningFuel())
     {
-      delete m_activeFurnaces[index];
-      m_activeFurnaces.erase(m_activeFurnaces.begin() + index);
+      it = m_activeFurnaces.erase(it);
     }
-  }
-}
-
-void removeFurnace(furnaceData* data_)
-{
-  Mineserver::get()->furnaceManager()->removeFurnace(data_);
-}
-
-void FurnaceManager::removeFurnace(furnaceData* data_)
-{
-  Furnace* furnace = NULL;
-  // Loop thru all active furnaces, to see if this one is here
-  for (unsigned int index = 0; index < m_activeFurnaces.size(); index++)
-  {
-    Furnace* currentFurnace = (Furnace*)m_activeFurnaces[index];
-    if (currentFurnace->x() == data_->x && currentFurnace->y() == data_->y && currentFurnace->z() == data_->z)
+    else
     {
-      furnace = currentFurnace;
-      m_activeFurnaces.erase(m_activeFurnaces.begin() + index);
-      break;
+      ++it;
     }
   }
 }
 
-
-void FurnaceManager::handleActivity(furnaceData* data_)
+void removeFurnace(furnaceDataPtr data)
 {
+  Mineserver::get()->furnaceManager()->removeFurnace(data);
+}
 
-  Furnace* furnace = NULL;
-  int32_t arraypos = -1;
-  bool found = false;
-  // Loop thru all active furnaces, to see if this one is here
-  for (unsigned int index = 0; index < m_activeFurnaces.size(); index++)
-  {
-    Furnace* currentFurnace = (Furnace*)m_activeFurnaces[index];
-    if (currentFurnace->x() == data_->x && currentFurnace->y() == data_->y && currentFurnace->z() == data_->z)
-    {
-      found = true;
-      furnace = currentFurnace;
-      arraypos = index;
-      furnace->updateItems();
-      break;
-    }
-  }
+struct FurnaceDataFinder
+{
+  FurnaceDataFinder(furnaceDataPtr d) : data(d) { }
+  furnaceDataPtr data;
+  inline bool operator()(FurnacePtr f) { return (f->x() == data->x && f->y() == data->y && f->z() == data->z); }
+};
 
-  if (!found)
+void FurnaceManager::removeFurnace(furnaceDataPtr data)
+{
+  FurnaceContainer::iterator it = std::find_if(m_activeFurnaces.begin(), m_activeFurnaces.end(), FurnaceDataFinder(data));
+
+  if (it != m_activeFurnaces.end())
   {
-    // Create a furnace
-    furnace = new Furnace(data_);
+    m_activeFurnaces.erase(it);
   }
+}
+
+void FurnaceManager::handleActivity(furnaceDataPtr data)
+{
+  FurnaceContainer::iterator it = std::find_if(m_activeFurnaces.begin(), m_activeFurnaces.end(), FurnaceDataFinder(data));
+  const bool found = !(it == m_activeFurnaces.end());
+  FurnacePtr furnace = found ? *it : FurnacePtr(new Furnace(data));
+
+  if (found) furnace->updateItems();
 
   // Check if this furnace is active
-  if ((furnace->isBurningFuel() || furnace->slots()[SLOT_FUEL].getCount() > 0) &&
-      furnace->hasValidIngredient())
+  if ((furnace->isBurningFuel() || furnace->slots()[SLOT_FUEL].getCount() > 0) &&  furnace->hasValidIngredient())
   {
-    if (!found)
-    {
-      m_activeFurnaces.push_back(furnace);
-    }
+    if (!found) m_activeFurnaces.push_front(furnace);
   }
   else
   {
-    if (found)
-    {
-      delete furnace;
-      furnace = NULL;
-      m_activeFurnaces.erase(m_activeFurnaces.begin() + arraypos);
-    }
+    if (found)  m_activeFurnaces.erase(it);
   }
 }
 

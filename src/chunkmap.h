@@ -35,6 +35,7 @@
 
 #include "tr1.h"
 #include TR1INCLUDE(unordered_map)
+#include TR1INCLUDE(memory)
 
 #include "packets.h"
 #include "user.h"
@@ -86,7 +87,12 @@ struct furnaceData
   int16_t cookTime;
   int32_t map;
 };
-void removeFurnace(furnaceData* data_);
+
+typedef std::tr1::shared_ptr<chestData>   chestDataPtr;
+typedef std::tr1::shared_ptr<signData>    signDataPtr;
+typedef std::tr1::shared_ptr<furnaceData> furnaceDataPtr;
+
+void removeFurnace(furnaceDataPtr data);
 
 struct sChunk
 {
@@ -104,13 +110,13 @@ struct sChunk
   time_t lastused;
 
   NBT_Value* nbt;
+
   std::set<User*>           users;
   std::vector<spawnedItem*> items;
 
-  // ToDo: clear these
-  std::vector<chestData*>   chests;
-  std::vector<signData*>    signs;
-  std::vector<furnaceData*> furnaces;
+  std::vector<chestDataPtr>   chests;
+  std::vector<signDataPtr>    signs;
+  std::vector<furnaceDataPtr> furnaces;
 
   sChunk() : refCount(0), lightRegen(false), changed(false), lastused(0), nbt(NULL)
   {
@@ -118,30 +124,11 @@ struct sChunk
 
   ~sChunk()
   {
-    if (!chests.empty())
-    {
-      for (std::vector<chestData*>::iterator chest_it = chests.begin(); chest_it != chests.end(); ++chest_it)
-      {
-        delete *chest_it;
-      }
-      chests.clear();
-    }
-
-    if (!signs.empty())
-    {
-      for (std::vector<signData*>::iterator sign_it = signs.begin(); sign_it != signs.end(); ++sign_it)
-      {
-        delete *sign_it;
-      }
-      signs.clear();
-    }
-
     if (!furnaces.empty())
     {
-      for (std::vector<furnaceData*>::iterator furnace_it = furnaces.begin(); furnace_it != furnaces.end(); ++furnace_it)
+      for (std::vector<furnaceDataPtr>::iterator furnace_it = furnaces.begin(); furnace_it != furnaces.end(); ++furnace_it)
       {
-        removeFurnace((*furnace_it));
-        delete *furnace_it;
+        removeFurnace(*furnace_it);
       }
       furnaces.clear();
     }

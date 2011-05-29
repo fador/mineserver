@@ -1254,7 +1254,7 @@ sChunk* Map::loadMap(int x, int z, bool generate)
       //Extract sign data
       if ((*id == "Sign"))
       {
-        signData* newSign = new signData;
+        signDataPtr newSign(new signData);
         newSign->x = entityX;
         newSign->y = entityY;
         newSign->z = entityZ;
@@ -1278,15 +1278,14 @@ sChunk* Map::loadMap(int x, int z, bool generate)
           }
 
           std::vector<NBT_Value*>* itemList = chestItems->GetList();
-          std::vector<NBT_Value*>::iterator itemIterator = itemList->begin(), itemIteratorEnd = itemList->end();
 
-          chestData* newChest = new chestData;
+          chestDataPtr newChest(new chestData);
           newChest->x = entityX;
           newChest->y = entityY;
           newChest->z = entityZ;
 
           //Loop items
-          for (; itemIterator != itemIteratorEnd; itemIterator++)
+          for (std::vector<NBT_Value*>::iterator itemIterator = itemList->begin(); itemIterator != itemList->end(); ++itemIterator)
           {
             //Check that all info exists and is the right type
             if ((**itemIterator)["Count"]  == NULL || (**itemIterator)["Slot"] == NULL ||
@@ -1321,7 +1320,6 @@ sChunk* Map::loadMap(int x, int z, bool generate)
           }
 
           std::vector<NBT_Value*>* itemList = chestItems->GetList();
-          std::vector<NBT_Value*>::iterator itemIterator = itemList->begin(), itemIteratorEnd = itemList->end();
 
           if ((**iter)["BurnTime"] == NULL || (**iter)["CookTime"] == NULL)
           {
@@ -1329,7 +1327,7 @@ sChunk* Map::loadMap(int x, int z, bool generate)
             continue;
           }
 
-          furnaceData* newFurnace = new furnaceData;
+          furnaceDataPtr newFurnace(new furnaceData);
           newFurnace->x = entityX;
           newFurnace->y = entityY;
           newFurnace->z = entityZ;
@@ -1338,7 +1336,7 @@ sChunk* Map::loadMap(int x, int z, bool generate)
           newFurnace->cookTime = (int16_t) * (**iter)["CookTime"];
 
           //Loop through all items
-          for (; itemIterator != itemIteratorEnd; itemIterator++)
+          for (std::vector<NBT_Value*>::iterator itemIterator = itemList->begin(); itemIterator != itemList->end(); ++itemIterator)
           {
             //Check that all info exists and is the right type
             if ((**itemIterator)["Count"] == NULL || (**itemIterator)["Slot"] == NULL ||

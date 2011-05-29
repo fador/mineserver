@@ -44,13 +44,14 @@ Creation::Creation()
   count = 0;
 }
 
-Furnace::Furnace(furnaceData* data_)
+Furnace::Furnace(furnaceDataPtr data)
+  : m_data(data)
 {
-
-  data = data_;
   uint8_t block;
   uint8_t meta;
-  Mineserver::get()->map(data->map)->getBlock(data->x, data->y, data->z, &block, &meta);
+
+  Mineserver::get()->map(m_data->map)->getBlock(m_data->x, m_data->y, m_data->z, &block, &meta);
+
   if (!configIsRead)
   {
     readConfig();
@@ -75,7 +76,7 @@ void Furnace::updateItems()
 {
   if (!hasValidIngredient())
   {
-    data->cookTime = 0;
+    m_data->cookTime = 0;
   }
   else
   {
@@ -92,19 +93,19 @@ void Furnace::updateBlock()
   // Now make sure that it's got the correct block type based on it's current status
   if (isBurningFuel() && !m_burning)
   {
-    Mineserver::get()->map(data->map)->getBlock(data->x, data->y, data->z, &block, &meta);
+    Mineserver::get()->map(m_data->map)->getBlock(m_data->x, m_data->y, m_data->z, &block, &meta);
     // Switch to burning furnace
-    Mineserver::get()->map(data->map)->setBlock(data->x, data->y, data->z, BLOCK_BURNING_FURNACE, meta);
-    Mineserver::get()->map(data->map)->sendBlockChange(data->x, data->y, data->z, BLOCK_BURNING_FURNACE, meta);
+    Mineserver::get()->map(m_data->map)->setBlock(m_data->x, m_data->y, m_data->z, BLOCK_BURNING_FURNACE, meta);
+    Mineserver::get()->map(m_data->map)->sendBlockChange(m_data->x, m_data->y, m_data->z, BLOCK_BURNING_FURNACE, meta);
     sendToAllUsers();
     m_burning = true;
   }
   else if (!isBurningFuel() && m_burning)
   {
-    Mineserver::get()->map(data->map)->getBlock(data->x, data->y, data->z, &block, &meta);
+    Mineserver::get()->map(m_data->map)->getBlock(m_data->x, m_data->y, m_data->z, &block, &meta);
     // Switch to regular furnace
-    Mineserver::get()->map(data->map)->setBlock(data->x, data->y, data->z, BLOCK_FURNACE, meta);
-    Mineserver::get()->map(data->map)->sendBlockChange(data->x, data->y, data->z, BLOCK_FURNACE, meta);
+    Mineserver::get()->map(m_data->map)->setBlock(m_data->x, m_data->y, m_data->z, BLOCK_FURNACE, meta);
+    Mineserver::get()->map(m_data->map)->sendBlockChange(m_data->x, m_data->y, m_data->z, BLOCK_FURNACE, meta);
     sendToAllUsers();
     m_burning = false;
   }
@@ -131,17 +132,17 @@ void Furnace::smelt()
         outputSlot->setCount(1);
         outputSlot->setHealth(createList[inputSlot->getType()].meta);
         inputSlot->setCount(inputSlot->getCount() - 1);
-        data->cookTime = 0;
+        m_data->cookTime = 0;
       }
 
       // Ok - now check if the current output slot contains the same stuff
-      if (outputSlot->getType() == creationID && data->cookTime != 0)
+      if (outputSlot->getType() == creationID && m_data->cookTime != 0)
       {
         // Increment output and decrememnt the input source
         outputSlot->setCount(outputSlot->getCount() + createList[inputSlot->getType()].count);
         inputSlot->setCount(inputSlot->getCount() - 1);
         outputSlot->setHealth(createList[inputSlot->getType()].meta);
-        data->cookTime = 0;
+        m_data->cookTime = 0;
 
         if (inputSlot->getCount() == 0)
         {
@@ -154,7 +155,7 @@ void Furnace::smelt()
 bool Furnace::isBurningFuel()
 {
   // Check if this furnace is currently burning
-  if (data->burnTime > 0)
+  if (m_data->burnTime > 0)
   {
     return true;
   }
@@ -243,7 +244,7 @@ void Furnace::consumeFuel()
 
   if (fuelTime > 0)
   {
-    data->burnTime += fuelTime;
+    m_data->burnTime += fuelTime;
     // Now decrement the fuel & reset
     fuelSlot->setCount(fuelSlot->getCount() - 1);
     if (fuelSlot->getCount() == 0)
@@ -257,7 +258,7 @@ void Furnace::consumeFuel()
 }
 int16_t Furnace::burnTime()
 {
-  return data->burnTime;
+  return m_data->burnTime;
 }
 int16_t Furnace::cookTime()
 {
@@ -275,23 +276,23 @@ void Furnace::sendToAllUsers()
 
   for (size_t openinv = 0; openinv < inv.size(); ++openinv)
   {
-    if (inv[openinv]->x == data->x &&
-        inv[openinv]->y == data->y &&
-        inv[openinv]->z == data->z)
+    if (inv[openinv]->x == m_data->x &&
+        inv[openinv]->y == m_data->y &&
+        inv[openinv]->z == m_data->z)
     {
       for (size_t user = 0; user < inv[openinv]->users.size(); ++user)
       {
         for (size_t j = 0; j < 3; ++j)
         {
-          if (data->items[j].getType() != -1)
+          if (m_data->items[j].getType() != -1)
           {
-            inv[openinv]->users[user]->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_FURNACE << (int16_t)j << (int16_t)data->items[j].getType()
-                                                 << (int8_t)(data->items[j].getCount()) << (int16_t)data->items[j].getHealth();
+            inv[openinv]->users[user]->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_FURNACE << (int16_t)j << (int16_t)m_data->items[j].getType()
+                                                 << (int8_t)(m_data->items[j].getCount()) << (int16_t)m_data->items[j].getHealth();
           }
         }
 
-        inv[openinv]->users[user]->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)PROGRESS_ARROW << (int16_t)(data->cookTime * 18);
-        inv[openinv]->users[user]->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)PROGRESS_FIRE  << (int16_t)(data->burnTime * 3);
+        inv[openinv]->users[user]->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)PROGRESS_ARROW << (int16_t)(m_data->cookTime * 18);
+        inv[openinv]->users[user]->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)PROGRESS_FIRE  << (int16_t)(m_data->burnTime * 3);
       }
 
       break;

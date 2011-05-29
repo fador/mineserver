@@ -527,7 +527,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   }
 
   Item* slotItem = NULL;
-  furnaceData* tempFurnace = NULL;
+  furnaceDataPtr tempFurnace;
 
   switch (windowID)
   {
@@ -555,7 +555,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
       //Create chest data if it doesn't exist
       if (slotItem == NULL)
       {
-        chestData* newChest = new chestData;
+        chestDataPtr newChest(new chestData);
         newChest->x = user->openInv.x;
         newChest->y = user->openInv.y;
         newChest->z = user->openInv.z;
@@ -594,7 +594,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
       //Create furnace data if it doesn't exist
       if (slotItem == NULL)
       {
-        furnaceData* newFurnace = new furnaceData;
+        furnaceDataPtr newFurnace(new furnaceData);
         newFurnace->x = user->openInv.x;
         newFurnace->y = user->openInv.y;
         newFurnace->z = user->openInv.z;
