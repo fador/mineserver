@@ -26,29 +26,14 @@
 */
 
 
-#include <cstring>
-#include <cstdlib>
-#include <iostream>
 #include <sstream>
-#include <string>
-#include <vector>
-#include <cstdio>
-#include <ctime>
-#include <cmath>
-#include <algorithm>
-
-#include <zlib.h>
 #include <sys/stat.h>
 
-#include "logger.h"
-#include "tools.h"
 #include "map.h"
+#include "logger.h"
 #include "worldgen/mapgen.h"
-#include "user.h"
-#include "nbt.h"
 #include "config.h"
 #include "permissions.h"
-#include "chat.h"
 #include "mineserver.h"
 #include "tree.h"
 #include "furnaceManager.h"

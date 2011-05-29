@@ -28,6 +28,10 @@
 #ifndef _PHYSICS_H
 #define _PHYSICS_H
 
+#include <stdint.h>
+#include <vector>
+#include "vec.h"
+
 class Physics
 {
 public:

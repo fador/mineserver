@@ -25,14 +25,12 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "logger.h"
-#include "constants.h"
-#include "map.h"
-#include "vec.h"
-#include "mineserver.h"
-#include "tools.h"
 
 #include "physics.h"
+#include "logger.h"
+#include "constants.h"
+#include "mineserver.h"
+#include "map.h"
 
 namespace
 {

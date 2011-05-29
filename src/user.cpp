@@ -30,17 +30,14 @@
 
 #include "constants.h"
 
-#include "logger.h"
-#include "map.h"
 #include "user.h"
+#include "mineserver.h"
+#include "map.h"
 #include "chat.h"
 #include "plugin.h"
-#include "packets.h"
-#include "mineserver.h"
-#include "config.h"
 #include "permissions.h"
 #include "mob.h"
-#include "inventory.h"
+#include "logger.h"
 
 
 #define LOADBLOCK(x,y,z) Mineserver::get()->map(pos.map)->getBlock(int(std::floor(x)), int(std::floor(y)), int(std::floor(z)), &type, &meta)

@@ -52,18 +52,13 @@ struct RegionFile {
 #include <dirent.h>
 #endif
 
+#include <cstdio>
 #include <cstring>
-#include <sys/stat.h>
-#include <fstream>
 #include <vector>
-#include <string>
-#include <stdint.h>
-#include <ctime>
-#include <iostream>
+#include <sys/stat.h>
 
-#include "constants.h"
 #include "mcregion.h"
-#include "tools.h"
+#include "constants.h"
 #include "logger.h"
 #include "nbt.h"
 

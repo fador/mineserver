@@ -25,15 +25,10 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mineserver.h"
-#include "logger.h"
-#include "constants.h"
-
-#include "config.h"
-#include "nbt.h"
-#include "map.h"
-
 #include "lighting.h"
+#include "mineserver.h"
+#include "map.h"
+#include "nbt.h"
 
 Lighting* Lighting::mLight;
 

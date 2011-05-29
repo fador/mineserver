@@ -35,8 +35,6 @@
 #include "vec.h"
 #include "chunkmap.h"
 
-class User;
-
 struct sTree
 {
   int32_t x, y, z;

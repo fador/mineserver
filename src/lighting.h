@@ -28,8 +28,9 @@
 #ifndef _LIGHTING_H_
 #define _LIGHTING_H_
 
-#include "constants.h"
 #include <queue>
+#include "constants.h"
+#include "chunkmap.h"
 
 
 struct lightInfo
