@@ -74,7 +74,7 @@ public:
   int ID;
   int deSpawn;
   double velocity;
-  explicit MyPetMob(int ID, double velocity = 0) : ID(ID), velocity(velocity) { }
+  explicit MyPetMob(int ID, double velocity = 0) : ID(ID), despawn(0), velocity(velocity) { }
 };
 
 typedef std::tr1::shared_ptr<MyPetMob> MyPetMobPtr;
