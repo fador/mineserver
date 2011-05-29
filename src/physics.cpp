@@ -24,31 +24,6 @@
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifdef WIN32
-#include <cstdlib>
-#include <winsock2.h>
-typedef  int socklen_t;
-#else
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <cstring>
-#include <cstdlib>
-#include <cstdio>
-#include <fcntl.h>
-#include <unistd.h>
-#endif
-
-#include <cstdlib>
-#include <cstdio>
-#include <iostream>
-#include <vector>
-#include <map>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <ctime>
 
 #include "logger.h"
 #include "constants.h"

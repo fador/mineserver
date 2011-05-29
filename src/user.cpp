@@ -27,24 +27,19 @@
 
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
+#include <ctime>
+#include <cmath>
+
 #include <iostream>
 #include <deque>
 #include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <map>
-#include <cmath>
 
 #include <sys/stat.h>
-#ifdef WIN32
-#include <winsock2.h>
-#include <direct.h>
-#else
-#include <netinet/in.h>
-#include <cstring>
-#endif
 #include <zlib.h>
-#include <ctime>
 
 #include "constants.h"
 

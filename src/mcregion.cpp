@@ -48,15 +48,11 @@ struct RegionFile {
 }
 */
 
-#ifdef WIN32
-#include <winsock2.h>
-#include <direct.h>
-#else
-#include <netinet/in.h>
-#include <sys/types.h>
+#ifdef linux
 #include <dirent.h>
-#include <cstring>
 #endif
+
+#include <cstring>
 #include <sys/stat.h>
 #include <fstream>
 #include <vector>

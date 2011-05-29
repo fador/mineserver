@@ -25,26 +25,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <iostream>
-#include <fstream>
-#include <deque>
-#include <vector>
-#include <string>
-#ifdef WIN32
-#include <winsock2.h>
-#else
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <cstring>
-#include <cstdlib>
-#include <cstdio>
-#include <fcntl.h>
-#include <unistd.h>
-#endif
-
-#include <zlib.h>
 
 #include "tools.h"
 #include "logger.h"

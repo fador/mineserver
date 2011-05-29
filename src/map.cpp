@@ -26,13 +26,6 @@
 */
 
 
-#ifdef WIN32
-#include <direct.h>
-#include <winsock2.h>
-#else
-#include <netinet/in.h>
-#endif
-
 #include <cstring>
 #include <cstdlib>
 #include <iostream>

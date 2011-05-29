@@ -25,13 +25,6 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef WIN32
-#include <winsock2.h>
-#else
-#include <netinet/in.h>
-#include <pwd.h>
-#endif
-
 #ifdef linux
 #include <unistd.h>
 #include <libgen.h>

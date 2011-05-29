@@ -25,31 +25,14 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstdlib>
 #include <sys/types.h>
 #ifdef WIN32
 #include <winsock2.h>
 #else
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <cstring>
-#include <netdb.h>
 #include <netinet/tcp.h>
 #endif
 
-#include <fcntl.h>
-#include <cstdio>
-#include <deque>
-#include <iostream>
-#include <event.h>
-#include <fstream>
-#include <ctime>
 #include <cmath>
-#include <vector>
-#include <zlib.h>
-#include <stdint.h>
-#include <functional>
 
 #include "chat.h"
 #include "config.h"

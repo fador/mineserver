@@ -34,8 +34,6 @@
 #ifdef WIN32
 // This is needed for event to work on Windows.
 #include <winsock2.h>
-#else
-#include <sys/types.h>
 #endif
 #include <event.h>
 

@@ -29,26 +29,9 @@
 #include <cstdlib>
 #include <winsock2.h>
 typedef  int socklen_t;
-#else
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <cstring>
-#include <cstdlib>
-#include <cstdio>
-#include <fcntl.h>
-#include <unistd.h>
 #endif
+
 #include <errno.h>
-#include <iostream>
-#include <fstream>
-#include <deque>
-#include <vector>
-#include <ctime>
-#include <event.h>
-#include <sys/stat.h>
-#include <zlib.h>
 #include <sstream>
 
 #include "tools.h"

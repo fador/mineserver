@@ -25,38 +25,14 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <cstdlib>
-
 #include <sys/stat.h>
-#ifdef WIN32
-#include <winsock2.h>
-#include <process.h>
-#include <direct.h>
-#else
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <cstring>
-#include <netdb.h>
-#include <unistd.h>
-#include <sys/times.h>
-#endif
-#include <sys/types.h>
 #include <fcntl.h>
-#include <cassert>
-#include <deque>
-#include <map>
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <algorithm>
-#include <event.h>
-#include <ctime>
-#include <vector>
-#include <zlib.h>
 #include <signal.h>
 #include <errno.h>
-#include <sys/stat.h>
+#include <zlib.h>
+
+#include <sstream>
+#include <fstream>
 
 #include "constants.h"
 #include "mineserver.h"
