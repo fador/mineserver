@@ -29,10 +29,10 @@
 #include <fstream>
 #include <cstring>
 
+#include "nbt.h"
 #include "tools.h"
 #include "logger.h"
 #include "mineserver.h"
-#include "nbt.h"
 #include "constants.h"
 
 

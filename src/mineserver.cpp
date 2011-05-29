@@ -26,12 +26,13 @@
 */
 
 #ifdef WIN32
-	#include <winsock2.h>
-	#include <process.h>
-	#include <direct.h>
+//#include <winsock2.h>
+//#include <process.h>  // Windows users: Please find the minimal necessary includes!
+//#include <direct.h>
 #else
-	#include <netdb.h>
+#include <netdb.h>  // for gethostbyname()
 #endif
+
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <signal.h>

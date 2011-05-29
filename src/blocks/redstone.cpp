@@ -23,7 +23,7 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
 #include "../mineserver.h"
 #include "../map.h"
@@ -53,10 +53,10 @@ bool BlockRedstone::onBroken(User* user, int8_t status, int32_t x, int8_t y, int
   uint8_t meta;
   Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  Mineserver::get()->map(map)->setBlock(x, y, z, char(BLOCK_AIR), 0);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, char(BLOCK_AIR), 0);
 
-  this->spawnBlockItem(x, y, z, map, (uint8_t)ITEM_REDSTONE, 0);
+  spawnBlockItem(x, y, z, map, uint8_t(ITEM_REDSTONE), 0);
   return false;
 }
 
@@ -70,12 +70,12 @@ void BlockRedstone::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, i
     return;
   }
 
-  if (this->isBlockEmpty(x, y - 1, z, map))
+  if (isBlockEmpty(x, y - 1, z, map))
   {
     // Break torch and spawn torch item
     Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
     Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-    this->spawnBlockItem(x, y, z, map, block);
+    spawnBlockItem(x, y, z, map, block);
   }
 }
 
@@ -91,20 +91,20 @@ bool BlockRedstone::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, i
   }
 
   /* Check block below allows blocks placed on top */
-  if (!this->isBlockStackable(block))
+  if (!isBlockStackable(block))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
   /* move the x,y,z coords dependent upon placement direction */
-  if (!this->translateDirection(&x, &y, &z, map, direction))
+  if (!translateDirection(&x, &y, &z, map, direction))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
-  if (!this->isBlockEmpty(x, y, z, map))
+  if (!isBlockEmpty(x, y, z, map))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -113,8 +113,8 @@ bool BlockRedstone::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, i
   newblock = 55;
   meta = 0;
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, meta);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, meta);
+  Mineserver::get()->map(map)->setBlock(x, y, z, char(newblock), meta);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, char(newblock), meta);
   return false;
 }
 

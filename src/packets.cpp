@@ -27,10 +27,10 @@
 
 #include <sys/types.h>
 #ifdef WIN32
-	#include <winsock2.h>
+#include <winsock2.h>
 #else
-	#include <netdb.h>
-	#include <netinet/tcp.h>
+#include <netdb.h>       // for gethostbyname()
+#include <netinet/tcp.h> // for TCP constants
 #endif
 
 #include <cmath>
