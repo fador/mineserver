@@ -87,12 +87,8 @@ foreach(p ${TARGETS})
   endforeach()
 endforeach()
 
-set(LIBRARY_OUTPUT_PATH ${CONFIG_DIR_BIN}/plugins)
-
 
 #
 # install
 #
-install(TARGETS ${TARGETS}
-  LIBRARY DESTINATION ${CONFIG_DIR_BIN}/plugins
-)
+install(TARGETS ${TARGETS} DESTINATION ${CONFIG_DIR_BIN}/plugins)
