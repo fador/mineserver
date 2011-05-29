@@ -27,9 +27,10 @@
 
 #include <sys/types.h>
 #ifdef WIN32
-#include <winsock2.h>
+	#include <winsock2.h>
 #else
-#include <netinet/tcp.h>
+	#include <netdb.h>
+	#include <netinet/tcp.h>
 #endif
 
 #include <cmath>
