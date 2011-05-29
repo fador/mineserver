@@ -25,16 +25,6 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstdlib>
-#include <cstdio>
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <vector>
-#include <cmath>
-#include <ctime>
-#include <queue>
-
 #include "mineserver.h"
 #include "logger.h"
 #include "constants.h"
@@ -42,7 +32,6 @@
 #include "config.h"
 #include "nbt.h"
 #include "map.h"
-
 
 #include "lighting.h"
 

@@ -45,7 +45,6 @@
 #include <dlfcn.h>
 #endif
 
-//#include "constants.h"
 #include "tools.h"
 #include "user.h"
 #include "hook.h"

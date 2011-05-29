@@ -25,20 +25,15 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <map>
-#include <vector>
-#include <string>
-#include <cstdarg>
-
 #include "sys/stat.h"
 
-#include "mineserver.h"
 #ifdef WIN32
 #include <windows.h>
 #else
 #include <dlfcn.h>
 #endif
 
+#include "mineserver.h"
 #include "logger.h"
 #include "chat.h"
 #include "permissions.h"

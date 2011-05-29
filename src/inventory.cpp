@@ -26,19 +26,7 @@
 */
 
 
-#include <cstring>
-#include <cstdlib>
-#include <iostream>
 #include <fstream>
-#include <vector>
-#include <cstdio>
-#include <ctime>
-#include <cmath>
-#include <algorithm>
-
-
-#include <zlib.h>
-#include <sys/stat.h>
 
 #include "inventory.h"
 #include "constants.h"

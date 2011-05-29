@@ -25,21 +25,8 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-#include <ctime>
 #include <cmath>
-
-#include <iostream>
-#include <deque>
-#include <algorithm>
-#include <fstream>
-#include <sstream>
-#include <map>
-
 #include <sys/stat.h>
-#include <zlib.h>
 
 #include "constants.h"
 

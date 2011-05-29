@@ -29,10 +29,7 @@
 // Mineserver logger.cpp
 //
 
-#include <cstdio>
-#include <iostream>
 #include <sstream>
-#include <string>
 
 #include "mineserver.h"
 #include "plugin.h"
