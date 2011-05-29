@@ -37,13 +37,14 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <errno.h>
-#include <zlib.h>
 
 #include <sstream>
 #include <fstream>
 
-#include "constants.h"
 #include "mineserver.h"
+
+#include "configure.h"
+#include "constants.h"
 #include "logger.h"
 #include "sockets.h"
 #include "tools.h"
@@ -207,16 +208,17 @@ int main(int argc, char* argv[])
       std::cout << "not found\n"
                 << ++search_count << ". in home/app directory: ";
 
+      cfg = getHomeDir() + PATH_SEPARATOR + CONFIG_FILE;
+      Mineserver::get()->config()->config_path = getHomeDir();
+
       if (fileExists(getHomeDir() + PATH_SEPARATOR + CONFIG_FILE))
       {
-        cfg = getHomeDir() + PATH_SEPARATOR + CONFIG_FILE;
-        Mineserver::get()->config()->config_path = getHomeDir();
         std::cout << "FOUND at \"" << cfg << "\"!\n";
       }
       else
       {
-        std::cout << "not found\n" << "Giving up, no config file!" << std::endl;
-        return 0;
+        std::cout << "not found\n"
+                  << "No config file found! We will place the factory default in \"" << cfg << "\"." << std::endl;
       }
 #ifdef DEBUG
     }
@@ -224,9 +226,8 @@ int main(int argc, char* argv[])
   }
   std::cout << "Configuration directory is \"" << Mineserver::get()->config()->config_path << "\"." << std::endl;
 
-
   // create home and copy files if necessary
-  Mineserver::get()->homePrepare(Mineserver::get()->config()->config_path);
+  Mineserver::get()->configDirectoryPrepare(Mineserver::get()->config()->config_path);
 
   // load config
   Config & config = *Mineserver::get()->config();
@@ -815,10 +816,31 @@ bool Mineserver::stop()
   return true;
 }
 
-// This entire function should be removed and handled by the build/install process;
-// it's missing plugin and recipe file handling as it is.
-bool Mineserver::homePrepare(const std::string& path)
+
+/* The purpose of this function is to ensure that the configuration
+   directory contains all the required files: secondary config files,
+   recipes, plugins.
+
+   The "path" argument is the full path that contains the primary
+   config file (named 'config.cfg' by default).
+
+   We must check if the necessary files exist, and if not we must
+   copy them from the distribution source. The location of the
+   distribution source is passed down from the build process.
+*/
+
+bool Mineserver::configDirectoryPrepare(const std::string& path)
 {
+  const std::string distsrc = pathOfExecutable() + PATH_SEPARATOR + CONFIG_DIR_DISTSOURCE;
+
+  std::cout << std::endl
+            << "configDirectoryPrepare(): target directory = \"" << path
+            << "\", distribution source is \"" << distsrc << "\"." << std::endl
+            << "WARNING: This function is not implemented fully at present." << std::endl
+            << "You must check that all the necessary files are in the target directory" << std::endl
+            << "(including recipes and plugins) and that the config file is correct." << std::endl
+            << std::endl;
+
   struct stat st;
   if (stat(path.c_str(), &st) != 0)
   {

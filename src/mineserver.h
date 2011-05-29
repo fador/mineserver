@@ -205,7 +205,7 @@ public:
   void saveAllPlayers();
   void saveAll();
 
-  bool homePrepare(const std::string& path);
+  bool configDirectoryPrepare(const std::string& path);
 
 private:
   Mineserver();

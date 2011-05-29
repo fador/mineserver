@@ -1,70 +1,74 @@
-cmake_minimum_required(VERSION 2.6)
-project(mineserver)
-cmake_policy(SET CMP0003 NEW)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+PROJECT(mineserver)
+CMAKE_POLICY(SET CMP0003 NEW)
 
 # project version
 # TODO: get that from src/constants.h
-set( ${PROJECT_NAME}_MAJOR_VERSION 0 )
-set( ${PROJECT_NAME}_MINOR_VERSION 1 )
-set( ${PROJECT_NAME}_PATCH_LEVEL 15 )
+# louisdx: Why not go the other way and make constants.h take it from here?
+SET(${PROJECT_NAME}_MAJOR_VERSION 0)
+SET(${PROJECT_NAME}_MINOR_VERSION 1)
+SET(${PROJECT_NAME}_PATCH_LEVEL 15)
 
 # set default build to Debug
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug
+IF(NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE Debug
     CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
     FORCE
   )
-endif()
+ENDIF()
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
+SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 
 #
 # Configure paths
 #
-set(CONFIG_DIR_BIN   bin/)
-set(CONFIG_DIR_ETC   etc/${PROJECT_NAME}/)
-set(CONFIG_DIR_LIB   lib/${PROJECT_NAME}/)
-set(CONFIG_DIR_SHARE ./)
-if(WIN32)
-  message(STATUS "CONFIG_LOCAL is set -- assuming local build")
-  set(CONFIG_DIR_BIN   bin/)
-  set(CONFIG_DIR_ETC   bin/)
-  set(CONFIG_DIR_LIB   bin/)
-  set(CONFIG_DIR_SHARE ./)
-  set(CONFIG_PREFIX    ${CMAKE_INSTALL_PREFIX})
-endif()
+SET(CONFIG_DIR_BIN   bin/)
+SET(CONFIG_DIR_ETC   etc/${PROJECT_NAME}/)
+SET(CONFIG_DIR_LIB   lib/${PROJECT_NAME}/)
+SET(CONFIG_DIR_SHARE ./)
+IF(WIN32)
+  MESSAGE(STATUS "CONFIG_LOCAL is set -- assuming local build")
+  SET(CONFIG_DIR_BIN   bin/)
+  SET(CONFIG_DIR_ETC   bin/)
+  SET(CONFIG_DIR_LIB   bin/)
+  SET(CONFIG_DIR_SHARE ./)
+  SET(CONFIG_PREFIX    ${CMAKE_INSTALL_PREFIX})
+ENDIF()
+
+# The DISTSOURCE parameter tells the executable where to find the factory defaults.
+# It is used by Mineserver::configDirectoryPrepare() to install the factory defaults.
+# In the Release build, this should eventually be overridden by a central location
+# like $PREFIX/share/mineserver/files, I suppose.
+SET(CONFIG_DIR_DISTSOURCE files)
 
 # preprocess configuration file
-configure_file(${PROJECT_SOURCE_DIR}/src/configure.h.in
-  ${PROJECT_SOURCE_DIR}/src/configure.h
-)
-
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/configure.h.in ${PROJECT_SOURCE_DIR}/src/configure.h)
 
 # Output paths
-set(EXECUTABLE_OUTPUT_PATH bin)
-set(LIBRARY_OUTPUT_PATH bin)
+SET(EXECUTABLE_OUTPUT_PATH bin)
+SET(LIBRARY_OUTPUT_PATH bin)
 
 
 # Set compiler specific build flags
-IF (CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS "-W -Wall -Wno-unused -pedantic -DHAVE_TR1_SUBDIR")
-  set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g")
-  set(CMAKE_CXX_FLAGS_PROFILE "-DDEBUG -g -pg")
-  set(CMAKE_CXX_FLAGS_RELEASE "-O2 -s -DNDEBUG")
+IF(CMAKE_COMPILER_IS_GNUCXX)
+  SET(CMAKE_CXX_FLAGS "-W -Wall -Wno-unused -pedantic -DHAVE_TR1_SUBDIR")
+  SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g")
+  SET(CMAKE_CXX_FLAGS_PROFILE "-DDEBUG -g -pg")
+  SET(CMAKE_CXX_FLAGS_RELEASE "-O2 -s -DNDEBUG")
 ENDIF()
 
 
-IF (MSVC_IDE)
-  set(CMAKE_CXX_FLAGS "/DWIN32 /D_CONSOLE /DZLIB_WINAPI /fp:fast /EHsc")
-  set(CMAKE_CXX_FLAGS_DEBUG "/DDEBUG /D_DEBUG /MTd /Zi")
-  set(CMAKE_CXX_FLAGS_RELEASE "/MT /D_SECURE_SCL=0")
-ENDIF (MSVC_IDE)
+IF(MSVC_IDE)
+  SET(CMAKE_CXX_FLAGS "/DWIN32 /D_CONSOLE /DZLIB_WINAPI /fp:fast /EHsc")
+  SET(CMAKE_CXX_FLAGS_DEBUG "/DDEBUG /D_DEBUG /MTd /Zi")
+  SET(CMAKE_CXX_FLAGS_RELEASE "/MT /D_SECURE_SCL=0")
+ENDIF(MSVC_IDE)
 
 
 #
 # mineserver sources
 #
-set(mineserver_source
+SET(mineserver_source
   src/lighting.cpp
   src/logger.cpp
   src/furnace.cpp
@@ -128,13 +132,13 @@ set(mineserver_source
   src/items/projectile.cpp
   src/mob.cpp
 )
-source_group(${PROJECT_NAME} FILES ${mineserver_source})
+SOURCE_GROUP(${PROJECT_NAME} FILES ${mineserver_source})
 
 
 #
 # project files
 #
-set(mineserver_configs
+SET(mineserver_configs
   files/banned.txt
   files/commands.cfg
   files/config.cfg
@@ -147,20 +151,15 @@ set(mineserver_configs
   files/whitelist.txt
 )
 
-file(GLOB_RECURSE mineserver_recipes RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} files/recipes/*)
+FILE(GLOB_RECURSE mineserver_recipes RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} files/recipes/*)
 
-set(mineserver_dirs
-  files/recipes
-)
-
-
-include_directories(src/)
+INCLUDE_DIRECTORIES(src)
 
 
 #
 # dependencies
 #
-set(mineserver_depends
+SET(mineserver_depends
   ZLIB
   #Lua51
   Event
@@ -171,68 +170,75 @@ set(mineserver_depends
 #
 # dependency check
 #
-set(TARGET mineserver)
-message(STATUS "Dependency check: ${TARGET}")
-set(dependency_error False)
-foreach(lib ${${TARGET}_depends})
-  find_package(${lib})
-  string(TOUPPER ${lib} LIB)
-  if (NOT ${LIB}_FOUND)
-    set(errors "${errors}\t\t- ${lib}\n")
-    set(dependency_error True)
-  endif()
-endforeach()
+SET(TARGET mineserver)
+MESSAGE(STATUS "Dependency check: ${TARGET}")
+SET(dependency_error False)
+FOREACH(lib ${${TARGET}_depends})
+  FIND_PACKAGE(${lib})
+  STRING(TOUPPER ${lib} LIB)
+  IF(NOT ${LIB}_FOUND)
+    SET(errors "${errors}\t\t- ${lib}\n")
+    SET(dependency_error True)
+  ENDIF()
+ENDFOREACH()
 
 
 #
 # platform-specific tweaks
 #
-if(WIN32)
+IF(WIN32)
   # this requires WinMain() entry, disabled until console/GUI option is added
   #set(exe "WIN32")
 
   # this shouldn't be here, but can cmake find these .lib's?
   # do we really need winmm?
-  foreach(lib ws2_32 winmm)
-    string(TOUPPER ${lib} LIB)
-    list(APPEND mineserver_depends "${lib}")
-    set(${LIB}_LIBRARY "${lib}")
-  endforeach()
-else()
-  if(NOISE_DIR_IS_LIBNOISE)
-    add_definitions(-DLIBNOISE)
-  endif()
-endif()
+  FOREACH(lib ws2_32 winmm)
+    STRING(TOUPPER ${lib} LIB)
+    LIST(APPEND mineserver_depends "${lib}")
+    SET(${LIB}_LIBRARY "${lib}")
+  ENDFOREACH()
+ELSE()
+  IF(NOISE_DIR_IS_LIBNOISE)
+    ADD_DEFINITIONS(-DLIBNOISE)
+  ENDIF()
+ENDIF()
 
 
 #
 # subdirectories
 #
-add_subdirectory(plugins)
+ADD_SUBDIRECTORY(plugins)
 
 
 #
 # build targets
 #
-set(TARGET mineserver)
-message(STATUS "Target: ${TARGET}")
-add_executable(${TARGET} ${exe} ${${TARGET}_source})
-target_link_libraries(${TARGET} ${CMAKE_DL_LIBS})
+SET(TARGET mineserver)
+MESSAGE(STATUS "Target: ${TARGET}")
+ADD_EXECUTABLE(${TARGET} ${exe} ${${TARGET}_source})
+TARGET_LINK_LIBRARIES(${TARGET} ${CMAKE_DL_LIBS})
 
-foreach(lib ${${TARGET}_depends})
-  string(TOUPPER ${lib} LIB)
-  include_directories(${${LIB}_INCLUDE_DIR})
-  target_link_libraries(${TARGET} ${${LIB}_LIBRARY})
-endforeach()
+FOREACH(lib ${${TARGET}_depends})
+  STRING(TOUPPER ${lib} LIB)
+  INCLUDE_DIRECTORIES(${${LIB}_INCLUDE_DIR})
+  TARGET_LINK_LIBRARIES(${TARGET} ${${LIB}_LIBRARY})
+ENDFOREACH()
 
 # copy configs for local usage
-foreach(path ${mineserver_configs} ${mineserver_recipes})
-  set(dest "${EXECUTABLE_OUTPUT_PATH}/${path}")
-  if(NOT EXISTS ${dest})
-    message(STATUS "Configuring: ${dest}")
-    configure_file(${path} ${dest} COPYONLY)
-  endif()
-endforeach()
+FOREACH(path ${mineserver_configs} ${mineserver_recipes})
+  SET(dest "${EXECUTABLE_OUTPUT_PATH}/${path}")
+  IF(NOT EXISTS ${dest})
+    MESSAGE(STATUS "Configuring: ${dest}")
+    CONFIGURE_FILE(${path} ${dest} COPYONLY)
+  ENDIF()
+ENDFOREACH()
+
+# In the Debug build, we provide a local config file.
+IF(CMAKE_BUILD_TYPE MATCHES Debug)
+    CONFIGURE_FILE(files/config.cfg "${EXECUTABLE_OUTPUT_PATH}/config.cfg" COPYONLY)
+ENDIF()
+
+
 
 
 #
