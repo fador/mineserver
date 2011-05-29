@@ -217,7 +217,7 @@ std::string canonicalizePath(const std::string& pathname)
   std::string res(rp);
 
   free(d);
-  delete rp;
+  delete[] rp;
 
   return res;
 
