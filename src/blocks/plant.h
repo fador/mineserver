@@ -23,10 +23,17 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-#pragma once
+
+#ifndef _BLOCKS_PLANT_H
+#define _BLOCKS_PLANT_H
+
 #include "basic.h"
+
+#include "tr1.h"
+#include TR1INCLUDE(memory)
+
 
 // 10000 == 100%
 enum { SEEDS_CHANCE = 1000 };
@@ -36,8 +43,12 @@ class User;
 class PlantBlock
 {
 public:
+  PlantBlock(int x, int y, int z, int map, int count) : x(x), y(y), z(z), map(map), count(count) { }
   int x, y, z, map, count;
 };
+
+typedef std::tr1::shared_ptr<PlantBlock> PlantBlockPtr;
+
 
 /** BlockPlant deals specifically with plant block functionality
 @see BlockBasic
@@ -68,10 +79,12 @@ public:
   void onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
   void timer200();
   void addBlocks(int x, int y, int z, int map);
-  void addBlock(PlantBlock* p2);
+  void addBlock(PlantBlockPtr p2);
   void addBlock(int x, int y, int z, int map);
-  void remBlock(PlantBlock* p2);
+  void remBlock(PlantBlockPtr p2);
   void remBlock(int x, int y, int z, int map);
   bool isPlant(int num);
 };
 
+
+#endif

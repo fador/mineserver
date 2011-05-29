@@ -33,7 +33,7 @@
 #include "../map.h"
 
 
-std::vector<PlantBlock*> growingPlants;
+std::vector<PlantBlockPtr> growingPlants;
 
 BlockPlant::BlockPlant()
 {
@@ -60,25 +60,11 @@ void BlockPlant::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y
 
 }
 
-void BlockPlant::remBlock(PlantBlock* p2)
+void BlockPlant::addBlock(PlantBlockPtr p2)
 {
-  for (std::vector<PlantBlock*>::iterator p = growingPlants.begin();
-       p != growingPlants.end(); p++)
+  for (size_t i = 0; i < growingPlants.size(); ++i)
   {
-    if ((*p)->x == p2->x && (*p)->y == p2->y && (*p)->z == p2->z && (*p)->map == p2->map)
-    {
-      delete(*p);
-      growingPlants.erase(p);
-      return;
-    }
-  }
-}
-
-void BlockPlant::addBlock(PlantBlock* p2)
-{
-  for (size_t i = 0; i < growingPlants.size(); i++)
-  {
-    PlantBlock* p = growingPlants[i];
+    PlantBlockPtr p = growingPlants[i];
     if (p->x == p2->x && p->y == p2->y && p->z == p2->z && p->map == p2->map)
     {
       return;
@@ -87,31 +73,35 @@ void BlockPlant::addBlock(PlantBlock* p2)
   growingPlants.push_back(p2);
 }
 
-void BlockPlant::remBlock(int x, int y, int z, int map)
+void BlockPlant::remBlock(PlantBlockPtr p)
 {
-  PlantBlock* p = new PlantBlock;
-  p->x = x;
-  p->y = y;
-  p->z = z;
-  p->map = map;
-  remBlock(p);
+  std::vector<PlantBlockPtr>::iterator it = std::find(growingPlants.begin(), growingPlants.end(), p);
+  if (it != growingPlants.end())
+    growingPlants.erase(it);
 }
 
+void BlockPlant::remBlock(int x, int y, int z, int map)
+{
+  for (std::vector<PlantBlockPtr>::iterator it = growingPlants.begin(); it != growingPlants.end(); ++it)
+  {
+    if ((*it)->x == x && (*it)->y == y && (*it)->z == z && (*it)->map == map)
+    {
+      growingPlants.erase(it);
+      return;
+    }
+  }
+}
 
 void BlockPlant::addBlock(int x, int y, int z, int map)
 {
   uint8_t block, meta;
   Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
-  int b = (int) block;
+
+  const int b = block;
+
   if (b == BLOCK_GRASS || b == BLOCK_DIRT || b == BLOCK_CROPS || b == BLOCK_REED || b == BLOCK_CACTUS)
   {
-    PlantBlock* p = new PlantBlock;
-    p->x = x;
-    p->y = y;
-    p->z = z;
-    p->map = map;
-    p->count = 0;
-    addBlock(p);
+    addBlock(PlantBlockPtr(new PlantBlock(x, y, z, map, 0)));
   }
 }
 
@@ -142,11 +132,14 @@ void BlockPlant::timer200()
 {
   for (int i = growingPlants.size() - 1; i >= 0; i--)
   {
-    PlantBlock* p = growingPlants[i];
+    PlantBlockPtr p = growingPlants[i];
     uint8_t block, meta, sky, light;
+
     Mineserver::get()->map(p->map)->getBlock(p->x, p->y, p->z, &block, &meta);
     Mineserver::get()->map(p->map)->getLight(p->x, p->y, p->z, &light, &sky);
+
     p->count++;
+
     if (p->count > grass_timeout * 5 && (block == BLOCK_DIRT || block == BLOCK_GRASS))
     {
       uint8_t block2, meta2;
