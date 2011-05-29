@@ -28,7 +28,8 @@
 #ifndef _PACKETS_H
 #define _PACKETS_H
 
-#include <string.h>
+#include <string>
+#include <cstring>
 #include <stdint.h>
 
 #define PACKET_NEED_MORE_DATA -3

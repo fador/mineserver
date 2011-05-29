@@ -25,14 +25,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <cstdlib>
-#include <cstdio>
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <vector>
-#include <cmath>
-#include <ctime>
 
 // libnoise
 #ifdef LIBNOISE
@@ -46,12 +38,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../mineserver.h"
 #include "../config.h"
-#include "../constants.h"
 #include "../logger.h"
 #include "../map.h"
-#include "../nbt.h"
 #include "../tree.h"
-#include "../tools.h"
 
 int g_seed;
 int f_seed;

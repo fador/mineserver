@@ -25,32 +25,11 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <cstdlib>
-#include <cstdio>
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <vector>
-#include <cmath>
-#include <ctime>
-#include <assert.h>
-
-// libnoise
-#ifdef LIBNOISE
-#include <libnoise/noise.h>
-#else
-#include <noise/noise.h>
-#endif
-
-#include "cavegen.h"
 #include "eximgen.h"
 
 #include "../mineserver.h"
 #include "../config.h"
-#include "../constants.h"
-#include "../logger.h"
 #include "../map.h"
-#include "../nbt.h"
 #include "../tree.h"
 #include "../tools.h"
 #include "../random.h"

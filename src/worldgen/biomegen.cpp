@@ -25,34 +25,11 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <vector>
-#include <cmath>
-#include <ctime>
-#include <cstdlib>
-#include <cstdio>
-
-
-// libnoise
-#ifdef LIBNOISE
-#include <libnoise/noise.h>
-#else
-#include <noise/noise.h>
-#endif
-
-#include "cavegen.h"
 #include "biomegen.h"
 
 #include "../mineserver.h"
 #include "../config.h"
-#include "../constants.h"
-#include "../logger.h"
-#include "../map.h"
-#include "../nbt.h"
 #include "../tree.h"
-#include "../tools.h"
 #include "../random.h"
 
 BiomeGen::BiomeGen()

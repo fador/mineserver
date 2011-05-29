@@ -28,15 +28,7 @@
 #ifndef _BIOMEGEN_H
 #define _BIOMEGEN_H
 
-#ifdef LIBNOISE
-#include <libnoise/noise.h>
-#else
-#include <noise/noise.h>
-#endif
-
-#include "cavegen.h"
 #include "mapgen.h"
-#include "../map.h"
 
 class BiomeGen: public MapGen
 {

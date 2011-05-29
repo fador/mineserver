@@ -28,16 +28,8 @@
 #ifndef _EXIMGEN_H
 #define _EXIMGEN_H
 
-#ifdef LIBNOISE
-#include <libnoise/noise.h>
-#else
-#include <noise/noise.h>
-#endif
 
-#include "cavegen.h"
 #include "mapgen.h"
-#include "../map.h"
-
 
 class EximGen: public MapGen
 {

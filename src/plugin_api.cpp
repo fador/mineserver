@@ -38,7 +38,6 @@
 #include "chat.h"
 #include "permissions.h"
 
-#include "hook.h"
 #include "plugin.h"
 #include "config.h"
 #include "map.h"
