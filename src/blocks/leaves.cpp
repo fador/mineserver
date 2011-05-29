@@ -90,7 +90,7 @@ void BlockLeaves::timer200()
 {
   while (!decaying.empty())
   {
-    const Decay& d = *decaying.begin();
+    Decay d = *decaying.begin(); // copy! might get deleted by decayIt()
 
     if ((time(NULL) - d.decayStart) >= 5)
     {
