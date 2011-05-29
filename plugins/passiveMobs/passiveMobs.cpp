@@ -37,6 +37,10 @@
 #include <stdint.h>
 #include <cmath>
 
+#include "tr1.h"
+#include TR1INCLUDE(memory)
+
+
 #define MINESERVER_C_API
 #include "../../src/plugin_api.h"
 
@@ -59,8 +63,8 @@ std::string dtos(double n)
   return result.str();
 }
 
-std::string Mobnames[] = { "Chicken", "Pig", "Sheep", "Cow" };
-std::string enemyMobNames[] = {"Spider","Zombie","Skeleton","Creeper"};
+static const char* Mobnames[] = { "Chicken", "Pig", "Sheep", "Cow" };
+static const char* enemyMobNames[] = { "Spider", "Zombie", "Skeleton", "Creeper" };
  
 // The list of Mobs this plugin has control of
 // Note that other plugins may make other mobs, and control them itself
@@ -73,7 +77,9 @@ public:
   explicit MyPetMob(int ID, double velocity = 0) : ID(ID), velocity(velocity) { }
 };
 
-std::vector<MyPetMob*> MyMobs;
+typedef std::tr1::shared_ptr<MyPetMob> MyPetMobPtr;
+
+std::vector<MyPetMobPtr> MyMobs;
 
 const unsigned int maxMobs = 15; // Maximum ammount of mobs allowed
 time_t lastSpawn = time(NULL);
@@ -147,13 +153,13 @@ void timer200Function()
           int newMob = 0;
           if (mineserver->map.getTime() > 18000 && mineserver->map.getTime() < 24000)
           {
-            newMob = mineserver->mob.createMob(enemyMobNames[randomMob].c_str());
+            newMob = mineserver->mob.createMob(enemyMobNames[randomMob]);
           }
           else
           {
-            newMob = mineserver->mob.createMob(Mobnames[randomMob].c_str());
+            newMob = mineserver->mob.createMob(Mobnames[randomMob]);
           }
-          MyPetMob* newMobData = new MyPetMob(newMob);
+          MyPetMobPtr newMobData(new MyPetMob(newMob));
           MyMobs.push_back(newMobData);
           mineserver->mob.moveMobW(newMob,x,y,z,w);
           mineserver->mob.spawnMob(newMob);
@@ -163,7 +169,8 @@ void timer200Function()
       }
     }
   }
-  for(int i = MyMobs.size()-1; i >= 0; i--)
+
+  for (int i = MyMobs.size() - 1; i >= 0; i--)
   {
     double x,y,z;
     int w;

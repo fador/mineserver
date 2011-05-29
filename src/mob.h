@@ -119,7 +119,7 @@ public:
 
   inline MobPtr createMob()
   {
-    const MobPtr mob(new Mob);
+    MobPtr mob(new Mob);
     addMob(mob);
     return mob;
   }
