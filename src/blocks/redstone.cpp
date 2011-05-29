@@ -56,7 +56,7 @@ bool BlockRedstone::onBroken(User* user, int8_t status, int32_t x, int8_t y, int
   Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
 
-  this->spawnBlockItem(x, y, z, map, ITEM_REDSTONE, 0);
+  this->spawnBlockItem(x, y, z, map, (uint8_t)ITEM_REDSTONE, 0);
   return false;
 }
 

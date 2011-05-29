@@ -52,7 +52,7 @@ std::string dtos(double n)
   return result.str();
 }
 
-bool loginPost(const char* userIn){
+void loginPost(const char* userIn){
   std::ifstream file;
   file.open("permissions.txt", std::ios::in);
   std::string line;

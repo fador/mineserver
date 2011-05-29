@@ -25,6 +25,13 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#ifdef WIN32
+	#include <winsock2.h>
+	#include <process.h>
+	#include <direct.h>
+#else
+	#include <netdb.h>
+#endif
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <signal.h>
