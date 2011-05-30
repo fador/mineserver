@@ -40,7 +40,7 @@
 #include "logger.h"
 
 
-#define LOADBLOCK(x,y,z) Mineserver::get()->map(pos.map)->getBlock(int(std::floor(x)), int(std::floor(y)), int(std::floor(z)), &type, &meta)
+#define LOADBLOCK(x,y,z) Mineserver::get()->map(pos.map)->getBlock(int(std::floor(double(x))), int(std::floor(double(y))), int(std::floor(double(z))), &type, &meta)
 
 
 // Generate "unique" entity ID
@@ -1207,9 +1207,9 @@ bool User::spawnOthers()
 
 void User::checkEnvironmentDamage()
 {
-  const int yVal = floor(pos.y - 0.5);
+  const double yVal = std::floor(pos.y - 0.5);
 
-  if (yVal > 127)
+  if (yVal > 127.0)
   {
     return;
   }
