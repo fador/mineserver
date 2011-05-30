@@ -42,6 +42,7 @@
 #define _WINSOCKAPI_
 
 #ifdef WIN32
+#define NOMINMAX
 #include <windows.h>
 #else
 #include <dlfcn.h>

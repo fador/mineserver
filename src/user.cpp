@@ -430,13 +430,10 @@ bool User::saveData()
 
     if (stat(outdir.c_str(), &stFileInfo) != 0)
     {
-#ifdef WIN32
-      if (_mkdir(outdir.c_str()) == -1)
-#else
-      if (mkdir(outdir.c_str(), 0755) == -1)
-#endif
-
+      if (!makeDirectory(outdir))
+      {
         return false;
+      }
     }
   }
 

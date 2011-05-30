@@ -90,7 +90,7 @@ inline int32_t blockToChunkBlock(int32_t value)
 
 inline int8_t angleToByte(float angle)
 {
-  return (int8_t)((angle / 360.f) * 256);
+  return (int8_t)((angle / 360.f) * 256.f);
 }
 
 

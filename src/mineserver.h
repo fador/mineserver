@@ -37,6 +37,7 @@
 
 #ifdef WIN32
 // This is needed for event to work on Windows.
+#define NOMINMAX
 #include <winsock2.h>
 #else
 //Do not remove!! Required on Debian

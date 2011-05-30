@@ -26,8 +26,8 @@
 */
 
 #ifdef WIN32
-//#include <winsock2.h>
-//#include <process.h>  // Windows users: Please find the minimal necessary includes!
+//#include <winsock2.h>   // Windows users: Please find the minimal necessary includes!
+#include <process.h>
 #include <direct.h>
 #else
 #include <netdb.h>  // for gethostbyname()

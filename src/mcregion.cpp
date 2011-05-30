@@ -497,11 +497,7 @@ bool convertMap(std::string mapDir)
   if (stat(regionDir.c_str(), &stFileInfo) != 0)
   {
     std::cout << "Creating region dir" << std::endl;
-#ifdef WIN32
-    if (_mkdir(std::string(regionDir).c_str()) == -1)
-#else
-    if (mkdir(std::string(regionDir).c_str(), 0755) == -1)
-#endif
+    if (!makeDirectory(regionDir))
     {
       exit(EXIT_FAILURE);
     }
