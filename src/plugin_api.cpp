@@ -27,12 +27,6 @@
 
 #include "sys/stat.h"
 
-#ifdef WIN32
-#include <windows.h>
-#else
-#include <dlfcn.h>
-#endif
-
 #include "mineserver.h"
 #include "logger.h"
 #include "chat.h"

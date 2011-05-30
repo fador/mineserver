@@ -63,9 +63,8 @@ std::string hash(std::string value);
 #define PATH_SEPARATOR  '/'
 #endif
 
-std::string pathExpandUser(const std::string& path);
-
 bool fileExists(const std::string& filename);
+bool makeDirectory(const std::string& path);
 std::string canonicalizePath(const std::string& pathname);
 std::string getHomeDir();
 std::string pathOfExecutable();

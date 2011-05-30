@@ -240,11 +240,7 @@ void Map::init(int number)
   {
     LOG(WARNING, "Map", "Warning: Map directory not found, creating it now.");
 
-#ifdef WIN32
-    if (_mkdir(mapDirectory.c_str()) == -1)
-#else
-    if (mkdir(mapDirectory.c_str(), 0755) == -1)
-#endif
+    if (!makeDirectory(mapDirectory))
     {
       LOG(EMERG, "Map", "Error: Could not create map directory.");
 

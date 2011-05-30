@@ -25,16 +25,18 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <iostream>
+#include <sstream>
+#include <fstream> // Added for MOTD
 #include <string>
 #include <deque>
-#include <ctime>
-#include <sstream>
-#include <cstdlib>
-#include <tr1/unordered_map>
-#include <tr1/memory>
-#include <iostream>
-#include <fstream> // Added for MOTD
 #include <stdint.h>
+#include <cstdlib>
+#include <ctime>
+
+#include "tr1.h"
+#include TR1INCLUDE(unordered_map)
+#include TR1INCLUDE(memory)
 
 #define MINESERVER_C_API
 #include "../../src/plugin_api.h"

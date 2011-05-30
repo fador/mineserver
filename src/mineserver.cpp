@@ -28,7 +28,7 @@
 #ifdef WIN32
 //#include <winsock2.h>
 //#include <process.h>  // Windows users: Please find the minimal necessary includes!
-//#include <direct.h>
+#include <direct.h>
 #else
 #include <netdb.h>  // for gethostbyname()
 #endif
@@ -845,11 +845,7 @@ bool Mineserver::configDirectoryPrepare(const std::string& path)
   if (stat(path.c_str(), &st) != 0)
   {
     LOG2(INFO, "Creating: " + path);
-#ifdef WIN32
-    if (_mkdir(path.c_str()) == -1)
-#else
-    if (mkdir(path.c_str(), 0755) == -1)
-#endif
+    if (!makeDirectory(path))
     {
       LOG2(ERROR, path + ": " + strerror(errno));
       return false;

@@ -36,6 +36,8 @@
 #include TR1INCLUDE(memory)
 #include TR1INCLUDE(unordered_map)
 
+#include "hook.h"
+
 //Fix Winsock2 error that occurs when Windows.h is included before it.
 #define _WINSOCKAPI_
 
@@ -45,9 +47,6 @@
 #include <dlfcn.h>
 #endif
 
-#include "tools.h"
-#include "user.h"
-#include "hook.h"
 
 // A wild INCONSISTENCY appears!
 //
@@ -58,6 +57,7 @@
 //
 // deoxxa uses MACRO ATTACK!
 //
+
 #ifdef WIN32
 #define LIBRARY_HANDLE HINSTANCE
 #define LIBRARY_LOAD(x) LoadLibrary(x)
@@ -75,8 +75,10 @@
 #define LIBRARY_CLOSE(x) dlclose(x)
 #define LIBRARY_EXTENSION ".so"
 #endif
+
 #include "blocks/basic.h"
 #include "items/itembasic.h"
+
 //
 // It's SUPER EFFECTIVE!
 // Foe INCONSISTENCY fainted!

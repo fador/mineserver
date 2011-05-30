@@ -25,11 +25,14 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef linux
+#if defined(linux)
 #include <unistd.h>
 #include <libgen.h>
-#include <wordexp.h>
+#include <wordexp.h>  // for wordexp
+#include <sys/stat.h> // for mkdir
 #include <climits>
+#elif defined(WIN32)
+#include <direct.h>
 #endif
 
 #include <iostream>
@@ -196,6 +199,15 @@ bool fileExists(const std::string& filename)
   return i;
 }
 
+bool makeDirectory(const std::string& path)
+{
+#ifdef WIN32
+  return _mkdir(path.c_str()) != -1;
+#else
+  return mkdir(path.c_str(), 0755) == -1;
+#endif
+}
+
 std::string canonicalizePath(const std::string& pathname)
 {
   // We assume that pathname is already a path name, with no file component!
@@ -254,7 +266,7 @@ std::string getHomeDir()
 
 #elif defined(WIN32)
 
-  return "%APPDATA%\Mineserver";
+  return "%APPDATA%\\Mineserver";
 
 #else
 
