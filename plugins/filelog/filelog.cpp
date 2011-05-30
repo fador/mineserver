@@ -23,7 +23,7 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
 /*
   Feature List:
@@ -49,10 +49,10 @@
     filelog.server.daily_split = false;
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
+#include <cstring>
 
 #define MINESERVER_C_API
 #include "../../src/plugin_api.h"
@@ -83,14 +83,15 @@ const float pluginVersion = 1.0f;
 
 // Variables
 mineserver_pointer_struct* mineserver;
-FILE *logFile;
-FILE *chatFile;
+FILE* logFile;
+FILE* chatFile;
 const char* formatTimestamp = FORMAT_TIME;
 
 // Configuration Helper functions
 bool filelog_config_boolean(const char* key, bool defaultValue)
 {
-  if (!mineserver->config.has(key)) {
+  if (!mineserver->config.has(key))
+  {
     return defaultValue;
   }
   return mineserver->config.bData(key);
@@ -98,7 +99,8 @@ bool filelog_config_boolean(const char* key, bool defaultValue)
 
 const char* filelog_config_string(const char* key, const char*defaultValue)
 {
-  if (!mineserver->config.has(key)) {
+  if (!mineserver->config.has(key))
+  {
     return defaultValue;
   }
   return mineserver->config.sData(key);
@@ -166,8 +168,8 @@ PLUGIN_API_EXPORT void CALLCONVERSION filelog_init(mineserver_pointer_struct* mi
   // Check if chat logging is enabled, if the option is not specified default to true.
   if (filelog_config_boolean("filelog.chat.enable", true))
   {
-    const char *filename = filelog_config_string("filelog.chat.filename", FILENAME_CHAT);
-    char *message = (char *)malloc(strlen(filename) + 17); 
+    const char* filename = filelog_config_string("filelog.chat.filename", FILENAME_CHAT);
+    char* message = (char *)malloc(strlen(filename) + 17); 
 
     mineserver->plugin.addCallback("PlayerChatPost", reinterpret_cast<voidF>(chatPost));
     chatFile = fopen(filename, "a");    
