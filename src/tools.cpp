@@ -332,7 +332,7 @@ std::pair<std::string, std::string> pathOfFile(const std::string& filename)
 
   GetFullPathName(filename.c_str(), dest_len, path, &pPart);
 
-  const size_t diff = pPart - buffer;
+  const size_t diff = pPart - path;
 
   if (diff > 0 && diff != size_t(-1))
     return std::make_pair(std::string(path, diff - 1), std::string(pPart));

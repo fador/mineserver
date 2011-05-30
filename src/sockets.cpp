@@ -27,6 +27,7 @@
 
 #ifdef WIN32
 #include <cstdlib>
+#define NOMINMAX
 #include <winsock2.h>
 typedef  int socklen_t;
 #endif

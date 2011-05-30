@@ -33,6 +33,7 @@
 #include <string>
 
 #ifdef WIN32
+#define NOMINMAX
 #include <winsock2.h>
 #else
 #include <arpa/inet.h>

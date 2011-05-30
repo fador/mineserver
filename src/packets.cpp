@@ -27,6 +27,7 @@
 
 #include <sys/types.h>
 #ifdef WIN32
+#define NOMINMAX
 #include <winsock2.h>
 #else
 #include <netdb.h>       // for gethostbyname()
