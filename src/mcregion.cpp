@@ -48,14 +48,15 @@ struct RegionFile {
 }
 */
 
+#include <vector>
+#include <cstdio>
+#include <cstring>
+#include <ctime>
+#include <sys/stat.h>
+
 #ifdef linux
 #include <dirent.h>
 #endif
-
-#include <cstdio>
-#include <cstring>
-#include <vector>
-#include <sys/stat.h>
 
 #include "mcregion.h"
 #include "constants.h"
@@ -99,14 +100,11 @@ bool RegionFile::openFile(std::string mapDir, int32_t chunkX, int32_t chunkZ)
 
   //Make sure we have the region directory inside mapDir
   struct stat stFileInfo;
-  std::string regionDir = mapDir + "/region";
+  std::string regionDir = mapDir + PATH_SEPARATOR + "region";
+
   if (stat(regionDir.c_str(), &stFileInfo) != 0)
   {
-#ifdef WIN32
-    if (_mkdir(std::string(regionDir).c_str()) == -1)
-#else
-    if (mkdir(std::string(regionDir).c_str(), 0755) == -1)
-#endif
+    if (!makeDirectory(regionDir))
     {
 
       exit(EXIT_FAILURE);
@@ -321,7 +319,7 @@ bool RegionFile::writeChunk(uint8_t* chunkdata, uint32_t datalen, int32_t x, int
       setOffset(x, z, (sectorNumber << 8) | sectorsNeeded);
     }
   }
-  setTimestamp(x, z, (int)time(NULL));
+  setTimestamp(x, z, std::time(NULL));
 
   return true;
 }
