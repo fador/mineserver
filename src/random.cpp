@@ -27,6 +27,7 @@
 
 #include <fstream>
 #include <iostream>
+//#include <iomanip>
 #include <limits>
 #include <ctime>
 
@@ -50,7 +51,8 @@ void initPRNG()
     prng_seed = std::time(NULL);
   }
 
-  //std::cout << "Seeding the PRNG with: 0x" << std::hex << std::uppercase << std::setfill('0') << std::setw(8) << prng_seed << std::endl;
+  //std::cout << "Seeding the PRNG with: 0x" << std::hex << std::uppercase << std::setfill('0')
+  //          << std::setw(2 * sizeof(MyRNG::result_type)) << prng_seed << std::endl;
 
   prng.seed(prng_seed);
 }
