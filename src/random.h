@@ -31,20 +31,26 @@
 
 #include <stdint.h>
 
-#ifdef WIN32
-#include <random>
-typedef std::mt19937_64 MyRNG;
-#else
 #include "tr1.h"
 #include TR1INCLUDE(random)
+
+
+// This is our core PRNG engine. The Mersenne Twister is both fast and good.
+
 typedef std::tr1::mt19937 MyRNG;
-#endif
+
+
+// Ideally we would have "typedef MyRNG::result_type seed_type", but mt19937 is broken.
+// Set this to whatever MyRNG::seed(seed_type) needs to be.
+
+typedef unsigned long int seed_type;
+
 
 /// Global objects: The PRNG, its seed value, and a 32-bit uniform distribution.
 /// Other distribution objects are instantiated locally as needed.
 
 extern MyRNG prng;
-extern MyRNG::result_type prng_seed;
+extern seed_type prng_seed;
 extern std::tr1::uniform_int<MyRNG::result_type> m_uniformUINT;
 
 

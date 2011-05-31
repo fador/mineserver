@@ -33,7 +33,7 @@
 
 #include "random.h"
 
-MyRNG::result_type prng_seed = 0;
+seed_type prng_seed = 0;
 
 MyRNG prng;
 
