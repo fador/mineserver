@@ -25,11 +25,16 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <fstream>
-#include <iostream>
+//#include <iostream>
 //#include <iomanip>
 #include <limits>
 #include <ctime>
+
+#ifdef WIN32
+#include <wincrypt.h>
+#else
+#include <fstream>
+#endif
 
 #include "random.h"
 
@@ -41,12 +46,30 @@ std::tr1::uniform_int<MyRNG::result_type> m_uniformUINT(0, std::numeric_limits<M
 
 void initPRNG()
 {
+  bool seedsuccess = false;
+
+#ifdef WIN32
+  HCRYPTPROV hCryptProv;
+  BYTE* pbData = reinterpret_cast<BYTE*>(&prng_seed);
+
+  if (CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, 0))
+  {
+    if (CryptGenRandom(hCryptProv, sizeof(prng_seed), pbData))
+    {
+      seedsuccess = true;
+    }
+    CryptReleaseContext(hCryptProv, 0);
+  }
+#else
   std::ifstream urandom("/dev/urandom");
   if (urandom)
   {
     urandom.read(reinterpret_cast<char*>(&prng_seed), sizeof(prng_seed));
+    seedsuccess = true;
   }
-  else
+#endif
+
+  if (!seedsuccess)
   {
     prng_seed = std::time(NULL);
   }
