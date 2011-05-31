@@ -31,18 +31,21 @@
 
 #include <stdint.h>
 
+#ifdef WIN32
+#include <random>
+typedef std::mt19937_64 MyRNG;
+#else
 #include "tr1.h"
 #include TR1INCLUDE(random)
-
 typedef std::tr1::mt19937 MyRNG;
-
+#endif
 
 /// Global objects: The PRNG, its seed value, and a 32-bit uniform distribution.
 /// Other distribution objects are instantiated locally as needed.
 
 extern MyRNG prng;
-extern uint32_t prng_seed;
-extern std::tr1::uniform_int<uint32_t> m_uniformUINT32;
+extern MyRNG::result_type prng_seed;
+extern std::tr1::uniform_int<MyRNG::result_type> m_uniformUINT;
 
 
 /// A function to initialize the PRNG.
@@ -52,14 +55,14 @@ void initPRNG();
 
 /// Some global accessor functions for useful distributions.
 
-inline uint32_t uniformUINT32()
+inline MyRNG::result_type uniformUINT()
 {
-  return m_uniformUINT32(prng);
+  return m_uniformUINT(prng);
 }
 
-inline uint32_t uniformUINT32(uint32_t min, uint32_t max)
+inline MyRNG::result_type uniformUINT(MyRNG::result_type min, MyRNG::result_type max)
 {
-  std::tr1::uniform_int<uint32_t> uni(min, max);
+  std::tr1::uniform_int<MyRNG::result_type> uni(min, max);
   return uni(prng);
 }
 
@@ -73,7 +76,7 @@ double uniform01();
 
 #define MAKE_UNIFORM_DIST(A,B) static inline unsigned int uniform_ ## A ## _ ## B()\
 {\
-  std::tr1::uniform_int<unsigned int> uni(A, B);\
+  std::tr1::uniform_int<MyRNG::result_type> uni(A, B);\
   return uni(prng);\
 }\
 

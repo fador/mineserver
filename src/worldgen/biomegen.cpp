@@ -633,7 +633,7 @@ void BiomeGen::AddOre(int x, int z, int map, uint8_t type)
     //blockZ += zBlockpos;
 
     // Calculate Y
-    blockY = uniformUINT32(0, blockY);
+    blockY = uniformUINT(0, blockY);
 
     block = chunk->blocks[blockY + ((blockZ << 7) + (blockX << 11))];
 
@@ -649,7 +649,7 @@ void BiomeGen::AddOre(int x, int z, int map, uint8_t type)
 
 void BiomeGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int minDepoSize, int maxDepoSize, sChunk* chunk)
 {
-  int depoSize = uniformUINT32(maxDepoSize - minDepoSize, maxDepoSize);
+  int depoSize = uniformUINT(maxDepoSize - minDepoSize, maxDepoSize);
 
   for (int i = 0; i < depoSize; i++)
   {

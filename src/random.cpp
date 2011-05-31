@@ -32,11 +32,11 @@
 
 #include "random.h"
 
-uint32_t prng_seed = 0;
+MyRNG::result_type prng_seed = 0;
 
 MyRNG prng;
 
-std::tr1::uniform_int<uint32_t> m_uniformUINT32(0, std::numeric_limits<uint32_t>::max());
+std::tr1::uniform_int<MyRNG::result_type> m_uniformUINT(0, std::numeric_limits<MyRNG::result_type>::max());
 
 void initPRNG()
 {
@@ -57,5 +57,5 @@ void initPRNG()
 
 double uniform01()
 {
-  return double(m_uniformUINT32(prng)) / double(std::numeric_limits<uint32_t>::max());
+  return double(m_uniformUINT(prng)) / double(std::numeric_limits<MyRNG::result_type>::max());
 }
