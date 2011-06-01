@@ -202,12 +202,12 @@ void Map::checkGenTrees()
       }
       else
       {
-        iter++;
+        ++iter;
       }
     }
     else
     {
-      iter++;
+      ++iter;
     }
   }
 }
@@ -1512,54 +1512,52 @@ bool Map::releaseMap(int x, int z)
   return true;
 }
 
-bool Map::sendMultiBlocks(std::vector<vec> & blocks)
+bool Map::sendMultiBlocks(std::set<vec>& blocks)
 {
-  while (blocks.size() > 0)
+  while (!blocks.empty())
   {
-    std::vector<vec> toRem;
-    int chunk_x = blockToChunk(blocks[0].x());
-    int chunk_z = blockToChunk(blocks[0].z());
-    for (size_t i = 0; i < blocks.size(); i++)
+    std::set<vec> toRem;
+    const vec firstblock = *blocks.begin();
+    const int chunk_x = blockToChunk(firstblock.x());
+    const int chunk_z = blockToChunk(firstblock.z());
+
+    for (std::set<vec>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
     {
-      int t_chunk_x = blockToChunk(blocks[i].x());
-      int t_chunk_z = blockToChunk(blocks[i].z());
+      const int t_chunk_x = blockToChunk(it->x());
+      const int t_chunk_z = blockToChunk(it->z());
+
       if (chunk_x == t_chunk_x && chunk_z == t_chunk_z)
       {
-        for (int j = toRem.size() - 1; j >= 0; j--)
-        {
-          if (toRem[j].x() == blocks[i].x() &&
-              toRem[j].y() == blocks[i].y() &&
-              toRem[j].z() == blocks[i].z())
-          {
-            continue;
-          }
-        }
-        toRem.push_back(blocks[i]);
+        toRem.insert(*it);
       }
     }
+
     Packet packet, pC, pT, pM;
-    int offsetx = chunk_x << 4, offsetz = chunk_z << 4;
+    unsigned int offsetx = chunk_x << 4;
+    unsigned int offsetz = chunk_z << 4;
+
     packet << (int8_t) PACKET_MULTI_BLOCK_CHANGE << (int32_t) chunk_x << (int32_t) chunk_z << (int16_t) toRem.size();
-    for (size_t i = 0; i < toRem.size(); i++)
+
+    for (std::set<vec>::const_iterator it = toRem.begin(); it != toRem.end(); ++it)
     {
       uint8_t block, meta;
-      Mineserver::get()->map(m_number)->getBlock(toRem[i].x(), toRem[i].y(), toRem[i].z(), &block, &meta);
+      Mineserver::get()->map(m_number)->getBlock(it->x(), it->y(), it->z(), &block, &meta);
+
       // Sending packet a uint16_t makes it assume int...
-      uint16_t coord = (((toRem[i].x() - offsetx) << 12) + ((toRem[i].z() - offsetz) << 8) + (toRem[i].y()));
+      uint16_t coord = (((it->x() - offsetx) << 12) + ((it->z() - offsetz) << 8) + (it->y()));
       int16_t* coord2 = (int16_t*)&coord;
+
       pC << (int16_t)(*coord2);
       pT << (int8_t) block;
       pM << (int8_t) meta;
-      for (int j = blocks.size() - 1; j >= 0; j--)
+
+      std::set<vec>::iterator jt = blocks.find(*it);
+      if (jt != blocks.end())
       {
-        if (blocks[j].x() == toRem[i].x() &&
-            blocks[j].y() == toRem[j].y() &&
-            blocks[j].z() == toRem[i].z())
-        {
-          blocks.erase(blocks.begin() + j);
-        }
+        blocks.erase(jt);
       }
     }
+
     toRem.clear();
 
     const ChunkMap::const_iterator it = chunks.find(Coords(chunk_x, chunk_z));

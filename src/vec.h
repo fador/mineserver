@@ -23,7 +23,7 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
 #ifndef _VEC_H
 #define _VEC_H
@@ -53,7 +53,7 @@ private:
   } data;
 #endif
 public:
-  vec(int x, int y, int z)
+  explicit vec(int x = 0, int y = 0, int z = 0)
   {
     data.arrayValue[0] = x;
     data.arrayValue[1] = y;
@@ -64,12 +64,6 @@ public:
     data.arrayValue[0] = values[0];
     data.arrayValue[1] = values[1];
     data.arrayValue[2] = values[2];
-  }
-  vec()
-  {
-    data.arrayValue[0] = 0;
-    data.arrayValue[1] = 0;
-    data.arrayValue[2] = 0;
   }
   vec(const vec& ov)
   {
@@ -164,15 +158,13 @@ public:
   {
     return *this = *this - ov;
   }
-  bool operator==(const vec& b)
+  bool operator==(const vec& b) const
   {
-    if (data.arrayValue[0] == b.x() &&
-        data.arrayValue[1] == b.y() &&
-        data.arrayValue[2] == b.z())
-    {
-      return true;
-    }
-    return false;
+    return x() == b.x() && y() == b.y() && z() == b.z();
+  }
+  bool operator<(const vec& b) const
+  {
+    return x() < b.x() || (x() == b.x() && y() < b.y()) || (x() == b.x() && y() == b.y() && z() < b.z());
   }
 
   int squareLength() const

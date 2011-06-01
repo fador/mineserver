@@ -165,7 +165,7 @@ public:
 
   bool sendProjectileSpawn(User* user, int8_t projID);
 
-  bool sendMultiBlocks(std::vector<vec> & blocks);
+  bool sendMultiBlocks(std::set<vec>& blocks);
 };
 
 #endif

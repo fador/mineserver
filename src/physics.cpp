@@ -73,7 +73,7 @@ bool Physics::update()
 
   std::vector<vec> toAdd;
   std::vector<vec> toRem;
-  std::vector<vec> changed;
+  std::set<vec> changed;
 
   clock_t starttime = clock();
 
@@ -131,9 +131,9 @@ bool Physics::update()
         if (falling && !isLiquidBlock(newblock))
         {
           Mineserver::get()->map(map)->setBlock(local, block, meta);
-          changed.push_back(local);
+          changed.insert(local);
           Mineserver::get()->map(map)->setBlock(pos, BLOCK_AIR, 0);
-          changed.push_back(pos);
+          changed.insert(pos);
           toRem.push_back(pos);
           toAdd.push_back(local);
           used = true;
@@ -167,18 +167,18 @@ bool Physics::update()
           {
             Mineserver::get()->map(map)->setBlock(pos, block, a_meta);
 
-            changed.push_back(pos);
+            changed.insert(pos);
           }
           else
           {
             Mineserver::get()->map(map)->setBlock(pos, BLOCK_AIR, 0);
-            changed.push_back(pos);
+            changed.insert(pos);
           }
           Mineserver::get()->map(map)->setBlock(local, block, a_newmeta);
           used = true;
           toAdd.push_back(local);
           toAdd.push_back(pos);
-          changed.push_back(pos);
+          changed.insert(pos);
           continue;
         }
 
@@ -195,17 +195,17 @@ bool Physics::update()
           // We are spreading onto dry area.
           newmeta = 7;
           Mineserver::get()->map(map)->setBlock(local, block, newmeta);
-          changed.push_back(local);
+          changed.insert(local);
           meta++;
           if (meta < 8)
           {
             Mineserver::get()->map(map)->setBlock(pos, block, meta);
-            changed.push_back(pos);
+            changed.insert(pos);
           }
           else
           {
             Mineserver::get()->map(map)->setBlock(pos, BLOCK_AIR, 0);
-            changed.push_back(pos);
+            changed.insert(pos);
             toRem.push_back(pos);
           }
           toAdd.push_back(local);
@@ -216,17 +216,17 @@ bool Physics::update()
         {
           newmeta --;
           Mineserver::get()->map(map)->setBlock(local, block, newmeta);
-          changed.push_back(local);
+          changed.insert(local);
           meta ++;
           if (meta < 8)
           {
             Mineserver::get()->map(map)->setBlock(pos, block, meta);
-            changed.push_back(pos);
+            changed.insert(pos);
           }
           else
           {
             Mineserver::get()->map(map)->setBlock(pos, BLOCK_AIR, 0);
-            changed.push_back(pos);
+            changed.insert(pos);
             toRem.push_back(pos);
           }
           toAdd.push_back(local);
