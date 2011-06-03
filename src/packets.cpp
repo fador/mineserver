@@ -177,7 +177,7 @@ int PacketHandler::change_sign(User* user)
     Packet pkt;
     pkt << (int8_t)PACKET_SIGN << x << y << z;
     pkt << strings1 << strings2 << strings3 << strings4;
-    user->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+    user->sendAll(pkt);
   }
 
   LOG2(INFO, "Sign: " + strings1 + strings2 + strings3 + strings4);
@@ -925,7 +925,7 @@ int PacketHandler::player_block_placement(User* user)
     Packet pkt;
     // MINECART
     pkt << PACKET_ADD_OBJECT << (int32_t)EID << (int8_t)10 << (int32_t)(x * 32 + 16) << (int32_t)(y * 32) << (int32_t)(z * 32 + 16);
-    user->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+    user->sendAll(pkt);
   }
 
   if (newblock == -1 && newblock != ITEM_SIGN)
@@ -1169,7 +1169,7 @@ int PacketHandler::holding_change(User* user)
   //Send holding change to others
   Packet pkt;
   pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)user->UID << (int16_t)0 << (int16_t)user->inv[itemSlot + 36].getType() << (int16_t)user->inv[itemSlot + 36].getHealth();
-  user->sendOthers((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+  user->sendOthers(pkt);
 
   // Set current itemID to user
   user->setCurrentItemSlot(itemSlot);
@@ -1192,7 +1192,7 @@ int PacketHandler::arm_animation(User* user)
 
   Packet pkt;
   pkt << (int8_t)PACKET_ARM_ANIMATION << (int32_t)user->UID << animType;
-  user->sendOthers((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+  user->sendOthers(pkt);
 
   (static_cast<Hook1<bool, const char*>*>(Mineserver::get()->plugin()->getHook("PlayerArmSwing")))->doAll(user->nick.c_str());
 
@@ -1291,7 +1291,7 @@ int PacketHandler::use_entity(User* user)
       pkt << PACKET_ATTACH_ENTITY << (int32_t)user->UID << (int32_t) - 1;
       user->attachedTo = 0;
     }
-    user->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+    user->sendAll(pkt);
     return PACKET_OK;
   }
 
@@ -1309,7 +1309,7 @@ int PacketHandler::use_entity(User* user)
         {
           Packet pkt;
           pkt << PACKET_DEATH_ANIMATION << (int32_t)(*it)->UID << (int8_t)3;
-          (*it)->sendOthers((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+          (*it)->sendOthers(pkt);
         }
         break;
       }
@@ -1349,8 +1349,7 @@ Packet& Packet::operator>>(int8_t& val)
 {
   if (haveData(1))
   {
-    val = *reinterpret_cast<const int8_t*>(&m_readBuffer[m_readPos]);
-    m_readPos += 1;
+    val = m_readBuffer[m_readPos++];
   }
   return *this;
 }
@@ -1358,7 +1357,7 @@ Packet& Packet::operator>>(int8_t& val)
 Packet& Packet::operator<<(int16_t val)
 {
   uint16_t nval = htons(val);
-  addToWrite(&nval, 2);
+  addToWrite(reinterpret_cast<const uint8_t*>(&nval), sizeof(nval));
   return *this;
 }
 
@@ -1366,8 +1365,10 @@ Packet& Packet::operator>>(int16_t& val)
 {
   if (haveData(2))
   {
-    val = ntohs(*reinterpret_cast<const int16_t*>(&m_readBuffer[m_readPos]));
-    m_readPos += 2;
+    int16_t res;
+    uint8_t* p = reinterpret_cast<uint8_t*>(&res);
+    for (size_t i = 0; i < sizeof(res); ++i) *p++ = m_readBuffer[m_readPos++];
+    val = ntohs(res);
   }
   return *this;
 }
@@ -1375,7 +1376,7 @@ Packet& Packet::operator>>(int16_t& val)
 Packet& Packet::operator<<(int32_t val)
 {
   uint32_t nval = htonl(val);
-  addToWrite(&nval, 4);
+  addToWrite(reinterpret_cast<const uint8_t*>(&nval), sizeof(nval));
   return *this;
 }
 
@@ -1383,8 +1384,10 @@ Packet& Packet::operator>>(int32_t& val)
 {
   if (haveData(4))
   {
-    val = ntohl(*reinterpret_cast<const int32_t*>(&m_readBuffer[m_readPos]));
-    m_readPos += 4;
+    int32_t res;
+    uint8_t* p = reinterpret_cast<uint8_t*>(&res);
+    for (size_t i = 0; i < sizeof(res); ++i) *p++ = m_readBuffer[m_readPos++];
+    val = ntohl(res);
   }
   return *this;
 }
@@ -1392,7 +1395,7 @@ Packet& Packet::operator>>(int32_t& val)
 Packet& Packet::operator<<(int64_t val)
 {
   uint64_t nval = ntohll(val);
-  addToWrite(&nval, 8);
+  addToWrite(reinterpret_cast<const uint8_t*>(&nval), sizeof(nval));
   return *this;
 }
 
@@ -1400,9 +1403,10 @@ Packet& Packet::operator>>(int64_t& val)
 {
   if (haveData(8))
   {
-    memcpy(&val, &m_readBuffer[m_readPos], 8);
+    int64_t res;
+    uint8_t* p = reinterpret_cast<uint8_t*>(&res);
+    for (size_t i = 0; i < sizeof(res); ++i) *p++ = m_readBuffer[m_readPos++];
     val = ntohll(val);
-    m_readPos += 8;
   }
   return *this;
 }
@@ -1410,9 +1414,9 @@ Packet& Packet::operator>>(int64_t& val)
 Packet& Packet::operator<<(float val)
 {
   uint32_t nval;
-  memcpy(&nval, &val , 4);
+  memcpy(&nval, &val, 4);
   nval = htonl(nval);
-  addToWrite(&nval, 4);
+  addToWrite(reinterpret_cast<const uint8_t*>(&nval), sizeof(nval));
   return *this;
 }
 
@@ -1420,9 +1424,11 @@ Packet& Packet::operator>>(float& val)
 {
   if (haveData(4))
   {
-    int32_t ival = ntohl(*reinterpret_cast<const int32_t*>(&m_readBuffer[m_readPos]));
+    uint32_t res;
+    uint8_t* p = reinterpret_cast<uint8_t*>(&res);
+    for (size_t i = 0; i < sizeof(res); ++i) *p++ = m_readBuffer[m_readPos++];
+    uint32_t ival = ntohl(res);
     memcpy(&val, &ival, 4);
-    m_readPos += 4;
   }
   return *this;
 }
@@ -1432,20 +1438,19 @@ Packet& Packet::operator<<(double val)
   uint64_t nval;
   memcpy(&nval, &val, 8);
   nval = ntohll(nval);
-  addToWrite(&nval, 8);
+  addToWrite(reinterpret_cast<const uint8_t*>(&nval), sizeof(nval));
   return *this;
 }
-
 
 Packet& Packet::operator>>(double& val)
 {
   if (haveData(8))
   {
-    uint64_t ival;
-    memcpy(&ival, &m_readBuffer[m_readPos], 8);
-    ival = ntohll(ival);
-    memcpy((void*)&val, (void*)&ival, 8);
-    m_readPos += 8;
+    uint64_t res;
+    uint8_t* p = reinterpret_cast<uint8_t*>(&res);
+    for (size_t i = 0; i < sizeof(res); ++i) *p++ = m_readBuffer[m_readPos++];
+    uint64_t ival = ntohll(res);
+    memcpy(&val, &ival, 8);
   }
   return *this;
 }
@@ -1456,12 +1461,12 @@ Packet& Packet::operator<<(const std::string& str)
   makeUCS2MessageFromUTF8(str, result);
 
   uint16_t lenval = htons(result.size());
-  addToWrite(&lenval, 2);
+  addToWrite(reinterpret_cast<const uint8_t*>(&lenval), 2);
 
   for (size_t i = 0;  i < result.size(); ++i)
   {
     uint16_t character = htons(result[i]);
-    addToWrite(&character, 2);
+    addToWrite(reinterpret_cast<const uint8_t*>(&character), 2);
   }
 
   return *this;
@@ -1472,8 +1477,8 @@ Packet& Packet::operator>>(std::string& str)
   uint16_t lenval;
   if (haveData(2))
   {
-    lenval = ntohs(*reinterpret_cast<const int16_t*>(&m_readBuffer[m_readPos]));
-    m_readPos += 2;
+    uint16_t lenval = 0;
+    *this >> (int16_t&)lenval;
 
     if (lenval && haveData(2 * lenval)) // We ASSUME that every character takes 2 bytes. DANGEROUS.
     {
@@ -1493,16 +1498,9 @@ Packet& Packet::operator>>(std::string& str)
   return *this;
 }
 
-void Packet::operator<<(Packet& other)
+void Packet::operator<<(const Packet& other)
 {
-  int dataSize = other.getWriteLen();
-  if (dataSize == 0)
-  {
-    return;
-  }
-  BufferVector::size_type start = m_writeBuffer.size();
-  m_writeBuffer.resize(start + dataSize);
-  memcpy(&m_writeBuffer[start], other.getWrite(), dataSize);
+  addToWrite(other);
 }
 
 // writeString and readString provide the old, 8-bit string features.
@@ -1510,25 +1508,25 @@ void Packet::operator<<(Packet& other)
 void Packet::writeString(const std::string& str)
 {
   uint16_t lenval = htons(str.size());
-  addToWrite(&lenval, 2);
-
-  addToWrite(&str[0], str.size());
+  addToWrite(reinterpret_cast<const uint8_t*>(&lenval), 2);
+  addToWrite(reinterpret_cast<const uint8_t*>(str.data()), str.length());
 }
 
 std::string Packet::readString()
 {
   std::string str;
-  uint16_t lenval;
+
   if (haveData(2))
   {
-    lenval = ntohs(*reinterpret_cast<const int16_t*>(&m_readBuffer[m_readPos]));
-    m_readPos += 2;
+    uint16_t lenval = 0;
+    *this >> (int16_t)lenval;
 
     if (lenval && haveData(lenval))
     {
-      str.assign((char*)&m_readBuffer[m_readPos], lenval);
-      m_readPos += lenval;
+      for (size_t i = 0; i < lenval; ++i)
+        str += m_readBuffer[m_readPos++];
     }
   }
+
   return str;
 }

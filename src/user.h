@@ -114,11 +114,16 @@ public:
   bool updateLook(float yaw, float pitch);
   int8_t relativeToBlock(const int32_t x, const int8_t y, const int32_t z);
 
-  bool sendOthers(uint8_t* data, uint32_t len);
-  static bool sendAll(uint8_t* data, uint32_t len);
-  static bool sendAdmins(uint8_t* data, uint32_t len);
-  static bool sendOps(uint8_t* data, uint32_t len);
-  static bool sendGuests(uint8_t* data, uint32_t len);
+  bool sendOthers(const Packet& packet);
+  bool sendOthers(uint8_t* data, size_t len);
+  static bool sendAll(const Packet& packet);
+  static bool sendAll(uint8_t* data, size_t len);
+  static bool sendAdmins(const Packet& packet);
+  static bool sendAdmins(uint8_t* data, size_t len);
+  static bool sendOps(const Packet& packet);
+  static bool sendOps(uint8_t* data, size_t len);
+  static bool sendGuests(const Packet& packet);
+  static bool sendGuests(uint8_t* data, size_t len);
 
   //Login
   bool sendLoginInfo();

@@ -715,11 +715,11 @@ bool Mineserver::run()
         // Send server time
         Packet pkt;
         pkt << (int8_t)PACKET_TIME_UPDATE << (int64_t)m_map[0]->mapTime;
-        (*User::all().begin())->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+        (*User::all().begin())->sendAll(pkt);
       }
 
       //Check for tree generation from saplings
-      for (std::vector<Map*>::size_type i = 0; i < m_map.size(); i++)
+      for (size_t i = 0; i < m_map.size(); ++i)
       {
         m_map[i]->checkGenTrees();
       }

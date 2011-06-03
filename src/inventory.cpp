@@ -46,14 +46,14 @@ void Item::sendUpdate()
       Packet pkt;
       pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)player->UID
           << (int16_t)0 << (int16_t)type << (int16_t) health;
-      player->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+      player->sendAll(pkt);
     }
     if (slot >= 5 && slot <= 8)
     {
       Packet pkt;
       pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)player->UID
           << (int16_t)(5 - (slot - 4)) << (int16_t)type << (int16_t) 0;
-      player->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+      player->sendAll(pkt);
     }
     int window = 0;
     int t_slot = slot;

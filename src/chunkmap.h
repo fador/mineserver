@@ -150,7 +150,7 @@ struct sChunk
     {
       if ((*it) != nosend && (*it)->logged)
       {
-        (*it)->buffer.addToWrite(packet.getWrite(), packet.getWriteLen());
+        (*it)->buffer.addToWrite(packet);
       }
     }
   }

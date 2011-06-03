@@ -23,13 +23,16 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
 #ifndef _PACKETS_H
 #define _PACKETS_H
 
+#include <vector>
+#include <deque>
 #include <string>
 #include <cstring>
+#include <iterator>
 #include <stdint.h>
 
 #define PACKET_NEED_MORE_DATA -3
@@ -111,58 +114,60 @@ enum
 
 class Packet
 {
-  typedef std::vector<uint8_t> BufferVector;
+  // A deque has random-access iterators, so we can track the read position in an integer.
+  typedef std::deque<uint8_t> BufferVector;
 
 private:
   BufferVector m_readBuffer;
-  BufferVector::size_type m_readPos;
+  BufferVector m_writeBuffer;
+  size_t m_readPos;
   bool m_isValid;
 
-  BufferVector m_writeBuffer;
-
 public:
-  Packet() : m_readPos(0), m_isValid(true) {}
-
-  bool haveData(int requiredBytes)
+  Packet()
+    :
+    m_readBuffer(),
+    m_writeBuffer(),
+    m_readPos(0),
+    m_isValid(true) 
   {
-    return m_isValid = m_isValid && ((m_readPos + requiredBytes) <= m_readBuffer.size());
   }
 
-  operator bool() const
+  inline uint8_t firstwrite() const { return m_writeBuffer.front(); }
+
+  inline bool haveData(int requiredBytes)
+  {
+    return m_isValid = m_isValid && (m_readPos + requiredBytes <= m_readBuffer.size());
+  }
+
+  inline operator bool() const
   {
     return m_isValid;
   }
 
-  void reset()
+  inline void reset()
   {
     m_readPos = 0;
     m_isValid = true;
   }
 
-  void addToRead(const BufferVector& buffer)
+  inline void addToRead(const uint8_t* const data, const size_t len)
   {
-    m_readBuffer.insert(m_readBuffer.end(), buffer.begin(), buffer.end());
+    m_readBuffer.insert(m_readBuffer.end(), data, data + len);
+    m_isValid = true;
   }
 
-  void addToRead(const void* data, BufferVector::size_type dataSize)
+  inline void addToWrite(const Packet& p)
   {
-    BufferVector::size_type start = m_readBuffer.size();
-    m_readBuffer.resize(start + dataSize);
-    memcpy(&m_readBuffer[start], data, dataSize);
+    m_writeBuffer.insert(m_writeBuffer.end(), p.m_writeBuffer.begin(), p.m_writeBuffer.end());
   }
 
-  void addToWrite(const void* data, BufferVector::size_type dataSize)
+  inline void addToWrite(const uint8_t* const buffer, const size_t len)
   {
-    if (dataSize == 0)
-    {
-      return;
-    }
-    BufferVector::size_type start = m_writeBuffer.size();
-    m_writeBuffer.resize(start + dataSize);
-    memcpy(&m_writeBuffer[start], data, dataSize);
+    m_writeBuffer.insert(m_writeBuffer.end(), buffer, buffer + len);
   }
 
-  void removePacket()
+  inline void removePacket()
   {
     m_readBuffer.erase(m_readBuffer.begin(), m_readBuffer.begin() + m_readPos);
     m_readPos = 0;
@@ -188,66 +193,56 @@ public:
   void writeString(const std::string& str);
   std::string readString();
 
-  void operator<<(Packet& other);
+  void operator<<(const Packet& other);
 
-  void getData(void* buf, int count)
+  inline void getData(uint8_t* buf, size_t count)
   {
     if (haveData(count))
     {
-      memcpy(buf, &m_readBuffer[m_readPos], count);
+      std::copy(m_readBuffer.begin() + m_readPos, m_readBuffer.begin() + m_readPos + count, buf);
       m_readPos += count;
     }
   }
 
-  void* getWrite()
-  {
-    return &m_writeBuffer[0];
-  }
-
-  const void* getWrite() const
-  {
-    return &m_writeBuffer[0];
-  }
-
-  size_t getWriteLen() const
+  inline size_t getWriteLen() const
   {
     return m_writeBuffer.size();
   }
 
-  void clearWrite(int count)
+  inline bool getWriteEmpty() const
   {
-    m_writeBuffer.erase(m_writeBuffer.begin(), m_writeBuffer.begin() + count);
+    return m_writeBuffer.empty();
+  }
+
+  inline void getWriteData(std::vector<char>& buf) const
+  {
+    buf.clear();
+    buf.resize(m_writeBuffer.size(), 0);
+    std::copy(m_writeBuffer.begin(), m_writeBuffer.end(), buf.begin());
+  }
+
+  inline void clearWrite(size_t count)
+  {
+    BufferVector::iterator it = m_writeBuffer.begin();
+    std::advance(it, count);
+    m_writeBuffer.erase(m_writeBuffer.begin(), it);
   }
 };
 
 
-
 struct Packets
 {
-  int len;
-  int (PacketHandler::*function)(User*);
+  typedef int (*handler_function)(User*);
 
-  //int (PacketHandler::*varLenFunction)(User *);
+  int len;
+  handler_function function;
 
   Packets(int newlen = PACKET_DOES_NOT_EXIST)
   : len(newlen)
   {
   }
 
-  /*  Packets(int newlen, void (PacketHandler::*newfunction)(uint *, User *))
-    {
-      len      = newlen;
-      function = newfunction;
-    }
-
-    Packets(int newlen, void (PacketHandler::*newfunction)(User *))
-    {
-      len            = newlen;
-      function = newfunction;
-    }
-  */
-
-  Packets(int newlen, int (PacketHandler::*newfunction)(User*))
+  Packets(int newlen, handler_function newfunction)
   : len(newlen), function(newfunction)
   {
   }
@@ -304,32 +299,32 @@ public:
   Packets packets[256];
 
   // The packet functions
-  int keep_alive(User* user);
-  int login_request(User* user);
-  int handshake(User* user);
-  int chat_message(User* user);
-  int player(User* user);
-  int player_position(User* user);
-  int player_look(User* user);
-  int player_position_and_look(User* user);
-  int player_digging(User* user);
-  int player_block_placement(User* user);
-  int holding_change(User* user);
-  int arm_animation(User* user);
-  int pickup_spawn(User* user);
-  int disconnect(User* user);
-  int use_entity(User* user);
-  int respawn(User* user);
-  int change_sign(User* user);
-  int inventory_transaction(User* user);
+  static int keep_alive(User* user);
+  static int login_request(User* user);
+  static int handshake(User* user);
+  static int chat_message(User* user);
+  static int player(User* user);
+  static int player_position(User* user);
+  static int player_look(User* user);
+  static int player_position_and_look(User* user);
+  static int player_digging(User* user);
+  static int player_block_placement(User* user);
+  static int holding_change(User* user);
+  static int arm_animation(User* user);
+  static int pickup_spawn(User* user);
+  static int disconnect(User* user);
+  static int use_entity(User* user);
+  static int respawn(User* user);
+  static int change_sign(User* user);
+  static int inventory_transaction(User* user);
 
-  int inventory_change(User* user);
-  int inventory_close(User* user);
-  int destroy_entity(User* user);
+  static int inventory_change(User* user);
+  static int inventory_close(User* user);
+  static int destroy_entity(User* user);
 
-  int entity_crouch(User* user);
+  static int entity_crouch(User* user);
 
-  int unhandledPacket(User* user);
+  static int unhandledPacket(User* user);
 };
 
 #endif

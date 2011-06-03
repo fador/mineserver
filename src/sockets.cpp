@@ -23,7 +23,7 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
 #ifdef WIN32
 #include <cstdlib>
@@ -54,28 +54,17 @@ extern int setnonblock(int fd);
 #define SOCKET_ERROR -1
 #endif
 
-void client_callback(int fd,
-                     short ev,
-                     void* arg)
+void client_callback(int fd, short ev, void* arg)
 {
-  User* user = (User*)arg;
-  /*
-  std::vector<User *>::const_iterator it = std::find (Mineserver::get()->users().begin(),
-                                                      Mineserver::get()->users().end(), user);
-  if(it == Mineserver::get()->users().end())
-  {
-    LOG2(INFO, "Using dead player!!!");
-    return;
-  }
-  */
+  User* user = reinterpret_cast<User*>(arg);
+
   if (ev & EV_READ)
   {
-
     int read   = 1;
-
     uint8_t* buf = new uint8_t[2048];
 
-    read = recv(fd, (char*)buf, 2048, 0);
+    read = recv(fd, reinterpret_cast<char*>(buf), 2048, 0);
+
     if (read == 0)
     {
       LOG2(INFO, "Socket closed properly");
@@ -110,10 +99,9 @@ void client_callback(int fd,
       if (Mineserver::get()->packetHandler()->packets[user->action].len == PACKET_VARIABLE_LEN)
       {
         //Call specific function
-        int (PacketHandler::*function)(User*) =
-          Mineserver::get()->packetHandler()->packets[user->action].function;
-        bool disconnecting = user->action == 0xFF;
-        int curpos = (Mineserver::get()->packetHandler()->*function)(user);
+        const bool disconnecting = user->action == 0xFF;
+        const int curpos = Mineserver::get()->packetHandler()->packets[user->action].function(user);
+
         if (curpos == PACKET_NEED_MORE_DATA)
         {
           user->waitForData = true;
@@ -132,7 +120,7 @@ void client_callback(int fd,
       else if (Mineserver::get()->packetHandler()->packets[user->action].len == PACKET_DOES_NOT_EXIST)
       {
         std::ostringstream str;
-        str << "Unknown action: 0x" << std::hex << user->action;
+        str << "Unknown action: 0x" << std::hex << (unsigned int)(user->action);
         LOG2(DEBUG, str.str());
 
         delete user;
@@ -150,16 +138,18 @@ void client_callback(int fd,
         }
 
         //Call specific function
-        int (PacketHandler::*function)(User*) = Mineserver::get()->packetHandler()->packets[user->action].function;
-        (Mineserver::get()->packetHandler()->*function)(user);
+        Mineserver::get()->packetHandler()->packets[user->action].function(user);
       }
-    } //End while
+    } // while(user->buffer)
   }
 
-  int writeLen = user->buffer.getWriteLen();
-  if (writeLen)
+  if (!user->buffer.getWriteEmpty())
   {
-    int written = send(fd, (char*)user->buffer.getWrite(), writeLen, 0);
+    std::vector<char> buf;
+    user->buffer.getWriteData(buf);
+
+    int written = send(fd, buf.data(), buf.size(), 0);
+
     if (written == SOCKET_ERROR)
     {
 #ifdef WIN32
@@ -170,7 +160,7 @@ void client_callback(int fd,
       if ((errno != EAGAIN && errno != EINTR))
 #endif
       {
-        LOG2(ERROR, "Error writing to client, tried to write " + dtos(writeLen) + " bytes, code: " + dtos(ERROR_NUMBER));
+        LOG2(ERROR, "Error writing to client, tried to write " + dtos(buf.size()) + " bytes, code: " + dtos(ERROR_NUMBER));
 
         delete user;
         user = (User*)5;
@@ -188,7 +178,7 @@ void client_callback(int fd,
       //user->write_err_count=0;
     }
 
-    if (user->buffer.getWriteLen())
+    if (!user->buffer.getWriteEmpty())
     {
       event_set(user->GetEvent(), fd, EV_WRITE | EV_READ, client_callback, user);
       event_add(user->GetEvent(), NULL);
@@ -200,27 +190,22 @@ void client_callback(int fd,
   event_add(user->GetEvent(), NULL);
 }
 
-void accept_callback(int fd,
-                     short ev,
-                     void* arg)
+void accept_callback(int fd, short ev, void* arg)
 {
-  int client_fd;
   struct sockaddr_in client_addr;
   socklen_t client_len = sizeof(client_addr);
 
+  const int client_fd = accept(fd, reinterpret_cast<sockaddr*>(&client_addr), &client_len);
 
-  client_fd = accept(fd,
-                     (struct sockaddr*)&client_addr,
-                     &client_len);
   if (client_fd < 0)
   {
     LOGLF("Client: accept() failed");
     return;
   }
-  User* client = new User(client_fd, Mineserver::generateEID());
+
+  User* const client = new User(client_fd, Mineserver::generateEID());
   setnonblock(client_fd);
 
   event_set(client->GetEvent(), client_fd, EV_WRITE | EV_READ, client_callback, client);
   event_add(client->GetEvent(), NULL);
-
 }

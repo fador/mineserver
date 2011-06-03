@@ -231,7 +231,7 @@ void Mob::look(int16_t yaw, int16_t pitch)
   pkt << PACKET_ENTITY_LOOK << (int32_t) UID << (int8_t) y_byte << (int8_t) p_byte;
   if (!User::all().empty())
   {
-    (*User::all().begin())->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+    (*User::all().begin())->sendAll(pkt);
   }
 }
 

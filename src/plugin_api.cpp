@@ -269,7 +269,7 @@ bool map_setTime(int timeValue)
 
   if (!User::all().empty())
   {
-    (*User::all().begin())->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+    (*User::all().begin())->sendAll(pkt);
   }
   return true;
 }

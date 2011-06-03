@@ -155,7 +155,7 @@ User::~User()
     uint8_t entityData[5];
     entityData[0] = 0x1d; // Destroy entity;
     putSint32(&entityData[1], this->UID);
-    this->sendOthers(&entityData[0], 5);
+    this->sendOthers(entityData, 5);
 
     // Loop every loaded chunk to make sure no user pointers are left!
 
@@ -242,7 +242,7 @@ bool User::sendLoginInfo()
   loginBuffer << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map(pos.map)->mapTime;
 
 
-  buffer.addToWrite((uint8_t*)loginBuffer.getWrite(), loginBuffer.getWriteLen());
+  buffer.addToWrite(loginBuffer);
   loginBuffer.reset();
 
   logged = true;
@@ -599,7 +599,7 @@ bool User::updatePos(double x, double y, double z, double stance)
         std::list<User*>::iterator iter = toremove.begin(), end = toremove.end();
         for (; iter != end ; iter++)
         {
-          (*iter)->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
+          (*iter)->buffer.addToWrite(pkt);
         }
       }
 
@@ -615,7 +615,7 @@ bool User::updatePos(double x, double y, double z, double stance)
         {
           if ((*iter) != this)
           {
-            (*iter)->buffer.addToWrite(pkt.getWrite(), pkt.getWriteLen());
+            (*iter)->buffer.addToWrite(pkt);
           }
         }
       }
@@ -732,21 +732,21 @@ bool User::updatePos(double x, double y, double z, double stance)
       end = toRemove.end();
       for (; iter != end ; iter++)
       {
-        (*iter)->buffer.addToWrite(destroyPkt.getWrite(), destroyPkt.getWriteLen());
+        (*iter)->buffer.addToWrite(destroyPkt);
       }
 
       iter = toAdd.begin();
       end = toAdd.end();
       for (; iter != end ; iter++)
       {
-        (*iter)->buffer.addToWrite(spawnPkt.getWrite(), spawnPkt.getWriteLen());
+        (*iter)->buffer.addToWrite(spawnPkt);
       }
 
       iter = toTeleport.begin();
       end = toTeleport.end();
       for (; iter != end ; iter++)
       {
-        (*iter)->buffer.addToWrite(telePacket.getWrite(), telePacket.getWriteLen());
+        (*iter)->buffer.addToWrite(telePacket);
       }
     }
 
@@ -754,8 +754,7 @@ bool User::updatePos(double x, double y, double z, double stance)
     if (newChunk->items.size())
     {
       // Loop through items and check if they are close enought to be picked up
-      std::vector<spawnedItem*>::iterator iter = newChunk->items.begin(), end = newChunk->items.end();
-      for (; iter != end; ++iter)
+      for (std::vector<spawnedItem*>::iterator iter = newChunk->items.begin(), end = newChunk->items.end(); iter != end; ++iter)
       {
         // No more than 2 blocks away
         if (abs((int32_t)x - ((*iter)->pos.x() / 32)) < 2 &&
@@ -876,7 +875,20 @@ bool User::updateLook(float yaw, float pitch)
   return true;
 }
 
-bool User::sendOthers(uint8_t* data, uint32_t len)
+bool User::sendOthers(const Packet& packet)
+{
+  for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
+  {
+    if ((*it)->fd != this->fd && (*it)->logged && !((*it)->dnd && packet.firstwrite() == PACKET_CHAT_MESSAGE))
+    {
+      (*it)->buffer.addToWrite(packet);
+    }
+  }
+
+  return true;
+}
+
+bool User::sendOthers(uint8_t* data, size_t len)
 {
   for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
@@ -923,7 +935,20 @@ int8_t User::relativeToBlock(const int32_t x, const int8_t y, const int32_t z)
   return direction;
 }
 
-bool User::sendAll(uint8_t* data, uint32_t len)
+bool User::sendAll(const Packet& packet)
+{
+  for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
+  {
+    if ((*it)->fd && (*it)->logged && !((*it)->dnd && packet.firstwrite() == PACKET_CHAT_MESSAGE))
+    {
+      (*it)->buffer.addToWrite(packet);
+    }
+  }
+
+  return true;
+}
+
+bool User::sendAll(uint8_t* data, size_t len)
 {
   for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
@@ -936,7 +961,20 @@ bool User::sendAll(uint8_t* data, uint32_t len)
   return true;
 }
 
-bool User::sendAdmins(uint8_t* data, uint32_t len)
+bool User::sendAdmins(const Packet& packet)
+{
+  for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
+  {
+    if ((*it)->fd && (*it)->logged && IS_ADMIN((*it)->permissions))
+    {
+      (*it)->buffer.addToWrite(packet);
+    }
+  }
+
+  return true;
+}
+
+bool User::sendAdmins(uint8_t* data, size_t len)
 {
   for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
@@ -949,7 +987,20 @@ bool User::sendAdmins(uint8_t* data, uint32_t len)
   return true;
 }
 
-bool User::sendOps(uint8_t* data, uint32_t len)
+bool User::sendOps(const Packet& packet)
+{
+  for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
+  {
+    if ((*it)->fd && (*it)->logged && IS_ADMIN((*it)->permissions))
+    {
+      (*it)->buffer.addToWrite(packet);
+    }
+  }
+
+  return true;
+}
+
+bool User::sendOps(uint8_t* data, size_t len)
 {
   for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
@@ -962,7 +1013,20 @@ bool User::sendOps(uint8_t* data, uint32_t len)
   return true;
 }
 
-bool User::sendGuests(uint8_t* data, uint32_t len)
+bool User::sendGuests(const Packet& packet)
+{
+  for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
+  {
+    if ((*it)->fd && (*it)->logged && IS_ADMIN((*it)->permissions))
+    {
+      (*it)->buffer.addToWrite(packet);
+    }
+  }
+
+  return true;
+}
+
+bool User::sendGuests(uint8_t* data, size_t len)
 {
   for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
@@ -1347,7 +1411,7 @@ bool User::sethealth(int userHealth)
     }
     Packet pkt;
     pkt << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID << (int8_t)2;
-    sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+    sendAll(pkt);
 
 
   }

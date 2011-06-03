@@ -1021,7 +1021,7 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
       << (int8_t)PACKET_ADD_OBJECT << (int32_t)EID << (int8_t)projID << (int32_t)pos.x() << (int32_t)pos.y() << (int32_t)pos.z()
       << (int8_t)PACKET_ENTITY_VELOCITY << (int32_t)EID << (int16_t)vel.x() << (int16_t)vel.y() << (int16_t)vel.z();
 
-  user->sendAll((uint8_t*)pkt.getWrite(), pkt.getWriteLen());
+  user->sendAll(pkt);
 
   return true;
 }
@@ -1618,7 +1618,7 @@ void Map::sendToUser(User* user, int x, int z, bool login)
   memcpy(&mapdata[32768 + 16384 + 16384], chunk->skylight, 16384);
 
   uLongf written = 81920;
-  Bytef* buffer = new Bytef[written];
+  uint8_t* buffer = new uint8_t[written];
 
   // Compress data with zlib deflate
   compress(buffer, &written, &mapdata[0], 81920);
@@ -1627,14 +1627,14 @@ void Map::sendToUser(User* user, int x, int z, bool login)
   (*p).addToWrite(buffer, written);
 
   //Push sign data to player
-  for (uint32_t i = 0; i < chunk->signs.size(); i++)
+  for (size_t i = 0; i < chunk->signs.size(); ++i)
   {
     (*p) << (int8_t)PACKET_SIGN << chunk->signs[i]->x << (int16_t)chunk->signs[i]->y << chunk->signs[i]->z;
     (*p) << chunk->signs[i]->text1 << chunk->signs[i]->text2 << chunk->signs[i]->text3 << chunk->signs[i]->text4;
   }
 
 
-  delete [] buffer;
+  delete[] buffer;
 
   delete[] data4;
   delete[] mapdata;
