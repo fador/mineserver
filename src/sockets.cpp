@@ -32,11 +32,15 @@
 typedef  int socklen_t;
 #endif
 
-#include <errno.h>
+#include <cerrno>
 #include <sstream>
+#include <algorithm>
 
+#include "tr1.h"
+#include TR1INCLUDE(array)
+
+#include "sockets.h"
 #include "tools.h"
-
 #include "logger.h"
 #include "constants.h"
 #include "user.h"
@@ -44,9 +48,8 @@ typedef  int socklen_t;
 #include "chat.h"
 #include "nbt.h"
 #include "mineserver.h"
-
 #include "packets.h"
-#include <algorithm>
+
 
 extern int setnonblock(int fd);
 
@@ -54,16 +57,20 @@ extern int setnonblock(int fd);
 #define SOCKET_ERROR -1
 #endif
 
-void client_callback(int fd, short ev, void* arg)
+static const size_t BUFSIZE = 2048;
+static std::tr1::array<uint8_t, BUFSIZE> BUF;
+static char* const cpBUF = reinterpret_cast<char*>(BUF.data());
+static uint8_t* const upBUF = BUF.data();
+
+extern "C" void client_callback(int fd, short ev, void* arg)
 {
   User* user = reinterpret_cast<User*>(arg);
 
   if (ev & EV_READ)
   {
-    int read   = 1;
-    uint8_t* buf = new uint8_t[2048];
+    int read = 1;
 
-    read = recv(fd, reinterpret_cast<char*>(buf), 2048, 0);
+    read = recv(fd, cpBUF, BUFSIZE, 0);
 
     if (read == 0)
     {
@@ -71,7 +78,6 @@ void client_callback(int fd, short ev, void* arg)
 
       delete user;
       user = (User*)1;
-      delete[] buf;
       return;
     }
 
@@ -81,15 +87,12 @@ void client_callback(int fd, short ev, void* arg)
 
       delete user;
       user = (User*)2;
-      delete[] buf;
       return;
     }
 
-    user->lastData = time(NULL);
+    user->lastData = std::time(NULL);
 
-    user->buffer.addToRead(buf, read);
-
-    delete[] buf;
+    user->buffer.addToRead(upBUF, read);
 
     user->buffer.reset();
 
@@ -148,7 +151,7 @@ void client_callback(int fd, short ev, void* arg)
     std::vector<char> buf;
     user->buffer.getWriteData(buf);
 
-    int written = send(fd, buf.data(), buf.size(), 0);
+    const int written = send(fd, buf.data(), buf.size(), 0);
 
     if (written == SOCKET_ERROR)
     {
@@ -190,9 +193,9 @@ void client_callback(int fd, short ev, void* arg)
   event_add(user->GetEvent(), NULL);
 }
 
-void accept_callback(int fd, short ev, void* arg)
+extern "C" void accept_callback(int fd, short ev, void* arg)
 {
-  struct sockaddr_in client_addr;
+  sockaddr_in client_addr;
   socklen_t client_len = sizeof(client_addr);
 
   const int client_fd = accept(fd, reinterpret_cast<sockaddr*>(&client_addr), &client_len);

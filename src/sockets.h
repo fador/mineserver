@@ -23,6 +23,12 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-void accept_callback(int fd, short ev, void* arg);
+/*
+  We declare functions that serve as C callbacks explicitly as 'extern "C"'
+  to avoid any potential ABI incompatibilities.
+*/
+
+extern "C" void accept_callback(int fd, short ev, void* arg);
+extern "C" void client_callback(int fd, short ev, void* arg);
