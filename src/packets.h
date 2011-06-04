@@ -204,11 +204,6 @@ public:
     }
   }
 
-  inline size_t getWriteLen() const
-  {
-    return m_writeBuffer.size();
-  }
-
   inline bool getWriteEmpty() const
   {
     return m_writeBuffer.empty();

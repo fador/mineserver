@@ -88,6 +88,18 @@ struct furnaceData
   int32_t map;
 };
 
+// The following predicate allows for finding *Data members based on their coordinates.
+template <typename T>
+struct DataFinder
+{
+  DataFinder(int32_t x, int32_t y, int32_t z) : x(x), y(y), z(z) { }
+  inline bool operator()(const std::tr1::shared_ptr<T> & t) const { return t->x == x && t->y == y && t->z == z; }
+private:
+  int32_t x;
+  int32_t y;
+  int32_t z;
+};
+
 typedef std::tr1::shared_ptr<chestData>   chestDataPtr;
 typedef std::tr1::shared_ptr<signData>    signDataPtr;
 typedef std::tr1::shared_ptr<furnaceData> furnaceDataPtr;

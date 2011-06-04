@@ -95,12 +95,7 @@ struct FurnaceDataFinder
 
 void FurnaceManager::removeFurnace(furnaceDataPtr data)
 {
-  FurnaceContainer::iterator it = std::find_if(m_activeFurnaces.begin(), m_activeFurnaces.end(), FurnaceDataFinder(data));
-
-  if (it != m_activeFurnaces.end())
-  {
-    m_activeFurnaces.erase(it);
-  }
+  m_activeFurnaces.remove_if(FurnaceDataFinder(data));
 }
 
 void FurnaceManager::handleActivity(furnaceDataPtr data)

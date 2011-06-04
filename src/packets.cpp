@@ -23,7 +23,7 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
 #include <sys/types.h>
 #ifdef WIN32
@@ -159,18 +159,9 @@ int PacketHandler::change_sign(User* user)
   if (chunk != NULL)
   {
     //Check if this sign data already exists and remove
-    //louisdx: Ugh, erase() from vector is not nice
-    for (size_t i = 0; i < chunk->signs.size(); ++i)
-    {
-      if (chunk->signs[i]->x == x &&
-          chunk->signs[i]->y == y &&
-          chunk->signs[i]->z == z)
-      {
-        //Erase existing data
-        chunk->signs.erase(chunk->signs.begin() + i);
-        break;
-      }
-    }
+    chunk->signs.erase(std::remove_if(chunk->signs.begin(), chunk->signs.end(), DataFinder<signData>(x,y,z)), chunk->signs.end());
+
+    // Insert new sign
     chunk->signs.push_back(newSign);
 
     //Send sign packet to everyone
