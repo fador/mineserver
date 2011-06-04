@@ -23,7 +23,7 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
 #include <cstdlib>
 
@@ -75,21 +75,12 @@ void BlockPlant::addBlock(PlantBlockPtr p2)
 
 void BlockPlant::remBlock(PlantBlockPtr p)
 {
-  std::vector<PlantBlockPtr>::iterator it = std::find(growingPlants.begin(), growingPlants.end(), p);
-  if (it != growingPlants.end())
-    growingPlants.erase(it);
+  growingPlants.erase(std::remove(growingPlants.begin(), growingPlants.end(), p), growingPlants.end());
 }
 
 void BlockPlant::remBlock(int x, int y, int z, int map)
 {
-  for (std::vector<PlantBlockPtr>::iterator it = growingPlants.begin(); it != growingPlants.end(); ++it)
-  {
-    if ((*it)->x == x && (*it)->y == y && (*it)->z == z && (*it)->map == map)
-    {
-      growingPlants.erase(it);
-      return;
-    }
-  }
+  growingPlants.erase(std::remove_if(growingPlants.begin(), growingPlants.end(), PlantBlockFinder(x,y,z,map)), growingPlants.end());
 }
 
 void BlockPlant::addBlock(int x, int y, int z, int map)

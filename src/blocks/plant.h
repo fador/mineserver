@@ -49,6 +49,12 @@ public:
 
 typedef std::tr1::shared_ptr<PlantBlock> PlantBlockPtr;
 
+struct PlantBlockFinder
+{
+  PlantBlockFinder(int x, int y, int z, int map) : x(x), y(y), z(z), map(map) { }
+  inline bool operator()(const PlantBlockPtr & t) const { return t->x == x && t->y == y && t->z == z && t->map == map; }
+  int x, y, z, map;
+};
 
 /** BlockPlant deals specifically with plant block functionality
 @see BlockBasic
