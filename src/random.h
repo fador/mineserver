@@ -38,6 +38,15 @@
 // This is our core PRNG engine. The Mersenne Twister is both fast and good.
 
 typedef std::tr1::mt19937 MyRNG;
+#if (defined(__GNUC__))
+/* GCC TR1 implementation has a bug, which doesn't produce a correct
+ * distribution on 64bit-machines when using mt19937 and uniform_int for 64bit
+ * integers together. Because GCC TR1 implementation is frozen, this bug won't
+ * be fixed and we need to limit uniform_int to 32bit integer */
+typedef std::tr1::uniform_int<uint32_t> MyUniform;
+#else
+typedef std::tr1::uniform_int<MyRNG::result_type> MyUniform;
+#endif
 
 
 // Ideally we would have "typedef MyRNG::result_type seed_type", but mt19937 is broken.
@@ -51,7 +60,7 @@ typedef unsigned long int seed_type;
 
 extern MyRNG prng;
 extern seed_type prng_seed;
-extern std::tr1::uniform_int<MyRNG::result_type> m_uniformUINT;
+extern MyUniform m_uniformUINT;
 
 
 /// A function to initialize the PRNG.
@@ -66,9 +75,9 @@ inline MyRNG::result_type uniformUINT()
   return m_uniformUINT(prng);
 }
 
-inline MyRNG::result_type uniformUINT(MyRNG::result_type min, MyRNG::result_type max)
+inline MyRNG::result_type uniformUINT(MyUniform::result_type min, MyUniform::result_type max)
 {
-  std::tr1::uniform_int<MyRNG::result_type> uni(min, max);
+  MyUniform uni(min, max);
   return uni(prng);
 }
 
@@ -82,7 +91,7 @@ double uniform01();
 
 #define MAKE_UNIFORM_DIST(A,B) static inline unsigned int uniform_ ## A ## _ ## B()\
 {\
-  std::tr1::uniform_int<MyRNG::result_type> uni(A, B);\
+  MyUniform uni(A, B);\
   return uni(prng);\
 }\
 
