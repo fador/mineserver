@@ -38,7 +38,6 @@ Mob::Mob()
   map(0),
   yaw(0),
   pitch(0),
-  meta(0),
   spawned(false),
   respawnable(false),
   health(0)
@@ -83,6 +82,14 @@ void Mob::animateDamage(int animID)
   for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
     (*it)->buffer << (int8_t)PACKET_DEATH_ANIMATION << (int32_t)UID << (int8_t)animID;
+  }
+}
+
+void Mob::updateMetadata()
+{
+  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
+  {
+    (*it)->buffer << (int8_t)PACKET_ENTITY_METADATA << (int32_t)UID << metadata;
   }
 }
 
@@ -136,15 +143,7 @@ void Mob::spawnToAll()
     {
       (*it)->buffer << (int8_t)PACKET_MOB_SPAWN << (int32_t) UID << (int8_t) type
                    << (int32_t)(x * 32.0) << (int32_t)(y * 32.0) << (int32_t)(z * 32.0) << (int8_t) yaw
-                   << (int8_t) pitch;
-      if (type == MOB_SHEEP)
-      {
-        (*it)->buffer << (int8_t) 0 << (int8_t) meta << (int8_t) 127;
-      }
-      else
-      {
-        (*it)->buffer << (int8_t) 127;
-      }
+                   << (int8_t) pitch << metadata;
     }
     spawned = true;
   }

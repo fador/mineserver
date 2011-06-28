@@ -90,6 +90,7 @@ enum
   PACKET_ENTITY_LOOK_RELATIVE_MOVE = 0x21,
   PACKET_ENTITY_TELEPORT           = 0x22,
   PACKET_DEATH_ANIMATION           = 0x26,
+  PACKET_ENTITY_METADATA           = 0x28,
   PACKET_PRE_CHUNK                 = 0x32,
   PACKET_MAP_CHUNK                 = 0x33,
   PACKET_MULTI_BLOCK_CHANGE        = 0x34,
