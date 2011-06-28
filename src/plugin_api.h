@@ -175,6 +175,9 @@ struct mob_pointer_struct
   void (*moveAnimal)(const char* userIn, size_t mobID);
   void (*animateMob)(const char* userIn, size_t mobID, int animID);
   void (*animateDamage)(const char* userIn, size_t mobID, int animID);
+  bool (*setByteMetadata)(int uid, int8_t idx, int8_t byte);
+  bool (*updateMetadata)(int uid);
+  int8_t (*getByteMetadata)(int uid, int idx);
   void* temp[97];
 
 };

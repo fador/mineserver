@@ -896,6 +896,32 @@ bool mob_getMobPositionW(int uid, double* x, double* y, double* z, int* w)
   return false;
 }
 
+bool mob_setByteMetadata(int uid, int8_t idx, int8_t val)
+{
+  MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
+  if (!m) return false;
+  m->metadata.set(new MetaDataElemByte(idx, val));
+  return true;
+}
+
+bool mob_updateMetadata(int uid)
+{
+  MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
+  if (!m) return false;
+  m->updateMetadata();
+  return true;
+}
+
+int8_t mob_getByteMetadata(int uid, int idx)
+{
+  MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
+  if (!m) return false;
+  MetaDataElemPtr x = m->metadata.get(idx);
+  MetaDataElemByte* data = dynamic_cast<MetaDataElemByte*>(x.get());
+  if (!data) return 0;
+  return data->val;
+}
+
 bool permission_setAdmin(const char* name)
 {
   User* tempuser = userFromName(std::string(name));
@@ -1069,6 +1095,9 @@ void init_plugin_api(void)
   plugin_api_pointers.mob.getMobPositionW          = &mob_getMobPositionW;
   plugin_api_pointers.mob.getLook                  = &mob_getLook;
   plugin_api_pointers.mob.setLook                  = &mob_setLook;
+  plugin_api_pointers.mob.setByteMetadata          = &mob_setByteMetadata;
+  plugin_api_pointers.mob.updateMetadata           = &mob_updateMetadata;
+  plugin_api_pointers.mob.getByteMetadata          = &mob_getByteMetadata;
 
   plugin_api_pointers.permissions.setAdmin         = &permission_setAdmin;
   plugin_api_pointers.permissions.setOp            = &permission_setOp;
