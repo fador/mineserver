@@ -34,3 +34,15 @@ void MetaData::set(MetaDataElem* el)
   }
   m_elem.push_back(MetaDataElemPtr(el));
 }
+
+MetaDataElemPtr MetaData::get(int8_t idx)
+{
+  for (std::vector<MetaDataElemPtr>::iterator i = m_elem.begin(); i != m_elem.end(); ++i)
+  {
+    if ((*i)->idx == idx)
+    {
+      return *i;
+    }
+  }
+  return MetaDataElemPtr();
+}

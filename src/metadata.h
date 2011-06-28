@@ -18,7 +18,6 @@ class MetaDataElemByte : public MetaDataElem
   public:
     MetaDataElemByte(int8_t _idx, int8_t _val);
     void output(Packet& p) const;
-  private:
     int8_t val;
 };
 
@@ -30,6 +29,7 @@ class MetaData
   friend Packet& operator<<(Packet& p, const MetaData& m);
   public:
     void set(MetaDataElem* p);
+    MetaDataElemPtr get(int8_t idx);
   private:
     std::vector<MetaDataElemPtr> m_elem;
 };
