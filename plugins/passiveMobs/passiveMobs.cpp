@@ -131,6 +131,39 @@ void fallMob(double* x, double* y, double* z, int w)
   }
 }
 
+int defaultHealth(int mob)
+{
+  switch (mob)
+  {
+    case MOB_PIG:
+    case MOB_COW:
+    case MOB_SHEEP:
+      return 10;
+    case MOB_CHICKEN:
+      return 4;
+    default:
+      return 10;
+  }
+}
+
+int defaultDamage(int item)
+{
+  switch (item)
+  {
+    case ITEM_WOODEN_SWORD:
+    case ITEM_GOLD_SWORD:
+      return 5;
+    case ITEM_STONE_SWORD:
+      return 7;
+    case ITEM_IRON_SWORD:
+      return 9;
+    case ITEM_DIAMOND_SWORD:
+      return 11;
+    default:
+      return 2;
+  }
+}
+
 void spawn()
 {
   if (MyMobs.size() < maxMobs &&
@@ -151,6 +184,7 @@ void spawn()
         y+=1;
         int type = passiveMobs[mineserver->tools.uniformInt(0, sizeof(passiveMobs) / sizeof(passiveMobs[0]) - 1)];
         int newMob = mineserver->mob.createMob(type);
+        mineserver->mob.setHealth(newMob, defaultHealth(type));
         MyPetMobPtr newMobData(new MyPetMob(newMob));
         MyMobs.push_back(newMobData);
         mineserver->mob.moveMobW(newMob,x,y,z,w);
@@ -166,7 +200,6 @@ void spawn()
     }
   }
 }
-
 
 void timer200Function()
 {
@@ -303,7 +336,12 @@ void drop(int mobID)
 void gotAttacked(const char* userIn,int mobID)
 {
   std::string user(userIn);
+  int atk_item, _meta, _quant;
+  mineserver->user.getItemInHand(userIn, &atk_item, &_meta, &_quant);
   int mobHealth = mineserver->mob.getHealth((int)mobID);
+
+  if (mobHealth <= 0) return;
+
   int type = mineserver->mob.getType(mobID);
   double x, y, z; int w;
   mineserver->mob.getMobPositionW(mobID, &x, &y, &z, &w);
@@ -320,9 +358,9 @@ void gotAttacked(const char* userIn,int mobID)
     }
   }
 
-  mobHealth--;
+  mobHealth -= defaultDamage(atk_item);
 
-  if (mobHealth == 0)
+  if (mobHealth <= 0)
   {
     drop(mobID);
   }

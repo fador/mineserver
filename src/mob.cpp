@@ -116,27 +116,6 @@ void Mob::moveAnimal()
 
 void Mob::spawnToAll()
 {
-  if (type == MOB_PIG)
-  {
-    health = 10;
-  }
-  if (type == MOB_SHEEP)
-  {
-    health = 10;
-  }
-  if (type == MOB_COW)
-  {
-    health = 10;
-  }
-  if (type == MOB_CHICKEN)
-  {
-    health = 4;
-  }
-  if (type == MOB_SQUID)
-  {
-    health = 10;
-  }
-
   for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
     if ((*it)->logged)
