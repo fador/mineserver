@@ -184,19 +184,8 @@ void timer200Function()
       }
       else
       {
-        int type = mineserver->mob.getType(MyMobs[i]->ID);
-        int item = 0,count = 0;
-        if (type == 90) { item = 319; count = (rand()%4); }
-        if (type == 91) { item = 35; count = (rand()%5);  }
-        if (type == 92) { item = 334; count = (rand()%6); }
-        if (type == 93) { item = 288; count = (rand()%8); }
         mineserver->mob.despawnMob(MyMobs[i]->ID);
-        if (item != 0)
-        {
-          mineserver->map.createPickupSpawn((int)floor(x),(int)floor(y),(int)floor(z),
-                                            item, count, 0,NULL);
-        }
-        // TODO : Fix obvious gaping memory leak
+        /* TODO: fix memory leak */
         MyMobs.erase(MyMobs.begin()+i);
       }
       continue;
@@ -280,20 +269,46 @@ void timer200Function()
   }
 }
 
+void drop(int mobID)
+{
+  int type = mineserver->mob.getType(mobID);
+  double x,y,z;
+  int w;
+  mineserver->mob.getMobPositionW(mobID,&x,&y,&z,&w);
+  int item = 0, count = 1;
+  switch (type)
+  {
+    case MOB_PIG:
+      item = ITEM_PORK;
+      break;
+    case MOB_SHEEP:
+      /* sheep drops on first hit */
+      break;
+    case MOB_COW:
+      item = ITEM_LEATHER;
+      break;
+    case MOB_CHICKEN:
+      item = ITEM_FEATHER;
+      break;
+  }
+  if (item)
+  {
+    mineserver->map.createPickupSpawn((int)floor(x),(int)floor(y),(int)floor(z),
+                                      item, count, 0,NULL);
+  }
+}
+
 void gotAttacked(const char* userIn,int mobID)
 {
   std::string user(userIn);
   int mobHealth = mineserver->mob.getHealth((int)mobID);
   mobHealth--;
-  if (mobHealth != 0)
+
+  if (mobHealth == 0)
   {
-    //mineserver->mob.moveAnimal(user.c_str(), (int)mobID);
-    mineserver->mob.animateDamage(user.c_str(), (int)mobID, 2); //Hurt
+    drop(mobID);
   }
-  else
-  {
-    mineserver->mob.animateDamage(user.c_str(), (int)mobID, 3); //Death
-  }
+
   mineserver->mob.setHealth((int)mobID, (int)mobHealth);
 }
 

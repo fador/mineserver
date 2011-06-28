@@ -65,19 +65,17 @@ void Mob::sethealth(int health)
   {
     health = 30;
   }
-  if (health < this->health)
+	if (health == 0)
+	{
+		animateDamage(ANIMATE_DEAD);
+//		deSpawnToAll();
+	}
+	else if (health < this->health)
   {
-    for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
-    {
-      (*it)->buffer << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID << (int8_t)2;
-      // Hurt animation
-    }
+		animateDamage(ANIMATE_HURT);
+		animateMob(ANIMATE_DAMAGE);
   }
   this->health = health;
-  if (this->health <= 0)
-  {
-    deSpawnToAll();
-  }
 }
 //Possible values: 2 (entity hurt), 3 (entity dead?), 4, 5
 void Mob::animateDamage(int animID)

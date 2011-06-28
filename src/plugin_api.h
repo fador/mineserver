@@ -51,6 +51,7 @@
 #define PLUGIN_API_EXPORT extern "C"
 #define CALLCONVERSION
 #endif
+#include "constants_num.h"
 
 typedef void (*voidF)(); // voidF is a "void"-like function pointer
 

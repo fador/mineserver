@@ -813,15 +813,7 @@ int mob_getHealth(int uid)
 
 void mob_setHealth(int uid, int mobHealth)
 {
-  if (mobHealth < 0)
-  {
-    mobHealth = 0;
-  }
-  else if (mobHealth > 20)
-  {
-    mobHealth = 20;
-  }
-  Mineserver::get()->mobs()->getMobByID(uid)->health = mobHealth;
+  Mineserver::get()->mobs()->getMobByID(uid)->sethealth(mobHealth);
 }
 
 void mob_moveAnimal(const char*, size_t mobID)
