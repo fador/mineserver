@@ -63,9 +63,8 @@ std::string dtos(double n)
   return result.str();
 }
 
-static const char* Mobnames[] = { "Chicken", "Pig", "Sheep", "Cow" };
-static const char* enemyMobNames[] = { "Spider", "Zombie", "Skeleton", "Creeper" };
- 
+static const int passiveMobs[] = { MOB_SHEEP, MOB_COW, MOB_CHICKEN, MOB_PIG };
+
 // The list of Mobs this plugin has control of
 // Note that other plugins may make other mobs, and control them itself
 class MyPetMob
@@ -132,43 +131,46 @@ void fallMob(double* x, double* y, double* z, int w)
   }
 }
 
-void timer200Function()
+void spawn()
 {
-  if (MyMobs.size() < maxMobs && time(NULL)-lastSpawn > 2)
+  if (MyMobs.size() < maxMobs &&
+      time(NULL)-lastSpawn > 2 &&
+      mineserver->user.getCount() > 0 &&
+      mineserver->map.getTime() <= 18000)
   {
-    if (mineserver->user.getCount() > 0)
+    int randomPlayer = mineserver->tools.uniformInt(0, mineserver->user.getCount() - 1);
+    double x,y,z;
+    int w;
+    if (mineserver->user.getPositionW(mineserver->user.getUserNumbered(randomPlayer),&x,&y,&z,&w,NULL,NULL,NULL))
     {
-      int randomPlayer = rand()%mineserver->user.getCount();
-      double x,y,z;
-      int w;
-      if (mineserver->user.getPositionW(mineserver->user.getUserNumbered(randomPlayer),&x,&y,&z,&w,NULL,NULL,NULL))
+      x += mineserver->tools.uniformInt(-50, 50);
+      z += mineserver->tools.uniformInt(-50, 50);
+      y = topBlockSuitable(x,z,w);
+      if (y > 0)
       {
-        x += ((rand()%100)-50);
-        z += ((rand()%100)-50);
-        y = topBlockSuitable(x,z,w);
-        if (y > 0)
+        y+=1;
+        int type = passiveMobs[mineserver->tools.uniformInt(0, sizeof(passiveMobs) / sizeof(passiveMobs[0]) - 1)];
+        int newMob = mineserver->mob.createMob(type);
+        MyPetMobPtr newMobData(new MyPetMob(newMob));
+        MyMobs.push_back(newMobData);
+        mineserver->mob.moveMobW(newMob,x,y,z,w);
+        mineserver->mob.spawnMob(newMob);
+        if (type == MOB_SHEEP)
         {
-          y+=1;
-          int randomMob = rand()%4;
-          int newMob = 0;
-          if (mineserver->map.getTime() > 18000 && mineserver->map.getTime() < 24000)
-          {
-            newMob = mineserver->mob.createMob(enemyMobNames[randomMob]);
-          }
-          else
-          {
-            newMob = mineserver->mob.createMob(Mobnames[randomMob]);
-          }
-          MyPetMobPtr newMobData(new MyPetMob(newMob));
-          MyMobs.push_back(newMobData);
-          mineserver->mob.moveMobW(newMob,x,y,z,w);
-          mineserver->mob.spawnMob(newMob);
-
-          lastSpawn=time(NULL);
+          int color = mineserver->tools.uniformInt(0, 15);
+          mineserver->mob.setByteMetadata(newMob, 16, (int8_t)color);
+          mineserver->mob.updateMetadata(newMob);
         }
+        lastSpawn=time(NULL);
       }
     }
   }
+}
+
+
+void timer200Function()
+{
+  spawn();
 
   for (int i = MyMobs.size() - 1; i >= 0; i--)
   {
@@ -311,7 +313,7 @@ void gotAttacked(const char* userIn,int mobID)
     if (!(meta & 0x10))
     {
       mineserver->map.createPickupSpawn((int)floor(x),(int)floor(y),(int)floor(z),
-                                        BLOCK_WOOL, 1, 0, NULL);
+                                        BLOCK_WOOL, 1, meta, NULL);
       meta |= 0x10;
       mineserver->mob.setByteMetadata(mobID, 16, meta);
       mineserver->mob.updateMetadata(mobID);

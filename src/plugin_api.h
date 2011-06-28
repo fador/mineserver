@@ -159,7 +159,7 @@ struct config_pointer_struct
 
 struct mob_pointer_struct
 {
-  int (*createMob)(const char* name);
+  int (*createMob)(int type);
   int (*spawnMobN)(const char* name);
   void (*spawnMob)(int uid);
   void (*despawnMob)(int uid);
@@ -196,6 +196,12 @@ struct permission_pointer_struct
 
 };
 
+struct tools_pointer_struct
+{
+  int (*uniformInt)(int a, int b);
+  double (*uniform01)();
+};
+
 struct mineserver_pointer_struct
 {
   struct map_pointer_struct map;
@@ -206,7 +212,7 @@ struct mineserver_pointer_struct
   struct config_pointer_struct config;
   struct mob_pointer_struct mob;
   struct permission_pointer_struct permissions;
-
+  struct tools_pointer_struct tools;
   void* temp[99];
 };
 

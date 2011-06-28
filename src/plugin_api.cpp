@@ -36,6 +36,7 @@
 #include "config.h"
 #include "map.h"
 #include "mob.h"
+#include "random.h"
 #include "blocks/default.h"
 #include "blocks/falling.h"
 #include "blocks/torch.h"
@@ -49,7 +50,6 @@
 #include "blocks/tracks.h"
 #include "blocks/chest.h"
 #include "blocks/note.h"
-
 #define MINESERVER
 #include "plugin_api.h"
 
@@ -757,9 +757,8 @@ bool config_bData(const char* name)
   return Mineserver::get()->config()->bData(std::string(name));
 }
 
-int mob_createMob(const char* name)
+int mob_createMob(int type)
 {
-  int type = Mineserver::get()->mobs()->mobNametoType(std::string(name));
   MobPtr m = Mineserver::get()->mobs()->createMob();
   m->type = type;
   return Mineserver::get()->mobs()->getAll().size() - 1;
@@ -1009,6 +1008,20 @@ bool permission_isGuest(const char* name)
   return IS_GUEST(tempuser->permissions);
 }
 
+int tools_uniformInt(int a, int b)
+{
+  if (a < 0)
+  {
+    return uniformUINT(0, b - a) + a;
+  }
+  return uniformUINT(a, b);
+}
+
+double tools_uniform01()
+{
+  return uniform01();
+}
+
 void init_plugin_api(void)
 {
   plugin_api_pointers.logger.log                   = &logger_log;
@@ -1107,5 +1120,7 @@ void init_plugin_api(void)
   plugin_api_pointers.permissions.isOp             = &permission_isOp;
   plugin_api_pointers.permissions.isMember         = &permission_isMember;
   plugin_api_pointers.permissions.isGuest          = &permission_isGuest;
-
+  
+  plugin_api_pointers.tools.uniformInt             = &tools_uniformInt;
+  plugin_api_pointers.tools.uniform01              = &tools_uniform01;
 }
