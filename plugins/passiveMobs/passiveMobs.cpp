@@ -302,13 +302,28 @@ void gotAttacked(const char* userIn,int mobID)
 {
   std::string user(userIn);
   int mobHealth = mineserver->mob.getHealth((int)mobID);
+  int type = mineserver->mob.getType(mobID);
+  double x, y, z; int w;
+  mineserver->mob.getMobPositionW(mobID, &x, &y, &z, &w);
+  if (type == MOB_SHEEP)
+  {
+    int8_t meta = mineserver->mob.getByteMetadata(mobID, 16);
+    if (!(meta & 0x10))
+    {
+      mineserver->map.createPickupSpawn((int)floor(x),(int)floor(y),(int)floor(z),
+                                        BLOCK_WOOL, 1, 0, NULL);
+      meta |= 0x10;
+      mineserver->mob.setByteMetadata(mobID, 16, meta);
+      mineserver->mob.updateMetadata(mobID);
+    }
+  }
+
   mobHealth--;
 
   if (mobHealth == 0)
   {
     drop(mobID);
   }
-
   mineserver->mob.setHealth((int)mobID, (int)mobHealth);
 }
 
