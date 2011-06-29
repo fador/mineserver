@@ -42,7 +42,7 @@ seed_type prng_seed = 0;
 
 MyRNG prng;
 
-std::tr1::uniform_int<MyRNG::result_type> m_uniformUINT(0, std::numeric_limits<MyRNG::result_type>::max());
+MyUniform m_uniformUINT(0, std::numeric_limits<MyUniform::result_type>::max());
 
 void initPRNG()
 {
@@ -82,5 +82,5 @@ void initPRNG()
 
 double uniform01()
 {
-  return double(m_uniformUINT(prng)) / double(std::numeric_limits<MyRNG::result_type>::max());
+  return double(m_uniformUINT(prng)) / double(std::numeric_limits<MyUniform::result_type>::max());
 }

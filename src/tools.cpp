@@ -204,7 +204,7 @@ bool makeDirectory(const std::string& path)
 #ifdef WIN32
   return _mkdir(path.c_str()) != -1;
 #else
-  return mkdir(path.c_str(), 0755) == -1;
+  return mkdir(path.c_str(), 0755) != -1;
 #endif
 }
 
