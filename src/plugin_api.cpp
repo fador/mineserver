@@ -36,6 +36,7 @@
 #include "config.h"
 #include "map.h"
 #include "mob.h"
+#include "random.h"
 #include "blocks/default.h"
 #include "blocks/falling.h"
 #include "blocks/torch.h"
@@ -49,7 +50,6 @@
 #include "blocks/tracks.h"
 #include "blocks/chest.h"
 #include "blocks/note.h"
-
 #define MINESERVER
 #include "plugin_api.h"
 
@@ -757,17 +757,15 @@ bool config_bData(const char* name)
   return Mineserver::get()->config()->bData(std::string(name));
 }
 
-int mob_createMob(const char* name)
+int mob_createMob(int type)
 {
-  int type = Mineserver::get()->mobs()->mobNametoType(std::string(name));
   MobPtr m = Mineserver::get()->mobs()->createMob();
   m->type = type;
   return Mineserver::get()->mobs()->getAll().size() - 1;
 }
 
-int mob_spawnMobN(const char* name)
+int mob_createSpawnMob(int type)
 {
-  int type = Mineserver::get()->mobs()->mobNametoType(std::string(name));
   MobPtr m = Mineserver::get()->mobs()->createMob();
   m->type = type;
   m->spawnToAll();
@@ -813,15 +811,7 @@ int mob_getHealth(int uid)
 
 void mob_setHealth(int uid, int mobHealth)
 {
-  if (mobHealth < 0)
-  {
-    mobHealth = 0;
-  }
-  else if (mobHealth > 20)
-  {
-    mobHealth = 20;
-  }
-  Mineserver::get()->mobs()->getMobByID(uid)->health = mobHealth;
+  Mineserver::get()->mobs()->getMobByID(uid)->sethealth(mobHealth);
 }
 
 void mob_moveAnimal(const char*, size_t mobID)
@@ -902,6 +892,32 @@ bool mob_getMobPositionW(int uid, double* x, double* y, double* z, int* w)
     return true;
   }
   return false;
+}
+
+bool mob_setByteMetadata(int uid, int8_t idx, int8_t val)
+{
+  MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
+  if (!m) return false;
+  m->metadata.set(new MetaDataElemByte(idx, val));
+  return true;
+}
+
+bool mob_updateMetadata(int uid)
+{
+  MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
+  if (!m) return false;
+  m->updateMetadata();
+  return true;
+}
+
+int8_t mob_getByteMetadata(int uid, int idx)
+{
+  MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
+  if (!m) return false;
+  MetaDataElemPtr x = m->metadata.get(idx);
+  MetaDataElemByte* data = dynamic_cast<MetaDataElemByte*>(x.get());
+  if (!data) return 0;
+  return data->val;
 }
 
 bool permission_setAdmin(const char* name)
@@ -991,6 +1007,20 @@ bool permission_isGuest(const char* name)
   return IS_GUEST(tempuser->permissions);
 }
 
+int tools_uniformInt(int a, int b)
+{
+  if (a < 0)
+  {
+    return uniformUINT(0, b - a) + a;
+  }
+  return uniformUINT(a, b);
+}
+
+double tools_uniform01()
+{
+  return uniform01();
+}
+
 void init_plugin_api(void)
 {
   plugin_api_pointers.logger.log                   = &logger_log;
@@ -1062,7 +1092,7 @@ void init_plugin_api(void)
   plugin_api_pointers.config.bData                 = &config_bData;
 
   plugin_api_pointers.mob.createMob                = &mob_createMob;
-  plugin_api_pointers.mob.spawnMobN                = &mob_spawnMobN;
+  plugin_api_pointers.mob.createSpawnMob           = &mob_createSpawnMob;
   plugin_api_pointers.mob.spawnMob                 = &mob_spawnMob;
   plugin_api_pointers.mob.despawnMob               = &mob_despawnMob;
   plugin_api_pointers.mob.moveMob                  = &mob_moveMob;
@@ -1077,6 +1107,9 @@ void init_plugin_api(void)
   plugin_api_pointers.mob.getMobPositionW          = &mob_getMobPositionW;
   plugin_api_pointers.mob.getLook                  = &mob_getLook;
   plugin_api_pointers.mob.setLook                  = &mob_setLook;
+  plugin_api_pointers.mob.setByteMetadata          = &mob_setByteMetadata;
+  plugin_api_pointers.mob.updateMetadata           = &mob_updateMetadata;
+  plugin_api_pointers.mob.getByteMetadata          = &mob_getByteMetadata;
 
   plugin_api_pointers.permissions.setAdmin         = &permission_setAdmin;
   plugin_api_pointers.permissions.setOp            = &permission_setOp;
@@ -1086,5 +1119,7 @@ void init_plugin_api(void)
   plugin_api_pointers.permissions.isOp             = &permission_isOp;
   plugin_api_pointers.permissions.isMember         = &permission_isMember;
   plugin_api_pointers.permissions.isGuest          = &permission_isGuest;
-
+  
+  plugin_api_pointers.tools.uniformInt             = &tools_uniformInt;
+  plugin_api_pointers.tools.uniform01              = &tools_uniform01;
 }

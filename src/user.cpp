@@ -225,15 +225,7 @@ bool User::sendLoginInfo()
     {
       loginBuffer << PACKET_MOB_SPAWN << (int32_t)(*i)->UID << (int8_t)(*i)->type
                   << (int32_t)(*i)->x << (int32_t)(*i)->y << (int32_t)(*i)->z
-                  << (int8_t)(*i)->yaw << (int8_t)(*i)->pitch;
-      if ((*i)->type == MOB_SHEEP)
-      {
-        loginBuffer << (int8_t) 0 << (int8_t)(*i)->meta << (int8_t) 127;
-      }
-      else
-      {
-        loginBuffer << (int8_t) 127;
-      }
+                  << (int8_t)(*i)->yaw << (int8_t)(*i)->pitch << (*i)->metadata;
     }
   }
 
