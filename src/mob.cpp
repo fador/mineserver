@@ -146,8 +146,7 @@ void Mob::moveTo(double to_x, double to_y, double to_z, int to_map)
   }
   if(dx <= 4 && dy <= 4 && dz <= 4)
   {
-//    User::sendAll(Protocol::entityRelativeMove(UID, dx, dy, dz));
-      teleportToAll();
+    User::sendAll(Protocol::entityRelativeMove(UID, dx, dy, dz));
   }
   else
   {
@@ -172,5 +171,5 @@ void Mob::look(int16_t yaw, int16_t pitch)
   int8_t p_byte = (int8_t)((pitch * 1.0) / 360.0 * 256.0);
   this->pitch = p_byte;
   this->yaw = y_byte;
-//  User::sendAll(Protocol::entityLook(UID, yaw, pitch));
+  User::sendAll(Protocol::entityLook(UID, yaw, pitch));
 }

@@ -60,20 +60,28 @@ class Protocol
       return ret;
     }
 
-    static Packet entityLook(int eid, int yaw, int pitch) // BROKEN
+    static Packet entityLook(int eid, int yaw, int pitch)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ENTITY_LOOK << (int8_t)yaw << (int8_t)pitch;
+      ret << (int8_t)PACKET_ENTITY_LOOK << (int32_t)eid << (int8_t)yaw << (int8_t)pitch;
       return ret;
     }
     
-    static Packet entityRelativeMove(int eid, double dx, double dy, double dz) // BROKEN
+    static Packet entityRelativeMove(int eid, double dx, double dy, double dz)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ENTITY_RELATIVE_MOVE
+      ret << (int8_t)PACKET_ENTITY_RELATIVE_MOVE << (int32_t)eid
           << (int8_t)(dx * 32) << (int8_t)(dy * 32) << (int8_t)(dz * 32);
       return ret;
     }
-
+    
+    static Packet entityLookRelativeMove(int eid, double dx, double dy, double dz, int yaw, int pitch)
+    {
+      Packet ret;
+      ret << (int8_t)PACKET_ENTITY_LOOK_RELATIVE_MOVE << (int32_t)eid
+          << (int8_t)(dx * 32) << (int8_t)(dy * 32) << (int8_t)(dz * 32)
+          << (int8_t)yaw << (int8_t)pitch;
+      return ret;
+    }
 };
 #endif
