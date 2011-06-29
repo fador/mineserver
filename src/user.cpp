@@ -1418,7 +1418,7 @@ bool User::respawn()
 {
   this->health = 20;
   this->timeUnderwater = 0;
-  buffer << (int8_t)PACKET_RESPAWN;
+  buffer << (int8_t)PACKET_RESPAWN << (int8_t)0; //FIXME: send the correct world id
   Packet destroyPkt;
   destroyPkt << (int8_t)PACKET_DESTROY_ENTITY << (int32_t)UID;
   sChunk* chunk = Mineserver::get()->map(pos.map)->getMapData(blockToChunk((int32_t)pos.x), blockToChunk((int32_t)pos.z));
