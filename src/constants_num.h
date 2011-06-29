@@ -43,6 +43,7 @@ enum
 };
 
 // Chat colors
+#ifdef __cplusplus
 #define MC_COLOR_BLACK std::string("§0")
 #define MC_COLOR_DARK_BLUE std::string("§1")
 #define MC_COLOR_DARK_GREEN std::string("§2")
@@ -59,6 +60,24 @@ enum
 #define MC_COLOR_MAGENTA std::string("§d")
 #define MC_COLOR_YELLOW std::string("§e")
 #define MC_COLOR_WHITE std::string("§f")
+#else
+#define MC_COLOR_BLACK ("§0")
+#define MC_COLOR_DARK_BLUE ("§1")
+#define MC_COLOR_DARK_GREEN ("§2")
+#define MC_COLOR_DARK_CYAN ("§3")
+#define MC_COLOR_DARK_RED ("§4")
+#define MC_COLOR_DARK_MAGENTA ("§5")
+#define MC_COLOR_DARK_ORANGE ("§6")
+#define MC_COLOR_GREY ("§7")
+#define MC_COLOR_DARK_GREY ("§8")
+#define MC_COLOR_BLUE ("§9")
+#define MC_COLOR_GREEN ("§a")
+#define MC_COLOR_CYAN ("§b")
+#define MC_COLOR_RED ("§c")
+#define MC_COLOR_MAGENTA ("§d")
+#define MC_COLOR_YELLOW ("§e")
+#define MC_COLOR_WHITE ("§f")
+#endif
 
 // Direction
 enum Direction
