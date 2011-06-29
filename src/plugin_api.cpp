@@ -764,9 +764,8 @@ int mob_createMob(int type)
   return Mineserver::get()->mobs()->getAll().size() - 1;
 }
 
-int mob_spawnMobN(const char* name)
+int mob_createSpawnMob(int type)
 {
-  int type = Mineserver::get()->mobs()->mobNametoType(std::string(name));
   MobPtr m = Mineserver::get()->mobs()->createMob();
   m->type = type;
   m->spawnToAll();
@@ -1093,7 +1092,7 @@ void init_plugin_api(void)
   plugin_api_pointers.config.bData                 = &config_bData;
 
   plugin_api_pointers.mob.createMob                = &mob_createMob;
-  plugin_api_pointers.mob.spawnMobN                = &mob_spawnMobN;
+  plugin_api_pointers.mob.createSpawnMob           = &mob_createSpawnMob;
   plugin_api_pointers.mob.spawnMob                 = &mob_spawnMob;
   plugin_api_pointers.mob.despawnMob               = &mob_despawnMob;
   plugin_api_pointers.mob.moveMob                  = &mob_moveMob;

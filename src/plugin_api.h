@@ -160,7 +160,7 @@ struct config_pointer_struct
 struct mob_pointer_struct
 {
   int (*createMob)(int type);
-  int (*spawnMobN)(const char* name);
+  int (*createSpawnMob)(int type);
   void (*spawnMob)(int uid);
   void (*despawnMob)(int uid);
   void (*moveMob)(int uid, double x, double y, double z);

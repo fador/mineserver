@@ -96,8 +96,6 @@ public:
     return -1; // louisdx: This should be checked; at least it should cause a crash if used unchecked.
   }
 
-  int mobNametoType(std::string name);
-
   inline size_t getMobCount()
   {
     return m_moblist.size();
