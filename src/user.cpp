@@ -931,7 +931,7 @@ bool User::sendAll(const Packet& packet)
 {
   for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    if ((*it)->fd && (*it)->logged && !((*it)->dnd && packet.firstwrite() == PACKET_CHAT_MESSAGE))
+    if ((*it)->fd && (*it)->logged)
     {
       (*it)->buffer.addToWrite(packet);
     }
@@ -944,7 +944,7 @@ bool User::sendAll(uint8_t* data, size_t len)
 {
   for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    if ((*it)->fd && (*it)->logged && !((*it)->dnd && data[0] == PACKET_CHAT_MESSAGE))
+    if ((*it)->fd && (*it)->logged)
     {
       (*it)->buffer.addToWrite(data, len);
     }
