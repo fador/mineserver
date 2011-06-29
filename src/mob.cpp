@@ -26,6 +26,7 @@
 */
 
 #include "mob.h"
+#include "protocol.h"
 #include <algorithm>
 
 Mob::Mob()
@@ -47,11 +48,8 @@ Mob::Mob()
 //Can be 0 (no animation), 1 (swing arm), 2 (damage animation)
 //, 3 (leave bed), 104 (crouch), or 105 (uncrouch). Getting 102 somewhat often, too. 
 void Mob::animateMob(int animID)
-{ 
-  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
-  {
-    (*it)->buffer << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID << (int8_t)animID;
-  }
+{
+  User::sendAll(Protocol::armAnimation(UID, animID));
 }
 
 void Mob::sethealth(int health)
@@ -78,19 +76,13 @@ void Mob::sethealth(int health)
 }
 //Possible values: 2 (entity hurt), 3 (entity dead?), 4, 5
 void Mob::animateDamage(int animID)
-{ 
-  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
-  {
-    (*it)->buffer << (int8_t)PACKET_DEATH_ANIMATION << (int32_t)UID << (int8_t)animID;
-  }
+{
+  User::sendAll(Protocol::deathAnimation(UID, animID));
 }
 
 void Mob::updateMetadata()
 {
-  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
-  {
-    (*it)->buffer << (int8_t)PACKET_ENTITY_METADATA << (int32_t)UID << metadata;
-  }
+  User::sendAll(Protocol::entityMetadata(UID, metadata));
 }
 
 void Mob::moveAnimal()
@@ -116,27 +108,13 @@ void Mob::moveAnimal()
 
 void Mob::spawnToAll()
 {
-  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
-  {
-    if ((*it)->logged)
-    {
-      (*it)->buffer << (int8_t)PACKET_MOB_SPAWN << (int32_t) UID << (int8_t) type
-                   << (int32_t)(x * 32.0) << (int32_t)(y * 32.0) << (int32_t)(z * 32.0) << (int8_t) yaw
-                   << (int8_t) pitch << metadata;
-    }
-    spawned = true;
-  }
+  User::sendAll(Protocol::mobSpawn(UID, type, x, y, z, yaw, pitch, metadata));
+  spawned = true;
 }
 
 void Mob::deSpawnToAll()
 {
-  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
-  {
-    if ((*it)->logged)
-    {
-      (*it)->buffer << PACKET_DESTROY_ENTITY << (int32_t) UID;
-    }
-  }
+  User::sendAll(Protocol::destroyEntity(UID));
   spawned = false;
 }
 
@@ -147,27 +125,18 @@ void Mob::relativeMoveToAll()
 
 void Mob::teleportToAll()
 {
-  if (!spawned)
+  if (spawned)
   {
-    return;
-  }
-
-  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
-  {
-    if ((*it)->logged)
-    {
-      (*it)->buffer << PACKET_ENTITY_TELEPORT << (int32_t) UID
-                   << (int32_t)(x * 32.0) << (int32_t)(y * 32.0) << (int32_t)(z * 32.0)
-                   << (int8_t) yaw << (int8_t) pitch;
-    }
+    User::sendAll(Protocol::entityTeleport(UID, x, y, z, yaw, pitch));
   }
 }
 
 void Mob::moveTo(double to_x, double to_y, double to_z, int to_map)
 {
-  //  int distx = abs(x-to_x);
-  //  int disty = abs(y-to_y);
-  //  int distz = abs(z-to_z);
+  double dx = to_x - x,
+         dy = to_y - y,
+         dz = to_z - z;
+
   x = to_x;
   y = to_y;
   z = to_z;
@@ -175,15 +144,15 @@ void Mob::moveTo(double to_x, double to_y, double to_z, int to_map)
   {
     map = to_map;
   }
-  //  if(distx < 4 && disty < 4 && distz < 4)
-  //  {
-  //    // Work out how to use the relative move?
-  //    teleportToAll();
-  //  }
-  //  else
-  //  {
-  teleportToAll();
-  //  }
+  if(dx <= 4 && dy <= 4 && dz <= 4)
+  {
+//    User::sendAll(Protocol::entityRelativeMove(UID, dx, dy, dz));
+      teleportToAll();
+  }
+  else
+  {
+    teleportToAll();
+  }
 }
 
 void Mob::look(int16_t yaw, int16_t pitch)
@@ -203,10 +172,5 @@ void Mob::look(int16_t yaw, int16_t pitch)
   int8_t p_byte = (int8_t)((pitch * 1.0) / 360.0 * 256.0);
   this->pitch = p_byte;
   this->yaw = y_byte;
-  Packet pkt;
-  pkt << PACKET_ENTITY_LOOK << (int32_t) UID << (int8_t) y_byte << (int8_t) p_byte;
-  if (!User::all().empty())
-  {
-    (*User::all().begin())->sendAll(pkt);
-  }
+//  User::sendAll(Protocol::entityLook(UID, yaw, pitch));
 }
