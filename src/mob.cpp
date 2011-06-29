@@ -38,7 +38,6 @@ Mob::Mob()
   map(0),
   yaw(0),
   pitch(0),
-  meta(0),
   spawned(false),
   respawnable(false),
   health(0)
@@ -65,19 +64,17 @@ void Mob::sethealth(int health)
   {
     health = 30;
   }
-  if (health < this->health)
+	if (health == 0)
+	{
+		animateDamage(ANIMATE_DEAD);
+//		deSpawnToAll();
+	}
+	else if (health < this->health)
   {
-    for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
-    {
-      (*it)->buffer << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID << (int8_t)2;
-      // Hurt animation
-    }
+		animateDamage(ANIMATE_HURT);
+		animateMob(ANIMATE_DAMAGE);
   }
   this->health = health;
-  if (this->health <= 0)
-  {
-    deSpawnToAll();
-  }
 }
 //Possible values: 2 (entity hurt), 3 (entity dead?), 4, 5
 void Mob::animateDamage(int animID)
@@ -85,6 +82,14 @@ void Mob::animateDamage(int animID)
   for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
     (*it)->buffer << (int8_t)PACKET_DEATH_ANIMATION << (int32_t)UID << (int8_t)animID;
+  }
+}
+
+void Mob::updateMetadata()
+{
+  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
+  {
+    (*it)->buffer << (int8_t)PACKET_ENTITY_METADATA << (int32_t)UID << metadata;
   }
 }
 
@@ -111,42 +116,13 @@ void Mob::moveAnimal()
 
 void Mob::spawnToAll()
 {
-  if (type == MOB_PIG)
-  {
-    health = 10;
-  }
-  if (type == MOB_SHEEP)
-  {
-    health = 10;
-  }
-  if (type == MOB_COW)
-  {
-    health = 10;
-  }
-  if (type == MOB_CHICKEN)
-  {
-    health = 4;
-  }
-  if (type == MOB_SQUID)
-  {
-    health = 10;
-  }
-
   for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
     if ((*it)->logged)
     {
       (*it)->buffer << (int8_t)PACKET_MOB_SPAWN << (int32_t) UID << (int8_t) type
                    << (int32_t)(x * 32.0) << (int32_t)(y * 32.0) << (int32_t)(z * 32.0) << (int8_t) yaw
-                   << (int8_t) pitch;
-      if (type == MOB_SHEEP)
-      {
-        (*it)->buffer << (int8_t) 0 << (int8_t) meta << (int8_t) 127;
-      }
-      else
-      {
-        (*it)->buffer << (int8_t) 127;
-      }
+                   << (int8_t) pitch << metadata;
     }
     spawned = true;
   }
@@ -233,66 +209,4 @@ void Mob::look(int16_t yaw, int16_t pitch)
   {
     (*User::all().begin())->sendAll(pkt);
   }
-}
-
-int Mobs::mobNametoType(std::string name)
-{
-  std::transform(name.begin(), name.end(), name.begin(), ::toupper);
-  if (name == "CREEPER")
-  {
-    return MOB_CREEPER;
-  }
-  if (name == "SKELETON")
-  {
-    return MOB_SKELETON;
-  }
-  if (name == "SPIDER")
-  {
-    return MOB_SPIDER;
-  }
-  if (name == "GIANTZOMBIE")
-  {
-    return MOB_GIANT_ZOMBIE;
-  }
-  if (name == "GIANT")
-  {
-    return MOB_GIANT_ZOMBIE;
-  }
-  if (name == "ZOMBIE")
-  {
-    return MOB_ZOMBIE;
-  }
-  if (name == "SLIME")
-  {
-    return MOB_SLIME;
-  }
-  if (name == "GHAST")
-  {
-    return MOB_GHAST;
-  }
-  if (name == "ZOMBIEPIGMAN")
-  {
-    return MOB_ZOMBIE_PIGMAN;
-  }
-  if (name == "PIGMAN")
-  {
-    return MOB_ZOMBIE_PIGMAN;
-  }
-  if (name == "PIG")
-  {
-    return MOB_PIG;
-  }
-  if (name == "SHEEP")
-  {
-    return MOB_SHEEP;
-  }
-  if (name == "COW")
-  {
-    return MOB_COW;
-  }
-  if (name == "CHICKEN")
-  {
-    return MOB_CHICKEN;
-  }
-  return -1;
 }
