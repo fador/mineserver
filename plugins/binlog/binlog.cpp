@@ -231,11 +231,6 @@ bool callbackBlockBreakPre (const char* user,int x,int y,int z)
 
   return true;
 }
-// Direction
-enum Direction
-{
-   BLOCK_BOTTOM, BLOCK_NORTH, BLOCK_SOUTH, BLOCK_EAST, BLOCK_WEST, BLOCK_TOP
-};
 
 bool translateDirection(int32_t *x, int8_t *y, int32_t *z, int8_t direction)
 {

@@ -109,6 +109,7 @@ private:
     stopLight[0x4C] = 0; // Redstone Torch (On)
     stopLight[0x4e] = 0; // Snow
     stopLight[0x4f] = 3; // Ice
+    stopLight[0x53] = 0; // Reed (Sugar Cane)
     stopLight[0x55] = 0; // Fence
     stopLight[0x5A] = 0; // Portal
     stopLight[0x5B] = 0; // Jack-O-Lantern

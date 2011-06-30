@@ -63,9 +63,8 @@ std::string dtos(double n)
   return result.str();
 }
 
-static const char* Mobnames[] = { "Chicken", "Pig", "Sheep", "Cow" };
-static const char* enemyMobNames[] = { "Spider", "Zombie", "Skeleton", "Creeper" };
- 
+static const int passiveMobs[] = { MOB_SHEEP, MOB_COW, MOB_CHICKEN, MOB_PIG };
+
 // The list of Mobs this plugin has control of
 // Note that other plugins may make other mobs, and control them itself
 class MyPetMob
@@ -132,43 +131,79 @@ void fallMob(double* x, double* y, double* z, int w)
   }
 }
 
-void timer200Function()
+int defaultHealth(int mob)
 {
-  if (MyMobs.size() < maxMobs && time(NULL)-lastSpawn > 2)
+  switch (mob)
   {
-    if (mineserver->user.getCount() > 0)
-    {
-      int randomPlayer = rand()%mineserver->user.getCount();
-      double x,y,z;
-      int w;
-      if (mineserver->user.getPositionW(mineserver->user.getUserNumbered(randomPlayer),&x,&y,&z,&w,NULL,NULL,NULL))
-      {
-        x += ((rand()%100)-50);
-        z += ((rand()%100)-50);
-        y = topBlockSuitable(x,z,w);
-        if (y > 0)
-        {
-          y+=1;
-          int randomMob = rand()%4;
-          int newMob = 0;
-          if (mineserver->map.getTime() > 18000 && mineserver->map.getTime() < 24000)
-          {
-            newMob = mineserver->mob.createMob(enemyMobNames[randomMob]);
-          }
-          else
-          {
-            newMob = mineserver->mob.createMob(Mobnames[randomMob]);
-          }
-          MyPetMobPtr newMobData(new MyPetMob(newMob));
-          MyMobs.push_back(newMobData);
-          mineserver->mob.moveMobW(newMob,x,y,z,w);
-          mineserver->mob.spawnMob(newMob);
+    case MOB_PIG:
+    case MOB_COW:
+    case MOB_SHEEP:
+      return 10;
+    case MOB_CHICKEN:
+      return 4;
+    default:
+      return 10;
+  }
+}
 
-          lastSpawn=time(NULL);
+int defaultDamage(int item)
+{
+  switch (item)
+  {
+    case ITEM_WOODEN_SWORD:
+    case ITEM_GOLD_SWORD:
+      return 5;
+    case ITEM_STONE_SWORD:
+      return 7;
+    case ITEM_IRON_SWORD:
+      return 9;
+    case ITEM_DIAMOND_SWORD:
+      return 11;
+    default:
+      return 2;
+  }
+}
+
+void spawn()
+{
+  if (MyMobs.size() < maxMobs &&
+      time(NULL)-lastSpawn > 2 &&
+      mineserver->user.getCount() > 0 &&
+      mineserver->map.getTime() <= 18000)
+  {
+    int randomPlayer = mineserver->tools.uniformInt(0, mineserver->user.getCount() - 1);
+    double x,y,z;
+    int w;
+    if (mineserver->user.getPositionW(mineserver->user.getUserNumbered(randomPlayer),&x,&y,&z,&w,NULL,NULL,NULL))
+    {
+      x += mineserver->tools.uniformInt(-50, 50);
+      z += mineserver->tools.uniformInt(-50, 50);
+      y = topBlockSuitable(x,z,w);
+      if (y > 0)
+      {
+        y+=1;
+        int type = passiveMobs[mineserver->tools.uniformInt(0, sizeof(passiveMobs) / sizeof(passiveMobs[0]) - 1)];
+        int newMob = mineserver->mob.createMob(type);
+        mineserver->mob.setHealth(newMob, defaultHealth(type));
+        MyPetMobPtr newMobData(new MyPetMob(newMob));
+        MyMobs.push_back(newMobData);
+        mineserver->mob.moveMobW(newMob,x,y,z,w);
+        mineserver->mob.spawnMob(newMob);
+        if (type == MOB_SHEEP)
+        {
+          int color = mineserver->tools.uniformInt(0, 15);
+          mineserver->mob.setByteMetadata(newMob, 16, (int8_t)color);
+          mineserver->mob.updateMetadata(newMob);
         }
+        lastSpawn=time(NULL);
       }
     }
   }
+}
+
+void timer200Function()
+{
+  spawn();
 
   for (int i = MyMobs.size() - 1; i >= 0; i--)
   {
@@ -184,19 +219,8 @@ void timer200Function()
       }
       else
       {
-        int type = mineserver->mob.getType(MyMobs[i]->ID);
-        int item = 0,count = 0;
-        if (type == 90) { item = 319; count = (rand()%4); }
-        if (type == 91) { item = 35; count = (rand()%5);  }
-        if (type == 92) { item = 334; count = (rand()%6); }
-        if (type == 93) { item = 288; count = (rand()%8); }
         mineserver->mob.despawnMob(MyMobs[i]->ID);
-        if (item != 0)
-        {
-          mineserver->map.createPickupSpawn((int)floor(x),(int)floor(y),(int)floor(z),
-                                            item, count, 0,NULL);
-        }
-        // TODO : Fix obvious gaping memory leak
+        /* TODO: fix memory leak */
         MyMobs.erase(MyMobs.begin()+i);
       }
       continue;
@@ -219,6 +243,7 @@ void timer200Function()
     }
     if(nearest < 0 || nearest > 200)
     {
+      mineserver->mob.despawnMob(MyMobs[i]->ID);
       MyMobs.erase(MyMobs.begin()+i);
       continue;
     }
@@ -280,19 +305,65 @@ void timer200Function()
   }
 }
 
+void drop(int mobID)
+{
+  int type = mineserver->mob.getType(mobID);
+  double x,y,z;
+  int w;
+  mineserver->mob.getMobPositionW(mobID,&x,&y,&z,&w);
+  int item = 0, count = 1;
+  switch (type)
+  {
+    case MOB_PIG:
+      item = ITEM_PORK;
+      break;
+    case MOB_SHEEP:
+      /* sheep drops on first hit */
+      break;
+    case MOB_COW:
+      item = ITEM_LEATHER;
+      break;
+    case MOB_CHICKEN:
+      item = ITEM_FEATHER;
+      break;
+  }
+  if (item)
+  {
+    mineserver->map.createPickupSpawn((int)floor(x),(int)floor(y),(int)floor(z),
+                                      item, count, 0,NULL);
+  }
+}
+
 void gotAttacked(const char* userIn,int mobID)
 {
   std::string user(userIn);
+  int atk_item, _meta, _quant;
+  mineserver->user.getItemInHand(userIn, &atk_item, &_meta, &_quant);
   int mobHealth = mineserver->mob.getHealth((int)mobID);
-  mobHealth--;
-  if (mobHealth != 0)
+
+  if (mobHealth <= 0) return;
+
+  int type = mineserver->mob.getType(mobID);
+  double x, y, z; int w;
+  mineserver->mob.getMobPositionW(mobID, &x, &y, &z, &w);
+  if (type == MOB_SHEEP)
   {
-    //mineserver->mob.moveAnimal(user.c_str(), (int)mobID);
-    mineserver->mob.animateDamage(user.c_str(), (int)mobID, 2); //Hurt
+    int8_t meta = mineserver->mob.getByteMetadata(mobID, 16);
+    if (!(meta & 0x10))
+    {
+      mineserver->map.createPickupSpawn((int)floor(x),(int)floor(y),(int)floor(z),
+                                        BLOCK_WOOL, 1, meta, NULL);
+      meta |= 0x10;
+      mineserver->mob.setByteMetadata(mobID, 16, meta);
+      mineserver->mob.updateMetadata(mobID);
+    }
   }
-  else
+
+  mobHealth -= defaultDamage(atk_item);
+
+  if (mobHealth <= 0)
   {
-    mineserver->mob.animateDamage(user.c_str(), (int)mobID, 3); //Death
+    drop(mobID);
   }
   mineserver->mob.setHealth((int)mobID, (int)mobHealth);
 }

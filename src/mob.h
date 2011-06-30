@@ -1,3 +1,5 @@
+#ifndef _MOB_H
+#define _MOB_H
 /*
   Copyright (c) 2011, The Mineserver Project
   All rights reserved.
@@ -37,7 +39,7 @@
 #include "constants.h"
 #include "packets.h"
 #include "mineserver.h"
-
+#include "metadata.h"
 
 
 uint32_t generateEID();
@@ -53,7 +55,7 @@ public:
   double x, y, z;
   size_t map;
   int8_t yaw, pitch;
-  int8_t meta;
+  MetaData metadata;
   bool spawned;
   bool respawnable;
   int health;
@@ -67,6 +69,7 @@ public:
   void teleportToAll();
   void animateMob(int animID);
   void animateDamage(int animID);
+  void updateMetadata();
   void moveAnimal();
 
   void moveTo(double to_x, double to_y, double to_z, int to_map = -1);
@@ -94,8 +97,6 @@ public:
     }
     return -1; // louisdx: This should be checked; at least it should cause a crash if used unchecked.
   }
-
-  int mobNametoType(std::string name);
 
   inline size_t getMobCount()
   {
@@ -127,3 +128,4 @@ public:
 private:
   std::vector<MobPtr> m_moblist;
 };
+#endif

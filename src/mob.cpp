@@ -26,6 +26,7 @@
 */
 
 #include "mob.h"
+#include "protocol.h"
 #include <algorithm>
 
 Mob::Mob()
@@ -38,7 +39,6 @@ Mob::Mob()
   map(0),
   yaw(0),
   pitch(0),
-  meta(0),
   spawned(false),
   respawnable(false),
   health(0)
@@ -48,11 +48,8 @@ Mob::Mob()
 //Can be 0 (no animation), 1 (swing arm), 2 (damage animation)
 //, 3 (leave bed), 104 (crouch), or 105 (uncrouch). Getting 102 somewhat often, too. 
 void Mob::animateMob(int animID)
-{ 
-  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
-  {
-    (*it)->buffer << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID << (int8_t)animID;
-  }
+{
+  User::sendAll(Protocol::armAnimation(UID, animID));
 }
 
 void Mob::sethealth(int health)
@@ -65,27 +62,27 @@ void Mob::sethealth(int health)
   {
     health = 30;
   }
-  if (health < this->health)
+	if (health == 0)
+	{
+		animateDamage(ANIMATE_DEAD);
+//		deSpawnToAll();
+	}
+	else if (health < this->health)
   {
-    for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
-    {
-      (*it)->buffer << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID << (int8_t)2;
-      // Hurt animation
-    }
+		animateDamage(ANIMATE_HURT);
+		animateMob(ANIMATE_DAMAGE);
   }
   this->health = health;
-  if (this->health <= 0)
-  {
-    deSpawnToAll();
-  }
 }
 //Possible values: 2 (entity hurt), 3 (entity dead?), 4, 5
 void Mob::animateDamage(int animID)
-{ 
-  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
-  {
-    (*it)->buffer << (int8_t)PACKET_DEATH_ANIMATION << (int32_t)UID << (int8_t)animID;
-  }
+{
+  User::sendAll(Protocol::deathAnimation(UID, animID));
+}
+
+void Mob::updateMetadata()
+{
+  User::sendAll(Protocol::entityMetadata(UID, metadata));
 }
 
 void Mob::moveAnimal()
@@ -111,56 +108,13 @@ void Mob::moveAnimal()
 
 void Mob::spawnToAll()
 {
-  if (type == MOB_PIG)
-  {
-    health = 10;
-  }
-  if (type == MOB_SHEEP)
-  {
-    health = 10;
-  }
-  if (type == MOB_COW)
-  {
-    health = 10;
-  }
-  if (type == MOB_CHICKEN)
-  {
-    health = 4;
-  }
-  if (type == MOB_SQUID)
-  {
-    health = 10;
-  }
-
-  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
-  {
-    if ((*it)->logged)
-    {
-      (*it)->buffer << (int8_t)PACKET_MOB_SPAWN << (int32_t) UID << (int8_t) type
-                   << (int32_t)(x * 32.0) << (int32_t)(y * 32.0) << (int32_t)(z * 32.0) << (int8_t) yaw
-                   << (int8_t) pitch;
-      if (type == MOB_SHEEP)
-      {
-        (*it)->buffer << (int8_t) 0 << (int8_t) meta << (int8_t) 127;
-      }
-      else
-      {
-        (*it)->buffer << (int8_t) 127;
-      }
-    }
-    spawned = true;
-  }
+  User::sendAll(Protocol::mobSpawn(*this));
+  spawned = true;
 }
 
 void Mob::deSpawnToAll()
 {
-  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
-  {
-    if ((*it)->logged)
-    {
-      (*it)->buffer << PACKET_DESTROY_ENTITY << (int32_t) UID;
-    }
-  }
+  User::sendAll(Protocol::destroyEntity(UID));
   spawned = false;
 }
 
@@ -171,27 +125,18 @@ void Mob::relativeMoveToAll()
 
 void Mob::teleportToAll()
 {
-  if (!spawned)
+  if (spawned)
   {
-    return;
-  }
-
-  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
-  {
-    if ((*it)->logged)
-    {
-      (*it)->buffer << PACKET_ENTITY_TELEPORT << (int32_t) UID
-                   << (int32_t)(x * 32.0) << (int32_t)(y * 32.0) << (int32_t)(z * 32.0)
-                   << (int8_t) yaw << (int8_t) pitch;
-    }
+    User::sendAll(Protocol::entityTeleport(UID, x, y, z, yaw, pitch));
   }
 }
 
 void Mob::moveTo(double to_x, double to_y, double to_z, int to_map)
 {
-  //  int distx = abs(x-to_x);
-  //  int disty = abs(y-to_y);
-  //  int distz = abs(z-to_z);
+  double dx = to_x - x,
+         dy = to_y - y,
+         dz = to_z - z;
+
   x = to_x;
   y = to_y;
   z = to_z;
@@ -199,15 +144,14 @@ void Mob::moveTo(double to_x, double to_y, double to_z, int to_map)
   {
     map = to_map;
   }
-  //  if(distx < 4 && disty < 4 && distz < 4)
-  //  {
-  //    // Work out how to use the relative move?
-  //    teleportToAll();
-  //  }
-  //  else
-  //  {
-  teleportToAll();
-  //  }
+  if(dx <= 4 && dy <= 4 && dz <= 4)
+  {
+    User::sendAll(Protocol::entityRelativeMove(UID, dx, dy, dz));
+  }
+  else
+  {
+    teleportToAll();
+  }
 }
 
 void Mob::look(int16_t yaw, int16_t pitch)
@@ -227,72 +171,5 @@ void Mob::look(int16_t yaw, int16_t pitch)
   int8_t p_byte = (int8_t)((pitch * 1.0) / 360.0 * 256.0);
   this->pitch = p_byte;
   this->yaw = y_byte;
-  Packet pkt;
-  pkt << PACKET_ENTITY_LOOK << (int32_t) UID << (int8_t) y_byte << (int8_t) p_byte;
-  if (!User::all().empty())
-  {
-    (*User::all().begin())->sendAll(pkt);
-  }
-}
-
-int Mobs::mobNametoType(std::string name)
-{
-  std::transform(name.begin(), name.end(), name.begin(), ::toupper);
-  if (name == "CREEPER")
-  {
-    return MOB_CREEPER;
-  }
-  if (name == "SKELETON")
-  {
-    return MOB_SKELETON;
-  }
-  if (name == "SPIDER")
-  {
-    return MOB_SPIDER;
-  }
-  if (name == "GIANTZOMBIE")
-  {
-    return MOB_GIANT_ZOMBIE;
-  }
-  if (name == "GIANT")
-  {
-    return MOB_GIANT_ZOMBIE;
-  }
-  if (name == "ZOMBIE")
-  {
-    return MOB_ZOMBIE;
-  }
-  if (name == "SLIME")
-  {
-    return MOB_SLIME;
-  }
-  if (name == "GHAST")
-  {
-    return MOB_GHAST;
-  }
-  if (name == "ZOMBIEPIGMAN")
-  {
-    return MOB_ZOMBIE_PIGMAN;
-  }
-  if (name == "PIGMAN")
-  {
-    return MOB_ZOMBIE_PIGMAN;
-  }
-  if (name == "PIG")
-  {
-    return MOB_PIG;
-  }
-  if (name == "SHEEP")
-  {
-    return MOB_SHEEP;
-  }
-  if (name == "COW")
-  {
-    return MOB_COW;
-  }
-  if (name == "CHICKEN")
-  {
-    return MOB_CHICKEN;
-  }
-  return -1;
+  User::sendAll(Protocol::entityLook(UID, yaw, pitch));
 }

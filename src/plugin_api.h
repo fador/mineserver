@@ -51,6 +51,7 @@
 #define PLUGIN_API_EXPORT extern "C"
 #define CALLCONVERSION
 #endif
+#include "constants_num.h"
 
 typedef void (*voidF)(); // voidF is a "void"-like function pointer
 
@@ -158,8 +159,8 @@ struct config_pointer_struct
 
 struct mob_pointer_struct
 {
-  int (*createMob)(const char* name);
-  int (*spawnMobN)(const char* name);
+  int (*createMob)(int type);
+  int (*createSpawnMob)(int type);
   void (*spawnMob)(int uid);
   void (*despawnMob)(int uid);
   void (*moveMob)(int uid, double x, double y, double z);
@@ -174,6 +175,9 @@ struct mob_pointer_struct
   void (*moveAnimal)(const char* userIn, size_t mobID);
   void (*animateMob)(const char* userIn, size_t mobID, int animID);
   void (*animateDamage)(const char* userIn, size_t mobID, int animID);
+  bool (*setByteMetadata)(int uid, int8_t idx, int8_t byte);
+  bool (*updateMetadata)(int uid);
+  int8_t (*getByteMetadata)(int uid, int idx);
   void* temp[97];
 
 };
@@ -192,6 +196,12 @@ struct permission_pointer_struct
 
 };
 
+struct tools_pointer_struct
+{
+  int (*uniformInt)(int a, int b);
+  double (*uniform01)();
+};
+
 struct mineserver_pointer_struct
 {
   struct map_pointer_struct map;
@@ -202,7 +212,7 @@ struct mineserver_pointer_struct
   struct config_pointer_struct config;
   struct mob_pointer_struct mob;
   struct permission_pointer_struct permissions;
-
+  struct tools_pointer_struct tools;
   void* temp[99];
 };
 

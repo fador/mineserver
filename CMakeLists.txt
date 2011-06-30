@@ -132,6 +132,7 @@ SET(mineserver_source
   src/items/itembasic.cpp
   src/items/projectile.cpp
   src/mob.cpp
+  src/metadata.cpp
 )
 SOURCE_GROUP(${PROJECT_NAME} FILES ${mineserver_source})
 

@@ -513,12 +513,6 @@ void getTime(std::string user, std::string command, std::deque<std::string> args
 }
 
 
-// Direction
-enum Direction
-{
-   BLOCK_BOTTOM, BLOCK_NORTH, BLOCK_SOUTH, BLOCK_EAST, BLOCK_WEST, BLOCK_TOP
-};
-
 bool translateDirection(int32_t *x, int8_t *y, int32_t *z, int8_t direction)
 {
     switch(direction)
