@@ -36,7 +36,7 @@ const unsigned int SERVER_CONSOLE_UID = -1;
 
 const std::string VERSION = "0.1.15 (Alpha)";
 
-const int PROTOCOL_VERSION = 13;
+const int PROTOCOL_VERSION = 14;
 
 const char COMMENTPREFIX  = '#';
 
