@@ -28,6 +28,7 @@
 #include <map>
 
 #include "constants.h"
+#include "random.h"
 
 std::map<uint8_t, DropPtr> BLOCKDROPS;
 
@@ -97,7 +98,6 @@ void initConstants()
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_GOLD_BLOCK, DropPtr(new Drop(BLOCK_GOLD_BLOCK, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_DIAMOND_BLOCK, DropPtr(new Drop(BLOCK_DIAMOND_BLOCK, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_LAPIS_BLOCK, DropPtr(new Drop(BLOCK_LAPIS_BLOCK, 10000, 1))));
-  BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_LAPIS_ORE, DropPtr(new Drop(BLOCK_LAPIS_ORE, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_BED, DropPtr(new Drop(ITEM_BED, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_FURNACE, DropPtr(new Drop(BLOCK_FURNACE, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_BURNING_FURNACE, DropPtr(new Drop(BLOCK_FURNACE, 10000, 1))));
@@ -105,7 +105,7 @@ void initConstants()
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_WORKBENCH, DropPtr(new Drop(BLOCK_WORKBENCH, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_SIGN_POST, DropPtr(new Drop(ITEM_SIGN, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_WALL_SIGN, DropPtr(new Drop(ITEM_SIGN, 10000, 1))));
-
+  
 
   // Always drop but give more than one item
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_REDSTONE_ORE, DropPtr(new Drop(ITEM_REDSTONE, 10000, 4))));
@@ -114,9 +114,32 @@ void initConstants()
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_DOUBLE_STEP, DropPtr(new Drop(BLOCK_STEP, 10000, 2))));
 
   // Blocks that drop items by chance
-  BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_GRAVEL, DropPtr(new Drop(ITEM_FLINT, 850, 1, DropPtr(new Drop(BLOCK_GRAVEL, 10000, 1))))));
+  BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_GRAVEL, DropPtr(new Drop(ITEM_FLINT, 850, 1, 0, DropPtr(new Drop(BLOCK_GRAVEL, 10000, 1))))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_LEAVES, DropPtr(new Drop(BLOCK_SAPLING, 1200, 1))));
 
   // Blocks that drop nothing:
   // BLOCK_TNT, BLOCK_GLASS, BLOCK_MOB_SPAWNER
+
+  // Blocks that drop items with metadata
+  BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_LAPIS_ORE, DropPtr(new Drop(ITEM_DYE, 10000, 1, DYE_LAPIS_LAZULI))));
+}
+
+void Drop::getDrop(int16_t& item, uint8_t& count, uint8_t& meta)
+{
+  Drop *cur = this;
+  while (cur)
+  {
+    if (cur->probability >= uniformUINT(0, 9999))
+    {
+      item = cur->item_id;
+      count = cur->count;
+      if (cur->meta != -1) meta = (uint8_t)cur->meta;
+      return;
+    }
+    else
+    {
+      cur = cur->alt_drop.get();
+    }
+  }
+  count = 0;
 }

@@ -51,16 +51,20 @@ struct Drop
   uint16_t item_id;
   uint32_t probability;
   uint8_t count;
+  int16_t meta;
   DropPtr alt_drop;
 
-  explicit Drop(uint16_t _item_id = 0, uint32_t _probability = 0, uint8_t _count = 0, DropPtr _alt_drop = DropPtr())
+  explicit Drop(uint16_t _item_id = 0, uint32_t _probability = 0, uint8_t _count = 0, int16_t _meta = -1, DropPtr _alt_drop = DropPtr())
     :
     item_id(_item_id),
     probability(_probability),
     count(_count),
+    meta(_meta),
     alt_drop(_alt_drop)
   {
   }
+
+  void getDrop(int16_t& item, uint8_t& count, uint8_t& meta);
 };
 
 void initConstants();

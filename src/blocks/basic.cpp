@@ -130,7 +130,13 @@ bool BlockBasic::isBlockEmpty(const int32_t x, const int8_t y, const int32_t z, 
 bool BlockBasic::spawnBlockItem(const int32_t x, const int8_t y, const int32_t z, int map, const uint8_t block, const uint8_t meta)
 {
   DropPtr drop;
-
+  int16_t item; uint8_t count, item_meta = meta;
+  BLOCKDROPS[block]->getDrop(item, count, item_meta);
+  if (count)
+  {
+    Mineserver::get()->map(map)->createPickupSpawn(x, y, z, item, count, item_meta, NULL);
+    return true;
+  }/*
   if (BLOCKDROPS.count(block))
   {
     drop = BLOCKDROPS[block];
@@ -151,7 +157,7 @@ bool BlockBasic::spawnBlockItem(const int32_t x, const int8_t y, const int32_t z
       }
     }
   }
-
+*/
   return false;
 }
 
