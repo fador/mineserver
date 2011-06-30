@@ -1489,9 +1489,10 @@ Packet& Packet::operator>>(std::string& str)
   return *this;
 }
 
-void Packet::operator<<(const Packet& other)
+Packet& Packet::operator<<(const Packet& other)
 {
   addToWrite(other);
+  return *this;
 }
 
 // writeString and readString provide the old, 8-bit string features.

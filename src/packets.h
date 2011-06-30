@@ -194,7 +194,7 @@ public:
   void writeString(const std::string& str);
   std::string readString();
 
-  void operator<<(const Packet& other);
+  Packet& operator<<(const Packet& other);
 
   inline void getData(uint8_t* buf, size_t count)
   {
