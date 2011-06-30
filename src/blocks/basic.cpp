@@ -136,28 +136,7 @@ bool BlockBasic::spawnBlockItem(const int32_t x, const int8_t y, const int32_t z
   {
     Mineserver::get()->map(map)->createPickupSpawn(x, y, z, item, count, item_meta, NULL);
     return true;
-  }/*
-  if (BLOCKDROPS.count(block))
-  {
-    drop = BLOCKDROPS[block];
-
-    while (drop)
-    {
-      if ((int)drop->probability >= rand() % 10000)
-      {
-        if (drop->count)
-        {
-          Mineserver::get()->map(map)->createPickupSpawn(x, y, z, drop->item_id, drop->count, meta, NULL);
-        }
-        return true;
-      }
-      else
-      {
-        drop = drop->alt_drop;
-      }
-    }
   }
-*/
   return false;
 }
 
