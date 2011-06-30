@@ -37,79 +37,32 @@ uint8_t pickint;
 
 void BlockTNT::rb(int32_t x,int8_t y,int8_t z,int map, User* user)
 {
-  uint8_t block, meta;
+  uint8_t block, meta, count;
+  int16_t item;
+
   Mineserver::get()->map(map)->getBlock(x,y,z,&block,&meta);
 
-  // Blocks which have no pickups (or they are only accessable via /give )
-  if (block == 7 || block == 8 || block == 9 || block == 10 || block == 11 || block == 18 ||
-    block == 30 || block == 47 || block == 49 || block == 51 || block == 52 || block == 59 ||
-    block == 68 || block == 79 || block == 83 || block == 90 || block == 92 || block == 94) {
-    block = 0;
-  }
+  BLOCKDROPS[block]->getDrop(item, count, meta);
 
-  // Blocks which drop other things as the block item, (Coal, Diamond, ...)
-  if (block == 1) {
-    block=4;
-  } else if (block == 2) {
-    block=3;
-  }  else if (block == 16) {
-    block=263;
-  } else if (block == 21) {
-    block=351;
-    meta=4;
-  } else if (block == 26) {
-    block=355;
-  } else if (block == 53) {
-    block=5;
-  } else if (block == 55) {
-    block=331;
-  } else if (block == 56) {
-    block=264;
-  } else if (block == 59) {
-    block=295;
-  } else if (block == 60) {
-    block=3;
-  } else if (block == 62) {
-    block=61;
-  } else if (block == 68) {
-    block=63;
-  } else if (block == 73) {
-    block=331;
-  } else if (block == 74) {
-    block=331;
-  } else if (block == 76) {
-    block=75;
-  } else if (block == 78) {
-    block=332;
-  } else if (block == 82) {
-    block=337;
-  } else if (block == 83) {
-    block=338;
-  } else if (block == 89) {
-    block=348;
-  } else if (block == 92) {
-    block=354;
-  } else if (block == 95) /* Easter egg chest? */ {
-    block=54;
-  }
-  
-  
   // Undestroyable blocks
-  if (block == 0 || block == 7 || block == 49) {
+  if (block == BLOCK_AIR || block == BLOCK_BEDROCK || block == BLOCK_OBSIDIAN)
+  {
     return;
-  } else {
+  }
+  else
+  {
     Mineserver::get()->map(map)->setBlock(x,y,z,0,0);
     Mineserver::get()->map(map)->sendBlockChange(x,y,z,0,0);
   }
   
   // Pickup Spawn Area
   // The integer "pickint" is used to spawn 1/5 of the blocks, otherwise there would be too much pickups!
-  if(pickint == 5) {
-    
-    if(block != 0) {
-      Mineserver::get()->map(map)->createPickupSpawn(x,y,z,block,meta,0,user);
+  if(pickint == 5)
+  {
+    if(count) {
+      Mineserver::get()->map(map)->createPickupSpawn(x, y, z, item, count, meta, user);
+      pickint=0;
     }
-    pickint=0;
   } else {
     pickint++;
   }
