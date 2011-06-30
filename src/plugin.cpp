@@ -60,6 +60,7 @@
 #include "blocks/redstone.h"
 #include "blocks/pumpkin.h"
 #include "blocks/step.h"
+#include "blocks/tnt.h"
 #include "blocks/bed.h"
 #include "blocks/wool.h"
 #include "blocks/jackolantern.h"
@@ -145,6 +146,7 @@ void Plugin::init()
   m_block_CBs.push_back(BlockBasicPtr(new BlockWool));
   m_block_CBs.push_back(BlockBasicPtr(new Blockjackolantern));
   m_block_CBs.push_back(BlockBasicPtr(new BlockDefault));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockTNT));
 
   m_item_CBs.push_back(ItemBasicPtr(new ItemFood));
   m_item_CBs.push_back(ItemBasicPtr(new ItemProjectile));

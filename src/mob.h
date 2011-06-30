@@ -1,3 +1,5 @@
+#ifndef _MOB_H
+#define _MOB_H
 /*
   Copyright (c) 2011, The Mineserver Project
   All rights reserved.
@@ -126,3 +128,4 @@ public:
 private:
   std::vector<MobPtr> m_moblist;
 };
+#endif

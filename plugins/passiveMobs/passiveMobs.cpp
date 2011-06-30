@@ -243,6 +243,7 @@ void timer200Function()
     }
     if(nearest < 0 || nearest > 200)
     {
+      mineserver->mob.despawnMob(MyMobs[i]->ID);
       MyMobs.erase(MyMobs.begin()+i);
       continue;
     }
