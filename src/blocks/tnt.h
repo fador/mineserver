@@ -25,77 +25,20 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _CONSTANTS_H
-#define _CONSTANTS_H
+#pragma once
 
-#include <map>
-#include <string>
-#include <stdint.h>
-#include <iostream>
+#include "basic.h"
 
-#include "tr1.h"
-#include TR1INCLUDE(memory)
+class User;
 
-// configuration from build system
-#include "configure.h"
-#include "constants_num.h"
-
-//
-// Drops from blocks
-//
-struct Drop;
-typedef std::tr1::shared_ptr<Drop> DropPtr;
-
-struct Drop
+class BlockTNT : public BlockBasic
 {
-  uint16_t item_id;
-  uint32_t probability;
-  uint8_t count;
-  int16_t meta;
-  DropPtr alt_drop;
+public:
+  inline bool affectedBlock(int block) const { return block == BLOCK_TNT; }
 
-  explicit Drop(uint16_t _item_id = 0, uint32_t _probability = 0, uint8_t _count = 0, int16_t _meta = -1, DropPtr _alt_drop = DropPtr())
-    :
-    item_id(_item_id),
-    probability(_probability),
-    count(_count),
-    meta(_meta),
-    alt_drop(_alt_drop)
-  {
-  }
-
-  void getDrop(int16_t& item, uint8_t& count, uint8_t& meta);
+  void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int map, int32_t z, int8_t direction);
+  bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
+  bool onInteract(User* user, int32_t x, int8_t y, int32_t z, int map);
+  void rb(int32_t x,int8_t y,int8_t z,int map,User* user); // rb=Remove Block
+  void explode(User* user, int32_t x, int8_t y, int8_t z, int map);
 };
-
-void initConstants();
-
-extern std::map<uint8_t, DropPtr> BLOCKDROPS;
-
-// Chat prefixes
-enum
-{
-  SERVERMSGPREFIX = '%',
-  CHATCMDPREFIX   = '/',
-  ADMINCHATPREFIX = '&'
-};
-
-extern const unsigned int SERVER_CONSOLE_UID;
-
-extern const std::string VERSION;
-
-extern const int PROTOCOL_VERSION;
-
-extern const char COMMENTPREFIX;
-
-// Configuration
-extern const std::string CONFIG_FILE;
-
-// PID file
-extern const std::string PID_FILE;
-
-//allocate 1 MB for chunk files
-extern const int ALLOCATE_NBTFILE;
-
-extern const int kMaxChatMessageLength;
-
-#endif

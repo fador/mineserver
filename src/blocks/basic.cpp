@@ -130,28 +130,13 @@ bool BlockBasic::isBlockEmpty(const int32_t x, const int8_t y, const int32_t z, 
 bool BlockBasic::spawnBlockItem(const int32_t x, const int8_t y, const int32_t z, int map, const uint8_t block, const uint8_t meta)
 {
   DropPtr drop;
-
-  if (BLOCKDROPS.count(block))
+  int16_t item; uint8_t count, item_meta = meta;
+  BLOCKDROPS[block]->getDrop(item, count, item_meta);
+  if (count)
   {
-    drop = BLOCKDROPS[block];
-
-    while (drop)
-    {
-      if ((int)drop->probability >= rand() % 10000)
-      {
-        if (drop->count)
-        {
-          Mineserver::get()->map(map)->createPickupSpawn(x, y, z, drop->item_id, drop->count, meta, NULL);
-        }
-        return true;
-      }
-      else
-      {
-        drop = drop->alt_drop;
-      }
-    }
+    Mineserver::get()->map(map)->createPickupSpawn(x, y, z, item, count, item_meta, NULL);
+    return true;
   }
-
   return false;
 }
 

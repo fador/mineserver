@@ -38,7 +38,7 @@
 #include "permissions.h"
 #include "mob.h"
 #include "logger.h"
-
+#include "protocol.h"
 
 #define LOADBLOCK(x,y,z) Mineserver::get()->map(pos.map)->getBlock(int(std::floor(double(x))), int(std::floor(double(y))), int(std::floor(double(z))), &type, &meta)
 
@@ -200,10 +200,7 @@ bool User::sendLoginInfo()
   loadData();
 
   // Login OK package
-  // As of 1.5, we send one less empty string, at least in non-authenticated mode.
-  //buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << std::string("") << (int64_t)0 << (int8_t)0;
-  buffer << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)UID << std::string("") << (int64_t)0 << (int8_t)0;
-
+  buffer << Protocol::loginResponse(UID);
   spawnOthers();
 
   // Put nearby chunks to queue
@@ -223,16 +220,13 @@ bool User::sendLoginInfo()
   {
     if (pos.map == (*i)->map && (*i)->spawned)
     {
-      loginBuffer << PACKET_MOB_SPAWN << (int32_t)(*i)->UID << (int8_t)(*i)->type
-                  << (int32_t)(*i)->x << (int32_t)(*i)->y << (int32_t)(*i)->z
-                  << (int8_t)(*i)->yaw << (int8_t)(*i)->pitch << (*i)->metadata;
+      loginBuffer << Protocol::mobSpawn(**i);
     }
   }
 
   // Send spawn position
-  loginBuffer << (int8_t)PACKET_SPAWN_POSITION << (int32_t)pos.x << ((int32_t)pos.y + 2) << (int32_t)pos.z;
-  loginBuffer << (int8_t)PACKET_TIME_UPDATE << (int64_t)Mineserver::get()->map(pos.map)->mapTime;
-
+  loginBuffer << Protocol::spawnPosition(pos.x, pos.y + 2, pos.z)
+              << Protocol::timeUpdate(Mineserver::get()->map(pos.map)->mapTime);
 
   buffer.addToWrite(loginBuffer);
   loginBuffer.reset();
@@ -261,8 +255,7 @@ bool User::sendLoginInfo()
 // Kick player
 bool User::kick(std::string kickMsg)
 {
-  buffer << (int8_t)PACKET_KICK << kickMsg;
-
+  buffer << Protocol::kick(kickMsg);
   (static_cast<Hook2<bool, const char*, const char*>*>(Mineserver::get()->plugin()->getHook("PlayerKickPost")))->doAll(nick.c_str(), kickMsg.c_str());
 
   LOG2(WARNING, nick + " kicked. Reason: " + kickMsg);
@@ -570,10 +563,7 @@ bool User::updatePos(double x, double y, double z, double stance)
 
     if (newChunk == oldChunk)
     {
-      Packet telePacket;
-      telePacket << (int8_t)PACKET_ENTITY_TELEPORT
-                 << (int32_t)UID << (int32_t)(x * 32) << (int32_t)(y * 32)
-                 << (int32_t)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
+      Packet telePacket = Protocol::entityTeleport(UID, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch));
       newChunk->sendPacket(telePacket, this);
     }
     else if (abs(newChunk->x - oldChunk->x) <= 1  && abs(newChunk->z - oldChunk->z) <= 1)
@@ -586,8 +576,7 @@ bool User::updatePos(double x, double y, double z, double stance)
 
       if (toremove.size())
       {
-        Packet pkt;
-        pkt << (int8_t)PACKET_DESTROY_ENTITY << (int32_t)UID;
+        Packet pkt = Protocol::destroyEntity(UID);
         std::list<User*>::iterator iter = toremove.begin(), end = toremove.end();
         for (; iter != end ; iter++)
         {
@@ -597,10 +586,7 @@ bool User::updatePos(double x, double y, double z, double stance)
 
       if (toadd.size())
       {
-        Packet pkt;
-        pkt << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)UID << nick
-            << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32)
-            << angleToByte(pos.yaw) << angleToByte(pos.pitch) << (int16_t)curItem;
+        Packet pkt = Protocol::namedEntitySpawn(UID, nick, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch), curItem);
 
         std::list<User*>::iterator iter = toadd.begin(), end = toadd.end();
         for (; iter != end ; iter++)
@@ -613,10 +599,7 @@ bool User::updatePos(double x, double y, double z, double stance)
       }
 
       // TODO: Determine those who where present for both.
-      Packet telePacket;
-      telePacket << (int8_t)PACKET_ENTITY_TELEPORT
-                 << (int32_t)UID << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32)
-                 << angleToByte(pos.yaw) << angleToByte(pos.pitch);
+      Packet telePacket = Protocol::entityTeleport(UID, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch));
       newChunk->sendPacket(telePacket, this);
 
       int chunkDiffX = newChunk->x - oldChunk->x;
@@ -705,16 +688,9 @@ bool User::updatePos(double x, double y, double z, double stance)
         }
       }
 
-      Packet destroyPkt;
-      destroyPkt << (int8_t)PACKET_DESTROY_ENTITY << (int32_t)UID;
-
-      Packet spawnPkt;
-      spawnPkt << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)UID << nick
-               << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch) << (int16_t)curItem;
-
-      Packet telePacket;
-      telePacket << (int8_t)PACKET_ENTITY_TELEPORT
-                 << (int32_t)UID << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch);
+      Packet destroyPkt = Protocol::destroyEntity(UID);
+      Packet spawnPkt = Protocol::namedEntitySpawn(UID, nick, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch), curItem);
+      Packet telePacket = Protocol::entityTeleport(UID, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch));
 
       toTeleport.erase(this);
       toAdd.erase(this);
@@ -760,11 +736,10 @@ bool User::updatePos(double x, double y, double z, double stance)
             if (Mineserver::get()->inventory()->isSpace(this, (*iter)->item, (*iter)->count))
             {
               // Send player collect item packet
-              buffer << (int8_t)PACKET_COLLECT_ITEM << (int32_t)(*iter)->EID << (int32_t)UID;
+              buffer << Protocol::collectItem((*iter)->EID, UID);
 
               // Send everyone destroy_entity-packet
-              Packet pkt;
-              pkt << (int8_t)PACKET_DESTROY_ENTITY << (int32_t)(*iter)->EID;
+              Packet pkt = Protocol::destroyEntity((*iter)->EID);
               newChunk->sendPacket(pkt);
 
               // Add items to inventory
@@ -853,8 +828,7 @@ bool User::checkOnBlock(int32_t x, int8_t y, int32_t z)
 
 bool User::updateLook(float yaw, float pitch)
 {
-  Packet pkt;
-  pkt << (int8_t)PACKET_ENTITY_LOOK << (int32_t)UID << angleToByte(yaw) << angleToByte(pitch);
+  Packet pkt = Protocol::entityLook(UID, yaw, pitch);
 
   sChunk* chunk = Mineserver::get()->map(pos.map)->getChunk(blockToChunk((int32_t)pos.x), blockToChunk((int32_t)pos.z));
   if (chunk != NULL)
@@ -931,7 +905,7 @@ bool User::sendAll(const Packet& packet)
 {
   for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    if ((*it)->fd && (*it)->logged && !((*it)->dnd && packet.firstwrite() == PACKET_CHAT_MESSAGE))
+    if ((*it)->fd && (*it)->logged)
     {
       (*it)->buffer.addToWrite(packet);
     }
@@ -944,7 +918,7 @@ bool User::sendAll(uint8_t* data, size_t len)
 {
   for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
-    if ((*it)->fd && (*it)->logged && !((*it)->dnd && data[0] == PACKET_CHAT_MESSAGE))
+    if ((*it)->fd && (*it)->logged)
     {
       (*it)->buffer.addToWrite(data, len);
     }
@@ -1064,7 +1038,7 @@ bool User::addQueue(int x, int z)
   }
 
   // Pre chunk
-  buffer << (int8_t)PACKET_PRE_CHUNK << x << z << (int8_t)1;
+  buffer << Protocol::preChunk(x, z, true);
 
   this->mapQueue.push_back(newMap);
 
@@ -1136,7 +1110,7 @@ bool User::popMap()
   while (this->mapRemoveQueue.size())
   {
     // Pre chunk
-    buffer << (int8_t)PACKET_PRE_CHUNK << (int32_t)mapRemoveQueue[0].x() << (int32_t)mapRemoveQueue[0].z() << (int8_t)0;
+    buffer << Protocol::preChunk(mapRemoveQueue[0].x(), mapRemoveQueue[0].z(), false);
 
     // Delete from known list
     delKnown(mapRemoveQueue[0].x(), mapRemoveQueue[0].z());
@@ -1212,7 +1186,7 @@ bool User::teleport(double x, double y, double z, size_t map)
   }
   if (map == pos.map)
   {
-    buffer << (int8_t)PACKET_PLAYER_POSITION_AND_LOOK << x << y << 0.0 << z << 0.f << 0.f << (int8_t)1;
+    buffer << Protocol::playerPositionAndLook(x, y, 0, z, 0, 0, true);
   }
 
   //Also update pos for other players
@@ -1226,10 +1200,7 @@ bool User::teleport(double x, double y, double z, size_t map)
 
 bool User::spawnUser(int x, int y, int z)
 {
-  Packet pkt;
-  pkt << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)UID << nick
-      << (int32_t)x << (int32_t)y << (int32_t)z << (int8_t)0 << (int8_t)0
-      << (int16_t)0;
+  Packet pkt = Protocol::namedEntitySpawn(UID, nick, x, y, z, 0, 0, 0);
   sChunk* chunk = Mineserver::get()->map(pos.map)->getChunk(blockToChunk(x >> 5), blockToChunk(z >> 5));
   if (chunk != NULL)
   {
@@ -1245,16 +1216,12 @@ bool User::spawnOthers()
     //    if ((*it)->logged && (*it)->UID != this->UID && (*it)->nick != this->nick)
     if ((*it)->logged)
     {
-      loginBuffer << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)(*it)->UID << (*it)->nick
-                  << (int32_t)((*it)->pos.x * 32) << (int32_t)((*it)->pos.y * 32) << (int32_t)((*it)->pos.z * 32)
-                  << (int8_t)0 << (int8_t)0 << (int16_t)0;
+      loginBuffer << Protocol::namedEntitySpawn((*it)->UID, (*it)->nick, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, 0, 0, 0);
       for (int b = 0; b < 5; b++)
       {
         const int n = b == 0 ? (*it)->curItem + 36 : 9 - b;
         const int type = (*it)->inv[n].getType();
-
-        loginBuffer << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)(*it)->UID
-                    << (int16_t)b << (int16_t)type << (int16_t) 0;
+        loginBuffer << Protocol::entityEquipment((*it)->UID, b, type, 0);
       }
     }
   }
@@ -1391,7 +1358,7 @@ bool User::sethealth(int userHealth)
   }
   if (health == userHealth)
   {
-    buffer << (int8_t)PACKET_UPDATE_HEALTH << (int16_t)userHealth;
+    buffer << Protocol::updateHealth(userHealth);
     return false;
   }
   if (userHealth < health)
@@ -1401,16 +1368,12 @@ bool User::sethealth(int userHealth)
     {
       return false;
     }
-    Packet pkt;
-    pkt << (int8_t)PACKET_ARM_ANIMATION << (int32_t)UID << (int8_t)2;
-    sendAll(pkt);
-
-
+    sendAll(Protocol::armAnimation(UID, ANIMATE_DAMAGE));
   }
   healthtimeout = time(NULL);
 
   health = userHealth;
-  buffer << (int8_t)PACKET_UPDATE_HEALTH << (int16_t)userHealth;
+  buffer << Protocol::updateHealth(userHealth);
   return true;
 }
 
@@ -1418,9 +1381,9 @@ bool User::respawn()
 {
   this->health = 20;
   this->timeUnderwater = 0;
-  buffer << (int8_t)PACKET_RESPAWN << (int8_t)0; //FIXME: send the correct world id
+  buffer << Protocol::respawn(); //FIXME: send the correct world id
   Packet destroyPkt;
-  destroyPkt << (int8_t)PACKET_DESTROY_ENTITY << (int32_t)UID;
+  destroyPkt << Protocol::destroyEntity(UID);
   sChunk* chunk = Mineserver::get()->map(pos.map)->getMapData(blockToChunk((int32_t)pos.x), blockToChunk((int32_t)pos.z));
   if (chunk != NULL)
   {
@@ -1436,9 +1399,7 @@ bool User::respawn()
     teleport(Mineserver::get()->map(pos.map)->spawnPos.x(), Mineserver::get()->map(pos.map)->spawnPos.y() + 2, Mineserver::get()->map(pos.map)->spawnPos.z(), 0);
   }
 
-  Packet spawnPkt;
-  spawnPkt << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)UID << nick
-           << (int32_t)(pos.x * 32) << (int32_t)(pos.y * 32) << (int32_t)(pos.z * 32) << angleToByte(pos.yaw) << angleToByte(pos.pitch) << (int16_t)curItem;
+  Packet spawnPkt = Protocol::namedEntitySpawn(UID, nick, pos.x, pos.y, pos.z, angleToByte(pos.yaw), angleToByte(pos.pitch), curItem);
 
   chunk = Mineserver::get()->map(pos.map)->getMapData(blockToChunk((int32_t)pos.x), blockToChunk((int32_t)pos.z));
   if (chunk != NULL)

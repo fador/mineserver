@@ -589,7 +589,7 @@ int PacketHandler::player_digging(User* user)
 
   // Blocks that break with first hit
   if (status == BLOCK_STATUS_STARTED_DIGGING &&
-      (block == BLOCK_SNOW || block == BLOCK_REED || block == BLOCK_TORCH || block == BLOCK_TNT 
+      (block == BLOCK_SNOW || block == BLOCK_REED || block == BLOCK_TORCH
     || block == BLOCK_REDSTONE_WIRE || block == BLOCK_RED_ROSE || block == BLOCK_YELLOW_FLOWER 
     || block == BLOCK_BROWN_MUSHROOM || block == BLOCK_RED_MUSHROOM 
     || block == BLOCK_REDSTONE_TORCH_OFF || block == BLOCK_REDSTONE_TORCH_ON))
@@ -1489,9 +1489,10 @@ Packet& Packet::operator>>(std::string& str)
   return *this;
 }
 
-void Packet::operator<<(const Packet& other)
+Packet& Packet::operator<<(const Packet& other)
 {
   addToWrite(other);
+  return *this;
 }
 
 // writeString and readString provide the old, 8-bit string features.
