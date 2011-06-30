@@ -108,7 +108,7 @@ void Mob::moveAnimal()
 
 void Mob::spawnToAll()
 {
-  User::sendAll(Protocol::mobSpawn(UID, type, x, y, z, yaw, pitch, metadata));
+  User::sendAll(Protocol::mobSpawn(*this));
   spawned = true;
 }
 
