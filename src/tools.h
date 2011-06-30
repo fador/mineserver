@@ -52,6 +52,7 @@ int32_t getSint32(uint8_t* buf);
 int32_t getSint16(uint8_t* buf);
 
 void my_itoa(int value, std::string& buf, int base);
+std::string my_itoa(int value, int base = 10);
 std::string base36_encode(int value);
 std::string strToLower(std::string temp);
 

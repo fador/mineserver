@@ -154,6 +154,13 @@ void my_itoa(int value, std::string& buf, int base)
   }
 }
 
+std::string my_itoa(int value, int base)
+{
+  std::string ret;
+  my_itoa(value, ret, base);
+  return ret;
+}
+
 std::string strToLower(std::string temp)
 {
   const int len = temp.length();
