@@ -230,7 +230,7 @@ int PacketHandler::inventory_change(User* user)
     user->buffer >> itemCount >> itemUses;
   }
 
-  Mineserver::get()->inventory()->windowClick(user, windowID, slot, rightClick, actionNumber, itemID, itemCount, itemUses);
+  Mineserver::get()->inventory()->windowClick(user, windowID, slot, rightClick, actionNumber, itemID, itemCount, itemUses, shift);
 
   //No need to do anything
   user->buffer.removePacket();

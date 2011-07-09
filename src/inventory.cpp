@@ -27,6 +27,8 @@
 
 
 #include <fstream>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "inventory.h"
 #include "constants.h"
@@ -450,12 +452,12 @@ bool Inventory::canBeArmour(int slot, int type)
 }
 
 
-bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t rightClick, int16_t actionNumber, int16_t itemID, int8_t itemCount, int16_t itemUses)
+bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t rightClick, int16_t actionNumber, int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t shift)
 {
   //Ack
   user->buffer << (int8_t)PACKET_TRANSACTION << (int8_t)windowID << (int16_t)actionNumber << (int8_t)1;
-
-  //Mineserver::get()->logger()->log(1,"window: " + dtos(windowID) + " slot: " + dtos(slot) + " (" + dtos(actionNumber) + ") itemID: " + dtos(itemID));
+  //std::string LogMSG("window: " + dtos(windowID) + " slot: " + dtos(slot) + " (" + dtos(actionNumber) + ")  shift: ( " + dtos(shift) + " ) itemID: " + dtos(itemID));
+  //LOG(INFO,"test",LogMSG);
   //Click outside the window
   if (slot == -999)
   {
