@@ -146,7 +146,7 @@ void Plugin::init()
   m_block_CBs.push_back(BlockBasicPtr(new BlockBed));
   m_block_CBs.push_back(BlockBasicPtr(new BlockWool));
   m_block_CBs.push_back(BlockBasicPtr(new Blockjackolantern));
-  m_blocl_CBs.push_back(BlockBasicPtr(new BlockIce));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockIce));
   m_block_CBs.push_back(BlockBasicPtr(new BlockDefault));
   m_block_CBs.push_back(BlockBasicPtr(new BlockTNT));
 
