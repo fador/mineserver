@@ -126,6 +126,7 @@ public:
   bool canBeArmour(int slot, int type);
   bool onwindowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_t z);
   bool onwindowClose(User* user, int8_t type, int32_t x, int32_t y, int32_t z);
+  bool onupdateinventory(User* user, int8_t windowID);
 
 
   bool windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_t z);
@@ -140,6 +141,7 @@ public:
   //Add items to inventory (pickups)
   bool addItems(User* user, int16_t itemID, int16_t count, int16_t health);
 
+  bool updateInventory(User* user, int8_t windowID);
   bool doCraft(Item* slots, int8_t width, int8_t height);
 
   bool setSlot(User* user, int8_t windowID, int16_t slot, int16_t itemID, int8_t count, int16_t health);

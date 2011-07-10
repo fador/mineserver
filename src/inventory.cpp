@@ -456,8 +456,8 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
 {
   //Ack
   user->buffer << (int8_t)PACKET_TRANSACTION << (int8_t)windowID << (int16_t)actionNumber << (int8_t)1;
-  //std::string LogMSG("window: " + dtos(windowID) + " slot: " + dtos(slot) + " (" + dtos(actionNumber) + ")  shift: ( " + dtos(shift) + " ) itemID: " + dtos(itemID));
-  //LOG(INFO,"test",LogMSG);
+  std::string LogMSG("window: " + dtos(windowID) + " slot: " + dtos(slot) + " (" + dtos(actionNumber) + ")  shift: ( " + dtos(shift) + " ) itemID: " + dtos(itemID));
+  LOG(INFO,"test",LogMSG);
   //Click outside the window
   if (slot == -999)
   {
@@ -622,7 +622,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
 
   bool workbenchCrafting = false;
   bool playerCrafting    = false;
-
+  
   if (windowID == WINDOW_PLAYER && slot >= 5 && slot <= 8)
   {
     // Armour slots are a strange case. Only a quantity of one should be allowed, so this must be checked for.
@@ -806,7 +806,13 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   setSlot(user, windowID, slot, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
 
   //Update item on the cursor
-  setSlot(user, WINDOW_CURSOR, 0, user->inventoryHolding.getType(), user->inventoryHolding.getCount(), user->inventoryHolding.getHealth());
+  //TODO Shift klick
+  /*
+  if(shift != 0)
+  {
+  }
+  else*/
+	setSlot(user, WINDOW_CURSOR, 0, user->inventoryHolding.getType(), user->inventoryHolding.getCount(), user->inventoryHolding.getHealth());
 
 
   //Check if crafting
@@ -897,7 +903,8 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   }
   */
 
-
+  if(!updateInventory(user, windowID))
+     return false;
   return true;
 }
 
@@ -1300,6 +1307,19 @@ bool Inventory::setSlot(User* user, int8_t windowID, int16_t slot, int16_t itemI
   return true;
 }
 
+bool Inventory::updateInventory(User* user, int8_t windowID)
+{
+   if(!this->onupdateinventory(user, windowID))
+      return false;
+   for(int i = 0; i < 44; i++)
+      user->inv[i].sendUpdate();
+   return true;
+}
+
+bool Inventory::onupdateinventory(User* user, int8_t windowID)
+{
+   return true;
+}
 
 int16_t Inventory::itemHealth(int16_t itemID, int8_t block, bool& rightUse)
 {
