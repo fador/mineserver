@@ -35,6 +35,7 @@
 #include "mineserver.h"
 #include "furnaceManager.h"
 #include "logger.h"
+#include <sstream>
 
 
 void Item::sendUpdate()
@@ -452,6 +453,19 @@ bool Inventory::canBeArmour(int slot, int type)
 
 bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t rightClick, int16_t actionNumber, int16_t itemID, int8_t itemCount, int16_t itemUses)
 {
+  std::stringstream out;
+  out << "windowID: " << (int16_t)windowID;// << " slot: " << slot << " rightClick: " << rightClick << " actionNumber: " << actionNumber;
+  LOG(INFO, "Inventory::windowClick", out.str());
+  out.str("");
+  out << " slot: " << slot;
+  LOG(INFO, "Inventory::windowClick", out.str());
+  out.str("");
+  out << " rightClick: " << (int16_t)rightClick;
+  LOG(INFO, "Inventory::windowClick", out.str());
+  out.str("");
+  out << " actionNumber: " << actionNumber;
+  LOG(INFO, "Inventory::windowClick", out.str());
+
   //Ack
   user->buffer << (int8_t)PACKET_TRANSACTION << (int8_t)windowID << (int16_t)actionNumber << (int8_t)1;
 
@@ -468,11 +482,13 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
     }
     return true;
   }
+  LOG(INFO, "Inventory::windowClick", "still here");
 
   if (!user->isOpenInv && windowID != 0)
   {
     return false;
   }
+  LOG(INFO, "Inventory::windowClick", "still here");
 
   sChunk* chunk = NULL;
   if (windowID != 0)
@@ -486,6 +502,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
 
     chunk->changed = true;
   }
+  LOG(INFO, "Inventory::windowClick", "still here");
 
   std::vector<User*>* otherUsers = NULL;
   OpenInvPtr currentInventory;
@@ -496,6 +513,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
     switch (user->openInv.type)
     {
     case WINDOW_CHEST:
+    case WINDOW_LARGE_CHEST:
       pinv = &openChests;
       break;
     case WINDOW_FURNACE:
@@ -505,15 +523,18 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
       pinv = &openWorkbenches;
       break;
     }
+  LOG(INFO, "Inventory::windowClick", "still here" + dtos((uint64_t)pinv) + "|");
 
     std::vector<OpenInvPtr>& inv = *pinv;
 
     for (size_t i = 0; i < inv.size(); i++)
     {
+    LOG(INFO, "Inventory::windowClick", "investigating inventory " + dtos(i));
       if (inv[i]->x == user->openInv.x &&
           inv[i]->y == user->openInv.y &&
           inv[i]->z == user->openInv.z)
       {
+      LOG(INFO, "Inventory::windowClick", "match.");
         otherUsers = &inv[i]->users;
         currentInventory = inv[i];
         break;
@@ -526,13 +547,15 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
     }
   }
 
-  Item* slotItem = NULL;
+  LOG(INFO, "Inventory::windowClick", "still here");
+  Item* slotItem;
   furnaceDataPtr tempFurnace;
 
   switch (windowID)
   {
     //Player inventory
   case WINDOW_PLAYER:
+    LOG(INFO, "Inventory::windowClick", "still here" + dtos((int64_t)(&user->inv[slot])));
     slotItem = &user->inv[slot];
     break;
   case WINDOW_CHEST:
@@ -544,11 +567,11 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
     {
       for (uint32_t i = 0; i < chunk->chests.size(); i ++)
       {
-        if (chunk->chests[i]->x == user->openInv.x &&
-            chunk->chests[i]->y == user->openInv.y &&
-            chunk->chests[i]->z == user->openInv.z)
+        if (chunk->chests[i]->x() == user->openInv.x &&
+            chunk->chests[i]->y() == user->openInv.y &&
+            chunk->chests[i]->z() == user->openInv.z)
         {
-          slotItem = &chunk->chests[i]->items[slot];
+          slotItem = chunk->chests[i]->items[slot].get();
           break;
         }
       }
@@ -556,11 +579,11 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
       if (slotItem == NULL)
       {
         chestDataPtr newChest(new chestData);
-        newChest->x = user->openInv.x;
-        newChest->y = user->openInv.y;
-        newChest->z = user->openInv.z;
+        newChest->x(user->openInv.x);
+        newChest->y(user->openInv.y);
+        newChest->z(user->openInv.z);
         chunk->chests.push_back(newChest);
-        slotItem = &newChest->items[slot];
+        slotItem = newChest->items[slot].get();
       }
     }
     break;
@@ -572,6 +595,31 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
     else
     {
       //ToDo: Handle large chest
+      for (uint32_t i = 0; i < chunk->chests.size(); i++)
+      {
+        //if(!chunk->chests[i]->large())
+        //  continue;
+
+        if(chunk->chests[i]->x() == user->openInv.x &&
+          chunk->chests[i]->y() == user->openInv.y &&
+          chunk->chests[i]->z() == user->openInv.z)
+        {
+          LOG(INFO, "Inventory::windowClick", "found slot " + dtos(slot));
+          slotItem = chunk->chests[i]->items[slot].get();
+          break;
+        }
+      }
+      if(slotItem == NULL)
+      {
+        LOG(INFO, "Inventory::windowClick", "slotItem not found..." + dtos(slot));
+        chestDataPtr newChest(new chestData);
+        newChest->x(user->openInv.x);
+        newChest->y(user->openInv.y);
+        newChest->z(user->openInv.z);
+        newChest->large(true);
+        chunk->chests.push_back(newChest);
+        slotItem = newChest->items[slot].get();
+      }
     }
     break;
   case WINDOW_FURNACE:
@@ -903,41 +951,44 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
 bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_t z)
 {
   sChunk* chunk = Mineserver::get()->map(user->pos.map)->getChunk(blockToChunk(x), blockToChunk(z));
-
+LOG(INFO, "Inventory::windowOpen", "stillhere");
   if (chunk == NULL)
   {
     return false;
   }
 
   onwindowOpen(user, type, x, y, z);
+LOG(INFO, "Inventory::windowOpen", "stillhere");
 
   switch (type)
   {
   case WINDOW_CHEST:
-    user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)WINDOW_CHEST  << (int8_t)INVENTORYTYPE_CHEST;
-	user->buffer.writeString(std::string("Chest"));
-	user->buffer << (int8_t)27;
+  case WINDOW_LARGE_CHEST:
+    user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)type << (int8_t)INVENTORYTYPE_CHEST;
+      user->buffer.writeString(std::string("Chest")); // TODO: adjust title
+      user->buffer << (int8_t)(type == WINDOW_CHEST ? 27 : 54);
 
     for (uint32_t i = 0; i < chunk->chests.size(); i++)
     {
-      if (chunk->chests[i]->x == x && chunk->chests[i]->y == y && chunk->chests[i]->z == z)
+      if (chunk->chests[i]->x() == x && chunk->chests[i]->y() == y && chunk->chests[i]->z() == z)
       {
-        for (int j = 0; j < 27; j++)
+        for (size_t j = 0; j < chunk->chests[i]->size(); j++)
         {
-          if (chunk->chests[i]->items[j].getType() != -1)
+          if (chunk->chests[i]->items[j]->getType() != -1)
           {
-            user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_CHEST << (int16_t)j << (int16_t)chunk->chests[i]->items[j].getType()
-                         << (int8_t)(chunk->chests[i]->items[j].getCount()) << (int16_t)chunk->chests[i]->items[j].getHealth();
+            user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)type << (int16_t)j << (int16_t)chunk->chests[i]->items[j]->getType()
+                         << (int8_t)(chunk->chests[i]->items[j]->getCount()) << (int16_t)chunk->chests[i]->items[j]->getHealth();
           }
         }
         break;
       }
     }
     break;
+
   case WINDOW_WORKBENCH:
-	  user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)WINDOW_WORKBENCH  << (int8_t)INVENTORYTYPE_WORKBENCH;
-	  user->buffer.writeString(std::string("Workbench"));
-	  user->buffer  << (int8_t)0;
+    user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)WINDOW_WORKBENCH  << (int8_t)INVENTORYTYPE_WORKBENCH;
+    user->buffer.writeString(std::string("Workbench"));
+    user->buffer  << (int8_t)0;
 
     for (uint32_t i = 0; i < openWorkbenches.size(); i++)
     {
@@ -1095,6 +1146,7 @@ bool Inventory::onwindowOpen(User* user, int8_t type, int32_t x, int32_t y, int3
   switch (type)
   {
   case WINDOW_CHEST:
+  case WINDOW_LARGE_CHEST:
     pinv = &openChests;
     break;
   case WINDOW_FURNACE:
@@ -1142,6 +1194,7 @@ bool Inventory::onwindowClose(User* user, int8_t type, int32_t x, int32_t y, int
   switch (type)
   {
   case WINDOW_CHEST:
+  case WINDOW_LARGE_CHEST:
     pinv = &openChests;
     break;
   case WINDOW_FURNACE:

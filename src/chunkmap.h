@@ -58,12 +58,70 @@ struct spawnedItem
   }
 };
 
-struct chestData
+/** holds items and coordinates for small and large chests
+ * note: large chests are in testing
+ */
+class chestData
 {
-  int32_t x;
-  int32_t y;
-  int32_t z;
-  Item items[27];
+public:
+  int32_t x() { return m_x; }
+  void x(int32_t newx) { m_x = newx; }
+  int32_t y() { return m_y; }
+  void y(int32_t newy) { m_y = newy; }
+  int32_t z() { return m_z; }
+  void z(int32_t newz) { m_z = newz; }
+  //Item& getItem(size_t i);
+  bool large() { return m_is_large; }
+  void large(bool large)
+  {
+    if(large != m_is_large)
+    {
+      size_t new_length = 0;
+      if(large)
+      {
+        new_length = 54+3;
+      } else {
+        new_length = 27+3;
+      }
+      while(new_length > items.size())
+        items.push_back(ItemPtr(new Item));
+      while(new_length < items.size())
+        items.pop_back();
+      /*
+       Item* old_items = items;
+
+       items = new Item[new_length];
+       for(int i = 26; i >= 0; i--) // it's at least a small chest. sizing a large chest down will delete items.
+       {
+         items[i] = old_items[i];
+       }
+       delete[] old_items; // not sure, whether this works..
+       */
+    }
+    return;
+   }
+  chestData() :
+    m_is_large(false)
+  {
+    while(items.size() < 27)
+      items.push_back(ItemPtr(new Item));
+  }
+
+  ~chestData()
+  { }
+
+  size_t size()
+  {
+    return items.size();
+  }
+
+  std::vector<ItemPtr> items;
+
+private:
+  int32_t m_x;
+  int32_t m_y;
+  int32_t m_z;
+  bool m_is_large; /// "private" var, please use get_large() and set_large()
 };
 
 struct signData
@@ -106,6 +164,8 @@ typedef std::tr1::shared_ptr<furnaceData> furnaceDataPtr;
 
 void removeFurnace(furnaceDataPtr data);
 
+/** holds chunk data (16x16x16 blocks ?)
+ */
 struct sChunk
 {
   uint8_t* blocks;

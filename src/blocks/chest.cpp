@@ -34,6 +34,7 @@
 #include "../map.h"
 #include "../chat.h"
 #include "../tools.h"
+#include "../logger.h"
 
 
 void BlockChest::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
@@ -155,20 +156,20 @@ bool BlockChest::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
 
   for (uint32_t i = 0; i < chunk->chests.size(); i++)
   {
-    if (chunk->chests[i]->x == x &&
-        chunk->chests[i]->y == y &&
-        chunk->chests[i]->z == z)
+    if (chunk->chests[i]->x() == x &&
+        chunk->chests[i]->y() == y &&
+        chunk->chests[i]->z() == z)
     {
       for (uint32_t item_i = 0; item_i < 27; item_i++)
       {
-        if (chunk->chests[i]->items[item_i].getType() != -1)
+        if (chunk->chests[i]->items[item_i]->getType() != -1)
         {
-          Mineserver::get()->map(map)->createPickupSpawn(chunk->chests[i]->x,
-              chunk->chests[i]->y,
-              chunk->chests[i]->z,
-              chunk->chests[i]->items[item_i].getType(),
-              chunk->chests[i]->items[item_i].getCount(),
-              chunk->chests[i]->items[item_i].getHealth(),
+          Mineserver::get()->map(map)->createPickupSpawn(chunk->chests[i]->x(),
+              chunk->chests[i]->y(),
+              chunk->chests[i]->z(),
+              chunk->chests[i]->items[item_i]->getType(),
+              chunk->chests[i]->items[item_i]->getCount(),
+              chunk->chests[i]->items[item_i]->getHealth(),
               NULL);
         }
       }
@@ -244,7 +245,36 @@ bool BlockChest::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
   //  direction = BLOCK_BOTTOM;
   //  break;
   //}
-
+/*
+  int32_t connectedChestX, connectedChestZ;
+  if(findConnectedChest(x, y, z, map, &connectedChestX, &connectedChestZ))
+  {
+    LOG(INFO, "BlockChest::onPlace", "i found a connected chest - yeyah!");
+    chestDataPtr connectedChest;
+    if(getChestByCoordinates(connectedChestX, y, connectedChestZ, map, connectedChest))
+    {
+      chestDataPtr newchest;
+      if(!getChestByCoordinates(x, y, z, map, newchest))
+      {
+        LOG(INFO, "BlockChest::onPlace", "newchest not found...");
+        sChunk* chunk = Mineserver::get()->map(map)->getChunk(blockToChunk(x), blockToChunk(z));
+        LOG(INFO, "BlockChest::onPlace", dtos((uint64_t)chunk));
+        if(chunk != NULL)
+        {
+          newchest = connectedChest;
+          newchest->large(true);
+          chunk->chests.push_back(newchest);
+          LOG(INFO, "BlockChest::onPlace", "push_back'd a new chest");
+        }
+      } else {
+        newchest->large(true);
+      }
+      connectedChest->large(true);
+    } else {
+      LOG(INFO, "BlockChest::onPlace", "cannot find connectedChest");
+    }
+  }
+*/
   Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
   Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
   return false;
@@ -252,6 +282,23 @@ bool BlockChest::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
 
 void BlockChest::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
+/*  if(newblock == BLOCK_CHEST)
+  {
+    uint8_t blocktype;
+    uint8_t blockmeta;
+    Mineserver::get()->map(map)->getBlock(x, y, z, &blocktype, &blockmeta);
+    if(blocktype == BLOCK_CHEST)
+    {
+      std::string dbg = "theres a chest next to me. x:" + dtos(x) + " y:" + dtos(y) + " z:" + dtos(z);
+      chestDataPtr chest;
+      if(getChestByCoordinates(x, y, z, map, chest))
+      {
+        LOG(INFO, "BlockChest::onNeightbourPlace", "enlarging a chest. ");
+        chest->large(true);
+      }
+      LOG(INFO, "BlockChest::onNeighbourPlace", dbg);
+    }
+  }*/
 }
 
 void BlockChest::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
@@ -266,6 +313,90 @@ void BlockChest::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t
 bool BlockChest::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 {
   //ToDo: check for large chest!
-  Mineserver::get()->inventory()->windowOpen(user, WINDOW_CHEST, x, y, z);
-  return true;
+  sChunk* chunk = Mineserver::get()->map(map)->getChunk(blockToChunk(x), blockToChunk(z));
+  if(chunk == NULL)
+  {
+    return false;
+  }
+
+  chestDataPtr _chestData;
+
+  for(uint32_t i = 0; i < chunk->chests.size(); i++)
+  {
+    if(chunk->chests[i]->y() == y)
+    {
+      if(
+        ((chunk->chests[i]->x() == x) && (chunk->chests[i]->z() == z))
+        || ((chunk->chests[i]->x() - 1 == x) && (chunk->chests[i]->z() == z))
+        || ((chunk->chests[i]->x() + 1 == x) && (chunk->chests[i]->z() == z))
+        || ((chunk->chests[i]->x()  == x) && (chunk->chests[i]->z() - 1 == z))
+        || ((chunk->chests[i]->x()  == x) && (chunk->chests[i]->z() + 1 == z)) )
+      {
+        _chestData = chunk->chests[i];
+        break;
+      }
+    }
+  }
+  if(_chestData != NULL)
+  {
+    //Mineserver::get()->inventory()->windowOpen(user, (_chestData->get_large() ? WINDOW_LARGE_CHEST : WINDOW_CHEST), x, y, z);
+    /*
+    if(!_chestData->large())
+    {
+      LOG(INFO, "BlockChest::onInteract", "enlarge YOUR chest!");
+      _chestData->large(true);
+      LOG(INFO, "BlockChest::onInteract", "is it larger yet?" + dtos(_chestData->size()));
+    }*/
+    Mineserver::get()->inventory()->windowOpen(user, (_chestData->large() ? WINDOW_LARGE_CHEST : WINDOW_CHEST), x, y, z);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool BlockChest::findConnectedChest(int32_t x, int8_t y, int32_t z, int map, int32_t* chest_x, int32_t* chest_z)
+{
+  uint8_t blocktype, blockmeta;
+
+  *chest_x = x - 1;
+  *chest_z = z;
+  Mineserver::get()->map(map)->getBlock(*chest_x, y, *chest_z, &blocktype, &blockmeta);
+  if(blocktype == BLOCK_CHEST)
+    return true;
+
+  *chest_x = x + 1;
+  Mineserver::get()->map(map)->getBlock(*chest_x, y, *chest_z, &blocktype, &blockmeta);
+  if(blocktype == BLOCK_CHEST)
+    return true;
+
+  *chest_x = x;
+  *chest_z = z - 1;
+  Mineserver::get()->map(map)->getBlock(*chest_x, y, *chest_z, &blocktype, &blockmeta);
+  if(blocktype == BLOCK_CHEST)
+    return true;
+
+  *chest_x = x;
+  *chest_z = z + 1;
+  Mineserver::get()->map(map)->getBlock(*chest_x, y, *chest_z, &blocktype, &blockmeta);
+  if(blocktype == BLOCK_CHEST)
+    return true;
+
+  return false;
+}
+
+bool BlockChest::getChestByCoordinates(int32_t x, int8_t y, int32_t z, int map, chestDataPtr& chest)
+{
+  sChunk* chunk = Mineserver::get()->map(map)->getChunk(blockToChunk(x), blockToChunk(z));
+  for(size_t i = 0; i < chunk->chests.size(); i++)
+  {
+    if((chunk->chests[i]->x() == x)
+      && (chunk->chests[i]->y() == y)
+      && (chunk->chests[i]->z() == z))
+    {
+      LOG(INFO, "BlockChest::getChestByCoordinates", "found a chest");
+      chest = chunk->chests[i];
+      return true;
+    }
+  }
+  return false;
 }
