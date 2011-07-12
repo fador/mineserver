@@ -828,17 +828,15 @@ PLUGIN_API_EXPORT void CALLCONVERSION commands_init(mineserver_pointer_struct* m
   mineserver->plugin.addCallback("BlockPlacePre", reinterpret_cast<voidF>(blockPlacePreFunction));
 
   mineserver->plugin.addCallback("PlayerDiggingStarted", reinterpret_cast<voidF>(startedDiggingFunction));
-  
-
 
   registerCommand(ComPtr(new Command(parseCmd("replace"), "<from-id/alias> <to-id/alias>", "Type in the command and left-click two blocks, it will replace the selected blocks with the new blocks", replace)));
   registerCommand(ComPtr(new Command(parseCmd("replacechunk"), "<from-id/alias> <to-id/alias>", "Replaces the chunk you are at with the block you specify", replacechunk)));
-  registerCommand(ComPtr(new Command(parseCmd("flattenchunk"), "<id/alias>", "Changes all blocks above you to air and the current Y-level you are at to the block of your choice", flattenchunk)));
+  registerCommand(ComPtr(new Command(parseCmd("flattenchunk"), "<id/alias>", "Erases all blocks above you and changes all blocks at your Y-level to your block of choice", flattenchunk)));
   registerCommand(ComPtr(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport)));
   registerCommand(ComPtr(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf)));
   registerCommand(ComPtr(new Command(parseCmd("home"), "", "Teleport to map spawn location", home)));
-  registerCommand(ComPtr(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime)));
-  registerCommand(ComPtr(new Command(parseCmd("cuboid"), "", "Type in the command and place two blocks, it will fill the space between them", cuboid)));  
+  registerCommand(ComPtr(new Command(parseCmd("settime"), "<time>", "Sets the world time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime)));
+  registerCommand(ComPtr(new Command(parseCmd("cuboid"), "", "Type in the command and place two blocks, it will fill the space between them", cuboid)));
   registerCommand(ComPtr(new Command(parseCmd("players who names list"), "", "Lists online players", playerList)));
   registerCommand(ComPtr(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems)));
   registerCommand(ComPtr(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap)));  
@@ -849,9 +847,9 @@ PLUGIN_API_EXPORT void CALLCONVERSION commands_init(mineserver_pointer_struct* m
   registerCommand(ComPtr(new Command(parseCmd("dnd"), "", "Toggle Do Not Disturb mode", doNotDisturb)));
   registerCommand(ComPtr(new Command(parseCmd("rules"), "", "Display server rules", sendRules)));
   registerCommand(ComPtr(new Command(parseCmd("about"), "", "Display server name and software version", about)));
-  registerCommand(ComPtr(new Command(parseCmd("motd"), "", "Displays the MOTD", sendMOTD)));
-  registerCommand(ComPtr(new Command(parseCmd("world"), "<world Number>", "Move between worlds", userWorld)));
-  registerCommand(ComPtr(new Command(parseCmd("gettime"), "<time>", "Get the serverTime", getTime)));
+  registerCommand(ComPtr(new Command(parseCmd("motd"), "", "Displays the server's MOTD", sendMOTD)));
+  registerCommand(ComPtr(new Command(parseCmd("world"), "<world-id>", "Moves you between worlds", userWorld)));
+  registerCommand(ComPtr(new Command(parseCmd("gettime"), "", "Gets the world time", getTime)));
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION commands_shutdown(void)
