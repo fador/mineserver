@@ -62,6 +62,7 @@ public:
   virtual void onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
   virtual void onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
   virtual void onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction);
+  virtual void onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction, int map);
   virtual bool onInteract(User* user, int32_t x, int8_t y, int32_t z, int map);
   virtual void revertBlock(User* user, int32_t x, int8_t y, int32_t z, int map);
 
