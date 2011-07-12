@@ -230,6 +230,10 @@ void BlockBasic::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t
 {
 }
 
+void BlockBasic::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction, int map)
+{
+}
+
 bool BlockBasic::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 {
   return false;

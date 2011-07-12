@@ -64,6 +64,7 @@
 #include "blocks/bed.h"
 #include "blocks/wool.h"
 #include "blocks/jackolantern.h"
+#include "blocks/ice.h"
 
 #include "items/food.h"
 #include "items/projectile.h"
@@ -145,6 +146,7 @@ void Plugin::init()
   m_block_CBs.push_back(BlockBasicPtr(new BlockBed));
   m_block_CBs.push_back(BlockBasicPtr(new BlockWool));
   m_block_CBs.push_back(BlockBasicPtr(new Blockjackolantern));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockIce));
   m_block_CBs.push_back(BlockBasicPtr(new BlockDefault));
   m_block_CBs.push_back(BlockBasicPtr(new BlockTNT));
 

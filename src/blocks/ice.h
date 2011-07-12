@@ -23,35 +23,22 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-#ifndef _BLOCKS_FALLING_H
-#define _BLOCKS_FALLING_H
-
-#include "basic.h"
-#include "../user.h"
-
-/**
- * BlockFalling deals specifically with blocks that fall when there are empty
- * blocks below them.
- * @see BlockBasic
  */
 
-class BlockFalling: public BlockBasic
+#pragma once
+
+#include "basic.h"
+
+class User;
+
+/** BlockIce deals specifically with ice, for instance breaking ice turning into water
+@see BlockBasic
+*/
+
+class BlockIce : public BlockBasic
 {
 public:
-  inline bool affectedBlock(int block) const { 
-  						if((block == BLOCK_SAND) || (block == BLOCK_SLOW_SAND) || (block == BLOCK_GRAVEL))
-	  						return true; 
-	  					else
-	  						return false;
-  					     }
+  inline bool affectedBlock(int block) const { return block == BLOCK_ICE; }
 
-  void onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-  bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-  void onNeighbourMove(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int8_t direction, int map);
-private:
-  void applyPhysics(User* user, int32_t x, int8_t y, int32_t z, int map);
+  bool onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
 };
-
-#endif
