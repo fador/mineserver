@@ -833,7 +833,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION commands_init(mineserver_pointer_struct* m
 
   registerCommand(ComPtr(new Command(parseCmd("replace"), "<from-id/alias> <to-id/alias>", "Type in the command and left-click two blocks, it will replace the selected blocks with the new blocks", replace)));
   registerCommand(ComPtr(new Command(parseCmd("replacechunk"), "<from-id/alias> <to-id/alias>", "Replaces the chunk you are at with the block you specify", replacechunk)));
-  registerCommand(ComPtr(new Command(parseCmd("flattenchunk"), "<id/alias>", "Flattens the chunk by making everything above you air and everything at your current Y level to the block of your choice", flattenchunk)));
+  registerCommand(ComPtr(new Command(parseCmd("flattenchunk"), "<id/alias>", "Changes all blocks above you to air and the current Y-level you are at to the block of your choice", flattenchunk)));
   registerCommand(ComPtr(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport)));
   registerCommand(ComPtr(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf)));
   registerCommand(ComPtr(new Command(parseCmd("home"), "", "Teleport to map spawn location", home)));
