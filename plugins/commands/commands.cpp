@@ -431,7 +431,7 @@ void replacechunk(std::string user, std::string command, std::deque<std::string>
       {
         for(int bZ = 0; bZ < 16; bZ++)
         {
-          for(int bY = 0; bY < 127; bY++)
+          for(int bY = 0; bY < 128; bY++)
           {
             if(blocks[bY + ((bZ << 7) + (bX << 11))] == fromBlock)
             {
@@ -441,6 +441,59 @@ void replacechunk(std::string user, std::string command, std::deque<std::string>
         }
       }
 
+      mineserver->chat.sendmsgTo(user.c_str(),"Replace chunk done");
+    }
+  }
+}
+
+void flattenchunk(std::string user, std::string command, std::deque<std::string> args)
+{
+  if(args.size() == 1)
+  {
+    double x,y,z;
+    if(mineserver->user.getPosition(user.c_str(), &x,&y,&z,NULL,NULL,NULL))
+    {
+
+      int topBlock = atoi(args[0].c_str());
+
+      //If item was not a number, search the name from config
+      if (topBlock == 0)
+      {
+        topBlock = mineserver->config.iData(args[0].c_str());
+      }
+
+      if(topBlock < 1 || topBlock > 255)
+      {
+        return;
+      }
+
+      int chunkx,chunkz;
+      chunkx = ((int)x)>>4;
+      chunkz = ((int)z)>>4;
+      unsigned char* blocks = mineserver->map.getMapData_block(chunkx,chunkz);
+      for(int bX = 0; bX < 16; bX++)
+      {
+        for(int bZ = 0; bZ < 16; bZ++)
+        {
+          for(int bY = 127; bY >= 0; bY++)
+          {
+            if(bY > y)
+            {
+              blocks[bY + ((bZ << 7) + (bX << 11))] = 0;
+            }
+            else if(bY == y)
+            {
+              blocks[bY + ((bZ << 7) + (bX << 11))] = topBlock ;
+            }
+            else
+            {
+              break;
+            }
+          }
+        }
+      }
+
+      mineserver->chat.sendmsgTo(user.c_str(),"Flatten chunk done");
     }
   }
 }
@@ -776,13 +829,14 @@ PLUGIN_API_EXPORT void CALLCONVERSION commands_init(mineserver_pointer_struct* m
   
 
 
-  registerCommand(ComPtr(new Command(parseCmd("replace"), "", "", replace)));
-  registerCommand(ComPtr(new Command(parseCmd("replacechunk"), "", "", replacechunk)));
+  registerCommand(ComPtr(new Command(parseCmd("replace"), "<from-id/alias> <to-id/alias>", "Type in the command and left-click two blocks, it will replace the selected blocks with the new blocks", replace)));
+  registerCommand(ComPtr(new Command(parseCmd("replacechunk"), "<from-id/alias> <to-id/alias>", "Replaces the chunk you are at with the block you specify", replacechunk)));
+  registerCommand(ComPtr(new Command(parseCmd("flattenchunk"), "<id/alias>", "Flattens the chunk by making everything above you air and everything at your current Y level to the block of your choice", replacechunk)));
   registerCommand(ComPtr(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport)));
   registerCommand(ComPtr(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf)));
   registerCommand(ComPtr(new Command(parseCmd("home"), "", "Teleport to map spawn location", home)));
   registerCommand(ComPtr(new Command(parseCmd("settime"), "<time>", "Sets server time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime)));
-  registerCommand(ComPtr(new Command(parseCmd("cuboid"), "", "type in the command and place two blocks, it will fill the space between them", cuboid)));  
+  registerCommand(ComPtr(new Command(parseCmd("cuboid"), "", "Type in the command and place two blocks, it will fill the space between them", cuboid)));  
   registerCommand(ComPtr(new Command(parseCmd("players who names list"), "", "Lists online players", playerList)));
   registerCommand(ComPtr(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems)));
   registerCommand(ComPtr(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap)));  
