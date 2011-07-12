@@ -119,14 +119,10 @@ User::~User()
     delKnown(mapKnown[i].x(), mapKnown[i].z());
   }
 
-  for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
+  std::set<User*>::iterator user_set_it = Mineserver::get()->users().find(this);
+  if (user_set_it != Mineserver::get()->users().end())
   {
-    if (*it == this)
-    {
-      Mineserver::get()->users().erase(it);
-      //LOG2(WARNING, this->nick + " erased!");
-      break;
-    }
+    Mineserver::get()->users().erase(user_set_it);
   }
 
   if (logged)
@@ -159,13 +155,19 @@ User::~User()
 
     // Loop every loaded chunk to make sure no user pointers are left!
 
-    for (ChunkMap::const_iterator it = Mineserver::get()->map(pos.map)->chunks.begin(); it != Mineserver::get()->map(pos.map)->chunks.end(); ++it)
+    for (ChunkMap::const_iterator it = Mineserver::get()->map(pos.map)->chunks.begin(); it != Mineserver::get()->map(pos.map)->chunks.end(); )
     {
-      it->second->users.erase(this);
+      if((user_set_it = it->second->users.find(this)) != it->second->users.end())
+        it->second->users.erase(user_set_it);
 
       if (it->second->users.empty())
       {
-        Mineserver::get()->map(pos.map)->releaseMap(it->first.first, it->first.second);
+        ChunkMap::const_iterator jt = it++;
+        Mineserver::get()->map(pos.map)->releaseMap(jt->first.first, jt->first.second);
+      }
+      else
+      {
+        ++it;
       }
     }
 
