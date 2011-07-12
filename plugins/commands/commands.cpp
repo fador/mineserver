@@ -488,7 +488,7 @@ void flattenchunk(std::string user, std::string command, std::deque<std::string>
             }
             else
             {
-              break;
+              // Do nothing; leave this block untouched
             }
           }
         }
