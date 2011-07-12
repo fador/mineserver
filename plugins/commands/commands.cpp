@@ -567,6 +567,42 @@ void getTime(std::string user, std::string command, std::deque<std::string> args
   mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
 }
 
+void spawnMob(std::string user, std::string command, std::deque<std::string> args)
+{
+  if(args.size() >= 1)
+  {
+    int mobType = atoi(args[0].c_str());
+    int mobCount = 1;
+
+    // TODO: Recognize actual mob names such as 'creeper' instead of 50
+    if(!((mobType >= 50 && mobType <= 57) || (mobType >= 90 && mobType <= 95)))
+    {
+      mineserver->chat.sendmsgTo(user.c_str(),"Invalid mob type specified. IDs only please!");
+      return;
+    }
+
+    // TODO: Actually use mobCount, instead of assuming 1
+    if(args.size() >= 2)
+    {
+      mobCount = atoi(args[1].c_str());
+      if(mobCount<1)
+      {
+        mobCount = 1;
+      }
+      if(mobCount>50)
+      {
+        mobCount = 50;
+      }
+    }
+
+    int mobId = mineserver->mob.createSpawnMob(mobType);
+
+    double x,y,z;
+    if(mineserver->user.getPosition(user.c_str(), &x, &y, &z, NULL, NULL, NULL))
+      mineserver->mob.moveMob(mobId, x, y, z);
+  }
+}
+
 
 bool translateDirection(int32_t *x, int8_t *y, int32_t *z, int8_t direction)
 {
@@ -657,49 +693,52 @@ bool blockPlacePreFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int1
   {
     if(cuboidMap[user].active)
     {
-      if(cuboidMap[user].state == 0)
+      if(cuboidMap[user].action == PLANE)
       {
-        cuboidMap[user].state = 1;
-        cuboidMap[user].x     = x;
-        cuboidMap[user].y     = y;
-        cuboidMap[user].z     = z;
-        cuboidMap[user].block = block;
-        mineserver->chat.sendmsgTo(user.c_str(),"First block done, place second");
-      }
-      else if(cuboidMap[user].state == 1)
-      {
-        if(cuboidMap[user].block == block)
-        {
-            int xstart,xend;
-            int ystart,yend;
-            int zstart,zend;
-            xstart=(x<cuboidMap[user].x)?x:cuboidMap[user].x;
-            xend=(x<cuboidMap[user].x)?cuboidMap[user].x:x;
+	    if(cuboidMap[user].state == 0)
+	    {
+		  cuboidMap[user].state = 1;
+		  cuboidMap[user].x     = x;
+		  cuboidMap[user].y     = y;
+		  cuboidMap[user].z     = z;
+		  cuboidMap[user].block = block;
+		  mineserver->chat.sendmsgTo(user.c_str(),"First block done, place second");
+	    }
+	    else if(cuboidMap[user].state == 1)
+	    {
+		  if(cuboidMap[user].block == block)
+		  {
+			  int xstart,xend;
+			  int ystart,yend;
+			  int zstart,zend;
+			  xstart=(x<cuboidMap[user].x)?x:cuboidMap[user].x;
+			  xend=(x<cuboidMap[user].x)?cuboidMap[user].x:x;
 
-            ystart=(y<cuboidMap[user].y)?y:cuboidMap[user].y;
-            yend=(y<cuboidMap[user].y)?cuboidMap[user].y:y;
+			  ystart=(y<cuboidMap[user].y)?y:cuboidMap[user].y;
+			  yend=(y<cuboidMap[user].y)?cuboidMap[user].y:y;
 
-            zstart=(z<cuboidMap[user].z)?z:cuboidMap[user].z;
-            zend=(z<cuboidMap[user].z)?cuboidMap[user].z:z;
-            if((xend-xstart) * (yend-ystart) * (zend-zstart) > 10000)
-            {
-              mineserver->chat.sendmsgTo(user.c_str(),"Area too large!");
-              return true;
-            }
-            for(int xpos = xstart; xpos <= xend; xpos ++)
-            {
-              for(int zpos = zstart;  zpos <= zend; zpos ++)
-              {                
-                for(int ypos = ystart;  ypos <= yend; ypos ++)
-                {
-                  mineserver->map.setBlock(xpos,ypos,zpos,block,0);
-                }
-              }
-            }
-          mineserver->chat.sendmsgTo(user.c_str(),"Cuboid done");
-          cuboidMap.erase(user);
-        }
-      }
+			  zstart=(z<cuboidMap[user].z)?z:cuboidMap[user].z;
+			  zend=(z<cuboidMap[user].z)?cuboidMap[user].z:z;
+			  if((xend-xstart) * (yend-ystart) * (zend-zstart) > 10000)
+			  {
+			    mineserver->chat.sendmsgTo(user.c_str(),"Area too large!");
+			    return true;
+			  }
+			  for(int xpos = xstart; xpos <= xend; xpos ++)
+			  {
+			    for(int zpos = zstart;  zpos <= zend; zpos ++)
+			    {                
+				  for(int ypos = ystart;  ypos <= yend; ypos ++)
+				  {
+				    mineserver->map.setBlock(xpos,ypos,zpos,block,0);
+				  }
+			    }
+			  }
+		    mineserver->chat.sendmsgTo(user.c_str(),"Cuboid done");
+		    cuboidMap.erase(user);
+	  	  }
+	    }
+	  }
     }
   }
   return true;
@@ -715,7 +754,7 @@ void gps(std::string user, std::string command, std::deque<std::string> args)
   double x,y,z,stance;
   float yaw,pitch;
   mineserver->user.getPosition(user.c_str(), &x, &y, &z, &yaw, &pitch, &stance);
-  std::string msg = "X: " +dtos(x) +" Y: "+ dtos(y) +"Z: "+ dtos(z);
+  std::string msg = "X: " + dtos(x) + " Y: " + dtos(y) + " Z: " + dtos(z);
   mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
 }
 
@@ -829,27 +868,28 @@ PLUGIN_API_EXPORT void CALLCONVERSION commands_init(mineserver_pointer_struct* m
 
   mineserver->plugin.addCallback("PlayerDiggingStarted", reinterpret_cast<voidF>(startedDiggingFunction));
 
+  registerCommand(ComPtr(new Command(parseCmd("about"), "", "Displays server name and software version", about)));
+  registerCommand(ComPtr(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport)));
+  registerCommand(ComPtr(new Command(parseCmd("cuboid"), "", "Type in the command and place two blocks, it will fill the space between them", cuboid)));
+  registerCommand(ComPtr(new Command(parseCmd("dnd"), "", "Toggles Do Not Disturb mode", doNotDisturb)));
+  registerCommand(ComPtr(new Command(parseCmd("flattenchunk"), "<id/alias>", "Erases all blocks above you and changes all blocks at your Y-level to your block of choice", flattenchunk)));
+  registerCommand(ComPtr(new Command(parseCmd("gettime"), "", "Gets the world time", getTime)));
+  registerCommand(ComPtr(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems)));
+  registerCommand(ComPtr(new Command(parseCmd("gps"), "", "Display current coordinates", gps)));
+  registerCommand(ComPtr(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", sendHelp)));
+  registerCommand(ComPtr(new Command(parseCmd("home"), "", "Teleports you to this world's spawn location", home)));
+  registerCommand(ComPtr(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf)));
+  registerCommand(ComPtr(new Command(parseCmd("motd"), "", "Displays the server's MOTD", sendMOTD)));
+  registerCommand(ComPtr(new Command(parseCmd("players who names list"), "", "Lists online players", playerList)));
   registerCommand(ComPtr(new Command(parseCmd("replace"), "<from-id/alias> <to-id/alias>", "Type in the command and left-click two blocks, it will replace the selected blocks with the new blocks", replace)));
   registerCommand(ComPtr(new Command(parseCmd("replacechunk"), "<from-id/alias> <to-id/alias>", "Replaces the chunk you are at with the block you specify", replacechunk)));
-  registerCommand(ComPtr(new Command(parseCmd("flattenchunk"), "<id/alias>", "Erases all blocks above you and changes all blocks at your Y-level to your block of choice", flattenchunk)));
-  registerCommand(ComPtr(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport)));
-  registerCommand(ComPtr(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf)));
-  registerCommand(ComPtr(new Command(parseCmd("home"), "", "Teleport to map spawn location", home)));
+  registerCommand(ComPtr(new Command(parseCmd("rules"), "", "Displays server rules", sendRules)));
+  registerCommand(ComPtr(new Command(parseCmd("save"), "", "Manually saves map to disc", saveMap)));
+  registerCommand(ComPtr(new Command(parseCmd("setspawn"), "", "Sets home to your current coordinates", setSpawn)));
   registerCommand(ComPtr(new Command(parseCmd("settime"), "<time>", "Sets the world time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime)));
-  registerCommand(ComPtr(new Command(parseCmd("cuboid"), "", "Type in the command and place two blocks, it will fill the space between them", cuboid)));
-  registerCommand(ComPtr(new Command(parseCmd("players who names list"), "", "Lists online players", playerList)));
-  registerCommand(ComPtr(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems)));
-  registerCommand(ComPtr(new Command(parseCmd("save"), "", "Manually save map to disc", saveMap)));  
-  registerCommand(ComPtr(new Command(parseCmd("setspawn"), "", "", setSpawn)));  
-  registerCommand(ComPtr(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", sendHelp)));
+  registerCommand(ComPtr(new Command(parseCmd("spawnmob"), "<type> [count]", "Spawns 1 mob or [count] mobs near your coordinates", spawnMob)));
   registerCommand(ComPtr(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport)));
-  registerCommand(ComPtr(new Command(parseCmd("gps"), "", "Display current coordinates", gps)));
-  registerCommand(ComPtr(new Command(parseCmd("dnd"), "", "Toggle Do Not Disturb mode", doNotDisturb)));
-  registerCommand(ComPtr(new Command(parseCmd("rules"), "", "Display server rules", sendRules)));
-  registerCommand(ComPtr(new Command(parseCmd("about"), "", "Display server name and software version", about)));
-  registerCommand(ComPtr(new Command(parseCmd("motd"), "", "Displays the server's MOTD", sendMOTD)));
   registerCommand(ComPtr(new Command(parseCmd("world"), "<world-id>", "Moves you between worlds", userWorld)));
-  registerCommand(ComPtr(new Command(parseCmd("gettime"), "", "Gets the world time", getTime)));
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION commands_shutdown(void)
