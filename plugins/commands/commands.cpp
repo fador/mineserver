@@ -441,7 +441,7 @@ void replacechunk(std::string user, std::string command, std::deque<std::string>
         }
       }
 
-      mineserver->map.sendToUser(user, chunkx, chunkz);
+      // TODO: Send chunk update to all players.
       mineserver->chat.sendmsgTo(user.c_str(),"Replace chunk done");
     }
   }
@@ -494,7 +494,7 @@ void flattenchunk(std::string user, std::string command, std::deque<std::string>
         }
       }
 
-      mineserver->map.sendToUser(user, chunkx, chunkz);
+      // TODO: Send chunk update to all players.
       mineserver->chat.sendmsgTo(user.c_str(),"Flatten chunk done");
     }
   }
