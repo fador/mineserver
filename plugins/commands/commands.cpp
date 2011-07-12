@@ -136,7 +136,7 @@ bool isValidItem(int id)
     return false;
   }
 
-  if (id > 91 && id < 256)  // these are undefined blocks and items
+  if (id > 96 && id < 256)  // these are undefined blocks and items
   {
     return false;
   }
