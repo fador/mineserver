@@ -567,43 +567,6 @@ void getTime(std::string user, std::string command, std::deque<std::string> args
   mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
 }
 
-void spawnMob(std::string user, std::string command, std::deque<std::string> args)
-{
-  if(args.size() >= 1)
-  {
-    int mobType = atoi(args[0].c_str());
-    int mobCount = 1;
-
-    // TODO: Recognize actual mob names such as 'creeper' instead of 50
-    if(!((mobType >= 50 && mobType <= 57) || (mobType >= 90 && mobType <= 95)))
-    {
-      mineserver->chat.sendmsgTo(user.c_str(),"Invalid mob type specified. IDs only please!");
-      return;
-    }
-
-    // TODO: Actually use mobCount, instead of assuming 1
-    if(args.size() >= 2)
-    {
-      mobCount = atoi(args[1].c_str());
-      if(mobCount<1)
-      {
-        mobCount = 1;
-      }
-      if(mobCount>50)
-      {
-        mobCount = 50;
-      }
-    }
-
-    int mobId = mineserver->mob.createSpawnMob(mobType);
-
-    double x,y,z;
-    if(mineserver->user.getPosition(user.c_str(), &x, &y, &z, NULL, NULL, NULL))
-      mineserver->mob.moveMob(mobId, x, y, z);
-  }
-}
-
-
 bool translateDirection(int32_t *x, int8_t *y, int32_t *z, int8_t direction)
 {
     switch(direction)
@@ -887,7 +850,6 @@ PLUGIN_API_EXPORT void CALLCONVERSION commands_init(mineserver_pointer_struct* m
   registerCommand(ComPtr(new Command(parseCmd("save"), "", "Manually saves map to disc", saveMap)));
   registerCommand(ComPtr(new Command(parseCmd("setspawn"), "", "Sets home to your current coordinates", setSpawn)));
   registerCommand(ComPtr(new Command(parseCmd("settime"), "<time>", "Sets the world time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime)));
-  registerCommand(ComPtr(new Command(parseCmd("spawnmob"), "<type> [count]", "Spawns 1 mob or [count] mobs near your coordinates", spawnMob)));
   registerCommand(ComPtr(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport)));
   registerCommand(ComPtr(new Command(parseCmd("world"), "<world-id>", "Moves you between worlds", userWorld)));
 }
