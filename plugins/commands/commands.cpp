@@ -476,7 +476,7 @@ void flattenchunk(std::string user, std::string command, std::deque<std::string>
       {
         for(int bZ = 0; bZ < 16; bZ++)
         {
-          for(int bY = 127; bY >= 0; bY++)
+          for(int bY = 127; bY >= 0; bY--)
           {
             if(bY > y)
             {
