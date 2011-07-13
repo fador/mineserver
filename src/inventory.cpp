@@ -455,23 +455,9 @@ bool Inventory::canBeArmour(int slot, int type)
 
 bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t rightClick, int16_t actionNumber, int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t shift)
 {
-  std::stringstream out;
-  out << "windowID: " << (int16_t)windowID;// << " slot: " << slot << " rightClick: " << rightClick << " actionNumber: " << actionNumber;
-  LOG(INFO, "Inventory::windowClick", out.str());
-  out.str("");
-  out << " slot: " << slot;
-  LOG(INFO, "Inventory::windowClick", out.str());
-  out.str("");
-  out << " rightClick: " << (int16_t)rightClick;
-  LOG(INFO, "Inventory::windowClick", out.str());
-  out.str("");
-  out << " actionNumber: " << actionNumber;
-  LOG(INFO, "Inventory::windowClick", out.str());
-
   //Ack
   user->buffer << (int8_t)PACKET_TRANSACTION << (int8_t)windowID << (int16_t)actionNumber << (int8_t)1;
-  std::string LogMSG("window: " + dtos(windowID) + " slot: " + dtos(slot) + " (" + dtos(actionNumber) + ")  shift: ( " + dtos(shift) + " ) itemID: " + dtos(itemID));
-  LOG(INFO,"test",LogMSG);
+
   //Click outside the window
   if (slot == -999)
   {
@@ -484,13 +470,11 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
     }
     return true;
   }
-  LOG(INFO, "Inventory::windowClick", "still here");
 
   if (!user->isOpenInv && windowID != 0)
   {
     return false;
   }
-  LOG(INFO, "Inventory::windowClick", "still here");
 
   sChunk* chunk = NULL;
   if (windowID != 0)
@@ -504,7 +488,6 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
 
     chunk->changed = true;
   }
-  LOG(INFO, "Inventory::windowClick", "still here");
 
   std::vector<User*>* otherUsers = NULL;
   OpenInvPtr currentInventory;
@@ -525,18 +508,15 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
       pinv = &openWorkbenches;
       break;
     }
-  LOG(INFO, "Inventory::windowClick", "still here" + dtos((uint64_t)pinv) + "|");
 
     std::vector<OpenInvPtr>& inv = *pinv;
 
     for (size_t i = 0; i < inv.size(); i++)
     {
-    LOG(INFO, "Inventory::windowClick", "investigating inventory " + dtos(i));
       if (inv[i]->x == user->openInv.x &&
           inv[i]->y == user->openInv.y &&
           inv[i]->z == user->openInv.z)
       {
-      LOG(INFO, "Inventory::windowClick", "match.");
         otherUsers = &inv[i]->users;
         currentInventory = inv[i];
         break;
@@ -549,7 +529,6 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
     }
   }
 
-  LOG(INFO, "Inventory::windowClick", "still here");
   Item* slotItem;
   furnaceDataPtr tempFurnace;
 
@@ -557,7 +536,6 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   {
     //Player inventory
   case WINDOW_PLAYER:
-    LOG(INFO, "Inventory::windowClick", "still here" + dtos((int64_t)(&user->inv[slot])));
     slotItem = &user->inv[slot];
     break;
   case WINDOW_CHEST:
@@ -580,7 +558,6 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
       //Create chest data if it doesn't exist
       if (slotItem == NULL)
       {
-        LOG(INFO, "Inventory::windowclick", "we're createing a new chest now...");
         chestDataPtr newChest(new chestData);
         newChest->x(user->openInv.x);
         newChest->y(user->openInv.y);
@@ -607,14 +584,12 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
           chunk->chests[i]->y() == user->openInv.y &&
           chunk->chests[i]->z() == user->openInv.z)
         {
-          LOG(INFO, "Inventory::windowClick", "found slot " + dtos(slot));
           slotItem = (*chunk->chests[i]->items())[slot].get();
           break;
         }
       }
       if(slotItem == NULL)
       {
-        LOG(INFO, "Inventory::windowClick", "slotItem not found..." + dtos(slot));
         chestDataPtr newChest(new chestData);
         newChest->x(user->openInv.x);
         newChest->y(user->openInv.y);
@@ -671,7 +646,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
 
   bool workbenchCrafting = false;
   bool playerCrafting    = false;
-  
+
   if (windowID == WINDOW_PLAYER && slot >= 5 && slot <= 8)
   {
     // Armour slots are a strange case. Only a quantity of one should be allowed, so this must be checked for.
@@ -961,14 +936,12 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
 bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_t z)
 {
   sChunk* chunk = Mineserver::get()->map(user->pos.map)->getChunk(blockToChunk(x), blockToChunk(z));
-LOG(INFO, "Inventory::windowOpen", "stillhere");
   if (chunk == NULL)
   {
     return false;
   }
 
   onwindowOpen(user, type, x, y, z);
-LOG(INFO, "Inventory::windowOpen", "stillhere");
 
   switch (type)
   {

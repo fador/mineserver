@@ -66,14 +66,12 @@ typedef std::tr1::shared_ptr<std::vector<ItemPtr> > ItemVectorPtr;
 class chestData
 {
 public:
-  int32_t id;
   int32_t x() { return m_x; }
   void x(int32_t newx) { m_x = newx; }
   int32_t y() { return m_y; }
   void y(int32_t newy) { m_y = newy; }
   int32_t z() { return m_z; }
   void z(int32_t newz) { m_z = newz; }
-  //Item& getItem(size_t i);
   bool large() { return this->size() > 27; }
   void large(bool _large)
   {
@@ -120,7 +118,7 @@ private:
   int32_t m_x;
   int32_t m_y;
   int32_t m_z;
-  ItemVectorPtr m_items;
+  ItemVectorPtr m_items; /// pointer makes sharing between two connected chest blocks easier
 };
 
 struct signData
