@@ -158,7 +158,6 @@ bool BlockChest::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
         chunk->chests[i]->y() == y &&
         chunk->chests[i]->z() == z)
     {
-      LOG(INFO, "BlockChest::onBroken", "chest removal is uphand. size now: " + dtos(chunk->chests[i]->size()));
       if(!chunk->chests[i]->large())
       {
         // clean up a small chest
@@ -190,13 +189,10 @@ bool BlockChest::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
                 (*chunk->chests[i]->items())[item_i]->getCount(),
                 (*chunk->chests[i]->items())[item_i]->getHealth(),
                 NULL);
-            LOG(INFO, "BlockChest::onBroken", "popped a " + dtos((*chunk->chests[i]->items())[item_i]->getType()));
           }
           chunk->chests[i]->items()->pop_back();
-          LOG(INFO, "BlockChest::onBroken", "pop_back'd. size now: " + dtos(chunk->chests[i]->size()));
         }
       }
-      LOG(INFO, "BlockChest::onBroken", "size now: " + dtos(chunk->chests[i]->size()));
       chunk->chests.erase(chunk->chests.begin() + i);
 
       break;
