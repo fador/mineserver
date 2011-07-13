@@ -35,9 +35,42 @@ void ItemProjectile::onRightClick(User* user, Item* item)
     break;
   }
 
-  // TODO check arrows and remove one!
-  // instead of BOW itself here
-  item->decCount();
-
-  Mineserver::get()->map(user->pos.map)->sendProjectileSpawn(user, projID);
+  if(projID != 0)
+  {
+    if(projID == 60) // Bow and Arrow
+    {
+      bool foundArrow = false;
+      // Hotbar
+      for( int i = 36; i < 45; i++ )
+      {
+        if( user->inv[i].getType() == ITEM_ARROW )
+        {
+          foundArrow = true;
+          user->inv[i].decCount();
+          i = 45;
+        }
+      }
+      //Inventory
+      if(foundArrow == false)
+      {
+        for(int i = 9; i < 36; i++)
+        {
+          if( user->inv[i].getType() == ITEM_ARROW )
+          {
+            foundArrow = true;
+            user->inv[i].decCount();
+            i = 36;
+          }
+        }
+      }
+      if(!foundArrow)
+        return;
+      Mineserver::get()->map(user->pos.map)->sendProjectileSpawn(user, projID);
+    }
+    else
+    {
+      item->decCount();
+      Mineserver::get()->map(user->pos.map)->sendProjectileSpawn(user, projID);
+    }
+  }
 }
