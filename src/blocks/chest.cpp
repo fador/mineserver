@@ -158,21 +158,47 @@ bool BlockChest::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
         chunk->chests[i]->y() == y &&
         chunk->chests[i]->z() == z)
     {
-      for (uint32_t item_i = 0; item_i < 27; item_i++)
+      LOG(INFO, "BlockChest::onBroken", "chest removal is uphand. size now: " + dtos(chunk->chests[i]->size()));
+      if(!chunk->chests[i]->large())
       {
-        if ((*chunk->chests[i]->items())[item_i]->getType() != -1)
+        // clean up a small chest
+        int32_t item_i = 26;
+        for(int32_t item_i = 26; 0 <= item_i; item_i--)
         {
-          Mineserver::get()->map(map)->createPickupSpawn(chunk->chests[i]->x(),
-              chunk->chests[i]->y(),
-              chunk->chests[i]->z(),
-              (*chunk->chests[i]->items())[item_i]->getType(),
-              (*chunk->chests[i]->items())[item_i]->getCount(),
-              (*chunk->chests[i]->items())[item_i]->getHealth(),
-              NULL);
+          if ((*chunk->chests[i]->items())[(size_t)item_i]->getType() != -1)
+          {
+            Mineserver::get()->map(map)->createPickupSpawn(chunk->chests[i]->x(),
+                chunk->chests[i]->y(),
+                chunk->chests[i]->z(),
+                (*chunk->chests[i]->items())[(size_t)item_i]->getType(),
+                (*chunk->chests[i]->items())[(size_t)item_i]->getCount(),
+                (*chunk->chests[i]->items())[(size_t)item_i]->getHealth(),
+                NULL);
+          }
+          chunk->chests[i]->items()->pop_back();
+        }
+      } else {
+        // size a large chest down
+        for(uint32_t item_i = 53; 27-3 <= item_i; item_i--)
+        {
+          if ((*chunk->chests[i]->items())[item_i]->getType() != -1)
+          {
+            Mineserver::get()->map(map)->createPickupSpawn(chunk->chests[i]->x(),
+                chunk->chests[i]->y(),
+                chunk->chests[i]->z(),
+                (*chunk->chests[i]->items())[item_i]->getType(),
+                (*chunk->chests[i]->items())[item_i]->getCount(),
+                (*chunk->chests[i]->items())[item_i]->getHealth(),
+                NULL);
+            LOG(INFO, "BlockChest::onBroken", "popped a " + dtos((*chunk->chests[i]->items())[item_i]->getType()));
+          }
+          chunk->chests[i]->items()->pop_back();
+          LOG(INFO, "BlockChest::onBroken", "pop_back'd. size now: " + dtos(chunk->chests[i]->size()));
         }
       }
-
+      LOG(INFO, "BlockChest::onBroken", "size now: " + dtos(chunk->chests[i]->size()));
       chunk->chests.erase(chunk->chests.begin() + i);
+
       break;
     }
   }
