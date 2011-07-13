@@ -1298,9 +1298,9 @@ sChunk* Map::loadMap(int x, int z, bool generate)
             {
               continue;
             }
-            newChest->items[(int8_t) *(**itemIterator)["Slot"]]->setCount((int8_t)   *(**itemIterator)["Count"]);
-            newChest->items[(int8_t) *(**itemIterator)["Slot"]]->setHealth((int16_t) *(**itemIterator)["Damage"]);
-            newChest->items[(int8_t) *(**itemIterator)["Slot"]]->setType((int16_t)   *(**itemIterator)["id"]);
+            (*newChest->items())[(int8_t) *(**itemIterator)["Slot"]]->setCount((int8_t)   *(**itemIterator)["Count"]);
+            (*newChest->items())[(int8_t) *(**itemIterator)["Slot"]]->setHealth((int16_t) *(**itemIterator)["Damage"]);
+            (*newChest->items())[(int8_t) *(**itemIterator)["Slot"]]->setType((int16_t)   *(**itemIterator)["id"]);
           }
           //Push to our chest storage at chunk
           chunk->chests.push_back(newChest);
@@ -1440,13 +1440,13 @@ bool Map::saveMap(int x, int z)
     NBT_Value* nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
     for (uint32_t slot = 0; slot < chunk->chests[i]->size(); slot++)
     {
-      if (chunk->chests[i]->items[slot]->getCount() && chunk->chests[i]->items[slot]->getType() != -1)
+      if ((*chunk->chests[i]->items())[slot]->getCount() && (*chunk->chests[i]->items())[slot]->getType() != -1)
       {
         NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
-        val->Insert("Count", new NBT_Value((int8_t)chunk->chests[i]->items[slot]->getCount()));
+        val->Insert("Count", new NBT_Value((int8_t)(*chunk->chests[i]->items())[slot]->getCount()));
         val->Insert("Slot", new NBT_Value((int8_t)slot));
-        val->Insert("Damage", new NBT_Value((int16_t)chunk->chests[i]->items[slot]->getHealth()));
-        val->Insert("id", new NBT_Value((int16_t)chunk->chests[i]->items[slot]->getType()));
+        val->Insert("Damage", new NBT_Value((int16_t)(*chunk->chests[i]->items())[slot]->getHealth()));
+        val->Insert("id", new NBT_Value((int16_t)(*chunk->chests[i]->items())[slot]->getType()));
         nbtInv->GetList()->push_back(val);
       }
     }

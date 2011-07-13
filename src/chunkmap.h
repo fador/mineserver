@@ -58,12 +58,15 @@ struct spawnedItem
   }
 };
 
+typedef std::tr1::shared_ptr<std::vector<ItemPtr> > ItemVectorPtr;
+
 /** holds items and coordinates for small and large chests
  * note: large chests are in testing
  */
 class chestData
 {
 public:
+  int32_t id;
   int32_t x() { return m_x; }
   void x(int32_t newx) { m_x = newx; }
   int32_t y() { return m_y; }
@@ -71,40 +74,31 @@ public:
   int32_t z() { return m_z; }
   void z(int32_t newz) { m_z = newz; }
   //Item& getItem(size_t i);
-  bool large() { return m_is_large; }
-  void large(bool large)
+  bool large() { return this->size() > 27; }
+  void large(bool _large)
   {
-    if(large != m_is_large)
+    if(_large != this->large())
     {
       size_t new_length = 0;
-      if(large)
+      if(_large)
       {
         new_length = 54+3;
       } else {
         new_length = 27+3;
       }
-      while(new_length > items.size())
-        items.push_back(ItemPtr(new Item));
-      while(new_length < items.size())
-        items.pop_back();
-      /*
-       Item* old_items = items;
-
-       items = new Item[new_length];
-       for(int i = 26; i >= 0; i--) // it's at least a small chest. sizing a large chest down will delete items.
-       {
-         items[i] = old_items[i];
-       }
-       delete[] old_items; // not sure, whether this works..
-       */
+      while(new_length > items()->size())
+        items()->push_back(ItemPtr(new Item));
+      while(new_length < items()->size())
+        items()->pop_back();
     }
     return;
    }
-  chestData() :
-    m_is_large(false)
+
+  chestData()
   {
-    while(items.size() < 27)
-      items.push_back(ItemPtr(new Item));
+    this->items(ItemVectorPtr(new std::vector<ItemPtr>()));
+    while(items()->size() < 27)
+      items()->push_back(ItemPtr(new Item));
   }
 
   ~chestData()
@@ -112,16 +106,21 @@ public:
 
   size_t size()
   {
-    return items.size();
+    return items()->size();
   }
 
-  std::vector<ItemPtr> items;
+  ItemVectorPtr items() { return m_items; }
+  void items(ItemVectorPtr itemVectorPtr)
+  {
+    m_items = itemVectorPtr;
+  }
+
 
 private:
   int32_t m_x;
   int32_t m_y;
   int32_t m_z;
-  bool m_is_large; /// "private" var, please use get_large() and set_large()
+  ItemVectorPtr m_items;
 };
 
 struct signData

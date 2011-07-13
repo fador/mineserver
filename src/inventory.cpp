@@ -573,26 +573,27 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
             chunk->chests[i]->y() == user->openInv.y &&
             chunk->chests[i]->z() == user->openInv.z)
         {
-          slotItem = chunk->chests[i]->items[slot].get();
+          slotItem = (*chunk->chests[i]->items())[slot].get();
           break;
         }
       }
       //Create chest data if it doesn't exist
       if (slotItem == NULL)
       {
+        LOG(INFO, "Inventory::windowclick", "we're createing a new chest now...");
         chestDataPtr newChest(new chestData);
         newChest->x(user->openInv.x);
         newChest->y(user->openInv.y);
         newChest->z(user->openInv.z);
         chunk->chests.push_back(newChest);
-        slotItem = newChest->items[slot].get();
+        slotItem = (*newChest->items())[slot].get();
       }
     }
     break;
   case WINDOW_LARGE_CHEST:
     if (slot > 54)
     {
-      slotItem = &user->inv[slot - 47];
+      slotItem = &user->inv[slot - 45];
     }
     else
     {
@@ -607,7 +608,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
           chunk->chests[i]->z() == user->openInv.z)
         {
           LOG(INFO, "Inventory::windowClick", "found slot " + dtos(slot));
-          slotItem = chunk->chests[i]->items[slot].get();
+          slotItem = (*chunk->chests[i]->items())[slot].get();
           break;
         }
       }
@@ -620,7 +621,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         newChest->z(user->openInv.z);
         newChest->large(true);
         chunk->chests.push_back(newChest);
-        slotItem = newChest->items[slot].get();
+        slotItem = (*newChest->items())[slot].get();
       }
     }
     break;
@@ -973,23 +974,37 @@ LOG(INFO, "Inventory::windowOpen", "stillhere");
   {
   case WINDOW_CHEST:
   case WINDOW_LARGE_CHEST:
-    user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)type << (int8_t)INVENTORYTYPE_CHEST;
-      user->buffer.writeString(std::string("Chest")); // TODO: adjust title
-      user->buffer << (int8_t)(type == WINDOW_CHEST ? 27 : 54);
-
-    for (uint32_t i = 0; i < chunk->chests.size(); i++)
     {
-      if (chunk->chests[i]->x() == x && chunk->chests[i]->y() == y && chunk->chests[i]->z() == z)
+      chestDataPtr _chestData;
+      for (uint32_t i = 0; i < chunk->chests.size(); i++)
       {
-        for (size_t j = 0; j < chunk->chests[i]->size(); j++)
+        if ((chunk->chests[i]->x() == x)
+          && (chunk->chests[i]->y() == y)
+          && (chunk->chests[i]->z() == z) )
         {
-          if (chunk->chests[i]->items[j]->getType() != -1)
-          {
-            user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)type << (int16_t)j << (int16_t)chunk->chests[i]->items[j]->getType()
-                         << (int8_t)(chunk->chests[i]->items[j]->getCount()) << (int16_t)chunk->chests[i]->items[j]->getHealth();
-          }
+          _chestData = chunk->chests[i];
+          break;
         }
+      }
+      if(_chestData == NULL)
         break;
+
+      user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)type << (int8_t)INVENTORYTYPE_CHEST;
+      if(_chestData->large())
+      {
+        user->buffer.writeString(std::string("Large chest"));
+      } else {
+        user->buffer.writeString(std::string("Chest"));
+      }
+      user->buffer << (int8_t)(_chestData->size()); // size.. not a very good idea. lets just hope this will only return 27 or 54
+
+      for (size_t j = 0; j < _chestData->size(); j++)
+      {
+        if ((*_chestData->items())[j]->getType() != -1)
+        {
+          user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)type << (int16_t)j << (int16_t)(*_chestData->items())[j]->getType()
+                       << (int8_t)((*_chestData->items())[j]->getCount()) << (int16_t)(*_chestData->items())[j]->getHealth();
+        }
       }
     }
     break;
