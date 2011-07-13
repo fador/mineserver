@@ -253,6 +253,19 @@ bool BlockChest::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
     return true;
   }
 
+  // if there is a large chest around --> block
+  {
+    chestDataPtr _connectedChest;
+    if(findConnectedChest(x, y, z, map, _connectedChest))
+    {
+      if(_connectedChest->large())
+      {
+        revertBlock(user, x, y, z, map);
+        return true;
+      }
+    }
+  }
+
   direction = user->relativeToBlock(x, y, z);
 
   // Fix orientation
@@ -430,6 +443,17 @@ bool BlockChest::findConnectedChest(int32_t x, int8_t y, int32_t z, int map, int
     return true;
 
   return false;
+}
+
+bool BlockChest::findConnectedChest(int32_t x, int8_t y, int32_t z, int map, chestDataPtr& chest)
+{
+  int32_t connectedX, connectedZ;
+  if(findConnectedChest(x, y, z, map, &connectedX, &connectedZ))
+  {
+    return getChestByCoordinates(connectedX, y, connectedZ, map, chest);
+  } else {
+    return false;
+  }
 }
 
 bool BlockChest::getChestByCoordinates(int32_t x, int8_t y, int32_t z, int map, chestDataPtr& chest)
