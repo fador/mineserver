@@ -33,6 +33,9 @@
 #include <climits>
 #elif defined(WIN32)
 #include <direct.h>
+#define _WINSOCKAPI_ //Stops windows.h from including winsock.h
+                     //Fixes errors I was having
+#include <ShlObj.h>
 #endif
 
 #include <iostream>
@@ -273,7 +276,17 @@ std::string getHomeDir()
 
 #elif defined(WIN32)
 
-  return "%APPDATA%\\Mineserver";
+char szPath[MAX_PATH];
+if(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, szPath) == 0)
+{
+  std::string temp = szPath;
+  temp.append("\\Mineserver");
+  return temp;
+}
+else
+{
+  return "%APPDATA%\\Mineserver"; // This doesn't seem to work.
+}
 
 #else
 
