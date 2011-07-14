@@ -832,15 +832,16 @@ bool Mineserver::configDirectoryPrepare(const std::string& path)
 {
   const std::string distsrc = pathOfExecutable() + PATH_SEPARATOR + CONFIG_DIR_DISTSOURCE;
 
-  std::cout << std::endl
-            << "configDirectoryPrepare(): target directory = \"" << path
-            << "\", distribution source is \"" << distsrc << "\"." << std::endl
-            << "WARNING: This function is not implemented fully at present." << std::endl
-            << "You must check that all the necessary files are in the target directory" << std::endl
-            << "(including recipes and plugins) and that the config file is correct." << std::endl
-            << std::endl;
+  //std::cout << std::endl
+  //          << "configDirectoryPrepare(): target directory = \"" << path
+  //          << "\", distribution source is \"" << distsrc << "\"." << std::endl
+  //          << "WARNING: This function is not implemented fully at present." << std::endl
+  //          << "You must check that all the necessary files are in the target directory" << std::endl
+  //          << "(including recipes and plugins) and that the config file is correct." << std::endl
+  //          << std::endl;
 
   struct stat st;
+  //Create Mineserver directory
   if (stat(path.c_str(), &st) != 0)
   {
     LOG2(INFO, "Creating: " + path);
@@ -848,6 +849,38 @@ bool Mineserver::configDirectoryPrepare(const std::string& path)
     {
       LOG2(ERROR, path + ": " + strerror(errno));
       return false;
+    }
+  }
+
+  //Create recipe/plugin directories
+  const std::string directories [] = 
+  {
+    "plugins",
+    "files",
+    "files\\recipes",
+    "files\\recipes\\armour",
+    "files\\recipes\\block",
+    "files\\recipes\\cloth",
+    "files\\recipes\\dyes",
+    "files\\recipes\\food",
+    "files\\recipes\\materials",
+    "files\\recipes\\mechanism",
+    "files\\recipes\\misc",
+    "files\\recipes\\tools",
+    "files\\recipes\\transport",
+    "files\\recipes\\weapons",
+  };
+  for (size_t i = 0; i < sizeof(directories) / sizeof(directories[0]); i++)
+  {
+    std::string recipePath = path + PATH_SEPARATOR + directories[i];
+    if (stat(recipePath.c_str(), &st) != 0)
+    {
+      //LOG2(INFO, "Creating: " + recipePath);
+      if (!makeDirectory(recipePath))
+      {
+        LOG2(ERROR, recipePath + ": " + strerror(errno));
+        return false;
+      }
     }
   }
 
@@ -864,11 +897,38 @@ bool Mineserver::configDirectoryPrepare(const std::string& path)
     "roles.txt",
     "rules.txt",
     "whitelist.txt",
+    "commands.dll",
   };
-  for (size_t i = 0; i < sizeof(files) / sizeof(files[0]); i++)
+
+  //Get list of recipe files
+  std::vector<std::string> temp;
+  Mineserver::m_inventory->getEnabledRecipes(temp, pathOfExecutable() + PATH_SEPARATOR + "files" + PATH_SEPARATOR + "ENABLED_RECIPES.cfg");
+
+  //Add non-recipes to list
+  for(int i = 0; i < sizeof(files) / sizeof(files[0]); i++)
   {
-    const std::string namein  = pathOfExecutable() + PATH_SEPARATOR + "files" + PATH_SEPARATOR + files[i];
-    const std::string nameout = path + PATH_SEPARATOR + files[i];
+    temp.push_back(files[i]);
+  }
+
+  for (int i = 0; i < temp.size(); i++)
+  {
+    std::string namein, nameout;
+
+    if(temp[i].substr(temp[i].size() - 7).compare(".recipe") == 0)//If a recipe file
+    {
+      namein  = pathOfExecutable() + PATH_SEPARATOR + "files" + PATH_SEPARATOR + "recipes" + PATH_SEPARATOR + temp[i];
+      nameout = path + PATH_SEPARATOR + "files" + PATH_SEPARATOR + "recipes" + PATH_SEPARATOR + temp[i];
+    }
+    else if (temp[i].substr(temp[i].size() - 4).compare(".dll") == 0)
+    {
+      namein  = pathOfExecutable() + PATH_SEPARATOR + "files" + PATH_SEPARATOR + "plugins" + PATH_SEPARATOR + temp[i];
+      nameout = path + PATH_SEPARATOR + "plugins" + PATH_SEPARATOR + temp[i];
+    }
+    else
+    {
+      namein  = pathOfExecutable() + PATH_SEPARATOR + "files" + PATH_SEPARATOR + temp[i];
+      nameout = path + PATH_SEPARATOR + temp[i];
+    }
 
     // don't overwrite existing files
     if ((stat(nameout.c_str(), &st) == 0)) // && S_ISREG(st.st_mode) )
@@ -883,7 +943,7 @@ bool Mineserver::configDirectoryPrepare(const std::string& path)
       continue;
     }
 
-    LOG2(INFO, "Copying: " + nameout);
+    //LOG2(INFO, "Copying: " + nameout);
     std::ofstream fout(nameout.c_str(), std::ios_base::binary);
     if (fout.fail())
     {
