@@ -39,7 +39,7 @@ bool BlockIce::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t 
   return true;
 }
 
-bool BlockDefault::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockIce::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t oldblock;
   uint8_t oldmeta;
