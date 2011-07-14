@@ -58,12 +58,67 @@ struct spawnedItem
   }
 };
 
-struct chestData
+typedef std::tr1::shared_ptr<std::vector<ItemPtr> > ItemVectorPtr;
+
+/** holds items and coordinates for small and large chests
+ * note: large chests are in testing
+ */
+class chestData
 {
-  int32_t x;
-  int32_t y;
-  int32_t z;
-  Item items[27];
+public:
+  int32_t x() { return m_x; }
+  void x(int32_t newx) { m_x = newx; }
+  int32_t y() { return m_y; }
+  void y(int32_t newy) { m_y = newy; }
+  int32_t z() { return m_z; }
+  void z(int32_t newz) { m_z = newz; }
+  bool large() { return this->size() > 27; }
+  void large(bool _large)
+  {
+    if(_large != this->large())
+    {
+      size_t new_length = 0;
+      if(_large)
+      {
+        new_length = 54+3;
+      } else {
+        new_length = 27+3;
+      }
+      while(new_length > items()->size())
+        items()->push_back(ItemPtr(new Item));
+      while(new_length < items()->size())
+        items()->pop_back();
+    }
+    return;
+   }
+
+  chestData()
+  {
+    this->items(ItemVectorPtr(new std::vector<ItemPtr>()));
+    while(items()->size() < 27)
+      items()->push_back(ItemPtr(new Item));
+  }
+
+  ~chestData()
+  { }
+
+  size_t size()
+  {
+    return items()->size();
+  }
+
+  ItemVectorPtr items() { return m_items; }
+  void items(ItemVectorPtr itemVectorPtr)
+  {
+    m_items = itemVectorPtr;
+  }
+
+
+private:
+  int32_t m_x;
+  int32_t m_y;
+  int32_t m_z;
+  ItemVectorPtr m_items; /// pointer makes sharing between two connected chest blocks easier
 };
 
 struct signData
@@ -106,6 +161,8 @@ typedef std::tr1::shared_ptr<furnaceData> furnaceDataPtr;
 
 void removeFurnace(furnaceDataPtr data);
 
+/** holds chunk data (16x16x16 blocks ?)
+ */
 struct sChunk
 {
   uint8_t* blocks;
