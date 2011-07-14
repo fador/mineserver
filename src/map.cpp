@@ -1009,17 +1009,50 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
   int32_t EID = Mineserver::generateEID();
   float   tempMult = 1.f - abs(user->pos.pitch / 90.f);
 
-  // Spawn projectile on player location
-  // TODO: add about 0.5-1 units in forward direction here
-  vec pos = vec(user->pos.x * 32, (user->pos.y + 1.5) * 32, user->pos.z * 32);
-  vec vel = vec(
-              sinf(-(user->pos.yaw / 360.f) * 2.f * M_PI) * tempMult * 32768.f,
-              -(user->pos.pitch / 90.f) * 32768.f,
-              cosf(-(user->pos.yaw / 360.f) * 2.f * M_PI) * tempMult * 32768.f
-            );
+  //
+  // Below is for position and velocity
+  //
+  double tempx = ( user->pos.x * 32 );
+  double tempy = ( user->pos.y + 1.5f ) * 32;
+  double tempz = ( user->pos.z * 32 );
+  int distFromUser = 50; // 32 is one whole block away, 50 seems to work while walking
+
+  //userYaw makes the player's yaw between 0-359
+  float userYaw = ((int)user->pos.yaw % 360) + (user->pos.yaw - (int)user->pos.yaw);
+  if( user->pos.yaw < 0 )
+  {
+    userYaw += 360;
+  }
+
+  if( user->pos.pitch < 0 )
+  {
+    tempy = ( distFromUser * abs(sin(user->pos.pitch / 90.f))) + (user->pos.y + 1.5f) * 32;
+  }
+  else if ( user->pos.pitch > 0 )
+  {
+    tempy = -( distFromUser * abs(sin(user->pos.pitch / 90.f))) + (user->pos.y + 1.5f) * 32;
+  }
+
+  if( userYaw != 0 && userYaw != 180 )
+  {
+    tempx = ( ( -distFromUser * sin(user->pos.yaw * (M_PI / 180.0f) ) ) * cos( user->pos.pitch * (M_PI / 180.0f) ) ) + (user->pos.x * 32);
+  }
+  if( userYaw != 90 && userYaw != 270 )
+  {
+    tempz = ( ( distFromUser * cos(user->pos.yaw * (M_PI / 180.0f) ) ) * cos( user->pos.pitch * (M_PI / 180.0f) ) ) + (user->pos.z * 32);
+  }
+
+  vec pos = vec((int)tempx, (int)tempy, (int)tempz);
+
+  //The 9000 and 14000 are based off of trial and error.  Not calculated to exactly mimic notchian projectile.
+  vec vel = vec((int)(sin(-(user->pos.yaw / 360.f) * 2.f * M_PI) * cos(user->pos.pitch * (M_PI / 180.0f)) * 9000.f),
+                (int)(sinf(-(user->pos.pitch / 90.f)) * 14000.f),
+                (int)(cos(-(user->pos.yaw / 360.f) * 2.f * M_PI) * cos(user->pos.pitch * (M_PI / 180.0f)) * 9000.f));
+
   pkt << (int8_t)PACKET_ENTITY << (int32_t)EID
       << (int8_t)PACKET_ADD_OBJECT << (int32_t)EID << (int8_t)projID << (int32_t)pos.x() << (int32_t)pos.y() << (int32_t)pos.z() << (int32_t)0
       << (int8_t)PACKET_ENTITY_VELOCITY << (int32_t)EID << (int16_t)vel.x() << (int16_t)vel.y() << (int16_t)vel.z();
+
 
   user->sendAll(pkt);
 

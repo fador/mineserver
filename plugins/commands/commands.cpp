@@ -478,11 +478,11 @@ void flattenchunk(std::string user, std::string command, std::deque<std::string>
         {
           for(int bY = 127; bY >= 0; bY--)
           {
-            if(bY > y)
+            if(bY >= y)
             {
               blocks[bY + ((bZ << 7) + (bX << 11))] = 0;
             }
-            else if(bY == y)
+            else if(bY == y - 1)
             {
               blocks[bY + ((bZ << 7) + (bX << 11))] = topBlock;
             }

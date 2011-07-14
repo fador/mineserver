@@ -191,7 +191,7 @@ int16_t Item::itemHealth(int item)
 }
 
 
-Inventory::Inventory(const std::string& path, const std::string& suffix, const std::string& cfg)
+void Inventory::getEnabledRecipes(std::vector<std::string>& receiptFiles, const std::string& cfg)
 {
   std::ifstream ifs(cfg.c_str());
 
@@ -201,8 +201,8 @@ Inventory::Inventory(const std::string& path, const std::string& suffix, const s
     return;
   }
 
+  std::string suffix = ".recipe";
   std::string temp;
-  std::vector<std::string> receiptFiles;
   std::string text;
   while (getline(ifs, temp))
   {
@@ -221,6 +221,12 @@ Inventory::Inventory(const std::string& path, const std::string& suffix, const s
     receiptFiles.push_back(temp + suffix);
   }
   ifs.close();
+}
+
+Inventory::Inventory(const std::string& path, const std::string& suffix, const std::string& cfg)
+{
+  std::vector<std::string> receiptFiles;
+  getEnabledRecipes( receiptFiles, cfg);
 
   for (unsigned int i = 0; i < receiptFiles.size(); i++)
   {
