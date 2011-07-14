@@ -832,13 +832,20 @@ bool Mineserver::configDirectoryPrepare(const std::string& path)
 {
   const std::string distsrc = pathOfExecutable() + PATH_SEPARATOR + CONFIG_DIR_DISTSOURCE;
 
-  //std::cout << std::endl
-  //          << "configDirectoryPrepare(): target directory = \"" << path
-  //          << "\", distribution source is \"" << distsrc << "\"." << std::endl
-  //          << "WARNING: This function is not implemented fully at present." << std::endl
-  //          << "You must check that all the necessary files are in the target directory" << std::endl
-  //          << "(including recipes and plugins) and that the config file is correct." << std::endl
-  //          << std::endl;
+  std::cout << std::endl
+            << "configDirectoryPrepare(): target directory = \"" << path
+            << "\", distribution source is \"" << distsrc << "\"." << std::endl
+            << "WARNING: This function is not implemented fully at present." << std::endl
+            << "You must check that all the necessary files are in the target directory" << std::endl
+            << "(including recipes and plugins) and that the config file is correct." << std::endl
+            << std::endl;
+
+  /*
+     WARNING:
+     ========
+     kiki64's commit sort've messed things up. Someone needs to re-enable config.cfg's values for
+     target paths (home, plugins, and files paths). I have fixed the issue with windows vs. *nix.
+  */
 
   struct stat st;
   //Create Mineserver directory
@@ -853,6 +860,7 @@ bool Mineserver::configDirectoryPrepare(const std::string& path)
   }
 
   //Create recipe/plugin directories
+  // TODO: Fill in respective values with config()->sData("system.path.data")) and "system.path.plugins"
   const std::string directories [] = 
   {
     "plugins",
@@ -897,7 +905,11 @@ bool Mineserver::configDirectoryPrepare(const std::string& path)
     "roles.txt",
     "rules.txt",
     "whitelist.txt",
+#ifdef WIN32
     "commands.dll",
+#else
+    "commands.so",
+#endif
   };
 
   //Get list of recipe files
@@ -919,7 +931,8 @@ bool Mineserver::configDirectoryPrepare(const std::string& path)
       namein  = pathOfExecutable() + PATH_SEPARATOR + "files" + PATH_SEPARATOR + "recipes" + PATH_SEPARATOR + temp[i];
       nameout = path + PATH_SEPARATOR + "files" + PATH_SEPARATOR + "recipes" + PATH_SEPARATOR + temp[i];
     }
-    else if (temp[i].substr(temp[i].size() - 4).compare(".dll") == 0)
+    else if ((temp[i].substr(temp[i].size() - 4).compare(".dll") == 0) ||
+             (temp[i].substr(temp[i].size() - 3).compare(".so") == 0))
     {
       namein  = pathOfExecutable() + PATH_SEPARATOR + "files" + PATH_SEPARATOR + "plugins" + PATH_SEPARATOR + temp[i];
       nameout = path + PATH_SEPARATOR + "plugins" + PATH_SEPARATOR + temp[i];
