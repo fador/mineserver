@@ -33,8 +33,9 @@
 
 bool BlockIce::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-  Mineserver::get()->map(map)->setBlock(x, y, z, (char)BLOCK_STATIONARY_WATER, direction);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)BLOCK_STATIONARY_WATER, direction);
+  Mineserver::get()->map(map)->setBlock(x, y, z, (char)BLOCK_WATER, direction);
+  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)BLOCK_WATER, direction);
+  applyPhysics(user, x, y, z, map);
 
   return true;
 }
