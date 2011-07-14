@@ -148,7 +148,7 @@ public:
 
   int16_t itemHealth(int16_t itemID, int8_t block, bool& rightUse);
 
-  void Inventory::getEnabledRecipes(std::vector<std::string>& receiptFiles, const std::string& cfg);
+  void getEnabledRecipes(std::vector<std::string>& receiptFiles, const std::string& cfg);
 
 };
 
