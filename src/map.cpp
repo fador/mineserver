@@ -1309,9 +1309,13 @@ sChunk* Map::loadMap(int x, int z, bool generate)
           std::vector<NBT_Value*>* itemList = chestItems->GetList();
 
           chestDataPtr newChest(new chestData);
-          newChest->x = entityX;
-          newChest->y = entityY;
-          newChest->z = entityZ;
+          newChest->x(entityX);
+          newChest->y(entityY);
+          newChest->z(entityZ);
+
+          int8_t large = *(**iter)["large"];
+          if(large == 1)
+            newChest->large(true);
 
           //Loop items
           for (std::vector<NBT_Value*>::iterator itemIterator = itemList->begin(); itemIterator != itemList->end(); ++itemIterator)
@@ -1327,9 +1331,9 @@ sChunk* Map::loadMap(int x, int z, bool generate)
             {
               continue;
             }
-            newChest->items[(int8_t) *(**itemIterator)["Slot"]].setCount((int8_t)   *(**itemIterator)["Count"]);
-            newChest->items[(int8_t) *(**itemIterator)["Slot"]].setHealth((int16_t) *(**itemIterator)["Damage"]);
-            newChest->items[(int8_t) *(**itemIterator)["Slot"]].setType((int16_t)   *(**itemIterator)["id"]);
+            (*newChest->items())[(int8_t) *(**itemIterator)["Slot"]]->setCount((int8_t)   *(**itemIterator)["Count"]);
+            (*newChest->items())[(int8_t) *(**itemIterator)["Slot"]]->setHealth((int16_t) *(**itemIterator)["Damage"]);
+            (*newChest->items())[(int8_t) *(**itemIterator)["Slot"]]->setType((int16_t)   *(**itemIterator)["id"]);
           }
           //Push to our chest storage at chunk
           chunk->chests.push_back(newChest);
@@ -1461,19 +1465,21 @@ bool Map::saveMap(int x, int z)
   {
     NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
     val->Insert("id", new NBT_Value(std::string("Chest")));
-    val->Insert("x", new NBT_Value((int32_t)chunk->chests[i]->x));
-    val->Insert("y", new NBT_Value((int32_t)chunk->chests[i]->y));
-    val->Insert("z", new NBT_Value((int32_t)chunk->chests[i]->z));
+    val->Insert("x", new NBT_Value((int32_t)chunk->chests[i]->x()));
+    val->Insert("y", new NBT_Value((int32_t)chunk->chests[i]->y()));
+    val->Insert("z", new NBT_Value((int32_t)chunk->chests[i]->z()));
+    val->Insert("large", new NBT_Value((int8_t)(chunk->chests[i]->large() ? 1 : 0)));
+
     NBT_Value* nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
-    for (uint32_t slot = 0; slot < 27; slot++)
+    for (uint32_t slot = 0; slot < chunk->chests[i]->size(); slot++)
     {
-      if (chunk->chests[i]->items[slot].getCount() && chunk->chests[i]->items[slot].getType() != -1)
+      if ((*chunk->chests[i]->items())[slot]->getCount() && (*chunk->chests[i]->items())[slot]->getType() != -1)
       {
         NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
-        val->Insert("Count", new NBT_Value((int8_t)chunk->chests[i]->items[slot].getCount()));
+        val->Insert("Count", new NBT_Value((int8_t)(*chunk->chests[i]->items())[slot]->getCount()));
         val->Insert("Slot", new NBT_Value((int8_t)slot));
-        val->Insert("Damage", new NBT_Value((int16_t)chunk->chests[i]->items[slot].getHealth()));
-        val->Insert("id", new NBT_Value((int16_t)chunk->chests[i]->items[slot].getType()));
+        val->Insert("Damage", new NBT_Value((int16_t)(*chunk->chests[i]->items())[slot]->getHealth()));
+        val->Insert("id", new NBT_Value((int16_t)(*chunk->chests[i]->items())[slot]->getType()));
         nbtInv->GetList()->push_back(val);
       }
     }
