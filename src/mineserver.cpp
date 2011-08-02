@@ -916,15 +916,13 @@ bool Mineserver::configDirectoryPrepare(const std::string& path)
   std::vector<std::string> temp;
   Mineserver::m_inventory->getEnabledRecipes(temp, pathOfExecutable() + PATH_SEPARATOR + "files" + PATH_SEPARATOR + "ENABLED_RECIPES.cfg");
 
-  // TODO: Fix unsigned/signed issue with line 920 column 53 and line 925 column 33.
-
   //Add non-recipes to list
-  for(int i = 0; i < sizeof(files) / sizeof(files[0]); i++)
+  for (unsigned int i = 0; i < sizeof(files) / sizeof(files[0]); i++)
   {
     temp.push_back(files[i]);
   }
 
-  for (int i = 0; i < temp.size(); i++)
+  for (unsigned int i = 0; i < temp.size(); i++)
   {
     std::string namein, nameout;
 
