@@ -224,7 +224,7 @@ int main(int argc, char* argv[])
 #endif
   }
   std::cout << "Configuration directory is \"" << Mineserver::get()->config()->config_path << "\"." << std::endl;
-
+  
   // load config
   Config & config = *Mineserver::get()->config();
   if (!config.load(cfg))
@@ -234,9 +234,6 @@ int main(int argc, char* argv[])
 
   LOG2(INFO, "Using config: " + cfg);
   
-  // create home and copy files if necessary
-  Mineserver::get()->configDirectoryPrepare(Mineserver::get()->config()->config_path);
-
   if (overrides.size())
   {
     std::stringstream override_config;
@@ -252,9 +249,12 @@ int main(int argc, char* argv[])
       return EXIT_FAILURE;
     }
   }
+  
+  // create home and copy files if necessary
+  Mineserver::get()->configDirectoryPrepare(Mineserver::get()->config()->config_path);
 
   bool ret = Mineserver::get()->init();
-
+  
   if (!ret)
   {
     LOG2(ERROR, "Failed to start Mineserver!");
@@ -917,18 +917,18 @@ bool Mineserver::configDirectoryPrepare(const std::string& path)
 
     if(temp[i].substr(temp[i].size() - 7).compare(".recipe") == 0)//If a recipe file
     {
-      namein  = pathOfExecutable() + PATH_SEPARATOR + "files" + PATH_SEPARATOR + "recipes" + PATH_SEPARATOR + temp[i];
-      nameout = path + PATH_SEPARATOR + "files" + PATH_SEPARATOR + "recipes" + PATH_SEPARATOR + temp[i];
+      namein  = pathOfExecutable() + PATH_SEPARATOR + directories[2] + PATH_SEPARATOR + temp[i];
+      nameout = path + PATH_SEPARATOR + directories[2] + PATH_SEPARATOR + temp[i];
     }
     else if ((temp[i].substr(temp[i].size() - 4).compare(".dll") == 0) ||
              (temp[i].substr(temp[i].size() - 3).compare(".so") == 0))
     {
-      namein  = pathOfExecutable() + PATH_SEPARATOR + "files" + PATH_SEPARATOR + "plugins" + PATH_SEPARATOR + temp[i];
-      nameout = path + PATH_SEPARATOR + "plugins" + PATH_SEPARATOR + temp[i];
+      namein  = pathOfExecutable() + PATH_SEPARATOR + directories[1] + PATH_SEPARATOR + directories[0] + PATH_SEPARATOR + temp[i];
+      nameout = path + PATH_SEPARATOR + directories[1] + PATH_SEPARATOR + temp[i];
     }
     else
     {
-      namein  = pathOfExecutable() + PATH_SEPARATOR + "files" + PATH_SEPARATOR + temp[i];
+      namein  = pathOfExecutable() + PATH_SEPARATOR + directories[1] + PATH_SEPARATOR + temp[i];
       nameout = path + PATH_SEPARATOR + temp[i];
     }
 
