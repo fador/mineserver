@@ -1,3 +1,8 @@
+# NOTICE
+
+Please see https://github.com/Mineserver/mineserver2 - all new
+development will take place there. Thank you!
+
 # Mineserver
 *by Fador & Nredor and others*
 
