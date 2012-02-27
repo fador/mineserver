@@ -28,7 +28,7 @@
 #pragma once
 
 #include "basic.h"
-#include "chunkmap.h"
+#include "../chunkmap.h"
 
 class User;
 

@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "mob.h"
 #include "tools.h"
+#include "utf8.h"
 
 /* This file introduces a basic abstraction over raw protocol packets format.
  * This is needed for varuios protocol updates - we need to change the raw format
@@ -99,7 +100,8 @@ class Protocol
     static Packet loginResponse(int eid)
     {
       Packet ret;
-      ret << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)eid << std::string("") << (int64_t)0 << (int8_t)0;
+      ret << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)eid << std::string("") << (int64_t)0 
+          << std::string("DEFAULT") << (int32_t)0 << (int8_t)0 << (int8_t)2 << (int8_t)128 << (int8_t)64;
       return ret;
     }
 
@@ -161,10 +163,10 @@ class Protocol
       return ret;
     }
 
-    static Packet updateHealth(int health)
+    static Packet updateHealth(int health, int food=20)
     {
       Packet ret;
-      ret << (int8_t)PACKET_UPDATE_HEALTH << (int16_t)health;
+      ret << (int8_t)PACKET_UPDATE_HEALTH << (int16_t)health << (int16_t)food << (float)5.0;
       return ret;
     }
 

@@ -100,6 +100,7 @@ enum
   PACKET_PROGRESS_BAR              = 0x69,
   PACKET_TRANSACTION               = 0x6a,
   //PACKET_COMPLEX_ENTITIES          = 0x3b,
+  PACKET_PING                      = 0xFE,
   PACKET_KICK                      = 0xff,
 
 
@@ -321,6 +322,8 @@ public:
   static int entity_crouch(User* user);
 
   static int unhandledPacket(User* user);
+
+  static int ping(User* user);
 };
 
 #endif

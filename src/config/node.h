@@ -59,17 +59,17 @@ public:
 
   inline int iData() const
   {
-    return m_type == CONFIG_NODE_NUMBER ? m_nData : 0;
+    return m_type == CONFIG_NODE_NUMBER ? (int)m_nData : 0;
   }
 
   inline int64_t lData() const
   {
-    return m_type == CONFIG_NODE_NUMBER ? m_nData : 0;
+    return m_type == CONFIG_NODE_NUMBER ? (int64_t)m_nData : 0;
   }
 
   inline float fData() const
   {
-    return m_type == CONFIG_NODE_NUMBER ? m_nData : 0;
+    return m_type == CONFIG_NODE_NUMBER ? (float)m_nData : 0;
   }
 
   inline double dData() const

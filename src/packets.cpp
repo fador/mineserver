@@ -89,6 +89,8 @@ void PacketHandler::init()
   packets[PACKET_ENTITY_CROUCH]            = Packets(5, &PacketHandler::entity_crouch);
   packets[PACKET_WEATHER]		   = Packets(18, &PacketHandler::unhandledPacket);
   packets[PACKET_INCREMENT_STATISTICS]     = Packets(6, &PacketHandler::unhandledPacket);
+  packets[PACKET_PING]                     = Packets(0, &PacketHandler::ping);
+  
 }
 
 int PacketHandler::unhandledPacket(User* user)
@@ -1320,6 +1322,17 @@ int PacketHandler::use_entity(User* user)
 
   return PACKET_OK;
 }
+
+
+// Keep Alive (http://mc.kev009.com/wiki/Protocol)
+int PacketHandler::ping(User* user)
+{
+  //Reply with server info
+  user->buffer.removePacket();
+  user->kick("Blabla, Mineserver "+VERSION+"§");
+  return PACKET_OK;
+}
+
 
 int PacketHandler::respawn(User* user)
 {

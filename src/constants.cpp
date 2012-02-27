@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
+   Copyright (c) 2012, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,9 @@ std::map<uint8_t, DropPtr> BLOCKDROPS;
 
 const unsigned int SERVER_CONSOLE_UID = -1;
 
-const std::string VERSION = "0.1.15 (Alpha)";
+const std::string VERSION = "0.1.16 (Alpha)";
 
-const int PROTOCOL_VERSION = 14;
+const int PROTOCOL_VERSION = 23;
 
 const char COMMENTPREFIX  = '#';
 
