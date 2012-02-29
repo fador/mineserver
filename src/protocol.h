@@ -32,6 +32,7 @@
 #include "mob.h"
 #include "tools.h"
 #include "utf8.h"
+#include "mineserver.h"
 
 /* This file introduces a basic abstraction over raw protocol packets format.
  * This is needed for varuios protocol updates - we need to change the raw format
@@ -209,6 +210,19 @@ class Protocol
     {
       Packet ret;
       ret << (int8_t)PACKET_KEEP_ALIVE << (int32_t)time;
+      return ret;
+    }
+
+    static Packet playerlist()
+    {
+      Packet ret;
+      for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
+      { 
+        if((*it)->nick.length() > 0)
+        {
+          ret << (int8_t)PACKET_PLAYER_LIST_ITEM << (*it)->nick << (int8_t)1 << (int16_t)0;
+        }
+      }      
       return ret;
     }
 };

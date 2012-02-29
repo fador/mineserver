@@ -717,6 +717,7 @@ bool Mineserver::run()
         Packet pkt;
         pkt << Protocol::timeUpdate(m_map[0]->mapTime);        
         pkt << Protocol::keepalive(0);
+        pkt << Protocol::playerlist();
         (*User::all().begin())->sendAll(pkt);
       }
 
