@@ -185,10 +185,10 @@ class Protocol
       return ret;
     }
 
-    static Packet respawn(int world = 0)
+    static Packet respawn(int8_t world = 0, int8_t difficulty=1,int8_t creative_mode=0, int16_t world_height=128, int64_t map_seed=0, std::string level_type="DEFAULT")
     {
       Packet ret;
-      ret << (int8_t)PACKET_RESPAWN << (int8_t)world;
+      ret << (int8_t)PACKET_RESPAWN << world << difficulty << creative_mode << world_height << map_seed << level_type;
       return ret;
     }
 
@@ -216,6 +216,8 @@ class Protocol
     static Packet playerlist()
     {
       Packet ret;
+
+      //ToDo: Add admin/moderator coloring
       for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
       { 
         if((*it)->nick.length() > 0)
