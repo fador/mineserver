@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
+   Copyright (c) 2012, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -66,6 +66,7 @@
 #include "cliScreen.h"
 #include "hook.h"
 #include "mob.h"
+#include "protocol.h"
 //#include "minecart.h"
 #ifdef WIN32
 static bool quit = false;
@@ -411,7 +412,6 @@ bool Mineserver::init()
       MapGen* m = m_mapGenNames[k];
       m_mapGen.push_back(m);
       n++;
-
     }
   }
   else
@@ -620,6 +620,7 @@ bool Mineserver::run()
   addresslisten.sin_addr.s_addr = inet_addr(ip.c_str());
   addresslisten.sin_port        = htons(port);
 
+  //Reuse the socket
   setsockopt(m_socketlisten, SOL_SOCKET, SO_REUSEADDR, (char*)&reuse, sizeof(reuse));
 
   // Bind to port
@@ -712,9 +713,10 @@ bool Mineserver::run()
       // If users, ping them
       if (!User::all().empty())
       {
-        // Send server time
+        // Send server time and keepalive
         Packet pkt;
-        pkt << (int8_t)PACKET_TIME_UPDATE << (int64_t)m_map[0]->mapTime;
+        pkt << Protocol::timeUpdate(m_map[0]->mapTime);        
+        pkt << Protocol::keepalive(0);
         (*User::all().begin())->sendAll(pkt);
       }
 

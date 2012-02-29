@@ -87,7 +87,7 @@ void PacketHandler::init()
   packets[PACKET_SIGN]                     = Packets(PACKET_VARIABLE_LEN, &PacketHandler::change_sign);
   packets[PACKET_TRANSACTION]              = Packets(4, &PacketHandler::inventory_transaction);
   packets[PACKET_ENTITY_CROUCH]            = Packets(5, &PacketHandler::entity_crouch);
-  packets[PACKET_WEATHER]		   = Packets(18, &PacketHandler::unhandledPacket);
+  packets[PACKET_WEATHER]                  = Packets(18, &PacketHandler::unhandledPacket);
   packets[PACKET_INCREMENT_STATISTICS]     = Packets(6, &PacketHandler::unhandledPacket);
   packets[PACKET_PING]                     = Packets(0, &PacketHandler::ping);
   
@@ -242,6 +242,14 @@ int PacketHandler::inventory_change(User* user)
 // Keep Alive (http://mc.kev009.com/wiki/Protocol#Keep_Alive_.280x00.29)
 int PacketHandler::keep_alive(User* user)
 {
+  /*
+  if (!user->buffer.haveData(4))
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+  int32_t pingTime;
+  user->buffer >> pingTime;
+  */
   //No need to do anything
   user->buffer.removePacket();
   return PACKET_OK;

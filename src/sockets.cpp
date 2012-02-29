@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
+   Copyright (c) 2012, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,6 @@ extern "C" void client_callback(int fd, short ev, void* arg)
       LOG2(INFO, "Socket closed properly");
 
       delete user;
-      user = (User*)1;
       return;
     }
 
@@ -86,7 +85,6 @@ extern "C" void client_callback(int fd, short ev, void* arg)
       LOG2(INFO, "Socket had no data to read");
 
       delete user;
-      user = (User*)2;
       return;
     }
 
@@ -97,7 +95,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
     user->buffer.reset();
 
     while (user->buffer >> (int8_t&)user->action)
-    {
+    {      
       //Variable len package
       if (Mineserver::get()->packetHandler()->packets[user->action].len == PACKET_VARIABLE_LEN)
       {
@@ -116,7 +114,6 @@ extern "C" void client_callback(int fd, short ev, void* arg)
         if (disconnecting) // disconnect -- player gone
         {
           delete user;
-          user = (User*)4;
           return;
         }
       }
@@ -127,7 +124,6 @@ extern "C" void client_callback(int fd, short ev, void* arg)
         LOG2(DEBUG, str.str());
 
         delete user;
-        user = (User*)3;
         return;
       }
       else
@@ -166,7 +162,6 @@ extern "C" void client_callback(int fd, short ev, void* arg)
         LOG2(ERROR, "Error writing to client, tried to write " + dtos(buf.size()) + " bytes, code: " + dtos(ERROR_NUMBER));
 
         delete user;
-        user = (User*)5;
         return;
       }
       else

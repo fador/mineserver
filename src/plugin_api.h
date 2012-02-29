@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2011, The Mineserver Project
+  Copyright (c) 2012, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -46,11 +46,12 @@
 
 #ifdef WIN32
 #define PLUGIN_API_EXPORT extern "C" __declspec(dllexport)
-#define CALLCONVERSION __cdecl
+#define CALLCONVENSION __cdecl
 #else
 #define PLUGIN_API_EXPORT extern "C"
-#define CALLCONVERSION
+#define CALLCONVENSION
 #endif
+#define CALLCONVERSION CALLCONVENSION
 #include "constants_num.h"
 
 typedef void (*voidF)(); // voidF is a "void"-like function pointer
