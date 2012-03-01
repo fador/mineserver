@@ -1634,8 +1634,8 @@ void Map::sendToUser(User* user, int x, int z, bool login)
     return;
   }
 
-  uint8_t* data4   = new uint8_t[18 + 81920];
-  uint8_t* mapdata = new uint8_t[81920];
+  uint8_t* data4   = new uint8_t[18 + 98304];
+  uint8_t* mapdata = new uint8_t[98304];
   int32_t mapposx    = x;
   int32_t mapposz    = z;
 
@@ -1646,23 +1646,45 @@ void Map::sendToUser(User* user, int x, int z, bool login)
     chunk->lightRegen = false;
   }
 
-
+  
   // Chunk
-  (*p) << (int8_t)PACKET_MAP_CHUNK << (int32_t)(mapposx * 16) << (int16_t)0 << (int32_t)(mapposz * 16)
-       << (int8_t)15 << (int8_t)127 << (int8_t)15;
+  (*p) << (int8_t)PACKET_MAP_CHUNK << (int32_t)(mapposx) << (int32_t)(mapposz)
+       << (int8_t)0 /* Biome Data bool */ << (int16_t)0x00ff /* Enabled chunks */ 
+       << (int16_t)0x00ff /* Enabled additional data? in the enabled chunks */;
 
+  /*
   memcpy(&mapdata[0], chunk->blocks, 32768);
   memcpy(&mapdata[32768], chunk->data, 16384);
   memcpy(&mapdata[32768 + 16384], chunk->blocklight, 16384);
   memcpy(&mapdata[32768 + 16384 + 16384], chunk->skylight, 16384);
+  */
+  memset(&mapdata[32768 + 16384 + 16384+16384], 0, 16384);
+  
+  
+  for(int x = 0; x < 16; x++)
+  {
+    for(int z = 0; z < 16; z++)
+    {
+      for(int y = 0; y < 128; y++)
+      {
+        int index    = y + (z << 7) + (x << 11);
+        int index2   = x + (z << 4) + (y << 8);
+        mapdata[index2] = chunk->blocks[index];
+        mapdata[32768+(index2>>1)] = chunk->data[index>>1];
+        mapdata[32768+16384+(index2>>1)] = chunk->blocklight[index>>1];
+        mapdata[32768+16384+16384+(index2>>1)] = chunk->skylight[index>>1];
+        //mapdata[32768+16384+16384+16384+(x+16*z+16*16*y)>>1] = 0;
+      }
+    }
+  }
 
-  uLongf written = 81920;
+  uLongf written = 98304;
   uint8_t* buffer = new uint8_t[written];
 
   // Compress data with zlib deflate
-  compress(buffer, &written, &mapdata[0], 81920);
+  compress(buffer, &written, &mapdata[0], 98304);
 
-  (*p) << (int32_t)written;
+  (*p) << (int32_t)written << (int32_t)0 /* ??? */;
   (*p).addToWrite(buffer, written);
 
   //Push sign data to player

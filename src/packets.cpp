@@ -305,12 +305,13 @@ int PacketHandler::login_request(User* user)
 
   int32_t version;
   std::string player, passwd;
-  int64_t mapseed;
-  int8_t dimension;
+  //int64_t mapseed;
+  uint32_t param_1, param_2;
+  int8_t dimension, param_3, param_4;
 
   // As of version 1.5, the password is no longer sent (at least for non-authenticated mode)
   //user->buffer >> version >> player >> passwd >> mapseed >> dimension;
-  user->buffer >> version >> player >> mapseed >> dimension;
+  user->buffer >> version >> player >> passwd /*>> mapseed*/ >> param_1 >> param_2 >> dimension >> param_3 >> param_4;
 
   if (!user->buffer)
   {

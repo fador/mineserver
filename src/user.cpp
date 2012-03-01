@@ -198,9 +198,10 @@ User::~User()
 
 bool User::sendLoginInfo()
 {
+  
   // Load user data
   loadData();
-
+  
   // Login OK package
   buffer << Protocol::loginResponse(UID);
   spawnOthers();
@@ -1181,10 +1182,10 @@ bool User::teleport(double x, double y, double z, size_t map)
   {
     map = pos.map;
   }
-  if (y > 127.0)
+  if (y > 255.0)
   {
-    y = 127.0;
-    LOGLF("Player Attempted to teleport with y > 127.0");
+    y = 255.0;
+    LOGLF("Player Attempted to teleport with y > 255.0");
   }
   if (map == pos.map)
   {
@@ -1234,7 +1235,7 @@ void User::checkEnvironmentDamage()
 {
   const double yVal = std::floor(pos.y - 0.5);
 
-  if (yVal > 127.0)
+  if (yVal > 255.0)
   {
     return;
   }
@@ -1298,7 +1299,7 @@ void User::checkEnvironmentDamage()
     }
   }
 
-  if(std::floor(pos.y + 1.5) > 127)
+  if(std::floor(pos.y + 1.5) > 255)
   {
     sethealth(std::max(0, health - d));
     return;

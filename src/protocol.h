@@ -129,8 +129,8 @@ class Protocol
     static Packet loginResponse(int eid)
     {
       Packet ret;
-      ret << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)eid << std::string("") << (int64_t)0 
-          << std::string("DEFAULT") << (int32_t)0 << (int8_t)0 << (int8_t)2 << (int8_t)128 << (int8_t)64;
+      ret << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)eid << std::string("") /*<< (int64_t)0 */
+          << std::string("DEFAULT") << (int32_t)0 << (int32_t)0 << (int8_t)2 << (int8_t)128 << (int8_t)64;
       return ret;
     }
 
