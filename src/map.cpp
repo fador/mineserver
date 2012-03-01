@@ -1649,7 +1649,7 @@ void Map::sendToUser(User* user, int x, int z, bool login)
   
   // Chunk
   (*p) << (int8_t)PACKET_MAP_CHUNK << (int32_t)(mapposx) << (int32_t)(mapposz)
-       << (int8_t)0 /* Biome Data bool */ << (int16_t)0x00ff /* Enabled chunks */ 
+       << (int8_t)0 /* Biome Data bool */ << (int16_t)0x00ff /* Enabled chunks 0..15 */ 
        << (int16_t)0x00ff /* Enabled additional data? in the enabled chunks */;
 
   /*
@@ -1661,6 +1661,8 @@ void Map::sendToUser(User* user, int x, int z, bool login)
   memset(&mapdata[32768 + 16384 + 16384+16384], 0, 16384);
   
   
+  //HACK: x/z/y -> y/z/x
+  //ToDo: Changes required to make this format native
   for(int x = 0; x < 16; x++)
   {
     for(int z = 0; z < 16; z++)

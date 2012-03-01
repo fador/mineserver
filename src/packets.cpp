@@ -81,7 +81,7 @@ void PacketHandler::init()
   packets[PACKET_ARM_ANIMATION]            = Packets(5, &PacketHandler::arm_animation);
   packets[PACKET_PICKUP_SPAWN]             = Packets(22, &PacketHandler::pickup_spawn);
   packets[PACKET_DISCONNECT]               = Packets(PACKET_VARIABLE_LEN, &PacketHandler::disconnect);
-  packets[PACKET_RESPAWN]                  = Packets(0, &PacketHandler::respawn);
+  packets[PACKET_RESPAWN]                  = Packets(PACKET_VARIABLE_LEN, &PacketHandler::respawn);
   packets[PACKET_INVENTORY_CHANGE]         = Packets(PACKET_VARIABLE_LEN, &PacketHandler::inventory_change);
   packets[PACKET_INVENTORY_CLOSE]          = Packets(1, &PacketHandler::inventory_close);
   packets[PACKET_SIGN]                     = Packets(PACKET_VARIABLE_LEN, &PacketHandler::change_sign);
@@ -1351,6 +1351,16 @@ int PacketHandler::ping(User* user)
 
 int PacketHandler::respawn(User* user)
 {
+  if (!user->buffer.haveData(10))
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+  int32_t dimension;
+  int8_t difficulty,creative;
+  int16_t height;
+  std::string level_type;
+
+  user->buffer >> dimension >> difficulty >> creative >> height >> level_type;
   user->dropInventory();
   user->respawn();
   user->buffer.removePacket();

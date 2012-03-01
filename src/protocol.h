@@ -185,10 +185,10 @@ class Protocol
       return ret;
     }
 
-    static Packet respawn(int8_t world = 0, int8_t difficulty=1,int8_t creative_mode=0, int16_t world_height=128, int64_t map_seed=0, std::string level_type="DEFAULT")
+    static Packet respawn(int32_t world = 0, int8_t difficulty=1,int8_t creative_mode=0, int16_t world_height=128, std::string level_type="DEFAULT")
     {
       Packet ret;
-      ret << (int8_t)PACKET_RESPAWN << world << difficulty << creative_mode << world_height << map_seed << level_type;
+      ret << (int8_t)PACKET_RESPAWN << world << difficulty << creative_mode << world_height << level_type;
       return ret;
     }
 
