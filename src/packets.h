@@ -91,6 +91,7 @@ enum
   PACKET_ENTITY_TELEPORT           = 0x22,
   PACKET_DEATH_ANIMATION           = 0x26,
   PACKET_ENTITY_METADATA           = 0x28,
+  PACKET_REMOVE_ENTITY_EFFECT      = 0x2a,
   PACKET_PRE_CHUNK                 = 0x32,
   PACKET_MAP_CHUNK                 = 0x33,
   PACKET_MULTI_BLOCK_CHANGE        = 0x34,
@@ -325,6 +326,10 @@ public:
   static int unhandledPacket(User* user);
 
   static int ping(User* user);
+
+
+  static int block_change(User* user);
+
 };
 
 #endif

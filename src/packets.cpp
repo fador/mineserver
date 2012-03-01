@@ -90,6 +90,8 @@ void PacketHandler::init()
   packets[PACKET_WEATHER]                  = Packets(18, &PacketHandler::unhandledPacket);
   packets[PACKET_INCREMENT_STATISTICS]     = Packets(6, &PacketHandler::unhandledPacket);
   packets[PACKET_PING]                     = Packets(0, &PacketHandler::ping);
+  packets[PACKET_BLOCK_CHANGE]             = Packets(11, &PacketHandler::block_change);
+  
   
 }
 
@@ -623,6 +625,7 @@ int PacketHandler::player_digging(User* user)
     }
     break;
   }
+  /*
   case BLOCK_STATUS_DIGGING:
   {
     (static_cast<Hook5<bool, const char*, int32_t, int8_t, int32_t, int8_t>*>(Mineserver::get()->plugin()->getHook("PlayerDigging")))->doAll(user->nick.c_str(), x, y, z, direction);
@@ -638,6 +641,7 @@ int PacketHandler::player_digging(User* user)
 
     break;
   }
+  */
   /*    case BLOCK_STATUS_STOPPED_DIGGING:
       {
         (static_cast<Hook5<bool,const char*,int32_t,int8_t,int32_t,int8_t>*>(Mineserver::get()->plugin()->getHook("PlayerDiggingStopped")))->doAll(user->nick.c_str(), x, y, z, direction);
@@ -811,6 +815,8 @@ int PacketHandler::player_digging(User* user)
 
   return PACKET_OK;
 }
+
+
 
 int PacketHandler::player_block_placement(User* user)
 {
@@ -1349,6 +1355,22 @@ int PacketHandler::respawn(User* user)
   user->buffer.removePacket();
   return PACKET_OK;
 }
+
+
+
+int PacketHandler::block_change(User* user)
+{
+  int32_t x,z;
+  int8_t y,type,meta;
+
+  user->buffer >> x >> y >> z >> type >> meta;
+
+  user->buffer.removePacket();
+  return PACKET_OK;
+}
+
+
+
 
 // Shift operators for Packet class
 Packet& Packet::operator<<(int8_t val)

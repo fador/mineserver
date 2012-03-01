@@ -902,7 +902,7 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
 
   Packet pkt;
 
-  pkt << PACKET_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int8_t)type << (int8_t)meta;
+  pkt << (int8_t)PACKET_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int8_t)type << (int8_t)meta;
 
   it->second->sendPacket(pkt);
 
@@ -920,7 +920,7 @@ bool Map::sendNote(int x, int y, int z, char instrument, char pitch)
 
   Packet pkt;
 
-  pkt << PACKET_PLAY_NOTE << (int32_t)x << (int16_t)y << (int32_t)z << (int8_t)instrument << (int8_t)pitch;
+  pkt << (int8_t)PACKET_PLAY_NOTE << (int32_t)x << (int16_t)y << (int32_t)z << (int8_t)instrument << (int8_t)pitch;
 
   it->second->sendPacket(pkt);
 
@@ -949,7 +949,7 @@ bool Map::sendPickupSpawn(spawnedItem item)
 
   Packet pkt;
 
-  pkt << PACKET_PICKUP_SPAWN << (int32_t)item.EID << (int16_t)item.item << (int8_t)item.count << (int16_t)item.health
+  pkt << (int8_t)PACKET_PICKUP_SPAWN << (int32_t)item.EID << (int16_t)item.item << (int8_t)item.count << (int16_t)item.health
       << (int32_t)item.pos.x() << (int32_t)item.pos.y() << (int32_t)item.pos.z()
       << (int8_t)0 << (int8_t)0 << (int8_t)0;
 

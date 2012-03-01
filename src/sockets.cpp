@@ -29,7 +29,7 @@
 #include <cstdlib>
 #define NOMINMAX
 #include <winsock2.h>
-typedef  int socklen_t;
+typedef int socklen_t;
 #endif
 
 #include <cerrno>
@@ -110,6 +110,9 @@ extern "C" void client_callback(int fd, short ev, void* arg)
           event_add(user->GetEvent(), NULL);
           return;
         }
+        /*
+        if(user->action != 0xa)
+          printf("Packet %x\r\n", user->action); */
 
         if (disconnecting) // disconnect -- player gone
         {
@@ -135,6 +138,10 @@ extern "C" void client_callback(int fd, short ev, void* arg)
           event_add(user->GetEvent(), NULL);
           return;
         }
+        /*
+        if(user->action != 0xa)
+          printf("Packet %x\r\n", user->action);
+          */
 
         //Call specific function
         Mineserver::get()->packetHandler()->packets[user->action].function(user);
