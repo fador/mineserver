@@ -110,9 +110,6 @@ extern "C" void client_callback(int fd, short ev, void* arg)
           event_add(user->GetEvent(), NULL);
           return;
         }
-        /*
-        if(user->action != 0xa)
-          printf("Packet %x\r\n", user->action); */
 
         if (disconnecting) // disconnect -- player gone
         {
@@ -129,8 +126,10 @@ extern "C" void client_callback(int fd, short ev, void* arg)
         delete user;
         return;
       }
+      //Constant len packets
       else
       {
+        //Check that the buffer has enough data before calling the function
         if (!user->buffer.haveData(Mineserver::get()->packetHandler()->packets[user->action].len))
         {
           user->waitForData = true;
@@ -138,10 +137,6 @@ extern "C" void client_callback(int fd, short ev, void* arg)
           event_add(user->GetEvent(), NULL);
           return;
         }
-        /*
-        if(user->action != 0xa)
-          printf("Packet %x\r\n", user->action);
-          */
 
         //Call specific function
         Mineserver::get()->packetHandler()->packets[user->action].function(user);
@@ -149,13 +144,16 @@ extern "C" void client_callback(int fd, short ev, void* arg)
     } // while(user->buffer)
   }
 
+  //If there is data in the output buffer, try to write it
   if (!user->buffer.getWriteEmpty())
   {
     std::vector<char> buf;
     user->buffer.getWriteData(buf);
 
+    //Try to write the whole buffer
     const int written = send(fd, buf.data(), buf.size(), 0);
 
+    //Handle errors
     if (written == SOCKET_ERROR)
     {
 #ifdef WIN32
@@ -171,18 +169,15 @@ extern "C" void client_callback(int fd, short ev, void* arg)
         delete user;
         return;
       }
-      else
-      {
-        //user->write_err_count++;
-      }
 
     }
     else
     {
+      //Remove written amount from the buffer
       user->buffer.clearWrite(written);
-      //user->write_err_count=0;
     }
 
+    //If we couldn't write everything at once, add EV_WRITE event calling this function again..
     if (!user->buffer.getWriteEmpty())
     {
       event_set(user->GetEvent(), fd, EV_WRITE | EV_READ, client_callback, user);
@@ -191,6 +186,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
     }
   }
 
+  //Add EV_READ event again
   event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
   event_add(user->GetEvent(), NULL);
 }

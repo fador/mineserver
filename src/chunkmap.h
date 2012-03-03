@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
+   Copyright (c) 2012, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -161,17 +161,29 @@ typedef std::tr1::shared_ptr<furnaceData> furnaceDataPtr;
 
 void removeFurnace(furnaceDataPtr data);
 
-/** holds chunk data (16x16x16 blocks ?)
+/** holds chunk data (0..15 16x16x16 blocks)
  */
 struct sChunk
 {
+  //Basic block data (8bits/block)
   uint8_t* blocks;
+  //Additional block id data for id > 255 (4bits/block)
+  uint8_t* addblocks;
+  //Metadata (4bits/block)
   uint8_t* data;
+  //block light data (4bits/block)
   uint8_t* blocklight;
+  //skylight data (4bits/block)
   uint8_t* skylight;
+
   uint8_t* heightmap;
+
+  //Chunk coordinates
   int32_t x;
   int32_t z;
+
+  //Bitmap of the present 16x16x16 chunks, 0xffff would mean 0..15 chunks are present
+  uint16_t chunks_present;
 
   int refCount;
   bool lightRegen;
@@ -187,7 +199,7 @@ struct sChunk
   std::vector<signDataPtr>    signs;
   std::vector<furnaceDataPtr> furnaces;
 
-  sChunk() : refCount(0), lightRegen(false), changed(false), lastused(0), nbt(NULL)
+  sChunk() : refCount(0), lightRegen(false), changed(false), lastused(0), nbt(NULL), chunks_present(0)
   {
   }
 

@@ -372,6 +372,7 @@ bool Mineserver::init()
 
 
   LOG2(INFO, "Welcome to Mineserver v" + VERSION);
+  LOG2(INFO, "    Using zlib "+std::string(ZLIB_VERSION)+" libevent "+std::string(event_get_version()));
 
   MapGen* mapgen = new MapGen;
   MapGen* nethergen = new NetherGen;
@@ -659,6 +660,7 @@ bool Mineserver::run()
     LOG2(INFO, ip + ":" + dtos(port));
   }
 
+  //Let event_base_loop lock for 200ms
   timeval loopTime;
   loopTime.tv_sec  = 0;
   loopTime.tv_usec = 200000; // 200ms

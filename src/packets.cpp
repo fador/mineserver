@@ -1368,14 +1368,14 @@ int PacketHandler::respawn(User* user)
 }
 
 
-
+//Sent when right clicking blocks without placing, interact?
 int PacketHandler::block_change(User* user)
 {
   int32_t x,z;
   int8_t y,type,meta;
 
   user->buffer >> x >> y >> z >> type >> meta;
-
+  //printf("block change %d:%d:%d type %d meta %d\r\n",x,y,z, type,meta);
   user->buffer.removePacket();
   return PACKET_OK;
 }
