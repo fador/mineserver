@@ -50,7 +50,8 @@ public:
     TAG_BYTE_ARRAY = 7,
     TAG_STRING     = 8,
     TAG_LIST       = 9,
-    TAG_COMPOUND   = 10
+    TAG_COMPOUND   = 10,
+    TAG_INT_ARRAY  = 11
   };
 
   NBT_Value(eTAG_Type type, eTAG_Type listType = TAG_END);
@@ -61,6 +62,7 @@ public:
   NBT_Value(float value);
   NBT_Value(double value);
 
+  NBT_Value(int32_t* buf, int32_t len);
   NBT_Value(uint8_t* buf, int32_t len);
   NBT_Value(std::vector<uint8_t> const& bytes);
   NBT_Value(const std::string& str);
@@ -88,6 +90,7 @@ public:
   NBT_Value& operator =(float val);
   NBT_Value& operator =(double val);
 
+  std::vector<int32_t> *NBT_Value::GetIntArray();
   std::vector<uint8_t>* GetByteArray();
   std::string* GetString();
   eTAG_Type GetListType();
@@ -119,6 +122,7 @@ private:
     double doubleVal;
     std::string* stringVal;
     std::vector<uint8_t>* byteArrayVal;
+    std::vector<int32_t>* intArrayVal;
     struct
     {
       eTAG_Type type;
