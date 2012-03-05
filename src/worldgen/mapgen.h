@@ -48,6 +48,7 @@ public:
 
 private:
   std::vector<uint8_t> blocks;
+  std::vector<uint8_t> addblocks;
   std::vector<uint8_t> blockdata;
   std::vector<uint8_t> skylight;
   std::vector<uint8_t> blocklight;

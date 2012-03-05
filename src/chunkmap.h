@@ -185,6 +185,8 @@ struct sChunk
   //Bitmap of the present 16x16x16 chunks, 0xffff would mean 0..15 chunks are present
   uint16_t chunks_present;
 
+  uint16_t addblocks_present;
+
   int refCount;
   bool lightRegen;
   bool changed;
@@ -199,7 +201,7 @@ struct sChunk
   std::vector<signDataPtr>    signs;
   std::vector<furnaceDataPtr> furnaces;
 
-  sChunk() : refCount(0), lightRegen(false), changed(false), lastused(0), nbt(NULL), chunks_present(0)
+  sChunk() : addblocks_present(0), blocks(NULL), addblocks(NULL), data(NULL), blocklight(NULL), skylight(NULL), refCount(0), lightRegen(false), changed(false), lastused(0), nbt(NULL), chunks_present(0)
   {
   }
 
@@ -214,10 +216,13 @@ struct sChunk
       furnaces.clear();
     }
 
-    if (nbt != NULL) // unnecessary check, it's safe to delete the null pointer
-    {
-      delete nbt;
-    }
+    delete nbt;
+    
+    delete[] blocks;
+    delete[] addblocks;
+    delete[] data;
+    delete[] blocklight;
+    delete[] skylight;
   }
 
   bool hasUser(User* user) const

@@ -45,6 +45,8 @@ private:
   std::vector<uint8_t> blocklight;
   std::vector<uint8_t> heightmap;
 
+  uint8_t* heightmap_pointer;
+
   int seaLevel;
 
   bool addTrees;

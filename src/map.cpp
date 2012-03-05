@@ -259,7 +259,7 @@ void Map::init(int number)
     level["Data"]->Insert("SpawnY", new NBT_Value((int32_t)120));
     level["Data"]->Insert("SpawnZ", new NBT_Value((int32_t)0));
     level["Data"]->Insert("RandomSeed", new NBT_Value((int64_t)(rand() * 65535)));
-    level["Data"]->Insert("version", new NBT_Value((int32_t)19132));
+    level["Data"]->Insert("version", new NBT_Value((int32_t)19133));
     level["Data"]->Insert("LevelName", new NBT_Value(std::string("Mineserver world")));
 
     level.Insert("Trees", new NBT_Value(NBT_Value::TAG_LIST));
@@ -288,22 +288,23 @@ void Map::init(int number)
   //Check for McRegion format!
   int32_t version = (int32_t) * data["version"];
 
-  //Not in McRegion format?
-  if (version != 19132)
+  //Not in Anvil format?
+  if (version != 19133)
   {
-    LOG(EMERG, "Map", "Error: map not in McRegion format, converting..(old mapdata is not removed!)");
-    LOG(EMERG, "Map", "THIS MIGHT TAKE A WHILE");
-    LOG(EMERG, "Map", "every dot is converted subfolder and | is root level folder");
-
+    LOG(EMERG, "Map", "Error: map not in Anvil format, shutting down!");
+    
+    /*
     //Do the actual conversion
     convertMap(mapDirectory);
 
     //Add version info to tell we are using McRegion format and levelname
-    (*root)["Data"]->Insert("version", new NBT_Value((int32_t)19132));
+    (*root)["Data"]->Insert("version", new NBT_Value((int32_t)19133));
     (*root)["Data"]->Insert("LevelName", new NBT_Value(std::string("Mineserver world")));
 
     //Save level.dat back with the new info
     root->SaveToFile(infile);
+    */
+    exit(EXIT_FAILURE);
   }
 
   /////////////
@@ -439,8 +440,8 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
   int highest_y = 0;
 
   // Clear lightmaps
-  memset(skylight, 0, 16 * 16 * 128 / 2);
-  memset(blocklight, 0, 16 * 16 * 128 / 2);
+  memset(skylight, 0, 16 * 16 * 256 / 2);
+  memset(blocklight, 0, 16 * 16 * 256 / 2);
 
   // Sky light
   int light = 0;
@@ -551,7 +552,7 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
 
 void Map::spreadLight(int x, int y, int z, int light_value, uint8_t type /* 0: sky, 1: block */)
 {
-  if ((y < 0) || (y > 127))
+  if ((y < 0) || (y > 255))
   {
     //LOGLF("Invalid y value (spreadLight)");
     // For sky style maps or maps with holes, this spams.
@@ -567,7 +568,7 @@ void Map::spreadLight(int x, int y, int z, int light_value, uint8_t type /* 0: s
   for (int direction = 0; direction < 6; direction++)
   {
     // Going too high
-    if ((y == 127) && (direction == 2))
+    if ((y == 255) && (direction == 2))
     {
       //Skip this direction
       direction++;
@@ -634,7 +635,7 @@ void Map::spreadLight(int x, int y, int z, int light_value, uint8_t type /* 0: s
 
 bool Map::getBlock(int x, int y, int z, uint8_t* type, uint8_t* meta, bool generate)
 {
-  if ((y < 0) || (y > 127))
+  if ((y < 0) || (y > 255))
   {
     std::ostringstream str;
     str << "Invalid y value (" << x << ", " << y << ", " << z << ")";
@@ -667,11 +668,11 @@ bool Map::getBlock(int x, int y, int z, uint8_t* type, uint8_t* meta, bool gener
 
   uint8_t* blocks      = chunk->blocks;
   uint8_t* metapointer = chunk->data;
-  int index            = y + (chunk_block_z << 7) + (chunk_block_x << 11);
+  int index            = chunk_block_x + (chunk_block_z << 4) + (y << 8);
   *type                = blocks[index];
   uint8_t metadata     = metapointer[(index) >> 1];
 
-  if (y & 1)
+  if (x & 1)
   {
     metadata  &= 0xf0;
     metadata >>= 4;
@@ -689,7 +690,7 @@ bool Map::getBlock(int x, int y, int z, uint8_t* type, uint8_t* meta, bool gener
 
 bool Map::getLight(int x, int y, int z, uint8_t* skylight, uint8_t* blocklight)
 {
-  if ((y < 0) || (y > 127))
+  if ((y < 0) || (y > 255))
   {
     LOGLF("Invalid y value (getLight)");
     return false;
@@ -718,11 +719,11 @@ bool Map::getLight(int x, int y, int z, uint8_t* skylight, uint8_t* blocklight, 
 
   uint8_t* blocklightPtr = chunk->blocklight;
   uint8_t* skylightPtr   = chunk->skylight;
-  int index            = y + (chunk_block_z << 7) + (chunk_block_x << 11);
+  int index            = chunk_block_x + (chunk_block_z << 4) + (y << 8);
   *blocklight = blocklightPtr[(index) >> 1];
   *skylight   = skylightPtr[(index) >> 1];
 
-  if (y % 2)
+  if (x % 2)
   {
     *blocklight  &= 0xf0;
     *blocklight >>= 4;
@@ -742,7 +743,7 @@ bool Map::getLight(int x, int y, int z, uint8_t* skylight, uint8_t* blocklight, 
 bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type)
 {
 
-  if ((y < 0) || (y > 127))
+  if ((y < 0) || (y > 255))
   {
     LOGLF("Invalid y value (setLight)");
     return false;
@@ -765,7 +766,7 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type)
 bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type, sChunk* chunk)
 {
   //Make sure we are inside boundaries
-  if ((y < 0) || (y > 127))
+  if ((y < 0) || (y > 255))
   {
     LOGLF("Invalid y value (setLight 2)");
     return false;
@@ -775,11 +776,11 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type, 
 
   uint8_t* blocklightPtr     = chunk->blocklight;
   uint8_t* skylightPtr       = chunk->skylight;
-  int index                = y + (chunk_block_z << 7) + (chunk_block_x << 11);
+  int index                = chunk_block_x + (chunk_block_z << 4) + (y << 8);
   char skylight_local      = skylightPtr[index >> 1];
   char blocklight_local    = blocklightPtr[index >> 1];
 
-  if (y & 1)
+  if (x & 1)
   {
     if (type & 0x5) // 1 or 4
     {
@@ -823,7 +824,7 @@ bool Map::setLight(int x, int y, int z, int skylight, int blocklight, int type, 
 
 bool Map::setBlock(int x, int y, int z, char type, char meta)
 {
-  if ((y < 0) || (y > 127))
+  if ((y < 0) || (y > 255))
   {
     LOGLF("Invalid y value (setBlock)");
     return false;
@@ -847,11 +848,11 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
 
   uint8_t* blocks      = chunk->blocks;
   uint8_t* metapointer = chunk->data;
-  int index          = y + (chunk_block_z << 7) + (chunk_block_x << 11);
+  int index          = chunk_block_x + (chunk_block_z << 4) + (y << 8);
   blocks[index] = type;
   char metadata      = metapointer[index >> 1];
 
-  if (y & 1)
+  if (chunk_block_x & 1)
   {
     metadata &= 0x0f;
     metadata |= meta << 4;
@@ -1190,50 +1191,69 @@ sChunk* Map::loadMap(int x, int z, bool generate)
     return getChunk(x, z);
   }
 
-  NBT_Value* nbt_blocks     = (*level)["Blocks"];
-  NBT_Value* nbt_data       = (*level)["Data"];
-  NBT_Value* nbt_blocklight = (*level)["BlockLight"];
-  NBT_Value* nbt_skylight   = (*level)["SkyLight"];
   NBT_Value* nbt_heightmap  = (*level)["HeightMap"];
 
-  if (!nbt_blocks || !nbt_data || !nbt_blocklight || !nbt_skylight || !nbt_heightmap)
-  {
-    LOGLF("Error in loading map (chunk missing data)");
-    delete chunk;
-    return NULL;
-  }
-
-  std::vector<uint8_t>* blocks = nbt_blocks->GetByteArray();
-  std::vector<uint8_t>* data = nbt_data->GetByteArray();
-  std::vector<uint8_t>* blocklight = nbt_blocklight->GetByteArray();
-  std::vector<uint8_t>* skylight = nbt_skylight->GetByteArray();
-  std::vector<uint8_t>* heightmap = nbt_heightmap->GetByteArray();
-
-  if (!blocks || !data || !blocklight || !skylight || !heightmap)
-  {
-    LOGLF("Error in loading map (chunk missing data)");
-    delete chunk;
-    return NULL;
-  }
-
-  size_t fullLen = (16 * 128 * 16);
+  size_t fullLen = (16 * 256 * 16);
   size_t halfLen = fullLen >> 1;
-  //Check that there is all the data we need
-  if (blocks->size()     != fullLen ||
-      data->size()       != halfLen ||
-      blocklight->size() != halfLen ||
-      skylight->size()   != halfLen)
-  {
-    LOGLF("Error in loading map (corrupt?)");
-    delete chunk;
-    return NULL;
-  }
+  chunk->blocks     = new uint8_t[fullLen];
+  chunk->addblocks  = new uint8_t[halfLen];
+  chunk->data       = new uint8_t[halfLen];
+  chunk->blocklight = new uint8_t[halfLen];
+  chunk->skylight   = new uint8_t[halfLen];
+  chunk->heightmap  = nbt_heightmap->GetByteArray()->data();
+  chunk->chunks_present = 0;
+  chunk->addblocks_present = 0;
 
-  chunk->blocks     = &((*blocks)[0]);
-  chunk->data       = &((*data)[0]);
-  chunk->blocklight = &((*blocklight)[0]);
-  chunk->skylight   = &((*skylight)[0]);
-  chunk->heightmap  = &((*heightmap)[0]);
+
+  //Clear all because there might not be every 16x16 block in the file
+  memset(chunk->blocks,    0, fullLen);
+  memset(chunk->addblocks, 0, halfLen);
+  memset(chunk->data,      0, halfLen);
+  memset(chunk->blocklight,  0, halfLen);
+  memset(chunk->skylight,  0, halfLen);
+
+  //Loading "Anvil" type data structure
+  NBT_Value* nbt_sections     = (*level)["Sections"];
+  std::vector<NBT_Value*>* nbt_list = nbt_sections->GetList();
+
+  std::vector<NBT_Value*>::iterator nbt_list_iter;
+  
+  for(nbt_list_iter = nbt_list->begin(); nbt_list_iter != nbt_list->end(); nbt_list_iter++)
+  {
+    NBT_Value& compound = *(*nbt_list_iter);
+    int8_t Y = (int8_t) *compound["Y"];
+    chunk->chunks_present |= 1<<Y;
+    NBT_Value* nbt_blocks     = compound["Blocks"];  
+    NBT_Value* nbt_data       = compound["Data"];
+    NBT_Value* nbt_blocklight = compound["BlockLight"];
+    NBT_Value* nbt_skylight   = compound["SkyLight"];
+    NBT_Value* nbt_addblocks  = compound["AddBlocks"];
+
+    if (nbt_blocks->GetByteArray()->size()     != 16*16*16   ||
+        nbt_data->GetByteArray()->size()       != 16*16*16/2 ||
+        nbt_blocklight->GetByteArray()->size() != 16*16*16/2 ||
+        nbt_skylight->GetByteArray()->size()   != 16*16*16/2)
+    {
+      LOGLF("Error in loading map (corrupt?)");
+      delete chunk;
+      return NULL;
+    }
+    uint32_t offset = 16*16*16*Y;
+    memcpy(chunk->blocks+offset, nbt_blocks->GetByteArray()->data(), 16*16*16);
+    memcpy(chunk->data+offset/2, nbt_data->GetByteArray()->data(), 16*16*16/2);
+    memcpy(chunk->blocklight+offset/2, nbt_blocklight->GetByteArray()->data(), 16*16*16/2);
+    memcpy(chunk->skylight+offset/2, nbt_skylight->GetByteArray()->data(), 16*16*16/2);
+
+    if (nbt_blocks->GetByteArray()->size() == 16*16*16/2)
+    {
+      chunk->addblocks_present |= 1<<Y;
+      memcpy(chunk->addblocks+offset/2, nbt_addblocks->GetByteArray()->data(), 16*16*16/2);
+    }
+
+    //Clear the data from the NBT
+    delete *nbt_list_iter;
+  }
+  nbt_list->clear();
 
   chunks.insert(ChunkMap::value_type(ChunkMap::key_type(x, z), chunk));
 
@@ -1518,10 +1538,45 @@ bool Map::saveMap(int x, int z)
     entityList->GetList()->push_back(val);
   }
 
+  NBT_Value* sections = (*(*chunk->nbt)["Level"])["Sections"];
+  //Store chunk data to NBT
+  for(uint32_t Y = 0; Y < 16; Y++)
+  {
+    uint32_t offset = 16*16*16*Y;
+    if(chunk->chunks_present & (1<<Y))
+    {
+      NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+      val->Insert("Y", new NBT_Value((int8_t)Y));
+      val->Insert("Blocks", new NBT_Value(&chunk->blocks[offset], 16*16*16));
+      val->Insert("Data", new NBT_Value(&chunk->data[offset>>1], 16*16*16/2));
+      val->Insert("SkyLight", new NBT_Value(&chunk->skylight[offset>>1], 16*16*16/2));
+      val->Insert("BlockLight", new NBT_Value(&chunk->blocklight[offset>>1], 16*16*16/2));
+      if(chunk->addblocks_present & (1<<Y))
+      {
+        val->Insert("AddBlocks", new NBT_Value(&chunk->addblocks[offset>>1], 16*16*16/2));
+      }
+      sections->GetList()->push_back(val);
+    }
+  }
+
+
   //Allocate memory for NBT and save (+deflate) it
   uint8_t* buffer = new uint8_t[ALLOCATE_NBTFILE];
   uint32_t len;
   chunk->nbt->SaveToMemory(buffer, &len);
+
+
+  //Clear off the chunk data
+  NBT_Value* nbt_sections     = (*(*chunk->nbt)["Level"])["Sections"];
+  std::vector<NBT_Value*>* nbt_list = nbt_sections->GetList();
+  std::vector<NBT_Value*>::iterator nbt_list_iter;
+  
+  for(nbt_list_iter = nbt_list->begin(); nbt_list_iter != nbt_list->end(); nbt_list_iter++)
+  {
+    delete *nbt_list_iter;
+  }
+  nbt_list->clear();
+
 
   //Open regionfile and write chunk
   RegionFile newRegion;
@@ -1634,8 +1689,7 @@ void Map::sendToUser(User* user, int x, int z, bool login)
     return;
   }
 
-  uint8_t* data4   = new uint8_t[18 + 98304];
-  uint8_t* mapdata = new uint8_t[98304];
+  uint8_t* mapdata = new uint8_t[98304*2];
   int32_t mapposx    = x;
   int32_t mapposz    = z;
 
@@ -1647,44 +1701,26 @@ void Map::sendToUser(User* user, int x, int z, bool login)
   }
 
   
+  //ToDo: now sending all 16 16x16 chunks, limit to only those with blocks.
   // Chunk
   (*p) << (int8_t)PACKET_MAP_CHUNK << (int32_t)(mapposx) << (int32_t)(mapposz)
-       << (int8_t)0 /* Biome Data bool */ << (int16_t)0x00ff /* Enabled chunks 0..15 */ 
-       << (int16_t)0x00ff /* Enabled additional data? in the enabled chunks */;
+       << (int8_t)0 /* Biome Data bool? */ << (int16_t)0xffff /* Enabled chunks 0..15 */ 
+       << (int16_t)0xffff /* Enabled additional data? in the enabled chunks */;
 
-  /*
-  memcpy(&mapdata[0], chunk->blocks, 32768);
-  memcpy(&mapdata[32768], chunk->data, 16384);
-  memcpy(&mapdata[32768 + 16384], chunk->blocklight, 16384);
-  memcpy(&mapdata[32768 + 16384 + 16384], chunk->skylight, 16384);
-  */
-  memset(&mapdata[32768 + 16384 + 16384+16384], 0, 16384);
-  
-  
-  //HACK: x/z/y -> y/z/x
-  //ToDo: Changes required to make this format native
-  for(int x = 0; x < 16; x++)
-  {
-    for(int z = 0; z < 16; z++)
-    {
-      for(int y = 0; y < 128; y++)
-      {
-        int index    = y + (z << 7) + (x << 11);
-        int index2   = x + (z << 4) + (y << 8);
-        mapdata[index2] = chunk->blocks[index];
-        mapdata[32768+(index2>>1)] = chunk->data[index>>1];
-        mapdata[32768+16384+(index2>>1)] = chunk->blocklight[index>>1];
-        mapdata[32768+16384+16384+(index2>>1)] = chunk->skylight[index>>1];
-        //mapdata[32768+16384+16384+16384+(x+16*z+16*16*y)>>1] = 0;
-      }
-    }
-  }
 
-  uLongf written = 98304;
+  memcpy(&mapdata[0], chunk->blocks, 32768*2);
+  memcpy(&mapdata[32768*2], chunk->data, 16384*2);
+  memcpy(&mapdata[(32768 + 16384)*2], chunk->blocklight, 16384*2);
+  memcpy(&mapdata[(32768 + 16384 + 16384)*2], chunk->skylight, 16384*2);
+  memcpy(&mapdata[(32768 + 16384 + 16384 + 16384)*2], chunk->addblocks, 16384*2);
+ 
+
+
+  uLongf written = 98304*2;
   uint8_t* buffer = new uint8_t[written];
 
   // Compress data with zlib deflate
-  compress(buffer, &written, &mapdata[0], 98304);
+  compress(buffer, &written, &mapdata[0], 98304*2);
 
   (*p) << (int32_t)written << (int32_t)0 /* ??? */;
   (*p).addToWrite(buffer, written);
@@ -1699,7 +1735,6 @@ void Map::sendToUser(User* user, int x, int z, bool login)
 
   delete[] buffer;
 
-  delete[] data4;
   delete[] mapdata;
 }
 

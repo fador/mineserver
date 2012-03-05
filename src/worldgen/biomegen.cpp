@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2011, The Mineserver Project
+    Copyright (c) 2012, The Mineserver Project
     All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -135,24 +135,24 @@ void BiomeGen::generateFlatgrass(int x, int z, int map)
   {
     for (int bZ = 0; bZ < 16; bZ++)
     {
-      heightmap[(bZ << 4) + bX] = 64;
+      heightmap_pointer[(bZ << 4) + bX] = 64;
       for (int bY = 0; bY < 128; bY++)
       {
         if (bY == 0)
         {
-          chunk->blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_BEDROCK;
+          chunk->blocks[bX + (bZ << 4) + (bY << 8)] = BLOCK_BEDROCK;
         }
         else if (bY < 64)
         {
-          chunk->blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_DIRT;
+          chunk->blocks[bX + (bZ << 4) + (bY << 8)] = BLOCK_DIRT;
         }
         else if (bY == 64)
         {
-          chunk->blocks[bY + (bZ * 128 + (bX * 128 * 16))] = top;
+          chunk->blocks[bX + (bZ << 4) + (bY << 8)] = top;
         }
         else
         {
-          chunk->blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_AIR;
+          chunk->blocks[bX + (bZ << 4) + (bY << 8)] = BLOCK_AIR;
         }
       }
     }
@@ -164,10 +164,8 @@ void BiomeGen::generateChunk(int x, int z, int map)
   NBT_Value* main = new NBT_Value(NBT_Value::TAG_COMPOUND);
   NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
 
-  val->Insert("Blocks", new NBT_Value(blocks));
-  val->Insert("Data", new NBT_Value(blockdata));
-  val->Insert("SkyLight", new NBT_Value(skylight));
-  val->Insert("BlockLight", new NBT_Value(blocklight));
+  val->Insert("Sections", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
+
   val->Insert("HeightMap", new NBT_Value(heightmap));
   val->Insert("Entities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
   val->Insert("TileEntities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
@@ -178,27 +176,24 @@ void BiomeGen::generateChunk(int x, int z, int map)
 
   main->Insert("Level", val);
 
-  /*  uint32_t chunkid;
-  Mineserver::get()->map()->posToId(x, z, &chunkid);
-
-  Mineserver::get()->map()->maps[chunkid].x = x;
-  Mineserver::get()->map()->maps[chunkid].z = z; */
-
-  std::vector<uint8_t>* t_blocks = (*val)["Blocks"]->GetByteArray();
-  std::vector<uint8_t>* t_data = (*val)["Data"]->GetByteArray();
-  std::vector<uint8_t>* t_blocklight = (*val)["BlockLight"]->GetByteArray();
-  std::vector<uint8_t>* t_skylight = (*val)["SkyLight"]->GetByteArray();
-  std::vector<uint8_t>* heightmap = (*val)["HeightMap"]->GetByteArray();
-
   sChunk* chunk = new sChunk();
-  chunk->blocks = &((*t_blocks)[0]);
-  chunk->data = &((*t_data)[0]);
-  chunk->blocklight = &((*t_blocklight)[0]);
-  chunk->skylight = &((*t_skylight)[0]);
-  chunk->heightmap = &((*heightmap)[0]);
+  chunk->blocks = new uint8_t[16 * 16 * 256];
+  chunk->addblocks = new uint8_t[16 * 16 * 256 / 2];
+  chunk->data = new uint8_t[16 * 16 * 256 / 2];
+  chunk->blocklight = new uint8_t[16 * 16 * 256 / 2];
+  chunk->skylight = new uint8_t[16 * 16 * 256 / 2];
+  chunk->heightmap = &((*(*val)["HeightMap"]->GetByteArray())[0]);
+  heightmap_pointer = chunk->heightmap;
   chunk->nbt = main;
   chunk->x = x;
   chunk->z = z;
+
+  memset(chunk->blocks, 0, 16*16*256);
+  memset(chunk->addblocks, 0, 16*16*256/2);
+  memset(chunk->data, 0, 16*16*256/2);
+  memset(chunk->blocklight, 0, 16*16*256/2);
+  memset(chunk->skylight, 0, 16*16*256/2);
+  chunk->chunks_present = 0xffff;
 
   Mineserver::get()->map(map)->chunks.insert(ChunkMap::value_type(ChunkMap::key_type(x, z), chunk));
 
@@ -265,7 +260,7 @@ void BiomeGen::AddTrees(int x, int z, int map)
     {
       blockX = a + xBlockpos;
       blockZ = b + zBlockpos;
-      blockY = heightmap[(b<<4)+a];
+      blockY = heightmap_pointer[(b<<4)+a];
 
       // Another dirty haxx!
       if (blockY > 120)
@@ -406,7 +401,7 @@ void BiomeGen::generateWithNoise(int x, int z, int map)
   {
     for (int bZ = 0; bZ < 16; bZ++)
     {
-      heightmap[(bZ << 4) + bX] = ymax = currentHeight = (uint8_t)((finalTerrain.GetValue((xBlockpos + bX) / 100.0, 0, (zBlockpos + bZ) / 100.0) * 60) + 64);
+      heightmap_pointer[(bZ << 4) + bX] = ymax = currentHeight = (uint8_t)((finalTerrain.GetValue((xBlockpos + bX) / 100.0, 0, (zBlockpos + bZ) / 100.0) * 60) + 64);
       int biome = BiomeSelect.GetValue((xBlockpos + bX) / 100.0, 0, (zBlockpos + bZ) / 100.0);
       char toplayer;
       if (biome == 0)
@@ -435,7 +430,7 @@ void BiomeGen::generateWithNoise(int x, int z, int map)
       }
 
       int32_t stoneHeight = (int32_t)currentHeight - ((64 - (currentHeight % 64)) / 8) + 1;
-      int32_t bYbX = ((bZ << 7) + (bX << 11));
+      //int32_t bYbX = ((bZ << 7) + (bX << 11));
 
       if (ymax < seaLevel)
       {
@@ -445,7 +440,7 @@ void BiomeGen::generateWithNoise(int x, int z, int map)
 
       for (int bY = 0; bY <= ymax; bY++)
       {
-        curBlock = &(chunk->blocks[bYbX++]);
+        curBlock = &(chunk->blocks[bX + (bZ << 4) + (bY << 8)]);
 
         // Place bedrock
         if (bY == 0)
@@ -620,7 +615,7 @@ void BiomeGen::AddOre(int x, int z, int map, uint8_t type)
     blockX = uniform_8_12();
     blockZ = uniform_8_12();
 
-    blockY = heightmap[(blockZ << 4) + blockX];
+    blockY = heightmap_pointer[(blockZ << 4) + blockX];
     blockY -= 5;
 
     // Check that startheight is not higher than height at that column
@@ -635,7 +630,8 @@ void BiomeGen::AddOre(int x, int z, int map, uint8_t type)
     // Calculate Y
     blockY = uniformUINT(0, blockY);
 
-    block = chunk->blocks[blockY + ((blockZ << 7) + (blockX << 11))];
+    
+    block = chunk->blocks[blockX + (blockZ << 4) + (blockY << 8)];
 
     // No ore in caves
     if (block == BLOCK_AIR)
@@ -653,9 +649,9 @@ void BiomeGen::AddDeposit(int x, int y, int z, int map, uint8_t block, int minDe
 
   for (int i = 0; i < depoSize; i++)
   {
-    if (chunk->blocks[y + ((z << 7) + (x << 11))] == BLOCK_STONE)
+    if (chunk->blocks[x + (z << 4) + (y << 8)] == BLOCK_STONE)
     {
-      chunk->blocks[y + ((z << 7) + (x << 11))] = block;
+      chunk->blocks[x + (z << 4) + (y << 8)] = block;
     }
 
     z = z + int(uniform_0_1()) - 1;
