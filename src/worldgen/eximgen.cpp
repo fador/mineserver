@@ -169,7 +169,7 @@ void EximGen::generateChunk(int x, int z, int map)
   std::vector<uint8_t> *t_data = (*val)["Data"]->GetByteArray();
   std::vector<uint8_t> *t_blocklight = (*val)["BlockLight"]->GetByteArray();
   std::vector<uint8_t> *t_skylight = (*val)["SkyLight"]->GetByteArray();
-  std::vector<uint8_t> *heightmap = (*val)["HeightMap"]->GetByteArray();
+  std::vector<int32_t> *heightmap = (*val)["HeightMap"]->GetIntArray();
 
   sChunk* chunk = new sChunk();
   chunk->blocks = &((*t_blocks)[0]);

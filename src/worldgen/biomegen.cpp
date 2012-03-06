@@ -182,7 +182,7 @@ void BiomeGen::generateChunk(int x, int z, int map)
   chunk->data = new uint8_t[16 * 16 * 256 / 2];
   chunk->blocklight = new uint8_t[16 * 16 * 256 / 2];
   chunk->skylight = new uint8_t[16 * 16 * 256 / 2];
-  chunk->heightmap = &((*(*val)["HeightMap"]->GetByteArray())[0]);
+  chunk->heightmap = &((*(*val)["HeightMap"]->GetIntArray())[0]);
   heightmap_pointer = chunk->heightmap;
   chunk->nbt = main;
   chunk->x = x;

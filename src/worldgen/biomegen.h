@@ -43,9 +43,9 @@ private:
   std::vector<uint8_t> blockdata;
   std::vector<uint8_t> skylight;
   std::vector<uint8_t> blocklight;
-  std::vector<uint8_t> heightmap;
+  std::vector<int32_t> heightmap;
 
-  uint8_t* heightmap_pointer;
+  int32_t* heightmap_pointer;
 
   int seaLevel;
 

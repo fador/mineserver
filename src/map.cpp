@@ -435,7 +435,7 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
   uint8_t* blocks     = chunk->blocks;
   uint8_t* skylight   = chunk->skylight;
   uint8_t* blocklight = chunk->blocklight;
-  uint8_t* heightmap  = chunk->heightmap;
+  int32_t* heightmap  = chunk->heightmap;
 
   int highest_y = 0;
 
@@ -1148,6 +1148,7 @@ sChunk* Map::loadMap(int x, int z, bool generate)
   //Load NBT from memory
   chunk->nbt = NBT_Value::LoadFromMemory(chunkPointer, chunkLen);
 
+
   delete [] chunkPointer;
 
 
@@ -1200,7 +1201,7 @@ sChunk* Map::loadMap(int x, int z, bool generate)
   chunk->data       = new uint8_t[halfLen];
   chunk->blocklight = new uint8_t[halfLen];
   chunk->skylight   = new uint8_t[halfLen];
-  chunk->heightmap  = nbt_heightmap->GetByteArray()->data();
+  chunk->heightmap  = nbt_heightmap->GetIntArray()->data();
   chunk->chunks_present = 0;
   chunk->addblocks_present = 0;
 

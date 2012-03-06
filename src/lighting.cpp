@@ -39,7 +39,7 @@ bool Lighting::generateLight(int x, int z, sChunk* chunk)
   uint8_t* blocks     = chunk->blocks;
   uint8_t* skylight   = chunk->skylight;
   uint8_t* blocklight = chunk->blocklight;
-  uint8_t* heightmap  = chunk->heightmap;
+  int32_t* heightmap  = chunk->heightmap;
 
   uint64_t* blocks64 = (uint64_t*)blocks;
   uint32_t* skylight32 = (uint32_t*)skylight;

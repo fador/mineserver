@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2011, The Mineserver Project
+  Copyright (c) 2012, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -96,6 +96,11 @@ NBT_Value::NBT_Value(int32_t* buf, int32_t len) : m_type(TAG_INT_ARRAY)
 NBT_Value::NBT_Value(std::vector<uint8_t> const& bytes) : m_type(TAG_BYTE_ARRAY)
 {
   m_value.byteArrayVal = new std::vector<uint8_t>(bytes);
+}
+
+NBT_Value::NBT_Value(std::vector<int32_t> const& bytes) : m_type(TAG_INT_ARRAY)
+{
+  m_value.intArrayVal = new std::vector<int32_t>(bytes);
 }
 
 NBT_Value::NBT_Value(const std::string& str) : m_type(TAG_STRING)

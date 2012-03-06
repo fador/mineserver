@@ -175,8 +175,10 @@ struct sChunk
   uint8_t* blocklight;
   //skylight data (4bits/block)
   uint8_t* skylight;
-
-  uint8_t* heightmap;
+  //16x16 heightmap
+  int32_t* heightmap;  
+  //16x16 biome array
+  uint8_t* biome;
 
   //Chunk coordinates
   int32_t x;

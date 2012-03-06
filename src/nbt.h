@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
+   Copyright (c) 2012, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,7 @@ public:
   NBT_Value(int32_t* buf, int32_t len);
   NBT_Value(uint8_t* buf, int32_t len);
   NBT_Value(std::vector<uint8_t> const& bytes);
+  NBT_Value(std::vector<int32_t> const& bytes);
   NBT_Value(const std::string& str);
 
   NBT_Value(eTAG_Type type, uint8_t** buf, int& remaining);
