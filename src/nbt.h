@@ -91,7 +91,7 @@ public:
   NBT_Value& operator =(float val);
   NBT_Value& operator =(double val);
 
-  std::vector<int32_t> *NBT_Value::GetIntArray();
+  std::vector<int32_t>* GetIntArray();
   std::vector<uint8_t>* GetByteArray();
   std::string* GetString();
   eTAG_Type GetListType();
