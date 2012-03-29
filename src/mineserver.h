@@ -205,6 +205,7 @@ public:
 
   void saveAllPlayers();
   void saveAll();
+  size_t getLoggedUsersCount();
 
   bool configDirectoryPrepare(const std::string& path);
 

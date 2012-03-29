@@ -35,6 +35,7 @@
 #endif
 
 #include <cmath>
+#include <sstream>
 
 #include "chat.h"
 #include "config.h"
@@ -1344,7 +1345,13 @@ int PacketHandler::ping(User* user)
 {
   //Reply with server info
   user->buffer.removePacket();
-  user->kick("Blabla, Mineserver "+VERSION+"§");
+
+  std::ostringstream line;
+  line << Mineserver::get()->config()->sData("system.server_name") << "§"
+       << Mineserver::get()->getLoggedUsersCount() << "§"
+       << Mineserver::get()->config()->iData("system.user_limit");
+  user->kick(line.str());
+
   return PACKET_OK;
 }
 
