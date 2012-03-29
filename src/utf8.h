@@ -72,14 +72,14 @@ inline unsigned int getOneCodepointFromUTF8(const std::string& str, size_t & pos
   unsigned char data[7];
   data[0] = str[position++];
 
-  if ((data[0] & 0x80) == 0)
+  if ((data[0] & 0x80) == 0) // first byte: 0xxxxxxx
   {
     // 1 code unit
 
     return data[0];
   }
 
-  else if ((data[0] & 0xC0) == 0xC0)
+  else if ((data[0] & 0xE0) == 0xC0) // first byte: 110xxxxx
   {
     // 2 code units
 
@@ -87,7 +87,7 @@ inline unsigned int getOneCodepointFromUTF8(const std::string& str, size_t & pos
 
     data[1] = str[position++];
 
-    if ((data[1] & 0xF0) != 0xF0)
+    if ((data[1] & 0xC0) != 0x80) // second byte: 10xxxxxx
     {
       position = str.length();
       return -1;
@@ -96,7 +96,7 @@ inline unsigned int getOneCodepointFromUTF8(const std::string& str, size_t & pos
     return ((data[0] & 0x1F) << 6) | (data[1] & 0x3F);
   }
 
-  else if ((data[0] & 0xE0) == 0xE0)
+  else if ((data[0] & 0xF0) == 0xE0) // first byte: 1110xxxx
   {
     // 3 code units
 
@@ -105,16 +105,15 @@ inline unsigned int getOneCodepointFromUTF8(const std::string& str, size_t & pos
     data[1] = str[position++];
     data[2] = str[position++];
 
-    if ((data[1] & 0xF0) != 0xF0 || (data[2] & 0xF0) != 0xF0)
+    if ((data[1] & 0xC0) != 0x80 || (data[2] & 0xC0) != 0x80) // second and third byte: 10xxxxxx
     {
       position = str.length();
       return -1;
     }
-
     return ((data[0] & 0x0F) << 12) | ((data[1] & 0x3F) << 6) | (data[2] & 0x3F);
   }
 
-  else if ((data[0] & 0xF0) == 0xF0)
+  else if ((data[0] & 0xF8) == 0xF0) // first byte: 11110xxx
   {
     // 4 code units
 
@@ -124,7 +123,7 @@ inline unsigned int getOneCodepointFromUTF8(const std::string& str, size_t & pos
     data[2] = str[position++];
     data[3] = str[position++];
 
-    if ((data[1] & 0xF0) != 0xF0 || (data[2] & 0xF0) != 0xF0 || (data[3] & 0xF0) != 0xF0)
+    if ((data[1] & 0xC0) != 0x80 || (data[2] & 0xC0) != 0x80 || (data[3] & 0xC0) != 0x80) // following bytes: 10xxxxxx
     {
       position = str.length();
       return -1;
@@ -133,7 +132,7 @@ inline unsigned int getOneCodepointFromUTF8(const std::string& str, size_t & pos
     return ((data[0] & 0x07) << 18) | ((data[1] & 0x3F) << 12) | ((data[2] & 0x3F) << 6) | (data[3] & 0x3F);
   }
 
-  else if ((data[0] & 0xF8) == 0xF8)
+  else if ((data[0] & 0xFC) == 0xF8) // first byte: 111110xx
   {
     // 5 code units
 
@@ -144,7 +143,7 @@ inline unsigned int getOneCodepointFromUTF8(const std::string& str, size_t & pos
     data[3] = str[position++];
     data[4] = str[position++];
 
-    if ((data[1] & 0xF0) != 0xF0 || (data[2] & 0xF0) != 0xF0 || (data[3] & 0xF0) != 0xF0 || (data[4] & 0xF0) != 0xF0)
+    if ((data[1] & 0xC0) != 0x80 || (data[2] & 0xC0) != 0x80 || (data[3] & 0xC0) != 0x80 || (data[4] & 0xC0) != 0x80) // following bytes: 10xxxxxx
     {
       position = str.length();
       return -1;
@@ -153,7 +152,7 @@ inline unsigned int getOneCodepointFromUTF8(const std::string& str, size_t & pos
     return ((data[0] & 0x03) << 24) | ((data[1] & 0x3F) << 18) | ((data[2] & 0x3F) << 12) | ((data[3] & 0x3F) << 6) | (data[4] & 0x3F);
   }
 
-  else if ((data[0] & 0xFC) == 0xFC)
+  else if ((data[0] & 0xFE) == 0xFC)
   {
     // 6 code units
 
@@ -165,7 +164,7 @@ inline unsigned int getOneCodepointFromUTF8(const std::string& str, size_t & pos
     data[4] = str[position++];
     data[5] = str[position++];
 
-    if ((data[1] & 0xF0) != 0xF0 || (data[2] & 0xF0) != 0xF0 || (data[3] & 0xF0) != 0xF0 || (data[4] & 0xF0) != 0xF0 || (data[5] & 0xF0) != 0xF0)
+    if ((data[1] & 0xC0) != 0x80 || (data[2] & 0xC0) != 0x80 || (data[3] & 0xC0) != 0x80 || (data[4] & 0xC0) != 0x80 || (data[5] & 0xC0) != 0x80) // following bytes: 10xxxxxx
     {
       position = str.length();
       return -1;
