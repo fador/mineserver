@@ -499,6 +499,16 @@ void Mineserver::saveAllPlayers()
   }
 }
 
+size_t Mineserver::getLoggedUsersCount()
+{
+  size_t count = 0;
+  for(std::set<User*>::const_iterator it = users().begin(); it != users().end(); ++it) {
+    if((*it)->logged) count++;
+  }
+  return count;
+}
+
+
 bool Mineserver::run()
 {
   uint32_t starttime = (uint32_t)time(0);
