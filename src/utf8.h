@@ -79,7 +79,7 @@ inline unsigned int getOneCodepointFromUTF8(const std::string& str, size_t & pos
     return data[0];
   }
 
-  else if ((data[0] & 0xE0) == 0xC0) // first byte: 110xxxxxx
+  else if ((data[0] & 0xE0) == 0xC0) // first byte: 110xxxxx
   {
     // 2 code units
 
@@ -110,7 +110,6 @@ inline unsigned int getOneCodepointFromUTF8(const std::string& str, size_t & pos
       position = str.length();
       return -1;
     }
-
     return ((data[0] & 0x0F) << 12) | ((data[1] & 0x3F) << 6) | (data[2] & 0x3F);
   }
 
