@@ -1,30 +1,22 @@
-# NOTICE
-
-Please see https://github.com/Mineserver/mineserver2 - all new
-development will take place there. Thank you!
-*NOTE:* MS1 is still more functional than MS2. Current MS1 should work with latest Minecraft client.
-Submit bugs to GitHub Issues.
-
 # Mineserver
 *by Fador & Nredor and others*
 
 You can find the core team from #mineserver @ irc.freenode.net
 Also mail to developers@mineserver.be will reach us.
 
-    Copyright (c) 2010-2011, The Mineserver Project
+    Copyright (c) 2010-2012, The Mineserver Project
 
 Custom Minecraft server software written in C++.
 
 ### NOTICE
-Currently in development.
-Server still lacks some features and might have some serious bugs.
+Server still lacks features compared to original minecraft server.
 
-**Tested to build on**
+**Supported platforms**
 
- * Windows (VS2010 and VS2008 projects included)
+ * Windows (VS2010 project included)
  * Linux
- * (Mac OS X)
- * (FreeBSD / PCBSD)
+ 
+Server has also been tested to build on Mac OS X and FreeBSD/PCBSD but we do not officially support those.
 
 We are trying to minimize memory and CPU usage compared to original Java server.
 
@@ -42,6 +34,9 @@ C++ compiler. MS Visual C++ 10 and GCC 4.4 should be sufficient. The build syste
  * Physics for water (currently revising this)
  * Flatland and terrain map generation (Also biomegen!)
  * Working chests, furnaces & signs
+
+### Current bugs
+ * Lightning bug that causes clients massive CPU usage
 
 ### Configuration Notes
 
