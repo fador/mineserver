@@ -2,6 +2,8 @@
 
 Please see https://github.com/Mineserver/mineserver2 - all new
 development will take place there. Thank you!
+*NOTE:* MS1 is still more functional than MS2. Current MS1 should work with latest Minecraft client.
+Submit bugs to GitHub Issues.
 
 # Mineserver
 *by Fador & Nredor and others*
@@ -11,7 +13,7 @@ Also mail to developers@mineserver.be will reach us.
 
     Copyright (c) 2010-2011, The Mineserver Project
 
-Custom Minecraft Beta server software written in C++.
+Custom Minecraft server software written in C++.
 
 ### NOTICE
 Currently in development.
@@ -21,8 +23,8 @@ Server still lacks some features and might have some serious bugs.
 
  * Windows (VS2010 and VS2008 projects included)
  * Linux
- * Mac OS X
- * FreeBSD / PCBSD
+ * (Mac OS X)
+ * (FreeBSD / PCBSD)
 
 We are trying to minimize memory and CPU usage compared to original Java server.
 
