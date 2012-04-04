@@ -1534,7 +1534,7 @@ Packet& Packet::operator>>(std::string& str)
 
     if (lenval && haveData(2 * lenval)) // We ASSUME that every character takes 2 bytes. DANGEROUS.
     {
-      char buf[2];
+      unsigned char buf[2];
       t_codepoint ccp;
 
       for (size_t i = 0;  i < lenval; ++i)
