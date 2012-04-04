@@ -38,6 +38,7 @@ Mob::Mob()
   z(0),
   map(0),
   yaw(0),
+  head_yaw(0), // TODO: actually use head_yaw
   pitch(0),
   spawned(false),
   respawnable(false),
