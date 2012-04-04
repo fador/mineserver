@@ -1,5 +1,6 @@
 # Mineserver
 Custom Minecraft server software written in C++.
+
 *by Fador & Nredor and others*
 
 You can find the core team from #mineserver @ irc.freenode.net
