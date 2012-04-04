@@ -54,7 +54,7 @@ public:
   int8_t type;
   double x, y, z;
   size_t map;
-  int8_t yaw, pitch;
+  int8_t yaw, pitch, head_yaw;
   MetaData metadata;
   bool spawned;
   bool respawnable;
