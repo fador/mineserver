@@ -372,7 +372,7 @@ bool Mineserver::init()
 
 
   LOG2(INFO, "Welcome to Mineserver v" + VERSION);
-  LOG2(INFO, "    Using zlib "+std::string(ZLIB_VERSION)+" libevent "+std::string(event_get_version()));
+  LOG2(INFO, "Using zlib "+std::string(ZLIB_VERSION)+" libevent "+std::string(event_get_version()));
 
   MapGen* mapgen = new MapGen;
   MapGen* nethergen = new NetherGen;

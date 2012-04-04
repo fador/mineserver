@@ -1,4 +1,5 @@
 # Mineserver
+Custom Minecraft server software written in C++.
 *by Fador & Nredor and others*
 
 You can find the core team from #mineserver @ irc.freenode.net
@@ -6,15 +7,13 @@ Also mail to developers@mineserver.be will reach us.
 
     Copyright (c) 2010-2012, The Mineserver Project
 
-Custom Minecraft server software written in C++.
-
 ### NOTICE
 Server still lacks features compared to original minecraft server.
 
 **Supported platforms**
 
- * Windows (VS2010 project included)
  * Linux
+ * Windows (VS2010 project included)
  
 Server has also been tested to build on Mac OS X and FreeBSD/PCBSD but we do not officially support those.
 
@@ -38,7 +37,7 @@ C++ compiler. MS Visual C++ 10 and GCC 4.4 should be sufficient. The build syste
 ### Current bugs
  * Lightning bug that causes clients massive CPU usage
 
-### Configuration Notes
+### Configuration Notes (Deprecated)
 
 All runtime configuration of mineserver begins with the *config file*. This file is searched for in the following order:
 
@@ -70,14 +69,14 @@ appropriate location for the server to find them.
 
 ### Bug tracker
 
-Here is the [bug tracker](http://redmine.fknsrs.biz/projects/mineserver).
+Use the GitHub Issues list.
 
 ### To Do / Roadmap
 
 Please check the [Mineserver wiki]((http://www.mineserver.be/wiki) for details about the project status and development plans.
 Check the [fork network](https://github.com/fador/mineserver/network) for the latest development status.
 
-### Compiling (Better instructions in [wiki](http://www.mineserver.be/wiki))
+### Compiling
 
 Mineserver requires the following libraries:
 
@@ -114,7 +113,7 @@ Mineserver requires the following libraries:
  * Download and extract source or use `git clone git://github.com/fador/mineserver.git`
  * Go to mineserver directory
  * Run `cmake .`
- * Run `make all install`
+ * Run `make all`  (`make install` does not currently work)
  * Run server with `cd bin && ./mineserver`
 
 **Compiling using FreeBSD / PCBSD (cmake & gmake & g++):**
