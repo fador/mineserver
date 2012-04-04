@@ -237,9 +237,10 @@ FOREACH(path ${mineserver_configs} ${mineserver_recipes})
 ENDFOREACH()
 
 # In the Debug build, we provide a local config file.
-IF(CMAKE_BUILD_TYPE MATCHES Debug)
+#IF(CMAKE_BUILD_TYPE MATCHES Debug)
     CONFIGURE_FILE(files/config.cfg "${EXECUTABLE_OUTPUT_PATH}/config.cfg" COPYONLY)
-ENDIF()
+    CONFIGURE_FILE(files/item_alias.cfg "${EXECUTABLE_OUTPUT_PATH}/item_alias.cfg" COPYONLY)
+#ENDIF()
 
 
 
