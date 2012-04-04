@@ -66,19 +66,19 @@ class Protocol
       return ret;
     }
 
-    static Packet mobSpawn(int eid, int8_t type, double x, double y, double z, int yaw, int pitch, MetaData& metadata)
+    static Packet mobSpawn(int eid, int8_t type, double x, double y, double z, int yaw, int pitch, int head_yaw, MetaData& metadata)
     {
       // Warning! This converts absolute double coordinates to absolute integer coordinates!
       Packet ret;
       ret << (int8_t)PACKET_MOB_SPAWN << (int32_t)eid << (int8_t)type
           << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32)
-          << (int8_t)yaw << (int8_t)pitch << metadata;
+          << (int8_t)yaw << (int8_t)pitch << (int8_t)head_yaw << metadata;
       return ret;
     }
 
     static Packet mobSpawn(Mob& mob)
     {
-      return Protocol::mobSpawn(mob.UID, mob.type, mob.x, mob.y, mob.z, mob.yaw, mob.pitch, mob.metadata);
+      return Protocol::mobSpawn(mob.UID, mob.type, mob.x, mob.y, mob.z, mob.yaw, mob.pitch, mob.head_yaw, mob.metadata);
     }
 
     static Packet destroyEntity(int eid)
