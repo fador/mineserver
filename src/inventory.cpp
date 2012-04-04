@@ -971,9 +971,9 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
       user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)type << (int8_t)INVENTORYTYPE_CHEST;
       if(_chestData->large())
       {
-        user->buffer.writeString(std::string("Large chest"));
+        user->buffer << std::string("Large chest");
       } else {
-        user->buffer.writeString(std::string("Chest"));
+        user->buffer << std::string("Chest");
       }
       user->buffer << (int8_t)(_chestData->size()); // size.. not a very good idea. lets just hope this will only return 27 or 54
 
@@ -990,8 +990,7 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
 
   case WINDOW_WORKBENCH:
     user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)WINDOW_WORKBENCH  << (int8_t)INVENTORYTYPE_WORKBENCH;
-    user->buffer.writeString(std::string("Workbench"));
-    user->buffer  << (int8_t)0;
+    user->buffer << std::string("Workbench") << (int8_t)0;
 
     for (uint32_t i = 0; i < openWorkbenches.size(); i++)
     {
@@ -1014,8 +1013,7 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
   case WINDOW_FURNACE:
 
     user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)WINDOW_FURNACE  << (int8_t)INVENTORYTYPE_FURNACE;
-	user->buffer.writeString(std::string("Furnace"));
-	user->buffer << (int8_t)0;
+	user->buffer << std::string("Furnace") << (int8_t)0;
 
     for (uint32_t i = 0; i < chunk->furnaces.size(); i++)
     {
