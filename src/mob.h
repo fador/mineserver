@@ -74,6 +74,7 @@ public:
 
   void moveTo(double to_x, double to_y, double to_z, int to_map = -1);
   void look(int16_t yaw, int16_t pitch);
+  void headLook(int16_t head_yaw);
 };
 
 typedef std::tr1::shared_ptr<Mob> MobPtr;
