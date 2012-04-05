@@ -532,7 +532,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
     }
   }
 
-  Item* slotItem;
+  Item* slotItem = NULL;
   furnaceDataPtr tempFurnace;
 
   switch (windowID)

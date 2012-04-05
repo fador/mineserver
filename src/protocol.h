@@ -125,13 +125,20 @@ class Protocol
       return ret;
     }
 
+    static Packet entityHeadLook(int eid, int head_yaw)
+    {
+      Packet ret;
+      ret << (int8_t)PACKET_ENTITY_HEAD_LOOK << eid << (int8_t)head_yaw;
+      return ret;
+    }
+
     static Packet entityLook(int eid, int yaw, int pitch)
     {
       Packet ret;
       ret << (int8_t)PACKET_ENTITY_LOOK << (int32_t)eid << (int8_t)yaw << (int8_t)pitch;
       return ret;
     }
-    
+
     static Packet entityLook(int eid, double yaw, double pitch)
     {
       return entityLook(eid, angleToByte(yaw), angleToByte(pitch));

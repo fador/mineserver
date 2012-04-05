@@ -838,7 +838,7 @@ int mob_getType(size_t uid)
   return m->type;
 }
 
-bool mob_getLook(int uid, double* rot, double* pitch)
+bool mob_getLook(int uid, double* rot, double* pitch, double* head_yaw)
 {
   MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
   if (m != NULL)
@@ -851,17 +851,22 @@ bool mob_getLook(int uid, double* rot, double* pitch)
     {
       *pitch = (double)((m->pitch * 1.0) * 360.0 / 256.0);
     }
+    if (head_yaw != NULL)
+    {
+      *head_yaw = (double)((m->head_yaw * 1.0) * 360.0 / 256.0);
+    }
     return true;
   }
   return false;
 }
 
-bool mob_setLook(int uid, double rot, double pitch)
+bool mob_setLook(int uid, double rot, double pitch, double head_yaw)
 {
   MobPtr m = Mineserver::get()->mobs()->getMobByID(uid);
   if (m != NULL)
   {
     m->look((int16_t)rot, (int16_t)pitch);
+    m->headLook((int16_t)head_yaw);
     return true;
   }
   return false;

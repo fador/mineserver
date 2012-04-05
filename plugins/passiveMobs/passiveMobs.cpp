@@ -43,6 +43,7 @@
 
 #define MINESERVER_C_API
 #include "../../src/plugin_api.h"
+#include "../../src/tools.h"
 
 #include "passiveMobs.h"
 
@@ -209,8 +210,9 @@ void timer200Function()
   {
     double x,y,z;
     int w;
-    mineserver->mob.getMobPositionW(MyMobs[i]->ID,&x,&y,&z,&w);
-
+    // get position and world
+    mineserver->mob.getMobPositionW(MyMobs[i]->ID, &x, &y, &z, &w);
+    // kill dead mobs
     if(mineserver->mob.getHealth(MyMobs[i]->ID) == 0)
     {
       if (MyMobs[i]->deSpawn < 12)
@@ -229,7 +231,9 @@ void timer200Function()
     {
       MyMobs[i]->deSpawn=0;
     }
+    // get the nearest user
     int nearest = 10000;
+    double nearest_x = .0, nearest_y = .0, nearest_z = .0;
     for (int j = 0; j < mineserver->user.getCount(); j++)
     {
       const char * const name = mineserver->user.getUserNumbered(j);
@@ -239,45 +243,57 @@ void timer200Function()
 
       if (w != pmap) { continue; }
       int distance = abs(int(px-x)) + abs(int(py-y)) + abs(int(pz-z));
-      if(distance < nearest) { nearest = distance; }
+      if(distance < nearest) {
+        nearest = distance;
+        nearest_x = px;
+        nearest_y = py;
+        nearest_z = pz;
+      }
     }
     if(nearest < 0 || nearest > 200)
     {
+      // if there is no user here, despawn the mob
       mineserver->mob.despawnMob(MyMobs[i]->ID);
       MyMobs.erase(MyMobs.begin()+i);
       continue;
     }
-    int action = rand()%100;
-    double yaw, pitch;
+    // do something, my little mob
+    int action = rand() % 150;
+    double yaw, pitch, head_yaw;
     float forward = 0;
-    mineserver->mob.getLook(MyMobs[i]->ID, &yaw, &pitch);
+    mineserver->mob.getLook(MyMobs[i]->ID, &yaw, &pitch, &head_yaw);
     if (action < 5)
     {
       yaw += 30;
     }
-    else if (action <10)
+    else if (action < 10)
     {
       yaw += 15;
-      while (yaw >= 360){ yaw-=360; }
       forward = 0.3;
     }
-    else if (action <15)
+    else if (action < 15)
     {
       yaw -= 30;
     }
-    else if (action <20)
+    else if (action < 20)
     {
       yaw -= 15;
-      while(yaw <= 0) { yaw += 360; }
       forward = 0.3;
     }
     else if (action < 30)
     {
-      forward =+ 0.6;
+      forward = 0.6;
+    }
+    else if (action < 40)
+    {
+      // for now, just look around stupidly
+      head_yaw += rand() % 40;
     }
     else if (action < 50)
     {
-      forward =- 0.6;;
+      forward = -0.6;
+      // turn around!
+      yaw -= 180;
     }
     MyMobs[i]->velocity += forward;
     if (MyMobs[i]->velocity > 2.0){ MyMobs[i]->velocity = 2.0; }
@@ -286,6 +302,12 @@ void timer200Function()
 
     if (yaw <= 0) { yaw += 360; }
     if (yaw >= 360) { yaw -= 360; }
+
+    // TODO: make it look at the player if he's near enough.
+    // (nearest_x, nearest_y, nearest_z).
+/*    if(nearest_z != z) {
+      head_yaw = RADIANS_TO_DEGREES(tan((nearest_x - x) / (nearest_z - z)));
+    }*/
 
     if (forward>0.1 && rand()%6 == 3)
     {
@@ -300,7 +322,7 @@ void timer200Function()
       }
       fallMob(&x,&y,&z,w); // Even if they dont move, make them fall
     }
-    mineserver->mob.setLook(MyMobs[i]->ID, yaw, pitch);
+    mineserver->mob.setLook(MyMobs[i]->ID, yaw, pitch, head_yaw);
 
   }
 }

@@ -39,6 +39,12 @@
 #include <arpa/inet.h>
 #endif
 
+#ifdef WIN32
+#define M_PI 3.141592653589793238462643
+#endif
+#define DEGREES_TO_RADIANS(x) ((x) / 180.0 * M_PI)
+#define RADIANS_TO_DEGREES(x) ((x) / M_PI * 180.0)
+
 void putSint64(uint8_t* buf, int64_t value);
 void putSint32(uint8_t* buf, int32_t value);
 void putSint16(uint8_t* buf, short value);
