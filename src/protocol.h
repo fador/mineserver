@@ -73,15 +73,15 @@ class Protocol
       Packet ret;
       ret << id;
       if(id != -1) {
-	ret << count << damage;
-	if(Item::isEnchantable(id)) {
-	  if(data != NULL) {
-	    ret << data_size;
-	    ret.addToWrite(data, data_size);
-	  } else {
-	    ret << (int16_t)-1;
-	  }
-	}
+        ret << count << damage;
+        if(Item::isEnchantable(id)) {
+          if(data != NULL) {
+            ret << data_size;
+            ret.addToWrite(data, data_size);
+          } else {
+            ret << (int16_t)-1;
+          }
+        }
       }
       return ret;
     }
