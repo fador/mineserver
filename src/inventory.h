@@ -43,6 +43,17 @@ public:
   void setCount(int8_t count);
   void setHealth(int16_t healt);
 
+  static bool isEnchantable(int16_t type)
+  {
+    return (256 <= type && type <= 259) ||
+	   (267 <= type && type <= 279) ||
+	   (283 <= type && type <= 286) ||
+	   (290 <= type && type <= 294) ||
+	   (298 <= type && type <= 317) ||
+	     type == 261 || type == 359 ||
+	     type == 346;
+  }
+
   inline int16_t getType()   const { return type;   }
   inline int8_t  getCount()  const { return count;  }
   inline int16_t getHealth() const { return health; }
