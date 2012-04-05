@@ -33,6 +33,7 @@
 #include "map.h"
 #include "tools.h"
 #include "config.h"
+#include "protocol.h"
 
 Creation createList[2258];
 bool configIsRead = false;
@@ -286,8 +287,9 @@ void Furnace::sendToAllUsers()
         {
           if (m_data->items[j].getType() != -1)
           {
-            inv[openinv]->users[user]->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_FURNACE << (int16_t)j << (int16_t)m_data->items[j].getType()
-                                                 << (int8_t)(m_data->items[j].getCount()) << (int16_t)m_data->items[j].getHealth();
+            Item& item = m_data->items[j];
+            inv[openinv]->users[user]->buffer << Protocol::setSlotHeader(WINDOW_FURNACE, j)
+                                              << Protocol::slot(item.getType(), item.getCount(), item.getHealth());
           }
         }
 
