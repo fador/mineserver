@@ -31,6 +31,7 @@
 #include <stdlib.h>
 
 #include "inventory.h"
+#include "protocol.h"
 #include "constants.h"
 #include "map.h"
 #include "user.h"
@@ -65,12 +66,8 @@ void Item::sendUpdate()
       window = -1;
       t_slot = 0;
     }
-    player->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)window
-                   << (int16_t)t_slot << (int16_t) type;
-    if (type != -1)
-    {
-      player->buffer << (int8_t)count << (int16_t)health;
-    }
+    player->buffer << Protocol::setSlotHeader(window, t_slot)
+                   << Protocol::slot(type, count, health);
   }
   // Cases where we're changing items in chests, furnaces etc?
 }
@@ -842,7 +839,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   {
   }
   else*/
-	setSlot(user, WINDOW_CURSOR, 0, user->inventoryHolding.getType(), user->inventoryHolding.getCount(), user->inventoryHolding.getHealth());
+  setSlot(user, WINDOW_CURSOR, 0, user->inventoryHolding.getType(), user->inventoryHolding.getCount(), user->inventoryHolding.getHealth());
 
 
   //Check if crafting
@@ -971,9 +968,9 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
       user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)type << (int8_t)INVENTORYTYPE_CHEST;
       if(_chestData->large())
       {
-        user->buffer.writeString(std::string("Large chest"));
+        user->buffer << std::string("Large chest");
       } else {
-        user->buffer.writeString(std::string("Chest"));
+        user->buffer << std::string("Chest");
       }
       user->buffer << (int8_t)(_chestData->size()); // size.. not a very good idea. lets just hope this will only return 27 or 54
 
@@ -981,8 +978,10 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
       {
         if ((*_chestData->items())[j]->getType() != -1)
         {
-          user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)type << (int16_t)j << (int16_t)(*_chestData->items())[j]->getType()
-                       << (int8_t)((*_chestData->items())[j]->getCount()) << (int16_t)(*_chestData->items())[j]->getHealth();
+          Packet packet = Protocol::setSlotHeader(type, j);
+          ItemPtr item = (*_chestData->items())[j];
+          packet << Protocol::slot(item->getType(), item->getCount(), item->getHealth());
+          user->buffer << packet;
         }
       }
     }
@@ -990,8 +989,7 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
 
   case WINDOW_WORKBENCH:
     user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)WINDOW_WORKBENCH  << (int8_t)INVENTORYTYPE_WORKBENCH;
-    user->buffer.writeString(std::string("Workbench"));
-    user->buffer  << (int8_t)0;
+    user->buffer << std::string("Workbench") << (int8_t)0;
 
     for (uint32_t i = 0; i < openWorkbenches.size(); i++)
     {
@@ -1003,8 +1001,11 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
         {
           if (openWorkbenches[i]->workbench[j].getType() != -1)
           {
-            user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_WORKBENCH << (int16_t)j << (int16_t)openWorkbenches[i]->workbench[j].getType()
-                         << (int8_t)(openWorkbenches[i]->workbench[j].getCount()) << (int16_t)openWorkbenches[i]->workbench[j].getHealth();
+            Packet packet = Protocol::setSlotHeader(WINDOW_WORKBENCH, j);
+            packet << Protocol::slot(openWorkbenches[i]->workbench[j].getType(),
+            openWorkbenches[i]->workbench[j].getCount(),
+            openWorkbenches[i]->workbench[j].getHealth());
+            user->buffer << packet;
           }
         }
         break;
@@ -1014,8 +1015,7 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
   case WINDOW_FURNACE:
 
     user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)WINDOW_FURNACE  << (int8_t)INVENTORYTYPE_FURNACE;
-	user->buffer.writeString(std::string("Furnace"));
-	user->buffer << (int8_t)0;
+    user->buffer << std::string("Furnace") << (int8_t)0;
 
     for (uint32_t i = 0; i < chunk->furnaces.size(); i++)
     {
@@ -1025,8 +1025,9 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
         {
           if (chunk->furnaces[i]->items[j].getType() != -1)
           {
-            user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)WINDOW_FURNACE << (int16_t)j << (int16_t)chunk->furnaces[i]->items[j].getType()
-                         << (int8_t)(chunk->furnaces[i]->items[j].getCount()) << (int16_t)chunk->furnaces[i]->items[j].getHealth();
+            Packet packet = Protocol::setSlotHeader(WINDOW_FURNACE, j);
+            Item& item = chunk->furnaces[i]->items[j];
+            packet << Protocol::slot(item.getType(), item.getCount(), item.getHealth());
           }
         }
         user->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)0 << (int16_t)(chunk->furnaces[i]->cookTime * 18);
@@ -1345,12 +1346,7 @@ bool Inventory::doCraft(Item* slots, int8_t width, int8_t height)
 bool Inventory::setSlot(User* user, int8_t windowID, int16_t slot, int16_t itemID, int8_t count, int16_t health)
 {
   //Mineserver::get()->logger()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(itemID) + " (" + dtos(count) + ") health: " + dtos(health));
-  user->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)windowID << (int16_t)slot   << (int16_t)itemID;
-  if (itemID != -1)
-  {
-    user->buffer << (int8_t)count << (int16_t)health;
-  }
-
+  user->buffer << Protocol::setSlotHeader(windowID, slot) << Protocol::slot(itemID, count, health);
   return true;
 }
 
