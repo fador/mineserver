@@ -32,6 +32,7 @@
 #include "mob.h"
 #include "tools.h"
 #include "utf8.h"
+#include "inventory.h"
 #include "mineserver.h"
 
 /* This file introduces a basic abstraction over raw protocol packets format.
@@ -63,6 +64,33 @@ class Protocol
     {
       Packet ret;
       ret << (int8_t)PACKET_ENTITY_METADATA << (int32_t)eid << metadata;
+      return ret;
+    }
+
+    static Packet slot(int16_t id, int8_t count=0, int16_t damage=0, int16_t data_size=-1, const uint8_t *data=NULL)
+    {
+      // TODO: respect data!
+      Packet ret;
+      ret << id;
+      if(id != -1) {
+        ret << count << damage;
+        if(Item::isEnchantable(id)) {
+          if(data != NULL) {
+            ret << data_size;
+            ret.addToWrite(data, data_size);
+          } else {
+            ret << (int16_t)-1;
+          }
+        }
+      }
+      return ret;
+    }
+
+    static Packet setSlotHeader(int8_t window_id, int16_t slot) {
+      // `header` means: You need to place a `slot` packet after this one.
+      Packet ret;
+      ret << (int8_t)PACKET_SET_SLOT << window_id << slot;
+      // NOTE: never ever use operator<<(uint8_t) because there is no such function.
       return ret;
     }
 

@@ -233,6 +233,13 @@ int PacketHandler::inventory_change(User* user)
       return PACKET_NEED_MORE_DATA;
     }
     user->buffer >> itemCount >> itemUses;
+    if(Item::isEnchantable(itemID)) {
+      int16_t enchantment_data_len;
+      user->buffer >> enchantment_data_len;
+      if(enchantment_data_len >= 0) {
+        LOG2(INFO, "Got enchantment data, ignoring...");
+      }
+    }
   }
 
   Mineserver::get()->inventory()->windowClick(user, windowID, slot, rightClick, actionNumber, itemID, itemCount, itemUses, shift);
@@ -850,6 +857,13 @@ int PacketHandler::player_block_placement(User* user)
       return PACKET_NEED_MORE_DATA;
     }
     user->buffer >> count >> health;
+    if(Item::isEnchantable(newblock)) {
+      int16_t enchantment_data_len;
+      user->buffer >> enchantment_data_len;
+      if(enchantment_data_len >= 0) {
+        LOG2(INFO, "Got enchantment data, ignoring...");
+      }
+    }
   }
   user->buffer.removePacket();
 
