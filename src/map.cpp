@@ -74,9 +74,9 @@ Map::Map()
 
   stopLight[0x00] = 0; // Empty
   stopLight[0x06] = 0; // Sapling
-  stopLight[0x08] = 3; // Water
-  stopLight[0x09] = 3; // Stationary water
-  stopLight[0x12] = 3; // Leaves
+  stopLight[0x08] = 2; // Water
+  stopLight[0x09] = 2; // Stationary water
+  stopLight[0x12] = 2; // Leaves
   stopLight[0x14] = 0; // Glass
   stopLight[0x25] = 0; // Yellow flower
   stopLight[0x26] = 0; // Red rose
@@ -95,7 +95,7 @@ Map::Map()
   stopLight[0x4b] = 0; // Redstone Torch (Off)
   stopLight[0x4C] = 0; // Redstone Torch (On)
   stopLight[0x4e] = 0; // Snow
-  stopLight[0x4f] = 3; // Ice
+  stopLight[0x4f] = 2; // Ice
   stopLight[0x55] = 0; // Fence
   stopLight[0x5A] = 0; // Portal
   stopLight[0x5B] = 0; // Jack-O-Lantern
@@ -443,6 +443,12 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
   memset(skylight, 0, 16 * 16 * 256 / 2);
   memset(blocklight, 0, 16 * 16 * 256 / 2);
 
+  //Get neighboring chunks
+  sChunk* chunk_left   = getMapData(x-1, z, false);
+  sChunk* chunk_right  = getMapData(x+1, z, false);
+  sChunk* chunk_top    = getMapData(x, z+1, false);
+  sChunk* chunk_bottom = getMapData(x, z-1, false);
+
   // Sky light
   int light = 0;
   bool foundheight = false;
@@ -452,14 +458,41 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
     {
       light = 15;
       foundheight = false;
-      int32_t blockx_blockz = (block_z << 7) + (block_x << 11);
+      uint32_t blockx_blockz = block_x + (block_z << 4);
 
-      for (int block_y = 127; block_y > 0; block_y--)
+      for (int block_y = 255; block_y >= 0; block_y--)
       {
-        int index      = block_y + blockx_blockz;
+        int index      = blockx_blockz + (block_y << 8);
         int absolute_x = x * 16 + block_x;
         int absolute_z = z * 16 + block_z;
         uint8_t block    = blocks[index];
+
+        //Grab light from the neighbouring chunks if it's brighter there..
+        if(block_x == 0 && chunk_left != NULL)
+        {
+          uint8_t temp_blocklight, temp_skylight;
+          getLight(absolute_x-1, block_y, absolute_z, &temp_skylight, &temp_blocklight, chunk_left);          
+          if(temp_skylight-1 > light) light = temp_skylight-1;
+        }
+        else if(block_x == 15 && chunk_right != NULL)
+        {
+          uint8_t temp_blocklight, temp_skylight;
+          getLight(absolute_x+1, block_y, absolute_z, &temp_skylight, &temp_blocklight, chunk_right);
+          if(temp_skylight-1 > light) light = temp_skylight-1;
+        }
+
+        if(block_z == 0 && chunk_bottom != NULL)
+        {
+          uint8_t temp_blocklight, temp_skylight;
+          getLight(absolute_x, block_y, absolute_z-1, &temp_skylight, &temp_blocklight, chunk_bottom);
+          if(temp_skylight-1 > light) light = temp_skylight-1;
+        }
+        else if(block_z == 15 && chunk_top != NULL)
+        {
+          uint8_t temp_blocklight, temp_skylight;
+          getLight(absolute_x, block_y, absolute_z+1, &temp_skylight, &temp_blocklight, chunk_top);
+          if(temp_skylight-1 > light) light = temp_skylight-1;
+        }
 
         light -= stopLight[block];
         if (light < 0)
@@ -470,7 +503,7 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
         // Calculate heightmap while looping this
         if ((block != BLOCK_AIR) && (foundheight == false))
         {
-          heightmap[block_z + (block_x << 4)] = ((block_y == 127) ? block_y : block_y + 1);
+          heightmap[block_z + (block_x << 4)] = ((block_y == 255) ? block_y : block_y + 1);
           foundheight = true;
         }
 
@@ -490,22 +523,56 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
   }
 
   // Block light
-  for (int block_x = 0; block_x < 16; block_x++)
+  for (int block_y = highest_y; block_y >= 0; block_y--)
   {
     for (int block_z = 0; block_z < 16; block_z++)
-    {
-      int32_t blockx_blockz = (block_z << 7) + (block_x << 11);
-      for (int block_y = highest_y; block_y >= 0; block_y--)
+    {      
+      uint32_t blocky_blockz = (block_z << 4) + (block_y << 8);
+
+      for (int block_x = 0; block_x < 16; block_x++)
       {
-        int index      = block_y + blockx_blockz;
+        int index      = block_y + blocky_blockz;
         int absolute_x = x * 16 + block_x;
         int absolute_z = z * 16 + block_z;
         uint8_t block    = blocks[index];
+        int8_t light = 0;
+
+        if(block_x == 0 && chunk_left != NULL)
+        {
+          uint8_t temp_blocklight, temp_skylight;
+          getLight(absolute_x-1, block_y, absolute_z, &temp_skylight, &temp_blocklight, chunk_left);          
+          light = temp_blocklight-1;
+        }
+        else if(block_x == 15 && chunk_right != NULL)
+        {
+          uint8_t temp_blocklight, temp_skylight;
+          getLight(absolute_x+1, block_y, absolute_z, &temp_skylight, &temp_blocklight, chunk_right);
+          light = temp_blocklight-1;
+        }
+
+        if(block_z == 0 && chunk_bottom != NULL)
+        {
+          uint8_t temp_blocklight, temp_skylight;
+          getLight(absolute_x, block_y, absolute_z-1, &temp_skylight, &temp_blocklight, chunk_bottom);
+          light = temp_blocklight-1;
+        }
+        else if(block_z == 15 && chunk_top != NULL)
+        {
+          uint8_t temp_blocklight, temp_skylight;
+          getLight(absolute_x, block_y, absolute_z+1, &temp_skylight, &temp_blocklight, chunk_top);
+          light = temp_blocklight-1;
+        }
+        light -= stopLight[block];
+        if (light < 0)
+        {
+          light = 0;
+        }
 
         // If light emitting block
-        if (emitLight[block] > 0)
+        if (emitLight[block] > 0 || light > 0)
         {
-          setLight(absolute_x, block_y, absolute_z, 0, emitLight[block], 2, chunk);
+          if(emitLight[block] > light) light = emitLight[block];
+          setLight(absolute_x, block_y, absolute_z, 0, light, 2, chunk);
         }
       }
     }
@@ -1210,7 +1277,7 @@ sChunk* Map::loadMap(int x, int z, bool generate)
   memset(chunk->blocks,    0, fullLen);
   memset(chunk->addblocks, 0, halfLen);
   memset(chunk->data,      0, halfLen);
-  memset(chunk->blocklight,  0, halfLen);
+  memset(chunk->blocklight,0, halfLen);
   memset(chunk->skylight,  0, halfLen);
 
   //Loading "Anvil" type data structure
