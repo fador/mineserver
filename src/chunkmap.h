@@ -203,7 +203,7 @@ struct sChunk
   std::vector<signDataPtr>    signs;
   std::vector<furnaceDataPtr> furnaces;
 
-  sChunk() : addblocks_present(0), blocks(NULL), addblocks(NULL), data(NULL), blocklight(NULL), skylight(NULL), refCount(0), lightRegen(false), changed(false), lastused(0), nbt(NULL), chunks_present(0)
+  sChunk() : blocks(NULL), addblocks(NULL), data(NULL), blocklight(NULL), skylight(NULL), chunks_present(0), addblocks_present(0), refCount(0), lightRegen(false), changed(false), lastused(0), nbt(NULL)
   {
   }
 
