@@ -104,6 +104,7 @@ Plugin::Plugin()
   setHook("PlayerChatCommand", new Hook4<bool, const char*, const char*, int, const char**>);
   setHook("PlayerRespawn", new Hook1<bool, const char*>);
   setHook("gotAttacked", new Hook2<bool, const char*, int32_t>);
+  setHook("interact", new Hook2<bool, const char*, int32_t>);
 
   init();
 }

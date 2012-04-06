@@ -1280,10 +1280,10 @@ int PacketHandler::disconnect(User* user)
 int PacketHandler::use_entity(User* user)
 {
   int32_t userID, target;
-  int8_t targetType;
+  int8_t leftClick;
 
 
-  user->buffer >> userID >> target >> targetType;
+  user->buffer >> userID >> target >> leftClick;
 
   if (!user->buffer)
   {
@@ -1292,9 +1292,20 @@ int PacketHandler::use_entity(User* user)
 
   user->buffer.removePacket();
 
-  if (targetType != 1)
+  if (!leftClick)
   {
+    // right clicks: interaction, attaching, ...
+    for (size_t i = 0; i < Mineserver::get()->mobs()->getMobCount(); i++)
+    {
+      if (Mineserver::get()->mobs()->getMobByID(i)->UID == (uint32_t)target)
+      {
+        (static_cast<Hook2<bool, const char* ,int32_t>*>(Mineserver::get()->plugin()->getHook("interact")))->doAll(user->nick.c_str(), (int32_t)Mineserver::get()->mobs()->getMobByTarget(target));
+        //make a callback
+        return PACKET_OK;
+      }
+    }
 
+    // No? Try to attach.
     Packet pkt;
     //Attach
     if (user->attachedTo == 0)
@@ -1310,37 +1321,41 @@ int PacketHandler::use_entity(User* user)
     }
     user->sendAll(pkt);
     return PACKET_OK;
+
   }
-
-  if (Mineserver::get()->m_pvp_enabled)
+  else
   {
-    //This is used when punching users, mobs or other entities
-    for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
+    // left clicks: fighhht!
+    if (Mineserver::get()->m_pvp_enabled)
     {
-      if ((*it)->UID == (uint32_t)target)
+      //This is used when punching users, mobs or other entities
+      for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
       {
-        (*it)->health--;
-        (*it)->sethealth((*it)->health);
-
-        if ((*it)->health <= 0)
+        if ((*it)->UID == (uint32_t)target)
         {
-          Packet pkt;
-          pkt << PACKET_DEATH_ANIMATION << (int32_t)(*it)->UID << (int8_t)3;
-          (*it)->sendOthers(pkt);
+          (*it)->health--;
+          (*it)->sethealth((*it)->health);
+
+          if ((*it)->health <= 0)
+          {
+            Packet pkt;
+            pkt << PACKET_DEATH_ANIMATION << (int32_t)(*it)->UID << (int8_t)3;
+            (*it)->sendOthers(pkt);
+          }
+          break;
         }
-        break;
       }
     }
-  }
-  for (size_t i = 0; i < Mineserver::get()->mobs()->getMobCount(); i++)
-  {
-    if (Mineserver::get()->mobs()->getMobByID(i)->UID == (uint32_t)target)
+    for (size_t i = 0; i < Mineserver::get()->mobs()->getMobCount(); i++)
     {
-      //int h = Mineserver::get()->mobs()->getMobByID(i)->health - 1;
-      //Mineserver::get()->mobs()->getMobByID(i)->sethealth(h);
-      (static_cast<Hook2<bool, const char* ,int32_t>*>(Mineserver::get()->plugin()->getHook("gotAttacked")))->doAll(user->nick.c_str(),(int32_t)Mineserver::get()->mobs()->getMobByTarget(target));
-      //make a callback
-      break;
+      if (Mineserver::get()->mobs()->getMobByID(i)->UID == (uint32_t)target)
+      {
+        //int h = Mineserver::get()->mobs()->getMobByID(i)->health - 1;
+        //Mineserver::get()->mobs()->getMobByID(i)->sethealth(h);
+        (static_cast<Hook2<bool, const char* ,int32_t>*>(Mineserver::get()->plugin()->getHook("gotAttacked")))->doAll(user->nick.c_str(),(int32_t)Mineserver::get()->mobs()->getMobByTarget(target));
+        //make a callback
+        break;
+      }
     }
   }
 

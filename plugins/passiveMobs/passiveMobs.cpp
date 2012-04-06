@@ -365,22 +365,6 @@ void gotAttacked(const char* userIn,int mobID)
 
   if (mobHealth <= 0) return;
 
-  int type = mineserver->mob.getType(mobID);
-  double x, y, z; int w;
-  mineserver->mob.getMobPositionW(mobID, &x, &y, &z, &w);
-  if (type == MOB_SHEEP)
-  {
-    int8_t meta = mineserver->mob.getByteMetadata(mobID, 16);
-    if (!(meta & 0x10))
-    {
-      mineserver->map.createPickupSpawn((int)floor(x),(int)floor(y),(int)floor(z),
-                                        BLOCK_WOOL, 1, meta, NULL);
-      meta |= 0x10;
-      mineserver->mob.setByteMetadata(mobID, 16, meta);
-      mineserver->mob.updateMetadata(mobID);
-    }
-  }
-
   mobHealth -= defaultDamage(atk_item);
 
   if (mobHealth <= 0)
@@ -390,6 +374,42 @@ void gotAttacked(const char* userIn,int mobID)
   mineserver->mob.setHealth((int)mobID, (int)mobHealth);
 }
 
+void interact(const char* userIn,int mobID)
+{
+  // Certain mobs drop something when the user interacts with them.
+  // Sheep drop wool.
+  std::string user(userIn);
+  int atk_item, _meta, _quant;
+  mineserver->user.getItemInHand(userIn, &atk_item, &_meta, &_quant);
+  int mobHealth = mineserver->mob.getHealth((int)mobID);
+
+  if (mobHealth <= 0) return;
+
+  int type = mineserver->mob.getType(mobID);
+  double x, y, z; int w;
+  mineserver->mob.getMobPositionW(mobID, &x, &y, &z, &w);
+  if (type == MOB_SHEEP)
+  {
+    // On unsheared sheeps, use a shear to obtain 1-3 wool blocks.
+    int8_t meta = mineserver->mob.getByteMetadata(mobID, 16);
+    if (atk_item == ITEM_SHEARS && !(meta & 0x10))
+    {
+      size_t amount = rand() % 3 + 1;
+      mineserver->map.createPickupSpawn((int)floor(x),(int)floor(y),(int)floor(z),
+                                        BLOCK_WOOL, amount, meta, NULL);
+      meta |= 0x10;
+      mineserver->mob.setByteMetadata(mobID, 16, meta);
+      mineserver->mob.updateMetadata(mobID);
+    }
+  } else if(type == MOB_COW)
+  {
+    if(atk_item == ITEM_BUCKET)
+    {
+      mineserver->logger.log(6, "plugin.passiveMobs", "Yow, I was milked");
+      // TODO!
+    }
+  }
+}
 
 std::string pluginName = "passiveMobs";
 
@@ -414,6 +434,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION passiveMobs_init(mineserver_pointer_struct
   }
   mineserver->plugin.addCallback("Timer200", reinterpret_cast<voidF>(timer200Function));
   mineserver->plugin.addCallback("gotAttacked", reinterpret_cast<voidF>(gotAttacked));
+  mineserver->plugin.addCallback("interact", reinterpret_cast<voidF>(interact));
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION passiveMobs_shutdown(void)
