@@ -170,62 +170,37 @@ int main(int argc, char* argv[])
   }
 
   const std::string path_exe = pathOfExecutable();
-  unsigned int search_count = 0;
 
-  std::cout << "Executable is in directory \"" << path_exe << "\".\n"
-            << "Home/App directory is \"" << getHomeDir() << "\".\n"
-            << "Searching for configuration file..." << std::endl;
-
+  // If config file is provided as an argument
   if (!cfg.empty())
   {
-    std::cout << ++search_count << ". in specified file (\"" << cfg << "\"): ";
+	std::cout << "Searching for configuration file..." << std::endl;
     if (fileExists(cfg))
     {
       const std::pair<std::string, std::string> fullpath = pathOfFile(cfg);
       cfg = fullpath.first + PATH_SEPARATOR + fullpath.second;
       Mineserver::get()->config()->config_path = fullpath.first;
-      std::cout << "FOUND at \"" << cfg << "\"!\n";
     }
     else
     {
-      std::cout << "not found\n";
+      std::cout << "Config not found...\n";;
       cfg.clear();
     }
   }
+  
   if (cfg.empty())
   {
-#ifdef DEBUG
-    std::cout << ++search_count << ". in executable directory: ";
     if (fileExists(path_exe + PATH_SEPARATOR + CONFIG_FILE))
     {
       cfg = path_exe + PATH_SEPARATOR + CONFIG_FILE;
       Mineserver::get()->config()->config_path = path_exe;
-      std::cout << "FOUND at \"" << cfg << "\"!\n";
     }
     else
     {
-#endif
-      std::cout << "not found\n"
-                << ++search_count << ". in home/app directory: ";
-
-      cfg = getHomeDir() + PATH_SEPARATOR + CONFIG_FILE;
-      Mineserver::get()->config()->config_path = getHomeDir();
-
-      if (fileExists(getHomeDir() + PATH_SEPARATOR + CONFIG_FILE))
-      {
-        std::cout << "FOUND at \"" << cfg << "\"!\n";
-      }
-      else
-      {
-        std::cout << "not found\n"
-                  << "No config file found! We will place the factory default in \"" << cfg << "\"." << std::endl;
-      }
-#ifdef DEBUG
+      std::cout << "Config not found\n";
     }
-#endif
   }
-  std::cout << "Configuration directory is \"" << Mineserver::get()->config()->config_path << "\"." << std::endl;
-  
+    
   // load config
   Config & config = *Mineserver::get()->config();
   if (!config.load(cfg))
@@ -252,7 +227,7 @@ int main(int argc, char* argv[])
   }
   
   // create home and copy files if necessary
-  Mineserver::get()->configDirectoryPrepare(Mineserver::get()->config()->config_path);
+  //Mineserver::get()->configDirectoryPrepare(Mineserver::get()->config()->config_path);
 
   bool ret = Mineserver::get()->init();
   
@@ -299,7 +274,7 @@ Mineserver::Mineserver()
 
 bool Mineserver::init()
 {
-  // expand '~', '~user' in next vars
+  /* expand '~', '~user' in next vars
   bool error = false;
   const char* const vars[] =
   {
@@ -344,7 +319,7 @@ bool Mineserver::init()
   {
     LOG2(ERROR, "Failed to change working directory to: " + str);
     return false;
-  }
+  }*/
 
   // Write PID to file
   std::ofstream pid_out((config()->sData("system.pid_file")).c_str());
@@ -827,150 +802,6 @@ bool Mineserver::run()
 bool Mineserver::stop()
 {
   m_running = false;
-  return true;
-}
-
-
-/* The purpose of this function is to ensure that the configuration
-   directory contains all the required files: secondary config files,
-   recipes, plugins.
-
-   The "path" argument is the full path that contains the primary
-   config file (named 'config.cfg' by default).
-
-   We must check if the necessary files exist, and if not we must
-   copy them from the distribution source. The location of the
-   distribution source is passed down from the build process.
-*/
-
-bool Mineserver::configDirectoryPrepare(const std::string& path)
-{
-  const std::string distsrc = pathOfExecutable() + PATH_SEPARATOR + CONFIG_DIR_DISTSOURCE;
-
-  std::cout << std::endl
-            << "configDirectoryPrepare(): target directory = \"" << path
-            << "\", distribution source is \"" << distsrc << "\"." << std::endl
-            << std::endl;
-
-  struct stat st;
-  //Create Mineserver directory
-  if (stat(path.c_str(), &st) != 0)
-  {
-    LOG2(INFO, "Creating: " + path);
-    if (!makeDirectory(path))
-    {
-      LOG2(ERROR, path + ": " + strerror(errno));
-      return false;
-    }
-  }
-
-  //Create recipe/plugin directories
-  const std::string directories [] = 
-  {
-    config()->sData("system.path.plugins"),
-    config()->sData("system.path.data"),
-    directories[1] + PATH_SEPARATOR + "recipes",
-    directories[2] + PATH_SEPARATOR + "armour",
-    directories[2] + PATH_SEPARATOR + "block",
-    directories[2] + PATH_SEPARATOR + "cloth",
-    directories[2] + PATH_SEPARATOR + "dyes",
-    directories[2] + PATH_SEPARATOR + "food",
-    directories[2] + PATH_SEPARATOR + "materials",
-    directories[2] + PATH_SEPARATOR + "mechanism",
-    directories[2] + PATH_SEPARATOR + "misc",
-    directories[2] + PATH_SEPARATOR + "tools",
-    directories[2] + PATH_SEPARATOR + "transport",
-    directories[2] + PATH_SEPARATOR + "weapons"
-  };
-  for (size_t i = 0; i < sizeof(directories) / sizeof(directories[0]); i++)
-  {
-    std::string recipePath = path + PATH_SEPARATOR + directories[i];
-    if (stat(recipePath.c_str(), &st) != 0)
-    {
-      //LOG2(INFO, "Creating: " + recipePath);
-      if (!makeDirectory(recipePath))
-      {
-        LOG2(ERROR, recipePath + ": " + strerror(errno));
-        return false;
-      }
-    }
-  }
-
-  // copy example configs
-  const std::string files[] =
-  {
-    "banned.txt",
-    "commands.cfg",
-    "config.cfg",
-    "item_alias.cfg",
-    "ENABLED_RECIPES.cfg",
-    "motd.txt",
-    "permissions.txt",
-    "roles.txt",
-    "rules.txt",
-    "whitelist.txt",
-#ifdef WIN32
-    "commands.dll",
-#else
-    "commands.so",
-#endif
-  };
-
-  //Get list of recipe files
-  std::vector<std::string> temp;
-  Mineserver::m_inventory->getEnabledRecipes(temp, pathOfExecutable() + PATH_SEPARATOR + "files" + PATH_SEPARATOR + "ENABLED_RECIPES.cfg");
-
-  //Add non-recipes to list
-  for (unsigned int i = 0; i < sizeof(files) / sizeof(files[0]); i++)
-  {
-    temp.push_back(files[i]);
-  }
-
-  for (unsigned int i = 0; i < temp.size(); i++)
-  {
-    std::string namein, nameout;
-
-    if(temp[i].substr(temp[i].size() - 7).compare(".recipe") == 0)//If a recipe file
-    {
-      namein  = pathOfExecutable() + PATH_SEPARATOR + directories[2] + PATH_SEPARATOR + temp[i];
-      nameout = path + PATH_SEPARATOR + directories[2] + PATH_SEPARATOR + temp[i];
-    }
-    else if ((temp[i].substr(temp[i].size() - 4).compare(".dll") == 0) ||
-             (temp[i].substr(temp[i].size() - 3).compare(".so") == 0))
-    {
-      namein  = pathOfExecutable() + PATH_SEPARATOR + directories[1] + PATH_SEPARATOR + directories[0] + PATH_SEPARATOR + temp[i];
-      nameout = path + PATH_SEPARATOR + directories[1] + PATH_SEPARATOR + temp[i];
-    }
-    else
-    {
-      namein  = pathOfExecutable() + PATH_SEPARATOR + directories[1] + PATH_SEPARATOR + temp[i];
-      nameout = path + PATH_SEPARATOR + temp[i];
-    }
-
-    // don't overwrite existing files
-    if ((stat(nameout.c_str(), &st) == 0)) // && S_ISREG(st.st_mode) )
-    {
-      continue;
-    }
-
-    std::ifstream fin(namein.c_str(), std::ios_base::binary | std::ios_base::in);
-    if (fin.fail())
-    {
-      LOG2(ERROR, "Failed to open: " + namein);
-      continue;
-    }
-
-    //LOG2(INFO, "Copying: " + nameout);
-    std::ofstream fout(nameout.c_str(), std::ios_base::binary);
-    if (fout.fail())
-    {
-      LOG2(ERROR, "Failed to write to: " + nameout);
-      continue;
-    }
-
-    fout << fin.rdbuf();
-  }
-
   return true;
 }
 

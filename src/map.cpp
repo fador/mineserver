@@ -225,7 +225,7 @@ void Map::init(int number)
     mapDirectory = *it;
   }
 
-  LOG2(INFO, "World " + mapDirectory);
+  LOG2(INFO, "Using world: " + mapDirectory);
 
   if (mapDirectory == "Not found!")
   {
