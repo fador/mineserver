@@ -405,8 +405,10 @@ void interact(const char* userIn,int mobID)
   {
     if(atk_item == ITEM_BUCKET)
     {
-      mineserver->logger.log(6, "plugin.passiveMobs", "Yow, I was milked");
-      // TODO!
+      // give him milk, take the bucket!
+      _quant--;
+      mineserver->user.setItemInHand(userIn, atk_item, _meta, _quant);
+      mineserver->user.addItem(userIn, ITEM_MILK_BUCKET, 1, 0);
     }
   }
 }
