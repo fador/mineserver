@@ -35,46 +35,29 @@ C++ compiler. MS Visual C++ 10 and GCC 4.4 should be sufficient. The build syste
  * Flatland and terrain map generation (Also biomegen!)
  * Working chests, furnaces & signs
 
-### Current bugs
- * Lightning bug that causes clients massive CPU usage
-
-### Configuration Notes (Deprecated)
-
-All runtime configuration of mineserver begins with the *config file*. This file is searched for in the following order:
-
- 1. A single non-option argument (not starting with '+' or '-') is tried as a filename.
- 2. (Debug build only:) A file named `config.cfg` is searched in the same directory as the executable.
- 3. (The canonical location:) A file named `config.cfg` is searched for in `$HOME/.mineserver` (Unix-style)
-    or `%APPDATA%\Mineserver` (Windows).
+### Configuration Notes
 
 An example `config.cfg` file is located in the `files` subdirectory.
 
 The config file sets three path names and one file name which are relevant to the server; with their example values they are:
 
-    system.path.data    = "~/.mineserver/files";
-    system.path.plugins = "~/.mineserver/plugins";
-    system.path.home    = "~/.mineserver";
+    system.path.data    = "files";
+    system.path.plugins = "plugins";
+    system.path.home    = "";
     system.pid_file     = "mineserver.pid";
 
-These paths may be either absolute (as in the first three examples) or relative (as in the last case). A path is
-absolute if it starts with a path separator or a tilde; otherwise it is relative. (Drive letters for Windows will
-have to be incorporated eventually.) Relative paths are *relative to the location of the config file!*
+These paths may be either absolute or relative.
 
 The server requires a set of configuration files which are located in the `files` subdirectory
-of the distribution. The program contains rudimentary logic to copy some of those files, but this
-is incomplete at present and you must ensure manually that those config files are copied into
-the directory pointed to by your config file, or you must set the path parameters to the directory
-in your source distribution. The same applies to the plugin binaries, which you must place in the
-appropriate location for the server to find them.
+of the distribution. 
+
+The plugin binaries must be manually placed in the appropriate location for the server to find them.
 
 
-### Bug tracker
+### Bug Tracker / To Do / Roadmap
 
-Use the GitHub Issues list.
-
-### To Do / Roadmap
-
-Please check the [Mineserver wiki]((http://www.mineserver.be/wiki) for details about the project status and development plans.
+We use GitHub issue tracker and milestones.
+Please check the wiki pages for details about the project status and development plans.
 Check the [fork network](https://github.com/fador/mineserver/network) for the latest development status.
 
 ### Compiling
@@ -114,7 +97,7 @@ Mineserver requires the following libraries:
  * Download and extract source or use `git clone git://github.com/fador/mineserver.git`
  * Go to mineserver directory
  * Run `cmake .`
- * Run `make all`  (`make install` does not currently work)
+ * Run `make all`
  * Run server with `cd bin && ./mineserver`
 
 **Compiling using FreeBSD / PCBSD (cmake & gmake & g++):**
@@ -122,10 +105,10 @@ Mineserver requires the following libraries:
  * Download and extract source or use `git clone git://github.com/fador/mineserver.git`
  * Go to mineserver directory
  * Run `cmake .`
- * Run `gmake all install`
+ * Run `gmake all`
  * Run server with `cd bin && ./mineserver`
 
-**Compiling using Windows (VS2010/VS2008): (Might be outdated)**
+**Compiling using Windows (VS2010): (Might be outdated)**
 
  * Download and compile [zlib](http://www.zlib.org) or use [pre-built binaries](http://www.winimage.com/zLibDll/index.html)
  * Add zlib libraries to project (zlibstat.lib or zlibwapi.lib which requires also zlibwapi.dll in the same dir with the executable)
