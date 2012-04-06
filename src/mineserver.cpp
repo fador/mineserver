@@ -225,9 +225,6 @@ int main(int argc, char* argv[])
       return EXIT_FAILURE;
     }
   }
-  
-  // create home and copy files if necessary
-  //Mineserver::get()->configDirectoryPrepare(Mineserver::get()->config()->config_path);
 
   bool ret = Mineserver::get()->init();
   
@@ -274,53 +271,6 @@ Mineserver::Mineserver()
 
 bool Mineserver::init()
 {
-  /* expand '~', '~user' in next vars
-  bool error = false;
-  const char* const vars[] =
-  {
-    "system.path.data",
-    "system.path.plugins",
-    "system.path.home",
-    "system.pid_file",
-  };
-  for (size_t i = 0; i < sizeof(vars) / sizeof(vars[0]); i++)
-  {
-    ConfigNode::Ptr node = config()->mData(vars[i]);
-    if (!node)
-    {
-      LOG2(ERROR, std::string("Variable is missing: ") + vars[i]);
-      error = true;
-      continue;
-    }
-    if (node->type() != CONFIG_NODE_STRING)
-    {
-      LOG2(ERROR, std::string("Variable is not string: ") + vars[i]);
-      error = true;
-      continue;
-    }
-
-    const std::string newvalue = relativeToAbsolute(node->sData());
-
-    node->setData(newvalue);
-    LOG2(INFO, std::string(vars[i]) + " = \"" + newvalue + "\"");
-  }
-
-  if (error)
-  {
-    return false;
-  }
-
-  const std::string str = config()->sData("system.path.home");
-#ifdef WIN32
-  if (_chdir(str.c_str()) != 0)
-#else
-  if (chdir(str.c_str()) != 0)
-#endif
-  {
-    LOG2(ERROR, "Failed to change working directory to: " + str);
-    return false;
-  }*/
-
   // Write PID to file
   std::ofstream pid_out((config()->sData("system.pid_file")).c_str());
   if (!pid_out.fail())
