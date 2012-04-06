@@ -1,15 +1,14 @@
 # Mineserver
-Custom Minecraft server software written in C++.
-
 *by Fador & Nredor and others*
 
-You can find the core team from #mineserver @ irc.freenode.net
-Also mail to developers@mineserver.be will reach us.
+Custom Minecraft server software written in C++.
+
+You can find the core team from #mineserver @ irc.freenode.net Also mail to developers@mineserver.be will reach us.
 
     Copyright (c) 2010-2012, The Mineserver Project
 
-### NOTICE
-Server still lacks features compared to original minecraft server.
+**NOTICE:** Server still lacks features compared to original minecraft server.
+
 
 **Supported platforms**
 
@@ -43,12 +42,10 @@ The config file sets three path names and one file name which are relevant to th
 
     system.path.data    = "files";
     system.path.plugins = "plugins";
-    system.path.home    = "";
+    system.path.home    = ".";
     system.pid_file     = "mineserver.pid";
 
-These paths may be either absolute or relative.
-
-The server requires a set of configuration files which are located in the `files` subdirectory
+These paths may be either absolute or relative. The server requires a set of configuration files which are located in the `files` subdirectory
 of the distribution. 
 
 The plugin binaries must be manually placed in the appropriate location for the server to find them.
