@@ -2,12 +2,40 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(mineserver)
 CMAKE_POLICY(SET CMP0003 NEW)
 
+#
 # project version
-# TODO: get that from src/constants.h
-# louisdx: Why not go the other way and make constants.h take it from here?
+#
+
+# Justasic: Get the git revision location for the branch we're on
+if(EXISTS "${${PROJECT_NAME}_SOURCE_DIR}/.git/HEAD")
+  file(STRINGS ${${PROJECT_NAME}_SOURCE_DIR}/.git/HEAD GIT_HEAD_LOC REGEX ".*")
+  #file(GIT_HEAD_LOC ${${PROJECT_NAME}_SOURCE_DIR}/.git/HEAD REGEX ".*")
+  string(LENGTH ${GIT_HEAD_LOC} HEAD_LEN)
+  math(EXPR LEN "${HEAD_LEN} - 5")
+  string(SUBSTRING ${GIT_HEAD_LOC} 5 ${LEN} GIT_HEAD)
+endif(EXISTS "${${PROJECT_NAME}_SOURCE_DIR}/.git/HEAD")
+
+# Justasic: Get the git revision we're on for the version string
+if(EXISTS "${${PROJECT_NAME}_SOURCE_DIR}/.git/${GIT_HEAD}")
+  # Justasic: read_from_file(${${PROJECT_NAME}_SOURCE_DIR}/.git/${GIT_HEAD} ".*" VERSION_STR)
+  file(STRINGS ${${PROJECT_NAME}_SOURCE_DIR}/.git/${GIT_HEAD} VERSION_STR REGEX ".*")
+  # Justasic: Get the length of the string
+  string(LENGTH ${VERSION_STR} VERSION_LEN)
+  # Justasic: Subtract 7 from the string's length
+  math(EXPR VERSION_NUM_LEN "${VERSION_LEN} - ${VERSION_LEN} + 7")
+  # Justasic: Extract the value from the string
+  string(SUBSTRING ${VERSION_STR} 0 ${VERSION_NUM_LEN} VERSION_GIT)
+endif(EXISTS "${${PROJECT_NAME}_SOURCE_DIR}/.git/${GIT_HEAD}")
+
+# Set the actual version strings, these are used inside the program later
 SET(${PROJECT_NAME}_MAJOR_VERSION 0)
 SET(${PROJECT_NAME}_MINOR_VERSION 1)
 SET(${PROJECT_NAME}_PATCH_LEVEL 15)
+
+# Justasic: the rest is automatic
+SET(${PROJECT_NAME}_VERSION_SIMPLE "${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_PATCH_LEVEL}")
+# Justasic: Get the git revision as well, really only useful for locating what revision we're on
+SET(${PROJECT_NAME}_VERSION_COMPLETE "${${PROJECT_NAME}_VERSION_SIMPLE}-${VERSION_GIT}")
 
 # set default build to Debug
 IF(NOT CMAKE_BUILD_TYPE)
@@ -15,7 +43,7 @@ IF(NOT CMAKE_BUILD_TYPE)
     CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
     FORCE
   )
-ENDIF()
+ENDIF(NOT CMAKE_BUILD_TYPE)
 
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 

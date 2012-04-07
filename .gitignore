@@ -5,6 +5,7 @@
 CMakeFiles
 CMakeCache.txt
 src/configure.h
+include/configure.h
 
 # ignore our compile directory
 bin
