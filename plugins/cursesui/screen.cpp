@@ -27,10 +27,10 @@
 
 #include "screen.h"
 
-#include "../../src/logtype.h"
+#include "logtype.h"
 
 #define MINESERVER_C_API
-#include "../../src/plugin_api.h"
+#include "plugin_api.h"
 
 #include <cstdlib>
 #include <ctime>

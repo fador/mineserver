@@ -39,7 +39,7 @@
 #include TR1INCLUDE(memory)
 
 #define MINESERVER_C_API
-#include "../../src/plugin_api.h"
+#include "plugin_api.h"
 
 #include "commands.h"
 

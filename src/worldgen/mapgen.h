@@ -35,7 +35,7 @@
 #endif
 
 #include "cavegen.h"
-#include "../map.h"
+#include "map.h"
 
 class MapGen
 {

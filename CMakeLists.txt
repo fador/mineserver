@@ -44,6 +44,9 @@ SET(CONFIG_DIR_DISTSOURCE files)
 # preprocess configuration file
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/configure.h.in ${PROJECT_SOURCE_DIR}/src/configure.h)
 
+# Include directory
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
+
 # Output paths
 SET(EXECUTABLE_OUTPUT_PATH bin)
 SET(LIBRARY_OUTPUT_PATH bin)

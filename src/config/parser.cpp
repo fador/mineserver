@@ -39,7 +39,7 @@
 #include "parser.h"
 #include "node.h"
 
-#include "../tools.h"
+#include "tools.h"
 
 ConfigParser::ConfigParser()
   : m_includes(0)

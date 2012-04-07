@@ -25,8 +25,8 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../mineserver.h"
-#include "../map.h"
+#include "mineserver.h"
+#include "map.h"
 
 #include "jackolantern.h"
 

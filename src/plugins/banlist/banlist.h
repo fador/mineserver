@@ -1,8 +1,8 @@
 #include <string>
 #include <vector>
 
-#include "../../mineserver.h"
-#include "../../user.h"
+#include "mineserver.h"
+#include "user.h"
 
 #ifndef _PLUGIN_BANLIST_H
 #define _PLUGIN_BANLIST_H

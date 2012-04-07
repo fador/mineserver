@@ -25,11 +25,11 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "../mineserver.h"
-#include "../map.h"
-#include "../plugin.h"
-#include "../logger.h"
-#include "../protocol.h"
+#include "mineserver.h"
+#include "map.h"
+#include "plugin.h"
+#include "logger.h"
+#include "protocol.h"
 
 #include "falling.h"
 

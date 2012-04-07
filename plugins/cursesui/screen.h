@@ -40,7 +40,7 @@
 #include <vector>
 #include <stack>
 
-#include "../../src/logtype.h"
+#include "logtype.h"
 enum
 {
   TEXT_COLOR_RED = 1,

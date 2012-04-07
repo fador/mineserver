@@ -1,7 +1,7 @@
 #include <string>
 
-#include "../../mineserver.h"
-#include "../../user.h"
+#include "mineserver.h"
+#include "user.h"
 
 #ifndef _PLUGIN_COMMAND_H
 #define _PLUGIN_COMMAND_H

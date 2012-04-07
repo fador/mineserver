@@ -27,9 +27,9 @@
 
 #include <iostream>
 
-#include "../mineserver.h"
-#include "../map.h"
-#include "../logger.h"
+#include "mineserver.h"
+#include "map.h"
+#include "logger.h"
 
 #include "tracks.h"
 

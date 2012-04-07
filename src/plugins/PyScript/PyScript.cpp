@@ -12,7 +12,7 @@
 #include <dirent.h>
 #include <sys/types.h>
 
-#include "../../plugin_api.h"
+#include "plugin_api.h"
 #include "python_plugin_api.h"
 #include "PyScript.h"
 #include "MineServer_wrap.cxx"

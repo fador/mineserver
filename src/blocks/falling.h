@@ -29,7 +29,7 @@
 #define _BLOCKS_FALLING_H
 
 #include "basic.h"
-#include "../user.h"
+#include "user.h"
 
 /**
  * BlockFalling deals specifically with blocks that fall when there are empty
