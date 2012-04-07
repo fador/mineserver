@@ -42,7 +42,7 @@ ENDIF()
 SET(CONFIG_DIR_DISTSOURCE files)
 
 # preprocess configuration file
-CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/configure.h.in ${PROJECT_SOURCE_DIR}/src/configure.h)
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/configure.h.in ${PROJECT_SOURCE_DIR}/include/configure.h)
 
 # Include directory
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
