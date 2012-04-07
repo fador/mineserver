@@ -70,10 +70,22 @@ ENDIF()
 SET(CONFIG_DIR_DISTSOURCE files)
 
 # preprocess configuration file
-CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/configure.h.in ${PROJECT_SOURCE_DIR}/include/configure.h)
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/configure.h.in ${PROJECT_BINARY_DIR}/include/configure.h)
 
-# Include directory
+#
+# Include directories
+#
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
+INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/include)
+
+
+# CMake crap to include
+include(CheckFunctionExists)
+include(CheckIncludeFile)
+include(CheckTypeSize)
+include(CheckLibraryExists)
+include(CheckCXXCompilerFlag)
 
 # Output paths
 SET(EXECUTABLE_OUTPUT_PATH bin)
@@ -95,80 +107,6 @@ IF(MSVC_IDE)
   SET(CMAKE_CXX_FLAGS_RELEASE "/MT /D_SECURE_SCL=0")
 ENDIF(MSVC_IDE)
 
-
-#
-# mineserver sources
-#
-SET(mineserver_source
-  src/lighting.cpp
-  src/logger.cpp
-  src/furnace.cpp
-  src/plugin_api.cpp
-  src/constants.cpp
-  src/map.cpp
-  src/mineserver.cpp
-  src/furnaceManager.cpp
-  src/screenBase.cpp
-  src/inventory.cpp
-  src/packets.cpp
-  src/plugin.cpp
-  src/nbt.cpp
-  src/user.cpp
-  src/random.cpp
-  src/config/lexer.cpp
-  src/config/scanner.cpp
-  src/config/parser.cpp
-  src/config/node.cpp
-  src/sockets.cpp
-  src/chat.cpp
-  src/tree.cpp
-  src/mcregion.cpp
-  src/worldgen/cavegen.cpp
-  src/worldgen/heavengen.cpp
-  src/worldgen/mapgen.cpp
-  src/worldgen/nethergen.cpp
-  src/worldgen/biomegen.cpp
-  src/worldgen/eximgen.cpp
-  src/blocks/cake.cpp
-  src/blocks/stair.cpp
-  src/blocks/chest.cpp
-  src/blocks/snow.cpp
-  src/blocks/fire.cpp
-  src/blocks/default.cpp
-  src/blocks/plant.cpp
-  src/blocks/sign.cpp
-  src/blocks/door.cpp
-  src/blocks/ladder.cpp
-  src/blocks/torch.cpp
-  src/blocks/basic.cpp
-  src/blocks/tracks.cpp
-  src/blocks/falling.cpp
-  src/blocks/liquid.cpp
-  src/blocks/redstone.cpp
-  src/blocks/leaves.cpp
-  src/tools.cpp
-  src/physics.cpp
-  src/cliScreen.cpp
-  src/blocks/blockfurnace.cpp
-  src/blocks/note.cpp
-  src/blocks/workbench.cpp
-  src/blocks/pumpkin.cpp
-  src/blocks/bed.cpp
-  src/blocks/step.cpp
-  src/blocks/tnt.cpp
-  src/blocks/jackolantern.cpp
-  src/blocks/wool.cpp
-  src/blocks/wood.cpp
-  src/blocks/ice.cpp
-  src/items/food.cpp
-  src/items/itembasic.cpp
-  src/items/projectile.cpp
-  src/mob.cpp
-  src/metadata.cpp
-)
-SOURCE_GROUP(${PROJECT_NAME} FILES ${mineserver_source})
-
-
 #
 # project files
 #
@@ -187,9 +125,6 @@ SET(mineserver_configs
 
 FILE(GLOB_RECURSE mineserver_recipes RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} files/recipes/*)
 
-INCLUDE_DIRECTORIES(src)
-
-
 #
 # dependencies
 #
@@ -204,7 +139,7 @@ SET(mineserver_depends
 #
 # dependency check
 #
-SET(TARGET mineserver)
+SET(TARGET ${PROJECT_NAME})
 MESSAGE(STATUS "Dependency check: ${TARGET}")
 SET(dependency_error False)
 FOREACH(lib ${${TARGET}_depends})
@@ -239,24 +174,10 @@ ENDIF()
 
 
 #
-# subdirectories
+# subdirectories to build
 #
+ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(plugins)
-
-
-#
-# build targets
-#
-SET(TARGET mineserver)
-MESSAGE(STATUS "Target: ${TARGET}")
-ADD_EXECUTABLE(${TARGET} ${exe} ${${TARGET}_source})
-TARGET_LINK_LIBRARIES(${TARGET} ${CMAKE_DL_LIBS})
-
-FOREACH(lib ${${TARGET}_depends})
-  STRING(TOUPPER ${lib} LIB)
-  INCLUDE_DIRECTORIES(${${LIB}_INCLUDE_DIR})
-  TARGET_LINK_LIBRARIES(${TARGET} ${${LIB}_LIBRARY})
-ENDFOREACH()
 
 # copy configs for local usage
 FOREACH(path ${mineserver_configs} ${mineserver_recipes})
@@ -274,12 +195,10 @@ ENDFOREACH()
 #ENDIF()
 
 
-
-
 #
 # install
 #
-install(TARGETS mineserver
+install(FILES src/bin/${PROJECT_NAME}
   RUNTIME DESTINATION ${CONFIG_DIR_BIN}/
 )
 
