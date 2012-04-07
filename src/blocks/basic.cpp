@@ -243,5 +243,5 @@ void BlockBasic::revertBlock(User* user, int32_t x, int8_t y, int32_t z, int map
 {
   unsigned char block, meta;
   Mineserver::get()->map(map)->getBlock((int)x, (int)y, (int)z, &block, &meta);
-  user->buffer << PACKET_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int8_t)block << (int8_t)meta;
+  user->buffer << (int8_t)PACKET_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int8_t)block << (int8_t)meta;
 }

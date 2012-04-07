@@ -941,7 +941,7 @@ int PacketHandler::player_block_placement(User* user)
     int32_t EID = Mineserver::generateEID();
     Packet pkt;
     // MINECART
-    pkt << PACKET_ADD_OBJECT << (int32_t)EID << (int8_t)10 << (int32_t)(x * 32 + 16) << (int32_t)(y * 32) << (int32_t)(z * 32 + 16);
+    pkt << (int8_t)PACKET_ADD_OBJECT << (int32_t)EID << (int8_t)10 << (int32_t)(x * 32 + 16) << (int32_t)(y * 32) << (int32_t)(z * 32 + 16);
     user->sendAll(pkt);
   }
 
@@ -1310,13 +1310,13 @@ int PacketHandler::use_entity(User* user)
     //Attach
     if (user->attachedTo == 0)
     {
-      pkt << PACKET_ATTACH_ENTITY << (int32_t)user->UID << (int32_t)target;
+      pkt << (int8_t)PACKET_ATTACH_ENTITY << (int32_t)user->UID << (int32_t)target;
       user->attachedTo = target;
     }
     //Detach
     else
     {
-      pkt << PACKET_ATTACH_ENTITY << (int32_t)user->UID << (int32_t) - 1;
+      pkt << (int8_t)PACKET_ATTACH_ENTITY << (int32_t)user->UID << (int32_t) - 1;
       user->attachedTo = 0;
     }
     user->sendAll(pkt);
@@ -1339,7 +1339,7 @@ int PacketHandler::use_entity(User* user)
           if ((*it)->health <= 0)
           {
             Packet pkt;
-            pkt << PACKET_DEATH_ANIMATION << (int32_t)(*it)->UID << (int8_t)3;
+            pkt << (int8_t)PACKET_DEATH_ANIMATION << (int32_t)(*it)->UID << (int8_t)3;
             (*it)->sendOthers(pkt);
           }
           break;
