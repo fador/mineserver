@@ -34,7 +34,7 @@ std::map<uint8_t, DropPtr> BLOCKDROPS;
 
 const unsigned int SERVER_CONSOLE_UID = -1;
 
-const std::string VERSION = "0.1.16 (Alpha)";
+const std::string VERSION = "0.1.17 (Alpha)";
 
 const int PROTOCOL_VERSION = 29;
 

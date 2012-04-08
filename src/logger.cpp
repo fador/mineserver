@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2011, The Mineserver Project
+  Copyright (c) 2012, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@
 //
 
 #include <sstream>
+#include <stdio.h>
 
 #include "mineserver.h"
 #include "plugin.h"
