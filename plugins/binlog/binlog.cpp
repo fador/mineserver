@@ -37,7 +37,7 @@
 #include <ctime>
 #include <vector>
 
-#include "../../src/plugin_api.h"
+#include "plugin_api.h"
 #include "binlog.h"
 
 Binlog::Binlog (std::string filename) 

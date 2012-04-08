@@ -13,5 +13,14 @@
 #cmakedefine CONFIG_DIR_SHARE "@CONFIG_DIR_SHARE@"
 #cmakedefine CONFIG_DIR_DISTSOURCE "@CONFIG_DIR_DISTSOURCE@"
 
+// Version strings
+#define VERSION_MAJOR "@mineserver_MAJOR_VERSION@"
+#define VERSION_MINOR "@mineserver_MINOR_VERSION@"
+#define VERSION_PATCH "@mineserver_PATCH_LEVEL@"
+#define VERSION_GIT_SHORT "@VERSION_GIT@"
+#define VERSION_GIT "@VERSION_STR@"
+#define VERSION_SIMPLE "@mineserver_VERSION_SIMPLE@"
+#define VERSION_COMPLETE "@mineserver_VERSION_COMPLETE@"
+
 
 #endif // _CONFIGURE_H

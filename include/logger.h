@@ -57,6 +57,7 @@ class Logger
 public:
   void log(const std::string& message, const std::string& file, int line);
   void log(LogType::LogType type, const std::string& source, const std::string& message);
+  void log(LogType::LogType type, const std::string& source, const char* message, ...);
 
 };
 

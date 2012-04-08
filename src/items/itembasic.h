@@ -31,9 +31,9 @@
 #include <stdint.h>
 #include <string>
 
-#include "../constants.h"
-#include "../inventory.h"
-#include "../user.h"
+#include "constants.h"
+#include "inventory.h"
+#include "user.h"
 
 
 /**

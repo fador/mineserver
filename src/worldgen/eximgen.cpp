@@ -27,12 +27,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "eximgen.h"
 
-#include "../mineserver.h"
-#include "../config.h"
-#include "../map.h"
-#include "../tree.h"
-#include "../tools.h"
-#include "../random.h"
+#include "mineserver.h"
+#include "config.h"
+#include "map.h"
+#include "tree.h"
+#include "tools.h"
+#include "random.h"
 
 EximGen::EximGen()
   : blocks(16 * 16 * 128, 0),

@@ -28,9 +28,9 @@
 #include <cmath>
 #include <cstdlib>
 
-#include "../mineserver.h"
-#include "../plugin.h"
-#include "../inventory.h"
+#include "mineserver.h"
+#include "plugin.h"
+#include "inventory.h"
 
 #include "itembasic.h"
 

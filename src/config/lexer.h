@@ -32,7 +32,7 @@
 #include <stack>
 #include <utility>
 
-#include "../tr1.h"
+#include "tr1.h"
 #include TR1INCLUDE(memory)
 
 enum {

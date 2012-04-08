@@ -13,7 +13,7 @@
 
 //##ifndef PyScript
 //##define PyScript
-#include "../../plugin_api.h"
+#include "plugin_api.h"
 
 
 using namespace std;

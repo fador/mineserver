@@ -39,7 +39,7 @@
 #ifndef PyWrapper
 #define PyWrapper
 
-#include "../../plugin_api.h"
+#include "plugin_api.h"
 
 class PyLoc
 {

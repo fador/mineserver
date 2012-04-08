@@ -27,13 +27,13 @@
 
 #include "chest.h"
 
-#include "../user.h"
-#include "../permissions.h"
-#include "../nbt.h"
-#include "../mineserver.h"
-#include "../map.h"
-#include "../chat.h"
-#include "../tools.h"
+#include "user.h"
+#include "permissions.h"
+#include "nbt.h"
+#include "mineserver.h"
+#include "map.h"
+#include "chat.h"
+#include "tools.h"
 
 void BlockChest::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {

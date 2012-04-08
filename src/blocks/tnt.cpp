@@ -26,10 +26,10 @@
  */
 
 #include "default.h"
-#include "../mineserver.h"
-#include "../map.h"
-#include "../constants.h"
-#include "../logger.h"
+#include "mineserver.h"
+#include "map.h"
+#include "constants.h"
+#include "logger.h"
 
 #include "tnt.h"
 

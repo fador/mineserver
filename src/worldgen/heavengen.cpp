@@ -47,16 +47,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "heavengen.h"
 #include "cavegen.h"
 
-#include "../mineserver.h"
-#include "../config.h"
-#include "../constants.h"
-#include "../logger.h"
-#include "../map.h"
-#include "../nbt.h"
-#include "../tree.h"
+#include "mineserver.h"
+#include "config.h"
+#include "constants.h"
+#include "logger.h"
+#include "map.h"
+#include "nbt.h"
+#include "tree.h"
 
-#include "../tools.h"
-#include "../random.h"
+#include "tools.h"
+#include "random.h"
 
 int heaven_seed;
 

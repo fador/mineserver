@@ -43,7 +43,7 @@ copy nether.so to Mineserver bin directory.
 #include <cmath>
 
 #define MINESERVER_C_API
-#include "../../src/plugin_api.h"
+#include "plugin_api.h"
 
 #include "nether.h"
 
