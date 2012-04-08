@@ -165,6 +165,7 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int8_t y, int32_t z, int 
     	return;
     if(!Mineserver::get()->map(map)->getBlock(x,y+1,z,&testbl, &testmet))
     	return;
+    // Justasic: wtf is this? someone should correct it..
     if(testbl == BLOCK_SAND)
     	LOG(INFO, "Dfsdf", "what");
     	
@@ -173,7 +174,7 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int8_t y, int32_t z, int 
     for(unsigned int i = 0; i < Mineserver::get()->plugin()->getBlockCB().size(); i++)
     {
     	if(Mineserver::get()->plugin()->getBlockCB()[i]->affectedBlock(neighbour)) {
-    		LOG(INFO, "Penis", "toll");
+    		LOG(INFO, "Gravity", "Gravity was here :)");
     		Mineserver::get()->plugin()->getBlockCB()[i]->onNeighbourMove(user, fallblock, x, y+2, z, 1, map);
     	}
     }
