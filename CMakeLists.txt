@@ -123,7 +123,7 @@ SET(mineserver_configs
   files/whitelist.txt
 )
 
-FILE(GLOB_RECURSE mineserver_recipes RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} files/recipes/*)
+FILE(GLOB_RECURSE mineserver_recipes_raw RELATIVE ${PROJECT_SOURCE_DIR} "files/recipes/*")
 
 #
 # dependencies
@@ -172,6 +172,10 @@ ELSE()
   ENDIF()
 ENDIF()
 
+#
+# Create some directories we need
+#
+FILE(MAKE_DIRECTORY "${CONFIG_DIR_BIN}/plugins")
 
 #
 # subdirectories to build
@@ -194,14 +198,17 @@ ENDFOREACH()
     CONFIGURE_FILE(files/item_alias.cfg "${EXECUTABLE_OUTPUT_PATH}/item_alias.cfg" COPYONLY)
 #ENDIF()
 
+#
+# Install config files
+#
+FOREACH(file ${mineserver_configs})
+  CONFIGURE_FILE(${file} "${EXECUTABLE_OUTPUT_PATH}/${file}" COPYONLY)
+ENDFOREACH(file ${mineserver_configs})
+
 
 #
 # install
 #
-install(FILES src/bin/${PROJECT_NAME}
-  RUNTIME DESTINATION ${CONFIG_DIR_BIN}/
-)
-
 install(FILES ${mineserver_configs}
   DESTINATION ${CONFIG_DIR_ETC}/
 )

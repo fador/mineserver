@@ -71,6 +71,8 @@ foreach(p ${plugins})
   endif()
 endforeach()
 
+# override the build location again.
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "../${CONFIG_DIR_BIN}/plugins")
 
 #
 # build targets
