@@ -108,24 +108,6 @@ IF(MSVC_IDE)
 ENDIF(MSVC_IDE)
 
 #
-# project files
-#
-SET(mineserver_configs
-  files/banned.txt
-  files/commands.cfg
-  files/config.cfg
-  files/item_alias.cfg
-  files/ENABLED_RECIPES.cfg
-  files/motd.txt
-  files/permissions.txt
-  files/roles.txt
-  files/rules.txt
-  files/whitelist.txt
-)
-
-FILE(GLOB_RECURSE mineserver_recipes_raw RELATIVE ${PROJECT_SOURCE_DIR} "files/recipes/*")
-
-#
 # dependencies
 #
 SET(mineserver_depends
@@ -182,29 +164,13 @@ FILE(MAKE_DIRECTORY "${CONFIG_DIR_BIN}/plugins")
 #
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(plugins)
-
-# copy configs for local usage
-FOREACH(path ${mineserver_configs} ${mineserver_recipes})
-  SET(dest "${EXECUTABLE_OUTPUT_PATH}/${path}")
-  IF(NOT EXISTS ${dest})
-    MESSAGE(STATUS "Configuring: ${dest}")
-    CONFIGURE_FILE(${path} ${dest} COPYONLY)
-  ENDIF()
-ENDFOREACH()
+ADD_SUBDIRECTORY(files)
 
 # In the Debug build, we provide a local config file.
 #IF(CMAKE_BUILD_TYPE MATCHES Debug)
-    CONFIGURE_FILE(files/config.cfg "${EXECUTABLE_OUTPUT_PATH}/config.cfg" COPYONLY)
-    CONFIGURE_FILE(files/item_alias.cfg "${EXECUTABLE_OUTPUT_PATH}/item_alias.cfg" COPYONLY)
+    #CONFIGURE_FILE(files/config.cfg "${EXECUTABLE_OUTPUT_PATH}/config.cfg" COPYONLY)
+    #CONFIGURE_FILE(files/item_alias.cfg "${EXECUTABLE_OUTPUT_PATH}/item_alias.cfg" COPYONLY)
 #ENDIF()
-
-#
-# Install config files
-#
-FOREACH(file ${mineserver_configs})
-  CONFIGURE_FILE(${file} "${EXECUTABLE_OUTPUT_PATH}/${file}" COPYONLY)
-ENDFOREACH(file ${mineserver_configs})
-
 
 #
 # install
