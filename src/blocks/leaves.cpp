@@ -13,10 +13,10 @@
 
 #include <cmath>
 #include "leaves.h"
-#include "../map.h"
-#include "../mineserver.h"
-#include "../constants.h"
-#include "../plugin.h"
+#include "map.h"
+#include "mineserver.h"
+#include "constants.h"
+#include "plugin.h"
 
 
 bool BlockLeaves::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)

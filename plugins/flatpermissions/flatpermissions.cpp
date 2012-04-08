@@ -39,7 +39,7 @@ g++ -shared flatpermissions.o -o flatpermissions.so
 #include <fstream>
 
 #define MINESERVER_C_API
-#include "../../src/plugin_api.h"
+#include "plugin_api.h"
 
 #define PLUGIN_VERSION 1.0
 mineserver_pointer_struct* mineserver;

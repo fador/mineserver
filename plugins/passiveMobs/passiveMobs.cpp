@@ -42,8 +42,8 @@
 
 
 #define MINESERVER_C_API
-#include "../../src/plugin_api.h"
-#include "../../src/tools.h"
+#include "plugin_api.h"
+#include "tools.h"
 
 #include "passiveMobs.h"
 

@@ -31,8 +31,8 @@
 #include <stdint.h>
 #include <string>
 
-#include "../constants.h"
-#include "../inventory.h"
+#include "constants.h"
+#include "inventory.h"
 #include "itembasic.h"
 
 class ItemProjectile: public ItemBasic

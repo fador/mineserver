@@ -1,5 +1,5 @@
 #include "food.h"
-#include "../packets.h"
+#include "packets.h"
 
 bool ItemFood::affectedItem(int item) const
 {

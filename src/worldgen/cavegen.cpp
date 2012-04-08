@@ -35,12 +35,12 @@
 #include <noise/noise.h>
 #endif
 
-#include "../logger.h"
-#include "../constants.h"
-#include "../tools.h"
-#include "../map.h"
-#include "../config.h"
-#include "../mineserver.h"
+#include "logger.h"
+#include "constants.h"
+#include "tools.h"
+#include "map.h"
+#include "config.h"
+#include "mineserver.h"
 
 #include "cavegen.h"
 

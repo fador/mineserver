@@ -70,3 +70,16 @@ void Logger::log(LogType::LogType type, const std::string& source, const std::st
 
   (static_cast<Hook3<bool, int, const char*, const char*>*>(hook))->doAll((int)type, source.c_str(), message.c_str());
 }
+
+void Logger::log(LogType::LogType type, const std::string& source, const char* message, ...)
+{
+  // Message formatting
+  char buffer[4096];
+  va_list args;
+  va_start(args, message);
+  vsnprintf(buffer, sizeof(buffer), message, args);
+  va_end(args);
+
+  // Call back to our own logging function because i am too lazy to make it here
+  this->log(type, source, std::string(buffer));
+}

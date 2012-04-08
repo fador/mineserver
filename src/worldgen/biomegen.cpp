@@ -27,10 +27,10 @@
 
 #include "biomegen.h"
 
-#include "../mineserver.h"
-#include "../config.h"
-#include "../tree.h"
-#include "../random.h"
+#include "mineserver.h"
+#include "config.h"
+#include "tree.h"
+#include "random.h"
 
 BiomeGen::BiomeGen()
   : blocks(16 * 16 * 128, 0),

@@ -28,9 +28,9 @@
 #include <cmath>
 #include <cstdlib>
 
-#include "../mineserver.h"
-#include "../plugin.h"
-#include "../map.h"
+#include "mineserver.h"
+#include "plugin.h"
+#include "map.h"
 
 #include "basic.h"
 

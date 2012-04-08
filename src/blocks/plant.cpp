@@ -28,9 +28,9 @@
 #include <cstdlib>
 
 #include "plant.h"
-#include "../mineserver.h"
-#include "../config.h"
-#include "../map.h"
+#include "mineserver.h"
+#include "config.h"
+#include "map.h"
 
 
 std::vector<PlantBlockPtr> growingPlants;

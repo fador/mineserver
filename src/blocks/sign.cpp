@@ -27,8 +27,8 @@
 
 #include <math.h>
 
-#include "../mineserver.h"
-#include "../map.h"
+#include "mineserver.h"
+#include "map.h"
 
 #include "sign.h"
 

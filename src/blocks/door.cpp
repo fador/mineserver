@@ -25,9 +25,9 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "../mineserver.h"
-#include "../map.h"
-//#include "../logger.h"
+#include "mineserver.h"
+#include "map.h"
+//#include "logger.h"
 
 #include "door.h"
 

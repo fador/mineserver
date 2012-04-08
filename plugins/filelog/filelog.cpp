@@ -55,9 +55,9 @@
 #include <cstring>
 
 #define MINESERVER_C_API
-#include "../../src/plugin_api.h"
+#include "plugin_api.h"
 
-// This should mirror mineserver/src/logtype.h.
+// This should mirror mineserver/logtype.h.
 static const char* logTypeName[] = {
   "EMERG",
   "Alert",

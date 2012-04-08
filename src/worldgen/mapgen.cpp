@@ -36,11 +36,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cavegen.h"
 #include "mapgen.h"
 
-#include "../mineserver.h"
-#include "../config.h"
-#include "../logger.h"
-#include "../map.h"
-#include "../tree.h"
+#include "mineserver.h"
+#include "config.h"
+#include "logger.h"
+#include "map.h"
+#include "tree.h"
 
 int g_seed;
 int f_seed;
