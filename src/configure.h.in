@@ -22,5 +22,11 @@
 #define VERSION_SIMPLE "@mineserver_VERSION_SIMPLE@"
 #define VERSION_COMPLETE "@mineserver_VERSION_COMPLETE@"
 
+// Windows specific fixes
+#ifdef WIN32
+# define unlink _unlink
+# define close closesocket
+# define getpid GetCurrentProcessId
+#endif
 
 #endif // _CONFIGURE_H

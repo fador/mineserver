@@ -94,13 +94,6 @@ void sighandler(int sig_num)
   Mineserver::get()->stop();
 }
 
-#ifndef WIN32
-void pipehandler(int sig_num)
-{
-  //Do nothing
-}
-#endif
-
 std::string removeChar(std::string str, const char* c)
 {
   const size_t loc = str.find(c);
@@ -133,7 +126,8 @@ int main(int argc, char* argv[])
   signal(SIGINT, sighandler);
 
 #ifndef WIN32
-  signal(SIGPIPE, pipehandler);
+  // Justasic: use SIG_IGN instead of a blank and useless function
+  signal(SIGPIPE, SIG_IGN);
 #else
   signal(SIGBREAK, sighandler);
 #endif
@@ -275,11 +269,7 @@ bool Mineserver::init()
   std::ofstream pid_out((config()->sData("system.pid_file")).c_str());
   if (!pid_out.fail())
   {
-#ifdef WIN32
-    pid_out << _getpid();
-#else
     pid_out << getpid();
-#endif
   }
   pid_out.close();
 
@@ -392,11 +382,7 @@ bool Mineserver::free()
   }
 
   // Remove the PID file
-#ifdef WIN32
-  _unlink((config()->sData("system.pid_file")).c_str());
-#else
   unlink((config()->sData("system.pid_file")).c_str());
-#endif
 
   return true;
 }
@@ -736,11 +722,7 @@ bool Mineserver::run()
     }
   }
 
-#ifdef WIN32
-  closesocket(m_socketlisten);
-#else
   close(m_socketlisten);
-#endif
 
   saveAll();
 
