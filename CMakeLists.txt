@@ -87,6 +87,10 @@ include(CheckTypeSize)
 include(CheckLibraryExists)
 include(CheckCXXCompilerFlag)
 
+# functions/includes needed during compile
+check_function_exists(backtrace HAVE_BACKTRACE)
+check_include_file(sys/utsname.h HAVE_SYS_UTSNAME_H)
+
 # Output paths
 SET(EXECUTABLE_OUTPUT_PATH bin)
 SET(LIBRARY_OUTPUT_PATH bin)

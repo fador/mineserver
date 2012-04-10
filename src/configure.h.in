@@ -29,4 +29,18 @@
 # define getpid GetCurrentProcessId
 #endif
 
+// Justasic:
+// Check to see if we have the proper includes for our signal handler
+// if we do then include them as well
+#cmakedefine HAVE_BACKTRACE 1
+#cmakedefine HAVE_SYS_UTSNAME_H 1
+
+#ifdef HAVE_BACKTRACE
+# include <execinfo.h>
+#endif
+
+#ifdef HAVE_SYS_UTSNAME_H
+# include <sys/utsname.h>
+#endif
+
 #endif // _CONFIGURE_H

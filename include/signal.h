@@ -1,6 +1,6 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
-   All rights reserved.
+  Copyright (c) 2012, The Mineserver Project
+  All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -23,79 +23,21 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-#ifndef _CONSTANTS_H
-#define _CONSTANTS_H
+#ifndef SIGNAL_H
+#define SIGNAL_H
 
-#include <map>
-#include <string>
-#include <stdint.h>
-#include <iostream>
+// Segfault buffer
+extern char segv_location[255];
 
-#include "tr1.h"
-#include TR1INCLUDE(memory)
+// Initialize our signals.
+extern void InitSignals();
 
-// configuration from build system
-#include "configure.h"
-#include "constants_num.h"
+// Use this macro for segfault specific locations
+#define SET_SEGV_LOCATION() snprintf(segv_location, sizeof(segv_location), "%s %d %s", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-//
-// Drops from blocks
-//
-struct Drop;
-typedef std::tr1::shared_ptr<Drop> DropPtr;
-
-struct Drop
-{
-  uint16_t item_id;
-  uint32_t probability;
-  uint8_t count;
-  int16_t meta;
-  DropPtr alt_drop;
-
-  explicit Drop(uint16_t _item_id = 0, uint32_t _probability = 0, uint8_t _count = 0, int16_t _meta = -1, DropPtr _alt_drop = DropPtr())
-    :
-    item_id(_item_id),
-    probability(_probability),
-    count(_count),
-    meta(_meta),
-    alt_drop(_alt_drop)
-  {
-  }
-
-  void getDrop(int16_t& item, uint8_t& count, uint8_t& meta);
-};
-
-extern void initConstants();
-
-extern std::map<uint8_t, DropPtr> BLOCKDROPS;
-
-// Chat prefixes
-enum
-{
-  SERVERMSGPREFIX = '%',
-  CHATCMDPREFIX   = '/',
-  ADMINCHATPREFIX = '&'
-};
-
-extern const unsigned int SERVER_CONSOLE_UID;
-
-extern const std::string VERSION;
-
-extern const int PROTOCOL_VERSION;
-
-extern const char COMMENTPREFIX;
-
-// Configuration
-extern const std::string CONFIG_FILE;
-
-// PID file
-extern const std::string PID_FILE;
-
-//allocate 1 MB for chunk files
-extern const int ALLOCATE_NBTFILE;
-
-extern const int kMaxChatMessageLength;
+// Use this one to clear it
+#define CLEAR_SEGV_LOCATION() segv_location[0]='\0';
 
 #endif

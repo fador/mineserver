@@ -50,6 +50,7 @@
 #include "random.h"
 #include "map.h"
 #include "user.h"
+#include "signal.h"
 #include "chat.h"
 #include "worldgen/mapgen.h"
 #include "worldgen/nethergen.h"
@@ -88,11 +89,11 @@ int setnonblock(int fd)
   return 1;
 }
 
-// Handle signals
-void sighandler(int sig_num)
-{
-  Mineserver::get()->stop();
-}
+// // Handle signals
+// void sighandler(int sig_num)
+// {
+//   Mineserver::get()->stop();
+// }
 
 std::string removeChar(std::string str, const char* c)
 {
@@ -122,15 +123,15 @@ int printHelp(int code)
 
 int main(int argc, char* argv[])
 {
-  signal(SIGTERM, sighandler);
-  signal(SIGINT, sighandler);
-
-#ifndef WIN32
-  // Justasic: use SIG_IGN instead of a blank and useless function
-  signal(SIGPIPE, SIG_IGN);
-#else
-  signal(SIGBREAK, sighandler);
-#endif
+//   signal(SIGTERM, sighandler);
+//   signal(SIGINT, sighandler);
+// 
+// #ifndef WIN32
+//   // Justasic: use SIG_IGN instead of a blank and useless function
+//   signal(SIGPIPE, SIG_IGN);
+// #else
+//   signal(SIGBREAK, sighandler);
+// #endif
 
   std::srand((uint32_t)std::time(NULL));
   initPRNG();
