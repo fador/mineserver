@@ -41,7 +41,7 @@
 #include <fstream>
 
 #include "mineserver.h"
-
+#include "Signal.h"
 #include "configure.h"
 #include "constants.h"
 #include "logger.h"
@@ -50,7 +50,6 @@
 #include "random.h"
 #include "map.h"
 #include "user.h"
-#include "signal.h"
 #include "chat.h"
 #include "worldgen/mapgen.h"
 #include "worldgen/nethergen.h"
@@ -132,6 +131,7 @@ int main(int argc, char* argv[])
 // #else
 //   signal(SIGBREAK, sighandler);
 // #endif
+  InitSignals();
 
   std::srand((uint32_t)std::time(NULL));
   initPRNG();

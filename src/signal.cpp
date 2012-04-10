@@ -25,19 +25,21 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "signal.h"
+#include "Signal.h"
 #include "mineserver.h"
+#include "logger.h"
 #include <cstdio>
 #include <sstream>
 #include <iostream>
-#include <signal.h>
-#include <csignal>
 #include <errno.h>
 #include <cstring>
 #include <cstdlib>
 #include <ctime>
+#include <signal.h>
 
-
+#ifndef SIGBREK
+# define SIGBREAK 0 // Define this for unix systems
+#endif
 char segv_location[255];
 
 void SignalHandler(int);
@@ -110,7 +112,7 @@ void SignalHandler(int sig)
     case SIGHUP:
       signal(sig, SIG_IGN);
       /* TODO: Rehash a config? hmmnn */
-      std::cout << "SIGHUP caught, rehashing.." << std::endl;
+      LOG2(INFO, "Received SIGHUP, rehashing..");
       break;
 #ifdef HAVE_BACKTRACE
     case SIGSEGV:
@@ -129,7 +131,7 @@ void SignalHandler(int sig)
     case SIGTERM:
       signal(sig, SIG_IGN);
       signal(SIGHUP, SIG_IGN);
-      std::cout << "Received SIGTERM, Exiting.." << std::endl;
+      LOG2(INFO, "Received SIGTERM, Exiting..");
       Mineserver::get()->stop();
       break;
     default:
