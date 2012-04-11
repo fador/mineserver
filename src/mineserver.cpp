@@ -41,7 +41,7 @@
 #include <fstream>
 
 #include "mineserver.h"
-
+#include "Signal.h"
 #include "configure.h"
 #include "constants.h"
 #include "logger.h"
@@ -88,18 +88,11 @@ int setnonblock(int fd)
   return 1;
 }
 
-// Handle signals
-void sighandler(int sig_num)
-{
-  Mineserver::get()->stop();
-}
-
-#ifndef WIN32
-void pipehandler(int sig_num)
-{
-  //Do nothing
-}
-#endif
+// // Handle signals
+// void sighandler(int sig_num)
+// {
+//   Mineserver::get()->stop();
+// }
 
 std::string removeChar(std::string str, const char* c)
 {
@@ -129,14 +122,16 @@ int printHelp(int code)
 
 int main(int argc, char* argv[])
 {
-  signal(SIGTERM, sighandler);
-  signal(SIGINT, sighandler);
-
-#ifndef WIN32
-  signal(SIGPIPE, pipehandler);
-#else
-  signal(SIGBREAK, sighandler);
-#endif
+//   signal(SIGTERM, sighandler);
+//   signal(SIGINT, sighandler);
+// 
+// #ifndef WIN32
+//   // Justasic: use SIG_IGN instead of a blank and useless function
+//   signal(SIGPIPE, SIG_IGN);
+// #else
+//   signal(SIGBREAK, sighandler);
+// #endif
+  InitSignals();
 
   std::srand((uint32_t)std::time(NULL));
   initPRNG();
@@ -275,11 +270,7 @@ bool Mineserver::init()
   std::ofstream pid_out((config()->sData("system.pid_file")).c_str());
   if (!pid_out.fail())
   {
-#ifdef WIN32
-    pid_out << _getpid();
-#else
     pid_out << getpid();
-#endif
   }
   pid_out.close();
 
@@ -392,11 +383,7 @@ bool Mineserver::free()
   }
 
   // Remove the PID file
-#ifdef WIN32
-  _unlink((config()->sData("system.pid_file")).c_str());
-#else
   unlink((config()->sData("system.pid_file")).c_str());
-#endif
 
   return true;
 }
@@ -736,11 +723,7 @@ bool Mineserver::run()
     }
   }
 
-#ifdef WIN32
-  closesocket(m_socketlisten);
-#else
   close(m_socketlisten);
-#endif
 
   saveAll();
 
