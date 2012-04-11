@@ -27,6 +27,7 @@
 
 #include "Signal.h"
 #include "mineserver.h"
+#include "constants.h"
 #include "logger.h"
 #include <cstdio>
 #include <sstream>

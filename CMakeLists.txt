@@ -69,9 +69,6 @@ ENDIF()
 # like $PREFIX/share/mineserver/files, I suppose.
 SET(CONFIG_DIR_DISTSOURCE files)
 
-# preprocess configuration file
-CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/configure.h.in ${PROJECT_BINARY_DIR}/include/configure.h)
-
 #
 # Include directories
 #
@@ -121,6 +118,9 @@ SET(mineserver_depends
   Noise
 )
 
+
+# preprocess configuration file
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/configure.h.in ${PROJECT_BINARY_DIR}/include/configure.h)
 
 #
 # dependency check
