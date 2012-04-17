@@ -55,6 +55,12 @@ void BlockTNT::rb(int32_t x,int8_t y,int8_t z,int map, User* user)
     Mineserver::get()->map(map)->sendBlockChange(x,y,z,0,0);
   }
   
+  if(block == BLOCK_TNT)
+  {
+    explode(user, x, y, z, map);
+    return;
+  } 
+  
   // Pickup Spawn Area
   // The integer "pickint" is used to spawn 1/5 of the blocks, otherwise there would be too much pickups!
   if(pickint == 5)
@@ -80,6 +86,10 @@ void BlockTNT::explode(User* user,int32_t x,int8_t y,int8_t z,int map)
     // But we want to be fair; let's create a pickup for the TNT block =)
     Mineserver::get()->map(map)->createPickupSpawn(x,y,z,46,1,0,user);
   } else {
+    //Remove tnt block so it doesn't mess up the explosion
+    Mineserver::get()->map(map)->setBlock(x,y,z,0,0);
+    Mineserver::get()->map(map)->sendBlockChange(x,y,z,0,0);
+    
     int number; // Counter in the for(...){...} loops.
     // Layer Y-4
   
