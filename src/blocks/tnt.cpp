@@ -32,6 +32,7 @@
 #include "logger.h"
 
 #include "tnt.h"
+#include <protocol.h>
 
 uint8_t pickint;
 
@@ -89,7 +90,7 @@ void BlockTNT::explode(User* user,int32_t x,int8_t y,int8_t z,int map)
     //Remove tnt block so it doesn't mess up the explosion
     Mineserver::get()->map(map)->setBlock(x,y,z,0,0);
     Mineserver::get()->map(map)->sendBlockChange(x,y,z,0,0);
-    
+
     int number; // Counter in the for(...){...} loops.
     // Layer Y-4
   
@@ -234,7 +235,8 @@ void BlockTNT::explode(User* user,int32_t x,int8_t y,int8_t z,int map)
     // Layer Y+4
   
   //rb(x,y+4,z,map,user);
-  
+    User::sendAll(Protocol::explosionEvent(x, y, z, 3.0));
+    
     LOG2(INFO,"TNT Block exploded!");
   }
 }
