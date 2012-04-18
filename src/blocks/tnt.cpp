@@ -46,7 +46,7 @@ void BlockTNT::rb(int32_t x,int8_t y,int8_t z,int map, User* user)
   BLOCKDROPS[block]->getDrop(item, count, meta);
 
   // Undestroyable blocks
-  if (block == BLOCK_AIR || block == BLOCK_BEDROCK || block == BLOCK_OBSIDIAN)
+  if (block == BLOCK_AIR || block == BLOCK_BEDROCK || block == BLOCK_OBSIDIAN || block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER || block == BLOCK_LAVA || block == BLOCK_STATIONARY_LAVA)
   {
     return;
   }
