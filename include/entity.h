@@ -1,3 +1,6 @@
+#ifndef ENTITY_H
+#define ENTITY_H
+
 #include <stdint.h>
 
 class Entity {
@@ -14,3 +17,5 @@ protected:
   Entity();
   Entity(int8_t type, int32_t x, int32_t y, int32_t z);
 };
+
+#endif //ENTITY_H
