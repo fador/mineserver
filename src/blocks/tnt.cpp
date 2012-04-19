@@ -33,213 +33,8 @@
 
 #include "tnt.h"
 #include <protocol.h>
-
-uint8_t pickint;
-
-void BlockTNT::rb(int32_t x,int8_t y,int8_t z,int map, User* user)
-{
-  uint8_t block, meta, count;
-  int16_t item;
-
-  Mineserver::get()->map(map)->getBlock(x,y,z,&block,&meta);
-
-  BLOCKDROPS[block]->getDrop(item, count, meta);
-
-  // Undestroyable blocks
-  if (block == BLOCK_AIR || block == BLOCK_BEDROCK || block == BLOCK_OBSIDIAN || block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER || block == BLOCK_LAVA || block == BLOCK_STATIONARY_LAVA)
-  {
-    return;
-  }
-  else
-  {
-    Mineserver::get()->map(map)->setBlock(x,y,z,0,0);
-    Mineserver::get()->map(map)->sendBlockChange(x,y,z,0,0);
-  }
-  
-  if(block == BLOCK_TNT)
-  {
-    explode(user, x, y, z, map);
-    return;
-  } 
-  
-  // Pickup Spawn Area
-  // The integer "pickint" is used to spawn 1/5 of the blocks, otherwise there would be too much pickups!
-  if(pickint == 5)
-  {
-    if(count) {
-      Mineserver::get()->map(map)->createPickupSpawn(x, y, z, item, count, meta, user);
-      pickint=0;
-    }
-  } else {
-    pickint++;
-  }
-
-}
-
-void BlockTNT::explode(User* user,int32_t x,int8_t y,int8_t z,int map)
-{
-  pickint = 0;
-  if (rand() % 9 == 5) {
-    // There is a chance of 1/10 that the TNT block does'nt explode;
-    // this is more realistic ;)
-    Mineserver::get()->map(map)->setBlock(x,y,z,0,0);
-    Mineserver::get()->map(map)->sendBlockChange(x,y,z,0,0);
-    // But we want to be fair; let's create a pickup for the TNT block =)
-    Mineserver::get()->map(map)->createPickupSpawn(x,y,z,46,1,0,user);
-  } else {
-    //Remove tnt block so it doesn't mess up the explosion
-    Mineserver::get()->map(map)->setBlock(x,y,z,0,0);
-    Mineserver::get()->map(map)->sendBlockChange(x,y,z,0,0);
-
-    int number; // Counter in the for(...){...} loops.
-    // Layer Y-4
-  
-    //rb(x,y-4,z,map,user);
-    
-    // Layer Y-3
-    
-    rb(x-1,y-3,z+1,map,user);
-    rb(x,y-3,z+1,map,user);
-    rb(x+1,y-3,z+1,map,user);
-    rb(x-1,y-3,z,map,user);
-    rb(x,y-3,z,map,user);
-    rb(x+1,y-3,z,map,user);
-    rb(x-1,y-3,z-1,map,user);
-    rb(x,y-3,z-1,map,user);
-    rb(x+1,y-3,z-1,map,user);
-  
-    // Layer Y-2
-  
-    for (number=-2; number<=2; number++) {
-      rb(x+number,y-2,z+1,map,user);
-      rb(x+number,y-2,z,map,user);
-      rb(x+number,y-2,z-1,map,user);
-    }
-  
-    rb(x-1,y-2,z+2,map,user);
-    rb(x,y-2,z+2,map,user);
-    rb(x+1,y-2,z+2,map,user);
-  
-    rb(x-1,y-2,z-2,map,user);
-    rb(x,y-2,z-2,map,user);
-    rb(x+1,y-2,z-2,map,user);
-  
-    // Layer Y-1
-  
-    rb(x-3,y-1,z+2,map,user);
-    rb(x-3,y-1,z+1,map,user);
-    rb(x-3,y-1,z,map,user);
-    rb(x-3,y-1,z-1,map,user);
-    rb(x-3,y-1,z-2,map,user);
-  
-    for (number=-2; number<=2; number++) {
-      rb(x-number,y-1,z+3,map,user);
-      rb(x-number,y-1,z+2,map,user);
-      rb(x-number,y-1,z+1,map,user);
-      rb(x-number,y-1,z,map,user);
-      rb(x-number,y-1,z-1,map,user);
-      rb(x-number,y-1,z-2,map,user);
-      rb(x-number,y-1,z-3,map,user);
-    }
-  
-    rb(x+3,y-1,z+2,map,user);
-    rb(x+3,y-1,z+1,map,user);
-    rb(x+3,y-1,z,map,user);
-    rb(x+3,y-1,z-1,map,user);
-    rb(x+3,y-1,z-2,map,user);
-  
-  
-    // Layer Y {+,-} 0, same as TNT block
-  
-    //rb(x-4,y,z,map,user);
-  
-    rb(x-3,y,z+2,map,user);
-    rb(x-3,y,z+1,map,user);
-    rb(x-3,y,z,map,user);
-    rb(x-3,y,z-1,map,user);
-    rb(x-3,y,z-2,map,user);
-  
-    for (number=-2; number<=2; number++) {
-      rb(x-number,y,z+3,map,user);
-      rb(x-number,y,z+2,map,user);
-      rb(x-number,y,z+1,map,user);
-      rb(x-number,y,z,map,user);
-      rb(x-number,y,z-1,map,user);
-      rb(x-number,y,z-2,map,user);
-      rb(x-number,y,z-3,map,user);
-    }
-  
-    rb(x+3,y,z+2,map,user);
-    rb(x+3,y,z+1,map,user);
-    rb(x+3,y,z,map,user);
-    rb(x+3,y,z-1,map,user);
-    rb(x+3,y,z-2,map,user);
-  
-  //rb(x+4,y,z,map,user);
-  
-  //rb(x,y,z+4,map,user);
-  //rb(x,y,z-4,map,user);
-  
-    // Layer Y+1
-  
-    rb(x-3,y+1,z+2,map,user);
-    rb(x-3,y+1,z+1,map,user);
-    rb(x-3,y+1,z,map,user);
-    rb(x-3,y+1,z-1,map,user);
-    rb(x-3,y+1,z-2,map,user);
-  
-    for (number=-2; number<=2; number++) {
-      rb(x-number,y+1,z+3,map,user);
-      rb(x-number,y+1,z+2,map,user);
-      rb(x-number,y+1,z+1,map,user);
-      rb(x-number,y+1,z,map,user);
-      rb(x-number,y+1,z-1,map,user);
-      rb(x-number,y+1,z-2,map,user);
-      rb(x-number,y+1,z-3,map,user);
-    }
-  
-    rb(x+3,y+1,z+2,map,user);
-    rb(x+3,y+1,z+1,map,user);
-    rb(x+3,y+1,z,map,user);
-    rb(x+3,y+1,z-1,map,user);
-    rb(x+3,y+1,z-2,map,user);
-  
-    // Layer Y+2
-  
-    for (number=-2; number<=2; number++) {
-      rb(x+number,y+2,z+1,map,user);
-      rb(x+number,y+2,z,map,user);
-      rb(x+number,y+2,z-1,map,user);
-    }
-  
-    rb(x-1,y+2,z+2,map,user);
-    rb(x,y+2,z+2,map,user);
-    rb(x+1,y+2,z+2,map,user);
-  
-    rb(x-1,y+2,z-2,map,user);
-    rb(x,y+2,z-2,map,user);
-    rb(x+1,y+2,z-2,map,user);
-  
-    // Layer Y+3
-  
-    rb(x-1,y+3,z+1,map,user);
-    rb(x,y+3,z+1,map,user);
-    rb(x+1,y+3,z+1,map,user);
-    rb(x-1,y+3,z,map,user);
-    rb(x,y+3,z,map,user);
-    rb(x+1,y+3,z,map,user);
-    rb(x-1,y+3,z-1,map,user);
-    rb(x,y+3,z-1,map,user);
-    rb(x+1,y+3,z-1,map,user);
-  
-    // Layer Y+4
-  
-  //rb(x,y+4,z,map,user);
-    User::sendAll(Protocol::explosionEvent(x, y, z, 3.0));
-    
-    LOG2(INFO,"TNT Block exploded!");
-  }
-}
+#include <vehicle.h>
+#include <explosion.h>
 
 bool BlockTNT::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
@@ -283,8 +78,23 @@ bool BlockTNT::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_
 void BlockTNT::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t block, metadata;
-  explode(user,x,y,z,map);
-  
+
+  //Remove tnt block so it doesn't mess up the explosion
+  Mineserver::get()->map(map)->setBlock(x,y,z,0,0);
+  Mineserver::get()->map(map)->sendBlockChange(x,y,z,0,0);
+
+  if (rand() % 9 == 5)
+  {
+    // There is a chance of 1/10 that the TNT block does'nt explode;
+    // this is more realistic ;)
+    // But we want to be fair; let's create a pickup for the TNT block =)
+    Mineserver::get()->map(map)->createPickupSpawn(x,y,z,46,1,0,user);
+    return;
+  } 
+
+  Vehicle primedTNT(50, x*32, y*32, z*32);
+  primedTNT.spawnToAll(); 
+  Explosion::explode(user,x,y,z,map);
 }
 
 bool BlockTNT::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
