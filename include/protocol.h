@@ -280,5 +280,12 @@ class Protocol
       }
       return ret;
     }
+    
+    static Packet spawnObject(int eid, int8_t type, int x, int y, int z)
+    {
+    Packet ret;
+    ret << (int8_t)PACKET_ADD_OBJECT << (int32_t)eid << (int8_t)type << (int32_t)x << (int32_t)y << (int32_t)z << (int32_t)0;
+    return ret;
+    }
 };
 #endif
