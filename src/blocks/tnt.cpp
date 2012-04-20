@@ -92,13 +92,25 @@ void BlockTNT::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, 
     return;
   } 
 
-  Vehicle primedTNT(50, x*32, y*32, z*32);
-  primedTNT.spawnToAll(); 
-  Explosion::explode(user,x,y,z,map);
+  tntQueue.push_front(tntTimer(x, y, z, map, user));
 }
 
 bool BlockTNT::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 {
   uint8_t block, metadata;
   return true;
+}
+
+void BlockTNT::timer200()
+{
+  if(tntQueue.size() == 0)
+  {return;}
+    if ((time(0) - tntQueue.front().timerStart) > 3)
+    {
+      tntQueue.front().primedTNT.deSpawnToAll();
+      //TODO: TNT physics so the explosion is created where the primedTNT entity is.
+      //The primedTNT entity has client-sided physics so people will notice if we screw up the server-sided pysics.
+      Explosion::explode(tntQueue.front().user, tntQueue.front().x, tntQueue.front().y, tntQueue.front().z, tntQueue.front().map);
+      tntQueue.pop_front();
+    }
 }

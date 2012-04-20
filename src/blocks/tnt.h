@@ -28,8 +28,34 @@
 #pragma once
 
 #include "basic.h"
+#include <time.h>
+#include <vehicle.h>
+#include <deque>
+#include <user.h>
 
 class User;
+
+struct tntTimer{
+  int32_t x;
+  int8_t y;
+  int32_t z;
+  time_t timerStart;
+  int map;
+  Vehicle primedTNT;
+  User *user;
+  tntTimer(int x, int8_t y, int z, int map, User *user)
+    :
+    x(x),
+    y(y),
+    z(z),
+    timerStart(time(0)),
+    map(map),
+    primedTNT(Vehicle(50,x*32,y*32,z*32)),
+    user(user)
+  {
+    primedTNT.spawnToAll();
+  }
+};
 
 class BlockTNT : public BlockBasic
 {
@@ -39,5 +65,7 @@ public:
   void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
   bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
   bool onInteract(User* user, int32_t x, int8_t y, int32_t z, int map);
-  //void timer200();
+  void timer200();
+private:
+  std::deque<tntTimer> tntQueue;
 };
