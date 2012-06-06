@@ -25,7 +25,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Signal.h"
+#include "signalhandler.h"
 #include "mineserver.h"
 #include "constants.h"
 #include "logger.h"
@@ -38,7 +38,7 @@
 #include <ctime>
 #include <signal.h>
 
-#ifndef SIGBREK
+#ifndef SIGBREAK
 # define SIGBREAK 0 // Define this for unix systems
 #endif
 char segv_location[255];
@@ -48,9 +48,11 @@ void SignalHandler(int);
 void InitSignals()
 {
   signal(SIGTERM, SignalHandler); // Justasic: Terminate signal sent by kill
+  #ifndef WIN32
   signal(SIGKILL, SignalHandler); // Justasic: Kill signal sent by kill or kernel i think
-  signal(SIGINT, SignalHandler);  // Justasic: Signal Interrupt, usually a CTRL+C at console
   signal(SIGHUP, SignalHandler);  // Justasic: Signal Hangup, typically used as a Config Rehash
+  #endif
+  signal(SIGINT, SignalHandler);  // Justasic: Signal Interrupt, usually a CTRL+C at console
   signal(SIGBREAK, SignalHandler); // Justasic: ?? is this like sigterm?
   #ifdef HAVE_BACKTRACE
   signal(SIGSEGV, SignalHandler); // Justasic: Segmentation Fault signal, used for generating segfault reports
@@ -110,11 +112,7 @@ void SignalHandler(int sig)
 {
   switch(sig)
   {
-    case SIGHUP:
-      signal(sig, SIG_IGN);
-      /* TODO: Rehash a config? hmmnn */
-      LOG2(INFO, "Received SIGHUP, rehashing..");
-      break;
+
 #ifdef HAVE_BACKTRACE
     case SIGSEGV:
       // Justasic: You can stop SIGSEGV's but I HIGHLY recommend against it unless you have good reason to.
@@ -122,16 +120,25 @@ void SignalHandler(int sig)
       HandleSegfault();
       break;
 #endif
+    #ifndef WIN32
+    case SIGHUP:
+      signal(sig, SIG_IGN);
+      /* TODO: Rehash a config? hmmnn */
+      LOG2(INFO, "Received SIGHUP, rehashing..");
+      break;
     case SIGPIPE:
       // Justasic: Ignore sigpipe since it just gets in the way.
       signal(sig, SIG_IGN);
       break;
-    case SIGINT:
     case SIGKILL:
+    #endif
+    case SIGINT:    
     case SIGBREAK:
     case SIGTERM:
       signal(sig, SIG_IGN);
+      #ifndef WIN32
       signal(SIGHUP, SIG_IGN);
+      #endif
       LOG2(INFO, "Received SIGTERM, Exiting..");
       Mineserver::get()->stop();
       break;

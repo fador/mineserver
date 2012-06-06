@@ -41,7 +41,7 @@
 #include <fstream>
 
 #include "mineserver.h"
-#include "Signal.h"
+#include "signalhandler.h"
 #include "configure.h"
 #include "constants.h"
 #include "logger.h"
@@ -722,8 +722,11 @@ bool Mineserver::run()
       }
     }
   }
-
+  #ifdef WIN32
+  closesocket(m_socketlisten);
+  #else
   close(m_socketlisten);
+  #endif
 
   saveAll();
 
