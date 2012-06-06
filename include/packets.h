@@ -98,6 +98,7 @@ enum
   PACKET_MULTI_BLOCK_CHANGE        = 0x34,
   PACKET_BLOCK_CHANGE              = 0x35,
   PACKET_PLAY_NOTE                 = 0x36,
+  PACKET_EXPLOSION                 = 0x3c,
   PACKET_OPEN_WINDOW               = 0x64,
   PACKET_PROGRESS_BAR              = 0x69,
   PACKET_TRANSACTION               = 0x6a,

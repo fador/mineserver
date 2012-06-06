@@ -262,5 +262,30 @@ class Protocol
       }      
       return ret;
     }
+    
+    static Packet explosionEvent(double x, double y, double z, float radius)
+    {
+      Packet ret;
+      ret << (int8_t)PACKET_EXPLOSION << x << y << z << radius << 27;
+      for (int i = 0; i < 3; i++){
+        ret << (int8_t)i << (int8_t)0 << (int8_t)0;
+        ret << (int8_t)i << (int8_t)0 << (int8_t)1;
+        ret << (int8_t)i << (int8_t)0 << (int8_t)2;
+        ret << (int8_t)i << (int8_t)1 << (int8_t)0;
+        ret << (int8_t)i << (int8_t)1 << (int8_t)1;
+        ret << (int8_t)i << (int8_t)1 << (int8_t)2;
+        ret << (int8_t)i << (int8_t)2 << (int8_t)0;
+        ret << (int8_t)i << (int8_t)2 << (int8_t)1;
+        ret << (int8_t)i << (int8_t)2 << (int8_t)2;
+      }
+      return ret;
+    }
+    
+    static Packet spawnObject(int eid, int8_t type, int x, int y, int z)
+    {
+    Packet ret;
+    ret << (int8_t)PACKET_ADD_OBJECT << (int32_t)eid << (int8_t)type << (int32_t)x << (int32_t)y << (int32_t)z << (int32_t)0;
+    return ret;
+    }
 };
 #endif

@@ -28,17 +28,44 @@
 #pragma once
 
 #include "basic.h"
+#include <time.h>
+#include <vehicle.h>
+#include <deque>
+#include <user.h>
 
 class User;
+
+struct tntTimer{
+  int32_t x;
+  int8_t y;
+  int32_t z;
+  time_t timerStart;
+  int map;
+  Vehicle primedTNT;
+  User *user;
+  tntTimer(int x, int8_t y, int z, int map, User *user)
+    :
+    x(x),
+    y(y),
+    z(z),
+    timerStart(time(0)),
+    map(map),
+    primedTNT(Vehicle(50,x*32,y*32,z*32)),
+    user(user)
+  {
+    primedTNT.spawnToAll();
+  }
+};
 
 class BlockTNT : public BlockBasic
 {
 public:
   inline bool affectedBlock(int block) const { return block == BLOCK_TNT; }
 
-  void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int map, int32_t z, int8_t direction);
+  void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
   bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
   bool onInteract(User* user, int32_t x, int8_t y, int32_t z, int map);
-  void rb(int32_t x,int8_t y,int8_t z,int map,User* user); // rb=Remove Block
-  void explode(User* user, int32_t x, int8_t y, int8_t z, int map);
+  void timer200();
+private:
+  std::deque<tntTimer> tntQueue;
 };
