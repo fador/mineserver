@@ -101,6 +101,7 @@ std::string removeChar(std::string str, const char* c)
 }
 
 // What is the purpose of "code"? -- louisdx
+// God I have no clue.. some day someone will fix it - Justasic
 int printHelp(int code)
 {
   std::cout
@@ -115,104 +116,14 @@ int printHelp(int code)
   return code;
 }
 
-
+// Main :D
 int main(int argc, char* argv[])
 {
-  InitSignals();
-
-  std::srand((uint32_t)std::time(NULL));
-  initPRNG();
-
-  std::string cfg;
-  std::vector<std::string> overrides;
-
-  for (int i = 1; i < argc; i++)
-  {
-    const std::string arg(argv[i]);
-
-    switch (arg[0])
-    {
-    case '-':   // option
-      // we have only '-h' and '--help' now, so just return with help
-      return printHelp(EXIT_SUCCESS);
-
-    case '+':   // override
-      overrides.push_back(arg.substr(1));
-      break;
-
-    default:    // otherwise, it is config file
-      if (!cfg.empty())
-      {
-        LOG2(ERROR, "Only single CONFIG_FILE argument is allowed!");
-        return EXIT_FAILURE;
-      }
-      cfg = arg;
-      break;
-    }
-  }
-
-  const std::string path_exe = pathOfExecutable();
-
-  // If config file is provided as an argument
-  if (!cfg.empty())
-  {
-    std::cout << "Searching for configuration file..." << std::endl;
-    if (fileExists(cfg))
-    {
-      const std::pair<std::string, std::string> fullpath = pathOfFile(cfg);
-      cfg = fullpath.first + PATH_SEPARATOR + fullpath.second;
-      ServerInstance->config()->config_path = fullpath.first;
-    }
-    else
-    {
-      std::cout << "Config not found...\n";;
-      cfg.clear();
-    }
-  }
-  
-  if (cfg.empty())
-  {
-    if (fileExists(path_exe + PATH_SEPARATOR + CONFIG_FILE))
-    {
-      cfg = path_exe + PATH_SEPARATOR + CONFIG_FILE;
-      ServerInstance->config()->config_path = path_exe;
-    }
-    else
-    {
-      std::cout << "Config not found\n";
-    }
-  }
-    
-  // load config
-  Config & config = *ServerInstance->config();
-  if (!config.load(cfg))
-  {
-    return EXIT_FAILURE;
-  }
-
-  LOG2(INFO, "Using config: " + cfg);
-  
-  if (overrides.size())
-  {
-    std::stringstream override_config;
-    for (size_t i = 0; i < overrides.size(); i++)
-    {
-      LOG2(INFO, "Overriden: " + overrides[i]);
-      override_config << overrides[i] << ';' << std::endl;
-    }
-    // override config
-    if (!config.load(override_config))
-    {
-      LOG2(ERROR, "Error when parsing overrides: maybe you forgot to doublequote string values?");
-      return EXIT_FAILURE;
-    }
-  }
-
   bool ret = false;
   // Try and start a new server instance
   try
   {
-    ServerInstance = new Mineserver();
+    ServerInstance = new Mineserver(argc, argv);
     ret = ServerInstance->run();
   }
   catch (const CoreException &e)
@@ -227,7 +138,7 @@ int main(int argc, char* argv[])
 }
 
 
-Mineserver::Mineserver()
+Mineserver::Mineserver(int args, char **argarray)
   :  m_socketlisten  (0),
      m_saveInterval  (0),
      m_lastSave      (std::time(NULL)),
@@ -236,6 +147,8 @@ Mineserver::Mineserver()
      m_only_helmets  (false),
      m_running       (false),
      m_eventBase     (NULL),
+     argc(args),
+     argv(argarray),
 
      // core modules
      m_config        (new Config()),
@@ -249,6 +162,91 @@ Mineserver::Mineserver()
      m_inventory     (NULL),
      m_mobs          (NULL)
 {
+  InitSignals();
+  
+  std::srand((uint32_t)std::time(NULL));
+  initPRNG();
+  
+  std::string cfg;
+  std::vector<std::string> overrides;
+  
+  for (int i = 1; i < argc; i++)
+  {
+    const std::string arg(argv[i]);
+    
+    switch (arg[0])
+    {
+      case '-':   // option
+      // we have only '-h' and '--help' now, so just return with help
+      printHelp(0);
+      throw CoreException();
+      
+      case '+':   // override
+      overrides.push_back(arg.substr(1));
+      break;
+      
+      default:    // otherwise, it is config file
+      if (!cfg.empty())
+	throw CoreException("Only single CONFIG_FILE argument is allowed!");
+      cfg = arg;
+      break;
+    }
+  }
+  
+  const std::string path_exe = pathOfExecutable();
+  
+  // If config file is provided as an argument
+  if (!cfg.empty())
+  {
+    std::cout << "Searching for configuration file..." << std::endl;
+    if (fileExists(cfg))
+    {
+      const std::pair<std::string, std::string> fullpath = pathOfFile(cfg);
+      cfg = fullpath.first + PATH_SEPARATOR + fullpath.second;
+      this->config()->config_path = fullpath.first;
+    }
+    else
+    {
+      std::cout << "Config not found...\n";;
+      cfg.clear();
+    }
+  }
+  
+  if (cfg.empty())
+  {
+    if (fileExists(path_exe + PATH_SEPARATOR + CONFIG_FILE))
+    {
+      cfg = path_exe + PATH_SEPARATOR + CONFIG_FILE;
+      this->config()->config_path = path_exe;
+    }
+    else
+    {
+      std::cout << "Config not found\n";
+    }
+  }
+  
+  // load config
+  Config &configvar = *this->config();
+  if (!configvar.load(cfg))
+  {
+    throw CoreException("Could not load config!");
+  }
+  
+  LOG2(INFO, "Using config: " + cfg);
+  
+  if (overrides.size())
+  {
+    std::stringstream override_config;
+    for (size_t i = 0; i < overrides.size(); i++)
+    {
+      LOG2(INFO, "Overriden: " + overrides[i]);
+      override_config << overrides[i] << ';' << std::endl;
+    }
+    // override config
+    if (!configvar.load(override_config))
+      throw CoreException("Error when parsing overrides: maybe you forgot to doublequote string values?");
+  }
+  
   memset(&m_listenEvent, 0, sizeof(event));
   initConstants();
   // Write PID to file
@@ -330,7 +328,7 @@ Mineserver::Mineserver()
   m_inventory      = new Inventory(m_config->sData("system.path.data") + '/' + "recipes", ".recipe", "ENABLED_RECIPES.cfg");
   m_mobs           = new Mobs;
 
-}
+} // End Mineserver constructor
 
 Mineserver::~Mineserver()
 {

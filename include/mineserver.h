@@ -51,27 +51,44 @@
 #include "plugin_api.h"
 #undef MINESERVER
 
-
 struct event_base;
 
 class Mineserver
 {
 public:
-  Mineserver();
+  // Variables
+  char** argv;
+  int argc;
+  int m_socketlisten;
+  int m_saveInterval;
+  time_t m_lastSave;
+  bool m_pvp_enabled;
+  bool m_damage_enabled;
+  bool m_only_helmets;
+  struct event m_listenEvent;
 
+  // Constructor/Destructor
+  Mineserver(int, char**);
+  ~Mineserver();
+
+  // Non-inline functions
+  bool run();
+  bool stop();
+  event_base* getEventBase();
+  Map* map(size_t n) const;
+  void saveAllPlayers();
+  void saveAll();
+  size_t getLoggedUsersCount();
+  bool configDirectoryPrepare(const std::string& path);
+  
   static uint32_t generateEID()
   {
     static uint32_t m_EID = 0;
     return ++m_EID;
   }
 
-  ~Mineserver();
-
-  bool run();
-  bool stop();
-
-  event_base* getEventBase();
-
+  // Inline functions
+  // Get the total number of connected users
   inline std::set<User*>& users()
   {
     return m_users;
@@ -82,107 +99,114 @@ public:
     return m_users;
   }
 
-  struct event m_listenEvent;
-  int m_socketlisten;
-
-  int    m_saveInterval;
-  time_t m_lastSave;
-
-  bool m_pvp_enabled;
-  bool m_damage_enabled;
-  bool m_only_helmets;
-
-  Map* map(size_t n) const;
   inline void setMap(Map* map, size_t n = 0)
   {
     m_map[n] = map;
   }
+  
   inline size_t mapCount()
   {
     return m_map.size();
   }
+  
   inline Chat* chat() const
   {
     return m_chat;
   }
+  
   inline void setChat(Chat* chat)
   {
     m_chat = chat;
   }
+  
   inline Mobs* mobs() const
   {
     return m_mobs;
   }
+  
   inline Plugin* plugin() const
   {
     return m_plugin;
   }
+  
   inline void setPlugin(Plugin* plugin)
   {
     m_plugin = plugin;
   }
+  
   inline std::tr1::shared_ptr<Screen> screen() const
   {
     return m_screen;
   }
+  
   inline void setScreen(std::tr1::shared_ptr<Screen> screen)
   {
     m_screen = screen;
   }
+  
   inline Physics* physics(size_t n) const
   {
     return m_physics[n];
   }
+
+  // Get the configuration pointer
   inline std::tr1::shared_ptr<Config> config() const
   {
     return m_config;
   }
+
+  // Set a pointer to the configuration file
   inline void setConfig(std::tr1::shared_ptr<Config> config)
   {
     m_config = config;
   }
+
   inline FurnaceManager* furnaceManager() const
   {
     return m_furnaceManager;
   }
+  
   inline void setFurnaceManager(FurnaceManager* furnaceManager)
   {
     m_furnaceManager = furnaceManager;
   }
+  
   inline PacketHandler* packetHandler() const
   {
     return m_packetHandler;
   }
+  
   inline void setPacketHandler(PacketHandler* packetHandler)
   {
     m_packetHandler = packetHandler;
   }
+  
   inline MapGen* mapGen(size_t n) const
   {
     return m_mapGen[n];
   }
+  
   inline std::tr1::shared_ptr<Logger> logger() const
   {
     return m_logger;
   }
+
+  // Set the logger to use
   inline void setLogger(std::tr1::shared_ptr<Logger> logger)
   {
     m_logger = logger;
   }
+  
   inline Inventory* inventory() const
   {
     return m_inventory;
   }
+
+  // Set a pointer to the inventory
   inline void setInventory(Inventory* inventory)
   {
     m_inventory = m_inventory;
   }
-
-  void saveAllPlayers();
-  void saveAll();
-  size_t getLoggedUsersCount();
-
-  bool configDirectoryPrepare(const std::string& path);
 
 private:
 
