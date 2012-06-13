@@ -35,7 +35,7 @@
 void BlockDoor::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t block, metadata;
-  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
+  ServerInstance->map(map)->getBlock(x, y, z, &block, &metadata);
   
   if (block != BLOCK_IRON_DOOR)
   {
@@ -46,10 +46,10 @@ void BlockDoor::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y,
   uint8_t metadata2, block2;
 
   int modifier = ((metadata & 0x8) == 0x8) ? -1 : 1;
-  Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)block, metadata);
+  ServerInstance->map(map)->setBlock(x, y, z, block, metadata);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)block, metadata);
 
-  Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
+  ServerInstance->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
 
   if (block2 == block)
   {
@@ -62,8 +62,8 @@ void BlockDoor::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y,
       metadata2 ^= 0x4;
     }
 
-    Mineserver::get()->map(map)->setBlock(x, y + modifier, z, block2, metadata2);
-    Mineserver::get()->map(map)->sendBlockChange(x, y + modifier, z, (char)block, metadata2);
+    ServerInstance->map(map)->setBlock(x, y + modifier, z, block2, metadata2);
+    ServerInstance->map(map)->sendBlockChange(x, y + modifier, z, (char)block, metadata2);
   }
   }
 }
@@ -82,19 +82,19 @@ bool BlockDoor::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
   // get block info
   uint8_t block, metadata;
   uint8_t metadata2, block2;
-  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
+  ServerInstance->map(map)->getBlock(x, y, z, &block, &metadata);
   // check if block is the upper part of the door
   int modifier = ((metadata & 0x8) == 0x8) ? -1 : 1;
-  Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
+  ServerInstance->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
   // if upper part, remove it
   if (block2 == block)
   {
-    Mineserver::get()->map(map)->setBlock(x, y + modifier, z, BLOCK_AIR, 0);
-    Mineserver::get()->map(map)->sendBlockChange(x, y + modifier, z, BLOCK_AIR, 0);
+    ServerInstance->map(map)->setBlock(x, y + modifier, z, BLOCK_AIR, 0);
+    ServerInstance->map(map)->sendBlockChange(x, y + modifier, z, BLOCK_AIR, 0);
   }
   // remove lower part
-  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  ServerInstance->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
   this->spawnBlockItem(x, y, z, map, block, 0);
   return false;
 }
@@ -104,11 +104,11 @@ void BlockDoor::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
   // get block info
   uint8_t block, metadata;
   uint8_t metadata2, block2;
-  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
+  ServerInstance->map(map)->getBlock(x, y, z, &block, &metadata);
   // check if block is the upper part of the door
   int modifier = ((metadata & 0x8) == 0x8) ? -1 : 1;
 
-  Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
+  ServerInstance->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
   if (metadata & 0x4)
   {
     metadata &= (0x8 | 0x3);
@@ -125,11 +125,11 @@ void BlockDoor::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
   // break the door if the block is below it
   if (direction == BLOCK_TOP && (block == BLOCK_WOODEN_DOOR || block == BLOCK_IRON_DOOR))
   {
-    Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-    Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+    ServerInstance->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+    ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
     this->spawnBlockItem(x, y, z, map, block, 0);
 
-    Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
+    ServerInstance->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
 
     if (block2 == block)
     {
@@ -144,8 +144,8 @@ void BlockDoor::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
         metadata2 |= 0x8;
       }
 
-      Mineserver::get()->map(map)->setBlock(x, y + modifier, z, BLOCK_AIR, 0);
-      Mineserver::get()->map(map)->sendBlockChange(x, y + modifier, z, BLOCK_AIR, 0);
+      ServerInstance->map(map)->setBlock(x, y + modifier, z, BLOCK_AIR, 0);
+      ServerInstance->map(map)->sendBlockChange(x, y + modifier, z, BLOCK_AIR, 0);
     }
   }
 }
@@ -155,7 +155,7 @@ bool BlockDoor::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -219,14 +219,14 @@ bool BlockDoor::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
     break;
   }
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+  ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, direction);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
 
   /* Get correct direction for top of the door */
   direction ^= 8;
 
-  Mineserver::get()->map(map)->setBlock(x, y + 1, z, (char)newblock, direction);
-  Mineserver::get()->map(map)->sendBlockChange(x, y + 1, z, (char)newblock, direction);
+  ServerInstance->map(map)->setBlock(x, y + 1, z, (char)newblock, direction);
+  ServerInstance->map(map)->sendBlockChange(x, y + 1, z, (char)newblock, direction);
   return false;
 }
 
@@ -242,13 +242,13 @@ bool BlockDoor::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 {
   uint8_t block, metadata;
   uint8_t metadata2, block2;
-  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
+  ServerInstance->map(map)->getBlock(x, y, z, &block, &metadata);
   int modifier = ((metadata & 0x8) == 0x8) ? -1 : 1;
 
   if (block != BLOCK_IRON_DOOR)
   {
 
-  Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
+  ServerInstance->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
   if (metadata & 0x4)
   {
     metadata &= (0x8 | 0x3);
@@ -258,10 +258,10 @@ bool BlockDoor::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
     metadata |= 0x4;
   }
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)block, metadata);
+  ServerInstance->map(map)->setBlock(x, y, z, block, metadata);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)block, metadata);
 
-  Mineserver::get()->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
+  ServerInstance->map(map)->getBlock(x, y + modifier, z, &block2, &metadata2);
 
   if (block2 == block)
   {
@@ -276,8 +276,8 @@ bool BlockDoor::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
       metadata2 |= 0x8;
     }
 
-    Mineserver::get()->map(map)->setBlock(x, y + modifier, z, block2, metadata2);
-    Mineserver::get()->map(map)->sendBlockChange(x, y + modifier, z, (char)block, metadata2);
+    ServerInstance->map(map)->setBlock(x, y + modifier, z, block2, metadata2);
+    ServerInstance->map(map)->sendBlockChange(x, y + modifier, z, (char)block, metadata2);
   }
  }
   return false;

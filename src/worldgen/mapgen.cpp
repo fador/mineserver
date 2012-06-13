@@ -79,16 +79,16 @@ void MapGen::init(int seed)
   treenoise.SetLacunarity(2.0);
 
   //###### END TREE GEN #######
-  seaLevel = Mineserver::get()->config()->iData("mapgen.sea.level");
-  addTrees = Mineserver::get()->config()->bData("mapgen.trees.enabled");
-  expandBeaches = Mineserver::get()->config()->bData("mapgen.beaches.expand");
-  beachExtent = Mineserver::get()->config()->iData("mapgen.beaches.extent");
-  beachHeight = Mineserver::get()->config()->iData("mapgen.beaches.height");
+  seaLevel = ServerInstance->config()->iData("mapgen.sea.level");
+  addTrees = ServerInstance->config()->bData("mapgen.trees.enabled");
+  expandBeaches = ServerInstance->config()->bData("mapgen.beaches.expand");
+  beachExtent = ServerInstance->config()->iData("mapgen.beaches.extent");
+  beachHeight = ServerInstance->config()->iData("mapgen.beaches.height");
 
-  addOre = Mineserver::get()->config()->bData("mapgen.addore");
-  addCaves = Mineserver::get()->config()->bData("mapgen.caves.enabled");
+  addOre = ServerInstance->config()->bData("mapgen.addore");
+  addCaves = ServerInstance->config()->bData("mapgen.caves.enabled");
 
-  winterEnabled = Mineserver::get()->config()->bData("mapgen.winter.enabled");
+  winterEnabled = ServerInstance->config()->bData("mapgen.winter.enabled");
 
 }
 
@@ -102,7 +102,7 @@ void MapGen::re_init(int seed)
 
 void MapGen::generateFlatgrass(int x, int z, int map)
 {
-  sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
+  sChunk* chunk = ServerInstance->map(map)->getChunk(x, z);
   Block top = BLOCK_GRASS;
   if (winterEnabled)
   {
@@ -164,7 +164,7 @@ void MapGen::generateChunk(int x, int z, int map)
   chunk->nbt = main;
   chunk->x = x;
   chunk->z = z;
-  Mineserver::get()->map(map)->chunks.insert(ChunkMap::value_type(ChunkMap::key_type(x, z), chunk));
+  ServerInstance->map(map)->chunks.insert(ChunkMap::value_type(ChunkMap::key_type(x, z), chunk));
 
   memset(chunk->blocks, 0, 16*16*256);
   memset(chunk->addblocks, 0, 16*16*256/2);
@@ -173,7 +173,7 @@ void MapGen::generateChunk(int x, int z, int map)
   memset(chunk->skylight, 0, 16*16*256/2);
   chunk->chunks_present = 0xffff;
 
-  if (Mineserver::get()->config()->bData("mapgen.flatgrass"))
+  if (ServerInstance->config()->bData("mapgen.flatgrass"))
   {
     generateFlatgrass(x, z, map);
   }
@@ -184,12 +184,12 @@ void MapGen::generateChunk(int x, int z, int map)
 
 
   // Update last used time
-  //Mineserver::get()->map()->mapLastused[chunkid] = (int)time(0);
+  //ServerInstance->map()->mapLastused[chunkid] = (int)time(0);
 
   // Not changed
-  chunk->changed = Mineserver::get()->config()->bData("map.save_unchanged_chunks");
+  chunk->changed = ServerInstance->config()->bData("map.save_unchanged_chunks");
 
-  //Mineserver::get()->map()->maps[chunkid].nbt = main;
+  //ServerInstance->map()->maps[chunkid].nbt = main;
   
   if (addOre)
   {
@@ -248,7 +248,7 @@ void MapGen::AddTrees(int x, int z, int map)
       blockZ = b + zBlockpos;
       blockY = heightmap[(b << 4) + a] + 1;
 
-      Mineserver::get()->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
+      ServerInstance->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
 
       // No trees on water, sand or air
       if (block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER && block != BLOCK_SAND && block != BLOCK_AIR)
@@ -274,7 +274,7 @@ void MapGen::generateWithNoise(int x, int z, int map)
   gettimeofday(&start, NULL);
 #endif
 #endif
-  sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
+  sChunk* chunk = ServerInstance->map(map)->getChunk(x, z);
 
   // Winterland or Summerland
   Block topBlock = winterEnabled ? BLOCK_SNOW : BLOCK_GRASS;
@@ -361,17 +361,17 @@ void MapGen::generateWithNoise(int x, int z, int map)
 #ifdef PRINT_MAPGEN_TIME
 #ifdef WIN32
   t_end = timeGetTime();
-  Mineserver::get()->logger()->log("Mapgen: " + dtos(t_end - t_begin) + "ms");
+  ServerInstance->logger()->log("Mapgen: " + dtos(t_end - t_begin) + "ms");
 #else
   gettimeofday(&end, NULL);
-  Mineserver::get()->logger()->log("Mapgen: " + dtos(end.tv_usec - start.tv_usec));
+  ServerInstance->logger()->log("Mapgen: " + dtos(end.tv_usec - start.tv_usec));
 #endif
 #endif
 }
 
 void MapGen::ExpandBeaches(int x, int z, int map)
 {
-  sChunk* chunk = Mineserver::get()->map(map)->getChunk(blockToChunk(x), blockToChunk(z));
+  sChunk* chunk = ServerInstance->map(map)->getChunk(blockToChunk(x), blockToChunk(z));
   int beachExtentSqr = (beachExtent + 1) * (beachExtent + 1);
   int xBlockpos = x << 4;
   int zBlockpos = z << 4;
@@ -425,15 +425,15 @@ void MapGen::ExpandBeaches(int x, int z, int map)
       }
       if (found)
       {
-        Mineserver::get()->map(map)->sendBlockChange(blockX, h, blockZ, BLOCK_SAND, 0);
-        Mineserver::get()->map(map)->setBlock(blockX, h, blockZ, BLOCK_SAND, 0);
+        ServerInstance->map(map)->sendBlockChange(blockX, h, blockZ, BLOCK_SAND, 0);
+        ServerInstance->map(map)->setBlock(blockX, h, blockZ, BLOCK_SAND, 0);
 
-        Mineserver::get()->map(map)->getBlock(blockX, h - 1, blockZ, &block, &meta);
+        ServerInstance->map(map)->getBlock(blockX, h - 1, blockZ, &block, &meta);
 
         if (h > 0 && block == BLOCK_DIRT)
         {
-          Mineserver::get()->map(map)->sendBlockChange(blockX, h - 1, blockZ, BLOCK_SAND, 0);
-          Mineserver::get()->map(map)->setBlock(blockX, h - 1, blockZ, BLOCK_SAND, 0);
+          ServerInstance->map(map)->sendBlockChange(blockX, h - 1, blockZ, BLOCK_SAND, 0);
+          ServerInstance->map(map)->setBlock(blockX, h - 1, blockZ, BLOCK_SAND, 0);
         }
       }
     }
@@ -442,7 +442,7 @@ void MapGen::ExpandBeaches(int x, int z, int map)
 
 void MapGen::AddOre(int x, int z, int map, uint8_t type)
 {
-  sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
+  sChunk* chunk = ServerInstance->map(map)->getChunk(x, z);
 
   int blockX, blockY, blockZ;
   uint8_t block;

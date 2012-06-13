@@ -36,7 +36,7 @@ bool BlockWorkbench::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, 
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -68,13 +68,13 @@ bool BlockWorkbench::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, 
     return true;
   }
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+  ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, direction);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
   return false;
 }
 
 bool BlockWorkbench::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 {
-  Mineserver::get()->inventory()->windowOpen(user, WINDOW_WORKBENCH, x, y, z);
+  ServerInstance->inventory()->windowOpen(user, WINDOW_WORKBENCH, x, y, z);
   return true;
 }

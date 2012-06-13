@@ -97,11 +97,11 @@ extern "C" void client_callback(int fd, short ev, void* arg)
     while (user->buffer >> (int8_t&)user->action)
     {      
       //Variable len package
-      if (Mineserver::get()->packetHandler()->packets[user->action].len == PACKET_VARIABLE_LEN)
+      if (ServerInstance->packetHandler()->packets[user->action].len == PACKET_VARIABLE_LEN)
       {
         //Call specific function
         const bool disconnecting = user->action == 0xFF;
-        const int curpos = Mineserver::get()->packetHandler()->packets[user->action].function(user);
+        const int curpos = ServerInstance->packetHandler()->packets[user->action].function(user);
 
         if (curpos == PACKET_NEED_MORE_DATA)
         {
@@ -117,7 +117,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
           return;
         }
       }
-      else if (Mineserver::get()->packetHandler()->packets[user->action].len == PACKET_DOES_NOT_EXIST)
+      else if (ServerInstance->packetHandler()->packets[user->action].len == PACKET_DOES_NOT_EXIST)
       {
         std::ostringstream str;
         str << "Unknown action: 0x" << std::hex << (unsigned int)(user->action);
@@ -130,7 +130,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
       else
       {
         //Check that the buffer has enough data before calling the function
-        if (!user->buffer.haveData(Mineserver::get()->packetHandler()->packets[user->action].len))
+        if (!user->buffer.haveData(ServerInstance->packetHandler()->packets[user->action].len))
         {
           user->waitForData = true;
           event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
@@ -139,7 +139,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
         }
 
         //Call specific function
-        Mineserver::get()->packetHandler()->packets[user->action].function(user);
+        ServerInstance->packetHandler()->packets[user->action].function(user);
       }
     } // while(user->buffer)
   }

@@ -51,14 +51,14 @@ bool BlockSnow::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
   uint8_t block;
   uint8_t meta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &block, &meta))
   {
     revertBlock(user, x, y, z, map);
     return true;
   }
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  ServerInstance->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
   this->spawnBlockItem(x, y, z, map, block, meta);
   return false;
 }
@@ -68,15 +68,15 @@ void BlockSnow::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
   uint8_t block;
   uint8_t meta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &block, &meta))
   {
     return;
   }
 
   if (direction == BLOCK_TOP && this->isBlockEmpty(x, y - 1, z, map))
   {
-    Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-    Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+    ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+    ServerInstance->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
     this->spawnBlockItem(x, y, z, map, block, 0);
   }
 }
@@ -86,7 +86,7 @@ bool BlockSnow::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -112,8 +112,8 @@ bool BlockSnow::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
     return true;
   }
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+  ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, direction);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
   return false;
 }
 

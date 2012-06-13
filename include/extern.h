@@ -1,6 +1,6 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
-   All rights reserved.
+  Copyright (c) 2011-2012, The Mineserver Project
+  All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -23,42 +23,38 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-#ifndef _LOGGER_H
-#define _LOGGER_H
+// NOTICE: These are for EXTERNAL GLOBAL VARIABLES ONLY!
 
-//
-// Mineserver logger.h
-//
-#include <string>
+// NOTE: this is to be used with all classes that are considered "API" for plugins
+#ifndef EXTERN_H
+#define EXTERN_H
 
-#include "logtype.h"
-#include "tools.h"
-
-#define LOGLF(msg) ServerInstance->logger()->log(msg, std::string(__FILE__), __LINE__)
-
-#define LOG(type, source, msg) ServerInstance->logger()->log(LogType::LOG_##type, source, msg)
-
-
-// TODO: winex: log(type, file, line, msg) might be better than this
-#define LOG_FILENAME std::string(__FILE__).substr(std::string(__FILE__).rfind(PATH_SEPARATOR) + 1)
-#ifdef DEBUG
-#define LOG_FORMAT   LOG_FILENAME + ":" + dtos(__LINE__) + "::" + std::string(__FUNCTION__) + "()"
+#include "SystemExceptions.h"
+#ifndef _WIN32
+# define CoreExport
 #else
-#define LOG_FORMAT   LOG_FILENAME + "::" + std::string(__FUNCTION__) + "()"
+# define CoreExport __declspec(dllimport)
 #endif
+#define E extern CoreExport
 
-#define LOG2(type, msg) ServerInstance->logger()->log(LogType::LOG_##type, LOG_FORMAT, msg)
+class Mineserver;
+class User;
+class Map;
+class Chat;
+class Plugin;
+class Screen;
+class Config;
+class FurnaceManager;
+class PacketHandler;
+class Physics;
+class MapGen;
+class Logger;
+class Inventory;
+class Mobs;
+class Mob;
 
-
-class Logger
-{
-public:
-  void log(const std::string& message, const std::string& file, int line);
-  void log(LogType::LogType type, const std::string& source, const std::string& message);
-  void log(LogType::LogType type, const std::string& source, const char* message, ...);
-
-};
+E Mineserver *ServerInstance;
 
 #endif

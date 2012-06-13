@@ -260,7 +260,7 @@ std::string relativeToAbsolute(std::string pathname)
   /// This is a very crude way to check if the path is relative.
   /// We must replace this by a more portable "pathIsRelative()" check.
   if (!pathname.empty() && pathname[0] != PATH_SEPARATOR && pathname[0] != '~')
-    pathname = Mineserver::get()->config()->config_path + PATH_SEPARATOR + pathname;
+    pathname = ServerInstance->config()->config_path + PATH_SEPARATOR + pathname;
 
   pathname = canonicalizePath(pathname);
 

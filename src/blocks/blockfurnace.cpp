@@ -36,7 +36,7 @@ bool BlockFurnace::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -88,13 +88,13 @@ bool BlockFurnace::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
   //  break;
   //}
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+  ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, direction);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
 
 
   int chunk_x = blockToChunk(x);
   int chunk_z = blockToChunk(z);
-  sChunk* chunk = Mineserver::get()->map(map)->loadMap(chunk_x, chunk_z);
+  sChunk* chunk = ServerInstance->map(map)->loadMap(chunk_x, chunk_z);
 
   if (chunk == NULL)
   {
@@ -118,7 +118,7 @@ bool BlockFurnace::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
 
 bool BlockFurnace::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 {
-  Mineserver::get()->inventory()->windowOpen(user, WINDOW_FURNACE, x, y, z);
+  ServerInstance->inventory()->windowOpen(user, WINDOW_FURNACE, x, y, z);
   return true;
 }
 
@@ -128,7 +128,7 @@ bool BlockFurnace::onBroken(User* user, int8_t status, int32_t x, int8_t y, int3
   uint8_t block;
   uint8_t meta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &block, &meta))
   {
     return true;
   }
@@ -138,7 +138,7 @@ bool BlockFurnace::onBroken(User* user, int8_t status, int32_t x, int8_t y, int3
   int chunk_x = blockToChunk(x);
   int chunk_z = blockToChunk(z);
 
-  sChunk* chunk = Mineserver::get()->map(map)->loadMap(chunk_x, chunk_z);
+  sChunk* chunk = ServerInstance->map(map)->loadMap(chunk_x, chunk_z);
 
   if (chunk == NULL)
   {
@@ -156,8 +156,8 @@ bool BlockFurnace::onBroken(User* user, int8_t status, int32_t x, int8_t y, int3
     }
   }
 
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  ServerInstance->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
   this->spawnBlockItem(x, y, z, map, block);
   return false;
 }

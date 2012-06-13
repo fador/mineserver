@@ -253,7 +253,7 @@ class Protocol
       Packet ret;
 
       //ToDo: Add admin/moderator coloring
-      for (std::set<User*>::const_iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
+      for (std::set<User*>::const_iterator it = ServerInstance->users().begin(); it != ServerInstance->users().end(); ++it)
       { 
         if((*it)->nick.length() > 0)
         {

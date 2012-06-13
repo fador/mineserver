@@ -88,11 +88,7 @@ int setnonblock(int fd)
   return 1;
 }
 
-// // Handle signals
-// void sighandler(int sig_num)
-// {
-//   Mineserver::get()->stop();
-// }
+Mineserver *ServerInstance = NULL;
 
 std::string removeChar(std::string str, const char* c)
 {
@@ -122,15 +118,6 @@ int printHelp(int code)
 
 int main(int argc, char* argv[])
 {
-//   signal(SIGTERM, sighandler);
-//   signal(SIGINT, sighandler);
-// 
-// #ifndef WIN32
-//   // Justasic: use SIG_IGN instead of a blank and useless function
-//   signal(SIGPIPE, SIG_IGN);
-// #else
-//   signal(SIGBREAK, sighandler);
-// #endif
   InitSignals();
 
   std::srand((uint32_t)std::time(NULL));
@@ -169,12 +156,12 @@ int main(int argc, char* argv[])
   // If config file is provided as an argument
   if (!cfg.empty())
   {
-	std::cout << "Searching for configuration file..." << std::endl;
+    std::cout << "Searching for configuration file..." << std::endl;
     if (fileExists(cfg))
     {
       const std::pair<std::string, std::string> fullpath = pathOfFile(cfg);
       cfg = fullpath.first + PATH_SEPARATOR + fullpath.second;
-      Mineserver::get()->config()->config_path = fullpath.first;
+      ServerInstance->config()->config_path = fullpath.first;
     }
     else
     {
@@ -188,7 +175,7 @@ int main(int argc, char* argv[])
     if (fileExists(path_exe + PATH_SEPARATOR + CONFIG_FILE))
     {
       cfg = path_exe + PATH_SEPARATOR + CONFIG_FILE;
-      Mineserver::get()->config()->config_path = path_exe;
+      ServerInstance->config()->config_path = path_exe;
     }
     else
     {
@@ -197,7 +184,7 @@ int main(int argc, char* argv[])
   }
     
   // load config
-  Config & config = *Mineserver::get()->config();
+  Config & config = *ServerInstance->config();
   if (!config.load(cfg))
   {
     return EXIT_FAILURE;
@@ -221,19 +208,21 @@ int main(int argc, char* argv[])
     }
   }
 
-  bool ret = Mineserver::get()->init();
+  bool ret = false;
+  // Try and start a new server instance
+  try
+  {
+    ServerInstance = new Mineserver();
+    ret = ServerInstance->run();
+  }
+  catch (const CoreException &e)
+  {
+    LOG2(ERROR, e.GetReason());
+    return EXIT_FAILURE;
+  }
+
+  delete ServerInstance;
   
-  if (!ret)
-  {
-    LOG2(ERROR, "Failed to start Mineserver!");
-  }
-  else
-  {
-    ret = Mineserver::get()->run();
-  }
-
-  Mineserver::get()->free();
-
   return ret ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
@@ -249,9 +238,9 @@ Mineserver::Mineserver()
      m_eventBase     (NULL),
 
      // core modules
-     m_config        (new Config),
-     m_screen        (new CliScreen),
-     m_logger        (new Logger),
+     m_config        (new Config()),
+     m_screen        (new CliScreen()),
+     m_logger        (new Logger()),
 
      m_plugin        (NULL),
      m_chat          (NULL),
@@ -262,10 +251,6 @@ Mineserver::Mineserver()
 {
   memset(&m_listenEvent, 0, sizeof(event));
   initConstants();
-}
-
-bool Mineserver::init()
-{
   // Write PID to file
   std::ofstream pid_out((config()->sData("system.pid_file")).c_str());
   if (!pid_out.fail())
@@ -276,7 +261,7 @@ bool Mineserver::init()
 
 
   // screen::init() needs m_plugin
-  m_plugin = new Plugin;
+  m_plugin = new Plugin();
 
   init_plugin_api();
 
@@ -290,11 +275,11 @@ bool Mineserver::init()
   LOG2(INFO, "Welcome to Mineserver v" + VERSION);
   LOG2(INFO, "Using zlib "+std::string(ZLIB_VERSION)+" libevent "+std::string(event_get_version()));
 
-  MapGen* mapgen = new MapGen;
-  MapGen* nethergen = new NetherGen;
-  MapGen* heavengen = new HeavenGen;
-  MapGen* biomegen = new BiomeGen;
-  MapGen* eximgen = new EximGen;
+  MapGen* mapgen = new MapGen();
+  MapGen* nethergen = new NetherGen();
+  MapGen* heavengen = new HeavenGen();
+  MapGen* biomegen = new BiomeGen();
+  MapGen* eximgen = new EximGen();
   m_mapGenNames.push_back(mapgen);
   m_mapGenNames.push_back(nethergen);
   m_mapGenNames.push_back(heavengen);
@@ -337,10 +322,7 @@ bool Mineserver::init()
   }
 
   if (m_map.size() == 0)
-  {
-    LOG2(ERROR, "No worlds in Config!");
-    return false;
-  }
+    throw CoreException("No worlds in Config");
 
   m_chat           = new Chat;
   m_furnaceManager = new FurnaceManager;
@@ -348,19 +330,16 @@ bool Mineserver::init()
   m_inventory      = new Inventory(m_config->sData("system.path.data") + '/' + "recipes", ".recipe", "ENABLED_RECIPES.cfg");
   m_mobs           = new Mobs;
 
-  return true;
 }
 
-bool Mineserver::free()
+Mineserver::~Mineserver()
 {
   // Let the user know we're shutting the server down cleanly
   LOG2(INFO, "Shutting down...");
 
   // Close the cli session if its in use
   if (config() && config()->bData("system.interface.use_cli"))
-  {
     screen()->end();
-  }
 
   // Free memory
   for (std::vector<Map*>::size_type i = 0; i < m_map.size(); i++)
@@ -384,8 +363,6 @@ bool Mineserver::free()
 
   // Remove the PID file
   unlink((config()->sData("system.pid_file")).c_str());
-
-  return true;
 }
 
 

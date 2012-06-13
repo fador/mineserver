@@ -45,20 +45,7 @@
 #endif
 #include <event.h>
 
-class User;
-class Map;
-class Chat;
-class Plugin;
-class Screen;
-class Config;
-class FurnaceManager;
-class PacketHandler;
-class Physics;
-class MapGen;
-class Logger;
-class Inventory;
-class Mobs;
-class Mob;
+#include "extern.h"
 
 #define MINESERVER
 #include "plugin_api.h"
@@ -70,17 +57,7 @@ struct event_base;
 class Mineserver
 {
 public:
-  static Mineserver* get()
-  {
-    static Mineserver* m_instance = NULL;
-
-    if (!m_instance)
-    {
-      m_instance = new Mineserver;
-    }
-
-    return m_instance;
-  }
+  Mineserver();
 
   static uint32_t generateEID()
   {
@@ -88,9 +65,7 @@ public:
     return ++m_EID;
   }
 
-
-  bool init();
-  bool free();
+  ~Mineserver();
 
   bool run();
   bool stop();
@@ -210,7 +185,6 @@ public:
   bool configDirectoryPrepare(const std::string& path);
 
 private:
-  Mineserver();
 
   bool m_running;
 

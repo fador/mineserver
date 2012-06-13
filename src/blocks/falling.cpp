@@ -65,7 +65,7 @@ bool BlockFalling::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -97,8 +97,8 @@ bool BlockFalling::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
     return true;
   }
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, 0);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);
+  ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, 0);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);
 
   applyPhysics(user, x, y, z, map);
   return false;
@@ -109,7 +109,7 @@ void BlockFalling::onNeighbourMove(User* user, int16_t, int32_t x, int8_t y, int
   uint8_t block;
   uint8_t meta;
 
-  if(!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
+  if(!ServerInstance->map(map)->getBlock(x, y, z, &block, &meta))
   	return;
   if (affectedBlock(block))
   {
@@ -122,16 +122,16 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int8_t y, int32_t z, int 
   uint8_t fallblock, block, neighbour, testbl;
   uint8_t fallmeta, meta, neighbourmeta, testmet;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &fallblock, &fallmeta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &fallblock, &fallmeta))
   {
     return;
   }
 
   // Destroy original block
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  ServerInstance->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
   
-  while (Mineserver::get()->map(map)->getBlock(x, y - 1, z, &block, &meta))
+  while (ServerInstance->map(map)->getBlock(x, y - 1, z, &block, &meta))
   {
     unsigned int falldist = 0;
     switch (block)
@@ -147,9 +147,9 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int8_t y, int32_t z, int 
         const int chunk_x = blockToChunk(x);
         const int chunk_z = blockToChunk(z);
 	    
-        const ChunkMap::const_iterator it = Mineserver::get()->map(map)->chunks.find(Coords(blockToChunk(x), blockToChunk(z)));
+        const ChunkMap::const_iterator it = ServerInstance->map(map)->chunks.find(Coords(blockToChunk(x), blockToChunk(z)));
 
-        if (it == Mineserver::get()->map(map)->chunks.end())
+        if (it == ServerInstance->map(map)->chunks.end())
           return;
 
         Packet pkt = Protocol::entityRelativeMove(ENTITY_SAND, 0, 1, 0);
@@ -157,8 +157,8 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int8_t y, int32_t z, int 
         it->second->sendPacket(pkt);
       }
       // stop falling
-      Mineserver::get()->map(map)->setBlock(x, y, z, fallblock, fallmeta);
-      Mineserver::get()->map(map)->sendBlockChange(x, y, z, fallblock, fallmeta);
+      ServerInstance->map(map)->setBlock(x, y, z, fallblock, fallmeta);
+      ServerInstance->map(map)->sendBlockChange(x, y, z, fallblock, fallmeta);
       return;
       break;
     }
@@ -170,9 +170,9 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int8_t y, int32_t z, int 
       const int chunk_x = blockToChunk(x);
       const int chunk_z = blockToChunk(z);
 	    
-      const ChunkMap::const_iterator it = Mineserver::get()->map(map)->chunks.find(Coords(blockToChunk(x), blockToChunk(z)));
+      const ChunkMap::const_iterator it = ServerInstance->map(map)->chunks.find(Coords(blockToChunk(x), blockToChunk(z)));
 
-      if (it == Mineserver::get()->map(map)->chunks.end())
+      if (it == ServerInstance->map(map)->chunks.end())
         return;
 
       Packet pkt = Protocol::entityRelativeMove(ENTITY_SAND, 0, 1, 0);
@@ -183,9 +183,9 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int8_t y, int32_t z, int 
     //is commented out
     this->notifyNeighbours(x, y + 2, z, map, "onNeighbourMove", user, block, BLOCK_BOTTOM);
     //temporary
-    if(!Mineserver::get()->map(map)->getBlock(x,y+2,z,&neighbour, &neighbourmeta))
+    if(!ServerInstance->map(map)->getBlock(x,y+2,z,&neighbour, &neighbourmeta))
     	return;
-    if(!Mineserver::get()->map(map)->getBlock(x,y+1,z,&testbl, &testmet))
+    if(!ServerInstance->map(map)->getBlock(x,y+1,z,&testbl, &testmet))
     	return;
     
     // Justasic: wtf is this? someone should correct it..
@@ -201,14 +201,14 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int8_t y, int32_t z, int 
     if(neighbour == BLOCK_GRAVEL)
       LOG(INFO, "Gravity", "Neighboring gravel block! Making it fall!");
     
-    for(unsigned int i = 0; i < Mineserver::get()->plugin()->getBlockCB().size(); i++)
+    for(unsigned int i = 0; i < ServerInstance->plugin()->getBlockCB().size(); i++)
     {
-    	if(Mineserver::get()->plugin()->getBlockCB()[i]->affectedBlock(neighbour))
+    	if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(neighbour))
 	{
 	  LOG(INFO, "Gravity", printfify("Falling block %s (x=%i, y=%i, z=%i)", GetBlockName(static_cast<Block>(neighbour)).c_str(), x, y, z));
 
 	  uint8_t neighbor, neighbormeta;
-	  while(Mineserver::get()->map(map)->getBlock(++x,y,z, &neighbor, &neighbormeta) && affectedBlock(neighbor))
+	  while(ServerInstance->map(map)->getBlock(++x,y,z, &neighbor, &neighbormeta) && affectedBlock(neighbor))
 	  {
 	    switch(block)
 	    {
@@ -224,10 +224,10 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int8_t y, int32_t z, int 
 	      default:
 		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is invalid?", x, y, z));
 	    }
-	    Mineserver::get()->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y, z, 1, map);
+	    ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y, z, 1, map);
 	  }
 
-	  while(Mineserver::get()->map(map)->getBlock(x,y,++z, &neighbor, &neighbormeta) && affectedBlock(neighbor))
+	  while(ServerInstance->map(map)->getBlock(x,y,++z, &neighbor, &neighbormeta) && affectedBlock(neighbor))
 	  {
 	    switch(block)
 	    {
@@ -243,9 +243,9 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int8_t y, int32_t z, int 
 	      default:
 		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is invalid?", x, y, z));
 	    }
-	    Mineserver::get()->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y, z, 1, map);
+	    ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y, z, 1, map);
 	  }
-	  Mineserver::get()->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y+2, z, 1, map);
+	  ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y+2, z, 1, map);
     	}
     }
   }

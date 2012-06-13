@@ -58,7 +58,7 @@ bool BlockLiquid::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -70,7 +70,7 @@ bool BlockLiquid::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
     revertBlock(user, x, y, z, map);
     return true;
   }
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -102,8 +102,8 @@ bool BlockLiquid::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
     }
     item->setType(new_item);
 
-    Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-    Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+    ServerInstance->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+    ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
     return true;
   }
   if (!this->isBlockEmpty(x, y, z, map))
@@ -143,8 +143,8 @@ bool BlockLiquid::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int
     item->decCount();
   }
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, 0);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);
+  ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, 0);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);
 
   physics(x, y, z, map);
   return true;
@@ -163,19 +163,19 @@ void BlockLiquid::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, i
   {
     return;
   }
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     return;
   }
 
-  Mineserver::get()->physics(map)->removeSimulation(vec(x, y, z));
+  ServerInstance->physics(map)->removeSimulation(vec(x, y, z));
 
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  ServerInstance->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
 }
 
 void BlockLiquid::physics(int32_t x, int8_t y, int32_t z, int map)
 {
-  Mineserver::get()->physics(map)->addSimulation(vec(x, y, z));
-  //Mineserver::get()->physics()->checkSurrounding(vec(x, y, z));
+  ServerInstance->physics(map)->addSimulation(vec(x, y, z));
+  //ServerInstance->physics()->checkSurrounding(vec(x, y, z));
 }

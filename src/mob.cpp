@@ -101,8 +101,8 @@ void Mob::moveAnimal()
   x += vel.x()*0.01;
   y += vel.y()*0.01;  
   z += vel.z()*0.01;  
-  for (int i = 0; i < Mineserver::get()->users().size(); i++) {
-    User* user2 = Mineserver::get()->users()[i];
+  for (int i = 0; i < ServerInstance->users().size(); i++) {
+    User* user2 = ServerInstance->users()[i];
   user2->buffer << (int8_t)PACKET_ENTITY_VELOCITY << (int32_t)UID << (int16_t)vel.x() << (int16_t)vel.y() << (int16_t)vel.z();
   }*/
 }

@@ -33,8 +33,8 @@
 
 bool BlockIce::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_WATER, direction);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_WATER, direction);
+  ServerInstance->map(map)->setBlock(x, y, z, BLOCK_WATER, direction);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_WATER, direction);
   return true;
 }
 
@@ -48,7 +48,7 @@ bool BlockIce::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_
     return true;
   }
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -81,8 +81,8 @@ bool BlockIce::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_
 
   //direction = user->relativeToBlock(x, y, z);
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, 0);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);
+  ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, 0);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);
   return false;
 }
 

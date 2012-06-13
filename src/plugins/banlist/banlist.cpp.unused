@@ -117,7 +117,7 @@ void P_Banlist::setBan(const std::string user, bool banned)
 
 bool P_Banlist::callbackLoginPre(User* user, std::string* reason)
 {
-  P_Banlist* banlist = static_cast<P_Banlist*>(Mineserver::get()->plugin()->getPointer("banlist"));
+  P_Banlist* banlist = static_cast<P_Banlist*>(ServerInstance->plugin()->getPointer("banlist"));
   LOG(INFO, "plugin.banlist", "Banlist: Checking if user "+user->nick+" is banned");
   if (banlist->getBan(user->nick))
   {

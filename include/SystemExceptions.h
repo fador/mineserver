@@ -1,6 +1,6 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
-   All rights reserved.
+  Copyright (c) 2011-2012, The Mineserver Project
+  All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -23,42 +23,40 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
+#ifndef SYSTEM_EXCEPTIONS_H
+#define SYSTEM_EXCEPTIONS_H
 
-#ifndef _LOGGER_H
-#define _LOGGER_H
-
-//
-// Mineserver logger.h
-//
 #include <string>
+#include <exception>
 
-#include "logtype.h"
-#include "tools.h"
-
-#define LOGLF(msg) ServerInstance->logger()->log(msg, std::string(__FILE__), __LINE__)
-
-#define LOG(type, source, msg) ServerInstance->logger()->log(LogType::LOG_##type, source, msg)
-
-
-// TODO: winex: log(type, file, line, msg) might be better than this
-#define LOG_FILENAME std::string(__FILE__).substr(std::string(__FILE__).rfind(PATH_SEPARATOR) + 1)
-#ifdef DEBUG
-#define LOG_FORMAT   LOG_FILENAME + ":" + dtos(__LINE__) + "::" + std::string(__FUNCTION__) + "()"
-#else
-#define LOG_FORMAT   LOG_FILENAME + "::" + std::string(__FUNCTION__) + "()"
-#endif
-
-#define LOG2(type, msg) ServerInstance->logger()->log(LogType::LOG_##type, LOG_FORMAT, msg)
-
-
-class Logger
+class CoreException : public std::exception
 {
-public:
-  void log(const std::string& message, const std::string& file, int line);
-  void log(LogType::LogType type, const std::string& source, const std::string& message);
-  void log(LogType::LogType type, const std::string& source, const char* message, ...);
+ public:
+	// Holds the error message to be displayed
+	const std::string err;
+	// Source of the exception
+	const std::string source;
+	// Default constructor, just uses the error mesage 'Core threw an exception'.
+	CoreException() : err("Core threw an exception"), source("The core") { }
+	// This constructor can be used to specify an error message before throwing.
+	CoreException(const std::string &message) : err(message), source("The core") { }
+	// This constructor can be used to specify an error message before throwing,
+	// and to specify the source of the exception.
+	CoreException(const std::string &message, const std::string &src) : err(message), source(src) { }
+	// This destructor solves world hunger, cancels the world debt, and causes the world to end.
+	// Actually no, it does nothing. Never mind.
+	virtual ~CoreException() throw() { };
+	// Returns the reason for the exception.
+	// The module should probably put something informative here as the user will see this upon failure.
+	virtual const char* GetReason() const
+	{
+	  return err.c_str();
+	}
 
+	virtual const char* GetSource()
+	{
+	  return source.c_str();
+	}
 };
-
 #endif
