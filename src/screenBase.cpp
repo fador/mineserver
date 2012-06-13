@@ -28,7 +28,7 @@
 #include "screenBase.h"
 #include <ctime>
 
-Screen::~Screen(void) {}
+Screen::~Screen() {}
 
 std::string Screen::currentTimestamp(bool seconds)
 {

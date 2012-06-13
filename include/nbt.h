@@ -55,12 +55,12 @@ public:
   };
 
   NBT_Value(eTAG_Type type, eTAG_Type listType = TAG_END);
-  NBT_Value(int8_t value);
-  NBT_Value(int16_t value);
-  NBT_Value(int32_t value);
-  NBT_Value(int64_t value);
-  NBT_Value(float value);
-  NBT_Value(double value);
+  explicit NBT_Value(int8_t value);
+  explicit NBT_Value(int16_t value);
+  explicit NBT_Value(int32_t value);
+  explicit NBT_Value(int64_t value);
+  explicit NBT_Value(float value);
+  explicit NBT_Value(double value);
 
   NBT_Value(int32_t* buf, int32_t len);
   NBT_Value(uint8_t* buf, int32_t len);
