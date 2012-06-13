@@ -69,7 +69,7 @@ bool BlockBasic::isBlockStackable(const uint8_t block)
 
 bool BlockBasic::isUserOnBlock(const int32_t x, const int8_t y, const int32_t z, const int map)
 {
-  /* TODO: Get Users by chunk rather then whole list */
+  /* TODO: Get Users by chunk rather than whole list */
   for (std::set<User*>::iterator it = Mineserver::get()->users().begin(); it != Mineserver::get()->users().end(); ++it)
   {
     /* don't allow block placement on top of player */

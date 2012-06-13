@@ -43,6 +43,7 @@
 #endif
 
 #include "logtype.h"
+#include "configure.h"
 
 #ifdef WIN32
 #define PLUGIN_API_EXPORT extern "C" __declspec(dllexport)

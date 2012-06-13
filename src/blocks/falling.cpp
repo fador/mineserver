@@ -33,10 +33,31 @@
 
 #include "falling.h"
 
-
-void BlockFalling::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockFalling::affectedBlock(int block) const
 {
-  this->onNeighbourMove(user, oldblock, x, y, z, direction, map);
+  if (block == BLOCK_SAND || block == BLOCK_SLOW_SAND || block == BLOCK_GRAVEL)
+    return true;
+  return false;
+}
+
+std::string printfify(const char *fmt, ...)
+{
+  if(fmt)
+  {
+    va_list args;
+    char buf[4096];
+    va_start(args, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    va_end(args);
+    return buf;
+  }
+  else
+    return fmt;
+}
+
+void BlockFalling::onNeighbourBroken(User* user, int16_t, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+{
+  this->onNeighbourMove(user, 0, x, y, z, direction, map);
 }
 
 bool BlockFalling::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
@@ -83,14 +104,14 @@ bool BlockFalling::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
   return false;
 }
 
-void BlockFalling::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction, int map)
+void BlockFalling::onNeighbourMove(User* user, int16_t, int32_t x, int8_t y, int32_t z, int8_t direction, int map)
 {
   uint8_t block;
   uint8_t meta;
 
   if(!Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta))
   	return;
-  if (block == BLOCK_SAND || block == BLOCK_SLOW_SAND ||block == BLOCK_GRAVEL)
+  if (affectedBlock(block))
   {
     applyPhysics(user, x, y, z, map);
   }
@@ -144,7 +165,8 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int8_t y, int32_t z, int 
 
     y--;
     falldist++;
-    if(falldist >= 4) {
+    if(falldist >= 4)
+    {
       const int chunk_x = blockToChunk(x);
       const int chunk_z = blockToChunk(z);
 	    
@@ -165,17 +187,65 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int8_t y, int32_t z, int 
     	return;
     if(!Mineserver::get()->map(map)->getBlock(x,y+1,z,&testbl, &testmet))
     	return;
+    
     // Justasic: wtf is this? someone should correct it..
     if(testbl == BLOCK_SAND)
-    	LOG(INFO, "Dfsdf", "what");
+      LOG(INFO, "Gravity", "Sand block fell!");
+
+    if(testbl == BLOCK_GRAVEL)
+      LOG(INFO, "Gravity", "Gravel block fell!");
     	
-    	if(neighbour == BLOCK_SAND)
-    	   LOG(INFO, "sdfasd", "sdgdfgsdg");
+    if(neighbour == BLOCK_SAND)
+      LOG(INFO, "Gravity", "Neighboring sand block! Making it fall!");
+
+    if(neighbour == BLOCK_GRAVEL)
+      LOG(INFO, "Gravity", "Neighboring gravel block! Making it fall!");
+    
     for(unsigned int i = 0; i < Mineserver::get()->plugin()->getBlockCB().size(); i++)
     {
-    	if(Mineserver::get()->plugin()->getBlockCB()[i]->affectedBlock(neighbour)) {
-    		LOG(INFO, "Gravity", "Gravity was here :)");
-    		Mineserver::get()->plugin()->getBlockCB()[i]->onNeighbourMove(user, fallblock, x, y+2, z, 1, map);
+    	if(Mineserver::get()->plugin()->getBlockCB()[i]->affectedBlock(neighbour))
+	{
+	  LOG(INFO, "Gravity", printfify("Falling block %s (x=%i, y=%i, z=%i)", GetBlockName(static_cast<Block>(neighbour)).c_str(), x, y, z));
+
+	  uint8_t neighbor, neighbormeta;
+	  while(Mineserver::get()->map(map)->getBlock(++x,y,z, &neighbor, &neighbormeta) && affectedBlock(neighbor))
+	  {
+	    switch(block)
+	    {
+	      case BLOCK_SAND:
+		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is sand!", x, y, z));
+		break;
+	      case BLOCK_SLOW_SAND:
+		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is slow sand!", x, y, z));
+		break;
+	      case BLOCK_GRAVEL:
+		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is gravel!", x, y, z));
+		break;
+	      default:
+		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is invalid?", x, y, z));
+	    }
+	    Mineserver::get()->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y, z, 1, map);
+	  }
+
+	  while(Mineserver::get()->map(map)->getBlock(x,y,++z, &neighbor, &neighbormeta) && affectedBlock(neighbor))
+	  {
+	    switch(block)
+	    {
+	      case BLOCK_SAND:
+		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is sand!", x, y, z));
+		break;
+	      case BLOCK_SLOW_SAND:
+		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is slow sand!", x, y, z));
+		break;
+	      case BLOCK_GRAVEL:
+		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is gravel!", x, y, z));
+		break;
+	      default:
+		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is invalid?", x, y, z));
+	    }
+	    Mineserver::get()->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y, z, 1, map);
+	  }
+	  Mineserver::get()->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y+2, z, 1, map);
     	}
     }
   }

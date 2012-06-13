@@ -750,7 +750,7 @@ void about(std::string user, std::string command, std::deque<std::string> args)
   std::ostringstream msg;
   if (mineserver->config.bData("system.show_version"))
   {
-    msg  << "§9" << mineserver->config.sData("system.server_name") << " Running Mineserver v. ???";
+    msg  << "§9" << mineserver->config.sData("system.server_name") << " Running Mineserver v." << VERSION_SIMPLE;
     mineserver->chat.sendmsgTo(user.c_str(), msg.str().c_str());
   }
 }
@@ -841,7 +841,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION commands_init(mineserver_pointer_struct* m
   registerCommand(ComPtr(new Command(parseCmd("gps"), "", "Display current coordinates", gps)));
   registerCommand(ComPtr(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", sendHelp)));
   registerCommand(ComPtr(new Command(parseCmd("home"), "", "Teleports you to this world's spawn location", home)));
-  registerCommand(ComPtr(new Command(parseCmd("igive i"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf)));
+  registerCommand(ComPtr(new Command(parseCmd("igive i item"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf)));
   registerCommand(ComPtr(new Command(parseCmd("motd"), "", "Displays the server's MOTD", sendMOTD)));
   registerCommand(ComPtr(new Command(parseCmd("players who names list"), "", "Lists online players", playerList)));
   registerCommand(ComPtr(new Command(parseCmd("replace"), "<from-id/alias> <to-id/alias>", "Type in the command and left-click two blocks, it will replace the selected blocks with the new blocks", replace)));
