@@ -1,0 +1,249 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\blocks\basic.cpp" />
+    <ClCompile Include="..\src\blocks\bed.cpp" />
+    <ClCompile Include="..\src\blocks\cake.cpp" />
+    <ClCompile Include="..\src\blocks\chest.cpp" />
+    <ClCompile Include="..\src\blocks\default.cpp" />
+    <ClCompile Include="..\src\blocks\door.cpp" />
+    <ClCompile Include="..\src\blocks\falling.cpp" />
+    <ClCompile Include="..\src\blocks\fire.cpp" />
+    <ClCompile Include="..\src\blocks\blockfurnace.cpp" />
+    <ClCompile Include="..\src\blocks\ice.cpp" />
+    <ClCompile Include="..\src\blocks\jackolantern.cpp" />
+    <ClCompile Include="..\src\blocks\ladder.cpp" />
+    <ClCompile Include="..\src\blocks\leaves.cpp" />
+    <ClCompile Include="..\src\blocks\liquid.cpp" />
+    <ClCompile Include="..\src\blocks\note.cpp" />
+    <ClCompile Include="..\src\blocks\plant.cpp" />
+    <ClCompile Include="..\src\blocks\pumpkin.cpp" />
+    <ClCompile Include="..\src\blocks\redstone.cpp" />
+    <ClCompile Include="..\src\blocks\sign.cpp" />
+    <ClCompile Include="..\src\blocks\snow.cpp" />
+    <ClCompile Include="..\src\blocks\stair.cpp" />
+    <ClCompile Include="..\src\blocks\step.cpp" />
+    <ClCompile Include="..\src\blocks\tnt.cpp" />
+    <ClCompile Include="..\src\blocks\torch.cpp" />
+    <ClCompile Include="..\src\blocks\tracks.cpp" />
+    <ClCompile Include="..\src\blocks\wood.cpp" />
+    <ClCompile Include="..\src\blocks\wool.cpp" />
+    <ClCompile Include="..\src\blocks\workbench.cpp" />
+    <ClCompile Include="..\src\chat.cpp" />
+    <ClCompile Include="..\src\cliScreen.cpp" />
+    <ClCompile Include="..\src\config\lexer.cpp" />
+    <ClCompile Include="..\src\config\node.cpp" />
+    <ClCompile Include="..\src\config\parser.cpp" />
+    <ClCompile Include="..\src\config\scanner.cpp" />
+    <ClCompile Include="..\src\constants.cpp" />
+    <ClCompile Include="..\src\furnace.cpp" />
+    <ClCompile Include="..\src\furnaceManager.cpp" />
+    <ClCompile Include="..\src\inventory.cpp" />
+    <ClCompile Include="..\src\items\itembasic.cpp" />
+    <ClCompile Include="..\src\items\food.cpp" />
+    <ClCompile Include="..\src\items\projectile.cpp" />
+    <ClCompile Include="..\src\lighting.cpp" />
+    <ClCompile Include="..\src\logger.cpp" />
+    <ClCompile Include="..\src\map.cpp" />
+    <ClCompile Include="..\src\mcregion.cpp" />
+    <ClCompile Include="..\src\metadata.cpp" />
+    <ClCompile Include="..\src\mineserver.cpp" />
+    <ClCompile Include="..\src\mob.cpp" />
+    <ClCompile Include="..\src\nbt.cpp" />
+    <ClCompile Include="..\src\packets.cpp" />
+    <ClCompile Include="..\src\physics.cpp" />
+    <ClCompile Include="..\src\plugin.cpp" />
+    <ClCompile Include="..\src\plugin_api.cpp" />
+    <ClCompile Include="..\src\random.cpp" />
+    <ClCompile Include="..\src\screenBase.cpp" />
+    <ClCompile Include="..\src\signalhandler.cpp" />
+    <ClCompile Include="..\src\sockets.cpp" />
+    <ClCompile Include="..\src\tools.cpp" />
+    <ClCompile Include="..\src\tree.cpp" />
+    <ClCompile Include="..\src\user.cpp" />
+    <ClCompile Include="..\src\worldgen\biomegen.cpp" />
+    <ClCompile Include="..\src\worldgen\cavegen.cpp" />
+    <ClCompile Include="..\src\worldgen\eximgen.cpp" />
+    <ClCompile Include="..\src\worldgen\heavengen.cpp" />
+    <ClCompile Include="..\src\worldgen\mapgen.cpp" />
+    <ClCompile Include="..\src\worldgen\nethergen.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\chat.h" />
+    <ClInclude Include="..\include\chunkmap.h" />
+    <ClInclude Include="..\include\cliScreen.h" />
+    <ClInclude Include="..\include\config.h" />
+    <ClInclude Include="..\include\constants.h" />
+    <ClInclude Include="..\include\constants_num.h" />
+    <ClInclude Include="..\include\furnace.h" />
+    <ClInclude Include="..\include\furnaceManager.h" />
+    <ClInclude Include="..\include\hook.h" />
+    <ClInclude Include="..\include\inventory.h" />
+    <ClInclude Include="..\include\lighting.h" />
+    <ClInclude Include="..\include\logger.h" />
+    <ClInclude Include="..\include\logtype.h" />
+    <ClInclude Include="..\include\map.h" />
+    <ClInclude Include="..\include\mcregion.h" />
+    <ClInclude Include="..\include\metadata.h" />
+    <ClInclude Include="..\include\mineserver.h" />
+    <ClInclude Include="..\include\mob.h" />
+    <ClInclude Include="..\include\nbt.h" />
+    <ClInclude Include="..\include\packets.h" />
+    <ClInclude Include="..\include\permissions.h" />
+    <ClInclude Include="..\include\physics.h" />
+    <ClInclude Include="..\include\plugin.h" />
+    <ClInclude Include="..\include\plugin_api.h" />
+    <ClInclude Include="..\include\protocol.h" />
+    <ClInclude Include="..\include\random.h" />
+    <ClInclude Include="..\include\screenBase.h" />
+    <ClInclude Include="..\include\signalhandler.h" />
+    <ClInclude Include="..\include\sockets.h" />
+    <ClInclude Include="..\include\tools.h" />
+    <ClInclude Include="..\include\tr1.h" />
+    <ClInclude Include="..\include\tree.h" />
+    <ClInclude Include="..\include\user.h" />
+    <ClInclude Include="..\include\utf8.h" />
+    <ClInclude Include="..\include\vec.h" />
+    <ClInclude Include="..\src\blocks\basic.h" />
+    <ClInclude Include="..\src\blocks\bed.h" />
+    <ClInclude Include="..\src\blocks\cake.h" />
+    <ClInclude Include="..\src\blocks\chest.h" />
+    <ClInclude Include="..\src\blocks\default.h" />
+    <ClInclude Include="..\src\blocks\door.h" />
+    <ClInclude Include="..\src\blocks\falling.h" />
+    <ClInclude Include="..\src\blocks\fire.h" />
+    <ClInclude Include="..\src\blocks\blockfurnace.h" />
+    <ClInclude Include="..\src\blocks\ice.h" />
+    <ClInclude Include="..\src\blocks\jackolantern.h" />
+    <ClInclude Include="..\src\blocks\ladder.h" />
+    <ClInclude Include="..\src\blocks\leaves.h" />
+    <ClInclude Include="..\src\blocks\liquid.h" />
+    <ClInclude Include="..\src\blocks\note.h" />
+    <ClInclude Include="..\src\blocks\plant.h" />
+    <ClInclude Include="..\src\blocks\pumpkin.h" />
+    <ClInclude Include="..\src\blocks\redstone.h" />
+    <ClInclude Include="..\src\blocks\sign.h" />
+    <ClInclude Include="..\src\blocks\snow.h" />
+    <ClInclude Include="..\src\blocks\stair.h" />
+    <ClInclude Include="..\src\blocks\step.h" />
+    <ClInclude Include="..\src\blocks\tnt.h" />
+    <ClInclude Include="..\src\blocks\torch.h" />
+    <ClInclude Include="..\src\blocks\tracks.h" />
+    <ClInclude Include="..\src\blocks\wood.h" />
+    <ClInclude Include="..\src\blocks\wool.h" />
+    <ClInclude Include="..\src\blocks\workbench.h" />
+    <ClInclude Include="..\src\config\lexer.h" />
+    <ClInclude Include="..\src\config\node.h" />
+    <ClInclude Include="..\src\config\parser.h" />
+    <ClInclude Include="..\src\config\scanner.h" />
+    <ClInclude Include="..\src\items\itembasic.h" />
+    <ClInclude Include="..\src\items\food.h" />
+    <ClInclude Include="..\src\items\projectile.h" />
+    <ClInclude Include="..\src\worldgen\biomegen.h" />
+    <ClInclude Include="..\src\worldgen\cavegen.h" />
+    <ClInclude Include="..\src\worldgen\eximgen.h" />
+    <ClInclude Include="..\src\worldgen\heavengen.h" />
+    <ClInclude Include="..\src\worldgen\mapgen.h" />
+    <ClInclude Include="..\src\worldgen\nethergen.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7F6D1DAB-AA49-4343-B28E-C3E647BE5007}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>mineserver</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\bin\</OutDir>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\bin\</OutDir>
+    <IncludePath>C:\Libraries\Include;C:\Libraries\Include\noise;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Libraries\Lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;FADOR_PLUGIN;ZLIB_WINAPI;WIN32;DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Winmm.lib;libnoise.lib;zlibwapi.lib;ws2_32.lib;libevent.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>FADOR_PLUGIN;WIN32;ZLIB_WINAPI;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CONSOLE;FTLOG=main;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\include;..\src</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FloatingPointModel>Fast</FloatingPointModel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>Winmm.lib;libnoise.lib;zlibwapi.lib;libevent.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
