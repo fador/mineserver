@@ -83,7 +83,7 @@ void FurnaceManager::update()
 
 void removeFurnace(furnaceDataPtr data)
 {
-  Mineserver::get()->furnaceManager()->removeFurnace(data);
+  ServerInstance->furnaceManager()->removeFurnace(data);
 }
 
 struct FurnaceDataFinder

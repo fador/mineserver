@@ -46,9 +46,9 @@
 
 void CaveGen::init(int seed)
 {
-  addCaveLava = Mineserver::get()->config()->bData("mapgen.caves.lava");
-  caveSize = Mineserver::get()->config()->iData("mapgen.caves.size");
-  caveTreshold = Mineserver::get()->config()->dData("mapgen.caves.treshold");
+  addCaveLava = ServerInstance->config()->bData("mapgen.caves.lava");
+  caveSize = ServerInstance->config()->iData("mapgen.caves.size");
+  caveTreshold = ServerInstance->config()->dData("mapgen.caves.treshold");
 
   // Set up us the Perlin-noise module.
   caveNoise.SetSeed(seed + 22);

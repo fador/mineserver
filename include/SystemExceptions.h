@@ -1,6 +1,6 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
-   All rights reserved.
+  Copyright (c) 2011-2012, The Mineserver Project
+  All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -23,19 +23,40 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
+#ifndef SYSTEM_EXCEPTIONS_H
+#define SYSTEM_EXCEPTIONS_H
 
-#include "screenBase.h"
-#include <ctime>
+#include <string>
+#include <exception>
 
-Screen::~Screen() {}
-
-std::string Screen::currentTimestamp(bool seconds)
+class CoreException : public std::exception
 {
-  time_t currentTime = time(NULL);
-  struct tm* Tm  = localtime(&currentTime);
-  std::string timeStamp(asctime(Tm));
-  timeStamp = timeStamp.substr(11, seconds ? 8 : 5);
+ public:
+	// Holds the error message to be displayed
+	const std::string err;
+	// Source of the exception
+	const std::string source;
+	// Default constructor, just uses the error mesage 'Core threw an exception'.
+	CoreException() : err("Core threw an exception"), source("The core") { }
+	// This constructor can be used to specify an error message before throwing.
+	CoreException(const std::string &message) : err(message), source("The core") { }
+	// This constructor can be used to specify an error message before throwing,
+	// and to specify the source of the exception.
+	CoreException(const std::string &message, const std::string &src) : err(message), source(src) { }
+	// This destructor solves world hunger, cancels the world debt, and causes the world to end.
+	// Actually no, it does nothing. Never mind.
+	virtual ~CoreException() throw() { };
+	// Returns the reason for the exception.
+	// The module should probably put something informative here as the user will see this upon failure.
+	virtual const char* GetReason() const
+	{
+	  return err.c_str();
+	}
 
-  return timeStamp;
-}
+	virtual const char* GetSource()
+	{
+	  return source.c_str();
+	}
+};
+#endif

@@ -133,11 +133,11 @@ bool P_Command::callbackChatPre(User* user, time_t time, std::string data)
       }
     }
 
-    Mineserver::get()->screen()->log("Command ("+user->nick+"): "+*command_name);
+    ServerInstance->screen()->log("Command ("+user->nick+"): "+*command_name);
 
-    if (!static_cast<Hook4<bool,User*,time_t,std::string*,std::deque<std::string*>*>*>(Mineserver::get()->plugin()->getHook("CommandPre"))->doUntilFalse(user, time, command_name, command_args))
+    if (!static_cast<Hook4<bool,User*,time_t,std::string*,std::deque<std::string*>*>*>(ServerInstance->plugin()->getHook("CommandPre"))->doUntilFalse(user, time, command_name, command_args))
     {
-      static_cast<Hook4<void,User*,time_t,std::string*,std::deque<std::string*>*>*>(Mineserver::get()->plugin()->getHook("CommandPost"))->doAll(user, time, command_name, command_args);
+      static_cast<Hook4<void,User*,time_t,std::string*,std::deque<std::string*>*>*>(ServerInstance->plugin()->getHook("CommandPost"))->doAll(user, time, command_name, command_args);
     }
 
     delete command_name;

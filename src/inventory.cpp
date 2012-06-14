@@ -390,7 +390,7 @@ bool Inventory::canBeArmour(int slot, int type)
   if (slot == 5)
   {
     // Helmet slot. Lots of fun here
-    if (Mineserver::get()->m_only_helmets)
+    if (ServerInstance->m_only_helmets)
     {
       switch (type)
       {
@@ -466,7 +466,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   {
     if (user->inventoryHolding.getType() != -1)
     {
-      Mineserver::get()->map(user->pos.map)->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z,
+      ServerInstance->map(user->pos.map)->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z,
           user->inventoryHolding.getType(), user->inventoryHolding.getCount(),
           user->inventoryHolding.getHealth(), user);
       user->inventoryHolding.setType(-1);
@@ -482,7 +482,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   sChunk* chunk = NULL;
   if (windowID != 0)
   {
-    chunk = Mineserver::get()->map(user->pos.map)->getChunk(blockToChunk(user->openInv.x), blockToChunk(user->openInv.z));
+    chunk = ServerInstance->map(user->pos.map)->getChunk(blockToChunk(user->openInv.x), blockToChunk(user->openInv.z));
 
     if (chunk == NULL)
     {
@@ -871,7 +871,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   else if (windowID == WINDOW_FURNACE && (slot == 1 || slot == 0))
   {
     tempFurnace->map = user->pos.map;
-    Mineserver::get()->furnaceManager()->handleActivity(tempFurnace);
+    ServerInstance->furnaceManager()->handleActivity(tempFurnace);
   }
 
   /*
@@ -938,7 +938,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
 
 bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_t z)
 {
-  sChunk* chunk = Mineserver::get()->map(user->pos.map)->getChunk(blockToChunk(x), blockToChunk(z));
+  sChunk* chunk = ServerInstance->map(user->pos.map)->getChunk(blockToChunk(x), blockToChunk(z));
   if (chunk == NULL)
   {
     return false;
@@ -1124,7 +1124,7 @@ bool Inventory::windowClose(User* user, int8_t windowID)
   //If still holding something, dump the items to ground
   if (user->inventoryHolding.getType() != -1)
   {
-    Mineserver::get()->map(user->pos.map)->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z,
+    ServerInstance->map(user->pos.map)->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z,
         user->inventoryHolding.getType(), user->inventoryHolding.getCount(),
         user->inventoryHolding.getHealth(), user);
     user->inventoryHolding.setType(-1);
@@ -1235,7 +1235,7 @@ bool Inventory::onwindowClose(User* user, int8_t type, int32_t x, int32_t y, int
               {
                 if (inv[i]->workbench[slotNumber].getType() != -1)
                 {
-                  Mineserver::get()->map(user->pos.map)->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z,
+                  ServerInstance->map(user->pos.map)->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z,
                       inv[i]->workbench[slotNumber].getType(), inv[i]->workbench[slotNumber].getCount(),
                       inv[i]->workbench[slotNumber].getHealth(), user);
                 }
@@ -1345,7 +1345,7 @@ bool Inventory::doCraft(Item* slots, int8_t width, int8_t height)
 
 bool Inventory::setSlot(User* user, int8_t windowID, int16_t slot, int16_t itemID, int8_t count, int16_t health)
 {
-  //Mineserver::get()->logger()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(itemID) + " (" + dtos(count) + ") health: " + dtos(health));
+  //ServerInstance->logger()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(itemID) + " (" + dtos(count) + ") health: " + dtos(health));
   user->buffer << Protocol::setSlotHeader(windowID, slot) << Protocol::slot(itemID, count, health);
   return true;
 }

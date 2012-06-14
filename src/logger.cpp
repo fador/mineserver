@@ -56,8 +56,8 @@ void Logger::log(const std::string& msg, const std::string& file, int line)
 void Logger::log(LogType::LogType type, const std::string& source, const std::string& message)
 {
   Hook* hook = NULL;
-  if (!Mineserver::get()->plugin()
-      || !(hook = Mineserver::get()->plugin()->getHook("LogPost")))
+  if (!ServerInstance->plugin()
+      || !(hook = ServerInstance->plugin()->getHook("LogPost")))
   {
     std::clog.tie(&std::cout);
     if (type < LogType::LOG_WARNING)

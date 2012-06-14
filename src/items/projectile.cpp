@@ -65,12 +65,12 @@ void ItemProjectile::onRightClick(User* user, Item* item)
       }
       if(!foundArrow)
         return;
-      Mineserver::get()->map(user->pos.map)->sendProjectileSpawn(user, projID);
+      ServerInstance->map(user->pos.map)->sendProjectileSpawn(user, projID);
     }
     else
     {
       item->decCount();
-      Mineserver::get()->map(user->pos.map)->sendProjectileSpawn(user, projID);
+      ServerInstance->map(user->pos.map)->sendProjectileSpawn(user, projID);
     }
   }
 }

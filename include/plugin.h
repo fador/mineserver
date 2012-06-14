@@ -64,7 +64,16 @@
 #define LIBRARY_LOAD(x) LoadLibrary(x)
 #define LIBRARY_SELF() GetModuleHandle(NULL)
 #define LIBRARY_SYMBOL(x, y) GetProcAddress(x, y)
-#define LIBRARY_ERROR() "Windows error handling needs work!" // <- NOTE
+char *LIBRARY_ERROR(void)
+{
+  char errbuf[513];
+  DWORD err = GetLastError();
+  if(!err)
+    return NULL;
+  FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, err, 0, errbuf, 512, NULL);
+  SetLastError(0);
+  return errbuf;
+}
 #define LIBRARY_CLOSE(x) FreeLibrary(x)
 #define LIBRARY_EXTENSION ".dll"
 #else

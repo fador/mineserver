@@ -62,7 +62,7 @@ bool BlockBed::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_
   uint8_t oldmeta;
   int zMod = 0, xMod = 0;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -126,14 +126,14 @@ bool BlockBed::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_
     break;
   }
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, direction);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+  ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, direction);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
 
   // set head of the bed
   direction ^= 8;
 
-  Mineserver::get()->map(map)->setBlock(x + xMod, y, z + zMod, (char)newblock, direction);
-  Mineserver::get()->map(map)->sendBlockChange(x + xMod, y, z + zMod, (char)newblock, direction);
+  ServerInstance->map(map)->setBlock(x + xMod, y, z + zMod, (char)newblock, direction);
+  ServerInstance->map(map)->sendBlockChange(x + xMod, y, z + zMod, (char)newblock, direction);
   return false;
 }
 

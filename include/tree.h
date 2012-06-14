@@ -59,8 +59,8 @@ public:
 
   inline virtual void update()
   {
-    Mineserver::get()->map(_map)->setBlock(_x, _y, _z, _type, _meta);
-    Mineserver::get()->map(_map)->sendBlockChange(_x, _y, _z, _type, _meta);
+    ServerInstance->map(_map)->setBlock(_x, _y, _z, _type, _meta);
+    ServerInstance->map(_map)->sendBlockChange(_x, _y, _z, _type, _meta);
   }
 
   int32_t _x;
