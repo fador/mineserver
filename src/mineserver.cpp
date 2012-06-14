@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
   // Try and start a new server instance
   try
   {
-    ServerInstance = new Mineserver(argc, argv);
+    new Mineserver(argc, argv);
     ret = ServerInstance->run();
   }
   catch (const CoreException &e)
@@ -162,6 +162,7 @@ Mineserver::Mineserver(int args, char **argarray)
      m_inventory     (NULL),
      m_mobs          (NULL)
 {
+  ServerInstance = this;
   InitSignals();
   
   std::srand((uint32_t)std::time(NULL));
@@ -638,26 +639,27 @@ bool Mineserver::run()
       tick = (uint32_t)timeNow;
 
       // Loop users
-      for (std::set<User*>::const_iterator it = users().begin(); it != users().end(); ++it)
+      for (std::set<User*>::iterator it = users().begin(), it_end = users().end(); it != it_end;)
       {
+	// NOTE: iterators corrupt when you delete their objects, therefore we have to iterate in a special way - Justasic
+	User *u = *it;
+	++it;
         // No data received in 30s, timeout
-        if ((*it)->logged && timeNow - (*it)->lastData > 30)
+        if (u->logged && timeNow - u->lastData > 30)
         {
-          LOG2(INFO, "Player " + (*it)->nick + " timed out");
-          delete *it;
+          LOG2(INFO, "Player " + u->nick + " timed out");
+          delete u;
         }
-        else if (!(*it)->logged && timeNow - (*it)->lastData > 100)
-        {
-          delete (*it);
-        }
+        else if (!u->logged && timeNow - u->lastData > 100)
+          delete u;
         else
         {
           if (m_damage_enabled)
           {
-            (*it)->checkEnvironmentDamage();
+            u->checkEnvironmentDamage();
           }
-          (*it)->pushMap();
-          (*it)->popMap();
+          u->pushMap();
+          u->popMap();
         }
 
       }

@@ -248,17 +248,18 @@ std::string canonicalizePath(const std::string& pathname)
   return pathname;
 
 #else
-
+  // Why is this else? what the fuck are we compiling on? - Justasic
   return pathname;
 
 #endif
 
 }
 
-std::string relativeToAbsolute(std::string pathname)
+std::string relativeToAbsolute(const std::string &path)
 {
   /// This is a very crude way to check if the path is relative.
   /// We must replace this by a more portable "pathIsRelative()" check.
+  std::string pathname = path;
   if (!pathname.empty() && pathname[0] != PATH_SEPARATOR && pathname[0] != '~')
     pathname = ServerInstance->config()->config_path + PATH_SEPARATOR + pathname;
 
