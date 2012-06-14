@@ -47,12 +47,12 @@ void BlockSign::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y,
 
 bool BlockSign::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  ServerInstance->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
   this->spawnBlockItem(x, y, z, map, BLOCK_WALL_SIGN);
 
   //Remove sign data from the chunk
-  sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
+  sChunk* chunk = ServerInstance->map(map)->getChunk(x, z);
   if (chunk != NULL)
   {
     for (uint32_t i = 0; i < chunk->signs.size(); i++)
@@ -72,7 +72,7 @@ bool BlockSign::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t
 void BlockSign::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t block, meta;
-  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
+  ServerInstance->map(map)->getBlock(x, y, z, &block, &meta);
 
   bool blockBroken = false;
 
@@ -98,12 +98,12 @@ void BlockSign::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_
 
   if (blockBroken)
   {
-    Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-    Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+    ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+    ServerInstance->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
     this->spawnBlockItem(x, y, z, map, block, 0);
 
     //Remove sign data from the chunk
-    sChunk* chunk = Mineserver::get()->map(map)->getChunk(x, z);
+    sChunk* chunk = ServerInstance->map(map)->getChunk(x, z);
     if (chunk != NULL)
     {
       for (uint32_t i = 0; i < chunk->signs.size(); i++)
@@ -125,7 +125,7 @@ bool BlockSign::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -237,8 +237,8 @@ bool BlockSign::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
     return true;
   }
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, metadata);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, metadata);
+  ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, metadata);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, metadata);
   return false;
 }
 

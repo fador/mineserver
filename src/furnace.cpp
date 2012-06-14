@@ -51,7 +51,7 @@ Furnace::Furnace(furnaceDataPtr data)
   uint8_t block;
   uint8_t meta;
 
-  Mineserver::get()->map(m_data->map)->getBlock(m_data->x, m_data->y, m_data->z, &block, &meta);
+  ServerInstance->map(m_data->map)->getBlock(m_data->x, m_data->y, m_data->z, &block, &meta);
 
   if (!configIsRead)
   {
@@ -94,19 +94,19 @@ void Furnace::updateBlock()
   // Now make sure that it's got the correct block type based on it's current status
   if (isBurningFuel() && !m_burning)
   {
-    Mineserver::get()->map(m_data->map)->getBlock(m_data->x, m_data->y, m_data->z, &block, &meta);
+    ServerInstance->map(m_data->map)->getBlock(m_data->x, m_data->y, m_data->z, &block, &meta);
     // Switch to burning furnace
-    Mineserver::get()->map(m_data->map)->setBlock(m_data->x, m_data->y, m_data->z, BLOCK_BURNING_FURNACE, meta);
-    Mineserver::get()->map(m_data->map)->sendBlockChange(m_data->x, m_data->y, m_data->z, BLOCK_BURNING_FURNACE, meta);
+    ServerInstance->map(m_data->map)->setBlock(m_data->x, m_data->y, m_data->z, BLOCK_BURNING_FURNACE, meta);
+    ServerInstance->map(m_data->map)->sendBlockChange(m_data->x, m_data->y, m_data->z, BLOCK_BURNING_FURNACE, meta);
     sendToAllUsers();
     m_burning = true;
   }
   else if (!isBurningFuel() && m_burning)
   {
-    Mineserver::get()->map(m_data->map)->getBlock(m_data->x, m_data->y, m_data->z, &block, &meta);
+    ServerInstance->map(m_data->map)->getBlock(m_data->x, m_data->y, m_data->z, &block, &meta);
     // Switch to regular furnace
-    Mineserver::get()->map(m_data->map)->setBlock(m_data->x, m_data->y, m_data->z, BLOCK_FURNACE, meta);
-    Mineserver::get()->map(m_data->map)->sendBlockChange(m_data->x, m_data->y, m_data->z, BLOCK_FURNACE, meta);
+    ServerInstance->map(m_data->map)->setBlock(m_data->x, m_data->y, m_data->z, BLOCK_FURNACE, meta);
+    ServerInstance->map(m_data->map)->sendBlockChange(m_data->x, m_data->y, m_data->z, BLOCK_FURNACE, meta);
     sendToAllUsers();
     m_burning = false;
   }
@@ -273,7 +273,7 @@ void Furnace::sendToAllUsers()
   enum { PROGRESS_ARROW = 0, PROGRESS_FIRE = 1 };
   //ToDo: send changes to all with this furnace opened
 
-  std::vector<OpenInvPtr>& inv = Mineserver::get()->inventory()->openFurnaces;
+  std::vector<OpenInvPtr>& inv = ServerInstance->inventory()->openFurnaces;
 
   for (size_t openinv = 0; openinv < inv.size(); ++openinv)
   {
@@ -306,15 +306,15 @@ void Furnace::sendToAllUsers()
 void readConfig()
 {
   const std::string key = "furnace.items";
-  if (Mineserver::get()->config()->has(key) && Mineserver::get()->config()->type(key) == CONFIG_NODE_LIST)
+  if (ServerInstance->config()->has(key) && ServerInstance->config()->type(key) == CONFIG_NODE_LIST)
   {
-    std::list<std::string> tmp = Mineserver::get()->config()->mData(key)->keys();
+    std::list<std::string> tmp = ServerInstance->config()->mData(key)->keys();
     for (std::list<std::string>::const_iterator it = tmp.begin(); it != tmp.end(); ++it)
     {
-      int input = Mineserver::get()->config()->iData(key + "." + *it + ".in");
-      createList[input].output = Mineserver::get()->config()->iData(key + "." + *it + ".out");
-      createList[input].meta = Mineserver::get()->config()->iData(key + "." + *it + ".meta");
-      createList[input].count = Mineserver::get()->config()->iData(key + "." + *it + ".count");
+      int input = ServerInstance->config()->iData(key + "." + *it + ".in");
+      createList[input].output = ServerInstance->config()->iData(key + "." + *it + ".out");
+      createList[input].meta = ServerInstance->config()->iData(key + "." + *it + ".meta");
+      createList[input].count = ServerInstance->config()->iData(key + "." + *it + ".count");
     }
   }
 }

@@ -39,6 +39,7 @@
 // configuration from build system
 #include "configure.h"
 #include "constants_num.h"
+#include "extern.h"
 
 //
 // Drops from blocks

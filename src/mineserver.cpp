@@ -88,11 +88,7 @@ int setnonblock(int fd)
   return 1;
 }
 
-// // Handle signals
-// void sighandler(int sig_num)
-// {
-//   Mineserver::get()->stop();
-// }
+Mineserver *ServerInstance = NULL;
 
 std::string removeChar(std::string str, const char* c)
 {
@@ -105,6 +101,7 @@ std::string removeChar(std::string str, const char* c)
 }
 
 // What is the purpose of "code"? -- louisdx
+// God I have no clue.. some day someone will fix it - Justasic
 int printHelp(int code)
 {
   std::cout
@@ -119,62 +116,95 @@ int printHelp(int code)
   return code;
 }
 
-
+// Main :D
 int main(int argc, char* argv[])
 {
-//   signal(SIGTERM, sighandler);
-//   signal(SIGINT, sighandler);
-// 
-// #ifndef WIN32
-//   // Justasic: use SIG_IGN instead of a blank and useless function
-//   signal(SIGPIPE, SIG_IGN);
-// #else
-//   signal(SIGBREAK, sighandler);
-// #endif
-  InitSignals();
+  bool ret = false;
+  // Try and start a new server instance
+  try
+  {
+    new Mineserver(argc, argv);
+    ret = ServerInstance->run();
+  }
+  catch (const CoreException &e)
+  {
+    LOG2(ERROR, e.GetReason());
+    return EXIT_FAILURE;
+  }
 
+  delete ServerInstance;
+  
+  return ret ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+
+
+Mineserver::Mineserver(int args, char **argarray)
+  :  m_socketlisten  (0),
+     m_saveInterval  (0),
+     m_lastSave      (std::time(NULL)),
+     m_pvp_enabled   (false),
+     m_damage_enabled(false),
+     m_only_helmets  (false),
+     m_running       (false),
+     m_eventBase     (NULL),
+     argc(args),
+     argv(argarray),
+
+     // core modules
+     m_config        (new Config()),
+     m_screen        (new CliScreen()),
+     m_logger        (new Logger()),
+
+     m_plugin        (NULL),
+     m_chat          (NULL),
+     m_furnaceManager(NULL),
+     m_packetHandler (NULL),
+     m_inventory     (NULL),
+     m_mobs          (NULL)
+{
+  ServerInstance = this;
+  InitSignals();
+  
   std::srand((uint32_t)std::time(NULL));
   initPRNG();
-
+  
   std::string cfg;
   std::vector<std::string> overrides;
-
+  
   for (int i = 1; i < argc; i++)
   {
     const std::string arg(argv[i]);
-
+    
     switch (arg[0])
     {
-    case '-':   // option
+      case '-':   // option
       // we have only '-h' and '--help' now, so just return with help
-      return printHelp(EXIT_SUCCESS);
-
-    case '+':   // override
+      printHelp(0);
+      throw CoreException();
+      
+      case '+':   // override
       overrides.push_back(arg.substr(1));
       break;
-
-    default:    // otherwise, it is config file
+      
+      default:    // otherwise, it is config file
       if (!cfg.empty())
-      {
-        LOG2(ERROR, "Only single CONFIG_FILE argument is allowed!");
-        return EXIT_FAILURE;
-      }
+	throw CoreException("Only single CONFIG_FILE argument is allowed!");
       cfg = arg;
       break;
     }
   }
-
+  
   const std::string path_exe = pathOfExecutable();
-
+  
   // If config file is provided as an argument
   if (!cfg.empty())
   {
-	std::cout << "Searching for configuration file..." << std::endl;
+    std::cout << "Searching for configuration file..." << std::endl;
     if (fileExists(cfg))
     {
       const std::pair<std::string, std::string> fullpath = pathOfFile(cfg);
       cfg = fullpath.first + PATH_SEPARATOR + fullpath.second;
-      Mineserver::get()->config()->config_path = fullpath.first;
+      this->config()->config_path = fullpath.first;
     }
     else
     {
@@ -188,21 +218,21 @@ int main(int argc, char* argv[])
     if (fileExists(path_exe + PATH_SEPARATOR + CONFIG_FILE))
     {
       cfg = path_exe + PATH_SEPARATOR + CONFIG_FILE;
-      Mineserver::get()->config()->config_path = path_exe;
+      this->config()->config_path = path_exe;
     }
     else
     {
       std::cout << "Config not found\n";
     }
   }
-    
+  
   // load config
-  Config & config = *Mineserver::get()->config();
-  if (!config.load(cfg))
+  Config &configvar = *this->config();
+  if (!configvar.load(cfg))
   {
-    return EXIT_FAILURE;
+    throw CoreException("Could not load config!");
   }
-
+  
   LOG2(INFO, "Using config: " + cfg);
   
   if (overrides.size())
@@ -214,58 +244,12 @@ int main(int argc, char* argv[])
       override_config << overrides[i] << ';' << std::endl;
     }
     // override config
-    if (!config.load(override_config))
-    {
-      LOG2(ERROR, "Error when parsing overrides: maybe you forgot to doublequote string values?");
-      return EXIT_FAILURE;
-    }
+    if (!configvar.load(override_config))
+      throw CoreException("Error when parsing overrides: maybe you forgot to doublequote string values?");
   }
-
-  bool ret = Mineserver::get()->init();
   
-  if (!ret)
-  {
-    LOG2(ERROR, "Failed to start Mineserver!");
-  }
-  else
-  {
-    ret = Mineserver::get()->run();
-  }
-
-  Mineserver::get()->free();
-
-  return ret ? EXIT_SUCCESS : EXIT_FAILURE;
-}
-
-
-Mineserver::Mineserver()
-  :  m_socketlisten  (0),
-     m_saveInterval  (0),
-     m_lastSave      (std::time(NULL)),
-     m_pvp_enabled   (false),
-     m_damage_enabled(false),
-     m_only_helmets  (false),
-     m_running       (false),
-     m_eventBase     (NULL),
-
-     // core modules
-     m_config        (new Config),
-     m_screen        (new CliScreen),
-     m_logger        (new Logger),
-
-     m_plugin        (NULL),
-     m_chat          (NULL),
-     m_furnaceManager(NULL),
-     m_packetHandler (NULL),
-     m_inventory     (NULL),
-     m_mobs          (NULL)
-{
   memset(&m_listenEvent, 0, sizeof(event));
   initConstants();
-}
-
-bool Mineserver::init()
-{
   // Write PID to file
   std::ofstream pid_out((config()->sData("system.pid_file")).c_str());
   if (!pid_out.fail())
@@ -276,7 +260,7 @@ bool Mineserver::init()
 
 
   // screen::init() needs m_plugin
-  m_plugin = new Plugin;
+  m_plugin = new Plugin();
 
   init_plugin_api();
 
@@ -290,11 +274,11 @@ bool Mineserver::init()
   LOG2(INFO, "Welcome to Mineserver v" + VERSION);
   LOG2(INFO, "Using zlib "+std::string(ZLIB_VERSION)+" libevent "+std::string(event_get_version()));
 
-  MapGen* mapgen = new MapGen;
-  MapGen* nethergen = new NetherGen;
-  MapGen* heavengen = new HeavenGen;
-  MapGen* biomegen = new BiomeGen;
-  MapGen* eximgen = new EximGen;
+  MapGen* mapgen = new MapGen();
+  MapGen* nethergen = new NetherGen();
+  MapGen* heavengen = new HeavenGen();
+  MapGen* biomegen = new BiomeGen();
+  MapGen* eximgen = new EximGen();
   m_mapGenNames.push_back(mapgen);
   m_mapGenNames.push_back(nethergen);
   m_mapGenNames.push_back(heavengen);
@@ -337,10 +321,7 @@ bool Mineserver::init()
   }
 
   if (m_map.size() == 0)
-  {
-    LOG2(ERROR, "No worlds in Config!");
-    return false;
-  }
+    throw CoreException("No worlds in Config");
 
   m_chat           = new Chat;
   m_furnaceManager = new FurnaceManager;
@@ -348,19 +329,16 @@ bool Mineserver::init()
   m_inventory      = new Inventory(m_config->sData("system.path.data") + '/' + "recipes", ".recipe", "ENABLED_RECIPES.cfg");
   m_mobs           = new Mobs;
 
-  return true;
-}
+} // End Mineserver constructor
 
-bool Mineserver::free()
+Mineserver::~Mineserver()
 {
   // Let the user know we're shutting the server down cleanly
   LOG2(INFO, "Shutting down...");
 
   // Close the cli session if its in use
   if (config() && config()->bData("system.interface.use_cli"))
-  {
     screen()->end();
-  }
 
   // Free memory
   for (std::vector<Map*>::size_type i = 0; i < m_map.size(); i++)
@@ -384,8 +362,6 @@ bool Mineserver::free()
 
   // Remove the PID file
   unlink((config()->sData("system.pid_file")).c_str());
-
-  return true;
 }
 
 
@@ -663,26 +639,27 @@ bool Mineserver::run()
       tick = (uint32_t)timeNow;
 
       // Loop users
-      for (std::set<User*>::const_iterator it = users().begin(); it != users().end(); ++it)
+      for (std::set<User*>::iterator it = users().begin(), it_end = users().end(); it != it_end;)
       {
+	// NOTE: iterators corrupt when you delete their objects, therefore we have to iterate in a special way - Justasic
+	User *u = *it;
+	++it;
         // No data received in 30s, timeout
-        if ((*it)->logged && timeNow - (*it)->lastData > 30)
+        if (u->logged && timeNow - u->lastData > 30)
         {
-          LOG2(INFO, "Player " + (*it)->nick + " timed out");
-          delete *it;
+          LOG2(INFO, "Player " + u->nick + " timed out");
+          delete u;
         }
-        else if (!(*it)->logged && timeNow - (*it)->lastData > 100)
-        {
-          delete (*it);
-        }
+        else if (!u->logged && timeNow - u->lastData > 100)
+          delete u;
         else
         {
           if (m_damage_enabled)
           {
-            (*it)->checkEnvironmentDamage();
+            u->checkEnvironmentDamage();
           }
-          (*it)->pushMap();
-          (*it)->popMap();
+          u->pushMap();
+          u->popMap();
         }
 
       }

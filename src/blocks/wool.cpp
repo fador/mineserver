@@ -35,7 +35,7 @@ bool BlockWool::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -68,7 +68,7 @@ bool BlockWool::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
 
   Item item = user->inv[user->curItem + 36];
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, item.getHealth());
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, item.getHealth());
+  ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, item.getHealth());
+  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, item.getHealth());
   return false;
 }

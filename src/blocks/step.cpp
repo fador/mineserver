@@ -49,10 +49,10 @@ void BlockStep::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y,
 bool BlockStep::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t block, meta;
-  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
+  ServerInstance->map(map)->getBlock(x, y, z, &block, &meta);
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  ServerInstance->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
 
   this->spawnBlockItem(x, y, z, map, block, meta);
   return false;
@@ -67,7 +67,7 @@ bool BlockStep::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -80,8 +80,8 @@ bool BlockStep::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
 
     if (item.getHealth() == oldmeta)
     {
-      Mineserver::get()->map(map)->setBlock(x, y, z, (char)BLOCK_DOUBLE_STEP, oldmeta);
-      Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)BLOCK_DOUBLE_STEP, oldmeta);
+      ServerInstance->map(map)->setBlock(x, y, z, (char)BLOCK_DOUBLE_STEP, oldmeta);
+      ServerInstance->map(map)->sendBlockChange(x, y, z, (char)BLOCK_DOUBLE_STEP, oldmeta);
       revertBlock(user, x, y, z, map);
       return true;
     }
@@ -119,8 +119,8 @@ bool BlockStep::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
 
   Item item = user->inv[user->curItem + 36];
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, (char)newblock, item.getHealth());
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, (char)newblock, item.getHealth());
+  ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, item.getHealth());
+  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, item.getHealth());
   return false;
 }
 

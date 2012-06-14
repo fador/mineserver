@@ -32,6 +32,8 @@
 #include <cstdlib>
 #include <string>
 
+#include "extern.h"
+
 #ifdef WIN32
 #define NOMINMAX
 #include <winsock2.h>
@@ -71,13 +73,13 @@ std::string hash(std::string value);
 #define PATH_SEPARATOR  '/'
 #endif
 
-bool fileExists(const std::string& filename);
-bool makeDirectory(const std::string& path);
-std::string canonicalizePath(const std::string& pathname);
-std::string getHomeDir();
-std::string pathOfExecutable();
-std::pair<std::string, std::string> pathOfFile(const std::string& filename);
-std::string relativeToAbsolute(std::string pathname);
+E bool fileExists(const std::string& filename);
+E bool makeDirectory(const std::string& path);
+E std::string canonicalizePath(const std::string& pathname);
+E std::string getHomeDir();
+E std::string pathOfExecutable();
+E std::pair<std::string, std::string> pathOfFile(const std::string& filename);
+E std::string relativeToAbsolute(const std::string &pathname);
 
 inline uint64_t ntohll(uint64_t v)
 {

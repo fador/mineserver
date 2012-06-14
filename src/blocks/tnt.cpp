@@ -40,7 +40,7 @@ void BlockTNT::rb(int32_t x,int8_t y,int8_t z,int map, User* user)
   uint8_t block, meta, count;
   int16_t item;
 
-  Mineserver::get()->map(map)->getBlock(x,y,z,&block,&meta);
+  ServerInstance->map(map)->getBlock(x,y,z,&block,&meta);
 
   BLOCKDROPS[block]->getDrop(item, count, meta);
 
@@ -51,8 +51,8 @@ void BlockTNT::rb(int32_t x,int8_t y,int8_t z,int map, User* user)
   }
   else
   {
-    Mineserver::get()->map(map)->setBlock(x,y,z,0,0);
-    Mineserver::get()->map(map)->sendBlockChange(x,y,z,0,0);
+    ServerInstance->map(map)->setBlock(x,y,z,0,0);
+    ServerInstance->map(map)->sendBlockChange(x,y,z,0,0);
   }
   
   // Pickup Spawn Area
@@ -60,7 +60,7 @@ void BlockTNT::rb(int32_t x,int8_t y,int8_t z,int map, User* user)
   if(pickint == 5)
   {
     if(count) {
-      Mineserver::get()->map(map)->createPickupSpawn(x, y, z, item, count, meta, user);
+      ServerInstance->map(map)->createPickupSpawn(x, y, z, item, count, meta, user);
       pickint=0;
     }
   } else {
@@ -75,10 +75,10 @@ void BlockTNT::explode(User* user,int32_t x,int8_t y,int8_t z,int map)
   if (rand() % 9 == 5) {
     // There is a chance of 1/10 that the TNT block does'nt explode;
     // this is more realistic ;)
-    Mineserver::get()->map(map)->setBlock(x,y,z,0,0);
-    Mineserver::get()->map(map)->sendBlockChange(x,y,z,0,0);
+    ServerInstance->map(map)->setBlock(x,y,z,0,0);
+    ServerInstance->map(map)->sendBlockChange(x,y,z,0,0);
     // But we want to be fair; let's create a pickup for the TNT block =)
-    Mineserver::get()->map(map)->createPickupSpawn(x,y,z,46,1,0,user);
+    ServerInstance->map(map)->createPickupSpawn(x,y,z,46,1,0,user);
   } else {
     int number; // Counter in the for(...){...} loops.
     // Layer Y-4
@@ -234,7 +234,7 @@ bool BlockTNT::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_
   uint8_t oldblock;
   uint8_t oldmeta;
   
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;

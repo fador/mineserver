@@ -36,7 +36,7 @@ bool BlockNote::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
   uint8_t oldblock;
   uint8_t oldmeta;
 
-  if (!Mineserver::get()->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &oldblock, &oldmeta))
   {
     revertBlock(user, x, y, z, map);
     return true;
@@ -67,33 +67,33 @@ bool BlockNote::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32
     return true;
   }
 
-  Mineserver::get()->map(map)->setBlock(x, y, z, BLOCK_NOTE_BLOCK, 0);
-  Mineserver::get()->map(map)->sendBlockChange(x, y, z, BLOCK_NOTE_BLOCK, 0);
+  ServerInstance->map(map)->setBlock(x, y, z, BLOCK_NOTE_BLOCK, 0);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_NOTE_BLOCK, 0);
   return false;
 }
 
 void BlockNote::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t block, metadata;
-  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
-  Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
+  ServerInstance->map(map)->getBlock(x, y, z, &block, &metadata);
+  ServerInstance->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
 }
 
 bool BlockNote::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 {
   uint8_t block, metadata;
-  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &metadata);
+  ServerInstance->map(map)->getBlock(x, y, z, &block, &metadata);
   if (metadata == 0x14)
   {
     metadata = 0x00;
-    Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
-    Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
+    ServerInstance->map(map)->setBlock(x, y, z, block, metadata);
+    ServerInstance->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
   }
   else
   {
     metadata++;
-    Mineserver::get()->map(map)->setBlock(x, y, z, block, metadata);
-    Mineserver::get()->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
+    ServerInstance->map(map)->setBlock(x, y, z, block, metadata);
+    ServerInstance->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
   }
   return true;
 }
@@ -101,7 +101,7 @@ bool BlockNote::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
 int BlockNote::getInstrument(int32_t x, int8_t y, int32_t z, int map)
 {
   uint8_t block, meta;
-  Mineserver::get()->map(map)->getBlock(x, y, z, &block, &meta);
+  ServerInstance->map(map)->getBlock(x, y, z, &block, &meta);
   switch (block)
   {
   case BLOCK_WOOD:

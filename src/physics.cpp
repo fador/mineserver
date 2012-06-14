@@ -86,7 +86,7 @@ bool Physics::update()
     vec pos = simList[simIt].blocks[0].pos;
     // Blocks
     uint8_t block, meta;
-    Mineserver::get()->map(map)->getBlock(pos, &block, &meta);
+    ServerInstance->map(map)->getBlock(pos, &block, &meta);
     simList[simIt].blocks[0].id   = block;
     simList[simIt].blocks[0].meta = meta;
 
@@ -119,8 +119,8 @@ bool Physics::update()
         break;
       }
       uint8_t newblock, newmeta;
-      Mineserver::get()->map(map)->getBlock(pos, &block, &meta);
-      Mineserver::get()->map(map)->getBlock(local, &newblock, &newmeta);
+      ServerInstance->map(map)->getBlock(pos, &block, &meta);
+      ServerInstance->map(map)->getBlock(local, &newblock, &newmeta);
       if (!isLiquidBlock(block))
       {
         toRem.push_back(pos);
@@ -130,9 +130,9 @@ bool Physics::update()
       {
         if (falling && !isLiquidBlock(newblock))
         {
-          Mineserver::get()->map(map)->setBlock(local, block, meta);
+          ServerInstance->map(map)->setBlock(local, block, meta);
           changed.insert(local);
-          Mineserver::get()->map(map)->setBlock(pos, BLOCK_AIR, 0);
+          ServerInstance->map(map)->setBlock(pos, BLOCK_AIR, 0);
           changed.insert(pos);
           toRem.push_back(pos);
           toAdd.push_back(local);
@@ -165,16 +165,16 @@ bool Physics::update()
           }
           if ((isWaterBlock(block) && a_meta < 8) || (isLavaBlock(block) && a_meta < 4))
           {
-            Mineserver::get()->map(map)->setBlock(pos, block, a_meta);
+            ServerInstance->map(map)->setBlock(pos, block, a_meta);
 
             changed.insert(pos);
           }
           else
           {
-            Mineserver::get()->map(map)->setBlock(pos, BLOCK_AIR, 0);
+            ServerInstance->map(map)->setBlock(pos, BLOCK_AIR, 0);
             changed.insert(pos);
           }
-          Mineserver::get()->map(map)->setBlock(local, block, a_newmeta);
+          ServerInstance->map(map)->setBlock(local, block, a_newmeta);
           used = true;
           toAdd.push_back(local);
           toAdd.push_back(pos);
@@ -194,17 +194,17 @@ bool Physics::update()
           }
           // We are spreading onto dry area.
           newmeta = 7;
-          Mineserver::get()->map(map)->setBlock(local, block, newmeta);
+          ServerInstance->map(map)->setBlock(local, block, newmeta);
           changed.insert(local);
           meta++;
           if (meta < 8)
           {
-            Mineserver::get()->map(map)->setBlock(pos, block, meta);
+            ServerInstance->map(map)->setBlock(pos, block, meta);
             changed.insert(pos);
           }
           else
           {
-            Mineserver::get()->map(map)->setBlock(pos, BLOCK_AIR, 0);
+            ServerInstance->map(map)->setBlock(pos, BLOCK_AIR, 0);
             changed.insert(pos);
             toRem.push_back(pos);
           }
@@ -215,17 +215,17 @@ bool Physics::update()
         if (meta < newmeta - 1 || (meta == newmeta && falling))
         {
           newmeta --;
-          Mineserver::get()->map(map)->setBlock(local, block, newmeta);
+          ServerInstance->map(map)->setBlock(local, block, newmeta);
           changed.insert(local);
           meta ++;
           if (meta < 8)
           {
-            Mineserver::get()->map(map)->setBlock(pos, block, meta);
+            ServerInstance->map(map)->setBlock(pos, block, meta);
             changed.insert(pos);
           }
           else
           {
-            Mineserver::get()->map(map)->setBlock(pos, BLOCK_AIR, 0);
+            ServerInstance->map(map)->setBlock(pos, BLOCK_AIR, 0);
             changed.insert(pos);
             toRem.push_back(pos);
           }
@@ -248,7 +248,7 @@ bool Physics::update()
   {
     addSimulation(toAdd[i]);
   }
-  Mineserver::get()->map(map)->sendMultiBlocks(changed);
+  ServerInstance->map(map)->sendMultiBlocks(changed);
 
   clock_t endtime = clock() - starttime;
   //  LOG(INFO, "Physics", "Exit simulation, took " + dtos(endtime * 1000 / CLOCKS_PER_SEC) + " ms, " + dtos(simList.size()) + " items left");
@@ -265,7 +265,7 @@ bool Physics::addSimulation(vec pos)
 
   uint8_t block;
   uint8_t meta;
-  Mineserver::get()->map(map)->getBlock(pos, &block, &meta);
+  ServerInstance->map(map)->getBlock(pos, &block, &meta);
   SimBlock simulationBlock(block, pos, meta);
 
   // Dont add duplicates
@@ -357,7 +357,7 @@ bool Physics::checkSurrounding(vec pos)
     }
 
     //Add liquid blocks to simulation if they are affected by breaking a block
-    if (Mineserver::get()->map(map)->getBlock(local, &block, &meta) &&
+    if (ServerInstance->map(map)->getBlock(local, &block, &meta) &&
         isLiquidBlock(block))
     {
       addSimulation(local);

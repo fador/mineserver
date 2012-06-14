@@ -27,6 +27,7 @@
 
 #ifndef _CONSTANTS_NUM_H
 #define _CONSTANTS_NUM_H
+#include <string>
 
 //
 // Mineserver constants
@@ -183,4 +184,7 @@ enum Dye
   DYE_LIGHT_GRAY, DYE_GRAY, DYE_PINK, DYE_LIME, DYE_YELLOW, DYE_LIGHT_BLUE, DYE_MAGENTA, DYE_ORANGE,
   DYE_BONE_MEAL
 };
+
+// get block names.
+extern std::string GetBlockName(Block);
 #endif

@@ -216,7 +216,7 @@ void Map::init(int number)
 {
   m_number = number;
   const char* key = "map.storage.nbt.directories"; // Prefix for worlds config
-  std::list<std::string> tmp = Mineserver::get()->config()->mData(key)->keys();
+  std::list<std::string> tmp = ServerInstance->config()->mData(key)->keys();
 
   if (number < int(tmp.size()))
   {
@@ -338,7 +338,7 @@ void Map::init(int number)
   /////////////////
 
   // Init mapgenerator
-  Mineserver::get()->mapGen(m_number)->re_init((int32_t)mapSeed);
+  ServerInstance->mapGen(m_number)->re_init((int32_t)mapSeed);
 
   delete root;
 }
@@ -606,10 +606,10 @@ bool Map::generateLight(int x, int z, sChunk* chunk)
 #ifdef PRINT_LIGHTGEN_TIME
 #ifdef WIN32
   t_end = timeGetTime();
-  Mineserver::get()->logger()->log("Lightgen: " + dtos(t_end - t_begin) + "ms");
+  ServerInstance->logger()->log("Lightgen: " + dtos(t_end - t_begin) + "ms");
 #else
   t_end = clock();
-  Mineserver::get()->logger()->log("Lightgen: " + dtos((t_end - t_begin) / (CLOCKS_PER_SEC / 1000))) + "ms");
+  ServerInstance->logger()->log("Lightgen: " + dtos((t_end - t_begin) / (CLOCKS_PER_SEC / 1000))) + "ms");
 #endif
 #endif
 
@@ -1157,8 +1157,8 @@ sChunk* Map::loadMap(int x, int z, bool generate)
     if (generate)
     {
       // Re-seed! We share map gens with other maps
-      Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
-      Mineserver::get()->mapGen(m_number)->generateChunk(x, z, m_number);
+      ServerInstance->mapGen(m_number)->init((int32_t)mapSeed);
+      ServerInstance->mapGen(m_number)->generateChunk(x, z, m_number);
       generateLight(x, z);
       //If we generated spawn pos, make sure the position is not underground!
       if (x == blockToChunk(spawnPos.x()) && z == blockToChunk(spawnPos.z()))
@@ -1223,8 +1223,8 @@ sChunk* Map::loadMap(int x, int z, bool generate)
   {
     LOGLF("Error in loading map (unable to load file)");
     delete chunk;
-    Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
-    Mineserver::get()->mapGen(m_number)->generateChunk(x, z, m_number);
+    ServerInstance->mapGen(m_number)->init((int32_t)mapSeed);
+    ServerInstance->mapGen(m_number)->generateChunk(x, z, m_number);
     generateLight(x, z);
     return getChunk(x, z);
   }
@@ -1235,8 +1235,8 @@ sChunk* Map::loadMap(int x, int z, bool generate)
   {
     LOGLF("Error in loading map (unable to find Level)");
     delete chunk;
-    Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
-    Mineserver::get()->mapGen(m_number)->generateChunk(x, z, m_number);
+    ServerInstance->mapGen(m_number)->init((int32_t)mapSeed);
+    ServerInstance->mapGen(m_number)->generateChunk(x, z, m_number);
     generateLight(x, z);
     return getChunk(x, z);
   }
@@ -1253,8 +1253,8 @@ sChunk* Map::loadMap(int x, int z, bool generate)
   {
     LOG(WARNING, "Map", "incorrect chunk (missing xPos or zPos) regenerating");
     delete chunk;
-    Mineserver::get()->mapGen(m_number)->init((int32_t)mapSeed);
-    Mineserver::get()->mapGen(m_number)->generateChunk(x, z, m_number);
+    ServerInstance->mapGen(m_number)->init((int32_t)mapSeed);
+    ServerInstance->mapGen(m_number)->generateChunk(x, z, m_number);
     generateLight(x, z);
     return getChunk(x, z);
   }
@@ -1479,7 +1479,7 @@ sChunk* Map::loadMap(int x, int z, bool generate)
 
           //Push to our furnace storage at chunk and check for possible activity
           chunk->furnaces.push_back(newFurnace);
-          Mineserver::get()->furnaceManager()->handleActivity(newFurnace);
+          ServerInstance->furnaceManager()->handleActivity(newFurnace);
         }
       }
 
@@ -1703,7 +1703,7 @@ bool Map::sendMultiBlocks(std::set<vec>& blocks)
     for (std::set<vec>::const_iterator it = toRem.begin(); it != toRem.end(); ++it)
     {
       uint8_t block, meta;
-      Mineserver::get()->map(m_number)->getBlock(it->x(), it->y(), it->z(), &block, &meta);
+      ServerInstance->map(m_number)->getBlock(it->x(), it->y(), it->z(), &block, &meta);
 
       // Sending packet a uint16_t makes it assume int...
       uint16_t coord = (((it->x() - offsetx) << 12) + ((it->z() - offsetz) << 8) + (it->y()));
