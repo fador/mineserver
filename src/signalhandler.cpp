@@ -103,7 +103,7 @@ void HandleSegfault()
   std::cout.flush(); //Clear output
   #endif // HAVE_BACKTRACE
   
-  Mineserver::get()->stop();
+  ServerInstance->stop();
   exit(SIGSEGV); // Exit so we're not still running
 }
 
@@ -140,7 +140,7 @@ void SignalHandler(int sig)
       signal(SIGHUP, SIG_IGN);
       #endif
       LOG2(INFO, "Received SIGTERM, Exiting..");
-      Mineserver::get()->stop();
+      ServerInstance->stop();
       break;
     default:
       static_cast<void>(0); // TODO: fix this to do something useful?

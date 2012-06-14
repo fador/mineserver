@@ -64,7 +64,7 @@
 #define LIBRARY_LOAD(x) LoadLibrary(x)
 #define LIBRARY_SELF() GetModuleHandle(NULL)
 #define LIBRARY_SYMBOL(x, y) GetProcAddress(x, y)
-char *LIBRARY_ERROR(void)
+static char *LIBRARY_ERROR(void)
 {
   char errbuf[513];
   DWORD err = GetLastError();

@@ -186,5 +186,5 @@ enum Dye
 };
 
 // get block names.
-extern std::string GetBlockName(Block);
+//extern std::string GetBlockName(Block);
 #endif

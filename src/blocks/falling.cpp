@@ -25,6 +25,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <stdio.h>
 #include "mineserver.h"
 #include "map.h"
 #include "plugin.h"
@@ -205,7 +206,7 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int8_t y, int32_t z, int 
     {
     	if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(neighbour))
 	{
-	  LOG(INFO, "Gravity", printfify("Falling block %s (x=%i, y=%i, z=%i)", GetBlockName(static_cast<Block>(neighbour)).c_str(), x, y, z));
+	  //LOG(INFO, "Gravity", printfify("Falling block %s (x=%i, y=%i, z=%i)", GetBlockName(static_cast<Block>(neighbour)).c_str(), x, y, z));
 
 	  uint8_t neighbor, neighbormeta;
 	  while(ServerInstance->map(map)->getBlock(++x,y,z, &neighbor, &neighbormeta) && affectedBlock(neighbor))
