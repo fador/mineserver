@@ -23,11 +23,13 @@
 #define VERSION_COMPLETE "@mineserver_VERSION_COMPLETE@"
 
 // Windows specific fixes
+/*
 #ifdef WIN32
-# define unlink _unlink
-# define close closesocket
-# define getpid GetCurrentProcessId
+#define unlink _unlink
+#define close closesocket
+#define getpid GetCurrentProcessId
 #endif
+*/
 
 // Justasic:
 // Check to see if we have the proper includes for our signal handler
