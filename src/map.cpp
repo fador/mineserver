@@ -1772,7 +1772,7 @@ void Map::sendToUser(User* user, int x, int z, bool login)
   //ToDo: now sending all 16 16x16 chunks, limit to only those with blocks.
   // Chunk
   (*p) << (int8_t)PACKET_MAP_CHUNK << (int32_t)(mapposx) << (int32_t)(mapposz)
-       << (int8_t)0 /* Biome Data bool? */ << (int16_t)0xffff /* Enabled chunks 0..15 */ 
+       << (int8_t)1 /* Biome Data bool? */ << (int16_t)0xffff /* Enabled chunks 0..15 */ 
        << (int16_t)0xffff /* Enabled additional data? in the enabled chunks */;
 
 
