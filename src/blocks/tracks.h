@@ -34,7 +34,7 @@ class User;
 struct TrackData
 {
   uint32_t x;
-  uint8_t y;
+  uint16_t y;
   uint32_t z;
 };
 

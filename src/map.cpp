@@ -938,7 +938,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   if (type == BLOCK_AIR)
   {
     uint8_t temp_type = 0, temp_meta = 0;
-    int8_t temp_y = y;
+    int16_t temp_y = y;
     while (getBlock(x, temp_y, z, &temp_type, &temp_meta, false) && (temp_type == BLOCK_AIR))
     {
       temp_y--;
@@ -1043,7 +1043,7 @@ void Map::createPickupSpawn(int x, int y, int z, int type, int count, int health
   // If so, find the lowest air block at x,*,z that we can place it in and move it there
   // Effectively we get... Gravity!
   uint8_t temp_type = 0, temp_meta = 0;
-  int8_t temp_y = y;
+  int16_t temp_y = y;
   if (getBlock(x, temp_y, z, &temp_type, &temp_meta, false) && (temp_type == BLOCK_AIR))
   {
     while (getBlock(x, temp_y, z, &temp_type, &temp_meta, false) && (temp_type == BLOCK_AIR))

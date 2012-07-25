@@ -578,7 +578,8 @@ int PacketHandler::player_digging(User* user)
 {
   int8_t status;
   int32_t x;
-  int8_t  y;
+  int16_t  y;
+  int8_t temp_y;
   int32_t z;
   int8_t direction;
   uint8_t block;
@@ -587,7 +588,8 @@ int PacketHandler::player_digging(User* user)
   BlockDefault blockD;
 
 
-  user->buffer >> status >> x >> y >> z >> direction;
+  user->buffer >> status >> x >> temp_y >> z >> direction;
+  y = (uint8_t)temp_y;
 
   if (!user->buffer)
   {
