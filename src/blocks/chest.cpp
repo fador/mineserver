@@ -35,7 +35,7 @@
 #include "chat.h"
 #include "tools.h"
 
-void BlockChest::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockChest::onStartedDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
   // Locksystem
   if (user->inv[36 + user->currentItemSlot()].getType() == ITEM_WOODEN_AXE)
@@ -120,17 +120,17 @@ void BlockChest::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y
   }
 }
 
-void BlockChest::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockChest::onDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-void BlockChest::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockChest::onStoppedDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-bool BlockChest::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockChest::onBroken(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t block;
   uint8_t meta;
@@ -206,11 +206,11 @@ bool BlockChest::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
 
 }
 
-void BlockChest::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockChest::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-bool BlockChest::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockChest::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t oldblock;
   uint8_t oldmeta;
@@ -322,21 +322,21 @@ bool BlockChest::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int3
   return false;
 }
 
-void BlockChest::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockChest::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-void BlockChest::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockChest::onReplace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
 
 }
 
-void BlockChest::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockChest::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-bool BlockChest::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
+bool BlockChest::onInteract(User* user, int32_t x, int16_t y, int32_t z, int map)
 {
   //ToDo: check for large chest!
   sChunk* chunk = ServerInstance->map(map)->getChunk(blockToChunk(x), blockToChunk(z));
@@ -364,7 +364,7 @@ bool BlockChest::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
   }
 }
 
-bool BlockChest::findConnectedChest(int32_t x, int8_t y, int32_t z, int map, int32_t* chest_x, int32_t* chest_z)
+bool BlockChest::findConnectedChest(int32_t x, int16_t y, int32_t z, int map, int32_t* chest_x, int32_t* chest_z)
 {
   uint8_t blocktype, blockmeta;
 
@@ -394,7 +394,7 @@ bool BlockChest::findConnectedChest(int32_t x, int8_t y, int32_t z, int map, int
   return false;
 }
 
-bool BlockChest::findConnectedChest(int32_t x, int8_t y, int32_t z, int map, chestDataPtr& chest)
+bool BlockChest::findConnectedChest(int32_t x, int16_t y, int32_t z, int map, chestDataPtr& chest)
 {
   int32_t connectedX, connectedZ;
   if(findConnectedChest(x, y, z, map, &connectedX, &connectedZ))
@@ -405,7 +405,7 @@ bool BlockChest::findConnectedChest(int32_t x, int8_t y, int32_t z, int map, che
   }
 }
 
-bool BlockChest::getChestByCoordinates(int32_t x, int8_t y, int32_t z, int map, chestDataPtr& chest)
+bool BlockChest::getChestByCoordinates(int32_t x, int16_t y, int32_t z, int map, chestDataPtr& chest)
 {
   sChunk* chunk = ServerInstance->map(map)->getChunk(blockToChunk(x), blockToChunk(z));
   for(size_t i = 0; i < chunk->chests.size(); i++)

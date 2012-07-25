@@ -48,30 +48,30 @@ public:
   // Everybody MUST implement this, so we make it pure virtual.
   virtual bool affectedBlock(int block) const = 0;
 
-  virtual void notifyNeighbours(const int32_t x, const int8_t y, const int32_t z,
+  virtual void notifyNeighbours(const int32_t x, const int16_t y, const int32_t z,
                                 const int map, const std::string callback, User* user,
                                 const uint8_t oldblock, const int8_t ignore_direction);
 
   virtual void timer200() { }
-  virtual void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-  virtual void onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
-  virtual void onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
-  virtual bool onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
-  virtual void onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
-  virtual bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
-  virtual void onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
-  virtual void onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
-  virtual void onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction);
-  virtual void onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction, int map);
-  virtual bool onInteract(User* user, int32_t x, int8_t y, int32_t z, int map);
-  virtual void revertBlock(User* user, int32_t x, int8_t y, int32_t z, int map);
+  virtual void onStartedDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction);
+  virtual void onDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map,  int8_t direction);
+  virtual void onStoppedDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map,  int8_t direction);
+  virtual bool onBroken(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map,  int8_t direction);
+  virtual void onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int16_t y, int32_t z, int map,  int8_t direction);
+  virtual bool onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map,  int8_t direction);
+  virtual void onNeighbourPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map,  int8_t direction);
+  virtual void onReplace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map,  int8_t direction);
+  virtual void onNeighbourMove(User* user, int16_t oldblock, int32_t x, int16_t y, int32_t z, int8_t direction);
+  virtual void onNeighbourMove(User* user, int16_t oldblock, int32_t x, int16_t y, int32_t z, int8_t direction, int map);
+  virtual bool onInteract(User* user, int32_t x, int16_t y, int32_t z, int map);
+  virtual void revertBlock(User* user, int32_t x, int16_t y, int32_t z, int map);
 
 protected:
   virtual bool isBlockStackable(const uint8_t block);
-  virtual bool isUserOnBlock(const int32_t x, const int8_t y, const int32_t z, const int map);
-  virtual bool translateDirection(int32_t* x, int8_t* y, int32_t* z, const int map, const int8_t direction);
-  virtual bool isBlockEmpty(const int32_t x, const int8_t y, const int32_t z, const int map);
-  virtual bool spawnBlockItem(const int32_t x, const int8_t y, const int32_t z, const int map, const uint8_t block, uint8_t meta = 0);
+  virtual bool isUserOnBlock(const int32_t x, const int16_t y, const int32_t z, const int map);
+  virtual bool translateDirection(int32_t* x, int16_t* y, int32_t* z, const int map, const int8_t direction);
+  virtual bool isBlockEmpty(const int32_t x, const int16_t y, const int32_t z, const int map);
+  virtual bool spawnBlockItem(const int32_t x, const int16_t y, const int32_t z, const int map, const uint8_t block, uint8_t meta = 0);
 };
 
 #endif

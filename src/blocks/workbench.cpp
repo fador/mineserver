@@ -31,7 +31,7 @@
 #include "workbench.h"
 
 
-bool BlockWorkbench::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockWorkbench::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t oldblock;
   uint8_t oldmeta;
@@ -73,7 +73,7 @@ bool BlockWorkbench::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, 
   return false;
 }
 
-bool BlockWorkbench::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
+bool BlockWorkbench::onInteract(User* user, int32_t x, int16_t y, int32_t z, int map)
 {
   ServerInstance->inventory()->windowOpen(user, WINDOW_WORKBENCH, x, y, z);
   return true;

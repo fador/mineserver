@@ -1289,7 +1289,7 @@ sChunk* Map::loadMap(int x, int z, bool generate)
   for(nbt_list_iter = nbt_list->begin(); nbt_list_iter != nbt_list->end(); nbt_list_iter++)
   {
     NBT_Value& compound = *(*nbt_list_iter);
-    int8_t Y = (int8_t) *compound["Y"];
+    int16_t Y = (uint8_t)((int8_t) *compound["Y"]);
     chunk->chunks_present |= 1<<Y;
     NBT_Value* nbt_blocks     = compound["Blocks"];  
     NBT_Value* nbt_data       = compound["Data"];

@@ -19,7 +19,7 @@
 #include "plugin.h"
 
 
-bool BlockLeaves::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockLeaves::onBroken(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
   std::set<Decay>::iterator it = std::find_if(decaying.begin(), decaying.end(), DecayFinder(x,y,z,map));
 
@@ -28,7 +28,7 @@ bool BlockLeaves::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32
   return true;
 }
 
-void BlockLeaves::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockLeaves::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
   if ( (oldblock != BLOCK_WOOD && oldblock != BLOCK_LEAVES)   ||
        std::find_if(decaying.begin(), decaying.end(), DecayFinder(x,y,z,map)) != decaying.end() )

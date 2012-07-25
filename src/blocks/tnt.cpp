@@ -35,7 +35,7 @@
 
 uint8_t pickint;
 
-void BlockTNT::rb(int32_t x,int8_t y,int8_t z,int map, User* user)
+void BlockTNT::rb(int32_t x,int16_t y,int32_t z,int map, User* user)
 {
   uint8_t block, meta, count;
   int16_t item;
@@ -69,7 +69,7 @@ void BlockTNT::rb(int32_t x,int8_t y,int8_t z,int map, User* user)
 
 }
 
-void BlockTNT::explode(User* user,int32_t x,int8_t y,int8_t z,int map)
+void BlockTNT::explode(User* user,int32_t x,int16_t y,int32_t z,int map)
 {
   pickint = 0;
   if (rand() % 9 == 5) {
@@ -229,7 +229,7 @@ void BlockTNT::explode(User* user,int32_t x,int8_t y,int8_t z,int map)
   }
 }
 
-bool BlockTNT::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockTNT::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t oldblock;
   uint8_t oldmeta;
@@ -268,14 +268,14 @@ bool BlockTNT::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_
   return false;
 }
 
-void BlockTNT::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockTNT::onStartedDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t block, metadata;
   explode(user,x,y,z,map);
   
 }
 
-bool BlockTNT::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
+bool BlockTNT::onInteract(User* user, int32_t x, int16_t y, int32_t z, int map)
 {
   uint8_t block, metadata;
   return true;

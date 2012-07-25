@@ -40,6 +40,6 @@ class BlockIce : public BlockBasic
 public:
   inline bool affectedBlock(int block) const { return block == BLOCK_ICE; }
 
-  bool onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-  bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
+  bool onBroken(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction);
+  bool onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map,  int8_t direction);
 };

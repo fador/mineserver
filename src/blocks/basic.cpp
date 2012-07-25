@@ -67,7 +67,7 @@ bool BlockBasic::isBlockStackable(const uint8_t block)
   return true;
 }
 
-bool BlockBasic::isUserOnBlock(const int32_t x, const int8_t y, const int32_t z, const int map)
+bool BlockBasic::isUserOnBlock(const int32_t x, const int16_t y, const int32_t z, const int map)
 {
   /* TODO: Get Users by chunk rather than whole list */
   for (std::set<User*>::iterator it = ServerInstance->users().begin(); it != ServerInstance->users().end(); ++it)
@@ -82,7 +82,7 @@ bool BlockBasic::isUserOnBlock(const int32_t x, const int8_t y, const int32_t z,
   return false;
 }
 
-bool BlockBasic::translateDirection(int32_t* x, int8_t* y, int32_t* z, int map, const int8_t direction)
+bool BlockBasic::translateDirection(int32_t* x, int16_t* y, int32_t* z, int map, const int8_t direction)
 {
   uint8_t block, meta;
   ServerInstance->map(map)->getBlock(*x, *y, *z, &block, &meta);
@@ -116,7 +116,7 @@ bool BlockBasic::translateDirection(int32_t* x, int8_t* y, int32_t* z, int map, 
   return true;
 }
 
-bool BlockBasic::isBlockEmpty(const int32_t x, const int8_t y, const int32_t z, const int map)
+bool BlockBasic::isBlockEmpty(const int32_t x, const int16_t y, const int32_t z, const int map)
 {
   uint8_t block;
   uint8_t meta;
@@ -127,7 +127,7 @@ bool BlockBasic::isBlockEmpty(const int32_t x, const int8_t y, const int32_t z, 
   return (block == BLOCK_AIR || block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER || block == BLOCK_LAVA || block == BLOCK_STATIONARY_LAVA || block == BLOCK_SNOW);
 }
 
-bool BlockBasic::spawnBlockItem(const int32_t x, const int8_t y, const int32_t z, int map, const uint8_t block, const uint8_t meta)
+bool BlockBasic::spawnBlockItem(const int32_t x, const int16_t y, const int32_t z, int map, const uint8_t block, const uint8_t meta)
 {
   DropPtr drop;
   int16_t item; uint8_t count, item_meta = meta;
@@ -140,7 +140,7 @@ bool BlockBasic::spawnBlockItem(const int32_t x, const int8_t y, const int32_t z
   return false;
 }
 
-void BlockBasic::notifyNeighbours(const int32_t x, const int8_t y, const int32_t z, const int map, const std::string callback, User* user, const uint8_t oldblock, const int8_t ignore_direction)
+void BlockBasic::notifyNeighbours(const int32_t x, const int16_t y, const int32_t z, const int map, const std::string callback, User* user, const uint8_t oldblock, const int8_t ignore_direction)
 {
   uint8_t block;
   uint8_t meta;
@@ -186,19 +186,19 @@ void BlockBasic::notifyNeighbours(const int32_t x, const int8_t y, const int32_t
     }*/
 }
 
-void BlockBasic::onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+void BlockBasic::onStartedDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
 }
 
-void BlockBasic::onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map,  int8_t direction)
+void BlockBasic::onDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map,  int8_t direction)
 {
 }
 
-void BlockBasic::onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map,  int8_t direction)
+void BlockBasic::onStoppedDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map,  int8_t direction)
 {
 }
 
-bool BlockBasic::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map,  int8_t direction)
+bool BlockBasic::onBroken(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map,  int8_t direction)
 {
   //Clear block on destroy
   uint8_t block, meta;
@@ -209,37 +209,37 @@ bool BlockBasic::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_
   return false;
 }
 
-void BlockBasic::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction)
+void BlockBasic::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int16_t y, int32_t z, int map,  int8_t direction)
 {
 }
 
-bool BlockBasic::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction)
-{
-  return false;
-}
-
-void BlockBasic::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction)
-{
-}
-
-void BlockBasic::onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction)
-{
-}
-
-void BlockBasic::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction)
-{
-}
-
-void BlockBasic::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int8_t direction, int map)
-{
-}
-
-bool BlockBasic::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
+bool BlockBasic::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map,  int8_t direction)
 {
   return false;
 }
 
-void BlockBasic::revertBlock(User* user, int32_t x, int8_t y, int32_t z, int map)
+void BlockBasic::onNeighbourPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map,  int8_t direction)
+{
+}
+
+void BlockBasic::onReplace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map,  int8_t direction)
+{
+}
+
+void BlockBasic::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int16_t y, int32_t z, int8_t direction)
+{
+}
+
+void BlockBasic::onNeighbourMove(User* user, int16_t oldblock, int32_t x, int16_t y, int32_t z, int8_t direction, int map)
+{
+}
+
+bool BlockBasic::onInteract(User* user, int32_t x, int16_t y, int32_t z, int map)
+{
+  return false;
+}
+
+void BlockBasic::revertBlock(User* user, int32_t x, int16_t y, int32_t z, int map)
 {
   unsigned char block, meta;
   ServerInstance->map(map)->getBlock((int)x, (int)y, (int)z, &block, &meta);

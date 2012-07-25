@@ -41,16 +41,16 @@ class BlockChest : public BlockBasic
 public:
   inline bool affectedBlock(int block) const { return block == BLOCK_CHEST; }
 
-  void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int map, int32_t z, int8_t direction);
-  void onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-  void onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int map, int32_t z, int8_t direction);
-  bool onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-  void onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-  bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-  void onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-  void onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map,  int8_t direction);
-  void onNeighbourMove(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-  bool onInteract(User* user, int32_t x, int8_t y, int32_t z, int map);
+  void onStartedDigging(User* user, int8_t status, int32_t x, int16_t y, int map, int32_t z, int8_t direction);
+  void onDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction);
+  void onStoppedDigging(User* user, int8_t status, int32_t x, int16_t y, int map, int32_t z, int8_t direction);
+  bool onBroken(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction);
+  void onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction);
+  bool onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction);
+  void onNeighbourPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction);
+  void onReplace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map,  int8_t direction);
+  void onNeighbourMove(User* user, int16_t oldblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction);
+  bool onInteract(User* user, int32_t x, int16_t y, int32_t z, int map);
 
   /** finds the chest, that is connected to a block. gets coordinates. for large chests
    * @param x x coordinate of the chest you know
@@ -61,7 +61,7 @@ public:
    * @param chest_z contains the z coordinate of the other chest part
    * @returns true when a chest could be found, otherwise false.
    */
-  bool findConnectedChest(int32_t x, int8_t y, int32_t z, int map, int32_t* chest_x, int32_t* chest_z);
+  bool findConnectedChest(int32_t x, int16_t y, int32_t z, int map, int32_t* chest_x, int32_t* chest_z);
 
   /** find the chest, that is connected to a block. gets chestData.
    * @param x x coordinate of the chest you know
@@ -71,7 +71,7 @@ public:
    * @param chest reference to a chestDataPtr. will be filled, if connected chest is found.
    * @returns true when a chest could be found, otherwise false.
    */
-  bool findConnectedChest(int32_t x, int8_t y, int32_t z, int map, chestDataPtr& chest);
+  bool findConnectedChest(int32_t x, int16_t y, int32_t z, int map, chestDataPtr& chest);
 
   /** gets the chestDataPtr for a cest at given coordinates
    * @param x x coordinate of the chest
@@ -80,6 +80,6 @@ public:
    * @param chest is filled with the chestData, if the chest can be found
    * @returns true, when a chest at given coordinates was found, otherwise false
    */
-  bool getChestByCoordinates(int32_t x, int8_t y, int32_t z, int map, chestDataPtr& chest);
+  bool getChestByCoordinates(int32_t x, int16_t y, int32_t z, int map, chestDataPtr& chest);
 
 };

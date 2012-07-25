@@ -43,14 +43,14 @@ public:
     return block == BLOCK_WOODEN_DOOR || block == BLOCK_IRON_DOOR || block == ITEM_WOODEN_DOOR || block == ITEM_IRON_DOOR;
   }
 
-  void onStartedDigging(User* user, int8_t status, int32_t x, int8_t y, int map, int32_t z, int8_t direction);
-  void onDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-  void onStoppedDigging(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-  bool onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-  void onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-  bool onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-  void onNeighbourPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-  void onReplace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction);
-  bool onInteract(User* user, int32_t x, int8_t y, int32_t z, int map);
+  void onStartedDigging(User* user, int8_t status, int32_t x, int16_t y, int map, int32_t z, int8_t direction);
+  void onDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction);
+  void onStoppedDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction);
+  bool onBroken(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction);
+  void onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction);
+  bool onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction);
+  void onNeighbourPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction);
+  void onReplace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction);
+  bool onInteract(User* user, int32_t x, int16_t y, int32_t z, int map);
 };
 

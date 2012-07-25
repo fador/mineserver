@@ -31,7 +31,7 @@
 
 #include "blockfurnace.h"
 
-bool BlockFurnace::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, int32_t z, int map, int8_t direction)
+bool BlockFurnace::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t oldblock;
   uint8_t oldmeta;
@@ -116,14 +116,14 @@ bool BlockFurnace::onPlace(User* user, int16_t newblock, int32_t x, int8_t y, in
   return false;
 }
 
-bool BlockFurnace::onInteract(User* user, int32_t x, int8_t y, int32_t z, int map)
+bool BlockFurnace::onInteract(User* user, int32_t x, int16_t y, int32_t z, int map)
 {
   ServerInstance->inventory()->windowOpen(user, WINDOW_FURNACE, x, y, z);
   return true;
 }
 
 
-bool BlockFurnace::onBroken(User* user, int8_t status, int32_t x, int8_t y, int32_t z, int map,  int8_t direction)
+bool BlockFurnace::onBroken(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map,  int8_t direction)
 {
   uint8_t block;
   uint8_t meta;

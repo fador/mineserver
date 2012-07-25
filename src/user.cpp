@@ -815,7 +815,7 @@ bool User::updatePos(double x, double y, double z, double stance)
   return true;
 }
 
-bool User::checkOnBlock(int32_t x, int8_t y, int32_t z)
+bool User::checkOnBlock(int32_t x, int16_t y, int32_t z)
 {
   const double diffX = x - this->pos.x;
   const double diffZ = z - this->pos.z;
@@ -870,7 +870,7 @@ bool User::sendOthers(uint8_t* data, size_t len)
   return true;
 }
 
-int8_t User::relativeToBlock(const int32_t x, const int8_t y, const int32_t z)
+int8_t User::relativeToBlock(const int32_t x, const int16_t y, const int32_t z)
 {
   int8_t direction;
   double diffX, diffZ;

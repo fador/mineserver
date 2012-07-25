@@ -110,9 +110,9 @@ public:
   bool updatePos(double x, double y, double z, double stance);
   bool updatePosM(double x, double y, double z, size_t map, double stance);
   /** Check if the user is standing on this block */
-  bool checkOnBlock(int32_t x, int8_t y, int32_t z);
+  bool checkOnBlock(int32_t x, int16_t y, int32_t z);
   bool updateLook(float yaw, float pitch);
-  int8_t relativeToBlock(const int32_t x, const int8_t y, const int32_t z);
+  int8_t relativeToBlock(const int32_t x, const int16_t y, const int32_t z);
 
   bool sendOthers(const Packet& packet);
   bool sendOthers(uint8_t* data, size_t len);
