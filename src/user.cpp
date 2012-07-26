@@ -832,6 +832,7 @@ bool User::checkOnBlock(int32_t x, int16_t y, int32_t z)
 bool User::updateLook(float yaw, float pitch)
 {
   Packet pkt = Protocol::entityLook(UID, yaw, pitch);
+  pkt << Protocol::entityHeadLook(UID, angleToByte(yaw));  
 
   sChunk* chunk = ServerInstance->map(pos.map)->getChunk(blockToChunk((int32_t)pos.x), blockToChunk((int32_t)pos.z));
   if (chunk != NULL)

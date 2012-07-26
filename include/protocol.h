@@ -139,7 +139,7 @@ class Protocol
       return ret;
     }
 
-    static Packet entityLook(int eid, double yaw, double pitch)
+    static Packet entityLook(int eid, float yaw, float pitch)
     {
       return entityLook(eid, angleToByte(yaw), angleToByte(pitch));
     }
