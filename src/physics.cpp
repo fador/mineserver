@@ -67,7 +67,7 @@ bool Physics::updateFall()
   for (int32_t simIt = listSize-1; simIt >= 0; simIt--)
   {
     bool hitGround = false;    
-    double timeInSec = fallSimList[simIt].ticks/5.0;
+    double timeInSec = (microTime()-fallSimList[simIt].startTime)/1000000.0;
     fallSimList[simIt].ticks++;
     //Falling 18m/s^2 ToDo: verify!
     double offset = 0.5*fallSimList[simIt].ticks*18*timeInSec*timeInSec;

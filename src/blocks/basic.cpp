@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2011, The Mineserver Project
+  Copyright (c) 2012, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -145,45 +145,73 @@ void BlockBasic::notifyNeighbours(const int32_t x, const int16_t y, const int32_
   uint8_t block;
   uint8_t meta;
 
-  //why is this commented out?
+  //Call all onNeighbourMove callbacks for all the neighbouring blocks
 
-  /*  Function::invoker_type inv(user, oldblock, x, y, z, 0);
-
-    if (ignore_direction != BLOCK_SOUTH && ServerInstance->map(map)->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
+  if (ignore_direction != BLOCK_SOUTH && ServerInstance->map(map)->getBlock(x+1, y, z, &block, &meta) && block != BLOCK_AIR)
+  {
+    for(unsigned int i = 0; i < ServerInstance->plugin()->getBlockCB().size(); i++)
     {
-      inv = Function::invoker_type(user, oldblock, x+1, y, z, BLOCK_SOUTH);
-      ServerInstance->plugin()->runBlockCallback(block, callback, inv);
+    	if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
+	    {
+        ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x+1, y, z, BLOCK_SOUTH, map);
+      }
     }
+  }
 
-    if (ignore_direction != BLOCK_NORTH && ServerInstance->map(map)->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
+  if (ignore_direction != BLOCK_NORTH && ServerInstance->map(map)->getBlock(x-1, y, z, &block, &meta) && block != BLOCK_AIR)
+  {
+    for(unsigned int i = 0; i < ServerInstance->plugin()->getBlockCB().size(); i++)
     {
-      inv = Function::invoker_type(user, oldblock, x-1, y, z, BLOCK_NORTH);
-      ServerInstance->plugin()->runBlockCallback(block, callback, inv);
+    	if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
+	    {
+        ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x-1, y, z, BLOCK_NORTH, map);
+      }
     }
+  }
 
-    if (y < 127 && ignore_direction != BLOCK_TOP && ServerInstance->map(map)->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
+  if (y < 255 && ignore_direction != BLOCK_TOP && ServerInstance->map(map)->getBlock(x, y+1, z, &block, &meta) && block != BLOCK_AIR)
+  {
+    for(unsigned int i = 0; i < ServerInstance->plugin()->getBlockCB().size(); i++)
     {
-      inv = Function::invoker_type(user, oldblock, x, y+1, z, BLOCK_TOP);
-      ServerInstance->plugin()->runBlockCallback(block, callback, inv);
+    	if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
+	    {
+        ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y+1, z, BLOCK_TOP, map);
+      }
     }
+  }
 
-    if (y > 0 && ignore_direction != BLOCK_BOTTOM && ServerInstance->map(map)->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
+  if (y > 0 && ignore_direction != BLOCK_BOTTOM && ServerInstance->map(map)->getBlock(x, y-1, z, &block, &meta) && block != BLOCK_AIR)
+  {
+    for(unsigned int i = 0; i < ServerInstance->plugin()->getBlockCB().size(); i++)
     {
-      inv = Function::invoker_type(user, oldblock, x, y-1, z, BLOCK_BOTTOM);
-      ServerInstance->plugin()->runBlockCallback(block, callback, inv);
+    	if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
+	    {
+        ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y-1, z, BLOCK_BOTTOM, map);
+      }
     }
+  }
 
-    if (ignore_direction != BLOCK_WEST && ServerInstance->map(map)->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
+  if (ignore_direction != BLOCK_WEST && ServerInstance->map(map)->getBlock(x, y, z+1, &block, &meta) && block != BLOCK_AIR)
+  {
+    for(unsigned int i = 0; i < ServerInstance->plugin()->getBlockCB().size(); i++)
     {
-      inv = Function::invoker_type(user, oldblock, x, y, z+1, BLOCK_WEST);
-      ServerInstance->plugin()->runBlockCallback(block, callback, inv);
+    	if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
+	    {
+        ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y, z+1, BLOCK_WEST, map);
+      }
     }
+  }
 
-    if (ignore_direction != BLOCK_EAST && ServerInstance->map(map)->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
+  if (ignore_direction != BLOCK_EAST && ServerInstance->map(map)->getBlock(x, y, z-1, &block, &meta) && block != BLOCK_AIR)
+  {
+    for(unsigned int i = 0; i < ServerInstance->plugin()->getBlockCB().size(); i++)
     {
-      inv = Function::invoker_type(user, oldblock, x, y, z-1, BLOCK_EAST);
-      ServerInstance->plugin()->runBlockCallback(block, callback, inv);
-    }*/
+    	if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
+	    {
+        ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y, z-1, BLOCK_EAST, map);
+      }
+    }
+  }
 }
 
 void BlockBasic::onStartedDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction)

@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include <cstdlib>
 #include <string>
+#include <time.h>
 
 #include "extern.h"
 
@@ -102,6 +103,8 @@ inline int8_t angleToByte(float angle)
 {
   return (int8_t)((angle / 360.f) * 256.f);
 }
+
+uint64_t microTime();
 
 
 #endif

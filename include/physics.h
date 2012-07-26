@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include <vector>
 #include "vec.h"
+#include "tools.h"
 
 class Physics
 {
@@ -76,6 +77,7 @@ private:
     uint32_t EID;
     vec pos;
     int16_t lastY;
+    uint64_t startTime;
     int ticks;
     Falling() {};
     Falling(uint8_t _block, vec _pos, uint32_t _EID)
@@ -85,6 +87,7 @@ private:
       lastY = pos.y();
       EID = _EID;
       ticks = 0;
+      startTime = microTime();
     }
   };
 
