@@ -54,6 +54,14 @@ void ItemFood::onRightClick(User* user, Item* item)
     newhealth = 20;
   }
   user->sethealth(newhealth);
-  item->setType(-1);
+  if(item->getCount() > 1)
+  {
+    item->setCount(item->getCount()-1);
+  }
+  else
+  {
+    item->setType(-1);
+    item->setCount(0);
+  }
 }
 

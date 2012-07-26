@@ -868,7 +868,7 @@ int PacketHandler::player_block_placement(User* user)
 
 
   ItemBasicPtr itemcb;
-  if (x == -1 && y == -1 && z == -1)
+  if (direction == -1 && x == -1 && y == 255 && z == -1)
   {
     // Right clicked without pointing at a tile
     Item* item = &(user->inv[user->curItem + 36]);
