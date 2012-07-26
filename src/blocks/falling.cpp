@@ -31,6 +31,7 @@
 #include "plugin.h"
 #include "logger.h"
 #include "protocol.h"
+#include "physics.h"
 
 #include "falling.h"
 
@@ -120,21 +121,18 @@ void BlockFalling::onNeighbourMove(User* user, int16_t, int32_t x, int16_t y, in
 
 void BlockFalling::applyPhysics(User* user, int32_t x, int16_t y, int32_t z, int map)
 {
-  uint8_t fallblock, block, neighbour, testbl;
-  uint8_t fallmeta, meta, neighbourmeta, testmet;
+  uint8_t fallblock, block;
+  uint8_t fallmeta, meta;
 
   if (!ServerInstance->map(map)->getBlock(x, y, z, &fallblock, &fallmeta))
   {
     return;
   }
 
-  // Destroy original block
-  ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
-  ServerInstance->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+
   
-  while (ServerInstance->map(map)->getBlock(x, y - 1, z, &block, &meta))
+  if (ServerInstance->map(map)->getBlock(x, y - 1, z, &block, &meta))
   {
-    unsigned int falldist = 0;
     switch (block)
     {
     case BLOCK_AIR:
@@ -144,111 +142,38 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int16_t y, int32_t z, int
     case BLOCK_STATIONARY_LAVA:
       break;
     default:
-      if(falldist > 0) {
-        const int chunk_x = blockToChunk(x);
-        const int chunk_z = blockToChunk(z);
-	    
-        const ChunkMap::const_iterator it = ServerInstance->map(map)->chunks.find(Coords(blockToChunk(x), blockToChunk(z)));
-
-        if (it == ServerInstance->map(map)->chunks.end())
-          return;
-
-        Packet pkt = Protocol::entityRelativeMove(ENTITY_SAND, 0, 1, 0);
-
-        it->second->sendPacket(pkt);
-      }
-      // stop falling
-      ServerInstance->map(map)->setBlock(x, y, z, fallblock, fallmeta);
-      ServerInstance->map(map)->sendBlockChange(x, y, z, fallblock, fallmeta);
-      return;
+       return;
       break;
     }
 
+    // Destroy original block
+    ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+    ServerInstance->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+
     y--;
-    falldist++;
-    if(falldist >= 4)
-    {
-      const int chunk_x = blockToChunk(x);
-      const int chunk_z = blockToChunk(z);
-	    
-      const ChunkMap::const_iterator it = ServerInstance->map(map)->chunks.find(Coords(blockToChunk(x), blockToChunk(z)));
 
-      if (it == ServerInstance->map(map)->chunks.end())
-        return;
 
-      Packet pkt = Protocol::entityRelativeMove(ENTITY_SAND, 0, 1, 0);
+    //Spawn an entity for the falling block
+    const int chunk_x = blockToChunk(x);
+    const int chunk_z = blockToChunk(z);
 
-      it->second->sendPacket(pkt);
-    }
-    
-    //is commented out
-    this->notifyNeighbours(x, y + 2, z, map, "onNeighbourMove", user, block, BLOCK_BOTTOM);
-    //temporary
-    if(!ServerInstance->map(map)->getBlock(x,y+2,z,&neighbour, &neighbourmeta))
-    	return;
-    if(!ServerInstance->map(map)->getBlock(x,y+1,z,&testbl, &testmet))
-    	return;
-    
-    // Justasic: wtf is this? someone should correct it..
-    if(testbl == BLOCK_SAND)
-      LOG(INFO, "Gravity", "Sand block fell!");
+    const ChunkMap::const_iterator it = ServerInstance->map(map)->chunks.find(Coords(chunk_x, chunk_z));
 
-    if(testbl == BLOCK_GRAVEL)
-      LOG(INFO, "Gravity", "Gravel block fell!");
-    	
-    if(neighbour == BLOCK_SAND)
-      LOG(INFO, "Gravity", "Neighboring sand block! Making it fall!");
+    if (it == ServerInstance->map(map)->chunks.end())
+       return;
 
-    if(neighbour == BLOCK_GRAVEL)
-      LOG(INFO, "Gravity", "Neighboring gravel block! Making it fall!");
-    
-    for(unsigned int i = 0; i < ServerInstance->plugin()->getBlockCB().size(); i++)
-    {
-    	if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(neighbour))
-	{
-	  //LOG(INFO, "Gravity", printfify("Falling block %s (x=%i, y=%i, z=%i)", GetBlockName(static_cast<Block>(neighbour)).c_str(), x, y, z));
+    uint32_t EID = Mineserver::generateEID();
+    uint8_t object = 0;
+    if(fallblock == BLOCK_SAND) object = 70;
+    if(fallblock == BLOCK_GRAVEL) object = 71;
+    Packet pkt = Protocol::addObject(EID,object, x, y+1, z);
+    it->second->sendPacket(pkt);
 
-	  uint8_t neighbor, neighbormeta;
-	  while(ServerInstance->map(map)->getBlock(++x,y,z, &neighbor, &neighbormeta) && affectedBlock(neighbor))
-	  {
-	    switch(block)
-	    {
-	      case BLOCK_SAND:
-		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is sand!", x, y, z));
-		break;
-	      case BLOCK_SLOW_SAND:
-		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is slow sand!", x, y, z));
-		break;
-	      case BLOCK_GRAVEL:
-		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is gravel!", x, y, z));
-		break;
-	      default:
-		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is invalid?", x, y, z));
-	    }
-	    ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y, z, 1, map);
-	  }
+    //Add to physics loop
+    ServerInstance->physics(map)->addFallSimulation(fallblock,vec(x, y+1, z), EID);
 
-	  while(ServerInstance->map(map)->getBlock(x,y,++z, &neighbor, &neighbormeta) && affectedBlock(neighbor))
-	  {
-	    switch(block)
-	    {
-	      case BLOCK_SAND:
-		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is sand!", x, y, z));
-		break;
-	      case BLOCK_SLOW_SAND:
-		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is slow sand!", x, y, z));
-		break;
-	      case BLOCK_GRAVEL:
-		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is gravel!", x, y, z));
-		break;
-	      default:
-		LOG(INFO, "Gravity", printfify("Block x=%i, y=%i, z=%i is invalid?", x, y, z));
-	    }
-	    ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y, z, 1, map);
-	  }
-	  ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y+2, z, 1, map);
-    	}
-    }
+    this->notifyNeighbours(x, y + 1, z, map, "onNeighbourMove", user, block, BLOCK_BOTTOM);
+
   }
 }
 

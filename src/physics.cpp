@@ -31,6 +31,7 @@
 #include "constants.h"
 #include "mineserver.h"
 #include "map.h"
+#include "protocol.h"
 
 namespace
 {
@@ -57,9 +58,70 @@ inline bool mayFallThrough(int id)
 
 }
 
+//Falling physics loop
+bool Physics::updateFall()
+{
+
+  uint32_t listSize = fallSimList.size();
+
+  for (int32_t simIt = listSize-1; simIt >= 0; simIt--)
+  {
+    bool hitGround = false;    
+    double timeInSec = fallSimList[simIt].ticks/5.0;
+    fallSimList[simIt].ticks++;
+    //Falling 18m/s^2 ToDo: verify!
+    double offset = 0.5*fallSimList[simIt].ticks*18*timeInSec*timeInSec;
+    int blockOffset = fallSimList[simIt].pos.y() - fallSimList[simIt].lastY;
+    if(blockOffset != (int)offset)
+    {
+      for(int ypos = fallSimList[simIt].lastY-1; ypos >= fallSimList[simIt].lastY-((int)offset-blockOffset);ypos--)
+      {
+        uint8_t block, meta;
+        ServerInstance->map(map)->getBlock(fallSimList[simIt].pos.x(),ypos,fallSimList[simIt].pos.z(), &block, &meta);
+        fallSimList[simIt].lastY--;
+        switch (block)
+        {
+        case BLOCK_AIR:
+        case BLOCK_WATER:
+        case BLOCK_STATIONARY_WATER:
+        case BLOCK_LAVA:
+        case BLOCK_STATIONARY_LAVA:
+          break;
+          //If we hit ground
+        default:
+          {
+            ServerInstance->map(map)->setBlock(fallSimList[simIt].pos.x(),ypos+1,fallSimList[simIt].pos.z(), fallSimList[simIt].block, 0);
+            ServerInstance->map(map)->sendBlockChange(fallSimList[simIt].pos.x(),ypos+1,fallSimList[simIt].pos.z(), fallSimList[simIt].block, 0);
+            
+            //Despawn entity
+            Packet pkt = Protocol::destroyEntity(fallSimList[simIt].EID);
+            const int chunk_x = blockToChunk(fallSimList[simIt].pos.x());
+            const int chunk_z = blockToChunk(fallSimList[simIt].pos.z());
+            const ChunkMap::const_iterator it = ServerInstance->map(map)->chunks.find(Coords(chunk_x, chunk_z));
+            if (it != ServerInstance->map(map)->chunks.end())
+            {               
+              it->second->sendPacket(pkt);
+            }
+            //Erase from the simulation list
+            fallSimList.erase(fallSimList.begin()+simIt);
+            hitGround = true;
+          break;
+          }
+        }
+        if(hitGround)
+        {
+          break;
+        }
+      }
+    }
+  }
+  return true;
+}
+
 // Physics loop
 bool Physics::update()
 {
+  updateFall();
   if (!enabled)
   {
     return true;
@@ -255,9 +317,15 @@ bool Physics::update()
   return true;
 }
 
+bool Physics::addFallSimulation(uint8_t block, vec pos, uint32_t EID)
+{  
+  fallSimList.push_back(Falling(block,pos,EID));
+  return true;
+}
+
 // Add world simulation
 bool Physics::addSimulation(vec pos)
-{
+{  
   if (!enabled)
   {
     return true;

@@ -199,6 +199,15 @@ class Protocol
       return ret;
     }
 
+    static Packet addObject(int eid, int8_t object, double x, double y, double z)
+    {
+      Packet  pkt;  
+      pkt << (int8_t)PACKET_ENTITY << (int32_t)eid
+          << (int8_t)PACKET_ADD_OBJECT << (int32_t)eid << (int8_t)object << (int32_t)(x * 32 + 16) << (int32_t)(y * 32 + 16) << (int32_t)(z * 32 + 16) << (int32_t)0;
+
+      return pkt;
+    }
+
     static Packet collectItem(int itemEid, int eid)
     {
       Packet ret;

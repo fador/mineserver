@@ -39,7 +39,9 @@ public:
   int map; // Which map are we affecting?
 
   bool update();
+  bool updateFall();
   bool addSimulation(vec pos);
+  bool addFallSimulation(uint8_t block, vec pos, uint32_t EID);
   bool removeSimulation(vec pos);
   bool checkSurrounding(vec pos);
 
@@ -68,7 +70,27 @@ private:
     Sim(char stype, SimBlock initblock) : type(stype), blocks(1, initblock) {}
   };
 
+  struct Falling
+  {
+    uint8_t block;
+    uint32_t EID;
+    vec pos;
+    int16_t lastY;
+    int ticks;
+    Falling() {};
+    Falling(uint8_t _block, vec _pos, uint32_t _EID)
+    {
+      block = _block;
+      pos = _pos;
+      lastY = pos.y();
+      EID = _EID;
+      ticks = 0;
+    }
+  };
+
   std::vector<Sim> simList;
+
+  std::vector<Falling> fallSimList;
 };
 
 #endif
