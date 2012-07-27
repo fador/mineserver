@@ -758,6 +758,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
     }
 
   }
+  //We are not holding anything, get the item we clicked
   else if (user->inventoryHolding.getType() == -1)
   {
     //If accessing crafting output slot, remove from input!
@@ -793,18 +794,29 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         }
         playerCrafting = true;
       }
+      
     }
     else
     {
-      user->inventoryHolding.setType(slotItem->getType());
-      user->inventoryHolding.setHealth(slotItem->getHealth());
-      user->inventoryHolding.setCount(slotItem->getCount());
-      if (rightClick == 1)
+      //Shift+click -> items to player inv
+      //ToDo: from player inventory to chest
+      if(!rightClick && shift && isSpace(user, slotItem->getType(), slotItem->getCount()))
       {
-        user->inventoryHolding.decCount(slotItem->getCount() >> 1);
+        addItems(user, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
+        slotItem->setCount(0);
       }
-
-      slotItem->decCount(user->inventoryHolding.getCount());
+      else
+      {
+        user->inventoryHolding.setType(slotItem->getType());
+        user->inventoryHolding.setHealth(slotItem->getHealth());
+        user->inventoryHolding.setCount(slotItem->getCount());
+        if (rightClick == 1)
+        {
+          user->inventoryHolding.decCount(slotItem->getCount() >> 1);
+        }
+        slotItem->decCount(user->inventoryHolding.getCount());
+      }
+      
       if (slotItem->getCount() == 0)
       {
         slotItem->setHealth(0);
@@ -833,12 +845,6 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   setSlot(user, windowID, slot, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
 
   //Update item on the cursor
-  //TODO Shift klick
-  /*
-  if(shift != 0)
-  {
-  }
-  else*/
   setSlot(user, WINDOW_CURSOR, 0, user->inventoryHolding.getType(), user->inventoryHolding.getCount(), user->inventoryHolding.getHealth());
 
 
@@ -1071,27 +1077,21 @@ bool Inventory::isSpace(User* user, int16_t itemID, char count)
 bool Inventory::addItems(User* user, int16_t itemID, int16_t count, int16_t health)
 {
   bool checkingTaskbar = true;
+  int checkdir=1;
 
-  for (uint8_t i = 36 - 9; i < 36 - 9 || checkingTaskbar; i++)
+  //First loop and check if we can pile this up with existing blocks
+  for (uint8_t i = 36 - 9; i >= 9 || checkingTaskbar; i+=checkdir)
   {
     //First, the "task bar"
     if (i == 36)
     {
       checkingTaskbar = false;
-      i = 0;
+      i = 35-9;
+      checkdir=-1;
     }
 
     //The main slots are in range 9-44
     Item* slot = &user->inv[i + 9];
-
-    //If slot empty, put item there
-    if (slot->getType() == -1)
-    {
-      slot->setType(itemID);
-      slot->setCount(count);
-      slot->setHealth(health);
-      break;
-    }
 
     //If same item type
     if (slot->getType() == itemID)
@@ -1112,6 +1112,34 @@ bool Inventory::addItems(User* user, int16_t itemID, int16_t count, int16_t heal
           count -= 64 - slot->getCount();
           slot->setCount(64);
         }
+      }
+    }
+  }
+
+  //If more items
+  if(count)
+  {
+    //Check for empty slots
+    for (uint8_t i = 36 - 9; i >= 9 || checkingTaskbar; i+=checkdir)
+    {
+      //First, the "task bar"
+      if (i == 36)
+      {
+        checkingTaskbar = false;
+        i = 35-9;
+        checkdir=-1;
+      }
+
+      //The main slots are in range 9-44
+      Item* slot = &user->inv[i + 9];
+
+      //If slot empty, put item there
+      if (slot->getType() == -1)
+      {
+        slot->setType(itemID);
+        slot->setCount(count);
+        slot->setHealth(health);
+        break;
       }
     }
   }
