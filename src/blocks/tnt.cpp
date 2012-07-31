@@ -270,13 +270,13 @@ bool BlockTNT::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32
 
 void BlockTNT::onStartedDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
-  uint8_t block, metadata;
+  uint8_t block = 0, metadata = 0;
   explode(user,x,y,z,map);
   
 }
 
 bool BlockTNT::onInteract(User* user, int32_t x, int16_t y, int32_t z, int map)
 {
-  uint8_t block, metadata;
+  //uint8_t block, metadata;
   return true;
 }

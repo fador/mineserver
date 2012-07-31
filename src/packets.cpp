@@ -719,7 +719,7 @@ int PacketHandler::player_digging(User* user)
     status = block;
     if (ServerInstance->map(user->pos.map)->getBlock(x + 1, y, z, &block, &meta) && block != BLOCK_AIR)
     {
-      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x + 1, y, z, x, y, z);
+      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x + 1, y, z, x, int8_t(y), z);
       for (uint32_t i = 0 ; i < ServerInstance->plugin()->getBlockCB().size(); i++)
       {
         blockcb = ServerInstance->plugin()->getBlockCB()[i];
@@ -733,7 +733,7 @@ int PacketHandler::player_digging(User* user)
 
     if (ServerInstance->map(user->pos.map)->getBlock(x - 1, y, z, &block, &meta) && block != BLOCK_AIR)
     {
-      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x - 1, y, z, x, y, z);
+      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x - 1, y, z, x, int8_t(y), z);
       for (uint32_t i = 0 ; i < ServerInstance->plugin()->getBlockCB().size(); i++)
       {
         blockcb = ServerInstance->plugin()->getBlockCB()[i];
@@ -747,7 +747,7 @@ int PacketHandler::player_digging(User* user)
 
     if (ServerInstance->map(user->pos.map)->getBlock(x, y + 1, z, &block, &meta) && block != BLOCK_AIR)
     {
-      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x, y + 1, z, x, y, z);
+      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x, y + 1, z, x, int8_t(y), z);
       for (uint32_t i = 0 ; i < ServerInstance->plugin()->getBlockCB().size(); i++)
       {
         blockcb = ServerInstance->plugin()->getBlockCB()[i];
@@ -761,7 +761,7 @@ int PacketHandler::player_digging(User* user)
 
     if (ServerInstance->map(user->pos.map)->getBlock(x, y - 1, z, &block, &meta) && block != BLOCK_AIR)
     {
-      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x, y - 1, z, x, y, z);
+      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x, y - 1, z, x, int8_t(y), z);
       for (uint32_t i = 0 ; i < ServerInstance->plugin()->getBlockCB().size(); i++)
       {
         blockcb = ServerInstance->plugin()->getBlockCB()[i];
@@ -775,7 +775,7 @@ int PacketHandler::player_digging(User* user)
 
     if (ServerInstance->map(user->pos.map)->getBlock(x, y, z + 1, &block, &meta) && block != BLOCK_AIR)
     {
-      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x, y, z + 1, x, y, z);
+      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x, y, z + 1, x, int8_t(y), z);
       for (uint32_t i = 0 ; i < ServerInstance->plugin()->getBlockCB().size(); i++)
       {
         blockcb = ServerInstance->plugin()->getBlockCB()[i];
@@ -789,7 +789,7 @@ int PacketHandler::player_digging(User* user)
 
     if (ServerInstance->map(user->pos.map)->getBlock(x, y, z - 1, &block, &meta) && block != BLOCK_AIR)
     {
-      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x, y, z - 1, x, y, z);
+      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x, y, z - 1, x, int8_t(y), z);
       for (uint32_t i = 0 ; i < ServerInstance->plugin()->getBlockCB().size(); i++)
       {
         blockcb = ServerInstance->plugin()->getBlockCB()[i];
@@ -809,7 +809,7 @@ int PacketHandler::player_digging(User* user)
 #define itemSlot (36+user->currentItemSlot())
     if (user->inv[itemSlot].getType() > 0)
     {
-      ServerInstance->map(user->pos.map)->createPickupSpawn(user->pos.x, user->pos.y, user->pos.z, user->inv[itemSlot].getType(), 1, user->inv[itemSlot].getHealth(), user);
+      ServerInstance->map(user->pos.map)->createPickupSpawn(int(user->pos.x), int(user->pos.y), int(user->pos.z), int(user->inv[itemSlot].getType()), 1, int(user->inv[itemSlot].getHealth()), user);
 
       user->inv[itemSlot].decCount();
     }
@@ -1250,7 +1250,7 @@ int PacketHandler::pickup_spawn(User* user)
 
   // Modify the position of the dropped item so that it appears in front of user instead of under user
   int distanceToThrow = 64;
-  float angle = DEGREES_TO_RADIANS(user->pos.yaw + 45);     // For some reason, yaw seems to be off to the left by 45 degrees from where you're actually looking?
+  float angle = float(DEGREES_TO_RADIANS(user->pos.yaw + 45));     // For some reason, yaw seems to be off to the left by 45 degrees from where you're actually looking?
   int x = int(cos(angle) * distanceToThrow - sin(angle) * distanceToThrow);
   int z = int(sin(angle) * distanceToThrow + cos(angle) * distanceToThrow);
   item.pos += vec(x, 0, z);
@@ -1554,7 +1554,7 @@ Packet& Packet::operator<<(const std::string& str)
 
 Packet& Packet::operator>>(std::string& str)
 {
-  uint16_t lenval;
+  uint16_t lenval = 0;
   if (haveData(2))
   {
     uint16_t lenval = 0;
@@ -1600,7 +1600,7 @@ std::string Packet::readString()
   if (haveData(2))
   {
     uint16_t lenval = 0;
-    *this >> (int16_t)lenval;
+    *this >> int16_t(lenval);
 
     if (lenval && haveData(lenval))
     {

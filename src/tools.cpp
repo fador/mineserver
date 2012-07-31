@@ -206,7 +206,7 @@ std::string hash(std::string value)
 bool fileExists(const std::string& filename)
 {
   std::ifstream i(filename.c_str());
-  return i;
+  return i.is_open();
 }
 
 bool makeDirectory(const std::string& path)

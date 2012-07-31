@@ -276,7 +276,7 @@ bool map_setTime(int timeValue)
 
 int map_getTime()
 {
-  return (int64_t)ServerInstance->map(0)->mapTime;
+  return int(ServerInstance->map(0)->mapTime);
 }
 
 void map_createPickupSpawn(int x, int y, int z, int type, int count, int health, const char* user)
@@ -979,7 +979,7 @@ bool permission_isAdmin(const char* name)
   {
     return false;
   }
-  return IS_ADMIN(tempuser->permissions);
+  return (IS_ADMIN(tempuser->permissions) != 0);
 }
 
 bool permission_isOp(const char* name)
@@ -989,7 +989,7 @@ bool permission_isOp(const char* name)
   {
     return false;
   }
-  return IS_OP(tempuser->permissions);
+  return (IS_OP(tempuser->permissions) != 0);
 }
 
 bool permission_isMember(const char* name)
@@ -999,7 +999,7 @@ bool permission_isMember(const char* name)
   {
     return false;
   }
-  return IS_MEMBER(tempuser->permissions);
+  return (IS_MEMBER(tempuser->permissions) != 0);
 }
 
 bool permission_isGuest(const char* name)
@@ -1009,7 +1009,7 @@ bool permission_isGuest(const char* name)
   {
     return false;
   }
-  return IS_GUEST(tempuser->permissions);
+  return (IS_GUEST(tempuser->permissions) != 0);
 }
 
 int tools_uniformInt(int a, int b)

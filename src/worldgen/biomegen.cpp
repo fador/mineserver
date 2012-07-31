@@ -249,12 +249,12 @@ void BiomeGen::AddTrees(int x, int z, int map)
 
   memset(empty, 1, 256);
 
-  uint8_t trees = uniform01() * 7 + 13;
+  uint8_t trees = uint8_t(uniform01() * 7 + 13);
   uint8_t i = 0;
   while (i < trees)
   {
-    uint8_t a = uniform01() * 16;
-    uint8_t b = uniform01() * 16;
+    uint8_t a = uint8_t(uniform01() * 16);
+    uint8_t b = uint8_t(uniform01() * 16);
 
     if (empty[a][b])
     {
@@ -270,7 +270,7 @@ void BiomeGen::AddTrees(int x, int z, int map)
       }
       ServerInstance->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
 
-      int biome = BiomeSelect.GetValue(blockX / 100.0, 0, blockZ / 100.0);
+      int biome = int(BiomeSelect.GetValue(blockX / 100.0, 0, blockZ / 100.0));
       if (biome == 1 &&
           treenoise.GetValue(blockX, 0, blockZ) > -0.3 &&
           ((rand() % 16) < 7)) // Dirty haxx!
@@ -402,7 +402,7 @@ void BiomeGen::generateWithNoise(int x, int z, int map)
     for (int bZ = 0; bZ < 16; bZ++)
     {
       heightmap_pointer[(bZ << 4) + bX] = ymax = currentHeight = (uint8_t)((finalTerrain.GetValue((xBlockpos + bX) / 100.0, 0, (zBlockpos + bZ) / 100.0) * 60) + 64);
-      int biome = BiomeSelect.GetValue((xBlockpos + bX) / 100.0, 0, (zBlockpos + bZ) / 100.0);
+      int biome = int(BiomeSelect.GetValue((xBlockpos + bX) / 100.0, 0, (zBlockpos + bZ) / 100.0));
       char toplayer;
       if (biome == 0)
       {
@@ -457,7 +457,7 @@ void BiomeGen::generateWithNoise(int x, int z, int map)
             // Add caves
             if (addCaves)
             {
-              cave.AddCaves(*curBlock, xBlockpos + bX, bY, zBlockpos + bZ);
+              cave.AddCaves(*curBlock, int(xBlockpos + bX), bY, int(zBlockpos + bZ));
             }
           }
           else

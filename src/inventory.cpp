@@ -97,7 +97,7 @@ void Item::setCount(int8_t count)
 
 void Item::setHealth(int16_t health)
 {
-  bool rightUse;
+  //bool rightUse;
   if (health <= 0)
   {
     this->health = health;
@@ -1140,7 +1140,7 @@ bool Inventory::addItems(User* user, int16_t itemID, int16_t count, int16_t heal
       if (slot->getType() == -1)
       {
         slot->setType(itemID);
-        slot->setCount(count);
+        slot->setCount(int8_t(count));
         slot->setHealth(health);
         break;
       }

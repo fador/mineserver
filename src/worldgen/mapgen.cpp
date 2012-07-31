@@ -241,8 +241,8 @@ void MapGen::AddTrees(int x, int z, int map)
     //u for x and v for z iteration
     for (uint8_t v = 0; v < vn; v++)
     {
-      uint8_t a = u * uFactor;
-      uint8_t b = v * vFactor;
+      uint8_t a = uint8_t(u * uFactor);
+      uint8_t b = uint8_t(v * vFactor);
 
       blockX = a + xBlockpos;
       blockZ = b + zBlockpos;
@@ -320,7 +320,7 @@ void MapGen::generateWithNoise(int x, int z, int map)
             // Add caves
             if (addCaves)
             {
-              cave.AddCaves(*curBlock, xBlockpos + bX, bY, zBlockpos + bZ);
+              cave.AddCaves(*curBlock, int(xBlockpos + bX), bY, int(zBlockpos + bZ));
             }
           }
           else

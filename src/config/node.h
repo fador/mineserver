@@ -97,19 +97,19 @@ public:
   inline void setData(int64_t data)
   {
     m_type = CONFIG_NODE_NUMBER;
-    m_nData = data;
+    m_nData = double(data);
   }
 
   inline void setData(float data)
   {
     m_type = CONFIG_NODE_NUMBER;
-    m_nData = data;
+    m_nData = double(data);
   }
 
   inline void setData(double data)
   {
     m_type = CONFIG_NODE_NUMBER;
-    m_nData = data;
+    m_nData = double(data);
   }
 
   inline void setData(const std::string& data)

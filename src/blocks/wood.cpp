@@ -69,8 +69,8 @@ bool BlockWood::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int3
 
   Item item = user->inv[user->curItem + 36];
 
-  ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, item.getHealth());
-  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, item.getHealth());
+  ServerInstance->map(map)->setBlock(x, y, z, char(newblock), char(item.getHealth()));
+  ServerInstance->map(map)->sendBlockChange(x, y, z, char(newblock), char(item.getHealth()));
   return false;
 }
 

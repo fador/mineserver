@@ -220,9 +220,9 @@ void HeavenGen::generateWithNoise(int x, int z, int map)
 #endif
 
   // Populate blocks in chunk
-  int32_t currentHeight;
-  int32_t ymax;
-  uint16_t ciel;
+  int32_t currentHeight = 0;
+  int32_t ymax = 0;
+  uint16_t ciel = 0;
   uint8_t* curBlock;
   uint8_t* curData;
   uint8_t col[2] = {0, 8};
