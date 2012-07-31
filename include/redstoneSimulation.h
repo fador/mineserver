@@ -49,12 +49,14 @@ private:
     uint8_t id;
     vec pos;    
     uint8_t power;
+    uint8_t direction;
     RedstoneSim() {}
-    RedstoneSim(uint8_t id, vec pos, uint8_t power)
+    RedstoneSim(uint8_t id, vec pos, uint8_t power, uint8_t direction = -1)
     {
       this->id    = id;
       this->pos   = pos;
       this->power = power;
+      this->direction = direction;
     }
   };
 
