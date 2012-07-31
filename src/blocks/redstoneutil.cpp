@@ -34,6 +34,30 @@
 #include "redstoneutil.h"
 
 
+void BlockRedstoneUtil::timer200() {
+	// Loop activated buttons -list
+	for (PositionList::iterator iter = activated.begin(); iter != activated.end();) {
+		if (!(--iter->timeleft)) {
+			uint8_t block;
+			uint8_t meta;
+			if (ServerInstance->map(iter->map)->getBlock(iter->x, iter->y, iter->z, &block, &meta)) {
+				// Enable button
+				meta ^= 0x08;
+
+				// Save the block
+				ServerInstance->map(iter->map)->setBlock(iter->x, iter->y, iter->z, char(block), meta);
+				ServerInstance->map(iter->map)->sendBlockChange(iter->x, iter->y, iter->z, char(block), meta);
+			}
+
+			// Remove button from list
+			iter = activated.erase(iter);
+		}
+		else {
+			iter++;
+		}
+	}
+}
+
 void BlockRedstoneUtil::onStartedDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
 	this->onInteract(user, x, y, z, map);
@@ -183,6 +207,9 @@ bool BlockRedstoneUtil::onInteract(User* user, int32_t x, int16_t y, int32_t z, 
 	  }
 	  
 	  meta |= 0x08;
+
+	  // Save button position
+	  activated.push_back(Position(x, y, z, map));
   }
   else if (block == BLOCK_LEVER) {
 	  // Enable/disable lever
