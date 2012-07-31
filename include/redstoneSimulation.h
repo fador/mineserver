@@ -38,12 +38,27 @@ class RedstoneSimulation
 public:
   bool enabled;
   int map;
-  //ToDo: add functions to add/remove from simulation list
-
+  bool addSimulation(vec pos);  
   bool update();
 
 private:
-  //ToDo: add list of active blocks
+  enum { TYPE_WIRE, TYPE_TORCH, TYPE_BLOCK } SimType;
+
+  struct RedstoneSim
+  {
+    uint8_t id;
+    vec pos;    
+    uint8_t power;
+    RedstoneSim() {}
+    RedstoneSim(uint8_t id, vec pos, uint8_t power)
+    {
+      this->id    = id;
+      this->pos   = pos;
+      this->power = power;
+    }
+  };
+
+  std::vector<RedstoneSim> simList;
 
 };
 

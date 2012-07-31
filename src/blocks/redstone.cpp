@@ -28,6 +28,8 @@
 #include "mineserver.h"
 #include "map.h"
 #include "logger.h"
+#include "redstoneSimulation.h"
+#include "vec.h"
 
 #include "redstone.h"
 
@@ -57,6 +59,9 @@ bool BlockRedstone::onBroken(User* user, int8_t status, int32_t x, int16_t y, in
   ServerInstance->map(map)->sendBlockChange(x, y, z, char(BLOCK_AIR), 0);
 
   spawnBlockItem(x, y, z, map, uint8_t(ITEM_REDSTONE), 0);
+
+  ServerInstance->redstone(map)->addSimulation(vec(x,y,z));
+
   return false;
 }
 
@@ -115,6 +120,9 @@ bool BlockRedstone::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, 
 
   ServerInstance->map(map)->setBlock(x, y, z, char(newblock), meta);
   ServerInstance->map(map)->sendBlockChange(x, y, z, char(newblock), meta);
+
+  ServerInstance->redstone(map)->addSimulation(vec(x,y,z));
+
   return false;
 }
 

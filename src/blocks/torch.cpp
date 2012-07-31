@@ -27,6 +27,8 @@
 
 #include "mineserver.h"
 #include "map.h"
+#include "redstoneSimulation.h"
+#include "vec.h"
 
 #include "torch.h"
 
@@ -55,6 +57,12 @@ bool BlockTorch::onBroken(User* user, int8_t status, int32_t x, int16_t y, int32
   ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
 
   this->spawnBlockItem(x, y, z, map, block, 0);
+
+  if(block == BLOCK_REDSTONE_TORCH_OFF || block == BLOCK_REDSTONE_TORCH_ON)
+  {
+    ServerInstance->redstone(map)->addSimulation(vec(x,y,z));
+  }
+
   return false;
 }
 
@@ -139,6 +147,12 @@ bool BlockTorch::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int
 
   ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, direction);
   ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+
+  if(newblock == BLOCK_REDSTONE_TORCH_OFF || newblock == BLOCK_REDSTONE_TORCH_ON)
+  {
+    ServerInstance->redstone(map)->addSimulation(vec(x,y,z));
+  }
+
   return false;
 }
 

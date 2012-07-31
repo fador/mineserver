@@ -301,9 +301,11 @@ Mineserver::Mineserver(int args, char **argarray)
     {
       m_map.push_back(new Map());
       Physics* phy = new Physics;
-      RedstoneSimulation* red = new RedstoneSimulation;
       phy->map = n;
+
       m_physics.push_back(phy);
+      RedstoneSimulation* red = new RedstoneSimulation;
+      red->map = n;      
       m_redstone.push_back(red);
       int k = m_config->iData((std::string(key) + ".") + (*it));
       if ((uint32_t)k >= m_mapGenNames.size())
@@ -430,6 +432,7 @@ bool Mineserver::run()
   for (int i = 0; i < (int)m_map.size(); i++)
   {
     physics(i)->enabled = (config()->bData("system.physics.enabled"));
+    redstone(i)->enabled = (config()->bData("system.redstone.enabled"));
 
     m_map[i]->init(i);
     if (config()->bData("map.generate_spawn.enabled"))
