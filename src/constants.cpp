@@ -79,8 +79,9 @@ void initConstants()
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_REED, DropPtr(new Drop(ITEM_REED, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_PUMPKIN, DropPtr(new Drop(BLOCK_PUMPKIN, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_TORCH, DropPtr(new Drop(BLOCK_TORCH, 10000, 1))));
-  BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_REDSTONE_TORCH_OFF, DropPtr(new Drop(BLOCK_REDSTONE_TORCH_OFF, 10000, 1))));
+  BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_REDSTONE_TORCH_OFF, DropPtr(new Drop(BLOCK_REDSTONE_TORCH_ON, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_REDSTONE_TORCH_ON, DropPtr(new Drop(BLOCK_REDSTONE_TORCH_ON, 10000, 1))));
+  BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_REDSTONE_WIRE, DropPtr(new Drop(BLOCK_REDSTONE_WIRE, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_GLOWSTONE, DropPtr(new Drop(ITEM_GLOWSTONE_DUST, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_BRICK, DropPtr(new Drop(ITEM_CLAY_BRICK, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_JUKEBOX, DropPtr(new Drop(BLOCK_JUKEBOX, 10000, 1))));

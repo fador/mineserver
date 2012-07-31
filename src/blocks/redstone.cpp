@@ -58,7 +58,7 @@ bool BlockRedstone::onBroken(User* user, int8_t status, int32_t x, int16_t y, in
   ServerInstance->map(map)->setBlock(x, y, z, char(BLOCK_AIR), 0);
   ServerInstance->map(map)->sendBlockChange(x, y, z, char(BLOCK_AIR), 0);
 
-  spawnBlockItem(x, y, z, map, uint8_t(ITEM_REDSTONE), 0);
+  spawnBlockItem(x, y, z, map, uint8_t(BLOCK_REDSTONE_WIRE), 0);
 
   ServerInstance->redstone(map)->addSimulation(vec(x,y,z));
 
