@@ -58,6 +58,7 @@
 #include "items/itembasic.h"
 #include "mob.h"
 #include "utf8.h"
+#include "protocol.h"
 
 void PacketHandler::init()
 {
@@ -73,7 +74,7 @@ void PacketHandler::init()
   packets[PACKET_PLAYER_DIGGING]           = Packets(11, &PacketHandler::player_digging);
   packets[PACKET_PLAYER_BLOCK_PLACEMENT]   = Packets(PACKET_VARIABLE_LEN, &PacketHandler::player_block_placement);
   packets[PACKET_HOLDING_CHANGE]           = Packets(2, &PacketHandler::holding_change);
-  packets[PACKET_ARM_ANIMATION]            = Packets(5, &PacketHandler::arm_animation);
+  packets[PACKET_ANIMATION]            = Packets(5, &PacketHandler::arm_animation);
   packets[PACKET_PICKUP_SPAWN]             = Packets(22, &PacketHandler::pickup_spawn);
   packets[PACKET_DISCONNECT]               = Packets(PACKET_VARIABLE_LEN, &PacketHandler::disconnect);
   packets[PACKET_RESPAWN]                  = Packets(PACKET_VARIABLE_LEN, &PacketHandler::respawn);
@@ -1212,8 +1213,7 @@ int PacketHandler::arm_animation(User* user)
 
   user->buffer.removePacket();
 
-  Packet pkt;
-  pkt << (int8_t)PACKET_ARM_ANIMATION << (int32_t)user->UID << animType;
+  Packet pkt = Protocol::animation(user->UID,animType);
   user->sendOthers(pkt);
 
   (static_cast<Hook1<bool, const char*>*>(ServerInstance->plugin()->getHook("PlayerArmSwing")))->doAll(user->nick.c_str());
@@ -1344,7 +1344,7 @@ int PacketHandler::use_entity(User* user)
           if ((*it)->health <= 0)
           {
             Packet pkt;
-            pkt << (int8_t)PACKET_DEATH_ANIMATION << (int32_t)(*it)->UID << (int8_t)3;
+            pkt << (int8_t)PACKET_ENTITY_STATUS << (int32_t)(*it)->UID << (int8_t)3;
             (*it)->sendOthers(pkt);
           }
           break;

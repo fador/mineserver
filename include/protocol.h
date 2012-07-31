@@ -46,17 +46,17 @@
 class Protocol
 {
   public:
-    static Packet armAnimation(int eid, int aid)
+    static Packet animation(int eid, int aid)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ARM_ANIMATION << (int32_t)eid << (int8_t)aid;
+      ret << (int8_t)PACKET_ANIMATION << (int32_t)eid << (int8_t)aid;
       return ret;
     }
 
-    static Packet deathAnimation(int eid, int aid)
+    static Packet entityStatus(int eid, int aid)
     {
       Packet ret;
-      ret << (int8_t)PACKET_DEATH_ANIMATION << (int32_t)eid << (int8_t)aid;
+      ret << (int8_t)PACKET_ENTITY_STATUS << (int32_t)eid << (int8_t)aid;
       return ret;
     }
 

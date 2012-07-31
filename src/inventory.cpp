@@ -1103,6 +1103,7 @@ bool Inventory::addItems(User* user, int16_t itemID, int16_t count, int16_t heal
         {
           slot->setType(itemID);
           slot->decCount(-count);
+          count--;
           break;
         }
         //Put some of the items to this stack and continue searching for space
@@ -1115,6 +1116,8 @@ bool Inventory::addItems(User* user, int16_t itemID, int16_t count, int16_t heal
       }
     }
   }
+
+  checkdir=1;
 
   //If more items
   if(count)

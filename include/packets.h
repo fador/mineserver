@@ -56,6 +56,7 @@ enum
   PACKET_HANDSHAKE                 = 0x02,
   PACKET_CHAT_MESSAGE              = 0x03,
   PACKET_ENTITY_EQUIPMENT          = 0x05,
+  PACKET_USE_ENTITY                = 0x07,
   PACKET_RESPAWN                   = 0x09,
   PACKET_PLAYER                    = 0x0a,
   PACKET_PLAYER_POSITION           = 0x0b,
@@ -64,7 +65,7 @@ enum
   PACKET_PLAYER_DIGGING            = 0x0e,
   PACKET_PLAYER_BLOCK_PLACEMENT    = 0x0f,
   PACKET_HOLDING_CHANGE            = 0x10,
-  PACKET_ARM_ANIMATION             = 0x12,
+  PACKET_ANIMATION                 = 0x12,
   PACKET_ENTITY_CROUCH             = 0x13,
   PACKET_INVENTORY_CLOSE           = 0x65,
   PACKET_INVENTORY_CHANGE          = 0x66,
@@ -83,6 +84,7 @@ enum
   PACKET_COLLECT_ITEM              = 0x16,
   PACKET_ADD_OBJECT                = 0x17,
   PACKET_MOB_SPAWN                 = 0x18,
+  PACKET_ENTITY_VELOCITY           = 0x1c,
   PACKET_DESTROY_ENTITY            = 0x1d,
   PACKET_ENTITY                    = 0x1e,
   PACKET_ENTITY_RELATIVE_MOVE      = 0x1f,
@@ -90,7 +92,8 @@ enum
   PACKET_ENTITY_LOOK_RELATIVE_MOVE = 0x21,
   PACKET_ENTITY_TELEPORT           = 0x22,
   PACKET_ENTITY_HEAD_LOOK          = 0x23,
-  PACKET_DEATH_ANIMATION           = 0x26,
+  PACKET_ENTITY_STATUS             = 0x26,
+  PACKET_ATTACH_ENTITY             = 0x27,
   PACKET_ENTITY_METADATA           = 0x28,
   PACKET_REMOVE_ENTITY_EFFECT      = 0x2a,
   PACKET_PRE_CHUNK                 = 0x32,
@@ -107,10 +110,6 @@ enum
   PACKET_KICK                      = 0xff,
 
 
-  //v4 Packets
-  PACKET_USE_ENTITY      = 0x07,
-  PACKET_ENTITY_VELOCITY = 0x1c,
-  PACKET_ATTACH_ENTITY   = 0x27,
 
   // TODO unhandled packets
   PACKET_WEATHER = 0x47,

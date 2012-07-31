@@ -1,5 +1,7 @@
 #include "food.h"
 #include "packets.h"
+#include "protocol.h"
+#include "map.h"
 
 bool ItemFood::affectedItem(int item) const
 {
@@ -53,7 +55,23 @@ void ItemFood::onRightClick(User* user, Item* item)
   {
     newhealth = 20;
   }
+  
   user->sethealth(newhealth);
+   
+  //ToDo: fix animation
+
+  //Accept eating
+  user->buffer << Protocol::entityStatus(user->UID, 9);
+
+  //Eating animation (should work but doesn't)
+  Packet pkt = Protocol::animation(user->UID, 5);
+  
+  sChunk* chunk = ServerInstance->map(user->pos.map)->getChunk(blockToChunk((int32_t)user->pos.x), blockToChunk((int32_t)user->pos.z));
+  if (chunk != NULL)
+  {
+    chunk->sendPacket(pkt);
+  }
+
   if(item->getCount() > 1)
   {
     item->setCount(item->getCount()-1);

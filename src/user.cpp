@@ -1372,7 +1372,7 @@ bool User::sethealth(int userHealth)
     {
       return false;
     }
-    sendAll(Protocol::armAnimation(UID, ANIMATE_DAMAGE));
+    sendAll(Protocol::animation(UID, ANIMATE_DAMAGE));
   }
   healthtimeout = time(NULL);
 
