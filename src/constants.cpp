@@ -82,6 +82,7 @@ void initConstants()
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_REDSTONE_TORCH_OFF, DropPtr(new Drop(BLOCK_REDSTONE_TORCH_ON, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_REDSTONE_TORCH_ON, DropPtr(new Drop(BLOCK_REDSTONE_TORCH_ON, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_REDSTONE_WIRE, DropPtr(new Drop(BLOCK_REDSTONE_WIRE, 10000, 1))));
+  BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_LEVER, DropPtr(new Drop(BLOCK_LEVER, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_GLOWSTONE, DropPtr(new Drop(ITEM_GLOWSTONE_DUST, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_BRICK, DropPtr(new Drop(ITEM_CLAY_BRICK, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_JUKEBOX, DropPtr(new Drop(BLOCK_JUKEBOX, 10000, 1))));

@@ -29,6 +29,7 @@
     <ClCompile Include="..\src\blocks\plant.cpp" />
     <ClCompile Include="..\src\blocks\pumpkin.cpp" />
     <ClCompile Include="..\src\blocks\redstone.cpp" />
+    <ClCompile Include="..\src\blocks\redstoneutil.cpp" />
     <ClCompile Include="..\src\blocks\sign.cpp" />
     <ClCompile Include="..\src\blocks\snow.cpp" />
     <ClCompile Include="..\src\blocks\stair.cpp" />
@@ -135,6 +136,7 @@
     <ClInclude Include="..\src\blocks\plant.h" />
     <ClInclude Include="..\src\blocks\pumpkin.h" />
     <ClInclude Include="..\src\blocks\redstone.h" />
+    <ClInclude Include="..\src\blocks\redstoneutil.h" />
     <ClInclude Include="..\src\blocks\sign.h" />
     <ClInclude Include="..\src\blocks\snow.h" />
     <ClInclude Include="..\src\blocks\stair.h" />
