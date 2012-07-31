@@ -53,28 +53,36 @@ bool RedstoneSimulation::update()
     vec pos = simList[simIt].pos;
     //ToDo: handle removed
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i <= 5; i++)
     {
+      if(simList[simIt].direction == i) continue;
       vec local(pos);
+      uint8_t disableDir = -1;
       switch (i)
       {
       case 0:
         local += vec(0, -1, 0);
+        disableDir = 5;
         break;
       case 1:
         local += vec(1, 0, 0);
+        disableDir = 2;
         break;
       case 2:
         local += vec(-1, 0, 0);
+        disableDir = 1;
         break;
       case 3:
         local += vec(0, 0, 1);
+        disableDir = 4;
         break;
       case 4:
         local += vec(0, 0, -1);
+        disableDir = 3;
         break;
       case 5:
         local += vec(0,1,0);
+        disableDir = 0;
         break;
       }
 
@@ -100,13 +108,18 @@ bool RedstoneSimulation::update()
 
         if(block == BLOCK_REDSTONE_WIRE)
         {
-          if(meta < simList[simIt].power-1)
+          if(meta < curPower-1)
           {
-            simList.push_back(RedstoneSim(BLOCK_REDSTONE_WIRE,local,simList[simIt].power-1));
+            simList.push_back(RedstoneSim(BLOCK_REDSTONE_WIRE,local,curPower-1, disableDir));
             listSize++;
-            ServerInstance->map(map)->setBlock(local, block, simList[simIt].power-1);
-            ServerInstance->map(map)->sendBlockChange(local, block, simList[simIt].power-1);
+            ServerInstance->map(map)->setBlock(local, block, curPower-1);
+            ServerInstance->map(map)->sendBlockChange(local, block, curPower-1);
           }
+        }
+        else if(curBlock == BLOCK_REDSTONE_WIRE || curBlock == BLOCK_REDSTONE_TORCH_ON)
+        {
+          simList.push_back(RedstoneSim(block,local,curPower, disableDir));
+          listSize++;
         }
 
       }
@@ -114,12 +127,11 @@ bool RedstoneSimulation::update()
       //We got power from neighbouring blocks
       if(newPower > curPower)
       {
-          simList.push_back(RedstoneSim(curBlock,pos,newPower));
+          simList.push_back(RedstoneSim(curBlock,pos,newPower, i));
           listSize++;
           ServerInstance->map(map)->setBlock(pos, curBlock, newPower);
           ServerInstance->map(map)->sendBlockChange(pos, curBlock, newPower);
       }
-
       
     }
     //Add queue to be removed
