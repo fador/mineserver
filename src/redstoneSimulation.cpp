@@ -47,52 +47,80 @@ bool RedstoneSimulation::update()
 
   for (uint32_t simIt = 0; simIt < listSize; simIt++)
   {
+    uint8_t curBlock = simList[simIt].id;
+    uint8_t curPower = simList[simIt].power;
+    uint8_t newPower = curPower;
     vec pos = simList[simIt].pos;
     //ToDo: handle removed
-    if(simList[simIt].power)
-    {
-      for (int i = 0; i < 5; i++)
-      {
-        vec local(pos);
-        switch (i)
-        {
-        case 0:
-          local += vec(0, -1, 0);
-          break;
-        case 1:
-          local += vec(1, 0, 0);
-          break;
-        case 2:
-          local += vec(-1, 0, 0);
-          break;
-        case 3:
-          local += vec(0, 0, 1);
-          break;
-        case 4:
-          local += vec(0, 0, -1);
-          break;
-        case 5:
-          local += vec(0,1,0);
-          break;
-        }
 
-        uint8_t block, meta;
-        ServerInstance->map(map)->getBlock(local, &block, &meta);
-        if(block != BLOCK_AIR)
+    for (int i = 0; i < 5; i++)
+    {
+      vec local(pos);
+      switch (i)
+      {
+      case 0:
+        local += vec(0, -1, 0);
+        break;
+      case 1:
+        local += vec(1, 0, 0);
+        break;
+      case 2:
+        local += vec(-1, 0, 0);
+        break;
+      case 3:
+        local += vec(0, 0, 1);
+        break;
+      case 4:
+        local += vec(0, 0, -1);
+        break;
+      case 5:
+        local += vec(0,1,0);
+        break;
+      }
+
+      uint8_t block, meta;
+      ServerInstance->map(map)->getBlock(local, &block, &meta);
+      //Skip air blocks
+      if(block != BLOCK_AIR)
+      {
+        if(curBlock == BLOCK_REDSTONE_WIRE)
         {
+          if(block == BLOCK_REDSTONE_TORCH_ON)
+          {
+            newPower = 15;
+          }
           if(block == BLOCK_REDSTONE_WIRE)
           {
-            if(meta < simList[simIt].power-1)
+            if(meta-1 > newPower)
             {
-              simList.push_back(RedstoneSim(BLOCK_REDSTONE_WIRE,local,simList[simIt].power-1));
-              listSize++;
-              ServerInstance->map(map)->setBlock(local, block, simList[simIt].power-1);
-              ServerInstance->map(map)->sendBlockChange(local, block, simList[simIt].power-1);
+              newPower = meta-1;
             }
           }
         }
 
+        if(block == BLOCK_REDSTONE_WIRE)
+        {
+          if(meta < simList[simIt].power-1)
+          {
+            simList.push_back(RedstoneSim(BLOCK_REDSTONE_WIRE,local,simList[simIt].power-1));
+            listSize++;
+            ServerInstance->map(map)->setBlock(local, block, simList[simIt].power-1);
+            ServerInstance->map(map)->sendBlockChange(local, block, simList[simIt].power-1);
+          }
+        }
+
       }
+
+      //We got power from neighbouring blocks
+      if(newPower > curPower)
+      {
+          simList.push_back(RedstoneSim(curBlock,pos,newPower));
+          listSize++;
+          ServerInstance->map(map)->setBlock(pos, curBlock, newPower);
+          ServerInstance->map(map)->sendBlockChange(pos, curBlock, newPower);
+      }
+
+      
     }
     //Add queue to be removed
     toRemove.push_back(simIt);
