@@ -309,7 +309,7 @@ int PacketHandler::login_request(User* user)
   int32_t version;
   std::string player, passwd;
   //int64_t mapseed;
-  uint32_t param_1 = 0, param_2 = 0;
+  int32_t param_1 = 0, param_2 = 0;
   int8_t dimension = 0, param_3 = 0, param_4 = 0;
 
   // As of version 1.5, the password is no longer sent (at least for non-authenticated mode)
@@ -1599,12 +1599,12 @@ std::string Packet::readString()
 
   if (haveData(2))
   {
-    uint16_t lenval = 0;
-    *this >> int16_t(lenval);
+    int16_t lenval = 0;
+    *this >> lenval;
 
     if (lenval && haveData(lenval))
     {
-      for (size_t i = 0; i < lenval; ++i)
+      for (size_t i = 0; i < uint16_t(lenval); ++i)
         str += m_readBuffer[m_readPos++];
     }
   }

@@ -66,7 +66,7 @@
 #define LIBRARY_SYMBOL(x, y) GetProcAddress(x, y)
 static char *LIBRARY_ERROR(void)
 {
-  char errbuf[513];
+  static char errbuf[513];
   DWORD err = GetLastError();
   if(!err)
     return NULL;
