@@ -379,7 +379,7 @@ uint64_t microTime()
 #else
   FILETIME ft;
   GetSystemTimeAsFileTime(&ft);
-  uint64_t out = ft.dwHighDateTime<<32 | ft.dwLowDateTime;
+  uint64_t out = ((uint64_t)ft.dwHighDateTime)<<32 | (uint64_t)ft.dwLowDateTime;
   out /= 10; // from 100ns to 1us
   return out;
 #endif

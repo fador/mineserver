@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2011-2012, The Mineserver Project
-  All rights reserved.
+   Copyright (c) 2012, The Mineserver Project
+   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -23,39 +23,28 @@
   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
-// NOTICE: These are for EXTERNAL GLOBAL VARIABLES ONLY!
+#ifndef _REDSTONESIMULATION_H
+#define _REDSTONESIMULATION_H
 
-// NOTE: this is to be used with all classes that are considered "API" for plugins
-#ifndef EXTERN_H
-#define EXTERN_H
+#include <stdint.h>
+#include <vector>
+#include "vec.h"
+#include "tools.h"
 
-#include "SystemExceptions.h"
-#ifndef _WIN32
-# define CoreExport
-#else
-# define CoreExport __declspec(dllimport)
-#endif
-#define E extern CoreExport
+class RedstoneSimulation
+{
+public:
+  bool enabled;
+  int map;
+  //ToDo: add functions to add/remove from simulation list
 
-class Mineserver;
-class User;
-class Map;
-class Chat;
-class Plugin;
-class Screen;
-class Config;
-class FurnaceManager;
-class PacketHandler;
-class Physics;
-class RedstoneSimulation;
-class MapGen;
-class Logger;
-class Inventory;
-class Mobs;
-class Mob;
+  bool update();
 
-E Mineserver *ServerInstance;
+private:
+  //ToDo: add list of active blocks
+
+};
 
 #endif

@@ -149,6 +149,11 @@ public:
     return m_physics[n];
   }
 
+  inline RedstoneSimulation* redstone(size_t n) const
+  {
+    return m_redstone[n];
+  }
+
   // Get the configuration pointer
   inline std::tr1::shared_ptr<Config> config() const
   {
@@ -217,10 +222,11 @@ private:
   // holds all connected users
   std::set<User*>    m_users;
 
-  std::vector<Map*>     m_map;
-  std::vector<Physics*> m_physics;
-  std::vector<MapGen*>  m_mapGenNames;
-  std::vector<MapGen*>  m_mapGen;
+  std::vector<Map*>                m_map;
+  std::vector<Physics*>            m_physics;
+  std::vector<RedstoneSimulation*> m_redstone;
+  std::vector<MapGen*>             m_mapGenNames;
+  std::vector<MapGen*>             m_mapGen;
 
   // core modules
   std::tr1::shared_ptr<Config> m_config;

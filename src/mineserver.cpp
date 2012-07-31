@@ -61,6 +61,7 @@
 #include "nbt.h"
 #include "packets.h"
 #include "physics.h"
+#include "redstoneSimulation.h"
 #include "plugin.h"
 #include "furnaceManager.h"
 #include "cliScreen.h"
@@ -300,8 +301,10 @@ Mineserver::Mineserver(int args, char **argarray)
     {
       m_map.push_back(new Map());
       Physics* phy = new Physics;
+      RedstoneSimulation* red = new RedstoneSimulation;
       phy->map = n;
       m_physics.push_back(phy);
+      m_redstone.push_back(red);
       int k = m_config->iData((std::string(key) + ".") + (*it));
       if ((uint32_t)k >= m_mapGenNames.size())
       {
@@ -590,6 +593,7 @@ bool Mineserver::run()
     for (std::vector<Map*>::size_type i = 0 ; i < m_map.size(); i++)
     {
       physics(i)->update();
+      redstone(i)->update();
     }
 
     //Every 10 seconds..
