@@ -319,7 +319,7 @@ bool RegionFile::writeChunk(uint8_t* chunkdata, uint32_t datalen, int32_t x, int
       setOffset(x, z, (sectorNumber << 8) | sectorsNeeded);
     }
   }
-  setTimestamp(x, z, std::time(NULL));
+  setTimestamp(x, z, int(std::time(NULL)));
 
   return true;
 }

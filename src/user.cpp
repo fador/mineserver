@@ -228,7 +228,7 @@ bool User::sendLoginInfo()
   }
 
   // Send spawn position
-  loginBuffer << Protocol::spawnPosition(pos.x, pos.y + 2, pos.z)
+  loginBuffer << Protocol::spawnPosition(int(pos.x), int(pos.y + 2), int(pos.z))
               << Protocol::timeUpdate(ServerInstance->map(pos.map)->mapTime);
 
   buffer.addToWrite(loginBuffer);
@@ -1430,7 +1430,7 @@ bool User::dropInventory()
 bool User::isUnderwater()
 {
   uint8_t topblock, topmeta;
-  const int y = (pos.y - int(pos.y) <= 0.25) ? pos.y + 1 : pos.y + 2;
+  const int y = int((pos.y - int(pos.y) <= 0.25) ? pos.y + 1 : pos.y + 2);
 
   if (y > 127)
   {

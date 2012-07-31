@@ -109,8 +109,8 @@ bool BlockStair::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int
   }
 
   direction = user->relativeToBlock(x, y, z);
-  ServerInstance->map(map)->setBlock(x, y, z, newblock, direction);
-  ServerInstance->map(map)->sendBlockChange(x, y, z, newblock, direction);
+  ServerInstance->map(map)->setBlock(x, y, z, char(newblock), char(direction));
+  ServerInstance->map(map)->sendBlockChange(x, y, z, char(newblock), char(direction));
 
   return false;
 }

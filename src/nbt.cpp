@@ -819,19 +819,19 @@ void NBT_Value::Dump(std::string& data, const std::string& name, int tabs)
     data += tabPrefix + "TAG_End(\"" + name + "\")\n";
     break;
   case TAG_BYTE:
-    data += tabPrefix + "TAG_Byte(\"" + name + "\"): " + dtos((int)m_value.byteVal) + "\n";
+    data += tabPrefix + "TAG_Byte(\"" + name + "\"): " + dtos(double(int(m_value.byteVal))) + "\n";
     break;
   case TAG_SHORT:
-    data += tabPrefix + "TAG_Short(\"" + name + "\"): " + dtos(m_value.shortVal) + "\n";
+    data += tabPrefix + "TAG_Short(\"" + name + "\"): " + dtos(double(m_value.shortVal)) + "\n";
     break;
   case TAG_INT:
-    data += tabPrefix + "TAG_Int(\"" + name + "\"): " + dtos(m_value.intVal) + "\n";
+    data += tabPrefix + "TAG_Int(\"" + name + "\"): " + dtos(double(m_value.intVal)) + "\n";
     break;
   case TAG_LONG:
-    data += tabPrefix + "TAG_Long(\"" + name + "\"): " + dtos(m_value.longVal) + "\n";
+    data += tabPrefix + "TAG_Long(\"" + name + "\"): " + dtos(double(m_value.longVal)) + "\n";
     break;
   case TAG_FLOAT:
-    data += tabPrefix + "TAG_Float(\"" + name + "\"): " + dtos(m_value.floatVal) + "\n";
+    data += tabPrefix + "TAG_Float(\"" + name + "\"): " + dtos(double(m_value.floatVal)) + "\n";
     break;
   case TAG_DOUBLE:
     data += tabPrefix + "TAG_Double(\"" + name + "\"): " + dtos(m_value.doubleVal) + "\n";

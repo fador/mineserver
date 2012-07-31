@@ -420,8 +420,8 @@ bool BlockPlant::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int
   }
   else
   {
-    ServerInstance->map(map)->sendBlockChange(x, y, z, newblock, 0);
-    ServerInstance->map(map)->setBlock(x, y, z, newblock, 0);
+    ServerInstance->map(map)->sendBlockChange(x, y, z, char(newblock), 0);
+    ServerInstance->map(map)->setBlock(x, y, z, char(newblock), 0);
     addBlocks(x, y, z, map);
   }
   return false;

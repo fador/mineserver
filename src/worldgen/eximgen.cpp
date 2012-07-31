@@ -235,12 +235,12 @@ void EximGen::AddTrees(int x, int z, int map)
 
   memset(empty, 1, 256);
 
-  uint8_t trees = uniform01() * 7 + 13;
+  uint8_t trees = uint8_t(uniform01() * 7 + 13);
   uint8_t i = 0;
   while (i < trees)
   {
-    uint8_t a = uniform01() * 16;
-    uint8_t b = uniform01() * 16;
+    uint8_t a = uint8_t(uniform01() * 16);
+    uint8_t b = uint8_t(uniform01() * 16);
 
     if (empty[a][b])
     {
@@ -312,7 +312,7 @@ void EximGen::generateWithNoise(int x, int z, int map)
     {
       heightmap[(bZ<<4)+bX]  = ymax = currentHeight = (int32_t)(finalTerrain.GetValue(xBlockpos + bX, 0, zBlockpos + bZ));
 
-      uint8_t stoneHeight = currentHeight - (uniform01() * 3);
+      uint8_t stoneHeight = uint8_t(currentHeight - (uniform01() * 3));
       int32_t bYbX = ((bZ << 7) + (bX << 11));
 
       if (currentHeight < seaLevel)
@@ -499,49 +499,49 @@ void EximGen::AddOre(int x, int z, int map, uint8_t type)
   switch (type)
   {
   case BLOCK_COAL_ORE:
-    count = uniform01() * 10 + 20; // 20-30 coal deposits
+    count = uint8_t(uniform01() * 10 + 20); // 20-30 coal deposits
     //startHeight = 90;
     minDepoSize = 3;
     maxDepoSize = 7;
     break;
   case BLOCK_IRON_ORE:
-    count = uniform01() * 8 + 10; // 10-18 iron deposits
+    count = uint8_t(uniform01() * 8 + 10); // 10-18 iron deposits
     startHeight = 90;
     minDepoSize = 2;
     maxDepoSize = 5;
     break;
   case BLOCK_GOLD_ORE:
-    count = uniform01() * 4 + 5; // 4-9 gold deposits
+    count = uint8_t(uniform01() * 4 + 5); // 4-9 gold deposits
     startHeight = 42;
     minDepoSize = 2;
     maxDepoSize = 4;
     break;
   case BLOCK_DIAMOND_ORE:
-    count = uniform01() * 1 + 2; // 1-3 diamond deposits
+    count = uint8_t(uniform01() * 1 + 2); // 1-3 diamond deposits
     startHeight = 17;
     minDepoSize = 1;
     maxDepoSize = 2;
     break;
   case BLOCK_REDSTONE_ORE:
-    count = uniform01() * 5 + 5; // 5-10 redstone deposits
+    count = uint8_t(uniform01() * 5 + 5); // 5-10 redstone deposits
     startHeight = 25;
     minDepoSize = 2;
     maxDepoSize = 4;
     break;
   case BLOCK_LAPIS_ORE:
-    count = uniform01() * 1 + 2; // 1-3 lapis lazuli deposits
+    count = uint8_t(uniform01() * 1 + 2); // 1-3 lapis lazuli deposits
     startHeight = 17;
     minDepoSize = 1;
     maxDepoSize = 2;
     break;
   case BLOCK_GRAVEL:
-    count = uniform01() * 10 + 20; // 20-30 gravel deposits
+    count = uint8_t(uniform01() * 10 + 20); // 20-30 gravel deposits
     //startHeight = 90;
     minDepoSize = 6;
     maxDepoSize = 10;
     break;
   case BLOCK_DIRT:
-    count = uniform01() * 10 + 20; // 20-30 gravel deposits
+    count = uint8_t(uniform01() * 10 + 20); // 20-30 gravel deposits
     //startHeight = 90;
     minDepoSize = 6;
     maxDepoSize = 10;
@@ -553,11 +553,11 @@ void EximGen::AddOre(int x, int z, int map, uint8_t type)
   int i = 0;
   while (i < count)
   {
-    blockX = uniform01() * 16;
-    blockZ = uniform01() * 16;
+    blockX = int32_t(uniform01() * 16);
+    blockZ = int32_t(uniform01() * 16);
 
     blockY = heightmap[(blockZ<<4)+blockX];
-    blockY -= uniform01() * 5;
+    blockY -= uint8_t(uniform01() * 5);
 
     // Check that startheight is not higher than height at that column
     if (blockY > startHeight)
@@ -566,7 +566,7 @@ void EximGen::AddOre(int x, int z, int map, uint8_t type)
     }
 
     // Calculate Y
-    blockY = uniform01() * (blockY);
+    blockY = uint8_t(uniform01() * (blockY));
 
     i++;
 
@@ -584,7 +584,7 @@ void EximGen::AddOre(int x, int z, int map, uint8_t type)
 
 void EximGen::AddDeposit(int x, int y, int z, int map, uint8_t block, uint8_t minDepoSize, uint8_t maxDepoSize, sChunk* chunk)
 {
-  uint8_t depoSize = (uniform01() * (maxDepoSize - minDepoSize) + minDepoSize) / 2;
+  uint8_t depoSize = uint8_t((uniform01() * (maxDepoSize - minDepoSize) + minDepoSize) / 2);
   int32_t t_posx, t_posy, t_posz;
   for (int8_t xi = (-depoSize); xi <= depoSize; xi++)
   {

@@ -67,7 +67,7 @@ bool ConfigParser::parse(std::istream& data, ConfigNode::Ptr ptr)
   ConfigNode::Ptr root = ptr;
 
   data.seekg(0, std::ios::end);
-  const size_t data_size = data.tellg();
+  const size_t data_size = size_t(data.tellg());
   data.seekg(0, std::ios::beg);
 
   char* buf = new char[data_size];
