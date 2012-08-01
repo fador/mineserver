@@ -140,7 +140,9 @@ int main(int argc, char* argv[])
 
 
 Mineserver::Mineserver(int args, char **argarray)
-  :  m_socketlisten  (0),
+  :  argv(argarray),
+     argc(args),
+     m_socketlisten  (0),
      m_saveInterval  (0),
      m_lastSave      (std::time(NULL)),
      m_pvp_enabled   (false),
@@ -148,8 +150,6 @@ Mineserver::Mineserver(int args, char **argarray)
      m_only_helmets  (false),
      m_running       (false),
      m_eventBase     (NULL),
-     argc(args),
-     argv(argarray),
 
      // core modules
      m_config        (new Config()),
