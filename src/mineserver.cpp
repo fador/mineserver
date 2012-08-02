@@ -274,6 +274,62 @@ Mineserver::Mineserver(int args, char **argarray)
 
   LOG2(INFO, "Welcome to Mineserver v" + VERSION);
   LOG2(INFO, "Using zlib "+std::string(ZLIB_VERSION)+" libevent "+std::string(event_get_version()));
+  #ifdef PROTOCOL_ENCRYPTION
+
+  LOG2(INFO, "Generating RSA key pair for protocol encryption");
+  //Protocol encryption
+  srand(microTime());
+  if((rsa = RSA_generate_key(1024, 17, 0, 0)) == NULL)
+  {
+    LOG2(INFO, "KEY GENERATION FAILED!");
+    exit(1);
+  }
+  LOG2(INFO, "RSA key pair generated.");
+
+  /* Get ASN.1 format public key */
+  X509 *x=X509_new();
+  EVP_PKEY *pk=EVP_PKEY_new();
+  EVP_PKEY_assign_RSA(pk,rsa);
+  X509_set_version(x,0);
+  X509_set_pubkey(x,pk);
+
+  int len;
+  unsigned char *buf;
+  buf = NULL;
+  len = i2d_X509(x, &buf);
+    
+  //Glue + jesus tape, dont ask - Fador
+  publicKey = std::string((char *)(buf+28),len-36);
+
+  OPENSSL_free(buf);
+
+  /* END key fetching */
+
+  const std::string temp_nums="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890=-";
+
+  const std::string temp_hex="0123456789abcdef";
+
+  for(int i = 0; i < 4; i++)
+  {
+    encryptionBytes += (char)(temp_nums[rand()%temp_nums.size()]);
+  }
+  
+  for(int i = 0; i < 16; i++)
+  {
+    serverID += (char)(temp_hex[rand()%temp_hex.size()]);
+  }
+
+  LOG2(INFO, "ServerID: " + serverID);
+  //LOG2(INFO, "Public Key: " + publicKey);
+  /*
+  std::cout << "\r\n";
+  for(int i = 0; i < publicKey.size(); i++)
+  {    
+    printf("%02x ", (uint8_t)publicKey[i]);
+  }
+  std::cout << "\r\n";
+  */
+  #endif
 
   MapGen* mapgen = new MapGen();
   MapGen* nethergen = new NetherGen();
@@ -367,6 +423,9 @@ Mineserver::~Mineserver()
 
   // Remove the PID file
   unlink((config()->sData("system.pid_file")).c_str());
+  #ifdef PROTOCOL_ENCRYPTION
+  RSA_free(rsa);
+  #endif
 }
 
 
