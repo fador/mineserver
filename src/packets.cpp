@@ -253,7 +253,7 @@ int PacketHandler::tab_complete(User* user)
   user->buffer.removePacket();
 
   //ToDo: autocomplete!
-  user->buffer << PACKET_TAB_COMPLETE << " ";
+  user->buffer << (int8_t)PACKET_TAB_COMPLETE << " ";
 
   return PACKET_OK;
 }
