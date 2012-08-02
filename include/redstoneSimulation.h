@@ -36,13 +36,19 @@
 class RedstoneSimulation
 {
 public:
+  enum Power { POWER_NONE, POWER_WEAK, POWER_NORMAL };
+
   bool enabled;
   int map;
   bool addSimulation(vec pos);  
   bool update();
+  Power getPower(int32_t x, int16_t y, int32_t z);
 
 private:
+  bool isBlockSolid(const uint8_t block);
+
   enum { TYPE_WIRE, TYPE_TORCH, TYPE_BLOCK } SimType;
+  
 
   struct RedstoneSim
   {

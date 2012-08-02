@@ -199,3 +199,165 @@ bool RedstoneSimulation::addSimulation(vec pos)
 
   return true;
 }
+
+RedstoneSimulation::Power RedstoneSimulation::getPower(int32_t x, int16_t y, int32_t z)
+{
+	uint8_t block;
+	uint8_t meta = 0;
+	bool weak = false;
+
+	// Check block type
+	if (!ServerInstance->map(map)->getBlock(x + 1, y, z, &block, &meta))
+	{
+		return POWER_NONE;
+	}
+	if (!isBlockSolid(block)) {
+		return POWER_NONE;
+	}
+
+	//
+	// Check for switches or wires on sides
+	//
+
+	// North
+	if (!ServerInstance->map(map)->getBlock(x + 1, y, z, &block, &meta))
+	{
+		return POWER_NONE;
+	}
+
+	if ((block == BLOCK_STONE_BUTTON || block == BLOCK_LEVER) && (meta & 0x4) == 0x4 && (meta & 0x8) == 0x8)
+	{
+		return POWER_NORMAL;
+	}
+	else if (block == BLOCK_REDSTONE_WIRE && meta != 0)
+	{
+		// TODO: Check if wire ends here
+		weak = true;
+	}
+
+	// South
+	if (!ServerInstance->map(map)->getBlock(x - 1, y, z, &block, &meta))
+	{
+		return POWER_NONE;
+	}
+
+	if ((block == BLOCK_STONE_BUTTON || block == BLOCK_LEVER) && (meta & 0x3) == 0x3 && (meta & 0x8) == 0x8)
+	{
+		return POWER_NORMAL;
+	}
+	else if (block == BLOCK_REDSTONE_WIRE && meta != 0)
+	{
+		weak = true;
+	}
+
+	// East
+	if (!ServerInstance->map(map)->getBlock(x, y, z + 1, &block, &meta))
+	{
+		return POWER_NONE;
+	}
+
+	if ((block == BLOCK_STONE_BUTTON || block == BLOCK_LEVER) && (meta & 0x1) == 0x1 && (meta & 0x8) == 0x8)
+	{
+		return POWER_NORMAL;
+	}
+	else if (block == BLOCK_REDSTONE_WIRE && meta != 0)
+	{
+		weak = true;
+	}
+
+	// West
+	if (!ServerInstance->map(map)->getBlock(x, y, z - 1, &block, &meta))
+	{
+		return POWER_NONE;
+	}
+
+	if ((block == BLOCK_STONE_BUTTON || block == BLOCK_LEVER) && (meta & 0x2) == 0x2 && (meta & 0x8) == 0x8)
+	{
+		return POWER_NORMAL;
+	}
+	else if (block == BLOCK_REDSTONE_WIRE && meta != 0)
+	{
+		weak = true;
+	}
+
+	// Switch or pressure plate on top of the block
+	if (!ServerInstance->map(map)->getBlock(x, y + 1, z, &block, &meta))
+	{
+		return POWER_NONE;
+	}
+
+	if (block == BLOCK_WOODEN_PRESSURE_PLATE || block == BLOCK_STONE_PRESSURE_PLATE && (meta & 0x1) == 0x1)
+	{
+		return POWER_NORMAL;
+	}
+	else if (block == BLOCK_LEVER && (meta & 0x8) == 0x8)
+	{
+		return POWER_NORMAL;
+	}
+
+	// Wire on top of the block
+	else if (block == BLOCK_REDSTONE_WIRE && meta != 0)
+	{
+		weak = true;
+	}
+
+	// Torch beneath the block
+	if (!ServerInstance->map(map)->getBlock(x, y - 1, z, &block, &meta))
+	{
+		return POWER_NONE;
+	}
+	if (block == BLOCK_REDSTONE_TORCH_ON)
+	{
+		return POWER_NORMAL;
+	}
+
+	if (weak) {
+		return POWER_WEAK;
+	}
+
+	// No power
+	return POWER_NONE;
+}
+
+bool RedstoneSimulation::isBlockSolid(const uint8_t block) {
+	switch (block)
+	{
+	case BLOCK_AIR:
+	case BLOCK_STONE_BUTTON:
+	case BLOCK_WATER:
+	case BLOCK_LAVA:
+	case BLOCK_STATIONARY_WATER:
+	case BLOCK_STATIONARY_LAVA:
+	case BLOCK_FIRE:
+	case BLOCK_LEVER:
+	case BLOCK_PORTAL:
+	case BLOCK_REDSTONE_WIRE:
+	case BLOCK_REDSTONE_TORCH_OFF:
+	case BLOCK_REDSTONE_TORCH_ON:
+	case BLOCK_SAPLING:
+	case BLOCK_SIGN_POST:
+	case BLOCK_GRASS:
+	case BLOCK_YELLOW_FLOWER:
+	case BLOCK_RED_ROSE:
+	case BLOCK_RED_MUSHROOM:
+	case BLOCK_BROWN_MUSHROOM:
+	case BLOCK_CROPS:
+	case BLOCK_TORCH:
+	case BLOCK_WOODEN_DOOR:
+	case BLOCK_FENCE:
+	case BLOCK_WALL_SIGN:
+	case BLOCK_DOUBLE_STEP:
+	case BLOCK_IRON_DOOR:
+	case BLOCK_LADDER:
+	case BLOCK_SNOW:
+	case BLOCK_STEP:
+	case BLOCK_WOODEN_STAIRS:
+	case BLOCK_COBBLESTONE_STAIRS:
+    return false;
+    break;
+  default:
+    break;
+  }
+
+  return true;
+}
