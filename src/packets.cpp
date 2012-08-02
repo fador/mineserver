@@ -164,17 +164,17 @@ int PacketHandler::encryption_response(User* user)
     return PACKET_OK;
   }
 
+  //Response
+  user->buffer << (int8_t)PACKET_ENCRYPTION_RESPONSE << (int16_t)0 << (int16_t) 0;
+
   //Decrypt secret sent by the client and store
   memset(buffer, 0, 1024);
   ret = RSA_private_decrypt(secretLen,(const uint8_t *)secret.c_str(),buffer,ServerInstance->rsa,RSA_PKCS1_PADDING);
   user->secret = std::string((char *)buffer, ret);
-  user->crypted = true;  
+  user->crypted = true;
   user->initCipher();
   //ToDo: validate user
-
-
-  //Response
-  user->buffer << (int8_t)PACKET_ENCRYPTION_RESPONSE << (int16_t)0 << (int16_t) 0;
+  user->uncryptedLeft = 5; //5 first bytes are uncrypted
 
   return PACKET_OK;
 }
@@ -190,8 +190,10 @@ int PacketHandler::client_status(User* user)
 
   //ToDo: Do something with the values
   //0: Initial spawn, 1: Respawn after death
+  LOG2(INFO, "client_status.");
   if(payload == 0 && user->crypted)
   {
+    LOG2(INFO, "Sending login info..");
     user->sendLoginInfo();
   }
 

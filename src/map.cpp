@@ -970,7 +970,7 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
 
   Packet pkt;
 
-  pkt << (int8_t)PACKET_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int8_t)type << (int8_t)meta;
+  pkt << (int8_t)PACKET_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int16_t)type << (int8_t)meta;
 
   it->second->sendPacket(pkt);
 
@@ -1785,13 +1785,13 @@ void Map::sendToUser(User* user, int x, int z, bool login)
   memset(&mapdata[(32768 + 16384 + 16384 + 16384 + 16384)*2], 0, 256);
 
 
-  uLongf written = 98304*2;
+  uLongf written = 98304*2+256;
   uint8_t* buffer = new uint8_t[written];
 
   // Compress data with zlib deflate
   compress(buffer, &written, &mapdata[0], 98304*2+256);
 
-  (*p) << (int32_t)written << (int32_t)0 /* ??? */;
+  (*p) << (int32_t)written;
   (*p).addToWrite(buffer, written);
 
   //Push sign data to player
