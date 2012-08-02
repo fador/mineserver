@@ -73,11 +73,6 @@ void BlockRedstoneUtil::onStoppedDigging(User* user, int8_t status, int32_t x, i
 
 }
 
-bool BlockRedstoneUtil::onBroken(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
-{
-  return false;
-}
-
 void BlockRedstoneUtil::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
   uint8_t block;
@@ -119,7 +114,7 @@ void BlockRedstoneUtil::onNeighbourBroken(User* user, int16_t oldblock, int32_t 
 
   if (destroy)
   {
-    // Break switch and spawn switch item
+    // Break switch and spawn item
     ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
     ServerInstance->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
     this->spawnBlockItem(x, y, z, map, block);
@@ -130,7 +125,6 @@ bool BlockRedstoneUtil::onPlace(User* user, int16_t newblock, int32_t x, int16_t
 {
   uint8_t block;
   uint8_t meta = 0;
-
   if (!ServerInstance->map(map)->getBlock(x, y, z, &block, &meta))
   {
     revertBlock(user, x, y, z, map);
@@ -157,17 +151,40 @@ bool BlockRedstoneUtil::onPlace(User* user, int16_t newblock, int32_t x, int16_t
     return true;
   }
 
+
   // Check that switch is placed on legal direction
   if ((newblock == BLOCK_STONE_BUTTON && (direction == BLOCK_TOP || direction == BLOCK_BOTTOM))
-  || ((newblock == BLOCK_STONE_PRESSURE_PLATE || newblock == BLOCK_WOODEN_PRESSURE_PLATE) && direction != BLOCK_TOP)
-  || (newblock == BLOCK_LEVER && direction == BLOCK_BOTTOM)) {
+  || ((newblock == BLOCK_STONE_PRESSURE_PLATE || newblock == BLOCK_WOODEN_PRESSURE_PLATE) && direction != BLOCK_TOP)) {
 	revertBlock(user, x, y, z, map);
     return true;
   }
 
   // Set metadata for the position
   if (newblock == BLOCK_STONE_BUTTON || newblock == BLOCK_LEVER) {
-	  meta = direction;
+	  // Wall switch
+	  if (direction != BLOCK_TOP && direction != BLOCK_BOTTOM) {
+		meta = direction;
+	  }
+	  // Ceiling lever
+	  else if (direction == BLOCK_BOTTOM) {
+		  int yaw = abs(int(user->pos.yaw)) % 360;
+		  if ((yaw > 45 && yaw <= 135) || (yaw > 225 && yaw <= 315)) {
+			  meta = 0x00;
+		  }
+		  else {
+			  meta = 0x07;
+		  }
+	  }
+	  // Floor lever
+	  else {
+		  int yaw = abs(int(user->pos.yaw)) % 360;
+		  if ((yaw > 45 && yaw <= 135) || (yaw > 225 && yaw <= 315)) {
+			  meta = 0x06;
+		  }
+		  else {
+			  meta = 0x05;
+		  }
+	  }
   }
 
   ServerInstance->map(map)->setBlock(x, y, z, char(newblock), meta);
