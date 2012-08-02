@@ -98,6 +98,7 @@ void PacketHandler::init()
   packets[PACKET_CLIENT_INFO]              = Packets(PACKET_VARIABLE_LEN, &PacketHandler::client_info);
   packets[PACKET_CLIENT_STATUS]            = Packets(1, &PacketHandler::client_status);
   packets[PACKET_ENCRYPTION_RESPONSE]      = Packets(PACKET_VARIABLE_LEN, &PacketHandler::encryption_response);
+  packets[PACKET_PLUGIN_MESSAGE]           = Packets(PACKET_VARIABLE_LEN, &PacketHandler::plugin_message);
 }
 
 int PacketHandler::unhandledPacket(User* user)
@@ -105,6 +106,45 @@ int PacketHandler::unhandledPacket(User* user)
   user->buffer.removePacket();
   return PACKET_OK;
 }
+
+int PacketHandler::plugin_message(User* user)
+{
+
+  if (!user->buffer.haveData(4))
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+
+  
+  std::string channel;
+  int16_t datalen;
+
+  user->buffer >> channel;
+
+  if (!user->buffer || !user->buffer.haveData(2))
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+
+  user->buffer >> datalen;
+
+  if (!user->buffer.haveData(datalen))
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+
+  for(int i = 0; i < datalen; i++)
+  {
+    int8_t byte;
+    user->buffer >> byte;
+  }
+
+  LOG2(INFO, "Plugin message: "+channel);
+
+  user->buffer.removePacket();
+  return PACKET_OK;
+}
+
 
 #ifdef PROTOCOL_ENCRYPTION
 int PacketHandler::encryption_response(User* user)
@@ -253,7 +293,7 @@ int PacketHandler::tab_complete(User* user)
   user->buffer.removePacket();
 
   //ToDo: autocomplete!
-  user->buffer << PACKET_TAB_COMPLETE << " ";
+  user->buffer << (int8_t)PACKET_TAB_COMPLETE << " ";
 
   return PACKET_OK;
 }

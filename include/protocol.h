@@ -262,7 +262,8 @@ class Protocol
     static Packet entityEquipment(int eid, int slot, int type, int damage)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)eid << (int16_t)slot << (int16_t)type << (int16_t)damage;
+      ret << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)eid << (int16_t)slot
+          << Protocol::slot(type,1,damage);
       return ret;
     }
 
