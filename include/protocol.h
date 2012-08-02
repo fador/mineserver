@@ -90,14 +90,12 @@ class Protocol
       ret << id;
       if(id != -1) {
         ret << count << damage;
-        if(Item::isEnchantable(id)) {
           if(data != NULL) {
             ret << data_size;
             ret.addToWrite(data, data_size);
           } else {
             ret << (int16_t)-1;
           }
-        }
       }
       return ret;
     }
@@ -116,7 +114,8 @@ class Protocol
       Packet ret;
       ret << (int8_t)PACKET_MOB_SPAWN << (int32_t)eid << (int8_t)type
           << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32)
-          << (int8_t)yaw << (int8_t)pitch << (int8_t)head_yaw << metadata;
+          << (int8_t)yaw << (int8_t)pitch << (int8_t)head_yaw << (int16_t)0 
+          << (int16_t)0 << (int16_t)0 << metadata;
       return ret;
     }
 
@@ -128,7 +127,7 @@ class Protocol
     static Packet destroyEntity(int eid)
     {
       Packet ret;
-      ret << (int8_t)PACKET_DESTROY_ENTITY << (int32_t)eid;
+      ret << (int8_t)PACKET_DESTROY_ENTITY << (int8_t)1 << (int32_t)eid;
       return ret;
     }
 
