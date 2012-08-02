@@ -115,7 +115,7 @@ class Protocol
       ret << (int8_t)PACKET_MOB_SPAWN << (int32_t)eid << (int8_t)type
           << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32)
           << (int8_t)yaw << (int8_t)pitch << (int8_t)head_yaw << (int16_t)0 
-          << (int16_t)0 << (int16_t)0 << metadata;
+          << (int16_t)0 << (int16_t)0 << (int8_t)0 << (int8_t)0 << metadata;
       return ret;
     }
 
@@ -211,7 +211,7 @@ class Protocol
       Packet ret;
       ret << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)eid << nick
           << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32)
-          << (int8_t)yaw << (int8_t)pitch << (int16_t)item << (int8_t)127;
+          << (int8_t)yaw << (int8_t)pitch << (int16_t)item << (int8_t)0 << (int8_t)0 << (int8_t)127;
       return ret;
     }
 
