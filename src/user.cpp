@@ -113,6 +113,7 @@ User::~User()
   }
 
   this->buffer.reset();
+  this->bufferCrypted.reset();
 
   // Remove all known chunks
   for (uint32_t i = 0; i < mapKnown.size(); i++)
@@ -238,12 +239,15 @@ bool User::sendLoginInfo()
   logged = true;
   spawnUser((int32_t)pos.x * 32, (int32_t)((pos.y + 2) * 32), (int32_t)pos.z * 32);
   
+  /*
   for (int i = 1; i < 45; i++)
   {
     inv[i].ready = true;
     inv[i].sendUpdate();
   }
   
+  */
+
   // Teleport player (again)
   teleport(pos.x, pos.y + 2, pos.z);
 

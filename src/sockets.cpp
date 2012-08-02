@@ -63,7 +63,7 @@ static std::tr1::array<uint8_t, BUFSIZE> BUFCRYPT;
 static char* const cpBUF = reinterpret_cast<char*>(BUF.data());
 static uint8_t* const upBUF = BUF.data();
 
-static char* const cpBUFCRYPT = reinterpret_cast<char*>(BUFCRYPT.data());
+static char* cpBUFCRYPT = reinterpret_cast<char*>(BUFCRYPT.data());
 
 extern "C" void client_callback(int fd, short ev, void* arg)
 {
@@ -77,13 +77,10 @@ extern "C" void client_callback(int fd, short ev, void* arg)
     if(user->crypted)
     {
       read = recv(fd, cpBUFCRYPT, BUFSIZE, 0);
-      //ToDo: fix this
-      int p_len = read, f_len = 0;  
-      EVP_DecryptInit_ex(&user->de, NULL, NULL, NULL, NULL);
-      EVP_DecryptUpdate(&user->de, upBUF, &p_len, (const uint8_t *)cpBUFCRYPT, read);
-      EVP_DecryptFinal_ex(&user->de, upBUF+p_len, &f_len);
-      read = p_len + f_len;
 
+      int p_len = read, f_len = 0;  
+      EVP_DecryptUpdate(&user->de, upBUF, &p_len, (const uint8_t *)cpBUFCRYPT, read);
+      read = p_len + f_len;
     }
     else
     {
@@ -166,9 +163,43 @@ extern "C" void client_callback(int fd, short ev, void* arg)
   if (!user->buffer.getWriteEmpty())
   {
     std::vector<char> buf;
+    
     user->buffer.getWriteData(buf);
+    
+    //More glue - Fador
+    if(user->crypted)
+    {      
+      if(user->uncryptedLeft)
+      {
+        user->bufferCrypted.addToWrite((uint8_t *)buf.data(),user->uncryptedLeft);
+      }
+      int p_len = buf.size()-user->uncryptedLeft, f_len = 0;
+      if(p_len)
+      {
+        uint8_t *buffer = (uint8_t *)malloc(p_len+1);
+        EVP_EncryptUpdate(&user->en, (uint8_t *)buffer, &p_len, (const uint8_t *)buf.data()+user->uncryptedLeft, buf.size()-user->uncryptedLeft);
+        int written = p_len + f_len;
+        user->bufferCrypted.addToWrite((uint8_t *)buffer,written);
+        free(buffer);
+      }
+      user->uncryptedLeft = 0;
+    }
+    else
+    {
+      user->bufferCrypted.addToWrite((uint8_t *)buf.data(),buf.size());
+      user->uncryptedLeft = 0;
+    }
 
-    //ToDo: add encryption
+    //free(outBuf);
+    user->buffer.clearWrite(buf.size());
+  }
+
+
+  if(!user->bufferCrypted.getWriteEmpty())
+  {
+    std::vector<char> buf;
+    user->bufferCrypted.getWriteData(buf);
+
     //Try to write the whole buffer
     const int written = send(fd, buf.data(), buf.size(), 0);
 
@@ -193,11 +224,11 @@ extern "C" void client_callback(int fd, short ev, void* arg)
     else
     {
       //Remove written amount from the buffer
-      user->buffer.clearWrite(written);
+      user->bufferCrypted.clearWrite(written);
     }
 
     //If we couldn't write everything at once, add EV_WRITE event calling this function again..
-    if (!user->buffer.getWriteEmpty())
+    if (!user->bufferCrypted.getWriteEmpty())
     {
       event_set(user->GetEvent(), fd, EV_WRITE | EV_READ, client_callback, user);
       event_add(user->GetEvent(), NULL);
