@@ -188,13 +188,18 @@ int PacketHandler::client_status(User* user)
   
   user->buffer.removePacket();
 
-  //ToDo: Do something with the values
   //0: Initial spawn, 1: Respawn after death
   LOG2(INFO, "client_status.");
   if(payload == 0 && user->crypted)
   {
     LOG2(INFO, "Sending login info..");
     user->sendLoginInfo();
+  }
+  //player respawns
+  if(payload == 1)
+  {
+    user->dropInventory();
+    user->respawn();
   }
 
   return PACKET_OK;
@@ -409,13 +414,13 @@ int PacketHandler::inventory_change(User* user)
       return PACKET_NEED_MORE_DATA;
     }
     user->buffer >> itemCount >> itemUses;
-    if(Item::isEnchantable(itemID)) {
+    //if(Item::isEnchantable(itemID)) {
       int16_t enchantment_data_len;
       user->buffer >> enchantment_data_len;
       if(enchantment_data_len >= 0) {
         LOG2(INFO, "Got enchantment data, ignoring...");
       }
-    }
+    //}
   }
 
   ServerInstance->inventory()->windowClick(user, windowID, slot, rightClick, actionNumber, itemID, itemCount, itemUses, shift);
@@ -488,6 +493,7 @@ int PacketHandler::handshake(User* user)
   }
   else
   {
+    //ToDo: add option for protocol encryption
     //user->sendLoginInfo();
     user->buffer << Protocol::encryptionRequest();
     (static_cast<Hook1<bool, const char*>*>(ServerInstance->plugin()->getHook("PlayerLoginPost")))->doAll(player.c_str());
@@ -837,26 +843,36 @@ int PacketHandler::player_block_placement(User* user)
   int16_t health = 0;
   BlockBasicPtr blockcb;
   BlockDefault blockD;
-
+  int16_t slotLen;
+  int8_t posx,posy,posz;
 
   user->buffer >> x >> temp_y >> z >> direction >> newblock;
-  y = (uint8_t)temp_y;
-
-  if (newblock >= 0)
+  if(newblock != -1)
   {
-    if (!user->buffer.haveData(2))
+    int8_t count;
+    int16_t damage;
+    user->buffer >> count >> damage;
+    user->buffer >> slotLen;
+    if(slotLen != -1)
     {
-      return PACKET_NEED_MORE_DATA;
-    }
-    user->buffer >> count >> health;
-    if(Item::isEnchantable(newblock)) {
-      int16_t enchantment_data_len;
-      user->buffer >> enchantment_data_len;
-      if(enchantment_data_len >= 0) {
-        LOG2(INFO, "Got enchantment data, ignoring...");
+      if (!user->buffer.haveData(slotLen+3))
+      {
+        return PACKET_NEED_MORE_DATA;
       }
+      uint8_t *buf = new uint8_t[slotLen];
+      for(int i = 0; i < slotLen; i++)
+      {
+        user->buffer >> (int8_t)buf[i];
+      }
+      //Do something with the slot data
+      delete[] buf;
     }
   }
+
+  user->buffer  >> posx >> posy >> posz;
+    //newblock;
+  y = (uint8_t)temp_y;
+
   user->buffer.removePacket();
 
 
@@ -1183,7 +1199,7 @@ int PacketHandler::holding_change(User* user)
 
   //Send holding change to others
   Packet pkt;
-  pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)user->UID << (int16_t)0 << (int16_t)user->inv[itemSlot + 36].getType() << (int16_t)user->inv[itemSlot + 36].getHealth();
+  pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)user->UID << (int16_t)0 << Protocol::slot(user->inv[itemSlot + 36].getType(),1,user->inv[itemSlot + 36].getHealth());
   user->sendOthers(pkt);
 
   // Set current itemID to user

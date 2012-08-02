@@ -320,15 +320,6 @@ Mineserver::Mineserver(int args, char **argarray)
   }
 
   LOG2(INFO, "ServerID: " + serverID);
-  //LOG2(INFO, "Public Key: " + publicKey);
-  /*
-  std::cout << "\r\n";
-  for(int i = 0; i < publicKey.size(); i++)
-  {    
-    printf("%02x ", (uint8_t)publicKey[i]);
-  }
-  std::cout << "\r\n";
-  */
   #endif
 
   MapGen* mapgen = new MapGen();
