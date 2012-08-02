@@ -970,7 +970,7 @@ bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
 
   Packet pkt;
 
-  pkt << (int8_t)PACKET_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int8_t)type << (int8_t)meta;
+  pkt << (int8_t)PACKET_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int16_t)type << (int8_t)meta;
 
   it->second->sendPacket(pkt);
 

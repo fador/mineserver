@@ -245,7 +245,6 @@ bool User::sendLoginInfo()
     inv[i].ready = true;
     inv[i].sendUpdate();
   }
-  
   */
 
   // Teleport player (again)
