@@ -35,6 +35,11 @@
 #include "tr1.h"
 #include TR1INCLUDE(memory)
 
+
+//Enable protocol encryption
+#define PROTOCOL_ENCRYPTION
+
+
 #ifdef WIN32
 // This is needed for event to work on Windows.
 #define NOMINMAX
@@ -44,6 +49,12 @@
 #include <sys/types.h>
 #endif
 #include <event.h>
+
+#ifdef PROTOCOL_ENCRYPTION
+#include <openssl/rsa.h>
+#include <openssl/x509v3.h>
+#include <openssl/rc4.h>
+#endif
 
 #include "extern.h"
 
@@ -67,6 +78,14 @@ public:
   bool m_only_helmets;
   struct event m_listenEvent;
 
+  #ifdef PROTOCOL_ENCRYPTION
+  //Protocol encryption
+  RSA *rsa;
+  std::string encryptionBytes;
+  std::string serverID;
+  std::string publicKey;
+  #endif
+
   // Constructor/Destructor
   Mineserver(int, char**);
   ~Mineserver();
@@ -74,6 +93,7 @@ public:
   // Non-inline functions
   bool run();
   bool stop();
+  
   event_base* getEventBase();
   Map* map(size_t n) const;
   void saveAllPlayers();

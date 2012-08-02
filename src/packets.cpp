@@ -37,6 +37,8 @@
 #include <cmath>
 #include <sstream>
 
+
+
 #include "chat.h"
 #include "config.h"
 #include "constants.h"
@@ -59,6 +61,11 @@
 #include "mob.h"
 #include "utf8.h"
 #include "protocol.h"
+
+#ifdef PROTOCOL_ENCRYPTION
+#include <openssl/rsa.h>
+#include <openssl/err.h>
+#endif
 
 void PacketHandler::init()
 {
@@ -87,13 +94,160 @@ void PacketHandler::init()
   packets[PACKET_INCREMENT_STATISTICS]     = Packets(6, &PacketHandler::unhandledPacket);
   packets[PACKET_PING]                     = Packets(0, &PacketHandler::ping);
   packets[PACKET_BLOCK_CHANGE]             = Packets(11, &PacketHandler::block_change);
-  
-  
+  packets[PACKET_TAB_COMPLETE]             = Packets(PACKET_VARIABLE_LEN, &PacketHandler::tab_complete);
+  packets[PACKET_CLIENT_INFO]              = Packets(PACKET_VARIABLE_LEN, &PacketHandler::client_info);
+  packets[PACKET_CLIENT_STATUS]            = Packets(1, &PacketHandler::client_status);
+  packets[PACKET_ENCRYPTION_RESPONSE]      = Packets(PACKET_VARIABLE_LEN, &PacketHandler::encryption_response);
 }
 
 int PacketHandler::unhandledPacket(User* user)
 {
   user->buffer.removePacket();
+  return PACKET_OK;
+}
+
+#ifdef PROTOCOL_ENCRYPTION
+int PacketHandler::encryption_response(User* user)
+{
+
+  if (!user->buffer.haveData(4))
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+
+  int16_t secretLen, verifyLen;
+  std::string secret,verify;
+  std::string decryptedSecret(' ', 16);
+
+  user->buffer >> secretLen;
+
+  if (!user->buffer.haveData(secretLen))
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+
+  for(int i = 0; i < secretLen; i++)
+  {
+    int8_t byte;
+    user->buffer >> byte;
+    secret.push_back(byte);
+  }
+
+  user->buffer >> verifyLen;
+
+  if (!user->buffer.haveData(verifyLen))
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+
+  for(int i = 0; i < verifyLen; i++)
+  {
+    int8_t byte;
+    user->buffer >> byte;
+    verify.push_back(byte);
+  }  
+  user->buffer.removePacket();
+
+  if(verifyLen > 1023 || secretLen > 1023)
+  {
+    user->kick("Invalid verify/secret size");
+    return PACKET_OK;
+  }
+
+  //Decrypt the verification bytes
+  uint8_t buffer[1024];
+  memset(buffer, 0, 1024);
+  int ret = RSA_private_decrypt(verifyLen,(const uint8_t *)verify.c_str(),buffer,ServerInstance->rsa,RSA_PKCS1_PADDING);
+  if(ret != 4 || std::string((char *)buffer) != ServerInstance->encryptionBytes)
+  {
+    user->kick("Decryption failed");
+    return PACKET_OK;
+  }
+
+  //Decrypt secret sent by the client and store
+  memset(buffer, 0, 1024);
+  ret = RSA_private_decrypt(secretLen,(const uint8_t *)secret.c_str(),buffer,ServerInstance->rsa,RSA_PKCS1_PADDING);
+  user->secret = std::string((char *)buffer, ret);
+  user->crypted = true;  
+  user->initCipher();
+  //ToDo: validate user
+
+
+  //Response
+  user->buffer << (int8_t)PACKET_ENCRYPTION_RESPONSE << (int16_t)0 << (int16_t) 0;
+
+  return PACKET_OK;
+}
+#endif
+
+int PacketHandler::client_status(User* user)
+{
+  int8_t payload;
+
+  user->buffer >> payload;
+  
+  user->buffer.removePacket();
+
+  //ToDo: Do something with the values
+  //0: Initial spawn, 1: Respawn after death
+  if(payload == 0 && user->crypted)
+  {
+    user->sendLoginInfo();
+  }
+
+  return PACKET_OK;
+}
+
+int PacketHandler::client_info(User* user)
+{
+  // Wait for length-short. HEHE
+  if (!user->buffer.haveData(2))
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+
+  std::string locale;
+  int8_t viewDistance,chatFlags,difficulty;
+
+  user->buffer >> locale;
+
+  if (!user->buffer || !user->buffer.haveData(3))
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+
+  user->buffer >> viewDistance >> chatFlags >> difficulty;
+
+  user->buffer.removePacket();
+
+  //ToDo: Do something with the values
+
+
+  return PACKET_OK;
+}
+
+
+int PacketHandler::tab_complete(User* user)
+{
+  // Wait for length-short. HEHE
+  if (!user->buffer.haveData(2))
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+
+  std::string msg;
+
+  user->buffer >> msg;
+
+  if (!user->buffer)
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+  user->buffer.removePacket();
+
+  //ToDo: autocomplete!
+  user->buffer << PACKET_TAB_COMPLETE << " ";
+
   return PACKET_OK;
 }
 
@@ -103,9 +257,34 @@ int PacketHandler::entity_crouch(User* user)
   int8_t action;
 
   user->buffer >> EID >> action;
+  Packet pkt;
+  bool packetData = false;
 
-  //ToDo: inform other players
-  //LOG2(INFO, "Entity action: EID: " + dtos(EID) +" Action: " +dtos(action));
+  //ToDo: handle other actions
+  switch(action)
+  {
+    //Crouch
+  case 1:
+    pkt << Protocol::animation(user->UID, 104);
+    packetData = true;
+    break;
+    //Uncrouch
+  case 2:
+    pkt << Protocol::animation(user->UID, 105);
+    packetData = true;
+    break;
+  default:
+    break;
+  }
+  
+  if(packetData)
+  {
+    sChunk* chunk = ServerInstance->map(user->pos.map)->getChunk(blockToChunk((int32_t)user->pos.x), blockToChunk((int32_t)user->pos.z));
+    if (chunk != NULL)
+    {
+      chunk->sendPacket(pkt);
+    }
+  }
 
   user->buffer.removePacket();
   return PACKET_OK;
@@ -239,7 +418,6 @@ int PacketHandler::inventory_change(User* user)
 
   ServerInstance->inventory()->windowClick(user, windowID, slot, rightClick, actionNumber, itemID, itemCount, itemUses, shift);
 
-  //No need to do anything
   user->buffer.removePacket();
   return PACKET_OK;
 }
@@ -247,88 +425,43 @@ int PacketHandler::inventory_change(User* user)
 // Keep Alive (http://mc.kev009.com/wiki/Protocol#Keep_Alive_.280x00.29)
 int PacketHandler::keep_alive(User* user)
 {
-  /*
-  if (!user->buffer.haveData(4))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
-  int32_t pingTime;
-  user->buffer >> pingTime;
-  */
   //No need to do anything
   user->buffer.removePacket();
   return PACKET_OK;
 }
 
-//Source: http://wiki.linuxquestions.org/wiki/Connecting_a_socket_in_C
-int socket_connect(char* host, int port)
-{
-  struct hostent* hp;
-  struct sockaddr_in addr;
-  int on = 1, sock;
-
-  if ((hp = gethostbyname(host)) == NULL)
-  {
-    return 0;
-  }
-
-  memmove(&addr.sin_addr, hp->h_addr, hp->h_length);
-  addr.sin_port = htons(port);
-  addr.sin_family = AF_INET;
-  sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-  struct timeval tv;
-  tv.tv_sec = 2;
-  setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(struct timeval));
-  setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tv, sizeof(struct timeval));
-
-  setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const char*)&on, sizeof(int));
-
-  if (sock == -1)
-  {
-    return 0;
-  }
-
-  if (connect(sock, (struct sockaddr*)&addr, sizeof(struct sockaddr_in)) == -1)
-  {
-    return 0;
-  }
-
-  return sock;
-}
-
-// Login request (http://mc.kev009.com/wiki/Protocol#Login_Request_.280x01.29)
+// Login request
 int PacketHandler::login_request(User* user)
 {
-  //Check that we have enough data in the buffer
-  if (!user->buffer.haveData(18))
-    {
-      return PACKET_NEED_MORE_DATA;
-    }
+  //This should not be used in 1.3
+  LOG(INFO, "Packets", "LOGIN REQUEST!!");
 
-  int32_t version;
-  std::string player, passwd;
-  //int64_t mapseed;
-  int32_t param_1 = 0, param_2 = 0;
-  int8_t dimension = 0, param_3 = 0, param_4 = 0;
+  return PACKET_OK;
+}
 
-  // As of version 1.5, the password is no longer sent (at least for non-authenticated mode)
-  //user->buffer >> version >> player >> passwd >> mapseed >> dimension;
-  user->buffer >> version >> player >> passwd /*>> mapseed*/ >> param_1 >> param_2 >> dimension >> param_3 >> param_4;
+int PacketHandler::handshake(User* user)
+{
+  if (!user->buffer.haveData(9))
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
 
+  std::string player, host;
+  int8_t version;
+  int32_t port;
+
+  user->buffer >> version >> player >> host >> port;
+
+  // Check for data
   if (!user->buffer)
   {
     return PACKET_NEED_MORE_DATA;
   }
 
+  // Remove package from buffer
   user->buffer.removePacket();
 
-  while (User::byNick(player) != NULL)
-  {
-    player.append("_");
-  }
-
-  LOG(INFO, "Packets", "Player " + dtos(user->UID) + " login v." + dtos(version) + " : " + player + ":" + passwd);
+  LOG(INFO, "Packets", "Player " + dtos(user->UID) + " login v." + dtos(version) + " : " + player);
 
   user->nick = player;
 
@@ -346,86 +479,6 @@ int PacketHandler::login_request(User* user)
     return PACKET_OK;
   }
 
-
-
-  // Check if we're to do user validation
-  if (ServerInstance->config()->bData("system.user_validation") == true)
-  {
-    std::string url = "/game/checkserver.jsp?user=" + player + "&serverId=" + hash(player);
-    LOG(INFO, "Packets", "Validating " + player + " against minecraft.net: ");
-
-    std::string http_request = "GET " + url + " HTTP/1.1\r\n"
-                               + "Host: www.minecraft.net\r\n"
-                               + "Connection: close\r\n\r\n";
-
-    int fd = socket_connect((char*)"50.16.200.224", 80);
-    if (fd)
-    {
-#ifdef WIN32
-      send(fd, http_request.c_str(), http_request.length(), NULL);
-#else
-      write(fd, http_request.c_str(), http_request.length());
-#endif
-
-#define BUFFER_SIZE 1024
-      char* buffer = new char[BUFFER_SIZE];
-      std::string stringbuffer;
-
-#ifdef WIN32
-      while (int received = recv(fd, buffer, BUFFER_SIZE - 1, NULL) != 0)
-      {
-#else
-      while (read(fd, buffer, BUFFER_SIZE - 1) != 0)
-      {
-#endif
-        stringbuffer += std::string(buffer);
-      }
-      delete[] buffer;
-#ifdef WIN32
-      closesocket(fd);
-#else
-      close(fd);
-#endif
-
-      bool allow_access = false;
-      //No response data, timeout
-      if (stringbuffer.size() == 0 && ServerInstance->config()->bData("system.allow_connect_on_auth_timeout"))
-      {
-        LOG(INFO, "Packets", "  Auth skipped on timeout ");
-        allow_access = true;
-      }
-
-      if (allow_access || (stringbuffer.size() >= 3 && stringbuffer.find("\r\n\r\nYES", 0) != std::string::npos))
-      {
-        LOG(INFO, "Packets", "  Verified!");
-
-        char* kickMessage = NULL;
-        if ((static_cast<Hook2<bool, const char*, char**>*>(ServerInstance->plugin()->getHook("PlayerLoginPre")))->doUntilFalse(player.c_str(), &kickMessage))
-        {
-          user->kick(std::string(kickMessage));
-        }
-        else
-        {
-          user->sendLoginInfo();
-          (static_cast<Hook1<bool, const char*>*>(ServerInstance->plugin()->getHook("PlayerLoginPost")))->doAll(player.c_str());
-        }
-      }
-      else
-      {
-        LOG(INFO, "Packets", "  Failed"  + stringbuffer.substr(stringbuffer.size() - 3));
-        user->kick("Failed to verify username!");
-      }
-    }
-    else
-    {
-      LOG(INFO, "Packets", "  Failed");
-      user->kick("Failed to verify username!");
-    }
-
-    return PACKET_OK;
-  }
-
-
   char* kickMessage = NULL;
   if ((static_cast<Hook2<bool, const char*, char**>*>(ServerInstance->plugin()->getHook("PlayerLoginPre")))->doUntilFalse(player.c_str(), &kickMessage))
   {
@@ -433,47 +486,13 @@ int PacketHandler::login_request(User* user)
   }
   else
   {
-    user->sendLoginInfo();
+    //user->sendLoginInfo();
+    user->buffer << Protocol::encryptionRequest();
     (static_cast<Hook1<bool, const char*>*>(ServerInstance->plugin()->getHook("PlayerLoginPost")))->doAll(player.c_str());
   }
 
-  return PACKET_OK;
-}
-
-int PacketHandler::handshake(User* user)
-{
-  if (!user->buffer.haveData(3))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
-
-  std::string player;
-
-  user->buffer >> player;
-
-  // Check for data
-  if (!user->buffer)
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
-
-  // Remove package from buffer
-  user->buffer.removePacket();
-
-  // Check whether we're to validate against minecraft.net
-  if (ServerInstance->config()->bData("system.user_validation") == true)
-  {
-    // Send the unique hash for this player to prompt the client to go to minecraft.net to validate
-    LOG(INFO, "Packets", "Handshake: Giving player " + player + " their minecraft.net hash of: " + hash(player));
-    user->buffer << (int8_t)PACKET_HANDSHAKE << hash(player);
-  }
-  else
-  {
-    // Send "no validation or password needed" validation
-    LOG(INFO, "Packets", "Handshake: No validation required for player " + player + ".");
-    user->buffer << (int8_t)PACKET_HANDSHAKE << std::string("-");
-  }
-  // TODO: Add support for prompting user for Server password (once client supports it)
+  
+  // TODO: Add support for prompting user for Server password
 
   return PACKET_OK;
 }
@@ -631,36 +650,7 @@ int PacketHandler::player_digging(User* user)
     }
     break;
   }
-  /*
-  case BLOCK_STATUS_DIGGING:
-  {
-    (static_cast<Hook5<bool, const char*, int32_t, int16_t, int32_t, int8_t>*>(ServerInstance->plugin()->getHook("PlayerDigging")))->doAll(user->nick.c_str(), x, y, z, direction);
-    (static_cast<Hook4<bool, const char*, int32_t, int16_t, int32_t>*>(ServerInstance->plugin()->getHook("PlayerDigging")))->doAll(user->nick.c_str(), x, y, z);
-    for (uint32_t i = 0 ; i < ServerInstance->plugin()->getBlockCB().size(); i++)
-    {
-      blockcb = ServerInstance->plugin()->getBlockCB()[i];
-      if (blockcb != NULL && blockcb->affectedBlock(block))
-      {
-        blockcb->onDigging(user, status, x, y, z, user->pos.map, direction);
-      }
-    }
 
-    break;
-  }
-  */
-  /*    case BLOCK_STATUS_STOPPED_DIGGING:
-      {
-        (static_cast<Hook5<bool,const char*,int32_t,int8_t,int32_t,int8_t>*>(ServerInstance->plugin()->getHook("PlayerDiggingStopped")))->doAll(user->nick.c_str(), x, y, z, direction);
-        for(uint32_t i =0 ; i<ServerInstance->plugin()->getBlockCB().size(); i++)
-        {
-          blockcb = ServerInstance->plugin()->getBlockCB()[i];
-          if(blockcb!=NULL && blockcb->affectedBlock(block))
-          {
-            blockcb->onStoppedDigging(user,status, x,y,z,user->pos.map,direction);
-          }
-        }
-        break;
-      }*/
   case BLOCK_STATUS_BLOCK_BROKEN:
   {
     //Player tool usage calculation etc

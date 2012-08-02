@@ -28,12 +28,15 @@
 #ifndef _PROTOCOL_H
 #define _PROTOCOL_H
 
+#include "extern.h"
+#include "config.h"
 #include "constants.h"
 #include "mob.h"
 #include "tools.h"
 #include "utf8.h"
 #include "inventory.h"
 #include "mineserver.h"
+#include "logger.h"
 
 /* This file introduces a basic abstraction over raw protocol packets format.
  * This is needed for varuios protocol updates - we need to change the raw format
@@ -46,6 +49,19 @@
 class Protocol
 {
   public:
+
+    #ifdef PROTOCOL_ENCRYPTION
+    static Packet encryptionRequest()
+    {
+      Packet ret;
+      ret << (int8_t)PACKET_ENCRYPTION_REQUEST << ServerInstance->serverID << (int16_t)ServerInstance->publicKey.size();
+      ret.addToWrite((uint8_t*)ServerInstance->publicKey.c_str(),ServerInstance->publicKey.size());
+      ret << (int16_t)ServerInstance->encryptionBytes.size();
+      ret.addToWrite((uint8_t*)ServerInstance->encryptionBytes.c_str(),ServerInstance->encryptionBytes.size());
+      return ret;
+    }
+    #endif
+
     static Packet animation(int eid, int aid)
     {
       Packet ret;
@@ -164,8 +180,9 @@ class Protocol
     static Packet loginResponse(int eid)
     {
       Packet ret;
-      ret << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)eid << std::string("") /*<< (int64_t)0 */
-          << std::string("DEFAULT") << (int32_t)0 << (int32_t)0 << (int8_t)2 << (int8_t)128 << (int8_t)64;
+      ret << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)eid
+          << std::string("default") << (int8_t)0 << (int8_t)0 
+          << (int8_t)2 << (int8_t)0 << (int8_t)ServerInstance->config()->iData("system.user_limit");
       return ret;
     }
 
@@ -195,7 +212,7 @@ class Protocol
       Packet ret;
       ret << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)eid << nick
           << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32)
-          << (int8_t)yaw << (int8_t)pitch << (int16_t)item;
+          << (int8_t)yaw << (int8_t)pitch << (int16_t)item << (int8_t)127;
       return ret;
     }
 
@@ -218,7 +235,7 @@ class Protocol
     static Packet preChunk(int x, int z, bool create)
     {
       Packet ret;
-      ret << (int8_t)PACKET_PRE_CHUNK << (int32_t)x << (int32_t)z << (int8_t)(create ? 1 : 0);
+      //ret << (int8_t)PACKET_PRE_CHUNK << (int32_t)x << (int32_t)z << (int8_t)(create ? 1 : 0);
       return ret;
     }
 
@@ -229,7 +246,7 @@ class Protocol
       return ret;
     }
 
-    static Packet respawn(int32_t world = 0, int8_t difficulty=1,int8_t creative_mode=0, int16_t world_height=128, std::string level_type="DEFAULT")
+    static Packet respawn(int32_t world = 0, int8_t difficulty=1,int8_t creative_mode=0, int16_t world_height=256, std::string level_type="default")
     {
       Packet ret;
       ret << (int8_t)PACKET_RESPAWN << world << difficulty << creative_mode << world_height << level_type;

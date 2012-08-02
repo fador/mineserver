@@ -59,8 +59,11 @@ extern int setnonblock(int fd);
 
 static const size_t BUFSIZE = 2048;
 static std::tr1::array<uint8_t, BUFSIZE> BUF;
+static std::tr1::array<uint8_t, BUFSIZE> BUFCRYPT;
 static char* const cpBUF = reinterpret_cast<char*>(BUF.data());
 static uint8_t* const upBUF = BUF.data();
+
+static char* const cpBUFCRYPT = reinterpret_cast<char*>(BUFCRYPT.data());
 
 extern "C" void client_callback(int fd, short ev, void* arg)
 {
@@ -70,7 +73,22 @@ extern "C" void client_callback(int fd, short ev, void* arg)
   {
     int read = 1;
 
-    read = recv(fd, cpBUF, BUFSIZE, 0);
+    //Data must be decrypted if we are in crypted mode
+    if(user->crypted)
+    {
+      read = recv(fd, cpBUFCRYPT, BUFSIZE, 0);
+      //ToDo: fix this
+      int p_len = read, f_len = 0;  
+      EVP_DecryptInit_ex(&user->de, NULL, NULL, NULL, NULL);
+      EVP_DecryptUpdate(&user->de, upBUF, &p_len, (const uint8_t *)cpBUFCRYPT, read);
+      EVP_DecryptFinal_ex(&user->de, upBUF+p_len, &f_len);
+      read = p_len + f_len;
+
+    }
+    else
+    {
+      read = recv(fd, cpBUF, BUFSIZE, 0);
+    }
 
     if (read == 0)
     {
@@ -150,6 +168,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
     std::vector<char> buf;
     user->buffer.getWriteData(buf);
 
+    //ToDo: add encryption
     //Try to write the whole buffer
     const int written = send(fd, buf.data(), buf.size(), 0);
 

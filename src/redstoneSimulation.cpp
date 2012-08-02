@@ -84,6 +84,8 @@ bool RedstoneSimulation::update()
         local += vec(0,1,0);
         disableDir = 0;
         break;
+      default:
+        break;
       }
 
       uint8_t block, meta;
@@ -118,14 +120,14 @@ bool RedstoneSimulation::update()
         }
         else if(curBlock == BLOCK_REDSTONE_WIRE || curBlock == BLOCK_REDSTONE_TORCH_ON)
         {
-          simList.push_back(RedstoneSim(block,local,curPower, disableDir));
+          simList.push_back(RedstoneSim(block,local,curPower-1, disableDir));
           listSize++;
         }
 
       }
 
       //We got power from neighbouring blocks
-      if(newPower > curPower)
+      if(newPower > curPower && curBlock == BLOCK_REDSTONE_WIRE)
       {
           simList.push_back(RedstoneSim(curBlock,pos,newPower, i));
           listSize++;
@@ -156,7 +158,7 @@ bool RedstoneSimulation::addSimulation(vec pos)
 {  
   if (!enabled)
   {
-    return true;
+    return false;
   }
 
   uint8_t block;
@@ -188,7 +190,7 @@ bool RedstoneSimulation::addSimulation(vec pos)
     vec itpos = simIt->pos;
     if (itpos.x() == pos.x() && itpos.y() == pos.y() && itpos.z() == pos.z())
     {
-      return true;
+      return false;
     }
   }
 

@@ -72,6 +72,10 @@ enum
   PACKET_SET_SLOT                  = 0x67,
   PACKET_INVENTORY                 = 0x68,
   PACKET_SIGN                      = 0x82,
+  PACKET_TAB_COMPLETE              = 0xcb,
+  PACKET_CLIENT_INFO               = 0xcc,
+  PACKET_CLIENT_STATUS             = 0xcd,
+  PACKET_ENCRYPTION_RESPONSE       = 0xFC,
   PACKET_DISCONNECT                = 0xff,
   //Server to client
   PACKET_LOGIN_RESPONSE            = 0x01,
@@ -107,6 +111,7 @@ enum
   PACKET_PLAYER_LIST_ITEM          = 0xc9,
   //PACKET_COMPLEX_ENTITIES          = 0x3b,
   PACKET_PING                      = 0xFE,
+  PACKET_ENCRYPTION_REQUEST        = 0xFD,
   PACKET_KICK                      = 0xff,
 
 
@@ -316,6 +321,11 @@ public:
   static int respawn(User* user);
   static int change_sign(User* user);
   static int inventory_transaction(User* user);
+  static int tab_complete(User* user);
+  static int encryption_response(User* user);
+
+  static int client_info(User* user);
+  static int client_status(User* user);
 
   static int inventory_change(User* user);
   static int inventory_close(User* user);

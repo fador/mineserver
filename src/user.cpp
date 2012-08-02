@@ -68,6 +68,7 @@ User::User(int sock, uint32_t EID)
   this->permissions     = 0;
   this->fallDistance    = -10;
   this->healthtimeout   = time(NULL) - 1;
+  this->crypted         = false;
 
 
   this->m_currentItemSlot = 0;
@@ -236,13 +237,13 @@ bool User::sendLoginInfo()
 
   logged = true;
   spawnUser((int32_t)pos.x * 32, (int32_t)((pos.y + 2) * 32), (int32_t)pos.z * 32);
-
+  
   for (int i = 1; i < 45; i++)
   {
     inv[i].ready = true;
     inv[i].sendUpdate();
   }
-
+  
   // Teleport player (again)
   teleport(pos.x, pos.y + 2, pos.z);
 
@@ -1041,9 +1042,6 @@ bool User::addQueue(int x, int z)
     }
   }
 
-  // Pre chunk
-  buffer << Protocol::preChunk(x, z, true);
-
   this->mapQueue.push_back(newMap);
 
   return true;
@@ -1113,9 +1111,6 @@ bool User::popMap()
   // If map in queue, push it to client
   while (this->mapRemoveQueue.size())
   {
-    // Pre chunk
-    buffer << Protocol::preChunk(mapRemoveQueue[0].x(), mapRemoveQueue[0].z(), false);
-
     // Delete from known list
     delKnown(mapRemoveQueue[0].x(), mapRemoveQueue[0].z());
 

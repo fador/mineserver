@@ -41,6 +41,7 @@
 #include "vec.h"
 #include "inventory.h"
 #include "packets.h"
+#include "mineserver.h"
 
 struct position
 {
@@ -91,6 +92,23 @@ public:
   bool isOpenInv;
   //More info on the inventory
   OpenInventory openInv;
+  std::string secret;
+  EVP_CIPHER_CTX en, de;
+
+  void initCipher()
+  {
+
+    int nrounds = 5;
+    unsigned char key[16], iv[16];
+    memcpy(&iv,secret.c_str(),16);
+    EVP_BytesToKey(EVP_aes_128_cfb8(), EVP_sha1(), NULL, (const uint8_t *)secret.c_str(), 16, nrounds, key, iv);
+    EVP_CIPHER_CTX_init(&en);
+    EVP_EncryptInit_ex(&en, EVP_aes_128_cfb8(), NULL, key, iv);
+    EVP_CIPHER_CTX_init(&de);
+    EVP_DecryptInit_ex(&de, EVP_aes_128_cfb8(), NULL, key, iv);
+
+  }
+  bool crypted;
 
   bool serverAdmin;
   int permissions; // bitmask for permissions. See permissions.h

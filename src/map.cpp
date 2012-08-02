@@ -1757,7 +1757,7 @@ void Map::sendToUser(User* user, int x, int z, bool login)
     return;
   }
 
-  uint8_t* mapdata = new uint8_t[98304*2];
+  uint8_t* mapdata = new uint8_t[98304*2+256];
   int32_t mapposx    = x;
   int32_t mapposz    = z;
 
@@ -1781,14 +1781,15 @@ void Map::sendToUser(User* user, int x, int z, bool login)
   memcpy(&mapdata[(32768 + 16384)*2], chunk->blocklight, 16384*2);
   memcpy(&mapdata[(32768 + 16384 + 16384)*2], chunk->skylight, 16384*2);
   memcpy(&mapdata[(32768 + 16384 + 16384 + 16384)*2], chunk->addblocks, 16384*2);
- 
+  //Biome data
+  memset(&mapdata[(32768 + 16384 + 16384 + 16384 + 16384)*2], 0, 256);
 
 
   uLongf written = 98304*2;
   uint8_t* buffer = new uint8_t[written];
 
   // Compress data with zlib deflate
-  compress(buffer, &written, &mapdata[0], 98304*2);
+  compress(buffer, &written, &mapdata[0], 98304*2+256);
 
   (*p) << (int32_t)written << (int32_t)0 /* ??? */;
   (*p).addToWrite(buffer, written);
