@@ -150,10 +150,8 @@ User::~User()
     this->saveData();
 
     // Send signal to everyone that the entity is destroyed
-    uint8_t entityData[5];
-    entityData[0] = 0x1d; // Destroy entity;
-    putSint32(&entityData[1], this->UID);
-    this->sendOthers(entityData, 5);
+    Packet pkt = Protocol::destroyEntity(this->UID);
+    this->sendOthers(pkt);
 
     // Loop every loaded chunk to make sure no user pointers are left!
 

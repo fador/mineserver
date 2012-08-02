@@ -902,7 +902,9 @@ int PacketHandler::player_block_placement(User* user)
       uint8_t *buf = new uint8_t[slotLen];
       for(int i = 0; i < slotLen; i++)
       {
-        user->buffer >> (int8_t)buf[i];
+        int8_t data;
+        user->buffer >> data;
+        buf[i] = data;
       }
       //Do something with the slot data
       delete[] buf;
