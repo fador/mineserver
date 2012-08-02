@@ -75,6 +75,7 @@ enum
   PACKET_TAB_COMPLETE              = 0xcb,
   PACKET_CLIENT_INFO               = 0xcc,
   PACKET_CLIENT_STATUS             = 0xcd,
+  PACKET_PLUGIN_MESSAGE            = 0xfa,
   PACKET_ENCRYPTION_RESPONSE       = 0xFC,
   PACKET_DISCONNECT                = 0xff,
   //Server to client
@@ -323,6 +324,7 @@ public:
   static int inventory_transaction(User* user);
   static int tab_complete(User* user);
   static int encryption_response(User* user);
+  static int plugin_message(User* user);
 
   static int client_info(User* user);
   static int client_status(User* user);
