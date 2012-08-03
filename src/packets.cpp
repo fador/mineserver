@@ -538,9 +538,15 @@ int PacketHandler::handshake(User* user)
   }
   else
   {
-    //ToDo: add option for protocol encryption
-    //user->sendLoginInfo();
-    user->buffer << Protocol::encryptionRequest();
+    //We can skip the protocol encryption
+    if(!ServerInstance->config()->bData("system.protocol_encryption"))
+    {
+      user->sendLoginInfo();
+    }
+    else
+    {
+      user->buffer << Protocol::encryptionRequest();
+    }
     (static_cast<Hook1<bool, const char*>*>(ServerInstance->plugin()->getHook("PlayerLoginPost")))->doAll(player.c_str());
   }
 

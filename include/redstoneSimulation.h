@@ -56,13 +56,15 @@ private:
     vec pos;    
     uint8_t power;
     uint8_t direction;
+    Power charge;
     RedstoneSim() {}
-    RedstoneSim(uint8_t id, vec pos, uint8_t power, uint8_t direction = -1)
+    RedstoneSim(uint8_t id, vec pos, uint8_t power, uint8_t direction = -1, Power charge = POWER_NONE)
     {
       this->id    = id;
       this->pos   = pos;
       this->power = power;
       this->direction = direction;
+      this->charge = charge;
     }
   };
 

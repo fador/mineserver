@@ -136,17 +136,17 @@ bool isValidItem(int id)
     return false;
   }
 
-  if (id > 96 && id < 256)  // these are undefined blocks and items
+  if (id > 136 && id < 256)  // these are undefined blocks and items
   {
     return false;
   }
 
-  if (id == 2256 || id == 2257)  // records are special cased
+  if (id >= 2256 && id <= 2266)  // records are special cased
   {
     return true;
   }
 
-  if (id > 383)  // high items are invalid
+  if (id > 388)  // high items are invalid
   {
     return false;
   }
