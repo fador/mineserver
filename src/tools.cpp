@@ -375,7 +375,7 @@ uint64_t microTime()
 #ifndef WIN32
   struct timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);
-  return now.tv_sec*1000000000LL + now.tv_nsec;
+  return (now.tv_sec*(uint64_t)1000000 + now.tv_nsec/(uint64_t)1000);
 #else
   FILETIME ft;
   GetSystemTimeAsFileTime(&ft);

@@ -71,7 +71,7 @@ bool Physics::updateFall()
     fallSimList[simIt].ticks++;
 
     const double gravity = 9.81;
-    double offset = 0.5*fallSimList[simIt].ticks*gravity*timeInSec*timeInSec;
+    double offset = 0.5*gravity*timeInSec*timeInSec;
     int blockOffset = fallSimList[simIt].pos.y() - fallSimList[simIt].lastY;
     if(blockOffset != (int)offset)
     {
