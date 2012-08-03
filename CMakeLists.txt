@@ -83,7 +83,6 @@ include(CheckIncludeFile)
 include(CheckTypeSize)
 include(CheckLibraryExists)
 include(CheckCXXCompilerFlag)
-include(FindOpenSSL)
 
 # functions/includes needed during compile
 check_function_exists(backtrace HAVE_BACKTRACE)
@@ -112,32 +111,23 @@ ENDIF(MSVC_IDE)
 #
 # dependencies
 #
-SET(mineserver_depends
-  ZLIB
-  #Lua51
-  Event
-  Noise
-  OPENSSL
-)
 
+SET(TARGET ${PROJECT_NAME})
+SET(mineserver_depends)
+
+# Note that on Ubuntu systems, CMake's FindOpenSSL.cmake file does not define
+# all the proper defines, therefore our old and generic library finder does not
+# work like it should :< - Justasic
+Find_package(OpenSSL REQUIRED)
+Find_package(Event REQUIRED)
+Find_package(Noise REQUIRED)
+Find_package(ZLIB REQUIRED)
+
+include_directories(${ZLIB_INCLUDE_DIR} ${NOISE_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR} ${EVENT_INCLUDE_DIR})
+LIST(APPEND mineserver_depends "${ZLIB_LIBRARY};${NOISE_LIBRARY};${OPENSSL_LIBRARIES};${EVENT_LIBRARY}")
 
 # preprocess configuration file
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/configure.h.in ${PROJECT_BINARY_DIR}/include/configure.h)
-
-#
-# dependency check
-#
-SET(TARGET ${PROJECT_NAME})
-MESSAGE(STATUS "Dependency check: ${TARGET}")
-SET(dependency_error False)
-FOREACH(lib ${${TARGET}_depends})
-  FIND_PACKAGE(${lib})
-  STRING(TOUPPER ${lib} LIB)
-  IF(NOT ${LIB}_FOUND)
-    SET(errors "${errors}\t\t- ${lib}\n")
-    SET(dependency_error True)
-  ENDIF()
-ENDFOREACH()
 
 
 #
