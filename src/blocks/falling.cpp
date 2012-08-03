@@ -140,6 +140,7 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int16_t y, int32_t z, int
     case BLOCK_STATIONARY_WATER:
     case BLOCK_LAVA:
     case BLOCK_STATIONARY_LAVA:
+    case BLOCK_SNOW:
       break;
     default:
        return;
@@ -163,10 +164,8 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int16_t y, int32_t z, int
        return;
 
     uint32_t EID = Mineserver::generateEID();
-    uint8_t object = 0;
-    if(fallblock == BLOCK_SAND) object = 70;
-    if(fallblock == BLOCK_GRAVEL) object = 71;
-    Packet pkt = Protocol::addObject(EID,object, x, y+1, z);
+    uint8_t object = 70; //type == Falling object
+    Packet pkt = Protocol::addObject(EID,object, x, y+1, z, fallblock);
     it->second->sendPacket(pkt);
 
     //Add to physics loop

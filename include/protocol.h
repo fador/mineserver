@@ -215,12 +215,15 @@ class Protocol
       return ret;
     }
 
-    static Packet addObject(int eid, int8_t object, double x, double y, double z)
+    static Packet addObject(int eid, int8_t object, double x, double y, double z, int objectData)
     {
       Packet  pkt;  
       pkt << (int8_t)PACKET_ENTITY << (int32_t)eid
-          << (int8_t)PACKET_ADD_OBJECT << (int32_t)eid << (int8_t)object << (int32_t)(x * 32 + 16) << (int32_t)(y * 32 + 16) << (int32_t)(z * 32 + 16) << (int32_t)0;
-
+          << (int8_t)PACKET_ADD_OBJECT << (int32_t)eid << (int8_t)object << (int32_t)(x * 32 + 16) << (int32_t)(y * 32 + 16) << (int32_t)(z * 32 + 16) << (int32_t)objectData;
+      if(objectData)
+      {
+        pkt << (int16_t)0 << (int16_t)0 << (int16_t)0;
+      }
       return pkt;
     }
 

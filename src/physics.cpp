@@ -69,8 +69,9 @@ bool Physics::updateFall()
     bool hitGround = false;    
     double timeInSec = (microTime()-fallSimList[simIt].startTime)/1000000.0;
     fallSimList[simIt].ticks++;
-    //Falling 18m/s^2 ToDo: verify!
-    double offset = 0.5*fallSimList[simIt].ticks*18*timeInSec*timeInSec;
+
+    const double gravity = 9.81;
+    double offset = 0.5*fallSimList[simIt].ticks*gravity*timeInSec*timeInSec;
     int blockOffset = fallSimList[simIt].pos.y() - fallSimList[simIt].lastY;
     if(blockOffset != (int)offset)
     {
@@ -86,6 +87,7 @@ bool Physics::updateFall()
         case BLOCK_STATIONARY_WATER:
         case BLOCK_LAVA:
         case BLOCK_STATIONARY_LAVA:
+        case BLOCK_SNOW:
           break;
           //If we hit ground
         default:

@@ -187,34 +187,39 @@ int PacketHandler::encryption_response(User* user)
     verify.push_back(byte);
   }  
   user->buffer.removePacket();
-
+  
+  //Those should be around 128 bytes
   if(verifyLen > 1023 || secretLen > 1023)
   {
     user->kick("Invalid verify/secret size");
     return PACKET_OK;
   }
 
-  //Decrypt the verification bytes
+  
   uint8_t buffer[1024];
   memset(buffer, 0, 1024);
+  //Decrypt the verification bytes
   int ret = RSA_private_decrypt(verifyLen,(const uint8_t *)verify.c_str(),buffer,ServerInstance->rsa,RSA_PKCS1_PADDING);
+  //Check they match with the ones sent
   if(ret != 4 || std::string((char *)buffer) != ServerInstance->encryptionBytes)
   {
     user->kick("Decryption failed");
     return PACKET_OK;
   }
 
-  //Response
-  user->buffer << (int8_t)PACKET_ENCRYPTION_RESPONSE << (int16_t)0 << (int16_t) 0;
-
   //Decrypt secret sent by the client and store
   memset(buffer, 0, 1024);
   ret = RSA_private_decrypt(secretLen,(const uint8_t *)secret.c_str(),buffer,ServerInstance->rsa,RSA_PKCS1_PADDING);
   user->secret = std::string((char *)buffer, ret);
-  user->crypted = true;
+  //We're going crypted!  
   user->initCipher();
-  //ToDo: validate user
+  user->crypted = true;
+  
+  //Response
+  user->buffer << (int8_t)PACKET_ENCRYPTION_RESPONSE << (int16_t)0 << (int16_t) 0;
   user->uncryptedLeft = 5; //5 first bytes are uncrypted
+
+  //ToDo: validate user
 
   return PACKET_OK;
 }
