@@ -22,6 +22,11 @@ We are trying to minimize memory and CPU usage compared to original Java server.
 *Important:* The language is C++98 with STL/TR1 library support, so you will need a reasonably modern
 C++ compiler. MS Visual C++ 10 and GCC 4.4 should be sufficient. The build system requires [cmake](http://www.cmake.org/).
 
+
+### Supported Minecraft version
+
+ * Working with 1.3.1 client (protocol 39)
+
 ### Features
 
  * Plugins (chatcommands, filelog, nether, passivemobs, etc..)
@@ -33,6 +38,7 @@ C++ compiler. MS Visual C++ 10 and GCC 4.4 should be sufficient. The build syste
  * Physics for water (currently revising this)
  * Flatland and terrain map generation (Also biomegen!)
  * Working chests, furnaces & signs
+ * Protocol Encryption (NEW)
 
 ### Configuration Notes
 
@@ -64,10 +70,11 @@ Mineserver requires the following libraries:
  * [zlib 1.2.5](http://www.zlib.org)
  * [libevent 1.4.14b](http://monkey.org/~provos/libevent/)
  * [libnoise 1.0](http://libnoise.sourceforge.net/)
+ * [openssl/libssl](http://www.openssl.org/)
 
  * Installing on Debian and Ubuntu: (For Ubuntu libevent1 -> libevent-1.4-2)
 
-    `sudo apt-get install libevent1 libevent-dev zlib1g zlib1g-dev libnoise-dev`
+    `sudo apt-get install libssl libssl-dev libevent1 libevent-dev zlib1g zlib1g-dev libnoise-dev`
 
  * Installing on CentOS and RHEL
 
@@ -114,6 +121,8 @@ Mineserver requires the following libraries:
  * Add libevent library to project (libevent.lib)
  * Build
  * Run mineserver.exe
+ 
+ * [Build Pack](http://mineserver.be/downloads/mineserver-VS2010_build_pack.zip) also available for easy compiling
 
  An example using commandline compiler available at http://www.microsoft.com/express/Windows/ Please change the ZLIB_INC_DIR, LIBEVENT_INC_DIR, ZLIB_LIB_DIR and LIBEVENT_LIB_DIR to those you keep the includes/libs.
 

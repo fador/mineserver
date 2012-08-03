@@ -83,6 +83,7 @@ include(CheckIncludeFile)
 include(CheckTypeSize)
 include(CheckLibraryExists)
 include(CheckCXXCompilerFlag)
+include(FindOpenSSL)
 
 # functions/includes needed during compile
 check_function_exists(backtrace HAVE_BACKTRACE)
@@ -116,6 +117,7 @@ SET(mineserver_depends
   #Lua51
   Event
   Noise
+  OPENSSL
 )
 
 
