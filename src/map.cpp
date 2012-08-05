@@ -959,7 +959,7 @@ bool Map::setBlock(int x, int y, int z, char type, char meta)
   return true;
 }
 
-bool Map::sendBlockChange(int x, int y, int z, char type, char meta)
+bool Map::sendBlockChange(int x, int y, int z, int16_t type, char meta)
 {
   const ChunkMap::const_iterator it = chunks.find(Coords(blockToChunk(x), blockToChunk(z)));
 

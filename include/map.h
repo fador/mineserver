@@ -149,8 +149,8 @@ public:
     return setBlock(pos.x(), pos.y(), pos.z(), type, meta);
   }
 
-  bool sendBlockChange(int x, int y, int z, char type, char meta);
-  bool sendBlockChange(vec pos, char type, char meta)
+  bool sendBlockChange(int x, int y, int z, int16_t type, char meta);
+  bool sendBlockChange(vec pos, int16_t type, char meta)
   {
     return sendBlockChange(pos.x(), pos.y(), pos.z(), type, meta);
   }
