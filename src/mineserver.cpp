@@ -25,10 +25,12 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifdef DEBUG & _MSC_VER  
+#ifdef DEBUG
+  #ifdef _MSC_VER
   #define _CRTDBG_MAP_ALLOC
   #include <stdlib.h>
-  #include <crtdbg.h>  
+  #include <crtdbg.h>
+  #endif
 #endif
 
 #ifdef WIN32
@@ -127,8 +129,10 @@ int printHelp(int code)
 int main(int argc, char* argv[])
 {
   bool ret = false;
-  #ifdef DEBUG & _MSC_VER  
-  _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );  
+  #ifdef DEBUG
+    #ifdef _MSC_VER
+      _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+    #endif
   #endif
   // Try and start a new server instance
   try
@@ -170,7 +174,8 @@ Mineserver::Mineserver(int args, char **argarray)
      m_furnaceManager(NULL),
      m_packetHandler (NULL),
      m_inventory     (NULL),
-     m_mobs          (NULL)
+     m_mobs          (NULL),
+     m_validation_mutex(PTHREAD_MUTEX_INITIALIZER)
 {
   ServerInstance = this;
   InitSignals();
@@ -283,7 +288,6 @@ Mineserver::Mineserver(int args, char **argarray)
 
   LOG2(INFO, "Welcome to Mineserver v" + VERSION);
   LOG2(INFO, "Using zlib "+std::string(ZLIB_VERSION)+" libevent "+std::string(event_get_version()));
-  #ifdef PROTOCOL_ENCRYPTION
 
   LOG2(INFO, "Generating RSA key pair for protocol encryption");
   //Protocol encryption
@@ -327,7 +331,11 @@ Mineserver::Mineserver(int args, char **argarray)
   }
 
   LOG2(INFO, "ServerID: " + serverID);
-  #endif
+  
+  if(!m_config->bData("system.user_validation"))
+  {
+    serverID = "-";
+  }
 
   MapGen* mapgen = new MapGen();
   MapGen* nethergen = new NetherGen();
@@ -754,6 +762,41 @@ bool Mineserver::run()
 
       // Check for Furnace activity
       furnaceManager()->update();
+
+      // Check for user validation results
+      pthread_mutex_lock(&ServerInstance->m_validation_mutex);
+      for(int i = 0; i < ServerInstance->validatedUsers.size(); i++)
+      {
+        //To make sure user hasn't timed out or anything while validating
+        User *tempuser = NULL;
+        for (std::set<User*>::const_iterator it = users().begin(); it != users().end(); ++it)
+        {
+          if((*it)->UID == ServerInstance->validatedUsers[i].UID)
+          {
+            tempuser = (*it);
+            break;
+          }
+        }
+
+        if(tempuser != NULL)
+        {
+          if(ServerInstance->validatedUsers[i].valid)
+          {
+            LOG(INFO, "Packets", tempuser->nick + " is VALID ");
+            tempuser->crypted = true;
+            tempuser->buffer << (int8_t)PACKET_ENCRYPTION_RESPONSE << (int16_t)0 << (int16_t) 0;
+            tempuser->uncryptedLeft = 5;
+          }
+          else
+          {
+            tempuser->kick("User not Premium");
+          }
+          //Flush
+          client_callback(tempuser->fd, EV_WRITE, tempuser);
+        }
+      }
+      ServerInstance->validatedUsers.clear();
+      pthread_mutex_unlock(&ServerInstance->m_validation_mutex);
 
       // Run 1s timer hook
       static_cast<Hook0<bool>*>(plugin()->getHook("Timer1000"))->doAll();

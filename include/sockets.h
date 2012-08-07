@@ -32,3 +32,4 @@
 
 extern "C" void accept_callback(int fd, short ev, void* arg);
 extern "C" void client_callback(int fd, short ev, void* arg);
+extern "C" void *user_validation_thread(void *arg);

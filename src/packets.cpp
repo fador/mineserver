@@ -61,6 +61,7 @@
 #include "mob.h"
 #include "utf8.h"
 #include "protocol.h"
+#include "sockets.h"
 
 #ifdef PROTOCOL_ENCRYPTION
 #include <openssl/rsa.h>
@@ -213,13 +214,24 @@ int PacketHandler::encryption_response(User* user)
   user->secret = std::string((char *)buffer, ret);
   //We're going crypted!  
   user->initCipher();
-  user->crypted = true;
   
-  //Response
-  user->buffer << (int8_t)PACKET_ENCRYPTION_RESPONSE << (int16_t)0 << (int16_t) 0;
-  user->uncryptedLeft = 5; //5 first bytes are uncrypted
-
-  //ToDo: validate user
+  
+  if(!ServerInstance->config()->bData("system.user_validation"))
+  {
+    //Response
+    user->crypted = true;
+    user->buffer << (int8_t)PACKET_ENCRYPTION_RESPONSE << (int16_t)0 << (int16_t) 0;
+    user->uncryptedLeft = 5; //5 first bytes are uncrypted
+  }
+  else
+  {
+    pthread_t validation_thread;
+    Mineserver::userValidation* valid = new Mineserver::userValidation;
+    valid->user = user;
+    valid->UID = user->UID;
+    pthread_create(&validation_thread,NULL,user_validation_thread,(void*)valid);
+  }
+  
 
   return PACKET_OK;
 }

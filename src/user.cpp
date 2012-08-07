@@ -1493,3 +1493,52 @@ void User::setCurrentItemSlot(int16_t item_slot)
 {
   m_currentItemSlot = item_slot;
 }
+
+std::string User::generateDigest()
+{
+  SHA_CTX context;
+  unsigned char md[20];
+  std::string out;
+  int i;
+  const char hex[] = "0123456789abcdef";
+
+  SHA1_Init(&context);
+  SHA1_Update(&context, (unsigned char*)ServerInstance->serverID.data(), ServerInstance->serverID.size());
+  SHA1_Update(&context, (unsigned char*)secret.data(), secret.size());
+  SHA1_Update(&context, (unsigned char*)ServerInstance->publicKey.data(), ServerInstance->publicKey.size());
+  SHA1_Final(md, &context);
+
+  if(md[0] & 0x80)
+  {
+    unsigned char carry = 1;
+    out = '-';
+    for (i = 19; i >= 0; i--)
+    {
+      unsigned short twocomp = (unsigned char)~md[i];
+      twocomp+=carry;
+      if(twocomp & 0xff00)
+      {
+        twocomp = twocomp&0xff;
+      }
+      else
+      {
+       carry = 0;
+      }
+      md[i] = twocomp;
+    }
+  }
+
+  for (i = 0; i < 20; i++)
+  {
+   if(i || md[i]>>4)
+   {
+     out += hex[(md[i]>>4)];
+   }
+   if(i || md[i]>>4 || md[i]&0xf)
+   {
+    out += hex[(md[i]&0xf)];
+   }
+  } 
+
+  return out;
+}

@@ -49,6 +49,7 @@ typedef int socklen_t;
 #include "nbt.h"
 #include "mineserver.h"
 #include "packets.h"
+#include "config.h"
 
 
 extern int setnonblock(int fd);
@@ -259,4 +260,95 @@ extern "C" void accept_callback(int fd, short ev, void* arg)
 
   event_set(client->GetEvent(), client_fd, EV_WRITE | EV_READ, client_callback, client);
   event_add(client->GetEvent(), NULL);
+}
+
+
+int socket_connect(char* host, int port)
+{
+  struct hostent* hp;
+  struct sockaddr_in addr;
+  int on = 1, sock;
+
+  if ((hp = gethostbyname(host)) == NULL)
+  {
+    return 0;
+  }
+
+  memmove(&addr.sin_addr, hp->h_addr, hp->h_length);
+  addr.sin_port = htons(port);
+  addr.sin_family = AF_INET;
+  sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+  struct timeval tv;
+  tv.tv_sec = 5;
+  setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(struct timeval));
+  setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tv, sizeof(struct timeval));
+
+  setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const char*)&on, sizeof(int));
+
+  if (sock == -1)
+  {
+    return 0;
+  }
+
+  if (connect(sock, (struct sockaddr*)&addr, sizeof(struct sockaddr_in)) == -1)
+  {
+    return 0;
+  }
+
+  return sock;
+}
+
+void *user_validation_thread(void *arg)
+{
+  Mineserver::userValidation *user = reinterpret_cast<Mineserver::userValidation *>(arg);
+  user->valid=false;
+  std::string url = "/game/checkserver.jsp?user=" + user->user->nick + "&serverId=" + user->user->generateDigest();
+  LOG(INFO, "Packets", "Validating " + user->user->nick + " against minecraft.net: ");
+
+  std::string http_request = "GET " + url + " HTTP/1.1\r\n"
+                              + "Host: session.minecraft.net\r\n"
+                              + "Connection: close\r\n\r\n";
+
+  int fd = socket_connect((char*)"session.minecraft.net", 80);
+  if (fd)
+  {
+#ifdef WIN32
+      send(fd, http_request.c_str(), http_request.length(), NULL);
+#else
+      write(fd, http_request.c_str(), http_request.length());
+#endif
+
+#define BUFFER_SIZE 1024
+      char* buffer = new char[BUFFER_SIZE];
+      std::string stringbuffer;
+
+#ifdef WIN32
+      while (int received = recv(fd, buffer, BUFFER_SIZE - 1, NULL) != 0)
+      {
+#else
+      while (read(fd, buffer, BUFFER_SIZE - 1) != 0)
+      {
+#endif
+        stringbuffer += std::string(buffer);
+      }
+      delete[] buffer;
+#ifdef WIN32
+      closesocket(fd);
+#else
+      close(fd);
+#endif
+
+    if ((stringbuffer.size() >= 3 && stringbuffer.find("\r\n\r\nYES", 0) != std::string::npos))
+    {      
+      user->valid = true;
+    }
+  }
+  pthread_mutex_lock(&ServerInstance->m_validation_mutex);
+  ServerInstance->validatedUsers.push_back(*user);
+  pthread_mutex_unlock(&ServerInstance->m_validation_mutex);
+  user->user = NULL;
+  delete user;
+  pthread_exit(NULL);
+  return NULL;
 }

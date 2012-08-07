@@ -94,9 +94,9 @@ public:
   OpenInventory openInv;
   std::string secret;
   EVP_CIPHER_CTX en, de;
-
+  std::string generateDigest();
   void initCipher()
-  {   
+  {
     unsigned char key[16], iv[16];
     memcpy(&iv,secret.c_str(),16);
     memcpy(&key,secret.c_str(),16);    

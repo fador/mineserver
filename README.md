@@ -38,6 +38,7 @@ C++ compiler. MS Visual C++ 10 and GCC 4.4 should be sufficient. The build syste
  * Physics for water (currently revising this)
  * Flatland and terrain map generation (Also biomegen!)
  * Working chests, furnaces & signs
+ * User validation from minecraft.net
  * Protocol Encryption (NEW)
 
 ### Configuration Notes
@@ -71,6 +72,7 @@ Mineserver requires the following libraries:
  * [libevent 1.4.14b](http://monkey.org/~provos/libevent/)
  * [libnoise 1.0](http://libnoise.sourceforge.net/)
  * [openssl/libssl](http://www.openssl.org/)
+ * [pthread](http://en.wikipedia.org/wiki/POSIX_Threads)
 
  * Installing on Debian and Ubuntu: (For Ubuntu libevent1 -> libevent-1.4-2)
 
