@@ -88,7 +88,7 @@ void Tree::generateBranches(TrunkPtr wrap)
   uint8_t y = wrap->_y;
   int32_t z = wrap->_z;
 
-  uint32_t schanse = BRANCHING_CHANCE;
+  //uint32_t schanse = BRANCHING_CHANCE;
 
   if (uniform01() > 1.0 - (1.0 / BRANCHING_CHANCE))
   {

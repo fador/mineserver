@@ -134,10 +134,10 @@ void NetherGen::generateChunk(int x, int z, int map)
   std::vector<int32_t> *heightmap = (*val)["HeightMap"]->GetIntArray();
 
   sChunk* chunk = new sChunk();
-  chunk->blocks = &((*t_blocks)[0]);
-  chunk->data = &((*t_data)[0]);
-  chunk->blocklight = &((*t_blocklight)[0]);
-  chunk->skylight = &((*t_skylight)[0]);
+  //chunk->blocks = &((*t_blocks)[0]);
+  //chunk->data = &((*t_data)[0]);
+  //chunk->blocklight = &((*t_blocklight)[0]);
+  //chunk->skylight = &((*t_skylight)[0]);
   chunk->heightmap = &((*heightmap)[0]);
   chunk->nbt = main;
   chunk->x = x;

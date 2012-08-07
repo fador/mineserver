@@ -25,29 +25,33 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef _RANDOM_H
-#define _RANDOM_H
+#ifndef MY_RANDOM_H
+#define MY_RANDOM_H
+
+/// <Eximius> @MY_RANDOM_H : There seemed to be a conflict with another define of unknown origin
+///          (don't use names starting with underscores... compilers are stl libraries like that too)
 
 
 #include <stdint.h>
 
-#include "tr1.h"
-#include TR1INCLUDE(random)
-
+#include <random>
 
 // This is our core PRNG engine. The Mersenne Twister is both fast and good.
 
-typedef std::tr1::mt19937 MyRNG;
+typedef std::mt19937 MyRNG;
+/**
 #if (defined(__GNUC__))
-/* GCC TR1 implementation has a bug, which doesn't produce a correct
+ * GCC TR1 implementation has a bug, which doesn't produce a correct
  * distribution on 64bit-machines when using mt19937 and uniform_int for 64bit
  * integers together. Because GCC TR1 implementation is frozen, this bug won't
- * be fixed and we need to limit uniform_int to 32bit integer */
-typedef std::tr1::uniform_int<uint32_t> MyUniform;
+ * be fixed and we need to limit uniform_int to 32bit integer
+typedef std::uniform_int<uint32_t> MyUniform;
 #else
-typedef std::tr1::uniform_int<MyRNG::result_type> MyUniform;
+typedef std::uniform_int<MyRNG::result_type> MyUniform;
 #endif
+*/ /// not sure! but my right brain says to wing it
 
+typedef std::uniform_int_distribution<MyRNG::result_type> MyUniform;
 
 // Ideally we would have "typedef MyRNG::result_type seed_type", but mt19937 is broken.
 // Set this to whatever MyRNG::seed(seed_type) needs to be.
@@ -83,7 +87,7 @@ inline MyRNG::result_type uniformUINT(MyUniform::result_type min, MyUniform::res
 
 inline uint8_t uniformUINT8(uint8_t min, uint8_t max)
 {
-  std::tr1::uniform_int<uint8_t> uni(min, max);
+  std::uniform_int_distribution<uint8_t> uni(min, max);
   return uni(prng);
 }
 

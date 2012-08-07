@@ -25,11 +25,9 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifdef WIN32
-#include <cstdlib>
-#define NOMINMAX
+#ifdef __WIN32__
 #include <winsock2.h>
-typedef int socklen_t;
+#include <windows.h>
 #endif
 
 #include <cerrno>
@@ -58,8 +56,8 @@ extern int setnonblock(int fd);
 #endif
 
 static const size_t BUFSIZE = 2048;
-static std::tr1::array<uint8_t, BUFSIZE> BUF;
-static std::tr1::array<uint8_t, BUFSIZE> BUFCRYPT;
+static std::array<uint8_t, BUFSIZE> BUF;
+static std::array<uint8_t, BUFSIZE> BUFCRYPT;
 static char* const cpBUF = reinterpret_cast<char*>(BUF.data());
 static uint8_t* const upBUF = BUF.data();
 
@@ -243,8 +241,9 @@ extern "C" void client_callback(int fd, short ev, void* arg)
 
 extern "C" void accept_callback(int fd, short ev, void* arg)
 {
+
   sockaddr_in client_addr;
-  socklen_t client_len = sizeof(client_addr);
+  int32_t client_len = sizeof(client_addr);
 
   const int client_fd = accept(fd, reinterpret_cast<sockaddr*>(&client_addr), &client_len);
 

@@ -47,7 +47,7 @@ public:
   int x, y, z, map, count;
 };
 
-typedef std::tr1::shared_ptr<PlantBlock> PlantBlockPtr;
+typedef std::shared_ptr<PlantBlock> PlantBlockPtr;
 
 struct PlantBlockFinder
 {

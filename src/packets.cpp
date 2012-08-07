@@ -26,8 +26,8 @@
 */
 
 #include <sys/types.h>
-#ifdef WIN32
-#define NOMINMAX
+/// 'WIN32` undefined here
+#ifdef __WIN32__
 #include <winsock2.h>
 #else
 #include <netdb.h>       // for gethostbyname()
@@ -890,8 +890,8 @@ int PacketHandler::player_block_placement(User* user)
   /* neighbour blocks */
   uint8_t block = 0;
   uint8_t meta  = 0;
-  int8_t count  = 0;
-  int16_t health = 0;
+  //int8_t count  = 0;
+  //int16_t health = 0;
   BlockBasicPtr blockcb;
   BlockDefault blockD;
   int16_t slotLen;

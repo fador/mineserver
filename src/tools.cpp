@@ -25,6 +25,8 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "tools.h"
+
 #if defined(linux)
 #include <unistd.h>
 #include <libgen.h>
@@ -33,8 +35,7 @@
 #include <climits>
 #elif defined(WIN32)
 #include <direct.h>
-#define _WINSOCKAPI_ //Stops windows.h from including winsock.h
-                     //Fixes errors I was having
+
 #include <ShlObj.h>
 #endif
 
@@ -50,7 +51,6 @@
 #include <cmath>
 #include <cctype>
 
-#include "tools.h"
 #include "logger.h"
 #include "mineserver.h"
 #include "config.h"
@@ -278,7 +278,7 @@ std::string getHomeDir()
 #elif defined(WIN32)
 
 char szPath[MAX_PATH];
-if(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, szPath) == 0)
+if(SHGetFolderPathA(NULL, CSIDL_APPDATA, NULL, 0, szPath) == 0)
 {
   std::string temp = szPath;
   temp.append("\\Mineserver");
@@ -296,7 +296,8 @@ else
 #endif
 
 }
-
+#include <stdlib.h>
+#include <cassert>
 std::string pathOfExecutable()
 {
   const size_t dest_len = 4096;
@@ -313,14 +314,18 @@ std::string pathOfExecutable()
   return std::string(path);
 
 #elif defined(WIN32)
-
-  if (0 == GetModuleFileName(NULL, path, dest_len))
+/*
+  if (0 == GetModuleFileNameA(NULL, path, dest_len))
   {
     return "";
   }
 
   return pathOfFile(path).first;
+*/
+  char buffer[512];
+  assert(getcwd(buffer, sizeof(buffer)));
 
+  return buffer;
 #else
 
   return "";
@@ -351,7 +356,7 @@ std::pair<std::string, std::string> pathOfFile(const std::string& filename)
   char path[dest_len], *pPart;
   std::memset(path, 0, dest_len);
 
-  GetFullPathName(filename.c_str(), dest_len, path, &pPart);
+  GetFullPathNameA(filename.c_str(), dest_len, path, &pPart);
 
   const size_t diff = pPart - path;
 

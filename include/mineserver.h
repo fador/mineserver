@@ -42,7 +42,6 @@
 
 #ifdef WIN32
 // This is needed for event to work on Windows.
-#define NOMINMAX
 #include <winsock2.h>
 #else
 //Do not remove!! Required on Debian
@@ -154,12 +153,12 @@ public:
     m_plugin = plugin;
   }
   
-  inline std::tr1::shared_ptr<Screen> screen() const
+  inline std::shared_ptr<Screen> screen() const
   {
     return m_screen;
   }
   
-  inline void setScreen(std::tr1::shared_ptr<Screen> screen)
+  inline void setScreen(std::shared_ptr<Screen> screen)
   {
     m_screen = screen;
   }
@@ -175,13 +174,13 @@ public:
   }
 
   // Get the configuration pointer
-  inline std::tr1::shared_ptr<Config> config() const
+  inline std::shared_ptr<Config> config() const
   {
     return m_config;
   }
 
   // Set a pointer to the configuration file
-  inline void setConfig(std::tr1::shared_ptr<Config> config)
+  inline void setConfig(std::shared_ptr<Config> config)
   {
     m_config = config;
   }
@@ -211,13 +210,13 @@ public:
     return m_mapGen[n];
   }
   
-  inline std::tr1::shared_ptr<Logger> logger() const
+  inline std::shared_ptr<Logger> logger() const
   {
     return m_logger;
   }
 
   // Set the logger to use
-  inline void setLogger(std::tr1::shared_ptr<Logger> logger)
+  inline void setLogger(std::shared_ptr<Logger> logger)
   {
     m_logger = logger;
   }
@@ -249,9 +248,9 @@ private:
   std::vector<MapGen*>             m_mapGen;
 
   // core modules
-  std::tr1::shared_ptr<Config> m_config;
-  std::tr1::shared_ptr<Screen> m_screen;
-  std::tr1::shared_ptr<Logger> m_logger;
+  std::shared_ptr<Config> m_config;
+  std::shared_ptr<Screen> m_screen;
+  std::shared_ptr<Logger> m_logger;
 
   Plugin*         m_plugin;
   Chat*           m_chat;

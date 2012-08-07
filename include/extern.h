@@ -37,7 +37,12 @@
 #else
 # define CoreExport __declspec(dllimport)
 #endif
+
+#ifndef MINESERVER_BUILD
 #define E extern CoreExport
+#else
+#define E extern
+#endif
 
 class Mineserver;
 class User;

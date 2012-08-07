@@ -25,7 +25,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifdef WIN32
+#ifdef __WIN32__
 #include <process.h>
 #include <direct.h>
 #else
@@ -36,6 +36,8 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <errno.h>
+
+#include <typeinfo>
 
 #include <sstream>
 #include <fstream>
@@ -129,7 +131,12 @@ int main(int argc, char* argv[])
   }
   catch (const CoreException &e)
   {
-    LOG2(ERROR, e.GetReason());
+      std::cout<<"main(): Caught CoreException of type \""
+                 <<typeid(e).name()<<"\" Reason: "<<e.GetReason()<< std::endl;
+
+      /// Constructor might not have finished, ergo no ServerInstance, ergo no logger - exim
+    //LOG2(ERROR, e.GetReason());
+
     return EXIT_FAILURE;
   }
 

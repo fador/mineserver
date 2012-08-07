@@ -114,7 +114,7 @@ ConfigNode::Ptr ConfigNode::get(const std::string& key, bool createMissing)
     }
     else
     {
-      return m_list.insert(Map::value_type(keyA, std::tr1::shared_ptr<ConfigNode>(new ConfigNode))).first->second->get(keyB, createMissing);
+      return m_list.insert(Map::value_type(keyA, std::shared_ptr<ConfigNode>(new ConfigNode))).first->second->get(keyB, createMissing);
     }
   }
   else

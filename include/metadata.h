@@ -21,7 +21,7 @@ class MetaDataElemByte : public MetaDataElem
     int8_t val;
 };
 
-typedef std::tr1::shared_ptr<MetaDataElem> MetaDataElemPtr;
+typedef std::shared_ptr<MetaDataElem> MetaDataElemPtr;
 
 /* The MetaInfo class for storing and sending metainfo packages */
 class MetaData

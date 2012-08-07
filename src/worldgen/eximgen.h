@@ -31,73 +31,121 @@
 
 #include "mapgen.h"
 
+#include <iostream>
+
+struct BlockRef{
+    BlockRef(sChunk* chunk,int x, int y, int z){
+        int index = x + (z<<4) + (y<<8);
+
+        m_block = chunk->blocks+index;
+        m_data  = chunk->data + (index>>1);
+
+        meta_top = x & 1;
+    }
+
+    uint8_t id(){return *m_block;}
+    uint8_t meta(){
+        if(meta_top) return (*m_data)>>4;
+
+        else return (*m_data)&0xf;
+
+    }
+
+    void id(uint8_t id){
+        *m_block = id;
+    }
+    void meta(uint8_t meta){
+        assert(meta <= 15);
+        if(meta_top){
+            *m_data &= 0xf;
+            *m_data += meta<<4;
+        }
+        else{
+            *m_data &= 0xf0;
+            *m_data += meta;
+        }
+    }
+private:
+    uint8_t* m_block;
+    bool     meta_top;
+    uint8_t* m_data;
+};
+
+struct AnvilAccessor{
+    AnvilAccessor(sChunk* chunk)
+        :m_chunk(chunk){}
+
+    BlockRef operator()(int x, int y, int z){
+        return BlockRef(m_chunk, x, y, z);
+    }
+
+private:
+    sChunk* m_chunk;
+};
+struct ChunkInfo{
+    ChunkInfo(sChunk* chunk):chunk(chunk),blocks(chunk){}
+
+    sChunk* chunk;
+    AnvilAccessor blocks;
+};
+
 class EximGen: public MapGen
 {
 public:
-  EximGen();
-  void init(int seed);
-  void re_init(int seed); // Used when generating multiple maps
-  void generateChunk(int x, int z, int map);
+    EximGen();
+    void init(int seed);
+    void re_init(int seed); // Used when generating multiple maps
+    void generateChunk(int x, int z, int map);
 
 private:
-  std::vector<uint8_t> blocks;
-  std::vector<uint8_t> blockdata;
-  std::vector<uint8_t> skylight;
-  std::vector<uint8_t> blocklight;
-  std::vector<uint8_t> heightmap;
+    std::vector<uint8_t> blocks;
+    std::vector<uint8_t> blockdata;
+    std::vector<uint8_t> skylight;
+    std::vector<uint8_t> blocklight;
+    std::vector<int32_t> heightmap;
 
-  int seaLevel;
+    int seaLevel;
 
-  bool addTrees;
+    bool addTrees;
 
-  bool expandBeaches;
-  int beachExtent;
-  int beachHeight;
+    bool expandBeaches;
+    int beachExtent;
+    int beachHeight;
 
-  bool addOre;
-  bool addCaves;
-  bool winterEnabled;
+    bool addOre;
+    bool addCaves;
+    bool winterEnabled;
 
-  void generateFlatgrass(int x, int z, int map);
-  void generateWithNoise(int x, int z, int map);
+    void generateWithNoise(ChunkInfo &info);
 
-  void ExpandBeaches(int x, int z, int map);
-  void AddTrees(int x, int z, int map);
+    void AddOre  (sChunk* chunk);
+    void AddTrees(sChunk* chunk);
 
-  void AddOre(int x, int z, int map, uint8_t type);
-  void AddDeposit(int x, int y, int z, int map, uint8_t block, uint8_t minDepoSize, uint8_t maxDepoSize, sChunk* chunk);
+    void ExpandBeaches(int x, int z, int map);
+    void AddTrees(int x, int z, int map);
 
-  CaveGen cave;
+    void AddOre(int x, int z, int map, uint8_t type);
+    void AddDeposit(int x, int y, int z, int map, uint8_t block, uint8_t minDepoSize, uint8_t maxDepoSize, sChunk* chunk);
 
-  // Heightmap composition
+    // Heightmap composition
 
-  noise::module::RidgedMulti mountainTerrain;
-  noise::module::ScaleBias mountainScale;
-  noise::module::Billow baseFlatTerrain;
-  noise::module::ScaleBias flatTerrain;
-  noise::module::Perlin terrainType;
-  noise::module::Select terrainSelector;
-  noise::module::ScaleBias finalTerrain;
+    noise::module::RidgedMulti mountainTerrain;
+    noise::module::ScaleBias mountainScale;
+    noise::module::Perlin baseFlatTerrain;
+    noise::module::ScaleBias flatTerrain;
+    noise::module::Billow terrainType;
+    noise::module::Select terrainSelector;
+    noise::module::ScaleBias finalTerrain;
 
-  // ##### TREE GEN #####
+    // stuff
 
-  noise::module::Billow treenoise;
-  // ##### END TREE GEN ####
+    noise::module::RidgedMulti earthNoise;
+    noise::module::Billow caveNoise;
+    // ##### TREE GEN #####
 
-  /*noise::module::ScaleBias perlinBiased;
+    noise::module::Billow treenoise;
+    // ##### END TREE GEN ####
 
-  noise::module::Perlin baseFlatTerrain;
-  noise::module::ScaleBias flatTerrain;
-
-  noise::module::Perlin seaFloor;
-  noise::module::ScaleBias seaBias;
-
-  noise::module::Perlin terrainType;
-
-  noise::module::Perlin seaControl;
-
-  noise::module::Select seaTerrain;
-  noise::module::Select finalTerrain;*/
 };
 
 #endif

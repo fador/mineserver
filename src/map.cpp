@@ -1263,11 +1263,11 @@ sChunk* Map::loadMap(int x, int z, bool generate)
 
   size_t fullLen = (16 * 256 * 16);
   size_t halfLen = fullLen >> 1;
-  chunk->blocks     = new uint8_t[fullLen];
-  chunk->addblocks  = new uint8_t[halfLen];
-  chunk->data       = new uint8_t[halfLen];
-  chunk->blocklight = new uint8_t[halfLen];
-  chunk->skylight   = new uint8_t[halfLen];
+  //chunk->blocks     = new uint8_t[fullLen];
+  //chunk->addblocks  = new uint8_t[halfLen];
+  //chunk->data       = new uint8_t[halfLen];
+  //chunk->blocklight = new uint8_t[halfLen];
+  //chunk->skylight   = new uint8_t[halfLen];
   chunk->heightmap  = nbt_heightmap->GetIntArray()->data();
   chunk->chunks_present = 0;
   chunk->addblocks_present = 0;
