@@ -30,6 +30,9 @@
 #define NOMINMAX
 #include <winsock2.h>
 typedef int socklen_t;
+#else
+#include <netdb.h>       // for gethostbyname()
+#include <netinet/tcp.h> // for TCP constants
 #endif
 
 #include <cerrno>
