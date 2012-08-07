@@ -80,6 +80,8 @@ public:
 
   #ifdef PROTOCOL_ENCRYPTION
   //Protocol encryption
+  X509 *x;
+  EVP_PKEY *pk;
   RSA *rsa;
   std::string encryptionBytes;
   std::string serverID;

@@ -25,6 +25,12 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#ifdef DEBUG & _MSC_VER  
+  #define _CRTDBG_MAP_ALLOC
+  #include <stdlib.h>
+  #include <crtdbg.h>  
+#endif
+
 #ifdef WIN32
 #include <process.h>
 #include <direct.h>
@@ -121,6 +127,9 @@ int printHelp(int code)
 int main(int argc, char* argv[])
 {
   bool ret = false;
+  #ifdef DEBUG & _MSC_VER  
+  _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );  
+  #endif
   // Try and start a new server instance
   try
   {
@@ -285,10 +294,10 @@ Mineserver::Mineserver(int args, char **argarray)
     exit(1);
   }
   LOG2(INFO, "RSA key pair generated.");
-
+      
   /* Get ASN.1 format public key */
-  X509 *x=X509_new();
-  EVP_PKEY *pk=EVP_PKEY_new();
+  x=X509_new();
+  pk=EVP_PKEY_new();
   EVP_PKEY_assign_RSA(pk,rsa);
   X509_set_version(x,0);
   X509_set_pubkey(x,pk);
@@ -300,9 +309,7 @@ Mineserver::Mineserver(int args, char **argarray)
     
   //Glue + jesus tape, dont ask - Fador
   publicKey = std::string((char *)(buf+28),len-36);
-
   OPENSSL_free(buf);
-
   /* END key fetching */
 
   const std::string temp_nums="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890=-";
@@ -397,7 +404,8 @@ Mineserver::~Mineserver()
   {
     delete m_map[i];
     delete m_physics[i];
-    delete m_mapGen[i];
+    delete m_redstone[i];
+    m_mapGen.clear();
   }
 
   delete m_chat;
@@ -405,6 +413,11 @@ Mineserver::~Mineserver()
   delete m_packetHandler;
   delete m_inventory;
   delete m_mobs;
+
+  for(int i = m_mapGenNames.size()-1; i >= 0 ; i--)
+  {
+    delete m_mapGenNames[i];
+  }
 
   if (m_plugin)
   {
@@ -416,6 +429,9 @@ Mineserver::~Mineserver()
   unlink((config()->sData("system.pid_file")).c_str());
   #ifdef PROTOCOL_ENCRYPTION
   RSA_free(rsa);
+  X509_free(x);
+  pk->pkey.ptr = NULL;
+  EVP_PKEY_free(pk);
   #endif
 }
 
