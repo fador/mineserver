@@ -90,7 +90,7 @@ public:
         items()->pop_back();
     }
     return;
-   }
+  }
 
   chestData()
   {
@@ -165,13 +165,13 @@ void removeFurnace(furnaceDataPtr data);
  */
 struct sChunk
 {
-    uint8_t blocks[16 * 16 * 256];
-    uint8_t addblocks[16 * 16 * 256 / 2];
-    uint8_t data[16 * 16 * 256 / 2];
-    uint8_t blocklight[16 * 16 * 256 / 2];
-    uint8_t skylight[16 * 16 * 256 / 2];
-    //int32_t heightmap[16*16];
-    uint8_t biome[16*16];
+  uint8_t blocks[16 * 16 * 256];
+  uint8_t addblocks[16 * 16 * 256 / 2];
+  uint8_t data[16 * 16 * 256 / 2];
+  uint8_t blocklight[16 * 16 * 256 / 2];
+  uint8_t skylight[16 * 16 * 256 / 2];
+  //int32_t heightmap[16*16];
+  uint8_t biome[16*16];
 
   //Basic block data (8bits/block)
   //uint8_t* blocks;
@@ -212,7 +212,7 @@ struct sChunk
   std::vector<furnaceDataPtr> furnaces;
 
   sChunk() :// blocks(NULL), addblocks(NULL), data(NULL), blocklight(NULL), skylight(NULL),
-      chunks_present(0), addblocks_present(0), refCount(0), lightRegen(false), changed(false), lastused(0), nbt(NULL)
+    chunks_present(0), addblocks_present(0), refCount(0), lightRegen(false), changed(false), lastused(0), nbt(NULL)
   {
   }
 
