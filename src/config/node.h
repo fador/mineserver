@@ -47,7 +47,7 @@ class ConfigNode
 {
 public:
 
-  typedef std::tr1::shared_ptr<ConfigNode> Ptr;
+  typedef std::shared_ptr<ConfigNode> Ptr;
   typedef std::map<std::string, Ptr> Map;
 
   ConfigNode();

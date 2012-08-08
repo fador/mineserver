@@ -25,9 +25,8 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifdef WIN32
+#ifdef __WIN32__
 #include <cstdlib>
-#define NOMINMAX
 #include <winsock2.h>
 typedef int socklen_t;
 #else
@@ -62,8 +61,8 @@ extern int setnonblock(int fd);
 #endif
 
 static const size_t BUFSIZE = 2048;
-static std::tr1::array<uint8_t, BUFSIZE> BUF;
-static std::tr1::array<uint8_t, BUFSIZE> BUFCRYPT;
+static std::array<uint8_t, BUFSIZE> BUF;
+static std::array<uint8_t, BUFSIZE> BUFCRYPT;
 static char* const cpBUF = reinterpret_cast<char*>(BUF.data());
 static uint8_t* const upBUF = BUF.data();
 

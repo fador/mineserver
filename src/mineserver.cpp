@@ -33,7 +33,7 @@
   #endif
 #endif
 
-#ifdef WIN32
+#ifdef  __WIN32__
 #include <process.h>
 #include <direct.h>
 #else

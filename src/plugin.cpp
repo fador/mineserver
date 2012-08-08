@@ -28,7 +28,9 @@
 #include "sys/stat.h"
 
 #include "mineserver.h"
-#ifdef WIN32
+
+/// 'WIN32` undefined again... pollutly polluted sources
+#ifdef __WIN32__
 #include <windows.h>
 #else
 #include <dlfcn.h>

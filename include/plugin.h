@@ -41,8 +41,7 @@
 //Fix Winsock2 error that occurs when Windows.h is included before it.
 #define _WINSOCKAPI_
 
-#ifdef WIN32
-#define NOMINMAX
+#ifdef __WIN32__
 #include <windows.h>
 #else
 #include <dlfcn.h>
@@ -61,7 +60,7 @@
 
 #ifdef WIN32
 #define LIBRARY_HANDLE HINSTANCE
-#define LIBRARY_LOAD(x) LoadLibrary(x)
+#define LIBRARY_LOAD(x) LoadLibraryA(x)
 #define LIBRARY_SELF() GetModuleHandle(NULL)
 #define LIBRARY_SYMBOL(x, y) GetProcAddress(x, y)
 static char *LIBRARY_ERROR(void)
@@ -70,7 +69,7 @@ static char *LIBRARY_ERROR(void)
   DWORD err = GetLastError();
   if(!err)
     return NULL;
-  FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, err, 0, errbuf, 512, NULL);
+  FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, err, 0, errbuf, 512, NULL);
   SetLastError(0);
   return errbuf;
 }
@@ -94,17 +93,17 @@ static char *LIBRARY_ERROR(void)
 // Foe INCONSISTENCY fainted!
 // You got 374¥ for winning!
 
-typedef std::tr1::shared_ptr<BlockBasic> BlockBasicPtr;
-typedef std::tr1::shared_ptr<ItemBasic>  ItemBasicPtr;
+typedef std::shared_ptr<BlockBasic> BlockBasicPtr;
+typedef std::shared_ptr<ItemBasic>  ItemBasicPtr;
 
 class Plugin
 {
 public:
 
-  typedef std::tr1::unordered_map<std::string, Hook*> HookMap;
-  typedef std::tr1::unordered_map<std::string, LIBRARY_HANDLE> LibHandleMap;
-  typedef std::tr1::unordered_map<std::string, void*> PointerMap;
-  typedef std::tr1::unordered_map<std::string, float> VersionMap;
+  typedef std::unordered_map<std::string, Hook*> HookMap;
+  typedef std::unordered_map<std::string, LIBRARY_HANDLE> LibHandleMap;
+  typedef std::unordered_map<std::string, void*> PointerMap;
+  typedef std::unordered_map<std::string, float> VersionMap;
 
   typedef std::vector<BlockBasicPtr> BlockCBs;
   typedef std::vector<ItemBasicPtr>  ItemCBs;

@@ -31,7 +31,6 @@
 #include <ctime>
 
 #ifdef WIN32
-#define NOMINMAX
 #include <windows.h>
 #include <wincrypt.h>
 #else
