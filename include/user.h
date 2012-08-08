@@ -42,6 +42,8 @@
 #include "packets.h"
 #include "mineserver.h"
 
+//#include "chunkmap.h"
+
 struct position
 {
   double x;
@@ -69,22 +71,33 @@ public:
 
   //View distance in chunks -viewDistance <-> viewDistance
   static const int viewDistance = 10;
+
+  std::string nick;
+  position pos;
+  int16_t health;
+
+  Item inv[45];
+  int16_t curItem;
+
+  /// updates this user's world (queues chunks, adds/removes entities)
+  void updateWorld();
+
+  /// chunks in use by user
+  //fastset<sChunk*> usedChunks;
+  /// chunk in which user last was during last updateWorld()
+  //sChunk*          lastChunk;
+
   uint8_t action;
   bool waitForData;
   uint32_t write_err_count;
   bool logged;
   bool muted;
   bool dnd;
-  int16_t health;
   uint16_t timeUnderwater;
   double fallDistance;
   unsigned int UID;
-  std::string nick;
   std::string temp_nick;
-  position pos;
   vec curChunk;
-  Item inv[45];
-  int16_t curItem;
   time_t healthtimeout;
   Item inventoryHolding;
   //Do we have an open _shared_ inventory?
@@ -123,6 +136,7 @@ public:
 
   bool changeNick(std::string _nick);
   void checkEnvironmentDamage();
+
   bool updatePos(double x, double y, double z, double stance);
   bool updatePosM(double x, double y, double z, size_t map, double stance);
   /** Check if the user is standing on this block */

@@ -9,3 +9,6 @@ include/configure.h
 
 # ignore our compile directory
 bin
+
+# qmake .pro(ject) per platform config file
+src/mineserver.pro.user

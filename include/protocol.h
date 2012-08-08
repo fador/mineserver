@@ -146,6 +146,15 @@ class Protocol
       return ret;
     }
 
+    static Packet entityTeleport(int eid, const position& pos)
+    {
+      Packet ret;
+      ret << (int8_t)PACKET_ENTITY_TELEPORT << (int32_t)eid
+          << (int32_t)(pos.x * 32) << (int32_t)(pos.y * 32) << (int32_t)(pos.z * 32)
+          << (int8_t)pos.yaw << (int8_t)pos.pitch;
+      return ret;
+    }
+
     static Packet entityHeadLook(int eid, int head_yaw)
     {
       Packet ret;
@@ -219,12 +228,20 @@ class Protocol
       return ret;
     }
 
-    static Packet namedEntitySpawn(int eid, std::string nick, double x, double y, double z, int yaw, int pitch, int item)
+    static Packet namedEntitySpawn(int eid, const std::string& nick, double x, double y, double z, int yaw, int pitch, int item)
     {
       Packet ret;
       ret << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)eid << nick
           << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32)
           << (int8_t)yaw << (int8_t)pitch << (int16_t)item << (int8_t)0 << (int8_t)0 << (int8_t)127;
+      return ret;
+    }
+    static Packet namedEntitySpawn(int eid, const std::string& nick, const position& pos, int item){
+      Packet ret;
+      ret << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)eid << nick
+          << (int32_t)(pos.x*32)<<(int32_t)(pos.y * 32) << (int32_t)(pos.z * 32)
+          << (int8_t)pos.yaw << (int8_t)pos.pitch << (int16_t)item
+          << (int8_t)0 << (int8_t)0 << (int8_t)127;
       return ret;
     }
 

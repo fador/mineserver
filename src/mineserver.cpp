@@ -367,7 +367,7 @@ Mineserver::Mineserver(int args, char **argarray)
 
       m_physics.push_back(phy);
       RedstoneSimulation* red = new RedstoneSimulation;
-      red->map = n;      
+      red->map = n;
       m_redstone.push_back(red);
       int k = m_config->iData((std::string(key) + ".") + (*it));
       if ((uint32_t)k >= m_mapGenNames.size())
@@ -435,12 +435,12 @@ Mineserver::~Mineserver()
 
   // Remove the PID file
   unlink((config()->sData("system.pid_file")).c_str());
-  #ifdef PROTOCOL_ENCRYPTION
+#ifdef PROTOCOL_ENCRYPTION
   RSA_free(rsa);
   X509_free(x);
   pk->pkey.ptr = NULL;
   EVP_PKEY_free(pk);
-  #endif
+#endif
 }
 
 
@@ -697,7 +697,7 @@ bool Mineserver::run()
       {
         // Send server time and keepalive
         Packet pkt;
-        pkt << Protocol::timeUpdate(m_map[0]->mapTime);        
+        pkt << Protocol::timeUpdate(m_map[0]->mapTime);
         pkt << Protocol::keepalive(0);
         pkt << Protocol::playerlist();
         (*User::all().begin())->sendAll(pkt);        
@@ -723,9 +723,9 @@ bool Mineserver::run()
       // Loop users
       for (std::set<User*>::iterator it = users().begin(), it_end = users().end(); it != it_end;)
       {
-	// NOTE: iterators corrupt when you delete their objects, therefore we have to iterate in a special way - Justasic
-	User *u = *it;
-	++it;
+        // NOTE: iterators corrupt when you delete their objects, therefore we have to iterate in a special way - Justasic
+        User *u = *it;
+        ++it;
         // No data received in 30s, timeout
         if (u->logged && timeNow - u->lastData > 30)
         {
@@ -819,11 +819,11 @@ bool Mineserver::run()
       client_write((*it));
     }
   }
-  #ifdef WIN32
+#ifdef WIN32
   closesocket(m_socketlisten);
-  #else
+#else
   close(m_socketlisten);
-  #endif
+#endif
 
   saveAll();
 

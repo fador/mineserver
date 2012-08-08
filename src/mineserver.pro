@@ -11,6 +11,8 @@ win32{
 	LIBS += -lnoise -leay32 -lssleay32 -lssl32 -lpdcurses -lz -levent -lWs2_32 -lwinmm -lpthread
 
 	INCLUDEPATH += $$(MINESERVER_WIN32_LIBS)/include
+
+	QMAKE_LFLAGS += -Wl,--large-address-aware
 }
 
 unix{
@@ -174,4 +176,5 @@ HEADERS += \
     ../include/cliScreen.h \
     ../include/chunkmap.h \
     ../include/chat.h \
-    configure.h
+    configure.h \
+    ../include/stdtime.h

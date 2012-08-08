@@ -169,7 +169,7 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int16_t y, int32_t z, int
     it->second->sendPacket(pkt);
 
     //Add to physics loop
-    ServerInstance->physics(map)->addFallSimulation(fallblock,vec(x, y+1, z), EID);
+    ServerInstance->physics(map)->addFallSimulation(fallblock,vec(x, y, z), EID);
 
     this->notifyNeighbours(x, y + 1, z, map, "onNeighbourMove", user, fallblock, BLOCK_BOTTOM);
 
