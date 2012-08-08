@@ -120,12 +120,11 @@ void NetherGen::generateChunk(int x, int z, int map)
   ServerInstance->map()->maps[chunkid].z = z; */
 
   sChunk* chunk = new sChunk();
-  chunk->blocks = new uint8_t[16 * 16 * 256];
-  chunk->addblocks = new uint8_t[16 * 16 * 256 / 2];
-  chunk->data = new uint8_t[16 * 16 * 256 / 2];
-  chunk->blocklight = new uint8_t[16 * 16 * 256 / 2];
-  chunk->skylight = new uint8_t[16 * 16 * 256 / 2];
-  chunk->heightmap = &((*(*val)["HeightMap"]->GetIntArray())[0]);
+  //chunk->blocks = &((*t_blocks)[0]);
+  //chunk->data = &((*t_data)[0]);
+  //chunk->blocklight = &((*t_blocklight)[0]);
+  //chunk->skylight = &((*t_skylight)[0]);
+  chunk->heightmap = &((*heightmap)[0]);
   chunk->nbt = main;
   chunk->x = x;
   chunk->z = z;

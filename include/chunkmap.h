@@ -90,7 +90,7 @@ public:
         items()->pop_back();
     }
     return;
-   }
+  }
 
   chestData()
   {
@@ -165,20 +165,28 @@ void removeFurnace(furnaceDataPtr data);
  */
 struct sChunk
 {
+  uint8_t blocks[16 * 16 * 256];
+  uint8_t addblocks[16 * 16 * 256 / 2];
+  uint8_t data[16 * 16 * 256 / 2];
+  uint8_t blocklight[16 * 16 * 256 / 2];
+  uint8_t skylight[16 * 16 * 256 / 2];
+  //int32_t heightmap[16*16];
+  uint8_t biome[16*16];
+
   //Basic block data (8bits/block)
-  uint8_t* blocks;
+  //uint8_t* blocks;
   //Additional block id data for id > 255 (4bits/block)
-  uint8_t* addblocks;
+  //uint8_t* addblocks;
   //Metadata (4bits/block)
-  uint8_t* data;
+  //uint8_t* data;
   //block light data (4bits/block)
-  uint8_t* blocklight;
+  //uint8_t* blocklight;
   //skylight data (4bits/block)
-  uint8_t* skylight;
+  //uint8_t* skylight;
   //16x16 heightmap
-  int32_t* heightmap;  
+  int32_t* heightmap;
   //16x16 biome array
-  uint8_t* biome;
+  //uint8_t* biome;
 
   //Chunk coordinates
   int32_t x;
@@ -203,7 +211,8 @@ struct sChunk
   std::vector<signDataPtr>    signs;
   std::vector<furnaceDataPtr> furnaces;
 
-  sChunk() : blocks(NULL), addblocks(NULL), data(NULL), blocklight(NULL), skylight(NULL), chunks_present(0), addblocks_present(0), refCount(0), lightRegen(false), changed(false), lastused(0), nbt(NULL)
+  sChunk() :// blocks(NULL), addblocks(NULL), data(NULL), blocklight(NULL), skylight(NULL),
+    chunks_present(0), addblocks_present(0), refCount(0), lightRegen(false), changed(false), lastused(0), nbt(NULL)
   {
   }
 
@@ -219,12 +228,12 @@ struct sChunk
     }
 
     delete nbt;
-    
+    /*
     delete[] blocks;
     delete[] addblocks;
     delete[] data;
     delete[] blocklight;
-    delete[] skylight;
+    delete[] skylight;*/
   }
 
   bool hasUser(User* user) const

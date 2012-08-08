@@ -419,9 +419,9 @@ int getdir(std::string dir, std::vector<std::string> &files)
 {
 #ifdef WIN32
   HANDLE hFind = INVALID_HANDLE_VALUE;
-  WIN32_FIND_DATA ffd; // File information
+  WIN32_FIND_DATAA ffd; // File information
   dir += "\\*.*";
-  hFind = FindFirstFile(dir.c_str(), &ffd);
+  hFind = FindFirstFileA(dir.c_str(), &ffd);
 
   if (INVALID_HANDLE_VALUE == hFind)
   {

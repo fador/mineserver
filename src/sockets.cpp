@@ -25,9 +25,8 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifdef WIN32
+#ifdef __WIN32__
 #include <cstdlib>
-#define NOMINMAX
 #include <winsock2.h>
 typedef int socklen_t;
 #else

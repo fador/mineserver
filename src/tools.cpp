@@ -31,10 +31,9 @@
 #include <wordexp.h>  // for wordexp
 #include <sys/stat.h> // for mkdir
 #include <climits>
-#elif defined(WIN32)
+#elif defined(__WIN32__)
 #include <direct.h>
-#define _WINSOCKAPI_ //Stops windows.h from including winsock.h
-                     //Fixes errors I was having
+
 #include <ShlObj.h>
 #endif
 
@@ -49,6 +48,7 @@
 #include <ctime>
 #include <cmath>
 #include <cctype>
+#include <cassert>
 
 #include "tools.h"
 #include "logger.h"
@@ -212,7 +212,7 @@ bool fileExists(const std::string& filename)
 bool makeDirectory(const std::string& path)
 {
 #ifdef WIN32
-  return _mkdir(path.c_str()) != -1;
+  return mkdir(path.c_str()) != -1;
 #else
   return mkdir(path.c_str(), 0755) != -1;
 #endif
@@ -275,7 +275,7 @@ std::string getHomeDir()
 
   return canonicalizePath("~/.mineserver");
 
-#elif defined(WIN32)
+#elif defined(__WIN32__)
 
 char szPath[MAX_PATH];
 if(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, szPath) == 0)
@@ -314,13 +314,18 @@ std::string pathOfExecutable()
 
 #elif defined(WIN32)
 
+  /*
   if (0 == GetModuleFileName(NULL, path, dest_len))
   {
     return "";
   }
 
   return pathOfFile(path).first;
+  */
+  char buffer[512];
+  assert(getcwd(buffer, sizeof(buffer)));
 
+  return buffer;
 #else
 
   return "";
