@@ -1019,8 +1019,10 @@ int PacketHandler::player_block_placement(User* user)
     int32_t EID = Mineserver::generateEID();
     Packet pkt;
     // MINECART
-    pkt << (int8_t)PACKET_ADD_OBJECT << (int32_t)EID << (int8_t)10 << (int32_t)(x * 32 + 16) << (int32_t)(y * 32) << (int32_t)(z * 32 + 16);
+    //10 == minecart
+    pkt << Protocol::addObject(EID, 10,x,y,z,0);
     user->sendAll(pkt);
+    //ToDo: Store
   }
 
   if (newblock == -1 && newblock != ITEM_SIGN)
