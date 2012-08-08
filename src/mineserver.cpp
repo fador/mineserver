@@ -26,11 +26,11 @@
 */
 
 #ifdef DEBUG
-  #ifdef _MSC_VER
-  #define _CRTDBG_MAP_ALLOC
-  #include <stdlib.h>
-  #include <crtdbg.h>
-  #endif
+#ifdef _MSC_VER
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
 #endif
 
 #ifdef  __WIN32__
@@ -47,6 +47,7 @@
 
 #include <sstream>
 #include <fstream>
+#include <iostream>
 
 #include "mineserver.h"
 #include "signalhandler.h"
@@ -125,24 +126,70 @@ int printHelp(int code)
   return code;
 }
 
+#include <stdtime.h>
+
+Time systemboot;
+
 // Main :D
 int main(int argc, char* argv[])
 {
+#ifdef __WIN32__
+    /// Initialize systemboot Time object
+    LARGE_INTEGER c;
+    QueryPerformanceCounter(&c);
+    auto current_time = std::chrono::system_clock::now();
+    LARGE_INTEGER freq;
+    QueryPerformanceFrequency(&freq);
+    auto boot_time = current_time - std::chrono::milliseconds(uint64_t(double(c.QuadPart) * 1000 / freq.QuadPart));
+
+    uint64_t msecs = std::chrono::duration_cast<std::chrono::microseconds>(boot_time.time_since_epoch()).count();
+    systemboot = Time(msecs/1000000,msecs % 1000000);
+#endif
+
   bool ret = false;
-  #ifdef DEBUG
-    #ifdef _MSC_VER
-      _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-    #endif
-  #endif
+#ifdef DEBUG
+#ifdef _MSC_VER
+  _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+#endif
+#endif
+
+  using namespace std;
   // Try and start a new server instance
-  try
-  {
+  try{
     new Mineserver(argc, argv);
-    ret = ServerInstance->run();
   }
-  catch (const CoreException &e)
+  catch (CoreException &e)
   {
-    LOG2(ERROR, e.GetReason());
+    cout<<"new Mineserver() raised CoreException of type '"<<typeid(e).name()<<
+          "' reason: "<<e.GetReason()<<endl;
+    return EXIT_FAILURE;
+  }
+  catch (std::exception& e){
+    cout<<"new Mineserver() raised std::exception of type '"<<typeid(e).name()<<
+          "' reason: "<<e.what()<<endl;
+    return EXIT_FAILURE;
+  }
+
+  try{
+    try{
+      ret = ServerInstance->run();
+    }
+    catch (CoreException &e)
+    {
+      cout<<"Mineserver::run() raised CoreException of type '"<<typeid(e).name()<<
+            "' reason: "<<e.GetReason()<<endl;
+      throw;
+    }
+    catch (std::exception& e){
+      cout<<"Mineserver::run() raised std::exception of type '"<<typeid(e).name()<<
+            "' reason: "<<e.what()<<endl;
+      throw;
+    }
+  }
+  catch(...){
+    LOG2(CRITICAL, "Saving worlds.");
+    ServerInstance->saveAll();
+    LOG2(NOTICE, "Worlds saved successfully!");
     return EXIT_FAILURE;
   }
 
@@ -154,28 +201,28 @@ int main(int argc, char* argv[])
 
 Mineserver::Mineserver(int args, char **argarray)
   :  argv(argarray),
-     argc(args),
-     m_socketlisten  (0),
-     m_saveInterval  (0),
-     m_lastSave      (std::time(NULL)),
-     m_pvp_enabled   (false),
-     m_damage_enabled(false),
-     m_only_helmets  (false),
-     m_running       (false),
-     m_eventBase     (NULL),
+    argc(args),
+    m_socketlisten  (0),
+    m_saveInterval  (0),
+    m_lastSave      (std::time(NULL)),
+    m_pvp_enabled   (false),
+    m_damage_enabled(false),
+    m_only_helmets  (false),
+    m_running       (false),
+    m_eventBase     (NULL),
 
-     // core modules
-     m_config        (new Config()),
-     m_screen        (new CliScreen()),
-     m_logger        (new Logger()),
+    // core modules
+    m_config        (new Config()),
+    m_screen        (new CliScreen()),
+    m_logger        (new Logger()),
 
-     m_plugin        (NULL),
-     m_chat          (NULL),
-     m_furnaceManager(NULL),
-     m_packetHandler (NULL),
-     m_inventory     (NULL),
-     m_mobs          (NULL),
-     m_validation_mutex(PTHREAD_MUTEX_INITIALIZER)
+    m_plugin        (NULL),
+    m_chat          (NULL),
+    m_furnaceManager(NULL),
+    m_packetHandler (NULL),
+    m_inventory     (NULL),
+    m_mobs          (NULL),
+    m_validation_mutex(PTHREAD_MUTEX_INITIALIZER)
 {
   ServerInstance = this;
   InitSignals();
@@ -192,18 +239,18 @@ Mineserver::Mineserver(int args, char **argarray)
     
     switch (arg[0])
     {
-      case '-':   // option
+    case '-':   // option
       // we have only '-h' and '--help' now, so just return with help
       printHelp(0);
       throw CoreException();
       
-      case '+':   // override
+    case '+':   // override
       overrides.push_back(arg.substr(1));
       break;
       
-      default:    // otherwise, it is config file
+    default:    // otherwise, it is config file
       if (!cfg.empty())
-	throw CoreException("Only single CONFIG_FILE argument is allowed!");
+        throw CoreException("Only single CONFIG_FILE argument is allowed!");
       cfg = arg;
       break;
     }
@@ -298,7 +345,7 @@ Mineserver::Mineserver(int args, char **argarray)
     exit(1);
   }
   LOG2(INFO, "RSA key pair generated.");
-      
+
   /* Get ASN.1 format public key */
   x=X509_new();
   pk=EVP_PKEY_new();
@@ -310,7 +357,7 @@ Mineserver::Mineserver(int args, char **argarray)
   unsigned char *buf;
   buf = NULL;
   len = i2d_X509(x, &buf);
-    
+
   //Glue + jesus tape, dont ask - Fador
   publicKey = std::string((char *)(buf+28),len-36);
   OPENSSL_free(buf);
@@ -367,7 +414,7 @@ Mineserver::Mineserver(int args, char **argarray)
 
       m_physics.push_back(phy);
       RedstoneSimulation* red = new RedstoneSimulation;
-      red->map = n;      
+      red->map = n;
       m_redstone.push_back(red);
       int k = m_config->iData((std::string(key) + ".") + (*it));
       if ((uint32_t)k >= m_mapGenNames.size())
@@ -435,12 +482,12 @@ Mineserver::~Mineserver()
 
   // Remove the PID file
   unlink((config()->sData("system.pid_file")).c_str());
-  #ifdef PROTOCOL_ENCRYPTION
+#ifdef PROTOCOL_ENCRYPTION
   RSA_free(rsa);
   X509_free(x);
   pk->pkey.ptr = NULL;
   EVP_PKEY_free(pk);
-  #endif
+#endif
 }
 
 
@@ -696,7 +743,7 @@ bool Mineserver::run()
       {
         // Send server time and keepalive
         Packet pkt;
-        pkt << Protocol::timeUpdate(m_map[0]->mapTime);        
+        pkt << Protocol::timeUpdate(m_map[0]->mapTime);
         pkt << Protocol::keepalive(0);
         pkt << Protocol::playerlist();
         (*User::all().begin())->sendAll(pkt);
@@ -722,9 +769,9 @@ bool Mineserver::run()
       // Loop users
       for (std::set<User*>::iterator it = users().begin(), it_end = users().end(); it != it_end;)
       {
-	// NOTE: iterators corrupt when you delete their objects, therefore we have to iterate in a special way - Justasic
-	User *u = *it;
-	++it;
+        // NOTE: iterators corrupt when you delete their objects, therefore we have to iterate in a special way - Justasic
+        User *u = *it;
+        ++it;
         // No data received in 30s, timeout
         if (u->logged && timeNow - u->lastData > 30)
         {
@@ -815,11 +862,11 @@ bool Mineserver::run()
       }
     }
   }
-  #ifdef WIN32
+#ifdef WIN32
   closesocket(m_socketlisten);
-  #else
+#else
   close(m_socketlisten);
-  #endif
+#endif
 
   saveAll();
 

@@ -374,18 +374,8 @@ std::pair<std::string, std::string> pathOfFile(const std::string& filename)
 }
 
 
-
+#include "stdtime.h"
 uint64_t microTime()
 {
-#ifndef WIN32
-  struct timespec now;
-  clock_gettime(CLOCK_MONOTONIC, &now);
-  return (now.tv_sec*(uint64_t)1000000 + now.tv_nsec/(uint64_t)1000);
-#else
-  FILETIME ft;
-  GetSystemTimeAsFileTime(&ft);
-  uint64_t out = ((uint64_t)ft.dwHighDateTime)<<32 | (uint64_t)ft.dwLowDateTime;
-  out /= 10; // from 100ns to 1us
-  return out;
-#endif
+  return Time::now().total_usec();
 }

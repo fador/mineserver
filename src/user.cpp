@@ -176,8 +176,8 @@ User::~User()
     if (inventoryHolding.getType() != -1)
     {
       ServerInstance->map(pos.map)->createPickupSpawn((int)pos.x, (int)pos.y, (int)pos.z,
-          inventoryHolding.getType(), inventoryHolding.getCount(),
-          inventoryHolding.getHealth(), this);
+                                                      inventoryHolding.getType(), inventoryHolding.getCount(),
+                                                      inventoryHolding.getHealth(), this);
       inventoryHolding.setType(-1);
     }
 
@@ -571,71 +571,33 @@ bool User::updatePos(double x, double y, double z, double stance)
       Packet telePacket = Protocol::entityTeleport(UID, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch));
       newChunk->sendPacket(telePacket, this);
     }
-    else if (abs(newChunk->x - oldChunk->x) <= 1  && abs(newChunk->z - oldChunk->z) <= 1)
-    {
-
+    else{
       std::list<User*> toremove;
       std::list<User*> toadd;
 
       sChunk::userBoundary(oldChunk, toremove, newChunk, toadd);
 
-      if (toremove.size())
-      {
-        Packet pkt = Protocol::destroyEntity(UID);
-        std::list<User*>::iterator iter = toremove.begin(), end = toremove.end();
-        for (; iter != end ; iter++)
-        {
-          (*iter)->buffer.addToWrite(pkt);
-        }
+      /// update this player's pos for others
+
+      Packet dtPkt = Protocol::destroyEntity(UID);
+      for( User*& u : toremove){
+        u->buffer.addToWrite(dtPkt);
+
+        this->buffer.addToWrite(Protocol::destroyEntity(u->UID));
       }
 
-      if (toadd.size())
-      {
-        Packet pkt = Protocol::namedEntitySpawn(UID, nick, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch), curItem);
+      Packet spawnPkt = Protocol::namedEntitySpawn(UID, nick, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch), curItem);
+      for( User*& u : toadd){
+        u->buffer.addToWrite(spawnPkt);
 
-        std::list<User*>::iterator iter = toadd.begin(), end = toadd.end();
-        for (; iter != end ; iter++)
-        {
-          if ((*iter) != this)
-          {
-            (*iter)->buffer.addToWrite(pkt);
-          }
-        }
+        this->buffer.addToWrite(
+              Protocol::namedEntitySpawn(u->UID, u->nick, u->pos, u->curItem)
+              );
       }
 
-      // TODO: Determine those who where present for both.
-      Packet telePacket = Protocol::entityTeleport(UID, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch));
-      newChunk->sendPacket(telePacket, this);
+      Packet tpPkt = Protocol::entityTeleport(UID, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch));
 
-      int chunkDiffX = newChunk->x - oldChunk->x;
-      int chunkDiffZ = newChunk->z - oldChunk->z;
-
-      // Send new chunk and clear old chunks
-      for (int mapx = newChunk->x - viewDistance; mapx <= newChunk->x + viewDistance; mapx++)
-      {
-        for (int mapz = newChunk->z - viewDistance; mapz <= newChunk->z + viewDistance; mapz++)
-        {
-          if (!withinViewDistance((mapx - chunkDiffX), newChunk->x) || !withinViewDistance((mapz - chunkDiffZ), newChunk->z))
-          {
-            addRemoveQueue(mapx - chunkDiffX, mapz - chunkDiffZ);
-          }
-
-          // If this chunk wasn't in the view distance before
-          // if (!withinViewDistance(chunkDiffX, oldChunk->x) || !withinViewDistance(chunkDiffZ, oldChunk->z))
-          //{
-
-          // This will remove the chunks from being removed if they were put to the remove queue.
-          addQueue(mapx, mapz);
-
-
-          //}
-        }
-      }
-    }
-    else
-    {
-      std::set<User*> toRemove;
-      std::set<User*> toAdd;
+      newChunk->sendPacket(tpPkt,this);
 
       int chunkDiffX = newChunk->x - oldChunk->x;
       int chunkDiffZ = newChunk->z - oldChunk->z;
@@ -646,81 +608,15 @@ bool User::updatePos(double x, double y, double z, double stance)
           if (!withinViewDistance(chunkDiffX, oldChunk->x) || !withinViewDistance(chunkDiffZ, oldChunk->z))
           {
             addQueue(mapx, mapz);
-            sChunk* chunk = ServerInstance->map(pos.map)->getChunk(mapx, mapz);
-
-            if (chunk != NULL)
-            {
-              toAdd.insert(chunk->users.begin(), chunk->users.end());
-            }
           }
 
           if (!withinViewDistance((mapx - chunkDiffX), newChunk->x) || !withinViewDistance((mapz - chunkDiffZ), newChunk->z))
           {
             addRemoveQueue(mapx - chunkDiffX, mapz - chunkDiffZ);
-
-            sChunk* chunk = ServerInstance->map(pos.map)->getChunk((mapx - chunkDiffX), (mapz - chunkDiffZ));
-
-            if (chunk != NULL)
-            {
-              toRemove.insert(chunk->users.begin(), chunk->users.end());
-            }
           }
         }
       }
 
-      std::set<User*> toTeleport;
-      std::set<User*>::iterator iter = toRemove.begin(), end = toRemove.end();
-      for (; iter != end ; iter++)
-      {
-        std::set<User*>::iterator result = toAdd.find(*iter);
-        if (result != toAdd.end())
-        {
-          toTeleport.insert(*iter);
-          toAdd.erase(result);
-
-#ifdef _MSC_VER
-          iter = toRemove.erase(iter);
-#else
-          // TODO: Optimise
-          toRemove.erase(iter);
-          iter = toRemove.begin();
-#endif
-          end = toRemove.end();
-          if (iter == end)
-          {
-            break;
-          }
-        }
-      }
-
-      Packet destroyPkt = Protocol::destroyEntity(UID);
-      Packet spawnPkt = Protocol::namedEntitySpawn(UID, nick, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch), curItem);
-      Packet telePacket = Protocol::entityTeleport(UID, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch));
-
-      toTeleport.erase(this);
-      toAdd.erase(this);
-      toRemove.erase(this);
-
-      iter = toRemove.begin();
-      end = toRemove.end();
-      for (; iter != end ; iter++)
-      {
-        (*iter)->buffer.addToWrite(destroyPkt);
-      }
-
-      iter = toAdd.begin();
-      end = toAdd.end();
-      for (; iter != end ; iter++)
-      {
-        (*iter)->buffer.addToWrite(spawnPkt);
-      }
-
-      iter = toTeleport.begin();
-      end = toTeleport.end();
-      for (; iter != end ; iter++)
-      {
-        (*iter)->buffer.addToWrite(telePacket);
-      }
     }
 
 
@@ -834,7 +730,7 @@ bool User::checkOnBlock(int32_t x, int16_t y, int32_t z)
 bool User::updateLook(float yaw, float pitch)
 {
   Packet pkt = Protocol::entityLook(UID, yaw, pitch);
-  pkt << Protocol::entityHeadLook(UID, angleToByte(yaw));  
+  pkt << Protocol::entityHeadLook(UID, angleToByte(yaw));
 
   sChunk* chunk = ServerInstance->map(pos.map)->getChunk(blockToChunk((int32_t)pos.x), blockToChunk((int32_t)pos.z));
   if (chunk != NULL)
@@ -1141,7 +1037,7 @@ public:
     a.y() = 0;
     b.y() = 0;
     return vec::squareDistance(a, target) <
-           vec::squareDistance(b, target);
+        vec::squareDistance(b, target);
   }
 };
 
@@ -1240,7 +1136,7 @@ void User::checkEnvironmentDamage()
   /// louisdx: This makes no sense at the moment; type is not initialized!
   //uint8_t type, meta;
   uint8_t type = 0, meta = 0;
- 
+
   int16_t d = 0;
 
   if (type == BLOCK_CACTUS && LOADBLOCK(pos.x, yVal, pos.z))
@@ -1522,7 +1418,7 @@ std::string User::generateDigest()
       }
       else
       {
-       carry = 0;
+        carry = 0;
       }
       md[i] = twocomp;
     }
@@ -1530,15 +1426,15 @@ std::string User::generateDigest()
 
   for (i = 0; i < 20; i++)
   {
-   if(i || md[i]>>4)
-   {
-     out += hex[(md[i]>>4)];
-   }
-   if(i || md[i]>>4 || md[i]&0xf)
-   {
-    out += hex[(md[i]&0xf)];
-   }
-  } 
+    if(i || md[i]>>4)
+    {
+      out += hex[(md[i]>>4)];
+    }
+    if(i || md[i]>>4 || md[i]&0xf)
+    {
+      out += hex[(md[i]&0xf)];
+    }
+  }
 
   return out;
 }
