@@ -126,8 +126,8 @@ bool Physics::updateMinecart()
         }
         else
         {
-          //-z = north
-          //x = east
+          //z = north
+          //-x = east
 
           //Going west
           if(minecarts[simIt].speed.x() > 0 && meta == CORNER_NW)
@@ -189,8 +189,8 @@ bool Physics::updateMinecart()
       }
       else
       {
-        minecarts[simIt].pos.y() += 32;
-        changed = true;
+        //minecarts[simIt].pos.y() += 32;
+        //changed = true;
       }
 
       //Signal clients about the new pos
