@@ -139,11 +139,24 @@ class Protocol
           << (int8_t)yaw << (int8_t)pitch;
       return ret;
     }
+    static Packet entityRelativeMove(int eid, int8_t x, int8_t y, int8_t z)
+    {
+      Packet ret;
+      ret << (int8_t)PACKET_ENTITY_RELATIVE_MOVE << (int32_t)eid << (int8_t)x << (int8_t)y << (int8_t)z;
+      return ret;
+    }
 
     static Packet entityHeadLook(int eid, int head_yaw)
     {
       Packet ret;
       ret << (int8_t)PACKET_ENTITY_HEAD_LOOK << eid << (int8_t)head_yaw;
+      return ret;
+    }
+
+    static Packet attachEntity(int32_t entity, int32_t vehicle)
+    {
+      Packet ret;
+      ret << (int8_t)PACKET_ATTACH_ENTITY << (int32_t)entity << (int32_t)vehicle;
       return ret;
     }
 
@@ -218,7 +231,7 @@ class Protocol
     static Packet addObject(int eid, int8_t object, double x, double y, double z, int objectData, int16_t speed_x = 0, int16_t speed_y = 0,int16_t speed_z = 0)
     {
       Packet  pkt;  
-      pkt << (int8_t)PACKET_ENTITY << (int32_t)eid
+      pkt //<< (int8_t)PACKET_ENTITY << (int32_t)eid
           << (int8_t)PACKET_ADD_OBJECT << (int32_t)eid << (int8_t)object << (int32_t)(x * 32 + 16) << (int32_t)(y * 32 + 16) << (int32_t)(z * 32 + 16) << (int32_t)objectData;
       if(objectData)
       {

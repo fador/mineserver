@@ -32,6 +32,7 @@
 #include "mineserver.h"
 #include "map.h"
 #include "protocol.h"
+#include "vec.h"
 
 namespace
 {
@@ -56,6 +57,163 @@ inline bool mayFallThrough(int id)
   return ((id == BLOCK_AIR) || (id == BLOCK_WATER) || (id == BLOCK_STATIONARY_WATER) || (id == BLOCK_SNOW));
 }
 
+}
+
+enum
+{
+  FLAT_NS = 0,
+  FLAT_EW,
+  ASCEND_W,
+  ASCEND_E,
+  ASCEND_S,
+  ASCEND_N,
+  CORNER_SE,
+  CORNER_SW,
+  CORNER_NW,
+  CORNER_NE
+};
+
+//Minecart physics loop
+bool Physics::updateMinecart()
+{
+  std::vector<MinecartData> &minecarts = ServerInstance->map(map)->minecarts;
+  uint32_t listSize = minecarts.size();
+
+  for (int32_t simIt = 0; simIt < listSize; simIt++)
+  {
+    //Check if the cart is suppose to move
+    if(minecarts[simIt].speed.x() != 0 ||
+       minecarts[simIt].speed.y() != 0 ||
+       minecarts[simIt].speed.z() != 0)
+    {      
+      uint64_t timeNow = microTime();
+      double timeDiff = (timeNow-minecarts[simIt].timestamp*1.0)/1000000.0; //s
+      minecarts[simIt].timestamp = timeNow;
+
+      vec diff = vec(int8_t(float(minecarts[simIt].speed.x())*(timeDiff)),
+                     int8_t(float(minecarts[simIt].speed.y())*(timeDiff)),
+                     int8_t(float(minecarts[simIt].speed.z())*(timeDiff)) );
+      minecarts[simIt].pos = vec(minecarts[simIt].pos.x()+diff.x(),
+                                 minecarts[simIt].pos.y()+diff.y(),
+                                 minecarts[simIt].pos.z()+diff.z());
+
+
+
+      vec blockPos = vec((int)(minecarts[simIt].pos.x()/32),
+                          (int)(minecarts[simIt].pos.y()/32),
+                          (int)(minecarts[simIt].pos.z()/32)); 
+      uint8_t block, meta;
+      ServerInstance->map(map)->getBlock(blockPos.x(),
+                                         blockPos.y(),
+                                         blockPos.z(),
+                                         &block, &meta);
+      bool changed = false;
+      if(block == BLOCK_AIR)
+      {
+        minecarts[simIt].pos.y() -= 32;
+        changed = true;
+      }
+      else if((minecarts[simIt].lastBlock.x() != blockPos.x() ||
+               minecarts[simIt].lastBlock.y() != blockPos.y() ||
+               minecarts[simIt].lastBlock.z() != blockPos.z()) &&
+              block == BLOCK_MINECART_TRACKS)
+      {
+        minecarts[simIt].lastBlock = blockPos;
+        if((meta == FLAT_NS && minecarts[simIt].speed.x() != 0)
+           || (meta == FLAT_EW && minecarts[simIt].speed.z() != 0))
+        {
+
+        }
+        else
+        {
+          //-z = north
+          //x = east
+
+          //Going west
+          if(minecarts[simIt].speed.x() > 0 && meta == CORNER_NW)
+          {
+            minecarts[simIt].speed.z() = -minecarts[simIt].speed.x();
+            minecarts[simIt].speed.x() = 0;
+            changed = true;
+          }
+          //Going west
+          else if(minecarts[simIt].speed.x() > 0 && meta == CORNER_SW)
+          {
+            minecarts[simIt].speed.z() = minecarts[simIt].speed.x();
+            minecarts[simIt].speed.x() = 0;
+            changed = true;
+          }
+          //Going east
+          else if(minecarts[simIt].speed.x() < 0 && meta == CORNER_NE)
+          {
+            minecarts[simIt].speed.z() = minecarts[simIt].speed.x();
+            minecarts[simIt].speed.x() = 0;
+            changed = true;
+          }
+          //Going east
+          else if(minecarts[simIt].speed.x() < 0 && meta == CORNER_SE)
+          {
+            minecarts[simIt].speed.z() = -minecarts[simIt].speed.x();
+            minecarts[simIt].speed.x() = 0;
+            changed = true;
+          }
+          //Going north
+          else if(minecarts[simIt].speed.z() > 0 && meta == CORNER_NW)
+          {
+            minecarts[simIt].speed.x() = -minecarts[simIt].speed.z();
+            minecarts[simIt].speed.z() = 0;
+            changed = true;
+          }
+          //Going north
+          else if(minecarts[simIt].speed.z() > 0 && meta == CORNER_NE)
+          {
+            minecarts[simIt].speed.x() = minecarts[simIt].speed.z();
+            minecarts[simIt].speed.z() = 0;
+            changed = true;            
+          }
+          //Going south
+          else if(minecarts[simIt].speed.z() < 0 && meta == CORNER_SE)
+          {
+            minecarts[simIt].speed.x() = -minecarts[simIt].speed.z();
+            minecarts[simIt].speed.z() = 0;
+            changed = true;            
+          }
+          //Going south
+          else if(minecarts[simIt].speed.z() < 0 && meta == CORNER_SW)
+          {
+            minecarts[simIt].speed.x() = minecarts[simIt].speed.z();
+            minecarts[simIt].speed.z() = 0;
+            changed = true;            
+          }
+        }
+      }
+      else
+      {
+        minecarts[simIt].pos.y() += 32;
+        changed = true;
+      }
+
+      //Signal clients about the new pos
+      Packet pkt;
+      if(changed)
+      {
+        minecarts[simIt].pos.x() = blockPos.x()*32;
+        minecarts[simIt].pos.y() = blockPos.y()*32;
+        minecarts[simIt].pos.z() = blockPos.z()*32;
+        pkt = Protocol::entityTeleport(minecarts[simIt].EID,
+                                       (minecarts[simIt].pos.x()+16.0)/32.0,
+                                       (minecarts[simIt].pos.y()+16.0)/32.0,
+                                       (minecarts[simIt].pos.z()+16.0)/32.0, 0, 0);
+      }
+      else
+      {
+        pkt = Protocol::entityRelativeMove(minecarts[simIt].EID,(int8_t)diff.x(),(int8_t)diff.y(),(int8_t)diff.z());
+
+      }
+      User::sendAll(pkt);
+    }
+  }
+  return true;
 }
 
 //Falling physics loop
@@ -124,6 +282,7 @@ bool Physics::updateFall()
 bool Physics::update()
 {
   updateFall();
+  updateMinecart();
   if (!enabled)
   {
     return true;

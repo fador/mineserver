@@ -46,6 +46,23 @@ struct sTree
     plantedTime(_plantedTime), plantedBy(_plantedBy) {}
 };
 
+struct MinecartData
+{
+  uint32_t EID;
+  vec pos;
+  vec speed;
+  uint64_t timestamp;
+  vec lastBlock;
+  MinecartData(uint32_t EID, vec pos, vec speed, uint64_t timestamp)
+  {
+    this->EID = EID;
+    this->pos = pos;
+    this->speed = speed;
+    this->timestamp = timestamp;
+    lastBlock = vec(0,0,0);
+  }
+};
+
 class Map
 {
 public:
@@ -86,6 +103,7 @@ public:
 
   // Store item pointers for each chunk
   //std::map<uint32, std::vector<spawnedItem *> > mapItems;
+  std::vector<MinecartData> minecarts;
 
   //All spawned items on map
   std::map<uint32_t, spawnedItem*> items;

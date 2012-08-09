@@ -45,6 +45,7 @@ public:
   bool addFallSimulation(uint8_t block, vec pos, uint32_t EID);
   bool removeSimulation(vec pos);
   bool checkSurrounding(vec pos);
+  bool updateMinecart();
 
 private:
   enum { TYPE_WATER, TYPE_LAVA } SimType;
