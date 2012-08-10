@@ -81,7 +81,7 @@ void PacketHandler::init()
   packets[PACKET_PLAYER_DIGGING]           = Packets(11, &PacketHandler::player_digging);
   packets[PACKET_PLAYER_BLOCK_PLACEMENT]   = Packets(PACKET_VARIABLE_LEN, &PacketHandler::player_block_placement);
   packets[PACKET_HOLDING_CHANGE]           = Packets(2, &PacketHandler::holding_change);
-  packets[PACKET_ANIMATION]            = Packets(5, &PacketHandler::arm_animation);
+  packets[PACKET_ANIMATION]                = Packets(5, &PacketHandler::arm_animation);
   packets[PACKET_PICKUP_SPAWN]             = Packets(22, &PacketHandler::pickup_spawn);
   packets[PACKET_DISCONNECT]               = Packets(PACKET_VARIABLE_LEN, &PacketHandler::disconnect);
   packets[PACKET_RESPAWN]                  = Packets(PACKET_VARIABLE_LEN, &PacketHandler::respawn);
@@ -90,7 +90,7 @@ void PacketHandler::init()
   packets[PACKET_SIGN]                     = Packets(PACKET_VARIABLE_LEN, &PacketHandler::change_sign);
   packets[PACKET_TRANSACTION]              = Packets(4, &PacketHandler::inventory_transaction);
   packets[PACKET_ENTITY_CROUCH]            = Packets(5, &PacketHandler::entity_crouch);
-  packets[PACKET_WEATHER]                  = Packets(18, &PacketHandler::unhandledPacket);
+  packets[PACKET_THUNDERBOLT]              = Packets(18, &PacketHandler::unhandledPacket);
   packets[PACKET_INCREMENT_STATISTICS]     = Packets(6, &PacketHandler::unhandledPacket);
   packets[PACKET_PING]                     = Packets(0, &PacketHandler::ping);
   packets[PACKET_BLOCK_CHANGE]             = Packets(11, &PacketHandler::block_change);
@@ -99,6 +99,8 @@ void PacketHandler::init()
   packets[PACKET_CLIENT_STATUS]            = Packets(1, &PacketHandler::client_status);
   packets[PACKET_ENCRYPTION_RESPONSE]      = Packets(PACKET_VARIABLE_LEN, &PacketHandler::encryption_response);
   packets[PACKET_PLUGIN_MESSAGE]           = Packets(PACKET_VARIABLE_LEN, &PacketHandler::plugin_message);
+  packets[PACKET_CREATIVE_INVENTORY]       = Packets(PACKET_VARIABLE_LEN, &PacketHandler::creative_inventory);
+  packets[PACKET_PLAYER_ABILITIES]         = Packets(3, &PacketHandler::player_abilities);
 }
 
 int PacketHandler::unhandledPacket(User* user)
@@ -185,7 +187,7 @@ int PacketHandler::encryption_response(User* user)
     int8_t byte;
     user->buffer >> byte;
     verify.push_back(byte);
-  }  
+  }
   user->buffer.removePacket();
   
   //Those should be around 128 bytes
@@ -211,7 +213,7 @@ int PacketHandler::encryption_response(User* user)
   memset(buffer, 0, 1024);
   ret = RSA_private_decrypt(secretLen,(const uint8_t *)secret.c_str(),buffer,ServerInstance->rsa,RSA_PKCS1_PADDING);
   user->secret = std::string((char *)buffer, ret);
-  //We're going crypted!  
+  //We're going crypted!
   user->initCipher();
   
   
@@ -259,6 +261,54 @@ int PacketHandler::client_status(User* user)
   }
 
   return PACKET_OK;
+}
+
+int PacketHandler::creative_inventory(User *user)
+{
+    /// TODO: use this somewhere!
+    if (!user->buffer.haveData(4))
+        return PACKET_NEED_MORE_DATA;
+
+    uint16_t slot, itemID;
+
+    user->buffer>>slot>>itemID;
+
+    if(itemID == 0xffff) return PACKET_OK;
+
+    if (!user->buffer.haveData(5))
+        return PACKET_NEED_MORE_DATA;
+
+    uint8_t count;
+    uint16_t meta;
+
+    user->buffer >> count >> meta;
+
+
+    uint16_t enchantment_data_len;
+    user->buffer >> enchantment_data_len;
+
+    if(enchantment_data_len != 0xffff) {
+        LOG2(INFO, "Got enchantment data, ignoring...");
+    }
+
+    Item& it = user->inv[slot];
+
+    it.setType(itemID);
+    it.setCount(count);
+    it.setHealth(meta);
+
+    user->buffer.removePacket();
+    return PACKET_OK;
+}
+
+int PacketHandler::player_abilities(User *user)
+{
+    /// TODO: use this somewhere!
+    uint8_t flags, fspeed, wspeed;
+
+    user->buffer >> flags >> fspeed >> wspeed;
+
+    return PACKET_OK;
 }
 
 int PacketHandler::client_info(User* user)
@@ -326,7 +376,7 @@ int PacketHandler::entity_crouch(User* user)
   //ToDo: handle other actions
   switch(action)
   {
-    //Crouch
+  //Crouch
   case 1:
     pkt << Protocol::animation(user->UID, 104);
     packetData = true;
@@ -471,11 +521,11 @@ int PacketHandler::inventory_change(User* user)
     }
     user->buffer >> itemCount >> itemUses;
     //if(Item::isEnchantable(itemID)) {
-      int16_t enchantment_data_len;
-      user->buffer >> enchantment_data_len;
-      if(enchantment_data_len >= 0) {
-        LOG2(INFO, "Got enchantment data, ignoring...");
-      }
+    int16_t enchantment_data_len;
+    user->buffer >> enchantment_data_len;
+    if(enchantment_data_len >= 0) {
+      LOG2(INFO, "Got enchantment data, ignoring...");
+    }
     //}
   }
 
@@ -677,7 +727,6 @@ int PacketHandler::player_digging(User* user)
   BlockBasicPtr blockcb;
   BlockDefault blockD;
 
-
   user->buffer >> status >> x >> temp_y >> z >> direction;
   y = (uint8_t)temp_y;
 
@@ -695,13 +744,15 @@ int PacketHandler::player_digging(User* user)
   }
 
   // Blocks that break with first hit
-  if (status == BLOCK_STATUS_STARTED_DIGGING &&
-      (block == BLOCK_SNOW || block == BLOCK_REED || block == BLOCK_TORCH
-    || block == BLOCK_REDSTONE_WIRE || block == BLOCK_RED_ROSE || block == BLOCK_YELLOW_FLOWER 
-    || block == BLOCK_BROWN_MUSHROOM || block == BLOCK_RED_MUSHROOM 
-    || block == BLOCK_REDSTONE_TORCH_OFF || block == BLOCK_REDSTONE_TORCH_ON))
+  if(status == BLOCK_STATUS_STARTED_DIGGING)
   {
-    status = BLOCK_STATUS_BLOCK_BROKEN;
+      if( user->creative || (block == BLOCK_SNOW || block == BLOCK_REED || block == BLOCK_TORCH
+                             || block == BLOCK_REDSTONE_WIRE || block == BLOCK_RED_ROSE || block == BLOCK_YELLOW_FLOWER
+                             || block == BLOCK_BROWN_MUSHROOM || block == BLOCK_RED_MUSHROOM
+                             || block == BLOCK_REDSTONE_TORCH_OFF || block == BLOCK_REDSTONE_TORCH_ON))
+      {
+          status = BLOCK_STATUS_BLOCK_BROKEN;
+      }
   }
 
   switch (status)
@@ -747,7 +798,7 @@ int PacketHandler::player_digging(User* user)
         }
       }
       ServerInstance->inventory()->setSlot(user, WINDOW_PLAYER, itemSlot, user->inv[itemSlot].getType(),
-                                              user->inv[itemSlot].getCount(), user->inv[itemSlot].getHealth());
+                                           user->inv[itemSlot].getCount(), user->inv[itemSlot].getHealth());
     }
 
     if ((static_cast<Hook4<bool, const char*, int32_t, int16_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockBreakPre")))->doUntilFalse(user->nick.c_str(), x, y, z))
@@ -934,11 +985,10 @@ int PacketHandler::player_block_placement(User* user)
   }
 
   user->buffer  >> posx >> posy >> posz;
-    //newblock;
+  //newblock;
   y = (uint8_t)temp_y;
 
   user->buffer.removePacket();
-
 
   ItemBasicPtr itemcb;
   if (direction == -1 && x == -1 && y == 255 && z == -1)
@@ -998,7 +1048,6 @@ int PacketHandler::player_block_placement(User* user)
     foundFromInventory = true;
   }
 #undef INV_TASKBAR_START
-
 
   // TODO: Handle processing of
   if (direction == -1 || !foundFromInventory)
@@ -1237,7 +1286,8 @@ int PacketHandler::player_block_placement(User* user)
     //if(newblock<256)
     {
       // It's a block
-      user->inv[INV_TASKBAR_START + user->currentItemSlot()].decCount();
+      if(!user->creative)
+        user->inv[INV_TASKBAR_START + user->currentItemSlot()].decCount();
     }
   }
 #undef INV_TASKBAR_START
@@ -1490,138 +1540,17 @@ int PacketHandler::block_change(User* user)
 }
 
 
-
-
-// Shift operators for Packet class
-Packet& Packet::operator<<(int8_t val)
-{
-  m_writeBuffer.push_back(val);
-  return *this;
-}
-
-Packet& Packet::operator>>(int8_t& val)
-{
-  if (haveData(1))
-  {
-    val = m_readBuffer[m_readPos++];
-  }
-  return *this;
-}
-
-Packet& Packet::operator<<(int16_t val)
-{
-  uint16_t nval = htons(val);
-  addToWrite(reinterpret_cast<const uint8_t*>(&nval), sizeof(nval));
-  return *this;
-}
-
-Packet& Packet::operator>>(int16_t& val)
-{
-  if (haveData(2))
-  {
-    int16_t res;
-    uint8_t* p = reinterpret_cast<uint8_t*>(&res);
-    for (size_t i = 0; i < sizeof(res); ++i) *p++ = m_readBuffer[m_readPos++];
-    val = ntohs(res);
-  }
-  return *this;
-}
-
-Packet& Packet::operator<<(int32_t val)
-{
-  uint32_t nval = htonl(val);
-  addToWrite(reinterpret_cast<const uint8_t*>(&nval), sizeof(nval));
-  return *this;
-}
-
-Packet& Packet::operator>>(int32_t& val)
-{
-  if (haveData(4))
-  {
-    int32_t res;
-    uint8_t* p = reinterpret_cast<uint8_t*>(&res);
-    for (size_t i = 0; i < sizeof(res); ++i) *p++ = m_readBuffer[m_readPos++];
-    val = ntohl(res);
-  }
-  return *this;
-}
-
-Packet& Packet::operator<<(int64_t val)
-{
-  uint64_t nval = ntohll(val);
-  addToWrite(reinterpret_cast<const uint8_t*>(&nval), sizeof(nval));
-  return *this;
-}
-
-Packet& Packet::operator>>(int64_t& val)
-{
-  if (haveData(8))
-  {
-    int64_t res;
-    uint8_t* p = reinterpret_cast<uint8_t*>(&res);
-    for (size_t i = 0; i < sizeof(res); ++i) *p++ = m_readBuffer[m_readPos++];
-    val = ntohll(val);
-  }
-  return *this;
-}
-
-Packet& Packet::operator<<(float val)
-{
-  uint32_t nval;
-  memcpy(&nval, &val, 4);
-  nval = htonl(nval);
-  addToWrite(reinterpret_cast<const uint8_t*>(&nval), sizeof(nval));
-  return *this;
-}
-
-Packet& Packet::operator>>(float& val)
-{
-  if (haveData(4))
-  {
-    uint32_t res;
-    uint8_t* p = reinterpret_cast<uint8_t*>(&res);
-    for (size_t i = 0; i < sizeof(res); ++i) *p++ = m_readBuffer[m_readPos++];
-    uint32_t ival = ntohl(res);
-    memcpy(&val, &ival, 4);
-  }
-  return *this;
-}
-
-Packet& Packet::operator<<(double val)
-{
-  uint64_t nval;
-  memcpy(&nval, &val, 8);
-  nval = ntohll(nval);
-  addToWrite(reinterpret_cast<const uint8_t*>(&nval), sizeof(nval));
-  return *this;
-}
-
-Packet& Packet::operator>>(double& val)
-{
-  if (haveData(8))
-  {
-    uint64_t res;
-    uint8_t* p = reinterpret_cast<uint8_t*>(&res);
-    for (size_t i = 0; i < sizeof(res); ++i) *p++ = m_readBuffer[m_readPos++];
-    uint64_t ival = ntohll(res);
-    memcpy(&val, &ival, 8);
-  }
-  return *this;
-}
-
 Packet& Packet::operator<<(const std::string& str)
 {
   std::vector<uint16_t> result;
   makeUCS2MessageFromUTF8(str, result);
 
-  uint16_t lenval = htons(result.size());
-  addToWrite(reinterpret_cast<const uint8_t*>(&lenval), 2);
+  (*this)<<(int16_t)result.size();
+  //uint16_t lenval = htons(result.size());
+  //addToWrite(reinterpret_cast<const uint8_t*>(&lenval), 2);
 
   for (size_t i = 0;  i < result.size(); ++i)
-  {
-    uint16_t character = htons(result[i]);
-    addToWrite(reinterpret_cast<const uint8_t*>(&character), 2);
-  }
+    (*this)<<(int16_t)result[i];
 
   return *this;
 }
@@ -1684,4 +1613,9 @@ std::string Packet::readString()
   }
 
   return str;
+}
+
+void Packet::write(const void *data, size_t size)
+{
+  addToWrite((uint8_t*)data,size);
 }

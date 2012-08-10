@@ -33,9 +33,8 @@
 #include <vector>
 #include <ctime>
 
-#include "tr1.h"
-#include TR1INCLUDE(unordered_map)
-#include TR1INCLUDE(memory)
+#include <unordered_map>
+#include <memory>
 
 #include "packets.h"
 #include "user.h"

@@ -45,6 +45,18 @@
 
 enum { PLANE,REPLACE };
 
+int _atoi(const std::string& str, bool* ok = 0){
+    if(ok){
+        *ok =true;
+        for(int i=0;i<str.size();i++)
+            if(str[i] < 48 || str[i] > 57){
+               *ok = false;
+                return 0;
+            }
+    }
+    return atoi(str.c_str());
+}
+
 #define PLUGIN_COMMANDS_VERSION 1.1
 const char CHATCMDPREFIX   = '/';
 mineserver_pointer_struct* mineserver;
@@ -62,7 +74,7 @@ struct cuboidStruct
   int toBlock;
 };
 
-std::tr1::unordered_map<std::string, cuboidStruct> cuboidMap;
+std::unordered_map<std::string, cuboidStruct> cuboidMap;
 
 std::string dtos(double n)
 {
@@ -87,8 +99,8 @@ struct Command
   CommandCallback callback;  
 };
 
-typedef std::tr1::shared_ptr<Command> ComPtr;
-typedef std::tr1::unordered_map<std::string, ComPtr> CommandList;
+typedef std::shared_ptr<Command> ComPtr;
+typedef std::unordered_map<std::string, ComPtr> CommandList;
 CommandList m_Commands;
 
 void registerCommand(ComPtr command)
@@ -808,6 +820,36 @@ void sendMOTD(std::string user, std::string command, std::deque<std::string> arg
     MOTDFile.close();
   }
 }
+void changeGameMode(std::string user, std::string command, std::deque<std::string> args){
+    std::string changeUser;
+    if(args.size() == 2){
+        changeUser = args[0];
+        args.erase(args.begin());
+    }
+    else changeUser = user;
+
+    if(args.size() == 1){
+        bool ok;
+        int i = _atoi(args[0], &ok);
+
+        if(!ok){
+            if(args[0] == "survival") i=0;
+            else if(args[0] == "creative") i=1;
+            else goto printhelp;
+        }
+
+        if(i != 0 && i != 1) goto printhelp;
+
+        mineserver->user.setGameMode(user.c_str(), i);
+        std::string info = user + " set " + changeUser
+                + "'s gamemode to " + ( i ? "creative" : "survival") + ".";
+        mineserver->logger.log(LOG_INFO, "plugin.commands", info.c_str());
+        return;
+    }
+
+    printhelp:
+    mineserver->chat.sendmsgTo(user.c_str(), "usage: /gamemode [player] < survival | 0 ; creative | 1 > " ) ;
+}
 
 std::string pluginName = "commands";
 
@@ -852,6 +894,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION commands_init(mineserver_pointer_struct* m
   registerCommand(ComPtr(new Command(parseCmd("settime"), "<time>", "Sets the world time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime)));
   registerCommand(ComPtr(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport)));
   registerCommand(ComPtr(new Command(parseCmd("world"), "<world-id>", "Moves you between worlds", userWorld)));
+  registerCommand(ComPtr(new Command(parseCmd("gamemode"), "[player] < survival | 0 ; creative | 1 >", "Changes your or someone else's gamemode.", changeGameMode)));
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION commands_shutdown(void)

@@ -34,9 +34,25 @@ typedef int socklen_t;
 #include <netinet/tcp.h> // for TCP constants
 #endif
 
+#include <string>
+
+/// FIXME: When this works
+#ifdef __GNUC__
+std::string to_string(int i){
+    char buffer[512];
+    itoa(i,buffer, 10);
+    return buffer;
+}
+
+#endif
+
+#include <sys/stat.h>
+#include <fstream>
+
 #include <cerrno>
 #include <sstream>
 #include <algorithm>
+
 
 #include "tr1.h"
 #include TR1INCLUDE(array)
@@ -129,6 +145,10 @@ extern "C" void client_callback(int fd, short ev, void* arg)
           return;
         }
 
+#ifdef DEBUG
+        printf("Packet from %s, id = 0x%hx \n", user->nick.c_str(), user->action);
+#endif
+
         if (disconnecting) // disconnect -- player gone
         {
           delete user;
@@ -137,9 +157,36 @@ extern "C" void client_callback(int fd, short ev, void* arg)
       }
       else if (ServerInstance->packetHandler()->packets[user->action].len == PACKET_DOES_NOT_EXIST)
       {
-        std::ostringstream str;
+        using namespace std;
+        stringstream str;
         str << "Unknown action: 0x" << std::hex << (unsigned int)(user->action);
         LOG2(DEBUG, str.str());
+
+
+        str.str().clear();
+
+        str << "0x" << std::hex << (unsigned int)(user->action);
+        string hex = str.str();
+
+        string fname = string("packet_") + hex + "_";
+
+        struct stat st;
+        for(int i=0;;i++){
+            string tmp = fname + to_string(i) + ".txt";
+            if(!stat(tmp.c_str(),&st))
+                fname = tmp;
+        }
+        str.str().clear();
+        str << "dumping packet data to: " << fname;
+        LOG2(DEBUG, str.str());
+
+        ofstream file(fname);
+
+        for(int i= user->buffer.m_readPos; i< user->buffer.m_readBuffer.size(); i++){
+            file << "0x" << std::hex << user->buffer.m_readBuffer[i] << ' ';
+            if( i % 16 == 15)
+                file<< '\n';
+        }
 
         delete user;
         return;
@@ -155,6 +202,10 @@ extern "C" void client_callback(int fd, short ev, void* arg)
           event_add(user->GetEvent(), NULL);
           return;
         }
+
+#ifdef DEBUG
+        printf("Packet from %s, id = 0x%hx \n", user->nick.c_str(), user->action);
+#endif
 
         //Call specific function
         ServerInstance->packetHandler()->packets[user->action].function(user);
@@ -316,7 +367,7 @@ void *user_validation_thread(void *arg)
   if (fd)
   {
 #ifdef WIN32
-      send(fd, http_request.c_str(), http_request.length(), NULL);
+      send(fd, http_request.c_str(), http_request.length(), 0);
 #else
       write(fd, http_request.c_str(), http_request.length());
 #endif
@@ -326,7 +377,7 @@ void *user_validation_thread(void *arg)
       std::string stringbuffer;
 
 #ifdef WIN32
-      while (int received = recv(fd, buffer, BUFFER_SIZE - 1, NULL) != 0)
+      while (int received = recv(fd, buffer, BUFFER_SIZE - 1, 0) != 0)
       {
 #else
       while (read(fd, buffer, BUFFER_SIZE - 1) != 0)

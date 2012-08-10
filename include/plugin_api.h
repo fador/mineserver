@@ -110,6 +110,8 @@ struct user_pointer_struct
   bool (*getItemAt)(const char* user, int slot, int* type, int* meta, int* quant);
   bool (*setItemAt)(const char* user, int slot, int type, int meta, int quant);
 
+  bool (*setGameMode)(const char* user, int gameMode);
+
   void* temp[96];
 };
 

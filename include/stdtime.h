@@ -141,7 +141,7 @@ public:
 
         if(uint32_t ms = msec())
         s<<ms<<"ms ";
-        s<<usec()<<"us";//<<u8"µs";
+        s<<usec()<<u8"Âµs";
         return s.str();
     }
 
@@ -167,7 +167,7 @@ public:
         s<< std::string(buf, l);
         if(uint32_t ms = msec())
         s<<':'<<ms;
-        s<<':'<<usec();//<<u8"µs";
+        s<<':'<<usec();
         return s.str();
     }
 
@@ -200,7 +200,7 @@ inline std::ostream& operator<<(std::ostream& strm, const Time& t){
 
     if(uint32_t ms = t.msec())
     strm<<ms<<"ms ";
-    strm<<t.usec()<<"us";//<<u8"µs";
+    strm<<t.usec()<<u8"Âµs";
     return strm;
 }
 
