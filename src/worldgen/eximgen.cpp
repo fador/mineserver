@@ -34,581 +34,525 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "tools.h"
 #include "random.h"
 
+#include <cassert>
+
 EximGen::EximGen()
-  : blocks(16 * 16 * 128, 0),
-    blockdata(16 * 16 * 128 / 2, 0),
-    skylight(16 * 16 * 128 / 2, 0),
-    blocklight(16 * 16 * 128 / 2, 0),
-    heightmap(16 * 16, 0)
+    : blocks(16 * 16 * 128, 0),
+      blockdata(16 * 16 * 128 / 2, 0),
+      skylight(16 * 16 * 128 / 2, 0),
+      blocklight(16 * 16 * 128 / 2, 0),
+      heightmap(16 * 16, 0)
 {
 
 }
 
 void EximGen::init(int seed)
 {
-  cave.init(seed + 7);
+    seaLevel = ServerInstance->config()->iData("mapgen.sea.level");
+    addTrees = ServerInstance->config()->bData("mapgen.trees.enabled");
+    expandBeaches = ServerInstance->config()->bData("mapgen.beaches.expand");
+    beachExtent = ServerInstance->config()->iData("mapgen.beaches.extent");
+    beachHeight = ServerInstance->config()->iData("mapgen.beaches.height");
 
-  mountainTerrain.SetSeed(seed);
-  mountainTerrain.SetFrequency(0.005);
-  mountainTerrain.SetOctaveCount(5);
+    addOre = ServerInstance->config()->bData("mapgen.addore");
+    addCaves = ServerInstance->config()->bData("mapgen.caves.enabled");
 
-  mountainScale.SetSourceModule(0, mountainTerrain);
-  mountainScale.SetScale(-1.0);
-  mountainScale.SetBias(- (1.0 / 128) * 13);
+    winterEnabled = ServerInstance->config()->bData("mapgen.winter.enabled");
 
-  baseFlatTerrain.SetSeed(seed);
-  baseFlatTerrain.SetFrequency(0.005);
-  baseFlatTerrain.SetOctaveCount(5);
-  baseFlatTerrain.SetPersistence(0.5);
 
-  flatTerrain.SetSourceModule(0, baseFlatTerrain);
-  flatTerrain.SetScale(0.125);
-  flatTerrain.SetBias(0.05);
+    //cave.init(seed + 7);
 
-  terrainType.SetSeed(seed);
-  terrainType.SetFrequency(0.005);
-  terrainType.SetOctaveCount(4);
-  terrainType.SetPersistence(0.5);
+    int upperLevel = 255-seaLevel;
 
-  terrainSelector.SetSourceModule(0, flatTerrain);
-  terrainSelector.SetSourceModule(1, mountainScale);
-  terrainSelector.SetControlModule(terrainType);
-  terrainSelector.SetBounds(0.5, 1000.0);
-  terrainSelector.SetEdgeFalloff(0.125);
+    mountainTerrain.SetSeed(seed);
+    mountainTerrain.SetFrequency(1.0/180.0);
+    mountainTerrain.SetOctaveCount(6);
 
-  finalTerrain.SetSourceModule(0, terrainSelector);
-  finalTerrain.SetScale(62);
-  finalTerrain.SetBias(62);
+    mountainScale.SetSourceModule(0, mountainTerrain);
+    mountainScale.SetScale(upperLevel * 0.4);
+    mountainScale.SetBias(upperLevel * 0.4 + seaLevel);
 
-  treenoise.SetSeed(seed + 404);
-  treenoise.SetFrequency(0.01);
-  treenoise.SetOctaveCount(3);
+    baseFlatTerrain.SetSeed(seed);
+    baseFlatTerrain.SetFrequency(1.0/512.0);
+    baseFlatTerrain.SetOctaveCount(6);
+    baseFlatTerrain.SetPersistence(0.3);
 
-  seaLevel = ServerInstance->config()->iData("mapgen.sea.level");
-  addTrees = ServerInstance->config()->bData("mapgen.trees.enabled");
-  expandBeaches = ServerInstance->config()->bData("mapgen.beaches.expand");
-  beachExtent = ServerInstance->config()->iData("mapgen.beaches.extent");
-  beachHeight = ServerInstance->config()->iData("mapgen.beaches.height");
+    flatTerrain.SetSourceModule(0, baseFlatTerrain);
+    flatTerrain.SetScale(seaLevel / 2.0);
+    flatTerrain.SetBias(seaLevel / 2.0 + 40);
 
-  addOre = ServerInstance->config()->bData("mapgen.addore");
-  addCaves = ServerInstance->config()->bData("mapgen.caves.enabled");
+    terrainType.SetSeed(seed);
+    terrainType.SetFrequency(1.0/512.0);
+    terrainType.SetOctaveCount(4);
+    terrainType.SetPersistence(0.3);
 
-  winterEnabled = ServerInstance->config()->bData("mapgen.winter.enabled");
+    terrainSelector.SetSourceModule(0, flatTerrain);
+    terrainSelector.SetSourceModule(1, mountainScale);
+    terrainSelector.SetControlModule(terrainType);
+    terrainSelector.SetBounds(0.3, 1.1);
+    terrainSelector.SetEdgeFalloff(0.25);
+
+    finalTerrain.SetSourceModule(0, terrainSelector);
+    finalTerrain.SetScale(1.0);
+    finalTerrain.SetBias(0);
+
+    treenoise.SetSeed(seed + 404);
+    treenoise.SetFrequency(1.0/64);
+    treenoise.SetOctaveCount(3);
+
+    earthNoise.SetSeed(seed + 900);
+    earthNoise.SetFrequency(1.0/32);
+    earthNoise.SetOctaveCount(5);
+
+    caveNoise.SetSeed(seed + 1000);
+    caveNoise.SetFrequency(1.0/20);
+    caveNoise.SetOctaveCount(2);
 
 }
 
 void EximGen::re_init(int seed)
 {
-  cave.init(seed + 7);
+    //cave.init(seed + 7);
 
-  mountainTerrain.SetSeed(seed);
-  baseFlatTerrain.SetSeed(seed);
-  terrainType.SetSeed(seed);
+    mountainTerrain.SetSeed(seed);
+    baseFlatTerrain.SetSeed(seed);
+    terrainType.SetSeed(seed);
 
-  treenoise.SetSeed(seed + 404);
+    treenoise.SetSeed(seed + 404);
+    earthNoise.SetSeed(seed + 900);
+    caveNoise.SetSeed(seed + 1000);
 }
 
-
-void EximGen::generateFlatgrass(int x, int z, int map)
-{
-  sChunk* chunk = ServerInstance->map(map)->getChunk(x, z);
-  Block top = BLOCK_GRASS;
-  if (winterEnabled)
-  {
-    top = BLOCK_SNOW;
-  }
-
-  for (int bX = 0; bX < 16; bX++)
-  {
-    for (int bZ = 0; bZ < 16; bZ++)
-    {
-      heightmap[(bZ<<4)+bX] = 64;
-      for (int bY = 0; bY < 128; bY++)
-      {
-        if (bY == 0)
-        {
-          chunk->blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_BEDROCK;
-        }
-        else if (bY < 64)
-        {
-          chunk->blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_DIRT;
-        }
-        else if (bY == 64)
-        {
-          chunk->blocks[bY + (bZ * 128 + (bX * 128 * 16))] = top;
-        }
-        else
-        {
-          chunk->blocks[bY + (bZ * 128 + (bX * 128 * 16))] = BLOCK_AIR;
-        }
-      }
-    }
-  }
-}
 
 void EximGen::generateChunk(int x, int z, int map)
 {
-  NBT_Value* main = new NBT_Value(NBT_Value::TAG_COMPOUND);
-  NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
+    NBT_Value* main = new NBT_Value(NBT_Value::TAG_COMPOUND);
+    NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
 
-  val->Insert("Blocks", new NBT_Value(blocks));
-  val->Insert("Data", new NBT_Value(blockdata));
-  val->Insert("SkyLight", new NBT_Value(skylight));
-  val->Insert("BlockLight", new NBT_Value(blocklight));
-  val->Insert("HeightMap", new NBT_Value(heightmap));
-  val->Insert("Entities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
-  val->Insert("TileEntities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
-  val->Insert("LastUpdate", new NBT_Value((int64_t)time(NULL)));
-  val->Insert("xPos", new NBT_Value(x));
-  val->Insert("zPos", new NBT_Value(z));
-  val->Insert("TerrainPopulated", new NBT_Value((int8_t)1));
+    val->Insert("Sections", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
 
-  main->Insert("Level", val);
+    val->Insert("HeightMap", new NBT_Value(heightmap));
+    val->Insert("Entities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
+    val->Insert("TileEntities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
+    val->Insert("LastUpdate", new NBT_Value((int64_t)time(NULL)));
+    val->Insert("xPos", new NBT_Value(x));
+    val->Insert("zPos", new NBT_Value(z));
+    val->Insert("TerrainPopulated", new NBT_Value((int8_t)1));
 
-  std::vector<uint8_t> *t_blocks = (*val)["Blocks"]->GetByteArray();
-  std::vector<uint8_t> *t_data = (*val)["Data"]->GetByteArray();
-  std::vector<uint8_t> *t_blocklight = (*val)["BlockLight"]->GetByteArray();
-  std::vector<uint8_t> *t_skylight = (*val)["SkyLight"]->GetByteArray();
-  std::vector<int32_t> *heightmap = (*val)["HeightMap"]->GetIntArray();
+    main->Insert("Level", val);
 
-  sChunk* chunk = new sChunk();
-  chunk->blocks = &((*t_blocks)[0]);
-  chunk->data = &((*t_data)[0]);
-  chunk->blocklight = &((*t_blocklight)[0]);
-  chunk->skylight = &((*t_skylight)[0]);
-  chunk->heightmap = &((*heightmap)[0]);
-  chunk->nbt = main;
-  chunk->x = x;
-  chunk->z = z;
-  ServerInstance->map(map)->chunks.insert(ChunkMap::value_type(ChunkMap::key_type(x, z), chunk));
+    sChunk* chunk = new sChunk();
 
-  if (ServerInstance->config()->bData("mapgen.flatgrass"))
-  {
-    generateFlatgrass(x, z, map);
-  }
-  else
-  {
-    generateWithNoise(x, z, map);
-  }
+    NBT_Value* val1 = (*val)["HeightMap"];
+    chunk->heightmap = val1->GetIntArray()->data();
+    chunk->nbt = main;
+    chunk->x = x<<4;
+    chunk->z = z<<4;
+    ServerInstance->map(map)->chunks.insert(ChunkMap::value_type(ChunkMap::key_type(x, z), chunk));
+
+    memset(chunk->blocks, 0, 16*16*256);
+    memset(chunk->addblocks, 0, 16*16*256/2);
+    memset(chunk->data, 0, 16*16*256/2);
+    memset(chunk->blocklight, 0, 16*16*256/2);
+    memset(chunk->skylight, 0, 16*16*256/2);
+    chunk->chunks_present = 0xffff;
+
+    ChunkInfo info(chunk);
 
 
-  // Not changed
-  chunk->changed = ServerInstance->config()->bData("map.save_unchanged_chunks");
+    if (ServerInstance->config()->bData("mapgen.flatgrass"))
+    {
+        generateFlatgrass(x, z, map);
+    }
+    else
+    {
+        generateWithNoise(info);
+    }
 
-  if (addOre)
-  {
-    AddOre(x, z, map, BLOCK_COAL_ORE);
-    AddOre(x, z, map, BLOCK_IRON_ORE);
-    AddOre(x, z, map, BLOCK_GOLD_ORE);
-    AddOre(x, z, map, BLOCK_DIAMOND_ORE);
-    AddOre(x, z, map, BLOCK_REDSTONE_ORE);
-    AddOre(x, z, map, BLOCK_LAPIS_ORE);
-  }
 
-  AddOre(x, z, map, BLOCK_GRAVEL);
-  AddOre(x, z, map, BLOCK_DIRT); // guess what, dirt also exists underground
+    // Not changed
+    chunk->changed = ServerInstance->config()->bData("map.save_unchanged_chunks");
 
-  // Add trees
-  if (addTrees)
-  {
-    AddTrees(x, z, map);
-  }
+    if (false && addOre)
+    {
+        AddOre(x, z, map, BLOCK_COAL_ORE);
+        AddOre(x, z, map, BLOCK_IRON_ORE);
+        AddOre(x, z, map, BLOCK_GOLD_ORE);
+        AddOre(x, z, map, BLOCK_DIAMOND_ORE);
+        AddOre(x, z, map, BLOCK_REDSTONE_ORE);
+        AddOre(x, z, map, BLOCK_LAPIS_ORE);
+    }
 
-  if (expandBeaches)
-  {
-    ExpandBeaches(x, z, map);
-  }
+    //AddOre(x, z, map, BLOCK_GRAVEL);
+    //AddOre(x, z, map, BLOCK_DIRT); // guess what, dirt also exists underground
 
-  // AddRiver(x, z, map);
+    // Add trees
+    if (addTrees)
+    {
+        //AddTrees(x, z, map);
+    }
+
+    if (expandBeaches)
+    {
+        //ExpandBeaches(x, z, map);
+    }
+
+    // AddRiver(x, z, map);
 
 }
+
+
 #include <iostream>
 using namespace std;
 void EximGen::AddTrees(int x, int z, int map)
 {
-  int32_t xBlockpos = x << 4;
-  int32_t zBlockpos = z << 4;
-  int blockX, blockZ;
-  uint8_t blockY, block, meta;
+    int32_t xBlockpos = x << 4;
+    int32_t zBlockpos = z << 4;
+    int blockX, blockZ;
+    uint8_t blockY, block, meta;
 
-  bool empty[16][16]; // is block emptey~
+    bool empty[16][16]; // is block emptey~
 
-  memset(empty, 1, 256);
+    memset(empty, 1, 256);
 
-  uint8_t trees = uint8_t(uniform01() * 7 + 13);
-  uint8_t i = 0;
-  while (i < trees)
-  {
-    uint8_t a = uint8_t(uniform01() * 16);
-    uint8_t b = uint8_t(uniform01() * 16);
-
-    if (empty[a][b])
+    uint8_t trees = uint8_t(uniform01() * 7 + 13);
+    uint8_t i = 0;
+    while (i < trees)
     {
-      blockX = a + xBlockpos;
-      blockZ = b + zBlockpos;
-      blockY = heightmap[(b<<4)+a] ;
+        uint8_t a = uint8_t(uniform01() * 16);
+        uint8_t b = uint8_t(uniform01() * 16);
 
-      ServerInstance->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
-      if (block == BLOCK_DIRT || block == BLOCK_GRASS)
-      {
-        // Trees only grow on dirt and grass? =b
-        ServerInstance->map(map)->getBlock(blockX, ++blockY, blockZ, &block, &meta);
-        if (block == BLOCK_AIR || block == BLOCK_SNOW)
+        if (empty[a][b])
         {
-          if (treenoise.GetValue(blockX, 0, blockZ) > -0.4)
-          {
-            Tree tree(blockX, blockY, blockZ, map);
-          }
+            blockX = a + xBlockpos;
+            blockZ = b + zBlockpos;
+            blockY = heightmap[(b<<4)+a] ;
+
+            ServerInstance->map(map)->getBlock(blockX, blockY, blockZ, &block, &meta);
+            if (block == BLOCK_DIRT || block == BLOCK_GRASS)
+            {
+                // Trees only grow on dirt and grass? =b
+                ServerInstance->map(map)->getBlock(blockX, ++blockY, blockZ, &block, &meta);
+                if (block == BLOCK_AIR || block == BLOCK_SNOW)
+                {
+                    if (treenoise.GetValue(blockX, 0, blockZ) > -0.4)
+                    {
+                        Tree tree(blockX, blockY, blockZ, map);
+                    }
+                }
+            }
+            for (int8_t u = -2; u < 2; u++)
+            {
+                for (int8_t v = -2; v < 2; v++)
+                {
+                    //Check for array boundaries
+                    if((a+u) >= 0 && (b+v) >= 0 &&
+                            (a+u) < 16 && (b+v) < 16)
+                    {
+                        empty[a+u][b+v] = false;
+                    }
+                }
+            }
+            i++;
         }
-      }
-      for (int8_t u = -2; u < 2; u++)
-      {
-        for (int8_t v = -2; v < 2; v++)
-        {
-          //Check for array boundaries
-          if((a+u) >= 0 && (b+v) >= 0 &&
-             (a+u) < 16 && (b+v) < 16)
-          {
-            empty[a+u][b+v] = false;
-          }
-        }
-      }
-      i++;
     }
-  }
 }
 
-void EximGen::generateWithNoise(int x, int z, int map)
+void EximGen::generateWithNoise(ChunkInfo& info)
 {
-  // Debug..
+    // Debug..
 #ifdef PRINT_MAPGEN_TIME
 #ifdef WIN32
-  DWORD t_begin, t_end;
-  t_begin = timeGetTime();
+    DWORD t_begin, t_end;
+    t_begin = timeGetTime();
 #else
-  struct timeval start, end;
-  gettimeofday(&start, NULL);
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
 #endif
 #endif
-  sChunk* chunk = ServerInstance->map(map)->getChunk(x, z);
 
-  // Winterland
-  Block topBlock = BLOCK_GRASS;
-  if (winterEnabled)
-  {
-    topBlock = BLOCK_SNOW;
-  }
+    AnvilAccessor& blocks = info.blocks;
 
-  // Populate blocks in chunk
-  int32_t currentHeight;
-  int32_t ymax;
-  uint8_t* curBlock;
-
-  int32_t xBlockpos = x << 4;
-  int32_t zBlockpos = z << 4;
-  for (uint8_t bX = 0; bX < 16; bX++) //,xBlockpos++)   // ### optimization that somehow fucks up noise values =b
-  {
-    for (uint8_t bZ = 0; bZ < 16; bZ++) //,zBlockpos++)
-    {
-      heightmap[(bZ<<4)+bX]  = ymax = currentHeight = (int32_t)(finalTerrain.GetValue(xBlockpos + bX, 0, zBlockpos + bZ));
-
-      uint8_t stoneHeight = uint8_t(currentHeight - (uniform01() * 3));
-      int32_t bYbX = ((bZ << 7) + (bX << 11));
-
-      if (currentHeight < seaLevel)
-      {
-        ymax = seaLevel;
-      }
-
-      for (int bY = 0; bY <= ymax; bY++, bYbX++)
-      {
-        curBlock = &(chunk->blocks[bYbX]);
-
-        // Place bedrock
-        if (bY == 0)
-        {
-          *curBlock = BLOCK_BEDROCK;
-          continue;
+    for(int x=0;x<16;x++){
+        for(int z=0;z<16;z++){
+            blocks(x,0,z).id(BLOCK_BEDROCK);
         }
-        else if (bY <= stoneHeight)
-        {
-          *curBlock = BLOCK_STONE;
-          // Add caves
-          if (addCaves)
-          {
-            cave.AddCaves(*curBlock, xBlockpos, bY, zBlockpos);
-          }
-        }
-        else if (bY <= currentHeight) // -3,-2,-1,0 offset from top block
-        {
-          if (bY < seaLevel - 2)
-          {
-            *curBlock = BLOCK_GRAVEL;  // FF
-          }
-          else if (bY <= seaLevel)
-          {
-            *curBlock = BLOCK_SAND;  // FF
-          }
-          else
-          {
-            if (bY > 70)
-            {
-              if (uniform01() > 0.999)
-              {
-                *curBlock = BLOCK_STATIONARY_WATER; // mountain water spring
-                if (bYbX & 1)
-                {
-                  chunk->data[bYbX>>1] &= 0x0f;
-                  chunk->data[bYbX>>1] |= 0x4 << 4;
+    }
+
+    int chunkX = info.chunk->x;
+    int chunkZ = info.chunk->z;
+
+    for(int x=0;x<16;x++){
+        for(int z=0;z<16;z++){
+
+            int32_t& currentHeight = heightmap[(z << 4) + x];
+
+            currentHeight = (int)finalTerrain.GetValue(chunkX + x,0,chunkZ + z);
+
+            if(currentHeight > 256)
+                currentHeight = 256;
+
+            int stoneHeight = currentHeight - uniform01()*4;
+
+            int y=1;
+            bool cave=false;
+            int cave_start;
+            for(;y<=stoneHeight;y++){
+                if(caveNoise.GetValue(chunkX +x,y,chunkZ +z) > 0.8){
+                    if(!cave){
+                        cave =true;
+                        cave_start =y;
+                    }
+                }
+                else{
+                    cave = false;
+                    double density = earthNoise.GetValue(chunkX + x,y, chunkZ + z);
+
+                    BlockRef b = blocks(x,y,z);
+                    if(density < -0.75){
+                        b.id(BLOCK_SAND);
+                    }
+                    else if(density < -0.2){
+                        b.id(BLOCK_DIRT);
+                    }
+                    else if(density < 0.0){
+                        b.id(BLOCK_GRAVEL);
+                    }
+                    else b.id(BLOCK_STONE);
+                }
+            }
+
+            if(cave){
+                heightmap[(z << 4) + x] = cave_start;
+            }
+            if(currentHeight <= seaLevel){
+                for(;y<=currentHeight;y++)
+                    blocks(x,y,z).id(BLOCK_SAND);
+                for(;y<=seaLevel;y++)
+                    blocks(x,y,z).id(BLOCK_STATIONARY_WATER);
+            }else{
+                if(!cave){
+                    for(;y<currentHeight;y++)
+                        blocks(x,y,z).id(BLOCK_DIRT);
+                    blocks(x,y,z).id(BLOCK_GRASS);
                 }
                 else
-                {
-                  chunk->data[bYbX>>1] &= 0xf0;
-                  chunk->data[bYbX>>1] |= 0x4;
-                }
-              }
-              else
-              {
-                *curBlock = topBlock;  // FF
-              }
+                    blocks(x,cave_start,z).id(BLOCK_GRASS);
             }
-            else
-            {
-              *curBlock = topBlock;  // FF
+            if( currentHeight >= (230 + uniform01()*5) ){
+                blocks(x, currentHeight +1 ,z).id(BLOCK_SNOW_BLOCK);
             }
-          }
+            else if(winterEnabled || currentHeight >= (225 + uniform01()*5) ){
+                blocks(x, currentHeight +1 ,z).id(BLOCK_SNOW);
+            }
         }
-        else
-        {
-          if (bY <= seaLevel)
-          {
-            *curBlock = BLOCK_STATIONARY_WATER; // FF
-            if (bYbX & 1)
-            {
-              chunk->data[bYbX>>1] &= 0x0f;
-              chunk->data[bYbX>>1] |= 0x8 << 4;
-            }
-            else
-            {
-              chunk->data[bYbX>>1] &= 0xf0;
-              chunk->data[bYbX>>1] |= 0x8;
-            }
-          }
-          else
-          {
-            *curBlock = BLOCK_AIR;  // FF
-          }
-        }
-        //bYbX++;
-      }
     }
-  }
 
 #ifdef PRINT_MAPGEN_TIME
 #ifdef WIN32
-  t_end = timeGetTime();
-  ServerInstance->logger()->log("Mapgen: " + dtos(t_end - t_begin) + "ms");
+    t_end = timeGetTime();
+    ServerInstance->logger()->log("Mapgen: " + dtos(t_end - t_begin) + "ms");
 #else
-  gettimeofday(&end, NULL);
-  ServerInstance->logger()->log("Mapgen: " + dtos(end.tv_usec - start.tv_usec));
+    gettimeofday(&end, NULL);
+    ServerInstance->logger()->log("Mapgen: " + dtos(end.tv_usec - start.tv_usec));
 #endif
 #endif
 }
 
 void EximGen::ExpandBeaches(int x, int z, int map)
 {
-  sChunk* chunk = ServerInstance->map(map)->getChunk(blockToChunk(x), blockToChunk(z));
-  int beachExtentSqr = (beachExtent + 1) * (beachExtent + 1);
-  int xBlockpos = x << 4;
-  int zBlockpos = z << 4;
+    sChunk* chunk = ServerInstance->map(map)->getChunk(blockToChunk(x), blockToChunk(z));
+    int beachExtentSqr = (beachExtent + 1) * (beachExtent + 1);
+    int xBlockpos = x << 4;
+    int zBlockpos = z << 4;
 
-  int blockX, blockZ, h;
-  uint8_t block = 0;
-  uint8_t meta = 0;
+    int blockX, blockZ, h;
+    uint8_t block = 0;
+    uint8_t meta = 0;
 
-  for (int bX = 0; bX < 16; bX++)
-  {
-    for (int bZ = 0; bZ < 16; bZ++)
+    for (int bX = 0; bX < 16; bX++)
     {
-      blockX = xBlockpos + bX;
-      blockZ = zBlockpos + bZ;
-
-      h = heightmap[(bZ<<4)+bX];
-
-      if (h < 0)
-      {
-        continue;
-      }
-
-      bool found = false;
-      for (int dx = -beachExtent; !found && dx <= beachExtent; dx++)
-      {
-        for (int dz = -beachExtent; !found && dz <= beachExtent; dz++)
+        for (int bZ = 0; bZ < 16; bZ++)
         {
-          for (int dh = -beachHeight; !found && dh <= 0; dh++)
-          {
-            if (dx * dx + dz * dz + dh * dh > beachExtentSqr)
+            blockX = xBlockpos + bX;
+            blockZ = zBlockpos + bZ;
+
+            h = heightmap[(bZ<<4)+bX];
+
+            if (h < 0)
             {
-              continue;
+                continue;
             }
 
-            int xx = bX + dx;
-            int zz = bZ + dz;
-            int hh = h + dh;
-            if (xx < 0 || xx >= 15 || zz < 0 || zz >= 15 || hh < 0 || hh >= 127)
+            bool found = false;
+            for (int dx = -beachExtent; !found && dx <= beachExtent; dx++)
             {
-              continue;
-            }
+                for (int dz = -beachExtent; !found && dz <= beachExtent; dz++)
+                {
+                    for (int dh = -beachHeight; !found && dh <= 0; dh++)
+                    {
+                        if (dx * dx + dz * dz + dh * dh > beachExtentSqr)
+                        {
+                            continue;
+                        }
 
-            //ToDo: add getBlock!!
-            if (block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
-            {
-              found = true;
-              break;
+                        int xx = bX + dx;
+                        int zz = bZ + dz;
+                        int hh = h + dh;
+                        if (xx < 0 || xx >= 15 || zz < 0 || zz >= 15 || hh < 0 || hh >= 127)
+                        {
+                            continue;
+                        }
+
+                        //ToDo: add getBlock!!
+                        if (block == BLOCK_WATER || block == BLOCK_STATIONARY_WATER)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
             }
-          }
+            if (found)
+            {
+                ServerInstance->map(map)->sendBlockChange(blockX, h, blockZ, BLOCK_SAND, 0);
+                ServerInstance->map(map)->setBlock(blockX, h, blockZ, BLOCK_SAND, 0);
+
+                ServerInstance->map(map)->getBlock(blockX, h - 1, blockZ, &block, &meta);
+
+                if (h > 0 && block == BLOCK_DIRT)
+                {
+                    ServerInstance->map(map)->sendBlockChange(blockX, h - 1, blockZ, BLOCK_SAND, 0);
+                    ServerInstance->map(map)->setBlock(blockX, h - 1, blockZ, BLOCK_SAND, 0);
+                }
+            }
         }
-      }
-      if (found)
-      {
-        ServerInstance->map(map)->sendBlockChange(blockX, h, blockZ, BLOCK_SAND, 0);
-        ServerInstance->map(map)->setBlock(blockX, h, blockZ, BLOCK_SAND, 0);
-
-        ServerInstance->map(map)->getBlock(blockX, h - 1, blockZ, &block, &meta);
-
-        if (h > 0 && block == BLOCK_DIRT)
-        {
-          ServerInstance->map(map)->sendBlockChange(blockX, h - 1, blockZ, BLOCK_SAND, 0);
-          ServerInstance->map(map)->setBlock(blockX, h - 1, blockZ, BLOCK_SAND, 0);
-        }
-      }
     }
-  }
 }
 
 void EximGen::AddOre(int x, int z, int map, uint8_t type)
 {
-  sChunk* chunk = ServerInstance->map(map)->getChunk(x, z);
+    sChunk* chunk = ServerInstance->map(map)->getChunk(x, z);
 
-  int32_t blockX, blockZ;
-  uint8_t block, blockY;
+    int32_t blockX, blockZ;
+    uint8_t block, blockY;
 
-  // Parameters for deposits
-  uint8_t count, startHeight = 128, minDepoSize, maxDepoSize;
+    // Parameters for deposits
+    uint8_t count, startHeight = 128, minDepoSize, maxDepoSize;
 
-  switch (type)
-  {
-  case BLOCK_COAL_ORE:
-    count = uint8_t(uniform01() * 10 + 20); // 20-30 coal deposits
-    //startHeight = 90;
-    minDepoSize = 3;
-    maxDepoSize = 7;
-    break;
-  case BLOCK_IRON_ORE:
-    count = uint8_t(uniform01() * 8 + 10); // 10-18 iron deposits
-    startHeight = 90;
-    minDepoSize = 2;
-    maxDepoSize = 5;
-    break;
-  case BLOCK_GOLD_ORE:
-    count = uint8_t(uniform01() * 4 + 5); // 4-9 gold deposits
-    startHeight = 42;
-    minDepoSize = 2;
-    maxDepoSize = 4;
-    break;
-  case BLOCK_DIAMOND_ORE:
-    count = uint8_t(uniform01() * 1 + 2); // 1-3 diamond deposits
-    startHeight = 17;
-    minDepoSize = 1;
-    maxDepoSize = 2;
-    break;
-  case BLOCK_REDSTONE_ORE:
-    count = uint8_t(uniform01() * 5 + 5); // 5-10 redstone deposits
-    startHeight = 25;
-    minDepoSize = 2;
-    maxDepoSize = 4;
-    break;
-  case BLOCK_LAPIS_ORE:
-    count = uint8_t(uniform01() * 1 + 2); // 1-3 lapis lazuli deposits
-    startHeight = 17;
-    minDepoSize = 1;
-    maxDepoSize = 2;
-    break;
-  case BLOCK_GRAVEL:
-    count = uint8_t(uniform01() * 10 + 20); // 20-30 gravel deposits
-    //startHeight = 90;
-    minDepoSize = 6;
-    maxDepoSize = 10;
-    break;
-  case BLOCK_DIRT:
-    count = uint8_t(uniform01() * 10 + 20); // 20-30 gravel deposits
-    //startHeight = 90;
-    minDepoSize = 6;
-    maxDepoSize = 10;
-    break;
-  default:
-    return;
-  }
-
-  int i = 0;
-  while (i < count)
-  {
-    blockX = int32_t(uniform01() * 16);
-    blockZ = int32_t(uniform01() * 16);
-
-    blockY = heightmap[(blockZ<<4)+blockX];
-    blockY -= uint8_t(uniform01() * 5);
-
-    // Check that startheight is not higher than height at that column
-    if (blockY > startHeight)
+    switch (type)
     {
-      blockY = startHeight;
+    case BLOCK_COAL_ORE:
+        count = uint8_t(uniform01() * 10 + 20); // 20-30 coal deposits
+        //startHeight = 90;
+        minDepoSize = 3;
+        maxDepoSize = 7;
+        break;
+    case BLOCK_IRON_ORE:
+        count = uint8_t(uniform01() * 8 + 10); // 10-18 iron deposits
+        startHeight = 90;
+        minDepoSize = 2;
+        maxDepoSize = 5;
+        break;
+    case BLOCK_GOLD_ORE:
+        count = uint8_t(uniform01() * 4 + 5); // 4-9 gold deposits
+        startHeight = 42;
+        minDepoSize = 2;
+        maxDepoSize = 4;
+        break;
+    case BLOCK_DIAMOND_ORE:
+        count = uint8_t(uniform01() * 1 + 2); // 1-3 diamond deposits
+        startHeight = 17;
+        minDepoSize = 1;
+        maxDepoSize = 2;
+        break;
+    case BLOCK_REDSTONE_ORE:
+        count = uint8_t(uniform01() * 5 + 5); // 5-10 redstone deposits
+        startHeight = 25;
+        minDepoSize = 2;
+        maxDepoSize = 4;
+        break;
+    case BLOCK_LAPIS_ORE:
+        count = uint8_t(uniform01() * 1 + 2); // 1-3 lapis lazuli deposits
+        startHeight = 17;
+        minDepoSize = 1;
+        maxDepoSize = 2;
+        break;
+    case BLOCK_GRAVEL:
+        count = uint8_t(uniform01() * 10 + 20); // 20-30 gravel deposits
+        //startHeight = 90;
+        minDepoSize = 6;
+        maxDepoSize = 10;
+        break;
+    case BLOCK_DIRT:
+        count = uint8_t(uniform01() * 10 + 20); // 20-30 gravel deposits
+        //startHeight = 90;
+        minDepoSize = 6;
+        maxDepoSize = 10;
+        break;
+    default:
+        return;
     }
 
-    // Calculate Y
-    blockY = uint8_t(uniform01() * (blockY));
-
-    i++;
-
-    block = chunk->blocks[(blockX << 11) + (blockZ << 7) + blockY];
-    // No ore in caves
-    if (block == BLOCK_AIR)
+    int i = 0;
+    while (i < count)
     {
-      continue;
+        blockX = int32_t(uniform01() * 16);
+        blockZ = int32_t(uniform01() * 16);
+
+        blockY = heightmap[(blockZ<<4)+blockX];
+        blockY -= uint8_t(uniform01() * 5);
+
+        // Check that startheight is not higher than height at that column
+        if (blockY > startHeight)
+        {
+            blockY = startHeight;
+        }
+
+        // Calculate Y
+        blockY = uint8_t(uniform01() * (blockY));
+
+        i++;
+
+        block = chunk->blocks[(blockX << 11) + (blockZ << 7) + blockY];
+        // No ore in caves
+        if (block == BLOCK_AIR)
+        {
+            continue;
+        }
+
+        AddDeposit(blockX, blockY, blockZ, map, type, minDepoSize, maxDepoSize, chunk);
+
     }
-
-    AddDeposit(blockX, blockY, blockZ, map, type, minDepoSize, maxDepoSize, chunk);
-
-  }
 }
 
 void EximGen::AddDeposit(int x, int y, int z, int map, uint8_t block, uint8_t minDepoSize, uint8_t maxDepoSize, sChunk* chunk)
 {
-  uint8_t depoSize = uint8_t((uniform01() * (maxDepoSize - minDepoSize) + minDepoSize) / 2);
-  int32_t t_posx, t_posy, t_posz;
-  for (int8_t xi = (-depoSize); xi <= depoSize; xi++)
-  {
-    for (int8_t yi = (-depoSize); yi <= depoSize; yi++)
+    uint8_t depoSize = uint8_t((uniform01() * (maxDepoSize - minDepoSize) + minDepoSize) / 2);
+    int32_t t_posx, t_posy, t_posz;
+    for (int8_t xi = (-depoSize); xi <= depoSize; xi++)
     {
-      for (int8_t zi = (-depoSize); zi <= depoSize; zi++)
-      {
-        if (abs(xi) + abs(yi) + abs(zi) <= depoSize)
+        for (int8_t yi = (-depoSize); yi <= depoSize; yi++)
         {
-          t_posx = x + xi;
-          t_posy = y + yi;
-          t_posz = z + zi;
+            for (int8_t zi = (-depoSize); zi <= depoSize; zi++)
+            {
+                if (abs(xi) + abs(yi) + abs(zi) <= depoSize)
+                {
+                    t_posx = x + xi;
+                    t_posy = y + yi;
+                    t_posz = z + zi;
 
-          if (t_posz < 0 || t_posz > 15 || t_posx < 0 || t_posx > 15 || t_posy < 1)
-          {
-            break;
-          }
+                    if (t_posz < 0 || t_posz > 15 || t_posx < 0 || t_posx > 15 || t_posy < 1)
+                    {
+                        break;
+                    }
 
-          if (chunk->blocks[t_posy + (t_posz << 7) + (t_posx << 11)] == BLOCK_STONE)
-          {
-            chunk->blocks[t_posy + (t_posz << 7) + (t_posx << 11)] = block;
-          }
+                    if (chunk->blocks[t_posy + (t_posz << 7) + (t_posx << 11)] == BLOCK_STONE)
+                    {
+                        chunk->blocks[t_posy + (t_posz << 7) + (t_posx << 11)] = block;
+                    }
+                }
+            }
         }
-      }
     }
-  }
 }

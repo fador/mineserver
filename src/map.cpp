@@ -338,7 +338,8 @@ void Map::init(int number)
   /////////////////
 
   // Init mapgenerator
-  ServerInstance->mapGen(m_number)->re_init((int32_t)mapSeed);
+  Mineserver* _ServerInstance = ServerInstance;
+  _ServerInstance->mapGen(m_number)->re_init((int32_t)mapSeed);
 
   delete root;
 }
@@ -1263,11 +1264,11 @@ sChunk* Map::loadMap(int x, int z, bool generate)
 
   size_t fullLen = (16 * 256 * 16);
   size_t halfLen = fullLen >> 1;
-  chunk->blocks     = new uint8_t[fullLen];
-  chunk->addblocks  = new uint8_t[halfLen];
-  chunk->data       = new uint8_t[halfLen];
-  chunk->blocklight = new uint8_t[halfLen];
-  chunk->skylight   = new uint8_t[halfLen];
+  //chunk->blocks     = new uint8_t[fullLen];
+  //chunk->addblocks  = new uint8_t[halfLen];
+  //chunk->data       = new uint8_t[halfLen];
+  //chunk->blocklight = new uint8_t[halfLen];
+  //chunk->skylight   = new uint8_t[halfLen];
   chunk->heightmap  = nbt_heightmap->GetIntArray()->data();
   chunk->chunks_present = 0;
   chunk->addblocks_present = 0;
@@ -1772,7 +1773,7 @@ void Map::sendToUser(User* user, int x, int z, bool login)
   //ToDo: now sending all 16 16x16 chunks, limit to only those with blocks.
   // Chunk
   (*p) << (int8_t)PACKET_MAP_CHUNK << (int32_t)(mapposx) << (int32_t)(mapposz)
-       << (int8_t)1 /* Biome Data bool? */ << (int16_t)0xffff /* Enabled chunks 0..15 */ 
+       << (int8_t)1 /* Biome Data bool? */ << (int16_t)0xffff /* Enabled chunks 0..15 */
        << (int16_t)0xffff /* Enabled additional data? in the enabled chunks */;
 
 
@@ -1789,7 +1790,7 @@ void Map::sendToUser(User* user, int x, int z, bool login)
   uint8_t* buffer = new uint8_t[written];
 
   // Compress data with zlib deflate
-  compress(buffer, &written, &mapdata[0], 98304*2+256);
+  compress(buffer, &written, mapdata, 98304*2+256);
 
   (*p) << (int32_t)written;
   (*p).addToWrite(buffer, written);

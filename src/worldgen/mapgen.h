@@ -45,7 +45,6 @@ public:
   virtual void init(int seed);
   virtual void re_init(int seed); // Used when generating multiple maps
   virtual void generateChunk(int x, int z, int map);
-
 private:
   std::vector<uint8_t> blocks;
   std::vector<uint8_t> addblocks;
@@ -66,6 +65,8 @@ private:
   bool addCaves;
   bool winterEnabled;
 
+protected:
+
   virtual void generateFlatgrass(int x, int z, int map);
   virtual void generateWithNoise(int x, int z, int map);
 
@@ -74,7 +75,7 @@ private:
 
   virtual void AddOre(int x, int z, int map, uint8_t type);
   virtual void AddDeposit(int x, int y, int z, int map, uint8_t block, int minDepoSize, int maxDepoSize, sChunk* chunk);
-
+private:
   CaveGen cave;
 
   // Heightmap composition

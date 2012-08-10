@@ -24,17 +24,17 @@
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-#if defined(linux)
+#ifdef __unix__
 #include <unistd.h>
 #include <libgen.h>
 #include <wordexp.h>  // for wordexp
 #include <sys/stat.h> // for mkdir
 #include <climits>
-#elif defined(WIN32)
+#endif
+
+#ifdef __WIN32__
 #include <direct.h>
-#define _WINSOCKAPI_ //Stops windows.h from including winsock.h
-                     //Fixes errors I was having
+
 #include <ShlObj.h>
 #endif
 
@@ -49,6 +49,7 @@
 #include <ctime>
 #include <cmath>
 #include <cctype>
+#include <cassert>
 
 #include "tools.h"
 #include "logger.h"
@@ -212,7 +213,7 @@ bool fileExists(const std::string& filename)
 bool makeDirectory(const std::string& path)
 {
 #ifdef WIN32
-  return _mkdir(path.c_str()) != -1;
+  return mkdir(path.c_str()) != -1;
 #else
   return mkdir(path.c_str(), 0755) != -1;
 #endif
@@ -275,7 +276,7 @@ std::string getHomeDir()
 
   return canonicalizePath("~/.mineserver");
 
-#elif defined(WIN32)
+#elif defined(__WIN32__)
 
 char szPath[MAX_PATH];
 if(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, szPath) == 0)
@@ -299,6 +300,11 @@ else
 
 std::string pathOfExecutable()
 {
+    char buffer[512];
+    assert(getcwd(buffer, sizeof(buffer)));
+
+    return buffer;
+    /*
   const size_t dest_len = 4096;
   char path[dest_len];
   std::memset(path, 0, dest_len);
@@ -313,20 +319,26 @@ std::string pathOfExecutable()
   return std::string(path);
 
 #elif defined(WIN32)
-
+*/
+  /*
   if (0 == GetModuleFileName(NULL, path, dest_len))
   {
     return "";
   }
 
   return pathOfFile(path).first;
+  */
+    /*
+  char buffer[512];
+  assert(getcwd(buffer, sizeof(buffer)));
 
+  return buffer;
 #else
 
   return "";
 
 #endif
-
+*/
 }
 
 std::pair<std::string, std::string> pathOfFile(const std::string& filename)
@@ -369,18 +381,8 @@ std::pair<std::string, std::string> pathOfFile(const std::string& filename)
 }
 
 
-
+#include "stdtime.h"
 uint64_t microTime()
 {
-#ifndef WIN32
-  struct timespec now;
-  clock_gettime(CLOCK_MONOTONIC, &now);
-  return (now.tv_sec*(uint64_t)1000000 + now.tv_nsec/(uint64_t)1000);
-#else
-  FILETIME ft;
-  GetSystemTimeAsFileTime(&ft);
-  uint64_t out = ((uint64_t)ft.dwHighDateTime)<<32 | (uint64_t)ft.dwLowDateTime;
-  out /= 10; // from 100ns to 1us
-  return out;
-#endif
+  return Time::now().total_usec();
 }

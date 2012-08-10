@@ -77,7 +77,7 @@ public:
   void headLook(int16_t head_yaw);
 };
 
-typedef std::tr1::shared_ptr<Mob> MobPtr;
+typedef std::shared_ptr<Mob> MobPtr;
 
 class Mobs
 {

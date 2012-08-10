@@ -36,21 +36,21 @@
 class Furnace;
 class NBT_Value;
 
-typedef std::tr1::shared_ptr<Furnace> FurnacePtr;
+typedef std::shared_ptr<Furnace> FurnacePtr;
 
 class FurnaceManager
 {
 public:
   void update();
-  void handleActivity(std::tr1::shared_ptr<furnaceData> data);
-  void removeFurnace(std::tr1::shared_ptr<furnaceData> data);
+  void handleActivity(std::shared_ptr<furnaceData> data);
+  void removeFurnace(std::shared_ptr<furnaceData> data);
 
 private:
   typedef std::list<FurnacePtr> FurnaceContainer;
   FurnaceContainer m_activeFurnaces;
 };
 
-void removeFurnace(std::tr1::shared_ptr<furnaceData> data);
+void removeFurnace(std::shared_ptr<furnaceData> data);
 
 
 #endif

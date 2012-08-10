@@ -35,8 +35,8 @@
 
 #include "extern.h"
 
-#ifdef WIN32
-#define NOMINMAX
+#ifdef __WIN32__
+
 #include <winsock2.h>
 #else
 #include <arpa/inet.h>

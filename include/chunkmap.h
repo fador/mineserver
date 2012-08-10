@@ -33,9 +33,8 @@
 #include <vector>
 #include <ctime>
 
-#include "tr1.h"
-#include TR1INCLUDE(unordered_map)
-#include TR1INCLUDE(memory)
+#include <unordered_map>
+#include <memory>
 
 #include "packets.h"
 #include "user.h"
@@ -58,7 +57,7 @@ struct spawnedItem
   }
 };
 
-typedef std::tr1::shared_ptr<std::vector<ItemPtr> > ItemVectorPtr;
+typedef std::shared_ptr<std::vector<ItemPtr> > ItemVectorPtr;
 
 /** holds items and coordinates for small and large chests
  * note: large chests are in testing
@@ -90,7 +89,7 @@ public:
         items()->pop_back();
     }
     return;
-   }
+  }
 
   chestData()
   {
@@ -148,16 +147,16 @@ template <typename T>
 struct DataFinder
 {
   DataFinder(int32_t x, int32_t y, int32_t z) : x(x), y(y), z(z) { }
-  inline bool operator()(const std::tr1::shared_ptr<T> & t) const { return t->x == x && t->y == y && t->z == z; }
+  inline bool operator()(const std::shared_ptr<T> & t) const { return t->x == x && t->y == y && t->z == z; }
 private:
   int32_t x;
   int32_t y;
   int32_t z;
 };
 
-typedef std::tr1::shared_ptr<chestData>   chestDataPtr;
-typedef std::tr1::shared_ptr<signData>    signDataPtr;
-typedef std::tr1::shared_ptr<furnaceData> furnaceDataPtr;
+typedef std::shared_ptr<chestData>   chestDataPtr;
+typedef std::shared_ptr<signData>    signDataPtr;
+typedef std::shared_ptr<furnaceData> furnaceDataPtr;
 
 void removeFurnace(furnaceDataPtr data);
 
@@ -165,20 +164,28 @@ void removeFurnace(furnaceDataPtr data);
  */
 struct sChunk
 {
+  uint8_t blocks[16 * 16 * 256];
+  uint8_t addblocks[16 * 16 * 256 / 2];
+  uint8_t data[16 * 16 * 256 / 2];
+  uint8_t blocklight[16 * 16 * 256 / 2];
+  uint8_t skylight[16 * 16 * 256 / 2];
+  //int32_t heightmap[16*16];
+  uint8_t biome[16*16];
+
   //Basic block data (8bits/block)
-  uint8_t* blocks;
+  //uint8_t* blocks;
   //Additional block id data for id > 255 (4bits/block)
-  uint8_t* addblocks;
+  //uint8_t* addblocks;
   //Metadata (4bits/block)
-  uint8_t* data;
+  //uint8_t* data;
   //block light data (4bits/block)
-  uint8_t* blocklight;
+  //uint8_t* blocklight;
   //skylight data (4bits/block)
-  uint8_t* skylight;
+  //uint8_t* skylight;
   //16x16 heightmap
-  int32_t* heightmap;  
+  int32_t* heightmap;
   //16x16 biome array
-  uint8_t* biome;
+  //uint8_t* biome;
 
   //Chunk coordinates
   int32_t x;
@@ -203,7 +210,8 @@ struct sChunk
   std::vector<signDataPtr>    signs;
   std::vector<furnaceDataPtr> furnaces;
 
-  sChunk() : blocks(NULL), addblocks(NULL), data(NULL), blocklight(NULL), skylight(NULL), chunks_present(0), addblocks_present(0), refCount(0), lightRegen(false), changed(false), lastused(0), nbt(NULL)
+  sChunk() :// blocks(NULL), addblocks(NULL), data(NULL), blocklight(NULL), skylight(NULL),
+    chunks_present(0), addblocks_present(0), refCount(0), lightRegen(false), changed(false), lastused(0), nbt(NULL)
   {
   }
 
@@ -219,12 +227,12 @@ struct sChunk
     }
 
     delete nbt;
-    
+    /*
     delete[] blocks;
     delete[] addblocks;
     delete[] data;
     delete[] blocklight;
-    delete[] skylight;
+    delete[] skylight;*/
   }
 
   bool hasUser(User* user) const
@@ -277,7 +285,7 @@ struct sChunk
 template <class T>
 inline void hash_combine(std::size_t & seed, T const & v)
 {
-  std::tr1::hash<T> hasher;
+  std::hash<T> hasher;
   seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
 }
 
@@ -294,7 +302,7 @@ struct PairHash : public std::unary_function<std::pair<S, T>, size_t>
 };
 
 typedef std::pair<int, int> Coords;
-typedef std::tr1::unordered_map<Coords, sChunk*, PairHash<int, int> > ChunkMap;
+typedef std::unordered_map<Coords, sChunk*, PairHash<int, int> > ChunkMap;
 
 
 #endif

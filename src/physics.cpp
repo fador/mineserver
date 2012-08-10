@@ -224,20 +224,26 @@ bool Physics::updateFall()
 
   for (int32_t simIt = listSize-1; simIt >= 0; simIt--)
   {
-    bool hitGround = false;    
-    double timeInSec = (microTime()-fallSimList[simIt].startTime)/1000000.0;
-    fallSimList[simIt].ticks++;
+    Falling& f = fallSimList[simIt];
+
+    double timeInSec = (microTime()-f.startTime)/1000000.0;
+    f.ticks++;
 
     const double gravity = 9.81;
     double offset = 0.5*gravity*timeInSec*timeInSec;
-    int blockOffset = fallSimList[simIt].pos.y() - fallSimList[simIt].lastY;
-    if(blockOffset != (int)offset)
+    int blockOffset = f.pos.y() - f.lastY;
+    if(blockOffset != (int)offset) ///  not necessary, doesn't optimize much
     {
-      for(int ypos = fallSimList[simIt].lastY-1; ypos >= fallSimList[simIt].lastY-((int)offset-blockOffset);ypos--)
+      int yStart = f.pos.y();
+      int x = f.pos.x(); int z = f.pos.z();
+
+      int ypos = f.lastY;
+
+      f.lastY = yStart-(int)offset;
+      for(; ypos >= f.lastY;ypos--)
       {
         uint8_t block, meta;
-        ServerInstance->map(map)->getBlock(fallSimList[simIt].pos.x(),ypos,fallSimList[simIt].pos.z(), &block, &meta);
-        fallSimList[simIt].lastY--;
+        ServerInstance->map(map)->getBlock(x,ypos,z, &block, &meta);
         switch (block)
         {
         case BLOCK_AIR:
@@ -250,13 +256,13 @@ bool Physics::updateFall()
           //If we hit ground
         default:
           {
-            ServerInstance->map(map)->setBlock(fallSimList[simIt].pos.x(),ypos+1,fallSimList[simIt].pos.z(), fallSimList[simIt].block, 0);
-            ServerInstance->map(map)->sendBlockChange(fallSimList[simIt].pos.x(),ypos+1,fallSimList[simIt].pos.z(), fallSimList[simIt].block, 0);
+            ServerInstance->map(map)->setBlock(x, ++ypos, z, f.block, 0);
+            ServerInstance->map(map)->sendBlockChange(x, ypos, z, f.block, 0);
             
             //Despawn entity
-            Packet pkt = Protocol::destroyEntity(fallSimList[simIt].EID);
-            const int chunk_x = blockToChunk(fallSimList[simIt].pos.x());
-            const int chunk_z = blockToChunk(fallSimList[simIt].pos.z());
+            Packet pkt = Protocol::destroyEntity(f.EID);
+            const int chunk_x = blockToChunk(x);
+            const int chunk_z = blockToChunk(z);
             const ChunkMap::const_iterator it = ServerInstance->map(map)->chunks.find(Coords(chunk_x, chunk_z));
             if (it != ServerInstance->map(map)->chunks.end())
             {               
@@ -264,16 +270,13 @@ bool Physics::updateFall()
             }
             //Erase from the simulation list
             fallSimList.erase(fallSimList.begin()+simIt);
-            hitGround = true;
-          break;
+            goto breakout;
           }
-        }
-        if(hitGround)
-        {
-          break;
         }
       }
     }
+breakout:
+    continue;
   }
   return true;
 }
@@ -473,7 +476,7 @@ bool Physics::update()
   }
   ServerInstance->map(map)->sendMultiBlocks(changed);
 
-  clock_t endtime = clock() - starttime;
+  //clock_t endtime = clock() - starttime;
   //  LOG(INFO, "Physics", "Exit simulation, took " + dtos(endtime * 1000 / CLOCKS_PER_SEC) + " ms, " + dtos(simList.size()) + " items left");
   return true;
 }

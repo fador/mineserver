@@ -58,7 +58,7 @@ class ConfigScanner;
 class ConfigLexer
 {
   typedef std::pair<int, std::string> Token;
-  typedef std::tr1::shared_ptr<Token> TokenPtr;
+  typedef std::shared_ptr<Token> TokenPtr;
 
 public:
   ConfigLexer(ConfigScanner& scanner) : m_scanner(scanner) { }

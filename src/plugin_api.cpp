@@ -720,6 +720,17 @@ bool user_setItemAt(const char* user, int slotn, int type, int meta, int quant)
   }
   return true;
 }
+bool user_setGameMode(const char* user, int gamemode)
+{
+    User* tempuser = userFromName(std::string(user));
+    if (tempuser == NULL)
+        return false;
+
+    if(gamemode != 0 && gamemode != 1)
+        return false;
+
+    return tempuser->setGameMode((User::GameMode)gamemode);
+}
 
 // CONFIG WRAPPER FUNCTIONS
 bool config_has(const char* name)
@@ -1087,6 +1098,7 @@ void init_plugin_api(void)
   plugin_api_pointers.user.kick                    = &user_kick;
   plugin_api_pointers.user.getItemAt               = &user_getItemAt;
   plugin_api_pointers.user.setItemAt               = &user_setItemAt;
+  plugin_api_pointers.user.setGameMode             = &user_setGameMode;
 
   plugin_api_pointers.config.has                   = &config_has;
   plugin_api_pointers.config.iData                 = &config_iData;

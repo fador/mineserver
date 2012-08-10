@@ -32,7 +32,7 @@
 
 #include <cstdio>
 
-#ifndef WIN32
+#ifndef __WIN32__
 #include <poll.h>
 #include <unistd.h>
 #endif
