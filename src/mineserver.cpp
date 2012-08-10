@@ -721,11 +721,12 @@ bool Mineserver::run()
       tick = (uint32_t)timeNow;
 
       // Loop users
-      for (std::set<User*>::iterator it = users().begin(), it_end = users().end(); it != it_end;)
+      for (std::set<User*>::iterator it = m_users.begin(); it != m_users.end(); it++)
       {
         // NOTE: iterators corrupt when you delete their objects, therefore we have to iterate in a special way - Justasic
-        User *u = *it;
-        ++it;
+          /// BIGGER NOTE: Justasic is dumb
+
+        User * const & u = *it;
         // No data received in 30s, timeout
         if (u->logged && timeNow - u->lastData > 30)
         {
@@ -766,7 +767,7 @@ bool Mineserver::run()
 
       // Check for user validation results
       pthread_mutex_lock(&ServerInstance->m_validation_mutex);
-      for(uint32_t i = 0; i < ServerInstance->validatedUsers.size(); i++)
+      for(size_t i = 0; i < ServerInstance->validatedUsers.size(); i++)
       {
         //To make sure user hasn't timed out or anything while validating
         User *tempuser = NULL;

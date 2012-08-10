@@ -106,6 +106,7 @@ enum
   PACKET_MULTI_BLOCK_CHANGE        = 0x34,
   PACKET_BLOCK_CHANGE              = 0x35,
   PACKET_PLAY_NOTE                 = 0x36,
+  PACKET_GAMESTATE                 = 0x46,
   PACKET_OPEN_WINDOW               = 0x64,
   PACKET_PROGRESS_BAR              = 0x69,
   PACKET_TRANSACTION               = 0x6a,
@@ -115,10 +116,11 @@ enum
   PACKET_ENCRYPTION_REQUEST        = 0xFD,
   PACKET_KICK                      = 0xff,
 
-
-
+  /// two-way
+  PACKET_CREATIVE_INVENTORY        = 0x6b,
+  PACKET_PLAYER_ABILITIES          = 0xca,
   // TODO unhandled packets
-  PACKET_WEATHER = 0x47,
+  PACKET_THUNDERBOLT = 0x47,
   PACKET_INCREMENT_STATISTICS = 0xC8
 };
 
@@ -127,7 +129,7 @@ class Packet
   // A deque has random-access iterators, so we can track the read position in an integer.
   typedef std::deque<uint8_t> BufferVector;
 
-private:
+public:
   BufferVector m_readBuffer;
   BufferVector m_writeBuffer;
   size_t m_readPos;
@@ -243,17 +245,17 @@ struct Packets
   handler_function function;
 
   Packets(int newlen = PACKET_DOES_NOT_EXIST)
-  : len(newlen)
+    : len(newlen)
   {
   }
 
   Packets(int newlen, handler_function newfunction)
-  : len(newlen), function(newfunction)
+    : len(newlen), function(newfunction)
   {
   }
 
   Packets(const Packets & other)
-  : len(other.len), function(other.function)
+    : len(other.len), function(other.function)
   {
   }
 };
@@ -328,6 +330,9 @@ public:
 
   static int client_info(User* user);
   static int client_status(User* user);
+
+  static int creative_inventory(User* user);
+  static int player_abilities(User* user);
 
   static int inventory_change(User* user);
   static int inventory_close(User* user);

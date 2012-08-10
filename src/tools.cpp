@@ -24,14 +24,15 @@
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-#if defined(linux)
+#ifdef __unix__
 #include <unistd.h>
 #include <libgen.h>
 #include <wordexp.h>  // for wordexp
 #include <sys/stat.h> // for mkdir
 #include <climits>
-#elif defined(__WIN32__)
+#endif
+
+#ifdef __WIN32__
 #include <direct.h>
 
 #include <ShlObj.h>
@@ -299,6 +300,11 @@ else
 
 std::string pathOfExecutable()
 {
+    char buffer[512];
+    assert(getcwd(buffer, sizeof(buffer)));
+
+    return buffer;
+    /*
   const size_t dest_len = 4096;
   char path[dest_len];
   std::memset(path, 0, dest_len);
@@ -313,7 +319,7 @@ std::string pathOfExecutable()
   return std::string(path);
 
 #elif defined(WIN32)
-
+*/
   /*
   if (0 == GetModuleFileName(NULL, path, dest_len))
   {
@@ -322,6 +328,7 @@ std::string pathOfExecutable()
 
   return pathOfFile(path).first;
   */
+    /*
   char buffer[512];
   assert(getcwd(buffer, sizeof(buffer)));
 
@@ -331,7 +338,7 @@ std::string pathOfExecutable()
   return "";
 
 #endif
-
+*/
 }
 
 std::pair<std::string, std::string> pathOfFile(const std::string& filename)

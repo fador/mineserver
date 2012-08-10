@@ -35,7 +35,6 @@
 
 #include "extern.h"
 
-/// HUGE NOTE: SOMETHING CONFLICTS WITH 'WIN32`; IT's NOT DEFINED HERE!
 #ifdef __WIN32__
 
 #include <winsock2.h>

@@ -54,7 +54,7 @@ struct RegionFile {
 #include <ctime>
 #include <sys/stat.h>
 
-#ifdef linux
+#ifdef __unix__
 #include <dirent.h>
 #endif
 

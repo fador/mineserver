@@ -284,7 +284,10 @@ void EximGen::generateWithNoise(ChunkInfo& info)
 
     for(int x=0;x<16;x++){
         for(int z=0;z<16;z++){
-            int currentHeight = heightmap[(z << 4) + x] = (int)finalTerrain.GetValue(chunkX + x,0,chunkZ + z);
+
+            int32_t& currentHeight = heightmap[(z << 4) + x];
+
+            currentHeight = (int)finalTerrain.GetValue(chunkX + x,0,chunkZ + z);
 
             if(currentHeight > 256)
                 currentHeight = 256;
@@ -336,8 +339,11 @@ void EximGen::generateWithNoise(ChunkInfo& info)
                 else
                     blocks(x,cave_start,z).id(BLOCK_GRASS);
             }
-            if(winterEnabled){
-                blocks(x, heightmap[(z << 4) + x] +1 ,z).id(BLOCK_SNOW);
+            if( currentHeight >= (230 + uniform01()*5) ){
+                blocks(x, currentHeight +1 ,z).id(BLOCK_SNOW_BLOCK);
+            }
+            else if(winterEnabled || currentHeight >= (225 + uniform01()*5) ){
+                blocks(x, currentHeight +1 ,z).id(BLOCK_SNOW);
             }
         }
     }

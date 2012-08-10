@@ -79,13 +79,8 @@ public:
   Item inv[45];
   int16_t curItem;
 
-  /// updates this user's world (queues chunks, adds/removes entities)
-  void updateWorld();
-
-  /// chunks in use by user
-  //fastset<sChunk*> usedChunks;
-  /// chunk in which user last was during last updateWorld()
-  //sChunk*          lastChunk;
+  bool invulnerable;
+  bool creative; /// flying etc.
 
   uint8_t action;
   bool waitForData;
@@ -210,6 +205,12 @@ public:
 
   void clearLoadingMap();
 
+  /// gamemode
+  enum GameMode{
+      Survival=0,Creative
+  };
+
+  bool setGameMode(GameMode gameMode);
 
   // Getter/Setter for item currently in hold
   int16_t currentItemSlot();

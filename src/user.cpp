@@ -85,6 +85,9 @@ User::User(int sock, uint32_t EID)
   {
     inv[count] = Item(this, count);
   }
+
+  invulnerable = false;
+  creative = false;
 }
 
 bool User::changeNick(std::string _nick)
@@ -195,7 +198,7 @@ User::~User()
     (static_cast<Hook1<bool, const char*>*>(ServerInstance->plugin()->getHook("PlayerQuitPost")))->doAll(nick.c_str());
   }
 }
-
+#include <stdio.h>
 bool User::sendLoginInfo()
 {
   
@@ -1437,4 +1440,12 @@ std::string User::generateDigest()
   }
 
   return out;
+}
+
+bool User::setGameMode(User::GameMode gameMode)
+{
+  buffer.addToWrite(Protocol::gameState(3,gameMode));
+  invulnerable = true;
+  creative = true;
+  return true;
 }

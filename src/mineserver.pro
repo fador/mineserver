@@ -16,7 +16,7 @@ win32{
 }
 
 unix{
-	LIBS += -lnoise -leay -lssleay -lssl -lcurses -lz -levent -ldl -lpthread
+        LIBS += -lnoise -lssl -lcrypto -lcurses -lz -levent -ldl -lpthread
 }
 
 INCLUDEPATH += "../include"
