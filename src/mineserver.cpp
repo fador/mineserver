@@ -720,6 +720,7 @@ bool Mineserver::run()
       redstone(i)->update();
     }
 
+
     //Every 10 seconds..
     timeNow = time(0);
     if (timeNow - starttime > 10)
@@ -746,7 +747,7 @@ bool Mineserver::run()
         pkt << Protocol::timeUpdate(m_map[0]->mapTime);
         pkt << Protocol::keepalive(0);
         pkt << Protocol::playerlist();
-        (*User::all().begin())->sendAll(pkt);
+        (*User::all().begin())->sendAll(pkt);        
       }
 
       //Check for tree generation from saplings
@@ -854,6 +855,7 @@ bool Mineserver::run()
     // ToDo: this could be done a bit differently? - Fador
     // -- User::all() == users() - louisdx
 
+
     for (std::set<User*>::const_iterator it = users().begin(); it != users().end(); ++it)
     {
       (*it)->isUnderwater();
@@ -861,6 +863,8 @@ bool Mineserver::run()
       {
         (*it)->sethealth((*it)->health - 5);
       }
+      //Flush data
+      client_callback((*it)->fd, EV_WRITE, (*it));
     }
   }
 #ifdef WIN32

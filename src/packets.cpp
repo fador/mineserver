@@ -1063,14 +1063,16 @@ int PacketHandler::player_block_placement(User* user)
     {
       return PACKET_OK;
     }
-
-    LOG(INFO, "Packets", "Spawn minecart");
+    
     int32_t EID = Mineserver::generateEID();
     Packet pkt;
     // MINECART
     //10 == minecart
-    pkt << Protocol::addObject(EID, 10,x,y,z,0);
+    pkt << Protocol::addObject(EID,10,x,y,z,0);
+    
     user->sendAll(pkt);
+
+    ServerInstance->map(user->pos.map)->minecarts.push_back(MinecartData(EID,vec(x*32+16,y*32+16,z*32+16),vec(0,0,0),microTime()));
     //ToDo: Store
   }
 
@@ -1439,13 +1441,27 @@ int PacketHandler::use_entity(User* user)
     //Attach
     if (user->attachedTo == 0)
     {
-      pkt << (int8_t)PACKET_ATTACH_ENTITY << (int32_t)user->UID << (int32_t)target;
+      pkt << Protocol::attachEntity(user->UID,target);
       user->attachedTo = target;
+      for (size_t i = 0; i < ServerInstance->map(user->pos.map)->minecarts.size(); i++)
+      {
+        if(ServerInstance->map(user->pos.map)->minecarts[i].EID == target)
+        {
+          ServerInstance->map(user->pos.map)->minecarts[i].speed = vec(64,0,0);
+        }
+      }
     }
     //Detach
     else
     {
-      pkt << (int8_t)PACKET_ATTACH_ENTITY << (int32_t)user->UID << (int32_t) - 1;
+      for (size_t i = 0; i < ServerInstance->map(user->pos.map)->minecarts.size(); i++)
+      {
+        if(ServerInstance->map(user->pos.map)->minecarts[i].EID == user->attachedTo)
+        {
+          ServerInstance->map(user->pos.map)->minecarts[i].speed = vec(0,0,0);
+        }
+      }
+      pkt << Protocol::attachEntity(user->UID,-1);
       user->attachedTo = 0;
     }
     user->sendAll(pkt);
