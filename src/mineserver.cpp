@@ -174,9 +174,9 @@ Mineserver::Mineserver(int args, char **argarray)
      m_furnaceManager(NULL),
      m_packetHandler (NULL),
      m_inventory     (NULL),
-     m_mobs          (NULL),
-     m_validation_mutex(PTHREAD_MUTEX_INITIALIZER)
+     m_mobs          (NULL)
 {
+  pthread_mutex_init(&m_validation_mutex,NULL);
   ServerInstance = this;
   InitSignals();
   
@@ -766,7 +766,7 @@ bool Mineserver::run()
 
       // Check for user validation results
       pthread_mutex_lock(&ServerInstance->m_validation_mutex);
-      for(int i = 0; i < ServerInstance->validatedUsers.size(); i++)
+      for(uint32_t i = 0; i < ServerInstance->validatedUsers.size(); i++)
       {
         //To make sure user hasn't timed out or anything while validating
         User *tempuser = NULL;
