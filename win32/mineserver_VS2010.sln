@@ -2,6 +2,12 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mineserver", "mineserver.vcxproj", "{7F6D1DAB-AA49-4343-B28E-C3E647BE5007}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_commands", "plugins\plugin_commands.vcxproj", "{ED3F5170-79CB-4524-BF46-EBD2B5DFBBFB}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_filelog", "plugins\plugin_filelog.vcxproj", "{675D0293-C686-4009-ACDB-5F3FC5FA03C8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_luascript", "plugins\plugin_luascript.vcxproj", "{67064A5E-4849-4BDB-8E15-5796B15D0E84}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -12,6 +18,18 @@ Global
 		{7F6D1DAB-AA49-4343-B28E-C3E647BE5007}.Debug|Win32.Build.0 = Debug|Win32
 		{7F6D1DAB-AA49-4343-B28E-C3E647BE5007}.Release|Win32.ActiveCfg = Release|Win32
 		{7F6D1DAB-AA49-4343-B28E-C3E647BE5007}.Release|Win32.Build.0 = Release|Win32
+		{ED3F5170-79CB-4524-BF46-EBD2B5DFBBFB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{ED3F5170-79CB-4524-BF46-EBD2B5DFBBFB}.Debug|Win32.Build.0 = Debug|Win32
+		{ED3F5170-79CB-4524-BF46-EBD2B5DFBBFB}.Release|Win32.ActiveCfg = Release|Win32
+		{ED3F5170-79CB-4524-BF46-EBD2B5DFBBFB}.Release|Win32.Build.0 = Release|Win32
+		{675D0293-C686-4009-ACDB-5F3FC5FA03C8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{675D0293-C686-4009-ACDB-5F3FC5FA03C8}.Debug|Win32.Build.0 = Debug|Win32
+		{675D0293-C686-4009-ACDB-5F3FC5FA03C8}.Release|Win32.ActiveCfg = Release|Win32
+		{675D0293-C686-4009-ACDB-5F3FC5FA03C8}.Release|Win32.Build.0 = Release|Win32
+		{67064A5E-4849-4BDB-8E15-5796B15D0E84}.Debug|Win32.ActiveCfg = Debug|Win32
+		{67064A5E-4849-4BDB-8E15-5796B15D0E84}.Debug|Win32.Build.0 = Debug|Win32
+		{67064A5E-4849-4BDB-8E15-5796B15D0E84}.Release|Win32.ActiveCfg = Release|Win32
+		{67064A5E-4849-4BDB-8E15-5796B15D0E84}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
