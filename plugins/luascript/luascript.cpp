@@ -42,6 +42,8 @@ extern "C"
 #include <lualib.h>
 }
 
+#include "luawrapper.h"
+
 struct LuaScript
 {
   std::string script;
@@ -213,6 +215,11 @@ int lua_calltest(lua_State *pL)
   return 0;
 }
 
+void registerLuaFunctions(lua_State *pL)
+{
+  lua_register(pL, "calltest", lua_calltest);
+}
+
 void luaLoad(std::string user, std::string command, std::deque<std::string> args)
 {
 
@@ -228,11 +235,12 @@ void luaLoad(std::string user, std::string command, std::deque<std::string> args
     luaScripts.push_back(LuaScript());
     unsigned int last = luaScripts.size()-1;
 
+    //Initialize
     luaScripts[last].pL = lua_open();
-    luaScripts[last].script = args[0];
-    
+    luaScripts[last].script = args[0];    
     luaL_openlibs(luaScripts[last].pL);
 
+    //Try to open and run
     if(luaL_dofile(luaScripts[last].pL,  luaScripts[last].script.c_str()) != 0)
     {
       lua_close(luaScripts[last].pL);
@@ -243,7 +251,7 @@ void luaLoad(std::string user, std::string command, std::deque<std::string> args
     else
     {
       //Init stuff
-      lua_register(luaScripts[last].pL, "calltest", lua_calltest);
+      registerLuaFunctions(luaScripts[last].pL);
       std::string msg = MSG_PREFIX+"script "+args[0]+" loaded and running!";
       mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
     }

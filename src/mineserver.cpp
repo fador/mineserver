@@ -793,7 +793,7 @@ bool Mineserver::run()
             tempuser->kick("User not Premium");
           }
           //Flush
-          client_callback(tempuser->fd, EV_WRITE, tempuser);
+          client_write(tempuser);          
         }
       }
       ServerInstance->validatedUsers.clear();
@@ -816,7 +816,7 @@ bool Mineserver::run()
         (*it)->sethealth((*it)->health - 5);
       }
       //Flush data
-      client_callback((*it)->fd, EV_WRITE, (*it));
+      client_write((*it));
     }
   }
   #ifdef WIN32
