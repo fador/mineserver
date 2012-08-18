@@ -61,11 +61,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int neth_seed;
 
 NetherGen::NetherGen()
-  : netherblocks(16 * 16 * 128, 0),
-    blockdata(16 * 16 * 128 / 2, 0),
-    skylight(16 * 16 * 128 / 2, 0),
-    blocklight(16 * 16 * 128 / 2, 0),
-    heightmap(16 * 16, 0)
+  : heightmap(16 * 16, 0)
 {
 }
 
@@ -105,12 +101,8 @@ void NetherGen::generateChunk(int x, int z, int map)
   NBT_Value* main = new NBT_Value(NBT_Value::TAG_COMPOUND);
   NBT_Value* val = new NBT_Value(NBT_Value::TAG_COMPOUND);
 
-  generateWithNoise(x, z, map);
+  val->Insert("Sections", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND)); 
 
-  val->Insert("Blocks", new NBT_Value(netherblocks));
-  val->Insert("Data", new NBT_Value(blockdata));
-  val->Insert("SkyLight", new NBT_Value(skylight));
-  val->Insert("BlockLight", new NBT_Value(blocklight));
   val->Insert("HeightMap", new NBT_Value(heightmap));
   val->Insert("Entities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
   val->Insert("TileEntities", new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND));
@@ -127,23 +119,27 @@ void NetherGen::generateChunk(int x, int z, int map)
   ServerInstance->map()->maps[chunkid].x = x;
   ServerInstance->map()->maps[chunkid].z = z; */
 
-  std::vector<uint8_t> *t_blocks = (*val)["Blocks"]->GetByteArray();
-  std::vector<uint8_t> *t_data = (*val)["Data"]->GetByteArray();
-  std::vector<uint8_t> *t_blocklight = (*val)["BlockLight"]->GetByteArray();
-  std::vector<uint8_t> *t_skylight = (*val)["SkyLight"]->GetByteArray();
-  std::vector<int32_t> *heightmap = (*val)["HeightMap"]->GetIntArray();
-
   sChunk* chunk = new sChunk();
-  chunk->blocks = &((*t_blocks)[0]);
-  chunk->data = &((*t_data)[0]);
-  chunk->blocklight = &((*t_blocklight)[0]);
-  chunk->skylight = &((*t_skylight)[0]);
-  chunk->heightmap = &((*heightmap)[0]);
+  chunk->blocks = new uint8_t[16 * 16 * 256];
+  chunk->addblocks = new uint8_t[16 * 16 * 256 / 2];
+  chunk->data = new uint8_t[16 * 16 * 256 / 2];
+  chunk->blocklight = new uint8_t[16 * 16 * 256 / 2];
+  chunk->skylight = new uint8_t[16 * 16 * 256 / 2];
+  chunk->heightmap = &((*(*val)["HeightMap"]->GetIntArray())[0]);
   chunk->nbt = main;
   chunk->x = x;
   chunk->z = z;
 
   ServerInstance->map(map)->chunks.insert(ChunkMap::value_type(ChunkMap::key_type(x, z), chunk));
+
+  memset(chunk->blocks, 0, 16*16*256);
+  memset(chunk->addblocks, 0, 16*16*256/2);
+  memset(chunk->data, 0, 16*16*256/2);
+  memset(chunk->blocklight, 0, 16*16*256/2);
+  memset(chunk->skylight, 0, 16*16*256/2);
+  chunk->chunks_present = 0xffff;
+
+  generateWithNoise(x, z, map);
 
   // Update last used time
   //ServerInstance->map()->mapLastused[chunkid] = (int)time(0);
@@ -217,13 +213,13 @@ void NetherGen::generateWithNoise(int x, int z, int map)
   gettimeofday(&start, NULL);
 #endif
 #endif
+  sChunk* chunk = ServerInstance->map(map)->getChunk(x, z);
 
   // Populate blocks in chunk
   int32_t currentHeight;
   int32_t ymax;
   uint16_t ciel;
   uint8_t* curBlock;
-  netherblocks.assign(16 * 16 * 128, 0);
 
   double xBlockpos = x << 4;
   double zBlockpos = z << 4;
@@ -245,7 +241,8 @@ void NetherGen::generateWithNoise(int x, int z, int map)
 
       for (int bY = 0; bY < 128; bY++)
       {
-        curBlock = &netherblocks[bYbX++];
+        int index = bX + (bZ << 4) + (bY << 8);
+        curBlock = &(chunk->blocks[index]);
         if (bY >= 126)
         {
           *curBlock = BLOCK_BEDROCK;
