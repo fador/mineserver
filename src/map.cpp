@@ -1130,13 +1130,16 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
 bool Map::suitableForSpawn(const vec &pos)
 {
   uint8_t block, meta;
-  return ((getBlock(pos.x(), pos.y()-1, pos.z(), &block, &meta, false) && block != BLOCK_AIR)
+  if (!getBlock(pos.x(), pos.y()-1, pos.z(), &block, &meta, false)) return false;
+  return block != BLOCK_AIR && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER
+      && block != BLOCK_LAVA && block != BLOCK_STATIONARY_LAVA
       && (getBlock(pos.x(), pos.y(), pos.z(), &block, &meta, false) && block == BLOCK_AIR)
-      && (getBlock(pos.x(), pos.y()+1, pos.z(), &block, &meta, false) && block == BLOCK_AIR));
+      && (getBlock(pos.x(), pos.y()+1, pos.z(), &block, &meta, false) && block == BLOCK_AIR);
 }
 
 bool Map::chooseSpawnPosition()
 {
+  uint8_t block, meta;
   bool found = false;
   // Make sure spawn position is not underground!
   uint8_t new_y;
@@ -1147,6 +1150,9 @@ bool Map::chooseSpawnPosition()
     {
       for (new_y = spawnPos.y(); new_y > 30; new_y--)
       {
+        // Skip this colomn, we don't want to be underground
+        if (!getBlock(new_x, new_y, new_z, &block, &meta, false) ||
+            block != BLOCK_AIR) break;
         if (suitableForSpawn(vec(new_x, new_y, new_z)))
         {
           found = true;
