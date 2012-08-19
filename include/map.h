@@ -123,6 +123,12 @@ public:
   // Get pointer to struct
   sChunk* getMapData(int x, int z, bool generate = true);
 
+  // Is specified position suitable for spawn position
+  bool suitableForSpawn(const vec &pos);
+
+  // Make sure spawn position is not underground
+  bool chooseSpawnPosition();
+
   // Load map chunk
   sChunk* loadMap(int x, int z, bool generate = true);
 

@@ -769,7 +769,7 @@ bool User::updatePos(double x, double y, double z, double stance)
   if (ServerInstance->m_damage_enabled)
   {
     uint8_t type, meta;
-    if ((std::floor(pos.y - 0.5) < 128) && LOADBLOCK(pos.x, pos.y - 0.5, pos.z))
+    if ((std::floor(pos.y - 0.5) < 256) && LOADBLOCK(pos.x, pos.y - 0.5, pos.z))
     {
       switch (type)
       {

@@ -551,6 +551,8 @@ bool Mineserver::run()
         }
       }
     }
+    // Choose proper spawn position
+    m_map[i]->chooseSpawnPosition();
 #ifdef DEBUG
     LOG(DEBUG, "Map", "Spawn area ready!");
 #endif

@@ -1127,6 +1127,64 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
   return true;
 }
 
+bool Map::suitableForSpawn(const vec &pos)
+{
+  uint8_t block, meta;
+  if (!getBlock(pos.x(), pos.y()-1, pos.z(), &block, &meta, false)) return false;
+  return block != BLOCK_AIR && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER
+      && block != BLOCK_LAVA && block != BLOCK_STATIONARY_LAVA
+      && (getBlock(pos.x(), pos.y(), pos.z(), &block, &meta, false) && block == BLOCK_AIR)
+      && (getBlock(pos.x(), pos.y()+1, pos.z(), &block, &meta, false) && block == BLOCK_AIR);
+}
+
+bool Map::chooseSpawnPosition()
+{
+  uint8_t block, meta;
+  bool found = false;
+  // Make sure spawn position is not underground!
+  uint8_t new_y;
+  int new_x, new_z;
+  for (new_x = spawnPos.x(); new_x < spawnPos.x() + 100; new_x += 5)
+  {
+    for (new_z = spawnPos.z(); new_z < spawnPos.z() + 100; new_z += 5)
+    {
+      for (new_y = spawnPos.y(); new_y > 30; new_y--)
+      {
+        // Skip this colomn, we don't want to be underground
+        if (!getBlock(new_x, new_y, new_z, &block, &meta, false) ||
+            block != BLOCK_AIR) break;
+        if (suitableForSpawn(vec(new_x, new_y, new_z)))
+        {
+          found = true;
+          goto labelFound;
+        }
+      }
+    }
+  }
+labelFound:
+  if (found)
+  {
+    //Store new spawn position to level.dat
+    spawnPos.x() = new_x;
+    spawnPos.y() = new_y;
+    spawnPos.z() = new_z;
+    std::string infile = mapDirectory + "/level.dat";
+    NBT_Value* root = NBT_Value::LoadFromFile(infile);
+    if (root != NULL)
+    {
+      NBT_Value& data = *((*root)["Data"]);
+      *data["SpawnX"] = (int32_t)spawnPos.x();
+      *data["SpawnY"] = (int32_t)spawnPos.y();
+      *data["SpawnZ"] = (int32_t)spawnPos.z();
+
+      root->SaveToFile(infile);
+
+      delete root;
+    }
+  }
+  return found;
+}
+
 sChunk* Map::loadMap(int x, int z, bool generate)
 {
   const ChunkMap::const_iterator it = chunks.find(Coords(x, z));
@@ -1160,42 +1218,6 @@ sChunk* Map::loadMap(int x, int z, bool generate)
       ServerInstance->mapGen(m_number)->init((int32_t)mapSeed);
       ServerInstance->mapGen(m_number)->generateChunk(x, z, m_number);
       generateLight(x, z);
-      //If we generated spawn pos, make sure the position is not underground!
-      if (x == blockToChunk(spawnPos.x()) && z == blockToChunk(spawnPos.z()))
-      {
-        uint8_t block, meta;
-        bool foundLand = false;
-        if (getBlock(spawnPos.x(), spawnPos.y(), spawnPos.z(), &block, &meta, false) && block == BLOCK_AIR)
-        {
-          uint8_t new_y;
-          for (new_y = spawnPos.y(); new_y > 30; new_y--)
-          {
-            if (getBlock(spawnPos.x(), new_y, spawnPos.z(), &block, &meta, false) && block != BLOCK_AIR)
-            {
-              foundLand = true;
-              break;
-            }
-          }
-          if (foundLand)
-          {
-            //Store new spawn position to level.dat
-            spawnPos.y() = new_y + 1;
-            std::string infile = mapDirectory + "/level.dat";
-            NBT_Value* root = NBT_Value::LoadFromFile(infile);
-            if (root != NULL)
-            {
-              NBT_Value& data = *((*root)["Data"]);
-              *data["SpawnX"] = (int32_t)spawnPos.x();
-              *data["SpawnY"] = (int32_t)spawnPos.y();
-              *data["SpawnZ"] = (int32_t)spawnPos.z();
-
-              root->SaveToFile(infile);
-
-              delete root;
-            }
-          }
-        }
-      }
       delete newRegion;
       delete [] chunkPointer;
       return getChunk(x, z);
