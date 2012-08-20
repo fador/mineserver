@@ -209,7 +209,7 @@ Mineserver::Mineserver(int args, char **argarray)
     }
   }
   
-  const std::string path_exe = pathOfExecutable();
+  const std::string path_exe = "./";
   
   // If config file is provided as an argument
   if (!cfg.empty())
