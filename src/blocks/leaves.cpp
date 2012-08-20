@@ -25,6 +25,19 @@ bool BlockLeaves::onBroken(User* user, int8_t status, int32_t x, int16_t y, int3
 
   if (it != decaying.end()) decaying.erase(it);
 
+  uint8_t block;
+  uint8_t meta;
+
+  if (!ServerInstance->map(map)->getBlock(x, y, z, &block, &meta))
+  {
+    revertBlock(user, x, y, z, map);
+    return true;
+  }
+
+  ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
+  ServerInstance->map(map)->setBlock(x, y, z, BLOCK_AIR, 0);
+  this->spawnBlockItem(x, y, z, map, block, meta);
+
   return true;
 }
 
