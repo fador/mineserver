@@ -26,7 +26,7 @@
 */
 
 #include <sys/types.h>
-#ifdef __WIN32__
+#ifdef _WIN32
 #include <winsock2.h>
 #else
 #include <netdb.h>       // for gethostbyname()
@@ -269,7 +269,7 @@ int PacketHandler::creative_inventory(User *user)
     if (!user->buffer.haveData(4))
         return PACKET_NEED_MORE_DATA;
 
-    uint16_t slot, itemID;
+    int16_t slot, itemID;
 
     user->buffer>>slot>>itemID;
 
@@ -278,13 +278,13 @@ int PacketHandler::creative_inventory(User *user)
     if (!user->buffer.haveData(5))
         return PACKET_NEED_MORE_DATA;
 
-    uint8_t count;
-    uint16_t meta;
+    int8_t count;
+    int16_t meta;
 
     user->buffer >> count >> meta;
 
 
-    uint16_t enchantment_data_len;
+    int16_t enchantment_data_len;
     user->buffer >> enchantment_data_len;
 
     if(enchantment_data_len != 0xffff) {
@@ -304,7 +304,7 @@ int PacketHandler::creative_inventory(User *user)
 int PacketHandler::player_abilities(User *user)
 {
     /// TODO: use this somewhere!
-    uint8_t flags, fspeed, wspeed;
+    int8_t flags, fspeed, wspeed;
 
     user->buffer >> flags >> fspeed >> wspeed;
 

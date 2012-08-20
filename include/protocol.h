@@ -321,7 +321,7 @@ class Protocol
       }      
       return ret;
     }
-    static Packet gameState(uint8_t reason, uint8_t data){
+    static Packet gameState(int8_t reason, int8_t data){
       Packet ret;
       ret<< (int8_t)PACKET_GAMESTATE << reason << data;
       return ret;

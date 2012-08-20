@@ -29,8 +29,7 @@
 
 #include "mineserver.h"
 
-/// 'WIN32` undefined again... pollutly polluted sources
-#ifdef __WIN32__
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <dlfcn.h>

@@ -126,7 +126,7 @@ void HeavenGen::generateChunk(int x, int z, int map)
   //chunk->data = &((*t_data)[0]);
   //chunk->blocklight = &((*t_blocklight)[0]);
   //chunk->skylight = &((*t_skylight)[0]);
-  chunk->heightmap = &((*heightmap)[0]);
+  chunk->heightmap = &(heightmap[0]);
   chunk->nbt = main;
   chunk->x = x;
   chunk->z = z;

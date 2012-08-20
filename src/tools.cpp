@@ -32,9 +32,10 @@
 #include <climits>
 #endif
 
-#ifdef __WIN32__
+#ifdef _WIN32
 #include <direct.h>
-
+#define _WINSOCKAPI_ //Stops windows.h from including winsock.h
+                     //Fixes errors I was having
 #include <ShlObj.h>
 #endif
 

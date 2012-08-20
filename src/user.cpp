@@ -583,18 +583,22 @@ bool User::updatePos(double x, double y, double z, double stance)
       /// update this player's pos for others
 
       Packet dtPkt = Protocol::destroyEntity(UID);
-      for( User*& u : toremove){
-        u->buffer.addToWrite(dtPkt);
+      std::list<User*>::iterator iter = toremove.begin(), end = toremove.end();
+      for (; iter != end ; iter++)
+      {
+        (*iter)->buffer.addToWrite(dtPkt);
 
-        this->buffer.addToWrite(Protocol::destroyEntity(u->UID));
+        this->buffer.addToWrite(Protocol::destroyEntity((*iter)->UID));
       }
 
       Packet spawnPkt = Protocol::namedEntitySpawn(UID, nick, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch), curItem);
-      for( User*& u : toadd){
-        u->buffer.addToWrite(spawnPkt);
+      iter = toadd.begin(), end = toadd.end();
+      for (; iter != end ; iter++)
+      {
+        (*iter)->buffer.addToWrite(spawnPkt);
 
         this->buffer.addToWrite(
-              Protocol::namedEntitySpawn(u->UID, u->nick, u->pos, u->curItem)
+              Protocol::namedEntitySpawn((*iter)->UID, (*iter)->nick, (*iter)->pos, (*iter)->curItem)
               );
       }
 

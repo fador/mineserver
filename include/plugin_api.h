@@ -112,7 +112,7 @@ struct user_pointer_struct
 
   bool (*setGameMode)(const char* user, int gameMode);
 
-  void* temp[96];
+  void* temp[95];
 };
 
 struct chat_pointer_struct

@@ -41,7 +41,7 @@
 //Fix Winsock2 error that occurs when Windows.h is included before it.
 #define _WINSOCKAPI_
 
-#ifdef __WIN32__
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <dlfcn.h>

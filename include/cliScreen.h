@@ -31,10 +31,6 @@
 #include <string>
 #include <vector>
 
-#ifdef __WIN32__
-#include <windows.h>
-#endif
-
 #include "screenBase.h"
 #include "logtype.h"
 
@@ -53,7 +49,7 @@ public:
 
 private:
   std::string currentCommand;
-#ifdef __WIN32__
+#ifdef _WIN32
   bool _hasCommand;
   static DWORD WINAPI _stdinThreadProc(LPVOID lpParameter);
   DWORD WINAPI stdinThreadProc();

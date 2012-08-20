@@ -25,7 +25,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifdef __WIN32__
+#ifdef _WIN32
 #include <cstdlib>
 #include <winsock2.h>
 typedef int socklen_t;
