@@ -35,7 +35,8 @@
 #ifndef _WIN32
 # define CoreExport
 #else
-# define CoreExport __declspec(dllimport)
+# define CoreExport
+//__declspec(dllimport)
 #endif
 
 #ifndef MINESERVER_BUILD

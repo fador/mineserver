@@ -123,11 +123,12 @@ bool Chat::handleMsg(User* user, std::string msg)
   std::string timeStamp(asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
-  if ((static_cast<Hook3<bool, const char*, time_t, const char*>*>(ServerInstance->plugin()->getHook("PlayerChatPre")))->doUntilFalse(user->nick.c_str(), rawTime, msg.c_str()))
+  runCallbackUntilFalse("PlayerChatPre",user->nick.c_str(), rawTime, msg.c_str());
+  if (callbackReturnValue)
   {
     return false;
   }
-  (static_cast<Hook3<bool, const char*, time_t, const char*>*>(ServerInstance->plugin()->getHook("PlayerChatPost")))->doAll(user->nick.c_str(), rawTime, msg.c_str());
+  runAllCallback("PlayerChatPost",user->nick.c_str(), rawTime, msg.c_str());
   char prefix = msg[0];
 
   switch (prefix)
@@ -188,7 +189,7 @@ void Chat::handleCommand(User* user, std::string msg, const std::string& timeSta
   }
   else
   {
-    (static_cast<Hook4<bool, const char*, const char*, int, const char**>*>(ServerInstance->plugin()->getHook("PlayerChatCommand")))->doAll(user->nick.c_str(), command.c_str(), cmd.size(), (const char**)param);
+    runAllCallback("PlayerChatCommand",user->nick.c_str(), command.c_str(), cmd.size(), (const char**)param);
   }
 
   delete [] param;

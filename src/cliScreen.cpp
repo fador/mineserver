@@ -79,8 +79,8 @@ void CliScreen::init(std::string version)
   stdinThread = CreateThread(NULL, 0, _stdinThreadProc, (void*)this, 0, NULL);
 #endif
 
-  static_cast<Hook3<bool, int, const char*, const char*>*>(ServerInstance->plugin()->getHook("LogPost"))->addCallback(&CliScreen::Log);
-  static_cast<Hook0<bool>*>(ServerInstance->plugin()->getHook("Timer200"))->addCallback(&CliScreen::CheckForCommand);
+  addCallback("LogPost",(funcPointer)&CliScreen::LogEvent);
+  addCallback("Timer200",(funcPointer)&CliScreen::CheckForCommand);
 }
 
 void CliScreen::end()
@@ -148,7 +148,7 @@ bool CliScreen::CheckForCommand()
   return false;
 }
 
-bool CliScreen::Log(int type, const char* source, const char* message)
+bool CliScreen::LogEvent(int type, const char* source, const char* message)
 {
   ServerInstance->screen()->log((LogType::LogType)type, std::string(source), std::string(message));
   return true;

@@ -12,6 +12,7 @@
  */
 
 #include <cmath>
+#include <algorithm>
 #include "leaves.h"
 #include "map.h"
 #include "mineserver.h"

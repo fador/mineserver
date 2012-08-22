@@ -27,6 +27,7 @@
 
 #include <cmath>
 #include <sys/stat.h>
+#include <algorithm>
 
 #include "constants.h"
 
@@ -92,7 +93,7 @@ User::User(int sock, uint32_t EID)
 
 bool User::changeNick(std::string _nick)
 {
-  (static_cast<Hook2<bool, const char*, const char*>*>(ServerInstance->plugin()->getHook("PlayerNickPost")))->doAll(nick.c_str(), _nick.c_str());
+  runAllCallback("PlayerNickPost", nick.c_str(), _nick.c_str());
 
   nick = _nick;
 
@@ -195,7 +196,7 @@ User::~User()
 
   if (fd != -1 && logged)
   {
-    (static_cast<Hook1<bool, const char*>*>(ServerInstance->plugin()->getHook("PlayerQuitPost")))->doAll(nick.c_str());
+    runAllCallback("PlayerQuitPost",nick.c_str());
   }
 }
 #include <stdio.h>
@@ -264,7 +265,7 @@ bool User::sendLoginInfo()
 bool User::kick(std::string kickMsg)
 {
   buffer << Protocol::kick(kickMsg);
-  (static_cast<Hook2<bool, const char*, const char*>*>(ServerInstance->plugin()->getHook("PlayerKickPost")))->doAll(nick.c_str(), kickMsg.c_str());
+  runAllCallback("PlayerKickPost",nick.c_str(), kickMsg.c_str());
 
   LOG2(WARNING, nick + " kicked. Reason: " + kickMsg);
 
@@ -1293,7 +1294,8 @@ bool User::respawn()
     chunk->sendPacket(destroyPkt, this);
   }
 
-  if ((static_cast<Hook1<bool, const char*>*>(ServerInstance->plugin()->getHook("PlayerRespawn")))->doUntilFalse(nick.c_str()))
+  runCallbackUntilFalse("PlayerRespawn",nick.c_str());
+  if (callbackReturnValue)
   {
     // In this case, the plugin teleports automatically
   }

@@ -73,7 +73,6 @@
 #include "plugin.h"
 #include "furnaceManager.h"
 #include "cliScreen.h"
-#include "hook.h"
 #include "mob.h"
 #include "protocol.h"
 //#include "minecart.h"
@@ -185,7 +184,7 @@ Mineserver::Mineserver(int args, char **argarray)
   
   std::string cfg;
   std::vector<std::string> overrides;
-  
+
   for (int i = 1; i < argc; i++)
   {
     const std::string arg(argv[i]);
@@ -246,8 +245,10 @@ Mineserver::Mineserver(int args, char **argarray)
   if (!configvar.load(cfg))
   {
     throw CoreException("Could not load config!");
-  }
+  }  
   
+  m_plugin = new Plugin();
+
   LOG2(INFO, "Using config: " + cfg);
   
   if (overrides.size())
@@ -274,8 +275,7 @@ Mineserver::Mineserver(int args, char **argarray)
   pid_out.close();
 
 
-  // screen::init() needs m_plugin
-  m_plugin = new Plugin();
+
 
   init_plugin_api();
 
@@ -656,7 +656,7 @@ bool Mineserver::run()
     event_base_loopexit(m_eventBase, &loopTime);
 
     // Run 200ms timer hook
-    static_cast<Hook0<bool>*>(plugin()->getHook("Timer200"))->doAll();
+    runAllCallback("Timer200");
 
     // Alert any block types that care about timers
     for (size_t i = 0 ; i < plugin()->getBlockCB().size(); ++i)
@@ -714,7 +714,7 @@ bool Mineserver::run()
       // TODO: Run garbage collection for chunk storage dealie?
 
       // Run 10s timer hook
-      static_cast<Hook0<bool>*>(plugin()->getHook("Timer10000"))->doAll();
+      runAllCallback("Timer10000");
     }
 
     // Every second
@@ -803,7 +803,7 @@ bool Mineserver::run()
       pthread_mutex_unlock(&ServerInstance->m_validation_mutex);
 
       // Run 1s timer hook
-      static_cast<Hook0<bool>*>(plugin()->getHook("Timer1000"))->doAll();
+      runAllCallback("Timer1000");
     }
 
     // Underwater check / drowning

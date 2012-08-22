@@ -116,15 +116,17 @@ bool plugin_hasHook(const char* hookID)
   return ServerInstance->plugin()->hasHook(hookID);
 }
 
+/*
 Hook* plugin_getHook(const char* hookID)
 {
   return ServerInstance->plugin()->getHook(hookID);
 }
 
-void plugin_setHook(const char* hookID, Hook* hook)
+void plugin_setHook(const char* hookID, void* hook)
 {
   ServerInstance->plugin()->setHook(hookID, hook);
 }
+*/
 
 void plugin_remHook(const char* hookID)
 {
@@ -133,22 +135,38 @@ void plugin_remHook(const char* hookID)
 
 bool hook_hasCallback(const char* hookID, voidF function)
 {
-  return ServerInstance->plugin()->getHook(hookID)->hasCallback(function);
+  funcListType *funcList = ServerInstance->plugin()->getHook(hookID);
+  for(funcListType::iterator i = funcList->begin(); i != funcList->end(); i++)
+  {
+    if((*i) == (funcPointer)function)
+    {
+      return true;
+    }
+  }
+  return false;
 }
 
 void hook_addCallback(const char* hookID, voidF function)
 {
-  ServerInstance->plugin()->getHook(hookID)->addCallback(function);
+  addCallback(std::string(hookID), (funcPointer)function);
 }
 
 void hook_addIdentifiedCallback(const char* hookID, void* identifier, voidF function)
 {
-  ServerInstance->plugin()->getHook(hookID)->addIdentifiedCallback(identifier, function);
+  //ServerInstance->plugin()->getHook(hookID)->addIdentifiedCallback(identifier, function);
 }
 
 void hook_remCallback(const char* hookID, voidF function)
 {
-  ServerInstance->plugin()->getHook(hookID)->remCallback(function);
+  funcListType *funcList = ServerInstance->plugin()->getHook(hookID);
+  for(funcListType::iterator i = funcList->begin(); i != funcList->end(); i++)
+  {
+    if((*i) == (funcPointer)function)
+    {
+      funcList->erase(i);
+      break;
+    }
+  }
 }
 
 bool hook_doUntilTrue(const char* hookID, ...)
@@ -156,7 +174,8 @@ bool hook_doUntilTrue(const char* hookID, ...)
   bool result = false;
   va_list argList;
   va_start(argList, hookID);
-  result = ServerInstance->plugin()->getHook(hookID)->doUntilTrueVA(argList);
+  runCallbackUntilTrue(hookID,argList);
+  result = callbackReturnValue;
   va_end(argList);
   return result;
 }
@@ -165,8 +184,9 @@ bool hook_doUntilFalse(const char* hookID, ...)
 {
   bool result = false;
   va_list argList;
-  va_start(argList, hookID);
-  result = ServerInstance->plugin()->getHook(hookID)->doUntilFalseVA(argList);
+  va_start(argList, hookID);  
+  runCallbackUntilFalse(hookID,argList);
+  result = callbackReturnValue;
   va_end(argList);
   return result;
 }
@@ -175,7 +195,7 @@ void hook_doAll(const char* hookID, ...)
 {
   va_list argList;
   va_start(argList, hookID);
-  ServerInstance->plugin()->getHook(hookID)->doAllVA(argList);
+  runAllCallback(hookID,argList);
   va_end(argList);
 }
 
@@ -1055,8 +1075,8 @@ void init_plugin_api(void)
   plugin_api_pointers.plugin.setPointer            = &plugin_setPointer;
   plugin_api_pointers.plugin.remPointer            = &plugin_remPointer;
   plugin_api_pointers.plugin.hasHook               = &plugin_hasHook;
-  plugin_api_pointers.plugin.getHook               = &plugin_getHook;
-  plugin_api_pointers.plugin.setHook               = &plugin_setHook;
+  //plugin_api_pointers.plugin.getHook               = &plugin_getHook;
+  //plugin_api_pointers.plugin.setHook               = &plugin_setHook;
   plugin_api_pointers.plugin.remHook               = &plugin_remHook;
   plugin_api_pointers.plugin.hasCallback           = &hook_hasCallback;
   plugin_api_pointers.plugin.addCallback           = &hook_addCallback;

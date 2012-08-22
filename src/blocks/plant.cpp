@@ -26,6 +26,7 @@
 */
 
 #include <cstdlib>
+#include <algorithm>
 
 #include "plant.h"
 #include "mineserver.h"
