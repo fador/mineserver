@@ -102,9 +102,13 @@ bool User::changeNick(std::string _nick)
 
 User::~User()
 {
-  if (this->UID != SERVER_CONSOLE_UID && event_del(GetEvent()) == -1)
+  if (this->UID != SERVER_CONSOLE_UID && event_del(getReadEvent()) == -1)
   {
-    LOG2(WARNING, this->nick + " event del failed!");
+    LOG2(WARNING, this->nick + " event del failed for read event!");
+  }
+  if (this->UID != SERVER_CONSOLE_UID && event_del(getWriteEvent()) == -1)
+  {
+    LOG2(WARNING, this->nick + " event del failed for write event!");
   }
 
   if (fd != -1)
@@ -1354,9 +1358,14 @@ bool User::isUnderwater()
   return false;
 }
 
-struct event* User::GetEvent()
+struct event* User::getReadEvent()
 {
-  return &m_event;
+  return &m_readEvent;
+}
+
+struct event* User::getWriteEvent()
+{
+  return &m_writeEvent;
 }
 
 std::set<User*>& User::all()

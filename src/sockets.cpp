@@ -141,8 +141,7 @@ bool client_write(User *user)
     //If we couldn't write everything at once, add EV_WRITE event calling this function again..
     if (!user->bufferCrypted.getWriteEmpty())
     {
-      event_set(user->GetEvent(), user->fd, EV_WRITE | EV_READ, client_callback, user);
-      event_add(user->GetEvent(), NULL);
+      event_add(user->getWriteEvent(), NULL);
       return false;
     }
   }
@@ -209,8 +208,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
         if (curpos == PACKET_NEED_MORE_DATA)
         {
           user->waitForData = true;
-          event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
-          event_add(user->GetEvent(), NULL);
+          event_add(user->getReadEvent(), NULL);
           return;
         }
 
@@ -240,8 +238,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
         if (!user->buffer.haveData(ServerInstance->packetHandler()->packets[user->action].len))
         {
           user->waitForData = true;
-          event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
-          event_add(user->GetEvent(), NULL);
+          event_add(user->getReadEvent(), NULL);
           return;
         }
 
@@ -258,8 +255,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
   }  
 
   //Add EV_READ event again
-  event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
-  event_add(user->GetEvent(), NULL);
+  event_add(user->getReadEvent(), NULL);
 }
 
 extern "C" void accept_callback(int fd, short ev, void* arg)
@@ -282,8 +278,9 @@ extern "C" void accept_callback(int fd, short ev, void* arg)
   int one = 1;
   setsockopt(client_fd, IPPROTO_TCP, TCP_NODELAY, (const char*)&one, sizeof(int));
 
-  event_set(client->GetEvent(), client_fd, EV_WRITE | EV_READ, client_callback, client);
-  event_add(client->GetEvent(), NULL);
+  event_set(client->getReadEvent(), client_fd, EV_READ, client_callback, client);
+  event_set(client->getWriteEvent(), client_fd, EV_WRITE, client_callback, client);
+  event_add(client->getReadEvent(), NULL);
 }
 
 //Opens a socket and connects to the host/port
