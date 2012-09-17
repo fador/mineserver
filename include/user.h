@@ -223,10 +223,12 @@ public:
     return a > b ? (a - b) < viewDistance : (b - a) < viewDistance;
   }
 
-  struct event* GetEvent();
+  struct event* getReadEvent();
+  struct event* getWriteEvent();
 
 private:
-  event m_event;
+  event m_readEvent;
+  event m_writeEvent;
 
   // Item currently in hold
   int16_t m_currentItemSlot;
