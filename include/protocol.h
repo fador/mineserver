@@ -258,8 +258,6 @@ class Protocol
 
       //Ref: https://gist.github.com/4325656
       ret << (int8_t)PACKET_ENTITY_METADATA << eid;      
-      //ret << (int16_t)0; //Char \0 at index 0
-      //ret << (int8_t)0x21 << (int16_t)300; //Short 300 at index 1
       ret << (int8_t)0xAA /*Slot at index 10 */;
       ret << slot(item,(int8_t)count,health);
       ret << (int8_t)0x7f; //Terminate metadata

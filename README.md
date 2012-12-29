@@ -25,7 +25,7 @@ C++ compiler. MS Visual C++ 10 and GCC 4.4 should be sufficient. The build syste
 
 ### Supported Minecraft version
 
- * Working with 1.3.1 client (protocol 39)
+ * Working with 1.4.6 client (protocol 51)
 
 ### Features
 

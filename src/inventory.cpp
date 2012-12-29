@@ -57,7 +57,6 @@ void Item::sendUpdate()
       //ToDo: Check: With slotID == 4, client crashed -Fador 2012-12-29
       if((5 - (slot - 4)) != 4)
       {
-      //std::cout << "slot: " << (5 - (slot - 4)) << " item: " << type << " count: " << count << " health: " << health << std::endl;
       Packet pkt;
       pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)player->UID
           << (int16_t)(5 - (slot - 4)) << Protocol::slot(type,count,health);//<< (int16_t)type << (int16_t) 0;
