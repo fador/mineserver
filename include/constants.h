@@ -85,6 +85,7 @@ extern const unsigned int SERVER_CONSOLE_UID;
 extern const std::string VERSION;
 
 extern const int PROTOCOL_VERSION;
+extern const std::string MINECRAFT_VERSION;
 
 extern const char COMMENTPREFIX;
 

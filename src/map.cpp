@@ -38,6 +38,7 @@
 #include "tree.h"
 #include "furnaceManager.h"
 #include "mcregion.h"
+#include "protocol.h"
 
 // Copy Construtor
 Map::Map(const Map& oldmap)
@@ -1017,11 +1018,8 @@ bool Map::sendPickupSpawn(spawnedItem item)
   it->second->items.push_back(storedItem);
 
   Packet pkt;
-
-  pkt << (int8_t)PACKET_PICKUP_SPAWN << (int32_t)item.EID << (int16_t)item.item << (int8_t)item.count << (int16_t)item.health
-      << (int32_t)item.pos.x() << (int32_t)item.pos.y() << (int32_t)item.pos.z()
-      << (int8_t)0 << (int8_t)0 << (int8_t)0;
-
+  pkt << Protocol::pickupSpawn(item.EID, item.item, item.count, item.health,item.pos.x(), item.pos.y(),item.pos.z());
+  
   it->second->sendPacket(pkt);
 
   return true;

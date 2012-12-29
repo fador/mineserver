@@ -31,6 +31,7 @@
 #include "logger.h"
 #include "chat.h"
 #include "permissions.h"
+#include "protocol.h"
 
 #include "plugin.h"
 #include "config.h"
@@ -285,7 +286,7 @@ bool map_setTime(int timeValue)
 {
   ServerInstance->map(0)->mapTime = timeValue;
   Packet pkt;
-  pkt << (int8_t)PACKET_TIME_UPDATE << (int64_t)ServerInstance->map(0)->mapTime;
+  pkt << Protocol::timeUpdate(ServerInstance->map(0)->mapTime);
 
   if (!User::all().empty())
   {

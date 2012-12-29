@@ -723,12 +723,14 @@ bool Mineserver::run()
       tick = (uint32_t)timeNow;
 
       // Loop users
-      for (std::set<User*>::iterator it = m_users.begin(); it != m_users.end(); it++)
+      for (std::set<User*>::iterator it = m_users.begin(); it != m_users.end(); )
       {
         // NOTE: iterators corrupt when you delete their objects, therefore we have to iterate in a special way - Justasic
           /// BIGGER NOTE: Justasic is dumb
 
         User * const & u = *it;
+        //Increment before anything gets deleted
+        it++;
         // No data received in 30s, timeout
         if (u->logged && timeNow - u->lastData > 30)
         {
@@ -746,7 +748,6 @@ bool Mineserver::run()
           u->pushMap();
           u->popMap();
         }
-
       }
 
       for (std::vector<Map*>::size_type i = 0 ; i < m_map.size(); i++)

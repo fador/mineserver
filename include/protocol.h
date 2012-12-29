@@ -198,11 +198,12 @@ class Protocol
       return ret;
     }
 
-    static Packet loginResponse(int eid)
+    //ToDo: remember gamemode for players
+    static Packet loginResponse(int eid, int8_t gamemode = 0)
     {
       Packet ret;
       ret << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)eid
-          << std::string("default") << (int8_t)0 << (int8_t)0 
+          << std::string("default") << (int8_t)gamemode << (int8_t)0 
           << (int8_t)2 << (int8_t)0 << (int8_t)ServerInstance->config()->iData("system.user_limit");
       return ret;
     }
@@ -214,10 +215,11 @@ class Protocol
       return ret;
     }
 
-    static Packet timeUpdate(int64_t time)
+    //ToDo: use age of the world field somewhere
+    static Packet timeUpdate(int64_t time, int64_t ageOfTheWorld = 0)
     {
       Packet ret;
-      ret << (int8_t)PACKET_TIME_UPDATE << (int64_t)time;
+      ret << (int8_t)PACKET_TIME_UPDATE << (int64_t)ageOfTheWorld << (int64_t)time;
       return ret;
     }
 
@@ -245,11 +247,32 @@ class Protocol
       return ret;
     }
 
-    static Packet addObject(int eid, int8_t object, double x, double y, double z, int objectData, int16_t speed_x = 0, int16_t speed_y = 0,int16_t speed_z = 0)
+    static Packet pickupSpawn(int eid, int16_t item, int16_t count, int16_t health, int32_t x, int32_t y, int32_t z)
+    {
+      MetaData metadata;
+
+      Packet ret;
+      ret << addObject(eid, 0x02, x/32, y/32, z/32,0) ;
+      //Add metadata
+      //ToDo: expand metadata-class to handle this
+
+      //Ref: https://gist.github.com/4325656
+      ret << (int8_t)PACKET_ENTITY_METADATA << eid;      
+      //ret << (int16_t)0; //Char \0 at index 0
+      //ret << (int8_t)0x21 << (int16_t)300; //Short 300 at index 1
+      ret << (int8_t)0xAA /*Slot at index 10 */;
+      ret << slot(item,(int8_t)count,health);
+      ret << (int8_t)0x7f; //Terminate metadata
+      return ret;
+    }
+
+    static Packet addObject(int eid, int8_t object, double x, double y, double z, int objectData, int16_t speed_x = 0, int16_t speed_y = 0,int16_t speed_z = 0, int8_t yaw = 0, int8_t pitch = 0)
     {
       Packet  pkt;  
       pkt //<< (int8_t)PACKET_ENTITY << (int32_t)eid
-          << (int8_t)PACKET_ADD_OBJECT << (int32_t)eid << (int8_t)object << (int32_t)(x * 32 + 16) << (int32_t)(y * 32 + 16) << (int32_t)(z * 32 + 16) << (int32_t)objectData;
+          << (int8_t)PACKET_ADD_OBJECT << (int32_t)eid << (int8_t)object << (int32_t)(x * 32 + 16) << (int32_t)(y * 32 + 16) << (int32_t)(z * 32 + 16) 
+          << yaw << pitch
+          << (int32_t)objectData;
       if(objectData)
       {
         pkt << (int16_t)speed_x << (int16_t)speed_y << (int16_t)speed_z;

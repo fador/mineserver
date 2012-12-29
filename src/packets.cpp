@@ -320,16 +320,16 @@ int PacketHandler::client_info(User* user)
   }
 
   std::string locale;
-  int8_t viewDistance,chatFlags,difficulty;
+  int8_t viewDistance,chatFlags,difficulty,showCape;
 
   user->buffer >> locale;
 
-  if (!user->buffer || !user->buffer.haveData(3))
+  if (!user->buffer || !user->buffer.haveData(4))
   {
     return PACKET_NEED_MORE_DATA;
   }
 
-  user->buffer >> viewDistance >> chatFlags >> difficulty;
+  user->buffer >> viewDistance >> chatFlags >> difficulty >> showCape;
 
   user->buffer.removePacket();
 
@@ -1514,17 +1514,33 @@ int PacketHandler::use_entity(User* user)
 }
 
 
-// Keep Alive (http://mc.kev009.com/wiki/Protocol)
+// Serverlist ping (http://wiki.vg/Server_List_Ping)
 int PacketHandler::ping(User* user)
 {
-  //Reply with server info
+  //Read the new magic field in the 1.4 protocol
+  int8_t magic;
+  user->buffer >> magic;  
   user->buffer.removePacket();
+  
+  //Reply with server info
+  std::string line;
 
-  std::ostringstream line;
-  line << ServerInstance->config()->sData("system.server_name") << "§"
-       << ServerInstance->getLoggedUsersCount() << "§"
-       << ServerInstance->config()->iData("system.user_limit");
-  user->kick(line.str());
+  //Insert \1 instead of null char \0, then replace it later
+  line = "§1\1" +
+        my_itoa(PROTOCOL_VERSION) + "\1" +
+        MINECRAFT_VERSION + "\1" +
+        ServerInstance->config()->sData("system.server_name") + "\1" +
+        my_itoa(ServerInstance->getLoggedUsersCount()) + "\1" +
+        my_itoa(ServerInstance->config()->iData("system.user_limit"));
+  //Replacing \1 with \0
+  for(unsigned int i = 0; i < line.size();i++)
+  {
+    if(line[i] == '\1')
+    {
+      line[i] = '\0';
+    }
+  }
+  user->kick(line);
 
   return PACKET_OK;
 }
