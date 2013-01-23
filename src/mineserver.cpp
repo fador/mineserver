@@ -207,8 +207,13 @@ Mineserver::Mineserver(int args, char **argarray)
       break;
     }
   }
-  
+
+// VS2012 debug wouldn't be able to find config file without this
+#ifdef DEBUG
+  const std::string path_exe = "../bin/";
+#else
   const std::string path_exe = "./";
+#endif
   
   // If config file is provided as an argument
   if (!cfg.empty())
