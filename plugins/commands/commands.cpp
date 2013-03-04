@@ -87,15 +87,22 @@ typedef void (*CommandCallback)(std::string nick, std::string, std::deque<std::s
 
 struct Command
 {
-  Command(std::deque<std::string> _names, std::string _arguments, std::string _description, CommandCallback _callback)
+  Command(std::deque<std::string> _names, std::string _arguments, std::string _description, CommandCallback _callback,
+          bool _needAdmin = false, bool _needOp = false, bool _needMember = false)
     : names(_names),
       arguments(_arguments),
       description(_description),
-      callback(_callback)
+      callback(_callback),
+      needAdmin(_needAdmin),
+      needOp(_needOp),
+      needMember(_needMember)
   {}
   std::deque<std::string> names;
   std::string arguments;
   std::string description;
+  bool needAdmin;
+  bool needOp;
+  bool needMember;
   CommandCallback callback;  
 };
 
@@ -135,6 +142,31 @@ bool chatCommandFunction(const char* userIn,const char* cmdIn, int argc, char** 
   CommandList::iterator iter;
   if((iter = m_Commands.find(command)) != m_Commands.end())
   {
+    if(iter->second->needAdmin)
+    {
+      if(!mineserver->permissions.isAdmin(user.c_str()))
+      {
+        mineserver->chat.sendmsgTo(user.c_str(),  "Need Admin rights");
+        return true;
+      }
+    }
+    if(iter->second->needOp)
+    {
+      if(!mineserver->permissions.isOp(user.c_str()))
+      {
+        mineserver->chat.sendmsgTo(user.c_str(),  "Need Operator rights");
+        return true;
+      }
+    }
+    if(iter->second->needMember)
+    {
+      if(!mineserver->permissions.isMember(user.c_str()))
+      {
+        mineserver->chat.sendmsgTo(user.c_str(),  "Need Member rights");
+        return true;
+      }
+    }
+    
     iter->second->callback(user, command, cmd);
     return true;
   }
@@ -875,26 +907,26 @@ PLUGIN_API_EXPORT void CALLCONVERSION commands_init(mineserver_pointer_struct* m
 
   registerCommand(ComPtr(new Command(parseCmd("about"), "", "Displays server name and software version", about)));
   registerCommand(ComPtr(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport)));
-  registerCommand(ComPtr(new Command(parseCmd("cuboid"), "", "Type in the command and place two blocks, it will fill the space between them", cuboid)));
+  registerCommand(ComPtr(new Command(parseCmd("cuboid"), "", "Type in the command and place two blocks, it will fill the space between them", cuboid,false,true)));
   registerCommand(ComPtr(new Command(parseCmd("dnd"), "", "Toggles Do Not Disturb mode", doNotDisturb)));
-  registerCommand(ComPtr(new Command(parseCmd("flattenchunk"), "<id/alias>", "Erases all blocks above you and changes all blocks at your Y-level to your block of choice", flattenchunk)));
+  registerCommand(ComPtr(new Command(parseCmd("flattenchunk"), "<id/alias>", "Erases all blocks above you and changes all blocks at your Y-level to your block of choice", flattenchunk, false,true)));
   registerCommand(ComPtr(new Command(parseCmd("gettime"), "", "Gets the world time", getTime)));
-  registerCommand(ComPtr(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems)));
+  registerCommand(ComPtr(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems,false,true)));
   registerCommand(ComPtr(new Command(parseCmd("gps"), "", "Display current coordinates", gps)));
   registerCommand(ComPtr(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", sendHelp)));
   registerCommand(ComPtr(new Command(parseCmd("home"), "", "Teleports you to this world's spawn location", home)));
-  registerCommand(ComPtr(new Command(parseCmd("igive i item"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf)));
+  registerCommand(ComPtr(new Command(parseCmd("igive i item"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf, false,true)));
   registerCommand(ComPtr(new Command(parseCmd("motd"), "", "Displays the server's MOTD", sendMOTD)));
   registerCommand(ComPtr(new Command(parseCmd("players who names list"), "", "Lists online players", playerList)));
-  registerCommand(ComPtr(new Command(parseCmd("replace"), "<from-id/alias> <to-id/alias>", "Type in the command and left-click two blocks, it will replace the selected blocks with the new blocks", replace)));
-  registerCommand(ComPtr(new Command(parseCmd("replacechunk"), "<from-id/alias> <to-id/alias>", "Replaces the chunk you are at with the block you specify", replacechunk)));
+  registerCommand(ComPtr(new Command(parseCmd("replace"), "<from-id/alias> <to-id/alias>", "Type in the command and left-click two blocks, it will replace the selected blocks with the new blocks", replace, true)));
+  registerCommand(ComPtr(new Command(parseCmd("replacechunk"), "<from-id/alias> <to-id/alias>", "Replaces the chunk you are at with the block you specify", replacechunk, true)));
   registerCommand(ComPtr(new Command(parseCmd("rules"), "", "Displays server rules", sendRules)));
-  registerCommand(ComPtr(new Command(parseCmd("save"), "", "Manually saves map to disc", saveMap)));
-  registerCommand(ComPtr(new Command(parseCmd("setspawn"), "", "Sets home to your current coordinates", setSpawn)));
-  registerCommand(ComPtr(new Command(parseCmd("settime"), "<time>", "Sets the world time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime)));
-  registerCommand(ComPtr(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport)));
-  registerCommand(ComPtr(new Command(parseCmd("world"), "<world-id>", "Moves you between worlds", userWorld)));
-  registerCommand(ComPtr(new Command(parseCmd("gamemode"), "[player] < survival | 0 ; creative | 1 >", "Changes your or someone else's gamemode.", changeGameMode)));
+  registerCommand(ComPtr(new Command(parseCmd("save"), "", "Manually saves map to disc", saveMap, false, true)));
+  registerCommand(ComPtr(new Command(parseCmd("setspawn"), "", "Sets home to your current coordinates", setSpawn, true)));
+  registerCommand(ComPtr(new Command(parseCmd("settime"), "<time>", "Sets the world time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime, false, true)));
+  registerCommand(ComPtr(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport, false, true)));
+  registerCommand(ComPtr(new Command(parseCmd("world"), "<world-id>", "Moves you between worlds", userWorld, true)));
+  registerCommand(ComPtr(new Command(parseCmd("gamemode"), "[player] < survival | 0 ; creative | 1 >", "Changes your or someone else's gamemode.", changeGameMode, false, true)));
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION commands_shutdown(void)

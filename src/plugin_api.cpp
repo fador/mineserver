@@ -69,6 +69,18 @@ User* userFromName(std::string user)
   }
   return NULL;
 }
+User* anyUserFromName(std::string user)
+{
+  for (std::set<User*>::const_iterator it = ServerInstance->users().begin(); it != ServerInstance->users().end(); ++it)
+  {
+    // Don't send to his user if he is DND and the message is a chat message
+    if ((user == (*it)->nick))
+    {
+      return *it;
+    }
+  }
+  return NULL;
+}
 
 // PLUGIN_API FUNCTIONS
 
@@ -959,7 +971,7 @@ int8_t mob_getByteMetadata(int uid, int idx)
 
 bool permission_setAdmin(const char* name)
 {
-  User* tempuser = userFromName(std::string(name));
+  User* tempuser = anyUserFromName(std::string(name));
   if (tempuser == NULL)
   {
     return false;
@@ -970,7 +982,7 @@ bool permission_setAdmin(const char* name)
 
 bool permission_setOp(const char* name)
 {
-  User* tempuser = userFromName(std::string(name));
+  User* tempuser = anyUserFromName(std::string(name));
   if (tempuser == NULL)
   {
     return false;
@@ -982,7 +994,7 @@ bool permission_setOp(const char* name)
 
 bool permission_setMember(const char* name)
 {
-  User* tempuser = userFromName(std::string(name));
+  User* tempuser = anyUserFromName(std::string(name));
   if (tempuser == NULL)
   {
     return false;
@@ -994,7 +1006,7 @@ bool permission_setMember(const char* name)
 
 bool permission_setGuest(const char* name)
 {
-  User* tempuser = userFromName(std::string(name));
+  User* tempuser = anyUserFromName(std::string(name));
   if (tempuser == NULL)
   {
     return false;

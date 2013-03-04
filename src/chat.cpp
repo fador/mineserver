@@ -184,6 +184,7 @@ void Chat::handleCommand(User* user, std::string msg, const std::string& timeSta
   if (command == "auth" && param[0] == ServerInstance->config()->sData("system.admin.password"))
   {
     user->serverAdmin = true;
+    SET_ADMIN(user->permissions);
     msg = MC_COLOR_RED + "[!] " + MC_COLOR_GREEN + "You have been authed as admin!";
     sendMsg(user, msg, USER);
   }

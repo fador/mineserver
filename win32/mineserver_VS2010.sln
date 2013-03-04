@@ -8,6 +8,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_filelog", "plugins\p
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_luascript", "plugins\plugin_luascript.vcxproj", "{67064A5E-4849-4BDB-8E15-5796B15D0E84}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_flatpermissions", "plugins\plugin_flatpermissions.vcxproj", "{C33AEC42-DCAC-4E29-8269-3C063C929608}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -30,6 +32,10 @@ Global
 		{67064A5E-4849-4BDB-8E15-5796B15D0E84}.Debug|Win32.Build.0 = Debug|Win32
 		{67064A5E-4849-4BDB-8E15-5796B15D0E84}.Release|Win32.ActiveCfg = Release|Win32
 		{67064A5E-4849-4BDB-8E15-5796B15D0E84}.Release|Win32.Build.0 = Release|Win32
+		{C33AEC42-DCAC-4E29-8269-3C063C929608}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C33AEC42-DCAC-4E29-8269-3C063C929608}.Debug|Win32.Build.0 = Debug|Win32
+		{C33AEC42-DCAC-4E29-8269-3C063C929608}.Release|Win32.ActiveCfg = Release|Win32
+		{C33AEC42-DCAC-4E29-8269-3C063C929608}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

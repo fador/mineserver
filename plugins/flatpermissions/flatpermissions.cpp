@@ -41,7 +41,7 @@ g++ -shared flatpermissions.o -o flatpermissions.so
 #define MINESERVER_C_API
 #include "plugin_api.h"
 
-#define PLUGIN_VERSION 1.0
+#define PLUGIN_VERSION 1.1
 mineserver_pointer_struct* mineserver;
 std::string pluginName = "flatpermissions";
 
@@ -56,7 +56,9 @@ void loginPost(const char* userIn){
   std::ifstream file;
   file.open("permissions.txt", std::ios::in);
   std::string line;
+  mineserver->logger.log(6, "plugin.flatpermissions", "opening permissions.txt!");
   if(file.is_open()){
+    mineserver->logger.log(6, "plugin.flatpermissions", "opened permissions.txt!");
     while(file.good()){
       std::string msg;
       std::getline(file, msg);
@@ -68,13 +70,13 @@ void loginPost(const char* userIn){
         if(name.compare(std::string(userIn))==0){
           std::transform(rank.begin(), rank.end(), rank.begin(), ::tolower);
           if(rank.compare("admin")==0 || rank.compare("admins")==0){
-            mineserver->permissions.setAdmin(name.c_str());
+            mineserver->permissions.setAdmin(userIn);
           }else if(rank.compare("op")==0 || rank.compare("ops")==0){
-            mineserver->permissions.setOp(name.c_str());
+            mineserver->permissions.setOp(userIn);
           }else if(rank.compare("member")==0 || rank.compare("members")==0){
-            mineserver->permissions.setMember(name.c_str());
+            mineserver->permissions.setMember(userIn);
           }else{
-            mineserver->permissions.setGuest(name.c_str());
+            mineserver->permissions.setGuest(userIn);
           }
           break;
         }
@@ -85,7 +87,7 @@ void loginPost(const char* userIn){
 }
 
 
-PLUGIN_API_EXPORT void CALLCONVERSION flatpermissions_shutdown(void)
+PLUGIN_API_EXPORT void CALLCONVENSION flatpermissions_shutdown(void)
 {
   if (mineserver->plugin.getPluginVersion(pluginName.c_str()) <= 0)
   {
@@ -94,7 +96,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION flatpermissions_shutdown(void)
   }
 }
 
-PLUGIN_API_EXPORT void CALLCONVERSION flatpermissions_init(mineserver_pointer_struct* mineserver_temp)
+PLUGIN_API_EXPORT void CALLCONVENSION flatpermissions_init(mineserver_pointer_struct* mineserver_temp)
 {
   mineserver = mineserver_temp;
   if(mineserver->plugin.getPluginVersion(pluginName.c_str())>0){
