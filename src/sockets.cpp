@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2012, The Mineserver Project
+   Copyright (c) 2013, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,7 @@ typedef int socklen_t;
 #include "mineserver.h"
 #include "packets.h"
 #include "config.h"
+#include "extern.h"
 
 
 extern int setnonblock(int fd);
@@ -128,7 +129,9 @@ bool client_write(User *user)
     #endif
       {
         LOG2(ERROR, "Error writing to client, tried to write " + dtos(buf.size()) + " bytes, code: " + dtos(ERROR_NUMBER));
-        delete user;
+        //delete user;
+        user->logged = false;
+        ServerInstance->usersToRemove().insert(user);
         return false;
       }
     }

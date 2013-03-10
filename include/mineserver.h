@@ -121,6 +121,11 @@ public:
     return m_users;
   }
 
+  inline std::set<User*>& usersToRemove()
+  {
+    return m_usersToRemove;
+  }
+
   inline const std::set<User*>& users() const
   {
     return m_users;
@@ -248,6 +253,8 @@ private:
 
   // holds all connected users
   std::set<User*>    m_users;
+  //Delayed user removal
+  std::set<User*>    m_usersToRemove;
 
   std::vector<Map*>                m_map;
   std::vector<Physics*>            m_physics;

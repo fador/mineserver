@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2012, The Mineserver Project
+   Copyright (c) 2013, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -658,6 +658,20 @@ bool Mineserver::run()
     // Run 200ms timer hook
     runAllCallback("Timer200");
 
+    //Remove any users pending removal
+    if(m_usersToRemove.size())
+    {
+      for (std::set<User*>::iterator it = m_usersToRemove.begin(); it != m_usersToRemove.end(); it++)
+      {
+        User* u = *it;
+        delete u;
+        u = 0;
+      }
+      m_usersToRemove.clear();
+    }
+
+    
+
     // Alert any block types that care about timers
     for (size_t i = 0 ; i < plugin()->getBlockCB().size(); ++i)
     {
@@ -721,24 +735,23 @@ bool Mineserver::run()
     if (timeNow - tick > 0)
     {
       tick = (uint32_t)timeNow;
-
+      std::set<User*> usersToRemove;
       // Loop users
-      for (std::set<User*>::iterator it = m_users.begin(); it != m_users.end(); )
+      for (std::set<User*>::iterator it = m_users.begin(); it != m_users.end(); it++)
       {
-        // NOTE: iterators corrupt when you delete their objects, therefore we have to iterate in a special way - Justasic
-          /// BIGGER NOTE: Justasic is dumb
-
         User * const & u = *it;
-        //Increment before anything gets deleted
-        it++;
+
         // No data received in 30s, timeout
         if (u->logged && timeNow - u->lastData > 30)
         {
           LOG2(INFO, "Player " + u->nick + " timed out");
-          delete u;
+          usersToRemove.insert(u);
+          
         }
         else if (!u->logged && timeNow - u->lastData > 100)
-          delete u;
+        {
+          usersToRemove.insert(u);
+        }
         else
         {
           if (m_damage_enabled)
@@ -748,6 +761,10 @@ bool Mineserver::run()
           u->pushMap();
           u->popMap();
         }
+      }
+      for (std::set<User*>::iterator it = usersToRemove.begin(); it != usersToRemove.end(); it++)
+      {
+        delete *it;
       }
 
       for (std::vector<Map*>::size_type i = 0 ; i < m_map.size(); i++)
