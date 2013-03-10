@@ -1148,11 +1148,12 @@ void User::checkEnvironmentDamage()
   uint8_t type = 0, meta = 0;
 
   int16_t d = 0;
-
+  /*
   if (type == BLOCK_CACTUS && LOADBLOCK(pos.x, yVal, pos.z))
   {
     d = 1;
   }
+  */
 
   const double xbit = pos.x - std::floor(pos.x);
   const double zbit = pos.z - std::floor(pos.z);

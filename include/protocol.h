@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2012, The Mineserver Project
+   Copyright (c) 2013, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -306,7 +306,7 @@ class Protocol
       return ret;
     }
 
-    static Packet updateHealth(int health, int food=20)
+    static Packet updateHealth(int health, int food=15)
     {
       Packet ret;
       ret << (int8_t)PACKET_UPDATE_HEALTH << (int16_t)health << (int16_t)food << (float)5.0;

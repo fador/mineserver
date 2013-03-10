@@ -5,7 +5,7 @@ g++ -shared flatpermissions.o -o flatpermissions.so
 
 */
 /*
-  Copyright (c) 2010, The Mineserver Project
+  Copyright (c) 2013, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -56,26 +56,35 @@ void loginPost(const char* userIn){
   std::ifstream file;
   file.open("permissions.txt", std::ios::in);
   std::string line;
-  mineserver->logger.log(6, "plugin.flatpermissions", "opening permissions.txt!");
-  if(file.is_open()){
-    mineserver->logger.log(6, "plugin.flatpermissions", "opened permissions.txt!");
-    while(file.good()){
+  if(file.is_open())
+  {
+    while(file.good())
+    {
       std::string msg;
       std::getline(file, msg);
-      if(msg.size()>1){
+      if(msg.size()>1)
+      {
         std::string name, rank;
         std::istringstream line(msg);
         std::getline(line,name,':');
         std::getline(line,rank);
-        if(name.compare(std::string(userIn))==0){
+        if(name.compare(std::string(userIn))==0)
+        {
           std::transform(rank.begin(), rank.end(), rank.begin(), ::tolower);
-          if(rank.compare("admin")==0 || rank.compare("admins")==0){
+          if(rank.compare("admin")==0 || rank.compare("admins")==0)
+          {
             mineserver->permissions.setAdmin(userIn);
-          }else if(rank.compare("op")==0 || rank.compare("ops")==0){
+          }
+          else if(rank.compare("op")==0 || rank.compare("ops")==0)
+          {
             mineserver->permissions.setOp(userIn);
-          }else if(rank.compare("member")==0 || rank.compare("members")==0){
+          }
+          else if(rank.compare("member")==0 || rank.compare("members")==0)
+          {
             mineserver->permissions.setMember(userIn);
-          }else{
+          }
+          else
+          {
             mineserver->permissions.setGuest(userIn);
           }
           break;

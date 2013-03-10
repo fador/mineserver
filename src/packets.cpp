@@ -368,6 +368,8 @@ int PacketHandler::entity_crouch(User* user)
 {
   int32_t EID;
   int8_t action;
+  MetaData meta;
+  MetaDataElemByte *element;
 
   user->buffer >> EID >> action;
   Packet pkt;
@@ -377,13 +379,17 @@ int PacketHandler::entity_crouch(User* user)
   switch(action)
   {
   //Crouch
-  case 1:
-    pkt << Protocol::animation(user->UID, 104);
+  case 1:    
+    element = new MetaDataElemByte(0,0x02);
+    meta.set(element);
+    pkt << Protocol::animation(user->UID, 104) << Protocol::entityMetadata(user->UID,meta);
     packetData = true;
     break;
     //Uncrouch
   case 2:
-    pkt << Protocol::animation(user->UID, 105);
+    element = new MetaDataElemByte(0,0x00);
+    meta.set(element);
+    pkt << Protocol::animation(user->UID, 105) << Protocol::entityMetadata(user->UID,meta);
     packetData = true;
     break;
   default:

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012, The Mineserver Project
+  Copyright (c) 2013, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -173,15 +173,15 @@ void Chat::handleCommand(User* user, std::string msg, const std::string& timeSta
   std::string command = cmd[0];
   cmd.pop_front();
 
+  //Converting to char* array for plugins
   char** param = new char *[cmd.size()];
-
   for (uint32_t i = 0; i < cmd.size(); i++)
   {
     param[i] = (char*)cmd[i].c_str();
   }
 
-  // If hardcoded auth command!
-  if (command == "auth" && param[0] == ServerInstance->config()->sData("system.admin.password"))
+  // If hardcoded auth command, ignore default password "CHANGEME"
+  if (command == "auth" && cmd[0] != "CHANGEME" && cmd[0] == ServerInstance->config()->sData("system.admin.password"))
   {
     user->serverAdmin = true;
     SET_ADMIN(user->permissions);
