@@ -204,14 +204,14 @@ RedstoneSimulation::Power RedstoneSimulation::getPower(int32_t x, int16_t y, int
 {
 	uint8_t block;
 	uint8_t meta = 0;
-	bool weak = false;
 
 	// Check block type
 	if (!ServerInstance->map(map)->getBlock(x + 1, y, z, &block, &meta))
 	{
 		return POWER_NONE;
 	}
-	if (!isBlockSolid(block)) {
+	if (!isBlockSolid(block))
+  {
 		return POWER_NONE;
 	}
 
@@ -232,7 +232,7 @@ RedstoneSimulation::Power RedstoneSimulation::getPower(int32_t x, int16_t y, int
 	else if (block == BLOCK_REDSTONE_WIRE && meta != 0)
 	{
 		// TODO: Check if wire ends here
-		weak = true;
+		return POWER_WEAK;
 	}
 
 	// South
@@ -247,7 +247,7 @@ RedstoneSimulation::Power RedstoneSimulation::getPower(int32_t x, int16_t y, int
 	}
 	else if (block == BLOCK_REDSTONE_WIRE && meta != 0)
 	{
-		weak = true;
+		return POWER_WEAK;
 	}
 
 	// East
@@ -262,7 +262,7 @@ RedstoneSimulation::Power RedstoneSimulation::getPower(int32_t x, int16_t y, int
 	}
 	else if (block == BLOCK_REDSTONE_WIRE && meta != 0)
 	{
-		weak = true;
+		return POWER_WEAK;
 	}
 
 	// West
@@ -277,16 +277,17 @@ RedstoneSimulation::Power RedstoneSimulation::getPower(int32_t x, int16_t y, int
 	}
 	else if (block == BLOCK_REDSTONE_WIRE && meta != 0)
 	{
-		weak = true;
+		return POWER_WEAK;
 	}
 
-	// Switch or pressure plate on top of the block
+	
 	if (!ServerInstance->map(map)->getBlock(x, y + 1, z, &block, &meta))
 	{
 		return POWER_NONE;
 	}
 
-	if (block == BLOCK_WOODEN_PRESSURE_PLATE || block == BLOCK_STONE_PRESSURE_PLATE && (meta & 0x1) == 0x1)
+  // Switch or pressure plate on top of the block
+	if ((block == BLOCK_WOODEN_PRESSURE_PLATE || block == BLOCK_STONE_PRESSURE_PLATE) && (meta & 0x1) == 0x1)
 	{
 		return POWER_NORMAL;
 	}
@@ -298,7 +299,7 @@ RedstoneSimulation::Power RedstoneSimulation::getPower(int32_t x, int16_t y, int
 	// Wire on top of the block
 	else if (block == BLOCK_REDSTONE_WIRE && meta != 0)
 	{
-		weak = true;
+		return POWER_WEAK;
 	}
 
 	// Torch beneath the block
@@ -309,10 +310,6 @@ RedstoneSimulation::Power RedstoneSimulation::getPower(int32_t x, int16_t y, int
 	if (block == BLOCK_REDSTONE_TORCH_ON)
 	{
 		return POWER_NORMAL;
-	}
-
-	if (weak) {
-		return POWER_WEAK;
 	}
 
 	// No power

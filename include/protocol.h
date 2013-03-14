@@ -62,6 +62,13 @@ class Protocol
     }
     #endif
 
+    static Packet openWindow(int8_t windowId, int8_t type, std::string title, int8_t slots, int8_t useCustomTitle = 0)
+    {
+      Packet ret;
+      ret << (int8_t)PACKET_OPEN_WINDOW << windowId << type << title << slots << useCustomTitle;
+      return ret;
+    }
+
     static Packet animation(int eid, int aid)
     {
       Packet ret;

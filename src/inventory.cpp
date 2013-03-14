@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
+   Copyright (c) 2013, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -975,15 +975,17 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
       }
       if(_chestData == NULL)
         break;
-
-      user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)type << (int8_t)INVENTORYTYPE_CHEST;
+      std::string windowName;
+      
       if(_chestData->large())
       {
-        user->buffer << std::string("Large chest");
-      } else {
-        user->buffer << std::string("Chest");
+        windowName = "Large chest";
       }
-      user->buffer << (int8_t)(_chestData->size()); // size.. not a very good idea. lets just hope this will only return 27 or 54
+      else
+      {
+        windowName = "Chest";
+      }
+      user->buffer << Protocol::openWindow(type,INVENTORYTYPE_CHEST,windowName, _chestData->size());
 
       for (size_t j = 0; j < _chestData->size(); j++)
       {
@@ -999,8 +1001,7 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
     break;
 
   case WINDOW_WORKBENCH:
-    user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)WINDOW_WORKBENCH  << (int8_t)INVENTORYTYPE_WORKBENCH;
-    user->buffer << std::string("Workbench") << (int8_t)0;
+    user->buffer << Protocol::openWindow(WINDOW_WORKBENCH,INVENTORYTYPE_WORKBENCH,std::string("Workbench"), 0);
 
     for (uint32_t i = 0; i < openWorkbenches.size(); i++)
     {
@@ -1024,9 +1025,7 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
     }
     break;
   case WINDOW_FURNACE:
-
-    user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)WINDOW_FURNACE  << (int8_t)INVENTORYTYPE_FURNACE;
-    user->buffer << std::string("Furnace") << (int8_t)0;
+    user->buffer << Protocol::openWindow(WINDOW_FURNACE,INVENTORYTYPE_FURNACE,std::string("Furnace"), 0);
 
     for (uint32_t i = 0; i < chunk->furnaces.size(); i++)
     {
