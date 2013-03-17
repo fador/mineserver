@@ -259,7 +259,7 @@ class Protocol
       MetaData metadata;
 
       Packet ret;
-      ret << addObject(eid, 0x02, x/32, y/32, z/32,0) ;
+      ret << addObject(eid, 0x02, x, y, z,0) ;
       //Add metadata
       //ToDo: expand metadata-class to handle this
 
@@ -271,11 +271,11 @@ class Protocol
       return ret;
     }
 
-    static Packet addObject(int eid, int8_t object, double x, double y, double z, int objectData, int16_t speed_x = 0, int16_t speed_y = 0,int16_t speed_z = 0, int8_t yaw = 0, int8_t pitch = 0)
+    static Packet addObject(int eid, int8_t object, int32_t x, int32_t y, int32_t z, int objectData, int16_t speed_x = 0, int16_t speed_y = 0,int16_t speed_z = 0, int8_t yaw = 0, int8_t pitch = 0)
     {
       Packet  pkt;  
       pkt //<< (int8_t)PACKET_ENTITY << (int32_t)eid
-          << (int8_t)PACKET_ADD_OBJECT << (int32_t)eid << (int8_t)object << (int32_t)(x * 32 + 16) << (int32_t)(y * 32 + 16) << (int32_t)(z * 32 + 16) 
+          << (int8_t)PACKET_ADD_OBJECT << (int32_t)eid << (int8_t)object << x << y << z 
           << yaw << pitch
           << (int32_t)objectData;
       if(objectData)

@@ -1116,10 +1116,8 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
                 (int)(sinf(-(user->pos.pitch / 90.f)) * 14000.f),
                 (int)(cos(-(user->pos.yaw / 360.f) * 2.f * M_PI) * cos(user->pos.pitch * (M_PI / 180.0f)) * 9000.f));
 
-  pkt << (int8_t)PACKET_ENTITY << (int32_t)EID
-      << (int8_t)PACKET_ADD_OBJECT << (int32_t)EID << (int8_t)projID << (int32_t)pos.x() << (int32_t)pos.y() << (int32_t)pos.z() << (int32_t)0
-      << (int8_t)PACKET_ENTITY_VELOCITY << (int32_t)EID << (int16_t)vel.x() << (int16_t)vel.y() << (int16_t)vel.z();
-
+  pkt << (int8_t)PACKET_ENTITY << (int32_t)EID 
+      << Protocol::addObject(EID,projID, pos.x(), pos.y(), pos.z(), user->UID,(int16_t)vel.x(),(int16_t)vel.y(),(int16_t)vel.z(),0,0);
 
   user->sendAll(pkt);
 
