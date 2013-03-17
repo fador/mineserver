@@ -884,8 +884,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
     tempFurnace->map = user->pos.map;
     ServerInstance->furnaceManager()->handleActivity(tempFurnace);
   }
-
-  /*
+  
   //Signal others using the same space
   switch(windowID)
   {
@@ -894,10 +893,9 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
       {
         for(uint32_t i = 0; i < otherUsers->size(); i++)
         {
-          (*otherUsers)[i]->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)windowID << (int16_t)slot << (int16_t)slotItem->type;
-          if(slotItem->type != -1)
+          if((*otherUsers)[i] != user)
           {
-            (*otherUsers)[i]->buffer << (int8_t)slotItem->count << (int16_t)slotItem->health;
+            setSlot((*otherUsers)[i], windowID, slot, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
           }
         }
       }
@@ -911,11 +909,20 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         {
           if((*otherUsers)[i] != user)
           {
-            (*otherUsers)[i]->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)windowID << (int16_t)slot << (int16_t)slotItem->type;
-            if(slotItem->type != -1)
-            {
-              (*otherUsers)[i]->buffer << (int8_t)slotItem->count << (int16_t)slotItem->health;
-            }
+            setSlot((*otherUsers)[i], windowID, slot, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
+          }
+        }
+      }
+      break;
+    case WINDOW_LARGE_CHEST:
+      chunk->changed = true;
+      if(slot < 54)
+      {
+        for(uint32_t i = 0; i < otherUsers->size(); i++)
+        {
+          if((*otherUsers)[i] != user)
+          {
+            setSlot((*otherUsers)[i], windowID, slot, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
           }
         }
       }
@@ -929,20 +936,17 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         {
           if((*otherUsers)[i] != user)
           {
-            (*otherUsers)[i]->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)windowID << (int16_t)slot << (int16_t)slotItem->type;
-            if(slotItem->type != -1)
-            {
-              (*otherUsers)[i]->buffer << (int8_t)slotItem->count << (int16_t)slotItem->health;
-            }
+            setSlot((*otherUsers)[i], windowID, slot, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
           }
         }
       }
       break;
   }
-  */
-
+  
+  /*
   if(!updateInventory(user, windowID))
      return false;
+     */
   return true;
 }
 
@@ -1223,6 +1227,18 @@ bool Inventory::onwindowOpen(User* user, int8_t type, int32_t x, int32_t y, int3
   inv.push_back(newInv);
   user->isOpenInv = true;
 
+  Packet pkt;
+
+  //Chest opening animation
+  switch (type)
+  {
+    case WINDOW_CHEST:
+    case WINDOW_LARGE_CHEST:
+      pkt << Protocol::blockAction(x,y,z,1,1,BLOCK_CHEST);
+      user->sendAll(pkt);
+      break;
+  }
+
   return true;
 }
 
@@ -1276,6 +1292,12 @@ bool Inventory::onwindowClose(User* user, int8_t type, int32_t x, int32_t y, int
                 }
               }
             }
+            if(type == WINDOW_CHEST || type == WINDOW_LARGE_CHEST)
+            {
+              Packet pkt = Protocol::blockAction(x,y,z,1,0,BLOCK_CHEST);
+              user->sendAll(pkt);
+            }
+
             inv.erase(inv.begin() + i);
           }
 

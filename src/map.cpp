@@ -990,7 +990,7 @@ bool Map::sendNote(int x, int y, int z, char instrument, char pitch)
 
   Packet pkt;
 
-  pkt << (int8_t)PACKET_PLAY_NOTE << (int32_t)x << (int16_t)y << (int32_t)z << (int8_t)instrument << (int8_t)pitch;
+  pkt << (int8_t)PACKET_BLOCK_ACTION << (int32_t)x << (int16_t)y << (int32_t)z << (int8_t)instrument << (int8_t)pitch;
 
   it->second->sendPacket(pkt);
 

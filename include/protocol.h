@@ -107,7 +107,8 @@ class Protocol
       return ret;
     }
 
-    static Packet setSlotHeader(int8_t window_id, int16_t slot) {
+    static Packet setSlotHeader(int8_t window_id, int16_t slot)
+    {
       // `header` means: You need to place a `slot` packet after this one.
       Packet ret;
       ret << (int8_t)PACKET_SET_SLOT << window_id << slot;
@@ -289,6 +290,13 @@ class Protocol
     {
       Packet ret;
       ret << (int8_t)PACKET_COLLECT_ITEM << (int32_t)itemEid << (int32_t)eid;
+      return ret;
+    }
+
+    static Packet blockAction(int32_t x, int16_t y, int32_t z, int8_t byte1, int8_t byte2, int16_t blockid)
+    {
+      Packet ret;
+      ret << (int8_t)PACKET_BLOCK_ACTION << x << y << z << byte1 << byte2 << blockid;
       return ret;
     }
 

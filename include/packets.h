@@ -105,7 +105,7 @@ enum
   PACKET_MAP_CHUNK                 = 0x33,
   PACKET_MULTI_BLOCK_CHANGE        = 0x34,
   PACKET_BLOCK_CHANGE              = 0x35,
-  PACKET_PLAY_NOTE                 = 0x36,
+  PACKET_BLOCK_ACTION              = 0x36,
   PACKET_GAMESTATE                 = 0x46,
   PACKET_OPEN_WINDOW               = 0x64,
   PACKET_PROGRESS_BAR              = 0x69,
