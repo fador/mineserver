@@ -163,6 +163,13 @@ class Protocol
       return ret;
     }
 
+    static Packet namedSoundEffect(std::string name, int32_t x, int32_t y, int32_t z, float volume, int8_t pitch)
+    {
+      Packet ret;
+      ret << (int8_t)PACKET_NAMED_SOUND_EFFECT << name << x << y << z << volume << pitch;
+      return ret;
+    }
+
     static Packet entityHeadLook(int eid, int head_yaw)
     {
       Packet ret;
