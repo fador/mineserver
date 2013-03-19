@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012, The Mineserver Project
+  Copyright (c) 2013, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -161,6 +161,7 @@ bool blockPlacePreFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int1
 
 void sendHelp(std::string user, std::string command, std::deque<std::string> args)
 {
+  if(!mineserver->permissions.isAdmin(user.c_str())) return;
   CommandList* commandList = &m_Commands; // defaults
   //std::string commandColor = MC_COLOR_BLUE;
 
@@ -172,7 +173,7 @@ void sendHelp(std::string user, std::string command, std::deque<std::string> arg
       {
         std::string args = it->second->arguments;
         std::string description = it->second->description;
-        std::string msg = CHATCMDPREFIX + it->first + " " + args + " : " + description;
+        std::string msg = "§i§c!A!§r "+ CHATCMDPREFIX + it->first + " " + args + " : " + description;
         mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
       }
     }

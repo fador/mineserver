@@ -790,12 +790,11 @@ void sendRules(std::string user, std::string command, std::deque<std::string> ar
   }
 }
 void about(std::string user, std::string command, std::deque<std::string> args)
-{
-  std::ostringstream msg;
+{  
   if (mineserver->config.bData("system.show_version"))
   {
-    msg  << "§9" << mineserver->config.sData("system.server_name") << " Running Mineserver v." << VERSION_SIMPLE;
-    mineserver->chat.sendmsgTo(user.c_str(), msg.str().c_str());
+    std::string msg  = std::string("§9") + std::string(mineserver->config.sData("system.server_name")) + std::string(" Running Mineserver v.") + std::string(VERSION_SIMPLE);
+    mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
   }
 }
 
@@ -809,11 +808,50 @@ void sendHelp(std::string user, std::string command, std::deque<std::string> arg
 
   if (args.size() == 0)
   {
+    bool isAdmin = mineserver->permissions.isAdmin(user.c_str());
+    bool isOp = mineserver->permissions.isOp(user.c_str());
+    bool isMember = mineserver->permissions.isMember(user.c_str());
+
     for(CommandList::iterator it = commandList->begin();it != commandList->end();++it)
     {
+      //Display only commands you can use and add !A!, !O! or !M! to signal who can use those
+      std::string msg;
+      if(it->second->needAdmin)
+      {
+        if(!isAdmin)
+        {
+          continue;
+        }
+        else
+        {
+          msg += "§o§c!A!§r ";
+        }
+      }
+      if(it->second->needOp)
+      {
+        if(!isOp)
+        {
+          continue;
+        }
+        else
+        {
+          msg += "§o§c!O!§r ";
+        }
+      }
+      if(it->second->needMember)
+      {
+        if(!isMember)
+        {
+          continue;
+        }
+        else
+        {
+          msg += "§o§c!M!§r ";
+        }
+      }
       std::string args = it->second->arguments;
       std::string description = it->second->description;
-      std::string msg = /*commandColor +*/ CHATCMDPREFIX + it->first + " " + args + " : " /*+ MC_COLOR_YELLOW*/ + description;
+      msg += /*commandColor +*/ CHATCMDPREFIX + it->first + " " + args + " : " /*+ MC_COLOR_YELLOW*/ + description;
       mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
     }
   }
@@ -906,7 +944,7 @@ PLUGIN_API_EXPORT void CALLCONVERSION commands_init(mineserver_pointer_struct* m
   mineserver->plugin.addCallback("PlayerDiggingStarted", reinterpret_cast<voidF>(startedDiggingFunction));
 
   registerCommand(ComPtr(new Command(parseCmd("about"), "", "Displays server name and software version", about)));
-  registerCommand(ComPtr(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport)));
+  registerCommand(ComPtr(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport,false,false,true)));
   registerCommand(ComPtr(new Command(parseCmd("cuboid"), "", "Type in the command and place two blocks, it will fill the space between them", cuboid,false,true)));
   registerCommand(ComPtr(new Command(parseCmd("dnd"), "", "Toggles Do Not Disturb mode", doNotDisturb)));
   registerCommand(ComPtr(new Command(parseCmd("flattenchunk"), "<id/alias>", "Erases all blocks above you and changes all blocks at your Y-level to your block of choice", flattenchunk, false,true)));

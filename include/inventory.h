@@ -88,12 +88,15 @@ typedef std::tr1::shared_ptr<Item> ItemPtr;
 
 struct OpenInventory
 {
+  OpenInventory(): recordAction(false){};
   int8_t type;
   int32_t x;
   int32_t y;
   int32_t z;
   Item workbench[10];
   std::vector<User*> users;
+  std::vector<int16_t> slotActions;
+  bool recordAction;
 };
 
 typedef std::tr1::shared_ptr<OpenInventory> OpenInvPtr;

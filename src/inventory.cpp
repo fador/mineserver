@@ -464,20 +464,76 @@ bool Inventory::canBeArmour(int slot, int type)
 bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t rightClick, int16_t actionNumber, int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t shift)
 {
   //Ack
-  user->buffer << (int8_t)PACKET_TRANSACTION << (int8_t)windowID << (int16_t)actionNumber << (int8_t)1;
+  if(actionNumber)
+  {
+    user->buffer << (int8_t)PACKET_TRANSACTION << (int8_t)windowID << (int16_t)actionNumber << (int8_t)1;
+  }
 
   //Click outside the window
   if (slot == -999)
   {
-    if (user->inventoryHolding.getType() != -1)
+    //Dropping outside of the window
+    if(rightClick == 0 && shift == 0 && user->inventoryHolding.getType() != -1)
     {
       ServerInstance->map(user->pos.map)->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z,
           user->inventoryHolding.getType(), user->inventoryHolding.getCount(),
           user->inventoryHolding.getHealth(), user);
       user->inventoryHolding.setType(-1);
+      return true;
     }
-    return true;
+    if(shift == 5 && user->inventoryHolding.getType() != -1)
+    {
+      //Right click-and-drag, just ignore for now (begin and end)
+      if(rightClick == 4 || rightClick == 6)
+      {
+        return true;
+      }
+      //Left click-and-drag (begin)
+      else if(rightClick == 0)
+      {
+        user->openInv.slotActions.clear();
+        user->openInv.recordAction = true;
+        return true;
+      }
+      //Left click-and-drag (end)
+      else if(rightClick == 2)
+      {
+        user->openInv.recordAction = false;
+
+        //Spread the stack nice and evenly
+        if(user->openInv.slotActions.size() > user->inventoryHolding.getCount())
+        {
+          //FAILURE (should not happend)
+          return true;
+        }
+        //HAX
+        int16_t count = (user->inventoryHolding.getCount()/user->openInv.slotActions.size());
+        for(int i = 0; i < user->openInv.slotActions.size(); i++)
+        {
+          for(int c = 0; c < count; c++)
+          {
+            windowClick(user, windowID, user->openInv.slotActions[i], 1, 0, -1, itemCount, itemUses, 0);
+          }
+        }
+      }
+      return true;
+    }
+
+    //printf("slot: %d, rightClick: %d, action: %d, shift: %d, item: %d\r\n", slot, rightClick, actionNumber,shift, itemID);
+    
   }
+  else if(user->openInv.recordAction)
+  {
+    if(shift == 5)
+    {
+      user->openInv.slotActions.push_back(slot);
+    }
+    else
+    {
+      user->openInv.recordAction = false;
+    }
+  }
+  //printf("NON -999 slot: %d, rightClick: %d, action: %d, shift: %d, item: %d\r\n", slot,rightClick, actionNumber,shift, itemID);
 
   if (!user->isOpenInv && windowID != 0)
   {

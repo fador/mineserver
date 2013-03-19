@@ -95,11 +95,14 @@ public:
   std::string temp_nick;
   vec curChunk;
   time_t healthtimeout;
+
+  /* INVENTORY RELATED HELPERS */
   Item inventoryHolding;
   //Do we have an open _shared_ inventory?
   bool isOpenInv;
   //More info on the inventory
   OpenInventory openInv;
+
   std::string secret;
   EVP_CIPHER_CTX en, de;
   std::string generateDigest();

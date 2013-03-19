@@ -1122,13 +1122,14 @@ bool User::spawnOthers()
     //    if ((*it)->logged && (*it)->UID != this->UID && (*it)->nick != this->nick)
     if ((*it)->logged)
     {
-      loginBuffer << Protocol::namedEntitySpawn((*it)->UID, (*it)->nick, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, 0, 0, 0);
+      loginBuffer << Protocol::namedEntitySpawn((*it)->UID, (*it)->nick, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, angleToByte((*it)->pos.yaw),angleToByte((*it)->pos.pitch), 0);
       for (int b = 0; b < 5; b++)
       {
         const int n = b == 0 ? (*it)->curItem + 36 : 9 - b;
         const int type = (*it)->inv[n].getType();
         loginBuffer << Protocol::entityEquipment((*it)->UID, b, type, 0);
       }
+      loginBuffer << Protocol::entityHeadLook((*it)->UID,angleToByte((*it)->pos.yaw));
     }
   }
   return true;
