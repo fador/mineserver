@@ -515,13 +515,11 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
             windowClick(user, windowID, user->openInv.slotActions[i], 1, 0, -1, itemCount, itemUses, 0);
           }
         }
-      }
-      return true;
+      }      
     }
-
-    //printf("slot: %d, rightClick: %d, action: %d, shift: %d, item: %d\r\n", slot, rightClick, actionNumber,shift, itemID);
-    
+    return true;
   }
+  //on click-and-drag mode, recording the slots used
   else if(user->openInv.recordAction)
   {
     if(shift == 5)
@@ -532,8 +530,8 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
     {
       user->openInv.recordAction = false;
     }
+    return true;
   }
-  //printf("NON -999 slot: %d, rightClick: %d, action: %d, shift: %d, item: %d\r\n", slot,rightClick, actionNumber,shift, itemID);
 
   if (!user->isOpenInv && windowID != 0)
   {
