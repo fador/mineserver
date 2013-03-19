@@ -1289,7 +1289,7 @@ bool Inventory::onwindowOpen(User* user, int8_t type, int32_t x, int32_t y, int3
     case WINDOW_CHEST:
     case WINDOW_LARGE_CHEST:
       pkt << Protocol::blockAction(x,y,z,1,1,BLOCK_CHEST)
-          << Protocol::namedSoundEffect("random.chestopen", x, y, z, 9.0, 63);
+          << Protocol::namedSoundEffect("random.chestopen", x<<3, y<<3, z<<3, 1.0, 63);
       user->sendAll(pkt);
       break;
   }
@@ -1350,7 +1350,7 @@ bool Inventory::onwindowClose(User* user, int8_t type, int32_t x, int32_t y, int
             if(type == WINDOW_CHEST || type == WINDOW_LARGE_CHEST)
             {
               Packet pkt = Protocol::blockAction(x,y,z,1,0,BLOCK_CHEST);
-                     pkt << Protocol::namedSoundEffect("random.chestclosed", x, y, z, 9.0, 63);
+                     pkt << Protocol::namedSoundEffect("random.chestclosed", x<<3, y<<3, z<<3, 1.0, 63);
               user->sendAll(pkt);
             }
 
