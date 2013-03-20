@@ -50,18 +50,14 @@ void Item::sendUpdate()
       Packet pkt;
       pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)player->UID
           << (int16_t)0 << Protocol::slot(type,count,health);
-      player->sendAll(pkt);
+      player->sendOthers(pkt);
     }
     if (slot >= 5 && slot <= 8)
     {
-      //ToDo: Check: With slotID == 4, client crashed -Fador 2012-12-29
-      if((5 - (slot - 4)) != 4)
-      {
       Packet pkt;
       pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)player->UID
           << (int16_t)(5 - (slot - 4)) << Protocol::slot(type,count,health);//<< (int16_t)type << (int16_t) 0;
-      player->sendAll(pkt);
-      }
+      player->sendOthers(pkt);
     }
     
     int window = 0;
