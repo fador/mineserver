@@ -165,7 +165,7 @@ void BlockFalling::applyPhysics(User* user, int32_t x, int16_t y, int32_t z, int
 
     uint32_t EID = Mineserver::generateEID();
     uint8_t object = 70; //type == Falling object
-    Packet pkt = Protocol::addObject(EID,object, x, y+1, z, fallblock);
+    Packet pkt = Protocol::addObject(EID,object, (x<<5)+16, ((y+1)<<5)+16, (z<<5)+16, fallblock|(fallmeta<<0xc));
     it->second->sendPacket(pkt);
 
     //Add to physics loop

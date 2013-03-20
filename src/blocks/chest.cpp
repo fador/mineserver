@@ -261,9 +261,8 @@ bool BlockChest::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int
   }
 
   direction = user->relativeToBlock(x, y, z);
-  printf("Direction: %d\r\n", direction);
-  //// Fix orientation
-  
+
+  //// Fix orientation  
   switch (direction)
   {
   case BLOCK_EAST:
