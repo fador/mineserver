@@ -36,8 +36,8 @@ const unsigned int SERVER_CONSOLE_UID = -1;
 
 const std::string VERSION = "0.1.19 (Alpha)";
 
-const int PROTOCOL_VERSION = 60;
-const std::string MINECRAFT_VERSION = "1.5.0";
+const int PROTOCOL_VERSION = 61;
+const std::string MINECRAFT_VERSION = "1.5.2";
 
 const char COMMENTPREFIX  = '#';
 
