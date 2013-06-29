@@ -273,7 +273,7 @@ int PacketHandler::creative_inventory(User *user)
 
     user->buffer>>slot>>itemID;
 
-    if(itemID == 0xffff) return PACKET_OK;
+    if((uint16_t)itemID == 0xffff) return PACKET_OK;
 
     if (!user->buffer.haveData(5))
         return PACKET_NEED_MORE_DATA;
