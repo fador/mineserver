@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
+   Copyright (c) 2013, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,33 @@
 #include "vec.h"
 #include "tools.h"
 
+
+struct entity_position
+{
+  double x;
+  double y;
+  double z;
+  double vel_x;
+  double vel_y;
+  double vel_z;
+
+  entity_position() { x = y = z = vel_x = vel_y = vel_z = 0.0; };
+
+  entity_position(double _x, double _y, double _z)
+  {
+    x = _x; y = _y; z = _z;
+    vel_x = vel_y = vel_z = 0.0;
+  }
+
+  entity_position(double _x, double _y, double _z,double _vel_x, double _vel_y, double _vel_z)
+  {
+    x = _x; y = _y; z = _z;
+    vel_x = _vel_x;
+    vel_y = _vel_y;
+    vel_z = _vel_z;
+  }
+};
+
 class Physics
 {
 public:
@@ -41,8 +68,10 @@ public:
 
   bool update();
   bool updateFall();
+  bool updateEntity();
   bool addSimulation(vec pos);
   bool addFallSimulation(uint8_t block, vec pos, uint32_t EID);
+  bool addEntitySimulation(int16_t entity, entity_position pos, uint32_t EID, uint32_t UID);
   bool removeSimulation(vec pos);
   bool checkSurrounding(vec pos);
   bool updateMinecart();
@@ -92,9 +121,34 @@ private:
     }
   };
 
+  struct simulationEntity
+  {
+    int16_t entity;
+    uint32_t EID;
+    uint32_t UID;
+    entity_position startPos;
+    entity_position pos;
+    uint64_t startTime;
+    uint64_t lastTime;
+    int32_t ticks;
+    simulationEntity() {};
+    simulationEntity(int16_t _entity, entity_position _pos, uint32_t _EID, uint32_t _UID)
+    {
+      entity = _entity;
+      pos = _pos;
+      startPos = _pos;
+      EID = _EID;
+      UID = _UID;
+      ticks = 0;
+      startTime = microTime();
+      lastTime = startTime;
+    }
+  };
+
   std::vector<Sim> simList;
 
   std::vector<Falling> fallSimList;
+  std::vector<simulationEntity> entitySimList;
 };
 
 #endif

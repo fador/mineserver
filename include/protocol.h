@@ -90,6 +90,13 @@ class Protocol
       return ret;
     }
 
+    static Packet entityVelocity(int eid, int16_t vel_x, int16_t vel_y,int16_t vel_z)
+    {
+      Packet ret;
+      ret << (int8_t)PACKET_ENTITY_VELOCITY << (int32_t)eid << vel_x << vel_y << vel_z;
+      return ret;
+    }
+
     static Packet slot(int16_t id, int8_t count=0, int16_t damage=0, int16_t data_size=-1, const uint8_t *data=NULL)
     {
       // TODO: respect data!

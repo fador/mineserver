@@ -39,6 +39,7 @@
 #include "furnaceManager.h"
 #include "mcregion.h"
 #include "protocol.h"
+#include "physics.h"
 
 // Copy Construtor
 Map::Map(const Map& oldmap)
@@ -1120,6 +1121,17 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
       << Protocol::addObject(EID,projID, pos.x(), pos.y(), pos.z(), user->UID,(int16_t)vel.x(),(int16_t)vel.y(),(int16_t)vel.z(),0,0);
 
   user->sendAll(pkt);
+
+  //Add to simulation  
+  ServerInstance->physics(user->pos.map)->addEntitySimulation(projID,
+                                                             entity_position(pos.x()/32.0,
+                                                                             pos.y()/32.0,
+                                                                             pos.z()/32.0,
+                                                                             (vel.x()/8000.0)*20.0,
+                                                                             (vel.y()/8000.0)*20.0,
+                                                                             (vel.z()/8000.0)*20.0),
+                                                             EID,
+                                                             user->UID);
 
   return true;
 }
