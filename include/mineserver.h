@@ -33,8 +33,12 @@
 #include <string>
 
 #include "tr1.h"
-#include TR1INCLUDE(memory)
 
+#ifdef __APPLE__
+#include <tr1/memory>
+#else
+#include TR1INCLUDE(memory)
+#endif
 
 //Enable protocol encryption
 #define PROTOCOL_ENCRYPTION
@@ -242,7 +246,9 @@ public:
   // Set a pointer to the inventory
   inline void setInventory(Inventory* inventory)
   {
-    m_inventory = m_inventory;
+    m_inventory = inventory;
+      // was m_inventory = m_inventory before,
+      // which seems redundant. -- gk
   }
 
 private:

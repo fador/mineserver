@@ -34,8 +34,14 @@
 #include <ctime>
 
 #include "tr1.h"
-#include TR1INCLUDE(unordered_map)
+
+#ifdef __APPLE__
+#include <tr1/memory>
+#include <tr1/unordered_map>
+#else
 #include TR1INCLUDE(memory)
+#include TR1INCLUDE(unordered_map)
+#endif
 
 #include "packets.h"
 #include "user.h"

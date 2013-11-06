@@ -34,8 +34,14 @@
 #include <list>
 
 #include "tr1.h"
+
+#ifdef __APPLE__
+#include <tr1/memory>
+#include <tr1/unordered_map>
+#else
 #include TR1INCLUDE(memory)
 #include TR1INCLUDE(unordered_map)
+#endif
 
 //Fix Winsock2 error that occurs when Windows.h is included before it.
 #define _WINSOCKAPI_

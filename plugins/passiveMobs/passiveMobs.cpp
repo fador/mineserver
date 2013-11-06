@@ -38,7 +38,11 @@
 #include <cmath>
 
 #include "tr1.h"
+#ifdef __APPLE__
+#include <tr1/memory>
+#else
 #include TR1INCLUDE(memory)
+#endif
 
 
 #define MINESERVER_C_API
