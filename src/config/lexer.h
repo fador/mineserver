@@ -33,7 +33,11 @@
 #include <utility>
 
 #include "tr1.h"
+#ifdef __APPLE__
+#include <tr1/memory>
+#else
 #include TR1INCLUDE(memory)
+#endif
 
 enum {
   CONFIG_TOKEN_ENTITY = 1,

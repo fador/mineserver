@@ -32,7 +32,11 @@
 #include <stdint.h>
 
 #include "tr1.h"
+#ifdef __APPLE__
+#include <tr1/random>
+#else
 #include TR1INCLUDE(random)
+#endif
 
 
 // This is our core PRNG engine. The Mersenne Twister is both fast and good.
