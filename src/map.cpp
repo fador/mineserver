@@ -38,6 +38,8 @@
 #include "tree.h"
 #include "furnaceManager.h"
 #include "mcregion.h"
+#include "protocol.h"
+#include "physics.h"
 
 // Copy Construtor
 Map::Map(const Map& oldmap)
@@ -989,7 +991,7 @@ bool Map::sendNote(int x, int y, int z, char instrument, char pitch)
 
   Packet pkt;
 
-  pkt << (int8_t)PACKET_PLAY_NOTE << (int32_t)x << (int16_t)y << (int32_t)z << (int8_t)instrument << (int8_t)pitch;
+  pkt << (int8_t)PACKET_BLOCK_ACTION << (int32_t)x << (int16_t)y << (int32_t)z << (int8_t)instrument << (int8_t)pitch;
 
   it->second->sendPacket(pkt);
 
@@ -1017,11 +1019,8 @@ bool Map::sendPickupSpawn(spawnedItem item)
   it->second->items.push_back(storedItem);
 
   Packet pkt;
-
-  pkt << (int8_t)PACKET_PICKUP_SPAWN << (int32_t)item.EID << (int16_t)item.item << (int8_t)item.count << (int16_t)item.health
-      << (int32_t)item.pos.x() << (int32_t)item.pos.y() << (int32_t)item.pos.z()
-      << (int8_t)0 << (int8_t)0 << (int8_t)0;
-
+  pkt << Protocol::pickupSpawn(item.EID, item.item, item.count, item.health,item.pos.x(), item.pos.y(),item.pos.z());
+  
   it->second->sendPacket(pkt);
 
   return true;
@@ -1118,14 +1117,81 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
                 (int)(sinf(-(user->pos.pitch / 90.f)) * 14000.f),
                 (int)(cos(-(user->pos.yaw / 360.f) * 2.f * M_PI) * cos(user->pos.pitch * (M_PI / 180.0f)) * 9000.f));
 
-  pkt << (int8_t)PACKET_ENTITY << (int32_t)EID
-      << (int8_t)PACKET_ADD_OBJECT << (int32_t)EID << (int8_t)projID << (int32_t)pos.x() << (int32_t)pos.y() << (int32_t)pos.z() << (int32_t)0
-      << (int8_t)PACKET_ENTITY_VELOCITY << (int32_t)EID << (int16_t)vel.x() << (int16_t)vel.y() << (int16_t)vel.z();
-
+  pkt << (int8_t)PACKET_ENTITY << (int32_t)EID 
+      << Protocol::addObject(EID,projID, pos.x(), pos.y(), pos.z(), user->UID,(int16_t)vel.x(),(int16_t)vel.y(),(int16_t)vel.z(),0,0);
 
   user->sendAll(pkt);
 
+  //Add to simulation  
+  ServerInstance->physics(user->pos.map)->addEntitySimulation(projID,
+                                                             entity_position(pos.x()/32.0,
+                                                                             pos.y()/32.0,
+                                                                             pos.z()/32.0,
+                                                                             (vel.x()/8000.0)*20.0,
+                                                                             (vel.y()/8000.0)*20.0,
+                                                                             (vel.z()/8000.0)*20.0),
+                                                             EID,
+                                                             user->UID);
+
   return true;
+}
+
+bool Map::suitableForSpawn(const vec &pos)
+{
+  uint8_t block, meta;
+  if (!getBlock(pos.x(), pos.y()-1, pos.z(), &block, &meta, false)) return false;
+  return block != BLOCK_AIR && block != BLOCK_WATER && block != BLOCK_STATIONARY_WATER
+      && block != BLOCK_LAVA && block != BLOCK_STATIONARY_LAVA
+      && (getBlock(pos.x(), pos.y(), pos.z(), &block, &meta, false) && block == BLOCK_AIR)
+      && (getBlock(pos.x(), pos.y()+1, pos.z(), &block, &meta, false) && block == BLOCK_AIR);
+}
+
+bool Map::chooseSpawnPosition()
+{
+  uint8_t block, meta;
+  bool found = false;
+  // Make sure spawn position is not underground!
+  uint8_t new_y;
+  int new_x, new_z;
+  for (new_x = spawnPos.x(); new_x < spawnPos.x() + 100; new_x += 5)
+  {
+    for (new_z = spawnPos.z(); new_z < spawnPos.z() + 100; new_z += 5)
+    {
+      for (new_y = spawnPos.y(); new_y > 30; new_y--)
+      {
+        // Skip this colomn, we don't want to be underground
+        if (!getBlock(new_x, new_y, new_z, &block, &meta, false) ||
+            block != BLOCK_AIR) break;
+        if (suitableForSpawn(vec(new_x, new_y, new_z)))
+        {
+          found = true;
+          goto labelFound;
+        }
+      }
+    }
+  }
+labelFound:
+  if (found)
+  {
+    //Store new spawn position to level.dat
+    spawnPos.x() = new_x;
+    spawnPos.y() = new_y;
+    spawnPos.z() = new_z;
+    std::string infile = mapDirectory + "/level.dat";
+    NBT_Value* root = NBT_Value::LoadFromFile(infile);
+    if (root != NULL)
+    {
+      NBT_Value& data = *((*root)["Data"]);
+      *data["SpawnX"] = (int32_t)spawnPos.x();
+      *data["SpawnY"] = (int32_t)spawnPos.y();
+      *data["SpawnZ"] = (int32_t)spawnPos.z();
+
+      root->SaveToFile(infile);
+
+      delete root;
+    }
+  }
+  return found;
 }
 
 sChunk* Map::loadMap(int x, int z, bool generate)
@@ -1161,42 +1227,6 @@ sChunk* Map::loadMap(int x, int z, bool generate)
       ServerInstance->mapGen(m_number)->init((int32_t)mapSeed);
       ServerInstance->mapGen(m_number)->generateChunk(x, z, m_number);
       generateLight(x, z);
-      //If we generated spawn pos, make sure the position is not underground!
-      if (x == blockToChunk(spawnPos.x()) && z == blockToChunk(spawnPos.z()))
-      {
-        uint8_t block, meta;
-        bool foundLand = false;
-        if (getBlock(spawnPos.x(), spawnPos.y(), spawnPos.z(), &block, &meta, false) && block == BLOCK_AIR)
-        {
-          uint8_t new_y;
-          for (new_y = spawnPos.y(); new_y > 30; new_y--)
-          {
-            if (getBlock(spawnPos.x(), new_y, spawnPos.z(), &block, &meta, false) && block != BLOCK_AIR)
-            {
-              foundLand = true;
-              break;
-            }
-          }
-          if (foundLand)
-          {
-            //Store new spawn position to level.dat
-            spawnPos.y() = new_y + 1;
-            std::string infile = mapDirectory + "/level.dat";
-            NBT_Value* root = NBT_Value::LoadFromFile(infile);
-            if (root != NULL)
-            {
-              NBT_Value& data = *((*root)["Data"]);
-              *data["SpawnX"] = (int32_t)spawnPos.x();
-              *data["SpawnY"] = (int32_t)spawnPos.y();
-              *data["SpawnZ"] = (int32_t)spawnPos.z();
-
-              root->SaveToFile(infile);
-
-              delete root;
-            }
-          }
-        }
-      }
       delete newRegion;
       delete [] chunkPointer;
       return getChunk(x, z);

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2011, The Mineserver Project
+  Copyright (c) 2013, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,13 @@
 #include <ctime>
 
 #include "tr1.h"
-#include TR1INCLUDE(unordered_map)
+#ifdef __APPLE__
+#include <tr1/memory>
+#include <tr1/unordered_map>
+#else
 #include TR1INCLUDE(memory)
+#include TR1INCLUDE(unordered_map)
+#endif
 
 #define MINESERVER_C_API
 #include "plugin_api.h"
@@ -87,15 +92,22 @@ typedef void (*CommandCallback)(std::string nick, std::string, std::deque<std::s
 
 struct Command
 {
-  Command(std::deque<std::string> _names, std::string _arguments, std::string _description, CommandCallback _callback)
+  Command(std::deque<std::string> _names, std::string _arguments, std::string _description, CommandCallback _callback,
+          bool _needAdmin = false, bool _needOp = false, bool _needMember = false)
     : names(_names),
       arguments(_arguments),
       description(_description),
-      callback(_callback)
+      callback(_callback),
+      needAdmin(_needAdmin),
+      needOp(_needOp),
+      needMember(_needMember)
   {}
   std::deque<std::string> names;
   std::string arguments;
   std::string description;
+  bool needAdmin;
+  bool needOp;
+  bool needMember;
   CommandCallback callback;  
 };
 
@@ -135,6 +147,31 @@ bool chatCommandFunction(const char* userIn,const char* cmdIn, int argc, char** 
   CommandList::iterator iter;
   if((iter = m_Commands.find(command)) != m_Commands.end())
   {
+    if(iter->second->needAdmin)
+    {
+      if(!mineserver->permissions.isAdmin(user.c_str()))
+      {
+        mineserver->chat.sendmsgTo(user.c_str(),  "Need Admin rights");
+        return true;
+      }
+    }
+    if(iter->second->needOp)
+    {
+      if(!mineserver->permissions.isOp(user.c_str()))
+      {
+        mineserver->chat.sendmsgTo(user.c_str(),  "Need Operator rights");
+        return true;
+      }
+    }
+    if(iter->second->needMember)
+    {
+      if(!mineserver->permissions.isMember(user.c_str()))
+      {
+        mineserver->chat.sendmsgTo(user.c_str(),  "Need Member rights");
+        return true;
+      }
+    }
+    
     iter->second->callback(user, command, cmd);
     return true;
   }
@@ -758,12 +795,11 @@ void sendRules(std::string user, std::string command, std::deque<std::string> ar
   }
 }
 void about(std::string user, std::string command, std::deque<std::string> args)
-{
-  std::ostringstream msg;
+{  
   if (mineserver->config.bData("system.show_version"))
   {
-    msg  << "§9" << mineserver->config.sData("system.server_name") << " Running Mineserver v." << VERSION_SIMPLE;
-    mineserver->chat.sendmsgTo(user.c_str(), msg.str().c_str());
+    std::string msg  = std::string("§9") + std::string(mineserver->config.sData("system.server_name")) + std::string(" Running Mineserver v.") + std::string(VERSION_SIMPLE);
+    mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
   }
 }
 
@@ -777,11 +813,50 @@ void sendHelp(std::string user, std::string command, std::deque<std::string> arg
 
   if (args.size() == 0)
   {
+    bool isAdmin = mineserver->permissions.isAdmin(user.c_str());
+    bool isOp = mineserver->permissions.isOp(user.c_str());
+    bool isMember = mineserver->permissions.isMember(user.c_str());
+
     for(CommandList::iterator it = commandList->begin();it != commandList->end();++it)
     {
+      //Display only commands you can use and add !A!, !O! or !M! to signal who can use those
+      std::string msg;
+      if(it->second->needAdmin)
+      {
+        if(!isAdmin)
+        {
+          continue;
+        }
+        else
+        {
+          msg += "§o§c!A!§r ";
+        }
+      }
+      if(it->second->needOp)
+      {
+        if(!isOp)
+        {
+          continue;
+        }
+        else
+        {
+          msg += "§o§c!O!§r ";
+        }
+      }
+      if(it->second->needMember)
+      {
+        if(!isMember)
+        {
+          continue;
+        }
+        else
+        {
+          msg += "§o§c!M!§r ";
+        }
+      }
       std::string args = it->second->arguments;
       std::string description = it->second->description;
-      std::string msg = /*commandColor +*/ CHATCMDPREFIX + it->first + " " + args + " : " /*+ MC_COLOR_YELLOW*/ + description;
+      msg += /*commandColor +*/ CHATCMDPREFIX + it->first + " " + args + " : " /*+ MC_COLOR_YELLOW*/ + description;
       mineserver->chat.sendmsgTo(user.c_str(), msg.c_str());
     }
   }
@@ -874,27 +949,27 @@ PLUGIN_API_EXPORT void CALLCONVERSION commands_init(mineserver_pointer_struct* m
   mineserver->plugin.addCallback("PlayerDiggingStarted", reinterpret_cast<voidF>(startedDiggingFunction));
 
   registerCommand(ComPtr(new Command(parseCmd("about"), "", "Displays server name and software version", about)));
-  registerCommand(ComPtr(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport)));
-  registerCommand(ComPtr(new Command(parseCmd("cuboid"), "", "Type in the command and place two blocks, it will fill the space between them", cuboid)));
+  registerCommand(ComPtr(new Command(parseCmd("ctp"), "<x> <y> <z>", "Teleport to coordinates (eg. /ctp 100 100 100)", coordinateTeleport,false,false,true)));
+  registerCommand(ComPtr(new Command(parseCmd("cuboid"), "", "Type in the command and place two blocks, it will fill the space between them", cuboid,false,true)));
   registerCommand(ComPtr(new Command(parseCmd("dnd"), "", "Toggles Do Not Disturb mode", doNotDisturb)));
-  registerCommand(ComPtr(new Command(parseCmd("flattenchunk"), "<id/alias>", "Erases all blocks above you and changes all blocks at your Y-level to your block of choice", flattenchunk)));
+  registerCommand(ComPtr(new Command(parseCmd("flattenchunk"), "<id/alias>", "Erases all blocks above you and changes all blocks at your Y-level to your block of choice", flattenchunk, false,true)));
   registerCommand(ComPtr(new Command(parseCmd("gettime"), "", "Gets the world time", getTime)));
-  registerCommand(ComPtr(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems)));
+  registerCommand(ComPtr(new Command(parseCmd("give"), "<player> <id/alias> [count]", "Gives <player> [count] pieces of <id/alias>. By default [count] = 1", giveItems,false,true)));
   registerCommand(ComPtr(new Command(parseCmd("gps"), "", "Display current coordinates", gps)));
   registerCommand(ComPtr(new Command(parseCmd("help"), "[<commandName>]", "Display this help message.", sendHelp)));
   registerCommand(ComPtr(new Command(parseCmd("home"), "", "Teleports you to this world's spawn location", home)));
-  registerCommand(ComPtr(new Command(parseCmd("igive i item"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf)));
+  registerCommand(ComPtr(new Command(parseCmd("igive i item"), "<id/alias> [count]", "Gives self [count] pieces of <id/alias>. By default [count] = 1", giveItemsSelf, false,true)));
   registerCommand(ComPtr(new Command(parseCmd("motd"), "", "Displays the server's MOTD", sendMOTD)));
   registerCommand(ComPtr(new Command(parseCmd("players who names list"), "", "Lists online players", playerList)));
-  registerCommand(ComPtr(new Command(parseCmd("replace"), "<from-id/alias> <to-id/alias>", "Type in the command and left-click two blocks, it will replace the selected blocks with the new blocks", replace)));
-  registerCommand(ComPtr(new Command(parseCmd("replacechunk"), "<from-id/alias> <to-id/alias>", "Replaces the chunk you are at with the block you specify", replacechunk)));
+  registerCommand(ComPtr(new Command(parseCmd("replace"), "<from-id/alias> <to-id/alias>", "Type in the command and left-click two blocks, it will replace the selected blocks with the new blocks", replace, true)));
+  registerCommand(ComPtr(new Command(parseCmd("replacechunk"), "<from-id/alias> <to-id/alias>", "Replaces the chunk you are at with the block you specify", replacechunk, true)));
   registerCommand(ComPtr(new Command(parseCmd("rules"), "", "Displays server rules", sendRules)));
-  registerCommand(ComPtr(new Command(parseCmd("save"), "", "Manually saves map to disc", saveMap)));
-  registerCommand(ComPtr(new Command(parseCmd("setspawn"), "", "Sets home to your current coordinates", setSpawn)));
-  registerCommand(ComPtr(new Command(parseCmd("settime"), "<time>", "Sets the world time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime)));
-  registerCommand(ComPtr(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport)));
-  registerCommand(ComPtr(new Command(parseCmd("world"), "<world-id>", "Moves you between worlds", userWorld)));
-  registerCommand(ComPtr(new Command(parseCmd("gamemode"), "[player] < survival | 0 ; creative | 1 >", "Changes your or someone else's gamemode.", changeGameMode)));
+  registerCommand(ComPtr(new Command(parseCmd("save"), "", "Manually saves map to disc", saveMap, false, true)));
+  registerCommand(ComPtr(new Command(parseCmd("setspawn"), "", "Sets home to your current coordinates", setSpawn, true)));
+  registerCommand(ComPtr(new Command(parseCmd("settime"), "<time>", "Sets the world time. (<time> = 0-24000, 0 & 24000 = day, ~15000 = night)", setTime, false, true)));
+  registerCommand(ComPtr(new Command(parseCmd("tp"), "<player> [<anotherPlayer>]", "Teleport yourself to <player>'s position or <player> to <anotherPlayer>", userTeleport, false, true)));
+  registerCommand(ComPtr(new Command(parseCmd("world"), "<world-id>", "Moves you between worlds", userWorld, true)));
+  registerCommand(ComPtr(new Command(parseCmd("gamemode"), "[player] < survival | 0 ; creative | 1 >", "Changes your or someone else's gamemode.", changeGameMode, false, true)));
 }
 
 PLUGIN_API_EXPORT void CALLCONVERSION commands_shutdown(void)

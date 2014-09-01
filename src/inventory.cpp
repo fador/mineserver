@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
+   Copyright (c) 2013, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -50,15 +50,16 @@ void Item::sendUpdate()
       Packet pkt;
       pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)player->UID
           << (int16_t)0 << Protocol::slot(type,count,health);
-      player->sendAll(pkt);
+      player->sendOthers(pkt);
     }
     if (slot >= 5 && slot <= 8)
     {
       Packet pkt;
       pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)player->UID
           << (int16_t)(5 - (slot - 4)) << Protocol::slot(type,count,health);//<< (int16_t)type << (int16_t) 0;
-      player->sendAll(pkt);
+      player->sendOthers(pkt);
     }
+    
     int window = 0;
     int t_slot = slot;
     if (slot == -1)
@@ -459,17 +460,71 @@ bool Inventory::canBeArmour(int slot, int type)
 bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t rightClick, int16_t actionNumber, int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t shift)
 {
   //Ack
-  user->buffer << (int8_t)PACKET_TRANSACTION << (int8_t)windowID << (int16_t)actionNumber << (int8_t)1;
+  if(actionNumber)
+  {
+    user->buffer << (int8_t)PACKET_TRANSACTION << (int8_t)windowID << (int16_t)actionNumber << (int8_t)1;
+  }
 
   //Click outside the window
   if (slot == -999)
   {
-    if (user->inventoryHolding.getType() != -1)
+    //Dropping outside of the window
+    if(rightClick == 0 && shift == 0 && user->inventoryHolding.getType() != -1)
     {
       ServerInstance->map(user->pos.map)->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z,
           user->inventoryHolding.getType(), user->inventoryHolding.getCount(),
           user->inventoryHolding.getHealth(), user);
       user->inventoryHolding.setType(-1);
+      return true;
+    }
+    if(shift == 5 && user->inventoryHolding.getType() != -1)
+    {
+      //Right click-and-drag, just ignore for now (begin and end)
+      if(rightClick == 4 || rightClick == 6)
+      {
+        return true;
+      }
+      //Left click-and-drag (begin)
+      else if(rightClick == 0)
+      {
+        user->openInv.slotActions.clear();
+        user->openInv.recordAction = true;
+        return true;
+      }
+      //Left click-and-drag (end)
+      else if(rightClick == 2)
+      {
+        user->openInv.recordAction = false;
+
+        //Spread the stack nice and evenly
+        if(user->openInv.slotActions.size() > user->inventoryHolding.getCount())
+        {
+          //FAILURE (should not happend)
+          return true;
+        }
+        //HAX
+        int16_t count = (user->inventoryHolding.getCount()/user->openInv.slotActions.size());
+        for(int i = 0; i < user->openInv.slotActions.size(); i++)
+        {
+          for(int c = 0; c < count; c++)
+          {
+            windowClick(user, windowID, user->openInv.slotActions[i], 1, 0, -1, itemCount, itemUses, 0);
+          }
+        }
+      }      
+    }
+    return true;
+  }
+  //on click-and-drag mode, recording the slots used
+  else if(user->openInv.recordAction)
+  {
+    if(shift == 5)
+    {
+      user->openInv.slotActions.push_back(slot);
+    }
+    else
+    {
+      user->openInv.recordAction = false;
     }
     return true;
   }
@@ -879,8 +934,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
     tempFurnace->map = user->pos.map;
     ServerInstance->furnaceManager()->handleActivity(tempFurnace);
   }
-
-  /*
+  
   //Signal others using the same space
   switch(windowID)
   {
@@ -889,10 +943,9 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
       {
         for(uint32_t i = 0; i < otherUsers->size(); i++)
         {
-          (*otherUsers)[i]->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)windowID << (int16_t)slot << (int16_t)slotItem->type;
-          if(slotItem->type != -1)
+          if((*otherUsers)[i] != user)
           {
-            (*otherUsers)[i]->buffer << (int8_t)slotItem->count << (int16_t)slotItem->health;
+            setSlot((*otherUsers)[i], windowID, slot, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
           }
         }
       }
@@ -906,11 +959,20 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         {
           if((*otherUsers)[i] != user)
           {
-            (*otherUsers)[i]->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)windowID << (int16_t)slot << (int16_t)slotItem->type;
-            if(slotItem->type != -1)
-            {
-              (*otherUsers)[i]->buffer << (int8_t)slotItem->count << (int16_t)slotItem->health;
-            }
+            setSlot((*otherUsers)[i], windowID, slot, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
+          }
+        }
+      }
+      break;
+    case WINDOW_LARGE_CHEST:
+      chunk->changed = true;
+      if(slot < 54)
+      {
+        for(uint32_t i = 0; i < otherUsers->size(); i++)
+        {
+          if((*otherUsers)[i] != user)
+          {
+            setSlot((*otherUsers)[i], windowID, slot, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
           }
         }
       }
@@ -924,20 +986,17 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         {
           if((*otherUsers)[i] != user)
           {
-            (*otherUsers)[i]->buffer << (int8_t)PACKET_SET_SLOT << (int8_t)windowID << (int16_t)slot << (int16_t)slotItem->type;
-            if(slotItem->type != -1)
-            {
-              (*otherUsers)[i]->buffer << (int8_t)slotItem->count << (int16_t)slotItem->health;
-            }
+            setSlot((*otherUsers)[i], windowID, slot, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
           }
         }
       }
       break;
   }
-  */
-
+  
+  /*
   if(!updateInventory(user, windowID))
      return false;
+     */
   return true;
 }
 
@@ -970,15 +1029,17 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
       }
       if(_chestData == NULL)
         break;
-
-      user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)type << (int8_t)INVENTORYTYPE_CHEST;
+      std::string windowName;
+      
       if(_chestData->large())
       {
-        user->buffer << std::string("Large chest");
-      } else {
-        user->buffer << std::string("Chest");
+        windowName = "Large chest";
       }
-      user->buffer << (int8_t)(_chestData->size()); // size.. not a very good idea. lets just hope this will only return 27 or 54
+      else
+      {
+        windowName = "Chest";
+      }
+      user->buffer << Protocol::openWindow(type,INVENTORYTYPE_CHEST,windowName, _chestData->size());
 
       for (size_t j = 0; j < _chestData->size(); j++)
       {
@@ -994,8 +1055,7 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
     break;
 
   case WINDOW_WORKBENCH:
-    user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)WINDOW_WORKBENCH  << (int8_t)INVENTORYTYPE_WORKBENCH;
-    user->buffer << std::string("Workbench") << (int8_t)0;
+    user->buffer << Protocol::openWindow(WINDOW_WORKBENCH,INVENTORYTYPE_WORKBENCH,std::string("Workbench"), 0);
 
     for (uint32_t i = 0; i < openWorkbenches.size(); i++)
     {
@@ -1019,9 +1079,7 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
     }
     break;
   case WINDOW_FURNACE:
-
-    user->buffer << (int8_t)PACKET_OPEN_WINDOW << (int8_t)WINDOW_FURNACE  << (int8_t)INVENTORYTYPE_FURNACE;
-    user->buffer << std::string("Furnace") << (int8_t)0;
+    user->buffer << Protocol::openWindow(WINDOW_FURNACE,INVENTORYTYPE_FURNACE,std::string("Furnace"), 0);
 
     for (uint32_t i = 0; i < chunk->furnaces.size(); i++)
     {
@@ -1219,6 +1277,19 @@ bool Inventory::onwindowOpen(User* user, int8_t type, int32_t x, int32_t y, int3
   inv.push_back(newInv);
   user->isOpenInv = true;
 
+  Packet pkt;
+
+  //Chest opening animation
+  switch (type)
+  {
+    case WINDOW_CHEST:
+    case WINDOW_LARGE_CHEST:
+      pkt << Protocol::blockAction(x,y,z,1,1,BLOCK_CHEST)
+          << Protocol::namedSoundEffect("random.chestopen", x<<3, y<<3, z<<3, 1.0, 63);
+      user->sendAll(pkt);
+      break;
+  }
+
   return true;
 }
 
@@ -1272,6 +1343,13 @@ bool Inventory::onwindowClose(User* user, int8_t type, int32_t x, int32_t y, int
                 }
               }
             }
+            if(type == WINDOW_CHEST || type == WINDOW_LARGE_CHEST)
+            {
+              Packet pkt = Protocol::blockAction(x,y,z,1,0,BLOCK_CHEST);
+                     pkt << Protocol::namedSoundEffect("random.chestclosed", x<<3, y<<3, z<<3, 1.0, 63);
+              user->sendAll(pkt);
+            }
+
             inv.erase(inv.begin() + i);
           }
 

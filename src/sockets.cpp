@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2012, The Mineserver Project
+   Copyright (c) 2013, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -25,12 +25,12 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifdef __WIN32__
+#ifdef _WIN32
 #include <cstdlib>
 #include <winsock2.h>
 typedef int socklen_t;
 #else
-#include <netdb.h>       // for gethostbyname()
+#include <netdb.h>   // for gethostbyname()
 #include <netinet/tcp.h> // for TCP constants
 #endif
 
@@ -55,7 +55,11 @@ std::string to_string(int i){
 
 
 #include "tr1.h"
+#ifdef __APPLE__
+#include <tr1/array>
+#else
 #include TR1INCLUDE(array)
+#endif
 
 #include "sockets.h"
 #include "tools.h"
@@ -68,6 +72,7 @@ std::string to_string(int i){
 #include "mineserver.h"
 #include "packets.h"
 #include "config.h"
+#include "extern.h"
 
 
 extern int setnonblock(int fd);
@@ -84,6 +89,88 @@ static uint8_t* const upBUF = BUF.data();
 
 static char* cpBUFCRYPT = reinterpret_cast<char*>(BUFCRYPT.data());
 
+
+bool client_write(User *user)
+{
+  //If there is data in the output buffer, crypt it before writing
+  if (!user->buffer.getWriteEmpty())
+  {
+    std::vector<char> buf;
+    
+    user->buffer.getWriteData(buf);
+    
+    //More glue - Fador
+    if(user->crypted)
+    {
+      //We might have to write some data uncrypted ToDo: fix
+      if(user->uncryptedLeft)
+      {
+        user->bufferCrypted.addToWrite((uint8_t *)buf.data(),user->uncryptedLeft);
+      }
+      int p_len = buf.size()-user->uncryptedLeft, f_len = 0;
+      if(p_len)
+      {
+        uint8_t *buffer = (uint8_t *)malloc(p_len+1);
+        EVP_EncryptUpdate(&user->en, (uint8_t *)buffer, &p_len, (const uint8_t *)buf.data()+user->uncryptedLeft, buf.size()-user->uncryptedLeft);
+        int written = p_len + f_len;
+        user->bufferCrypted.addToWrite((uint8_t *)buffer,written);
+        free(buffer);
+      }
+      user->uncryptedLeft = 0;
+    }
+    else
+    {
+      user->bufferCrypted.addToWrite((uint8_t *)buf.data(),buf.size());
+      user->uncryptedLeft = 0;
+    }
+
+    //free(outBuf);
+    user->buffer.clearWrite(buf.size());
+  }
+
+  //We have crypted data ready to be written
+  if(!user->bufferCrypted.getWriteEmpty())
+  {
+    std::vector<char> buf;
+    user->bufferCrypted.getWriteData(buf);
+
+    //Try to write the whole buffer
+    const int written = send(user->fd, buf.data(), buf.size(), 0);
+
+    //Handle errors
+    if (written == SOCKET_ERROR)
+    {
+    #ifdef WIN32
+    #define ERROR_NUMBER WSAGetLastError()
+      if ((ERROR_NUMBER != WSATRY_AGAIN && ERROR_NUMBER != WSAEINTR && ERROR_NUMBER != WSAEWOULDBLOCK))
+    #else
+    #define ERROR_NUMBER errno
+      if ((errno != EAGAIN && errno != EINTR))
+    #endif
+      {
+        LOG2(ERROR, "Error writing to client, tried to write " + dtos(buf.size()) + " bytes, code: " + dtos(ERROR_NUMBER));
+        //delete user;
+        user->logged = false;
+        ServerInstance->usersToRemove().insert(user);
+        return false;
+      }
+    }
+    else
+    {
+      //Remove written amount from the buffer
+      user->bufferCrypted.clearWrite(written);
+    }
+
+    //If we couldn't write everything at once, add EV_WRITE event calling this function again..
+    if (!user->bufferCrypted.getWriteEmpty())
+    {
+      event_add(user->getWriteEvent(), NULL);
+      return false;
+    }
+  }
+  return true;
+}
+
 extern "C" void client_callback(int fd, short ev, void* arg)
 {
   User* user = reinterpret_cast<User*>(arg);
@@ -96,7 +183,6 @@ extern "C" void client_callback(int fd, short ev, void* arg)
     if(user->crypted)
     {
       read = recv(fd, cpBUFCRYPT, BUFSIZE, 0);
-
       int p_len = read, f_len = 0;  
       EVP_DecryptUpdate(&user->de, upBUF, &p_len, (const uint8_t *)cpBUFCRYPT, read);
       read = p_len + f_len;
@@ -108,28 +194,33 @@ extern "C" void client_callback(int fd, short ev, void* arg)
 
     if (read == 0)
     {
-      LOG2(INFO, "Socket closed properly");
-
+      if(user->nick.size())
+      {
+        LOG2(INFO, "User "+ user->nick + " disconnected by closing socket");
+      }
+      else
+      {
+        LOG2(INFO, "Socket closed");
+      }
       delete user;
       return;
     }
 
     if (read == SOCKET_ERROR)
     {
-      LOG2(INFO, "Socket had no data to read");
-
+      LOG2(INFO, "Socket error");
       delete user;
       return;
     }
 
+    //Keep track on incoming data, can timeout inactive users
     user->lastData = std::time(NULL);
 
     user->buffer.addToRead(upBUF, read);
-
     user->buffer.reset();
 
     while (user->buffer >> (int8_t&)user->action)
-    {      
+    {  
       //Variable len package
       if (ServerInstance->packetHandler()->packets[user->action].len == PACKET_VARIABLE_LEN)
       {
@@ -140,8 +231,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
         if (curpos == PACKET_NEED_MORE_DATA)
         {
           user->waitForData = true;
-          event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
-          event_add(user->GetEvent(), NULL);
+          event_add(user->getReadEvent(), NULL);
           return;
         }
 
@@ -151,15 +241,18 @@ extern "C" void client_callback(int fd, short ev, void* arg)
 
         if (disconnecting) // disconnect -- player gone
         {
+          if(user->nick.size())
+          {
+            LOG2(INFO, "User "+ user->nick + " disconnected normally");
+          }
           delete user;
           return;
         }
       }
       else if (ServerInstance->packetHandler()->packets[user->action].len == PACKET_DOES_NOT_EXIST)
       {
-        using namespace std;
-        stringstream str;
-        str << "Unknown action: 0x" << std::hex << (unsigned int)(user->action);
+        std::ostringstream str;
+        str << "Unknown packet: 0x" << std::hex << (unsigned int)(user->action);
         LOG2(DEBUG, str.str());
 
 
@@ -198,8 +291,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
         if (!user->buffer.haveData(ServerInstance->packetHandler()->packets[user->action].len))
         {
           user->waitForData = true;
-          event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
-          event_add(user->GetEvent(), NULL);
+          event_add(user->getReadEvent(), NULL);
           return;
         }
 
@@ -211,88 +303,16 @@ extern "C" void client_callback(int fd, short ev, void* arg)
         ServerInstance->packetHandler()->packets[user->action].function(user);
       }
     } // while(user->buffer)
-  }
+  } //End reading
 
-  //If there is data in the output buffer, try to write it
-  if (!user->buffer.getWriteEmpty())
+  //Write data to user socket
+  if(!client_write(user))
   {
-    std::vector<char> buf;
-    
-    user->buffer.getWriteData(buf);
-    
-    //More glue - Fador
-    if(user->crypted)
-    {      
-      if(user->uncryptedLeft)
-      {
-        user->bufferCrypted.addToWrite((uint8_t *)buf.data(),user->uncryptedLeft);
-      }
-      int p_len = buf.size()-user->uncryptedLeft, f_len = 0;
-      if(p_len)
-      {
-        uint8_t *buffer = (uint8_t *)malloc(p_len+1);
-        EVP_EncryptUpdate(&user->en, (uint8_t *)buffer, &p_len, (const uint8_t *)buf.data()+user->uncryptedLeft, buf.size()-user->uncryptedLeft);
-        int written = p_len + f_len;
-        user->bufferCrypted.addToWrite((uint8_t *)buffer,written);
-        free(buffer);
-      }
-      user->uncryptedLeft = 0;
-    }
-    else
-    {
-      user->bufferCrypted.addToWrite((uint8_t *)buf.data(),buf.size());
-      user->uncryptedLeft = 0;
-    }
-
-    //free(outBuf);
-    user->buffer.clearWrite(buf.size());
-  }
-
-
-  if(!user->bufferCrypted.getWriteEmpty())
-  {
-    std::vector<char> buf;
-    user->bufferCrypted.getWriteData(buf);
-
-    //Try to write the whole buffer
-    const int written = send(fd, buf.data(), buf.size(), 0);
-
-    //Handle errors
-    if (written == SOCKET_ERROR)
-    {
-#ifdef WIN32
-#define ERROR_NUMBER WSAGetLastError()
-      if ((ERROR_NUMBER != WSATRY_AGAIN && ERROR_NUMBER != WSAEINTR && ERROR_NUMBER != WSAEWOULDBLOCK))
-#else
-#define ERROR_NUMBER errno
-      if ((errno != EAGAIN && errno != EINTR))
-#endif
-      {
-        LOG2(ERROR, "Error writing to client, tried to write " + dtos(buf.size()) + " bytes, code: " + dtos(ERROR_NUMBER));
-
-        delete user;
-        return;
-      }
-
-    }
-    else
-    {
-      //Remove written amount from the buffer
-      user->bufferCrypted.clearWrite(written);
-    }
-
-    //If we couldn't write everything at once, add EV_WRITE event calling this function again..
-    if (!user->bufferCrypted.getWriteEmpty())
-    {
-      event_set(user->GetEvent(), fd, EV_WRITE | EV_READ, client_callback, user);
-      event_add(user->GetEvent(), NULL);
-      return;
-    }
-  }
+    return;
+  }  
 
   //Add EV_READ event again
-  event_set(user->GetEvent(), fd, EV_READ, client_callback, user);
-  event_add(user->GetEvent(), NULL);
+  event_add(user->getReadEvent(), NULL);
 }
 
 extern "C" void accept_callback(int fd, short ev, void* arg)
@@ -311,11 +331,16 @@ extern "C" void accept_callback(int fd, short ev, void* arg)
   User* const client = new User(client_fd, Mineserver::generateEID());
   setnonblock(client_fd);
 
-  event_set(client->GetEvent(), client_fd, EV_WRITE | EV_READ, client_callback, client);
-  event_add(client->GetEvent(), NULL);
+  //Keep delay minimum: more (smaller) packets -> less lag
+  int one = 1;
+  setsockopt(client_fd, IPPROTO_TCP, TCP_NODELAY, (const char*)&one, sizeof(int));
+
+  event_set(client->getReadEvent(), client_fd, EV_READ, client_callback, client);
+  event_set(client->getWriteEvent(), client_fd, EV_WRITE, client_callback, client);
+  event_add(client->getReadEvent(), NULL);
 }
 
-
+//Opens a socket and connects to the host/port
 int socket_connect(char* host, int port)
 {
   struct hostent* hp;
@@ -332,19 +357,14 @@ int socket_connect(char* host, int port)
   addr.sin_family = AF_INET;
   sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
+  //Set 5s timeout
   struct timeval tv;
   tv.tv_sec = 5;
   setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(struct timeval));
   setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tv, sizeof(struct timeval));
-
   setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const char*)&on, sizeof(int));
 
-  if (sock == -1)
-  {
-    return 0;
-  }
-
-  if (connect(sock, (struct sockaddr*)&addr, sizeof(struct sockaddr_in)) == -1)
+  if (sock == -1 || connect(sock, (struct sockaddr*)&addr, sizeof(struct sockaddr_in)) == -1)
   {
     return 0;
   }
@@ -352,48 +372,41 @@ int socket_connect(char* host, int port)
   return sock;
 }
 
+//Connects to session server and verifies the client
+//Will store output thread-safely to array which is read in the main loop
 void *user_validation_thread(void *arg)
 {
   Mineserver::userValidation *user = reinterpret_cast<Mineserver::userValidation *>(arg);
   user->valid=false;
   std::string url = "/game/checkserver.jsp?user=" + user->user->nick + "&serverId=" + user->user->generateDigest();
-  LOG(INFO, "Packets", "Validating " + user->user->nick + " against minecraft.net: ");
+  LOG(INFO, "Packets", "Validating " + user->user->nick + " against session.minecraft.net: ");
 
   std::string http_request = "GET " + url + " HTTP/1.1\r\n"
-                              + "Host: session.minecraft.net\r\n"
-                              + "Connection: close\r\n\r\n";
+                            + "Host: session.minecraft.net\r\n"
+                            + "Connection: close\r\n\r\n";
 
   int fd = socket_connect((char*)"session.minecraft.net", 80);
   if (fd)
   {
-#ifdef WIN32
-      send(fd, http_request.c_str(), http_request.length(), 0);
-#else
-      write(fd, http_request.c_str(), http_request.length());
-#endif
+    send(fd, http_request.c_str(), http_request.length(), 0);
 
-#define BUFFER_SIZE 1024
-      char* buffer = new char[BUFFER_SIZE];
-      std::string stringbuffer;
+    #define BUFFER_SIZE 1024
+    char* buffer = new char[BUFFER_SIZE];
+    std::string stringbuffer;
 
+    while (int received = recv(fd, buffer, BUFFER_SIZE - 1, 0) != 0)
+    {
+      stringbuffer += std::string(buffer);
+    }
+    delete[] buffer;
 #ifdef WIN32
-      while (int received = recv(fd, buffer, BUFFER_SIZE - 1, 0) != 0)
-      {
+    closesocket(fd);
 #else
-      while (read(fd, buffer, BUFFER_SIZE - 1) != 0)
-      {
+    close(fd);
 #endif
-        stringbuffer += std::string(buffer);
-      }
-      delete[] buffer;
-#ifdef WIN32
-      closesocket(fd);
-#else
-      close(fd);
-#endif
-
+    //session server will return "YES" if user is valid, have to skip HTTP headers
     if ((stringbuffer.size() >= 3 && stringbuffer.find("\r\n\r\nYES", 0) != std::string::npos))
-    {      
+    {  
       user->valid = true;
     }
   }

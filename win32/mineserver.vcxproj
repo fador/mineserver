@@ -90,7 +90,6 @@
     <ClInclude Include="..\include\extern.h" />
     <ClInclude Include="..\include\furnace.h" />
     <ClInclude Include="..\include\furnaceManager.h" />
-    <ClInclude Include="..\include\hook.h" />
     <ClInclude Include="..\include\inventory.h" />
     <ClInclude Include="..\include\lighting.h" />
     <ClInclude Include="..\include\logger.h" />

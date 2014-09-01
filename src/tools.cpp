@@ -32,7 +32,20 @@
 #include <climits>
 #endif
 
-#ifdef __WIN32__
+#ifdef __APPLE__
+#include <unistd.h>
+#include <libgen.h>
+#include <wordexp.h>
+#include <sys/stat.h>
+#include <climits>
+
+// Mac workaround because lack of clock_gettime
+// (idk why. But its a common problem.)
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
+#ifdef _WIN32
 #include <direct.h>
 
 #include <ShlObj.h>
@@ -384,5 +397,25 @@ std::pair<std::string, std::string> pathOfFile(const std::string& filename)
 #include "stdtime.h"
 uint64_t microTime()
 {
-  return Time::now().total_usec();
+#ifndef WIN32
+  #ifdef __APPLE__
+  // copied from gist.github.com/jbenet/1087739
+  clock_serv_t cclock;
+  mach_timespec_t m_ts;
+  host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+  clock_get_time(cclock, &m_ts);
+  mach_port_deallocate(mach_task_self(), cclock);
+  return (m_ts.tv_sec*(uint64_t)1000000 + m_ts.tv_nsec/(uint64_t)1000);
+  #else
+  struct timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  return (now.tv_sec*(uint64_t)1000000 + now.tv_nsec/(uint64_t)1000);
+  #endif
+#else
+  FILETIME ft;
+  GetSystemTimeAsFileTime(&ft);
+  uint64_t out = ((uint64_t)ft.dwHighDateTime)<<32 | (uint64_t)ft.dwLowDateTime;
+  out /= 10; // from 100ns to 1us
+  return out;
+#endif
 }

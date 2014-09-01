@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012, The Mineserver Project
+  Copyright (c) 2013, The Mineserver Project
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -123,11 +123,12 @@ bool Chat::handleMsg(User* user, std::string msg)
   std::string timeStamp(asctime(Tm));
   timeStamp = timeStamp.substr(11, 5);
 
-  if ((static_cast<Hook3<bool, const char*, time_t, const char*>*>(ServerInstance->plugin()->getHook("PlayerChatPre")))->doUntilFalse(user->nick.c_str(), rawTime, msg.c_str()))
+  runCallbackUntilFalse("PlayerChatPre",user->nick.c_str(), rawTime, msg.c_str());
+  if (callbackReturnValue)
   {
     return false;
   }
-  (static_cast<Hook3<bool, const char*, time_t, const char*>*>(ServerInstance->plugin()->getHook("PlayerChatPost")))->doAll(user->nick.c_str(), rawTime, msg.c_str());
+  runAllCallback("PlayerChatPost",user->nick.c_str(), rawTime, msg.c_str());
   char prefix = msg[0];
 
   switch (prefix)
@@ -172,23 +173,24 @@ void Chat::handleCommand(User* user, std::string msg, const std::string& timeSta
   std::string command = cmd[0];
   cmd.pop_front();
 
+  //Converting to char* array for plugins
   char** param = new char *[cmd.size()];
-
   for (uint32_t i = 0; i < cmd.size(); i++)
   {
     param[i] = (char*)cmd[i].c_str();
   }
 
-  // If hardcoded auth command!
-  if (command == "auth" && param[0] == ServerInstance->config()->sData("system.admin.password"))
+  // If hardcoded auth command, ignore default password "CHANGEME"
+  if (command == "auth" && cmd[0] != "CHANGEME" && cmd[0] == ServerInstance->config()->sData("system.admin.password"))
   {
     user->serverAdmin = true;
+    SET_ADMIN(user->permissions);
     msg = MC_COLOR_RED + "[!] " + MC_COLOR_GREEN + "You have been authed as admin!";
     sendMsg(user, msg, USER);
   }
   else
   {
-    (static_cast<Hook4<bool, const char*, const char*, int, const char**>*>(ServerInstance->plugin()->getHook("PlayerChatCommand")))->doAll(user->nick.c_str(), command.c_str(), cmd.size(), (const char**)param);
+    runAllCallback("PlayerChatCommand",user->nick.c_str(), command.c_str(), cmd.size(), (const char**)param);
   }
 
   delete [] param;

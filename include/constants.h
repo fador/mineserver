@@ -34,7 +34,11 @@
 #include <iostream>
 
 #include "tr1.h"
+#ifdef __APPLE__
+#include <tr1/memory>
+#else
 #include TR1INCLUDE(memory)
+#endif
 
 // configuration from build system
 #include "configure.h"
@@ -85,6 +89,7 @@ extern const unsigned int SERVER_CONSOLE_UID;
 extern const std::string VERSION;
 
 extern const int PROTOCOL_VERSION;
+extern const std::string MINECRAFT_VERSION;
 
 extern const char COMMENTPREFIX;
 

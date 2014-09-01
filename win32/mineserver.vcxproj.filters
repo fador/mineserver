@@ -395,9 +395,6 @@
     <ClInclude Include="..\include\furnaceManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\hook.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\inventory.h">
       <Filter>Header Files</Filter>
     </ClInclude>

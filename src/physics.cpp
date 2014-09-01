@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
+   Copyright (c) 2013, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -25,6 +25,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <math.h>
 
 #include "physics.h"
 #include "logger.h"
@@ -217,6 +218,83 @@ bool Physics::updateMinecart()
 }
 
 //Falling physics loop
+bool Physics::updateEntity()
+{
+
+  uint32_t listSize = entitySimList.size();
+  std::vector<uint32_t> toRem;
+  for (int32_t simIt = listSize-1; simIt >= 0; simIt--)
+  {
+    simulationEntity& f = entitySimList[simIt];
+
+    double timeInSec = (microTime()-f.startTime)/1000000.0;
+    double lasttimeInSec = (f.lastTime-f.startTime)/1000000.0;
+    f.lastTime = microTime();
+    f.ticks++;
+
+    const double gravity = -13.5;//9.81;
+
+    //Calculate offset when x and z velocity stays the same and y velocity has gravity to deal with
+    double offset_x = f.startPos.vel_x*timeInSec;
+    double offset_z = f.startPos.vel_z*timeInSec;
+    double offset_y = 0.5*gravity*timeInSec*timeInSec+f.startPos.vel_y*timeInSec;
+    entity_position newPos;
+    newPos.x = offset_x+f.startPos.x;
+    newPos.z = offset_z+f.startPos.z;
+    newPos.y = offset_y+f.startPos.y;
+    entity_position diffPos;
+    diffPos.x = newPos.x-f.pos.x;
+    diffPos.z = newPos.z-f.pos.z;
+    diffPos.y = newPos.y-f.pos.y;
+
+    //Loop all blocks between current point and last point. Just simple linear interpolation
+    for(double i = 0; i < 1.0; i+= 1.0/sqrt(diffPos.x*diffPos.x+diffPos.y*diffPos.y+diffPos.z*diffPos.z))
+    {
+      //Check for the block
+      uint8_t block,meta;
+      ServerInstance->map(map)->getBlock((int)(f.pos.x+diffPos.x*i-0.5),(int)(f.pos.y+diffPos.y*i),(int)(f.pos.z+diffPos.z*i-0.5),&block, &meta);
+
+      //When hitting _something_, turn it to glass and destroy the entity
+      if(block != BLOCK_AIR)
+      {
+        ServerInstance->map(map)->sendBlockChange((int)(f.pos.x+diffPos.x*i-0.5), (int)(f.pos.y+diffPos.y*i), (int)(f.pos.z+diffPos.z*i-0.5), BLOCK_GLASS, 0); 
+        //Add to "to-remove" list
+        toRem.push_back(f.EID);
+        break;
+      }
+    }
+
+
+    f.pos.x = newPos.x;
+    f.pos.z = newPos.z;
+    f.pos.y = newPos.y;
+    f.pos.vel_y = gravity*timeInSec+f.startPos.vel_y;
+    /*
+    Packet pkt = Protocol::entityVelocity(f.EID,(int16_t)(f.pos.vel_x*8000.0/20),
+                                                (int16_t)(f.pos.vel_y*8000.0/20),
+                                                (int16_t)(f.pos.vel_z*8000.0/20));  
+    pkt << Protocol::entityTeleport(f.EID, f.pos.x, f.pos.y, f.pos.z,0,0);
+                                                
+    User::sendAll(pkt);
+    */
+  }
+  for(int32_t i = 0; i < toRem.size(); i++)
+  {
+    for (int32_t simIt = entitySimList.size()-1; simIt >= 0; simIt--)
+    {
+      if(entitySimList[simIt].EID == toRem[i])
+      {
+        Packet pkt = Protocol::destroyEntity(toRem[i]);  
+        User::sendAll(pkt);
+        entitySimList.erase(entitySimList.begin()+simIt);
+        break;
+      }
+    }
+  }
+  return true;
+}
+
+//Falling physics loop
 bool Physics::updateFall()
 {
 
@@ -286,6 +364,7 @@ bool Physics::update()
 {
   updateFall();
   updateMinecart();
+  updateEntity();
   if (!enabled)
   {
     return true;
@@ -481,8 +560,14 @@ bool Physics::update()
   return true;
 }
 
+bool Physics::addEntitySimulation(int16_t entity, entity_position pos, uint32_t EID, uint32_t UID)
+{
+  entitySimList.push_back(simulationEntity(entity,pos,EID,UID));
+  return true;
+}
+
 bool Physics::addFallSimulation(uint8_t block, vec pos, uint32_t EID)
-{  
+{
   fallSimList.push_back(Falling(block,pos,EID));
   return true;
 }

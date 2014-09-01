@@ -32,7 +32,12 @@
 ///          (don't use names starting with underscores... compilers are stl libraries like that too)
 
 
-#include <stdint.h>
+#include "tr1.h"
+#ifdef __APPLE__
+#include <tr1/random>
+#else
+#include TR1INCLUDE(random)
+#endif
 
 #include <random>
 

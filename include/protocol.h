@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2012, The Mineserver Project
+   Copyright (c) 2013, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -62,6 +62,13 @@ class Protocol
     }
     #endif
 
+    static Packet openWindow(int8_t windowId, int8_t type, std::string title, int8_t slots, int8_t useCustomTitle = 0)
+    {
+      Packet ret;
+      ret << (int8_t)PACKET_OPEN_WINDOW << windowId << type << title << slots << useCustomTitle;
+      return ret;
+    }
+
     static Packet animation(int eid, int aid)
     {
       Packet ret;
@@ -83,6 +90,13 @@ class Protocol
       return ret;
     }
 
+    static Packet entityVelocity(int eid, int16_t vel_x, int16_t vel_y,int16_t vel_z)
+    {
+      Packet ret;
+      ret << (int8_t)PACKET_ENTITY_VELOCITY << (int32_t)eid << vel_x << vel_y << vel_z;
+      return ret;
+    }
+
     static Packet slot(int16_t id, int8_t count=0, int16_t damage=0, int16_t data_size=-1, const uint8_t *data=NULL)
     {
       // TODO: respect data!
@@ -100,7 +114,8 @@ class Protocol
       return ret;
     }
 
-    static Packet setSlotHeader(int8_t window_id, int16_t slot) {
+    static Packet setSlotHeader(int8_t window_id, int16_t slot)
+    {
       // `header` means: You need to place a `slot` packet after this one.
       Packet ret;
       ret << (int8_t)PACKET_SET_SLOT << window_id << slot;
@@ -155,6 +170,13 @@ class Protocol
       return ret;
     }
 
+    static Packet namedSoundEffect(std::string name, int32_t x, int32_t y, int32_t z, float volume, int8_t pitch)
+    {
+      Packet ret;
+      ret << (int8_t)PACKET_NAMED_SOUND_EFFECT << name << x << y << z << volume << pitch;
+      return ret;
+    }
+
     static Packet entityHeadLook(int eid, int head_yaw)
     {
       Packet ret;
@@ -198,11 +220,12 @@ class Protocol
       return ret;
     }
 
-    static Packet loginResponse(int eid)
+    //ToDo: remember gamemode for players
+    static Packet loginResponse(int eid, int8_t gamemode = 0)
     {
       Packet ret;
       ret << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)eid
-          << std::string("default") << (int8_t)0 << (int8_t)0 
+          << std::string("default") << (int8_t)gamemode << (int8_t)0 
           << (int8_t)2 << (int8_t)0 << (int8_t)ServerInstance->config()->iData("system.user_limit");
       return ret;
     }
@@ -214,10 +237,11 @@ class Protocol
       return ret;
     }
 
-    static Packet timeUpdate(int64_t time)
+    //ToDo: use age of the world field somewhere
+    static Packet timeUpdate(int64_t time, int64_t ageOfTheWorld = 0)
     {
       Packet ret;
-      ret << (int8_t)PACKET_TIME_UPDATE << (int64_t)time;
+      ret << (int8_t)PACKET_TIME_UPDATE << (int64_t)ageOfTheWorld << (int64_t)time;
       return ret;
     }
 
@@ -245,11 +269,30 @@ class Protocol
       return ret;
     }
 
-    static Packet addObject(int eid, int8_t object, double x, double y, double z, int objectData, int16_t speed_x = 0, int16_t speed_y = 0,int16_t speed_z = 0)
+    static Packet pickupSpawn(int eid, int16_t item, int16_t count, int16_t health, int32_t x, int32_t y, int32_t z)
+    {
+      MetaData metadata;
+
+      Packet ret;
+      ret << addObject(eid, 0x02, x, y, z,0) ;
+      //Add metadata
+      //ToDo: expand metadata-class to handle this
+
+      //Ref: https://gist.github.com/4325656
+      ret << (int8_t)PACKET_ENTITY_METADATA << eid;      
+      ret << (int8_t)0xAA /*Slot at index 10 */;
+      ret << slot(item,(int8_t)count,health);
+      ret << (int8_t)0x7f; //Terminate metadata
+      return ret;
+    }
+
+    static Packet addObject(int eid, int8_t object, int32_t x, int32_t y, int32_t z, int objectData, int16_t speed_x = 0, int16_t speed_y = 0,int16_t speed_z = 0, int8_t yaw = 0, int8_t pitch = 0)
     {
       Packet  pkt;  
       pkt //<< (int8_t)PACKET_ENTITY << (int32_t)eid
-          << (int8_t)PACKET_ADD_OBJECT << (int32_t)eid << (int8_t)object << (int32_t)(x * 32 + 16) << (int32_t)(y * 32 + 16) << (int32_t)(z * 32 + 16) << (int32_t)objectData;
+          << (int8_t)PACKET_ADD_OBJECT << (int32_t)eid << (int8_t)object << x << y << z 
+          << yaw << pitch
+          << (int32_t)objectData;
       if(objectData)
       {
         pkt << (int16_t)speed_x << (int16_t)speed_y << (int16_t)speed_z;
@@ -261,6 +304,13 @@ class Protocol
     {
       Packet ret;
       ret << (int8_t)PACKET_COLLECT_ITEM << (int32_t)itemEid << (int32_t)eid;
+      return ret;
+    }
+
+    static Packet blockAction(int32_t x, int16_t y, int32_t z, int8_t byte1, int8_t byte2, int16_t blockid)
+    {
+      Packet ret;
+      ret << (int8_t)PACKET_BLOCK_ACTION << x << y << z << byte1 << byte2 << blockid;
       return ret;
     }
 
@@ -285,7 +335,7 @@ class Protocol
       return ret;
     }
 
-    static Packet updateHealth(int health, int food=20)
+    static Packet updateHealth(int health, int food=15)
     {
       Packet ret;
       ret << (int8_t)PACKET_UPDATE_HEALTH << (int16_t)health << (int16_t)food << (float)5.0;
@@ -321,7 +371,7 @@ class Protocol
       }      
       return ret;
     }
-    static Packet gameState(uint8_t reason, uint8_t data){
+    static Packet gameState(int8_t reason, int8_t data){
       Packet ret;
       ret<< (int8_t)PACKET_GAMESTATE << reason << data;
       return ret;

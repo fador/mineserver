@@ -94,11 +94,14 @@ public:
   std::string temp_nick;
   vec curChunk;
   time_t healthtimeout;
+
+  /* INVENTORY RELATED HELPERS */
   Item inventoryHolding;
   //Do we have an open _shared_ inventory?
   bool isOpenInv;
   //More info on the inventory
   OpenInventory openInv;
+
   std::string secret;
   EVP_CIPHER_CTX en, de;
   std::string generateDigest();
@@ -222,10 +225,12 @@ public:
     return a > b ? (a - b) < viewDistance : (b - a) < viewDistance;
   }
 
-  struct event* GetEvent();
+  struct event* getReadEvent();
+  struct event* getWriteEvent();
 
 private:
-  event m_event;
+  event m_readEvent;
+  event m_writeEvent;
 
   // Item currently in hold
   int16_t m_currentItemSlot;

@@ -49,11 +49,11 @@ public:
   std::string getCommand();
 
   static bool CheckForCommand();
-  static bool Log(int type, const char* source, const char* message);
+  static bool LogEvent(int type, const char* source, const char* message);
 
 private:
   std::string currentCommand;
-#ifdef __WIN32__
+#ifdef _WIN32
   bool _hasCommand;
   static DWORD WINAPI _stdinThreadProc(LPVOID lpParameter);
   DWORD WINAPI stdinThreadProc();

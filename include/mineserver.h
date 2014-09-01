@@ -33,8 +33,12 @@
 #include <string>
 
 #include "tr1.h"
-#include TR1INCLUDE(memory)
 
+#ifdef __APPLE__
+#include <tr1/memory>
+#else
+#include TR1INCLUDE(memory)
+#endif
 
 //Enable protocol encryption
 #define PROTOCOL_ENCRYPTION
@@ -119,6 +123,11 @@ public:
   inline std::set<User*>& users()
   {
     return m_users;
+  }
+
+  inline std::set<User*>& usersToRemove()
+  {
+    return m_usersToRemove;
   }
 
   inline const std::set<User*>& users() const
@@ -237,7 +246,9 @@ public:
   // Set a pointer to the inventory
   inline void setInventory(Inventory* inventory)
   {
-    m_inventory = m_inventory;
+    m_inventory = inventory;
+      // was m_inventory = m_inventory before,
+      // which seems redundant. -- gk
   }
 
 private:
@@ -248,6 +259,8 @@ private:
 
   // holds all connected users
   std::set<User*>    m_users;
+  //Delayed user removal
+  std::set<User*>    m_usersToRemove;
 
   std::vector<Map*>                m_map;
   std::vector<Physics*>            m_physics;

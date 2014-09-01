@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2012, The Mineserver Project
+   Copyright (c) 2013, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -182,7 +182,8 @@ enum
   PACKET_MAP_CHUNK                 = 0x33,
   PACKET_MULTI_BLOCK_CHANGE        = 0x34,
   PACKET_BLOCK_CHANGE              = 0x35,
-  PACKET_PLAY_NOTE                 = 0x36,
+  PACKET_BLOCK_ACTION              = 0x36,
+  PACKET_NAMED_SOUND_EFFECT        = 0x3E,
   PACKET_GAMESTATE                 = 0x46,
   PACKET_OPEN_WINDOW               = 0x64,
   PACKET_PROGRESS_BAR              = 0x69,

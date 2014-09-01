@@ -31,17 +31,22 @@
 #include <string>
 #include <vector>
 #include <ctime>
+#include <list>
 
 #include "tr1.h"
+
+#ifdef __APPLE__
+#include <tr1/memory>
+#include <tr1/unordered_map>
+#else
 #include TR1INCLUDE(memory)
 #include TR1INCLUDE(unordered_map)
-
-#include "hook.h"
+#endif
 
 //Fix Winsock2 error that occurs when Windows.h is included before it.
 #define _WINSOCKAPI_
 
-#ifdef __WIN32__
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <dlfcn.h>
@@ -96,14 +101,31 @@ static char *LIBRARY_ERROR(void)
 typedef std::shared_ptr<BlockBasic> BlockBasicPtr;
 typedef std::shared_ptr<ItemBasic>  ItemBasicPtr;
 
+extern bool callbackReturnINTERNAL;
+typedef int(*funcPointer)(...);
+
+#define addCallback(name,func) if(ServerInstance->plugin()->getHook(name) == NULL) {ServerInstance->plugin()->setHook(name,new funcListType); } ServerInstance->plugin()->getHook(name)->push_back(func);
+#define runCallbackUntilTrue(name,...) { callbackReturnINTERNAL = false; funcListType *funcList = ServerInstance->plugin()->getHook(name);\
+                                         if(funcList != NULL) for(funcListType::iterator i = funcList->begin(); i != funcList->end(); i++) { \
+                                         if((*i)(__VA_ARGS__)) { callbackReturnINTERNAL = true; break; } } }
+#define runCallbackUntilFalse(name,...) { callbackReturnINTERNAL = false; funcListType *funcList = ServerInstance->plugin()->getHook(name);\
+                                          if(funcList != NULL) for(funcListType::iterator i = funcList->begin(); i != funcList->end(); i++) { \
+                                          if(!(*i)(__VA_ARGS__)) { callbackReturnINTERNAL = true; break; } } }
+#define runAllCallback(name,...)        {  funcListType *funcList = ServerInstance->plugin()->getHook(name);\
+                                          if(funcList != NULL) for(funcListType::iterator i = funcList->begin(); i != funcList->end(); i++) { \
+                                          (*i)(__VA_ARGS__); } }
+#define callbackReturnValue callbackReturnINTERNAL
+
+typedef std::list<funcPointer> funcListType;
+
 class Plugin
 {
 public:
-
-  typedef std::unordered_map<std::string, Hook*> HookMap;
-  typedef std::unordered_map<std::string, LIBRARY_HANDLE> LibHandleMap;
-  typedef std::unordered_map<std::string, void*> PointerMap;
-  typedef std::unordered_map<std::string, float> VersionMap;
+  
+  typedef std::tr1::unordered_map<std::string, funcListType* > HookMap;
+  typedef std::tr1::unordered_map<std::string, LIBRARY_HANDLE> LibHandleMap;
+  typedef std::tr1::unordered_map<std::string, void*> PointerMap;
+  typedef std::tr1::unordered_map<std::string, float> VersionMap;
 
   typedef std::vector<BlockBasicPtr> BlockCBs;
   typedef std::vector<ItemBasicPtr>  ItemCBs;
@@ -113,17 +135,17 @@ public:
 
   // Hook registry stuff
   inline bool  hasHook(const HookMap::key_type& name) const { return m_hooks.count(name) > 0; }
-  inline HookMap::mapped_type getHook(const HookMap::key_type& name) const
+  inline HookMap::mapped_type getHook(const HookMap::key_type& name)
   {
-    HookMap::const_iterator hook = m_hooks.find(name);
-    return hook == m_hooks.end() ? NULL : hook->second;
-  }
+    HookMap::iterator hook = m_hooks.find(name);
+    return (hook == m_hooks.end()) ? NULL : (hook->second);
+  }  
   inline void  setHook(const HookMap::key_type& name, HookMap::mapped_type hook) { m_hooks[name] = hook; }
   inline void  remHook(const HookMap::key_type& name) { m_hooks.erase(name); /* erases 0 or 1 elements */ }
 
   // Load/Unload plugins
   bool loadPlugin(const std::string& name, const std::string& path = "", std::string alias = "");
-  void unloadPlugin(const std::string name);
+  void unloadPlugin(const std::string& name);
 
   // Plugin version registry
   inline bool  hasPluginVersion(const VersionMap::key_type& name) const { return m_pluginVersions.find(name) != m_pluginVersions.end(); }

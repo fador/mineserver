@@ -38,10 +38,6 @@
 
 #include <stdint.h>
 
-#ifdef USE_HOOKS
-#include "hook.h"
-#endif
-
 #include "logtype.h"
 #include "configure.h"
 
@@ -70,13 +66,18 @@ struct plugin_pointer_struct
   void (*remPointer)(const char* name);
 
   bool (*hasHook)(const char* hookID);
+  /*
 #ifdef USE_HOOKS
   Hook*(*getHook)(const char* hookID);
   void (*setHook)(const char* hookID, Hook* hook);
-#else
+#else  
   void*(*getHook)(const char* hookID);
   void (*setHook)(const char* hookID, void* hook);
 #endif
+  */
+  void (*hookfiller)(void);
+  void (*hookfiller2)(void);
+
   void (*remHook)(const char* hookID);
 
   bool (*hasCallback)(const char* hookID, voidF function);
@@ -112,7 +113,7 @@ struct user_pointer_struct
 
   bool (*setGameMode)(const char* user, int gameMode);
 
-  void* temp[96];
+  void* temp[95];
 };
 
 struct chat_pointer_struct

@@ -32,7 +32,11 @@
 #include <vector>
 
 #include "tr1.h"
+#ifdef __APPLE__
+#include <tr1/memory>
+#else
 #include TR1INCLUDE(memory)
+#endif
 
 class User;
 
@@ -88,12 +92,15 @@ typedef std::shared_ptr<Item> ItemPtr;
 
 struct OpenInventory
 {
+  OpenInventory(): recordAction(false){};
   int8_t type;
   int32_t x;
   int32_t y;
   int32_t z;
   Item workbench[10];
   std::vector<User*> users;
+  std::vector<int16_t> slotActions;
+  bool recordAction;
 };
 
 typedef std::shared_ptr<OpenInventory> OpenInvPtr;

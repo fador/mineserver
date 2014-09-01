@@ -26,6 +26,7 @@
  */
 
 #include <iostream>
+#include <algorithm>
 
 #include "furnaceManager.h"
 #include "furnace.h"

@@ -55,9 +55,7 @@ void Logger::log(const std::string& msg, const std::string& file, int line)
 
 void Logger::log(LogType::LogType type, const std::string& source, const std::string& message)
 {
-  Hook* hook = NULL;
-  if (!ServerInstance->plugin()
-      || !(hook = ServerInstance->plugin()->getHook("LogPost")))
+  if (!ServerInstance->plugin()->hasHook("LogPost"))
   {
     std::clog.tie(&std::cout);
     if (type < LogType::LOG_WARNING)
@@ -69,7 +67,7 @@ void Logger::log(LogType::LogType type, const std::string& source, const std::st
     return;
   }
 
-  (static_cast<Hook3<bool, int, const char*, const char*>*>(hook))->doAll((int)type, source.c_str(), message.c_str());
+  runAllCallback("LogPost",(int)type, source.c_str(), message.c_str());
 }
 
 void Logger::log(LogType::LogType type, const std::string& source, const char* message, ...)

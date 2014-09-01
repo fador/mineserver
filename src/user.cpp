@@ -27,6 +27,7 @@
 
 #include <cmath>
 #include <sys/stat.h>
+#include <algorithm>
 
 #include "constants.h"
 
@@ -92,7 +93,7 @@ User::User(int sock, uint32_t EID)
 
 bool User::changeNick(std::string _nick)
 {
-  (static_cast<Hook2<bool, const char*, const char*>*>(ServerInstance->plugin()->getHook("PlayerNickPost")))->doAll(nick.c_str(), _nick.c_str());
+  runAllCallback("PlayerNickPost", nick.c_str(), _nick.c_str());
 
   nick = _nick;
 
@@ -101,9 +102,13 @@ bool User::changeNick(std::string _nick)
 
 User::~User()
 {
-  if (this->UID != SERVER_CONSOLE_UID && event_del(GetEvent()) == -1)
+  if (this->UID != SERVER_CONSOLE_UID && event_del(getReadEvent()) == -1)
   {
-    LOG2(WARNING, this->nick + " event del failed!");
+    LOG2(WARNING, this->nick + " event del failed for read event!");
+  }
+  if (this->UID != SERVER_CONSOLE_UID && event_del(getWriteEvent()) == -1)
+  {
+    LOG2(WARNING, this->nick + " event del failed for write event!");
   }
 
   if (fd != -1)
@@ -195,7 +200,7 @@ User::~User()
 
   if (fd != -1 && logged)
   {
-    (static_cast<Hook1<bool, const char*>*>(ServerInstance->plugin()->getHook("PlayerQuitPost")))->doAll(nick.c_str());
+    runAllCallback("PlayerQuitPost",nick.c_str());
   }
 }
 #include <stdio.h>
@@ -239,15 +244,13 @@ bool User::sendLoginInfo()
 
   logged = true;
   spawnUser((int32_t)pos.x * 32, (int32_t)((pos.y + 2) * 32), (int32_t)pos.z * 32);
-  
-  
+    
   for (int i = 1; i < 45; i++)
   {
     inv[i].ready = true;
     inv[i].sendUpdate();
   }
   
-
   // Teleport player (again)
   teleport(pos.x, pos.y + 2, pos.z);
 
@@ -264,7 +267,7 @@ bool User::sendLoginInfo()
 bool User::kick(std::string kickMsg)
 {
   buffer << Protocol::kick(kickMsg);
-  (static_cast<Hook2<bool, const char*, const char*>*>(ServerInstance->plugin()->getHook("PlayerKickPost")))->doAll(nick.c_str(), kickMsg.c_str());
+  runAllCallback("PlayerKickPost",nick.c_str(), kickMsg.c_str());
 
   LOG2(WARNING, nick + " kicked. Reason: " + kickMsg);
 
@@ -583,18 +586,22 @@ bool User::updatePos(double x, double y, double z, double stance)
       /// update this player's pos for others
 
       Packet dtPkt = Protocol::destroyEntity(UID);
-      for( User*& u : toremove){
-        u->buffer.addToWrite(dtPkt);
+      std::list<User*>::iterator iter = toremove.begin(), end = toremove.end();
+      for (; iter != end ; iter++)
+      {
+        (*iter)->buffer.addToWrite(dtPkt);
 
-        this->buffer.addToWrite(Protocol::destroyEntity(u->UID));
+        this->buffer.addToWrite(Protocol::destroyEntity((*iter)->UID));
       }
 
       Packet spawnPkt = Protocol::namedEntitySpawn(UID, nick, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch), curItem);
-      for( User*& u : toadd){
-        u->buffer.addToWrite(spawnPkt);
+      iter = toadd.begin(), end = toadd.end();
+      for (; iter != end ; iter++)
+      {
+        (*iter)->buffer.addToWrite(spawnPkt);
 
         this->buffer.addToWrite(
-              Protocol::namedEntitySpawn(u->UID, u->nick, u->pos, u->curItem)
+              Protocol::namedEntitySpawn((*iter)->UID, (*iter)->nick, (*iter)->pos, (*iter)->curItem)
               );
       }
 
@@ -668,7 +675,7 @@ bool User::updatePos(double x, double y, double z, double stance)
   if (ServerInstance->m_damage_enabled)
   {
     uint8_t type, meta;
-    if ((std::floor(pos.y - 0.5) < 128) && LOADBLOCK(pos.x, pos.y - 0.5, pos.z))
+    if ((std::floor(pos.y - 0.5) < 256) && LOADBLOCK(pos.x, pos.y - 0.5, pos.z))
     {
       switch (type)
       {
@@ -1115,13 +1122,14 @@ bool User::spawnOthers()
     //    if ((*it)->logged && (*it)->UID != this->UID && (*it)->nick != this->nick)
     if ((*it)->logged)
     {
-      loginBuffer << Protocol::namedEntitySpawn((*it)->UID, (*it)->nick, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, 0, 0, 0);
+      loginBuffer << Protocol::namedEntitySpawn((*it)->UID, (*it)->nick, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, angleToByte((*it)->pos.yaw),angleToByte((*it)->pos.pitch), 0);
       for (int b = 0; b < 5; b++)
       {
         const int n = b == 0 ? (*it)->curItem + 36 : 9 - b;
         const int type = (*it)->inv[n].getType();
         loginBuffer << Protocol::entityEquipment((*it)->UID, b, type, 0);
       }
+      loginBuffer << Protocol::entityHeadLook((*it)->UID,angleToByte((*it)->pos.yaw));
     }
   }
   return true;
@@ -1141,11 +1149,12 @@ void User::checkEnvironmentDamage()
   uint8_t type = 0, meta = 0;
 
   int16_t d = 0;
-
+  /*
   if (type == BLOCK_CACTUS && LOADBLOCK(pos.x, yVal, pos.z))
   {
     d = 1;
   }
+  */
 
   const double xbit = pos.x - std::floor(pos.x);
   const double zbit = pos.z - std::floor(pos.z);
@@ -1289,7 +1298,8 @@ bool User::respawn()
     chunk->sendPacket(destroyPkt, this);
   }
 
-  if ((static_cast<Hook1<bool, const char*>*>(ServerInstance->plugin()->getHook("PlayerRespawn")))->doUntilFalse(nick.c_str()))
+  runCallbackUntilFalse("PlayerRespawn",nick.c_str());
+  if (callbackReturnValue)
   {
     // In this case, the plugin teleports automatically
   }
@@ -1348,9 +1358,14 @@ bool User::isUnderwater()
   return false;
 }
 
-struct event* User::GetEvent()
+struct event* User::getReadEvent()
 {
-  return &m_event;
+  return &m_readEvent;
+}
+
+struct event* User::getWriteEvent()
+{
+  return &m_writeEvent;
 }
 
 std::set<User*>& User::all()

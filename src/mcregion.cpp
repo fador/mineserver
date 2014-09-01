@@ -58,6 +58,10 @@ struct RegionFile {
 #include <dirent.h>
 #endif
 
+#ifdef __APPLE__
+#include <dirent.h>
+#endif
+
 #include "mcregion.h"
 #include "constants.h"
 #include "logger.h"

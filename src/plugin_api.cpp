@@ -31,6 +31,7 @@
 #include "logger.h"
 #include "chat.h"
 #include "permissions.h"
+#include "protocol.h"
 
 #include "plugin.h"
 #include "config.h"
@@ -62,6 +63,18 @@ User* userFromName(std::string user)
   {
     // Don't send to his user if he is DND and the message is a chat message
     if (((*it)->fd && (*it)->logged && user == (*it)->nick))
+    {
+      return *it;
+    }
+  }
+  return NULL;
+}
+User* anyUserFromName(std::string user)
+{
+  for (std::set<User*>::const_iterator it = ServerInstance->users().begin(); it != ServerInstance->users().end(); ++it)
+  {
+    // Don't send to his user if he is DND and the message is a chat message
+    if ((user == (*it)->nick))
     {
       return *it;
     }
@@ -116,15 +129,17 @@ bool plugin_hasHook(const char* hookID)
   return ServerInstance->plugin()->hasHook(hookID);
 }
 
+/*
 Hook* plugin_getHook(const char* hookID)
 {
   return ServerInstance->plugin()->getHook(hookID);
 }
 
-void plugin_setHook(const char* hookID, Hook* hook)
+void plugin_setHook(const char* hookID, void* hook)
 {
   ServerInstance->plugin()->setHook(hookID, hook);
 }
+*/
 
 void plugin_remHook(const char* hookID)
 {
@@ -133,22 +148,38 @@ void plugin_remHook(const char* hookID)
 
 bool hook_hasCallback(const char* hookID, voidF function)
 {
-  return ServerInstance->plugin()->getHook(hookID)->hasCallback(function);
+  funcListType *funcList = ServerInstance->plugin()->getHook(hookID);
+  for(funcListType::iterator i = funcList->begin(); i != funcList->end(); i++)
+  {
+    if((*i) == (funcPointer)function)
+    {
+      return true;
+    }
+  }
+  return false;
 }
 
 void hook_addCallback(const char* hookID, voidF function)
 {
-  ServerInstance->plugin()->getHook(hookID)->addCallback(function);
+  addCallback(std::string(hookID), (funcPointer)function);
 }
 
 void hook_addIdentifiedCallback(const char* hookID, void* identifier, voidF function)
 {
-  ServerInstance->plugin()->getHook(hookID)->addIdentifiedCallback(identifier, function);
+  //ServerInstance->plugin()->getHook(hookID)->addIdentifiedCallback(identifier, function);
 }
 
 void hook_remCallback(const char* hookID, voidF function)
 {
-  ServerInstance->plugin()->getHook(hookID)->remCallback(function);
+  funcListType *funcList = ServerInstance->plugin()->getHook(hookID);
+  for(funcListType::iterator i = funcList->begin(); i != funcList->end(); i++)
+  {
+    if((*i) == (funcPointer)function)
+    {
+      funcList->erase(i);
+      break;
+    }
+  }
 }
 
 bool hook_doUntilTrue(const char* hookID, ...)
@@ -156,7 +187,8 @@ bool hook_doUntilTrue(const char* hookID, ...)
   bool result = false;
   va_list argList;
   va_start(argList, hookID);
-  result = ServerInstance->plugin()->getHook(hookID)->doUntilTrueVA(argList);
+  runCallbackUntilTrue(hookID,argList);
+  result = callbackReturnValue;
   va_end(argList);
   return result;
 }
@@ -165,8 +197,9 @@ bool hook_doUntilFalse(const char* hookID, ...)
 {
   bool result = false;
   va_list argList;
-  va_start(argList, hookID);
-  result = ServerInstance->plugin()->getHook(hookID)->doUntilFalseVA(argList);
+  va_start(argList, hookID);  
+  runCallbackUntilFalse(hookID,argList);
+  result = callbackReturnValue;
   va_end(argList);
   return result;
 }
@@ -175,7 +208,7 @@ void hook_doAll(const char* hookID, ...)
 {
   va_list argList;
   va_start(argList, hookID);
-  ServerInstance->plugin()->getHook(hookID)->doAllVA(argList);
+  runAllCallback(hookID,argList);
   va_end(argList);
 }
 
@@ -265,7 +298,7 @@ bool map_setTime(int timeValue)
 {
   ServerInstance->map(0)->mapTime = timeValue;
   Packet pkt;
-  pkt << (int8_t)PACKET_TIME_UPDATE << (int64_t)ServerInstance->map(0)->mapTime;
+  pkt << Protocol::timeUpdate(ServerInstance->map(0)->mapTime);
 
   if (!User::all().empty())
   {
@@ -938,7 +971,7 @@ int8_t mob_getByteMetadata(int uid, int idx)
 
 bool permission_setAdmin(const char* name)
 {
-  User* tempuser = userFromName(std::string(name));
+  User* tempuser = anyUserFromName(std::string(name));
   if (tempuser == NULL)
   {
     return false;
@@ -949,7 +982,7 @@ bool permission_setAdmin(const char* name)
 
 bool permission_setOp(const char* name)
 {
-  User* tempuser = userFromName(std::string(name));
+  User* tempuser = anyUserFromName(std::string(name));
   if (tempuser == NULL)
   {
     return false;
@@ -961,7 +994,7 @@ bool permission_setOp(const char* name)
 
 bool permission_setMember(const char* name)
 {
-  User* tempuser = userFromName(std::string(name));
+  User* tempuser = anyUserFromName(std::string(name));
   if (tempuser == NULL)
   {
     return false;
@@ -973,7 +1006,7 @@ bool permission_setMember(const char* name)
 
 bool permission_setGuest(const char* name)
 {
-  User* tempuser = userFromName(std::string(name));
+  User* tempuser = anyUserFromName(std::string(name));
   if (tempuser == NULL)
   {
     return false;
@@ -1055,8 +1088,8 @@ void init_plugin_api(void)
   plugin_api_pointers.plugin.setPointer            = &plugin_setPointer;
   plugin_api_pointers.plugin.remPointer            = &plugin_remPointer;
   plugin_api_pointers.plugin.hasHook               = &plugin_hasHook;
-  plugin_api_pointers.plugin.getHook               = &plugin_getHook;
-  plugin_api_pointers.plugin.setHook               = &plugin_setHook;
+  //plugin_api_pointers.plugin.getHook               = &plugin_getHook;
+  //plugin_api_pointers.plugin.setHook               = &plugin_setHook;
   plugin_api_pointers.plugin.remHook               = &plugin_remHook;
   plugin_api_pointers.plugin.hasCallback           = &hook_hasCallback;
   plugin_api_pointers.plugin.addCallback           = &hook_addCallback;

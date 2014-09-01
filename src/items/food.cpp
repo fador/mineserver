@@ -2,6 +2,7 @@
 #include "packets.h"
 #include "protocol.h"
 #include "map.h"
+#include "metadata.h"
 
 bool ItemFood::affectedItem(int item) const
 {
@@ -50,21 +51,25 @@ void ItemFood::onRightClick(User* user, Item* item)
     healammount = 4;
     break;
   }
+
   int newhealth = user->health + healammount;
   if (newhealth > 20)
   {
     newhealth = 20;
   }
-  
+
   user->sethealth(newhealth);
    
-  //ToDo: fix animation
-
   //Accept eating
   user->buffer << Protocol::entityStatus(user->UID, 9);
 
-  //Eating animation (should work but doesn't)
-  Packet pkt = Protocol::animation(user->UID, 5);
+  //Eating animation
+  MetaData meta;
+  MetaDataElemByte *element = new MetaDataElemByte(0,0x10);
+  meta.set(element);
+  Packet pkt = Protocol::animation(user->UID,5);
+  //pkt << Protocol::entityMetadata(user->UID, meta);
+  //ToDo: add timer stop animation
   
   sChunk* chunk = ServerInstance->map(user->pos.map)->getChunk(blockToChunk((int32_t)user->pos.x), blockToChunk((int32_t)user->pos.z));
   if (chunk != NULL)

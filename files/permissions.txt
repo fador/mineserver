@@ -1,2 +1,3 @@
-player:Guest
-YourNameHere:Admin
+someMemberName:Member
+someOpName:Op
+someAdminName:Admin

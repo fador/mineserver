@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
+   Copyright (c) 2012, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,9 @@
   We declare functions that serve as C callbacks explicitly as 'extern "C"'
   to avoid any potential ABI incompatibilities.
 */
+class User;
 
 extern "C" void accept_callback(int fd, short ev, void* arg);
 extern "C" void client_callback(int fd, short ev, void* arg);
 extern "C" void *user_validation_thread(void *arg);
+bool client_write(User *user);

@@ -33,8 +33,15 @@
 #include <vector>
 #include <ctime>
 
-#include <unordered_map>
-#include <memory>
+#include "tr1.h"
+
+#ifdef __APPLE__
+#include <tr1/memory>
+#include <tr1/unordered_map>
+#else
+#include TR1INCLUDE(memory)
+#include TR1INCLUDE(unordered_map)
+#endif
 
 #include "packets.h"
 #include "user.h"

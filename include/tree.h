@@ -31,8 +31,13 @@
 #include <stack>
 
 #include "tr1.h"
+#ifdef __APPLE__
+#include <tr1/memory>
+#include <tr1/array>
+#else
 #include TR1INCLUDE(memory)
 #include TR1INCLUDE(array)
+#endif
 
 #include "constants.h"
 #include "mineserver.h"

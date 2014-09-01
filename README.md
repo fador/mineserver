@@ -5,7 +5,7 @@ Custom Minecraft server software written in C++.
 
 You can find the core team from #mineserver @ irc.freenode.net Also mail to developers@mineserver.be will reach us.
 
-    Copyright (c) 2010-2012, The Mineserver Project
+    Copyright (c) 2010-2013, The Mineserver Project
 
 **NOTICE:** Server still lacks features compared to original minecraft server.
 
@@ -25,7 +25,7 @@ C++ compiler. MS Visual C++ 10 and GCC 4.4 should be sufficient. The build syste
 
 ### Supported Minecraft version
 
- * Working with 1.3.1 client (protocol 39)
+ * Working with 1.5.2 client (protocol 61)
 
 ### Features
 
@@ -39,7 +39,7 @@ C++ compiler. MS Visual C++ 10 and GCC 4.4 should be sufficient. The build syste
  * Flatland and terrain map generation (Also biomegen!)
  * Working chests, furnaces & signs
  * User validation from minecraft.net
- * Protocol Encryption (NEW)
+ * Protocol Encryption
 
 ### Configuration Notes
 

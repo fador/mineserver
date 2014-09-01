@@ -29,8 +29,7 @@
 
 #include "mineserver.h"
 
-/// 'WIN32` undefined again... pollutly polluted sources
-#ifdef __WIN32__
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <dlfcn.h>
@@ -72,9 +71,11 @@
 #include "items/food.h"
 #include "items/projectile.h"
 
+bool callbackReturnINTERNAL;
 // Create default hooks
 Plugin::Plugin()
 {
+  /*
   setHook("Timer200", new Hook0<bool>);
   setHook("Timer1000", new Hook0<bool>);
   setHook("Timer10000", new Hook0<bool>);
@@ -108,6 +109,7 @@ Plugin::Plugin()
   setHook("PlayerRespawn", new Hook1<bool, const char*>);
   setHook("gotAttacked", new Hook2<bool, const char*, int32_t>);
   setHook("interact", new Hook2<bool, const char*, int32_t>);
+  */
 
   init();
 }
@@ -115,11 +117,12 @@ Plugin::Plugin()
 // Remove existing hooks
 Plugin::~Plugin()
 {
+  
   for (HookMap::iterator it = m_hooks.begin(); it != m_hooks.end(); ++it)
   {
     delete it->second;
   }
-
+  
   m_hooks.clear();
 }
 
@@ -226,7 +229,7 @@ bool Plugin::loadPlugin(const std::string& name, const std::string& path, std::s
   return true;
 }
 
-void Plugin::unloadPlugin(const std::string name)
+void Plugin::unloadPlugin(const std::string& name)
 {
   LIBRARY_HANDLE lhandle = NULL;
   pfv fhandle = NULL;

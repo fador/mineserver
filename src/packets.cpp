@@ -26,7 +26,7 @@
 */
 
 #include <sys/types.h>
-#ifdef __WIN32__
+#ifdef _WIN32
 #include <winsock2.h>
 #else
 #include <netdb.h>       // for gethostbyname()
@@ -35,7 +35,7 @@
 
 #include <cmath>
 #include <sstream>
-
+#include <algorithm>
 
 
 #include "chat.h"
@@ -269,22 +269,22 @@ int PacketHandler::creative_inventory(User *user)
     if (!user->buffer.haveData(4))
         return PACKET_NEED_MORE_DATA;
 
-    uint16_t slot, itemID;
+    int16_t slot, itemID;
 
     user->buffer>>slot>>itemID;
 
-    if(itemID == 0xffff) return PACKET_OK;
+    if((uint16_t)itemID == 0xffff) return PACKET_OK;
 
     if (!user->buffer.haveData(5))
         return PACKET_NEED_MORE_DATA;
 
-    uint8_t count;
-    uint16_t meta;
+    int8_t count;
+    int16_t meta;
 
     user->buffer >> count >> meta;
 
 
-    uint16_t enchantment_data_len;
+    int16_t enchantment_data_len;
     user->buffer >> enchantment_data_len;
 
     if(enchantment_data_len != 0xffff) {
@@ -304,7 +304,7 @@ int PacketHandler::creative_inventory(User *user)
 int PacketHandler::player_abilities(User *user)
 {
     /// TODO: use this somewhere!
-    uint8_t flags, fspeed, wspeed;
+    int8_t flags, fspeed, wspeed;
 
     user->buffer >> flags >> fspeed >> wspeed;
 
@@ -320,16 +320,16 @@ int PacketHandler::client_info(User* user)
   }
 
   std::string locale;
-  int8_t viewDistance,chatFlags,difficulty;
+  int8_t viewDistance,chatFlags,difficulty,showCape;
 
   user->buffer >> locale;
 
-  if (!user->buffer || !user->buffer.haveData(3))
+  if (!user->buffer || !user->buffer.haveData(4))
   {
     return PACKET_NEED_MORE_DATA;
   }
 
-  user->buffer >> viewDistance >> chatFlags >> difficulty;
+  user->buffer >> viewDistance >> chatFlags >> difficulty >> showCape;
 
   user->buffer.removePacket();
 
@@ -368,6 +368,8 @@ int PacketHandler::entity_crouch(User* user)
 {
   int32_t EID;
   int8_t action;
+  MetaData meta;
+  MetaDataElemByte *element;
 
   user->buffer >> EID >> action;
   Packet pkt;
@@ -377,13 +379,17 @@ int PacketHandler::entity_crouch(User* user)
   switch(action)
   {
   //Crouch
-  case 1:
-    pkt << Protocol::animation(user->UID, 104);
+  case 1:    
+    element = new MetaDataElemByte(0,0x02);
+    meta.set(element);
+    pkt << Protocol::animation(user->UID, 104) << Protocol::entityMetadata(user->UID,meta);
     packetData = true;
     break;
     //Uncrouch
   case 2:
-    pkt << Protocol::animation(user->UID, 105);
+    element = new MetaDataElemByte(0,0x00);
+    meta.set(element);
+    pkt << Protocol::animation(user->UID, 105) << Protocol::entityMetadata(user->UID,meta);
     packetData = true;
     break;
   default:
@@ -593,7 +599,8 @@ int PacketHandler::handshake(User* user)
   }
 
   char* kickMessage = NULL;
-  if ((static_cast<Hook2<bool, const char*, char**>*>(ServerInstance->plugin()->getHook("PlayerLoginPre")))->doUntilFalse(player.c_str(), &kickMessage))
+  runCallbackUntilFalse("PlayerLoginPre",player.c_str(), &kickMessage);
+  if (callbackReturnValue)
   {
     user->kick(std::string(kickMessage));
   }
@@ -608,7 +615,7 @@ int PacketHandler::handshake(User* user)
     {
       user->buffer << Protocol::encryptionRequest();
     }
-    (static_cast<Hook1<bool, const char*>*>(ServerInstance->plugin()->getHook("PlayerLoginPost")))->doAll(player.c_str());
+    runAllCallback("PlayerLoginPost",player.c_str());
   }
 
   
@@ -759,7 +766,7 @@ int PacketHandler::player_digging(User* user)
   {
   case BLOCK_STATUS_STARTED_DIGGING:
   {
-    (static_cast<Hook5<bool, const char*, int32_t, int16_t, int32_t, int8_t>*>(ServerInstance->plugin()->getHook("PlayerDiggingStarted")))->doAll(user->nick.c_str(), x, y, z, direction);
+    runAllCallback("PlayerDiggingStarted",user->nick.c_str(), x, y, z, direction);
 
     for (uint32_t i = 0 ; i < ServerInstance->plugin()->getBlockCB().size(); i++)
     {
@@ -801,13 +808,14 @@ int PacketHandler::player_digging(User* user)
                                            user->inv[itemSlot].getCount(), user->inv[itemSlot].getHealth());
     }
 
-    if ((static_cast<Hook4<bool, const char*, int32_t, int16_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockBreakPre")))->doUntilFalse(user->nick.c_str(), x, y, z))
+    runCallbackUntilFalse("BlockBreakPre",user->nick.c_str(), x, y, z);
+    if (callbackReturnValue)
     {
       blockD.revertBlock(user, x, y, z, user->pos.map);
       return PACKET_OK;
     }
 
-    (static_cast<Hook4<bool, const char*, int32_t, int16_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockBreakPost")))->doAll(user->nick.c_str(), x, y, z);
+    runAllCallback("BlockBreakPost",user->nick.c_str(), x, y, z);
 
     for (uint32_t i = 0 ; i < ServerInstance->plugin()->getBlockCB().size(); i++)
     {
@@ -830,7 +838,7 @@ int PacketHandler::player_digging(User* user)
     status = block;
     if (ServerInstance->map(user->pos.map)->getBlock(x + 1, y, z, &block, &meta) && block != BLOCK_AIR)
     {
-      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x + 1, y, z, x, int8_t(y), z);
+      runAllCallback("BlockNeighbourBreak",user->nick.c_str(), x + 1, y, z, x, int8_t(y), z);
       for (uint32_t i = 0 ; i < ServerInstance->plugin()->getBlockCB().size(); i++)
       {
         blockcb = ServerInstance->plugin()->getBlockCB()[i];
@@ -844,7 +852,7 @@ int PacketHandler::player_digging(User* user)
 
     if (ServerInstance->map(user->pos.map)->getBlock(x - 1, y, z, &block, &meta) && block != BLOCK_AIR)
     {
-      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x - 1, y, z, x, int8_t(y), z);
+      runAllCallback("BlockNeighbourBreak",user->nick.c_str(), x - 1, y, z, x, int8_t(y), z);
       for (uint32_t i = 0 ; i < ServerInstance->plugin()->getBlockCB().size(); i++)
       {
         blockcb = ServerInstance->plugin()->getBlockCB()[i];
@@ -858,7 +866,7 @@ int PacketHandler::player_digging(User* user)
 
     if (ServerInstance->map(user->pos.map)->getBlock(x, y + 1, z, &block, &meta) && block != BLOCK_AIR)
     {
-      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x, y + 1, z, x, int8_t(y), z);
+      runAllCallback("BlockNeighbourBreak",user->nick.c_str(), x, y + 1, z, x, int8_t(y), z);
       for (uint32_t i = 0 ; i < ServerInstance->plugin()->getBlockCB().size(); i++)
       {
         blockcb = ServerInstance->plugin()->getBlockCB()[i];
@@ -872,7 +880,7 @@ int PacketHandler::player_digging(User* user)
 
     if (ServerInstance->map(user->pos.map)->getBlock(x, y - 1, z, &block, &meta) && block != BLOCK_AIR)
     {
-      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x, y - 1, z, x, int8_t(y), z);
+      runAllCallback("BlockNeighbourBreak",user->nick.c_str(), x, y - 1, z, x, int8_t(y), z);
       for (uint32_t i = 0 ; i < ServerInstance->plugin()->getBlockCB().size(); i++)
       {
         blockcb = ServerInstance->plugin()->getBlockCB()[i];
@@ -886,7 +894,7 @@ int PacketHandler::player_digging(User* user)
 
     if (ServerInstance->map(user->pos.map)->getBlock(x, y, z + 1, &block, &meta) && block != BLOCK_AIR)
     {
-      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x, y, z + 1, x, int8_t(y), z);
+      runAllCallback("BlockNeighbourBreak",user->nick.c_str(), x, y, z + 1, x, int8_t(y), z);
       for (uint32_t i = 0 ; i < ServerInstance->plugin()->getBlockCB().size(); i++)
       {
         blockcb = ServerInstance->plugin()->getBlockCB()[i];
@@ -900,7 +908,7 @@ int PacketHandler::player_digging(User* user)
 
     if (ServerInstance->map(user->pos.map)->getBlock(x, y, z - 1, &block, &meta) && block != BLOCK_AIR)
     {
-      (static_cast<Hook7<bool, const char*, int32_t, int16_t, int32_t, int32_t, int8_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourBreak")))->doAll(user->nick.c_str(), x, y, z - 1, x, int8_t(y), z);
+      runAllCallback("BlockNeighbourBreak",user->nick.c_str(), x, y, z - 1, x, int8_t(y), z);
       for (uint32_t i = 0 ; i < ServerInstance->plugin()->getBlockCB().size(); i++)
       {
         blockcb = ServerInstance->plugin()->getBlockCB()[i];
@@ -995,7 +1003,8 @@ int PacketHandler::player_block_placement(User* user)
   {
     // Right clicked without pointing at a tile
     Item* item = &(user->inv[user->curItem + 36]);
-    if ((static_cast<Hook6<bool, const char*, int32_t, int16_t, int32_t, int16_t, int8_t>*>(ServerInstance->plugin()->getHook("ItemRightClickPre")))->doUntilFalse(user->nick.c_str(), x, y, z, item->getType(), direction))
+    runCallbackUntilFalse("ItemRightClickPre",user->nick.c_str(), x, y, z, item->getType(), direction);
+    if (callbackReturnValue)
     {
       return PACKET_OK;
     }
@@ -1021,7 +1030,7 @@ int PacketHandler::player_block_placement(User* user)
   /* Protocol docs say this should be what interacting is. */
   if (oldblock != BLOCK_AIR)
   {
-    (static_cast<Hook4<bool, const char*, int32_t, int16_t, int32_t>*>(ServerInstance->plugin()->getHook("PlayerBlockInteract")))->doAll(user->nick.c_str(), x, y, z);
+    runAllCallback("PlayerBlockInteract",user->nick.c_str(), x, y, z);
     for (uint32_t i = 0 ; i < ServerInstance->plugin()->getBlockCB().size(); i++)
     {
       blockcb = ServerInstance->plugin()->getBlockCB()[i];
@@ -1148,12 +1157,13 @@ int PacketHandler::player_block_placement(User* user)
         }
       }
 
-      if ((static_cast<Hook6<bool, const char*, int32_t, int16_t, int32_t, int16_t, int16_t>*>(ServerInstance->plugin()->getHook("BlockReplacePre")))->doUntilFalse(user->nick.c_str(), check_x, check_y, check_z, oldblock, newblock))
+      runCallbackUntilFalse("BlockReplacePre",user->nick.c_str(), check_x, check_y, check_z, oldblock, newblock);
+      if (callbackReturnValue)
       {
         blockD.revertBlock(user, x, y, z, user->pos.map);
         return PACKET_OK;
       }
-      (static_cast<Hook6<bool, const char*, int32_t, int16_t, int32_t, int16_t, int16_t>*>(ServerInstance->plugin()->getHook("BlockReplacePost")))->doAll(user->nick.c_str(), check_x, check_y, check_z, oldblock, newblock);
+      runAllCallback("BlockReplacePost",user->nick.c_str(), check_x, check_y, check_z, oldblock, newblock);
     }
     else
     {
@@ -1166,15 +1176,17 @@ int PacketHandler::player_block_placement(User* user)
               }
             }*/
 
-      if ((static_cast<Hook6<bool, const char*, int32_t, int16_t, int32_t, int16_t, int16_t>*>(ServerInstance->plugin()->getHook("BlockReplacePre")))->doUntilFalse(user->nick.c_str(), x, y, z, oldblock, newblock))
+      runCallbackUntilFalse("BlockReplacePre",user->nick.c_str(), x, y, z, oldblock, newblock);
+      if (callbackReturnValue)
       {
         blockD.revertBlock(user, x, y, z, user->pos.map);
         return PACKET_OK;
       }
-      (static_cast<Hook6<bool, const char*, int32_t, int16_t, int32_t, int16_t, int16_t>*>(ServerInstance->plugin()->getHook("BlockReplacePost")))->doAll(user->nick.c_str(), x, y, z, oldblock, newblock);
+      runAllCallback("BlockReplacePost",user->nick.c_str(), x, y, z, oldblock, newblock);
     }
 
-    if ((static_cast<Hook6<bool, const char*, int32_t, int16_t, int32_t, int16_t, int8_t>*>(ServerInstance->plugin()->getHook("BlockPlacePre")))->doUntilFalse(user->nick.c_str(), x, y, z, newblock, direction))
+    runCallbackUntilFalse("BlockPlacePre",user->nick.c_str(), x, y, z, newblock, direction);
+    if(callbackReturnValue)
     {
       blockD.revertBlock(user, x, y, z, user->pos.map);
       return PACKET_OK;
@@ -1199,7 +1211,7 @@ int PacketHandler::player_block_placement(User* user)
         }
       }
     }
-    (static_cast<Hook6<bool, const char*, int32_t, int16_t, int32_t, int16_t, int8_t>*>(ServerInstance->plugin()->getHook("BlockPlacePost")))->doAll(user->nick.c_str(), x, y, z, newblock, direction);
+    runAllCallback("BlockPlacePost",user->nick.c_str(), x, y, z, newblock, direction);
 
     /* notify neighbour blocks of the placed block */
     if (ServerInstance->map(user->pos.map)->getBlock(x + 1, y, z, &block, &meta) && block != BLOCK_AIR)
@@ -1213,7 +1225,7 @@ int PacketHandler::player_block_placement(User* user)
         }
       }
 
-      (static_cast<Hook4<bool, const char*, int32_t, int16_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourPlace")))->doAll(user->nick.c_str(), x + 1, y, z);
+      runAllCallback("BlockNeighbourPlace",user->nick.c_str(), x + 1, y, z);
     }
 
     if (ServerInstance->map(user->pos.map)->getBlock(x - 1, y, z, &block, &meta) && block != BLOCK_AIR)
@@ -1226,7 +1238,7 @@ int PacketHandler::player_block_placement(User* user)
           blockcb->onNeighbourPlace(user, newblock, x - 1, y, z, user->pos.map, direction);
         }
       }
-      (static_cast<Hook4<bool, const char*, int32_t, int16_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourPlace")))->doAll(user->nick.c_str(), x - 1, y, z);
+      runAllCallback("BlockNeighbourPlace",user->nick.c_str(), x - 1, y, z);
     }
 
     if (ServerInstance->map(user->pos.map)->getBlock(x, y + 1, z, &block, &meta) && block != BLOCK_AIR)
@@ -1239,7 +1251,7 @@ int PacketHandler::player_block_placement(User* user)
           blockcb->onNeighbourPlace(user, newblock, x, y + 1, z, user->pos.map, direction);
         }
       }
-      (static_cast<Hook4<bool, const char*, int32_t, int16_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourPlace")))->doAll(user->nick.c_str(), x, y + 1, z);
+      runAllCallback("BlockNeighbourPlace",user->nick.c_str(), x, y + 1, z);
     }
 
     if (ServerInstance->map(user->pos.map)->getBlock(x, y - 1, z, &block, &meta) && block != BLOCK_AIR)
@@ -1252,7 +1264,7 @@ int PacketHandler::player_block_placement(User* user)
           blockcb->onNeighbourPlace(user, newblock, x, y - 1, z, user->pos.map, direction);
         }
       }
-      (static_cast<Hook4<bool, const char*, int32_t, int16_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourPlace")))->doAll(user->nick.c_str(), x, y - 1, z);
+      runAllCallback("BlockNeighbourPlace",user->nick.c_str(), x, y - 1, z);
     }
 
     if (ServerInstance->map(user->pos.map)->getBlock(x, y, z + 1, &block, &meta) && block != BLOCK_AIR)
@@ -1265,7 +1277,7 @@ int PacketHandler::player_block_placement(User* user)
           blockcb->onNeighbourPlace(user, newblock, x, y, z + 1, user->pos.map, direction);
         }
       }
-      (static_cast<Hook4<bool, const char*, int32_t, int16_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourPlace")))->doAll(user->nick.c_str(), x, y, z + 1);
+      runAllCallback("BlockNeighbourPlace",user->nick.c_str(), x, y, z + 1);
     }
 
     if (ServerInstance->map(user->pos.map)->getBlock(x, y, z - 1, &block, &meta) && block != BLOCK_AIR)
@@ -1278,7 +1290,7 @@ int PacketHandler::player_block_placement(User* user)
           blockcb->onNeighbourPlace(user, newblock, x, y, z - 1, user->pos.map, direction);
         }
       }
-      (static_cast<Hook4<bool, const char*, int32_t, int16_t, int32_t>*>(ServerInstance->plugin()->getHook("BlockNeighbourPlace")))->doAll(user->nick.c_str(), x, y, z - 1);
+      runAllCallback("BlockNeighbourPlace",user->nick.c_str(), x, y, z - 1);
     }
   }
   // Now we're sure we're using it, lets remove from inventory!
@@ -1342,7 +1354,7 @@ int PacketHandler::arm_animation(User* user)
   Packet pkt = Protocol::animation(user->UID,animType);
   user->sendOthers(pkt);
 
-  (static_cast<Hook1<bool, const char*>*>(ServerInstance->plugin()->getHook("PlayerArmSwing")))->doAll(user->nick.c_str());
+  runAllCallback("PlayerArmSwing",user->nick.c_str());
 
   return PACKET_OK;
 }
@@ -1430,7 +1442,7 @@ int PacketHandler::use_entity(User* user)
     {
       if (ServerInstance->mobs()->getMobByID(i)->UID == (uint32_t)target)
       {
-        (static_cast<Hook2<bool, const char* ,int32_t>*>(ServerInstance->plugin()->getHook("interact")))->doAll(user->nick.c_str(), (int32_t)ServerInstance->mobs()->getMobByTarget(target));
+        runAllCallback("interact",user->nick.c_str(), (int32_t)ServerInstance->mobs()->getMobByTarget(target));
         //make a callback
         return PACKET_OK;
       }
@@ -1497,7 +1509,7 @@ int PacketHandler::use_entity(User* user)
       {
         //int h = ServerInstance->mobs()->getMobByID(i)->health - 1;
         //ServerInstance->mobs()->getMobByID(i)->sethealth(h);
-        (static_cast<Hook2<bool, const char* ,int32_t>*>(ServerInstance->plugin()->getHook("gotAttacked")))->doAll(user->nick.c_str(),(int32_t)ServerInstance->mobs()->getMobByTarget(target));
+        runAllCallback("gotAttacked",user->nick.c_str(),(int32_t)ServerInstance->mobs()->getMobByTarget(target));
         //make a callback
         break;
       }
@@ -1508,17 +1520,33 @@ int PacketHandler::use_entity(User* user)
 }
 
 
-// Keep Alive (http://mc.kev009.com/wiki/Protocol)
+// Serverlist ping (http://wiki.vg/Server_List_Ping)
 int PacketHandler::ping(User* user)
 {
-  //Reply with server info
+  //Read the new magic field in the 1.4 protocol
+  int8_t magic;
+  user->buffer >> magic;  
   user->buffer.removePacket();
+  
+  //Reply with server info
+  std::string line;
 
-  std::ostringstream line;
-  line << ServerInstance->config()->sData("system.server_name") << "§"
-       << ServerInstance->getLoggedUsersCount() << "§"
-       << ServerInstance->config()->iData("system.user_limit");
-  user->kick(line.str());
+  //Insert \1 instead of null char \0, then replace it later
+  line = "§1\1" +
+        my_itoa(PROTOCOL_VERSION) + "\1" +
+        MINECRAFT_VERSION + "\1" +
+        ServerInstance->config()->sData("system.server_name") + "\1" +
+        my_itoa(ServerInstance->getLoggedUsersCount()) + "\1" +
+        my_itoa(ServerInstance->config()->iData("system.user_limit"));
+  //Replacing \1 with \0
+  for(unsigned int i = 0; i < line.size();i++)
+  {
+    if(line[i] == '\1')
+    {
+      line[i] = '\0';
+    }
+  }
+  user->kick(line);
 
   return PACKET_OK;
 }
