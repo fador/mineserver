@@ -309,7 +309,7 @@ struct PairHash : public std::unary_function<std::pair<S, T>, size_t>
 };
 
 typedef std::pair<int, int> Coords;
-typedef std::unordered_map<Coords, sChunk*, PairHash<int, int> > ChunkMap;
+typedef std::tr1::unordered_map<Coords, sChunk*, PairHash<int, int> > ChunkMap;
 
 
 #endif

@@ -1658,8 +1658,3 @@ std::string Packet::readString()
 
   return str;
 }
-
-void Packet::write(const void *data, size_t size)
-{
-  addToWrite((uint8_t*)data,size);
-}

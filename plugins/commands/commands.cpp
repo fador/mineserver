@@ -79,7 +79,7 @@ struct cuboidStruct
   int toBlock;
 };
 
-std::unordered_map<std::string, cuboidStruct> cuboidMap;
+std::tr1::unordered_map<std::string, cuboidStruct> cuboidMap;
 
 std::string dtos(double n)
 {
@@ -112,7 +112,7 @@ struct Command
 };
 
 typedef std::shared_ptr<Command> ComPtr;
-typedef std::unordered_map<std::string, ComPtr> CommandList;
+typedef std::tr1::unordered_map<std::string, ComPtr> CommandList;
 CommandList m_Commands;
 
 void registerCommand(ComPtr command)

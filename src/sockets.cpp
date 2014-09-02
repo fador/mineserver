@@ -36,16 +36,6 @@ typedef int socklen_t;
 
 #include <string>
 
-/// FIXME: When this works
-#ifdef __GNUC__
-std::string to_string(int i){
-    char buffer[512];
-    itoa(i,buffer, 10);
-    return buffer;
-}
-
-#endif
-
 #include <sys/stat.h>
 #include <fstream>
 
@@ -254,32 +244,6 @@ extern "C" void client_callback(int fd, short ev, void* arg)
         std::ostringstream str;
         str << "Unknown packet: 0x" << std::hex << (unsigned int)(user->action);
         LOG2(DEBUG, str.str());
-
-
-        str.str().clear();
-
-        str << "0x" << std::hex << (unsigned int)(user->action);
-        string hex = str.str();
-
-        string fname = string("packet_") + hex + "_";
-
-        struct stat st;
-        for(int i=0;;i++){
-            string tmp = fname + to_string(i) + ".txt";
-            if(!stat(tmp.c_str(),&st))
-                fname = tmp;
-        }
-        str.str().clear();
-        str << "dumping packet data to: " << fname;
-        LOG2(DEBUG, str.str());
-
-        ofstream file(fname);
-
-        for(int i= user->buffer.m_readPos; i< user->buffer.m_readBuffer.size(); i++){
-            file << "0x" << std::hex << user->buffer.m_readBuffer[i] << ' ';
-            if( i % 16 == 15)
-                file<< '\n';
-        }
 
         delete user;
         return;
