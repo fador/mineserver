@@ -33,7 +33,6 @@
 #include "vec.h"
 #include "tools.h"
 
-
 struct entity_position
 {
   double x;
@@ -63,8 +62,11 @@ struct entity_position
 class Physics
 {
 public:
+  Physics(Map* map)
+    :map(map) {}
+
   bool enabled;
-  int map; // Which map are we affecting?
+  Map* map; // Which map are we affecting?
 
   bool update();
   bool updateFall();

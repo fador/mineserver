@@ -50,7 +50,8 @@ Map::Map(const Map& oldmap)
   mapLightRegen(oldmap.mapLightRegen),
   items(oldmap.items),
   mapTime(oldmap.mapTime),
-  mapSeed(oldmap.mapSeed)
+  mapSeed(oldmap.mapSeed),
+  physics(oldmap.physics)
 {
 }
 
@@ -103,6 +104,8 @@ Map::Map()
   stopLight[0x5B] = 0; // Jack-O-Lantern
   stopLight[BLOCK_SIGN_POST] = 0; // Sign post
   stopLight[BLOCK_WALL_SIGN] = 0; // Wall sign
+
+  physics = 0;
 }
 
 Map::~Map()

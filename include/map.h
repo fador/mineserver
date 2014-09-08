@@ -72,6 +72,8 @@ public:
 
   std::string mapDirectory;
 
+  Physics* physics;
+
   // List of saplings ready to grow
   std::list<sTree> saplings;
   void addSapling(User* user, int x, int y, int z);

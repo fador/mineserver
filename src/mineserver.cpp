@@ -408,11 +408,12 @@ Mineserver::Mineserver(int args, char **argarray)
     int n = 0;
     for (std::list<std::string>::const_iterator it = tmp.begin(); it != tmp.end(); ++it)
     {
-      m_map.push_back(new Map());
-      Physics* phy = new Physics;
-      phy->map = n;
+      Map* map = new Map();
+      m_map.push_back(map);
 
-      m_physics.push_back(phy);
+      Physics* phy = map->physics = new Physics(map);
+
+      m_physics.push_back(map->physics);
       RedstoneSimulation* red = new RedstoneSimulation;
       red->map = n;
       m_redstone.push_back(red);
