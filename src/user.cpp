@@ -212,6 +212,7 @@ bool User::sendLoginInfo()
   
   // Login OK package
   buffer << Protocol::loginResponse(UID);
+  setGameMode(gamemode);
   spawnOthers();
 
   // Put nearby chunks to queue
@@ -365,6 +366,7 @@ bool User::loadData()
   pos.z = (double)(*(*_pos)[2]);
 
   health = *nbtPlayer["Health"];
+  gamemode = (int)*nbtPlayer["playerGameType"] == 1 ? User::Creative : User::Survival;
 
   std::vector<NBT_Value*>* rot = nbtPlayer["Rotation"]->GetList();
   pos.yaw = (float)(*(*rot)[0]);
@@ -442,6 +444,7 @@ bool User::saveData()
   val.Insert("Health", new NBT_Value((int16_t)health));
   val.Insert("HurtTime", new NBT_Value((int16_t)0));
   val.Insert("FallDistance", new NBT_Value(54.f));
+  val.Insert("playerGameType", new NBT_Value(creative ? 1 : 0));
 
   NBT_Value* nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
 

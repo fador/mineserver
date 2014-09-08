@@ -79,6 +79,14 @@ public:
   Item inv[45];
   int16_t curItem;
 
+  /// gamemode
+  enum GameMode : u_int8_t{
+      Survival=0,Creative
+  };
+
+  bool setGameMode(GameMode gameMode);
+
+  GameMode gamemode;
   bool invulnerable;
   bool creative; /// flying etc.
 
@@ -207,13 +215,6 @@ public:
   bool isUnderwater();
 
   void clearLoadingMap();
-
-  /// gamemode
-  enum GameMode{
-      Survival=0,Creative
-  };
-
-  bool setGameMode(GameMode gameMode);
 
   // Getter/Setter for item currently in hold
   int16_t currentItemSlot();
