@@ -92,8 +92,8 @@ inline MyRNG::result_type uniformUINT(MyUniform::result_type min, MyUniform::res
 
 inline uint8_t uniformUINT8(uint8_t min, uint8_t max)
 {
-  std::uniform_int_distribution<uint8_t> uni(min, max);
-  return uni(prng);
+  std::uniform_int_distribution<uint16_t> uni(min, max);
+  return uint8_t(uni(prng));
 }
 
 double uniform01();

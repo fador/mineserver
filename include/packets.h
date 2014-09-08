@@ -61,8 +61,8 @@ inline uint64_t _htonll(uint64_t x){
 #ifdef __GNUC__
   return __builtin_bswap64(x);
 #else
-  uint32_t low = x>>32;
-  uint32_t high = x;
+  uint32_t low = uint32_t(x >> 32);
+  uint32_t high = uint32_t(x);
 
   return uint64_t(_htonl(high))<<32 | _htonl(low);
 #endif
@@ -97,7 +97,7 @@ bswap_def(uint64_t, htonll)
 /// because float/double casting is fucking special in c++
 /// FIXME: find a way to cast float types the right way to data types of uint
 inline float bswap(const float& x){
-  uint32_t i = htonll(*(uint32_t*)&x);
+  uint32_t i = uint32_t(htonll(*(uint32_t*)&x));
   return *(float*)&i;
 }
 

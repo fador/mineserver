@@ -47,7 +47,7 @@
 
 #ifdef _WIN32
 #include <direct.h>
-
+#define _WINSOCKAPI_
 #include <ShlObj.h>
 #endif
 

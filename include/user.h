@@ -33,6 +33,7 @@
 
 #ifdef WIN32
 // This is needed for event to work on Windows.
+#define NOMINMAX
 #include <winsock2.h>
 #endif
 #include <event.h>

@@ -30,12 +30,14 @@
 #include <limits>
 #include <ctime>
 #ifdef WIN32
+#define _WINSOCKAPI_
+#define NOMINMAX
 #include <windows.h>
 #include <wincrypt.h>
 #else
 #include <fstream>
 #endif
-
+#include "mineserver.h"
 #include "random.h"
 
 seed_type prng_seed = 0;

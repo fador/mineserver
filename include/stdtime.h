@@ -3,7 +3,7 @@
 
 #include <ctime>
 #include <stdint.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <cassert>
 #include <string>
 #include <iostream>
@@ -12,7 +12,7 @@
 
 #include <chrono>
 
-#ifdef __WIN32__
+#ifdef WIN32
 #include <windows.h>
 
 #endif
@@ -85,7 +85,7 @@ public:
 
     /// SLEEP
     static void sleep(const Time& t){
-        usleep(t.total_usec());
+        //usleep(t.total_usec());
     }
 
     static void sleep_until(const Time& until){
@@ -95,11 +95,11 @@ public:
     }
 
     static void context_switch(){
-        usleep(0);
+        //usleep(0);
     }
 
     static Time now(){
-#ifdef __WIN32__
+#ifdef WIN32
         LARGE_INTEGER temp;
         QueryPerformanceCounter(&temp);
 
@@ -141,7 +141,7 @@ public:
 
         if(uint32_t ms = msec())
         s<<ms<<"ms ";
-        s<<usec()<<u8"µs";
+        //s<<usec()<<u8"µs";
         return s.str();
     }
 
@@ -200,14 +200,14 @@ inline std::ostream& operator<<(std::ostream& strm, const Time& t){
 
     if(uint32_t ms = t.msec())
     strm<<ms<<"ms ";
-    strm<<t.usec()<<u8"µs";
+    //strm<<t.usec()<<u8"µs";
     return strm;
 }
 
 #undef _out
 #undef __out
 
-#ifdef __WIN32__
+#ifdef WIN32
     extern Time systemboot;
 #endif
 #endif // _TIME_H
