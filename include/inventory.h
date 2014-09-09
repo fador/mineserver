@@ -88,7 +88,7 @@ public:
   }
 };
 
-typedef std::tr1::shared_ptr<Item> ItemPtr;
+typedef std::shared_ptr<Item> ItemPtr;
 
 struct OpenInventory
 {
@@ -103,7 +103,7 @@ struct OpenInventory
   bool recordAction;
 };
 
-typedef std::tr1::shared_ptr<OpenInventory> OpenInvPtr;
+typedef std::shared_ptr<OpenInventory> OpenInvPtr;
 
 enum { WINDOW_CURSOR = -1, WINDOW_PLAYER = 0, WINDOW_WORKBENCH, WINDOW_CHEST, WINDOW_LARGE_CHEST, WINDOW_FURNACE };
 
@@ -125,7 +125,7 @@ public:
     Item output;
   };
 
-  typedef std::tr1::shared_ptr<Recipe> RecipePtr;
+  typedef std::shared_ptr<Recipe> RecipePtr;
 
   bool addRecipe(int width, int height, std::vector<ItemPtr> inputrecipe,
                  int outputCount, int16_t outputType, int16_t outputHealth);

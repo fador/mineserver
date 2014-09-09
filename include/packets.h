@@ -28,12 +28,89 @@
 #ifndef _PACKETS_H
 #define _PACKETS_H
 
-#include <vector>
 #include <deque>
 #include <string>
 #include <cstring>
-#include <iterator>
 #include <stdint.h>
+
+#include <stdio.h>
+
+/// endian functions... because windows htons are actually library functions
+
+inline uint16_t _htons(uint16_t x){
+#ifdef __GNUC__
+  /// return __builtin_bswap16(x); /// TODO: use when works, doesn't work in mingw64 4.7.1
+  return x<<8 | x>>8;
+#else
+  return x<<8 | x>>8;
+#endif
+}
+
+inline uint32_t _htonl(uint32_t x){
+#ifdef __GNUC__
+  return __builtin_bswap32(x);
+#else
+  uint16_t low  = x>>16;
+  uint16_t high = x;
+
+  return uint32_t(_htons(high))<<16 | _htons(low);
+#endif
+}
+
+inline uint64_t _htonll(uint64_t x){
+#ifdef __GNUC__
+  return __builtin_bswap64(x);
+#else
+  uint32_t low = uint32_t(x >> 32);
+  uint32_t high = uint32_t(x);
+
+  return uint64_t(_htonl(high))<<32 | _htonl(low);
+#endif
+}
+
+#ifndef __BIG_ENDIAN__
+#define htons(x)  _htons ((uint16_t)x)
+#define htonl(x)  _htonl ((uint32_t)x)
+#define htonll(x) _htonll((uint64_t)x)
+#else
+#define htons
+#define htonl
+#define htonll
+#endif
+/// bswap c++ endian flipper!
+
+#define bswap_def(TYPE, FLIPPER) \
+  inline TYPE bswap(const TYPE& x){ return (TYPE)FLIPPER(x); }
+
+bswap_def(int8_t, )
+bswap_def(uint8_t, )
+
+bswap_def(int16_t, htons)
+bswap_def(uint16_t, htons)
+
+bswap_def(int32_t, htonl)
+bswap_def(uint32_t, htonl)
+
+bswap_def(int64_t, htonll)
+bswap_def(uint64_t, htonll)
+
+/// because float/double casting is fucking special in c++
+/// FIXME: find a way to cast float types the right way to data types of uint
+inline float bswap(const float& x){
+  uint32_t i = uint32_t(htonll(*(uint32_t*)&x));
+  return *(float*)&i;
+}
+
+inline double bswap(const double& x){
+  uint64_t i = htonll(*(uint64_t*)&x);
+  return *(double*)&i;
+}
+
+#undef bswap_def
+
+#undef htons
+#undef htonl
+#undef htonll
 
 #define PACKET_NEED_MORE_DATA -3
 #define PACKET_DOES_NOT_EXIST -2
@@ -139,10 +216,10 @@ public:
 public:
   Packet()
     :
-    m_readBuffer(),
-    m_writeBuffer(),
-    m_readPos(0),
-    m_isValid(true) 
+      m_readBuffer(),
+      m_writeBuffer(),
+      m_readPos(0),
+      m_isValid(true)
   {
   }
 
@@ -180,24 +257,56 @@ public:
     m_writeBuffer.insert(m_writeBuffer.end(), buffer, buffer + len);
   }
 
+  size_t read( void* buffer, size_t size){
+    if(haveData(size)){
+      for(size_t i=0;i<size;i++)
+        *((uint8_t*&)buffer)++ = m_readBuffer[m_readPos++];
+      return size;
+    }
+    else return 0;
+  }
+
+  void write( const void* data, size_t size){
+    addToWrite((uint8_t*)data,size);
+  }
+
   inline void removePacket()
   {
     m_readBuffer.erase(m_readBuffer.begin(), m_readBuffer.begin() + m_readPos);
     m_readPos = 0;
   }
 
-  Packet& operator<<(int8_t val);
-  Packet& operator>>(int8_t& val);
-  Packet& operator<<(int16_t val);
-  Packet& operator>>(int16_t& val);
-  Packet& operator<<(int32_t val);
-  Packet& operator>>(int32_t& val);
-  Packet& operator<<(int64_t val);
-  Packet& operator>>(int64_t& val);
-  Packet& operator<<(float val);
-  Packet& operator>>(float& val);
-  Packet& operator<<(double val);
-  Packet& operator>>(double& val);
+  /// This was too much to write by hand... so I macro'ed - Exim
+  /// Oh wow! These macros are truly Majestic! I can hardly keep my breath. Astounding... - Everyone
+
+#define _rwop(T) \
+  Packet& operator<<(const T& x){ \
+  T y = bswap(x); \
+  write(&y, sizeof(T)); \
+  return *this; \
+} \
+  Packet& operator>>(T& x){ \
+  if(read(&x,sizeof(T))) \
+  x = bswap(x); \
+  return *this; \
+}
+
+  _rwop( int8_t )
+  _rwop(uint8_t )
+
+  _rwop( int16_t )
+  _rwop(uint16_t )
+
+  _rwop( int32_t )
+  _rwop(uint32_t )
+
+  _rwop( int64_t )
+  _rwop(uint64_t )
+
+  _rwop(float  )
+  _rwop(double )
+#undef _rwop
+
 
   // convert to wstring and call that operator
   Packet& operator<<(const std::string& str);

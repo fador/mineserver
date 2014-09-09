@@ -98,8 +98,8 @@ static char *LIBRARY_ERROR(void)
 // Foe INCONSISTENCY fainted!
 // You got 374¥ for winning!
 
-typedef std::tr1::shared_ptr<BlockBasic> BlockBasicPtr;
-typedef std::tr1::shared_ptr<ItemBasic>  ItemBasicPtr;
+typedef std::shared_ptr<BlockBasic> BlockBasicPtr;
+typedef std::shared_ptr<ItemBasic>  ItemBasicPtr;
 
 extern bool callbackReturnINTERNAL;
 typedef int(*funcPointer)(...);

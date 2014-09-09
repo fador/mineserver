@@ -34,9 +34,15 @@ typedef int socklen_t;
 #include <netinet/tcp.h> // for TCP constants
 #endif
 
+#include <string>
+
+#include <sys/stat.h>
+#include <fstream>
+
 #include <cerrno>
 #include <sstream>
 #include <algorithm>
+
 
 #include "tr1.h"
 #ifdef __APPLE__
@@ -66,8 +72,8 @@ extern int setnonblock(int fd);
 #endif
 
 static const size_t BUFSIZE = 2048;
-static std::tr1::array<uint8_t, BUFSIZE> BUF;
-static std::tr1::array<uint8_t, BUFSIZE> BUFCRYPT;
+static std::array<uint8_t, BUFSIZE> BUF;
+static std::array<uint8_t, BUFSIZE> BUFCRYPT;
 static char* const cpBUF = reinterpret_cast<char*>(BUF.data());
 static uint8_t* const upBUF = BUF.data();
 
@@ -219,6 +225,10 @@ extern "C" void client_callback(int fd, short ev, void* arg)
           return;
         }
 
+#ifdef DEBUG
+        printf("Packet from %s, id = 0x%hx \n", user->nick.c_str(), user->action);
+#endif
+
         if (disconnecting) // disconnect -- player gone
         {
           if(user->nick.size())
@@ -248,6 +258,10 @@ extern "C" void client_callback(int fd, short ev, void* arg)
           event_add(user->getReadEvent(), NULL);
           return;
         }
+
+#ifdef DEBUG
+        printf("Packet from %s, id = 0x%hx \n", user->nick.c_str(), user->action);
+#endif
 
         //Call specific function
         ServerInstance->packetHandler()->packets[user->action].function(user);

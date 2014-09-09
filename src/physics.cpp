@@ -77,7 +77,7 @@ enum
 //Minecart physics loop
 bool Physics::updateMinecart()
 {
-  std::vector<MinecartData> &minecarts = ServerInstance->map(map)->minecarts;
+  std::vector<MinecartData> &minecarts = map->minecarts;
   uint32_t listSize = minecarts.size();
 
   for (int32_t simIt = 0; simIt < listSize; simIt++)
@@ -104,7 +104,7 @@ bool Physics::updateMinecart()
                           (int)(minecarts[simIt].pos.y()/32),
                           (int)(minecarts[simIt].pos.z()/32)); 
       uint8_t block, meta;
-      ServerInstance->map(map)->getBlock(blockPos.x(),
+      map->getBlock(blockPos.x(),
                                          blockPos.y(),
                                          blockPos.z(),
                                          &block, &meta);
@@ -252,12 +252,12 @@ bool Physics::updateEntity()
     {
       //Check for the block
       uint8_t block,meta;
-      ServerInstance->map(map)->getBlock((int)(f.pos.x+diffPos.x*i-0.5),(int)(f.pos.y+diffPos.y*i),(int)(f.pos.z+diffPos.z*i-0.5),&block, &meta);
+      map->getBlock((int)(f.pos.x+diffPos.x*i-0.5),(int)(f.pos.y+diffPos.y*i),(int)(f.pos.z+diffPos.z*i-0.5),&block, &meta);
 
       //When hitting _something_, turn it to glass and destroy the entity
       if(block != BLOCK_AIR)
       {
-        ServerInstance->map(map)->sendBlockChange((int)(f.pos.x+diffPos.x*i-0.5), (int)(f.pos.y+diffPos.y*i), (int)(f.pos.z+diffPos.z*i-0.5), BLOCK_GLASS, 0); 
+        map->sendBlockChange((int)(f.pos.x+diffPos.x*i-0.5), (int)(f.pos.y+diffPos.y*i), (int)(f.pos.z+diffPos.z*i-0.5), BLOCK_GLASS, 0);
         //Add to "to-remove" list
         toRem.push_back(f.EID);
         break;
@@ -321,7 +321,7 @@ bool Physics::updateFall()
       for(; ypos >= f.lastY;ypos--)
       {
         uint8_t block, meta;
-        ServerInstance->map(map)->getBlock(x,ypos,z, &block, &meta);
+        map->getBlock(x,ypos,z, &block, &meta);
         switch (block)
         {
         case BLOCK_AIR:
@@ -334,15 +334,15 @@ bool Physics::updateFall()
           //If we hit ground
         default:
           {
-            ServerInstance->map(map)->setBlock(x, ++ypos, z, f.block, 0);
-            ServerInstance->map(map)->sendBlockChange(x, ypos, z, f.block, 0);
+            map->setBlock(x, ++ypos, z, f.block, 0);
+            map->sendBlockChange(x, ypos, z, f.block, 0);
             
             //Despawn entity
             Packet pkt = Protocol::destroyEntity(f.EID);
             const int chunk_x = blockToChunk(x);
             const int chunk_z = blockToChunk(z);
-            const ChunkMap::const_iterator it = ServerInstance->map(map)->chunks.find(Coords(chunk_x, chunk_z));
-            if (it != ServerInstance->map(map)->chunks.end())
+            const ChunkMap::const_iterator it = map->chunks.find(Coords(chunk_x, chunk_z));
+            if (it != map->chunks.end())
             {               
               it->second->sendPacket(pkt);
             }
@@ -391,7 +391,7 @@ bool Physics::update()
     vec pos = simList[simIt].blocks[0].pos;
     // Blocks
     uint8_t block, meta;
-    ServerInstance->map(map)->getBlock(pos, &block, &meta);
+    map->getBlock(pos, &block, &meta);
     simList[simIt].blocks[0].id   = block;
     simList[simIt].blocks[0].meta = meta;
 
@@ -424,8 +424,8 @@ bool Physics::update()
         break;
       }
       uint8_t newblock, newmeta;
-      ServerInstance->map(map)->getBlock(pos, &block, &meta);
-      ServerInstance->map(map)->getBlock(local, &newblock, &newmeta);
+      map->getBlock(pos, &block, &meta);
+      map->getBlock(local, &newblock, &newmeta);
       if (!isLiquidBlock(block))
       {
         toRem.push_back(pos);
@@ -435,9 +435,9 @@ bool Physics::update()
       {
         if (falling && !isLiquidBlock(newblock))
         {
-          ServerInstance->map(map)->setBlock(local, block, meta);
+          map->setBlock(local, block, meta);
           changed.insert(local);
-          ServerInstance->map(map)->setBlock(pos, BLOCK_AIR, 0);
+          map->setBlock(pos, BLOCK_AIR, 0);
           changed.insert(pos);
           toRem.push_back(pos);
           toAdd.push_back(local);
@@ -470,16 +470,16 @@ bool Physics::update()
           }
           if ((isWaterBlock(block) && a_meta < 8) || (isLavaBlock(block) && a_meta < 4))
           {
-            ServerInstance->map(map)->setBlock(pos, block, a_meta);
+            map->setBlock(pos, block, a_meta);
 
             changed.insert(pos);
           }
           else
           {
-            ServerInstance->map(map)->setBlock(pos, BLOCK_AIR, 0);
+            map->setBlock(pos, BLOCK_AIR, 0);
             changed.insert(pos);
           }
-          ServerInstance->map(map)->setBlock(local, block, a_newmeta);
+          map->setBlock(local, block, a_newmeta);
           used = true;
           toAdd.push_back(local);
           toAdd.push_back(pos);
@@ -499,17 +499,17 @@ bool Physics::update()
           }
           // We are spreading onto dry area.
           newmeta = 7;
-          ServerInstance->map(map)->setBlock(local, block, newmeta);
+          map->setBlock(local, block, newmeta);
           changed.insert(local);
           meta++;
           if (meta < 8)
           {
-            ServerInstance->map(map)->setBlock(pos, block, meta);
+            map->setBlock(pos, block, meta);
             changed.insert(pos);
           }
           else
           {
-            ServerInstance->map(map)->setBlock(pos, BLOCK_AIR, 0);
+            map->setBlock(pos, BLOCK_AIR, 0);
             changed.insert(pos);
             toRem.push_back(pos);
           }
@@ -520,17 +520,17 @@ bool Physics::update()
         if (meta < newmeta - 1 || (meta == newmeta && falling))
         {
           newmeta --;
-          ServerInstance->map(map)->setBlock(local, block, newmeta);
+          map->setBlock(local, block, newmeta);
           changed.insert(local);
           meta ++;
           if (meta < 8)
           {
-            ServerInstance->map(map)->setBlock(pos, block, meta);
+            map->setBlock(pos, block, meta);
             changed.insert(pos);
           }
           else
           {
-            ServerInstance->map(map)->setBlock(pos, BLOCK_AIR, 0);
+            map->setBlock(pos, BLOCK_AIR, 0);
             changed.insert(pos);
             toRem.push_back(pos);
           }
@@ -553,7 +553,7 @@ bool Physics::update()
   {
     addSimulation(toAdd[i]);
   }
-  ServerInstance->map(map)->sendMultiBlocks(changed);
+  map->sendMultiBlocks(changed);
 
   //clock_t endtime = clock() - starttime;
   //  LOG(INFO, "Physics", "Exit simulation, took " + dtos(endtime * 1000 / CLOCKS_PER_SEC) + " ms, " + dtos(simList.size()) + " items left");
@@ -582,7 +582,7 @@ bool Physics::addSimulation(vec pos)
 
   uint8_t block;
   uint8_t meta;
-  ServerInstance->map(map)->getBlock(pos, &block, &meta);
+  map->getBlock(pos, &block, &meta);
   SimBlock simulationBlock(block, pos, meta);
 
   // Dont add duplicates
@@ -674,7 +674,7 @@ bool Physics::checkSurrounding(vec pos)
     }
 
     //Add liquid blocks to simulation if they are affected by breaking a block
-    if (ServerInstance->map(map)->getBlock(local, &block, &meta) &&
+    if (map->getBlock(local, &block, &meta) &&
         isLiquidBlock(block))
     {
       addSimulation(local);

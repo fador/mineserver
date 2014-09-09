@@ -49,7 +49,7 @@
 // Drops from blocks
 //
 struct Drop;
-typedef std::tr1::shared_ptr<Drop> DropPtr;
+typedef std::shared_ptr<Drop> DropPtr;
 
 struct Drop
 {

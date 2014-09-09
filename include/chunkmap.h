@@ -64,7 +64,7 @@ struct spawnedItem
   }
 };
 
-typedef std::tr1::shared_ptr<std::vector<ItemPtr> > ItemVectorPtr;
+typedef std::shared_ptr<std::vector<ItemPtr> > ItemVectorPtr;
 
 /** holds items and coordinates for small and large chests
  * note: large chests are in testing
@@ -154,16 +154,16 @@ template <typename T>
 struct DataFinder
 {
   DataFinder(int32_t x, int32_t y, int32_t z) : x(x), y(y), z(z) { }
-  inline bool operator()(const std::tr1::shared_ptr<T> & t) const { return t->x == x && t->y == y && t->z == z; }
+  inline bool operator()(const std::shared_ptr<T> & t) const { return t->x == x && t->y == y && t->z == z; }
 private:
   int32_t x;
   int32_t y;
   int32_t z;
 };
 
-typedef std::tr1::shared_ptr<chestData>   chestDataPtr;
-typedef std::tr1::shared_ptr<signData>    signDataPtr;
-typedef std::tr1::shared_ptr<furnaceData> furnaceDataPtr;
+typedef std::shared_ptr<chestData>   chestDataPtr;
+typedef std::shared_ptr<signData>    signDataPtr;
+typedef std::shared_ptr<furnaceData> furnaceDataPtr;
 
 void removeFurnace(furnaceDataPtr data);
 
@@ -292,7 +292,7 @@ struct sChunk
 template <class T>
 inline void hash_combine(std::size_t & seed, T const & v)
 {
-  std::tr1::hash<T> hasher;
+  std::hash<T> hasher;
   seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
 }
 

@@ -82,10 +82,12 @@ E std::string pathOfExecutable();
 E std::pair<std::string, std::string> pathOfFile(const std::string& filename);
 E std::string relativeToAbsolute(const std::string &pathname);
 
+#ifndef WIN32
 inline uint64_t ntohll(uint64_t v)
 {
   return (uint64_t)ntohl(v & 0x00000000ffffffff) << 32 | (uint64_t)ntohl((v >> 32) & 0x00000000ffffffff);
 }
+#endif
 
 //Converts block-coordinates to chunk coordinate
 inline int32_t blockToChunk(int32_t value)

@@ -111,7 +111,7 @@ struct Command
   CommandCallback callback;  
 };
 
-typedef std::tr1::shared_ptr<Command> ComPtr;
+typedef std::shared_ptr<Command> ComPtr;
 typedef std::tr1::unordered_map<std::string, ComPtr> CommandList;
 CommandList m_Commands;
 

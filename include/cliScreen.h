@@ -31,6 +31,10 @@
 #include <string>
 #include <vector>
 
+#ifdef __WIN32__
+#include <windows.h>
+#endif
+
 #include "screenBase.h"
 #include "logtype.h"
 

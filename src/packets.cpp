@@ -1584,138 +1584,17 @@ int PacketHandler::block_change(User* user)
 }
 
 
-
-
-// Shift operators for Packet class
-Packet& Packet::operator<<(int8_t val)
-{
-  m_writeBuffer.push_back(val);
-  return *this;
-}
-
-Packet& Packet::operator>>(int8_t& val)
-{
-  if (haveData(1))
-  {
-    val = m_readBuffer[m_readPos++];
-  }
-  return *this;
-}
-
-Packet& Packet::operator<<(int16_t val)
-{
-  uint16_t nval = htons(val);
-  addToWrite(reinterpret_cast<const uint8_t*>(&nval), sizeof(nval));
-  return *this;
-}
-
-Packet& Packet::operator>>(int16_t& val)
-{
-  if (haveData(2))
-  {
-    int16_t res;
-    uint8_t* p = reinterpret_cast<uint8_t*>(&res);
-    for (size_t i = 0; i < sizeof(res); ++i) *p++ = m_readBuffer[m_readPos++];
-    val = ntohs(res);
-  }
-  return *this;
-}
-
-Packet& Packet::operator<<(int32_t val)
-{
-  uint32_t nval = htonl(val);
-  addToWrite(reinterpret_cast<const uint8_t*>(&nval), sizeof(nval));
-  return *this;
-}
-
-Packet& Packet::operator>>(int32_t& val)
-{
-  if (haveData(4))
-  {
-    int32_t res;
-    uint8_t* p = reinterpret_cast<uint8_t*>(&res);
-    for (size_t i = 0; i < sizeof(res); ++i) *p++ = m_readBuffer[m_readPos++];
-    val = ntohl(res);
-  }
-  return *this;
-}
-
-Packet& Packet::operator<<(int64_t val)
-{
-  uint64_t nval = ntohll(val);
-  addToWrite(reinterpret_cast<const uint8_t*>(&nval), sizeof(nval));
-  return *this;
-}
-
-Packet& Packet::operator>>(int64_t& val)
-{
-  if (haveData(8))
-  {
-    int64_t res;
-    uint8_t* p = reinterpret_cast<uint8_t*>(&res);
-    for (size_t i = 0; i < sizeof(res); ++i) *p++ = m_readBuffer[m_readPos++];
-    val = ntohll(val);
-  }
-  return *this;
-}
-
-Packet& Packet::operator<<(float val)
-{
-  uint32_t nval;
-  memcpy(&nval, &val, 4);
-  nval = htonl(nval);
-  addToWrite(reinterpret_cast<const uint8_t*>(&nval), sizeof(nval));
-  return *this;
-}
-
-Packet& Packet::operator>>(float& val)
-{
-  if (haveData(4))
-  {
-    uint32_t res;
-    uint8_t* p = reinterpret_cast<uint8_t*>(&res);
-    for (size_t i = 0; i < sizeof(res); ++i) *p++ = m_readBuffer[m_readPos++];
-    uint32_t ival = ntohl(res);
-    memcpy(&val, &ival, 4);
-  }
-  return *this;
-}
-
-Packet& Packet::operator<<(double val)
-{
-  uint64_t nval;
-  memcpy(&nval, &val, 8);
-  nval = ntohll(nval);
-  addToWrite(reinterpret_cast<const uint8_t*>(&nval), sizeof(nval));
-  return *this;
-}
-
-Packet& Packet::operator>>(double& val)
-{
-  if (haveData(8))
-  {
-    uint64_t res;
-    uint8_t* p = reinterpret_cast<uint8_t*>(&res);
-    for (size_t i = 0; i < sizeof(res); ++i) *p++ = m_readBuffer[m_readPos++];
-    uint64_t ival = ntohll(res);
-    memcpy(&val, &ival, 8);
-  }
-  return *this;
-}
-
 Packet& Packet::operator<<(const std::string& str)
 {
   std::vector<uint16_t> result;
   makeUCS2MessageFromUTF8(str, result);
 
-  uint16_t lenval = htons(result.size());
-  addToWrite(reinterpret_cast<const uint8_t*>(&lenval), 2);
+  (*this)<<(int16_t)result.size();
+  //uint16_t lenval = htons(result.size());
+  //addToWrite(reinterpret_cast<const uint8_t*>(&lenval), 2);
 
   for (size_t i = 0;  i < result.size(); ++i)
-  {
-    uint16_t character = htons(result[i]);
-    addToWrite(reinterpret_cast<const uint8_t*>(&character), 2);
-  }
+    (*this)<<(int16_t)result[i];
 
   return *this;
 }

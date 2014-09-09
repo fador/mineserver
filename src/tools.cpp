@@ -47,8 +47,7 @@
 
 #ifdef _WIN32
 #include <direct.h>
-#define _WINSOCKAPI_ //Stops windows.h from including winsock.h
-                     //Fixes errors I was having
+#define _WINSOCKAPI_
 #include <ShlObj.h>
 #endif
 
@@ -395,7 +394,7 @@ std::pair<std::string, std::string> pathOfFile(const std::string& filename)
 }
 
 
-
+#include "stdtime.h"
 uint64_t microTime()
 {
 #ifndef WIN32
