@@ -1463,7 +1463,8 @@ std::string User::generateDigest()
 bool User::setGameMode(User::GameMode gameMode)
 {
   buffer.addToWrite(Protocol::gameState(3,gameMode));
-  invulnerable = true;
-  creative = true;
+
+  invulnerable = gameMode == User::Creative;
+  creative = gameMode == User::Creative;
   return true;
 }
