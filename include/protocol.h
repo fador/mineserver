@@ -62,10 +62,10 @@ class Protocol
     }
     #endif
 
-    static Packet openWindow(int8_t windowId, int8_t type, std::string title, int8_t slots, int8_t useCustomTitle = 0)
+    static Packet openWindow(int8_t windowId, int8_t type, std::string title, int8_t nslots, int8_t useCustomTitle = 0)
     {
       Packet ret;
-      ret << (int8_t)PACKET_OPEN_WINDOW << windowId << type << title << slots << useCustomTitle;
+      ret << (int8_t)PACKET_OPEN_WINDOW << windowId << type << title << nslots << useCustomTitle;
       return ret;
     }
 
@@ -184,10 +184,10 @@ class Protocol
       return ret;
     }
 
-    static Packet attachEntity(int32_t entity, int32_t vehicle)
+    static Packet attachEntity(int32_t entity, int32_t vehicle, bool leash = 0)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ATTACH_ENTITY << (int32_t)entity << (int32_t)vehicle;
+      ret << (int8_t)PACKET_ATTACH_ENTITY << (int32_t)entity << (int32_t)vehicle << leash;
       return ret;
     }
 
@@ -238,7 +238,7 @@ class Protocol
     }
 
     //ToDo: use age of the world field somewhere
-    static Packet timeUpdate(int64_t time, int64_t ageOfTheWorld = 0)
+    static Packet timeUpdate(int64_t time, int64_t  ageOfTheWorld = 0)
     {
       Packet ret;
       ret << (int8_t)PACKET_TIME_UPDATE << (int64_t)ageOfTheWorld << (int64_t)time;
@@ -338,7 +338,7 @@ class Protocol
     static Packet updateHealth(int health, int food=15)
     {
       Packet ret;
-      ret << (int8_t)PACKET_UPDATE_HEALTH << (int16_t)health << (int16_t)food << (float)5.0;
+      ret << (int8_t)PACKET_UPDATE_HEALTH << (float)health << (int16_t)food << (float)5.0;
       return ret;
     }
 
@@ -374,6 +374,13 @@ class Protocol
     static Packet gameState(int8_t reason, int8_t data){
       Packet ret;
       ret<< (int8_t)PACKET_GAMESTATE << reason << data;
+      return ret;
+    }
+
+    static Packet chatMsg(const std::string& msg)
+    {
+      Packet ret;
+      ret << (int8_t)PACKET_CHAT_MESSAGE << msg;
       return ret;
     }
 };
