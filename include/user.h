@@ -81,7 +81,7 @@ public:
   int16_t curItem;
 
   /// gamemode
-  enum GameMode : u_int8_t{
+  enum GameMode : uint8_t{
       Survival=0,Creative
   };
 
