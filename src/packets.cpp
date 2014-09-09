@@ -368,10 +368,12 @@ int PacketHandler::entity_crouch(User* user)
 {
   int32_t EID;
   int8_t action;
+  int32_t horseJumpBoost; // range: 0 -> 100; (Notch Logic)
+
   MetaData meta;
   MetaDataElemByte *element;
 
-  user->buffer >> EID >> action;
+  user->buffer >> EID >> action >> horseJumpBoost;
   Packet pkt;
   bool packetData = false;
 
@@ -1586,42 +1588,15 @@ int PacketHandler::block_change(User* user)
 
 Packet& Packet::operator<<(const std::string& str)
 {
-  std::vector<uint16_t> result;
-  makeUCS2MessageFromUTF8(str, result);
-
-  (*this)<<(int16_t)result.size();
-  //uint16_t lenval = htons(result.size());
-  //addToWrite(reinterpret_cast<const uint8_t*>(&lenval), 2);
-
-  for (size_t i = 0;  i < result.size(); ++i)
-    (*this)<<(int16_t)result[i];
+  writeUCS16String(str);
 
   return *this;
 }
 
 Packet& Packet::operator>>(std::string& str)
 {
-  uint16_t lenval = 0;
-  if (haveData(2))
-  {
-    uint16_t lenval = 0;
-    *this >> (int16_t&)lenval;
+  str = readUCS16String();
 
-    if (lenval && haveData(2 * lenval)) // We ASSUME that every character takes 2 bytes. DANGEROUS.
-    {
-      unsigned char buf[2];
-      t_codepoint ccp;
-
-      for (size_t i = 0;  i < lenval; ++i)
-      {
-        buf[0] = m_readBuffer[m_readPos++];
-        buf[1] = m_readBuffer[m_readPos++];
-
-        codepointToUTF8(((unsigned int)(buf[0]) << 8) | ((unsigned int)(buf[1])), &ccp);
-        str += std::string(ccp.c);
-      }
-    }
-  }
   return *this;
 }
 
@@ -1657,4 +1632,73 @@ std::string Packet::readString()
   }
 
   return str;
+}
+
+void Packet::writeUCS16String(const std::string& str)
+{
+  std::vector<uint16_t> result;
+  makeUCS2MessageFromUTF8(str, result);
+
+  (*this)<<(int16_t)result.size();
+
+  for (size_t i = 0;  i < result.size(); ++i)
+    (*this)<<(int16_t)result[i];
+}
+
+std::string Packet::readUCS16String()
+{
+  std::string str;
+  if (haveData(2))
+  {
+    uint16_t lenval = 0;
+    *this >> (int16_t&)lenval;
+
+    if (lenval && haveData(2 * lenval)) // We ASSUME that every character takes 2 bytes. DANGEROUS.
+    {
+      unsigned char buf[2];
+      t_codepoint ccp;
+
+      for (size_t i = 0;  i < lenval; ++i)
+      {
+        buf[0] = m_readBuffer[m_readPos++];
+        buf[1] = m_readBuffer[m_readPos++];
+
+        codepointToUTF8(((unsigned int)(buf[0]) << 8) | ((unsigned int)(buf[1])), &ccp);
+        str += std::string(ccp.c);
+      }
+    }
+  }
+  return str;
+}
+
+void Packet::writeVarInt(int64_t varint)
+{
+  do{
+    uint8_t byte = 0;
+    if(varint > 128)
+      byte |= 0x80;
+
+    byte |= (varint & 0x7F);
+
+    write(&byte, 1);
+
+    varint = varint >> 7;
+  }while(varint != 0);
+}
+
+int64_t Packet::readVarInt()
+{
+  int64_t ret = 0;
+
+  int byte_idx = 0;
+
+  uint8_t byte;
+  do{
+    if(read(&byte, 1) != 1)
+      // silent fail
+      return 0;
+    ret += (byte & 0x7F) << (7*byte_idx);
+  }while(byte & 0x80);
+
+  return ret;
 }

@@ -97,7 +97,7 @@ bswap_def(uint64_t, htonll)
 /// because float/double casting is fucking special in c++
 /// FIXME: find a way to cast float types the right way to data types of uint
 inline float bswap(const float& x){
-  uint32_t i = uint32_t(htonll(*(uint32_t*)&x));
+  uint32_t i = uint32_t(htonl(*(uint32_t*)&x));
   return *(float*)&i;
 }
 
@@ -314,6 +314,12 @@ public:
 
   void writeString(const std::string& str);
   std::string readString();
+
+  void writeUCS16String(const std::string& str);
+  std::string readUCS16String();
+
+  void writeVarInt(int64_t varint);
+  int64_t readVarInt();
 
   Packet& operator<<(const Packet& other);
 

@@ -29,6 +29,8 @@
 #include <sys/stat.h>
 #include <algorithm>
 
+using namespace std;
+
 #include "constants.h"
 
 #include "user.h"
@@ -40,7 +42,6 @@
 #include "mob.h"
 #include "logger.h"
 #include "protocol.h"
-
 #define LOADBLOCK(x,y,z) ServerInstance->map(pos.map)->getBlock(int(std::floor(double(x))), int(std::floor(double(y))), int(std::floor(double(z))), &type, &meta)
 
 
@@ -1256,20 +1257,12 @@ void User::checkEnvironmentDamage()
 bool User::sethealth(int userHealth)
 {
   if (!logged)
-  {
     return false;
-  }
-  if (health > 20)
-  {
-    health = 20;
-  }
-  if (health < 0)
-  {
-    health = 0;
-  }
+
+  health = min(max(userHealth, 0), 20);
+
   if (health == userHealth)
   {
-    buffer << Protocol::updateHealth(userHealth);
     return false;
   }
   if (userHealth < health)
@@ -1293,6 +1286,7 @@ bool User::respawn()
   this->health = 20;
   this->timeUnderwater = 0;
   buffer << Protocol::respawn(); //FIXME: send the correct world id
+  sethealth(20);
   Packet destroyPkt;
   destroyPkt << Protocol::destroyEntity(UID);
   sChunk* chunk = ServerInstance->map(pos.map)->getMapData(blockToChunk((int32_t)pos.x), blockToChunk((int32_t)pos.z));
@@ -1463,7 +1457,8 @@ std::string User::generateDigest()
 bool User::setGameMode(User::GameMode gameMode)
 {
   buffer.addToWrite(Protocol::gameState(3,gameMode));
-  invulnerable = true;
-  creative = true;
+
+  invulnerable = gameMode == User::Creative;
+  creative = gameMode == User::Creative;
   return true;
 }

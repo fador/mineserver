@@ -41,6 +41,8 @@
 
 #include "chat.h"
 
+#include "protocol.h"
+
 Chat::Chat()
 {
 }
@@ -242,50 +244,34 @@ void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeSta
 
 bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
 {
-  std::vector<uint16_t> result;
-  makeUCS2MessageFromUTF8(msg, result);
-
-  const size_t tmpArrayLen = 2 * result.size() + 3;
-  uint8_t* tmpArray = new uint8_t[tmpArrayLen];
-
-  tmpArray[0] = 0x03;
-  tmpArray[1] = (result.size() >> 8) & 0xFF;
-  tmpArray[2] =  result.size()       & 0xFF;
-
-  for (size_t i = 0; i < result.size(); ++i)
-  {
-    tmpArray[2 * i + 3] = (result[i] >> 8);   // high byte
-    tmpArray[2 * i + 4] = (result[i] & 0xFF); // low byte
-  }
+  Packet pkt = Protocol::chatMsg(R"({"text":")"+json_esc(msg)+"\"}");
 
   switch (action)
   {
   case ALL:
-    user->sendAll(tmpArray, tmpArrayLen);
+    user->sendAll(pkt);
     break;
 
   case USER:
-    user->buffer.addToWrite(tmpArray, tmpArrayLen);
+    user->buffer.addToWrite(pkt);
     break;
 
   case ADMINS:
-    user->sendAdmins(tmpArray, tmpArrayLen);
+    user->sendAdmins(pkt);
     break;
 
   case OPS:
-    user->sendOps(tmpArray, tmpArrayLen);
+    user->sendOps(pkt);
     break;
 
   case GUESTS:
-    user->sendGuests(tmpArray, tmpArrayLen);
+    user->sendGuests(pkt);
     break;
 
   case OTHERS:
-    user->sendOthers(tmpArray, tmpArrayLen);
+    user->sendOthers(pkt);
     break;
   }
-
-  delete[] tmpArray;
 
   return true;
 }

@@ -108,5 +108,21 @@ inline int8_t angleToByte(float angle)
 
 uint64_t microTime();
 
+/// If we had any ol' good library, we would need this.
+inline std::string json_esc(const std::string str)
+{
+  std::string ret;
+
+  for(const char& c : str)
+  {
+    if(c == '\\')
+      ret += "\\\\";
+    else if(c == '"')
+      ret += "\\\"";
+    else
+      ret += c;
+  }
+  return ret;
+}
 
 #endif
