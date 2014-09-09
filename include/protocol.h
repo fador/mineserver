@@ -187,7 +187,7 @@ class Protocol
     static Packet attachEntity(int32_t entity, int32_t vehicle, bool leash = 0)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ATTACH_ENTITY << (int32_t)entity << (int32_t)vehicle << leash;
+      ret << (int8_t)PACKET_ATTACH_ENTITY << (int32_t)entity << (int32_t)vehicle << (int8_t)leash;
       return ret;
     }
 
