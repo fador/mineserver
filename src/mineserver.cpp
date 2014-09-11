@@ -310,8 +310,7 @@ Mineserver::Mineserver(int args, char **argarray)
     if (!configvar.load(override_config))
       throw CoreException("Error when parsing overrides: maybe you forgot to doublequote string values?");
   }
-  
-  memset(&m_listenEvent, 0, sizeof(event));
+
   initConstants();
   // Write PID to file
   std::ofstream pid_out((config()->sData("system.pid_file")).c_str());
@@ -666,8 +665,9 @@ bool Mineserver::run()
   }
 
   setnonblock(m_socketlisten);
-  event_set(&m_listenEvent, m_socketlisten, EV_WRITE | EV_READ | EV_PERSIST, accept_callback, NULL);
-  event_add(&m_listenEvent, NULL);
+
+  m_listenEvent = event_new(m_eventBase, m_socketlisten, EV_WRITE | EV_READ | EV_PERSIST, accept_callback, 0);
+  event_add(m_listenEvent, 0);
 
   LOG2(INFO, "Listening on: ");
   if (ip == "0.0.0.0")
@@ -694,200 +694,71 @@ bool Mineserver::run()
   loopTime.tv_usec = 200000; // 200ms
 
   m_running = true;
-  event_base_loopexit(m_eventBase, &loopTime);
 
-  // Create our Server Console user so we can issue commands
+  Time next_10s   = Time::now();
+  Time next_1s    = Time::now();
+  Time next_200ms = Time::now();
 
-  time_t timeNow = time(NULL);
-  while (m_running && event_base_loop(m_eventBase, 0) == 0)
+  Time to_sleep = Time(0,100);
+  /// #mainloop
+  while (m_running)
   {
-    event_base_loopexit(m_eventBase, &loopTime);
+    timeval tv;
+    tv.tv_sec  = to_sleep.total_sec();
+    tv.tv_usec = to_sleep.total_usec() % 1000000;
 
-    // Run 200ms timer hook
-    runAllCallback("Timer200");
-
-    //Remove any users pending removal
-    if(m_usersToRemove.size())
+    if(tv.tv_sec || tv.tv_usec)
     {
-      for (std::set<User*>::iterator it = m_usersToRemove.begin(); it != m_usersToRemove.end(); it++)
-      {
-        User* u = *it;
-        delete u;
-        u = 0;
-      }
-      m_usersToRemove.clear();
+      //LOG2(INFO, std::string("Time to sleep:") + std::string(to_sleep));
+      Time now = Time::now();
+      event_base_loopexit(m_eventBase, &tv);
+
+      if(event_base_loop(m_eventBase, 0) != 0)
+        break;
+
+      //LOG2(INFO, std::string("Time slept:") + std::string(Time::now() - now));
     }
 
-    
+    Time now = Time::now();
 
-    // Alert any block types that care about timers
-    for (size_t i = 0 ; i < plugin()->getBlockCB().size(); ++i)
-    {
-      const BlockBasicPtr blockcb = plugin()->getBlockCB()[i];
-      if (blockcb != NULL)
-      {
-        blockcb->timer200();
-      }
+    if( next_200ms < now){
+      timed_200ms();
+      next_200ms += Time(0,200*1000);
     }
 
-    //Update physics every 200ms
-    for (std::vector<Map*>::size_type i = 0 ; i < m_map.size(); i++)
-    {
-      physics(i)->update();
-      redstone(i)->update();
+    if( next_1s < now ){
+      timed_1s();
+      next_1s += Time(1, 0);
     }
 
-
-    //Every 10 seconds..
-    timeNow = time(0);
-    if (timeNow - starttime > 10)
-    {
-      starttime = (uint32_t)timeNow;
-
-      //Map saving on configurable interval
-      if (m_saveInterval != 0 && timeNow - m_lastSave >= m_saveInterval)
-      {
-        //Save
-        for (std::vector<Map*>::size_type i = 0; i < m_map.size(); i++)
-        {
-          m_map[i]->saveWholeMap();
-        }
-
-        m_lastSave = timeNow;
-      }
-
-      // If users, ping them
-      if (!User::all().empty())
-      {
-        // Send server time and keepalive
-        Packet pkt;
-        pkt << Protocol::timeUpdate(m_map[0]->mapTime);
-        pkt << Protocol::keepalive(0);
-        pkt << Protocol::playerlist();
-        (*User::all().begin())->sendAll(pkt);        
-      }
-
-      //Check for tree generation from saplings
-      for (size_t i = 0; i < m_map.size(); ++i)
-      {
-        m_map[i]->checkGenTrees();
-      }
-
-      // TODO: Run garbage collection for chunk storage dealie?
-
-      // Run 10s timer hook
-      runAllCallback("Timer10000");
+    if(next_10s < now){
+      timed_10s();
+      next_10s += Time(10, 0);
     }
 
-    // Every second
-    if (timeNow - tick > 0)
+    for ( User* const& u : m_users)
     {
-      tick = (uint32_t)timeNow;
-      std::set<User*> usersToRemove;
-      // Loop users
-      for (std::set<User*>::iterator it = m_users.begin(); it != m_users.end(); it++)
-      {
-        User * const & u = *it;
-
-        // No data received in 30s, timeout
-        if (u->logged && timeNow - u->lastData > 30)
-        {
-          LOG2(INFO, "Player " + u->nick + " timed out");
-          usersToRemove.insert(u);
-          
-        }
-        else if (!u->logged && timeNow - u->lastData > 100)
-        {
-          usersToRemove.insert(u);
-        }
-        else
-        {
-          if (m_damage_enabled)
-          {
-            u->checkEnvironmentDamage();
-          }
-          u->pushMap();
-          u->popMap();
-        }
-      }
-      for (std::set<User*>::iterator it = usersToRemove.begin(); it != usersToRemove.end(); it++)
-      {
-        delete *it;
-      }
-
-      for (std::vector<Map*>::size_type i = 0 ; i < m_map.size(); i++)
-      {
-        m_map[i]->mapTime += 20;
-        if (m_map[i]->mapTime >= 24000)
-        {
-          m_map[i]->mapTime = 0;
-        }
-      }
-
-      for (std::set<User*>::const_iterator it = users().begin(); it != users().end(); ++it)
-      {
-        (*it)->pushMap();
-        (*it)->popMap();
-      }
-
-      // Check for Furnace activity
-      furnaceManager()->update();
-
-      // Check for user validation results
-      pthread_mutex_lock(&ServerInstance->m_validation_mutex);
-      for(size_t i = 0; i < ServerInstance->validatedUsers.size(); i++)
-      {
-        //To make sure user hasn't timed out or anything while validating
-        User *tempuser = NULL;
-        for (std::set<User*>::const_iterator it = users().begin(); it != users().end(); ++it)
-        {
-          if((*it)->UID == ServerInstance->validatedUsers[i].UID)
-          {
-            tempuser = (*it);
-            break;
-          }
-        }
-
-        if(tempuser != NULL)
-        {
-          if(ServerInstance->validatedUsers[i].valid)
-          {
-            LOG(INFO, "Packets", tempuser->nick + " is VALID ");
-            tempuser->crypted = true;
-            tempuser->buffer << (int8_t)PACKET_ENCRYPTION_RESPONSE << (int16_t)0 << (int16_t) 0;
-            tempuser->uncryptedLeft = 5;
-          }
-          else
-          {
-            tempuser->kick("User not Premium");
-          }
-          //Flush
-          client_write(tempuser);          
-        }
-      }
-      ServerInstance->validatedUsers.clear();
-      pthread_mutex_unlock(&ServerInstance->m_validation_mutex);
-
-      // Run 1s timer hook
-      runAllCallback("Timer1000");
-    }
-
-    // Underwater check / drowning
-    // ToDo: this could be done a bit differently? - Fador
-    // -- User::all() == users() - louisdx
-
-
-    for (std::set<User*>::const_iterator it = users().begin(); it != users().end(); ++it)
-    {
-      (*it)->isUnderwater();
-      if ((*it)->pos.y < 0)
-      {
-        (*it)->sethealth((*it)->health - 5);
-      }
       //Flush data
-      client_write((*it));
+      client_write(u);
     }
+
+    now = Time::now();
+
+    /// Check if we need to run as fast as possible
+    if(next_200ms < now){
+      Time dt = now-next_200ms;
+
+      LOG2(WARNING, std::string("Mineserver not keeping up. Next 200ms was ")
+                      + (std::string)(dt) + " ago.");
+
+      to_sleep = Time(0,500);
+      continue;
+    }
+
+    /// The most sophisticated preemptive scheduler EVER
+    to_sleep = next_200ms - now;
   }
+
 #ifdef WIN32
   closesocket(m_socketlisten);
 #else
@@ -899,6 +770,181 @@ bool Mineserver::run()
   event_base_free(m_eventBase);
 
   return true;
+}
+
+void Mineserver::timed_200ms()
+{
+  // Run 200ms timer hook
+  runAllCallback("Timer200");
+
+  //Remove any users pending removal
+  if(m_usersToRemove.size())
+  {
+    for (std::set<User*>::iterator it = m_usersToRemove.begin(); it != m_usersToRemove.end(); it++)
+    {
+      User* u = *it;
+      delete u;
+      u = 0;
+    }
+    m_usersToRemove.clear();
+  }
+
+  // Alert any block types that care about timers
+  for (size_t i = 0 ; i < plugin()->getBlockCB().size(); ++i)
+  {
+    const BlockBasicPtr blockcb = plugin()->getBlockCB()[i];
+    if (blockcb != NULL)
+    {
+      blockcb->timer200();
+    }
+  }
+
+  //Update physics every 200ms
+  for (std::vector<Map*>::size_type i = 0 ; i < m_map.size(); i++)
+  {
+    physics(i)->update();
+    redstone(i)->update();
+  }
+
+  /// Drowning/suffocating
+  for ( User* const& u : m_users)
+  {
+    u->isUnderwater();
+    if (u->pos.y < 0)
+    {
+      u->sethealth(u->health - 5);
+    }
+  }
+}
+
+void Mineserver::timed_1s()
+{
+  // Run 1s timer hook
+  runAllCallback("Timer1000");
+
+  std::set<User*> usersToRemove;
+  // Loop users
+  for (std::set<User*>::iterator it = m_users.begin(); it != m_users.end(); it++)
+  {
+    User * const & u = *it;
+
+    // No data received in 30s, timeout
+    if (u->logged && time(0)- u->lastData > 30)
+    {
+      LOG2(INFO, "Player " + u->nick + " timed out");
+      usersToRemove.insert(u);
+
+    }
+    else if (!u->logged && time(0) - u->lastData > 100)
+    {
+      usersToRemove.insert(u);
+    }
+    else
+    {
+      if (m_damage_enabled)
+      {
+        u->checkEnvironmentDamage();
+      }
+      u->pushMap();
+      u->popMap();
+    }
+  }
+
+  for(User* u : usersToRemove)
+  {
+    delete u;
+  }
+
+  for (std::vector<Map*>::size_type i = 0 ; i < m_map.size(); i++)
+  {
+    m_map[i]->mapTime += 20;
+    if (m_map[i]->mapTime >= 24000)
+    {
+      m_map[i]->mapTime = 0;
+    }
+  }
+
+  for (std::set<User*>::const_iterator it = users().begin(); it != users().end(); ++it)
+  {
+    (*it)->pushMap();
+    (*it)->popMap();
+  }
+
+  // Check for Furnace activity
+  furnaceManager()->update();
+
+  // Check for user validation results
+  pthread_mutex_lock(&ServerInstance->m_validation_mutex);
+  for(size_t i = 0; i < ServerInstance->validatedUsers.size(); i++)
+  {
+    //To make sure user hasn't timed out or anything while validating
+    User *tempuser = NULL;
+    for (std::set<User*>::const_iterator it = users().begin(); it != users().end(); ++it)
+    {
+      if((*it)->UID == ServerInstance->validatedUsers[i].UID)
+      {
+        tempuser = (*it);
+        break;
+      }
+    }
+
+    if(tempuser != NULL)
+    {
+      if(ServerInstance->validatedUsers[i].valid)
+      {
+        LOG(INFO, "Packets", tempuser->nick + " is VALID ");
+        tempuser->crypted = true;
+        tempuser->buffer << (int8_t)PACKET_ENCRYPTION_RESPONSE << (int16_t)0 << (int16_t) 0;
+        tempuser->uncryptedLeft = 5;
+      }
+      else
+      {
+        tempuser->kick("User not Premium");
+      }
+      //Flush
+      client_write(tempuser);
+    }
+  }
+  ServerInstance->validatedUsers.clear();
+  pthread_mutex_unlock(&ServerInstance->m_validation_mutex);
+
+}
+
+void Mineserver::timed_10s()
+{
+  // Run 10s timer hook
+  runAllCallback("Timer10000");
+
+  //Map saving on configurable interval
+  if (m_saveInterval != 0 && time(0) - m_lastSave >= m_saveInterval)
+  {
+    //Save
+    for (std::vector<Map*>::size_type i = 0; i < m_map.size(); i++)
+    {
+      m_map[i]->saveWholeMap();
+    }
+
+    m_lastSave = time(0);
+  }
+
+  // If users, ping them
+  if (!User::all().empty())
+  {
+    // Send server time and keepalive
+    Packet pkt;
+    pkt << Protocol::timeUpdate(m_map[0]->mapTime);
+    pkt << Protocol::keepalive(0);
+    pkt << Protocol::playerlist();
+    (*User::all().begin())->sendAll(pkt);
+  }
+
+  //Check for tree generation from saplings
+  for (size_t i = 0; i < m_map.size(); ++i)
+  {
+    m_map[i]->checkGenTrees();
+  }
+
+  // TODO: Run garbage collection for chunk storage dealie?
 }
 
 bool Mineserver::stop()

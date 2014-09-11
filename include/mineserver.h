@@ -82,7 +82,7 @@ public:
   bool m_pvp_enabled;
   bool m_damage_enabled;
   bool m_only_helmets;
-  struct event m_listenEvent;
+  struct event* m_listenEvent;
   pthread_mutex_t m_validation_mutex;
   struct userValidation { User* user; bool valid; uint32_t UID; };
   std::vector<userValidation> validatedUsers;
@@ -103,6 +103,12 @@ public:
 
   // Non-inline functions
   bool run();
+
+  // Timed functions
+  void timed_200ms();
+  void timed_1s();
+  void timed_10s();
+
   bool stop();
   
   event_base* getEventBase();
