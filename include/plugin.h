@@ -33,15 +33,8 @@
 #include <ctime>
 #include <list>
 
-#include "tr1.h"
-
-#ifdef __APPLE__
-#include <tr1/memory>
-#include <tr1/unordered_map>
-#else
-#include TR1INCLUDE(memory)
-#include TR1INCLUDE(unordered_map)
-#endif
+#include <memory>
+#include <unordered_map>
 
 //Fix Winsock2 error that occurs when Windows.h is included before it.
 #define _WINSOCKAPI_
@@ -122,10 +115,10 @@ class Plugin
 {
 public:
   
-  typedef std::tr1::unordered_map<std::string, funcListType* > HookMap;
-  typedef std::tr1::unordered_map<std::string, LIBRARY_HANDLE> LibHandleMap;
-  typedef std::tr1::unordered_map<std::string, void*> PointerMap;
-  typedef std::tr1::unordered_map<std::string, float> VersionMap;
+  typedef std::unordered_map<std::string, funcListType* > HookMap;
+  typedef std::unordered_map<std::string, LIBRARY_HANDLE> LibHandleMap;
+  typedef std::unordered_map<std::string, void*> PointerMap;
+  typedef std::unordered_map<std::string, float> VersionMap;
 
   typedef std::vector<BlockBasicPtr> BlockCBs;
   typedef std::vector<ItemBasicPtr>  ItemCBs;

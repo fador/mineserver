@@ -44,12 +44,7 @@ typedef int socklen_t;
 #include <algorithm>
 
 
-#include "tr1.h"
-#ifdef __APPLE__
-#include <tr1/array>
-#else
-#include TR1INCLUDE(array)
-#endif
+#include <array>
 
 #include "sockets.h"
 #include "tools.h"

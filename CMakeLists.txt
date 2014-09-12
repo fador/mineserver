@@ -95,7 +95,7 @@ SET(LIBRARY_OUTPUT_PATH bin)
 
 # Set compiler specific build flags
 IF(CMAKE_COMPILER_IS_GNUCXX)
-  SET(CMAKE_CXX_FLAGS "-W -Wall -Wno-unused -pedantic -DHAVE_TR1_SUBDIR")
+  SET(CMAKE_CXX_FLAGS "-W -Wall -Wno-unused -pedantic -std=c++11")
   SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g -O0")
   SET(CMAKE_CXX_FLAGS_PROFILE "-DDEBUG -g -pg")
   SET(CMAKE_CXX_FLAGS_RELEASE "-O4 -s -DNDEBUG")

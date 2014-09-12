@@ -31,8 +31,7 @@
 
 #include "basic.h"
 
-#include "tr1.h"
-#include TR1INCLUDE(memory)
+#include <memory>
 
 
 // 10000 == 100%

@@ -37,12 +37,7 @@
 #include <stdint.h>
 #include <cmath>
 
-#include "tr1.h"
-#ifdef __APPLE__
-#include <tr1/memory>
-#else
-#include TR1INCLUDE(memory)
-#endif
+#include <memory>
 
 
 #define MINESERVER_C_API
@@ -81,7 +76,7 @@ public:
   explicit MyPetMob(int ID, double velocity = 0) : ID(ID), deSpawn(0), velocity(velocity) { }
 };
 
-typedef std::tr1::shared_ptr<MyPetMob> MyPetMobPtr;
+typedef std::shared_ptr<MyPetMob> MyPetMobPtr;
 
 std::vector<MyPetMobPtr> MyMobs;
 

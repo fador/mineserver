@@ -142,7 +142,6 @@ HEADERS += \
     ../include/utf8.h \
     ../include/user.h \
     ../include/tree.h \
-    ../include/tr1.h \
     ../include/tools.h \
     ../include/sockets.h \
     ../include/SystemExceptions.h \

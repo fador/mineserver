@@ -31,14 +31,7 @@
 #include <vector>
 #include <set>
 #include <string>
-
-#include "tr1.h"
-
-#ifdef __APPLE__
-#include <tr1/memory>
-#else
-#include TR1INCLUDE(memory)
-#endif
+#include <memory>
 
 //Enable protocol encryption
 #define PROTOCOL_ENCRYPTION

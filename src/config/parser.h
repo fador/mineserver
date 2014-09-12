@@ -31,12 +31,7 @@
 #include <string>
 #include <stdint.h>
 
-#include "tr1.h"
-#ifdef __APPLE__
-#include <tr1/memory>
-#else
-#include TR1INCLUDE(memory)
-#endif
+#include <memory>
 
 enum
 {

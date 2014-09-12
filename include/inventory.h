@@ -30,13 +30,7 @@
 
 #include <stdint.h>
 #include <vector>
-
-#include "tr1.h"
-#ifdef __APPLE__
-#include <tr1/memory>
-#else
-#include TR1INCLUDE(memory)
-#endif
+#include <memory>
 
 class User;
 

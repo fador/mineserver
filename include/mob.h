@@ -32,8 +32,7 @@
 #include <string>
 #include <stdint.h>
 
-#include "tr1.h"
-#include TR1INCLUDE(memory)
+#include <memory>
 
 #include "user.h"
 #include "constants.h"

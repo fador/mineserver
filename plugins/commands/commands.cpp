@@ -34,14 +34,8 @@
 #include <cstdlib>
 #include <ctime>
 
-#include "tr1.h"
-#ifdef __APPLE__
-#include <tr1/memory>
-#include <tr1/unordered_map>
-#else
-#include TR1INCLUDE(memory)
-#include TR1INCLUDE(unordered_map)
-#endif
+#include <memory>
+#include <unordered_map>
 
 #define MINESERVER_C_API
 #include "plugin_api.h"
@@ -79,7 +73,7 @@ struct cuboidStruct
   int toBlock;
 };
 
-std::tr1::unordered_map<std::string, cuboidStruct> cuboidMap;
+std::unordered_map<std::string, cuboidStruct> cuboidMap;
 
 std::string dtos(double n)
 {
@@ -112,7 +106,7 @@ struct Command
 };
 
 typedef std::shared_ptr<Command> ComPtr;
-typedef std::tr1::unordered_map<std::string, ComPtr> CommandList;
+typedef std::unordered_map<std::string, ComPtr> CommandList;
 CommandList m_Commands;
 
 void registerCommand(ComPtr command)

@@ -32,9 +32,6 @@
 #include <list>
 #include <stdint.h>
 
-//#include "tr1.h"
-//#include TR1INCLUDE(memory)
-
 #include "config/parser.h"
 #include "config/node.h"
 

@@ -33,15 +33,8 @@
 #include <vector>
 #include <ctime>
 
-#include "tr1.h"
-
-#ifdef __APPLE__
-#include <tr1/memory>
-#include <tr1/unordered_map>
-#else
-#include TR1INCLUDE(memory)
-#include TR1INCLUDE(unordered_map)
-#endif
+#include <memory>
+#include <unordered_map>
 
 #include "packets.h"
 #include "user.h"
@@ -309,7 +302,7 @@ struct PairHash : public std::unary_function<std::pair<S, T>, size_t>
 };
 
 typedef std::pair<int, int> Coords;
-typedef std::tr1::unordered_map<Coords, sChunk*, PairHash<int, int> > ChunkMap;
+typedef std::unordered_map<Coords, sChunk*, PairHash<int, int> > ChunkMap;
 
 
 #endif
