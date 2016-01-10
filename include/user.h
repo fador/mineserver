@@ -100,6 +100,7 @@ public:
   uint16_t timeUnderwater;
   double fallDistance;
   unsigned int UID;
+  std::string uuid;
   std::string temp_nick;
   vec curChunk;
   time_t healthtimeout;

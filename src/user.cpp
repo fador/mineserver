@@ -78,6 +78,13 @@ User::User(int sock, uint32_t EID)
   this->inventoryHolding  = Item(this, -1);
   this->curItem          = 0;
 
+  //Generate UUID based on the EID
+  const char hex[] = "0123456789abcdef";
+  this->uuid = "7fe8a8c1-f48c-3509-ac5c-97c3";
+  for (int i = 0; i < 8; i++) {
+    this->uuid+=hex[(EID>>(i-7)*4)&0xf];
+  }  
+
   // Ignore this user if it's the server console
   if (this->UID != SERVER_CONSOLE_UID)
   {
