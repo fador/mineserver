@@ -77,6 +77,16 @@ class Protocol
       return ret;
     }
 
+    static Packet updateSign(int32_t x, int32_t y, int32_t z, 
+                             std::string line1, std::string line2, std::string line3, std::string line4)
+    {
+      Packet ret;      
+      ret << MS_VarInt((uint32_t)PACKET_UPDATE_SIGN) 
+        << (uint64_t)((((uint64_t)x & 0x3FFFFFF) << 38) | (((uint64_t)y & 0xFFF) << 26) | ((uint64_t)z & 0x3FFFFFF))
+        << line1 << line2 << line3 << line4;
+      return ret;
+    }
+
     static Packet entityStatus(int eid, int aid)
     {
       Packet ret;

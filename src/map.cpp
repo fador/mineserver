@@ -1776,22 +1776,16 @@ bool Map::sendMultiBlocks(std::set<vec>& blocks)
 // Send chunk to user
 void Map::sendToUser(User* user, int x, int z, bool login)
 {
-  Packet* p;
-  if (login)
-  {
-    p = &user->loginBuffer;
-  }
-  else
-  {
-    p = &user->buffer;
-  }
+
+  Packet p;
+
   sChunk* chunk = loadMap(x, z);
   if (chunk == NULL)
   {
     return;
   }
-
-  uint8_t* mapdata = new uint8_t[98304*2+256];
+  const int mapdataLen = 98304*2+256;
+  uint8_t* mapdata = new uint8_t[mapdataLen];
   int32_t mapposx    = x;
   int32_t mapposz    = z;
 
@@ -1805,7 +1799,7 @@ void Map::sendToUser(User* user, int x, int z, bool login)
   
   //ToDo: now sending all 16 16x16 chunks, limit to only those with blocks.
   // Chunk
-  (*p) << (int8_t)PACKET_MAP_CHUNK << (int32_t)(mapposx) << (int32_t)(mapposz)
+  p << MS_VarInt((uint32_t)PACKET_MAP_CHUNK) << (int32_t)(mapposx) << (int32_t)(mapposz)
        << (int8_t)1 /* Biome Data bool? */ << (int16_t)0xffff /* Enabled chunks 0..15 */
        << (int16_t)0xffff /* Enabled additional data? in the enabled chunks */;
 
@@ -1819,24 +1813,17 @@ void Map::sendToUser(User* user, int x, int z, bool login)
   memset(&mapdata[(32768 + 16384 + 16384 + 16384 + 16384)*2], 0, 256);
 
 
-  uLongf written = 98304*2+256;
-  uint8_t* buffer = new uint8_t[written];
+  p << MS_VarInt((uint32_t)mapdataLen);
+  p.addToWrite(mapdata, mapdataLen);
 
-  // Compress data with zlib deflate
-  compress(buffer, &written, mapdata, 98304*2+256);
-
-  (*p) << (int32_t)written;
-  (*p).addToWrite(buffer, written);
+  user->buffer.writePacket(p, user->compression);
 
   //Push sign data to player
   for (size_t i = 0; i < chunk->signs.size(); ++i)
   {
-    (*p) << (int8_t)PACKET_SIGN << chunk->signs[i]->x << (int16_t)chunk->signs[i]->y << chunk->signs[i]->z;
-    (*p) << chunk->signs[i]->text1 << chunk->signs[i]->text2 << chunk->signs[i]->text3 << chunk->signs[i]->text4;
+    user->buffer.writePacket(Protocol::updateSign(chunk->signs[i]->x, chunk->signs[i]->y, chunk->signs[i]->z,
+      chunk->signs[i]->text1,chunk->signs[i]->text2, chunk->signs[i]->text3, chunk->signs[i]->text4), user->compression);
   }
-
-
-  delete[] buffer;
 
   delete[] mapdata;
 }
