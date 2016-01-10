@@ -1689,7 +1689,7 @@ int64_t Packet::readVarInt()
     if(read(&byte, 1) != 1)
       // silent fail
       return 0;
-    ret += (byte & 0x7F) << (7*byte_idx);
+    ret += (byte & 0x7F) << (7*byte_idx++);
   }while(byte & 0x80);
 
   return ret;

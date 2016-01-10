@@ -204,9 +204,11 @@ extern "C" void client_callback(int fd, short ev, void* arg)
     user->buffer.addToRead(upBUF, read);
     user->buffer.reset();
     MS_VarInt packetLen;
+    uint32_t varint_len;
 
     while (user->buffer >> (MS_VarInt&)packetLen)
     {  
+      varint_len = user->buffer.m_readPos;
       std::ostringstream str;
           str << "packet len: 0x" << std::hex << (unsigned int)(packetLen);
           LOG2(DEBUG, str.str());
@@ -228,7 +230,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
           std::ostringstream str;
           str << "Unknown packet: 0x" << std::hex << (unsigned int)(user->action);
           LOG2(DEBUG, str.str());
-          user->buffer.removePacketLen((uint32_t)packetLen);
+          user->buffer.removePacketLen((uint32_t)packetLen+varint_len);
           continue;
         }
 
@@ -250,7 +252,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
           return;
         }   
       }
-      user->buffer.removePacketLen((uint32_t)packetLen);
+      user->buffer.removePacketLen((uint32_t)packetLen+varint_len);
     } // while(user->buffer)
   } //End reading
 
