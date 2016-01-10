@@ -228,13 +228,12 @@ extern "C" void client_callback(int fd, short ev, void* arg)
           std::ostringstream str;
           str << "Unknown packet: 0x" << std::hex << (unsigned int)(user->action);
           LOG2(DEBUG, str.str());
-
-          delete user;
-          return;
+          user->buffer.removePacketLen((uint32_t)packetLen);
+          continue;
         }
 
 #ifdef DEBUG
-        printf("Packet from %s, id = 0x%hx \n", user->nick.c_str(), user->action);
+        printf("Packet from %s, state = 0x%hx, id = 0x%hx \n", user->nick.c_str(), user->gameState, user->action);
 #endif
 
         //Call specific function
@@ -249,8 +248,9 @@ extern "C" void client_callback(int fd, short ev, void* arg)
           }
           delete user;
           return;
-        }
+        }   
       }
+      user->buffer.removePacketLen((uint32_t)packetLen);
     } // while(user->buffer)
   } //End reading
 

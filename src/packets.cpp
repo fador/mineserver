@@ -111,7 +111,7 @@ void PacketHandler::init()
 
 int PacketHandler::unhandledPacket(User* user)
 {
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
@@ -149,7 +149,7 @@ int PacketHandler::plugin_message(User* user)
 
   LOG2(INFO, "Plugin message: "+channel);
 
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
@@ -194,7 +194,7 @@ int PacketHandler::encryption_response(User* user)
     user->buffer >> byte;
     verify.push_back(byte);
   }
-  user->buffer.removePacket();
+
   
   //Those should be around 128 bytes
   if(verifyLen > 1023 || secretLen > 1023)
@@ -250,7 +250,7 @@ int PacketHandler::client_status(User* user)
 
   user->buffer >> payload;
   
-  user->buffer.removePacket();
+
 
   //0: Initial spawn, 1: Respawn after death
   LOG2(INFO, "client_status.");
@@ -303,7 +303,7 @@ int PacketHandler::creative_inventory(User *user)
     it.setCount(count);
     it.setHealth(meta);
 
-    user->buffer.removePacket();
+  
     return PACKET_OK;
 }
 
@@ -337,7 +337,7 @@ int PacketHandler::client_info(User* user)
 
   user->buffer >> viewDistance >> chatFlags >> difficulty >> showCape;
 
-  user->buffer.removePacket();
+
 
   //ToDo: Do something with the values
 
@@ -362,7 +362,7 @@ int PacketHandler::tab_complete(User* user)
   {
     return PACKET_NEED_MORE_DATA;
   }
-  user->buffer.removePacket();
+
 
   //ToDo: autocomplete!
   user->buffer << (int8_t)PACKET_TAB_COMPLETE << " ";
@@ -413,7 +413,7 @@ int PacketHandler::entity_crouch(User* user)
     }
   }
 
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
@@ -480,7 +480,7 @@ int PacketHandler::change_sign(User* user)
   LOG2(INFO, "Sign: " + strings1 + strings2 + strings3 + strings4);
 
   //No need to do anything
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
@@ -493,7 +493,7 @@ int PacketHandler::inventory_close(User* user)
 
   ServerInstance->inventory()->windowClose(user, windowID);
 
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
@@ -507,7 +507,7 @@ int PacketHandler::inventory_transaction(User* user)
   user->buffer >> windowID >> action >> accepted;
 
   //No need to do anything
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
@@ -545,7 +545,7 @@ int PacketHandler::inventory_change(User* user)
 
   ServerInstance->inventory()->windowClick(user, windowID, slot, rightClick, actionNumber, itemID, itemCount, itemUses, shift);
 
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
@@ -553,7 +553,7 @@ int PacketHandler::inventory_change(User* user)
 int PacketHandler::keep_alive(User* user)
 {
   //No need to do anything
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
@@ -570,6 +570,7 @@ int PacketHandler::login_request(User* user)
   {
     return PACKET_NEED_MORE_DATA;
   }
+
 
   user->nick = player;
 
@@ -611,11 +612,7 @@ int PacketHandler::handshake(User* user)
     return PACKET_NEED_MORE_DATA;
   }
 
-  // Remove package from buffer
-  user->buffer.removePacket();
-
   LOG(INFO, "Packets", "Player " + dtos(user->UID) + " login v." + dtos(static_cast<int64_t>(version)) + " : ");
-
 
 
   // If version is not the current version
@@ -656,7 +653,7 @@ int PacketHandler::chat_message(User* user)
     return PACKET_NEED_MORE_DATA;
   }
 
-  user->buffer.removePacket();
+
 
   ServerInstance->chat()->handleMsg(user, msg);
 
@@ -672,7 +669,7 @@ int PacketHandler::player(User* user)
   {
     return PACKET_NEED_MORE_DATA;
   }
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
@@ -689,7 +686,7 @@ int PacketHandler::player_position(User* user)
   }
 
   user->updatePos(x, y, z, stance);
-  user->buffer.removePacket();
+
 
   return PACKET_OK;
 }
@@ -708,7 +705,7 @@ int PacketHandler::player_look(User* user)
 
   user->updateLook(yaw, pitch);
 
-  user->buffer.removePacket();
+
 
   return PACKET_OK;
 }
@@ -731,7 +728,7 @@ int PacketHandler::player_position_and_look(User* user)
   user->updatePos(x, y, z, stance);
   user->updateLook(yaw, pitch);
 
-  user->buffer.removePacket();
+
 
   return PACKET_OK;
 }
@@ -757,7 +754,7 @@ int PacketHandler::player_digging(User* user)
     return PACKET_NEED_MORE_DATA;
   }
 
-  user->buffer.removePacket();
+
 
   if (!ServerInstance->map(user->pos.map)->getBlock(x, y, z, &block, &meta))
   {
@@ -1011,7 +1008,7 @@ int PacketHandler::player_block_placement(User* user)
   //newblock;
   y = (uint8_t)temp_y;
 
-  user->buffer.removePacket();
+
 
   ItemBasicPtr itemcb;
   if (direction == -1 && x == -1 && y == 255 && z == -1)
@@ -1338,7 +1335,7 @@ int PacketHandler::holding_change(User* user)
     return PACKET_NEED_MORE_DATA;
   }
 
-  user->buffer.removePacket();
+
 
   user->curItem = itemSlot;
 
@@ -1364,7 +1361,7 @@ int PacketHandler::arm_animation(User* user)
     return PACKET_NEED_MORE_DATA;
   }
 
-  user->buffer.removePacket();
+
 
   Packet pkt = Protocol::animation(user->UID,animType);
   user->sendOthers(pkt);
@@ -1394,7 +1391,7 @@ int PacketHandler::pickup_spawn(User* user)
     return PACKET_NEED_MORE_DATA;
   }
 
-  user->buffer.removePacket();
+
 
   item.EID       = Mineserver::generateEID();
 
@@ -1428,7 +1425,7 @@ int PacketHandler::disconnect(User* user)
     return PACKET_NEED_MORE_DATA;
   }
 
-  user->buffer.removePacket();
+
   
   LOG(INFO, "Packets", "Disconnect: " + msg);
 
@@ -1448,7 +1445,7 @@ int PacketHandler::use_entity(User* user)
     return PACKET_NEED_MORE_DATA;
   }
 
-  user->buffer.removePacket();
+
 
   if (!leftClick)
   {
@@ -1541,7 +1538,6 @@ int PacketHandler::ping(User* user)
   //Read the new magic field in the 1.4 protocol
   int8_t magic;
   user->buffer >> magic;  
-  user->buffer.removePacket();
   
   //Reply with server info
   std::string line;
@@ -1581,7 +1577,7 @@ int PacketHandler::respawn(User* user)
   user->buffer >> dimension >> difficulty >> creative >> height >> level_type;
   user->dropInventory();
   user->respawn();
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
@@ -1594,7 +1590,7 @@ int PacketHandler::block_change(User* user)
 
   user->buffer >> x >> y >> z >> type >> meta;
   //printf("block change %d:%d:%d type %d meta %d\r\n",x,y,z, type,meta);
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
