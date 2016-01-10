@@ -72,6 +72,7 @@ void PacketHandler::init()
   
   packets[STATE_HANDSHAKE][PACKET_HANDSHAKE] = Packets(&PacketHandler::handshake);
   packets[STATE_LOGIN][PACKET_LOGIN_REQUEST] = Packets(&PacketHandler::login_request);
+  packets[STATE_LOGIN][PACKET_ENCRYPTION_RESPONSE] = Packets(&PacketHandler::encryption_response);
   
   packets[STATE_PLAY][PACKET_KEEP_ALIVE] = Packets(&PacketHandler::keep_alive);
   packets[STATE_PLAY][PACKET_CHAT_MESSAGE] = Packets(&PacketHandler::chat_message);
@@ -98,8 +99,7 @@ void PacketHandler::init()
   packets[STATE_PLAY][PACKET_BLOCK_CHANGE] = Packets(&PacketHandler::block_change);
   packets[STATE_PLAY][PACKET_TAB_COMPLETE] = Packets(&PacketHandler::tab_complete);
   packets[STATE_PLAY][PACKET_CLIENT_INFO] = Packets(&PacketHandler::client_info);
-  packets[STATE_PLAY][PACKET_CLIENT_STATUS] = Packets(&PacketHandler::client_status);
-  packets[STATE_PLAY][PACKET_ENCRYPTION_RESPONSE] = Packets(&PacketHandler::encryption_response);
+  packets[STATE_PLAY][PACKET_CLIENT_STATUS] = Packets(&PacketHandler::client_status);  
   packets[STATE_PLAY][PACKET_PLUGIN_MESSAGE] = Packets(&PacketHandler::plugin_message);
   packets[STATE_PLAY][PACKET_CREATIVE_INVENTORY] = Packets(&PacketHandler::creative_inventory);
   packets[STATE_PLAY][PACKET_PLAYER_ABILITIES] = Packets(&PacketHandler::player_abilities);
@@ -556,24 +556,10 @@ int PacketHandler::keep_alive(User* user)
 // Login request
 int PacketHandler::login_request(User* user)
 {
-  //This should not be used in 1.3
-  LOG(INFO, "Packets", "LOGIN REQUEST!!");
 
-  return PACKET_OK;
-}
+  std::string player;
 
-int PacketHandler::handshake(User* user)
-{
-  if (!user->buffer.haveData(9))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
-
-  std::string player, host;
-  int8_t version;
-  int32_t port;
-
-  user->buffer >> version >> player >> host >> port;
+  user->buffer >> player;
 
   // Check for data
   if (!user->buffer)
@@ -581,26 +567,7 @@ int PacketHandler::handshake(User* user)
     return PACKET_NEED_MORE_DATA;
   }
 
-  // Remove package from buffer
-  user->buffer.removePacket();
-
-  LOG(INFO, "Packets", "Player " + dtos(user->UID) + " login v." + dtos(version) + " : " + player);
-
   user->nick = player;
-
-  // If version is not the current version
-  if (version != PROTOCOL_VERSION)
-  {
-    user->kick(ServerInstance->config()->sData("strings.wrong_protocol"));
-    return PACKET_OK;
-  }
-
-  // If userlimit is reached
-  if ((int)User::all().size() > ServerInstance->config()->iData("system.user_limit"))
-  {
-    user->kick(ServerInstance->config()->sData("strings.server_full"));
-    return PACKET_OK;
-  }
 
   char* kickMessage = NULL;
   runCallbackUntilFalse("PlayerLoginPre",player.c_str(), &kickMessage);
@@ -622,9 +589,49 @@ int PacketHandler::handshake(User* user)
     runAllCallback("PlayerLoginPost",player.c_str());
   }
 
-  
-  // TODO: Add support for prompting user for Server password
+  return PACKET_OK;
+}
 
+int PacketHandler::handshake(User* user)
+{
+  std::string host;
+  MS_VarInt version;
+  int16_t port;
+  MS_VarInt nextState;
+
+  user->buffer >> version >> host >> port >> nextState;
+
+  // Check for data
+  if (!user->buffer)
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+
+  // Remove package from buffer
+  user->buffer.removePacket();
+
+  LOG(INFO, "Packets", "Player " + dtos(user->UID) + " login v." + dtos(static_cast<int64_t>(version)) + " : ");
+
+
+
+  // If version is not the current version
+  if (static_cast<int64_t>(version) != PROTOCOL_VERSION)
+  {
+    user->kick(ServerInstance->config()->sData("strings.wrong_protocol"));
+    return PACKET_OK;
+  }
+  
+  // If userlimit is reached
+  if ((int)User::all().size() > ServerInstance->config()->iData("system.user_limit"))
+  {
+    user->kick(ServerInstance->config()->sData("strings.server_full"));
+    return PACKET_OK;
+  }
+
+  // Move to the next state
+  if (nextState >= 0 && nextState < 4)
+    user->gameState = nextState;
+  
   return PACKET_OK;
 }
 

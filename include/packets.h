@@ -135,12 +135,19 @@ enum {
 //Packet names
 enum
 {
-  //   
+  //Client to server
+
+  // State: Handshake
   PACKET_HANDSHAKE                 = 0x00,
 
-  //Client to server
-  PACKET_KEEP_ALIVE                = 0x00,
-  PACKET_LOGIN_REQUEST             = 0x01,
+  // State: Status
+
+  // State: Login
+  PACKET_LOGIN_REQUEST             = 0x00,
+  PACKET_ENCRYPTION_RESPONSE       = 0x01,
+
+  
+  PACKET_KEEP_ALIVE                = 0x00,  
   PACKET_CHAT_MESSAGE              = 0x03,
   PACKET_ENTITY_EQUIPMENT          = 0x05,
   PACKET_USE_ENTITY                = 0x07,
@@ -162,11 +169,15 @@ enum
   PACKET_TAB_COMPLETE              = 0xcb,
   PACKET_CLIENT_INFO               = 0xcc,
   PACKET_CLIENT_STATUS             = 0xcd,
-  PACKET_PLUGIN_MESSAGE            = 0xfa,
-  PACKET_ENCRYPTION_RESPONSE       = 0xFC,
+  PACKET_PLUGIN_MESSAGE            = 0xfa,  
   PACKET_DISCONNECT                = 0xff,
+
   //Server to client
+
+  // State: Login
   PACKET_LOGIN_RESPONSE            = 0x01,
+
+
   PACKET_TIME_UPDATE               = 0x04,
   PACKET_SPAWN_POSITION            = 0x06,
   PACKET_UPDATE_HEALTH             = 0x08,
