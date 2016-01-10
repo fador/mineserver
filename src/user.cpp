@@ -218,6 +218,9 @@ bool User::sendLoginInfo()
   // Load user data
   loadData();
 
+  buffer.writePacket(Protocol::setCompression(128), this->compression);
+  this->compression = 128;
+
   // This packet moves gameState to "play"
   buffer.writePacket(Protocol::loginSuccess(this->uuid, this->nick), this->compression);
   this->gameState++;
@@ -232,6 +235,8 @@ bool User::sendLoginInfo()
     // Send spawn position
   buffer.writePacket(Protocol::spawnPosition(int(pos.x), int(pos.y + 2), int(pos.z)), this->compression);
   buffer.writePacket(Protocol::timeUpdate(ServerInstance->map(pos.map)->mapTime), this->compression);
+
+  buffer.writePacket(Protocol::playerAbilities(5, 0.1, 0.2), this->compression);
 
   // Put nearby chunks to queue
   for (int x = -viewDistance; x <= viewDistance; x++)

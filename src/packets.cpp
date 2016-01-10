@@ -75,10 +75,12 @@ void PacketHandler::init()
 {
   
   packets[STATE_HANDSHAKE][PACKET_HANDSHAKE] = Packets(&PacketHandler::handshake);
-  packets[STATE_LOGIN][PACKET_LOGIN_REQUEST] = Packets(&PacketHandler::login_request);
-  packets[STATE_LOGIN][PACKET_ENCRYPTION_RESPONSE] = Packets(&PacketHandler::encryption_response);
+
   packets[STATE_STATUS][PACKET_SERVER_LIST_PING] = Packets(&PacketHandler::server_list_ping);
   packets[STATE_STATUS][PACKET_PING] = Packets(&PacketHandler::ping);
+
+  packets[STATE_LOGIN][PACKET_LOGIN_REQUEST] = Packets(&PacketHandler::login_request);
+  packets[STATE_LOGIN][PACKET_ENCRYPTION_RESPONSE] = Packets(&PacketHandler::encryption_response);
   
   packets[STATE_PLAY][PACKET_KEEP_ALIVE] = Packets(&PacketHandler::keep_alive);
   packets[STATE_PLAY][PACKET_CHAT_MESSAGE] = Packets(&PacketHandler::chat_message);
@@ -548,6 +550,8 @@ int PacketHandler::inventory_change(User* user)
 int PacketHandler::keep_alive(User* user)
 {
   //No need to do anything
+  MS_VarInt time;
+  user->buffer >> time;
 
   return PACKET_OK;
 }

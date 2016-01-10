@@ -231,6 +231,21 @@ class Protocol
       return ret;
     }
 
+    static Packet setCompression(int threshold)
+    {
+      Packet ret;
+      ret << MS_VarInt((uint32_t)PACKET_SET_COMPRESSION) << MS_VarInt((uint32_t)threshold);
+      return ret;
+    }
+
+    static Packet loginSuccess(std::string uuid, std::string username)
+    {
+      Packet ret;
+      ret << MS_VarInt((uint32_t)PACKET_LOGIN_SUCCESS) << uuid
+          << username;
+      return ret;
+    }
+
     //ToDo: remember gamemode for players
     static Packet joinGame(int eid, int8_t gamemode = 0)
     {
@@ -240,6 +255,15 @@ class Protocol
           << (int8_t)gamemode << (int8_t)0 /* dimension */
           << (int8_t)2 /*difficulty */ << (int8_t)ServerInstance->config()->iData("system.user_limit")
           << std::string("default") << (int8_t)0; /* reduced debug info */
+      return ret;
+    }
+
+    static Packet playerAbilities(uint8_t flags, float flying_speed, float walking_speed)
+    {
+
+      Packet ret;
+      ret << MS_VarInt((uint32_t)PACKET_PLAYER_ABILITIES) << flags
+          << flying_speed << walking_speed;
       return ret;
     }
 
