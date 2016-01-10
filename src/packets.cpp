@@ -69,38 +69,40 @@
 
 void PacketHandler::init()
 {
-  packets[PACKET_KEEP_ALIVE]               = Packets(0, &PacketHandler::keep_alive);
-  packets[PACKET_LOGIN_REQUEST]            = Packets(PACKET_VARIABLE_LEN, &PacketHandler::login_request);
-  packets[PACKET_HANDSHAKE]                = Packets(PACKET_VARIABLE_LEN, &PacketHandler::handshake);
-  packets[PACKET_CHAT_MESSAGE]             = Packets(PACKET_VARIABLE_LEN, &PacketHandler::chat_message);
-  packets[PACKET_USE_ENTITY]               = Packets(9, &PacketHandler::use_entity);
-  packets[PACKET_PLAYER]                   = Packets(1, &PacketHandler::player);
-  packets[PACKET_PLAYER_POSITION]          = Packets(33, &PacketHandler::player_position);
-  packets[PACKET_PLAYER_LOOK]              = Packets(9, &PacketHandler::player_look);
-  packets[PACKET_PLAYER_POSITION_AND_LOOK] = Packets(41, &PacketHandler::player_position_and_look);
-  packets[PACKET_PLAYER_DIGGING]           = Packets(11, &PacketHandler::player_digging);
-  packets[PACKET_PLAYER_BLOCK_PLACEMENT]   = Packets(PACKET_VARIABLE_LEN, &PacketHandler::player_block_placement);
-  packets[PACKET_HOLDING_CHANGE]           = Packets(2, &PacketHandler::holding_change);
-  packets[PACKET_ANIMATION]                = Packets(5, &PacketHandler::arm_animation);
-  packets[PACKET_PICKUP_SPAWN]             = Packets(22, &PacketHandler::pickup_spawn);
-  packets[PACKET_DISCONNECT]               = Packets(PACKET_VARIABLE_LEN, &PacketHandler::disconnect);
-  packets[PACKET_RESPAWN]                  = Packets(PACKET_VARIABLE_LEN, &PacketHandler::respawn);
-  packets[PACKET_INVENTORY_CHANGE]         = Packets(PACKET_VARIABLE_LEN, &PacketHandler::inventory_change);
-  packets[PACKET_INVENTORY_CLOSE]          = Packets(1, &PacketHandler::inventory_close);
-  packets[PACKET_SIGN]                     = Packets(PACKET_VARIABLE_LEN, &PacketHandler::change_sign);
-  packets[PACKET_TRANSACTION]              = Packets(4, &PacketHandler::inventory_transaction);
-  packets[PACKET_ENTITY_CROUCH]            = Packets(5, &PacketHandler::entity_crouch);
-  packets[PACKET_THUNDERBOLT]              = Packets(18, &PacketHandler::unhandledPacket);
-  packets[PACKET_INCREMENT_STATISTICS]     = Packets(6, &PacketHandler::unhandledPacket);
-  packets[PACKET_PING]                     = Packets(0, &PacketHandler::ping);
-  packets[PACKET_BLOCK_CHANGE]             = Packets(11, &PacketHandler::block_change);
-  packets[PACKET_TAB_COMPLETE]             = Packets(PACKET_VARIABLE_LEN, &PacketHandler::tab_complete);
-  packets[PACKET_CLIENT_INFO]              = Packets(PACKET_VARIABLE_LEN, &PacketHandler::client_info);
-  packets[PACKET_CLIENT_STATUS]            = Packets(1, &PacketHandler::client_status);
-  packets[PACKET_ENCRYPTION_RESPONSE]      = Packets(PACKET_VARIABLE_LEN, &PacketHandler::encryption_response);
-  packets[PACKET_PLUGIN_MESSAGE]           = Packets(PACKET_VARIABLE_LEN, &PacketHandler::plugin_message);
-  packets[PACKET_CREATIVE_INVENTORY]       = Packets(PACKET_VARIABLE_LEN, &PacketHandler::creative_inventory);
-  packets[PACKET_PLAYER_ABILITIES]         = Packets(3, &PacketHandler::player_abilities);
+  
+  packets[STATE_HANDSHAKE][PACKET_HANDSHAKE] = Packets(&PacketHandler::handshake);
+  packets[STATE_LOGIN][PACKET_LOGIN_REQUEST] = Packets(&PacketHandler::login_request);
+  
+  packets[STATE_PLAY][PACKET_KEEP_ALIVE] = Packets(&PacketHandler::keep_alive);
+  packets[STATE_PLAY][PACKET_CHAT_MESSAGE] = Packets(&PacketHandler::chat_message);
+  packets[STATE_PLAY][PACKET_USE_ENTITY] = Packets(&PacketHandler::use_entity);
+  packets[STATE_PLAY][PACKET_PLAYER] = Packets(&PacketHandler::player);
+  packets[STATE_PLAY][PACKET_PLAYER_POSITION] = Packets(&PacketHandler::player_position);
+  packets[STATE_PLAY][PACKET_PLAYER_LOOK] = Packets(&PacketHandler::player_look);
+  packets[STATE_PLAY][PACKET_PLAYER_POSITION_AND_LOOK] = Packets(&PacketHandler::player_position_and_look);
+  packets[STATE_PLAY][PACKET_PLAYER_DIGGING] = Packets(&PacketHandler::player_digging);
+  packets[STATE_PLAY][PACKET_PLAYER_BLOCK_PLACEMENT] = Packets(&PacketHandler::player_block_placement);
+  packets[STATE_PLAY][PACKET_HOLDING_CHANGE] = Packets(&PacketHandler::holding_change);
+  packets[STATE_PLAY][PACKET_ANIMATION] = Packets(&PacketHandler::arm_animation);
+  packets[STATE_PLAY][PACKET_PICKUP_SPAWN] = Packets(&PacketHandler::pickup_spawn);
+  packets[STATE_PLAY][PACKET_DISCONNECT] = Packets(&PacketHandler::disconnect);
+  packets[STATE_PLAY][PACKET_RESPAWN] = Packets(&PacketHandler::respawn);
+  packets[STATE_PLAY][PACKET_INVENTORY_CHANGE] = Packets(&PacketHandler::inventory_change);
+  packets[STATE_PLAY][PACKET_INVENTORY_CLOSE] = Packets(&PacketHandler::inventory_close);
+  packets[STATE_PLAY][PACKET_SIGN] = Packets(&PacketHandler::change_sign);
+  packets[STATE_PLAY][PACKET_TRANSACTION] = Packets(&PacketHandler::inventory_transaction);
+  packets[STATE_PLAY][PACKET_ENTITY_CROUCH] = Packets(&PacketHandler::entity_crouch);
+  packets[STATE_PLAY][PACKET_THUNDERBOLT] = Packets(&PacketHandler::unhandledPacket);
+  packets[STATE_PLAY][PACKET_INCREMENT_STATISTICS] = Packets(&PacketHandler::unhandledPacket);
+  packets[STATE_PLAY][PACKET_PING] = Packets(&PacketHandler::ping);
+  packets[STATE_PLAY][PACKET_BLOCK_CHANGE] = Packets(&PacketHandler::block_change);
+  packets[STATE_PLAY][PACKET_TAB_COMPLETE] = Packets(&PacketHandler::tab_complete);
+  packets[STATE_PLAY][PACKET_CLIENT_INFO] = Packets(&PacketHandler::client_info);
+  packets[STATE_PLAY][PACKET_CLIENT_STATUS] = Packets(&PacketHandler::client_status);
+  packets[STATE_PLAY][PACKET_ENCRYPTION_RESPONSE] = Packets(&PacketHandler::encryption_response);
+  packets[STATE_PLAY][PACKET_PLUGIN_MESSAGE] = Packets(&PacketHandler::plugin_message);
+  packets[STATE_PLAY][PACKET_CREATIVE_INVENTORY] = Packets(&PacketHandler::creative_inventory);
+  packets[STATE_PLAY][PACKET_PLAYER_ABILITIES] = Packets(&PacketHandler::player_abilities);
 }
 
 int PacketHandler::unhandledPacket(User* user)

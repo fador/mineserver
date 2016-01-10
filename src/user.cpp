@@ -71,7 +71,7 @@ User::User(int sock, uint32_t EID)
   this->fallDistance    = -10;
   this->healthtimeout   = time(NULL) - 1;
   this->crypted         = false;
-
+  this->gameState       = 0;
 
   this->m_currentItemSlot = 0;
   this->inventoryHolding  = Item(this, -1);

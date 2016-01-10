@@ -124,13 +124,23 @@ inline double bswap(const double& x){
 class PacketHandler;
 class User;
 
+// gameState names
+enum {
+  STATE_HANDSHAKE = 0,
+  STATE_STATUS    = 1,
+  STATE_LOGIN     = 2,
+  STATE_PLAY      = 3
+};
+
 //Packet names
 enum
 {
+  //   
+  PACKET_HANDSHAKE                 = 0x00,
+
   //Client to server
   PACKET_KEEP_ALIVE                = 0x00,
   PACKET_LOGIN_REQUEST             = 0x01,
-  PACKET_HANDSHAKE                 = 0x02,
   PACKET_CHAT_MESSAGE              = 0x03,
   PACKET_ENTITY_EQUIPMENT          = 0x05,
   PACKET_USE_ENTITY                = 0x07,
@@ -371,8 +381,8 @@ struct Packets
   {
   }
 
-  Packets(int newlen, handler_function newfunction)
-    : len(newlen), function(newfunction)
+  Packets(handler_function newfunction)
+    : len(PACKET_OK), function(newfunction)
   {
   }
 

@@ -203,20 +203,33 @@ extern "C" void client_callback(int fd, short ev, void* arg)
 
     user->buffer.addToRead(upBUF, read);
     user->buffer.reset();
+    MS_VarInt packetLen;
 
-    while (user->buffer >> (int8_t&)user->action)
+    while (user->buffer >> (MS_VarInt&)packetLen)
     {  
-      //Variable len package
-      if (ServerInstance->packetHandler()->packets[user->action].len == PACKET_VARIABLE_LEN)
+      std::ostringstream str;
+          str << "packet len: 0x" << std::hex << (unsigned int)(packetLen);
+          LOG2(DEBUG, str.str());
+      // Check if we have the data in buffer
+      if (!user->buffer.haveData(static_cast<int64_t>(packetLen)))
       {
-        //Call specific function
-        const bool disconnecting = user->action == 0xFF;
-        const int curpos = ServerInstance->packetHandler()->packets[user->action].function(user);
+        user->waitForData = true;
+        event_add(user->getReadEvent(), NULL);
+        return;
+      }
+      // Packet data has been received, call the function
+      else
+      {
+        MS_VarInt action;
+        user->buffer >> (MS_VarInt&)action;
+        user->action = (uint8_t)static_cast<int64_t>(action);
 
-        if (curpos == PACKET_NEED_MORE_DATA)
-        {
-          user->waitForData = true;
-          event_add(user->getReadEvent(), NULL);
+        if (ServerInstance->packetHandler()->packets[user->gameState][user->action].len == PACKET_DOES_NOT_EXIST) {
+          std::ostringstream str;
+          str << "Unknown packet: 0x" << std::hex << (unsigned int)(user->action);
+          LOG2(DEBUG, str.str());
+
+          delete user;
           return;
         }
 
@@ -224,42 +237,19 @@ extern "C" void client_callback(int fd, short ev, void* arg)
         printf("Packet from %s, id = 0x%hx \n", user->nick.c_str(), user->action);
 #endif
 
+        //Call specific function
+        ServerInstance->packetHandler()->packets[user->gameState][user->action].function(user);
+
+        const bool disconnecting = user->action == 0xFF;
+
         if (disconnecting) // disconnect -- player gone
         {
-          if(user->nick.size())
-          {
-            LOG2(INFO, "User "+ user->nick + " disconnected normally");
+          if (user->nick.size()) {
+            LOG2(INFO, "User " + user->nick + " disconnected normally");
           }
           delete user;
           return;
         }
-      }
-      else if (ServerInstance->packetHandler()->packets[user->action].len == PACKET_DOES_NOT_EXIST)
-      {
-        std::ostringstream str;
-        str << "Unknown packet: 0x" << std::hex << (unsigned int)(user->action);
-        LOG2(DEBUG, str.str());
-
-        delete user;
-        return;
-      }
-      //Constant len packets
-      else
-      {
-        //Check that the buffer has enough data before calling the function
-        if (!user->buffer.haveData(ServerInstance->packetHandler()->packets[user->action].len))
-        {
-          user->waitForData = true;
-          event_add(user->getReadEvent(), NULL);
-          return;
-        }
-
-#ifdef DEBUG
-        printf("Packet from %s, id = 0x%hx \n", user->nick.c_str(), user->action);
-#endif
-
-        //Call specific function
-        ServerInstance->packetHandler()->packets[user->action].function(user);
       }
     } // while(user->buffer)
   } //End reading
