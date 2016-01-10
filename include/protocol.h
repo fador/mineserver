@@ -54,9 +54,10 @@ class Protocol
     static Packet encryptionRequest()
     {
       Packet ret;
-      ret << (int8_t)PACKET_ENCRYPTION_REQUEST << ServerInstance->serverID << (int16_t)ServerInstance->publicKey.size();
+      ret << MS_VarInt((uint32_t)PACKET_ENCRYPTION_REQUEST) << ServerInstance->serverID 
+      << MS_VarInt(ServerInstance->publicKey.size());
       ret.addToWrite((uint8_t*)ServerInstance->publicKey.c_str(),ServerInstance->publicKey.size());
-      ret << (int16_t)ServerInstance->encryptionBytes.size();
+      ret << MS_VarInt(ServerInstance->encryptionBytes.size());
       ret.addToWrite((uint8_t*)ServerInstance->encryptionBytes.c_str(),ServerInstance->encryptionBytes.size());
       return ret;
     }

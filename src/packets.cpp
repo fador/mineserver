@@ -159,18 +159,13 @@ int PacketHandler::plugin_message(User* user)
 int PacketHandler::encryption_response(User* user)
 {
 
-  if (!user->buffer.haveData(4))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
-
-  int16_t secretLen, verifyLen;
+  MS_VarInt secretLen, verifyLen;
   std::string secret,verify;
   std::string decryptedSecret(' ', 16);
 
   user->buffer >> secretLen;
 
-  if (!user->buffer.haveData(secretLen))
+  if (!user->buffer.haveData((int)secretLen))
   {
     return PACKET_NEED_MORE_DATA;
   }
@@ -184,21 +179,21 @@ int PacketHandler::encryption_response(User* user)
 
   user->buffer >> verifyLen;
 
-  if (!user->buffer.haveData(verifyLen))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
 
-  for(int i = 0; i < verifyLen; i++)
+  for(int i = 0; i < (int)verifyLen; i++)
   {
     int8_t byte;
     user->buffer >> byte;
     verify.push_back(byte);
   }
 
+  if (!user->buffer)
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
   
   //Those should be around 128 bytes
-  if(verifyLen > 1023 || secretLen > 1023)
+  if((int)verifyLen > 1023 || (int)secretLen > 1023)
   {
     user->kick("Invalid verify/secret size");
     return PACKET_OK;
@@ -208,7 +203,7 @@ int PacketHandler::encryption_response(User* user)
   uint8_t buffer[1024];
   memset(buffer, 0, 1024);
   //Decrypt the verification bytes
-  int ret = RSA_private_decrypt(verifyLen,(const uint8_t *)verify.c_str(),buffer,ServerInstance->rsa,RSA_PKCS1_PADDING);
+  int ret = RSA_private_decrypt((int)verifyLen,(const uint8_t *)verify.c_str(),buffer,ServerInstance->rsa,RSA_PKCS1_PADDING);
   //Check they match with the ones sent
   if(ret != 4 || std::string((char *)buffer) != ServerInstance->encryptionBytes)
   {
@@ -218,7 +213,7 @@ int PacketHandler::encryption_response(User* user)
 
   //Decrypt secret sent by the client and store
   memset(buffer, 0, 1024);
-  ret = RSA_private_decrypt(secretLen,(const uint8_t *)secret.c_str(),buffer,ServerInstance->rsa,RSA_PKCS1_PADDING);
+  ret = RSA_private_decrypt((int)secretLen,(const uint8_t *)secret.c_str(),buffer,ServerInstance->rsa,RSA_PKCS1_PADDING);
   user->secret = std::string((char *)buffer, ret);
   //We're going crypted!
   user->initCipher();
@@ -228,8 +223,7 @@ int PacketHandler::encryption_response(User* user)
   {
     //Response
     user->crypted = true;
-    user->buffer << (int8_t)PACKET_ENCRYPTION_RESPONSE << (int16_t)0 << (int16_t) 0;
-    user->uncryptedLeft = 5; //5 first bytes are uncrypted
+    user->sendLoginInfo();
   }
   else
   {
@@ -590,7 +584,7 @@ int PacketHandler::login_request(User* user)
     }
     else
     {
-      user->buffer << Protocol::encryptionRequest();
+      user->buffer.writePacket(Protocol::encryptionRequest(), user->compression);
     }
     runAllCallback("PlayerLoginPost",player.c_str());
   }
