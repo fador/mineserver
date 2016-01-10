@@ -1663,17 +1663,15 @@ std::string Packet::readString()
 
 void Packet::writeVarInt(int64_t varint)
 {
-  do{
-    uint8_t byte = 0;
-    if(varint > 128)
-      byte |= 0x80;
-
-    byte |= (varint & 0x7F);
-
+  uint8_t byte = 0;
+  while(varint > 127)
+  {
+    byte = (varint & 0x7f) | 0x80;
     write(&byte, 1);
-
-    varint = varint >> 7;
-  }while(varint != 0);
+    varint >>= 7;
+  }
+  byte = varint;
+  write(&byte, 1);
 }
 
 int64_t Packet::readVarInt()
