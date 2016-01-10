@@ -223,7 +223,10 @@ enum
   PACKET_INCREMENT_STATISTICS = 0xC8
 };
 
-typedef struct {
+typedef struct VarInt_internal {
+  VarInt_internal() {};
+  VarInt_internal(int64_t init_value) : val(init_value) {};
+  VarInt_internal(uint32_t init_value) : val((int64_t)init_value) {};
   operator int64_t() const { return val; }
   int64_t val;
 } MS_VarInt;
