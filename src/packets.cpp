@@ -715,7 +715,7 @@ int PacketHandler::player_position_and_look(User* user)
   float yaw, pitch;
   int8_t onground;
 
-  user->buffer >> x >> y >> stance >> z
+  user->buffer >> x >> y >> z
                >> yaw >> pitch >> onground;
 
   if (!user->buffer)
@@ -724,7 +724,7 @@ int PacketHandler::player_position_and_look(User* user)
   }
 
   //Update user data
-  user->updatePos(x, y, z, stance);
+  user->updatePos(x, y, z, 0.0);
   user->updateLook(yaw, pitch);
 
 
@@ -1705,7 +1705,7 @@ void Packet::writePacket(const Packet& p, uint16_t compression)
         uint8_t* inBuf = new uint8_t[(uint32_t)datalen];
 
         // Read the writebuffer to a continuous buffer
-        read(inBuf,(uint32_t)datalen);
+        std::copy(p.m_writeBuffer.begin(), p.m_writeBuffer.end(), inBuf);
 
         // Compress the buffer data
         uLongf written = (uint32_t)datalen+16;

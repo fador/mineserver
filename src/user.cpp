@@ -232,12 +232,14 @@ bool User::sendLoginInfo()
   // ToDo: spawn others
   //spawnOthers();
 
-    // Send spawn position
+  // Send spawn position
   buffer.writePacket(Protocol::spawnPosition(int(pos.x), int(pos.y + 2), int(pos.z)), this->compression);
   buffer.writePacket(Protocol::timeUpdate(ServerInstance->map(pos.map)->mapTime), this->compression);
 
   buffer.writePacket(Protocol::playerAbilities(5, 0.1, 0.2), this->compression);
 
+  buffer.writePacket(Protocol::playerPositionAndLook(pos.x, pos.y, pos.z, pos.yaw, pos.pitch, 0), this->compression);
+  
   // Put nearby chunks to queue
   for (int x = -viewDistance; x <= viewDistance; x++)
   {
@@ -281,7 +283,7 @@ bool User::sendLoginInfo()
   logged = true;
   */
 
-  ServerInstance->chat()->sendMsg(this, nick + " connected!", Chat::ALL);
+  //ServerInstance->chat()->sendMsg(this, nick + " connected!", Chat::ALL);
 
   return true;
 }
@@ -1117,7 +1119,7 @@ bool User::teleport(double x, double y, double z, size_t map)
   }
   if (map == pos.map)
   {
-    buffer << Protocol::playerPositionAndLook(x, y, 0, z, 0, 0, true);
+    buffer << Protocol::playerPositionAndLook(x, y, z, 0, 0, true);
   }
 
   //Also update pos for other players

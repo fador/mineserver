@@ -149,14 +149,15 @@ enum
   PACKET_ENCRYPTION_RESPONSE       = 0x01,
   
   PACKET_KEEP_ALIVE                = 0x00,  
-  
+  PACKET_PLAYER_POSITION_AND_LOOK  = 0x04,
   PACKET_ENTITY_EQUIPMENT          = 0x05,
+  
   PACKET_USE_ENTITY                = 0x07,
   PACKET_RESPAWN                   = 0x09,
   PACKET_PLAYER                    = 0x0a,
   PACKET_PLAYER_POSITION           = 0x0b,
   PACKET_PLAYER_LOOK               = 0x0c,
-  PACKET_PLAYER_POSITION_AND_LOOK  = 0x0d,
+  
   PACKET_PLAYER_DIGGING            = 0x0e,
   PACKET_PLAYER_BLOCK_PLACEMENT    = 0x0f,
   PACKET_HOLDING_CHANGE            = 0x10,
@@ -185,6 +186,7 @@ enum
   PACKET_CHAT_MESSAGE              = 0x02,
   PACKET_TIME_UPDATE               = 0x03,
   PACKET_SPAWN_POSITION            = 0x05,
+  PACKET_PLAYER_POSITION_AND_LOOK_S= 0x08,
   PACKET_MAP_CHUNK                 = 0x21,
   PACKET_GAME_MODE                 = 0x2b,
   PACKET_UPDATE_SIGN               = 0x33,
@@ -224,7 +226,7 @@ enum
   PACKET_PLAYER_LIST_ITEM          = 0xc9,
   //PACKET_COMPLEX_ENTITIES          = 0x3b,   
 
-  /// two-way
+  /// two-way  
   PACKET_CREATIVE_INVENTORY        = 0x6b,
   // TODO unhandled packets
   PACKET_THUNDERBOLT = 0x47,

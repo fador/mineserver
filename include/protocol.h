@@ -359,10 +359,10 @@ class Protocol
       return ret;
     }
 
-    static Packet playerPositionAndLook(double x, double y, double stance, double z, float yaw, float pitch, bool onGround)
+    static Packet playerPositionAndLook(double x, double y, double z, float yaw, float pitch, uint8_t flags)
     {
       Packet ret;
-      ret << (int8_t)PACKET_PLAYER_POSITION_AND_LOOK << x << y << stance << z << yaw << pitch << (int8_t)(onGround ? 1 : 0);
+      ret << MS_VarInt((uint32_t)PACKET_PLAYER_POSITION_AND_LOOK_S) << x << y << z << yaw << pitch << flags;
       return ret;
     }
 
