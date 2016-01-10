@@ -77,6 +77,8 @@ void PacketHandler::init()
   packets[STATE_HANDSHAKE][PACKET_HANDSHAKE] = Packets(&PacketHandler::handshake);
   packets[STATE_LOGIN][PACKET_LOGIN_REQUEST] = Packets(&PacketHandler::login_request);
   packets[STATE_LOGIN][PACKET_ENCRYPTION_RESPONSE] = Packets(&PacketHandler::encryption_response);
+  packets[STATE_STATUS][PACKET_SERVER_LIST_PING] = Packets(&PacketHandler::server_list_ping);
+  packets[STATE_STATUS][PACKET_PING] = Packets(&PacketHandler::ping);
   
   packets[STATE_PLAY][PACKET_KEEP_ALIVE] = Packets(&PacketHandler::keep_alive);
   packets[STATE_PLAY][PACKET_CHAT_MESSAGE] = Packets(&PacketHandler::chat_message);
@@ -99,7 +101,6 @@ void PacketHandler::init()
   packets[STATE_PLAY][PACKET_ENTITY_CROUCH] = Packets(&PacketHandler::entity_crouch);
   packets[STATE_PLAY][PACKET_THUNDERBOLT] = Packets(&PacketHandler::unhandledPacket);
   packets[STATE_PLAY][PACKET_INCREMENT_STATISTICS] = Packets(&PacketHandler::unhandledPacket);
-  packets[STATE_PLAY][PACKET_PING] = Packets(&PacketHandler::ping);
   packets[STATE_PLAY][PACKET_BLOCK_CHANGE] = Packets(&PacketHandler::block_change);
   packets[STATE_PLAY][PACKET_TAB_COMPLETE] = Packets(&PacketHandler::tab_complete);
   packets[STATE_PLAY][PACKET_CLIENT_INFO] = Packets(&PacketHandler::client_info);
@@ -1533,35 +1534,43 @@ int PacketHandler::use_entity(User* user)
 
 
 // Serverlist ping (http://wiki.vg/Server_List_Ping)
-int PacketHandler::ping(User* user)
-{
-  //Read the new magic field in the 1.4 protocol
-  int8_t magic;
-  user->buffer >> magic;  
-  
+int PacketHandler::server_list_ping(User* user)
+{  
   //Reply with server info
   std::string line;
+  Packet pkt;
 
-  //Insert \1 instead of null char \0, then replace it later
-  line = "§1\1" +
-        my_itoa(PROTOCOL_VERSION) + "\1" +
-        MINECRAFT_VERSION + "\1" +
-        ServerInstance->config()->sData("system.server_name") + "\1" +
-        my_itoa(ServerInstance->getLoggedUsersCount()) + "\1" +
-        my_itoa(ServerInstance->config()->iData("system.user_limit"));
-  //Replacing \1 with \0
-  for(unsigned int i = 0; i < line.size();i++)
-  {
-    if(line[i] == '\1')
-    {
-      line[i] = '\0';
-    }
-  }
-  user->kick(line);
+  line = "{ \"version\": {\"name\": \""+MINECRAFT_VERSION+"\", \"protocol\": "+my_itoa(PROTOCOL_VERSION)+" },\n"+
+        "\"players\": {"+
+          "\"max\": "+my_itoa(ServerInstance->config()->iData("system.user_limit"))+","+
+          "\"online\": "+my_itoa(ServerInstance->getLoggedUsersCount())+
+        " },"+
+        "\"description\": {\"text\": \""+ServerInstance->config()->sData("system.server_name")+"\" }"+
+      "}";
+
+  LOG2(DEBUG, line);
+  pkt << (uint8_t)0 << line;
+
+  user->buffer.writePacket(pkt, user->compression);
 
   return PACKET_OK;
 }
 
+int PacketHandler::ping(User* user)
+{
+
+  uint64_t value;
+  user->buffer >> value; 
+  
+  std::string line;
+  Packet pkt;
+
+  pkt << (uint8_t)1 << value;
+
+  user->buffer.writePacket(pkt, user->compression);
+
+  return PACKET_OK;
+}
 
 int PacketHandler::respawn(User* user)
 {

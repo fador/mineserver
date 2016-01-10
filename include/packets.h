@@ -141,6 +141,8 @@ enum
   PACKET_HANDSHAKE                 = 0x00,
 
   // State: Status
+  PACKET_SERVER_LIST_PING          = 0x00,
+  PACKET_PING                      = 0x01,
 
   // State: Login
   PACKET_LOGIN_REQUEST             = 0x00,
@@ -177,7 +179,6 @@ enum
   // State: Login
   PACKET_LOGIN_RESPONSE            = 0x01,
 
-
   PACKET_TIME_UPDATE               = 0x04,
   PACKET_SPAWN_POSITION            = 0x06,
   PACKET_UPDATE_HEALTH             = 0x08,
@@ -210,8 +211,7 @@ enum
   PACKET_PROGRESS_BAR              = 0x69,
   PACKET_TRANSACTION               = 0x6a,
   PACKET_PLAYER_LIST_ITEM          = 0xc9,
-  //PACKET_COMPLEX_ENTITIES          = 0x3b,
-  PACKET_PING                      = 0xFE,
+  //PACKET_COMPLEX_ENTITIES          = 0x3b,  
   PACKET_ENCRYPTION_REQUEST        = 0xFD,
   PACKET_KICK                      = 0xff,
 
@@ -494,6 +494,7 @@ public:
   static int unhandledPacket(User* user);
 
   static int ping(User* user);
+  static int server_list_ping(User* user);
 
 
   static int block_change(User* user);
