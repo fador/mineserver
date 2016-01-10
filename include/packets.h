@@ -273,6 +273,8 @@ public:
     m_isValid = true;
   }
 
+  inline void writePacket(const Packet& p, uint16_t compression);
+
   inline void addToWrite(const Packet& p)
   {
     m_writeBuffer.insert(m_writeBuffer.end(), p.m_writeBuffer.begin(), p.m_writeBuffer.end());
@@ -299,6 +301,11 @@ public:
   inline void removePacket()
   {
     m_readBuffer.erase(m_readBuffer.begin(), m_readBuffer.begin() + m_readPos);
+    m_readPos = 0;
+  }
+  inline void removePacketLen(uint32_t len)
+  {
+    m_readBuffer.erase(m_readBuffer.begin(), m_readBuffer.begin() + len);
     m_readPos = 0;
   }
 

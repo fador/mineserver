@@ -103,6 +103,7 @@ public:
   std::string temp_nick;
   vec curChunk;
   time_t healthtimeout;
+  uint16_t compression; // Protocol compression threshold
 
   /* INVENTORY RELATED HELPERS */
   Item inventoryHolding;

@@ -67,6 +67,10 @@
 #include <openssl/err.h>
 #endif
 
+#define _WINSOCKAPI_
+#define NOMINMAX
+#include <zlib.h>
+
 void PacketHandler::init()
 {
   
@@ -1685,3 +1689,58 @@ int64_t Packet::readVarInt()
 
   return ret;
 }
+
+
+void Packet::writePacket(const Packet& p, uint16_t compression)
+  {
+    MS_VarInt datalen;
+    datalen.val = p.m_writeBuffer.end()-p.m_writeBuffer.begin();
+
+    if (compression)
+    {
+      if (datalen > compression) 
+      {
+        uint8_t* tempBuf = new uint8_t[(uint32_t)datalen+16];
+        uint8_t* inBuf = new uint8_t[(uint32_t)datalen];
+
+        // Read the writebuffer to a continuous buffer
+        read(inBuf,(uint32_t)datalen);
+
+        // Compress the buffer data
+        uLongf written = (uint32_t)datalen+16;
+        compress(tempBuf, &written, inBuf, (uint32_t)datalen);
+
+        // We have to get the length of the uncompressed data
+        Packet pkt_len;
+        pkt_len << datalen;
+        
+        // Compressed packet length is the uncompressed length varint len + compressed data len
+        MS_VarInt compressedLen;
+        compressedLen.val = pkt_len.m_writeBuffer.size() + written;
+
+        // Write the total packet length, uncompressed length and the compressed data
+        Packet packetOut;
+        packetOut << compressedLen << datalen;
+        packetOut.write(tempBuf, written);
+        addToWrite(packetOut);
+        delete[] tempBuf;
+        delete[] inBuf;
+      }
+      else
+      {
+        // If data is uncompressed, set uncompressed size to "0"
+        datalen.val ++;
+        *this << datalen;
+        datalen.val = 0;
+        *this << datalen;
+        addToWrite(p);      
+      }
+    }
+    else {
+      // Write without the compress field
+      MS_VarInt len;
+      len.val = p.m_writeBuffer.end()-p.m_writeBuffer.begin();
+      *this << len;
+      addToWrite(p);
+    }
+  }
