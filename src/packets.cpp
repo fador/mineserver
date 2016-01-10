@@ -1598,6 +1598,17 @@ Packet& Packet::operator>>(std::string& str)
   return *this;
 }
 
+Packet& Packet::operator<<(const MS_VarInt& varint)
+{
+  writeVarInt(static_cast<int64_t>(varint));
+  return *this;
+}
+Packet& Packet::operator>>(MS_VarInt& varint)
+{
+  varint.val = readVarInt();
+  return *this;
+}
+
 Packet& Packet::operator<<(const Packet& other)
 {
   addToWrite(other);

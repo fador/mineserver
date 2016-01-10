@@ -202,6 +202,11 @@ enum
   PACKET_INCREMENT_STATISTICS = 0xC8
 };
 
+typedef struct {
+  operator int64_t() const { return val; }
+  int64_t val;
+} MS_VarInt;
+
 class Packet
 {
   // A deque has random-access iterators, so we can track the read position in an integer.
@@ -312,6 +317,10 @@ public:
   Packet& operator<<(const std::string& str);
   Packet& operator>>(std::string& str);
 
+  // Varint reading and writing
+  Packet& operator<<(const MS_VarInt& varint);
+  Packet& operator>>(MS_VarInt& varint);
+
   void writeString(const std::string& str);
   std::string readString();
 
@@ -415,8 +424,9 @@ public:
   void init();
 
   // Information of all the packets
-  // around 2kB of memory
-  Packets packets[256];
+  // around 4*2kB of memory
+  // 4 gamestates with max 256 packets each
+  Packets packets[4][256];
 
   // The packet functions
   static int keep_alive(User* user);
