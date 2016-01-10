@@ -1619,8 +1619,9 @@ Packet& Packet::operator<<(const Packet& other)
 
 void Packet::writeString(const std::string& str)
 {
-  uint16_t lenval = htons(str.size());
-  addToWrite(reinterpret_cast<const uint8_t*>(&lenval), 2);
+  MS_VarInt len;
+  len.val = str.size();
+  *this << len;
   addToWrite(reinterpret_cast<const uint8_t*>(str.data()), str.length());
 }
 
@@ -1628,14 +1629,15 @@ std::string Packet::readString()
 {
   std::string str;
 
-  if (haveData(2))
+  if (haveData(1))
   {
-    int16_t lenval = 0;
+    MS_VarInt lenval;
     *this >> lenval;
+    uint16_t len = (uint16_t)static_cast<int64_t>(lenval);
 
-    if (lenval && haveData(lenval))
+    if (len && haveData(len))
     {
-      for (size_t i = 0; i < uint16_t(lenval); ++i)
+      for (size_t i = 0; i < uint16_t(len); ++i)
         str += m_readBuffer[m_readPos++];
     }
   }
