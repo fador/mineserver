@@ -932,10 +932,9 @@ void Mineserver::timed_10s()
   {
     // Send server time and keepalive
     Packet pkt;
-    pkt << Protocol::timeUpdate(m_map[0]->mapTime);
-    pkt << Protocol::keepalive(0);
-    pkt << Protocol::playerlist();
-    (*User::all().begin())->sendAll(pkt);
+    (*User::all().begin())->sendAll(Protocol::timeUpdate(m_map[0]->mapTime));
+    (*User::all().begin())->sendAll(Protocol::keepalive(0));
+    //(*User::all().begin())->sendAll(Protocol::playerlist());
   }
 
   //Check for tree generation from saplings

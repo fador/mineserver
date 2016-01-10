@@ -147,10 +147,9 @@ enum
   // State: Login
   PACKET_LOGIN_REQUEST             = 0x00,
   PACKET_ENCRYPTION_RESPONSE       = 0x01,
-
   
   PACKET_KEEP_ALIVE                = 0x00,  
-  PACKET_CHAT_MESSAGE              = 0x03,
+  
   PACKET_ENTITY_EQUIPMENT          = 0x05,
   PACKET_USE_ENTITY                = 0x07,
   PACKET_RESPAWN                   = 0x09,
@@ -172,15 +171,27 @@ enum
   PACKET_CLIENT_INFO               = 0xcc,
   PACKET_CLIENT_STATUS             = 0xcd,
   PACKET_PLUGIN_MESSAGE            = 0xfa,  
-  PACKET_DISCONNECT                = 0xff,
 
   //Server to client
 
-  // State: Login
-  PACKET_LOGIN_RESPONSE            = 0x01,
+  // State: Login  
+  PACKET_ENCRYPTION_REQUEST        = 0x01,
+  PACKET_LOGIN_SUCCESS             = 0x02,
+  PACKET_SET_COMPRESSION           = 0x03, 
 
-  PACKET_TIME_UPDATE               = 0x04,
-  PACKET_SPAWN_POSITION            = 0x06,
+  // State: play
+
+  PACKET_JOIN_GAME                 = 0x01,
+  PACKET_CHAT_MESSAGE              = 0x02,
+  PACKET_TIME_UPDATE               = 0x03,
+  PACKET_SPAWN_POSITION            = 0x05,
+  PACKET_MAP_CHUNK                 = 0x21,
+  PACKET_GAME_MODE                 = 0x2b,
+  PACKET_UPDATE_SIGN               = 0x33,
+  PACKET_PLAYER_ABILITIES          = 0x39,
+  PACKET_DISCONNECT                = 0x40,
+
+  // ToDo:
   PACKET_UPDATE_HEALTH             = 0x08,
   PACKET_ADD_TO_INVENTORY          = 0x11,
   PACKET_NAMED_ENTITY_SPAWN        = 0x14,
@@ -201,23 +212,20 @@ enum
   PACKET_ENTITY_METADATA           = 0x28,
   PACKET_REMOVE_ENTITY_EFFECT      = 0x2a,
   PACKET_PRE_CHUNK                 = 0x32,
-  PACKET_MAP_CHUNK                 = 0x33,
+  
   PACKET_MULTI_BLOCK_CHANGE        = 0x34,
   PACKET_BLOCK_CHANGE              = 0x35,
   PACKET_BLOCK_ACTION              = 0x36,
   PACKET_NAMED_SOUND_EFFECT        = 0x3E,
-  PACKET_GAMESTATE                 = 0x46,
+
   PACKET_OPEN_WINDOW               = 0x64,
   PACKET_PROGRESS_BAR              = 0x69,
   PACKET_TRANSACTION               = 0x6a,
   PACKET_PLAYER_LIST_ITEM          = 0xc9,
-  //PACKET_COMPLEX_ENTITIES          = 0x3b,  
-  PACKET_ENCRYPTION_REQUEST        = 0xFD,
-  PACKET_KICK                      = 0xff,
+  //PACKET_COMPLEX_ENTITIES          = 0x3b,   
 
   /// two-way
   PACKET_CREATIVE_INVENTORY        = 0x6b,
-  PACKET_PLAYER_ABILITIES          = 0xca,
   // TODO unhandled packets
   PACKET_THUNDERBOLT = 0x47,
   PACKET_INCREMENT_STATISTICS = 0xC8

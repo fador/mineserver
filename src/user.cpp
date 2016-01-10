@@ -215,14 +215,23 @@ User::~User()
 #include <stdio.h>
 bool User::sendLoginInfo()
 {
-  
   // Load user data
   loadData();
-  
+
+  // This packet moves gameState to "play"
+  buffer.writePacket(Protocol::loginSuccess(this->uuid, this->nick), this->compression);
+  this->gameState++;
+
   // Login OK package
-  buffer << Protocol::loginResponse(UID);
+  buffer.writePacket(Protocol::joinGame(UID), this->compression);
   setGameMode(gamemode);
-  spawnOthers();
+  
+  // ToDo: spawn others
+  //spawnOthers();
+
+    // Send spawn position
+  buffer.writePacket(Protocol::spawnPosition(int(pos.x), int(pos.y + 2), int(pos.z)), this->compression);
+  buffer.writePacket(Protocol::timeUpdate(ServerInstance->map(pos.map)->mapTime), this->compression);
 
   // Put nearby chunks to queue
   for (int x = -viewDistance; x <= viewDistance; x++)
@@ -235,6 +244,7 @@ bool User::sendLoginInfo()
   // Push chunks to user
   pushMap(true);
 
+  /*
   const std::vector<MobPtr>& mobs = ServerInstance->mobs()->getAll();
 
   for (std::vector<MobPtr>::const_iterator i = mobs.begin(); i != mobs.end(); ++i)
@@ -244,17 +254,13 @@ bool User::sendLoginInfo()
       loginBuffer << Protocol::mobSpawn(**i);
     }
   }
-
-  // Send spawn position
-  loginBuffer << Protocol::spawnPosition(int(pos.x), int(pos.y + 2), int(pos.z))
-              << Protocol::timeUpdate(ServerInstance->map(pos.map)->mapTime);
-
-  buffer.addToWrite(loginBuffer);
-  loginBuffer.reset();
+  */
 
   logged = true;
+
+  /*  
   spawnUser((int32_t)pos.x * 32, (int32_t)((pos.y + 2) * 32), (int32_t)pos.z * 32);
-    
+
   for (int i = 1; i < 45; i++)
   {
     inv[i].ready = true;
@@ -264,11 +270,13 @@ bool User::sendLoginInfo()
   // Teleport player (again)
   teleport(pos.x, pos.y + 2, pos.z);
 
-  ServerInstance->chat()->sendMsg(this, nick + " connected!", Chat::ALL);
+  
 
   sethealth(health);
   logged = true;
+  */
 
+  ServerInstance->chat()->sendMsg(this, nick + " connected!", Chat::ALL);
 
   return true;
 }
@@ -276,7 +284,7 @@ bool User::sendLoginInfo()
 // Kick player
 bool User::kick(std::string kickMsg)
 {
-  buffer << Protocol::kick(kickMsg);
+  buffer.writePacket(Protocol::disconnect(R"({"text":")"+json_esc(kickMsg)+"\"}"), this->compression);
   runAllCallback("PlayerKickPost",nick.c_str(), kickMsg.c_str());
 
   LOG2(WARNING, nick + " kicked. Reason: " + kickMsg);
@@ -771,7 +779,7 @@ bool User::sendOthers(const Packet& packet)
   {
     if ((*it)->fd != this->fd && (*it)->logged && !((*it)->dnd && packet.firstwrite() == PACKET_CHAT_MESSAGE))
     {
-      (*it)->buffer.addToWrite(packet);
+      (*it)->buffer.writePacket(packet, (*it)->compression);
     }
   }
 
@@ -831,7 +839,7 @@ bool User::sendAll(const Packet& packet)
   {
     if ((*it)->fd && (*it)->logged)
     {
-      (*it)->buffer.addToWrite(packet);
+      (*it)->buffer.writePacket(packet, (*it)->compression);
     }
   }
 
@@ -857,7 +865,7 @@ bool User::sendAdmins(const Packet& packet)
   {
     if ((*it)->fd && (*it)->logged && IS_ADMIN((*it)->permissions))
     {
-      (*it)->buffer.addToWrite(packet);
+      (*it)->buffer.writePacket(packet, (*it)->compression);
     }
   }
 
@@ -883,7 +891,7 @@ bool User::sendOps(const Packet& packet)
   {
     if ((*it)->fd && (*it)->logged && IS_ADMIN((*it)->permissions))
     {
-      (*it)->buffer.addToWrite(packet);
+      (*it)->buffer.writePacket(packet, (*it)->compression);
     }
   }
 
@@ -909,7 +917,7 @@ bool User::sendGuests(const Packet& packet)
   {
     if ((*it)->fd && (*it)->logged && IS_ADMIN((*it)->permissions))
     {
-      (*it)->buffer.addToWrite(packet);
+      (*it)->buffer.writePacket(packet, (*it)->compression);
     }
   }
 
@@ -1134,14 +1142,14 @@ bool User::spawnOthers()
     //    if ((*it)->logged && (*it)->UID != this->UID && (*it)->nick != this->nick)
     if ((*it)->logged)
     {
-      loginBuffer << Protocol::namedEntitySpawn((*it)->UID, (*it)->nick, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, angleToByte((*it)->pos.yaw),angleToByte((*it)->pos.pitch), 0);
+      //loginBuffer << Protocol::namedEntitySpawn((*it)->UID, (*it)->nick, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, angleToByte((*it)->pos.yaw),angleToByte((*it)->pos.pitch), 0);
       for (int b = 0; b < 5; b++)
       {
         const int n = b == 0 ? (*it)->curItem + 36 : 9 - b;
         const int type = (*it)->inv[n].getType();
-        loginBuffer << Protocol::entityEquipment((*it)->UID, b, type, 0);
+        //loginBuffer << Protocol::entityEquipment((*it)->UID, b, type, 0);
       }
-      loginBuffer << Protocol::entityHeadLook((*it)->UID,angleToByte((*it)->pos.yaw));
+      //loginBuffer << Protocol::entityHeadLook((*it)->UID,angleToByte((*it)->pos.yaw));
     }
   }
   return true;
@@ -1464,7 +1472,7 @@ std::string User::generateDigest()
 
 bool User::setGameMode(User::GameMode gameMode)
 {
-  buffer.addToWrite(Protocol::gameState(3,gameMode));
+  buffer.writePacket(Protocol::gameMode(3,gameMode), this->compression);
 
   invulnerable = gameMode == User::Creative;
   creative = gameMode == User::Creative;

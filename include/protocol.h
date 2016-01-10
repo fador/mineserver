@@ -232,19 +232,22 @@ class Protocol
     }
 
     //ToDo: remember gamemode for players
-    static Packet loginResponse(int eid, int8_t gamemode = 0)
+    static Packet joinGame(int eid, int8_t gamemode = 0)
     {
+
       Packet ret;
-      ret << (int8_t)PACKET_LOGIN_RESPONSE << (int32_t)eid
-          << std::string("default") << (int8_t)gamemode << (int8_t)0 
-          << (int8_t)2 << (int8_t)0 << (int8_t)ServerInstance->config()->iData("system.user_limit");
+      ret << MS_VarInt((uint32_t)PACKET_JOIN_GAME) << (int32_t)eid
+          << (int8_t)gamemode << (int8_t)0 /* dimension */
+          << (int8_t)2 /*difficulty */ << (int8_t)ServerInstance->config()->iData("system.user_limit")
+          << std::string("default") << (int8_t)0; /* reduced debug info */
       return ret;
     }
 
     static Packet spawnPosition(int x, int y, int z)
     {
       Packet ret;
-      ret << (int8_t)PACKET_SPAWN_POSITION << (int32_t)x << (int32_t)y << (int32_t)z;
+      ret << MS_VarInt((uint32_t)PACKET_SPAWN_POSITION) << 
+      (uint64_t)((((uint64_t)x & 0x3FFFFFF) << 38) | (((uint64_t)y & 0xFFF) << 26) | ((uint64_t)z & 0x3FFFFFF));
       return ret;
     }
 
@@ -252,14 +255,14 @@ class Protocol
     static Packet timeUpdate(int64_t time, int64_t  ageOfTheWorld = 0)
     {
       Packet ret;
-      ret << (int8_t)PACKET_TIME_UPDATE << (int64_t)ageOfTheWorld << (int64_t)time;
+      ret << MS_VarInt((uint32_t)PACKET_TIME_UPDATE) << (int64_t)ageOfTheWorld << (int64_t)time;
       return ret;
     }
 
-    static Packet kick(std::string msg)
+    static Packet disconnect(std::string msg)
     {
       Packet ret;
-      ret << (int8_t)PACKET_KICK << msg;
+      ret << MS_VarInt((uint32_t)PACKET_DISCONNECT) << msg;
       return ret;
     }
 
@@ -364,7 +367,7 @@ class Protocol
     static Packet keepalive(int32_t time)
     {
       Packet ret;
-      ret << (int8_t)PACKET_KEEP_ALIVE << (int32_t)time;
+      ret << MS_VarInt((uint32_t)PACKET_KEEP_ALIVE) << MS_VarInt((uint32_t)time);
       return ret;
     }
 
@@ -382,16 +385,16 @@ class Protocol
       }      
       return ret;
     }
-    static Packet gameState(int8_t reason, int8_t data){
+    static Packet gameMode(int8_t reason, float value){
       Packet ret;
-      ret<< (int8_t)PACKET_GAMESTATE << reason << data;
+      ret<< MS_VarInt((uint32_t)PACKET_GAME_MODE) << reason << value;
       return ret;
     }
 
     static Packet chatMsg(const std::string& msg)
     {
       Packet ret;
-      ret << (int8_t)PACKET_CHAT_MESSAGE << msg;
+      ret << MS_VarInt((uint32_t)PACKET_CHAT_MESSAGE) << msg;
       return ret;
     }
 };

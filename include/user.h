@@ -137,7 +137,6 @@ public:
   //Input buffer
   Packet buffer;
   Packet bufferCrypted;
-  Packet loginBuffer; // Used to send all login info at once
   uint8_t gameState;
 
   static std::set<User*>& all();
