@@ -315,9 +315,6 @@ public:
   void writeString(const std::string& str);
   std::string readString();
 
-  void writeUCS16String(const std::string& str);
-  std::string readUCS16String();
-
   void writeVarInt(int64_t varint);
   int64_t readVarInt();
 

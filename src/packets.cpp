@@ -1588,15 +1588,13 @@ int PacketHandler::block_change(User* user)
 
 Packet& Packet::operator<<(const std::string& str)
 {
-  writeUCS16String(str);
-
+  writeString(str);
   return *this;
 }
 
 Packet& Packet::operator>>(std::string& str)
 {
-  str = readUCS16String();
-
+  str = readString();
   return *this;
 }
 
@@ -1631,43 +1629,6 @@ std::string Packet::readString()
     }
   }
 
-  return str;
-}
-
-void Packet::writeUCS16String(const std::string& str)
-{
-  std::vector<uint16_t> result;
-  makeUCS2MessageFromUTF8(str, result);
-
-  (*this)<<(int16_t)result.size();
-
-  for (size_t i = 0;  i < result.size(); ++i)
-    (*this)<<(int16_t)result[i];
-}
-
-std::string Packet::readUCS16String()
-{
-  std::string str;
-  if (haveData(2))
-  {
-    uint16_t lenval = 0;
-    *this >> (int16_t&)lenval;
-
-    if (lenval && haveData(2 * lenval)) // We ASSUME that every character takes 2 bytes. DANGEROUS.
-    {
-      unsigned char buf[2];
-      t_codepoint ccp;
-
-      for (size_t i = 0;  i < lenval; ++i)
-      {
-        buf[0] = m_readBuffer[m_readPos++];
-        buf[1] = m_readBuffer[m_readPos++];
-
-        codepointToUTF8(((unsigned int)(buf[0]) << 8) | ((unsigned int)(buf[1])), &ccp);
-        str += std::string(ccp.c);
-      }
-    }
-  }
   return str;
 }
 
