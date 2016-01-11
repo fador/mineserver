@@ -205,13 +205,12 @@ extern "C" void client_callback(int fd, short ev, void* arg)
     user->buffer.reset();
     MS_VarInt packetLen;
     uint32_t varint_len;
+    uint32_t buffer_pos = 0;
 
     while (user->buffer >> (MS_VarInt&)packetLen)
     {  
-      varint_len = user->buffer.m_readPos;
-      std::ostringstream str;
-          str << "packet len: 0x" << std::hex << (unsigned int)(packetLen);
-          LOG2(DEBUG, str.str());
+      varint_len = user->buffer.m_readPos-buffer_pos;      
+
       // Check if we have the data in buffer
       if (!user->buffer.haveData(static_cast<int64_t>(packetLen)))
       {
@@ -222,6 +221,38 @@ extern "C" void client_callback(int fd, short ev, void* arg)
       // Packet data has been received, call the function
       else
       {
+        // Handle compressed incoming data
+        if (user->compression)
+        {
+          MS_VarInt uncompressed_size;
+          int32_t cur_pos = user->buffer.m_readPos;
+          user->buffer >> (MS_VarInt&)uncompressed_size;          
+
+          // Hopefully a rare occasion when the packet size exceeds the compression threshold
+          if (uncompressed_size != 0)
+          {
+            uLongf written = uncompressed_size;
+            uLong sourceLen = (int)packetLen.val-(user->buffer.m_readPos-cur_pos);
+            uint8_t* inbuffer = new uint8_t[sourceLen];
+            uint8_t* buffer = new uint8_t[uncompressed_size+1];
+
+            user->buffer.getData(inbuffer,sourceLen);           
+
+            user->buffer.removePacketLen((uint32_t)packetLen+varint_len);
+            int ret = uncompress(buffer, &written, inbuffer, sourceLen);
+            if (ret < Z_OK || written != uncompressed_size) {
+              LOG2(DEBUG, "Uncompress error");              
+              buffer_pos = user->buffer.m_readPos;
+              continue;
+            }
+
+            user->buffer.addToReadBegin(buffer, written);
+            packetLen.val = written;
+            varint_len = 0;
+            delete[] inbuffer;
+            delete[] buffer;
+          }
+        }
         MS_VarInt action;
         user->buffer >> (MS_VarInt&)action;
         user->action = (uint8_t)static_cast<int64_t>(action);
@@ -231,6 +262,8 @@ extern "C" void client_callback(int fd, short ev, void* arg)
           str << "Unknown packet: 0x" << std::hex << (unsigned int)(user->action);
           LOG2(DEBUG, str.str());
           user->buffer.removePacketLen((uint32_t)packetLen+varint_len);
+
+          buffer_pos = user->buffer.m_readPos;
           continue;
         }
 
@@ -253,6 +286,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
         }   
       }
       user->buffer.removePacketLen((uint32_t)packetLen+varint_len);
+      buffer_pos = user->buffer.m_readPos;
     } // while(user->buffer)
   } //End reading
 

@@ -218,8 +218,8 @@ bool User::sendLoginInfo()
   // Load user data
   loadData();
 
-  buffer.writePacket(Protocol::setCompression(128), this->compression);
-  this->compression = 128;
+  buffer.writePacket(Protocol::setCompression(256), this->compression);
+  this->compression = 256;
 
   // This packet moves gameState to "play"
   buffer.writePacket(Protocol::loginSuccess(this->uuid, this->nick), this->compression);
