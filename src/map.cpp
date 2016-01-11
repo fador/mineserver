@@ -1803,13 +1803,17 @@ void Map::sendToUser(User* user, int x, int z, bool login)
        << (int8_t)1 /* Ground-Up Continuous */ << (int16_t)0xffff /* Enabled chunks 0..15 */;
 
 
-  memcpy(&mapdata[0], chunk->blocks, 32768*2);
-  memcpy(&mapdata[32768*2], chunk->data, 16384*2);
-  memcpy(&mapdata[(32768 + 16384)*2], chunk->blocklight, 16384*2);
-  memcpy(&mapdata[(32768 + 16384 + 16384)*2], chunk->skylight, 16384*2);
-  memcpy(&mapdata[(32768 + 16384 + 16384 + 16384)*2], chunk->addblocks, 16384*2);
+  //ToDo: Do this when loading the map instead
+  for (int i = 0; i < 65536; i++) {
+    mapdata[i << 1] = ((chunk->blocks[i] & 0xf) << 4) | (i & 4 ? chunk->data[i>>1]>>4 : chunk->data[i>>1]&0xf);
+    mapdata[(i<<1)+1] = chunk->blocks[i]>>4;
+  }
+
+  memcpy(&mapdata[(65536)*2], chunk->blocklight, 16384*2);
+  memcpy(&mapdata[(65536 + 16384)*2], chunk->skylight, 16384*2);
+
   //Biome data
-  memset(&mapdata[(32768 + 16384 + 16384 + 16384 + 16384)*2], 0, 256);
+  memset(&mapdata[(65536 + 16384 + 16384)*2], 0, 256);
 
 
   p << MS_VarInt((uint32_t)mapdataLen);
