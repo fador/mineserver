@@ -148,15 +148,16 @@ enum
   PACKET_LOGIN_REQUEST             = 0x00,
   PACKET_ENCRYPTION_RESPONSE       = 0x01,
   
-  PACKET_KEEP_ALIVE                = 0x00,  
-  PACKET_PLAYER_POSITION_AND_LOOK  = 0x04,
-  PACKET_ENTITY_EQUIPMENT          = 0x05,
-  
+  // State: Play
+  PACKET_KEEP_ALIVE                = 0x00,
+  PACKET_CHAT_MESSAGE_FROM_CLIENT  = 0x01,
+  PACKET_PLAYER                    = 0x03,
+  PACKET_PLAYER_POSITION           = 0x04,    
+  PACKET_PLAYER_LOOK               = 0x05,
+  PACKET_PLAYER_POSITION_AND_LOOK  = 0x06,
   PACKET_USE_ENTITY                = 0x07,
-  PACKET_RESPAWN                   = 0x09,
-  PACKET_PLAYER                    = 0x0a,
-  PACKET_PLAYER_POSITION           = 0x0b,
-  PACKET_PLAYER_LOOK               = 0x0c,
+  PACKET_RESPAWN                   = 0x09,  
+  
   
   PACKET_PLAYER_DIGGING            = 0x0e,
   PACKET_PLAYER_BLOCK_PLACEMENT    = 0x0f,
@@ -184,7 +185,8 @@ enum
 
   PACKET_JOIN_GAME                 = 0x01,
   PACKET_CHAT_MESSAGE              = 0x02,
-  PACKET_TIME_UPDATE               = 0x03,
+  PACKET_TIME_UPDATE               = 0x03,  
+  PACKET_ENTITY_EQUIPMENT          = 0x04,
   PACKET_SPAWN_POSITION            = 0x05,
   PACKET_PLAYER_POSITION_AND_LOOK_S= 0x08,
   PACKET_MAP_CHUNK                 = 0x21,
@@ -277,6 +279,12 @@ public:
   inline void reset()
   {
     m_readPos = 0;
+    m_isValid = true;
+  }
+
+  inline void addToReadBegin(const uint8_t* const data, const size_t len)
+  {
+    m_readBuffer.insert(m_readBuffer.begin(), data, data + len);
     m_isValid = true;
   }
 

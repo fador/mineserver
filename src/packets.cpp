@@ -83,7 +83,8 @@ void PacketHandler::init()
   packets[STATE_LOGIN][PACKET_ENCRYPTION_RESPONSE] = Packets(&PacketHandler::encryption_response);
   
   packets[STATE_PLAY][PACKET_KEEP_ALIVE] = Packets(&PacketHandler::keep_alive);
-  packets[STATE_PLAY][PACKET_CHAT_MESSAGE] = Packets(&PacketHandler::chat_message);
+
+  packets[STATE_PLAY][PACKET_CHAT_MESSAGE_FROM_CLIENT] = Packets(&PacketHandler::chat_message);
   packets[STATE_PLAY][PACKET_USE_ENTITY] = Packets(&PacketHandler::use_entity);
   packets[STATE_PLAY][PACKET_PLAYER] = Packets(&PacketHandler::player);
   packets[STATE_PLAY][PACKET_PLAYER_POSITION] = Packets(&PacketHandler::player_position);
@@ -674,17 +675,17 @@ int PacketHandler::player(User* user)
 
 int PacketHandler::player_position(User* user)
 {
-  double x, y, stance, z;
+  double x, y, z;
   int8_t onground;
 
-  user->buffer >> x >> y >> stance >> z >> onground;
+  user->buffer >> x >> y >> z >> onground;
 
   if (!user->buffer)
   {
     return PACKET_NEED_MORE_DATA;
   }
 
-  user->updatePos(x, y, z, stance);
+  user->updatePos(x, y, z, 0.0);
 
 
   return PACKET_OK;
