@@ -784,7 +784,7 @@ bool User::sendOthers(const Packet& packet)
 {
   for (std::set<User*>::const_iterator it = ServerInstance->users().begin(); it != ServerInstance->users().end(); ++it)
   {
-    if ((*it)->fd != this->fd && (*it)->logged && !((*it)->dnd && packet.firstwrite() == PACKET_CHAT_MESSAGE))
+    if ((*it)->fd != this->fd && (*it)->logged && !((*it)->dnd && packet.firstwrite() == PACKET_OUT_CHAT_MESSAGE))
     {
       (*it)->buffer.writePacket(packet, (*it)->compression);
     }
@@ -797,7 +797,7 @@ bool User::sendOthers(uint8_t* data, size_t len)
 {
   for (std::set<User*>::const_iterator it = ServerInstance->users().begin(); it != ServerInstance->users().end(); ++it)
   {
-    if ((*it)->fd != this->fd && (*it)->logged && !((*it)->dnd && data[0] == PACKET_CHAT_MESSAGE))
+    if ((*it)->fd != this->fd && (*it)->logged && !((*it)->dnd && data[0] == PACKET_OUT_CHAT_MESSAGE))
     {
       (*it)->buffer.addToWrite(data, len);
     }
@@ -1308,7 +1308,7 @@ bool User::respawn()
 {
   this->health = 20;
   this->timeUnderwater = 0;
-  buffer << Protocol::respawn(); //FIXME: send the correct world id
+  buffer << Protocol::client_status(); //FIXME: send the correct world id
   sethealth(20);
   Packet destroyPkt;
   destroyPkt << Protocol::destroyEntity(UID);

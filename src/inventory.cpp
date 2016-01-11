@@ -48,14 +48,14 @@ void Item::sendUpdate()
     if (slot == player->curItem + 36)
     {
       Packet pkt;
-      pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)player->UID
+      pkt << (int8_t)PACKET_OUT_ENTITY_EQUIPMENT << (int32_t)player->UID
           << (int16_t)0 << Protocol::slot(type,count,health);
       player->sendOthers(pkt);
     }
     if (slot >= 5 && slot <= 8)
     {
       Packet pkt;
-      pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)player->UID
+      pkt << (int8_t)PACKET_OUT_ENTITY_EQUIPMENT << (int32_t)player->UID
           << (int16_t)(5 - (slot - 4)) << Protocol::slot(type,count,health);//<< (int16_t)type << (int16_t) 0;
       player->sendOthers(pkt);
     }
@@ -462,7 +462,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   //Ack
   if(actionNumber)
   {
-    user->buffer << (int8_t)PACKET_TRANSACTION << (int8_t)windowID << (int16_t)actionNumber << (int8_t)1;
+    user->buffer << (int8_t)PACKET_OUT_CONFIRM_TRANSACTION << (int8_t)windowID << (int16_t)actionNumber << (int8_t)1;
   }
 
   //Click outside the window
@@ -1094,8 +1094,8 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
             packet << Protocol::slot(item.getType(), item.getCount(), item.getHealth());
           }
         }
-        user->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)0 << (int16_t)(chunk->furnaces[i]->cookTime * 18);
-        user->buffer << (int8_t)PACKET_PROGRESS_BAR << (int8_t)WINDOW_FURNACE << (int16_t)1 << (int16_t)(chunk->furnaces[i]->burnTime * 3);
+        user->buffer << (int8_t)PACKET_OUT_WINDOW_PROPERTY << (int8_t)WINDOW_FURNACE << (int16_t)0 << (int16_t)(chunk->furnaces[i]->cookTime * 18);
+        user->buffer << (int8_t)PACKET_OUT_WINDOW_PROPERTY << (int8_t)WINDOW_FURNACE << (int16_t)1 << (int16_t)(chunk->furnaces[i]->burnTime * 3);
         break;
       }
     }

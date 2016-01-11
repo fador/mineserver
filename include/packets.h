@@ -138,101 +138,131 @@ enum
   //Client to server
 
   // State: Handshake
-  PACKET_HANDSHAKE                 = 0x00,
+  PACKET_IN_HANDSHAKE                 = 0x00,
 
   // State: Status
-  PACKET_SERVER_LIST_PING          = 0x00,
-  PACKET_PING                      = 0x01,
+  PACKET_IN_SERVER_LIST_PING          = 0x00,
+  PACKET_IN_PING                      = 0x01,
 
   // State: Login
-  PACKET_LOGIN_REQUEST             = 0x00,
-  PACKET_ENCRYPTION_RESPONSE       = 0x01,
+  PACKET_IN_LOGIN_REQUEST             = 0x00,
+  PACKET_IN_ENCRYPTION_RESPONSE       = 0x01,
   
   // State: Play
-  PACKET_KEEP_ALIVE                = 0x00,
-  PACKET_CHAT_MESSAGE_FROM_CLIENT  = 0x01,
-  PACKET_PLAYER                    = 0x03,
-  PACKET_PLAYER_POSITION           = 0x04,    
-  PACKET_PLAYER_LOOK               = 0x05,
-  PACKET_PLAYER_POSITION_AND_LOOK  = 0x06,
-  PACKET_USE_ENTITY                = 0x07,
-  PACKET_RESPAWN                   = 0x09,  
-  
-  
-  PACKET_PLAYER_DIGGING            = 0x0e,
-  PACKET_PLAYER_BLOCK_PLACEMENT    = 0x0f,
-  PACKET_HOLDING_CHANGE            = 0x10,
-  PACKET_ANIMATION                 = 0x12,
-  PACKET_ENTITY_CROUCH             = 0x13,
-  PACKET_INVENTORY_CLOSE           = 0x65,
-  PACKET_INVENTORY_CHANGE          = 0x66,
-  PACKET_SET_SLOT                  = 0x67,
-  PACKET_INVENTORY                 = 0x68,
-  PACKET_SIGN                      = 0x82,
-  PACKET_TAB_COMPLETE              = 0xcb,
-  PACKET_CLIENT_INFO               = 0xcc,
-  PACKET_CLIENT_STATUS             = 0xcd,
-  PACKET_PLUGIN_MESSAGE            = 0xfa,  
+  PACKET_IN_KEEP_ALIVE                = 0x00,
+  PACKET_IN_CHAT_MESSAGE              = 0x01,
+  PACKET_IN_USE_ENTITY                = 0x02,
+  PACKET_IN_PLAYER                    = 0x03,
+  PACKET_IN_PLAYER_POSITION           = 0x04,
+  PACKET_IN_PLAYER_LOOK               = 0x05,
+  PACKET_IN_PLAYER_POSITION_AND_LOOK  = 0x06,
+  PACKET_IN_PLAYER_DIGGING            = 0x07,
+  PACKET_IN_PLAYER_BLOCK_PLACEMENT    = 0x08,
+  PACKET_IN_HELD_ITEM_CHANGE          = 0x09,    
+  PACKET_IN_ANIMATION                 = 0x0a,
+  PACKET_IN_ENTITY_ACTION             = 0x0b,
+  PACKET_IN_CLOSE_WINDOW              = 0x0d,
+  PACKET_IN_CLICK_WINDOW              = 0x0e,
+  PACKET_IN_CONFIRM_TRANSACTION       = 0x0f,
+  PACKET_IN_CREATIVE_INVENTORY_ACTION = 0x10,
+  PACKET_IN_ENCHANT_ITEM              = 0x11,
+  PACKET_IN_UPDATE_SIGN               = 0x12,
+  PACKET_IN_PLAYER_ABILITIES          = 0x13,
+  PACKET_IN_TAB_COMPLETE              = 0x14,
+  PACKET_IN_CLIENT_SETTINGS           = 0x15,
+  PACKET_IN_CLIENT_STATUS             = 0x16,
+  PACKET_IN_PLUGIN_MESSAGE            = 0x17,
+
+
+  PACKET_IN_INVENTORY                 = 0x99,
+  PACKET_IN_BLOCK_CHANGE              = 0x99,
+
 
   //Server to client
 
   // State: Login  
-  PACKET_ENCRYPTION_REQUEST        = 0x01,
-  PACKET_LOGIN_SUCCESS             = 0x02,
-  PACKET_SET_COMPRESSION           = 0x03, 
+  PACKET_OUT_ENCRYPTION_REQUEST        = 0x01,
+  PACKET_OUT_LOGIN_SUCCESS             = 0x02,
+  PACKET_OUT_SET_COMPRESSION           = 0x03,
 
   // State: play
+  PACKET_OUT_KEEP_ALIVE                = 0x00,
+  PACKET_OUT_JOIN_GAME                 = 0x01,
+  PACKET_OUT_CHAT_MESSAGE              = 0x02,
+  PACKET_OUT_TIME_UPDATE               = 0x03,
+  PACKET_OUT_ENTITY_EQUIPMENT          = 0x04,
+  PACKET_OUT_SPAWN_POSITION            = 0x05,
+  PACKET_OUT_UPDATE_HEALTH             = 0x06,
+  PACKET_OUT_client_status                   = 0x07,
+  PACKET_OUT_PLAYER_POSITION_AND_LOOK  = 0x08,
+  PACKET_OUT_HELD_ITEM_CHANGE          = 0x09,
+  PACKET_OUT_USE_BED                   = 0x0a,
+  PACKET_OUT_ANIMATION                 = 0x0b,
+  PACKET_OUT_SPAWN_PLAYER              = 0x0c,
+  PACKET_OUT_COLLECT_ITEM              = 0x0d,
+  PACKET_OUT_SPAWN_OBJECT              = 0x0e,
+  PACKET_OUT_SPAWN_MOB                 = 0x0f,
+  PACKET_OUT_SPAWN_PAINTING            = 0x10,
+  PACKET_OUT_SPAWN_EXPERIENCE_ORB      = 0x11,
+  PACKET_OUT_ENTITY_VELOCITY           = 0x12,
+  PACKET_OUT_DESTROY_ENTITIES          = 0x13,
+  PACKET_OUT_ENTITY                    = 0x14,
+  PACKET_OUT_ENTITY_RELATIVE_MOVE      = 0x15,
+  PACKET_OUT_ENTITY_LOOK               = 0x16,
+  PACKET_OUT_ENTITY_LOOK_RELATIVE_MOVE = 0x17,
+  PACKET_OUT_ENTITY_TELEPORT           = 0x18,
+  PACKET_OUT_ENTITY_HEAD_LOOK          = 0x19,
+  PACKET_OUT_ENTITY_STATUS             = 0x1a,
+  PACKET_OUT_ATTACH_ENTITY             = 0x1b,
+  PACKET_OUT_ENTITY_METADATA           = 0x1c,
+  PACKET_OUT_ENTITY_EFFECT             = 0x1d,
+  PACKET_OUT_REMOVE_ENTITY_EFFECT      = 0x1e,
+  PACKET_OUT_SET_EXPERIENCE            = 0x1f,
+  PACKET_OUT_ENTITY_PROPERTIES         = 0x20,
+  PACKET_OUT_MAP_CHUNK                 = 0x21,
+  PACKET_OUT_MULTI_BLOCK_CHANGE        = 0x22,
+  PACKET_OUT_BLOCK_CHANGE              = 0x23,
+  PACKET_OUT_BLOCK_ACTION              = 0x24,
+  PACKET_OUT_BLOCK_BREAK_ANIMATION     = 0x25,
+  PACKET_OUT_MAP_CHUNK_BULK            = 0x26,
+  PACKET_OUT_EXPLOSION                 = 0x27,
+  PACKET_OUT_EFFECT                    = 0x28,
+  PACKET_OUT_SOUND_EFFECT              = 0x29,
+  PACKET_OUT_PARTICLE                  = 0x2a,
+  PACKET_OUT_CHANGE_GAME_STATE         = 0x2b,
+  PACKET_OUT_SPAWN_GLOBAL_ENTITY       = 0x2c,
+  PACKET_OUT_OPEN_WINDOW               = 0x2d,
+  PACKET_OUT_CLOSE_WINDOW              = 0x2e,
+  PACKET_OUT_SET_SLOT                  = 0x2f,
+  PACKET_OUT_WINDOW_ITEMS              = 0x30,
+  PACKET_OUT_WINDOW_PROPERTY           = 0x31,
+  PACKET_OUT_CONFIRM_TRANSACTION       = 0x32,
+  PACKET_OUT_UPDATE_SIGN               = 0x33,
+  PACKET_OUT_MAP                       = 0x34,
+  PACKET_OUT_UPDATE_BLOCK_ENTITY       = 0x35,
+  PACKET_OUT_OPEN_SIGN_EDITOR          = 0x36,
+  PACKET_OUT_STATISTICS                = 0x37,
+  PACKET_OUT_PLAYER_LIST_ITEM          = 0x38,
+  PACKET_OUT_PLAYER_ABILITIES          = 0x39,
+  PACKET_OUT_TAB_COMPLETE              = 0x3a,
 
-  PACKET_JOIN_GAME                 = 0x01,
-  PACKET_CHAT_MESSAGE              = 0x02,
-  PACKET_TIME_UPDATE               = 0x03,  
-  PACKET_ENTITY_EQUIPMENT          = 0x04,
-  PACKET_SPAWN_POSITION            = 0x05,
-  PACKET_PLAYER_POSITION_AND_LOOK_S= 0x08,
-  PACKET_MAP_CHUNK                 = 0x21,
-  PACKET_GAME_MODE                 = 0x2b,
-  PACKET_UPDATE_SIGN               = 0x33,
-  PACKET_PLAYER_ABILITIES          = 0x39,
-  PACKET_DISCONNECT                = 0x40,
+  PACKET_OUT_SCOREBOARD_OBJECTIVE      = 0x3b,
+  PACKET_OUT_UPDATE_SCORE              = 0x3c,
+  PACKET_OUT_DISPLAY_SCOREBOARD        = 0x3d,
+  PACKET_OUT_TEAMS                     = 0x3e,
 
-  // ToDo:
-  PACKET_UPDATE_HEALTH             = 0x08,
-  PACKET_ADD_TO_INVENTORY          = 0x11,
-  PACKET_NAMED_ENTITY_SPAWN        = 0x14,
-  PACKET_PICKUP_SPAWN              = 0x15,
-  PACKET_COLLECT_ITEM              = 0x16,
-  PACKET_ADD_OBJECT                = 0x17,
-  PACKET_MOB_SPAWN                 = 0x18,
-  PACKET_ENTITY_VELOCITY           = 0x1c,
-  PACKET_DESTROY_ENTITY            = 0x1d,
-  PACKET_ENTITY                    = 0x1e,
-  PACKET_ENTITY_RELATIVE_MOVE      = 0x1f,
-  PACKET_ENTITY_LOOK               = 0x20,
-  PACKET_ENTITY_LOOK_RELATIVE_MOVE = 0x21,
-  PACKET_ENTITY_TELEPORT           = 0x22,
-  PACKET_ENTITY_HEAD_LOOK          = 0x23,
-  PACKET_ENTITY_STATUS             = 0x26,
-  PACKET_ATTACH_ENTITY             = 0x27,
-  PACKET_ENTITY_METADATA           = 0x28,
-  PACKET_REMOVE_ENTITY_EFFECT      = 0x2a,
-  PACKET_PRE_CHUNK                 = 0x32,
+  PACKET_OUT_PLUGIN_MESSAGE            = 0x3f,
+  PACKET_OUT_DISCONNECT                = 0x40,
+  PACKET_OUT_SERVER_DIFFICULTY         = 0x41,
+  PACKET_OUT_COMBAT_EVENT              = 0x42,
+  PACKET_OUT_CAMERA                    = 0x43,
+  PACKET_OUT_WORLD_BORDER              = 0x44,
+  PACKET_OUT_TITLE                     = 0x45,
+  PACKET_OUT_PLAYERLIST_HEADER_FOOTER  = 0x47,
+  PACKET_OUT_RESOURCE_PACK_SEND        = 0x48,
+  PACKET_OUT_UPDATE_ENTITY_NBT         = 0x49  
   
-  PACKET_MULTI_BLOCK_CHANGE        = 0x34,
-  PACKET_BLOCK_CHANGE              = 0x35,
-  PACKET_BLOCK_ACTION              = 0x36,
-  PACKET_NAMED_SOUND_EFFECT        = 0x3E,
 
-  PACKET_OPEN_WINDOW               = 0x64,
-  PACKET_PROGRESS_BAR              = 0x69,
-  PACKET_TRANSACTION               = 0x6a,
-  PACKET_PLAYER_LIST_ITEM          = 0xc9,
-  //PACKET_COMPLEX_ENTITIES          = 0x3b,   
-
-  /// two-way  
-  PACKET_CREATIVE_INVENTORY        = 0x6b,
-  // TODO unhandled packets
-  PACKET_THUNDERBOLT = 0x47,
-  PACKET_INCREMENT_STATISTICS = 0xC8
 };
 
 typedef struct VarInt_internal {
@@ -488,29 +518,27 @@ public:
   static int player_position_and_look(User* user);
   static int player_digging(User* user);
   static int player_block_placement(User* user);
-  static int holding_change(User* user);
-  static int arm_animation(User* user);
+  static int held_item_change(User* user);
+  static int animation(User* user);
   static int pickup_spawn(User* user);
-  static int disconnect(User* user);
   static int use_entity(User* user);
-  static int respawn(User* user);
-  static int change_sign(User* user);
-  static int inventory_transaction(User* user);
+  static int client_status(User* user);
+  static int update_sign(User* user);
+  static int confirm_transaction(User* user);
   static int tab_complete(User* user);
   static int encryption_response(User* user);
   static int plugin_message(User* user);
 
-  static int client_info(User* user);
-  static int client_status(User* user);
+  static int client_settings(User* user);
 
   static int creative_inventory(User* user);
   static int player_abilities(User* user);
 
-  static int inventory_change(User* user);
-  static int inventory_close(User* user);
+  static int click_window(User* user);
+  static int close_window(User* user);
   static int destroy_entity(User* user);
 
-  static int entity_crouch(User* user);
+  static int entity_action(User* user);
 
   static int unhandledPacket(User* user);
 

@@ -54,7 +54,7 @@ class Protocol
     static Packet encryptionRequest()
     {
       Packet ret;
-      ret << MS_VarInt((uint32_t)PACKET_ENCRYPTION_REQUEST) << ServerInstance->serverID 
+      ret << MS_VarInt((uint32_t)PACKET_OUT_ENCRYPTION_REQUEST) << ServerInstance->serverID 
       << MS_VarInt(ServerInstance->publicKey.size());
       ret.addToWrite((uint8_t*)ServerInstance->publicKey.c_str(),ServerInstance->publicKey.size());
       ret << MS_VarInt(ServerInstance->encryptionBytes.size());
@@ -66,14 +66,14 @@ class Protocol
     static Packet openWindow(int8_t windowId, int8_t type, std::string title, int8_t nslots, int8_t useCustomTitle = 0)
     {
       Packet ret;
-      ret << (int8_t)PACKET_OPEN_WINDOW << windowId << type << title << nslots << useCustomTitle;
+      ret << (int8_t)PACKET_OUT_OPEN_WINDOW << windowId << type << title << nslots << useCustomTitle;
       return ret;
     }
 
     static Packet animation(int eid, int aid)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ANIMATION << (int32_t)eid << (int8_t)aid;
+      ret << (int8_t)PACKET_OUT_ANIMATION << (int32_t)eid << (int8_t)aid;
       return ret;
     }
 
@@ -81,7 +81,7 @@ class Protocol
                              std::string line1, std::string line2, std::string line3, std::string line4)
     {
       Packet ret;      
-      ret << MS_VarInt((uint32_t)PACKET_UPDATE_SIGN) 
+      ret << MS_VarInt((uint32_t)PACKET_OUT_UPDATE_SIGN) 
         << (uint64_t)((((uint64_t)x & 0x3FFFFFF) << 38) | (((uint64_t)y & 0xFFF) << 26) | ((uint64_t)z & 0x3FFFFFF))
         << line1 << line2 << line3 << line4;
       return ret;
@@ -90,21 +90,21 @@ class Protocol
     static Packet entityStatus(int eid, int aid)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ENTITY_STATUS << (int32_t)eid << (int8_t)aid;
+      ret << (int8_t)PACKET_OUT_ENTITY_STATUS << (int32_t)eid << (int8_t)aid;
       return ret;
     }
 
     static Packet entityMetadata(int eid, MetaData& metadata)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ENTITY_METADATA << (int32_t)eid << metadata;
+      ret << (int8_t)PACKET_OUT_ENTITY_METADATA << (int32_t)eid << metadata;
       return ret;
     }
 
     static Packet entityVelocity(int eid, int16_t vel_x, int16_t vel_y,int16_t vel_z)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ENTITY_VELOCITY << (int32_t)eid << vel_x << vel_y << vel_z;
+      ret << (int8_t)PACKET_OUT_ENTITY_VELOCITY << (int32_t)eid << vel_x << vel_y << vel_z;
       return ret;
     }
 
@@ -129,8 +129,8 @@ class Protocol
     {
       // `header` means: You need to place a `slot` packet after this one.
       Packet ret;
-      ret << (int8_t)PACKET_SET_SLOT << window_id << slot;
-      // NOTE: never ever use operator<<(uint8_t) because there is no such function.
+      ret << (int8_t)PACKET_OUT_SET_SLOT << window_id << slot;
+
       return ret;
     }
 
@@ -138,7 +138,7 @@ class Protocol
     {
       // Warning! This converts absolute double coordinates to absolute integer coordinates!
       Packet ret;
-      ret << (int8_t)PACKET_MOB_SPAWN << (int32_t)eid << (int8_t)type
+      ret << (int8_t)PACKET_OUT_SPAWN_MOB << (int32_t)eid << (int8_t)type
           << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32)
           << (int8_t)yaw << (int8_t)pitch << (int8_t)head_yaw << (int16_t)0 
           << (int16_t)0 << (int16_t)0 << (int8_t)0 << (int8_t)0 << metadata;
@@ -153,14 +153,14 @@ class Protocol
     static Packet destroyEntity(int eid)
     {
       Packet ret;
-      ret << (int8_t)PACKET_DESTROY_ENTITY << (int8_t)1 << (int32_t)eid;
+      ret << (int8_t)PACKET_OUT_DESTROY_ENTITIES << (int8_t)1 << (int32_t)eid;
       return ret;
     }
 
     static Packet entityTeleport(int eid, double x, double y, double z, int yaw, int pitch)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ENTITY_TELEPORT << (int32_t)eid
+      ret << (int8_t)PACKET_OUT_ENTITY_TELEPORT << (int32_t)eid
           << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32)
           << (int8_t)yaw << (int8_t)pitch;
       return ret;
@@ -168,14 +168,14 @@ class Protocol
     static Packet entityRelativeMove(int eid, int8_t x, int8_t y, int8_t z)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ENTITY_RELATIVE_MOVE << (int32_t)eid << (int8_t)x << (int8_t)y << (int8_t)z;
+      ret << (int8_t)PACKET_OUT_ENTITY_RELATIVE_MOVE << (int32_t)eid << (int8_t)x << (int8_t)y << (int8_t)z;
       return ret;
     }
 
     static Packet entityTeleport(int eid, const position& pos)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ENTITY_TELEPORT << (int32_t)eid
+      ret << (int8_t)PACKET_OUT_ENTITY_TELEPORT << (int32_t)eid
           << (int32_t)(pos.x * 32) << (int32_t)(pos.y * 32) << (int32_t)(pos.z * 32)
           << (int8_t)pos.yaw << (int8_t)pos.pitch;
       return ret;
@@ -184,28 +184,28 @@ class Protocol
     static Packet namedSoundEffect(std::string name, int32_t x, int32_t y, int32_t z, float volume, int8_t pitch)
     {
       Packet ret;
-      ret << (int8_t)PACKET_NAMED_SOUND_EFFECT << name << x << y << z << volume << pitch;
+      ret << (int8_t)PACKET_OUT_SOUND_EFFECT << name << x << y << z << volume << pitch;
       return ret;
     }
 
     static Packet entityHeadLook(int eid, int head_yaw)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ENTITY_HEAD_LOOK << eid << (int8_t)head_yaw;
+      ret << (int8_t)PACKET_OUT_ENTITY_HEAD_LOOK << eid << (int8_t)head_yaw;
       return ret;
     }
 
     static Packet attachEntity(int32_t entity, int32_t vehicle, bool leash = 0)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ATTACH_ENTITY << (int32_t)entity << (int32_t)vehicle << (int8_t)leash;
+      ret << (int8_t)PACKET_OUT_ATTACH_ENTITY << (int32_t)entity << (int32_t)vehicle << (int8_t)leash;
       return ret;
     }
 
     static Packet entityLook(int eid, int yaw, int pitch)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ENTITY_LOOK << (int32_t)eid << (int8_t)yaw << (int8_t)pitch;
+      ret << (int8_t)PACKET_OUT_ENTITY_LOOK << (int32_t)eid << (int8_t)yaw << (int8_t)pitch;
       return ret;
     }
 
@@ -217,7 +217,7 @@ class Protocol
     static Packet entityRelativeMove(int eid, double dx, double dy, double dz)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ENTITY_RELATIVE_MOVE << (int32_t)eid
+      ret << (int8_t)PACKET_OUT_ENTITY_RELATIVE_MOVE << (int32_t)eid
           << (int8_t)(dx * 32) << (int8_t)(dy * 32) << (int8_t)(dz * 32);
       return ret;
     }
@@ -225,7 +225,7 @@ class Protocol
     static Packet entityLookRelativeMove(int eid, double dx, double dy, double dz, int yaw, int pitch)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ENTITY_LOOK_RELATIVE_MOVE << (int32_t)eid
+      ret << (int8_t)PACKET_OUT_ENTITY_LOOK_RELATIVE_MOVE << (int32_t)eid
           << (int8_t)(dx * 32) << (int8_t)(dy * 32) << (int8_t)(dz * 32)
           << (int8_t)yaw << (int8_t)pitch;
       return ret;
@@ -234,14 +234,14 @@ class Protocol
     static Packet setCompression(int threshold)
     {
       Packet ret;
-      ret << MS_VarInt((uint32_t)PACKET_SET_COMPRESSION) << MS_VarInt((uint32_t)threshold);
+      ret << MS_VarInt((uint32_t)PACKET_OUT_SET_COMPRESSION) << MS_VarInt((uint32_t)threshold);
       return ret;
     }
 
     static Packet loginSuccess(std::string uuid, std::string username)
     {
       Packet ret;
-      ret << MS_VarInt((uint32_t)PACKET_LOGIN_SUCCESS) << uuid
+      ret << MS_VarInt((uint32_t)PACKET_OUT_LOGIN_SUCCESS) << uuid
           << username;
       return ret;
     }
@@ -251,7 +251,7 @@ class Protocol
     {
 
       Packet ret;
-      ret << MS_VarInt((uint32_t)PACKET_JOIN_GAME) << (int32_t)eid
+      ret << MS_VarInt((uint32_t)PACKET_OUT_JOIN_GAME) << (int32_t)eid
           << (int8_t)gamemode << (int8_t)0 /* dimension */
           << (int8_t)2 /*difficulty */ << (int8_t)ServerInstance->config()->iData("system.user_limit")
           << std::string("default") << (int8_t)0; /* reduced debug info */
@@ -262,7 +262,7 @@ class Protocol
     {
 
       Packet ret;
-      ret << MS_VarInt((uint32_t)PACKET_PLAYER_ABILITIES) << flags
+      ret << MS_VarInt((uint32_t)PACKET_OUT_PLAYER_ABILITIES) << flags
           << flying_speed << walking_speed;
       return ret;
     }
@@ -270,7 +270,7 @@ class Protocol
     static Packet spawnPosition(int x, int y, int z)
     {
       Packet ret;
-      ret << MS_VarInt((uint32_t)PACKET_SPAWN_POSITION) << 
+      ret << MS_VarInt((uint32_t)PACKET_OUT_SPAWN_POSITION) << 
       (uint64_t)((((uint64_t)x & 0x3FFFFFF) << 38) | (((uint64_t)y & 0xFFF) << 26) | ((uint64_t)z & 0x3FFFFFF));
       return ret;
     }
@@ -279,28 +279,28 @@ class Protocol
     static Packet timeUpdate(int64_t time, int64_t  ageOfTheWorld = 0)
     {
       Packet ret;
-      ret << MS_VarInt((uint32_t)PACKET_TIME_UPDATE) << (int64_t)ageOfTheWorld << (int64_t)time;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_TIME_UPDATE) << (int64_t)ageOfTheWorld << (int64_t)time;
       return ret;
     }
 
     static Packet disconnect(std::string msg)
     {
       Packet ret;
-      ret << MS_VarInt((uint32_t)PACKET_DISCONNECT) << msg;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_DISCONNECT) << msg;
       return ret;
     }
 
     static Packet namedEntitySpawn(int eid, const std::string& nick, double x, double y, double z, int yaw, int pitch, int item)
     {
       Packet ret;
-      ret << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)eid << nick
+      ret << (int8_t)PACKET_OUT_SPAWN_PLAYER << (int32_t)eid << nick
           << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32)
           << (int8_t)yaw << (int8_t)pitch << (int16_t)item << (int8_t)0 << (int8_t)0 << (int8_t)127;
       return ret;
     }
     static Packet namedEntitySpawn(int eid, const std::string& nick, const position& pos, int item){
       Packet ret;
-      ret << (int8_t)PACKET_NAMED_ENTITY_SPAWN << (int32_t)eid << nick
+      ret << (int8_t)PACKET_OUT_SPAWN_PLAYER << (int32_t)eid << nick
           << (int32_t)(pos.x*32)<<(int32_t)(pos.y * 32) << (int32_t)(pos.z * 32)
           << (int8_t)pos.yaw << (int8_t)pos.pitch << (int16_t)item
           << (int8_t)0 << (int8_t)0 << (int8_t)127;
@@ -317,7 +317,7 @@ class Protocol
       //ToDo: expand metadata-class to handle this
 
       //Ref: https://gist.github.com/4325656
-      ret << (int8_t)PACKET_ENTITY_METADATA << eid;      
+      ret << (int8_t)PACKET_OUT_ENTITY_METADATA << eid;      
       ret << (int8_t)0xAA /*Slot at index 10 */;
       ret << slot(item,(int8_t)count,health);
       ret << (int8_t)0x7f; //Terminate metadata
@@ -327,8 +327,8 @@ class Protocol
     static Packet addObject(int eid, int8_t object, int32_t x, int32_t y, int32_t z, int objectData, int16_t speed_x = 0, int16_t speed_y = 0,int16_t speed_z = 0, int8_t yaw = 0, int8_t pitch = 0)
     {
       Packet  pkt;  
-      pkt //<< (int8_t)PACKET_ENTITY << (int32_t)eid
-          << (int8_t)PACKET_ADD_OBJECT << (int32_t)eid << (int8_t)object << x << y << z 
+      pkt //<< (int8_t)PACKET_OUT_ENTITY << (int32_t)eid
+          << (int8_t)PACKET_OUT_SPAWN_OBJECT << (int32_t)eid << (int8_t)object << x << y << z 
           << yaw << pitch
           << (int32_t)objectData;
       if(objectData)
@@ -341,49 +341,42 @@ class Protocol
     static Packet collectItem(int itemEid, int eid)
     {
       Packet ret;
-      ret << (int8_t)PACKET_COLLECT_ITEM << (int32_t)itemEid << (int32_t)eid;
+      ret << (int8_t)PACKET_OUT_COLLECT_ITEM << (int32_t)itemEid << (int32_t)eid;
       return ret;
     }
 
     static Packet blockAction(int32_t x, int16_t y, int32_t z, int8_t byte1, int8_t byte2, int16_t blockid)
     {
       Packet ret;
-      ret << (int8_t)PACKET_BLOCK_ACTION << x << y << z << byte1 << byte2 << blockid;
-      return ret;
-    }
-
-    static Packet preChunk(int x, int z, bool create)
-    {
-      Packet ret;
-      //ret << (int8_t)PACKET_PRE_CHUNK << (int32_t)x << (int32_t)z << (int8_t)(create ? 1 : 0);
+      ret << (int8_t)PACKET_OUT_BLOCK_ACTION << x << y << z << byte1 << byte2 << blockid;
       return ret;
     }
 
     static Packet playerPositionAndLook(double x, double y, double z, float yaw, float pitch, uint8_t flags)
     {
       Packet ret;
-      ret << MS_VarInt((uint32_t)PACKET_PLAYER_POSITION_AND_LOOK_S) << x << y << z << yaw << pitch << flags;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_PLAYER_POSITION_AND_LOOK) << x << y << z << yaw << pitch << flags;
       return ret;
     }
 
-    static Packet respawn(int32_t world = 0, int8_t difficulty=1,int8_t creative_mode=0, int16_t world_height=256, std::string level_type="default")
+    static Packet client_status(int32_t world = 0, int8_t difficulty=1,int8_t creative_mode=0, int16_t world_height=256, std::string level_type="default")
     {
       Packet ret;
-      ret << (int8_t)PACKET_RESPAWN << world << difficulty << creative_mode << world_height << level_type;
+      ret << (int8_t)PACKET_OUT_client_status << world << difficulty << creative_mode << world_height << level_type;
       return ret;
     }
 
     static Packet updateHealth(int health, int food=15)
     {
       Packet ret;
-      ret << (int8_t)PACKET_UPDATE_HEALTH << (float)health << (int16_t)food << (float)5.0;
+      ret << (int8_t)PACKET_OUT_UPDATE_HEALTH << (float)health << (int16_t)food << (float)5.0;
       return ret;
     }
 
     static Packet entityEquipment(int eid, int slot, int type, int damage)
     {
       Packet ret;
-      ret << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)eid << (int16_t)slot
+      ret << (int8_t)PACKET_OUT_ENTITY_EQUIPMENT << (int32_t)eid << (int16_t)slot
           << Protocol::slot(type,1,damage);
       return ret;
     }
@@ -391,7 +384,7 @@ class Protocol
     static Packet keepalive(int32_t time)
     {
       Packet ret;
-      ret << MS_VarInt((uint32_t)PACKET_KEEP_ALIVE) << MS_VarInt((uint32_t)time);
+      ret << MS_VarInt((uint32_t)PACKET_OUT_KEEP_ALIVE) << MS_VarInt((uint32_t)time);
       return ret;
     }
 
@@ -404,21 +397,21 @@ class Protocol
       { 
         if((*it)->nick.length() > 0)
         {
-          ret << (int8_t)PACKET_PLAYER_LIST_ITEM << (*it)->nick << (int8_t)1 << (int16_t)0;
+          ret << (int8_t)PACKET_OUT_PLAYER_LIST_ITEM << (*it)->nick << (int8_t)1 << (int16_t)0;
         }
       }      
       return ret;
     }
     static Packet gameMode(int8_t reason, float value){
       Packet ret;
-      ret<< MS_VarInt((uint32_t)PACKET_GAME_MODE) << reason << value;
+      ret<< MS_VarInt((uint32_t)PACKET_OUT_CHANGE_GAME_STATE) << reason << value;
       return ret;
     }
 
     static Packet chatMsg(const std::string& msg)
     {
       Packet ret;
-      ret << MS_VarInt((uint32_t)PACKET_CHAT_MESSAGE) << msg << (uint8_t)0;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_CHAT_MESSAGE) << msg << (uint8_t)0;
       return ret;
     }
 };

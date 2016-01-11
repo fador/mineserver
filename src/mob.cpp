@@ -103,7 +103,7 @@ void Mob::moveAnimal()
   z += vel.z()*0.01;  
   for (int i = 0; i < ServerInstance->users().size(); i++) {
     User* user2 = ServerInstance->users()[i];
-  user2->buffer << (int8_t)PACKET_ENTITY_VELOCITY << (int32_t)UID << (int16_t)vel.x() << (int16_t)vel.y() << (int16_t)vel.z();
+  user2->buffer << (int8_t)PACKET_OUT_ENTITY_VELOCITY << (int32_t)UID << (int16_t)vel.x() << (int16_t)vel.y() << (int16_t)vel.z();
   }*/
 }
 

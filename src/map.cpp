@@ -976,7 +976,7 @@ bool Map::sendBlockChange(int x, int y, int z, int16_t type, char meta)
 
   Packet pkt;
 
-  pkt << (int8_t)PACKET_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int16_t)type << (int8_t)meta;
+  pkt << (int8_t)PACKET_OUT_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int16_t)type << (int8_t)meta;
 
   it->second->sendPacket(pkt);
 
@@ -994,7 +994,7 @@ bool Map::sendNote(int x, int y, int z, char instrument, char pitch)
 
   Packet pkt;
 
-  pkt << (int8_t)PACKET_BLOCK_ACTION << (int32_t)x << (int16_t)y << (int32_t)z << (int8_t)instrument << (int8_t)pitch;
+  pkt << (int8_t)PACKET_OUT_BLOCK_ACTION << (int32_t)x << (int16_t)y << (int32_t)z << (int8_t)instrument << (int8_t)pitch;
 
   it->second->sendPacket(pkt);
 
@@ -1120,7 +1120,7 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
                 (int)(sinf(-(user->pos.pitch / 90.f)) * 14000.f),
                 (int)(cos(-(user->pos.yaw / 360.f) * 2.f * M_PI) * cos(user->pos.pitch * (M_PI / 180.0f)) * 9000.f));
 
-  pkt << (int8_t)PACKET_ENTITY << (int32_t)EID 
+  pkt << (int8_t)PACKET_OUT_ENTITY << (int32_t)EID 
       << Protocol::addObject(EID,projID, pos.x(), pos.y(), pos.z(), user->UID,(int16_t)vel.x(),(int16_t)vel.y(),(int16_t)vel.z(),0,0);
 
   user->sendAll(pkt);
@@ -1732,7 +1732,7 @@ bool Map::sendMultiBlocks(std::set<vec>& blocks)
     unsigned int offsetx = chunk_x << 4;
     unsigned int offsetz = chunk_z << 4;
 
-    packet << (int8_t) PACKET_MULTI_BLOCK_CHANGE << (int32_t) chunk_x << (int32_t) chunk_z << (int16_t) toRem.size();
+    packet << (int8_t) PACKET_OUT_MULTI_BLOCK_CHANGE << (int32_t) chunk_x << (int32_t) chunk_z << (int16_t) toRem.size();
 
     for (std::set<vec>::const_iterator it = toRem.begin(); it != toRem.end(); ++it)
     {
@@ -1799,7 +1799,7 @@ void Map::sendToUser(User* user, int x, int z, bool login)
   
   //ToDo: now sending all 16 16x16 chunks, limit to only those with blocks.
   // Chunk
-  p << MS_VarInt((uint32_t)PACKET_MAP_CHUNK) << (int32_t)(mapposx) << (int32_t)(mapposz)
+  p << MS_VarInt((uint32_t)PACKET_OUT_MAP_CHUNK) << (int32_t)(mapposx) << (int32_t)(mapposz)
        << (int8_t)1 /* Ground-Up Continuous */ << (int16_t)0xffff /* Enabled chunks 0..15 */;
 
 
