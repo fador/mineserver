@@ -418,7 +418,7 @@ class Protocol
     static Packet chatMsg(const std::string& msg)
     {
       Packet ret;
-      ret << MS_VarInt((uint32_t)PACKET_CHAT_MESSAGE) << msg;
+      ret << MS_VarInt((uint32_t)PACKET_CHAT_MESSAGE) << msg << (uint8_t)0;
       return ret;
     }
 };

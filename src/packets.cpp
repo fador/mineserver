@@ -638,12 +638,6 @@ int PacketHandler::handshake(User* user)
 
 int PacketHandler::chat_message(User* user)
 {
-  // Wait for length-short. HEHE
-  if (!user->buffer.haveData(2))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
-
   std::string msg;
 
   user->buffer >> msg;
@@ -652,8 +646,6 @@ int PacketHandler::chat_message(User* user)
   {
     return PACKET_NEED_MORE_DATA;
   }
-
-
 
   ServerInstance->chat()->handleMsg(user, msg);
 
