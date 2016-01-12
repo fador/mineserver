@@ -184,10 +184,10 @@ class Protocol
           << (int8_t)angleToByte(yaw) << (int8_t)angleToByte(pitch);
       return ret;
     }
-    static Packet entityRelativeMove(int eid, int8_t x, int8_t y, int8_t z)
+    static Packet entityRelativeMove(uint32_t eid, int8_t x, int8_t y, int8_t z, int8_t onGround)
     {
       Packet ret;
-      ret << (int8_t)PACKET_OUT_ENTITY_RELATIVE_MOVE << (int32_t)eid << (int8_t)x << (int8_t)y << (int8_t)z;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_ENTITY_RELATIVE_MOVE) << MS_VarInt((uint32_t)eid) << x << y << z << onGround;
       return ret;
     }
 
@@ -229,12 +229,9 @@ class Protocol
       return entityLook(eid, angleToByte(yaw), angleToByte(pitch));
     }
 
-    static Packet entityRelativeMove(int eid, double dx, double dy, double dz)
+    static Packet entityRelativeMove(uint32_t eid, double dx, double dy, double dz, int8_t onGround)
     {
-      Packet ret;
-      ret << (int8_t)PACKET_OUT_ENTITY_RELATIVE_MOVE << (int32_t)eid
-          << (int8_t)(dx * 32) << (int8_t)(dy * 32) << (int8_t)(dz * 32);
-      return ret;
+      return Protocol::entityRelativeMove(eid, dx * 32, dy * 32, dz * 32, onGround);
     }
     
     static Packet entityLookRelativeMove(int eid, double dx, double dy, double dz, int yaw, int pitch)

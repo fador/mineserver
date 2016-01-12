@@ -148,7 +148,7 @@ void Mob::moveTo(double to_x, double to_y, double to_z, int to_map)
   }
   if(dx <= 4 && dy <= 4 && dz <= 4)
   {
-    User::sendAll(Protocol::entityRelativeMove(UID, dx, dy, dz));
+    User::sendAll(Protocol::entityRelativeMove(UID, dx, dy, dz, 1));
   }
   else
   {

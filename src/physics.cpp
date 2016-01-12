@@ -208,7 +208,7 @@ bool Physics::updateMinecart()
       }
       else
       {
-        pkt = Protocol::entityRelativeMove(minecarts[simIt].EID,(int8_t)diff.x(),(int8_t)diff.y(),(int8_t)diff.z());
+        pkt = Protocol::entityRelativeMove(minecarts[simIt].EID,(int8_t)diff.x(),(int8_t)diff.y(),(int8_t)diff.z(), 1);
 
       }
       User::sendAll(pkt);
