@@ -1315,15 +1315,13 @@ int PacketHandler::player_block_placement(User* user)
 
 int PacketHandler::held_item_change(User* user)
 {
-  int16_t itemSlot;
+  int8_t itemSlot;
   user->buffer >> itemSlot;
 
   if (!user->buffer)
   {
     return PACKET_NEED_MORE_DATA;
   }
-
-
 
   user->curItem = itemSlot;
 
@@ -1338,19 +1336,7 @@ int PacketHandler::held_item_change(User* user)
 
 int PacketHandler::animation(User* user)
 {
-  int32_t userID;
-  int8_t animType;
-
-  user->buffer >> userID >> animType;
-
-  if (!user->buffer)
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
-
-
-
-  Packet pkt = Protocol::animation(user->UID,animType);
+  Packet pkt = Protocol::animation(user->UID,0);
   user->sendOthers(pkt);
 
   runAllCallback("PlayerArmSwing",user->nick.c_str());

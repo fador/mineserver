@@ -82,7 +82,7 @@ class Protocol
     static Packet animation(int eid, int aid)
     {
       Packet ret;
-      ret << (int8_t)PACKET_OUT_ANIMATION << (int32_t)eid << (int8_t)aid;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_ANIMATION) << MS_VarInt((uint32_t)eid) << (int8_t)aid;
       return ret;
     }
 
