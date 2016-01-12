@@ -154,6 +154,18 @@ std::string base36_encode(int value)
   return output;
 }
 
+uint8_t hexToByte(char hex)
+{
+  if (hex >= '0' && hex <= '9')
+    return hex - '0';
+  if (hex >= 'a' && hex <= 'f')
+    return 10+(hex - 'a');
+  if (hex >= 'A' && hex <= 'F')
+    return 10+(hex - 'A');
+
+  return 0;
+}
+
 void my_itoa(int value, std::string& buf, int base)
 {
   std::string hexarray("0123456789abcdefghijklmnopqrstuvwxyz");

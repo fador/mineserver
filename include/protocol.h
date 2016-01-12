@@ -309,20 +309,34 @@ class Protocol
       return ret;
     }
 
-    static Packet namedEntitySpawn(int eid, const std::string& nick, double x, double y, double z, int yaw, int pitch, int item)
+    static Packet spawnPlayer(int eid, uint8_t *uuid, std::string &nick, float health, double x, double y, double z, float yaw, float pitch, int16_t item)
     {
       Packet ret;
-      ret << (int8_t)PACKET_OUT_SPAWN_PLAYER << (int32_t)eid << nick
-          << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32)
-          << (int8_t)yaw << (int8_t)pitch << (int16_t)item << (int8_t)0 << (int8_t)0 << (int8_t)127;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_SPAWN_PLAYER) << MS_VarInt((uint32_t)eid);
+      for (int i = 0; i < 16; i++) ret << uuid[i];
+      ret << (int32_t)(x*32)<<(int32_t)(y * 32) << (int32_t)(z * 32)
+          << (int8_t)angleToByte(yaw) << (int8_t)angleToByte(pitch)
+          << (int16_t)item
+          << (uint8_t)((4<<5) | 2) // Metadata, type 4 = string, index 6 = name tag
+          << nick
+          << (uint8_t)((3<<5) | 6) // Metadata, type 3 = float, index 6 = health
+          << health
+          << (int8_t)127;
       return ret;
     }
-    static Packet namedEntitySpawn(int eid, const std::string& nick, const position& pos, int item){
+
+    static Packet spawnPlayer(int eid, uint8_t *uuid, std::string &nick, float health, position& pos, int16_t item){
       Packet ret;
-      ret << (int8_t)PACKET_OUT_SPAWN_PLAYER << (int32_t)eid << nick
-          << (int32_t)(pos.x*32)<<(int32_t)(pos.y * 32) << (int32_t)(pos.z * 32)
-          << (int8_t)pos.yaw << (int8_t)pos.pitch << (int16_t)item
-          << (int8_t)0 << (int8_t)0 << (int8_t)127;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_SPAWN_PLAYER) << MS_VarInt((uint32_t)eid);
+      for (int i = 0; i < 16; i++) ret << uuid[i];
+      ret << (int32_t)(pos.x*32)<<(int32_t)(pos.y * 32) << (int32_t)(pos.z * 32)
+          << (int8_t)angleToByte(pos.yaw) << (int8_t)angleToByte(pos.pitch)
+          << (int16_t)item
+          << (uint8_t)((4<<5) | 2) // Metadata, type 4 = string, index 6 = name tag
+          << nick
+          << (uint8_t)((3<<5) | 6) // Metadata, type 3 = float, index 6 = health
+          << health
+          << (int8_t)127;
       return ret;
     }
 

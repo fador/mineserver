@@ -83,7 +83,17 @@ User::User(int sock, uint32_t EID)
   this->uuid = "7fe8a8c1-f48c-3509-ac5c-97c3";
   for (int i = 0; i < 8; i++) {
     this->uuid+=hex[(EID>>(i-7)*4)&0xf];
-  }  
+  }
+  
+  std::string temp_uuid = this->uuid;
+  temp_uuid.erase(temp_uuid.begin()+23);
+  temp_uuid.erase(temp_uuid.begin()+18);
+  temp_uuid.erase(temp_uuid.begin()+13);
+  temp_uuid.erase(temp_uuid.begin()+8);
+  for (int i = 0; i < 16; i++) {
+    uuid_raw[i] = (hexToByte(temp_uuid[i*2])<<4)+hexToByte(temp_uuid[i*2+1]);
+  }
+
 
   // Ignore this user if it's the server console
   if (this->UID != SERVER_CONSOLE_UID)
@@ -617,20 +627,20 @@ bool User::updatePos(double x, double y, double z, double stance)
       std::list<User*>::iterator iter = toremove.begin(), end = toremove.end();
       for (; iter != end ; iter++)
       {
-        (*iter)->buffer.addToWrite(dtPkt);
+        (*iter)->buffer.writePacket(dtPkt, (*iter)->compression);
 
-        this->buffer.addToWrite(Protocol::destroyEntity((*iter)->UID));
+        this->buffer.writePacket(Protocol::destroyEntity((*iter)->UID), this->compression);
       }
 
-      Packet spawnPkt = Protocol::namedEntitySpawn(UID, nick, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch), curItem);
+      Packet spawnPkt = Protocol::spawnPlayer(UID, uuid_raw, nick, (float)health, x, y, z, pos.yaw, pos.pitch, curItem);
       iter = toadd.begin(), end = toadd.end();
       for (; iter != end ; iter++)
       {
-        (*iter)->buffer.addToWrite(spawnPkt);
+        (*iter)->buffer.writePacket(spawnPkt, (*iter)->compression);
 
-        this->buffer.addToWrite(
-              Protocol::namedEntitySpawn((*iter)->UID, (*iter)->nick, (*iter)->pos, (*iter)->curItem)
-              );
+        this->buffer.writePacket(
+              Protocol::spawnPlayer((*iter)->UID, (*iter)->uuid_raw, (*iter)->nick, (float)(*iter)->health, (*iter)->pos, (*iter)->curItem),
+              this->compression);
       }
 
       Packet tpPkt = Protocol::entityTeleport(UID, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch));
@@ -1134,7 +1144,7 @@ bool User::teleport(double x, double y, double z, size_t map)
 
 bool User::spawnUser(int x, int y, int z)
 {
-  Packet pkt = Protocol::namedEntitySpawn(UID, nick, x, y, z, 0, 0, 0);
+  Packet pkt = Protocol::spawnPlayer(UID, uuid_raw, nick, (float)health, x, y, z, 0, 0, 0);
   sChunk* chunk = ServerInstance->map(pos.map)->getChunk(blockToChunk(x >> 5), blockToChunk(z >> 5));
   if (chunk != NULL)
   {
@@ -1150,14 +1160,13 @@ bool User::spawnOthers()
     //    if ((*it)->logged && (*it)->UID != this->UID && (*it)->nick != this->nick)
     if ((*it)->logged)
     {
-      //loginBuffer << Protocol::namedEntitySpawn((*it)->UID, (*it)->nick, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, angleToByte((*it)->pos.yaw),angleToByte((*it)->pos.pitch), 0);
+      this->buffer.writePacket(Protocol::spawnPlayer((*it)->UID, (*it)->uuid_raw, (*it)->nick, (float)(*it)->health, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, (*it)->pos.yaw,(*it)->pos.pitch, 0), this->compression);
       for (int b = 0; b < 5; b++)
       {
         const int n = b == 0 ? (*it)->curItem + 36 : 9 - b;
-        const int type = (*it)->inv[n].getType();
-        //loginBuffer << Protocol::entityEquipment((*it)->UID, b, type, 0);
+        this->buffer.writePacket(Protocol::entityEquipment((*it)->UID, b, (*it)->inv[n]), this->compression);
       }
-      //loginBuffer << Protocol::entityHeadLook((*it)->UID,angleToByte((*it)->pos.yaw));
+      this->buffer.writePacket(Protocol::entityHeadLook((*it)->UID,angleToByte((*it)->pos.yaw)), this->compression);
     }
   }
   return true;
@@ -1329,7 +1338,7 @@ bool User::respawn()
     teleport(ServerInstance->map(pos.map)->spawnPos.x(), ServerInstance->map(pos.map)->spawnPos.y() + 2, ServerInstance->map(pos.map)->spawnPos.z(), 0);
   }
 
-  Packet spawnPkt = Protocol::namedEntitySpawn(UID, nick, pos.x, pos.y, pos.z, angleToByte(pos.yaw), angleToByte(pos.pitch), curItem);
+  Packet spawnPkt = Protocol::spawnPlayer(UID, uuid_raw, nick, (float)health, pos.x, pos.y, pos.z, pos.yaw, pos.pitch, curItem);
 
   chunk = ServerInstance->map(pos.map)->getMapData(blockToChunk((int32_t)pos.x), blockToChunk((int32_t)pos.z));
   if (chunk != NULL)

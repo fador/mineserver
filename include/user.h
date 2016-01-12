@@ -101,6 +101,7 @@ public:
   double fallDistance;
   unsigned int UID;
   std::string uuid;
+  uint8_t uuid_raw[16];
   std::string temp_nick;
   vec curChunk;
   time_t healthtimeout;
