@@ -1022,7 +1022,7 @@ bool Map::sendPickupSpawn(spawnedItem item)
   it->second->items.push_back(storedItem);
 
   Packet pkt;
-  pkt << Protocol::pickupSpawn(item.EID, item.item, item.count, item.health,item.pos.x(), item.pos.y(),item.pos.z());
+  pkt << Protocol::spawnObject(item.EID, item.item, item.count, item.health,item.pos.x(), item.pos.y(),item.pos.z());
   
   it->second->sendPacket(pkt);
 
@@ -1121,7 +1121,7 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
                 (int)(cos(-(user->pos.yaw / 360.f) * 2.f * M_PI) * cos(user->pos.pitch * (M_PI / 180.0f)) * 9000.f));
 
   pkt << (int8_t)PACKET_OUT_ENTITY << (int32_t)EID 
-      << Protocol::addObject(EID,projID, pos.x(), pos.y(), pos.z(), user->UID,(int16_t)vel.x(),(int16_t)vel.y(),(int16_t)vel.z(),0,0);
+      << Protocol::spawnObject(EID,projID, pos.x(), pos.y(), pos.z(), user->UID,(int16_t)vel.x(),(int16_t)vel.y(),(int16_t)vel.z(),0,0);
 
   user->sendAll(pkt);
 

@@ -805,8 +805,7 @@ int PacketHandler::player_digging(User* user)
           user->inv[itemSlot].setType(-1);
         }
       }
-      ServerInstance->inventory()->setSlot(user, WINDOW_PLAYER, itemSlot, user->inv[itemSlot].getType(),
-                                           user->inv[itemSlot].getCount(), user->inv[itemSlot].getHealth());
+      ServerInstance->inventory()->setSlot(user, WINDOW_PLAYER, itemSlot, user->inv[itemSlot]);
     }
 
     runCallbackUntilFalse("BlockBreakPre",user->nick.c_str(), x, y, z);
@@ -1078,7 +1077,7 @@ int PacketHandler::player_block_placement(User* user)
     Packet pkt;
     // MINECART
     //10 == minecart
-    pkt << Protocol::addObject(EID,10,x,y,z,0);
+    pkt << Protocol::spawnObject(EID,10,x,y,z,0);
     
     user->sendAll(pkt);
 
@@ -1329,8 +1328,7 @@ int PacketHandler::held_item_change(User* user)
   user->curItem = itemSlot;
 
   //Send holding change to others
-  Packet pkt;
-  pkt << (int8_t)PACKET_OUT_ENTITY_EQUIPMENT << (int32_t)user->UID << (int16_t)0 << Protocol::slot(user->inv[itemSlot + 36].getType(),1,user->inv[itemSlot + 36].getHealth());
+  Packet pkt = Protocol::entityEquipment(user->UID, 0, user->inv[itemSlot + 36]);
   user->sendOthers(pkt);
 
   // Set current itemID to user

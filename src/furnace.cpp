@@ -288,8 +288,7 @@ void Furnace::sendToAllUsers()
           if (m_data->items[j].getType() != -1)
           {
             Item& item = m_data->items[j];
-            inv[openinv]->users[user]->buffer << Protocol::setSlotHeader(WINDOW_FURNACE, j)
-                                              << Protocol::slot(item.getType(), item.getCount(), item.getHealth());
+            inv[openinv]->users[user]->buffer.writePacket(Protocol::setSlot(WINDOW_FURNACE, j, item), inv[openinv]->users[user]->compression);
           }
         }
 

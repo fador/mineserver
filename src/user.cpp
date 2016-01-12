@@ -264,15 +264,16 @@ bool User::sendLoginInfo()
   */
 
   logged = true;
-
-  /*  
-  spawnUser((int32_t)pos.x * 32, (int32_t)((pos.y + 2) * 32), (int32_t)pos.z * 32);
-
+  
   for (int i = 1; i < 45; i++)
   {
     inv[i].ready = true;
     inv[i].sendUpdate();
   }
+
+  /*  
+  spawnUser((int32_t)pos.x * 32, (int32_t)((pos.y + 2) * 32), (int32_t)pos.z * 32);
+
   
   // Teleport player (again)
   teleport(pos.x, pos.y + 2, pos.z);
@@ -291,7 +292,7 @@ bool User::sendLoginInfo()
 // Kick player
 bool User::kick(std::string kickMsg)
 {
-  buffer.writePacket(Protocol::disconnect(R"({"text":")"+json_esc(kickMsg)+"\"}"), this->compression);
+  buffer.writePacket(Protocol::disconnect("{\"text\": \""+json_esc(kickMsg)+"\"}"), this->compression);
   runAllCallback("PlayerKickPost",nick.c_str(), kickMsg.c_str());
 
   LOG2(WARNING, nick + " kicked. Reason: " + kickMsg);

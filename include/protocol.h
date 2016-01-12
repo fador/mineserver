@@ -117,29 +117,39 @@ class Protocol
       return ret;
     }
 
-    static Packet slot(int16_t id, int8_t count=0, int16_t damage=0, int16_t data_size=-1, const uint8_t *data=NULL)
+    static Packet slot(Item &item)
     {
-      // TODO: respect data!
       Packet ret;
-      ret << id;
-      if(id != -1) {
-        ret << count << damage;
-          if(data != NULL) {
-            ret << data_size;
-            ret.addToWrite(data, data_size);
-          } else {
-            ret << (int16_t)-1;
-          }
+      ret << (int16_t)item.getType();
+      if(item.getType() != -1) {
+        ret << (int16_t)item.getCount() << (int16_t)item.getHealth();
+        // ToDo: item extra data
+        /*
+        if(item_data != NULL) {
+          ret << item_data_size;
+          ret.addToWrite(item_data, item_data_size);
+        } else {
+          ret << (int16_t)-1;
+        }
+        */
+        ret << (int16_t)-1;
       }
       return ret;
     }
 
-    static Packet setSlotHeader(int8_t window_id, int16_t slot)
+    static Packet setSlot(int8_t window_id, int16_t slotId, Item& item)
     {
-      // `header` means: You need to place a `slot` packet after this one.
       Packet ret;
-      ret << (int8_t)PACKET_OUT_SET_SLOT << window_id << slot;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_SET_SLOT) << window_id << slotId;
+      ret << Protocol::slot(item);
+      return ret;
+    }
 
+    static Packet entityEquipment(int32_t eid, int16_t slot, Item& item)
+    {
+      Packet ret;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_ENTITY_EQUIPMENT) << MS_VarInt((uint32_t)eid) << (int16_t)slot
+          << Protocol::slot(item);
       return ret;
     }
 
@@ -316,24 +326,7 @@ class Protocol
       return ret;
     }
 
-    static Packet pickupSpawn(int eid, int16_t item, int16_t count, int16_t health, int32_t x, int32_t y, int32_t z)
-    {
-      MetaData metadata;
-
-      Packet ret;
-      ret << addObject(eid, 0x02, x, y, z,0) ;
-      //Add metadata
-      //ToDo: expand metadata-class to handle this
-
-      //Ref: https://gist.github.com/4325656
-      ret << (int8_t)PACKET_OUT_ENTITY_METADATA << eid;      
-      ret << (int8_t)0xAA /*Slot at index 10 */;
-      ret << slot(item,(int8_t)count,health);
-      ret << (int8_t)0x7f; //Terminate metadata
-      return ret;
-    }
-
-    static Packet addObject(int eid, int8_t object, int32_t x, int32_t y, int32_t z, int objectData, int16_t speed_x = 0, int16_t speed_y = 0,int16_t speed_z = 0, int8_t yaw = 0, int8_t pitch = 0)
+    static Packet spawnObject(int eid, int8_t object, int32_t x, int32_t y, int32_t z, int objectData, int16_t speed_x = 0, int16_t speed_y = 0,int16_t speed_z = 0, int8_t yaw = 0, int8_t pitch = 0)
     {
       Packet  pkt;  
       pkt //<< (int8_t)PACKET_OUT_ENTITY << (int32_t)eid
@@ -379,14 +372,6 @@ class Protocol
     {
       Packet ret;
       ret << (int8_t)PACKET_OUT_UPDATE_HEALTH << (float)health << (int16_t)food << (float)5.0;
-      return ret;
-    }
-
-    static Packet entityEquipment(int eid, int slot, int type, int damage)
-    {
-      Packet ret;
-      ret << (int8_t)PACKET_OUT_ENTITY_EQUIPMENT << (int32_t)eid << (int16_t)slot
-          << Protocol::slot(type,1,damage);
       return ret;
     }
 

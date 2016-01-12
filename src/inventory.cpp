@@ -47,16 +47,12 @@ void Item::sendUpdate()
   {
     if (slot == player->curItem + 36)
     {
-      Packet pkt;
-      pkt << (int8_t)PACKET_OUT_ENTITY_EQUIPMENT << (int32_t)player->UID
-          << (int16_t)0 << Protocol::slot(type,count,health);
+      Packet pkt = Protocol::entityEquipment(player->UID, 0, *this);
       player->sendOthers(pkt);
     }
     if (slot >= 5 && slot <= 8)
     {
-      Packet pkt;
-      pkt << (int8_t)PACKET_OUT_ENTITY_EQUIPMENT << (int32_t)player->UID
-          << (int16_t)(5 - (slot - 4)) << Protocol::slot(type,count,health);//<< (int16_t)type << (int16_t) 0;
+      Packet pkt = Protocol::entityEquipment(player->UID,(5 - (slot - 4)), *this);
       player->sendOthers(pkt);
     }
     
@@ -67,8 +63,7 @@ void Item::sendUpdate()
       window = -1;
       t_slot = 0;
     }
-    player->buffer << Protocol::setSlotHeader(window, t_slot)
-                   << Protocol::slot(type, count, health);
+    player->buffer.writePacket(Protocol::setSlot(window, t_slot, *this), player->compression);
   }
   // Cases where we're changing items in chests, furnaces etc?
 }
@@ -751,7 +746,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         user->inventoryHolding.decCount(0); // Refresh both
       }
     }
-    setSlot(user, WINDOW_CURSOR, 0, user->inventoryHolding.getType(), user->inventoryHolding.getCount(), user->inventoryHolding.getHealth());
+    setSlot(user, WINDOW_CURSOR, 0, user->inventoryHolding);
     return false;
   }
 
@@ -772,9 +767,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
             if (currentInventory->workbench[workbenchSlot].getType() != -1)
             {
               currentInventory->workbench[workbenchSlot].decCount();
-              setSlot(user, windowID, workbenchSlot, currentInventory->workbench[workbenchSlot].getType(),
-                      currentInventory->workbench[workbenchSlot].getCount(),
-                      currentInventory->workbench[workbenchSlot].getHealth());
+              setSlot(user, windowID, workbenchSlot, currentInventory->workbench[workbenchSlot]);
             }
           }
           workbenchCrafting = true;
@@ -786,9 +779,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
             if (user->inv[playerSlot].getType() != -1)
             {
               user->inv[playerSlot].decCount();
-              setSlot(user, windowID, playerSlot, user->inv[playerSlot].getType(),
-                      user->inv[playerSlot].getCount(),
-                      user->inv[playerSlot].getHealth());
+              setSlot(user, windowID, playerSlot, user->inv[playerSlot]);
             }
           }
           playerCrafting = true;
@@ -831,9 +822,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
           {
             currentInventory->workbench[workbenchSlot].decCount();
 
-            setSlot(user, windowID, workbenchSlot, currentInventory->workbench[workbenchSlot].getType(),
-                    currentInventory->workbench[workbenchSlot].getCount(),
-                    currentInventory->workbench[workbenchSlot].getHealth());
+            setSlot(user, windowID, workbenchSlot, currentInventory->workbench[workbenchSlot]);
           }
         }
         workbenchCrafting = true;
@@ -897,10 +886,10 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   }
 
   //Update slot
-  setSlot(user, windowID, slot, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
+  setSlot(user, windowID, slot, *slotItem);
 
   //Update item on the cursor
-  setSlot(user, WINDOW_CURSOR, 0, user->inventoryHolding.getType(), user->inventoryHolding.getCount(), user->inventoryHolding.getHealth());
+  setSlot(user, WINDOW_CURSOR, 0, user->inventoryHolding);
 
 
   //Check if crafting
@@ -908,24 +897,24 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   {
     if (doCraft(currentInventory->workbench, 3, 3))
     {
-      setSlot(user, windowID, 0, currentInventory->workbench[0].getType(), currentInventory->workbench[0].getCount(), currentInventory->workbench[0].getHealth());
+      setSlot(user, windowID, 0, currentInventory->workbench[0]);
     }
     else
     {
       currentInventory->workbench[0].setType(-1);
-      setSlot(user, windowID, 0, -1, 0, 0);
+      setSlot(user, windowID, 0, Item(0, -1));
     }
   }
   else if ((windowID == WINDOW_PLAYER && slot < 5 && slot > 0) || playerCrafting)
   {
     if (doCraft(user->inv, 2, 2))
     {
-      setSlot(user, windowID, 0, user->inv[0].getType(), user->inv[0].getCount(), user->inv[0].getHealth());
+      setSlot(user, windowID, 0, user->inv[0]);
     }
     else
     {
       user->inv[0].setType(-1);
-      setSlot(user, windowID, 0, -1, 0, 0);
+      setSlot(user, windowID, 0, Item(0, -1));
     }
   }
   //If handling the "fuel" slot
@@ -945,7 +934,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         {
           if((*otherUsers)[i] != user)
           {
-            setSlot((*otherUsers)[i], windowID, slot, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
+            setSlot((*otherUsers)[i], windowID, slot, *slotItem);
           }
         }
       }
@@ -959,7 +948,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         {
           if((*otherUsers)[i] != user)
           {
-            setSlot((*otherUsers)[i], windowID, slot, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
+            setSlot((*otherUsers)[i], windowID, slot, *slotItem);
           }
         }
       }
@@ -972,7 +961,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         {
           if((*otherUsers)[i] != user)
           {
-            setSlot((*otherUsers)[i], windowID, slot, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
+            setSlot((*otherUsers)[i], windowID, slot, *slotItem);
           }
         }
       }
@@ -986,7 +975,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         {
           if((*otherUsers)[i] != user)
           {
-            setSlot((*otherUsers)[i], windowID, slot, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
+            setSlot((*otherUsers)[i], windowID, slot, *slotItem);
           }
         }
       }
@@ -1045,9 +1034,7 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
       {
         if ((*_chestData->items())[j]->getType() != -1)
         {
-          user->buffer.writePacket(Protocol::setSlotHeader(type, j), user->compression);
-          ItemPtr item = (*_chestData->items())[j];
-          user->buffer.writePacket(Protocol::slot(item->getType(), item->getCount(), item->getHealth()), user->compression);
+          user->buffer.writePacket(Protocol::setSlot(type, j, *(*_chestData->items())[j]), user->compression);
         }
       }
     }
@@ -1066,10 +1053,7 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
         {
           if (openWorkbenches[i]->workbench[j].getType() != -1)
           {
-            user->buffer.writePacket(Protocol::setSlotHeader(WINDOW_CRAFTING_TABLE, j), user->compression);
-            user->buffer.writePacket(Protocol::slot(openWorkbenches[i]->workbench[j].getType(),
-              openWorkbenches[i]->workbench[j].getCount(),
-              openWorkbenches[i]->workbench[j].getHealth()), user->compression);
+            user->buffer.writePacket(Protocol::setSlot(WINDOW_CRAFTING_TABLE, j, openWorkbenches[i]->workbench[j]), user->compression);
           }
         }
         break;
@@ -1087,9 +1071,7 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
         {
           if (chunk->furnaces[i]->items[j].getType() != -1)
           {
-            user->buffer.writePacket(Protocol::setSlotHeader(WINDOW_FURNACE, j), user->compression);
-            Item& item = chunk->furnaces[i]->items[j];
-            user->buffer.writePacket(Protocol::slot(item.getType(), item.getCount(), item.getHealth()), user->compression);
+            user->buffer.writePacket(Protocol::setSlot(WINDOW_FURNACE, j, chunk->furnaces[i]->items[j]), user->compression);
           }
         }
         user->buffer.writePacket(Protocol::windowProperty(WINDOW_FURNACE, 0, (chunk->furnaces[i]->cookTime * 18)), user->compression);
@@ -1450,10 +1432,9 @@ bool Inventory::doCraft(Item* slots, int8_t width, int8_t height)
   return false;
 }
 
-bool Inventory::setSlot(User* user, int8_t windowID, int16_t slot, int16_t itemID, int8_t count, int16_t health)
+bool Inventory::setSlot(User* user, int8_t windowID, int16_t slot, Item& item)
 {
-  //ServerInstance->logger()->log(1,"Setslot: " + dtos(slot) + " to " + dtos(itemID) + " (" + dtos(count) + ") health: " + dtos(health));
-  user->buffer << Protocol::setSlotHeader(windowID, slot) << Protocol::slot(itemID, count, health);
+  user->buffer.writePacket(Protocol::setSlot(windowID, slot, item), user->compression);
   return true;
 }
 
