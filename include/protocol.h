@@ -176,12 +176,12 @@ class Protocol
       return ret;
     }
 
-    static Packet entityTeleport(int eid, double x, double y, double z, int yaw, int pitch)
+    static Packet entityTeleport(uint32_t eid, double x, double y, double z, float yaw, float pitch)
     {
       Packet ret;
-      ret << (int8_t)PACKET_OUT_ENTITY_TELEPORT << (int32_t)eid
+      ret << MS_VarInt((uint32_t)PACKET_OUT_ENTITY_TELEPORT) << MS_VarInt((uint32_t)eid)
           << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32)
-          << (int8_t)yaw << (int8_t)pitch;
+          << (int8_t)angleToByte(yaw) << (int8_t)angleToByte(pitch);
       return ret;
     }
     static Packet entityRelativeMove(int eid, int8_t x, int8_t y, int8_t z)
@@ -191,13 +191,9 @@ class Protocol
       return ret;
     }
 
-    static Packet entityTeleport(int eid, const position& pos)
+    static Packet entityTeleport(uint32_t eid, const position& pos)
     {
-      Packet ret;
-      ret << (int8_t)PACKET_OUT_ENTITY_TELEPORT << (int32_t)eid
-          << (int32_t)(pos.x * 32) << (int32_t)(pos.y * 32) << (int32_t)(pos.z * 32)
-          << (int8_t)pos.yaw << (int8_t)pos.pitch;
-      return ret;
+      return Protocol::entityTeleport(eid, pos.x, pos.y, pos.z, pos.yaw, pos.pitch);
     }
 
     static Packet namedSoundEffect(std::string name, int32_t x, int32_t y, int32_t z, float volume, int8_t pitch)

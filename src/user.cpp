@@ -612,7 +612,7 @@ bool User::updatePos(double x, double y, double z, double stance)
 
     if (newChunk == oldChunk)
     {
-      Packet telePacket = Protocol::entityTeleport(UID, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch));
+      Packet telePacket = Protocol::entityTeleport(UID, x, y, z, pos.yaw, pos.pitch);
       newChunk->sendPacket(telePacket, this);
     }
     else{
@@ -643,7 +643,7 @@ bool User::updatePos(double x, double y, double z, double stance)
               this->compression);
       }
 
-      Packet tpPkt = Protocol::entityTeleport(UID, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch));
+      Packet tpPkt = Protocol::entityTeleport(UID, x, y, z, pos.yaw, pos.pitch);
 
       newChunk->sendPacket(tpPkt,this);
 
