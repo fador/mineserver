@@ -63,10 +63,12 @@ class Protocol
     }
     #endif
 
-    static Packet openWindow(int8_t windowId, int8_t type, std::string title, int8_t nslots, int8_t useCustomTitle = 0)
+    static Packet openWindow(uint8_t windowId, std::string windowType, std::string title_json, int8_t numberOfSlots, int32_t EID = 0)
     {
       Packet ret;
-      ret << (int8_t)PACKET_OUT_OPEN_WINDOW << windowId << type << title << nslots << useCustomTitle;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_OPEN_WINDOW) << windowId << windowType << title_json << numberOfSlots;
+      if (windowType == INVENTORYTYPE_HORSE)
+        ret << EID;
       return ret;
     }
 
