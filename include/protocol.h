@@ -72,6 +72,13 @@ class Protocol
       return ret;
     }
 
+    static Packet windowProperty(uint8_t windowId, int16_t property, int16_t value)
+    {
+      Packet ret;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_WINDOW_PROPERTY) << windowId << property << value;
+      return ret;
+    }
+
     static Packet animation(int eid, int aid)
     {
       Packet ret;

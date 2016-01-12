@@ -293,8 +293,8 @@ void Furnace::sendToAllUsers()
           }
         }
 
-        inv[openinv]->users[user]->buffer << (int8_t)PACKET_OUT_WINDOW_PROPERTY << (int8_t)WINDOW_FURNACE << (int16_t)PROGRESS_ARROW << (int16_t)(m_data->cookTime * 18);
-        inv[openinv]->users[user]->buffer << (int8_t)PACKET_OUT_WINDOW_PROPERTY << (int8_t)WINDOW_FURNACE << (int16_t)PROGRESS_FIRE  << (int16_t)(m_data->burnTime * 3);
+        inv[openinv]->users[user]->buffer.writePacket(Protocol::windowProperty(WINDOW_FURNACE, PROGRESS_ARROW, (m_data->cookTime * 18)), inv[openinv]->users[user]->compression);
+        inv[openinv]->users[user]->buffer.writePacket(Protocol::windowProperty(WINDOW_FURNACE, PROGRESS_FIRE, (m_data->burnTime * 3)), inv[openinv]->users[user]->compression);
       }
 
       break;

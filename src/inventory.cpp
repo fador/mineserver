@@ -1092,8 +1092,8 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
             user->buffer.writePacket(Protocol::slot(item.getType(), item.getCount(), item.getHealth()), user->compression);
           }
         }
-        user->buffer << (int8_t)PACKET_OUT_WINDOW_PROPERTY << (int8_t)WINDOW_FURNACE << (int16_t)0 << (int16_t)(chunk->furnaces[i]->cookTime * 18);
-        user->buffer << (int8_t)PACKET_OUT_WINDOW_PROPERTY << (int8_t)WINDOW_FURNACE << (int16_t)1 << (int16_t)(chunk->furnaces[i]->burnTime * 3);
+        user->buffer.writePacket(Protocol::windowProperty(WINDOW_FURNACE, 0, (chunk->furnaces[i]->cookTime * 18)), user->compression);
+        user->buffer.writePacket(Protocol::windowProperty(WINDOW_FURNACE, 1, (chunk->furnaces[i]->burnTime * 3)), user->compression);
         break;
       }
     }
