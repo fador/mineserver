@@ -169,10 +169,10 @@ class Protocol
       return Protocol::mobSpawn(mob.UID, mob.type, mob.x, mob.y, mob.z, mob.yaw, mob.pitch, mob.head_yaw, mob.metadata);
     }
 
-    static Packet destroyEntity(int eid)
+    static Packet destroyEntity(uint32_t eid)
     {
       Packet ret;
-      ret << (int8_t)PACKET_OUT_DESTROY_ENTITIES << (int8_t)1 << (int32_t)eid;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_DESTROY_ENTITIES) << MS_VarInt((uint32_t)1) << MS_VarInt((uint32_t)eid);
       return ret;
     }
 
