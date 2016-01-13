@@ -333,6 +333,29 @@ class Protocol
       return ret;
     }
 
+    static Packet PlayerListItemAddSingle(uint8_t *uuid, std::string &nick, int8_t gamemode, int ping){
+      Packet ret;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_PLAYER_LIST_ITEM) 
+          << MS_VarInt((uint32_t)0) // Action: Add
+          << MS_VarInt((uint32_t)1); // Number of Players
+      for (int i = 0; i < 16; i++) ret << uuid[i];
+      ret << nick
+          << MS_VarInt((uint32_t)0) // Number Of Properties
+          << MS_VarInt((uint32_t)gamemode)
+          << MS_VarInt((uint32_t)ping)
+          << (uint8_t)0; // Has Display Name
+      return ret;
+    }
+
+    static Packet PlayerListItemRemoveSingle(uint8_t *uuid){
+      Packet ret;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_PLAYER_LIST_ITEM) 
+          << MS_VarInt((uint32_t)4) // Action: Remove
+          << MS_VarInt((uint32_t)1); // Number of Players
+      for (int i = 0; i < 16; i++) ret << uuid[i];
+      return ret;
+    }
+
     static Packet spawnObject(int eid, int8_t object, int32_t x, int32_t y, int32_t z, int objectData, int16_t speed_x = 0, int16_t speed_y = 0,int16_t speed_z = 0, int8_t yaw = 0, int8_t pitch = 0)
     {
       Packet  pkt;  

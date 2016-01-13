@@ -28,6 +28,7 @@
 #include <cmath>
 #include <sys/stat.h>
 #include <algorithm>
+#include <stdio.h>
 
 using namespace std;
 
@@ -180,6 +181,9 @@ User::~User()
     Packet pkt = Protocol::destroyEntity(this->UID);
     this->sendOthers(pkt);
 
+    pkt = Protocol::PlayerListItemRemoveSingle(this->uuid_raw);
+    this->sendOthers(pkt);
+
     // Loop every loaded chunk to make sure no user pointers are left!
 
     for (ChunkMap::const_iterator it = ServerInstance->map(pos.map)->chunks.begin(); it != ServerInstance->map(pos.map)->chunks.end(); )
@@ -222,7 +226,7 @@ User::~User()
     runAllCallback("PlayerQuitPost",nick.c_str());
   }
 }
-#include <stdio.h>
+
 bool User::sendLoginInfo()
 {
   // Load user data
@@ -239,8 +243,7 @@ bool User::sendLoginInfo()
   buffer.writePacket(Protocol::joinGame(UID), this->compression);
   setGameMode(gamemode);
   
-  // ToDo: spawn others
-  //spawnOthers();
+  spawnOthers();
 
   // Send spawn position
   buffer.writePacket(Protocol::spawnPosition(int(pos.x), int(pos.y + 2), int(pos.z)), this->compression);
@@ -281,7 +284,6 @@ bool User::sendLoginInfo()
     inv[i].sendUpdate();
   }
 
-  /*  
   spawnUser((int32_t)pos.x * 32, (int32_t)((pos.y + 2) * 32), (int32_t)pos.z * 32);
 
   
@@ -292,7 +294,6 @@ bool User::sendLoginInfo()
 
   sethealth(health);
   logged = true;
-  */
 
   //ServerInstance->chat()->sendMsg(this, nick + " connected!", Chat::ALL);
 
@@ -1145,10 +1146,12 @@ bool User::teleport(double x, double y, double z, size_t map)
 bool User::spawnUser(int x, int y, int z)
 {
   Packet pkt = Protocol::spawnPlayer(UID, uuid_raw, nick, (float)health, x, y, z, 0, 0, 0);
+  Packet playerListAddPkt = Protocol::PlayerListItemAddSingle(uuid_raw, nick, gamemode, 10);
   sChunk* chunk = ServerInstance->map(pos.map)->getChunk(blockToChunk(x >> 5), blockToChunk(z >> 5));
   if (chunk != NULL)
   {
     chunk->sendPacket(pkt, this);
+    chunk->sendPacket(playerListAddPkt, this);
   }
   return true;
 }
@@ -1161,6 +1164,7 @@ bool User::spawnOthers()
     if ((*it)->logged)
     {
       this->buffer.writePacket(Protocol::spawnPlayer((*it)->UID, (*it)->uuid_raw, (*it)->nick, (float)(*it)->health, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, (*it)->pos.yaw,(*it)->pos.pitch, 0), this->compression);
+      this->buffer.writePacket(Protocol::PlayerListItemAddSingle((*it)->uuid_raw, (*it)->nick, (*it)->gamemode, 10), this->compression);
       for (int b = 0; b < 5; b++)
       {
         const int n = b == 0 ? (*it)->curItem + 36 : 9 - b;
