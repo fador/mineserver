@@ -122,17 +122,17 @@ class Protocol
       Packet ret;
       ret << (int16_t)item.getType();
       if(item.getType() != -1) {
-        ret << (int16_t)item.getCount() << (int16_t)item.getHealth();
+        ret << (int8_t)item.getCount() << (int16_t)item.getHealth();
         // ToDo: item extra data
         /*
         if(item_data != NULL) {
           ret << item_data_size;
           ret.addToWrite(item_data, item_data_size);
         } else {
-          ret << (int16_t)-1;
+          ret << (int16_t)0;
         }
         */
-        ret << (int16_t)-1;
+        ret << (int8_t)0;
       }
       return ret;
     }
