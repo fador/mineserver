@@ -683,7 +683,7 @@ bool User::updatePos(double x, double y, double z, double stance)
             if (ServerInstance->inventory()->isSpace(this, (*iter)->item, (*iter)->count))
             {
               // Send player collect item packet
-              buffer << Protocol::collectItem((*iter)->EID, UID);
+              buffer.writePacket(Protocol::collectItem((*iter)->EID, UID), this->compression);
 
               // Send everyone destroy_entity-packet
               Packet pkt = Protocol::destroyEntity((*iter)->EID);

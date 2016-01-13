@@ -381,7 +381,7 @@ class Protocol
     static Packet collectItem(int itemEid, int eid)
     {
       Packet ret;
-      ret << (int8_t)PACKET_OUT_COLLECT_ITEM << (int32_t)itemEid << (int32_t)eid;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_COLLECT_ITEM) << MS_VarInt((uint32_t)itemEid) << MS_VarInt((uint32_t)eid);
       return ret;
     }
 
