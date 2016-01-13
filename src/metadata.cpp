@@ -53,7 +53,7 @@ MetaDataElemShort::MetaDataElemShort(int8_t _idx, int16_t _val)
   val = _val;
 }
 
-void MetaDataElemSlot::output(Packet& p)
+void MetaDataElemSlot::output(Packet& p) const
 {
   int header = 5 << 5 | idx;
   p << (int8_t)header << Protocol::slot(val);

@@ -117,7 +117,7 @@ class Protocol
       return ret;
     }
 
-    static Packet slot(Item &item)
+    static Packet slot(const Item &item)
     {
       Packet ret;
       ret << (int16_t)item.getType();
@@ -231,7 +231,7 @@ class Protocol
 
     static Packet entityRelativeMove(uint32_t eid, double dx, double dy, double dz, int8_t onGround)
     {
-      return Protocol::entityRelativeMove(eid, dx * 32, dy * 32, dz * 32, onGround);
+      return Protocol::entityRelativeMove(eid, (int8_t)(dx * 32), (int8_t)(dy * 32), (int8_t)(dz * 32), onGround);
     }
     
     static Packet entityLookRelativeMove(int eid, double dx, double dy, double dz, int yaw, int pitch)

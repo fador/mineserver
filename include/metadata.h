@@ -36,7 +36,7 @@
 class MetaDataElem
 {
   public:
-    virtual void output(Packet& p) const=0;
+    virtual void output(Packet& p) const=0; // Pure Virtual
     int8_t idx;
 };
 
@@ -60,7 +60,7 @@ class MetaDataElemSlot : public MetaDataElem
 {
   public:
     MetaDataElemSlot(int8_t _idx, Item _val);
-    void output(Packet& p);
+    void output(Packet& p) const;
     Item val;
 };
 
