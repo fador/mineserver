@@ -241,21 +241,19 @@ int PacketHandler::encryption_response(User* user)
 
 int PacketHandler::client_status(User* user)
 {
-  int8_t payload;
+  MS_VarInt action_id;
 
-  user->buffer >> payload;
+  user->buffer >> action_id;
   
-
-
   //0: Initial spawn, 1: Respawn after death
   LOG2(INFO, "client_status.");
-  if(payload == 0 && user->crypted)
+  if(action_id.val == 0 && !user->logged && user->crypted)
   {
     LOG2(INFO, "Sending login info..");
     user->sendLoginInfo();
   }
   //player respawns
-  if(payload == 1)
+  else if(action_id.val == 0)
   {
     user->dropInventory();
     user->respawn();

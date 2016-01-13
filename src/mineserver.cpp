@@ -443,6 +443,10 @@ Mineserver::Mineserver(int args, char **argarray)
   m_inventory      = new Inventory(m_config->sData("system.path.data") + '/' + "recipes", ".recipe", "ENABLED_RECIPES.cfg");
   m_mobs           = new Mobs;
 
+  std::ostringstream s;
+  s << "Known recipes for crafting: " << m_inventory->recipes.size();
+  LOG2(INFO, s.str());
+
 } // End Mineserver constructor
 
 Mineserver::~Mineserver()
