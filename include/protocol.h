@@ -401,7 +401,7 @@ class Protocol
     static Packet updateHealth(int health, int food=15)
     {
       Packet ret;
-      ret << (int8_t)PACKET_OUT_UPDATE_HEALTH << (float)health << (int16_t)food << (float)5.0;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_UPDATE_HEALTH) << (float)health << MS_VarInt((uint32_t)food) << (float)5.0;
       return ret;
     }
 

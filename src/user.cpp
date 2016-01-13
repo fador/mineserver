@@ -1314,7 +1314,7 @@ bool User::sethealth(int userHealth)
   healthtimeout = time(NULL);
 
   health = userHealth;
-  buffer << Protocol::updateHealth(userHealth);
+  buffer.writePacket(Protocol::updateHealth(userHealth), this->compression);
   return true;
 }
 
