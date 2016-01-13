@@ -446,5 +446,14 @@ class Protocol
       ret << MS_VarInt((uint32_t)PACKET_OUT_CHAT_MESSAGE) << msg << (uint8_t)0;
       return ret;
     }
+
+    static Packet blockChange(int32_t x, int32_t y, int32_t z, int16_t blocktype, int8_t meta)
+    {
+      Packet ret;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_BLOCK_CHANGE)
+      << (uint64_t)((((uint64_t)x & 0x3FFFFFF) << 38) | (((uint64_t)y & 0xFFF) << 26) | ((uint64_t)z & 0x3FFFFFF)) 
+      << MS_VarInt((uint32_t)(blocktype << 4) | meta);
+      return ret;
+    }
 };
 #endif

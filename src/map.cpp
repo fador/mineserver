@@ -974,11 +974,7 @@ bool Map::sendBlockChange(int x, int y, int z, int16_t type, char meta)
     return false;
   }
 
-  Packet pkt;
-
-  pkt << (int8_t)PACKET_OUT_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int16_t)type << (int8_t)meta;
-
-  it->second->sendPacket(pkt);
+  it->second->sendPacket(Protocol::blockChange(x, y, z, type, meta));
 
   return true;
 }

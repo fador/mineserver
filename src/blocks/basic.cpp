@@ -33,6 +33,7 @@
 #include "map.h"
 
 #include "basic.h"
+#include "protocol.h"
 
 
 bool BlockBasic::isBlockStackable(const uint8_t block)
@@ -274,5 +275,5 @@ void BlockBasic::revertBlock(User* user, int32_t x, int16_t y, int32_t z, int ma
 {
   unsigned char block, meta;
   ServerInstance->map(map)->getBlock((int)x, (int)y, (int)z, &block, &meta);
-  user->buffer << (int8_t)PACKET_OUT_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int16_t)((uint8_t)block) << (int8_t)meta;
+  user->buffer.writePacket(Protocol::blockChange(x, y, z, block, meta), user->compression);
 }
