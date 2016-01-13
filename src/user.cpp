@@ -286,11 +286,8 @@ bool User::sendLoginInfo()
 
   spawnUser((int32_t)pos.x * 32, (int32_t)((pos.y + 2) * 32), (int32_t)pos.z * 32);
 
-  
   // Teleport player (again)
   teleport(pos.x, pos.y + 2, pos.z);
-
-  
 
   sethealth(health);
   logged = true;
@@ -1131,7 +1128,7 @@ bool User::teleport(double x, double y, double z, size_t map)
   }
   if (map == pos.map)
   {
-    buffer << Protocol::playerPositionAndLook(x, y, z, 0, 0, true);
+    buffer.writePacket(Protocol::playerPositionAndLook(x, y, z, 0, 0, true), this->compression);
   }
 
   //Also update pos for other players
