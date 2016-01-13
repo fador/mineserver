@@ -1021,10 +1021,19 @@ bool Map::sendPickupSpawn(spawnedItem item)
 
   it->second->items.push_back(storedItem);
 
-  Packet pkt;
-  pkt << Protocol::spawnObject(item.EID, item.item, item.count, item.health,item.pos.x(), item.pos.y(),item.pos.z());
-  
-  it->second->sendPacket(pkt);
+  MetaData meta;
+  MetaDataElemByte* entity_attributes = new MetaDataElemByte(0,0x00);
+  meta.set(entity_attributes);
+
+  MetaDataElemShort* entity_attributes_2 = new MetaDataElemShort(1,300);
+  meta.set(entity_attributes_2);
+
+  MetaDataElemSlot* entity_item_type = new MetaDataElemSlot(10, Item(item.item, item.count, item.health));
+  meta.set(entity_item_type);
+
+  it->second->sendPacket(Protocol::entity(item.EID));
+  it->second->sendPacket(Protocol::spawnObject(item.EID, OBJECT_TYPE_ITEM_STACK,item.pos.x(), item.pos.y(),item.pos.z(), 1, 0, 0, 0));
+  it->second->sendPacket(Protocol::entityMetadata(item.EID, meta));
 
   return true;
 }
@@ -1076,7 +1085,6 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
     return false;
   }
 
-  Packet  pkt;
   int32_t EID = Mineserver::generateEID();
   float   tempMult = 1.f - abs(user->pos.pitch / 90.f);
 
@@ -1120,10 +1128,8 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
                 (int)(sinf(-(user->pos.pitch / 90.f)) * 14000.f),
                 (int)(cos(-(user->pos.yaw / 360.f) * 2.f * M_PI) * cos(user->pos.pitch * (M_PI / 180.0f)) * 9000.f));
 
-  pkt << (int8_t)PACKET_OUT_ENTITY << (int32_t)EID 
-      << Protocol::spawnObject(EID,projID, pos.x(), pos.y(), pos.z(), user->UID,(int16_t)vel.x(),(int16_t)vel.y(),(int16_t)vel.z(),0,0);
-
-  user->sendAll(pkt);
+  user->sendAll(Protocol::entity(EID));
+  user->sendAll(Protocol::spawnObject(EID,projID, pos.x(), pos.y(), pos.z(), user->UID,(int16_t)vel.x(),(int16_t)vel.y(),(int16_t)vel.z(),0,0));
 
   //Add to simulation  
   ServerInstance->physics(user->pos.map)->addEntitySimulation(projID,

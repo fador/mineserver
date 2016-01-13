@@ -106,7 +106,7 @@ class Protocol
     static Packet entityMetadata(int eid, MetaData& metadata)
     {
       Packet ret;
-      ret << (int8_t)PACKET_OUT_ENTITY_METADATA << (int32_t)eid << metadata;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_ENTITY_METADATA) << MS_VarInt((uint32_t)eid) << metadata;
       return ret;
     }
 
@@ -356,17 +356,25 @@ class Protocol
       return ret;
     }
 
-    static Packet spawnObject(int eid, int8_t object, int32_t x, int32_t y, int32_t z, int objectData, int16_t speed_x = 0, int16_t speed_y = 0,int16_t speed_z = 0, int8_t yaw = 0, int8_t pitch = 0)
+    static Packet spawnObject(int eid, int8_t object_type, int32_t x, int32_t y, int32_t z, int objectData, int16_t speed_x = 0, int16_t speed_y = 0,int16_t speed_z = 0, float yaw = 0.0, float pitch = 0.0)
     {
-      Packet  pkt;  
-      pkt //<< (int8_t)PACKET_OUT_ENTITY << (int32_t)eid
-          << (int8_t)PACKET_OUT_SPAWN_OBJECT << (int32_t)eid << (int8_t)object << x << y << z 
-          << yaw << pitch
+      Packet  pkt; 
+      pkt << MS_VarInt((uint32_t)PACKET_OUT_SPAWN_OBJECT) << MS_VarInt((uint32_t)eid)
+          << (int8_t)object_type
+          << x << y << z 
+          << angleToByte(yaw) << angleToByte(pitch)
           << (int32_t)objectData;
-      if(objectData)
-      {
-        pkt << (int16_t)speed_x << (int16_t)speed_y << (int16_t)speed_z;
-      }
+          if(objectData)
+          {
+            pkt << (int16_t)speed_x << (int16_t)speed_y << (int16_t)speed_z;
+          }
+      return pkt;
+    }
+
+    static Packet entity(int eid)
+    {
+      Packet  pkt; 
+      pkt << MS_VarInt((uint32_t)PACKET_OUT_ENTITY) << MS_VarInt((uint32_t)eid);
       return pkt;
     }
 

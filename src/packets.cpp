@@ -727,22 +727,25 @@ int PacketHandler::player_digging(User* user)
   int8_t status;
   int32_t x;
   int16_t  y;
-  int8_t temp_y;
   int32_t z;
   int8_t direction;
   uint8_t block;
   uint8_t meta;
+  uint64_t position;
   BlockBasicPtr blockcb;
   BlockDefault blockD;
 
-  user->buffer >> status >> x >> temp_y >> z >> direction;
-  y = (uint8_t)temp_y;
+  user->buffer >> status >> position >> direction;
 
   if (!user->buffer)
   {
     return PACKET_NEED_MORE_DATA;
   }
 
+  // ToDo: add tool to extract Position data
+  x = position >> 38;
+  y = (position >> 26) & 0xff;
+  z = position & 0x3ffffff;
 
 
   if (!ServerInstance->map(user->pos.map)->getBlock(x, y, z, &block, &meta))
@@ -922,10 +925,11 @@ int PacketHandler::player_digging(User* user)
 
     break;
   }
-  case BLOCK_STATUS_PICKUP_SPAWN:
+  case BLOCK_STATUS_DROP_ITEM_STACK:
+  case BLOCK_STATUS_DROP_ITEM:
   {
     //ToDo: handle
-#define itemSlot (36+user->currentItemSlot())
+    #define itemSlot (36+user->currentItemSlot())
     if (user->inv[itemSlot].getType() > 0)
     {
       ServerInstance->map(user->pos.map)->createPickupSpawn(int(user->pos.x), int(user->pos.y), int(user->pos.z), int(user->inv[itemSlot].getType()), 1, int(user->inv[itemSlot].getHealth()), user);
@@ -933,7 +937,7 @@ int PacketHandler::player_digging(User* user)
       user->inv[itemSlot].decCount();
     }
     break;
-#undef itemSlot
+    #undef itemSlot
   }
 
   }
@@ -1074,12 +1078,8 @@ int PacketHandler::player_block_placement(User* user)
     }
     
     int32_t EID = Mineserver::generateEID();
-    Packet pkt;
     // MINECART
-    //10 == minecart
-    pkt << Protocol::spawnObject(EID,10,x,y,z,0);
-    
-    user->sendAll(pkt);
+    user->sendAll(Protocol::spawnObject(EID,OBJECT_TYPE_MINECART,x,y,z,0));
 
     ServerInstance->map(user->pos.map)->minecarts.push_back(MinecartData(EID,vec(x*32+16,y*32+16,z*32+16),vec(0,0,0),microTime()));
     //ToDo: Store

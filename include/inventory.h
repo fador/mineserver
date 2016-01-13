@@ -80,6 +80,17 @@ public:
     health(0)
   {
   }
+
+  Item(int16_t _type, int8_t _count, int16_t _health, User* player = NULL)
+    :
+    ready(false),
+    player(player),
+    slot(-1),
+    type(_type),
+    count(_count),
+    health(_health)
+  {
+  }
 };
 
 typedef std::shared_ptr<Item> ItemPtr;
