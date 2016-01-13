@@ -1318,7 +1318,7 @@ bool User::respawn()
 {
   this->health = 20;
   this->timeUnderwater = 0;
-  buffer << Protocol::client_status(); //FIXME: send the correct world id
+  buffer.writePacket(Protocol::respawn(), this->compression); //FIXME: send the correct world id
   sethealth(20);
   Packet destroyPkt;
   destroyPkt << Protocol::destroyEntity(UID);
@@ -1338,7 +1338,7 @@ bool User::respawn()
     teleport(ServerInstance->map(pos.map)->spawnPos.x(), ServerInstance->map(pos.map)->spawnPos.y() + 2, ServerInstance->map(pos.map)->spawnPos.z(), 0);
   }
 
-  Packet spawnPkt = Protocol::spawnPlayer(UID, uuid_raw, nick, (float)health, pos.x, pos.y, pos.z, pos.yaw, pos.pitch, curItem);
+  Packet spawnPkt = Protocol::spawnPlayer(UID, uuid_raw, nick, (float)health, pos.x, pos.y, pos.z, pos.yaw, pos.pitch, curItem);  
 
   chunk = ServerInstance->map(pos.map)->getMapData(blockToChunk((int32_t)pos.x), blockToChunk((int32_t)pos.z));
   if (chunk != NULL)

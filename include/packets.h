@@ -193,7 +193,7 @@ enum
   PACKET_OUT_ENTITY_EQUIPMENT          = 0x04,
   PACKET_OUT_SPAWN_POSITION            = 0x05,
   PACKET_OUT_UPDATE_HEALTH             = 0x06,
-  PACKET_OUT_client_status                   = 0x07,
+  PACKET_OUT_RESPAWN                   = 0x07,
   PACKET_OUT_PLAYER_POSITION_AND_LOOK  = 0x08,
   PACKET_OUT_HELD_ITEM_CHANGE          = 0x09,
   PACKET_OUT_USE_BED                   = 0x0a,

@@ -368,10 +368,10 @@ class Protocol
       return ret;
     }
 
-    static Packet client_status(int32_t world = 0, int8_t difficulty=1,int8_t creative_mode=0, int16_t world_height=256, std::string level_type="default")
+    static Packet respawn(int32_t dimension = 0, int8_t difficulty=1,int8_t game_mode=0, std::string level_type="default")
     {
       Packet ret;
-      ret << (int8_t)PACKET_OUT_client_status << world << difficulty << creative_mode << world_height << level_type;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_RESPAWN) << dimension << difficulty << game_mode << level_type;
       return ret;
     }
 
