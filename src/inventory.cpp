@@ -457,7 +457,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   //Ack
   if(actionNumber)
   {
-    user->buffer << (int8_t)PACKET_OUT_CONFIRM_TRANSACTION << (int8_t)windowID << (int16_t)actionNumber << (int8_t)1;
+    user->buffer.writePacket(Protocol::confirmTransaction(windowID, actionNumber, 1), user->compression);
   }
 
   //Click outside the window

@@ -79,6 +79,13 @@ class Protocol
       return ret;
     }
 
+    static Packet confirmTransaction(uint8_t windowId, int16_t action_number, int8_t accepted)
+    {
+      Packet ret;
+      ret << MS_VarInt((uint32_t)PACKET_OUT_CONFIRM_TRANSACTION) << windowId << action_number << accepted;
+      return ret;
+    }
+
     static Packet animation(int eid, int aid)
     {
       Packet ret;
