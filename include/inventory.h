@@ -170,7 +170,7 @@ public:
   bool updateInventory(User* user, int8_t windowID);
   bool doCraft(Item* slots, int8_t width, int8_t height);
 
-  bool setSlot(User* user, int8_t windowID, int16_t slot, Item& item);
+  bool setSlot(User* user, int8_t windowID, int16_t slot, Item* item);
 
   int16_t itemHealth(int16_t itemID, int8_t block, bool& rightUse);
 

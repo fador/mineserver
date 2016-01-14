@@ -806,7 +806,7 @@ int PacketHandler::player_digging(User* user)
           user->inv[itemSlot].setType(-1);
         }
       }
-      ServerInstance->inventory()->setSlot(user, WINDOW_PLAYER, itemSlot, user->inv[itemSlot]);
+      ServerInstance->inventory()->setSlot(user, WINDOW_PLAYER, itemSlot, &user->inv[itemSlot]);
     }
 
     runCallbackUntilFalse("BlockBreakPre",user->nick.c_str(), x, y, z);

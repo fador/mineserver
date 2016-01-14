@@ -324,7 +324,7 @@ public:
     m_isValid = true;
   }
 
-  inline void writePacket(const Packet& p, uint16_t compression);
+  void writePacket(const Packet& p, uint16_t compression);
 
   inline void addToWrite(const Packet& p)
   {

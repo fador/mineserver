@@ -95,7 +95,7 @@ SET(LIBRARY_OUTPUT_PATH bin)
 
 # Set compiler specific build flags
 IF(CMAKE_COMPILER_IS_GNUCXX)
-  SET(CMAKE_CXX_FLAGS "-W -Wall -Wno-unused -pedantic -std=c++11")
+  SET(CMAKE_CXX_FLAGS "-W -Wall -Wno-unused-variable -Wno-unused-parameter -pedantic -std=c++11")
   SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g -O0")
   SET(CMAKE_CXX_FLAGS_PROFILE "-DDEBUG -g -pg")
   SET(CMAKE_CXX_FLAGS_RELEASE "-O4 -s -DNDEBUG")
@@ -113,7 +113,7 @@ ENDIF(MSVC_IDE)
 #
 
 SET(TARGET ${PROJECT_NAME})
-SET(mineserver_depends)
+SET(mineserver_depends -lpthread)
 
 # Note that on Ubuntu systems, CMake's FindOpenSSL.cmake file does not define
 # all the proper defines, therefore our old and generic library finder does not

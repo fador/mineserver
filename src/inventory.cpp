@@ -746,7 +746,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         user->inventoryHolding.decCount(0); // Refresh both
       }
     }
-    setSlot(user, WINDOW_CURSOR, 0, user->inventoryHolding);
+    setSlot(user, WINDOW_CURSOR, 0, &user->inventoryHolding);
     return false;
   }
 
@@ -767,7 +767,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
             if (currentInventory->workbench[workbenchSlot].getType() != -1)
             {
               currentInventory->workbench[workbenchSlot].decCount();
-              setSlot(user, windowID, workbenchSlot, currentInventory->workbench[workbenchSlot]);
+              setSlot(user, windowID, workbenchSlot, &currentInventory->workbench[workbenchSlot]);
             }
           }
           workbenchCrafting = true;
@@ -779,7 +779,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
             if (user->inv[playerSlot].getType() != -1)
             {
               user->inv[playerSlot].decCount();
-              setSlot(user, windowID, playerSlot, user->inv[playerSlot]);
+              setSlot(user, windowID, playerSlot, &user->inv[playerSlot]);
             }
           }
           playerCrafting = true;
@@ -822,7 +822,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
           {
             currentInventory->workbench[workbenchSlot].decCount();
 
-            setSlot(user, windowID, workbenchSlot, currentInventory->workbench[workbenchSlot]);
+            setSlot(user, windowID, workbenchSlot, &currentInventory->workbench[workbenchSlot]);
           }
         }
         workbenchCrafting = true;
@@ -886,10 +886,10 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   }
 
   //Update slot
-  setSlot(user, windowID, slot, *slotItem);
+  setSlot(user, windowID, slot, slotItem);
 
   //Update item on the cursor
-  setSlot(user, WINDOW_CURSOR, 0, user->inventoryHolding);
+  setSlot(user, WINDOW_CURSOR, 0, &user->inventoryHolding);
 
 
   //Check if crafting
@@ -897,24 +897,26 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   {
     if (doCraft(currentInventory->workbench, 3, 3))
     {
-      setSlot(user, windowID, 0, currentInventory->workbench[0]);
+      setSlot(user, windowID, 0, &currentInventory->workbench[0]);
     }
     else
     {
+      Item temp(0, -1);
       currentInventory->workbench[0].setType(-1);
-      setSlot(user, windowID, 0, Item(0, -1));
+      setSlot(user, windowID, 0, &temp);
     }
   }
   else if ((windowID == WINDOW_PLAYER && slot < 5 && slot > 0) || playerCrafting)
   {
     if (doCraft(user->inv, 2, 2))
     {
-      setSlot(user, windowID, 0, user->inv[0]);
+      setSlot(user, windowID, 0, &user->inv[0]);
     }
     else
     {
+      Item temp(0, -1);
       user->inv[0].setType(-1);
-      setSlot(user, windowID, 0, Item(0, -1));
+      setSlot(user, windowID, 0, &temp);
     }
   }
   //If handling the "fuel" slot
@@ -934,7 +936,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         {
           if((*otherUsers)[i] != user)
           {
-            setSlot((*otherUsers)[i], windowID, slot, *slotItem);
+            setSlot((*otherUsers)[i], windowID, slot, slotItem);
           }
         }
       }
@@ -948,7 +950,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         {
           if((*otherUsers)[i] != user)
           {
-            setSlot((*otherUsers)[i], windowID, slot, *slotItem);
+            setSlot((*otherUsers)[i], windowID, slot, slotItem);
           }
         }
       }
@@ -961,7 +963,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         {
           if((*otherUsers)[i] != user)
           {
-            setSlot((*otherUsers)[i], windowID, slot, *slotItem);
+            setSlot((*otherUsers)[i], windowID, slot, slotItem);
           }
         }
       }
@@ -975,7 +977,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         {
           if((*otherUsers)[i] != user)
           {
-            setSlot((*otherUsers)[i], windowID, slot, *slotItem);
+            setSlot((*otherUsers)[i], windowID, slot, slotItem);
           }
         }
       }
@@ -1432,9 +1434,9 @@ bool Inventory::doCraft(Item* slots, int8_t width, int8_t height)
   return false;
 }
 
-bool Inventory::setSlot(User* user, int8_t windowID, int16_t slot, Item& item)
+bool Inventory::setSlot(User* user, int8_t windowID, int16_t slot, Item* item)
 {
-  user->buffer.writePacket(Protocol::setSlot(windowID, slot, item), user->compression);
+  user->buffer.writePacket(Protocol::setSlot(windowID, slot, *item), user->compression);
   return true;
 }
 
