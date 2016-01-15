@@ -368,112 +368,109 @@
     <ClInclude Include="..\src\blocks\jackolantern.h">
       <Filter>Header Files\blocks</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\vec.h">
+    <ClInclude Include="..\src\vec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\chat.h">
+    <ClInclude Include="..\src\chat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\chunkmap.h">
+    <ClInclude Include="..\src\chunkmap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\cliScreen.h">
+    <ClInclude Include="..\src\cliScreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\config.h">
+    <ClInclude Include="..\src\config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\constants.h">
+    <ClInclude Include="..\src\constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\constants_num.h">
+    <ClInclude Include="..\src\constants_num.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\furnace.h">
+    <ClInclude Include="..\src\furnace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\furnaceManager.h">
+    <ClInclude Include="..\src\furnaceManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\inventory.h">
+    <ClInclude Include="..\src\inventory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lighting.h">
+    <ClInclude Include="..\src\lighting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\logger.h">
+    <ClInclude Include="..\src\logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\logtype.h">
+    <ClInclude Include="..\src\logtype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\map.h">
+    <ClInclude Include="..\src\map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\mcregion.h">
+    <ClInclude Include="..\src\mcregion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\metadata.h">
+    <ClInclude Include="..\src\metadata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\mineserver.h">
+    <ClInclude Include="..\src\mineserver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\mob.h">
+    <ClInclude Include="..\src\mob.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\nbt.h">
+    <ClInclude Include="..\src\nbt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\packets.h">
+    <ClInclude Include="..\src\packets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\permissions.h">
+    <ClInclude Include="..\src\permissions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\physics.h">
+    <ClInclude Include="..\src\physics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\plugin.h">
+    <ClInclude Include="..\src\plugin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\plugin_api.h">
+    <ClInclude Include="..\src\plugin_api.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\protocol.h">
+    <ClInclude Include="..\src\protocol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\random.h">
+    <ClInclude Include="..\src\random.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\screenBase.h">
+    <ClInclude Include="..\src\screenBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\sockets.h">
+    <ClInclude Include="..\src\sockets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\tools.h">
+    <ClInclude Include="..\src\tools.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\tr1.h">
+    <ClInclude Include="..\src\tree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\tree.h">
+    <ClInclude Include="..\src\user.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\user.h">
+    <ClInclude Include="..\src\utf8.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\utf8.h">
+    <ClInclude Include="..\src\signalhandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\signalhandler.h">
+    <ClInclude Include="..\src\extern.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\extern.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\redstoneSimulation.h">
+    <ClInclude Include="..\src\redstoneSimulation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\blocks\redstoneutil.h">

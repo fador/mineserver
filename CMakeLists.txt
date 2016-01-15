@@ -72,10 +72,7 @@ SET(CONFIG_DIR_DISTSOURCE files)
 #
 # Include directories
 #
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
-INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/include)
-
 
 # CMake crap to include
 include(CheckFunctionExists)
@@ -127,7 +124,7 @@ include_directories(${ZLIB_INCLUDE_DIR} ${NOISE_INCLUDE_DIR} ${OPENSSL_INCLUDE_D
 LIST(APPEND mineserver_depends "${ZLIB_LIBRARY};${NOISE_LIBRARY};${OPENSSL_LIBRARIES};${EVENT_LIBRARY}")
 
 # preprocess configuration file
-CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/configure.h.in ${PROJECT_BINARY_DIR}/include/configure.h)
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/configure.h.in ${PROJECT_BINARY_DIR}/src/configure.h)
 
 
 #
