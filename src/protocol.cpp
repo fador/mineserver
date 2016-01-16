@@ -175,7 +175,7 @@ Packet Protocol::entityTeleport(uint32_t eid, double x, double y, double z, floa
   Packet ret;
   ret << MS_VarInt((uint32_t)PACKET_OUT_ENTITY_TELEPORT) << MS_VarInt((uint32_t)eid)
       << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32)
-      << (int8_t)angleToByte(yaw) << (int8_t)angleToByte(pitch);
+      << (int8_t)angleToByte(yaw) << (int8_t)angleToByte(pitch) << (int8_t)1;
   return ret;
 }
 Packet Protocol::entityRelativeMove(uint32_t eid, int8_t x, int8_t y, int8_t z, int8_t onGround)

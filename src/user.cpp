@@ -1127,7 +1127,7 @@ bool User::teleport(double x, double y, double z, size_t map)
   }
   if (map == pos.map)
   {
-    writePacket(Protocol::playerPositionAndLook(x, y, z, 0, 0, true));
+    writePacket(Protocol::playerPositionAndLook(x, y, z, 0, 0, 0));
   }
 
   //Also update pos for other players
