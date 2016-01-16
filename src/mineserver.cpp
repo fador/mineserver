@@ -132,7 +132,7 @@ Time systemboot;
 // Main :D
 int main(int argc, char* argv[])
 {
-#ifdef __WIN32__
+#ifdef _WIN32
     /// Initialize systemboot Time object
     LARGE_INTEGER c;
     QueryPerformanceCounter(&c);

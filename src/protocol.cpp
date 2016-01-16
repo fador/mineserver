@@ -200,7 +200,7 @@ Packet Protocol::namedSoundEffect(std::string name, int32_t x, int32_t y, int32_
 Packet Protocol::entityHeadLook(int eid, int head_yaw)
 {
   Packet ret;
-  ret << (int8_t)PACKET_OUT_ENTITY_HEAD_LOOK << eid << (int8_t)head_yaw;
+  ret << MS_VarInt((uint32_t)PACKET_OUT_ENTITY_HEAD_LOOK) << MS_VarInt((uint32_t)eid) << (int8_t)head_yaw;
   return ret;
 }
 
@@ -214,7 +214,7 @@ Packet Protocol::attachEntity(int32_t entity, int32_t vehicle, bool leash)
 Packet Protocol::entityLook(int eid, int yaw, int pitch)
 {
   Packet ret;
-  ret << (int8_t)PACKET_OUT_ENTITY_LOOK << (int32_t)eid << (int8_t)yaw << (int8_t)pitch;
+  ret << MS_VarInt((uint32_t)PACKET_OUT_ENTITY_LOOK) << MS_VarInt((uint32_t)eid) << (int8_t)yaw << (int8_t)pitch << (int8_t)1;
   return ret;
 }
 
