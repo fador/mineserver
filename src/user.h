@@ -99,6 +99,7 @@ public:
   bool logged;
   bool muted;
   bool dnd;
+  int32_t packetsPerSecond;
   uint16_t timeUnderwater;
   double fallDistance;
   unsigned int UID;

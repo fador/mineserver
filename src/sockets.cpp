@@ -266,7 +266,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
           buffer_pos = user->buffer.m_readPos;
           continue;
         }
-
+        user->packetsPerSecond++;
 #ifdef DEBUG
         printf("Packet from %s, state = 0x%hx, id = 0x%hx \n", user->nick.c_str(), user->gameState, user->action);
 #endif

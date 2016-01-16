@@ -74,6 +74,7 @@ User::User(int sock, uint32_t EID)
   this->crypted         = false;
   this->gameState       = 0;
   this->compression     = 0;
+  this->packetsPerSecond = 0;
 
   this->m_currentItemSlot = 0;
   this->inventoryHolding  = Item(this, -1);

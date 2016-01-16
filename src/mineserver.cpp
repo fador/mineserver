@@ -819,25 +819,27 @@ void Mineserver::timed_1s()
   // Run 1s timer hook
   runAllCallback("Timer1000");
 
-  std::set<User*> usersToRemove;
   // Loop users
-  for (std::set<User*>::iterator it = m_users.begin(); it != m_users.end(); it++)
+  for (User* const &u : m_users)
   {
-    User * const & u = *it;
-
     // No data received in 30s, timeout
     if (u->logged && time(0)- u->lastData > 30)
     {
       LOG2(INFO, "Player " + u->nick + " timed out");
-      usersToRemove.insert(u);
+      m_usersToRemove.insert(u);
 
     }
     else if (!u->logged && time(0) - u->lastData > 100)
     {
-      usersToRemove.insert(u);
+      m_usersToRemove.insert(u);
     }
     else
     {
+#ifdef DEBUG
+      std::stringstream temp; temp << u->packetsPerSecond;
+      LOG2(INFO, "Player " + u->nick + " " + temp.str() + " packets per second");
+#endif
+      u->packetsPerSecond = 0;   
       if (m_damage_enabled)
       {
         u->checkEnvironmentDamage();
@@ -847,10 +849,6 @@ void Mineserver::timed_1s()
     }
   }
 
-  for(User* u : usersToRemove)
-  {
-    delete u;
-  }
 
   for (std::vector<Map*>::size_type i = 0 ; i < m_map.size(); i++)
   {
@@ -859,12 +857,6 @@ void Mineserver::timed_1s()
     {
       m_map[i]->mapTime = 0;
     }
-  }
-
-  for (std::set<User*>::const_iterator it = users().begin(); it != users().end(); ++it)
-  {
-    (*it)->pushMap();
-    (*it)->popMap();
   }
 
   // Check for Furnace activity
@@ -926,7 +918,6 @@ void Mineserver::timed_10s()
   if (!User::all().empty())
   {
     // Send server time and keepalive
-    Packet pkt;
     (*User::all().begin())->sendAll(Protocol::timeUpdate(m_map[0]->mapTime));
     (*User::all().begin())->sendAll(Protocol::keepalive(0));
     //(*User::all().begin())->sendAll(Protocol::playerlist());
