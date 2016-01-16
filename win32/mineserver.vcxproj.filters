@@ -243,6 +243,9 @@
     <ClCompile Include="..\src\blocks\redstoneutil.cpp">
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\protocol.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\blocks\door.h">
