@@ -288,12 +288,12 @@ void Furnace::sendToAllUsers()
           if (m_data->items[j].getType() != -1)
           {
             Item& item = m_data->items[j];
-            inv[openinv]->users[user]->buffer.writePacket(Protocol::setSlot(WINDOW_FURNACE, j, item), inv[openinv]->users[user]->compression);
+            inv[openinv]->users[user]->writePacket(Protocol::setSlot(WINDOW_FURNACE, j, item));
           }
         }
 
-        inv[openinv]->users[user]->buffer.writePacket(Protocol::windowProperty(WINDOW_FURNACE, PROGRESS_ARROW, (m_data->cookTime * 18)), inv[openinv]->users[user]->compression);
-        inv[openinv]->users[user]->buffer.writePacket(Protocol::windowProperty(WINDOW_FURNACE, PROGRESS_FIRE, (m_data->burnTime * 3)), inv[openinv]->users[user]->compression);
+        inv[openinv]->users[user]->writePacket(Protocol::windowProperty(WINDOW_FURNACE, PROGRESS_ARROW, (m_data->cookTime * 18)));
+        inv[openinv]->users[user]->writePacket(Protocol::windowProperty(WINDOW_FURNACE, PROGRESS_FIRE, (m_data->burnTime * 3)));
       }
 
       break;

@@ -63,7 +63,7 @@ void Item::sendUpdate()
       window = -1;
       t_slot = 0;
     }
-    player->buffer.writePacket(Protocol::setSlot(window, t_slot, *this), player->compression);
+    player->writePacket(Protocol::setSlot(window, t_slot, *this));
   }
   // Cases where we're changing items in chests, furnaces etc?
 }

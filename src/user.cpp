@@ -232,26 +232,26 @@ bool User::sendLoginInfo()
   // Load user data
   loadData();
 
-  buffer.writePacket(Protocol::setCompression(256), this->compression);
+  writePacket(Protocol::setCompression(256));
   this->compression = 256;
 
   // This packet moves gameState to "play"
-  buffer.writePacket(Protocol::loginSuccess(this->uuid, this->nick), this->compression);
+  writePacket(Protocol::loginSuccess(this->uuid, this->nick));
   this->gameState++;
 
   // Login OK package
-  buffer.writePacket(Protocol::joinGame(UID), this->compression);
+  writePacket(Protocol::joinGame(UID));
   setGameMode(gamemode);
   
   spawnOthers();
 
   // Send spawn position
-  buffer.writePacket(Protocol::spawnPosition(int(pos.x), int(pos.y + 2), int(pos.z)), this->compression);
-  buffer.writePacket(Protocol::timeUpdate(ServerInstance->map(pos.map)->mapTime), this->compression);
+  writePacket(Protocol::spawnPosition(int(pos.x), int(pos.y + 2), int(pos.z)));
+  writePacket(Protocol::timeUpdate(ServerInstance->map(pos.map)->mapTime));
 
-  buffer.writePacket(Protocol::playerAbilities(5, 0.1, 0.2), this->compression);
+  writePacket(Protocol::playerAbilities(5, 0.1, 0.2));
 
-  buffer.writePacket(Protocol::playerPositionAndLook(pos.x, pos.y, pos.z, pos.yaw, pos.pitch, 0), this->compression);
+  writePacket(Protocol::playerPositionAndLook(pos.x, pos.y, pos.z, pos.yaw, pos.pitch, 0));
   
   // Put nearby chunks to queue
   for (int x = -viewDistance; x <= viewDistance; x++)
@@ -300,7 +300,7 @@ bool User::sendLoginInfo()
 // Kick player
 bool User::kick(std::string kickMsg)
 {
-  buffer.writePacket(Protocol::disconnect("{\"text\": \""+json_esc(kickMsg)+"\"}"), this->compression);
+  writePacket(Protocol::disconnect("{\"text\": \""+json_esc(kickMsg)+"\"}"));
   runAllCallback("PlayerKickPost",nick.c_str(), kickMsg.c_str());
 
   LOG2(WARNING, nick + " kicked. Reason: " + kickMsg);
@@ -625,20 +625,19 @@ bool User::updatePos(double x, double y, double z, double stance)
       std::list<User*>::iterator iter = toremove.begin(), end = toremove.end();
       for (; iter != end ; iter++)
       {
-        (*iter)->buffer.writePacket(dtPkt, (*iter)->compression);
+        (*iter)->writePacket(dtPkt);
 
-        this->buffer.writePacket(Protocol::destroyEntity((*iter)->UID), this->compression);
+        this->writePacket(Protocol::destroyEntity((*iter)->UID));
       }
 
       Packet spawnPkt = Protocol::spawnPlayer(UID, uuid_raw, nick, (float)health, x, y, z, pos.yaw, pos.pitch, curItem);
       iter = toadd.begin(), end = toadd.end();
       for (; iter != end ; iter++)
       {
-        (*iter)->buffer.writePacket(spawnPkt, (*iter)->compression);
+        (*iter)->writePacket(spawnPkt);
 
-        this->buffer.writePacket(
-              Protocol::spawnPlayer((*iter)->UID, (*iter)->uuid_raw, (*iter)->nick, (float)(*iter)->health, (*iter)->pos, (*iter)->curItem),
-              this->compression);
+        this->writePacket(
+              Protocol::spawnPlayer((*iter)->UID, (*iter)->uuid_raw, (*iter)->nick, (float)(*iter)->health, (*iter)->pos, (*iter)->curItem));
       }
 
       Packet tpPkt = Protocol::entityTeleport(UID, x, y, z, pos.yaw, pos.pitch);
@@ -683,7 +682,7 @@ bool User::updatePos(double x, double y, double z, double stance)
             if (ServerInstance->inventory()->isSpace(this, (*iter)->item, (*iter)->count))
             {
               // Send player collect item packet
-              buffer.writePacket(Protocol::collectItem((*iter)->EID, UID), this->compression);
+              writePacket(Protocol::collectItem((*iter)->EID, UID));
 
               // Send everyone destroy_entity-packet
               Packet pkt = Protocol::destroyEntity((*iter)->EID);
@@ -795,7 +794,7 @@ bool User::sendOthers(const Packet& packet)
   {
     if ((*it)->fd != this->fd && (*it)->logged && !((*it)->dnd && packet.firstwrite() == PACKET_OUT_CHAT_MESSAGE))
     {
-      (*it)->buffer.writePacket(packet, (*it)->compression);
+      (*it)->writePacket(packet);
     }
   }
 
@@ -855,7 +854,7 @@ bool User::sendAll(const Packet& packet)
   {
     if ((*it)->fd && (*it)->logged)
     {
-      (*it)->buffer.writePacket(packet, (*it)->compression);
+      (*it)->writePacket(packet);
     }
   }
 
@@ -881,7 +880,7 @@ bool User::sendAdmins(const Packet& packet)
   {
     if ((*it)->fd && (*it)->logged && IS_ADMIN((*it)->permissions))
     {
-      (*it)->buffer.writePacket(packet, (*it)->compression);
+      (*it)->writePacket(packet);
     }
   }
 
@@ -907,7 +906,7 @@ bool User::sendOps(const Packet& packet)
   {
     if ((*it)->fd && (*it)->logged && IS_ADMIN((*it)->permissions))
     {
-      (*it)->buffer.writePacket(packet, (*it)->compression);
+      (*it)->writePacket(packet);
     }
   }
 
@@ -933,7 +932,7 @@ bool User::sendGuests(const Packet& packet)
   {
     if ((*it)->fd && (*it)->logged && IS_ADMIN((*it)->permissions))
     {
-      (*it)->buffer.writePacket(packet, (*it)->compression);
+      (*it)->writePacket(packet);
     }
   }
 
@@ -1128,7 +1127,7 @@ bool User::teleport(double x, double y, double z, size_t map)
   }
   if (map == pos.map)
   {
-    buffer.writePacket(Protocol::playerPositionAndLook(x, y, z, 0, 0, true), this->compression);
+    writePacket(Protocol::playerPositionAndLook(x, y, z, 0, 0, true));
   }
 
   //Also update pos for other players
@@ -1160,14 +1159,14 @@ bool User::spawnOthers()
     //    if ((*it)->logged && (*it)->UID != this->UID && (*it)->nick != this->nick)
     if ((*it)->logged)
     {
-      this->buffer.writePacket(Protocol::spawnPlayer((*it)->UID, (*it)->uuid_raw, (*it)->nick, (float)(*it)->health, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, (*it)->pos.yaw,(*it)->pos.pitch, 0), this->compression);
-      this->buffer.writePacket(Protocol::PlayerListItemAddSingle((*it)->uuid_raw, (*it)->nick, (*it)->gamemode, 10), this->compression);
+      this->writePacket(Protocol::spawnPlayer((*it)->UID, (*it)->uuid_raw, (*it)->nick, (float)(*it)->health, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, (*it)->pos.yaw,(*it)->pos.pitch, 0));
+      this->writePacket(Protocol::PlayerListItemAddSingle((*it)->uuid_raw, (*it)->nick, (*it)->gamemode, 10));
       for (int b = 0; b < 5; b++)
       {
         const int n = b == 0 ? (*it)->curItem + 36 : 9 - b;
-        this->buffer.writePacket(Protocol::entityEquipment((*it)->UID, b, (*it)->inv[n]), this->compression);
+        this->writePacket(Protocol::entityEquipment((*it)->UID, b, (*it)->inv[n]));
       }
-      this->buffer.writePacket(Protocol::entityHeadLook((*it)->UID,angleToByte((*it)->pos.yaw)), this->compression);
+      this->writePacket(Protocol::entityHeadLook((*it)->UID,angleToByte((*it)->pos.yaw)));
     }
   }
   return true;
@@ -1311,7 +1310,7 @@ bool User::sethealth(int userHealth)
   healthtimeout = time(NULL);
 
   health = userHealth;
-  buffer.writePacket(Protocol::updateHealth(userHealth), this->compression);
+  writePacket(Protocol::updateHealth(userHealth));
   return true;
 }
 
@@ -1319,7 +1318,7 @@ bool User::respawn()
 {
   this->health = 20;
   this->timeUnderwater = 0;
-  buffer.writePacket(Protocol::respawn(), this->compression); //FIXME: send the correct world id
+  writePacket(Protocol::respawn()); //FIXME: send the correct world id
   sethealth(20);
   Packet destroyPkt;
   destroyPkt << Protocol::destroyEntity(UID);
@@ -1502,7 +1501,7 @@ std::string User::generateDigest()
 
 bool User::setGameMode(User::GameMode gameMode)
 {
-  buffer.writePacket(Protocol::gameMode(3,gameMode), this->compression);
+  writePacket(Protocol::gameMode(3,gameMode));
 
   invulnerable = gameMode == User::Creative;
   creative = gameMode == User::Creative;

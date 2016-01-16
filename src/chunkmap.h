@@ -246,7 +246,7 @@ struct sChunk
     {
       if ((*it) != nosend && (*it)->logged)
       {
-        (*it)->buffer.writePacket(packet, (*it)->compression);
+        (*it)->writePacket(packet);
       }
     }
   }
