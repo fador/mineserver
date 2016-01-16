@@ -1027,7 +1027,6 @@ bool Map::sendPickupSpawn(spawnedItem item)
   MetaDataElemSlot* entity_item_type = new MetaDataElemSlot(10, Item(item.item, item.count, item.health));
   meta.set(entity_item_type);
 
-  it->second->sendPacket(Protocol::entity(item.EID));
   it->second->sendPacket(Protocol::spawnObject(item.EID, OBJECT_TYPE_ITEM_STACK,item.pos.x(), item.pos.y(),item.pos.z(), 1, 0, 0, 0));
   it->second->sendPacket(Protocol::entityMetadata(item.EID, meta));
 
