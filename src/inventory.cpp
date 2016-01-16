@@ -457,7 +457,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   //Ack
   if(actionNumber)
   {
-    user->buffer.writePacket(Protocol::confirmTransaction(windowID, actionNumber, 1), user->compression);
+    user->writePacket(Protocol::confirmTransaction(windowID, actionNumber, 1));
   }
 
   //Click outside the window
@@ -1030,20 +1030,20 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
       {
         windowName = "Chest";
       }
-      user->buffer.writePacket(Protocol::openWindow(type,INVENTORYTYPE_CHEST,"{\"text\": \""+json_esc(windowName)+"\"}", _chestData->size()), user->compression);
+      user->writePacket(Protocol::openWindow(type,INVENTORYTYPE_CHEST,"{\"text\": \""+json_esc(windowName)+"\"}", _chestData->size()));
 
       for (size_t j = 0; j < _chestData->size(); j++)
       {
         if ((*_chestData->items())[j]->getType() != -1)
         {
-          user->buffer.writePacket(Protocol::setSlot(type, j, *(*_chestData->items())[j]), user->compression);
+          user->writePacket(Protocol::setSlot(type, j, *(*_chestData->items())[j]));
         }
       }
     }
     break;
 
   case WINDOW_CRAFTING_TABLE:
-    user->buffer.writePacket(Protocol::openWindow(WINDOW_CRAFTING_TABLE,INVENTORYTYPE_CRAFTING_TABLE,"{\"text\": \""+json_esc("Workbench")+"\"}", 0), user->compression);
+    user->writePacket(Protocol::openWindow(WINDOW_CRAFTING_TABLE,INVENTORYTYPE_CRAFTING_TABLE,"{\"text\": \""+json_esc("Workbench")+"\"}", 0));
 
     for (uint32_t i = 0; i < openWorkbenches.size(); i++)
     {
@@ -1055,7 +1055,7 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
         {
           if (openWorkbenches[i]->workbench[j].getType() != -1)
           {
-            user->buffer.writePacket(Protocol::setSlot(WINDOW_CRAFTING_TABLE, j, openWorkbenches[i]->workbench[j]), user->compression);
+            user->writePacket(Protocol::setSlot(WINDOW_CRAFTING_TABLE, j, openWorkbenches[i]->workbench[j]));
           }
         }
         break;
@@ -1063,7 +1063,7 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
     }
     break;
   case WINDOW_FURNACE:
-    user->buffer.writePacket(Protocol::openWindow(WINDOW_FURNACE,INVENTORYTYPE_FURNACE,"{\"text\": \""+json_esc("Furnace")+"\"}", 0), user->compression);
+    user->writePacket(Protocol::openWindow(WINDOW_FURNACE,INVENTORYTYPE_FURNACE,"{\"text\": \""+json_esc("Furnace")+"\"}", 0));
 
     for (uint32_t i = 0; i < chunk->furnaces.size(); i++)
     {
@@ -1073,11 +1073,11 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
         {
           if (chunk->furnaces[i]->items[j].getType() != -1)
           {
-            user->buffer.writePacket(Protocol::setSlot(WINDOW_FURNACE, j, chunk->furnaces[i]->items[j]), user->compression);
+            user->writePacket(Protocol::setSlot(WINDOW_FURNACE, j, chunk->furnaces[i]->items[j]));
           }
         }
-        user->buffer.writePacket(Protocol::windowProperty(WINDOW_FURNACE, 0, (chunk->furnaces[i]->cookTime * 18)), user->compression);
-        user->buffer.writePacket(Protocol::windowProperty(WINDOW_FURNACE, 1, (chunk->furnaces[i]->burnTime * 3)), user->compression);
+        user->writePacket(Protocol::windowProperty(WINDOW_FURNACE, 0, (chunk->furnaces[i]->cookTime * 18)));
+        user->writePacket(Protocol::windowProperty(WINDOW_FURNACE, 1, (chunk->furnaces[i]->burnTime * 3)));
         break;
       }
     }
@@ -1436,7 +1436,7 @@ bool Inventory::doCraft(Item* slots, int8_t width, int8_t height)
 
 bool Inventory::setSlot(User* user, int8_t windowID, int16_t slot, Item* item)
 {
-  user->buffer.writePacket(Protocol::setSlot(windowID, slot, *item), user->compression);
+  user->writePacket(Protocol::setSlot(windowID, slot, *item));
   return true;
 }
 

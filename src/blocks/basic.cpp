@@ -275,5 +275,5 @@ void BlockBasic::revertBlock(User* user, int32_t x, int16_t y, int32_t z, int ma
 {
   unsigned char block, meta;
   ServerInstance->map(map)->getBlock((int)x, (int)y, (int)z, &block, &meta);
-  user->buffer.writePacket(Protocol::blockChange(x, y, z, block, meta), user->compression);
+  user->writePacket(Protocol::blockChange(x, y, z, block, meta));
 }

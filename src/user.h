@@ -45,6 +45,8 @@
 
 //#include "chunkmap.h"
 
+bool client_write(User *user);
+
 struct position
 {
   double x;

@@ -897,7 +897,7 @@ void Mineserver::timed_1s()
       if(ServerInstance->validatedUsers[i].valid)
       {
         LOG(INFO, "Packets", tempuser->nick + " is VALID ");
-        tempuser->buffer.writePacket(Protocol::encryptionRequest(), tempuser->compression);
+        tempuser->writePacket(Protocol::encryptionRequest());
       }
       else
       {

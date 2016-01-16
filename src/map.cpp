@@ -1821,13 +1821,13 @@ void Map::sendToUser(User* user, int x, int z, bool login)
   p << MS_VarInt((uint32_t)mapdataLen);
   p.addToWrite(mapdata, mapdataLen);
 
-  user->buffer.writePacket(p, user->compression);
+  user->writePacket(p);
 
   //Push sign data to player
   for (size_t i = 0; i < chunk->signs.size(); ++i)
   {
-    user->buffer.writePacket(Protocol::updateSign(chunk->signs[i]->x, chunk->signs[i]->y, chunk->signs[i]->z,
-      chunk->signs[i]->text1,chunk->signs[i]->text2, chunk->signs[i]->text3, chunk->signs[i]->text4), user->compression);
+    user->writePacket(Protocol::updateSign(chunk->signs[i]->x, chunk->signs[i]->y, chunk->signs[i]->z,
+      chunk->signs[i]->text1,chunk->signs[i]->text2, chunk->signs[i]->text3, chunk->signs[i]->text4));
   }
 
   delete[] mapdata;

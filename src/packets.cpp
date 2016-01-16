@@ -584,7 +584,7 @@ int PacketHandler::login_request(User* user)
     }
     else
     {
-      user->buffer.writePacket(Protocol::encryptionRequest(), user->compression);
+      user->writePacket(Protocol::encryptionRequest());
     }
     runAllCallback("PlayerLoginPost",player.c_str());
   }
@@ -1500,7 +1500,7 @@ int PacketHandler::server_list_ping(User* user)
   LOG2(DEBUG, line);
   pkt << (uint8_t)0 << line;
 
-  user->buffer.writePacket(pkt, user->compression);
+  user->writePacket(pkt);
 
   return PACKET_OK;
 }
@@ -1516,7 +1516,7 @@ int PacketHandler::ping(User* user)
 
   pkt << (uint8_t)1 << value;
 
-  user->buffer.writePacket(pkt, user->compression);
+  user->writePacket(pkt);
 
   return PACKET_OK;
 }

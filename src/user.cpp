@@ -122,13 +122,13 @@ bool User::changeNick(std::string _nick)
 
 User::~User()
 {
-  if (this->UID != SERVER_CONSOLE_UID && event_del(getReadEvent()) == -1)
+  if (this->UID != SERVER_CONSOLE_UID)
   {
-    LOG2(WARNING, this->nick + " event del failed for read event!");
+    event_free(getReadEvent());
   }
-  if (this->UID != SERVER_CONSOLE_UID && event_del(getWriteEvent()) == -1)
+  if (this->UID != SERVER_CONSOLE_UID)
   {
-    LOG2(WARNING, this->nick + " event del failed for write event!");
+    event_free(getWriteEvent());
   }
 
   if (fd != -1)

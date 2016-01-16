@@ -253,7 +253,7 @@ bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
     break;
 
   case USER:
-    user->buffer.writePacket(pkt, user->compression);
+    user->writePacket(pkt);
     break;
 
   case ADMINS:
