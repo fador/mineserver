@@ -745,6 +745,8 @@ int PacketHandler::player_digging(User* user)
   y = (position >> 26) & 0xff;
   z = position & 0x3ffffff;
 
+  if (z & 0x2000000) z |= 0xFC000000;
+  if (x & 0x2000000) x |= 0xFC000000;
 
   if (!ServerInstance->map(user->pos.map)->getBlock(x, y, z, &block, &meta))
   {
@@ -951,8 +953,8 @@ int PacketHandler::player_block_placement(User* user)
   {
     return PACKET_NEED_MORE_DATA;
   }
+  uint64_t position;
   int16_t y = 0;
-  int8_t temp_y = 0;
   int8_t direction = 0;
   int16_t newblock = 0;
   int32_t x, z = 0;
@@ -969,7 +971,8 @@ int PacketHandler::player_block_placement(User* user)
   int16_t slotLen;
   int8_t posx,posy,posz;
 
-  user->buffer >> x >> temp_y >> z >> direction >> newblock;
+  user->buffer >> position >> direction >> newblock;
+
   if(newblock != -1)
   {
     int8_t count;
@@ -995,10 +998,14 @@ int PacketHandler::player_block_placement(User* user)
   }
 
   user->buffer  >> posx >> posy >> posz;
-  //newblock;
-  y = (uint8_t)temp_y;
+  
+    // ToDo: add tool to extract Position data
+  x = position >> 38;
+  y = (position >> 26) & 0xff;
+  z = position & 0x3ffffff;
 
-
+  if (z & 0x2000000) z |= 0xFC000000;
+  if (x & 0x2000000) x |= 0xFC000000;
 
   ItemBasicPtr itemcb;
   if (direction == -1 && x == -1 && y == 255 && z == -1)
