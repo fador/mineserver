@@ -320,8 +320,8 @@ extern "C" void accept_callback(int fd, short ev, void* arg)
   int one = 1;
   setsockopt(client_fd, IPPROTO_TCP, TCP_NODELAY, (const char*)&one, sizeof(int));
 
-  event_set(client->getReadEvent(), client_fd, EV_READ, client_callback, client);
-  event_set(client->getWriteEvent(), client_fd, EV_WRITE, client_callback, client);
+  client->setReadEvent(event_new(ServerInstance->getEventBase(), client_fd, EV_READ, client_callback, client));
+  client->setWriteEvent(event_new(ServerInstance->getEventBase(), client_fd, EV_WRITE, client_callback, client));
   event_add(client->getReadEvent(), NULL);
 }
 

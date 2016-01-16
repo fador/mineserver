@@ -1391,12 +1391,24 @@ bool User::isUnderwater()
 
 struct event* User::getReadEvent()
 {
-  return &m_readEvent;
+  return m_readEvent;
+}
+
+bool User::setReadEvent(struct event* new_event)
+{
+  m_readEvent = new_event;
+  return true;
 }
 
 struct event* User::getWriteEvent()
 {
-  return &m_writeEvent;
+  return m_writeEvent;
+}
+
+bool User::setWriteEvent(struct event* new_event)
+{
+  m_writeEvent = new_event;
+  return true;
 }
 
 std::set<User*>& User::all()

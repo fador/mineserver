@@ -235,9 +235,18 @@ public:
   struct event* getReadEvent();
   struct event* getWriteEvent();
 
+  bool setReadEvent(struct event* new_event);
+  bool setWriteEvent(struct event* new_event);
+
+  bool writePacket(const Packet &pkt) {
+    this->buffer.writePacket(pkt, this->compression);
+    client_write(this);
+    return true;
+  }
+
 private:
-  event m_readEvent;
-  event m_writeEvent;
+  event* m_readEvent;
+  event* m_writeEvent;
 
   // Item currently in hold
   int16_t m_currentItemSlot;

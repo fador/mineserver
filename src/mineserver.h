@@ -102,6 +102,10 @@ public:
   void timed_1s();
   void timed_10s();
 
+  struct event ev_200ms;
+  struct event ev_1000ms;
+  struct event ev_10s;
+
   bool stop();
   
   event_base* getEventBase();

@@ -527,6 +527,32 @@ size_t Mineserver::getLoggedUsersCount()
 }
 
 
+void timer200ms(int fd, short event, void *arg) {
+  timeval timerTime200ms;
+  timerTime200ms.tv_sec  = 0;
+  timerTime200ms.tv_usec = 200000; // 200ms
+  evtimer_add(&ServerInstance->ev_200ms, &timerTime200ms);
+  ServerInstance->timed_200ms();
+}
+
+void timer1000ms(int fd, short event, void *arg) {
+
+  timeval timerTime1000ms;
+  timerTime1000ms.tv_sec  = 1;
+  timerTime1000ms.tv_usec = 0;
+  evtimer_add(&ServerInstance->ev_1000ms, &timerTime1000ms);
+  ServerInstance->timed_1s();
+}
+
+void timer10s(int fd, short event, void *arg) {
+
+  timeval timerTime10s;
+  timerTime10s.tv_sec  = 10;
+  timerTime10s.tv_usec = 0;
+  evtimer_add(&ServerInstance->ev_10s, &timerTime10s);
+  ServerInstance->timed_10s();
+}
+
 bool Mineserver::run()
 {
   uint32_t starttime = (uint32_t)time(0);
@@ -697,70 +723,37 @@ bool Mineserver::run()
   loopTime.tv_sec  = 0;
   loopTime.tv_usec = 200000; // 200ms
 
+  timeval timerTime200ms;
+  timerTime200ms.tv_sec  = 0;
+  timerTime200ms.tv_usec = 200000; // 200ms
+
+  timeval timerTime1000ms;
+  timerTime1000ms.tv_sec  = 1;
+  timerTime1000ms.tv_usec = 0;
+
+  timeval timerTime10s;
+  timerTime10s.tv_sec  = 10;
+  timerTime10s.tv_usec = 0;
+
   m_running = true;
 
-  Time next_10s   = Time::now();
-  Time next_1s    = Time::now();
-  Time next_200ms = Time::now();
+  // Set timed functions to run
+  evtimer_set(&ev_200ms, timer200ms, NULL);
+  evtimer_add(&ev_200ms, &timerTime200ms);
 
-  Time to_sleep = Time(0,100);
+  evtimer_set(&ev_1000ms, timer1000ms, NULL);
+  evtimer_add(&ev_1000ms, &timerTime1000ms);
+
+  evtimer_set(&ev_10s, timer10s, NULL);
+  evtimer_add(&ev_10s, &timerTime10s);
+
   /// #mainloop
   while (m_running)
   {
-    timeval tv;
-    tv.tv_sec  = to_sleep.total_sec();
-    tv.tv_usec = to_sleep.total_usec() % 1000000;
+    event_base_loopexit(m_eventBase, &loopTime);
 
-    if(tv.tv_sec || tv.tv_usec)
-    {
-      //LOG2(INFO, std::string("Time to sleep:") + std::string(to_sleep));
-      Time now = Time::now();
-      event_base_loopexit(m_eventBase, &tv);
-
-      if(event_base_loop(m_eventBase, 0) != 0)
-        break;
-
-      //LOG2(INFO, std::string("Time slept:") + std::string(Time::now() - now));
-    }
-
-    Time now = Time::now();
-
-    if( next_200ms < now){
-      timed_200ms();
-      next_200ms += Time(0,200*1000);
-    }
-
-    if( next_1s < now ){
-      timed_1s();
-      next_1s += Time(1, 0);
-    }
-
-    if(next_10s < now){
-      timed_10s();
-      next_10s += Time(10, 0);
-    }
-
-    for ( User* const& u : m_users)
-    {
-      //Flush data
-      client_write(u);
-    }
-
-    now = Time::now();
-
-    /// Check if we need to run as fast as possible
-    if(next_200ms < now){
-      Time dt = now-next_200ms;
-
-      LOG2(WARNING, std::string("Mineserver not keeping up. Next 200ms was ")
-                      + (std::string)(dt) + " ago.");
-
-      to_sleep = Time(0,500);
-      continue;
-    }
-
-    /// The most sophisticated preemptive scheduler EVER
-    to_sleep = next_200ms - now;
+    if(event_base_loop(m_eventBase, 0) != 0)
+      break;
   }
 
 #ifdef WIN32
