@@ -1316,7 +1316,7 @@ int PacketHandler::player_block_placement(User* user)
 
 int PacketHandler::held_item_change(User* user)
 {
-  int8_t itemSlot;
+  int16_t itemSlot;
   user->buffer >> itemSlot;
 
   if (!user->buffer)
