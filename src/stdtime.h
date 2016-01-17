@@ -72,7 +72,7 @@ public:
   /// SLEEP
   static void sleep(const Time& t){
 #ifdef WIN32
-    Sleep(t.total_usec());
+    Sleep((DWORD)t.total_usec());
 #elif defined(__unix__)
     usleep(t.total_usec());
 #endif

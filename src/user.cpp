@@ -1480,7 +1480,7 @@ std::string User::generateDigest()
       {
         carry = 0;
       }
-      md[i] = twocomp;
+      md[i] = (uint8_t)twocomp;
     }
   }
 

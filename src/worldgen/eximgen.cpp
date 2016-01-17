@@ -292,7 +292,7 @@ void EximGen::generateWithNoise(ChunkInfo& info)
             if(currentHeight > 256)
                 currentHeight = 256;
 
-            int stoneHeight = currentHeight - uniform01()*4;
+            int stoneHeight = currentHeight - (int)uniform01()*4;
 
             int y=1;
             bool cave=false;

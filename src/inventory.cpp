@@ -492,14 +492,14 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         user->openInv.recordAction = false;
 
         //Spread the stack nice and evenly
-        if(user->openInv.slotActions.size() > user->inventoryHolding.getCount())
+        if(user->openInv.slotActions.size() > (uint32_t)user->inventoryHolding.getCount())
         {
           //FAILURE (should not happend)
           return true;
         }
         //HAX
         int16_t count = (user->inventoryHolding.getCount()/user->openInv.slotActions.size());
-        for(int i = 0; i < user->openInv.slotActions.size(); i++)
+        for(uint32_t i = 0; i < user->openInv.slotActions.size(); i++)
         {
           for(int c = 0; c < count; c++)
           {

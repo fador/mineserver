@@ -80,7 +80,7 @@ bool Physics::updateMinecart()
   std::vector<MinecartData> &minecarts = map->minecarts;
   uint32_t listSize = minecarts.size();
 
-  for (int32_t simIt = 0; simIt < listSize; simIt++)
+  for (uint32_t simIt = 0; simIt < listSize; simIt++)
   {
     //Check if the cart is suppose to move
     if(minecarts[simIt].speed.x() != 0 ||
@@ -278,9 +278,9 @@ bool Physics::updateEntity()
     User::sendAll(pkt);
     */
   }
-  for(int32_t i = 0; i < toRem.size(); i++)
+  for(uint32_t i = 0; i < toRem.size(); i++)
   {
-    for (int32_t simIt = entitySimList.size()-1; simIt >= 0; simIt--)
+    for (uint32_t simIt = entitySimList.size()-1; simIt >= 0; simIt--)
     {
       if(entitySimList[simIt].EID == toRem[i])
       {
