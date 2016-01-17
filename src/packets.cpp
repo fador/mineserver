@@ -348,8 +348,17 @@ int PacketHandler::tab_complete(User* user)
   }
 
   std::string msg;
+  int8_t hasPosition;
 
-  user->buffer >> msg;
+  user->buffer >> msg >> hasPosition;
+
+  if (hasPosition) {
+    uint64_t position;
+    int32_t x,z;
+    int16_t y;
+    user->buffer >> position;
+    positionToXYZ(position, x, y, z);
+  }
 
   if (!user->buffer)
   {
@@ -357,8 +366,11 @@ int PacketHandler::tab_complete(User* user)
   }
 
 
+  std::vector<std::string> completion;
+  completion.push_back(msg+"test1");
+  completion.push_back(msg+"test2");
   //ToDo: autocomplete!
-  user->buffer << (int8_t)PACKET_IN_TAB_COMPLETE << " ";
+  user->writePacket(Protocol::tabComplete(completion));
 
   return PACKET_OK;
 }

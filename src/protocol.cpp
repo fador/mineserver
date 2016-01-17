@@ -449,3 +449,14 @@ Packet Protocol::blockChange(int32_t x, int32_t y, int32_t z, int16_t blocktype,
   << MS_VarInt((uint32_t)(blocktype << 4) | meta);
   return ret;
 }
+
+Packet Protocol::tabComplete(const std::vector<std::string> &msgs)
+{
+  Packet ret;
+  ret << MS_VarInt((uint32_t)PACKET_OUT_TAB_COMPLETE) << MS_VarInt((uint32_t)msgs.size());
+  for(std::string const& msg : msgs)
+  {
+    ret << msg;
+  }
+  return ret;
+}
