@@ -1617,9 +1617,11 @@ int64_t Packet::readVarInt()
 
   uint8_t byte;
   do{
-    if(read(&byte, 1) != 1)
-      // silent fail
+    if (read(&byte, 1) != 1) {
+      // silent fail? not anymore
+      throw std::logic_error("readVarInt");
       return 0;
+    }
     ret += (byte & 0x7F) << (7*byte_idx++);
   }while(byte & 0x80);
 
