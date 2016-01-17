@@ -1108,11 +1108,6 @@ int PacketHandler::player_block_placement(User* user)
   LOG(DEBUG, "Packets", "Block_placement: " + dtos(newblock) + " (" + dtos(x) + "," + dtos((int)y) + "," + dtos(z) + ") dir: " + dtos((int)direction));
 #endif
 
-  if (direction)
-  {
-    direction = 6 - direction;
-  }
-
   //if (ServerInstance->map()->getBlock(x, y, z, &oldblock, &metadata))
   {
     uint8_t oldblocktop;
