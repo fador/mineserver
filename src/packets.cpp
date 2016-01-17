@@ -607,7 +607,7 @@ int PacketHandler::handshake(User* user)
     return PACKET_NEED_MORE_DATA;
   }
 
-  LOG(INFO, "Packets", "Player " + dtos(user->UID) + " login v." + dtos(static_cast<int64_t>(version)) + " : ");
+  LOG(INFO, "Packets", "Player " + dtos((double)user->UID) + " login v." + dtos((double)version) + " : ");
 
 
   // If version is not the current version
@@ -626,7 +626,7 @@ int PacketHandler::handshake(User* user)
 
   // Move to the next state
   if (nextState >= 0 && nextState < 4)
-    user->gameState = nextState;
+    user->gameState = (uint8_t)nextState;
   
   return PACKET_OK;
 }
@@ -699,7 +699,7 @@ int PacketHandler::player_look(User* user)
 
 int PacketHandler::player_position_and_look(User* user)
 {
-  double x, y, stance, z;
+  double x, y, z;
   float yaw, pitch;
   int8_t onground;
 
@@ -740,13 +740,8 @@ int PacketHandler::player_digging(User* user)
     return PACKET_NEED_MORE_DATA;
   }
 
-  // ToDo: add tool to extract Position data
-  x = position >> 38;
-  y = (position >> 26) & 0xff;
-  z = position & 0x3ffffff;
+  positionToXYZ(position, x, y, z);
 
-  if (z & 0x2000000) z |= 0xFC000000;
-  if (x & 0x2000000) x |= 0xFC000000;
 
   if (!ServerInstance->map(user->pos.map)->getBlock(x, y, z, &block, &meta))
   {
@@ -999,13 +994,7 @@ int PacketHandler::player_block_placement(User* user)
 
   user->buffer  >> posx >> posy >> posz;
   
-    // ToDo: add tool to extract Position data
-  x = position >> 38;
-  y = (position >> 26) & 0xff;
-  z = position & 0x3ffffff;
-
-  if (z & 0x2000000) z |= 0xFC000000;
-  if (x & 0x2000000) x |= 0xFC000000;
+  positionToXYZ(position, x, y, z);
 
   ItemBasicPtr itemcb;
   if (direction == -1 && x == -1 && y == 255 && z == -1)
@@ -1609,7 +1598,7 @@ void Packet::writeVarInt(int64_t varint)
     write(&byte, 1);
     varint >>= 7;
   }
-  byte = varint;
+  byte = (uint8_t)varint;
   write(&byte, 1);
 }
 

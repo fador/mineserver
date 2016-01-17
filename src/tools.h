@@ -107,6 +107,16 @@ inline int8_t angleToByte(float angle)
   return (int8_t)((angle / 360.f) * 256.f);
 }
 
+inline bool positionToXYZ(uint64_t position, int32_t &x, int16_t &y, int32_t &z) {
+  x = position >> 38;
+  y = (position >> 26) & 0xff;
+  z = position & 0x3ffffff;
+
+  if (z & 0x2000000) z |= 0xFC000000;
+  if (x & 0x2000000) x |= 0xFC000000;
+  return true;
+}
+
 uint64_t microTime();
 
 /// If we had any ol' good library, we would need this.
