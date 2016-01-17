@@ -358,7 +358,7 @@ Mineserver::Mineserver(int args, char **argarray)
   len = i2d_X509(x, &buf);
 
   //Glue + jesus tape, dont ask - Fador
-  publicKey = std::string((char *)(buf+28),len-36);
+  publicKey = std::string((char *)(buf+28),160);
   OPENSSL_free(buf);
   /* END key fetching */
 
