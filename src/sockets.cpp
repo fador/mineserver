@@ -133,8 +133,7 @@ bool client_write(User *user)
       if ((errno != EAGAIN && errno != EINTR))
     #endif
       {
-        LOG2(ERROR, "Error writing to client, tried to write " + dtos(buf.size()) + " bytes, code: " + dtos(ERROR_NUMBER));
-        //delete user;
+        LOG2(ERROR, "Error writing to client, tried to write " + dtos(buf.size()) + " bytes, code: " + dtos(ERROR_NUMBER));        
         user->logged = false;
         ServerInstance->usersToRemove().insert(user);
         return false;
@@ -187,14 +186,16 @@ extern "C" void client_callback(int fd, short ev, void* arg)
       {
         LOG2(INFO, "Socket closed");
       }
-      delete user;
+      user->logged = false;
+      ServerInstance->usersToRemove().insert(user);
       return;
     }
 
     if (read == SOCKET_ERROR)
     {
       LOG2(INFO, "Socket error");
-      delete user;
+      user->logged = false;
+      ServerInstance->usersToRemove().insert(user);
       return;
     }
 
@@ -281,7 +282,8 @@ extern "C" void client_callback(int fd, short ev, void* arg)
           if (user->nick.size()) {
             LOG2(INFO, "User " + user->nick + " disconnected normally");
           }
-          delete user;
+          user->logged = false;
+          ServerInstance->usersToRemove().insert(user);
           return;
         }   
       }
