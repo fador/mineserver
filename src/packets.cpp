@@ -975,7 +975,7 @@ int PacketHandler::player_block_placement(User* user)
   int16_t health = 0;
   BlockBasicPtr blockcb;
   BlockDefault blockD;
-  int16_t slotLen;
+  int8_t nbtdata;
   int8_t posx,posy,posz;
 
   user->buffer >> position >> direction >> newblock;
@@ -985,26 +985,32 @@ int PacketHandler::player_block_placement(User* user)
     int8_t count;
     int16_t damage;
     user->buffer >> count >> damage;
-    user->buffer >> slotLen;
-    if(slotLen != -1)
+    user->buffer >> nbtdata;
+    if (nbtdata != 0)
     {
-      if (!user->buffer.haveData(slotLen+3))
-      {
-        return PACKET_NEED_MORE_DATA;
-      }
-      uint8_t *buf = new uint8_t[slotLen];
-      for(int i = 0; i < slotLen; i++)
-      {
-        int8_t data;
-        user->buffer >> data;
-        buf[i] = data;
-      }
-      //Do something with the slot data
+
+      // ToDo: make a tool to read Slot-data
+      /*
+      uint8_t *buf = (uint8_t*)malloc(user->buffer.m_readBuffer.size() - user->buffer.m_readPos+1);
+
+      std::copy(user->buffer.m_readBuffer.begin() + user->buffer.m_readPos, user->buffer.m_readBuffer.end(), buf+1);
+
+      buf[0] = nbtdata;
+      int remaining = user->buffer.m_readBuffer.size() - user->buffer.m_readPos;
+      NBT_Value* root = new NBT_Value(NBT_Value::eTAG_Type::TAG_COMPOUND, &buf,remaining);
+      std::string data, name;
+      root->Dump(data);
+
+      std::cout << data << std::endl;
+
+      delete root;
       delete[] buf;
+      */
     }
   }
 
-  user->buffer  >> posx >> posy >> posz;
+  // ToDo: read these after NBT data reading works
+  //user->buffer  >> posx >> posy >> posz;
   
   positionToXYZ(position, x, y, z);
 
