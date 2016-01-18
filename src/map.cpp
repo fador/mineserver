@@ -987,9 +987,31 @@ bool Map::sendNote(int x, int y, int z, char instrument, char pitch, int16_t blo
   {
     return false;
   }
+  std::string soundEffect;
+  switch (instrument)
+  {
+    case INSTRUMENT_BASS:
+      soundEffect = "note.bass";
+    break;
+    case INSTRUMENT_SNARE:
+      soundEffect = "note.snare";
+    break;
+    case INSTRUMENT_STICK:
+      soundEffect = "note.hat";
+    break;
+    case INSTRUMENT_BASSDRUM:
+      soundEffect = "note.bd";
+    break;
+    case INSTRUMENT_HARP:
+      soundEffect = "note.harp";
+    break;
+
+  }
+  const uint8_t pitchToEffectPitch[25] = {31, 33, 35, 38, 39, 42, 44, 46, 50, 53, 57, 60, 63, 
+                                          66, 69, 75, 79, 83, 88, 94, 101, 107, 113, 120, 126};
 
   it->second->sendPacket(Protocol::blockAction(x,y,z,instrument,pitch,blocktype));
-
+  it->second->sendPacket(Protocol::namedSoundEffect(soundEffect, x,y,z,100.0f,pitchToEffectPitch[pitch]));
   return true;
 }
 
