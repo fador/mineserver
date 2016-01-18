@@ -76,7 +76,7 @@ void BlockNote::onStartedDigging(User* user, int8_t status, int32_t x, int16_t y
 {
   uint8_t block, metadata;
   ServerInstance->map(map)->getBlock(x, y, z, &block, &metadata);
-  ServerInstance->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
+  ServerInstance->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata, block);
 }
 
 bool BlockNote::onInteract(User* user, int32_t x, int16_t y, int32_t z, int map)
@@ -87,13 +87,13 @@ bool BlockNote::onInteract(User* user, int32_t x, int16_t y, int32_t z, int map)
   {
     metadata = 0x00;
     ServerInstance->map(map)->setBlock(x, y, z, block, metadata);
-    ServerInstance->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
+    ServerInstance->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata, block);
   }
   else
   {
     metadata++;
     ServerInstance->map(map)->setBlock(x, y, z, block, metadata);
-    ServerInstance->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata);
+    ServerInstance->map(map)->sendNote(x, y, z, BlockNote::getInstrument(x, y - 1, z, map), metadata, block);
   }
   return true;
 }

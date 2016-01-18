@@ -382,7 +382,9 @@ Packet Protocol::collectItem(int itemEid, int eid)
 Packet Protocol::blockAction(int32_t x, int16_t y, int32_t z, int8_t byte1, int8_t byte2, int16_t blockid)
 {
   Packet ret;
-  ret << (int8_t)PACKET_OUT_BLOCK_ACTION << x << y << z << byte1 << byte2 << blockid;
+  ret << (int8_t)PACKET_OUT_BLOCK_ACTION 
+  << (uint64_t)((((uint64_t)x & 0x3FFFFFF) << 38) | (((uint64_t)y & 0xFFF) << 26) | ((uint64_t)z & 0x3FFFFFF)) 
+  << byte1 << byte2 << MS_VarInt((uint32_t)blockid);
   return ret;
 }
 

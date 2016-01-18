@@ -979,7 +979,7 @@ bool Map::sendBlockChange(int x, int y, int z, int16_t type, char meta)
   return true;
 }
 
-bool Map::sendNote(int x, int y, int z, char instrument, char pitch)
+bool Map::sendNote(int x, int y, int z, char instrument, char pitch, int16_t blocktype)
 {
   const ChunkMap::const_iterator it = chunks.find(Coords(blockToChunk(x), blockToChunk(z)));
 
@@ -988,11 +988,7 @@ bool Map::sendNote(int x, int y, int z, char instrument, char pitch)
     return false;
   }
 
-  Packet pkt;
-
-  pkt << (int8_t)PACKET_OUT_BLOCK_ACTION << (int32_t)x << (int16_t)y << (int32_t)z << (int8_t)instrument << (int8_t)pitch;
-
-  it->second->sendPacket(pkt);
+  it->second->sendPacket(Protocol::blockAction(x,y,z,instrument,pitch,blocktype));
 
   return true;
 }
