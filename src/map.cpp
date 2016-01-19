@@ -1764,7 +1764,7 @@ bool Map::sendMultiBlocks(std::set<vec>& blocks)
 
       packet << coord;
       packet << (uint8_t)it->y();
-      packet << MS_VarInt((uint32_t)( (block<<4) | meta & 0xf));
+      packet << MS_VarInt((uint32_t)( (block<<4) | (meta & 0xf) ));
       
       std::set<vec>::iterator jt = blocks.find(*it);
       if (jt != blocks.end())
