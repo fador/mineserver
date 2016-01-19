@@ -1747,25 +1747,25 @@ bool Map::sendMultiBlocks(std::set<vec>& blocks)
       }
     }
 
-    Packet packet, pC, pT, pM;
+    Packet packet;
     unsigned int offsetx = chunk_x << 4;
     unsigned int offsetz = chunk_z << 4;
 
-    packet << (int8_t) PACKET_OUT_MULTI_BLOCK_CHANGE << (int32_t) chunk_x << (int32_t) chunk_z << (int16_t) toRem.size();
+    // ToDo: Move to Protocol
+    packet << MS_VarInt((uint32_t)PACKET_OUT_MULTI_BLOCK_CHANGE) << (int32_t) chunk_x << (int32_t) chunk_z 
+           << MS_VarInt((uint32_t)toRem.size());
 
     for (std::set<vec>::const_iterator it = toRem.begin(); it != toRem.end(); ++it)
     {
       uint8_t block, meta;
       ServerInstance->map(m_number)->getBlock(it->x(), it->y(), it->z(), &block, &meta);
 
-      // Sending packet a uint16_t makes it assume int...
-      uint16_t coord = (((it->x() - offsetx) << 12) + ((it->z() - offsetz) << 8) + (it->y()));
-      int16_t* coord2 = (int16_t*)&coord;
+      uint8_t coord = ((it->x() - offsetx) << 4) + ((it->z() - offsetz));
 
-      pC << (int16_t)(*coord2);
-      pT << (int8_t) block;
-      pM << (int8_t) meta;
-
+      packet << coord;
+      packet << (uint8_t)it->y();
+      packet << MS_VarInt((uint32_t)( (block<<4) | meta & 0xf));
+      
       std::set<vec>::iterator jt = blocks.find(*it);
       if (jt != blocks.end())
       {
@@ -1784,9 +1784,6 @@ bool Map::sendMultiBlocks(std::set<vec>& blocks)
     }
 
     it->second->sendPacket(packet);
-    it->second->sendPacket(pC);
-    it->second->sendPacket(pT);
-    it->second->sendPacket(pM);
   }
 
   return true;
