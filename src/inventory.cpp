@@ -457,6 +457,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   //Ack
   if(actionNumber)
   {
+    // ToDo: actually check the action before ack
     user->writePacket(Protocol::confirmTransaction(windowID, actionNumber, 1));
   }
 
@@ -474,25 +475,20 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
     }
     if(shift == 5 && user->inventoryHolding.getType() != -1)
     {
-      //Right click-and-drag, just ignore for now (begin and end)
-      if(rightClick == 4 || rightClick == 6)
-      {
-        return true;
-      }
-      //Left click-and-drag (begin)
-      else if(rightClick == 0)
+      //click-and-drag (begin)
+      if(rightClick == 0 || rightClick == 4)
       {
         user->openInv.slotActions.clear();
         user->openInv.recordAction = true;
         return true;
       }
-      //Left click-and-drag (end)
-      else if(rightClick == 2)
+      //click-and-drag (end)
+      else if(rightClick == 2 || rightClick == 6)
       {
         user->openInv.recordAction = false;
 
         //Spread the stack nice and evenly
-        if(user->openInv.slotActions.size() > (uint32_t)user->inventoryHolding.getCount())
+        if(!user->openInv.slotActions.size() || user->openInv.slotActions.size() > (uint32_t)user->inventoryHolding.getCount())
         {
           //FAILURE (should not happend)
           return true;
@@ -530,7 +526,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   }
 
   sChunk* chunk = NULL;
-  if (windowID != 0)
+  if (windowID != WINDOW_PLAYER)
   {
     chunk = ServerInstance->map(user->pos.map)->getChunk(blockToChunk(user->openInv.x), blockToChunk(user->openInv.z));
 
