@@ -1148,7 +1148,7 @@ bool User::spawnUser(int x, int y, int z)
   if (chunk != NULL)
   {
     chunk->sendPacket(pkt, this);
-    chunk->sendPacket(playerListAddPkt, this);
+    chunk->sendPacket(playerListAddPkt);
   }
   return true;
 }
