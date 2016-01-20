@@ -5,27 +5,27 @@ Custom Minecraft server software written in C++.
 
 You can find the core team from #mineserver @ irc.freenode.net Also mail to developers@mineserver.be will reach us.
 
-    Copyright (c) 2010-2013, The Mineserver Project
+    Copyright (c) 2010-2016, The Mineserver Project
 
 **NOTICE:** Server still lacks features compared to original minecraft server.
 
 
 **Supported platforms**
 
- * Linux
- * Windows (VS2010 project included)
+ * Linux (CMake)
+ * Windows (VS2013 project included, CMake not tested)
  
 Server has also been tested to build on Mac OS X and FreeBSD/PCBSD but we do not officially support those.
 
 We are trying to minimize memory and CPU usage compared to original Java server.
 
-*Important:* The language is C++98 with STL/TR1 library support, so you will need a reasonably modern
-C++ compiler. MS Visual C++ 10 and GCC 4.4 should be sufficient. The build system requires [cmake](http://www.cmake.org/).
+*Important:* The language is C++11, so you will need a reasonably modern
+C++ compiler. MS Visual C++ 12 and GCC 4.8 should be sufficient. The build system requires [cmake](http://www.cmake.org/).
 
 
 ### Supported Minecraft version
 
- * Working with 1.5.2 client (protocol 61)
+ * Working with 1.8.9 client (protocol 47)
 
 ### Features
 
@@ -69,14 +69,14 @@ Check the [fork network](https://github.com/fador/mineserver/network) for the la
 Mineserver requires the following libraries:
 
  * [zlib 1.2.5](http://www.zlib.org)
- * [libevent 1.4.14b](http://monkey.org/~provos/libevent/)
+ * [libevent 2.0.x](http://libevent.org/)
  * [libnoise 1.0](http://libnoise.sourceforge.net/)
  * [openssl/libssl](http://www.openssl.org/)
  * [pthread](http://en.wikipedia.org/wiki/POSIX_Threads)
 
- * Installing on Debian and Ubuntu: (For Ubuntu libevent1 -> libevent-1.4-2)
+ * Installing on Debian and Ubuntu:
 
-    `sudo apt-get install libssl libssl-dev libevent1 libevent-dev zlib1g zlib1g-dev libnoise-dev`
+    `sudo apt-get install libssl libssl-dev libevent-2.0 libevent-dev zlib1g zlib1g-dev libnoise-dev`
 
  * Installing on CentOS and RHEL
 
@@ -114,21 +114,21 @@ Mineserver requires the following libraries:
  * Run `gmake all`
  * Run server with `cd bin && ./mineserver`
 
-**Compiling using Windows (VS2010): (Might be outdated)**
+**Compiling using Windows (VS2013): (Might be outdated)**
 
  * Download and compile [zlib](http://www.zlib.org) or use [pre-built binaries](http://www.winimage.com/zLibDll/index.html)
  * Add zlib libraries to project (zlibstat.lib or zlibwapi.lib which requires also zlibwapi.dll in the same dir with the executable)
- * Download and compile [libevent](http://monkey.org/~provos/libevent/)
+ * Download and compile [libevent 2.0.x](http://monkey.org/~provos/libevent/)
  * Download [libnoise 1.0](http://libnoise.sourceforge.net/) and add header/library files to project
- * Add libevent library to project (libevent.lib)
+ * Add libevent library to project (libevent2.lib)
  * Build
  * Run mineserver.exe
  
- * [Build Pack](http://mineserver.be/downloads/mineserver-VS2010_build_pack.zip) also available for easy compiling
+ * [Build Pack](http://mineserver.be/downloads/mineserver-VS2013_build_pack.zip) also available for easy compiling
 
  An example using commandline compiler available at http://www.microsoft.com/express/Windows/ Please change the ZLIB_INC_DIR, LIBEVENT_INC_DIR, ZLIB_LIB_DIR and LIBEVENT_LIB_DIR to those you keep the includes/libs.
 
-    call "%VS100COMNTOOLS%vsvars32.bat"
-    cl /I"ZLIB_INC_DIR;LIBEVENT_INC_DIR" /W3 /WX- /O2 /D ZLIB_WINAPI /D WIN32 /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /EHsc *.cpp zlibwapi.lib libevent.lib Ws2_32.lib /link /OUT:mineserver.exe /LIBPATH:"ZLIB_LIB_DIR;LIBEVENT_LIB_DIR"
+    call "%VS120COMNTOOLS%vsvars32.bat"
+    cl /I"ZLIB_INC_DIR;LIBEVENT_INC_DIR" /W3 /WX- /O2 /D ZLIB_WINAPI /D WIN32 /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /EHsc *.cpp zlibwapi.lib libevent2.lib Ws2_32.lib /link /OUT:mineserver.exe /LIBPATH:"ZLIB_LIB_DIR;LIBEVENT_LIB_DIR"
 
 
