@@ -132,7 +132,7 @@ Time systemboot;
 // Main :D
 int main(int argc, char* argv[])
 {
-#ifdef __WIN32__
+#ifdef _WIN32
     /// Initialize systemboot Time object
     LARGE_INTEGER c;
     QueryPerformanceCounter(&c);
@@ -358,7 +358,7 @@ Mineserver::Mineserver(int args, char **argarray)
   len = i2d_X509(x, &buf);
 
   //Glue + jesus tape, dont ask - Fador
-  publicKey = std::string((char *)(buf+28),len-36);
+  publicKey = std::string((char *)(buf+28),160);
   OPENSSL_free(buf);
   /* END key fetching */
 
@@ -443,6 +443,10 @@ Mineserver::Mineserver(int args, char **argarray)
   m_inventory      = new Inventory(m_config->sData("system.path.data") + '/' + "recipes", ".recipe", "ENABLED_RECIPES.cfg");
   m_mobs           = new Mobs;
 
+  std::ostringstream s;
+  s << "Known recipes for crafting: " << m_inventory->recipes.size();
+  LOG2(INFO, s.str());
+
 } // End Mineserver constructor
 
 Mineserver::~Mineserver()
@@ -522,6 +526,32 @@ size_t Mineserver::getLoggedUsersCount()
   return count;
 }
 
+
+void timer200ms(int fd, short event, void *arg) {
+  timeval timerTime200ms;
+  timerTime200ms.tv_sec  = 0;
+  timerTime200ms.tv_usec = 200000; // 200ms
+  evtimer_add(&ServerInstance->ev_200ms, &timerTime200ms);
+  ServerInstance->timed_200ms();
+}
+
+void timer1000ms(int fd, short event, void *arg) {
+
+  timeval timerTime1000ms;
+  timerTime1000ms.tv_sec  = 1;
+  timerTime1000ms.tv_usec = 0;
+  evtimer_add(&ServerInstance->ev_1000ms, &timerTime1000ms);
+  ServerInstance->timed_1s();
+}
+
+void timer10s(int fd, short event, void *arg) {
+
+  timeval timerTime10s;
+  timerTime10s.tv_sec  = 10;
+  timerTime10s.tv_usec = 0;
+  evtimer_add(&ServerInstance->ev_10s, &timerTime10s);
+  ServerInstance->timed_10s();
+}
 
 bool Mineserver::run()
 {
@@ -693,70 +723,37 @@ bool Mineserver::run()
   loopTime.tv_sec  = 0;
   loopTime.tv_usec = 200000; // 200ms
 
+  timeval timerTime200ms;
+  timerTime200ms.tv_sec  = 0;
+  timerTime200ms.tv_usec = 200000; // 200ms
+
+  timeval timerTime1000ms;
+  timerTime1000ms.tv_sec  = 1;
+  timerTime1000ms.tv_usec = 0;
+
+  timeval timerTime10s;
+  timerTime10s.tv_sec  = 10;
+  timerTime10s.tv_usec = 0;
+
   m_running = true;
 
-  Time next_10s   = Time::now();
-  Time next_1s    = Time::now();
-  Time next_200ms = Time::now();
+  // Set timed functions to run
+  evtimer_set(&ev_200ms, timer200ms, NULL);
+  evtimer_add(&ev_200ms, &timerTime200ms);
 
-  Time to_sleep = Time(0,100);
+  evtimer_set(&ev_1000ms, timer1000ms, NULL);
+  evtimer_add(&ev_1000ms, &timerTime1000ms);
+
+  evtimer_set(&ev_10s, timer10s, NULL);
+  evtimer_add(&ev_10s, &timerTime10s);
+
   /// #mainloop
   while (m_running)
   {
-    timeval tv;
-    tv.tv_sec  = to_sleep.total_sec();
-    tv.tv_usec = to_sleep.total_usec() % 1000000;
+    event_base_loopexit(m_eventBase, &loopTime);
 
-    if(tv.tv_sec || tv.tv_usec)
-    {
-      //LOG2(INFO, std::string("Time to sleep:") + std::string(to_sleep));
-      Time now = Time::now();
-      event_base_loopexit(m_eventBase, &tv);
-
-      if(event_base_loop(m_eventBase, 0) != 0)
-        break;
-
-      //LOG2(INFO, std::string("Time slept:") + std::string(Time::now() - now));
-    }
-
-    Time now = Time::now();
-
-    if( next_200ms < now){
-      timed_200ms();
-      next_200ms += Time(0,200*1000);
-    }
-
-    if( next_1s < now ){
-      timed_1s();
-      next_1s += Time(1, 0);
-    }
-
-    if(next_10s < now){
-      timed_10s();
-      next_10s += Time(10, 0);
-    }
-
-    for ( User* const& u : m_users)
-    {
-      //Flush data
-      client_write(u);
-    }
-
-    now = Time::now();
-
-    /// Check if we need to run as fast as possible
-    if(next_200ms < now){
-      Time dt = now-next_200ms;
-
-      LOG2(WARNING, std::string("Mineserver not keeping up. Next 200ms was ")
-                      + (std::string)(dt) + " ago.");
-
-      to_sleep = Time(0,500);
-      continue;
-    }
-
-    /// The most sophisticated preemptive scheduler EVER
-    to_sleep = next_200ms - now;
+    if(event_base_loop(m_eventBase, 0) != 0)
+      break;
   }
 
 #ifdef WIN32
@@ -822,25 +819,27 @@ void Mineserver::timed_1s()
   // Run 1s timer hook
   runAllCallback("Timer1000");
 
-  std::set<User*> usersToRemove;
   // Loop users
-  for (std::set<User*>::iterator it = m_users.begin(); it != m_users.end(); it++)
+  for (User* const &u : m_users)
   {
-    User * const & u = *it;
-
     // No data received in 30s, timeout
     if (u->logged && time(0)- u->lastData > 30)
     {
       LOG2(INFO, "Player " + u->nick + " timed out");
-      usersToRemove.insert(u);
+      m_usersToRemove.insert(u);
 
     }
     else if (!u->logged && time(0) - u->lastData > 100)
     {
-      usersToRemove.insert(u);
+      m_usersToRemove.insert(u);
     }
     else
     {
+#ifdef DEBUG
+      std::stringstream temp; temp << u->packetsPerSecond;
+      LOG2(INFO, "Player " + u->nick + " " + temp.str() + " packets per second");
+#endif
+      u->packetsPerSecond = 0;   
       if (m_damage_enabled)
       {
         u->checkEnvironmentDamage();
@@ -850,10 +849,6 @@ void Mineserver::timed_1s()
     }
   }
 
-  for(User* u : usersToRemove)
-  {
-    delete u;
-  }
 
   for (std::vector<Map*>::size_type i = 0 ; i < m_map.size(); i++)
   {
@@ -862,12 +857,6 @@ void Mineserver::timed_1s()
     {
       m_map[i]->mapTime = 0;
     }
-  }
-
-  for (std::set<User*>::const_iterator it = users().begin(); it != users().end(); ++it)
-  {
-    (*it)->pushMap();
-    (*it)->popMap();
   }
 
   // Check for Furnace activity
@@ -893,9 +882,7 @@ void Mineserver::timed_1s()
       if(ServerInstance->validatedUsers[i].valid)
       {
         LOG(INFO, "Packets", tempuser->nick + " is VALID ");
-        tempuser->crypted = true;
-        tempuser->buffer << (int8_t)PACKET_ENCRYPTION_RESPONSE << (int16_t)0 << (int16_t) 0;
-        tempuser->uncryptedLeft = 5;
+        tempuser->writePacket(Protocol::encryptionRequest());
       }
       else
       {
@@ -931,11 +918,9 @@ void Mineserver::timed_10s()
   if (!User::all().empty())
   {
     // Send server time and keepalive
-    Packet pkt;
-    pkt << Protocol::timeUpdate(m_map[0]->mapTime);
-    pkt << Protocol::keepalive(0);
-    pkt << Protocol::playerlist();
-    (*User::all().begin())->sendAll(pkt);
+    (*User::all().begin())->sendAll(Protocol::timeUpdate(m_map[0]->mapTime));
+    (*User::all().begin())->sendAll(Protocol::keepalive(0));
+    //(*User::all().begin())->sendAll(Protocol::playerlist());
   }
 
   //Check for tree generation from saplings

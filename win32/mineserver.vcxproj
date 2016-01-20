@@ -65,6 +65,7 @@
     <ClCompile Include="..\src\physics.cpp" />
     <ClCompile Include="..\src\plugin.cpp" />
     <ClCompile Include="..\src\plugin_api.cpp" />
+    <ClCompile Include="..\src\protocol.cpp" />
     <ClCompile Include="..\src\random.cpp" />
     <ClCompile Include="..\src\redstoneSimulation.cpp" />
     <ClCompile Include="..\src\screenBase.cpp" />
@@ -81,42 +82,41 @@
     <ClCompile Include="..\src\worldgen\nethergen.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\chat.h" />
-    <ClInclude Include="..\include\chunkmap.h" />
-    <ClInclude Include="..\include\cliScreen.h" />
-    <ClInclude Include="..\include\config.h" />
-    <ClInclude Include="..\include\constants.h" />
-    <ClInclude Include="..\include\constants_num.h" />
-    <ClInclude Include="..\include\extern.h" />
-    <ClInclude Include="..\include\furnace.h" />
-    <ClInclude Include="..\include\furnaceManager.h" />
-    <ClInclude Include="..\include\inventory.h" />
-    <ClInclude Include="..\include\lighting.h" />
-    <ClInclude Include="..\include\logger.h" />
-    <ClInclude Include="..\include\logtype.h" />
-    <ClInclude Include="..\include\map.h" />
-    <ClInclude Include="..\include\mcregion.h" />
-    <ClInclude Include="..\include\metadata.h" />
-    <ClInclude Include="..\include\mineserver.h" />
-    <ClInclude Include="..\include\mob.h" />
-    <ClInclude Include="..\include\nbt.h" />
-    <ClInclude Include="..\include\packets.h" />
-    <ClInclude Include="..\include\permissions.h" />
-    <ClInclude Include="..\include\physics.h" />
-    <ClInclude Include="..\include\plugin.h" />
-    <ClInclude Include="..\include\plugin_api.h" />
-    <ClInclude Include="..\include\protocol.h" />
-    <ClInclude Include="..\include\random.h" />
-    <ClInclude Include="..\include\redstoneSimulation.h" />
-    <ClInclude Include="..\include\screenBase.h" />
-    <ClInclude Include="..\include\signalhandler.h" />
-    <ClInclude Include="..\include\sockets.h" />
-    <ClInclude Include="..\include\tools.h" />
-    <ClInclude Include="..\include\tr1.h" />
-    <ClInclude Include="..\include\tree.h" />
-    <ClInclude Include="..\include\user.h" />
-    <ClInclude Include="..\include\utf8.h" />
-    <ClInclude Include="..\include\vec.h" />
+    <ClInclude Include="..\src\chat.h" />
+    <ClInclude Include="..\src\chunkmap.h" />
+    <ClInclude Include="..\src\cliScreen.h" />
+    <ClInclude Include="..\src\config.h" />
+    <ClInclude Include="..\src\constants.h" />
+    <ClInclude Include="..\src\constants_num.h" />
+    <ClInclude Include="..\src\extern.h" />
+    <ClInclude Include="..\src\furnace.h" />
+    <ClInclude Include="..\src\furnaceManager.h" />
+    <ClInclude Include="..\src\inventory.h" />
+    <ClInclude Include="..\src\lighting.h" />
+    <ClInclude Include="..\src\logger.h" />
+    <ClInclude Include="..\src\logtype.h" />
+    <ClInclude Include="..\src\map.h" />
+    <ClInclude Include="..\src\mcregion.h" />
+    <ClInclude Include="..\src\metadata.h" />
+    <ClInclude Include="..\src\mineserver.h" />
+    <ClInclude Include="..\src\mob.h" />
+    <ClInclude Include="..\src\nbt.h" />
+    <ClInclude Include="..\src\packets.h" />
+    <ClInclude Include="..\src\permissions.h" />
+    <ClInclude Include="..\src\physics.h" />
+    <ClInclude Include="..\src\plugin.h" />
+    <ClInclude Include="..\src\plugin_api.h" />
+    <ClInclude Include="..\src\protocol.h" />
+    <ClInclude Include="..\src\random.h" />
+    <ClInclude Include="..\src\redstoneSimulation.h" />
+    <ClInclude Include="..\src\screenBase.h" />
+    <ClInclude Include="..\src\signalhandler.h" />
+    <ClInclude Include="..\src\sockets.h" />
+    <ClInclude Include="..\src\tools.h" />
+    <ClInclude Include="..\src\tree.h" />
+    <ClInclude Include="..\src\user.h" />
+    <ClInclude Include="..\src\utf8.h" />
+    <ClInclude Include="..\src\vec.h" />
     <ClInclude Include="..\src\blocks\basic.h" />
     <ClInclude Include="..\src\blocks\bed.h" />
     <ClInclude Include="..\src\blocks\cake.h" />
@@ -196,7 +196,7 @@
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>true</LinkIncremental>
     <OutDir>..\bin\</OutDir>
     <IncludePath>C:\Libraries\Include;C:\Libraries\Include\noise;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Libraries\Lib;$(LibraryPath)</LibraryPath>
@@ -209,15 +209,18 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;FADOR_PLUGIN;ZLIB_WINAPI;WIN32;DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\include;..\src;..\buildpack\include</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>pthread.lib;libeay32.lib;ssleay32.lib;Winmm.lib;libnoise.lib;zlibwapi.lib;ws2_32.lib;libevent.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
+      <AdditionalDependencies>pthread.lib;libeay32.lib;ssleay32.lib;Winmm.lib;libnoise.lib;zlibwapi.lib;ws2_32.lib;libevent2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
       <AdditionalLibraryDirectories>..\buildpack\lib\</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -240,11 +243,12 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>pthread.lib;libeay32.lib;ssleay32.lib;Winmm.lib;libnoise.lib;zlibwapi.lib;libevent.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>pthread.lib;libeay32.lib;ssleay32.lib;Winmm.lib;libnoise.lib;zlibwapi.lib;libevent2.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
       <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>

@@ -234,7 +234,7 @@ bool chat_sendmsgTo(const char* user, const char* msg)
     // Don't send to his user if he is DND and the message is a chat message
     if ((*it)->fd && (*it)->logged && userStr == (*it)->nick)
     {
-      (*it)->buffer << Protocol::chatMsg(R"({"text":")"+json_esc(msg)+"\"}");
+      (*it)->writePacket(Protocol::chatMsg("{\"text\": \""+json_esc(msg)+"\"}"));
       return true;
     }
   }
@@ -251,7 +251,7 @@ bool chat_sendmsg(const char* msg)
     // Don't send to his user if he is DND and the message is a chat message
     if ((*it)->fd && (*it)->logged && !(*it)->dnd)
     {
-      (*it)->buffer << Protocol::chatMsg(R"({"text":")"+json_esc(msg)+"\"}");
+      (*it)->writePacket(Protocol::chatMsg("{\"text\": \""+ json_esc(msg) + "\"}"));
     }
   }
 

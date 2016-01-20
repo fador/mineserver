@@ -80,6 +80,17 @@ public:
     health(0)
   {
   }
+
+  Item(int16_t _type, int8_t _count, int16_t _health, User* player = NULL)
+    :
+    ready(false),
+    player(player),
+    slot(-1),
+    type(_type),
+    count(_count),
+    health(_health)
+  {
+  }
 };
 
 typedef std::shared_ptr<Item> ItemPtr;
@@ -99,9 +110,12 @@ struct OpenInventory
 
 typedef std::shared_ptr<OpenInventory> OpenInvPtr;
 
-enum { WINDOW_CURSOR = -1, WINDOW_PLAYER = 0, WINDOW_WORKBENCH, WINDOW_CHEST, WINDOW_LARGE_CHEST, WINDOW_FURNACE };
+enum { WINDOW_CURSOR = -1, WINDOW_PLAYER = 0, WINDOW_CRAFTING_TABLE, WINDOW_CHEST, WINDOW_LARGE_CHEST, WINDOW_FURNACE };
 
-enum { INVENTORYTYPE_CHEST = 0, INVENTORYTYPE_WORKBENCH, INVENTORYTYPE_FURNACE };
+#define INVENTORYTYPE_CHEST "minecraft:chest"
+#define INVENTORYTYPE_CRAFTING_TABLE "minecraft:crafting_table"
+#define INVENTORYTYPE_FURNACE "minecraft:furnace"
+#define INVENTORYTYPE_HORSE "EntityHorse"
 
 class User;
 
@@ -156,7 +170,7 @@ public:
   bool updateInventory(User* user, int8_t windowID);
   bool doCraft(Item* slots, int8_t width, int8_t height);
 
-  bool setSlot(User* user, int8_t windowID, int16_t slot, int16_t itemID, int8_t count, int16_t health);
+  bool setSlot(User* user, int8_t windowID, int16_t slot, Item* item);
 
   int16_t itemHealth(int16_t itemID, int8_t block, bool& rightUse);
 

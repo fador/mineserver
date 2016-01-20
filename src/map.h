@@ -180,10 +180,10 @@ public:
   {
     return sendBlockChange(pos.x(), pos.y(), pos.z(), type, meta);
   }
-  bool sendNote(int x, int y, int z, char instrument, char pitch);
-  bool sendNote(vec pos, char instrument, char pitch)
+  bool sendNote(int x, int y, int z, char instrument, char pitch, int16_t blocktype);
+  bool sendNote(vec pos, char instrument, char pitch, int16_t blocktype)
   {
-    return sendNote(pos.x(), pos.y(), pos.z(), instrument, pitch);
+    return sendNote(pos.x(), pos.y(), pos.z(), instrument, pitch, blocktype);
   }
 
   bool sendPickupSpawn(spawnedItem item);

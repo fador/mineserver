@@ -26,6 +26,8 @@
 */
 
 #include "metadata.h"
+#include "protocol.h"
+
 
 void MetaDataElemByte::output(Packet& p) const
 {
@@ -38,6 +40,31 @@ MetaDataElemByte::MetaDataElemByte(int8_t _idx, int8_t _val)
   idx = _idx;
   val = _val;
 }
+
+void MetaDataElemShort::output(Packet& p) const
+{
+  int header = 1 << 5 | idx;
+  p << (int8_t)header << (int16_t)val;
+}
+
+MetaDataElemShort::MetaDataElemShort(int8_t _idx, int16_t _val)
+{
+  idx = _idx;
+  val = _val;
+}
+
+void MetaDataElemSlot::output(Packet& p) const
+{
+  int header = 5 << 5 | idx;
+  p << (int8_t)header << Protocol::slot(val);
+}
+
+MetaDataElemSlot::MetaDataElemSlot(int8_t _idx, Item _val)
+{
+  idx = _idx;
+  val = _val;
+}
+
 
 Packet& operator<<(Packet& p, const MetaData& m)
 {

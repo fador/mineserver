@@ -103,7 +103,7 @@ void Mob::moveAnimal()
   z += vel.z()*0.01;  
   for (int i = 0; i < ServerInstance->users().size(); i++) {
     User* user2 = ServerInstance->users()[i];
-  user2->buffer << (int8_t)PACKET_ENTITY_VELOCITY << (int32_t)UID << (int16_t)vel.x() << (int16_t)vel.y() << (int16_t)vel.z();
+  user2->buffer << (int8_t)PACKET_OUT_ENTITY_VELOCITY << (int32_t)UID << (int16_t)vel.x() << (int16_t)vel.y() << (int16_t)vel.z();
   }*/
 }
 
@@ -128,6 +128,7 @@ void Mob::teleportToAll()
 {
   if (spawned)
   {
+    // ToDo: fix yaw/pitch type
     User::sendAll(Protocol::entityTeleport(UID, x, y, z, yaw, pitch));
   }
 }
@@ -147,7 +148,7 @@ void Mob::moveTo(double to_x, double to_y, double to_z, int to_map)
   }
   if(dx <= 4 && dy <= 4 && dz <= 4)
   {
-    User::sendAll(Protocol::entityRelativeMove(UID, dx, dy, dz));
+    User::sendAll(Protocol::entityRelativeMove(UID, dx, dy, dz, 1));
   }
   else
   {

@@ -45,6 +45,8 @@
 
 //#include "chunkmap.h"
 
+bool client_write(User *user);
+
 struct position
 {
   double x;
@@ -97,12 +99,16 @@ public:
   bool logged;
   bool muted;
   bool dnd;
+  int32_t packetsPerSecond;
   uint16_t timeUnderwater;
   double fallDistance;
   unsigned int UID;
+  std::string uuid;
+  uint8_t uuid_raw[16];
   std::string temp_nick;
   vec curChunk;
   time_t healthtimeout;
+  uint16_t compression; // Protocol compression threshold
 
   /* INVENTORY RELATED HELPERS */
   Item inventoryHolding;
@@ -135,7 +141,7 @@ public:
   //Input buffer
   Packet buffer;
   Packet bufferCrypted;
-  Packet loginBuffer; // Used to send all login info at once
+  uint8_t gameState;
 
   static std::set<User*>& all();
   static bool isUser(int sock);
@@ -230,9 +236,18 @@ public:
   struct event* getReadEvent();
   struct event* getWriteEvent();
 
+  bool setReadEvent(struct event* new_event);
+  bool setWriteEvent(struct event* new_event);
+
+  bool writePacket(const Packet &pkt) {
+    this->buffer.writePacket(pkt, this->compression);
+    client_write(this);
+    return true;
+  }
+
 private:
-  event m_readEvent;
-  event m_writeEvent;
+  event* m_readEvent;
+  event* m_writeEvent;
 
   // Item currently in hold
   int16_t m_currentItemSlot;

@@ -133,8 +133,7 @@ bool client_write(User *user)
       if ((errno != EAGAIN && errno != EINTR))
     #endif
       {
-        LOG2(ERROR, "Error writing to client, tried to write " + dtos(buf.size()) + " bytes, code: " + dtos(ERROR_NUMBER));
-        //delete user;
+        LOG2(ERROR, "Error writing to client, tried to write " + dtos(buf.size()) + " bytes, code: " + dtos(ERROR_NUMBER));        
         user->logged = false;
         ServerInstance->usersToRemove().insert(user);
         return false;
@@ -187,14 +186,16 @@ extern "C" void client_callback(int fd, short ev, void* arg)
       {
         LOG2(INFO, "Socket closed");
       }
-      delete user;
+      user->logged = false;
+      ServerInstance->usersToRemove().insert(user);
       return;
     }
 
     if (read == SOCKET_ERROR)
     {
       LOG2(INFO, "Socket error");
-      delete user;
+      user->logged = false;
+      ServerInstance->usersToRemove().insert(user);
       return;
     }
 
@@ -203,65 +204,100 @@ extern "C" void client_callback(int fd, short ev, void* arg)
 
     user->buffer.addToRead(upBUF, read);
     user->buffer.reset();
+    MS_VarInt packetLen;
+    uint32_t varint_len;
+    uint32_t buffer_pos = 0;
 
-    while (user->buffer >> (int8_t&)user->action)
-    {  
-      //Variable len package
-      if (ServerInstance->packetHandler()->packets[user->action].len == PACKET_VARIABLE_LEN)
-      {
-        //Call specific function
-        const bool disconnecting = user->action == 0xFF;
-        const int curpos = ServerInstance->packetHandler()->packets[user->action].function(user);
+    // Handle exceptions caused by varint reading
+    try
+    {
+      while (user->buffer >> (MS_VarInt&)packetLen)
+      {  
+        varint_len = user->buffer.m_readPos-buffer_pos;      
 
-        if (curpos == PACKET_NEED_MORE_DATA)
+        // Check if we have the data in buffer
+        if (!user->buffer.haveData(static_cast<int64_t>(packetLen)))
         {
           user->waitForData = true;
           event_add(user->getReadEvent(), NULL);
           return;
         }
-
-#ifdef DEBUG
-        printf("Packet from %s, id = 0x%hx \n", user->nick.c_str(), user->action);
-#endif
-
-        if (disconnecting) // disconnect -- player gone
+        // Packet data has been received, call the function
+        else
         {
-          if(user->nick.size())
+          // Handle compressed incoming data
+          if (user->compression)
           {
-            LOG2(INFO, "User "+ user->nick + " disconnected normally");
+            MS_VarInt uncompressed_size;
+            int32_t cur_pos = user->buffer.m_readPos;
+            user->buffer >> (MS_VarInt&)uncompressed_size;          
+
+            // Hopefully a rare occasion when the packet size exceeds the compression threshold
+            if (uncompressed_size != 0)
+            {
+              uLongf written = uncompressed_size;
+              uLong sourceLen = (int)packetLen.val-(user->buffer.m_readPos-cur_pos);
+              uint8_t* inbuffer = new uint8_t[sourceLen];
+              uint8_t* buffer = new uint8_t[uncompressed_size+1];
+
+              user->buffer.getData(inbuffer,sourceLen);           
+
+              user->buffer.removePacketLen((uint32_t)packetLen+varint_len);
+              int ret = uncompress(buffer, &written, inbuffer, sourceLen);
+              if (ret < Z_OK || written != uncompressed_size) {
+                LOG2(DEBUG, "Uncompress error");              
+                buffer_pos = user->buffer.m_readPos;
+                continue;
+              }
+
+              user->buffer.addToReadBegin(buffer, written);
+              packetLen.val = written;
+              varint_len = 0;
+              delete[] inbuffer;
+              delete[] buffer;
+            }
           }
-          delete user;
-          return;
+          MS_VarInt action;
+          user->buffer >> (MS_VarInt&)action;
+          user->action = (uint8_t)static_cast<int64_t>(action);
+
+          if (ServerInstance->packetHandler()->packets[user->gameState][user->action].len == PACKET_DOES_NOT_EXIST) {
+            std::ostringstream str;
+            str << "Unknown packet: 0x" << std::hex << (unsigned int)(user->action);
+            LOG2(DEBUG, str.str());
+            user->buffer.removePacketLen((uint32_t)packetLen+varint_len);
+
+            buffer_pos = user->buffer.m_readPos;
+            continue;
+          }
+          user->packetsPerSecond++;
+  #ifdef DEBUG
+          printf("Packet from %s, state = 0x%hx, id = 0x%hx \n", user->nick.c_str(), user->gameState, user->action);
+  #endif
+
+          //Call specific function
+          ServerInstance->packetHandler()->packets[user->gameState][user->action].function(user);
+
+          const bool disconnecting = user->action == 0xFF;
+
+          if (disconnecting) // disconnect -- player gone
+          {
+            if (user->nick.size()) {
+              LOG2(INFO, "User " + user->nick + " disconnected normally");
+            }
+            user->logged = false;
+            ServerInstance->usersToRemove().insert(user);
+            return;
+          }   
         }
-      }
-      else if (ServerInstance->packetHandler()->packets[user->action].len == PACKET_DOES_NOT_EXIST)
-      {
-        std::ostringstream str;
-        str << "Unknown packet: 0x" << std::hex << (unsigned int)(user->action);
-        LOG2(DEBUG, str.str());
-
-        delete user;
-        return;
-      }
-      //Constant len packets
-      else
-      {
-        //Check that the buffer has enough data before calling the function
-        if (!user->buffer.haveData(ServerInstance->packetHandler()->packets[user->action].len))
-        {
-          user->waitForData = true;
-          event_add(user->getReadEvent(), NULL);
-          return;
-        }
-
-#ifdef DEBUG
-        printf("Packet from %s, id = 0x%hx \n", user->nick.c_str(), user->action);
-#endif
-
-        //Call specific function
-        ServerInstance->packetHandler()->packets[user->action].function(user);
-      }
-    } // while(user->buffer)
+        user->buffer.removePacketLen((uint32_t)packetLen+varint_len);
+        buffer_pos = user->buffer.m_readPos;
+      } // while(user->buffer)
+    } catch (std::logic_error &e)
+    {
+      user->waitForData = true;
+      event_add(user->getReadEvent(), NULL);
+    }
   } //End reading
 
   //Write data to user socket
@@ -294,8 +330,8 @@ extern "C" void accept_callback(int fd, short ev, void* arg)
   int one = 1;
   setsockopt(client_fd, IPPROTO_TCP, TCP_NODELAY, (const char*)&one, sizeof(int));
 
-  event_set(client->getReadEvent(), client_fd, EV_READ, client_callback, client);
-  event_set(client->getWriteEvent(), client_fd, EV_WRITE, client_callback, client);
+  client->setReadEvent(event_new(ServerInstance->getEventBase(), client_fd, EV_READ, client_callback, client));
+  client->setWriteEvent(event_new(ServerInstance->getEventBase(), client_fd, EV_WRITE, client_callback, client));
   event_add(client->getReadEvent(), NULL);
 }
 

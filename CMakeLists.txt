@@ -29,8 +29,8 @@ endif(EXISTS "${${PROJECT_NAME}_SOURCE_DIR}/.git/${GIT_HEAD}")
 
 # Set the actual version strings, these are used inside the program later
 SET(${PROJECT_NAME}_MAJOR_VERSION 0)
-SET(${PROJECT_NAME}_MINOR_VERSION 1)
-SET(${PROJECT_NAME}_PATCH_LEVEL 17)
+SET(${PROJECT_NAME}_MINOR_VERSION 2)
+SET(${PROJECT_NAME}_PATCH_LEVEL 0)
 
 # Justasic: the rest is automatic
 SET(${PROJECT_NAME}_VERSION_SIMPLE "${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_PATCH_LEVEL}")
@@ -72,10 +72,7 @@ SET(CONFIG_DIR_DISTSOURCE files)
 #
 # Include directories
 #
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
-INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/include)
-
 
 # CMake crap to include
 include(CheckFunctionExists)
@@ -95,7 +92,7 @@ SET(LIBRARY_OUTPUT_PATH bin)
 
 # Set compiler specific build flags
 IF(CMAKE_COMPILER_IS_GNUCXX)
-  SET(CMAKE_CXX_FLAGS "-W -Wall -Wno-unused -pedantic -std=c++11")
+  SET(CMAKE_CXX_FLAGS "-W -Wall -Wno-unused-variable -Wno-unused-parameter -pedantic -std=c++11")
   SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g -O0")
   SET(CMAKE_CXX_FLAGS_PROFILE "-DDEBUG -g -pg")
   SET(CMAKE_CXX_FLAGS_RELEASE "-O4 -s -DNDEBUG")
@@ -113,7 +110,7 @@ ENDIF(MSVC_IDE)
 #
 
 SET(TARGET ${PROJECT_NAME})
-SET(mineserver_depends)
+SET(mineserver_depends -lpthread)
 
 # Note that on Ubuntu systems, CMake's FindOpenSSL.cmake file does not define
 # all the proper defines, therefore our old and generic library finder does not
@@ -127,7 +124,7 @@ include_directories(${ZLIB_INCLUDE_DIR} ${NOISE_INCLUDE_DIR} ${OPENSSL_INCLUDE_D
 LIST(APPEND mineserver_depends "${ZLIB_LIBRARY};${NOISE_LIBRARY};${OPENSSL_LIBRARIES};${EVENT_LIBRARY}")
 
 # preprocess configuration file
-CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/configure.h.in ${PROJECT_BINARY_DIR}/include/configure.h)
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/configure.h.in ${PROJECT_BINARY_DIR}/src/configure.h)
 
 
 #

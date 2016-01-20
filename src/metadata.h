@@ -31,11 +31,12 @@
 #include <vector>
 #include "packets.h"
 #include <memory>
+#include "inventory.h"
 
 class MetaDataElem
 {
   public:
-    virtual void output(Packet& p) const=0;
+    virtual void output(Packet& p) const=0; // Pure Virtual
     int8_t idx;
 };
 
@@ -45,6 +46,22 @@ class MetaDataElemByte : public MetaDataElem
     MetaDataElemByte(int8_t _idx, int8_t _val);
     void output(Packet& p) const;
     int8_t val;
+};
+
+class MetaDataElemShort : public MetaDataElem
+{
+  public:
+    MetaDataElemShort(int8_t _idx, int16_t _val);
+    void output(Packet& p) const;
+    int16_t val;
+};
+
+class MetaDataElemSlot : public MetaDataElem
+{
+  public:
+    MetaDataElemSlot(int8_t _idx, Item _val);
+    void output(Packet& p) const;
+    Item val;
 };
 
 typedef std::shared_ptr<MetaDataElem> MetaDataElemPtr;

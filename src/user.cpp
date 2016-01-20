@@ -28,6 +28,7 @@
 #include <cmath>
 #include <sys/stat.h>
 #include <algorithm>
+#include <stdio.h>
 
 using namespace std;
 
@@ -71,11 +72,31 @@ User::User(int sock, uint32_t EID)
   this->fallDistance    = -10;
   this->healthtimeout   = time(NULL) - 1;
   this->crypted         = false;
-
+  this->gameState       = 0;
+  this->compression     = 0;
+  this->packetsPerSecond = 0;
+  this->gamemode        = GameMode::Survival;
 
   this->m_currentItemSlot = 0;
   this->inventoryHolding  = Item(this, -1);
   this->curItem          = 0;
+
+  //Generate UUID based on the EID
+  const char hex[] = "0123456789abcdef";
+  this->uuid = "7fe8a8c1-f48c-3509-ac5c-97c3";
+  for (int i = 0; i < 8; i++) {
+    this->uuid+=hex[(EID>>(i-7)*4)&0xf];
+  }
+  
+  std::string temp_uuid = this->uuid;
+  temp_uuid.erase(temp_uuid.begin()+23);
+  temp_uuid.erase(temp_uuid.begin()+18);
+  temp_uuid.erase(temp_uuid.begin()+13);
+  temp_uuid.erase(temp_uuid.begin()+8);
+  for (int i = 0; i < 16; i++) {
+    uuid_raw[i] = (hexToByte(temp_uuid[i*2])<<4)+hexToByte(temp_uuid[i*2+1]);
+  }
+
 
   // Ignore this user if it's the server console
   if (this->UID != SERVER_CONSOLE_UID)
@@ -103,13 +124,13 @@ bool User::changeNick(std::string _nick)
 
 User::~User()
 {
-  if (this->UID != SERVER_CONSOLE_UID && event_del(getReadEvent()) == -1)
+  if (this->UID != SERVER_CONSOLE_UID)
   {
-    LOG2(WARNING, this->nick + " event del failed for read event!");
+    event_free(getReadEvent());
   }
-  if (this->UID != SERVER_CONSOLE_UID && event_del(getWriteEvent()) == -1)
+  if (this->UID != SERVER_CONSOLE_UID)
   {
-    LOG2(WARNING, this->nick + " event del failed for write event!");
+    event_free(getWriteEvent());
   }
 
   if (fd != -1)
@@ -162,6 +183,9 @@ User::~User()
     Packet pkt = Protocol::destroyEntity(this->UID);
     this->sendOthers(pkt);
 
+    pkt = Protocol::PlayerListItemRemoveSingle(this->uuid_raw);
+    this->sendOthers(pkt);
+
     // Loop every loaded chunk to make sure no user pointers are left!
 
     for (ChunkMap::const_iterator it = ServerInstance->map(pos.map)->chunks.begin(); it != ServerInstance->map(pos.map)->chunks.end(); )
@@ -204,18 +228,33 @@ User::~User()
     runAllCallback("PlayerQuitPost",nick.c_str());
   }
 }
-#include <stdio.h>
+
 bool User::sendLoginInfo()
 {
-  
   // Load user data
   loadData();
-  
+
+  writePacket(Protocol::setCompression(256));
+  this->compression = 256;
+
+  // This packet moves gameState to "play"
+  writePacket(Protocol::loginSuccess(this->uuid, this->nick));
+  this->gameState++;
+
   // Login OK package
-  buffer << Protocol::loginResponse(UID);
+  writePacket(Protocol::joinGame(UID));
   setGameMode(gamemode);
+  
   spawnOthers();
 
+  // Send spawn position
+  writePacket(Protocol::spawnPosition(int(pos.x), int(pos.y + 2), int(pos.z)));
+  writePacket(Protocol::timeUpdate(ServerInstance->map(pos.map)->mapTime));
+
+  writePacket(Protocol::playerAbilities(5, 0.1, 0.2));
+
+  writePacket(Protocol::playerPositionAndLook(pos.x, pos.y, pos.z, pos.yaw, pos.pitch, 0));
+  
   // Put nearby chunks to queue
   for (int x = -viewDistance; x <= viewDistance; x++)
   {
@@ -227,6 +266,7 @@ bool User::sendLoginInfo()
   // Push chunks to user
   pushMap(true);
 
+  /*
   const std::vector<MobPtr>& mobs = ServerInstance->mobs()->getAll();
 
   for (std::vector<MobPtr>::const_iterator i = mobs.begin(); i != mobs.end(); ++i)
@@ -236,31 +276,25 @@ bool User::sendLoginInfo()
       loginBuffer << Protocol::mobSpawn(**i);
     }
   }
-
-  // Send spawn position
-  loginBuffer << Protocol::spawnPosition(int(pos.x), int(pos.y + 2), int(pos.z))
-              << Protocol::timeUpdate(ServerInstance->map(pos.map)->mapTime);
-
-  buffer.addToWrite(loginBuffer);
-  loginBuffer.reset();
+  */
 
   logged = true;
-  spawnUser((int32_t)pos.x * 32, (int32_t)((pos.y + 2) * 32), (int32_t)pos.z * 32);
-    
+  
   for (int i = 1; i < 45; i++)
   {
     inv[i].ready = true;
     inv[i].sendUpdate();
   }
-  
+
+  spawnUser((int32_t)pos.x * 32, (int32_t)((pos.y + 2) * 32), (int32_t)pos.z * 32);
+
   // Teleport player (again)
   teleport(pos.x, pos.y + 2, pos.z);
-
-  ServerInstance->chat()->sendMsg(this, nick + " connected!", Chat::ALL);
 
   sethealth(health);
   logged = true;
 
+  //ServerInstance->chat()->sendMsg(this, nick + " connected!", Chat::ALL);
 
   return true;
 }
@@ -268,7 +302,7 @@ bool User::sendLoginInfo()
 // Kick player
 bool User::kick(std::string kickMsg)
 {
-  buffer << Protocol::kick(kickMsg);
+  writePacket(Protocol::disconnect("{\"text\": \""+json_esc(kickMsg)+"\"}"));
   runAllCallback("PlayerKickPost",nick.c_str(), kickMsg.c_str());
 
   LOG2(WARNING, nick + " kicked. Reason: " + kickMsg);
@@ -578,7 +612,7 @@ bool User::updatePos(double x, double y, double z, double stance)
 
     if (newChunk == oldChunk)
     {
-      Packet telePacket = Protocol::entityTeleport(UID, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch));
+      Packet telePacket = Protocol::entityTeleport(UID, x, y, z, pos.yaw, pos.pitch);
       newChunk->sendPacket(telePacket, this);
     }
     else{
@@ -593,23 +627,22 @@ bool User::updatePos(double x, double y, double z, double stance)
       std::list<User*>::iterator iter = toremove.begin(), end = toremove.end();
       for (; iter != end ; iter++)
       {
-        (*iter)->buffer.addToWrite(dtPkt);
+        (*iter)->writePacket(dtPkt);
 
-        this->buffer.addToWrite(Protocol::destroyEntity((*iter)->UID));
+        this->writePacket(Protocol::destroyEntity((*iter)->UID));
       }
 
-      Packet spawnPkt = Protocol::namedEntitySpawn(UID, nick, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch), curItem);
+      Packet spawnPkt = Protocol::spawnPlayer(UID, uuid_raw, nick, (float)health, x, y, z, pos.yaw, pos.pitch, curItem);
       iter = toadd.begin(), end = toadd.end();
       for (; iter != end ; iter++)
       {
-        (*iter)->buffer.addToWrite(spawnPkt);
+        (*iter)->writePacket(spawnPkt);
 
-        this->buffer.addToWrite(
-              Protocol::namedEntitySpawn((*iter)->UID, (*iter)->nick, (*iter)->pos, (*iter)->curItem)
-              );
+        this->writePacket(
+              Protocol::spawnPlayer((*iter)->UID, (*iter)->uuid_raw, (*iter)->nick, (float)(*iter)->health, (*iter)->pos, (*iter)->curItem));
       }
 
-      Packet tpPkt = Protocol::entityTeleport(UID, x, y, z, angleToByte(pos.yaw), angleToByte(pos.pitch));
+      Packet tpPkt = Protocol::entityTeleport(UID, x, y, z, pos.yaw, pos.pitch);
 
       newChunk->sendPacket(tpPkt,this);
 
@@ -651,7 +684,7 @@ bool User::updatePos(double x, double y, double z, double stance)
             if (ServerInstance->inventory()->isSpace(this, (*iter)->item, (*iter)->count))
             {
               // Send player collect item packet
-              buffer << Protocol::collectItem((*iter)->EID, UID);
+              writePacket(Protocol::collectItem((*iter)->EID, UID));
 
               // Send everyone destroy_entity-packet
               Packet pkt = Protocol::destroyEntity((*iter)->EID);
@@ -743,13 +776,12 @@ bool User::checkOnBlock(int32_t x, int16_t y, int32_t z)
 
 bool User::updateLook(float yaw, float pitch)
 {
-  Packet pkt = Protocol::entityLook(UID, yaw, pitch);
-  pkt << Protocol::entityHeadLook(UID, angleToByte(yaw));
 
   sChunk* chunk = ServerInstance->map(pos.map)->getChunk(blockToChunk((int32_t)pos.x), blockToChunk((int32_t)pos.z));
   if (chunk != NULL)
   {
-    chunk->sendPacket(pkt, this);
+    chunk->sendPacket(Protocol::entityLook(UID, yaw, pitch), this);
+    chunk->sendPacket(Protocol::entityHeadLook(UID, angleToByte(yaw)), this);
   }
 
   this->pos.yaw   = yaw;
@@ -761,9 +793,9 @@ bool User::sendOthers(const Packet& packet)
 {
   for (std::set<User*>::const_iterator it = ServerInstance->users().begin(); it != ServerInstance->users().end(); ++it)
   {
-    if ((*it)->fd != this->fd && (*it)->logged && !((*it)->dnd && packet.firstwrite() == PACKET_CHAT_MESSAGE))
+    if ((*it)->fd != this->fd && (*it)->logged && !((*it)->dnd && packet.firstwrite() == PACKET_OUT_CHAT_MESSAGE))
     {
-      (*it)->buffer.addToWrite(packet);
+      (*it)->writePacket(packet);
     }
   }
 
@@ -774,7 +806,7 @@ bool User::sendOthers(uint8_t* data, size_t len)
 {
   for (std::set<User*>::const_iterator it = ServerInstance->users().begin(); it != ServerInstance->users().end(); ++it)
   {
-    if ((*it)->fd != this->fd && (*it)->logged && !((*it)->dnd && data[0] == PACKET_CHAT_MESSAGE))
+    if ((*it)->fd != this->fd && (*it)->logged && !((*it)->dnd && data[0] == PACKET_OUT_CHAT_MESSAGE))
     {
       (*it)->buffer.addToWrite(data, len);
     }
@@ -823,7 +855,7 @@ bool User::sendAll(const Packet& packet)
   {
     if ((*it)->fd && (*it)->logged)
     {
-      (*it)->buffer.addToWrite(packet);
+      (*it)->writePacket(packet);
     }
   }
 
@@ -849,7 +881,7 @@ bool User::sendAdmins(const Packet& packet)
   {
     if ((*it)->fd && (*it)->logged && IS_ADMIN((*it)->permissions))
     {
-      (*it)->buffer.addToWrite(packet);
+      (*it)->writePacket(packet);
     }
   }
 
@@ -875,7 +907,7 @@ bool User::sendOps(const Packet& packet)
   {
     if ((*it)->fd && (*it)->logged && IS_ADMIN((*it)->permissions))
     {
-      (*it)->buffer.addToWrite(packet);
+      (*it)->writePacket(packet);
     }
   }
 
@@ -901,7 +933,7 @@ bool User::sendGuests(const Packet& packet)
   {
     if ((*it)->fd && (*it)->logged && IS_ADMIN((*it)->permissions))
     {
-      (*it)->buffer.addToWrite(packet);
+      (*it)->writePacket(packet);
     }
   }
 
@@ -1096,7 +1128,7 @@ bool User::teleport(double x, double y, double z, size_t map)
   }
   if (map == pos.map)
   {
-    buffer << Protocol::playerPositionAndLook(x, y, 0, z, 0, 0, true);
+    writePacket(Protocol::playerPositionAndLook(x, y, z, 0, 0, 0));
   }
 
   //Also update pos for other players
@@ -1110,11 +1142,13 @@ bool User::teleport(double x, double y, double z, size_t map)
 
 bool User::spawnUser(int x, int y, int z)
 {
-  Packet pkt = Protocol::namedEntitySpawn(UID, nick, x, y, z, 0, 0, 0);
+  Packet pkt = Protocol::spawnPlayer(UID, uuid_raw, nick, (float)health, x, y, z, 0, 0, 0);
+  Packet playerListAddPkt = Protocol::PlayerListItemAddSingle(uuid_raw, nick, gamemode, 10);
   sChunk* chunk = ServerInstance->map(pos.map)->getChunk(blockToChunk(x >> 5), blockToChunk(z >> 5));
   if (chunk != NULL)
   {
     chunk->sendPacket(pkt, this);
+    chunk->sendPacket(playerListAddPkt);
   }
   return true;
 }
@@ -1126,14 +1160,14 @@ bool User::spawnOthers()
     //    if ((*it)->logged && (*it)->UID != this->UID && (*it)->nick != this->nick)
     if ((*it)->logged)
     {
-      loginBuffer << Protocol::namedEntitySpawn((*it)->UID, (*it)->nick, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, angleToByte((*it)->pos.yaw),angleToByte((*it)->pos.pitch), 0);
+      this->writePacket(Protocol::spawnPlayer((*it)->UID, (*it)->uuid_raw, (*it)->nick, (float)(*it)->health, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, (*it)->pos.yaw,(*it)->pos.pitch, 0));
+      this->writePacket(Protocol::PlayerListItemAddSingle((*it)->uuid_raw, (*it)->nick, (*it)->gamemode, 10));
       for (int b = 0; b < 5; b++)
       {
         const int n = b == 0 ? (*it)->curItem + 36 : 9 - b;
-        const int type = (*it)->inv[n].getType();
-        loginBuffer << Protocol::entityEquipment((*it)->UID, b, type, 0);
+        this->writePacket(Protocol::entityEquipment((*it)->UID, b, (*it)->inv[n]));
       }
-      loginBuffer << Protocol::entityHeadLook((*it)->UID,angleToByte((*it)->pos.yaw));
+      this->writePacket(Protocol::entityHeadLook((*it)->UID,angleToByte((*it)->pos.yaw)));
     }
   }
   return true;
@@ -1277,7 +1311,7 @@ bool User::sethealth(int userHealth)
   healthtimeout = time(NULL);
 
   health = userHealth;
-  buffer << Protocol::updateHealth(userHealth);
+  writePacket(Protocol::updateHealth(userHealth));
   return true;
 }
 
@@ -1285,7 +1319,7 @@ bool User::respawn()
 {
   this->health = 20;
   this->timeUnderwater = 0;
-  buffer << Protocol::respawn(); //FIXME: send the correct world id
+  writePacket(Protocol::respawn()); //FIXME: send the correct world id
   sethealth(20);
   Packet destroyPkt;
   destroyPkt << Protocol::destroyEntity(UID);
@@ -1305,7 +1339,7 @@ bool User::respawn()
     teleport(ServerInstance->map(pos.map)->spawnPos.x(), ServerInstance->map(pos.map)->spawnPos.y() + 2, ServerInstance->map(pos.map)->spawnPos.z(), 0);
   }
 
-  Packet spawnPkt = Protocol::namedEntitySpawn(UID, nick, pos.x, pos.y, pos.z, angleToByte(pos.yaw), angleToByte(pos.pitch), curItem);
+  Packet spawnPkt = Protocol::spawnPlayer(UID, uuid_raw, nick, (float)health, pos.x, pos.y, pos.z, pos.yaw, pos.pitch, curItem);  
 
   chunk = ServerInstance->map(pos.map)->getMapData(blockToChunk((int32_t)pos.x), blockToChunk((int32_t)pos.z));
   if (chunk != NULL)
@@ -1357,12 +1391,24 @@ bool User::isUnderwater()
 
 struct event* User::getReadEvent()
 {
-  return &m_readEvent;
+  return m_readEvent;
+}
+
+bool User::setReadEvent(struct event* new_event)
+{
+  m_readEvent = new_event;
+  return true;
 }
 
 struct event* User::getWriteEvent()
 {
-  return &m_writeEvent;
+  return m_writeEvent;
+}
+
+bool User::setWriteEvent(struct event* new_event)
+{
+  m_writeEvent = new_event;
+  return true;
 }
 
 std::set<User*>& User::all()
@@ -1435,7 +1481,7 @@ std::string User::generateDigest()
       {
         carry = 0;
       }
-      md[i] = twocomp;
+      md[i] = (uint8_t)twocomp;
     }
   }
 
@@ -1456,7 +1502,7 @@ std::string User::generateDigest()
 
 bool User::setGameMode(User::GameMode gameMode)
 {
-  buffer.addToWrite(Protocol::gameState(3,gameMode));
+  writePacket(Protocol::gameMode(3,gameMode));
 
   invulnerable = gameMode == User::Creative;
   creative = gameMode == User::Creative;

@@ -34,10 +34,10 @@ std::map<uint8_t, DropPtr> BLOCKDROPS;
 
 const unsigned int SERVER_CONSOLE_UID = -1;
 
-const std::string VERSION = "0.1.19 (Alpha)";
+const std::string VERSION = "0.2.0 (Alpha)";
 
-const int PROTOCOL_VERSION = 78;
-const std::string MINECRAFT_VERSION = "1.5.2";
+const int PROTOCOL_VERSION = 47;
+const std::string MINECRAFT_VERSION = "1.8.9";
 
 const char COMMENTPREFIX  = '#';
 

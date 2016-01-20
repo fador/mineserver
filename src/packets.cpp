@@ -67,45 +67,52 @@
 #include <openssl/err.h>
 #endif
 
+#define _WINSOCKAPI_
+#define NOMINMAX
+#include <zlib.h>
+
 void PacketHandler::init()
 {
-  packets[PACKET_KEEP_ALIVE]               = Packets(0, &PacketHandler::keep_alive);
-  packets[PACKET_LOGIN_REQUEST]            = Packets(PACKET_VARIABLE_LEN, &PacketHandler::login_request);
-  packets[PACKET_HANDSHAKE]                = Packets(PACKET_VARIABLE_LEN, &PacketHandler::handshake);
-  packets[PACKET_CHAT_MESSAGE]             = Packets(PACKET_VARIABLE_LEN, &PacketHandler::chat_message);
-  packets[PACKET_USE_ENTITY]               = Packets(9, &PacketHandler::use_entity);
-  packets[PACKET_PLAYER]                   = Packets(1, &PacketHandler::player);
-  packets[PACKET_PLAYER_POSITION]          = Packets(33, &PacketHandler::player_position);
-  packets[PACKET_PLAYER_LOOK]              = Packets(9, &PacketHandler::player_look);
-  packets[PACKET_PLAYER_POSITION_AND_LOOK] = Packets(41, &PacketHandler::player_position_and_look);
-  packets[PACKET_PLAYER_DIGGING]           = Packets(11, &PacketHandler::player_digging);
-  packets[PACKET_PLAYER_BLOCK_PLACEMENT]   = Packets(PACKET_VARIABLE_LEN, &PacketHandler::player_block_placement);
-  packets[PACKET_HOLDING_CHANGE]           = Packets(2, &PacketHandler::holding_change);
-  packets[PACKET_ANIMATION]                = Packets(5, &PacketHandler::arm_animation);
-  packets[PACKET_PICKUP_SPAWN]             = Packets(22, &PacketHandler::pickup_spawn);
-  packets[PACKET_DISCONNECT]               = Packets(PACKET_VARIABLE_LEN, &PacketHandler::disconnect);
-  packets[PACKET_RESPAWN]                  = Packets(PACKET_VARIABLE_LEN, &PacketHandler::respawn);
-  packets[PACKET_INVENTORY_CHANGE]         = Packets(PACKET_VARIABLE_LEN, &PacketHandler::inventory_change);
-  packets[PACKET_INVENTORY_CLOSE]          = Packets(1, &PacketHandler::inventory_close);
-  packets[PACKET_SIGN]                     = Packets(PACKET_VARIABLE_LEN, &PacketHandler::change_sign);
-  packets[PACKET_TRANSACTION]              = Packets(4, &PacketHandler::inventory_transaction);
-  packets[PACKET_ENTITY_CROUCH]            = Packets(5, &PacketHandler::entity_crouch);
-  packets[PACKET_THUNDERBOLT]              = Packets(18, &PacketHandler::unhandledPacket);
-  packets[PACKET_INCREMENT_STATISTICS]     = Packets(6, &PacketHandler::unhandledPacket);
-  packets[PACKET_PING]                     = Packets(0, &PacketHandler::ping);
-  packets[PACKET_BLOCK_CHANGE]             = Packets(11, &PacketHandler::block_change);
-  packets[PACKET_TAB_COMPLETE]             = Packets(PACKET_VARIABLE_LEN, &PacketHandler::tab_complete);
-  packets[PACKET_CLIENT_INFO]              = Packets(PACKET_VARIABLE_LEN, &PacketHandler::client_info);
-  packets[PACKET_CLIENT_STATUS]            = Packets(1, &PacketHandler::client_status);
-  packets[PACKET_ENCRYPTION_RESPONSE]      = Packets(PACKET_VARIABLE_LEN, &PacketHandler::encryption_response);
-  packets[PACKET_PLUGIN_MESSAGE]           = Packets(PACKET_VARIABLE_LEN, &PacketHandler::plugin_message);
-  packets[PACKET_CREATIVE_INVENTORY]       = Packets(PACKET_VARIABLE_LEN, &PacketHandler::creative_inventory);
-  packets[PACKET_PLAYER_ABILITIES]         = Packets(3, &PacketHandler::player_abilities);
+  
+  packets[STATE_HANDSHAKE][PACKET_IN_HANDSHAKE]            = Packets(&PacketHandler::handshake);
+
+  packets[STATE_STATUS][PACKET_IN_SERVER_LIST_PING]        = Packets(&PacketHandler::server_list_ping);
+  packets[STATE_STATUS][PACKET_IN_PING]                    = Packets(&PacketHandler::ping);
+
+  packets[STATE_LOGIN][PACKET_IN_LOGIN_REQUEST]            = Packets(&PacketHandler::login_request);
+  packets[STATE_LOGIN][PACKET_IN_ENCRYPTION_RESPONSE]      = Packets(&PacketHandler::encryption_response);
+  
+  packets[STATE_PLAY][PACKET_IN_KEEP_ALIVE]                = Packets(&PacketHandler::keep_alive);
+  packets[STATE_PLAY][PACKET_IN_CHAT_MESSAGE]              = Packets(&PacketHandler::chat_message);
+  packets[STATE_PLAY][PACKET_IN_USE_ENTITY]                = Packets(&PacketHandler::use_entity);
+  packets[STATE_PLAY][PACKET_IN_PLAYER]                    = Packets(&PacketHandler::player);
+  packets[STATE_PLAY][PACKET_IN_PLAYER_POSITION]           = Packets(&PacketHandler::player_position);
+  packets[STATE_PLAY][PACKET_IN_PLAYER_LOOK]               = Packets(&PacketHandler::player_look);
+  packets[STATE_PLAY][PACKET_IN_PLAYER_POSITION_AND_LOOK]  = Packets(&PacketHandler::player_position_and_look);
+  packets[STATE_PLAY][PACKET_IN_PLAYER_DIGGING]            = Packets(&PacketHandler::player_digging);
+  packets[STATE_PLAY][PACKET_IN_PLAYER_BLOCK_PLACEMENT]    = Packets(&PacketHandler::player_block_placement);
+  packets[STATE_PLAY][PACKET_IN_HELD_ITEM_CHANGE]          = Packets(&PacketHandler::held_item_change);
+  packets[STATE_PLAY][PACKET_IN_ANIMATION]                 = Packets(&PacketHandler::animation);
+  //packets[STATE_PLAY][PACKET_IN_PICKUP_SPAWN]            = Packets(&PacketHandler::pickup_spawn);
+
+  packets[STATE_PLAY][PACKET_IN_CLIENT_STATUS]             = Packets(&PacketHandler::client_status);
+  packets[STATE_PLAY][PACKET_IN_CLICK_WINDOW]              = Packets(&PacketHandler::click_window);
+  packets[STATE_PLAY][PACKET_IN_CLOSE_WINDOW]              = Packets(&PacketHandler::close_window);
+  packets[STATE_PLAY][PACKET_IN_UPDATE_SIGN]               = Packets(&PacketHandler::update_sign);
+  packets[STATE_PLAY][PACKET_IN_CONFIRM_TRANSACTION]       = Packets(&PacketHandler::confirm_transaction);
+  packets[STATE_PLAY][PACKET_IN_ENTITY_ACTION]             = Packets(&PacketHandler::entity_action);
+  packets[STATE_PLAY][PACKET_IN_BLOCK_CHANGE]              = Packets(&PacketHandler::block_change);
+  packets[STATE_PLAY][PACKET_IN_TAB_COMPLETE]              = Packets(&PacketHandler::tab_complete);
+  packets[STATE_PLAY][PACKET_IN_CLIENT_SETTINGS]           = Packets(&PacketHandler::client_settings);
+
+  packets[STATE_PLAY][PACKET_IN_PLUGIN_MESSAGE]            = Packets(&PacketHandler::plugin_message);
+  packets[STATE_PLAY][PACKET_IN_CREATIVE_INVENTORY_ACTION] = Packets(&PacketHandler::creative_inventory);
+  packets[STATE_PLAY][PACKET_IN_PLAYER_ABILITIES]          = Packets(&PacketHandler::player_abilities);
 }
 
 int PacketHandler::unhandledPacket(User* user)
 {
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
@@ -143,7 +150,7 @@ int PacketHandler::plugin_message(User* user)
 
   LOG2(INFO, "Plugin message: "+channel);
 
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
@@ -152,18 +159,13 @@ int PacketHandler::plugin_message(User* user)
 int PacketHandler::encryption_response(User* user)
 {
 
-  if (!user->buffer.haveData(4))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
-
-  int16_t secretLen, verifyLen;
+  MS_VarInt secretLen, verifyLen;
   std::string secret,verify;
   std::string decryptedSecret(' ', 16);
 
   user->buffer >> secretLen;
 
-  if (!user->buffer.haveData(secretLen))
+  if (!user->buffer.haveData((int)secretLen))
   {
     return PACKET_NEED_MORE_DATA;
   }
@@ -177,21 +179,21 @@ int PacketHandler::encryption_response(User* user)
 
   user->buffer >> verifyLen;
 
-  if (!user->buffer.haveData(verifyLen))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
 
-  for(int i = 0; i < verifyLen; i++)
+  for(int i = 0; i < (int)verifyLen; i++)
   {
     int8_t byte;
     user->buffer >> byte;
     verify.push_back(byte);
   }
-  user->buffer.removePacket();
+
+  if (!user->buffer)
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
   
   //Those should be around 128 bytes
-  if(verifyLen > 1023 || secretLen > 1023)
+  if((int)verifyLen > 1023 || (int)secretLen > 1023)
   {
     user->kick("Invalid verify/secret size");
     return PACKET_OK;
@@ -201,7 +203,7 @@ int PacketHandler::encryption_response(User* user)
   uint8_t buffer[1024];
   memset(buffer, 0, 1024);
   //Decrypt the verification bytes
-  int ret = RSA_private_decrypt(verifyLen,(const uint8_t *)verify.c_str(),buffer,ServerInstance->rsa,RSA_PKCS1_PADDING);
+  int ret = RSA_private_decrypt((int)verifyLen,(const uint8_t *)verify.c_str(),buffer,ServerInstance->rsa,RSA_PKCS1_PADDING);
   //Check they match with the ones sent
   if(ret != 4 || std::string((char *)buffer) != ServerInstance->encryptionBytes)
   {
@@ -211,7 +213,7 @@ int PacketHandler::encryption_response(User* user)
 
   //Decrypt secret sent by the client and store
   memset(buffer, 0, 1024);
-  ret = RSA_private_decrypt(secretLen,(const uint8_t *)secret.c_str(),buffer,ServerInstance->rsa,RSA_PKCS1_PADDING);
+  ret = RSA_private_decrypt((int)secretLen,(const uint8_t *)secret.c_str(),buffer,ServerInstance->rsa,RSA_PKCS1_PADDING);
   user->secret = std::string((char *)buffer, ret);
   //We're going crypted!
   user->initCipher();
@@ -221,8 +223,7 @@ int PacketHandler::encryption_response(User* user)
   {
     //Response
     user->crypted = true;
-    user->buffer << (int8_t)PACKET_ENCRYPTION_RESPONSE << (int16_t)0 << (int16_t) 0;
-    user->uncryptedLeft = 5; //5 first bytes are uncrypted
+    user->sendLoginInfo();
   }
   else
   {
@@ -240,21 +241,19 @@ int PacketHandler::encryption_response(User* user)
 
 int PacketHandler::client_status(User* user)
 {
-  int8_t payload;
+  MS_VarInt action_id;
 
-  user->buffer >> payload;
+  user->buffer >> action_id;
   
-  user->buffer.removePacket();
-
   //0: Initial spawn, 1: Respawn after death
   LOG2(INFO, "client_status.");
-  if(payload == 0 && user->crypted)
+  if(action_id.val == 0 && !user->logged && user->crypted)
   {
     LOG2(INFO, "Sending login info..");
     user->sendLoginInfo();
   }
   //player respawns
-  if(payload == 1)
+  else if(action_id.val == 0)
   {
     user->dropInventory();
     user->respawn();
@@ -297,7 +296,7 @@ int PacketHandler::creative_inventory(User *user)
     it.setCount(count);
     it.setHealth(meta);
 
-    user->buffer.removePacket();
+  
     return PACKET_OK;
 }
 
@@ -311,7 +310,7 @@ int PacketHandler::player_abilities(User *user)
     return PACKET_OK;
 }
 
-int PacketHandler::client_info(User* user)
+int PacketHandler::client_settings(User* user)
 {
   // Wait for length-short. HEHE
   if (!user->buffer.haveData(2))
@@ -331,7 +330,7 @@ int PacketHandler::client_info(User* user)
 
   user->buffer >> viewDistance >> chatFlags >> difficulty >> showCape;
 
-  user->buffer.removePacket();
+
 
   //ToDo: Do something with the values
 
@@ -349,22 +348,34 @@ int PacketHandler::tab_complete(User* user)
   }
 
   std::string msg;
+  int8_t hasPosition;
 
-  user->buffer >> msg;
+  user->buffer >> msg >> hasPosition;
+
+  if (hasPosition) {
+    uint64_t position;
+    int32_t x,z;
+    int16_t y;
+    user->buffer >> position;
+    positionToXYZ(position, x, y, z);
+  }
 
   if (!user->buffer)
   {
     return PACKET_NEED_MORE_DATA;
   }
-  user->buffer.removePacket();
 
+
+  std::vector<std::string> completion;
+  completion.push_back(msg+"test1");
+  completion.push_back(msg+"test2");
   //ToDo: autocomplete!
-  user->buffer << (int8_t)PACKET_TAB_COMPLETE << " ";
+  user->writePacket(Protocol::tabComplete(completion));
 
   return PACKET_OK;
 }
 
-int PacketHandler::entity_crouch(User* user)
+int PacketHandler::entity_action(User* user)
 {
   int32_t EID;
   int8_t action;
@@ -407,11 +418,11 @@ int PacketHandler::entity_crouch(User* user)
     }
   }
 
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
-int PacketHandler::change_sign(User* user)
+int PacketHandler::update_sign(User* user)
 {
   if (!user->buffer.haveData(16))
   {
@@ -466,7 +477,7 @@ int PacketHandler::change_sign(User* user)
 
     //Send sign packet to everyone
     Packet pkt;
-    pkt << (int8_t)PACKET_SIGN << x << y << z;
+    pkt << (int8_t)PACKET_IN_UPDATE_SIGN << x << y << z;
     pkt << strings1 << strings2 << strings3 << strings4;
     user->sendAll(pkt);
   }
@@ -474,12 +485,12 @@ int PacketHandler::change_sign(User* user)
   LOG2(INFO, "Sign: " + strings1 + strings2 + strings3 + strings4);
 
   //No need to do anything
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
 
-int PacketHandler::inventory_close(User* user)
+int PacketHandler::close_window(User* user)
 {
   int8_t windowID;
 
@@ -487,12 +498,12 @@ int PacketHandler::inventory_close(User* user)
 
   ServerInstance->inventory()->windowClose(user, windowID);
 
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
 
-int PacketHandler::inventory_transaction(User* user)
+int PacketHandler::confirm_transaction(User* user)
 {
   int8_t windowID;
   int16_t action;
@@ -501,11 +512,11 @@ int PacketHandler::inventory_transaction(User* user)
   user->buffer >> windowID >> action >> accepted;
 
   //No need to do anything
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
-int PacketHandler::inventory_change(User* user)
+int PacketHandler::click_window(User* user)
 {
   if (!user->buffer.haveData(10))
   {
@@ -539,7 +550,7 @@ int PacketHandler::inventory_change(User* user)
 
   ServerInstance->inventory()->windowClick(user, windowID, slot, rightClick, actionNumber, itemID, itemCount, itemUses, shift);
 
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
@@ -547,31 +558,19 @@ int PacketHandler::inventory_change(User* user)
 int PacketHandler::keep_alive(User* user)
 {
   //No need to do anything
-  user->buffer.removePacket();
+  MS_VarInt time;
+  user->buffer >> time;
+
   return PACKET_OK;
 }
 
 // Login request
 int PacketHandler::login_request(User* user)
 {
-  //This should not be used in 1.3
-  LOG(INFO, "Packets", "LOGIN REQUEST!!");
 
-  return PACKET_OK;
-}
+  std::string player;
 
-int PacketHandler::handshake(User* user)
-{
-  if (!user->buffer.haveData(9))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
-
-  std::string player, host;
-  int8_t version;
-  int32_t port;
-
-  user->buffer >> version >> player >> host >> port;
+  user->buffer >> player;
 
   // Check for data
   if (!user->buffer)
@@ -579,26 +578,8 @@ int PacketHandler::handshake(User* user)
     return PACKET_NEED_MORE_DATA;
   }
 
-  // Remove package from buffer
-  user->buffer.removePacket();
-
-  LOG(INFO, "Packets", "Player " + dtos(user->UID) + " login v." + dtos(version) + " : " + player);
 
   user->nick = player;
-
-  // If version is not the current version
-  if (version != PROTOCOL_VERSION)
-  {
-    user->kick(ServerInstance->config()->sData("strings.wrong_protocol"));
-    return PACKET_OK;
-  }
-
-  // If userlimit is reached
-  if ((int)User::all().size() > ServerInstance->config()->iData("system.user_limit"))
-  {
-    user->kick(ServerInstance->config()->sData("strings.server_full"));
-    return PACKET_OK;
-  }
 
   char* kickMessage = NULL;
   runCallbackUntilFalse("PlayerLoginPre",player.c_str(), &kickMessage);
@@ -615,25 +596,55 @@ int PacketHandler::handshake(User* user)
     }
     else
     {
-      user->buffer << Protocol::encryptionRequest();
+      user->writePacket(Protocol::encryptionRequest());
     }
     runAllCallback("PlayerLoginPost",player.c_str());
   }
 
-  
-  // TODO: Add support for prompting user for Server password
+  return PACKET_OK;
+}
 
+int PacketHandler::handshake(User* user)
+{
+  std::string host;
+  MS_VarInt version;
+  int16_t port;
+  MS_VarInt nextState;
+
+  user->buffer >> version >> host >> port >> nextState;
+
+  // Check for data
+  if (!user->buffer)
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+
+  LOG(INFO, "Packets", "Player " + dtos((double)user->UID) + " login v." + dtos((double)version) + " : ");
+
+
+  // If version is not the current version
+  if (static_cast<int64_t>(version) != PROTOCOL_VERSION)
+  {
+    user->kick(ServerInstance->config()->sData("strings.wrong_protocol"));
+    return PACKET_OK;
+  }
+  
+  // If userlimit is reached
+  if ((int)User::all().size() > ServerInstance->config()->iData("system.user_limit"))
+  {
+    user->kick(ServerInstance->config()->sData("strings.server_full"));
+    return PACKET_OK;
+  }
+
+  // Move to the next state
+  if (nextState >= 0 && nextState < 4)
+    user->gameState = (uint8_t)nextState;
+  
   return PACKET_OK;
 }
 
 int PacketHandler::chat_message(User* user)
 {
-  // Wait for length-short. HEHE
-  if (!user->buffer.haveData(2))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
-
   std::string msg;
 
   user->buffer >> msg;
@@ -642,8 +653,6 @@ int PacketHandler::chat_message(User* user)
   {
     return PACKET_NEED_MORE_DATA;
   }
-
-  user->buffer.removePacket();
 
   ServerInstance->chat()->handleMsg(user, msg);
 
@@ -659,24 +668,24 @@ int PacketHandler::player(User* user)
   {
     return PACKET_NEED_MORE_DATA;
   }
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
 int PacketHandler::player_position(User* user)
 {
-  double x, y, stance, z;
+  double x, y, z;
   int8_t onground;
 
-  user->buffer >> x >> y >> stance >> z >> onground;
+  user->buffer >> x >> y >> z >> onground;
 
   if (!user->buffer)
   {
     return PACKET_NEED_MORE_DATA;
   }
 
-  user->updatePos(x, y, z, stance);
-  user->buffer.removePacket();
+  user->updatePos(x, y, z, 0.0);
+
 
   return PACKET_OK;
 }
@@ -695,18 +704,18 @@ int PacketHandler::player_look(User* user)
 
   user->updateLook(yaw, pitch);
 
-  user->buffer.removePacket();
+
 
   return PACKET_OK;
 }
 
 int PacketHandler::player_position_and_look(User* user)
 {
-  double x, y, stance, z;
+  double x, y, z;
   float yaw, pitch;
   int8_t onground;
 
-  user->buffer >> x >> y >> stance >> z
+  user->buffer >> x >> y >> z
                >> yaw >> pitch >> onground;
 
   if (!user->buffer)
@@ -715,10 +724,10 @@ int PacketHandler::player_position_and_look(User* user)
   }
 
   //Update user data
-  user->updatePos(x, y, z, stance);
+  user->updatePos(x, y, z, 0.0);
   user->updateLook(yaw, pitch);
 
-  user->buffer.removePacket();
+
 
   return PACKET_OK;
 }
@@ -728,23 +737,23 @@ int PacketHandler::player_digging(User* user)
   int8_t status;
   int32_t x;
   int16_t  y;
-  int8_t temp_y;
   int32_t z;
   int8_t direction;
   uint8_t block;
   uint8_t meta;
+  uint64_t position;
   BlockBasicPtr blockcb;
   BlockDefault blockD;
 
-  user->buffer >> status >> x >> temp_y >> z >> direction;
-  y = (uint8_t)temp_y;
+  user->buffer >> status >> position >> direction;
 
   if (!user->buffer)
   {
     return PACKET_NEED_MORE_DATA;
   }
 
-  user->buffer.removePacket();
+  positionToXYZ(position, x, y, z);
+
 
   if (!ServerInstance->map(user->pos.map)->getBlock(x, y, z, &block, &meta))
   {
@@ -806,8 +815,7 @@ int PacketHandler::player_digging(User* user)
           user->inv[itemSlot].setType(-1);
         }
       }
-      ServerInstance->inventory()->setSlot(user, WINDOW_PLAYER, itemSlot, user->inv[itemSlot].getType(),
-                                           user->inv[itemSlot].getCount(), user->inv[itemSlot].getHealth());
+      ServerInstance->inventory()->setSlot(user, WINDOW_PLAYER, itemSlot, &user->inv[itemSlot]);
     }
 
     runCallbackUntilFalse("BlockBreakPre",user->nick.c_str(), x, y, z);
@@ -924,10 +932,11 @@ int PacketHandler::player_digging(User* user)
 
     break;
   }
-  case BLOCK_STATUS_PICKUP_SPAWN:
+  case BLOCK_STATUS_DROP_ITEM_STACK:
+  case BLOCK_STATUS_DROP_ITEM:
   {
     //ToDo: handle
-#define itemSlot (36+user->currentItemSlot())
+    #define itemSlot (36+user->currentItemSlot())
     if (user->inv[itemSlot].getType() > 0)
     {
       ServerInstance->map(user->pos.map)->createPickupSpawn(int(user->pos.x), int(user->pos.y), int(user->pos.z), int(user->inv[itemSlot].getType()), 1, int(user->inv[itemSlot].getHealth()), user);
@@ -935,7 +944,7 @@ int PacketHandler::player_digging(User* user)
       user->inv[itemSlot].decCount();
     }
     break;
-#undef itemSlot
+    #undef itemSlot
   }
 
   }
@@ -951,8 +960,8 @@ int PacketHandler::player_block_placement(User* user)
   {
     return PACKET_NEED_MORE_DATA;
   }
+  uint64_t position;
   int16_t y = 0;
-  int8_t temp_y = 0;
   int8_t direction = 0;
   int16_t newblock = 0;
   int32_t x, z = 0;
@@ -966,39 +975,44 @@ int PacketHandler::player_block_placement(User* user)
   int16_t health = 0;
   BlockBasicPtr blockcb;
   BlockDefault blockD;
-  int16_t slotLen;
+  int8_t nbtdata;
   int8_t posx,posy,posz;
 
-  user->buffer >> x >> temp_y >> z >> direction >> newblock;
+  user->buffer >> position >> direction >> newblock;
+
   if(newblock != -1)
   {
     int8_t count;
     int16_t damage;
     user->buffer >> count >> damage;
-    user->buffer >> slotLen;
-    if(slotLen != -1)
+    user->buffer >> nbtdata;
+    if (nbtdata != 0)
     {
-      if (!user->buffer.haveData(slotLen+3))
-      {
-        return PACKET_NEED_MORE_DATA;
-      }
-      uint8_t *buf = new uint8_t[slotLen];
-      for(int i = 0; i < slotLen; i++)
-      {
-        int8_t data;
-        user->buffer >> data;
-        buf[i] = data;
-      }
-      //Do something with the slot data
+
+      // ToDo: make a tool to read Slot-data
+      /*
+      uint8_t *buf = (uint8_t*)malloc(user->buffer.m_readBuffer.size() - user->buffer.m_readPos+1);
+
+      std::copy(user->buffer.m_readBuffer.begin() + user->buffer.m_readPos, user->buffer.m_readBuffer.end(), buf+1);
+
+      buf[0] = nbtdata;
+      int remaining = user->buffer.m_readBuffer.size() - user->buffer.m_readPos;
+      NBT_Value* root = new NBT_Value(NBT_Value::eTAG_Type::TAG_COMPOUND, &buf,remaining);
+      std::string data, name;
+      root->Dump(data);
+
+      std::cout << data << std::endl;
+
+      delete root;
       delete[] buf;
+      */
     }
   }
 
-  user->buffer  >> posx >> posy >> posz;
-  //newblock;
-  y = (uint8_t)temp_y;
-
-  user->buffer.removePacket();
+  // ToDo: read these after NBT data reading works
+  //user->buffer  >> posx >> posy >> posz;
+  
+  positionToXYZ(position, x, y, z);
 
   ItemBasicPtr itemcb;
   if (direction == -1 && x == -1 && y == 255 && z == -1)
@@ -1076,12 +1090,8 @@ int PacketHandler::player_block_placement(User* user)
     }
     
     int32_t EID = Mineserver::generateEID();
-    Packet pkt;
     // MINECART
-    //10 == minecart
-    pkt << Protocol::addObject(EID,10,x,y,z,0);
-    
-    user->sendAll(pkt);
+    user->sendAll(Protocol::spawnObject(EID,OBJECT_TYPE_MINECART,x,y,z,0));
 
     ServerInstance->map(user->pos.map)->minecarts.push_back(MinecartData(EID,vec(x*32+16,y*32+16,z*32+16),vec(0,0,0),microTime()));
     //ToDo: Store
@@ -1103,11 +1113,6 @@ int PacketHandler::player_block_placement(User* user)
 #ifdef DEBUG
   LOG(DEBUG, "Packets", "Block_placement: " + dtos(newblock) + " (" + dtos(x) + "," + dtos((int)y) + "," + dtos(z) + ") dir: " + dtos((int)direction));
 #endif
-
-  if (direction)
-  {
-    direction = 6 - direction;
-  }
 
   //if (ServerInstance->map()->getBlock(x, y, z, &oldblock, &metadata))
   {
@@ -1315,7 +1320,7 @@ int PacketHandler::player_block_placement(User* user)
   return PACKET_OK;
 }
 
-int PacketHandler::holding_change(User* user)
+int PacketHandler::held_item_change(User* user)
 {
   int16_t itemSlot;
   user->buffer >> itemSlot;
@@ -1325,13 +1330,10 @@ int PacketHandler::holding_change(User* user)
     return PACKET_NEED_MORE_DATA;
   }
 
-  user->buffer.removePacket();
-
   user->curItem = itemSlot;
 
   //Send holding change to others
-  Packet pkt;
-  pkt << (int8_t)PACKET_ENTITY_EQUIPMENT << (int32_t)user->UID << (int16_t)0 << Protocol::slot(user->inv[itemSlot + 36].getType(),1,user->inv[itemSlot + 36].getHealth());
+  Packet pkt = Protocol::entityEquipment(user->UID, 0, user->inv[itemSlot + 36]);
   user->sendOthers(pkt);
 
   // Set current itemID to user
@@ -1339,21 +1341,9 @@ int PacketHandler::holding_change(User* user)
   return PACKET_OK;
 }
 
-int PacketHandler::arm_animation(User* user)
+int PacketHandler::animation(User* user)
 {
-  int32_t userID;
-  int8_t animType;
-
-  user->buffer >> userID >> animType;
-
-  if (!user->buffer)
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
-
-  user->buffer.removePacket();
-
-  Packet pkt = Protocol::animation(user->UID,animType);
+  Packet pkt = Protocol::animation(user->UID,0);
   user->sendOthers(pkt);
 
   runAllCallback("PlayerArmSwing",user->nick.c_str());
@@ -1381,7 +1371,7 @@ int PacketHandler::pickup_spawn(User* user)
     return PACKET_NEED_MORE_DATA;
   }
 
-  user->buffer.removePacket();
+
 
   item.EID       = Mineserver::generateEID();
 
@@ -1400,27 +1390,6 @@ int PacketHandler::pickup_spawn(User* user)
   return PACKET_OK;
 }
 
-int PacketHandler::disconnect(User* user)
-{
-  if (!user->buffer.haveData(2))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
-
-  std::string msg;
-  user->buffer >> msg;
-
-  if (!user->buffer)
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
-
-  user->buffer.removePacket();
-  
-  LOG(INFO, "Packets", "Disconnect: " + msg);
-
-  return PACKET_OK;
-}
 
 int PacketHandler::use_entity(User* user)
 {
@@ -1435,7 +1404,7 @@ int PacketHandler::use_entity(User* user)
     return PACKET_NEED_MORE_DATA;
   }
 
-  user->buffer.removePacket();
+
 
   if (!leftClick)
   {
@@ -1498,7 +1467,7 @@ int PacketHandler::use_entity(User* user)
           if ((*it)->health <= 0)
           {
             Packet pkt;
-            pkt << (int8_t)PACKET_ENTITY_STATUS << (int32_t)(*it)->UID << (int8_t)3;
+            pkt << (int8_t)PACKET_OUT_ENTITY_STATUS << (int32_t)(*it)->UID << (int8_t)3;
             (*it)->sendOthers(pkt);
           }
           break;
@@ -1523,55 +1492,43 @@ int PacketHandler::use_entity(User* user)
 
 
 // Serverlist ping (http://wiki.vg/Server_List_Ping)
-int PacketHandler::ping(User* user)
-{
-  //Read the new magic field in the 1.4 protocol
-  int8_t magic;
-  user->buffer >> magic;  
-  user->buffer.removePacket();
-  
+int PacketHandler::server_list_ping(User* user)
+{  
   //Reply with server info
   std::string line;
+  Packet pkt;
 
-  //Insert \1 instead of null char \0, then replace it later
-  line = "§1\1" +
-        my_itoa(PROTOCOL_VERSION) + "\1" +
-        MINECRAFT_VERSION + "\1" +
-        ServerInstance->config()->sData("system.server_name") + "\1" +
-        my_itoa(ServerInstance->getLoggedUsersCount()) + "\1" +
-        my_itoa(ServerInstance->config()->iData("system.user_limit"));
-  //Replacing \1 with \0
-  for(unsigned int i = 0; i < line.size();i++)
-  {
-    if(line[i] == '\1')
-    {
-      line[i] = '\0';
-    }
-  }
-  user->kick(line);
+  line = "{ \"version\": {\"name\": \""+MINECRAFT_VERSION+"\", \"protocol\": "+my_itoa(PROTOCOL_VERSION)+" },\n"+
+        "\"players\": {"+
+          "\"max\": "+my_itoa(ServerInstance->config()->iData("system.user_limit"))+","+
+          "\"online\": "+my_itoa(ServerInstance->getLoggedUsersCount())+
+        " },"+
+        "\"description\": {\"text\": \""+ServerInstance->config()->sData("system.server_name")+"\" }"+
+      "}";
+
+  LOG2(DEBUG, line);
+  pkt << (uint8_t)0 << line;
+
+  user->writePacket(pkt);
 
   return PACKET_OK;
 }
 
-
-int PacketHandler::respawn(User* user)
+int PacketHandler::ping(User* user)
 {
-  if (!user->buffer.haveData(10))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
-  int32_t dimension;
-  int8_t difficulty,creative;
-  int16_t height;
-  std::string level_type;
 
-  user->buffer >> dimension >> difficulty >> creative >> height >> level_type;
-  user->dropInventory();
-  user->respawn();
-  user->buffer.removePacket();
+  uint64_t value;
+  user->buffer >> value; 
+  
+  std::string line;
+  Packet pkt;
+
+  pkt << (uint8_t)1 << value;
+
+  user->writePacket(pkt);
+
   return PACKET_OK;
 }
-
 
 //Sent when right clicking blocks without placing, interact?
 int PacketHandler::block_change(User* user)
@@ -1581,22 +1538,31 @@ int PacketHandler::block_change(User* user)
 
   user->buffer >> x >> y >> z >> type >> meta;
   //printf("block change %d:%d:%d type %d meta %d\r\n",x,y,z, type,meta);
-  user->buffer.removePacket();
+
   return PACKET_OK;
 }
 
 
 Packet& Packet::operator<<(const std::string& str)
 {
-  writeUCS16String(str);
-
+  writeString(str);
   return *this;
 }
 
 Packet& Packet::operator>>(std::string& str)
 {
-  str = readUCS16String();
+  str = readString();
+  return *this;
+}
 
+Packet& Packet::operator<<(const MS_VarInt& varint)
+{
+  writeVarInt(static_cast<int64_t>(varint));
+  return *this;
+}
+Packet& Packet::operator>>(MS_VarInt& varint)
+{
+  varint.val = readVarInt();
   return *this;
 }
 
@@ -1610,8 +1576,9 @@ Packet& Packet::operator<<(const Packet& other)
 
 void Packet::writeString(const std::string& str)
 {
-  uint16_t lenval = htons(str.size());
-  addToWrite(reinterpret_cast<const uint8_t*>(&lenval), 2);
+  MS_VarInt len;
+  len.val = str.size();
+  *this << len;
   addToWrite(reinterpret_cast<const uint8_t*>(str.data()), str.length());
 }
 
@@ -1619,14 +1586,15 @@ std::string Packet::readString()
 {
   std::string str;
 
-  if (haveData(2))
+  if (haveData(1))
   {
-    int16_t lenval = 0;
+    MS_VarInt lenval;
     *this >> lenval;
+    uint16_t len = (uint16_t)static_cast<int64_t>(lenval);
 
-    if (lenval && haveData(lenval))
+    if (len && haveData(len))
     {
-      for (size_t i = 0; i < uint16_t(lenval); ++i)
+      for (size_t i = 0; i < uint16_t(len); ++i)
         str += m_readBuffer[m_readPos++];
     }
   }
@@ -1634,56 +1602,17 @@ std::string Packet::readString()
   return str;
 }
 
-void Packet::writeUCS16String(const std::string& str)
-{
-  std::vector<uint16_t> result;
-  makeUCS2MessageFromUTF8(str, result);
-
-  (*this)<<(int16_t)result.size();
-
-  for (size_t i = 0;  i < result.size(); ++i)
-    (*this)<<(int16_t)result[i];
-}
-
-std::string Packet::readUCS16String()
-{
-  std::string str;
-  if (haveData(2))
-  {
-    uint16_t lenval = 0;
-    *this >> (int16_t&)lenval;
-
-    if (lenval && haveData(2 * lenval)) // We ASSUME that every character takes 2 bytes. DANGEROUS.
-    {
-      unsigned char buf[2];
-      t_codepoint ccp;
-
-      for (size_t i = 0;  i < lenval; ++i)
-      {
-        buf[0] = m_readBuffer[m_readPos++];
-        buf[1] = m_readBuffer[m_readPos++];
-
-        codepointToUTF8(((unsigned int)(buf[0]) << 8) | ((unsigned int)(buf[1])), &ccp);
-        str += std::string(ccp.c);
-      }
-    }
-  }
-  return str;
-}
-
 void Packet::writeVarInt(int64_t varint)
 {
-  do{
-    uint8_t byte = 0;
-    if(varint > 128)
-      byte |= 0x80;
-
-    byte |= (varint & 0x7F);
-
+  uint8_t byte = 0;
+  while(varint > 127)
+  {
+    byte = (varint & 0x7f) | 0x80;
     write(&byte, 1);
-
-    varint = varint >> 7;
-  }while(varint != 0);
+    varint >>= 7;
+  }
+  byte = (uint8_t)varint;
+  write(&byte, 1);
 }
 
 int64_t Packet::readVarInt()
@@ -1694,11 +1623,68 @@ int64_t Packet::readVarInt()
 
   uint8_t byte;
   do{
-    if(read(&byte, 1) != 1)
-      // silent fail
+    if (read(&byte, 1) != 1) {
+      // silent fail? not anymore
+      throw std::logic_error("readVarInt");
       return 0;
-    ret += (byte & 0x7F) << (7*byte_idx);
+    }
+    ret += (byte & 0x7F) << (7*byte_idx++);
   }while(byte & 0x80);
 
   return ret;
 }
+
+
+void Packet::writePacket(const Packet& p, uint16_t compression)
+  {
+    MS_VarInt datalen;
+    datalen.val = p.m_writeBuffer.end()-p.m_writeBuffer.begin();
+
+    if (compression)
+    {
+      if (datalen > compression) 
+      {
+        uint8_t* tempBuf = new uint8_t[(uint32_t)datalen+16];
+        uint8_t* inBuf = new uint8_t[(uint32_t)datalen];
+
+        // Read the writebuffer to a continuous buffer
+        std::copy(p.m_writeBuffer.begin(), p.m_writeBuffer.end(), inBuf);
+
+        // Compress the buffer data
+        uLongf written = (uint32_t)datalen+16;
+        compress(tempBuf, &written, inBuf, (uint32_t)datalen);
+
+        // We have to get the length of the uncompressed data
+        Packet pkt_len;
+        pkt_len << datalen;
+        
+        // Compressed packet length is the uncompressed length varint len + compressed data len
+        MS_VarInt compressedLen;
+        compressedLen.val = pkt_len.m_writeBuffer.size() + written;
+
+        // Write the total packet length, uncompressed length and the compressed data
+        Packet packetOut;
+        packetOut << compressedLen << datalen;
+        packetOut.write(tempBuf, written);
+        addToWrite(packetOut);
+        delete[] tempBuf;
+        delete[] inBuf;
+      }
+      else
+      {
+        // If data is uncompressed, set uncompressed size to "0"
+        datalen.val ++;
+        *this << datalen;
+        datalen.val = 0;
+        *this << datalen;
+        addToWrite(p);      
+      }
+    }
+    else {
+      // Write without the compress field
+      MS_VarInt len;
+      len.val = p.m_writeBuffer.end()-p.m_writeBuffer.begin();
+      *this << len;
+      addToWrite(p);
+    }
+  }

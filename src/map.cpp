@@ -974,16 +974,12 @@ bool Map::sendBlockChange(int x, int y, int z, int16_t type, char meta)
     return false;
   }
 
-  Packet pkt;
-
-  pkt << (int8_t)PACKET_BLOCK_CHANGE << (int32_t)x << (int8_t)y << (int32_t)z << (int16_t)type << (int8_t)meta;
-
-  it->second->sendPacket(pkt);
+  it->second->sendPacket(Protocol::blockChange(x, y, z, type, meta));
 
   return true;
 }
 
-bool Map::sendNote(int x, int y, int z, char instrument, char pitch)
+bool Map::sendNote(int x, int y, int z, char instrument, char pitch, int16_t blocktype)
 {
   const ChunkMap::const_iterator it = chunks.find(Coords(blockToChunk(x), blockToChunk(z)));
 
@@ -991,13 +987,31 @@ bool Map::sendNote(int x, int y, int z, char instrument, char pitch)
   {
     return false;
   }
+  std::string soundEffect;
+  switch (instrument)
+  {
+    case INSTRUMENT_BASS:
+      soundEffect = "note.bass";
+    break;
+    case INSTRUMENT_SNARE:
+      soundEffect = "note.snare";
+    break;
+    case INSTRUMENT_STICK:
+      soundEffect = "note.hat";
+    break;
+    case INSTRUMENT_BASSDRUM:
+      soundEffect = "note.bd";
+    break;
+    case INSTRUMENT_HARP:
+      soundEffect = "note.harp";
+    break;
 
-  Packet pkt;
+  }
+  const uint8_t pitchToEffectPitch[25] = {31, 33, 35, 38, 39, 42, 44, 46, 50, 53, 57, 60, 63, 
+                                          66, 69, 75, 79, 83, 88, 94, 101, 107, 113, 120, 126};
 
-  pkt << (int8_t)PACKET_BLOCK_ACTION << (int32_t)x << (int16_t)y << (int32_t)z << (int8_t)instrument << (int8_t)pitch;
-
-  it->second->sendPacket(pkt);
-
+  it->second->sendPacket(Protocol::blockAction(x,y,z,instrument,pitch,blocktype));
+  it->second->sendPacket(Protocol::namedSoundEffect(soundEffect, x,y,z,100.0f,pitchToEffectPitch[pitch]));
   return true;
 }
 
@@ -1021,10 +1035,18 @@ bool Map::sendPickupSpawn(spawnedItem item)
 
   it->second->items.push_back(storedItem);
 
-  Packet pkt;
-  pkt << Protocol::pickupSpawn(item.EID, item.item, item.count, item.health,item.pos.x(), item.pos.y(),item.pos.z());
-  
-  it->second->sendPacket(pkt);
+  MetaData meta;
+  MetaDataElemByte* entity_attributes = new MetaDataElemByte(0,0x00);
+  meta.set(entity_attributes);
+
+  MetaDataElemShort* entity_attributes_2 = new MetaDataElemShort(1,300);
+  meta.set(entity_attributes_2);
+
+  MetaDataElemSlot* entity_item_type = new MetaDataElemSlot(10, Item(item.item, item.count, item.health));
+  meta.set(entity_item_type);
+
+  it->second->sendPacket(Protocol::spawnObject(item.EID, OBJECT_TYPE_ITEM_STACK,item.pos.x(), item.pos.y(),item.pos.z(), 1, 0, 0, 0));
+  it->second->sendPacket(Protocol::entityMetadata(item.EID, meta));
 
   return true;
 }
@@ -1076,7 +1098,6 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
     return false;
   }
 
-  Packet  pkt;
   int32_t EID = Mineserver::generateEID();
   float   tempMult = 1.f - abs(user->pos.pitch / 90.f);
 
@@ -1120,10 +1141,8 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
                 (int)(sinf(-(user->pos.pitch / 90.f)) * 14000.f),
                 (int)(cos(-(user->pos.yaw / 360.f) * 2.f * M_PI) * cos(user->pos.pitch * (M_PI / 180.0f)) * 9000.f));
 
-  pkt << (int8_t)PACKET_ENTITY << (int32_t)EID 
-      << Protocol::addObject(EID,projID, pos.x(), pos.y(), pos.z(), user->UID,(int16_t)vel.x(),(int16_t)vel.y(),(int16_t)vel.z(),0,0);
-
-  user->sendAll(pkt);
+  user->sendAll(Protocol::entity(EID));
+  user->sendAll(Protocol::spawnObject(EID,projID, pos.x(), pos.y(), pos.z(), user->UID,(int16_t)vel.x(),(int16_t)vel.y(),(int16_t)vel.z(),0,0));
 
   //Add to simulation  
   ServerInstance->physics(user->pos.map)->addEntitySimulation(projID,
@@ -1728,25 +1747,25 @@ bool Map::sendMultiBlocks(std::set<vec>& blocks)
       }
     }
 
-    Packet packet, pC, pT, pM;
+    Packet packet;
     unsigned int offsetx = chunk_x << 4;
     unsigned int offsetz = chunk_z << 4;
 
-    packet << (int8_t) PACKET_MULTI_BLOCK_CHANGE << (int32_t) chunk_x << (int32_t) chunk_z << (int16_t) toRem.size();
+    // ToDo: Move to Protocol
+    packet << MS_VarInt((uint32_t)PACKET_OUT_MULTI_BLOCK_CHANGE) << (int32_t) chunk_x << (int32_t) chunk_z 
+           << MS_VarInt((uint32_t)toRem.size());
 
     for (std::set<vec>::const_iterator it = toRem.begin(); it != toRem.end(); ++it)
     {
       uint8_t block, meta;
       ServerInstance->map(m_number)->getBlock(it->x(), it->y(), it->z(), &block, &meta);
 
-      // Sending packet a uint16_t makes it assume int...
-      uint16_t coord = (((it->x() - offsetx) << 12) + ((it->z() - offsetz) << 8) + (it->y()));
-      int16_t* coord2 = (int16_t*)&coord;
+      uint8_t coord = ((it->x() - offsetx) << 4) + ((it->z() - offsetz));
 
-      pC << (int16_t)(*coord2);
-      pT << (int8_t) block;
-      pM << (int8_t) meta;
-
+      packet << coord;
+      packet << (uint8_t)it->y();
+      packet << MS_VarInt((uint32_t)( (block<<4) | (meta & 0xf) ));
+      
       std::set<vec>::iterator jt = blocks.find(*it);
       if (jt != blocks.end())
       {
@@ -1765,9 +1784,6 @@ bool Map::sendMultiBlocks(std::set<vec>& blocks)
     }
 
     it->second->sendPacket(packet);
-    it->second->sendPacket(pC);
-    it->second->sendPacket(pT);
-    it->second->sendPacket(pM);
   }
 
   return true;
@@ -1776,22 +1792,16 @@ bool Map::sendMultiBlocks(std::set<vec>& blocks)
 // Send chunk to user
 void Map::sendToUser(User* user, int x, int z, bool login)
 {
-  Packet* p;
-  if (login)
-  {
-    p = &user->loginBuffer;
-  }
-  else
-  {
-    p = &user->buffer;
-  }
+
+  Packet p;
+
   sChunk* chunk = loadMap(x, z);
   if (chunk == NULL)
   {
     return;
   }
-
-  uint8_t* mapdata = new uint8_t[98304*2+256];
+  const int mapdataLen = 98304*2+256;
+  uint8_t* mapdata = new uint8_t[mapdataLen];
   int32_t mapposx    = x;
   int32_t mapposz    = z;
 
@@ -1805,38 +1815,34 @@ void Map::sendToUser(User* user, int x, int z, bool login)
   
   //ToDo: now sending all 16 16x16 chunks, limit to only those with blocks.
   // Chunk
-  (*p) << (int8_t)PACKET_MAP_CHUNK << (int32_t)(mapposx) << (int32_t)(mapposz)
-       << (int8_t)1 /* Biome Data bool? */ << (int16_t)0xffff /* Enabled chunks 0..15 */
-       << (int16_t)0xffff /* Enabled additional data? in the enabled chunks */;
+  p << MS_VarInt((uint32_t)PACKET_OUT_MAP_CHUNK) << (int32_t)(mapposx) << (int32_t)(mapposz)
+       << (int8_t)1 /* Ground-Up Continuous */ << (int16_t)0xffff /* Enabled chunks 0..15 */;
 
 
-  memcpy(&mapdata[0], chunk->blocks, 32768*2);
-  memcpy(&mapdata[32768*2], chunk->data, 16384*2);
-  memcpy(&mapdata[(32768 + 16384)*2], chunk->blocklight, 16384*2);
-  memcpy(&mapdata[(32768 + 16384 + 16384)*2], chunk->skylight, 16384*2);
-  memcpy(&mapdata[(32768 + 16384 + 16384 + 16384)*2], chunk->addblocks, 16384*2);
+  //ToDo: Do this when loading the map instead
+  for (int i = 0; i < 65536; i++) {
+    mapdata[i << 1] = ((chunk->blocks[i] & 0xf) << 4) | (i & 4 ? chunk->data[i>>1]>>4 : chunk->data[i>>1]&0xf);
+    mapdata[(i<<1)+1] = chunk->blocks[i]>>4;
+  }
+
+  memcpy(&mapdata[(65536)*2], chunk->blocklight, 16384*2);
+  memcpy(&mapdata[(65536 + 16384)*2], chunk->skylight, 16384*2);
+
   //Biome data
-  memset(&mapdata[(32768 + 16384 + 16384 + 16384 + 16384)*2], 0, 256);
+  memset(&mapdata[(65536 + 16384 + 16384)*2], 0, 256);
 
 
-  uLongf written = 98304*2+256;
-  uint8_t* buffer = new uint8_t[written];
+  p << MS_VarInt((uint32_t)mapdataLen);
+  p.addToWrite(mapdata, mapdataLen);
 
-  // Compress data with zlib deflate
-  compress(buffer, &written, mapdata, 98304*2+256);
-
-  (*p) << (int32_t)written;
-  (*p).addToWrite(buffer, written);
+  user->writePacket(p);
 
   //Push sign data to player
   for (size_t i = 0; i < chunk->signs.size(); ++i)
   {
-    (*p) << (int8_t)PACKET_SIGN << chunk->signs[i]->x << (int16_t)chunk->signs[i]->y << chunk->signs[i]->z;
-    (*p) << chunk->signs[i]->text1 << chunk->signs[i]->text2 << chunk->signs[i]->text3 << chunk->signs[i]->text4;
+    user->writePacket(Protocol::updateSign(chunk->signs[i]->x, chunk->signs[i]->y, chunk->signs[i]->z,
+      chunk->signs[i]->text1,chunk->signs[i]->text2, chunk->signs[i]->text3, chunk->signs[i]->text4));
   }
-
-
-  delete[] buffer;
 
   delete[] mapdata;
 }

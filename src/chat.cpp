@@ -244,7 +244,7 @@ void Chat::handleChatMsg(User* user, std::string msg, const std::string& timeSta
 
 bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
 {
-  Packet pkt = Protocol::chatMsg(R"({"text":")"+json_esc(msg)+"\"}");
+  Packet pkt = Protocol::chatMsg("{\"text\": \""+json_esc(msg)+"\"}");
 
   switch (action)
   {
@@ -253,7 +253,7 @@ bool Chat::sendMsg(User* user, std::string msg, MessageTarget action)
     break;
 
   case USER:
-    user->buffer.addToWrite(pkt);
+    user->writePacket(pkt);
     break;
 
   case ADMINS:
