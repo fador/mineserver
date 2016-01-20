@@ -431,15 +431,24 @@ bool Physics::update()
         toRem.push_back(pos);
         break;
       }
-      if ((isWaterBlock(newblock) && isWaterBlock(block)) || (isLavaBlock(newblock) && isLavaBlock(block)) || (isLiquidBlock(block) && mayFallThrough(newblock)))
+      if ((isWaterBlock(newblock) && isWaterBlock(block)) // New or old block is water
+          || (isLavaBlock(newblock) && isLavaBlock(block)) // New or ols block is lava
+          || (isLiquidBlock(block) && mayFallThrough(newblock)))
       {
+        // Falling non-liquid block
         if (falling && !isLiquidBlock(newblock))
         {
+          // Move block down one and replace old position with air
           map->setBlock(local, block, meta);
           changed.insert(local);
           map->setBlock(pos, BLOCK_AIR, 0);
+
+          // For blockchange packet
           changed.insert(pos);
+
+          // Remove old position from simulation
           toRem.push_back(pos);
+          // Add new position of the block to the simulation
           toAdd.push_back(local);
           used = true;
           continue;
@@ -487,10 +496,13 @@ bool Physics::update()
           continue;
         }
 
+        // if the new block is not liquid
         if (!isLiquidBlock(newblock))
         {
+          // If we are not falling
           if (!falling)
           {
+            // At lowest liquid level, we cannot spread anymore
             if ((isWaterBlock(block) && meta == 7) || (isLavaBlock(block) && meta >= 3))
             {
               toRem.push_back(pos);
@@ -498,22 +510,17 @@ bool Physics::update()
             }
           }
           // We are spreading onto dry area.
-          newmeta = 7;
+
+          // Reduce liquid level by one (0 = max level)
+          newmeta = ++meta;
           map->setBlock(local, block, newmeta);
           changed.insert(local);
-          meta++;
-          if (meta < 8)
-          {
-            map->setBlock(pos, block, meta);
-            changed.insert(pos);
+
+          // If we still have range to spread
+          if (meta < 8) {
+            // Add the new block back to the simulation for spreading
+            toAdd.push_back(local);
           }
-          else
-          {
-            map->setBlock(pos, BLOCK_AIR, 0);
-            changed.insert(pos);
-            toRem.push_back(pos);
-          }
-          toAdd.push_back(local);
           used = true;
           continue;
         }
