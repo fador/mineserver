@@ -793,7 +793,7 @@ bool User::sendOthers(const Packet& packet)
 {
   for (std::set<User*>::const_iterator it = ServerInstance->users().begin(); it != ServerInstance->users().end(); ++it)
   {
-    if ((*it)->fd != this->fd && (*it)->logged && !((*it)->dnd && packet.firstwrite() == PACKET_OUT_CHAT_MESSAGE))
+    if ((*it)->fd != this->fd && (*it)->logged && (packet.firstwrite() != PACKET_OUT_CHAT_MESSAGE || !((*it)->dnd)))
     {
       (*it)->writePacket(packet);
     }
