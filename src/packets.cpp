@@ -265,8 +265,7 @@ int PacketHandler::client_status(User* user)
 int PacketHandler::creative_inventory(User *user)
 {
     /// TODO: use this somewhere!
-    if (!user->buffer.haveData(4))
-        return PACKET_NEED_MORE_DATA;
+
 
     int16_t slot, itemID;
 
@@ -274,20 +273,21 @@ int PacketHandler::creative_inventory(User *user)
 
     if((uint16_t)itemID == 0xffff) return PACKET_OK;
 
-    if (!user->buffer.haveData(5))
-        return PACKET_NEED_MORE_DATA;
 
     int8_t count;
     int16_t meta;
 
     user->buffer >> count >> meta;
 
-
     int16_t enchantment_data_len;
     user->buffer >> enchantment_data_len;
 
     if(enchantment_data_len != 0xffff) {
         LOG2(INFO, "Got enchantment data, ignoring...");
+    }
+
+    if (!user->buffer) {
+      return PACKET_NEED_MORE_DATA;
     }
 
     Item& it = user->inv[slot];
@@ -518,10 +518,6 @@ int PacketHandler::confirm_transaction(User* user)
 
 int PacketHandler::click_window(User* user)
 {
-  if (!user->buffer.haveData(10))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
   int8_t windowID = 0;
   int16_t slot = 0;
   int8_t rightClick = 0;
@@ -540,11 +536,13 @@ int PacketHandler::click_window(User* user)
     }
     user->buffer >> itemCount >> itemUses;
     //if(Item::isEnchantable(itemID)) {
+    /*
     int16_t enchantment_data_len;
     user->buffer >> enchantment_data_len;
     if(enchantment_data_len >= 0) {
       LOG2(INFO, "Got enchantment data, ignoring...");
     }
+    */
     //}
   }
 
@@ -956,10 +954,6 @@ int PacketHandler::player_digging(User* user)
 
 int PacketHandler::player_block_placement(User* user)
 {
-  if (!user->buffer.haveData(12))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
   uint64_t position;
   int16_t y = 0;
   int8_t direction = 0;
