@@ -1255,16 +1255,13 @@ bool Inventory::onwindowOpen(User* user, int8_t type, int32_t x, int32_t y, int3
   inv.push_back(newInv);
   user->isOpenInv = true;
 
-  Packet pkt;
-
   //Chest opening animation
   switch (type)
   {
     case WINDOW_CHEST:
     case WINDOW_LARGE_CHEST:
-      pkt << Protocol::blockAction(x,y,z,1,1,BLOCK_CHEST)
-          << Protocol::namedSoundEffect("random.chestopen", x<<3, y<<3, z<<3, 1.0, 63);
-      user->sendAll(pkt);
+      user->sendAll(Protocol::blockAction(x,y,z,1,1,BLOCK_CHEST));
+      user->sendAll(Protocol::namedSoundEffect("random.chestopen", x<<3, y<<3, z<<3, 1.0, 63));
       break;
   }
 
@@ -1323,9 +1320,8 @@ bool Inventory::onwindowClose(User* user, int8_t type, int32_t x, int32_t y, int
             }
             if(type == WINDOW_CHEST || type == WINDOW_LARGE_CHEST)
             {
-              Packet pkt = Protocol::blockAction(x,y,z,1,0,BLOCK_CHEST);
-                     pkt << Protocol::namedSoundEffect("random.chestclosed", x<<3, y<<3, z<<3, 1.0, 63);
-              user->sendAll(pkt);
+              user->sendAll(Protocol::blockAction(x,y,z,1,0,BLOCK_CHEST));
+              user->sendAll(Protocol::namedSoundEffect("random.chestclosed", x<<3, y<<3, z<<3, 1.0, 63));
             }
 
             inv.erase(inv.begin() + i);
