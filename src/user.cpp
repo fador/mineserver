@@ -245,7 +245,7 @@ bool User::sendLoginInfo()
   writePacket(Protocol::joinGame(UID));
   setGameMode(gamemode);
   
-  spawnOthers();
+  
 
   // Send spawn position
   writePacket(Protocol::spawnPosition(int(pos.x), int(pos.y + 2), int(pos.z)));
@@ -286,13 +286,16 @@ bool User::sendLoginInfo()
     inv[i].sendUpdate();
   }
 
+  spawnOthers();
+
+  sethealth(health);
+
   spawnUser((int32_t)pos.x * 32, (int32_t)((pos.y + 2) * 32), (int32_t)pos.z * 32);
 
   // Teleport player (again)
   teleport(pos.x, pos.y + 2, pos.z);
 
-  sethealth(health);
-  logged = true;
+
 
   //ServerInstance->chat()->sendMsg(this, nick + " connected!", Chat::ALL);
 
@@ -1147,8 +1150,8 @@ bool User::spawnUser(int x, int y, int z)
   sChunk* chunk = ServerInstance->map(pos.map)->getChunk(blockToChunk(x >> 5), blockToChunk(z >> 5));
   if (chunk != NULL)
   {
-    chunk->sendPacket(pkt, this);
     chunk->sendPacket(playerListAddPkt);
+    chunk->sendPacket(pkt, this);    
   }
   return true;
 }
@@ -1160,8 +1163,8 @@ bool User::spawnOthers()
     //    if ((*it)->logged && (*it)->UID != this->UID && (*it)->nick != this->nick)
     if ((*it)->logged)
     {
-      this->writePacket(Protocol::spawnPlayer((*it)->UID, (*it)->uuid_raw, (*it)->nick, (float)(*it)->health, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, (*it)->pos.yaw,(*it)->pos.pitch, 0));
       this->writePacket(Protocol::PlayerListItemAddSingle((*it)->uuid_raw, (*it)->nick, (*it)->gamemode, 10));
+      this->writePacket(Protocol::spawnPlayer((*it)->UID, (*it)->uuid_raw, (*it)->nick, (float)(*it)->health, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, 0, 0, 0));      
       for (int b = 0; b < 5; b++)
       {
         const int n = b == 0 ? (*it)->curItem + 36 : 9 - b;
