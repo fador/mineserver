@@ -929,7 +929,22 @@ void Mineserver::timed_10s()
     m_map[i]->checkGenTrees();
   }
 
-  // TODO: Run garbage collection for chunk storage dealie?
+  // Loop every loaded chunk and release unused  
+  for (Map* map : m_map)
+  {
+    std::vector<vec> mapsToRemove;
+    for (auto it : map->chunks)
+    {      
+      if (time(0) - it.second->lastused > 60 && it.second->users.empty())
+      {
+        mapsToRemove.push_back(vec(it.first.first, 0, it.first.second));
+      }
+    }
+    for (vec rem : mapsToRemove)
+    {
+      map->releaseMap(rem.x(), rem.z());
+    }
+  }
 }
 
 bool Mineserver::stop()
