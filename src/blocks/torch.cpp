@@ -144,6 +144,29 @@ bool BlockTorch::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int
     revertBlock(user, x, y, z, map);
     return true;
   }
+  if (direction == 0)
+  {
+    if (ServerInstance->map(map)->getBlock(x+1, y, z, &oldblock, &oldmeta) && oldblock != BLOCK_AIR)
+    {
+      direction = 2;
+    }
+    else if (ServerInstance->map(map)->getBlock(x, y, z+1, &oldblock, &oldmeta) && oldblock != BLOCK_AIR)
+    {
+      direction = 4;
+    }
+    else if (ServerInstance->map(map)->getBlock(x-1, y, z, &oldblock, &oldmeta) && oldblock != BLOCK_AIR)
+    {
+      direction = 1;
+    }
+    else if (ServerInstance->map(map)->getBlock(x, y, z-1, &oldblock, &oldmeta) && oldblock != BLOCK_AIR)
+    {
+      direction = 3;
+    }
+    else
+    {
+      direction = 5;
+    }
+   }
 
   ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, direction);
   ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
