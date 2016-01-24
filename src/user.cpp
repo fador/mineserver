@@ -148,10 +148,13 @@ User::~User()
   this->buffer.reset();
   this->bufferCrypted.reset();
 
+  // Create a temp array since the mapKnown is altered by the delKnown() function
+  std::vector<vec> tempMapKnown = mapKnown;
+
   // Remove all known chunks
-  for (uint32_t i = 0; i < mapKnown.size(); i++)
+  for (uint32_t i = 0; i < tempMapKnown.size(); i++)
   {
-    delKnown(mapKnown[i].x(), mapKnown[i].z());
+    delKnown(tempMapKnown[i].x(), tempMapKnown[i].z());
   }
 
   std::set<User*>::iterator user_set_it = ServerInstance->users().find(this);
@@ -162,22 +165,6 @@ User::~User()
 
   if (logged)
   {
-    for (int mapx = -viewDistance + curChunk.x(); mapx <= viewDistance + curChunk.x(); mapx++)
-    {
-      for (int mapz = -viewDistance + curChunk.z(); mapz <= viewDistance + curChunk.z(); mapz++)
-      {
-        sChunk* chunk = ServerInstance->map(pos.map)->getChunk(mapx, mapz);
-        if (chunk != NULL)
-        {
-          chunk->users.erase(this);
-          if (chunk->users.size() == 0)
-          {
-            ServerInstance->map(pos.map)->releaseMap(mapx, mapz);
-          }
-        }
-      }
-    }
-
     ServerInstance->chat()->sendMsg(this, this->nick + " disconnected!", Chat::OTHERS);
     //LOG2(WARNING, this->nick + " removed!");
     this->saveData();
@@ -188,25 +175,6 @@ User::~User()
 
     pkt = Protocol::PlayerListItemRemoveSingle(this->uuid_raw);
     this->sendOthers(pkt);
-
-    // Loop every loaded chunk to make sure no user pointers are left!
-
-    for (ChunkMap::const_iterator it = ServerInstance->map(pos.map)->chunks.begin(); it != ServerInstance->map(pos.map)->chunks.end(); )
-    {
-      if((user_set_it = it->second->users.find(this)) != it->second->users.end())
-        it->second->users.erase(user_set_it);
-
-      if (it->second->users.empty())
-      {
-        ChunkMap::const_iterator jt = it++;
-        ServerInstance->map(pos.map)->releaseMap(jt->first.first, jt->first.second);
-      }
-      else
-      {
-        ++it;
-      }
-    }
-
 
     //If still holding something, dump the items to ground
     if (inventoryHolding.getType() != -1)
