@@ -74,3 +74,23 @@ bool BlockWood::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int3
   return false;
 }
 
+bool BlockWood::spawnBlockItem(const int32_t x, const int16_t y, const int32_t z, int map, const uint8_t block, const uint8_t meta)
+{
+  DropPtr drop;
+  int16_t item; uint8_t count, item_meta;
+  if (block == BLOCK_LOG)
+  {
+    item_meta = meta&3;
+  }
+  else if (block == BLOCK_LOG2)
+  {
+    item_meta = meta&1;
+  }
+  BLOCKDROPS[block]->getDrop(item, count, item_meta);
+  if (count)
+  {
+    ServerInstance->map(map)->createPickupSpawn(x, y, z, item, count, item_meta, NULL);
+    return true;
+  }
+  return false;
+}
