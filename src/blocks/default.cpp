@@ -53,7 +53,7 @@ bool BlockDefault::onBroken(User* user, int8_t status, int32_t x, int16_t y, int
     revertBlock(user, x, y, z, map);
     return true;
   }
-  if (block != BLOCK_WOOL && block != BLOCK_WOOD && block != BLOCK_STEP)
+  if (block != BLOCK_WOOL && block != BLOCK_LOG && block != BLOCK_STEP)
   {
     // Only Cloth, Wood and Step have colour metadata
     meta = 0;

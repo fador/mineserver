@@ -37,7 +37,7 @@ different blocks. */
 class BlockWood: public BlockBasic
 {
 public:
-  inline bool affectedBlock(int block) const { return block == BLOCK_WOOD; }
+  inline bool affectedBlock(int block) const { return block == BLOCK_LOG || block == BLOCK_LOG2; }
 
   bool onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction);
 };

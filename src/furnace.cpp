@@ -215,7 +215,7 @@ void Furnace::consumeFuel()
   case ITEM_STICK:
     fuelTime = 5;
     break;
-  case BLOCK_WOOD:
+  case BLOCK_LOG:
     fuelTime = 15;
     break;
   case BLOCK_WORKBENCH:

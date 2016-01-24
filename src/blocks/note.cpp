@@ -104,7 +104,7 @@ int BlockNote::getInstrument(int32_t x, int16_t y, int32_t z, int map)
   ServerInstance->map(map)->getBlock(x, y, z, &block, &meta);
   switch (block)
   {
-  case BLOCK_WOOD:
+  case BLOCK_LOG:
   case BLOCK_PLANK:
     return INSTRUMENT_BASS;
   case BLOCK_SAND:

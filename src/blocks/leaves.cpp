@@ -44,7 +44,7 @@ bool BlockLeaves::onBroken(User* user, int8_t status, int32_t x, int16_t y, int3
 
 void BlockLeaves::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
-  if ( (oldblock != BLOCK_WOOD && oldblock != BLOCK_LEAVES)   ||
+  if ( (oldblock != BLOCK_LOG && oldblock != BLOCK_LEAVES)   ||
        std::find_if(decaying.begin(), decaying.end(), DecayFinder(x,y,z,map)) != decaying.end() )
   {
     return;
@@ -59,7 +59,7 @@ void BlockLeaves::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int
 
           ServerInstance->map(map)->getBlock(x + xi, y + yi, z + zi, &block, &meta);
 
-          if (block == BLOCK_WOOD) return;
+          if (block == BLOCK_LOG) return;
         }
 
   decaying.insert(Decay(time(0), x, y, z, map));

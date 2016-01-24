@@ -1496,7 +1496,7 @@ int16_t Inventory::itemHealth(int16_t itemID, int8_t block, bool& rightUse)
   case ITEM_STONE_AXE:
   case ITEM_IRON_AXE:
   case ITEM_DIAMOND_AXE:
-    if (block == BLOCK_WOOD || block == BLOCK_PLANK)
+    if (block == BLOCK_LOG || block == BLOCK_PLANK)
     {
       rightUse = true;
     }

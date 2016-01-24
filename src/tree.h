@@ -77,7 +77,7 @@ class Trunk : public ITree
 {
 public:
   Trunk(int32_t x, int32_t y, int32_t z, int map, char meta = 0)
-  : ITree(x, y, z, map, BLOCK_WOOD, meta)
+  : ITree(x, y, z, map, BLOCK_LOG, meta)
   {
     update();
   }
