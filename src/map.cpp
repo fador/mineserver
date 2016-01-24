@@ -1821,7 +1821,7 @@ void Map::sendToUser(User* user, int x, int z, bool login)
 
   //ToDo: Do this when loading the map instead
   for (int i = 0; i < 65536; i++) {
-    mapdata[i << 1] = ((chunk->blocks[i] & 0xf) << 4) | (i & 4 ? chunk->data[i>>1]>>4 : chunk->data[i>>1]&0xf);
+    mapdata[i << 1] = ((chunk->blocks[i] & 0xf) << 4) | (i & 1 ? chunk->data[i>>1]>>4 : chunk->data[i>>1]&0xf);
     mapdata[(i<<1)+1] = chunk->blocks[i]>>4;
   }
 
