@@ -58,6 +58,7 @@
 #include "blocks/blockfurnace.h"
 #include "blocks/workbench.h"
 #include "blocks/wood.h"
+#include "blocks/planks.h"
 #include "blocks/redstone.h"
 #include "blocks/redstoneutil.h"
 #include "blocks/pumpkin.h"
@@ -132,6 +133,7 @@ void Plugin::init()
   m_block_CBs.push_back(BlockBasicPtr(new BlockRedstone));
   m_block_CBs.push_back(BlockBasicPtr(new BlockRedstoneUtil));
   m_block_CBs.push_back(BlockBasicPtr(new BlockWood));
+  m_block_CBs.push_back(BlockBasicPtr(new BlockPlanks));
   m_block_CBs.push_back(BlockBasicPtr(new BlockFalling));
   m_block_CBs.push_back(BlockBasicPtr(new BlockTorch));
   m_block_CBs.push_back(BlockBasicPtr(new BlockPlant));

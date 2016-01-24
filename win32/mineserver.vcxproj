@@ -26,6 +26,7 @@
     <ClCompile Include="..\src\blocks\leaves.cpp" />
     <ClCompile Include="..\src\blocks\liquid.cpp" />
     <ClCompile Include="..\src\blocks\note.cpp" />
+    <ClCompile Include="..\src\blocks\planks.cpp" />
     <ClCompile Include="..\src\blocks\plant.cpp" />
     <ClCompile Include="..\src\blocks\pumpkin.cpp" />
     <ClCompile Include="..\src\blocks\redstone.cpp" />
@@ -82,6 +83,7 @@
     <ClCompile Include="..\src\worldgen\nethergen.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\blocks\planks.h" />
     <ClInclude Include="..\src\chat.h" />
     <ClInclude Include="..\src\chunkmap.h" />
     <ClInclude Include="..\src\cliScreen.h" />
