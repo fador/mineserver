@@ -151,7 +151,7 @@ Packet Protocol::mobSpawn(int eid, int8_t type, double x, double y, double z, in
 {
   // Warning! This converts absolute double coordinates to absolute integer coordinates!
   Packet ret;
-  ret << (int8_t)PACKET_OUT_SPAWN_MOB << (int32_t)eid << (int8_t)type
+  ret << MS_VarInt((uint32_t)PACKET_OUT_SPAWN_MOB) << MS_VarInt((uint32_t)eid) << (int8_t)type
       << (int32_t)(x * 32) << (int32_t)(y * 32) << (int32_t)(z * 32)
       << (int8_t)yaw << (int8_t)pitch << (int8_t)head_yaw << (int16_t)0 
       << (int16_t)0 << (int16_t)0 << (int8_t)0 << (int8_t)0 << metadata;
