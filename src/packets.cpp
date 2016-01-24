@@ -1603,15 +1603,15 @@ std::string Packet::readString()
 
 void Packet::writeVarInt(int64_t varint)
 {
-  uint8_t byte = 0;
+  uint8_t out[10]; // 64bit variables should fit in this
+  uint8_t cur_byte = 0;
   while(varint > 127)
   {
-    byte = (varint & 0x7f) | 0x80;
-    write(&byte, 1);
+    out[cur_byte++] = (varint & 0x7f) | 0x80;
     varint >>= 7;
   }
-  byte = (uint8_t)varint;
-  write(&byte, 1);
+  out[cur_byte++] = (uint8_t)varint;
+  write(out, cur_byte);
 }
 
 int64_t Packet::readVarInt()
@@ -1674,9 +1674,8 @@ void Packet::writePacket(const Packet& p, uint16_t compression)
         // If data is uncompressed, set uncompressed size to "0"
         datalen.val ++;
         *this << datalen;
-        datalen.val = 0;
-        *this << datalen;
-        addToWrite(p);      
+        *this << (uint8_t)0;
+        addToWrite(p);
       }
     }
     else {
