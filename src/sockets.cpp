@@ -135,7 +135,7 @@ bool client_write(User *user)
       {
         LOG2(ERROR, "Error writing to client, tried to write " + dtos(buf.size()) + " bytes, code: " + dtos(ERROR_NUMBER));        
         user->logged = false;
-        ServerInstance->usersToRemove().insert(user);
+        delete user;
         return false;
       }
     }
@@ -187,7 +187,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
         LOG2(INFO, "Socket closed");
       }
       user->logged = false;
-      ServerInstance->usersToRemove().insert(user);
+      delete user;
       return;
     }
 
@@ -195,7 +195,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
     {
       LOG2(INFO, "Socket error");
       user->logged = false;
-      ServerInstance->usersToRemove().insert(user);
+      delete user;
       return;
     }
 
@@ -286,7 +286,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
               LOG2(INFO, "User " + user->nick + " disconnected normally");
             }
             user->logged = false;
-            ServerInstance->usersToRemove().insert(user);
+            delete user;
             return;
           }   
         }

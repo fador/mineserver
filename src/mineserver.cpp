@@ -774,18 +774,6 @@ void Mineserver::timed_200ms()
   // Run 200ms timer hook
   runAllCallback("Timer200");
 
-  //Remove any users pending removal
-  if(m_usersToRemove.size())
-  {
-    for (std::set<User*>::iterator it = m_usersToRemove.begin(); it != m_usersToRemove.end(); it++)
-    {
-      User* u = *it;
-      delete u;
-      u = 0;
-    }
-    m_usersToRemove.clear();
-  }
-
   // Alert any block types that care about timers
   for (size_t i = 0 ; i < plugin()->getBlockCB().size(); ++i)
   {
@@ -849,6 +837,18 @@ void Mineserver::timed_1s()
     }
   }
 
+  
+  //Remove any users pending removal
+  if(m_usersToRemove.size())
+  {
+    for (std::set<User*>::iterator it = m_usersToRemove.begin(); it != m_usersToRemove.end(); it++)
+    {
+      User* u = *it;
+      delete u;
+      u = 0;
+    }
+    m_usersToRemove.clear();
+  }
 
   for (std::vector<Map*>::size_type i = 0 ; i < m_map.size(); i++)
   {
