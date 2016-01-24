@@ -906,10 +906,7 @@ void Mineserver::timed_10s()
   if (m_saveInterval != 0 && time(0) - m_lastSave >= m_saveInterval)
   {
     //Save
-    for (std::vector<Map*>::size_type i = 0; i < m_map.size(); i++)
-    {
-      m_map[i]->saveWholeMap();
-    }
+    saveAll();
 
     m_lastSave = time(0);
   }
