@@ -68,8 +68,8 @@ bool BlockWorkbench::onPlace(User* user, int16_t newblock, int32_t x, int16_t y,
     return true;
   }
 
-  ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, direction);
-  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+  ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, 0);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);
   return false;
 }
 
