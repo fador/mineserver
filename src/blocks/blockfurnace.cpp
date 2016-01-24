@@ -70,23 +70,22 @@ bool BlockFurnace::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, i
 
   direction = user->relativeToBlock(x, y, z);
 
-  // Fix orientation
-
-  //switch (direction)
-  //{
-  //case BLOCK_EAST:
-  //  direction = BLOCK_SOUTH;
-  //  break;
-  //case BLOCK_BOTTOM:
-  //  direction = BLOCK_EAST;
-  //  break;
-  //case BLOCK_NORTH:
-  //  direction = BLOCK_NORTH;
-  //  break;
-  //case BLOCK_SOUTH:
-  //  direction = BLOCK_BOTTOM;
-  //  break;
-  //}
+  // Fix orientation  
+  switch (direction)
+  {
+  case BLOCK_EAST:
+    direction = 3;
+    break;
+  case BLOCK_BOTTOM:
+    direction = 4;
+    break;
+  case BLOCK_NORTH:
+    direction = 5;
+    break;
+  default:
+    direction = 2;
+    break;
+  }
 
   ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, direction);
   ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
