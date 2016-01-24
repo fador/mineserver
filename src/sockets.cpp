@@ -228,12 +228,14 @@ extern "C" void client_callback(int fd, short ev, void* arg)
         // Packet data has been received, call the function
         else
         {
+          // Store packetlen to be used in the parsing functions (replaced later if compression used..)
+          user->packetLen = (int32_t)packetLen;
           // Handle compressed incoming data
           if (user->compression)
           {
             MS_VarInt uncompressed_size;
             int32_t cur_pos = user->buffer.m_readPos;
-            user->buffer >> (MS_VarInt&)uncompressed_size;          
+            user->buffer >> (MS_VarInt&)uncompressed_size;
 
             // Hopefully a rare occasion when the packet size exceeds the compression threshold
             if (uncompressed_size != 0)
@@ -258,6 +260,9 @@ extern "C" void client_callback(int fd, short ev, void* arg)
               varint_len = 0;
               delete[] inbuffer;
               delete[] buffer;
+
+              // Replace the current packet length
+              user->packetLen = (int32_t)uncompressed_size;
             }
           }
           MS_VarInt action;

@@ -142,6 +142,7 @@ public:
   //Input buffer
   Packet buffer;
   Packet bufferCrypted;
+  int32_t packetLen;
   uint8_t gameState;
 
   static std::set<User*>& all();
