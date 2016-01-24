@@ -1059,7 +1059,7 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
     }
     break;
   case WINDOW_FURNACE:
-    user->writePacket(Protocol::openWindow(WINDOW_FURNACE,INVENTORYTYPE_FURNACE,"{\"text\": \""+json_esc("Furnace")+"\"}", 0));
+    user->writePacket(Protocol::openWindow(WINDOW_FURNACE,INVENTORYTYPE_FURNACE,"{\"text\": \""+json_esc("Furnace")+"\"}", 3));
 
     for (uint32_t i = 0; i < chunk->furnaces.size(); i++)
     {
