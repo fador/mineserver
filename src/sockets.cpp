@@ -77,6 +77,7 @@ static char* cpBUFCRYPT = reinterpret_cast<char*>(BUFCRYPT.data());
 
 bool client_write(User *user)
 {
+  if (user->deleting) return false;
   //If there is data in the output buffer, crypt it before writing
   if (!user->buffer.getWriteEmpty())
   {
@@ -135,7 +136,8 @@ bool client_write(User *user)
       {
         LOG2(ERROR, "Error writing to client, tried to write " + dtos(buf.size()) + " bytes, code: " + dtos(ERROR_NUMBER));        
         user->logged = false;
-        delete user;
+        user->deleting = true;
+        ServerInstance->usersToRemove().insert(user);
         return false;
       }
     }
@@ -158,6 +160,7 @@ bool client_write(User *user)
 extern "C" void client_callback(int fd, short ev, void* arg)
 {
   User* user = reinterpret_cast<User*>(arg);
+  if (user->deleting) return;
 
   if (ev & EV_READ)
   {

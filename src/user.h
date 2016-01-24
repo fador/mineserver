@@ -96,6 +96,7 @@ public:
   uint8_t action;
   bool waitForData;
   uint32_t write_err_count;
+  bool deleting;
   bool logged;
   bool muted;
   bool dnd;

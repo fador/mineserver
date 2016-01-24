@@ -76,6 +76,7 @@ User::User(int sock, uint32_t EID)
   this->compression     = 0;
   this->packetsPerSecond = 0;
   this->gamemode        = GameMode::Survival;
+  this->deleting        = false;
 
   this->m_currentItemSlot = 0;
   this->inventoryHolding  = Item(this, -1);
@@ -126,10 +127,12 @@ User::~User()
 {
   if (this->UID != SERVER_CONSOLE_UID)
   {
+    event_del(getReadEvent());
     event_free(getReadEvent());
   }
   if (this->UID != SERVER_CONSOLE_UID)
   {
+    event_del(getWriteEvent());
     event_free(getWriteEvent());
   }
 
