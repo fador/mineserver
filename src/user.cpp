@@ -1163,8 +1163,7 @@ bool User::spawnOthers()
 {
   for (std::set<User*>::const_iterator it = ServerInstance->users().begin(); it != ServerInstance->users().end(); ++it)
   {
-    //    if ((*it)->logged && (*it)->UID != this->UID && (*it)->nick != this->nick)
-    if ((*it)->logged)
+    if ((*it)->logged && (*it)->UID != this->UID)
     {
       this->writePacket(Protocol::PlayerListItemAddSingle((*it)->uuid_raw, (*it)->nick, (*it)->gamemode, 10));
       this->writePacket(Protocol::spawnPlayer((*it)->UID, (*it)->uuid_raw, (*it)->nick, (float)(*it)->health, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, 0, 0, 0));      
