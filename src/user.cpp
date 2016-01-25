@@ -1280,6 +1280,7 @@ bool User::sethealth(int userHealth)
       return false;
     }
     sendAll(Protocol::animation(UID, ANIMATE_DAMAGE));
+    sendAll(Protocol::entityStatus(UID, ENTITY_STATUS_HURT));
   }
   healthtimeout = time(NULL);
 
