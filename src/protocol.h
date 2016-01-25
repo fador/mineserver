@@ -65,6 +65,8 @@ class Protocol
     static Packet updateSign(int32_t x, int32_t y, int32_t z, 
                              std::string line1, std::string line2, std::string line3, std::string line4);
 
+    static Packet openSignEditor(int32_t x, int32_t y, int32_t z);
+
     static Packet entityStatus(int eid, int aid);
 
     static Packet entityMetadata(int eid, MetaData& metadata);

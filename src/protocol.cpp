@@ -90,6 +90,14 @@ Packet Protocol::updateSign(int32_t x, int32_t y, int32_t z,
   return ret;
 }
 
+Packet Protocol::openSignEditor(int32_t x, int32_t y, int32_t z)
+{
+  Packet ret;      
+  ret << MS_VarInt((uint32_t)PACKET_OUT_OPEN_SIGN_EDITOR) 
+    << (uint64_t)((((uint64_t)x & 0x3FFFFFF) << 38) | (((uint64_t)y & 0xFFF) << 26) | ((uint64_t)z & 0x3FFFFFF));
+  return ret;
+}
+
 Packet Protocol::entityStatus(int eid, int aid)
 {
   Packet ret;
