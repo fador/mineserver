@@ -98,8 +98,8 @@ bool BlockFurnace::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, i
   if (chunk == NULL)
   {
     revertBlock(user, x, y, z, map);
-  }
-  return true;
+    return true;
+  }  
 
   for (uint32_t i = 0; i < chunk->furnaces.size(); i++)
   {
