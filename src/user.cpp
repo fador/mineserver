@@ -237,17 +237,17 @@ bool User::sendLoginInfo()
   // Push chunks to user
   pushMap(true);
 
-  /*
+
   const std::vector<MobPtr>& mobs = ServerInstance->mobs()->getAll();
 
   for (std::vector<MobPtr>::const_iterator i = mobs.begin(); i != mobs.end(); ++i)
   {
     if (pos.map == (*i)->map && (*i)->spawned)
     {
-      loginBuffer << Protocol::mobSpawn(**i);
+      writePacket(Protocol::mobSpawn(**i));
     }
   }
-  */
+  
 
   logged = true;
   
