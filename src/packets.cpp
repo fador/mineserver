@@ -424,38 +424,28 @@ int PacketHandler::entity_action(User* user)
 
 int PacketHandler::update_sign(User* user)
 {
-  if (!user->buffer.haveData(16))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
+  uint64_t position;
   int32_t x, z;
   int16_t y;
   std::string strings1, strings2, strings3, strings4;
 
-  user->buffer >> x >> y >> z;
+  user->buffer >> position;
 
-  if (!user->buffer.haveData(8))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
+  positionToXYZ(position, x, y, z);
+
   user->buffer >> strings1;
-  if (!user->buffer.haveData(6))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
+
   user->buffer >> strings2;
-  if (!user->buffer.haveData(4))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
+
   user->buffer >> strings3;
-  if (!user->buffer.haveData(2))
-  {
-    return PACKET_NEED_MORE_DATA;
-  }
+
   user->buffer >> strings4;
 
-  //ToDo: Save signs!
+  if (!user->buffer)
+  {
+    return PACKET_NEED_MORE_DATA;
+  }
+  
   signDataPtr newSign(new signData);
   newSign->x = x;
   newSign->y = y;
@@ -476,10 +466,7 @@ int PacketHandler::update_sign(User* user)
     chunk->signs.push_back(newSign);
 
     //Send sign packet to everyone
-    Packet pkt;
-    pkt << (int8_t)PACKET_IN_UPDATE_SIGN << x << y << z;
-    pkt << strings1 << strings2 << strings3 << strings4;
-    user->sendAll(pkt);
+    user->sendAll(Protocol::updateSign(x, y, z, strings1, strings2, strings3, strings4));
   }
 
   LOG2(INFO, "Sign: " + strings1 + strings2 + strings3 + strings4);
