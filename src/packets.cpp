@@ -1392,11 +1392,17 @@ int PacketHandler::pickup_spawn(User* user)
 
 int PacketHandler::use_entity(User* user)
 {
-  int32_t userID, target;
+  MS_VarInt target, type;
   int8_t leftClick;
+  float x, y, z;
 
 
-  user->buffer >> userID >> target >> leftClick;
+  user->buffer >> target >> type;
+  
+  if ((int32_t)type == USE_ENTITY_INTERACT_AT)
+  {
+    user->buffer >> x >> y >> z;
+  }
 
   if (!user->buffer)
   {
@@ -1405,29 +1411,28 @@ int PacketHandler::use_entity(User* user)
 
 
 
-  if (!leftClick)
+  if ((int32_t)type == USE_ENTITY_INTERACT)
   {
     // right clicks: interaction, attaching, ...
     for (size_t i = 0; i < ServerInstance->mobs()->getMobCount(); i++)
     {
       if (ServerInstance->mobs()->getMobByID(i)->UID == (uint32_t)target)
       {
-        runAllCallback("interact",user->nick.c_str(), (int32_t)ServerInstance->mobs()->getMobByTarget(target));
+        runAllCallback("interact",user->nick.c_str(), (int32_t)ServerInstance->mobs()->getMobByTarget((uint32_t)target));
         //make a callback
         return PACKET_OK;
       }
     }
 
     // No? Try to attach.
-    Packet pkt;
     //Attach
     if (user->attachedTo == 0)
     {
-      pkt << Protocol::attachEntity(user->UID,target);
-      user->attachedTo = target;
+      user->sendAll(Protocol::attachEntity(user->UID,(int32_t)target));
+      user->attachedTo = (int32_t)target;
       for (size_t i = 0; i < ServerInstance->map(user->pos.map)->minecarts.size(); i++)
       {
-        if(ServerInstance->map(user->pos.map)->minecarts[i].EID == target)
+        if(ServerInstance->map(user->pos.map)->minecarts[i].EID == (uint32_t)target)
         {
           ServerInstance->map(user->pos.map)->minecarts[i].speed = vec(64,0,0);
         }
@@ -1443,14 +1448,13 @@ int PacketHandler::use_entity(User* user)
           ServerInstance->map(user->pos.map)->minecarts[i].speed = vec(0,0,0);
         }
       }
-      pkt << Protocol::attachEntity(user->UID,-1);
+      user->sendAll(Protocol::attachEntity(user->UID,-1));
       user->attachedTo = 0;
     }
-    user->sendAll(pkt);
     return PACKET_OK;
 
   }
-  else
+  else if ((int32_t)type == USE_ENTITY_ATTACK)
   {
     // left clicks: fighhht!
     if (ServerInstance->m_pvp_enabled)
@@ -1465,9 +1469,7 @@ int PacketHandler::use_entity(User* user)
 
           if ((*it)->health <= 0)
           {
-            Packet pkt;
-            pkt << (int8_t)PACKET_OUT_ENTITY_STATUS << (int32_t)(*it)->UID << (int8_t)3;
-            (*it)->sendOthers(pkt);
+            (*it)->sendOthers(Protocol::entityStatus((int32_t)(*it)->UID, ENTITY_STATUS_DEAD));
           }
           break;
         }

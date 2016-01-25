@@ -187,9 +187,23 @@ enum Dye
   DYE_BONE_MEAL
 };
 
-enum {
+enum
+{
   OBJECT_TYPE_ITEM_STACK = 2,
   OBJECT_TYPE_MINECART = 10
+};
+
+enum
+{
+  USE_ENTITY_INTERACT=0,
+  USE_ENTITY_ATTACK,
+  USE_ENTITY_INTERACT_AT
+};
+
+enum
+{
+  ENTITY_STATUS_HURT=2,
+  ENTITY_STATUS_DEAD=3
 };
 
 // get block names.
