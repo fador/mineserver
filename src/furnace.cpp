@@ -230,7 +230,11 @@ void Furnace::consumeFuel()
   case BLOCK_JUKEBOX:
     fuelTime = 15;
     break;
-  case BLOCK_FENCE:
+  case BLOCK_FENCE_OAK:
+  case BLOCK_FENCE_BIRCH:
+  case BLOCK_FENCE_JUNGLE:
+  case BLOCK_FENCE_DARK_OAK:
+  case BLOCK_FENCE_ACACIA:
     fuelTime = 15;
     break;
   case BLOCK_WOODEN_STAIRS:
