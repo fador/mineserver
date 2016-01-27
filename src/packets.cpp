@@ -991,8 +991,9 @@ int PacketHandler::player_block_placement(User* user)
   int16_t health = 0;
   BlockBasicPtr blockcb;
   BlockDefault blockD;
-  int8_t nbtdata;
+  int8_t nbt;
   int8_t posx,posy,posz;
+  NBT_Value* nbtdata = nullptr;
 
   user->buffer >> position >> direction >> newblock;
 
@@ -1001,32 +1002,38 @@ int PacketHandler::player_block_placement(User* user)
     int8_t count;
     int16_t damage;
     user->buffer >> count >> damage;
-    user->buffer >> nbtdata;
-    if (nbtdata != 0)
+    user->buffer >> nbt;
+    if (nbt != 0)
     {
+      int32_t nbtlen = user->packetLen - (user->buffer.m_readPos+2);  
+      if (nbtlen > 3)
+      {
+        uint8_t *buf = (uint8_t*)malloc(nbtlen-3);
 
-      // ToDo: make a tool to read Slot-data
-      /*
-      uint8_t *buf = (uint8_t*)malloc(user->buffer.m_readBuffer.size() - user->buffer.m_readPos+1);
+        std::copy(user->buffer.m_readBuffer.begin() + user->buffer.m_readPos+2, 
+                  user->buffer.m_readBuffer.begin() + user->buffer.m_readPos-1 + nbtlen, buf);
+        nbtlen -= 3;
+        nbtdata = new NBT_Value(NBT_Value::eTAG_Type::TAG_COMPOUND, &buf,nbtlen);
 
-      std::copy(user->buffer.m_readBuffer.begin() + user->buffer.m_readPos, user->buffer.m_readBuffer.end(), buf+1);
+        #ifdef DEBUG
+        std::string data, name;
+        nbtdata->Dump(data);
 
-      buf[0] = nbtdata;
-      int remaining = user->buffer.m_readBuffer.size() - user->buffer.m_readPos;
-      NBT_Value* root = new NBT_Value(NBT_Value::eTAG_Type::TAG_COMPOUND, &buf,remaining);
-      std::string data, name;
-      root->Dump(data);
+        std::cout << data << std::endl;
+        #endif
+        
+        delete[] buf;
 
-      std::cout << data << std::endl;
-
-      delete root;
-      delete[] buf;
-      */
+        // Hax, go forward length of the nbt data (-1 because we already read that before)
+        user->buffer.m_readPos += nbtlen-1;
+      }
     }
   }
 
-  // ToDo: read these after NBT data reading works
-  //user->buffer  >> posx >> posy >> posz;
+  // ToDo: use nbtdata, else just clean up
+  if (nbtdata) delete nbtdata;
+    
+  user->buffer >> posx >> posy >> posz;
   
   positionToXYZ(position, x, y, z);
 
