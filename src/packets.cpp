@@ -264,29 +264,45 @@ int PacketHandler::client_status(User* user)
 
 int PacketHandler::creative_inventory(User *user)
 {
-    /// TODO: use this somewhere!
-
-
     int16_t slot, itemID;
 
-    user->buffer>>slot>>itemID;
+    user->buffer >> slot >> itemID;
 
-    if((uint16_t)itemID == 0xffff) return PACKET_OK;
+    int8_t count = -1;
+    int16_t meta = -1;
+    int8_t nbt = 0;
+    NBT_Value* nbtdata = nullptr;
 
+    if (itemID != -1) {
+      user->buffer >> count >> meta;
 
-    int8_t count;
-    int16_t meta;
+      user->buffer >> nbt;
+      if (nbt != 0)
+      {
+        int32_t nbtlen = user->packetLen - (user->buffer.m_readPos-1);  
+        if (nbtlen > 3)
+        {
+          uint8_t *buf = (uint8_t*)malloc(nbtlen-3);
 
-    user->buffer >> count >> meta;
+          std::copy(user->buffer.m_readBuffer.begin() + user->buffer.m_readPos+2, 
+                    user->buffer.m_readBuffer.begin() + user->buffer.m_readPos-1 + nbtlen, buf);
+          nbtlen -= 3;
+          nbtdata = new NBT_Value(NBT_Value::eTAG_Type::TAG_COMPOUND, &buf,nbtlen);
 
-    int16_t enchantment_data_len;
-    user->buffer >> enchantment_data_len;
+          #ifdef DEBUG
+          std::string data, name;
+          nbtdata->Dump(data);
 
-    if(enchantment_data_len != 0xffff) {
-        LOG2(INFO, "Got enchantment data, ignoring...");
+          std::cout << data << std::endl;
+          #endif
+        
+          delete[] buf;      
+        }
+      }
     }
 
     if (!user->buffer) {
+      delete nbtdata;
       return PACKET_NEED_MORE_DATA;
     }
 
@@ -295,6 +311,7 @@ int PacketHandler::creative_inventory(User *user)
     it.setType(itemID);
     it.setCount(count);
     it.setHealth(meta);
+    it.setData(nbtdata);
 
   
     return PACKET_OK;
