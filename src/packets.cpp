@@ -530,26 +530,44 @@ int PacketHandler::click_window(User* user)
   int16_t itemID = 0;
   int8_t itemCount = 0;
   int16_t itemUses  = 0;
+  NBT_Value* nbtdata = nullptr;
 
   user->buffer >> windowID >> slot >> rightClick >> actionNumber >> shift >> itemID;
   if (itemID != -1)
   {
-    if (!user->buffer.haveData(2))
+    uint8_t nbt;
+    if (!user->buffer.haveData(4))
     {
       return PACKET_NEED_MORE_DATA;
     }
     user->buffer >> itemCount >> itemUses;
-    //if(Item::isEnchantable(itemID)) {
-    /*
-    int16_t enchantment_data_len;
-    user->buffer >> enchantment_data_len;
-    if(enchantment_data_len >= 0) {
-      LOG2(INFO, "Got enchantment data, ignoring...");
+    user->buffer >> nbt;
+    if (nbt != 0)
+    {
+      int32_t nbtlen = user->packetLen - (user->buffer.m_readPos-1);  
+      if (nbtlen > 3)
+      {
+        uint8_t *buf = (uint8_t*)malloc(nbtlen-3);
+
+        std::copy(user->buffer.m_readBuffer.begin() + user->buffer.m_readPos+2, 
+                  user->buffer.m_readBuffer.begin() + user->buffer.m_readPos-1 + nbtlen, buf);
+        nbtlen -= 3;
+        nbtdata = new NBT_Value(NBT_Value::eTAG_Type::TAG_COMPOUND, &buf,nbtlen);
+
+        #ifdef DEBUG
+        std::string data, name;
+        nbtdata->Dump(data);
+
+        std::cout << data << std::endl;
+        #endif
+        
+        delete[] buf;      
+      }
     }
-    */
-    //}
   }
 
+  //ToDo: push nbtdata to the windowClick()
+  if (nbtdata) delete nbtdata;
   ServerInstance->inventory()->windowClick(user, windowID, slot, rightClick, actionNumber, itemID, itemCount, itemUses, shift);
 
 
