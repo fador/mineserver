@@ -91,6 +91,12 @@ void Item::setCount(int8_t count)
   sendUpdate();
 }
 
+void Item::setData(NBT_Value* _data)
+{
+  if (data) delete data;
+  data = _data;
+}
+
 void Item::setHealth(int16_t health)
 {
   //bool rightUse;

@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include <vector>
 #include <memory>
+#include "nbt.h"
 
 class User;
 
@@ -40,6 +41,7 @@ public:
   void setType(int16_t type);
   void setCount(int8_t count);
   void setHealth(int16_t healt);
+  void setData(NBT_Value* _data);
 
   static bool isEnchantable(int16_t type)
   {
@@ -55,6 +57,7 @@ public:
   inline int16_t getType()   const { return type;   }
   inline int8_t  getCount()  const { return count;  }
   inline int16_t getHealth() const { return health; }
+  inline NBT_Value* getData() const { return data; }
 
   int16_t itemHealth(int type);
   void decCount(int c = 1);
@@ -68,8 +71,15 @@ private:
   int16_t type;
   int8_t count;
   int16_t health;
+  NBT_Value *data;
 
 public:
+
+  ~Item()
+  {
+    if (data) delete data;
+  }
+
   Item(User* player = NULL, int slot = -1)
     :
     ready(false),
@@ -77,7 +87,8 @@ public:
     slot(slot),
     type(-1),
     count(0),
-    health(0)
+    health(0),
+    data(nullptr)
   {
   }
 
@@ -88,7 +99,8 @@ public:
     slot(-1),
     type(_type),
     count(_count),
-    health(_health)
+    health(_health),
+    data(nullptr)
   {
   }
 };

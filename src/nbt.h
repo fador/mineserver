@@ -33,6 +33,9 @@
 #include <vector>
 
 #include <stdint.h>
+#ifdef WIN32
+  #define _WINSOCKAPI_
+#endif
 #include <zlib.h>
 
 class NBT_Value
