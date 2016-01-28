@@ -1070,6 +1070,19 @@ double tools_uniform01()
   return uniform01();
 }
 
+bool tools_namedSoundEffect(const char* name, int x, int y, int z, float volume, char pitch)
+{
+  Packet pkt = Protocol::namedSoundEffect(std::string(name), x, y, z, volume, pitch);
+  for (User* user : ServerInstance->users())
+  {
+    if (user->fd && user->logged)
+    {
+      user->writePacket(pkt);
+    }
+  }
+  return true;
+}
+
 void init_plugin_api(void)
 {
   plugin_api_pointers.logger.log                   = &logger_log;
@@ -1172,4 +1185,5 @@ void init_plugin_api(void)
   
   plugin_api_pointers.tools.uniformInt             = &tools_uniformInt;
   plugin_api_pointers.tools.uniform01              = &tools_uniform01;
+  plugin_api_pointers.tools.namedSoundEffect       = &tools_namedSoundEffect;
 }

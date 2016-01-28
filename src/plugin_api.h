@@ -205,6 +205,7 @@ struct tools_pointer_struct
 {
   int (*uniformInt)(int a, int b);
   double (*uniform01)();
+  bool (*namedSoundEffect)(const char* name, int x, int y, int z, float volume, char pitch);
 };
 
 struct mineserver_pointer_struct
@@ -218,7 +219,7 @@ struct mineserver_pointer_struct
   struct mob_pointer_struct mob;
   struct permission_pointer_struct permissions;
   struct tools_pointer_struct tools;
-  void* temp[99];
+  void* temp[98];
 };
 
 // Ignore these, only used when compiling with Mineserver
