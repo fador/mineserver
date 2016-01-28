@@ -1072,12 +1072,16 @@ double tools_uniform01()
 
 bool tools_namedSoundEffect(const char* name, int x, int y, int z, float volume, char pitch)
 {
-  Packet pkt = Protocol::namedSoundEffect(std::string(name), x, y, z, volume, pitch);
   for (User* user : ServerInstance->users())
   {
     if (user->fd && user->logged)
     {
-      user->writePacket(pkt);
+      float xx = user->pos.x-(float)x/32.0f;
+      float yy = user->pos.y-(float)y/32.0f;
+      float zz = user->pos.z-(float)z/32.0f;
+      int dist = sqrtf(xx*xx + yy*yy + zz*zz)/2.0f;
+      if (dist < 1.0f) dist = 1.0f;
+      user->writePacket(Protocol::namedSoundEffect(std::string(name), x, y, z, volume*(1.0f/dist), pitch));
     }
   }
   return true;
