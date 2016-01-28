@@ -72,8 +72,9 @@ class MyPetMob
 public:
   int ID;
   int deSpawn;
+  int lastSay;
   double velocity;
-  explicit MyPetMob(int ID, double velocity = 0) : ID(ID), deSpawn(0), velocity(velocity) { }
+  explicit MyPetMob(int ID, double velocity = 0) : ID(ID), deSpawn(0), velocity(velocity), lastSay(time(0)) { }
 };
 
 typedef std::shared_ptr<MyPetMob> MyPetMobPtr;
@@ -318,10 +319,41 @@ void timer200Function()
       {
         fallMob(&x,&y,&z,w);
         mineserver->mob.moveMobW(MyMobs[i]->ID,x,y,z,w);
+
+        // Make stepping sounds
+        int type = mineserver->mob.getType(MyMobs[i]->ID);
+        if (type == MOB_SHEEP)  {
+          mineserver->tools.namedSoundEffect("mob.sheep.step", x*32, y*32, z*32, 100.0f, 100);
+        } else if (type == MOB_COW) {    
+          mineserver->tools.namedSoundEffect("mob.cow.step", x*32, y*32, z*32, 100.0f, 100);
+        } else if (type == MOB_CHICKEN) {
+          mineserver->tools.namedSoundEffect("mob.chicken.step", x*32, y*32, z*32, 100.0f, 100);
+        } else if (type == MOB_PIG) {
+          mineserver->tools.namedSoundEffect("mob.pig.step", x*32, y*32, z*32, 100.0f, 100);
+        }
       }
       fallMob(&x,&y,&z,w); // Even if they dont move, make them fall
     }
     mineserver->mob.setLook(MyMobs[i]->ID, yaw, pitch, head_yaw);
+
+    // Random noises
+    if (mineserver->tools.uniformInt(0, 255) > 240) {
+      if (time(NULL) - MyMobs[i]->lastSay > 2) {
+        MyMobs[i]->lastSay = time(NULL);
+        
+        char rand = mineserver->tools.uniformInt(80,100);
+        int type = mineserver->mob.getType(MyMobs[i]->ID);
+        if (type == MOB_SHEEP)  {
+          mineserver->tools.namedSoundEffect("mob.sheep.say", x*32, y*32, z*32, 100.0f, rand);
+        } else if (type == MOB_COW) {    
+          mineserver->tools.namedSoundEffect("mob.cow.say", x*32, y*32, z*32, 100.0f, rand);
+        } else if (type == MOB_CHICKEN) {
+          mineserver->tools.namedSoundEffect("mob.chicken.say", x*32, y*32, z*32, 100.0f, rand);
+        } else if (type == MOB_PIG) {
+          mineserver->tools.namedSoundEffect("mob.pig.say", x*32, y*32, z*32, 100.0f, rand);
+        }
+      }
+    }
 
   }
 }
@@ -365,6 +397,19 @@ void gotAttacked(const char* userIn,int mobID)
   if (mobHealth <= 0) return;
 
   mobHealth -= defaultDamage(atk_item);
+  int type = mineserver->mob.getType(mobID);
+  double x, y, z; int w;
+  char rand = mineserver->tools.uniformInt(100,150);
+  mineserver->mob.getMobPositionW(mobID, &x, &y, &z, &w);
+  if (type == MOB_SHEEP)  {
+    mineserver->tools.namedSoundEffect("mob.sheep.say", x*32, y*32, z*32, 100.0f, rand);
+  } else if (type == MOB_COW) {    
+    mineserver->tools.namedSoundEffect("mob.cow.say", x*32, y*32, z*32, 100.0f, rand);
+  } else if (type == MOB_CHICKEN) {
+    mineserver->tools.namedSoundEffect("mob.chicken.say", x*32, y*32, z*32, 100.0f, rand);
+  } else if (type == MOB_PIG) {
+    mineserver->tools.namedSoundEffect("mob.pig.say", x*32, y*32, z*32, 100.0f, rand);
+  }
 
   if (mobHealth <= 0)
   {
@@ -399,6 +444,7 @@ void interact(const char* userIn,int mobID)
       meta |= 0x10;
       mineserver->mob.setByteMetadata(mobID, 16, meta);
       mineserver->mob.updateMetadata(mobID);
+      mineserver->tools.namedSoundEffect("mob.sheep.shear", x*32, y*32, z*32, 100.0f, 100);
     }
   } else if(type == MOB_COW)
   {
