@@ -458,7 +458,7 @@ bool Inventory::canBeArmour(int slot, int type)
 }
 
 
-bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t rightClick, int16_t actionNumber, int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t shift)
+bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t button, int16_t actionNumber, int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t mode)
 {
   //Ack
   if(actionNumber)
@@ -471,7 +471,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   if (slot == -999)
   {
     //Dropping outside of the window
-    if(rightClick == 0 && shift == 0 && user->inventoryHolding.getType() != -1)
+    if(button == 0 && mode == 0 && user->inventoryHolding.getType() != -1)
     {
       ServerInstance->map(user->pos.map)->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z,
           user->inventoryHolding.getType(), user->inventoryHolding.getCount(),
@@ -479,17 +479,17 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
       user->inventoryHolding.setType(-1);
       return true;
     }
-    if(shift == 5 && user->inventoryHolding.getType() != -1)
+    if(mode == 5 && user->inventoryHolding.getType() != -1)
     {
       //click-and-drag (begin)
-      if(rightClick == 0 || rightClick == 4)
+      if(button == 0 || button == 4)
       {
         user->openInv.slotActions.clear();
         user->openInv.recordAction = true;
         return true;
       }
       //click-and-drag (end)
-      else if(rightClick == 2 || rightClick == 6)
+      else if(button == 2 || button == 6)
       {
         user->openInv.recordAction = false;
 
@@ -515,7 +515,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
   //on click-and-drag mode, recording the slots used
   else if(user->openInv.recordAction)
   {
-    if(shift == 5)
+    if(mode == 5)
     {
       user->openInv.slotActions.push_back(slot);
     }
@@ -799,11 +799,11 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
       {
         int16_t addCount = (64 - slotItem->getCount() >= user->inventoryHolding.getCount()) ? user->inventoryHolding.getCount() : 64 - slotItem->getCount();
 
-        slotItem->decCount(0 - ((rightClick) ? 1 : addCount));
+        slotItem->decCount(0 - ((button) ? 1 : addCount));
         slotItem->setHealth(user->inventoryHolding.getHealth());
         slotItem->setType(user->inventoryHolding.getType());
 
-        user->inventoryHolding.decCount((rightClick) ? 1 : addCount);
+        user->inventoryHolding.decCount((button) ? 1 : addCount);
       }
     }
 
@@ -848,7 +848,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
     {
       //Shift+click -> items to player inv
       //ToDo: from player inventory to chest
-      if(!rightClick && shift && isSpace(user, slotItem->getType(), slotItem->getCount()))
+      if(!button && mode && isSpace(user, slotItem->getType(), slotItem->getCount()))
       {
         addItems(user, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
         slotItem->setCount(0);
@@ -858,7 +858,7 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
         user->inventoryHolding.setType(slotItem->getType());
         user->inventoryHolding.setHealth(slotItem->getHealth());
         user->inventoryHolding.setCount(slotItem->getCount());
-        if (rightClick == 1)
+        if (button == 1)
         {
           user->inventoryHolding.decCount(slotItem->getCount() >> 1);
         }
