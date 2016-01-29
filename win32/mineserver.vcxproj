@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\blocks\basic.cpp" />
     <ClCompile Include="..\src\blocks\bed.cpp" />
+    <ClCompile Include="..\src\blocks\blockbrewingstand.cpp" />
     <ClCompile Include="..\src\blocks\cake.cpp" />
     <ClCompile Include="..\src\blocks\chest.cpp" />
     <ClCompile Include="..\src\blocks\default.cpp" />
@@ -83,6 +84,7 @@
     <ClCompile Include="..\src\worldgen\nethergen.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\blocks\blockbrewingstand.h" />
     <ClInclude Include="..\src\blocks\planks.h" />
     <ClInclude Include="..\src\chat.h" />
     <ClInclude Include="..\src\chunkmap.h" />

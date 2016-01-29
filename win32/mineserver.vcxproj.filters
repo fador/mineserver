@@ -249,6 +249,9 @@
     <ClCompile Include="..\src\blocks\planks.cpp">
       <Filter>Source Files\blocks</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\blocks\blockbrewingstand.cpp">
+      <Filter>Source Files\blocks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\blocks\door.h">
@@ -483,6 +486,9 @@
       <Filter>Header Files\blocks</Filter>
     </ClInclude>
     <ClInclude Include="..\src\blocks\planks.h">
+      <Filter>Header Files\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blocks\blockbrewingstand.h">
       <Filter>Header Files\blocks</Filter>
     </ClInclude>
   </ItemGroup>

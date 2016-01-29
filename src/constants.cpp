@@ -109,6 +109,7 @@ void initConstants()
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_WORKBENCH, DropPtr(new Drop(BLOCK_WORKBENCH, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_SIGN_POST, DropPtr(new Drop(ITEM_SIGN, 10000, 1))));
   BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_WALL_SIGN, DropPtr(new Drop(ITEM_SIGN, 10000, 1))));
+  BLOCKDROPS.insert(std::pair<uint8_t, DropPtr>(BLOCK_BREWING_STAND, DropPtr(new Drop(ITEM_BREWING_STAND, 10000, 1))));
   
 
   // Always drop but give more than one item
