@@ -562,6 +562,8 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t ri
     case WINDOW_CRAFTING_TABLE:
       pinv = &openWorkbenches;
       break;
+    default:
+    return false;
     }
 
     std::vector<OpenInvPtr>& inv = *pinv;
@@ -1084,6 +1086,28 @@ bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_
       }
     }
     break;
+  case WINDOW_BREWING_STAND:
+    user->writePacket(Protocol::openWindow(WINDOW_BREWING_STAND,INVENTORYTYPE_BREWING_STAND,"{\"text\": \""+json_esc("Brewing Stand")+"\"}", 4));
+    // ToDo: chunk->brewingstands
+    /*
+    for (uint32_t i = 0; i < chunk->brewingstands.size(); i++)
+    {
+      if (chunk->brewingstands[i]->x == x && chunk->brewingstands[i]->y == y && chunk->brewingstands[i]->z == z)
+      {
+        for (int j = 0; j < 3; j++)
+        {
+          if (chunk->brewingstands[i]->items[j].getType() != -1)
+          {
+            user->writePacket(Protocol::setSlot(WINDOW_BREWING_STAND, j, chunk->brewingstands[i]->items[j]));
+          }
+        }
+        //user->writePacket(Protocol::windowProperty(WINDOW_FURNACE, 0, (chunk->brewingstands[i]->cookTime * 18)));
+        //user->writePacket(Protocol::windowProperty(WINDOW_FURNACE, 1, (chunk->furnaces[i]->burnTime * 3)));
+        break;
+      }
+    }
+    */
+    break;
   }
 
   return true;
@@ -1232,6 +1256,8 @@ bool Inventory::onwindowOpen(User* user, int8_t type, int32_t x, int32_t y, int3
   case WINDOW_CRAFTING_TABLE:
     pinv = &openWorkbenches;
     break;
+  default:
+  return false;
   }
 
   std::vector<OpenInvPtr>& inv = *pinv;

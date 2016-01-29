@@ -122,11 +122,12 @@ struct OpenInventory
 
 typedef std::shared_ptr<OpenInventory> OpenInvPtr;
 
-enum { WINDOW_CURSOR = -1, WINDOW_PLAYER = 0, WINDOW_CRAFTING_TABLE, WINDOW_CHEST, WINDOW_LARGE_CHEST, WINDOW_FURNACE };
+enum { WINDOW_CURSOR = -1, WINDOW_PLAYER = 0, WINDOW_CRAFTING_TABLE, WINDOW_CHEST, WINDOW_LARGE_CHEST, WINDOW_FURNACE, WINDOW_BREWING_STAND };
 
 #define INVENTORYTYPE_CHEST "minecraft:chest"
 #define INVENTORYTYPE_CRAFTING_TABLE "minecraft:crafting_table"
 #define INVENTORYTYPE_FURNACE "minecraft:furnace"
+#define INVENTORYTYPE_BREWING_STAND "minecraft:brewing_stand"
 #define INVENTORYTYPE_HORSE "EntityHorse"
 
 class User;

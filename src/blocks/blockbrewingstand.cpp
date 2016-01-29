@@ -101,7 +101,7 @@ bool BlockBrewingStand::onPlace(User* user, int16_t newblock, int32_t x, int16_t
 
 bool BlockBrewingStand::onInteract(User* user, int32_t x, int16_t y, int32_t z, int map)
 {
-  ServerInstance->inventory()->windowOpen(user, WINDOW_FURNACE, x, y, z);
+  ServerInstance->inventory()->windowOpen(user, WINDOW_BREWING_STAND, x, y, z);
   return true;
 }
 
