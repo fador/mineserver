@@ -38,7 +38,7 @@ class User;
 class BlockRedstoneUtil : public BlockBasic
 {
 public:
-	inline bool affectedBlock(int block) const { return block == BLOCK_STONE_BUTTON || block == BLOCK_LEVER || block == BLOCK_STONE_PRESSURE_PLATE || block == BLOCK_WOODEN_PRESSURE_PLATE; }
+  inline bool affectedBlock(int block) const { return block == BLOCK_STONE_BUTTON || block == BLOCK_LEVER || block == BLOCK_STONE_PRESSURE_PLATE || block == BLOCK_WOODEN_PRESSURE_PLATE; }
 
   void timer200();
   void onStartedDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map,  int8_t direction);
@@ -51,17 +51,17 @@ public:
   void onNeighbourMove(User* user, int16_t oldblock, int32_t x, int16_t y, int32_t z, int map,  int8_t direction);
   bool onInteract(User* user, int32_t x, int16_t y, int32_t z, int map);
 private:
-	struct Position {
-		Position(int32_t _x, int16_t _y, int32_t _z, int _map)
-			: x(_x), y(_y), z(_z), map(_map), timeleft(5) {}
-		int32_t x;
-		int16_t y;
-		int32_t z;
-		int map;
-		uint8_t timeleft;
-	};
-	typedef std::vector<Position> PositionList;
-	PositionList activated;
+  struct Position {
+    Position(int32_t _x, int16_t _y, int32_t _z, int _map)
+      : x(_x), y(_y), z(_z), map(_map), timeleft(5) {}
+    int32_t x;
+    int16_t y;
+    int32_t z;
+    int map;
+    uint8_t timeleft;
+  };
+  typedef std::vector<Position> PositionList;
+  PositionList activated;
 };
 
 #endif

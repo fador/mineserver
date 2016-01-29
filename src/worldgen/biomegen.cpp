@@ -323,11 +323,11 @@ void BiomeGen::AddTrees(int x, int z, int map)
           continue;
         }
           //LOGLF("testing reed area");
-	  int xOffset = 0;
-	  ServerInstance->map(map)->getBlock(blockX + xOffset, (blockY + i), blockZ, &block, &meta);
+        int xOffset = 0;
+        ServerInstance->map(map)->getBlock(blockX + xOffset, (blockY + i), blockZ, &block, &meta);
           if(block == BLOCK_DIRT || block == BLOCK_REED || block == BLOCK_GRASS){
             if(block == BLOCK_GRASS){
-	      ServerInstance->map(map)->setBlock(blockX + xOffset, (blockY + i), blockZ, (char)BLOCK_DIRT, (char)meta);
+              ServerInstance->map(map)->setBlock(blockX + xOffset, (blockY + i), blockZ, (char)BLOCK_DIRT, (char)meta);
               block = BLOCK_DIRT;
             }
             ServerInstance->map(map)->setBlock(blockX + xOffset, (blockY + 1 + i), blockZ, (char)BLOCK_REED, (char)meta);

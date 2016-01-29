@@ -112,7 +112,7 @@ void BlockFalling::onNeighbourMove(User* user, int16_t, int32_t x, int16_t y, in
   uint8_t meta;
 
   if(!ServerInstance->map(map)->getBlock(x, y, z, &block, &meta))
-  	return;
+    return;
   if (affectedBlock(block))
   {
     applyPhysics(user, x, y, z, map);

@@ -155,8 +155,8 @@ void BlockBasic::notifyNeighbours(const int32_t x, const int16_t y, const int32_
   {
     for(unsigned int i = 0; i < ServerInstance->plugin()->getBlockCB().size(); i++)
     {
-    	if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
-	    {
+      if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
+      {
         ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x+1, y, z, BLOCK_SOUTH, map);
       }
     }
@@ -166,8 +166,8 @@ void BlockBasic::notifyNeighbours(const int32_t x, const int16_t y, const int32_
   {
     for(unsigned int i = 0; i < ServerInstance->plugin()->getBlockCB().size(); i++)
     {
-    	if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
-	    {
+      if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
+      {
         ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x-1, y, z, BLOCK_NORTH, map);
       }
     }
@@ -177,8 +177,8 @@ void BlockBasic::notifyNeighbours(const int32_t x, const int16_t y, const int32_
   {
     for(unsigned int i = 0; i < ServerInstance->plugin()->getBlockCB().size(); i++)
     {
-    	if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
-	    {
+      if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
+      {
         ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y+1, z, BLOCK_TOP, map);
       }
     }
@@ -188,8 +188,8 @@ void BlockBasic::notifyNeighbours(const int32_t x, const int16_t y, const int32_
   {
     for(unsigned int i = 0; i < ServerInstance->plugin()->getBlockCB().size(); i++)
     {
-    	if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
-	    {
+      if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
+      {
         ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y-1, z, BLOCK_BOTTOM, map);
       }
     }
@@ -199,8 +199,8 @@ void BlockBasic::notifyNeighbours(const int32_t x, const int16_t y, const int32_
   {
     for(unsigned int i = 0; i < ServerInstance->plugin()->getBlockCB().size(); i++)
     {
-    	if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
-	    {
+      if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
+      {
         ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y, z+1, BLOCK_WEST, map);
       }
     }
@@ -210,8 +210,8 @@ void BlockBasic::notifyNeighbours(const int32_t x, const int16_t y, const int32_
   {
     for(unsigned int i = 0; i < ServerInstance->plugin()->getBlockCB().size(); i++)
     {
-    	if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
-	    {
+      if(ServerInstance->plugin()->getBlockCB()[i]->affectedBlock(block))
+      {
         ServerInstance->plugin()->getBlockCB()[i]->onNeighbourMove(user, 0, x, y, z-1, BLOCK_EAST, map);
       }
     }

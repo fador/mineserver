@@ -63,15 +63,15 @@ void Mob::sethealth(int health)
   {
     health = 30;
   }
-	if (health == 0)
-	{
-		animateDamage(ANIMATE_DEAD);
-//		deSpawnToAll();
-	}
-	else if (health < this->health)
+  if (health == 0)
   {
-		animateDamage(ANIMATE_HURT);
-		animateMob(ANIMATE_DAMAGE);
+    animateDamage(ANIMATE_DEAD);
+//    deSpawnToAll();
+  }
+  else if (health < this->health)
+  {
+    animateDamage(ANIMATE_HURT);
+    animateMob(ANIMATE_DAMAGE);
   }
   this->health = health;
 }

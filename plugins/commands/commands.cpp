@@ -701,50 +701,50 @@ bool blockPlacePreFunction(const char* userIn, int32_t x,int8_t y,int32_t z,int1
     {
       if(cuboidMap[user].action == PLANE)
       {
-	    if(cuboidMap[user].state == 0)
-	    {
-		  cuboidMap[user].state = 1;
-		  cuboidMap[user].x     = x;
-		  cuboidMap[user].y     = y;
-		  cuboidMap[user].z     = z;
-		  cuboidMap[user].block = block;
-		  mineserver->chat.sendmsgTo(user.c_str(),"First block done, place second");
-	    }
-	    else if(cuboidMap[user].state == 1)
-	    {
-		  if(cuboidMap[user].block == block)
-		  {
-			  int xstart,xend;
-			  int ystart,yend;
-			  int zstart,zend;
-			  xstart=(x<cuboidMap[user].x)?x:cuboidMap[user].x;
-			  xend=(x<cuboidMap[user].x)?cuboidMap[user].x:x;
+      if(cuboidMap[user].state == 0)
+      {
+      cuboidMap[user].state = 1;
+      cuboidMap[user].x     = x;
+      cuboidMap[user].y     = y;
+      cuboidMap[user].z     = z;
+      cuboidMap[user].block = block;
+      mineserver->chat.sendmsgTo(user.c_str(),"First block done, place second");
+      }
+      else if(cuboidMap[user].state == 1)
+      {
+      if(cuboidMap[user].block == block)
+      {
+        int xstart,xend;
+        int ystart,yend;
+        int zstart,zend;
+        xstart=(x<cuboidMap[user].x)?x:cuboidMap[user].x;
+        xend=(x<cuboidMap[user].x)?cuboidMap[user].x:x;
 
-			  ystart=(y<cuboidMap[user].y)?y:cuboidMap[user].y;
-			  yend=(y<cuboidMap[user].y)?cuboidMap[user].y:y;
+        ystart=(y<cuboidMap[user].y)?y:cuboidMap[user].y;
+        yend=(y<cuboidMap[user].y)?cuboidMap[user].y:y;
 
-			  zstart=(z<cuboidMap[user].z)?z:cuboidMap[user].z;
-			  zend=(z<cuboidMap[user].z)?cuboidMap[user].z:z;
-			  if((xend-xstart) * (yend-ystart) * (zend-zstart) > 10000)
-			  {
-			    mineserver->chat.sendmsgTo(user.c_str(),"Area too large!");
-			    return true;
-			  }
-			  for(int xpos = xstart; xpos <= xend; xpos ++)
-			  {
-			    for(int zpos = zstart;  zpos <= zend; zpos ++)
-			    {                
-				  for(int ypos = ystart;  ypos <= yend; ypos ++)
-				  {
-				    mineserver->map.setBlock(xpos,ypos,zpos,block,0);
-				  }
-			    }
-			  }
-		    mineserver->chat.sendmsgTo(user.c_str(),"Cuboid done");
-		    cuboidMap.erase(user);
-	  	  }
-	    }
-	  }
+        zstart=(z<cuboidMap[user].z)?z:cuboidMap[user].z;
+        zend=(z<cuboidMap[user].z)?cuboidMap[user].z:z;
+        if((xend-xstart) * (yend-ystart) * (zend-zstart) > 10000)
+        {
+          mineserver->chat.sendmsgTo(user.c_str(),"Area too large!");
+          return true;
+        }
+        for(int xpos = xstart; xpos <= xend; xpos ++)
+        {
+          for(int zpos = zstart;  zpos <= zend; zpos ++)
+          {                
+          for(int ypos = ystart;  ypos <= yend; ypos ++)
+          {
+            mineserver->map.setBlock(xpos,ypos,zpos,block,0);
+          }
+          }
+        }
+        mineserver->chat.sendmsgTo(user.c_str(),"Cuboid done");
+        cuboidMap.erase(user);
+        }
+      }
+    }
     }
   }
   return true;

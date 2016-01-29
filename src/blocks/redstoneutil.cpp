@@ -35,32 +35,32 @@
 
 
 void BlockRedstoneUtil::timer200() {
-	// Loop activated buttons -list
-	for (PositionList::iterator iter = activated.begin(); iter != activated.end();) {
-		if (!(--iter->timeleft)) {
-			uint8_t block;
-			uint8_t meta;
-			if (ServerInstance->map(iter->map)->getBlock(iter->x, iter->y, iter->z, &block, &meta)) {
-				// Enable button
-				meta ^= 0x08;
+  // Loop activated buttons -list
+  for (PositionList::iterator iter = activated.begin(); iter != activated.end();) {
+    if (!(--iter->timeleft)) {
+      uint8_t block;
+      uint8_t meta;
+      if (ServerInstance->map(iter->map)->getBlock(iter->x, iter->y, iter->z, &block, &meta)) {
+        // Enable button
+        meta ^= 0x08;
 
-				// Save the block
-				ServerInstance->map(iter->map)->setBlock(iter->x, iter->y, iter->z, char(block), meta);
-				ServerInstance->map(iter->map)->sendBlockChange(iter->x, iter->y, iter->z, char(block), meta);
-			}
+        // Save the block
+        ServerInstance->map(iter->map)->setBlock(iter->x, iter->y, iter->z, char(block), meta);
+        ServerInstance->map(iter->map)->sendBlockChange(iter->x, iter->y, iter->z, char(block), meta);
+      }
 
-			// Remove button from list
-			iter = activated.erase(iter);
-		}
-		else {
-			iter++;
-		}
-	}
+      // Remove button from list
+      iter = activated.erase(iter);
+    }
+    else {
+      iter++;
+    }
+  }
 }
 
 void BlockRedstoneUtil::onStartedDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
-	this->onInteract(user, x, y, z, map);
+  this->onInteract(user, x, y, z, map);
 }
 
 void BlockRedstoneUtil::onDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
@@ -155,36 +155,36 @@ bool BlockRedstoneUtil::onPlace(User* user, int16_t newblock, int32_t x, int16_t
   // Check that switch is placed on legal direction
   if ((newblock == BLOCK_STONE_BUTTON && (direction == BLOCK_TOP || direction == BLOCK_BOTTOM))
   || ((newblock == BLOCK_STONE_PRESSURE_PLATE || newblock == BLOCK_WOODEN_PRESSURE_PLATE) && direction != BLOCK_TOP)) {
-	revertBlock(user, x, y, z, map);
+  revertBlock(user, x, y, z, map);
     return true;
   }
 
   // Set metadata for the position
   if (newblock == BLOCK_STONE_BUTTON || newblock == BLOCK_LEVER) {
-	  // Wall switch
-	  if (direction != BLOCK_TOP && direction != BLOCK_BOTTOM) {
-		meta = direction;
-	  }
-	  // Ceiling lever
-	  else if (direction == BLOCK_BOTTOM) {
-		  int yaw = abs(int(user->pos.yaw)) % 360;
-		  if ((yaw > 45 && yaw <= 135) || (yaw > 225 && yaw <= 315)) {
-			  meta = 0x00;
-		  }
-		  else {
-			  meta = 0x07;
-		  }
-	  }
-	  // Floor lever
-	  else {
-		  int yaw = abs(int(user->pos.yaw)) % 360;
-		  if ((yaw > 45 && yaw <= 135) || (yaw > 225 && yaw <= 315)) {
-			  meta = 0x06;
-		  }
-		  else {
-			  meta = 0x05;
-		  }
-	  }
+    // Wall switch
+    if (direction != BLOCK_TOP && direction != BLOCK_BOTTOM) {
+    meta = direction;
+    }
+    // Ceiling lever
+    else if (direction == BLOCK_BOTTOM) {
+      int yaw = abs(int(user->pos.yaw)) % 360;
+      if ((yaw > 45 && yaw <= 135) || (yaw > 225 && yaw <= 315)) {
+        meta = 0x00;
+      }
+      else {
+        meta = 0x07;
+      }
+    }
+    // Floor lever
+    else {
+      int yaw = abs(int(user->pos.yaw)) % 360;
+      if ((yaw > 45 && yaw <= 135) || (yaw > 225 && yaw <= 315)) {
+        meta = 0x06;
+      }
+      else {
+        meta = 0x05;
+      }
+    }
   }
 
   ServerInstance->map(map)->setBlock(x, y, z, char(newblock), meta);
@@ -218,22 +218,22 @@ bool BlockRedstoneUtil::onInteract(User* user, int32_t x, int16_t y, int32_t z, 
   }
 
   if (block == BLOCK_STONE_BUTTON) {
-	  // Enable button if it's not already enabled
-	  if ((meta & 0x08) != 0) {
-		return true;
-	  }
-	  
-	  meta |= 0x08;
+    // Enable button if it's not already enabled
+    if ((meta & 0x08) != 0) {
+    return true;
+    }
+    
+    meta |= 0x08;
 
-	  // Save button position
-	  activated.push_back(Position(x, y, z, map));
+    // Save button position
+    activated.push_back(Position(x, y, z, map));
   }
   else if (block == BLOCK_LEVER) {
-	  // Enable/disable lever
-	  meta ^= 0x08;
+    // Enable/disable lever
+    meta ^= 0x08;
   }
   else {
-	  return true;
+    return true;
   }
 
   ServerInstance->map(map)->setBlock(x, y, z, char(block), meta);
