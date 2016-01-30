@@ -34,6 +34,11 @@
 #include "protocol.h"
 #include "map.h"
 
+bool InventoryFurnace::onwindowClick(User* user, int8_t windowID, int16_t slot, int8_t button, int16_t actionNumber, int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t mode) const
+{
+
+  return true;
+}
 
 bool InventoryFurnace::onwindowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_t z) const
 {  

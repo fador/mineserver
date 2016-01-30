@@ -43,6 +43,7 @@ class InventoryPlayer :  public InventoryBasic
 {
 public:
   bool affected(int window_id) const { return window_id == WINDOW_PLAYER; };
+  bool onwindowClick(User* user, int8_t windowID, int16_t slot, int8_t button, int16_t actionNumber, int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t mode = 0) const;
   bool onwindowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_t z) const;
   bool onwindowClose(User* user, int8_t type, int32_t x, int32_t y, int32_t z) const;
 };
