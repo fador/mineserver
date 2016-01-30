@@ -45,6 +45,13 @@ bool InventoryWorkbench::onwindowClick(User* user, int8_t windowID, int16_t slot
     user->writePacket(Protocol::confirmTransaction(windowID, actionNumber, 1));
   }
 
+  // Handle drag mode in a base class helper function
+  if (mode == INVENTORY_MODE_DRAG)
+  {
+    return this->handleDrag(user, windowID, slot, button, actionNumber, itemID, itemCount, itemUses, mode);
+  }
+  user->openInv.recordAction = false;
+
   //Click outside the window
   if (slot == -999)
   {
@@ -56,37 +63,6 @@ bool InventoryWorkbench::onwindowClick(User* user, int8_t windowID, int16_t slot
           user->inventoryHolding.getHealth(), user);
       user->inventoryHolding.setType(-1);
       return true;
-    }
-    if(mode == 5 && user->inventoryHolding.getType() != -1)
-    {
-      //click-and-drag (begin)
-      if(button == 0 || button == 4)
-      {
-        user->openInv.slotActions.clear();
-        user->openInv.recordAction = true;
-        return true;
-      }
-      //click-and-drag (end)
-      else if(button == 2 || button == 6)
-      {
-        user->openInv.recordAction = false;
-
-        //Spread the stack nice and evenly
-        if(!user->openInv.slotActions.size() || user->openInv.slotActions.size() > (uint32_t)user->inventoryHolding.getCount())
-        {
-          //FAILURE (should not happend)
-          return true;
-        }
-        //HAX
-        int16_t count = (user->inventoryHolding.getCount()/user->openInv.slotActions.size());
-        for(uint32_t i = 0; i < user->openInv.slotActions.size(); i++)
-        {
-          for(int c = 0; c < count; c++)
-          {
-            onwindowClick(user, windowID, user->openInv.slotActions[i], 1, 0, -1, itemCount, itemUses, 0);
-          }
-        }
-      }      
     }
     return true;
   }
