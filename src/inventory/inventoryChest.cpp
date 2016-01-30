@@ -35,9 +35,276 @@
 #include "chunkmap.h"
 #include "map.h"
 
-bool InventoryChest::onwindowClick(User* user, int8_t windowID, int16_t slot, int8_t button, int16_t actionNumber, int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t mode) const
+bool InventoryChest::onwindowClick(User* user, int8_t windowID, int16_t slot, int8_t button, int16_t actionNumber,
+                                  int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t mode) const
 {
+  Inventory* inventory = ServerInstance->inventory();
+  //Ack
+  if(actionNumber)
+  {
+    // ToDo: actually check the action before ack
+    user->writePacket(Protocol::confirmTransaction(windowID, actionNumber, 1));
+  }
 
+  //Click outside the window
+  if (slot == -999)
+  {
+    //Dropping outside of the window
+    if(button == 0 && mode == 0 && user->inventoryHolding.getType() != -1)
+    {
+      ServerInstance->map(user->pos.map)->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z,
+          user->inventoryHolding.getType(), user->inventoryHolding.getCount(),
+          user->inventoryHolding.getHealth(), user);
+      user->inventoryHolding.setType(-1);
+      return true;
+    }
+    if(mode == 5 && user->inventoryHolding.getType() != -1)
+    {
+      //click-and-drag (begin)
+      if(button == 0 || button == 4)
+      {
+        user->openInv.slotActions.clear();
+        user->openInv.recordAction = true;
+        return true;
+      }
+      //click-and-drag (end)
+      else if(button == 2 || button == 6)
+      {
+        user->openInv.recordAction = false;
+
+        //Spread the stack nice and evenly
+        if(!user->openInv.slotActions.size() || user->openInv.slotActions.size() > (uint32_t)user->inventoryHolding.getCount())
+        {
+          //FAILURE (should not happend)
+          return true;
+        }
+        //HAX
+        int16_t count = (user->inventoryHolding.getCount()/user->openInv.slotActions.size());
+        for(uint32_t i = 0; i < user->openInv.slotActions.size(); i++)
+        {
+          for(int c = 0; c < count; c++)
+          {
+            onwindowClick(user, windowID, user->openInv.slotActions[i], 1, 0, -1, itemCount, itemUses, 0);
+          }
+        }
+      }      
+    }
+    return true;
+  }
+  //on click-and-drag mode, recording the slots used
+  else if(user->openInv.recordAction)
+  {
+    if(mode == 5)
+    {
+      user->openInv.slotActions.push_back(slot);
+    }
+    else
+    {
+      user->openInv.recordAction = false;
+    }
+    return true;
+  }
+
+  if (!user->isOpenInv && windowID != 0)
+  {
+    return false;
+  }
+
+  sChunk* chunk = NULL;
+  chunk = ServerInstance->map(user->pos.map)->getChunk(blockToChunk(user->openInv.x), blockToChunk(user->openInv.z));
+
+  if (chunk == NULL)
+  {
+    return false;
+  }
+
+  chunk->changed = true;
+
+  std::vector<User*>* otherUsers = NULL;
+  OpenInvPtr currentInventory;
+
+  std::vector<OpenInvPtr>& inv = inventory->openChests;
+
+  for (size_t i = 0; i < inv.size(); i++)
+  {
+    if (inv[i]->x == user->openInv.x &&
+        inv[i]->y == user->openInv.y &&
+        inv[i]->z == user->openInv.z)
+    {
+      otherUsers = &inv[i]->users;
+      currentInventory = inv[i];
+      break;
+    }
+  }
+
+  if (otherUsers == NULL || currentInventory == NULL)
+  {
+    return false;
+  }
+
+  Item* slotItem = NULL;
+
+  switch (windowID)
+  {
+  case WINDOW_CHEST:
+    if (slot > 26)
+    {
+      slotItem = &user->inv[slot - 18];
+    }
+    else
+    {
+      for (uint32_t i = 0; i < chunk->chests.size(); i ++)
+      {
+        if (chunk->chests[i]->x() == user->openInv.x &&
+            chunk->chests[i]->y() == user->openInv.y &&
+            chunk->chests[i]->z() == user->openInv.z)
+        {
+          slotItem = (*chunk->chests[i]->items())[slot].get();
+          break;
+        }
+      }
+      //Create chest data if it doesn't exist
+      if (slotItem == NULL)
+      {
+        chestDataPtr newChest(new chestData);
+        newChest->x(user->openInv.x);
+        newChest->y(user->openInv.y);
+        newChest->z(user->openInv.z);
+        chunk->chests.push_back(newChest);
+        slotItem = (*newChest->items())[slot].get();
+      }
+    }
+    break;
+  case WINDOW_LARGE_CHEST:
+    if (slot > 53)
+    {
+      slotItem = &user->inv[slot - 45];
+    }
+    else
+    {
+      //ToDo: Handle large chest
+      for (uint32_t i = 0; i < chunk->chests.size(); i++)
+      {
+        //if(!chunk->chests[i]->large())
+        //  continue;
+
+        if(chunk->chests[i]->x() == user->openInv.x &&
+          chunk->chests[i]->y() == user->openInv.y &&
+          chunk->chests[i]->z() == user->openInv.z)
+        {
+          slotItem = (*chunk->chests[i]->items())[slot].get();
+          break;
+        }
+      }
+      if(slotItem == NULL)
+      {
+        chestDataPtr newChest(new chestData);
+        newChest->x(user->openInv.x);
+        newChest->y(user->openInv.y);
+        newChest->z(user->openInv.z);
+        newChest->large(true);
+        chunk->chests.push_back(newChest);
+        slotItem = (*newChest->items())[slot].get();
+      }
+    }
+    break;
+  }
+  
+  //Empty slot and holding something
+  if ((slotItem->getType() == -1 || (slotItem->getType() == user->inventoryHolding.getType() && slotItem->getHealth() == user->inventoryHolding.getHealth() && slotItem->getCount() < 64)) && user->inventoryHolding.getType() != -1)
+  {
+    //ToDo: Make sure we have room for the items!
+
+    //Make sure not putting anything to the crafting space
+    if ((windowID != WINDOW_CRAFTING_TABLE && windowID != WINDOW_PLAYER) || slot != 0)
+    {
+      int16_t addCount = (64 - slotItem->getCount() >= user->inventoryHolding.getCount()) ? user->inventoryHolding.getCount() : 64 - slotItem->getCount();
+
+      slotItem->decCount(0 - ((button) ? 1 : addCount));
+      slotItem->setHealth(user->inventoryHolding.getHealth());
+      slotItem->setType(user->inventoryHolding.getType());
+
+      user->inventoryHolding.decCount((button) ? 1 : addCount);
+    }
+  }
+  //We are not holding anything, get the item we clicked
+  else if (user->inventoryHolding.getType() == -1)
+  {
+    //Shift+click -> items to player inv
+    //ToDo: from player inventory to chest
+    if(!button && mode && inventory->isSpace(user, slotItem->getType(), slotItem->getCount()))
+    {
+      inventory->addItems(user, slotItem->getType(), slotItem->getCount(), slotItem->getHealth());
+      slotItem->setCount(0);
+    }
+    else
+    {
+      user->inventoryHolding.setType(slotItem->getType());
+      user->inventoryHolding.setHealth(slotItem->getHealth());
+      user->inventoryHolding.setCount(slotItem->getCount());
+      if (button == 1)
+      {
+        user->inventoryHolding.decCount(slotItem->getCount() >> 1);
+      }
+      slotItem->decCount(user->inventoryHolding.getCount());
+    }
+      
+    if (slotItem->getCount() == 0)
+    {
+      slotItem->setHealth(0);
+      slotItem->setType(-1);
+    }
+  }
+  else
+  {
+    //Swap items if holding something and clicking another, not with craft slot
+    int16_t type = slotItem->getType();
+    int8_t count = slotItem->getCount();
+    int16_t health = slotItem->getHealth();
+    slotItem->setType(user->inventoryHolding.getType());
+    slotItem->setCount(user->inventoryHolding.getCount());
+    slotItem->setHealth(user->inventoryHolding.getHealth());
+    user->inventoryHolding.setType(type);
+    user->inventoryHolding.setCount(count);
+    user->inventoryHolding.setHealth(health);
+  }
+
+  //Update slot
+  inventory->setSlot(user, windowID, slot, slotItem);
+
+  //Update item on the cursor
+  inventory->setSlot(user, WINDOW_CURSOR, 0, &user->inventoryHolding);
+  
+  //Signal others using the same space
+  switch(windowID)
+  {
+    case WINDOW_CHEST:
+      chunk->changed = true;
+      if(slot < 27)
+      {
+        for(uint32_t i = 0; i < otherUsers->size(); i++)
+        {
+          if((*otherUsers)[i] != user)
+          {
+            inventory->setSlot((*otherUsers)[i], windowID, slot, slotItem);
+          }
+        }
+      }
+      break;
+    case WINDOW_LARGE_CHEST:
+      chunk->changed = true;
+      if(slot < 54)
+      {
+        for(uint32_t i = 0; i < otherUsers->size(); i++)
+        {
+          if((*otherUsers)[i] != user)
+          {
+            inventory->setSlot((*otherUsers)[i], windowID, slot, slotItem);
+          }
+        }
+      }
+      break;
+  }
   return true;
 }
 
