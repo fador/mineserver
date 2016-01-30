@@ -274,7 +274,7 @@ void Furnace::sendToAllUsers()
 {
 
 
-  enum { PROGRESS_ARROW = 0, PROGRESS_FIRE = 1 };
+  enum { PROGRESS_FIRE = 0, PROGRESS_ARROW = 2 };
   //ToDo: send changes to all with this furnace opened
 
   std::vector<OpenInvPtr>& inv = ServerInstance->inventory()->openFurnaces;
@@ -289,15 +289,12 @@ void Furnace::sendToAllUsers()
       {
         for (size_t j = 0; j < 3; ++j)
         {
-          if (m_data->items[j].getType() != -1)
-          {
-            Item& item = m_data->items[j];
-            inv[openinv]->users[user]->writePacket(Protocol::setSlot(WINDOW_FURNACE, j, item));
-          }
+          Item& item = m_data->items[j];
+          inv[openinv]->users[user]->writePacket(Protocol::setSlot(WINDOW_FURNACE, j, item));
         }
-
-        inv[openinv]->users[user]->writePacket(Protocol::windowProperty(WINDOW_FURNACE, PROGRESS_ARROW, (m_data->cookTime * 18)));
-        inv[openinv]->users[user]->writePacket(Protocol::windowProperty(WINDOW_FURNACE, PROGRESS_FIRE, (m_data->burnTime * 3)));
+        inv[openinv]->users[user]->writePacket(Protocol::windowProperty(WINDOW_FURNACE, PROGRESS_FIRE,  m_data->burnTime>10?200: (m_data->burnTime * 20)));
+        inv[openinv]->users[user]->writePacket(Protocol::windowProperty(WINDOW_FURNACE, 3, 200));
+        inv[openinv]->users[user]->writePacket(Protocol::windowProperty(WINDOW_FURNACE, PROGRESS_ARROW, (m_data->cookTime * 20)));
       }
 
       break;
