@@ -52,6 +52,7 @@
     <ClCompile Include="..\src\furnace.cpp" />
     <ClCompile Include="..\src\furnaceManager.cpp" />
     <ClCompile Include="..\src\inventory.cpp" />
+    <ClCompile Include="..\src\inventory\inventoryBasic.cpp" />
     <ClCompile Include="..\src\inventory\inventoryBrewingstand.cpp" />
     <ClCompile Include="..\src\inventory\inventoryChest.cpp" />
     <ClCompile Include="..\src\inventory\inventoryFurnace.cpp" />

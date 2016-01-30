@@ -273,6 +273,9 @@
     <ClCompile Include="..\src\inventory\inventoryBrewingstand.cpp">
       <Filter>Source Files\inventory</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\inventory\inventoryBasic.cpp">
+      <Filter>Source Files\inventory</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\blocks\door.h">

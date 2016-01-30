@@ -36,7 +36,7 @@
 #include "map.h"
 
 bool InventoryChest::onwindowClick(User* user, int8_t windowID, int16_t slot, int8_t button, int16_t actionNumber,
-                                  int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t mode) const
+                                  int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t mode)
 {
   Inventory* inventory = ServerInstance->inventory();
   //Ack
