@@ -261,6 +261,9 @@
     <ClCompile Include="..\src\inventory\inventoryPlayer.cpp">
       <Filter>Source Files\inventory</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\inventory\inventoryChest.cpp">
+      <Filter>Source Files\inventory</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\inventory\inventoryWorkbench.cpp">
       <Filter>Source Files\inventory</Filter>
     </ClCompile>
@@ -507,6 +510,9 @@
       <Filter>Header Files\inventory</Filter>
     </ClInclude>
     <ClInclude Include="..\src\inventory\inventoryPlayer.h">
+      <Filter>Header Files\inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\inventory\inventoryChest.h">
       <Filter>Header Files\inventory</Filter>
     </ClInclude>
     <ClInclude Include="..\src\inventory\inventoryWorkbench.h">

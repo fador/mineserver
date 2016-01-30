@@ -468,6 +468,9 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t bu
     user->writePacket(Protocol::confirmTransaction(windowID, actionNumber, 1));
   }
 
+  std::cout << "Window: " << (int)windowID << " Slot: " << (int)slot << " Button: " << (int)button << " Item: " << (int)itemID << " mode: " << (int)mode << std::endl;
+  std::cout << "Holding: " << user->inventoryHolding.getType() << " Count: " << (int)user->inventoryHolding.getCount() << std::endl;
+
   //Click outside the window
   if (slot == -999)
   {

@@ -75,6 +75,7 @@
 
 #include "inventory/inventoryPlayer.h"
 #include "inventory/inventoryWorkbench.h"
+#include "inventory/inventoryChest.h"
 
 bool callbackReturnINTERNAL;
 // Create default hooks
@@ -173,6 +174,7 @@ void Plugin::init()
   // INVENTORIES
   m_inventory_CBs.push_back(InventoryBasicPtr(new InventoryPlayer));
   m_inventory_CBs.push_back(InventoryBasicPtr(new InventoryWorkbench));
+  m_inventory_CBs.push_back(InventoryBasicPtr(new InventoryChest));
 }
 
 
