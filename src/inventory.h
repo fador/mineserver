@@ -163,12 +163,11 @@ public:
   std::vector<OpenInvPtr> openFurnaces;
 
   bool canBeArmour(int slot, int type);
-  bool onwindowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_t z);
-  bool onwindowClose(User* user, int8_t type, int32_t x, int32_t y, int32_t z);
   bool onupdateinventory(User* user, int8_t windowID);
 
 
   bool windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_t z);
+  bool windowClose(User* user, int8_t type, int32_t x, int32_t y, int32_t z);
 
   bool windowClick(User* user, int8_t windowID, int16_t slot, int8_t button, int16_t actionNumber, int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t mode = 0);
 

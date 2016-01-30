@@ -85,6 +85,7 @@ static char *LIBRARY_ERROR(void)
 
 #include "blocks/basic.h"
 #include "items/itembasic.h"
+#include "inventory/inventorybasic.h"
 
 //
 // It's SUPER EFFECTIVE!
@@ -93,6 +94,7 @@ static char *LIBRARY_ERROR(void)
 
 typedef std::shared_ptr<BlockBasic> BlockBasicPtr;
 typedef std::shared_ptr<ItemBasic>  ItemBasicPtr;
+typedef std::shared_ptr<InventoryBasic>  InventoryBasicPtr;
 
 extern bool callbackReturnINTERNAL;
 typedef int(*funcPointer)(...);
@@ -122,6 +124,7 @@ public:
 
   typedef std::vector<BlockBasicPtr> BlockCBs;
   typedef std::vector<ItemBasicPtr>  ItemCBs;
+  typedef std::vector<InventoryBasicPtr>  InventoryCBs;
 
    Plugin();
   ~Plugin();
@@ -166,6 +169,8 @@ public:
 
   inline const ItemCBs  & getItemCB()  const { return m_item_CBs; }
 
+  inline const InventoryCBs  & getInventoryCB()  const { return m_inventory_CBs; }
+
 private:
   HookMap      m_hooks;
   LibHandleMap m_libraryHandles;
@@ -174,6 +179,7 @@ private:
 
   BlockCBs     m_block_CBs;
   ItemCBs      m_item_CBs;
+  InventoryCBs m_inventory_CBs;
 };
 
 #endif

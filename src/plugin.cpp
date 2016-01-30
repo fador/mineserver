@@ -73,6 +73,12 @@
 #include "items/food.h"
 #include "items/projectile.h"
 
+#include "inventory/inventoryPlayer.h"
+#include "inventory/inventoryWorkbench.h"
+#include "inventory/inventoryChest.h"
+#include "inventory/inventoryFurnace.h"
+#include "inventory/inventoryBrewingstand.h"
+
 bool callbackReturnINTERNAL;
 // Create default hooks
 Plugin::Plugin()
@@ -163,8 +169,16 @@ void Plugin::init()
   // !! DEFAULT ALWAYS LAST, HANDLES EVERY BLOCK !!
   m_block_CBs.push_back(BlockBasicPtr(new BlockDefault));
 
+  // ITEMS
   m_item_CBs.push_back(ItemBasicPtr(new ItemFood));
   m_item_CBs.push_back(ItemBasicPtr(new ItemProjectile));
+
+  // INVENTORIES
+  m_inventory_CBs.push_back(InventoryBasicPtr(new InventoryPlayer));
+  m_inventory_CBs.push_back(InventoryBasicPtr(new InventoryWorkbench));
+  m_inventory_CBs.push_back(InventoryBasicPtr(new InventoryChest));
+  m_inventory_CBs.push_back(InventoryBasicPtr(new InventoryFurnace));
+  m_inventory_CBs.push_back(InventoryBasicPtr(new InventoryBrewingstand));
 }
 
 
