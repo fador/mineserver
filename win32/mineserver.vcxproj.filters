@@ -267,6 +267,9 @@
     <ClCompile Include="..\src\inventory\inventoryWorkbench.cpp">
       <Filter>Source Files\inventory</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\inventory\inventoryFurnace.cpp">
+      <Filter>Source Files\inventory</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\blocks\door.h">
@@ -516,6 +519,9 @@
       <Filter>Header Files\inventory</Filter>
     </ClInclude>
     <ClInclude Include="..\src\inventory\inventoryWorkbench.h">
+      <Filter>Header Files\inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\inventory\inventoryFurnace.h">
       <Filter>Header Files\inventory</Filter>
     </ClInclude>
   </ItemGroup>
