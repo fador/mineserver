@@ -38,6 +38,7 @@
 #include "mineserver.h"
 #include "furnaceManager.h"
 #include "logger.h"
+#include "plugin.h"
 #include <sstream>
 
 
@@ -995,122 +996,40 @@ bool Inventory::windowClick(User* user, int8_t windowID, int16_t slot, int8_t bu
   return true;
 }
 
+bool Inventory::windowClose(User* user, int8_t type, int32_t x, int32_t y, int32_t z)
+{
+  for (auto invCb : ServerInstance->plugin()->getInventoryCB())
+  {    
+    if (invCb != NULL && invCb->affected(type))
+    {
+      if (invCb->onwindowClose(user, type, x, y, z))
+      {
+        return true;
+      }
+    }
+  }
+}
 
 bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_t z)
 {
-  sChunk* chunk = ServerInstance->map(user->pos.map)->getChunk(blockToChunk(x), blockToChunk(z));
-  if (chunk == NULL)
+  // Close inventory if one already open
+  if (user->isOpenInv)
   {
-    return false;
+    windowClose(user, user->openInv.type, user->openInv.x, user->openInv.y, user->openInv.z);
   }
 
-  onwindowOpen(user, type, x, y, z);
-
-  switch (type)
-  {
-  case WINDOW_CHEST:
-  case WINDOW_LARGE_CHEST:
+  for (auto invCb : ServerInstance->plugin()->getInventoryCB())
+  {    
+    if (invCb != NULL && invCb->affected(type))
     {
-      chestDataPtr _chestData;
-      for (uint32_t i = 0; i < chunk->chests.size(); i++)
+      if (invCb->onwindowOpen(user, type, x, y, z))
       {
-        if ((chunk->chests[i]->x() == x)
-          && (chunk->chests[i]->y() == y)
-          && (chunk->chests[i]->z() == z) )
-        {
-          _chestData = chunk->chests[i];
-          break;
-        }
-      }
-      if(_chestData == NULL)
-        break;
-      std::string windowName;
-      
-      if(_chestData->large())
-      {
-        windowName = "Large chest";
-      }
-      else
-      {
-        windowName = "Chest";
-      }
-      user->writePacket(Protocol::openWindow(type,INVENTORYTYPE_CHEST,"{\"text\": \""+json_esc(windowName)+"\"}", _chestData->size()));
-
-      for (size_t j = 0; j < _chestData->size(); j++)
-      {
-        if ((*_chestData->items())[j]->getType() != -1)
-        {
-          user->writePacket(Protocol::setSlot(type, j, *(*_chestData->items())[j]));
-        }
+        return true;
       }
     }
-    break;
-
-  case WINDOW_CRAFTING_TABLE:
-    user->writePacket(Protocol::openWindow(WINDOW_CRAFTING_TABLE,INVENTORYTYPE_CRAFTING_TABLE,"{\"text\": \""+json_esc("Workbench")+"\"}", 0));
-
-    for (uint32_t i = 0; i < openWorkbenches.size(); i++)
-    {
-      if (openWorkbenches[i]->x == user->openInv.x &&
-          openWorkbenches[i]->y == user->openInv.y &&
-          openWorkbenches[i]->z == user->openInv.z)
-      {
-        for (int j = 0; j < 10; j++)
-        {
-          if (openWorkbenches[i]->workbench[j].getType() != -1)
-          {
-            user->writePacket(Protocol::setSlot(WINDOW_CRAFTING_TABLE, j, openWorkbenches[i]->workbench[j]));
-          }
-        }
-        break;
-      }
-    }
-    break;
-  case WINDOW_FURNACE:
-    user->writePacket(Protocol::openWindow(WINDOW_FURNACE,INVENTORYTYPE_FURNACE,"{\"text\": \""+json_esc("Furnace")+"\"}", 3));
-
-    for (uint32_t i = 0; i < chunk->furnaces.size(); i++)
-    {
-      if (chunk->furnaces[i]->x == x && chunk->furnaces[i]->y == y && chunk->furnaces[i]->z == z)
-      {
-        for (int j = 0; j < 3; j++)
-        {
-          if (chunk->furnaces[i]->items[j].getType() != -1)
-          {
-            user->writePacket(Protocol::setSlot(WINDOW_FURNACE, j, chunk->furnaces[i]->items[j]));
-          }
-        }
-        user->writePacket(Protocol::windowProperty(WINDOW_FURNACE, 0, (chunk->furnaces[i]->cookTime * 18)));
-        user->writePacket(Protocol::windowProperty(WINDOW_FURNACE, 1, (chunk->furnaces[i]->burnTime * 3)));
-        break;
-      }
-    }
-    break;
-  case WINDOW_BREWING_STAND:
-    user->writePacket(Protocol::openWindow(WINDOW_BREWING_STAND,INVENTORYTYPE_BREWING_STAND,"{\"text\": \""+json_esc("Brewing Stand")+"\"}", 4));
-    // ToDo: chunk->brewingstands
-    /*
-    for (uint32_t i = 0; i < chunk->brewingstands.size(); i++)
-    {
-      if (chunk->brewingstands[i]->x == x && chunk->brewingstands[i]->y == y && chunk->brewingstands[i]->z == z)
-      {
-        for (int j = 0; j < 3; j++)
-        {
-          if (chunk->brewingstands[i]->items[j].getType() != -1)
-          {
-            user->writePacket(Protocol::setSlot(WINDOW_BREWING_STAND, j, chunk->brewingstands[i]->items[j]));
-          }
-        }
-        //user->writePacket(Protocol::windowProperty(WINDOW_FURNACE, 0, (chunk->brewingstands[i]->cookTime * 18)));
-        //user->writePacket(Protocol::windowProperty(WINDOW_FURNACE, 1, (chunk->furnaces[i]->burnTime * 3)));
-        break;
-      }
-    }
-    */
-    break;
   }
 
-  return true;
+  return false;
 }
 
 bool Inventory::isSpace(User* user, int16_t itemID, char count)
@@ -1229,149 +1148,11 @@ bool Inventory::windowClose(User* user, int8_t windowID)
 
   if (user->isOpenInv)
   {
-    onwindowClose(user, user->openInv.type, user->openInv.x, user->openInv.y, user->openInv.z);
+    windowClose(user, user->openInv.type, user->openInv.x, user->openInv.y, user->openInv.z);
   }
 
   return true;
 }
-
-bool Inventory::onwindowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_t z)
-{
-
-  if (user->isOpenInv)
-  {
-    onwindowClose(user, user->openInv.type, user->openInv.x, user->openInv.y, user->openInv.z);
-  }
-
-  std::vector<OpenInvPtr>* pinv;
-  switch (type)
-  {
-  case WINDOW_CHEST:
-  case WINDOW_LARGE_CHEST:
-    pinv = &openChests;
-    break;
-  case WINDOW_FURNACE:
-    pinv = &openFurnaces;
-    break;
-  case WINDOW_CRAFTING_TABLE:
-    pinv = &openWorkbenches;
-    break;
-  default:
-  return false;
-  }
-
-  std::vector<OpenInvPtr>& inv = *pinv;
-
-  for (size_t i = 0; i < inv.size(); ++i)
-  {
-    if (inv[i]->x == user->openInv.x &&
-        inv[i]->y == user->openInv.y &&
-        inv[i]->z == user->openInv.z)
-    {
-      inv[i]->users.push_back(user);
-      user->isOpenInv = true;
-      return true;
-    }
-  }
-
-  //If the inventory not yet opened, create it
-  OpenInvPtr newInv(new OpenInventory());
-  newInv->type = type;
-  newInv->x    = x;
-  newInv->y    = y;
-  newInv->z    = z;
-  user->openInv = *newInv;
-
-  newInv->users.push_back(user);
-
-  inv.push_back(newInv);
-  user->isOpenInv = true;
-
-  //Chest opening animation
-  switch (type)
-  {
-    case WINDOW_CHEST:
-    case WINDOW_LARGE_CHEST:
-      user->sendAll(Protocol::blockAction(x,y,z,1,1,BLOCK_CHEST));
-      user->sendAll(Protocol::namedSoundEffect("random.chestopen", x<<3, y<<3, z<<3, 1.0, 63));
-      break;
-  }
-
-  return true;
-}
-
-bool Inventory::onwindowClose(User* user, int8_t type, int32_t x, int32_t y, int32_t z)
-{
-  std::vector<OpenInvPtr>* pinv = NULL;
-
-  switch (type)
-  {
-  case WINDOW_CHEST:
-  case WINDOW_LARGE_CHEST:
-    pinv = &openChests;
-    break;
-  case WINDOW_FURNACE:
-    pinv = &openFurnaces;
-    break;
-  case WINDOW_CRAFTING_TABLE:
-    pinv = &openWorkbenches;
-    break;
-  default:
-    return false;
-  }
-
-  std::vector<OpenInvPtr>& inv = *pinv;
-
-  for (size_t i = 0; i < inv.size(); ++i)
-  {
-    if (inv[i]->x == user->openInv.x &&
-        inv[i]->y == user->openInv.y &&
-        inv[i]->z == user->openInv.z)
-    {
-      for (size_t j = 0; j < inv[i]->users.size(); ++j)
-      {
-        if (inv[i]->users[j] == user)
-        {
-          // We should make users into a container that supports fast erase.
-          inv[i]->users.erase(inv[i]->users.begin() + j);
-
-          if (inv[i]->users.empty())
-          {
-            //Dump stuff to ground if workbench and no other users
-            if (type == WINDOW_CRAFTING_TABLE)
-            {
-              for (uint32_t slotNumber = 1; slotNumber < 10; ++slotNumber)
-              {
-                if (inv[i]->workbench[slotNumber].getType() != -1)
-                {
-                  ServerInstance->map(user->pos.map)->createPickupSpawn((int)user->pos.x, (int)user->pos.y, (int)user->pos.z,
-                      inv[i]->workbench[slotNumber].getType(), inv[i]->workbench[slotNumber].getCount(),
-                      inv[i]->workbench[slotNumber].getHealth(), user);
-                }
-              }
-            }
-            if(type == WINDOW_CHEST || type == WINDOW_LARGE_CHEST)
-            {
-              user->sendAll(Protocol::blockAction(x,y,z,1,0,BLOCK_CHEST));
-              user->sendAll(Protocol::namedSoundEffect("random.chestclosed", x<<3, y<<3, z<<3, 1.0, 63));
-            }
-
-            inv.erase(inv.begin() + i);
-          }
-
-          user->isOpenInv = false;
-          return true;
-        }
-      }
-    }
-  }
-
-  user->isOpenInv = false;
-  return true;
-}
-
-
-
 
 bool Inventory::doCraft(Item* slots, int8_t width, int8_t height)
 {

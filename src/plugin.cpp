@@ -73,6 +73,8 @@
 #include "items/food.h"
 #include "items/projectile.h"
 
+#include "inventory/inventoryPlayer.h"
+
 bool callbackReturnINTERNAL;
 // Create default hooks
 Plugin::Plugin()
@@ -163,8 +165,12 @@ void Plugin::init()
   // !! DEFAULT ALWAYS LAST, HANDLES EVERY BLOCK !!
   m_block_CBs.push_back(BlockBasicPtr(new BlockDefault));
 
+  // ITEMS
   m_item_CBs.push_back(ItemBasicPtr(new ItemFood));
   m_item_CBs.push_back(ItemBasicPtr(new ItemProjectile));
+
+  // INVENTORIES
+  m_inventory_CBs.push_back(InventoryBasicPtr(new InventoryPlayer));
 }
 
 

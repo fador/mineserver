@@ -52,6 +52,7 @@
     <ClCompile Include="..\src\furnace.cpp" />
     <ClCompile Include="..\src\furnaceManager.cpp" />
     <ClCompile Include="..\src\inventory.cpp" />
+    <ClCompile Include="..\src\inventory\inventoryPlayer.cpp" />
     <ClCompile Include="..\src\items\itembasic.cpp" />
     <ClCompile Include="..\src\items\food.cpp" />
     <ClCompile Include="..\src\items\projectile.cpp" />
@@ -96,6 +97,8 @@
     <ClInclude Include="..\src\furnace.h" />
     <ClInclude Include="..\src\furnaceManager.h" />
     <ClInclude Include="..\src\inventory.h" />
+    <ClInclude Include="..\src\inventory\inventorybasic.h" />
+    <ClInclude Include="..\src\inventory\inventoryPlayer.h" />
     <ClInclude Include="..\src\lighting.h" />
     <ClInclude Include="..\src\logger.h" />
     <ClInclude Include="..\src\logtype.h" />

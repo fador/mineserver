@@ -188,7 +188,7 @@ User::~User()
     //Close open inventory
     if (isOpenInv)
     {
-      ServerInstance->inventory()->onwindowClose(this, openInv.type, openInv.x, openInv.y, openInv.z);
+      ServerInstance->inventory()->windowClose(this, openInv.type, openInv.x, openInv.y, openInv.z);
     }
 
 
