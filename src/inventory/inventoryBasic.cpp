@@ -111,3 +111,50 @@ bool InventoryBasic::handleDrag(User* user, int8_t windowID, int16_t slot, int8_
 
   return true;
 }
+
+
+bool InventoryBasic::handleNumber(User* user, int8_t windowID, int16_t slot, int8_t button, int16_t actionNumber, int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t mode)
+{
+  Inventory* inventory = ServerInstance->inventory();
+
+  // Only when not holding anything
+  if(user->inventoryHolding.getType() == -1)
+  {
+    // Offset for "toolbar" items depending on the opened inventory
+    int inventory_offset;
+    switch (windowID) {
+      case WINDOW_PLAYER:
+        inventory_offset = 36;
+      break;
+      case WINDOW_CRAFTING_TABLE:
+        inventory_offset = 37;
+      break;
+      case WINDOW_CHEST:
+        inventory_offset = 27;
+      break;
+      case WINDOW_LARGE_CHEST:
+        inventory_offset = 54;
+      break;
+      case WINDOW_FURNACE:
+        inventory_offset = 30;
+      break;
+      case WINDOW_BREWING_STAND:
+        inventory_offset = 30;
+      break;
+      default:
+      return false;
+        
+    }
+    // Pick up from toolbar
+    onwindowClick(user, windowID, inventory_offset+button, INVENTORY_BUTTON_LEFT, 0, -1, 0, 0, INVENTORY_MODE_NORMAL);
+    // Swap with slot
+    onwindowClick(user, windowID, slot, INVENTORY_BUTTON_LEFT, 0, -1, 0, 0, INVENTORY_MODE_NORMAL);    
+    // Insert back to toolbar if holding something
+    if(user->inventoryHolding.getType() != -1)
+    {
+      onwindowClick(user, windowID, inventory_offset+button, INVENTORY_BUTTON_LEFT, 0, -1, 0, 0, INVENTORY_MODE_NORMAL);
+    }
+  }
+
+  return true;
+}

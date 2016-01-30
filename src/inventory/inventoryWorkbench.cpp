@@ -50,6 +50,10 @@ bool InventoryWorkbench::onwindowClick(User* user, int8_t windowID, int16_t slot
   {
     return this->handleDrag(user, windowID, slot, button, actionNumber, itemID, itemCount, itemUses, mode);
   }
+  else if (mode == INVENTORY_MODE_NUMBER)
+  {
+    return this->handleNumber(user, windowID, slot, button, actionNumber, itemID, itemCount, itemUses, mode);
+  }
   user->openInv.recordAction = false;
 
   //Click outside the window

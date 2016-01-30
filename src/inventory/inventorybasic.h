@@ -47,4 +47,5 @@ public:
   virtual bool onwindowClose(User* user, int8_t type, int32_t x, int32_t y, int32_t z) const = 0;
 
   virtual bool handleDrag(User* user, int8_t windowID, int16_t slot, int8_t button, int16_t actionNumber, int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t mode);
+  virtual bool handleNumber(User* user, int8_t windowID, int16_t slot, int8_t button, int16_t actionNumber, int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t mode);
 };
