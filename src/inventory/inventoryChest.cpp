@@ -27,7 +27,7 @@
 
 #include <stdint.h>
 #include <string>
-#include "InventoryChest.h"
+#include "inventoryChest.h"
 #include "user.h"
 #include "mineserver.h"
 #include "plugin.h"
