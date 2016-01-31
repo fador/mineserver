@@ -150,5 +150,7 @@ class Protocol
     static Packet blockChange(int32_t x, int32_t y, int32_t z, int16_t blocktype, int8_t meta);
 
     static Packet tabComplete(const std::vector<std::string> &msgs);
+
+    static Packet explosion(float x, float y, float z, float radius, std::vector<vec>& record, float velocity_x, float velocity_y, float velocity_z);
 };
 #endif

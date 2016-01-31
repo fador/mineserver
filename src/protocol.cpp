@@ -470,3 +470,16 @@ Packet Protocol::tabComplete(const std::vector<std::string> &msgs)
   }
   return ret;
 }
+
+Packet Protocol::explosion(float x, float y, float z, float radius, std::vector<vec>& record, float velocity_x, float velocity_y, float velocity_z)
+{
+  Packet ret;
+  ret << MS_VarInt((uint32_t)PACKET_OUT_EXPLOSION) << x << y << z << radius;
+  ret << (int32_t)record.size();
+  for(vec const& pos : record)
+  {
+    ret << (int8_t)pos.x() << (int8_t)pos.y() <<(int8_t)pos.z();
+  }
+  ret << velocity_x << velocity_y << velocity_z;
+  return ret;
+}
