@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2011, The Mineserver Project
+   Copyright (c) 2016, The Mineserver Project
    All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -51,8 +51,9 @@ void BlockTNT::rb(int32_t x,int16_t y,int32_t z,int map, User* user)
   }
   else
   {
+    record.push_back(vec(x-position.x(), y-position.y(), z-position.z()));
     ServerInstance->map(map)->setBlock(x,y,z,0,0);
-    ServerInstance->map(map)->sendBlockChange(x,y,z,0,0);
+    //ServerInstance->map(map)->sendBlockChange(x,y,z,0,0);
   }
   
   // Pickup Spawn Area
@@ -81,6 +82,8 @@ void BlockTNT::explode(User* user,int32_t x,int16_t y,int32_t z,int map)
     ServerInstance->map(map)->createPickupSpawn(x,y,z,46,1,0,user);
   } else {
     int number; // Counter in the for(...){...} loops.
+    position = vec(x, y, z);
+    record.clear();
     // Layer Y-4
   
     //rb(x,y-4,z,map,user);
@@ -221,6 +224,8 @@ void BlockTNT::explode(User* user,int32_t x,int16_t y,int32_t z,int map)
     rb(x,y+3,z-1,map,user);
     rb(x+1,y+3,z-1,map,user);
   
+
+    ServerInstance->map(user->pos.map)->sendExplosion(x, y, z, 10.0f, record, 0.0f, 0.0f, 0.0f);
     // Layer Y+4
   
   //rb(x,y+4,z,map,user);
@@ -243,7 +248,7 @@ bool BlockTNT::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32
   if (!this->isBlockStackable(oldblock))
   {
     revertBlock(user, x, y, z, map);
-    return true;
+    return false;
   }
   
   /* move the x,y,z coords dependent upon placement direction */
@@ -264,15 +269,16 @@ bool BlockTNT::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32
     revertBlock(user, x, y, z, map);
     return true;
   }
+
+  ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, 0);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, 0);
   
   return false;
 }
 
 void BlockTNT::onStartedDigging(User* user, int8_t status, int32_t x, int16_t y, int32_t z, int map, int8_t direction)
 {
-  uint8_t block = 0, metadata = 0;
-  explode(user,x,y,z,map);
-  
+  explode(user,x,y,z,map); 
 }
 
 bool BlockTNT::onInteract(User* user, int32_t x, int16_t y, int32_t z, int map)

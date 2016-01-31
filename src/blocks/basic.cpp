@@ -247,6 +247,8 @@ void BlockBasic::onNeighbourBroken(User* user, int16_t oldblock, int32_t x, int1
 
 bool BlockBasic::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int32_t z, int map,  int8_t direction)
 {
+  // Don't allow placement of unknown blocks
+  revertBlock(user,x , y, z, map);
   return false;
 }
 
