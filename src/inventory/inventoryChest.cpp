@@ -38,6 +38,11 @@
 bool InventoryChest::onwindowClick(User* user, int8_t windowID, int16_t slot, int8_t button, int16_t actionNumber,
                                   int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t mode)
 {
+
+  if (windowID == WINDOW_LARGE_CHEST && slot > MAX_SLOT_LARGE_CHEST) return false;
+  else if (windowID == WINDOW_CHEST && slot > MAX_SLOT_CHEST) return false;
+  if (slot != -999 && slot < 0) return false;
+
   Inventory* inventory = ServerInstance->inventory();
   //Ack
   if(actionNumber)

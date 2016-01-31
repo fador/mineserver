@@ -39,6 +39,11 @@ bool InventoryPlayer::onwindowClick(User* user, int8_t windowID, int16_t slot, i
                                    int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t mode)
 {
   Inventory* inventory = ServerInstance->inventory();
+
+  // Safeguard against overflow
+  if (slot > MAX_SLOT_PLAYER) return false;
+  if (slot != -999 && slot < 0) return false;
+
   //Ack
   if(actionNumber)
   {

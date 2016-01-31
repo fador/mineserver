@@ -37,6 +37,11 @@
 bool InventoryBrewingstand::onwindowClick(User* user, int8_t windowID, int16_t slot, int8_t button, int16_t actionNumber, 
                                           int16_t itemID, int8_t itemCount, int16_t itemUses, int8_t mode)
 {
+
+  // Safeguard against overflow
+  if (slot > MAX_SLOT_BREWING_STAND) return false;
+  if (slot != -999 && slot < 0) return false;
+
   return true;
 }
 
