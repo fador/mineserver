@@ -192,6 +192,8 @@ public:
   bool sendProjectileSpawn(User* user, int8_t projID);
 
   bool sendMultiBlocks(std::set<vec>& blocks);
+
+  bool sendExplosion(int x, int y, int z, float radius, std::vector<vec>&record, float velocity_x, float velocity_y, float velocity_z);
 };
 
 #endif

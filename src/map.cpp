@@ -1158,6 +1158,25 @@ bool Map::sendProjectileSpawn(User* user, int8_t projID)
   return true;
 }
 
+bool Map::sendExplosion(int x, int y, int z, float radius, std::vector<vec>&record, float velocity_x, float velocity_y, float velocity_z)
+{
+  //Push to local item storage
+  int chunk_x = blockToChunk(x);
+  int chunk_z = blockToChunk(z);
+
+  const ChunkMap::const_iterator it = chunks.find(Coords(chunk_x, chunk_z));
+
+  if (it == chunks.end())
+  {
+    return false;
+  }
+
+  it->second->sendPacket(Protocol::explosion(x, y, z, radius, record, velocity_x, velocity_y, velocity_z));
+  it->second->sendPacket(Protocol::namedSoundEffect("random.explode", x, y, z, 100.0f, 63.0f));
+  return true;
+}
+
+
 bool Map::suitableForSpawn(const vec &pos)
 {
   uint8_t block, meta;
