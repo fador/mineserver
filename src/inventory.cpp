@@ -486,6 +486,7 @@ bool Inventory::windowClose(User* user, int8_t type, int32_t x, int32_t y, int32
       }
     }
   }
+  return false;
 }
 
 bool Inventory::windowOpen(User* user, int8_t type, int32_t x, int32_t y, int32_t z)

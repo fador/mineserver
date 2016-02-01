@@ -57,7 +57,9 @@ struct spawnedItem
   }
 };
 
+class chestData;
 typedef std::shared_ptr<std::vector<ItemPtr> > ItemVectorPtr;
+typedef std::shared_ptr<chestData>   chestDataPtr;
 
 /** holds items and coordinates for small and large chests
  * note: large chests are in testing
@@ -71,27 +73,30 @@ public:
   void y(int32_t newy) { m_y = newy; }
   int32_t z() { return m_z; }
   void z(int32_t newz) { m_z = newz; }
-  bool large() { return this->size() > 27; }
-  void large(bool _large)
-  {
-    if(_large != this->large())
-    {
-      size_t new_length = 0;
-      if(_large)
-      {
-        new_length = 54+3;
-      } else {
-        new_length = 27+3;
-      }
-      while(new_length > items()->size())
-        items()->push_back(ItemPtr(new Item));
-      while(new_length < items()->size())
-        items()->pop_back();
-    }
-    return;
-  }
 
-  chestData()
+  bool isConnectionChecked() { return connection_checked; };
+  void setConnectionCheck() { connection_checked = true; };
+  bool getTop() { return connected_top; };
+
+  vec getConnectedLoc() { return connected_loc; };
+  chestDataPtr getConnectedData() { return connected_chest; };
+
+  // Connect two chests together
+  void connect(vec loc, chestDataPtr& chest, bool top) {    
+    if(connected_chest.get() != nullptr) return;
+
+    connected_top = top;
+    connected_chest = chest;
+    connected_loc = loc;  
+    connection_checked = true;
+  }
+  void clearConnection() { connected_chest.reset(); connected_loc = vec(0,0,0); }
+
+  bool large() { return connected_chest.get() != nullptr; }
+  
+
+  chestData():      
+      connection_checked(false)
   {
     this->items(ItemVectorPtr(new std::vector<ItemPtr>()));
     while(items()->size() < 27)
@@ -117,6 +122,10 @@ private:
   int32_t m_x;
   int32_t m_y;
   int32_t m_z;
+  vec connected_loc;
+  chestDataPtr connected_chest;
+  bool connected_top; // Is this the "top part" inventory
+  bool connection_checked;
   ItemVectorPtr m_items; /// pointer makes sharing between two connected chest blocks easier
 };
 
@@ -154,7 +163,6 @@ private:
   int32_t z;
 };
 
-typedef std::shared_ptr<chestData>   chestDataPtr;
 typedef std::shared_ptr<signData>    signDataPtr;
 typedef std::shared_ptr<furnaceData> furnaceDataPtr;
 

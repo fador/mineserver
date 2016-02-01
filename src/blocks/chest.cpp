@@ -152,51 +152,77 @@ bool BlockChest::onBroken(User* user, int8_t status, int32_t x, int16_t y, int32
     return true;
   }
 
+  // Do quick connection test
+  chestDataPtr _thischest;
+  if (!getChestByCoordinates(x, y, z, map, _thischest)) {
+    _thischest = chestDataPtr(new chestData);
+    _thischest->x(x);
+    _thischest->y(y);
+    _thischest->z(z);
+    chunk->chests.push_back(_thischest);
+  }
+
+  if (!_thischest->large() && !_thischest->isConnectionChecked()) {
+    int32_t connectedChestX, connectedChestZ;
+    if (findConnectedChest(x, y, z, map, &connectedChestX, &connectedChestZ)) {
+      chestDataPtr _connectedChest;
+      if (!findConnectedChest(x, y, z, map, _connectedChest)) {
+        _connectedChest = chestDataPtr(new chestData);
+        _connectedChest->x(connectedChestX);
+        _connectedChest->y(y);
+        _connectedChest->z(connectedChestZ);
+        chunk->chests.push_back(_connectedChest);
+      }
+      _connectedChest->connect(vec(x,y,z),_thischest,true);
+      _thischest->connect(vec(connectedChestX,y,connectedChestZ),_connectedChest,false);
+    }
+  }
+  _thischest->setConnectionCheck();
+
+
+
+  chestDataPtr connected_chest = nullptr;
+
   for (uint32_t i = 0; i < chunk->chests.size(); i++)
   {
     if (chunk->chests[i]->x() == x &&
         chunk->chests[i]->y() == y &&
         chunk->chests[i]->z() == z)
-    {
-      if(!chunk->chests[i]->large())
+    {    
+      // clean up a small chest
+      int32_t item_i = 26;
+      for(int32_t item_i = 26; 0 <= item_i; item_i--)
       {
-        // clean up a small chest
-        int32_t item_i = 26;
-        for(int32_t item_i = 26; 0 <= item_i; item_i--)
+        if ((*chunk->chests[i]->items())[(size_t)item_i]->getType() != -1)
         {
-          if ((*chunk->chests[i]->items())[(size_t)item_i]->getType() != -1)
-          {
-            ServerInstance->map(map)->createPickupSpawn(chunk->chests[i]->x(),
-                chunk->chests[i]->y(),
-                chunk->chests[i]->z(),
-                (*chunk->chests[i]->items())[(size_t)item_i]->getType(),
-                (*chunk->chests[i]->items())[(size_t)item_i]->getCount(),
-                (*chunk->chests[i]->items())[(size_t)item_i]->getHealth(),
-                NULL);
-          }
-          chunk->chests[i]->items()->pop_back();
+          ServerInstance->map(map)->createPickupSpawn(chunk->chests[i]->x(),
+              chunk->chests[i]->y(),
+              chunk->chests[i]->z(),
+              (*chunk->chests[i]->items())[(size_t)item_i]->getType(),
+              (*chunk->chests[i]->items())[(size_t)item_i]->getCount(),
+              (*chunk->chests[i]->items())[(size_t)item_i]->getHealth(),
+              NULL);
         }
-      } else {
-        // size a large chest down
-        for(uint32_t item_i = 53; 27-3 <= item_i; item_i--)
-        {
-          if ((*chunk->chests[i]->items())[item_i]->getType() != -1)
-          {
-            ServerInstance->map(map)->createPickupSpawn(chunk->chests[i]->x(),
-                chunk->chests[i]->y(),
-                chunk->chests[i]->z(),
-                (*chunk->chests[i]->items())[item_i]->getType(),
-                (*chunk->chests[i]->items())[item_i]->getCount(),
-                (*chunk->chests[i]->items())[item_i]->getHealth(),
-                NULL);
-          }
-          chunk->chests[i]->items()->pop_back();
-        }
+        chunk->chests[i]->items()->pop_back();
       }
+
+      // Store connected chest for large chests
+      if (chunk->chests[i]->large()) {
+        connected_chest = chunk->chests[i]->getConnectedData();
+      }
+
       chunk->chests.erase(chunk->chests.begin() + i);
 
       break;
     }
+  }
+
+  if (connected_chest != nullptr)
+  {
+    // Clear connection before deletion -> prevent deletion loop
+    connected_chest->clearConnection();
+    // Destroy connected chest
+    onBroken(user, status, connected_chest->x(), connected_chest->y(), connected_chest->z(), map, direction);
   }
 
   ServerInstance->map(map)->sendBlockChange(x, y, z, BLOCK_AIR, 0);
@@ -279,6 +305,19 @@ bool BlockChest::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int
     break;
   }
   
+  // create a new (small) chest
+  chestDataPtr newchest(new chestData);
+  sChunk* chunk = ServerInstance->map(map)->getChunk(blockToChunk(x), blockToChunk(z));
+  if(chunk != NULL)
+  {
+    newchest->x(x);
+    newchest->y(y);
+    newchest->z(z);
+    chunk->chests.push_back(newchest);
+  }  
+  ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, direction);
+  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
+
 
   int32_t connectedChestX, connectedChestZ;
   if(findConnectedChest(x, y, z, map, &connectedChestX, &connectedChestZ))
@@ -298,6 +337,7 @@ bool BlockChest::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int
       }
     }
 
+    // Rotate the same way
     ServerInstance->map(map)->setBlock(connectedChestX, y, connectedChestZ, (char)newblock, direction);
     ServerInstance->map(map)->sendBlockChange(connectedChestX, y, connectedChestZ, (char)newblock, direction);
 
@@ -305,39 +345,23 @@ bool BlockChest::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int
     chestDataPtr connectedChest;
     if(getChestByCoordinates(connectedChestX, y, connectedChestZ, map, connectedChest))
     {
-      chestDataPtr newchest;
-      if(!getChestByCoordinates(x, y, z, map, newchest))
-      {
-        sChunk* chunk = ServerInstance->map(map)->getChunk(blockToChunk(x), blockToChunk(z));
-        if(chunk != NULL)
-        {
-          newchest = chestDataPtr(new chestData);
-          newchest->items(connectedChest->items());
-          newchest->x(x);
-          newchest->y(y);
-          newchest->z(z);
-          chunk->chests.push_back(newchest);
-        }
-      } else {
-        newchest->large(true);
+      // We cannot connect to an already connected chest
+      if(!connectedChest->large()) {
+       connectedChest->connect(vec(x, y, z), newchest, connectedChestX < x || connectedChestZ < z);
+       newchest->connect(vec(connectedChestX, y, connectedChestZ), connectedChest, !(connectedChestX < x || connectedChestZ < z));
       }
-      connectedChest->large(true);
-    }
-  } else {
-    // create a new (small) chest
-    chestDataPtr newchest(new chestData);
-    sChunk* chunk = ServerInstance->map(map)->getChunk(blockToChunk(x), blockToChunk(z));
-    if(chunk != NULL)
-    {
-      newchest->x(x);
-      newchest->y(y);
-      newchest->z(z);
-      chunk->chests.push_back(newchest);
+    } else { // Create chest data if not exist
+      chestDataPtr newConnectedChest(new chestData);
+      newConnectedChest->x(connectedChestX);
+      newConnectedChest->y(y);
+      newConnectedChest->z(connectedChestZ);
+      chunk->chests.push_back(newConnectedChest);
+      newConnectedChest->connect(vec(x, y, z), newchest, connectedChestX < x || connectedChestZ < z);
+      newchest->connect(vec(connectedChestX, y, connectedChestZ), newConnectedChest, !(connectedChestX < x || connectedChestZ < z));
     }
   }
+  newchest->setConnectionCheck();
 
-  ServerInstance->map(map)->setBlock(x, y, z, (char)newblock, direction);
-  ServerInstance->map(map)->sendBlockChange(x, y, z, (char)newblock, direction);
   return false;
 }
 
@@ -364,19 +388,36 @@ bool BlockChest::onInteract(User* user, int32_t x, int16_t y, int32_t z, int map
     return false;
   }
 
-  chestDataPtr _chestData;
+    // Do quick connection test
+  chestDataPtr _thischest;
+  if (!getChestByCoordinates(x, y, z, map, _thischest)) {
+    _thischest = chestDataPtr(new chestData);
+    _thischest->x(x);
+    _thischest->y(y);
+    _thischest->z(z);
+    chunk->chests.push_back(_thischest);
+  }
 
-  for(uint32_t i = 0; i < chunk->chests.size(); i++)
-  {
-    if((chunk->chests[i]->y() == y) && (chunk->chests[i]->x() == x) && (chunk->chests[i]->z() == z))
-    {
-      _chestData = chunk->chests[i];
-      break;
+  if (!_thischest->large() && !_thischest->isConnectionChecked()) {
+    int32_t connectedChestX, connectedChestZ;
+    if (findConnectedChest(x, y, z, map, &connectedChestX, &connectedChestZ)) {
+      chestDataPtr _connectedChest;
+      if (!findConnectedChest(x, y, z, map, _connectedChest)) {
+        _connectedChest = chestDataPtr(new chestData);
+        _connectedChest->x(connectedChestX);
+        _connectedChest->y(y);
+        _connectedChest->z(connectedChestZ);
+        chunk->chests.push_back(_connectedChest);
+      }
+      _connectedChest->connect(vec(x,y,z),_thischest,true);
+      _thischest->connect(vec(connectedChestX,y,connectedChestZ),_connectedChest,false);
     }
   }
-  if(_chestData != NULL)
+  _thischest->setConnectionCheck();
+
+  if(_thischest != NULL)
   {
-    ServerInstance->inventory()->windowOpen(user, (_chestData->large() ? WINDOW_LARGE_CHEST : WINDOW_CHEST), x, y, z);
+    ServerInstance->inventory()->windowOpen(user, (_thischest->large() ? WINDOW_LARGE_CHEST : WINDOW_CHEST), x, y, z);
     return true;
   } else {
     return false;

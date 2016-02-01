@@ -106,8 +106,20 @@ bool InventoryChest::onwindowClick(User* user, int8_t windowID, int16_t slot, in
 
   chunk->changed = true;
 
+  chestDataPtr _thischest;
+  for(size_t i = 0; i < chunk->chests.size(); i++)
+  {
+    if((chunk->chests[i]->x() == user->openInv.x)
+      && (chunk->chests[i]->y() == user->openInv.y)
+      && (chunk->chests[i]->z() == user->openInv.z))
+    {
+      _thischest = chunk->chests[i];
+      break;
+    }
+  }
+
   std::vector<User*>* otherUsers = NULL;
-  OpenInvPtr currentInventory;
+  std::vector<User*>* otherUsersCon = NULL;
 
   std::vector<OpenInvPtr>& inv = inventory->openChests;
 
@@ -118,12 +130,25 @@ bool InventoryChest::onwindowClick(User* user, int8_t windowID, int16_t slot, in
         inv[i]->z == user->openInv.z)
     {
       otherUsers = &inv[i]->users;
-      currentInventory = inv[i];
       break;
     }
   }
+  // Users in connected chest
+  if (_thischest->large())
+  {
+    for (size_t i = 0; i < inv.size(); i++)
+    {
+      if (inv[i]->x == _thischest->getConnectedLoc().x() &&
+          inv[i]->y == _thischest->getConnectedLoc().y() &&
+          inv[i]->z == _thischest->getConnectedLoc().z())
+      {
+        otherUsersCon = &inv[i]->users;
+        break;
+      }
+    }
+  }
 
-  if (otherUsers == NULL || currentInventory == NULL)
+  if (otherUsers == NULL)
   {
     return false;
   }
@@ -149,15 +174,10 @@ bool InventoryChest::onwindowClick(User* user, int8_t windowID, int16_t slot, in
           break;
         }
       }
-      //Create chest data if it doesn't exist
+      // Chest data has to exist at this point
       if (slotItem == NULL)
       {
-        chestDataPtr newChest(new chestData);
-        newChest->x(user->openInv.x);
-        newChest->y(user->openInv.y);
-        newChest->z(user->openInv.z);
-        chunk->chests.push_back(newChest);
-        slotItem = (*newChest->items())[slot].get();
+        return false;
       }
     }
     break;
@@ -168,30 +188,31 @@ bool InventoryChest::onwindowClick(User* user, int8_t windowID, int16_t slot, in
     }
     else
     {
-      //ToDo: Handle large chest
-      for (uint32_t i = 0; i < chunk->chests.size(); i++)
+      // Search for this chest
+      for (chestDataPtr chest : chunk->chests)
       {
-        //if(!chunk->chests[i]->large())
-        //  continue;
-
-        if(chunk->chests[i]->x() == user->openInv.x &&
-          chunk->chests[i]->y() == user->openInv.y &&
-          chunk->chests[i]->z() == user->openInv.z)
+        if(chest->x() == user->openInv.x &&
+           chest->y() == user->openInv.y &&
+           chest->z() == user->openInv.z)
         {
-          slotItem = (*chunk->chests[i]->items())[slot].get();
+          // Chests are separate entities and connected with "top" bit telling which is the top part of inventory
+
+          // Bottom part
+          if (slot > 26) {
+            slotItem = chest->getTop()?(*chest->getConnectedData()->items())[slot-27].get() : (*chest->items())[slot-27].get() ;
+          } else { // Top part
+            slotItem = chest->getTop()?(*chest->items())[slot].get() : (*chest->getConnectedData()->items())[slot].get();
+          }
           break;
         }
       }
-      if(slotItem == NULL)
+
+      // Chest data has to exist at this point
+      if (slotItem == NULL)
       {
-        chestDataPtr newChest(new chestData);
-        newChest->x(user->openInv.x);
-        newChest->y(user->openInv.y);
-        newChest->z(user->openInv.z);
-        newChest->large(true);
-        chunk->chests.push_back(newChest);
-        slotItem = (*newChest->items())[slot].get();
+        return false;
       }
+
     }
     break;
   }
@@ -265,31 +286,36 @@ bool InventoryChest::onwindowClick(User* user, int8_t windowID, int16_t slot, in
   switch(windowID)
   {
     case WINDOW_CHEST:
-      chunk->changed = true;
-      if(slot < 27)
+      if(slot > 26)
       {
-        for(uint32_t i = 0; i < otherUsers->size(); i++)
-        {
-          if((*otherUsers)[i] != user)
-          {
-            inventory->setSlot((*otherUsers)[i], windowID, slot, slotItem);
-          }
-        }
+        return true;
       }
       break;
     case WINDOW_LARGE_CHEST:
-      chunk->changed = true;
-      if(slot < 54)
+      if(slot > 53)
       {
-        for(uint32_t i = 0; i < otherUsers->size(); i++)
-        {
-          if((*otherUsers)[i] != user)
-          {
-            inventory->setSlot((*otherUsers)[i], windowID, slot, slotItem);
-          }
-        }
+        return true;
       }
-      break;
+  }
+
+  for(uint32_t i = 0; i < otherUsers->size(); i++)
+  {
+    if((*otherUsers)[i] != user)
+    {
+      inventory->setSlot((*otherUsers)[i], windowID, slot, slotItem);
+    }
+  }
+
+  // If connected chest inventory was found, loop that too
+  if (otherUsersCon != NULL)
+  {
+    for(uint32_t i = 0; i < otherUsersCon->size(); i++)
+    {
+      if((*otherUsersCon)[i] != user)
+      {
+        inventory->setSlot((*otherUsersCon)[i], windowID, slot, slotItem);
+      }
+    } 
   }
   return true;
 }
@@ -352,14 +378,29 @@ bool InventoryChest::onwindowOpen(User* user, int8_t type, int32_t x, int32_t y,
   {
     std::string windowName = _chestData->large() ? "Large chest" : "Chest";
 
-    user->writePacket(Protocol::openWindow(type,INVENTORYTYPE_CHEST,"{\"text\": \""+json_esc(windowName)+"\"}", _chestData->size()));
+    user->writePacket(Protocol::openWindow(type,INVENTORYTYPE_CHEST,"{\"text\": \""+json_esc(windowName)+"\"}", _chestData->large()?54:27));
 
-    for (size_t j = 0; j < _chestData->size(); j++)
+    uint32_t chestSlots = _chestData->size() * (_chestData->large() ? 2: 1);
+
+    for (size_t j = 0; j < chestSlots; j++)
     {
-      // Send all non-empty slots
-      if ((*_chestData->items())[j]->getType() != -1)
+      ItemPtr tmpItem;
+      if (_chestData->large()) {
+        if (j < 27) {
+          tmpItem = _chestData->getTop() ? (*_chestData->items())[j] : (*_chestData->getConnectedData()->items())[j];
+        } else {
+          tmpItem = _chestData->getTop() ? (*_chestData->getConnectedData()->items())[j-27] : (*_chestData->items())[j-27];
+        }
+      }
+      else
       {
-        user->writePacket(Protocol::setSlot(type, j, *(*_chestData->items())[j]));
+        tmpItem = (*_chestData->items())[j];
+      }
+
+      // Send all non-empty slots
+      if (tmpItem->getType() != -1)
+      {
+        user->writePacket(Protocol::setSlot(type, j, *tmpItem));
       }
     }
   }

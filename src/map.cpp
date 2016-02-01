@@ -1482,10 +1482,6 @@ sChunk* Map::loadMap(int x, int z, bool generate)
           newChest->y(entityY);
           newChest->z(entityZ);
 
-          int8_t large = *(**iter)["large"];
-          if(large == 1)
-            newChest->large(true);
-
           //Loop items
           for (std::vector<NBT_Value*>::iterator itemIterator = itemList->begin(); itemIterator != itemList->end(); ++itemIterator)
           {
@@ -1496,7 +1492,9 @@ sChunk* Map::loadMap(int x, int z, bool generate)
                 (**itemIterator)["Count"]->GetType() != NBT_Value::TAG_BYTE ||
                 (**itemIterator)["Slot"]->GetType() != NBT_Value::TAG_BYTE ||
                 (**itemIterator)["Damage"]->GetType() != NBT_Value::TAG_SHORT ||
-                (**itemIterator)["id"]->GetType() != NBT_Value::TAG_SHORT)
+                (**itemIterator)["id"]->GetType() != NBT_Value::TAG_SHORT ||
+                (int8_t) *(**itemIterator)["Slot"] > 26 ||
+                (int8_t) *(**itemIterator)["Slot"] < 0) // Ignore slots going off limits
             {
               continue;
             }
@@ -1640,7 +1638,6 @@ bool Map::saveMap(int x, int z)
     val->Insert("x", new NBT_Value((int32_t)chunk->chests[i]->x()));
     val->Insert("y", new NBT_Value((int32_t)chunk->chests[i]->y()));
     val->Insert("z", new NBT_Value((int32_t)chunk->chests[i]->z()));
-    val->Insert("large", new NBT_Value((int8_t)(chunk->chests[i]->large() ? 1 : 0)));
 
     NBT_Value* nbtInv = new NBT_Value(NBT_Value::TAG_LIST, NBT_Value::TAG_COMPOUND);
     for (uint32_t slot = 0; slot < chunk->chests[i]->size(); slot++)
