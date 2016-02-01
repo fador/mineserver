@@ -1440,9 +1440,15 @@ sChunk* Map::loadMap(int x, int z, bool generate)
       int32_t entityY = *(**iter)["y"];
       int32_t entityZ = *(**iter)["z"];
 
+      uint8_t entityBlock, entityMeta;
+      getBlock(entityX, entityY, entityZ, &entityBlock, &entityMeta, false);
+
       //Extract sign data
       if ((*id == "Sign"))
       {
+        // Make sure this block exists
+        if (entityBlock != BLOCK_SIGN_POST && entityBlock != BLOCK_WALL_SIGN) continue;
+
         signDataPtr newSign(new signData);
         newSign->x = entityX;
         newSign->y = entityY;
@@ -1457,6 +1463,9 @@ sChunk* Map::loadMap(int x, int z, bool generate)
       //Extract chest data
       else if ((*id == "Chest"))
       {
+        // Make sure this block exists
+        if (entityBlock != BLOCK_CHEST) continue;
+
         NBT_Value* chestItems = (**iter)["Items"];
 
         if (chestItems->GetType() == NBT_Value::TAG_LIST)
@@ -1503,6 +1512,9 @@ sChunk* Map::loadMap(int x, int z, bool generate)
       //Next, furnace data
       else if ((*id == "Furnace"))
       {
+        // Make sure this block exists
+        if (entityBlock != BLOCK_FURNACE) continue;
+
         NBT_Value* chestItems = (**iter)["Items"];
 
         if (chestItems->GetType() == NBT_Value::TAG_LIST)
