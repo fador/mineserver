@@ -1448,6 +1448,16 @@ sChunk* Map::loadMap(int x, int z, bool generate)
       {
         // Make sure this block exists
         if (entityBlock != BLOCK_SIGN_POST && entityBlock != BLOCK_WALL_SIGN) continue;
+                
+        // Check for duplicates
+        bool blockEntityFound = false;
+        for (auto &entitySign : chunk->signs) {
+          if (entitySign->x == entityX && entitySign->y == entityY && entitySign->z == entityZ) {
+            blockEntityFound = true;
+            break;
+          }
+        }
+        if (blockEntityFound) continue;
 
         signDataPtr newSign(new signData);
         newSign->x = entityX;
@@ -1465,6 +1475,16 @@ sChunk* Map::loadMap(int x, int z, bool generate)
       {
         // Make sure this block exists
         if (entityBlock != BLOCK_CHEST) continue;
+
+        // Check for duplicates
+        bool blockEntityFound = false;
+        for (auto &chest : chunk->chests) {
+          if (chest->x() == entityX && chest->y() == entityY && chest->z() == entityZ) {
+            blockEntityFound = true;
+            break;
+          }
+        }
+        if (blockEntityFound) continue;
 
         NBT_Value* chestItems = (**iter)["Items"];
 
@@ -1512,6 +1532,16 @@ sChunk* Map::loadMap(int x, int z, bool generate)
       {
         // Make sure this block exists
         if (entityBlock != BLOCK_FURNACE) continue;
+        
+        // Check for duplicates
+        bool blockEntityFound = false;
+        for (auto &furnace : chunk->furnaces) {
+          if (furnace->x == entityX && furnace->y == entityY && furnace->z == entityZ) {
+            blockEntityFound = true;
+            break;
+          }
+        }
+        if (blockEntityFound) continue;
 
         NBT_Value* chestItems = (**iter)["Items"];
 
