@@ -292,12 +292,13 @@ bool InventoryWorkbench::onwindowOpen(User* user, int8_t type, int32_t x, int32_
 
   for (size_t i = 0; i < inv.size(); ++i)
   {
-    if (inv[i]->x == user->openInv.x &&
-        inv[i]->y == user->openInv.y &&
-        inv[i]->z == user->openInv.z)
+    if (inv[i]->x == x &&
+        inv[i]->y == y &&
+        inv[i]->z == z)
     {
       inv[i]->users.push_back(user);
       user->isOpenInv = true;
+      user->openInv = *inv[i];
       break;
     }
   }
@@ -323,9 +324,9 @@ bool InventoryWorkbench::onwindowOpen(User* user, int8_t type, int32_t x, int32_
   // ToDo: option for shared workbenches
   for (uint32_t i = 0; i < inv.size(); i++)
   {
-    if (inv[i]->x == user->openInv.x &&
-        inv[i]->y == user->openInv.y &&
-        inv[i]->z == user->openInv.z)
+    if (inv[i]->x == x &&
+        inv[i]->y == y &&
+        inv[i]->z == z)
     {
       for (int j = 0; j < 10; j++)
       {
@@ -347,9 +348,9 @@ bool InventoryWorkbench::onwindowClose(User* user, int8_t type, int32_t x, int32
 
   for (size_t i = 0; i < inv.size(); ++i)
   {
-    if (inv[i]->x == user->openInv.x &&
-        inv[i]->y == user->openInv.y &&
-        inv[i]->z == user->openInv.z)
+    if (inv[i]->x == x &&
+        inv[i]->y == y &&
+        inv[i]->z == z)
     {
       for (size_t j = 0; j < inv[i]->users.size(); ++j)
       {

@@ -53,12 +53,13 @@ bool InventoryBrewingstand::onwindowOpen(User* user, int8_t type, int32_t x, int
 
   for (size_t i = 0; i < inv.size(); ++i)
   {
-    if (inv[i]->x == user->openInv.x &&
-        inv[i]->y == user->openInv.y &&
-        inv[i]->z == user->openInv.z)
+    if (inv[i]->x == x &&
+        inv[i]->y == y &&
+        inv[i]->z == z)
     {
       inv[i]->users.push_back(user);
       user->isOpenInv = true;
+      user->openInv = *inv[i];
       break;
     }
   }
@@ -94,9 +95,9 @@ bool InventoryBrewingstand::onwindowClose(User* user, int8_t type, int32_t x, in
 
   for (size_t i = 0; i < inv.size(); ++i)
   {
-    if (inv[i]->x == user->openInv.x &&
-        inv[i]->y == user->openInv.y &&
-        inv[i]->z == user->openInv.z)
+    if (inv[i]->x == x &&
+        inv[i]->y == y &&
+        inv[i]->z == z)
     {
       for (size_t j = 0; j < inv[i]->users.size(); ++j)
       {
