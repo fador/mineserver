@@ -341,14 +341,18 @@ bool BlockChest::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int
     ServerInstance->map(map)->setBlock(connectedChestX, y, connectedChestZ, (char)newblock, direction);
     ServerInstance->map(map)->sendBlockChange(connectedChestX, y, connectedChestZ, (char)newblock, direction);
 
+    // Select "top" chest based on the coordinates
+    bool connected_top = connectedChestX < x || connectedChestZ < z;
+
     // create a new chest and connect it to another chest --> large chest
     chestDataPtr connectedChest;
     if(getChestByCoordinates(connectedChestX, y, connectedChestZ, map, connectedChest))
     {
       // We cannot connect to an already connected chest
       if(!connectedChest->large()) {
-       connectedChest->connect(vec(x, y, z), newchest, connectedChestX < x || connectedChestZ < z);
-       newchest->connect(vec(connectedChestX, y, connectedChestZ), connectedChest, !(connectedChestX < x || connectedChestZ < z));
+       
+       connectedChest->connect(vec(x, y, z), newchest, connected_top);
+       newchest->connect(vec(connectedChestX, y, connectedChestZ), connectedChest, !connected_top);
       }
     } else { // Create chest data if not exist
       chestDataPtr newConnectedChest(new chestData);
@@ -356,8 +360,8 @@ bool BlockChest::onPlace(User* user, int16_t newblock, int32_t x, int16_t y, int
       newConnectedChest->y(y);
       newConnectedChest->z(connectedChestZ);
       chunk->chests.push_back(newConnectedChest);
-      newConnectedChest->connect(vec(x, y, z), newchest, connectedChestX < x || connectedChestZ < z);
-      newchest->connect(vec(connectedChestX, y, connectedChestZ), newConnectedChest, !(connectedChestX < x || connectedChestZ < z));
+      newConnectedChest->connect(vec(x, y, z), newchest, connected_top);
+      newchest->connect(vec(connectedChestX, y, connectedChestZ), newConnectedChest, !connected_top);
     }
   }
   newchest->setConnectionCheck();
@@ -401,6 +405,9 @@ bool BlockChest::onInteract(User* user, int32_t x, int16_t y, int32_t z, int map
   if (!_thischest->large() && !_thischest->isConnectionChecked()) {
     int32_t connectedChestX, connectedChestZ;
     if (findConnectedChest(x, y, z, map, &connectedChestX, &connectedChestZ)) {
+      // Select "top" chest based on the coordinates
+      bool connected_top = connectedChestX < x || connectedChestZ < z;
+
       chestDataPtr _connectedChest;
       if (!findConnectedChest(x, y, z, map, _connectedChest)) {
         _connectedChest = chestDataPtr(new chestData);
@@ -409,8 +416,8 @@ bool BlockChest::onInteract(User* user, int32_t x, int16_t y, int32_t z, int map
         _connectedChest->z(connectedChestZ);
         chunk->chests.push_back(_connectedChest);
       }
-      _connectedChest->connect(vec(x,y,z),_thischest,true);
-      _thischest->connect(vec(connectedChestX,y,connectedChestZ),_connectedChest,false);
+      _connectedChest->connect(vec(x,y,z),_thischest, connected_top);
+      _thischest->connect(vec(connectedChestX,y,connectedChestZ),_connectedChest,!connected_top);
     }
   }
   _thischest->setConnectionCheck();
