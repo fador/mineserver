@@ -283,15 +283,16 @@ bool InventoryFurnace::onwindowOpen(User* user, int8_t type, int32_t x, int32_t 
   {
     if (chunk->furnaces[i]->x == x && chunk->furnaces[i]->y == y && chunk->furnaces[i]->z == z)
     {
+      std::vector<Item> slots;
       for (int j = 0; j < 3; j++)
-      {
-        if (chunk->furnaces[i]->items[j].getType() != -1)
-        {
-          user->writePacket(Protocol::setSlot(WINDOW_FURNACE, j, chunk->furnaces[i]->items[j]));
-        }
+      {        
+        slots.push_back(chunk->furnaces[i]->items[j]);
       }
-      user->writePacket(Protocol::windowProperty(WINDOW_FURNACE, 0, (chunk->furnaces[i]->cookTime * 18)));
-      user->writePacket(Protocol::windowProperty(WINDOW_FURNACE, 1, (chunk->furnaces[i]->burnTime * 3)));
+      user->writePacket(Protocol::windowItems(WINDOW_FURNACE, slots));
+
+      user->writePacket(Protocol::windowProperty(WINDOW_FURNACE, 0,  chunk->furnaces[i]->burnTime>10?200: (chunk->furnaces[i]->burnTime * 20)));
+      user->writePacket(Protocol::windowProperty(WINDOW_FURNACE, 3, 200));
+      user->writePacket(Protocol::windowProperty(WINDOW_FURNACE, 2, (chunk->furnaces[i]->cookTime * 20)));
       break;
     }
   }

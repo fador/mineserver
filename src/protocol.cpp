@@ -483,3 +483,15 @@ Packet Protocol::explosion(float x, float y, float z, float radius, std::vector<
   ret << velocity_x << velocity_y << velocity_z;
   return ret;
 }
+
+ Packet Protocol::windowItems(uint8_t windowID, std::vector<Item>& slots)
+{
+  Packet ret;
+  ret << MS_VarInt((uint32_t)PACKET_OUT_WINDOW_ITEMS) << windowID;
+  ret << (int16_t)slots.size();
+  for(Item const& slot : slots)
+  {
+    ret << Protocol::slot(slot);
+  }
+  return ret;
+}
