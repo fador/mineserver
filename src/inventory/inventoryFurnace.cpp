@@ -317,10 +317,12 @@ bool InventoryFurnace::onwindowClose(User* user, int8_t type, int32_t x, int32_t
         {
           // We should make users into a container that supports fast erase.
           inv[i]->users.erase(inv[i]->users.begin() + j);
-
-          user->isOpenInv = false;
-          return true;
+          break;
         }
+      }
+      if (inv[i]->users.empty())
+      {
+        inv.erase(inv.begin()+i);
       }
       break;
     }
