@@ -533,5 +533,8 @@
     <ClInclude Include="..\src\inventory\inventoryBrewingstand.h">
       <Filter>Header Files\inventory</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\threadpool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

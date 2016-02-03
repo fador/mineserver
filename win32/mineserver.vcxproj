@@ -128,6 +128,7 @@
     <ClInclude Include="..\src\screenBase.h" />
     <ClInclude Include="..\src\signalhandler.h" />
     <ClInclude Include="..\src\sockets.h" />
+    <ClInclude Include="..\src\threadpool.h" />
     <ClInclude Include="..\src\tools.h" />
     <ClInclude Include="..\src\tree.h" />
     <ClInclude Include="..\src\user.h" />
