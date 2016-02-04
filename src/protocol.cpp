@@ -42,9 +42,9 @@ Packet Protocol::encryptionRequest()
 {
   Packet ret;
   ret << MS_VarInt((uint32_t)PACKET_OUT_ENCRYPTION_REQUEST) << ServerInstance->serverID 
-  << MS_VarInt(ServerInstance->publicKey.size());
+  << MS_VarInt((int64_t)ServerInstance->publicKey.size());
   ret.addToWrite((uint8_t*)ServerInstance->publicKey.c_str(),ServerInstance->publicKey.size());
-  ret << MS_VarInt(ServerInstance->encryptionBytes.size());
+  ret << MS_VarInt((int64_t)ServerInstance->encryptionBytes.size());
   ret.addToWrite((uint8_t*)ServerInstance->encryptionBytes.c_str(),ServerInstance->encryptionBytes.size());
   return ret;
 }
