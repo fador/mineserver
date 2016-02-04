@@ -38,16 +38,19 @@ void ThreadPool::taskValidateUser(ThreadTask *task)
   #define HOST_NAME "sessionserver.mojang.com"
   #define HOST_PORT "443"
   #define HOST_RESOURCE "/session/minecraft/hasJoined?"
-
+  const char* const PREFERRED_CIPHERS = "HIGH:!aNULL:!kRSA:!PSK:!SRP:!MD5:!RC4";
   long res = 1;
-
+  int len = 0;
   SSL_CTX* ctx = NULL;
   BIO *web = NULL;
   SSL *ssl = NULL;
-
+  char buff[1536] = {};
+  std::string::size_type findResult;
+  const long flags = SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_COMPRESSION;
   Mineserver::userValidation userValid;
   userValid.valid = false;
-  std::string output,request_uri, get_req;
+  std::string output,request_uri, get_req;  
+  X509* cert;
 
   const SSL_METHOD* method = SSLv23_method();
   if(!(NULL != method)) goto cleanup;
@@ -60,7 +63,6 @@ void ThreadPool::taskValidateUser(ThreadTask *task)
 
   SSL_CTX_set_verify_depth(ctx, 4);
 
-  const long flags = SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_COMPRESSION;
   SSL_CTX_set_options(ctx, flags);
 
   //res = SSL_CTX_load_verify_locations(ctx, "chain.pem", NULL);
@@ -74,8 +76,7 @@ void ThreadPool::taskValidateUser(ThreadTask *task)
 
   BIO_get_ssl(web, &ssl);
   if(!(ssl != NULL)) goto cleanup;
-
-  const char* const PREFERRED_CIPHERS = "HIGH:!aNULL:!kRSA:!PSK:!SRP:!MD5:!RC4";
+    
   res = SSL_set_cipher_list(ssl, PREFERRED_CIPHERS);
   if(!(1 == res)) goto cleanup;
 
@@ -89,7 +90,7 @@ void ThreadPool::taskValidateUser(ThreadTask *task)
   if(!(1 == res)) goto cleanup;
 
   // verify a server certificate was presented during the negotiation
-  X509* cert = SSL_get_peer_certificate(ssl);
+  cert = SSL_get_peer_certificate(ssl);
   if(cert) { X509_free(cert); } // Free immediately
   if(NULL == cert) goto cleanup;
 
@@ -106,21 +107,18 @@ void ThreadPool::taskValidateUser(ThreadTask *task)
                 "Connection: close\r\n"
                 "\r\n\r\n";
 
-  BIO_puts(web, get_req.c_str());
-    
-  int len = 0;
+  BIO_puts(web, get_req.c_str());    
+  
   do
-  {
-    char buff[1536] = {};
-    len = BIO_read(web, buff, sizeof(buff));
-            
+  {    
+    len = BIO_read(web, buff, sizeof(buff));            
     if(len > 0)
       output.append(buff, len);
 
   } while (len > 0 || BIO_should_retry(web));
   
 
-  auto findResult = output.find("200 OK");
+  findResult = output.find("200 OK");
   if (findResult == std::string::npos) goto cleanup;
   findResult = output.find("\"id\":\"");
   if (findResult == std::string::npos) goto cleanup;
