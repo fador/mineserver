@@ -79,6 +79,7 @@
     <ClCompile Include="..\src\screenBase.cpp" />
     <ClCompile Include="..\src\signalhandler.cpp" />
     <ClCompile Include="..\src\sockets.cpp" />
+    <ClCompile Include="..\src\threadpool.cpp" />
     <ClCompile Include="..\src\tools.cpp" />
     <ClCompile Include="..\src\tree.cpp" />
     <ClCompile Include="..\src\user.cpp" />
@@ -232,7 +233,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>pthread.lib;libeay32.lib;ssleay32.lib;Winmm.lib;libnoise.lib;zlibwapi.lib;ws2_32.lib;libevent2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libeay32.lib;ssleay32.lib;Winmm.lib;libnoise.lib;zlibwapi.lib;ws2_32.lib;libevent2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
       <AdditionalLibraryDirectories>..\buildpack\lib\</AdditionalLibraryDirectories>
@@ -260,7 +261,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>pthread.lib;libeay32.lib;ssleay32.lib;Winmm.lib;libnoise.lib;zlibwapi.lib;libevent2.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libeay32.lib;ssleay32.lib;Winmm.lib;libnoise.lib;zlibwapi.lib;libevent2.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>

@@ -36,16 +36,22 @@
 #include <chrono>
 #include <exception>
 
-enum ThreadType { THREAD_MAPGEN, THREAD_LIGHTGEN };
+enum ThreadType { THREAD_MAPGEN, THREAD_LIGHTGEN, THREAD_VALIDATEUSER };
+
+class User;
 
 struct ThreadTask {
 
   ThreadTask() {};
-  ThreadTask(ThreadType _type, void* _user) : type(_type), user(_user) {};
+  ThreadTask(ThreadType _type, User* _user) : type(_type), user(_user) {};
   ThreadType type;
-  void *user;
+  User *user;
 
   uint32_t taskID;
+
+  struct {
+    std::string accessToken;
+  } taskValidate;
 };
 
 class ThreadPool{
@@ -95,9 +101,15 @@ public:
         inputLock.unlock();
 
         // Handle task
-
-        // Simulate random delay
-        std::this_thread::sleep_for(std::chrono::milliseconds{ rand()%500 });
+        if (task->type == THREAD_VALIDATEUSER)
+        {
+         taskValidateUser(task);
+        }
+        else
+        {
+          // Simulate random delay
+          std::this_thread::sleep_for(std::chrono::milliseconds{ rand()%500 });
+        }
 
         std::unique_lock<std::mutex> outputLock(outputMutex);
         std::cout << "Thread " << std::this_thread::get_id() << " handled task " << task->taskID << std::endl;
@@ -119,4 +131,7 @@ private:
     std::vector<std::thread> threads;
     bool running;
     uint32_t taskID;
+
+    // Tasks
+    void taskValidateUser(ThreadTask* task);
 };

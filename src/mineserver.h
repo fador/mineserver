@@ -32,6 +32,7 @@
 #include <set>
 #include <string>
 #include <memory>
+#include <mutex>
 
 //Enable protocol encryption
 #define PROTOCOL_ENCRYPTION
@@ -51,6 +52,7 @@
 #include <openssl/rsa.h>
 #include <openssl/x509v3.h>
 #include <openssl/rc4.h>
+#include <openssl/ssl.h>
 #endif
 
 #include "extern.h"
@@ -59,7 +61,7 @@
 #include "plugin_api.h"
 #undef MINESERVER
 
-#include <pthread.h>
+#include "threadpool.h"
 
 struct event_base;
 
@@ -76,7 +78,7 @@ public:
   bool m_damage_enabled;
   bool m_only_helmets;
   struct event* m_listenEvent;
-  pthread_mutex_t m_validation_mutex;
+  std::mutex m_validation_mutex;
   struct userValidation { User* user; bool valid; uint32_t UID; };
   std::vector<userValidation> validatedUsers;
 
@@ -254,6 +256,16 @@ public:
       // which seems redundant. -- gk
   }
 
+  inline void setThreadpool(ThreadPool* threadpool)
+  {
+    m_threadpool = threadpool;
+  }
+
+  inline ThreadPool* getThreadpool() const
+  {
+    return m_threadpool;
+  }
+
 private:
 
   bool m_running;
@@ -282,6 +294,7 @@ private:
   PacketHandler*  m_packetHandler;
   Inventory*      m_inventory;
   Mobs*           m_mobs;
+  ThreadPool*     m_threadpool;
 };
 
 #endif

@@ -172,6 +172,7 @@ public:
 
   //Login
   bool sendLoginInfo();
+  bool setUUID(std::string uuid, bool stripDashes);
 
   //Load/save player data from/to a file at <mapdir>/players/<nick>.dat
   bool saveData();

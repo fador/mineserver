@@ -25,6 +25,8 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "threadpool.h"
+
 #ifdef DEBUG
 #ifdef _MSC_VER
 #define _CRTDBG_MAP_ALLOC
@@ -222,7 +224,6 @@ Mineserver::Mineserver(int args, char **argarray)
      m_inventory     (NULL),
      m_mobs          (NULL)
 {
-  pthread_mutex_init(&m_validation_mutex,NULL);
   ServerInstance = this;
   InitSignals();
   
@@ -319,9 +320,11 @@ Mineserver::Mineserver(int args, char **argarray)
     pid_out << getpid();
   }
   pid_out.close();
-
-
-
+    
+  // Init threadpool with thread count
+  // ToDo: thread count from the config
+  setThreadpool(new ThreadPool());
+  getThreadpool()->setThreadCount(2);
 
   init_plugin_api();
 
@@ -333,7 +336,12 @@ Mineserver::Mineserver(int args, char **argarray)
 
 
   LOG2(INFO, "Welcome to Mineserver v" + VERSION);
-  LOG2(INFO, "Using zlib "+std::string(ZLIB_VERSION)+" libevent "+std::string(event_get_version()));
+  LOG2(INFO, "Using:");
+  LOG2(INFO, "  zlib "+std::string(ZLIB_VERSION));
+  LOG2(INFO, "  libevent "+std::string(event_get_version()));
+  LOG2(INFO, "  "+std::string(OPENSSL_VERSION_TEXT));
+
+  SSL_library_init();
 
   LOG2(INFO, "Generating RSA key pair for protocol encryption");
   //Protocol encryption
@@ -863,7 +871,7 @@ void Mineserver::timed_1s()
   furnaceManager()->update();
 
   // Check for user validation results
-  pthread_mutex_lock(&ServerInstance->m_validation_mutex);
+  std::unique_lock<std::mutex> l(ServerInstance->m_validation_mutex);
   for(size_t i = 0; i < ServerInstance->validatedUsers.size(); i++)
   {
     //To make sure user hasn't timed out or anything while validating
@@ -882,18 +890,16 @@ void Mineserver::timed_1s()
       if(ServerInstance->validatedUsers[i].valid)
       {
         LOG(INFO, "Packets", tempuser->nick + " is VALID ");
-        tempuser->writePacket(Protocol::encryptionRequest());
+        tempuser->sendLoginInfo();        
       }
       else
       {
         tempuser->kick("User not Premium");
       }
-      //Flush
-      client_write(tempuser);
     }
   }
   ServerInstance->validatedUsers.clear();
-  pthread_mutex_unlock(&ServerInstance->m_validation_mutex);
+  l.unlock();
 
 }
 

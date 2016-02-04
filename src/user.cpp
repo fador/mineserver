@@ -88,16 +88,8 @@ User::User(int sock, uint32_t EID)
   for (int i = 0; i < 8; i++) {
     this->uuid+=hex[(EID>>(i-7)*4)&0xf];
   }
-  
-  std::string temp_uuid = this->uuid;
-  temp_uuid.erase(temp_uuid.begin()+23);
-  temp_uuid.erase(temp_uuid.begin()+18);
-  temp_uuid.erase(temp_uuid.begin()+13);
-  temp_uuid.erase(temp_uuid.begin()+8);
-  for (int i = 0; i < 16; i++) {
-    uuid_raw[i] = (hexToByte(temp_uuid[i*2])<<4)+hexToByte(temp_uuid[i*2+1]);
-  }
 
+  setUUID(this->uuid, true);
 
   // Ignore this user if it's the server console
   if (this->UID != SERVER_CONSOLE_UID)
@@ -120,6 +112,28 @@ bool User::changeNick(std::string _nick)
 
   nick = _nick;
 
+  return true;
+}
+
+bool User::setUUID(std::string uuid, bool dashes)
+{
+  this->uuid = uuid;
+  std::string temp_uuid = this->uuid;
+  if (dashes)
+  {
+    temp_uuid.erase(temp_uuid.begin()+23);
+    temp_uuid.erase(temp_uuid.begin()+18);
+    temp_uuid.erase(temp_uuid.begin()+13);
+    temp_uuid.erase(temp_uuid.begin()+8);
+  } else {
+    this->uuid.insert(8, "-");
+    this->uuid.insert(13, "-");
+    this->uuid.insert(18, "-");
+    this->uuid.insert(23, "-");    
+  }
+  for (int i = 0; i < 16; i++) {
+    uuid_raw[i] = (hexToByte(temp_uuid[i*2])<<4)+hexToByte(temp_uuid[i*2+1]);
+  }
   return true;
 }
 

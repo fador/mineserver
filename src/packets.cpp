@@ -218,20 +218,16 @@ int PacketHandler::encryption_response(User* user)
   //We're going crypted!
   user->initCipher();
   
-  
+  user->crypted = true;
   if(!ServerInstance->config()->bData("system.user_validation"))
   {
-    //Response
-    user->crypted = true;
+    //Response    
     user->sendLoginInfo();
   }
   else
   {
-    pthread_t validation_thread;
-    Mineserver::userValidation* valid = new Mineserver::userValidation;
-    valid->user = user;
-    valid->UID = user->UID;
-    pthread_create(&validation_thread,NULL,user_validation_thread,(void*)valid);
+    ThreadTask* task = new ThreadTask(THREAD_VALIDATEUSER, user);
+    ServerInstance->getThreadpool()->newTask(task);
   }
   
 
