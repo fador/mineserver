@@ -188,14 +188,16 @@ extern "C" void client_callback(int fd, short ev, void* arg)
       {
         LOG2(INFO, "Socket closed");
       }
-      delete user;
+      user->deleting = true;
+      ServerInstance->usersToRemove().insert(user);
       return;
     }
 
     if (read == SOCKET_ERROR)
     {
       LOG2(INFO, "Socket error");
-      delete user;
+      user->deleting = true;
+      ServerInstance->usersToRemove().insert(user);
       return;
     }
 
@@ -290,7 +292,8 @@ extern "C" void client_callback(int fd, short ev, void* arg)
             if (user->nick.size()) {
               LOG2(INFO, "User " + user->nick + " disconnected normally");
             }
-            delete user;
+            user->deleting = true;
+            ServerInstance->usersToRemove().insert(user);
             return;
           }   
         }
