@@ -1018,11 +1018,6 @@ bool User::delKnown(int x, int z)
   if (chunk != NULL)
   {
     chunk->users.erase(this);
-    // If no user needs this chunk
-    if (chunk->users.size() == 0)
-    {
-      ServerInstance->map(pos.map)->releaseMap(x, z);
-    }
   }
 
   for (unsigned int i = 0; i < mapKnown.size(); i++)
