@@ -117,10 +117,14 @@ public:
         delete task;
     }
 
-    // 
+    // Clean up the threads
     void shutdown(){
         running = false;
         taskCondition.notify_all();
+        for (auto &thread : threads)
+        {
+          thread.join();
+        }
     }
 
 private:

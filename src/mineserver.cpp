@@ -210,19 +210,20 @@ Mineserver::Mineserver(int args, char **argarray)
      m_damage_enabled(false),
      m_only_helmets  (false),
      m_running       (false),
-     m_eventBase     (NULL),
+     m_eventBase     (nullptr),
 
      // core modules
      m_config        (new Config()),
      m_screen        (new CliScreen()),
      m_logger        (new Logger()),
 
-     m_plugin        (NULL),
-     m_chat          (NULL),
-     m_furnaceManager(NULL),
-     m_packetHandler (NULL),
-     m_inventory     (NULL),
-     m_mobs          (NULL)
+     m_plugin        (nullptr),
+     m_chat          (nullptr),
+     m_furnaceManager(nullptr),
+     m_packetHandler (nullptr),
+     m_inventory     (nullptr),
+     m_mobs          (nullptr),
+     m_threadpool    (nullptr)
 {
   ServerInstance = this;
   InitSignals();
@@ -465,6 +466,13 @@ Mineserver::~Mineserver()
   // Close the cli session if its in use
   if (config() && config()->bData("system.interface.use_cli"))
     screen()->end();
+
+  
+  if (m_threadpool != nullptr)
+  {
+    m_threadpool->shutdown();
+    delete m_threadpool;
+  }
 
   // Free memory
   for (std::vector<Map*>::size_type i = 0; i < m_map.size(); i++)
