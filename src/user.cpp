@@ -1048,8 +1048,6 @@ bool User::delKnown(int x, int z)
     }
   }
 
-  writePacket(Protocol::chunkDataUnload(x,z));
-
   return false;
 }
 
@@ -1060,6 +1058,9 @@ bool User::popMap()
   {
     // Delete from known list
     delKnown(mapRemoveQueue[0].x(), mapRemoveQueue[0].z());
+
+    // Send unload packet to client
+    writePacket(Protocol::chunkDataUnload(mapRemoveQueue[0].x(), mapRemoveQueue[0].z()));
 
     // Remove from queue
     mapRemoveQueue.erase(mapRemoveQueue.begin());
