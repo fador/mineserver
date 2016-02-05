@@ -603,7 +603,8 @@ bool User::updatePos(double x, double y, double z, double stance)
       Packet telePacket = Protocol::entityTeleport(UID, x, y, z, pos.yaw, pos.pitch);
       newChunk->sendPacket(telePacket, this);
     }
-    else{
+    else
+    {
       std::list<User*> toremove;
       std::list<User*> toadd;
 
@@ -634,26 +635,44 @@ bool User::updatePos(double x, double y, double z, double stance)
 
       newChunk->sendPacket(tpPkt,this);
 
-      int chunkDiffX = newChunk->x - oldChunk->x;
-      int chunkDiffZ = newChunk->z - oldChunk->z;
+      std::vector<vec> removeQueue;
+
+      // Check if known chunks are out of view distance now
+      for (vec& chunk : mapKnown)
+      {
+        if (!withinViewDistance(chunk.x(), newChunk->x) || !withinViewDistance(chunk.z(), newChunk->z))
+        { 
+          removeQueue.push_back(vec(chunk.x(), 0, chunk.z()));          
+        }
+      }
+
+      
+      // ..or chunks in send queue for the player
+      for (vec& chunk : mapQueue)
+      {
+        if (!withinViewDistance(chunk.x(), newChunk->x) || !withinViewDistance(chunk.z(), newChunk->z))
+        {
+          removeQueue.push_back(vec(chunk.x(), 0, chunk.z()));
+        }
+      }
+
+      // Push to queue
+      for (vec& chunk : removeQueue)
+      {
+        addRemoveQueue(chunk.x(), chunk.z());
+      }
+
       for (int mapx = newChunk->x - viewDistance; mapx <= newChunk->x + viewDistance; mapx++)
       {
         for (int mapz = newChunk->z - viewDistance; mapz <= newChunk->z + viewDistance; mapz++)
         {
-          if (!withinViewDistance(chunkDiffX, oldChunk->x) || !withinViewDistance(chunkDiffZ, oldChunk->z))
+          if (!withinViewDistance(mapx, oldChunk->x) || !withinViewDistance(mapz, oldChunk->z))
           {
             addQueue(mapx, mapz);
           }
-
-          if (!withinViewDistance((mapx - chunkDiffX), newChunk->x) || !withinViewDistance((mapz - chunkDiffZ), newChunk->z))
-          {
-            addRemoveQueue(mapx - chunkDiffX, mapz - chunkDiffZ);
-          }
         }
       }
-
     }
-
 
     if (newChunk->items.size())
     {
