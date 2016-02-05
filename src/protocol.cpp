@@ -495,3 +495,11 @@ Packet Protocol::explosion(float x, float y, float z, float radius, std::vector<
   }
   return ret;
 }
+
+ Packet Protocol::chunkDataUnload(int32_t chunk_x, int32_t chunk_z)
+ {
+  Packet ret;  
+  ret << MS_VarInt((uint32_t)PACKET_OUT_MAP_CHUNK) << chunk_x << chunk_z;
+  ret << (uint8_t)1 << (int16_t)0 << MS_VarInt((uint32_t)0);
+  return ret;
+ }

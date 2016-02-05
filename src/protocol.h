@@ -154,5 +154,7 @@ class Protocol
     static Packet explosion(float x, float y, float z, float radius, std::vector<vec>& record, float velocity_x, float velocity_y, float velocity_z);
 
     static Packet windowItems(uint8_t windowID, std::vector<Item>& slots);
+
+    static Packet chunkDataUnload(int32_t chunk_x, int32_t chunk_z);
 };
 #endif
