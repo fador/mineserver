@@ -1029,6 +1029,8 @@ bool User::delKnown(int x, int z)
     }
   }
 
+  writePacket(Protocol::chunkDataUnload(x,z));
+
   return false;
 }
 
