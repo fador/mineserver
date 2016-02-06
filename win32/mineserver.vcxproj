@@ -61,6 +61,7 @@
     <ClCompile Include="..\src\items\itembasic.cpp" />
     <ClCompile Include="..\src\items\food.cpp" />
     <ClCompile Include="..\src\items\projectile.cpp" />
+    <ClCompile Include="..\src\json.cpp" />
     <ClCompile Include="..\src\lighting.cpp" />
     <ClCompile Include="..\src\logger.cpp" />
     <ClCompile Include="..\src\map.cpp" />
@@ -109,6 +110,7 @@
     <ClInclude Include="..\src\inventory\inventoryFurnace.h" />
     <ClInclude Include="..\src\inventory\inventoryPlayer.h" />
     <ClInclude Include="..\src\inventory\inventoryWorkbench.h" />
+    <ClInclude Include="..\src\json.h" />
     <ClInclude Include="..\src\lighting.h" />
     <ClInclude Include="..\src\logger.h" />
     <ClInclude Include="..\src\logtype.h" />

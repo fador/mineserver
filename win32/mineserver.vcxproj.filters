@@ -279,6 +279,9 @@
     <ClCompile Include="..\src\threadpool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\json.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\blocks\door.h">
@@ -537,6 +540,9 @@
       <Filter>Header Files\inventory</Filter>
     </ClInclude>
     <ClInclude Include="..\src\threadpool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\json.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
