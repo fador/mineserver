@@ -43,7 +43,8 @@ public:
     JSON_LIST,
     JSON_INT,
     JSON_STRING,
-    JSON_BOOL
+    JSON_BOOL,
+    JSON_FLOAT
   };
 
   JSON_Val(uint8_t* buf, int32_t& len, JSON_type type = JSON_COMPOUND);
@@ -60,6 +61,12 @@ public:
     m_type = JSON_INT;
     m_name = name;
     m_value.intVal = val;
+  }
+
+  JSON_Val(const std::string& name, double val) {
+    m_type = JSON_FLOAT;
+    m_name = name;
+    m_value.floatVal = val;
   }
 
   JSON_Val(const std::string& name, bool val) {
@@ -129,6 +136,10 @@ public:
     return m_value.stringVal;
   }
 
+  JSON_type getType() {
+    return m_type;
+  }
+
   std::vector<JSON_Val*>* getList() {
     if (m_type != JSON_LIST) {
         return nullptr;
@@ -152,8 +163,9 @@ private:
   {
     bool boolVal;
     int32_t intVal;
-    std::string *stringVal;
-    std::vector<JSON_Val*> *listVal;
+    double floatVal;
+    std::string* stringVal;
+    std::vector<JSON_Val*>* listVal;
     std::map<std::string, JSON_Val*>* compoundVal;
   } m_value;
 };

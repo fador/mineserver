@@ -29,6 +29,7 @@
 #include <fstream>
 #include <cstring>
 #include <cstdlib>
+#include <sstream>
 
 #include "mineserver.h"
 #include "json.h"
@@ -76,10 +77,11 @@ void JSON_Val::dump(std::string &str) {
             str += ",\n";
           }
           first = false;
+          if (val.second->getType() == JSON_COMPOUND) if (val.first != "") str += "\"" + val.first + "\": ";
           val.second->dump(str);
         }
       }
-      str += "}\n";
+      str += "\n}\n";
     break;
     case JSON_LIST:
       if (m_name != "") {
@@ -96,13 +98,19 @@ void JSON_Val::dump(std::string &str) {
           val->dump(str);
         }
       }
-      str += "],\n";
+      str += "\n]\n";
     break;
     case JSON_INT:
       if (m_name != "") {
         str += "\"" + m_name + "\": ";
       }
       str += dtos(m_value.intVal);
+    break;
+    case JSON_FLOAT:
+      if (m_name != "") {
+        str += "\"" + m_name + "\": ";
+      }
+      str += dtos(m_value.floatVal);
     break;
     case JSON_STRING:
       if (m_name != "") {
@@ -186,15 +194,24 @@ JSON_Val::JSON_Val(uint8_t* buf, int32_t& len, JSON_type type) : m_type(type)
           default:
             if (!len) done = true;
             else {
-              if (nameRead && byte >= '0' && byte <= '9') {
-                std::string val;              
-                while (byte >= '0' && byte <= '9') {
-                  val += byte;  
-                  byte = buf[0];    
+              if (nameRead && ((byte >= '0' && byte <= '9') || byte == '-')) {
+                std::string val;
+                bool floatingpoint = false;
+                while ((byte >= '0' && byte <= '9') || byte == '.' || byte == 'e') {
+                  if (byte == '.') floatingpoint = true;
+                  val += byte;
+                  byte = buf[0];
                   buf++;
                   readBytes++;
                 }
-                (*m_value.compoundVal)[temp] = new JSON_Val(temp, atoi(val.c_str()));
+                if (!floatingpoint) {
+                  (*m_value.compoundVal)[temp] = new JSON_Val(temp, atoi(val.c_str()));
+                } else {
+                  double d;
+                  std::istringstream floatVal(val);                  
+                  floatVal >> d;
+                  (*m_value.compoundVal)[temp] = new JSON_Val(temp, d);
+                }
                 buf--;
                 readBytes--;
                 nameRead = false;
