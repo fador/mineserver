@@ -30,6 +30,7 @@
 #include "tools.h"
 
 #include "threadpool.h"
+#include "json.h"
 
 
 void ThreadPool::taskValidateUser(ThreadTask *task)
@@ -117,13 +118,41 @@ void ThreadPool::taskValidateUser(ThreadTask *task)
 
   } while (len > 0 || BIO_should_retry(web));
   
-
+  // Make sure we have the right HTTP code
   findResult = output.find("200 OK");
   if (findResult == std::string::npos) goto cleanup;
-  findResult = output.find("\"id\":\"");
+  findResult = output.find("\r\n\r\n");
   if (findResult == std::string::npos) goto cleanup;
 
-  task->user->setUUID(output.substr(findResult+6, 32), false);
+  {
+    // Parse the JSON
+    std::string input_json = output.substr(findResult);
+    int32_t jsonlen = input_json.length();  
+    JSON_Val value((uint8_t*)input_json.c_str(), jsonlen, JSON_Val::JSON_COMPOUND);
+
+    // Grab the values
+    if (value["id"] != nullptr && value["id"]->getType() == JSON_Val::JSON_STRING &&
+       value["name"] != nullptr && value["name"]->getType() == JSON_Val::JSON_STRING &&
+       value["properties"] != nullptr && value["properties"]->getType() == JSON_Val::JSON_LIST)
+    {
+      task->user->setUUID(*value["id"]->getString(), false);    
+      //std::cout << "name: " << *value["name"]->getString() << std::endl;
+      for(JSON_Val *var : *value["properties"]->getList())
+      {
+        if ((*var)["name"] != nullptr && (*var)["name"]->getType() == JSON_Val::JSON_STRING &&
+           (*var)["value"] != nullptr && (*var)["value"]->getType() == JSON_Val::JSON_STRING &&
+           (*var)["signature"] != nullptr && (*var)["signature"]->getType() == JSON_Val::JSON_STRING)
+        {
+          task->user->properties.push_back(UserProperty(*(*var)["name"]->getString(),
+                                                        *(*var)["value"]->getString(),
+                                                        *(*var)["signature"]->getString()));
+        }
+      }
+    } else {
+      goto cleanup;
+    }
+
+  }
 
   //std::cout << output << std::endl;
  

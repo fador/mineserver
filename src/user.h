@@ -47,6 +47,17 @@
 
 bool client_write(User *user);
 
+
+
+struct UserProperty {
+  UserProperty() {};
+  UserProperty(std::string _name, std::string _value, std::string _signature):
+    name(_name), value(_value), signature(_signature) {};
+  std::string name;
+  std::string value;
+  std::string signature;
+};
+
 struct position
 {
   double x;
@@ -247,6 +258,8 @@ public:
     client_write(this);
     return true;
   }
+
+  std::vector<UserProperty> properties;
 
 private:
   event* m_readEvent;
