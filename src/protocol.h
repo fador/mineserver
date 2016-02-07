@@ -122,7 +122,7 @@ class Protocol
 
     static Packet spawnPlayer(int eid, uint8_t *uuid, std::string &nick, float health, position& pos, int16_t item);
 
-    static Packet PlayerListItemAddSingle(uint8_t *uuid, std::string &nick, int8_t gamemode, int ping);
+    static Packet PlayerListItemAddSingle(uint8_t *uuid, std::string &nick, int8_t gamemode, int ping, std::vector<UserProperty> &properties);
 
     static Packet PlayerListItemRemoveSingle(uint8_t *uuid);
 

@@ -1148,7 +1148,7 @@ bool User::teleport(double x, double y, double z, size_t map)
 bool User::spawnUser(int x, int y, int z)
 {
   Packet pkt = Protocol::spawnPlayer(UID, uuid_raw, nick, (float)health, x, y, z, 0, 0, 0);
-  Packet playerListAddPkt = Protocol::PlayerListItemAddSingle(uuid_raw, nick, gamemode, 10);
+  Packet playerListAddPkt = Protocol::PlayerListItemAddSingle(uuid_raw, nick, gamemode, 10, properties);
   sChunk* chunk = ServerInstance->map(pos.map)->getChunk(blockToChunk(x >> 5), blockToChunk(z >> 5));
   if (chunk != NULL)
   {
@@ -1164,7 +1164,7 @@ bool User::spawnOthers()
   {
     if ((*it)->logged && (*it)->UID != this->UID)
     {
-      this->writePacket(Protocol::PlayerListItemAddSingle((*it)->uuid_raw, (*it)->nick, (*it)->gamemode, 10));
+      this->writePacket(Protocol::PlayerListItemAddSingle((*it)->uuid_raw, (*it)->nick, (*it)->gamemode, 10, (*it)->properties));
       this->writePacket(Protocol::spawnPlayer((*it)->UID, (*it)->uuid_raw, (*it)->nick, (float)(*it)->health, (*it)->pos.x, (*it)->pos.y, (*it)->pos.z, 0, 0, 0));      
       for (int b = 0; b < 5; b++)
       {

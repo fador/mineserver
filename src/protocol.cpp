@@ -335,15 +335,23 @@ Packet Protocol::spawnPlayer(int eid, uint8_t *uuid, std::string &nick, float he
   return ret;
 }
 
-Packet Protocol::PlayerListItemAddSingle(uint8_t *uuid, std::string &nick, int8_t gamemode, int ping){
+Packet Protocol::PlayerListItemAddSingle(uint8_t *uuid, std::string &nick, int8_t gamemode, int ping, std::vector<UserProperty> &properties){
   Packet ret;
   ret << MS_VarInt((uint32_t)PACKET_OUT_PLAYER_LIST_ITEM) 
       << MS_VarInt((uint32_t)0) // Action: Add
       << MS_VarInt((uint32_t)1); // Number of Players
   for (int i = 0; i < 16; i++) ret << uuid[i];
   ret << nick
-      << MS_VarInt((uint32_t)0) // Number Of Properties
-      << MS_VarInt((uint32_t)gamemode)
+      << MS_VarInt((uint32_t)properties.size()); // Number Of Properties
+  for (UserProperty prop : properties)
+  {
+    ret << prop.name << prop.value << (uint8_t)(prop.signature != "")?1:0;
+    if (prop.signature != "")
+    {
+      ret << prop.signature;
+    }
+  }
+  ret << MS_VarInt((uint32_t)gamemode)
       << MS_VarInt((uint32_t)ping)
       << (uint8_t)0; // Has Display Name
   return ret;
