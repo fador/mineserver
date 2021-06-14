@@ -3,7 +3,7 @@
 
 Custom Minecraft server software written in C++.
 
-You can find the core team from #mineserver @ irc.freenode.net Also mail to developers@mineserver.be will reach us.
+You can find the core team from [#mineserver](https://web.libera.chat/#mineserver) in [Libera.Chat](https://libera.chat/) IRC network. Also mail to developers@mineserver.be will reach us.
 
     Copyright (c) 2010-2016, The Mineserver Project
 
