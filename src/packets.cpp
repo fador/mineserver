@@ -203,18 +203,29 @@ int PacketHandler::encryption_response(User* user)
   uint8_t buffer[1024];
   memset(buffer, 0, 1024);
   //Decrypt the verification bytes
+  #if OPENSSL_VERSION_NUMBER < 0x10000000L
   int ret = RSA_private_decrypt((int)verifyLen,(const uint8_t *)verify.c_str(),buffer,ServerInstance->rsa,RSA_PKCS1_PADDING);
+  #else
+  size_t outlen = 1024;
+  int ret = EVP_PKEY_decrypt(ServerInstance->crypto_ctx, buffer, &outlen, (const uint8_t *)verify.c_str(), verifyLen);
+  #endif
   //Check they match with the ones sent
-  if(ret != 4 || std::string((char *)buffer) != ServerInstance->encryptionBytes)
+  if(outlen != 4 || std::string((char *)buffer, outlen) != ServerInstance->encryptionBytes)
   {
+    LOG2(INFO, "Expected: " + ServerInstance->encryptionBytes + " Got: " + std::string((char *)buffer, outlen));
     user->kick("Decryption failed");
     return PACKET_OK;
   }
 
   //Decrypt secret sent by the client and store
   memset(buffer, 0, 1024);
+  #if OPENSSL_VERSION_NUMBER < 0x10000000L
   ret = RSA_private_decrypt((int)secretLen,(const uint8_t *)secret.c_str(),buffer,ServerInstance->rsa,RSA_PKCS1_PADDING);
-  user->secret = std::string((char *)buffer, ret);
+  #else
+  outlen = 1024;
+  ret = EVP_PKEY_decrypt(ServerInstance->crypto_ctx, buffer, &outlen, (const uint8_t *)secret.c_str(), secretLen);
+  #endif
+  user->secret = std::string((char *)buffer, outlen);
   //We're going crypted!
   user->initCipher();
   

@@ -130,17 +130,19 @@ public:
   OpenInventory openInv;
 
   std::string secret;
-  EVP_CIPHER_CTX en, de;
+  EVP_CIPHER_CTX* en, *de;
   std::string generateDigest();
   void initCipher()
   {
     unsigned char key[16], iv[16];
     memcpy(&iv,secret.c_str(),16);
-    memcpy(&key,secret.c_str(),16);    
-    EVP_CIPHER_CTX_init(&en);
-    EVP_EncryptInit_ex(&en, EVP_aes_128_cfb8(), NULL, key, iv);
-    EVP_CIPHER_CTX_init(&de);
-    EVP_DecryptInit_ex(&de, EVP_aes_128_cfb8(), NULL, key, iv);
+    memcpy(&key,secret.c_str(),16);
+    en = EVP_CIPHER_CTX_new();
+    EVP_CIPHER_CTX_init(en);
+    EVP_EncryptInit_ex(en, EVP_aes_128_cfb8(), NULL, key, iv);
+    de = EVP_CIPHER_CTX_new();
+    EVP_CIPHER_CTX_init(de);
+    EVP_DecryptInit_ex(de, EVP_aes_128_cfb8(), NULL, key, iv);
   }
   bool crypted;
   int uncryptedLeft;

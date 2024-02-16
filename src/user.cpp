@@ -139,6 +139,8 @@ bool User::setUUID(std::string uuid, bool dashes)
 
 User::~User()
 {
+  EVP_CIPHER_CTX_free(en);
+  EVP_CIPHER_CTX_free(de);
   if (this->UID != SERVER_CONSOLE_UID)
   {
     event_del(getReadEvent());

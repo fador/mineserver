@@ -53,6 +53,9 @@
 #include <openssl/x509v3.h>
 #include <openssl/rc4.h>
 #include <openssl/ssl.h>
+#if OPENSSL_VERSION_NUMBER > 0x10000000L
+#include <openssl/engine.h>
+#endif
 #endif
 
 #include "extern.h"
@@ -86,7 +89,12 @@ public:
   //Protocol encryption
   X509 *x;
   EVP_PKEY *pk;
+  #if OPENSSL_VERSION_NUMBER < 0x10000000L
   RSA *rsa;
+  #else
+  EVP_PKEY_CTX *crypto_ctx;  
+  ENGINE *eng;
+  #endif
   std::string encryptionBytes;
   std::string serverID;
   std::string publicKey;

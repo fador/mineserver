@@ -97,7 +97,7 @@ bool client_write(User *user)
       if(p_len)
       {
         uint8_t *buffer = (uint8_t *)malloc(p_len+1);
-        EVP_EncryptUpdate(&user->en, (uint8_t *)buffer, &p_len, (const uint8_t *)buf.data()+user->uncryptedLeft, buf.size()-user->uncryptedLeft);
+        EVP_EncryptUpdate(user->en, (uint8_t *)buffer, &p_len, (const uint8_t *)buf.data()+user->uncryptedLeft, buf.size()-user->uncryptedLeft);
         int written = p_len + f_len;
         user->bufferCrypted.addToWrite((uint8_t *)buffer,written);
         free(buffer);
@@ -170,7 +170,7 @@ extern "C" void client_callback(int fd, short ev, void* arg)
     {
       read = recv(fd, cpBUFCRYPT, BUFSIZE, 0);
       int p_len = read, f_len = 0;  
-      EVP_DecryptUpdate(&user->de, upBUF, &p_len, (const uint8_t *)cpBUFCRYPT, read);
+      EVP_DecryptUpdate(user->de, upBUF, &p_len, (const uint8_t *)cpBUFCRYPT, read);
       read = p_len + f_len;
     }
     else

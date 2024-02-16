@@ -199,7 +199,6 @@ int main(int argc, char* argv[])
   return ret ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-
 Mineserver::Mineserver(int args, char **argarray)
   :  argv(argarray),
      argc(args),
@@ -342,22 +341,60 @@ Mineserver::Mineserver(int args, char **argarray)
   LOG2(INFO, "  libevent "+std::string(event_get_version()));
   LOG2(INFO, "  "+std::string(OPENSSL_VERSION_TEXT));
 
+#ifdef PROTOCOL_ENCRYPTION
+
   SSL_library_init();
 
   LOG2(INFO, "Generating RSA key pair for protocol encryption");
   //Protocol encryption
   srand(microTime());
+  #if OPENSSL_VERSION_NUMBER < 0x10000000L
   if((rsa = RSA_generate_key(1024, 17, 0, 0)) == NULL)
+  #else
+  EVP_PKEY_CTX *temp_ctx;
+  temp_ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, NULL);
+  if (!temp_ctx) {
+      LOG2(ERROR, "ctx is NULL");
+      goto keygenfail;
+  }
+  if (EVP_PKEY_keygen_init(temp_ctx) <= 0) {
+      LOG2(ERROR, "EVP_PKEY_keygen_init failed");
+      goto keygenfail;
+  }
+  if (EVP_PKEY_CTX_set_rsa_keygen_bits(temp_ctx, 1024) <= 0) {
+      LOG2(ERROR, "EVP_PKEY_CTX_set_rsa_keygen_bits failed");
+      goto keygenfail;
+  }
+  
+  BIGNUM* exponent_bn = BN_new();
+  BN_set_word(exponent_bn, 17);
+  if(EVP_PKEY_CTX_set_rsa_keygen_pubexp(temp_ctx, exponent_bn) <= 0) {
+      LOG2(ERROR, "EVP_PKEY_CTX_set_rsa_keygen_pubexp failed");
+      goto keygenfail;
+  } 
+  
+  /* Generate key */
+  if (EVP_PKEY_keygen(temp_ctx, &pk) <= 0) {
+      LOG2(ERROR, "EVP_PKEY_keygen failed");
+      goto keygenfail;
+  }
+
+  //BN_free(exponent_bn);
+  EVP_PKEY_CTX_free(temp_ctx);
+  goto keygenpass;
+  #endif
   {
+    keygenfail:
     LOG2(INFO, "KEY GENERATION FAILED!");
     exit(1);
   }
+  keygenpass:
   LOG2(INFO, "RSA key pair generated.");
-
+  #if OPENSSL_VERSION_NUMBER < 0x10000000L
+  EVP_PKEY_assign_RSA(pk,rsa);
   /* Get ASN.1 format public key */
   x=X509_new();
-  pk=EVP_PKEY_new();
-  EVP_PKEY_assign_RSA(pk,rsa);
+
   X509_set_version(x,0);
   X509_set_pubkey(x,pk);
 
@@ -369,6 +406,32 @@ Mineserver::Mineserver(int args, char **argarray)
   //Glue + jesus tape, dont ask - Fador
   publicKey = std::string((char *)(buf+28),160);
   OPENSSL_free(buf);
+  #else
+  char rawBuffer[8192];  
+  unsigned char* ptr = (unsigned char*)&rawBuffer[0];
+  int buffSize = i2d_PUBKEY(pk, (unsigned char**)&ptr);
+  std::string pubkey_temp(rawBuffer, buffSize);
+  publicKey = pubkey_temp;
+  eng = ENGINE_get_default_RSA();
+  crypto_ctx = EVP_PKEY_CTX_new(pk, eng);
+  if (!crypto_ctx) {
+    LOG2(INFO, "KEY GENERATION FAILED!");
+    exit(1);
+  }
+  if (EVP_PKEY_decrypt_init(crypto_ctx) <= 0) {
+    LOG2(INFO, "KEY GENERATION FAILED!");
+    exit(1);
+  }
+  if (EVP_PKEY_CTX_set_rsa_padding(crypto_ctx, RSA_PKCS1_PADDING) <= 0) {
+    LOG2(INFO, "KEY GENERATION FAILED!");
+    exit(1);
+  }
+
+  #endif
+  
+
+#endif
+
   /* END key fetching */
 
   const std::string temp_nums="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890=-";
@@ -503,10 +566,10 @@ Mineserver::~Mineserver()
   // Remove the PID file
   unlink((config()->sData("system.pid_file")).c_str());
 #ifdef PROTOCOL_ENCRYPTION
-  RSA_free(rsa);
-  X509_free(x);
-  pk->pkey.ptr = NULL;
+  //RSA_free(rsa);
+  //X509_free(x);  
   EVP_PKEY_free(pk);
+  pk = NULL;
 #endif
 }
 
